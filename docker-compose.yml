@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: technikpool
+      POSTGRES_PASSWORD: technikpool_password
+      POSTGRES_DB: technikpool_db
+    ports:
+      - "7493:5432"

@@ -1,0 +1,248 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/lib/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ----------------------------------------------------
+// Better-Auth Models
+// ----------------------------------------------------
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sessions Session[]
+  accounts Account[]
+
+  // App-specific relations
+  homeOrgId       String?
+  homeOrg         Organization?   @relation("HomeOrg", fields: [homeOrgId], references: [id])
+  memberships     OrgMembership[]
+  transactions    AssetTransaction[]
+  crewAssignments ProductionCrew[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  @@map("verification")
+}
+
+// ----------------------------------------------------
+// App specific models
+// ----------------------------------------------------
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  defaultAssetVisibility String @default("PUBLIC")
+
+  homeUsers User[]          @relation("HomeOrg")
+  members   OrgMembership[]
+
+  locations   Location[]
+  assets      Asset[]
+  bundles     AssetBundle[]
+  productions Production[]
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+model OrgMembership {
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role           Role         @default(MEMBER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, organizationId])
+}
+
+model Manufacturer {
+  id        String    @id @default(cuid())
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+}
+
+model Product {
+  id             String       @id @default(cuid())
+  name           String
+  manufacturerId String
+  manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  assets         Asset[]
+}
+
+model Location {
+  id             String       @id @default(cuid())
+  name           String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  assets         Asset[]
+}
+
+model Asset {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product      @relation(fields: [productId], references: [id])
+  locationId     String?
+  location       Location?    @relation(fields: [locationId], references: [id])
+
+  serialNumber String?
+  assetTag     String?
+  status       String  @default("AVAILABLE") // AVAILABLE, MAINTENANCE, BROKEN
+  imageUrl     String?
+
+  bundleId String?
+  bundle   AssetBundle? @relation(fields: [bundleId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productionItems ProductionItem[]
+  transactions    AssetTransaction[]
+}
+
+model AssetBundle {
+  id             String       @id @default(cuid())
+  name           String
+  description    String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assets         Asset[]
+  productionItems ProductionItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Production {
+  id        String    @id @default(cuid())
+  name      String
+  startDate DateTime?
+  endDate   DateTime?
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  items        ProductionItem[]
+  crew         ProductionCrew[]
+  transactions AssetTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductionItem {
+  id           String     @id @default(cuid())
+  productionId String
+  production   Production @relation(fields: [productionId], references: [id], onDelete: Cascade)
+
+  assetId String
+  asset   Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  sourceBundleId String?
+  sourceBundle   AssetBundle? @relation(fields: [sourceBundleId], references: [id])
+
+  status String @default("PENDING") // PENDING, APPROVED, CHECKED_OUT, RETURNED
+
+  @@unique([productionId, assetId])
+}
+
+model ProductionCrew {
+  id           String     @id @default(cuid())
+  productionId String
+  production   Production @relation(fields: [productionId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role         String?
+  createdAt    DateTime   @default(now())
+
+  @@unique([productionId, userId])
+}
+
+model AssetTransaction {
+  id      String @id @default(cuid())
+  assetId String
+  asset   Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  productionId String?
+  production   Production? @relation(fields: [productionId], references: [id], onDelete: Cascade)
+
+  action String // e.g., STATUS_CHANGE, CHECK_OUT, RETURN, APPROVE, REQUEST
+  notes  String?
+
+  createdAt DateTime @default(now())
+}
