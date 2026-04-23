@@ -29,7 +29,7 @@ export const getProductions = query(v.string(), async (organizationId: string) =
 
 export const getProduction = query(v.string(), async (id: string) => {
 	await requireAuth();
-	return await prisma.production.findUnique({
+	return await prisma.production.findUniqueOrThrow({
 		where: { id },
 		include: {
 			items: {
@@ -89,11 +89,8 @@ const addAssetSchema = v.object({
 export const addAssetToProduction = command(addAssetSchema, async (data) => {
 	const user = await requireAuth();
 
-	const production = await prisma.production.findUnique({ where: { id: data.productionId } });
-	if (!production) throw new Error('Production not found');
-
-	const asset = await prisma.asset.findUnique({ where: { id: data.assetId } });
-	if (!asset) throw new Error('Asset not found');
+	const production = await prisma.production.findUniqueOrThrow({ where: { id: data.productionId } });
+	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: data.assetId } });
 
 	const isCrossOrg = production.organizationId !== asset.organizationId;
 	const initialStatus = isCrossOrg ? 'PENDING' : 'APPROVED';
@@ -123,12 +120,10 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 export const approveProductionItem = command(v.string(), async (itemId: string) => {
 	const user = await requireAuth();
 
-	const item = await prisma.productionItem.findUnique({
+	const item = await prisma.productionItem.findUniqueOrThrow({
 		where: { id: itemId },
 		include: { asset: true, production: true }
 	});
-
-	if (!item) throw new Error('Item not found');
 
 	const membership = await prisma.orgMembership.findUnique({
 		where: { userId_organizationId: { userId: user.id, organizationId: item.asset.organizationId } }
@@ -191,14 +186,11 @@ const addBundleSchema = v.object({
 export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	const user = await requireAuth();
 
-	const production = await prisma.production.findUnique({ where: { id: data.productionId } });
-	if (!production) throw new Error('Production not found');
-
-	const bundle = await prisma.assetBundle.findUnique({
+	const production = await prisma.production.findUniqueOrThrow({ where: { id: data.productionId } });
+	const bundle = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id: data.bundleId },
 		include: { assets: true }
 	});
-	if (!bundle) throw new Error('Bundle not found');
 
 	const existingItems = await prisma.productionItem.findMany({
 		where: { productionId: data.productionId },

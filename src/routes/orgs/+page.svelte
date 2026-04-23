@@ -5,7 +5,9 @@
 	import { Label } from '$lib/components/ui/label';
 	import { getMyOrgs, createOrg } from '$lib/remote/orgs.remote';
 	import { toast } from 'svelte-sonner';
+	import { resolve } from '$app/paths';
 
+	let orgs = $derived(await getMyOrgs());
 	let newOrgName = $state('');
 	let creating = $state(false);
 
@@ -56,18 +58,21 @@
 
 		<div class="space-y-4">
 			<h2 class="text-xl font-semibold">Your Organizations</h2>
-			{#if (await getMyOrgs()).length === 0}
+			{#if orgs.length === 0}
 				<p class="text-muted-foreground">You are not a member of any organization yet.</p>
 			{:else}
 				<div class="grid gap-4">
-					{#each await getMyOrgs() as org (org.id)}
+					{#each orgs as org (org.id)}
 						<Card.Root>
 							<Card.Content class="flex items-center justify-between py-4">
 								<div>
 									<p class="font-medium">{org.name}</p>
 									<p class="text-sm text-muted-foreground">Role: {org.role}</p>
 								</div>
-								<Button variant="outline" href="/inventory?org={org.id}">View Assets</Button>
+								<Button
+									variant="outline"
+									href={resolve(`/inventory?org=${org.id}`)}>View Assets</Button
+								>
 							</Card.Content>
 						</Card.Root>
 					{/each}

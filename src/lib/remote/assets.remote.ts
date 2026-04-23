@@ -179,7 +179,7 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 
 export const getBundle = query(v.string(), async (id: string) => {
 	await requireAuth();
-	return await prisma.assetBundle.findUnique({
+	return await prisma.assetBundle.findUniqueOrThrow({
 		where: { id },
 		include: {
 			organization: true,
