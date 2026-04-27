@@ -153,6 +153,42 @@ export const approveProductionItem = command(v.string(), async (itemId: string) 
 	return updated;
 });
 
+export const declineProductionItem = command(v.string(), async (itemId: string) => {
+	const user = await requireAuth();
+
+	const item = await prisma.productionItem.findUniqueOrThrow({
+		where: { id: itemId },
+		include: { asset: true, production: true }
+	});
+
+	const membership = await prisma.orgMembership.findUnique({
+		where: { userId_organizationId: { userId: user.id, organizationId: item.asset.organizationId } }
+	});
+
+	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
+		throw new Error('Unauthorized to decline assets from this org');
+	}
+
+	const updated = await prisma.productionItem.update({
+		where: { id: itemId },
+		data: { status: 'DECLINED' }
+	});
+
+	await prisma.assetTransaction.create({
+		data: {
+			assetId: item.assetId,
+			userId: user.id,
+			productionId: item.productionId,
+			action: 'DECLINED',
+			notes: `Declined for production ${item.production.name}`
+		}
+	});
+
+	getProduction(item.productionId).refresh();
+	getPendingApprovals(item.asset.organizationId).refresh();
+	return updated;
+});
+
 export const getPendingApprovals = query(v.string(), async (organizationId: string) => {
 	const user = await requireAuth();
 
