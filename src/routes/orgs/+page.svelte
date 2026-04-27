@@ -3,11 +3,13 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import { getMyOrgs, createOrg } from '$lib/remote/orgs.remote';
+	import { getMyOrgs, getAllOrgs, createOrg } from '$lib/remote/orgs.remote';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
 
-	let orgs = $derived(await getMyOrgs());
+	let { data } = $props();
+
+	let orgs = $derived(await (data.isAdmin ? getAllOrgs() : getMyOrgs()));
 	let newOrgName = $state('');
 	let creating = $state(false);
 
@@ -31,7 +33,9 @@
 	<div class="flex items-center justify-between">
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">Organizations</h1>
-			<p class="text-muted-foreground">Manage your organizations and memberships.</p>
+			<p class="text-muted-foreground">
+				{data.isAdmin ? 'All organizations in the system.' : 'Manage your organizations and memberships.'}
+			</p>
 		</div>
 	</div>
 
@@ -57,9 +61,13 @@
 		</Card.Root>
 
 		<div class="space-y-4">
-			<h2 class="text-xl font-semibold">Your Organizations</h2>
+			<h2 class="text-xl font-semibold">
+				{data.isAdmin ? `All Organizations (${orgs.length})` : 'Your Organizations'}
+			</h2>
 			{#if orgs.length === 0}
-				<p class="text-muted-foreground">You are not a member of any organization yet.</p>
+				<p class="text-muted-foreground">
+					{data.isAdmin ? 'No organizations exist yet.' : 'You are not a member of any organization yet.'}
+				</p>
 			{:else}
 				<div class="grid gap-4">
 					{#each orgs as org (org.id)}
@@ -67,12 +75,26 @@
 							<Card.Content class="flex items-center justify-between py-4">
 								<div>
 									<p class="font-medium">{org.name}</p>
-									<p class="text-sm text-muted-foreground">Role: {org.role}</p>
+									<p class="text-sm text-muted-foreground">
+										{#if org.role}
+											Role: {org.role}
+										{:else if data.isAdmin && 'memberCount' in org}
+											{org.memberCount} {org.memberCount === 1 ? 'member' : 'members'}
+										{/if}
+									</p>
 								</div>
-								<Button
-									variant="outline"
-									href={resolve(`/inventory?org=${org.id}`)}>View Assets</Button
-								>
+								<div class="flex gap-2">
+									{#if org.role === 'OWNER' || data.isAdmin}
+										<Button
+											variant="outline"
+											href={resolve(`/orgs/${org.id}`)}>Manage</Button
+										>
+									{/if}
+									<Button
+										variant="outline"
+										href={resolve(`/inventory?org=${org.id}`)}>View Assets</Button
+									>
+								</div>
 							</Card.Content>
 						</Card.Root>
 					{/each}

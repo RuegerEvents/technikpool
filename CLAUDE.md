@@ -1,3 +1,126 @@
+# Project Overview
+
+## What This Is
+
+Multi-tenant equipment/asset management app. Organizations own assets and productions (events). Assets can be loaned across orgs via a request/approval workflow.
+
+## Tech Stack
+
+- **SvelteKit** + **Svelte 5** (runes: `$state`, `$derived`, `$props`)
+- **Prisma 7** with PostgreSQL — client generated to `src/lib/prisma/`
+- **Better-Auth** for email/password auth
+- **Tailwind CSS 4** + **shadcn-svelte** components + **bits-ui** primitives
+- **Valibot 1** for input validation in remote functions
+- **svelte-sonner** for toast notifications
+
+## Data Layer: Remote Functions
+
+All server logic lives in `src/lib/remote/*.remote.ts`. These use SvelteKit's `query()` / `command()` from `$app/server`:
+
+- `query(schema?, handler)` — read-only, cacheable. Call with `.refresh()` to invalidate.
+- `command(schema, handler)` — mutations. Call related `query(...).refresh()` after mutating.
+- `getRequestEvent()` from `$app/server` gives access to `locals.user` / `locals.session`.
+- Valibot schema is the first arg (omit for no-param queries).
+
+```ts
+// Parameterized query
+export const getOrg = query(v.string(), async (orgId: string) => { ... });
+
+// Command that refreshes a parameterized query
+export const createProduction = command(schema, async (data) => {
+  ...
+  getProductions(data.organizationId).refresh();
+});
+```
+
+Auth guard pattern used in every remote file:
+```ts
+async function requireAuth() {
+  const event = await getRequestEvent();
+  if (!event?.locals.user) throw new Error('Unauthorized');
+  return event.locals.user;
+}
+```
+
+## Remote Files
+
+| File | Exports |
+|------|---------|
+| `src/lib/remote/orgs.remote.ts` | `getMyOrgs`, `getOrg`, `getOrgUsers`, `getOrgWithMembers`, `createOrg`, `addUserToOrg`, `removeUserFromOrg`, `updateMemberRole`, `getAllUsers`, `setUserAdmin` |
+| `src/lib/remote/assets.remote.ts` | `getAssets`, `getInventorySummary`, `getManufacturers`, `getProducts`, `createAssets`, `getAssetHistory`, `getBundles`, `getBundle`, `createBundle`, `addAssetToBundle`, `removeAssetFromBundle` |
+| `src/lib/remote/productions.remote.ts` | `getProductions`, `getProduction`, `createProduction`, `addAssetToProduction`, `approveProductionItem`, `getPendingApprovals`, `addBundleToProduction`, `addCrewMember`, `removeCrewMember`, `getCalendarData` |
+
+## Auth & Session
+
+- `src/lib/server/auth.ts` — Better-Auth init + exports `prisma` client (use this everywhere, not a separate Prisma instance)
+- `src/hooks.server.ts` — populates `event.locals.user` and `event.locals.session` on every request
+- `src/routes/+layout.server.ts` — passes `user`, `session`, and `isAdmin` to all pages via `data`
+- Auth routes: `/auth/login`, `/auth/register`
+- API handler: `/api/auth/[...all]/+server.ts`
+
+## Authorization Model
+
+- `user.isAdmin` (DB field) — system-level admin: can manage all orgs, grant/revoke admin
+- `OrgMembership.role` — per-org role: `OWNER | ADMIN | MEMBER | VIEWER`
+- Org `OWNER` role = can manage that org's members
+- System admins bypass org membership checks
+
+## Route Structure
+
+```
+src/routes/
+├── +layout.svelte          # App shell: nav, theme toggle, user menu
+├── +layout.server.ts       # Loads user, session, isAdmin for all pages
+├── +page.svelte            # Dashboard: pending approvals
+├── auth/
+│   ├── login/+page.svelte
+│   └── register/+page.svelte
+├── api/auth/[...all]/+server.ts   # Better-Auth handler
+├── orgs/
+│   ├── +page.svelte        # List orgs; Manage button for OWNER/admin
+│   └── [id]/+page.svelte   # Manage org members: add/remove/role
+├── admin/
+│   └── users/+page.svelte  # System admin: grant/revoke isAdmin per user
+├── inventory/
+│   ├── +page.svelte        # Product catalog with stock levels
+│   ├── [id]/+page.svelte   # Asset detail
+│   └── new/+page.svelte    # Create assets
+├── assets/
+│   ├── +page.svelte        # Asset list
+│   ├── new/+page.svelte
+│   └── bundles/
+│       ├── +page.svelte
+│       ├── new/+page.svelte
+│       └── [id]/+page.svelte
+├── productions/
+│   ├── +page.svelte
+│   ├── new/+page.svelte
+│   └── [id]/
+│       ├── +page.svelte
+│       ├── crew-passes/+page.svelte   # Print layout
+│       ├── packing-list/+page.svelte  # Print layout
+│       └── delivery-note/+page.svelte # Print layout
+└── calendar/+page.svelte
+```
+
+Print routes (`/packing-list`, `/delivery-note`, `/crew-passes`) bypass the app header — detected via regex in `+layout.svelte`.
+
+## UI Components
+
+Located in `src/lib/components/ui/`: `button`, `card`, `input`, `label`, `creatable-select`, `data-view`. No shadcn `Select` component — use a native `<select>` styled with Tailwind border/input classes when needed.
+
+## Database Schema Key Points
+
+- `User` — `isAdmin Boolean @default(false)` for system-level admin
+- `Organization` — multi-tenant root; has `defaultAssetVisibility`
+- `OrgMembership` — `userId + organizationId` unique; role enum `OWNER|ADMIN|MEMBER|VIEWER`
+- `Asset` — belongs to an org; can be in a `AssetBundle`
+- `Production` — belongs to an org; has `ProductionItem[]` (assets) and `ProductionCrew[]` (users)
+- `ProductionItem.status` — `PENDING` for cross-org requests, `APPROVED|CHECKED_OUT|RETURNED` otherwise
+- `AssetTransaction` — audit log for all asset actions
+
+---
+
 # Code Style Guidelines
 
 ## Svelte 5 Reactivity

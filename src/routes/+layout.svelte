@@ -49,7 +49,10 @@
 							<a href="/assets" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Assets</a>
 							<a href="/productions" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Productions</a>
 							<a href="/calendar" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Calendar</a>
-						</nav>
+								{#if data.isAdmin}
+									<a href="/admin/users" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Admin</a>
+								{/if}
+							</nav>
 					{/if}
 				</div>
 
