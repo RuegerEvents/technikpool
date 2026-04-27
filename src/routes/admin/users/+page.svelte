@@ -12,8 +12,8 @@
 		try {
 			await setUserAdmin({ userId, isAdmin: !currentIsAdmin });
 			toast.success(`${name} ${!currentIsAdmin ? 'granted' : 'revoked'} admin access`);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err) {
+			toast.error((err as Error).message);
 		}
 	}
 </script>
@@ -39,12 +39,16 @@
 							<div class="flex items-center gap-2">
 								<p class="truncate font-medium">{user.name || user.email}</p>
 								{#if user.isAdmin}
-									<span class="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
+									<span
+										class="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary"
+									>
 										Admin
 									</span>
 								{/if}
 								{#if user.id === data.user?.id}
-									<span class="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
+									<span
+										class="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground"
+									>
 										You
 									</span>
 								{/if}
@@ -58,7 +62,8 @@
 							<Button
 								variant={user.isAdmin ? 'destructive' : 'outline'}
 								size="sm"
-								onclick={() => handleToggleAdmin(user.id, user.isAdmin, user.name || user.email)}>
+								onclick={() => handleToggleAdmin(user.id, user.isAdmin, user.name || user.email)}
+							>
 								{user.isAdmin ? 'Revoke Admin' : 'Make Admin'}
 							</Button>
 						{/if}

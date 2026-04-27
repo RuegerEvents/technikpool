@@ -30,7 +30,6 @@
 	type RequestGroup = {
 		productionId: string;
 		productionName: string;
-		productionHref: string;
 		requesterOrg: string;
 		productGroups: ProductGroup[];
 		allItems: PendingItem[];
@@ -43,7 +42,6 @@
 					acc[item.productionId] = {
 						productionId: item.productionId,
 						productionName: item.production.name,
-						productionHref: resolve(`/productions/${item.productionId}`),
 						requesterOrg: item.production.organization.name,
 						productGroups: [],
 						allItems: []
@@ -53,7 +51,11 @@
 				group.allItems.push(item);
 				let pg = group.productGroups.find((p) => p.productId === item.asset.product.id);
 				if (!pg) {
-					pg = { productId: item.asset.product.id, productName: item.asset.product.name, items: [] };
+					pg = {
+						productId: item.asset.product.id,
+						productName: item.asset.product.name,
+						items: []
+					};
 					group.productGroups.push(pg);
 				}
 				pg.items.push(item);
@@ -82,24 +84,31 @@
 	async function handleApproveAll(items: PendingItem[]) {
 		const results = await Promise.allSettled(items.map((i) => approveProductionItem(i.id)));
 		const failed = results.filter((r) => r.status === 'rejected').length;
-		if (failed === 0) toast.success(`${items.length} asset${items.length !== 1 ? 's' : ''} approved.`);
+		if (failed === 0)
+			toast.success(`${items.length} asset${items.length !== 1 ? 's' : ''} approved.`);
 		else toast.error(`${failed} of ${items.length} approvals failed.`);
 	}
 
 	async function handleDeclineAll(items: PendingItem[]) {
 		const results = await Promise.allSettled(items.map((i) => declineProductionItem(i.id)));
 		const failed = results.filter((r) => r.status === 'rejected').length;
-		if (failed === 0) toast.success(`${items.length} asset${items.length !== 1 ? 's' : ''} declined.`);
+		if (failed === 0)
+			toast.success(`${items.length} asset${items.length !== 1 ? 's' : ''} declined.`);
 		else toast.error(`${failed} of ${items.length} declines failed.`);
 	}
 </script>
 
 <!-- Count picker modal -->
-<Dialog.Root open={modal !== null} onOpenChange={(open) => { if (!open) modal = null; }}>
+<Dialog.Root
+	open={modal !== null}
+	onOpenChange={(open) => {
+		if (!open) modal = null;
+	}}
+>
 	<Dialog.Portal>
 		<Dialog.Overlay class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
 		<Dialog.Content
-			class="fixed left-1/2 top-1/2 z-50 w-full max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-background p-6 shadow-lg"
+			class="fixed top-1/2 left-1/2 z-50 w-full max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-background p-6 shadow-lg"
 		>
 			{#if modal}
 				<Dialog.Title class="text-base font-semibold">
@@ -115,9 +124,10 @@
 						max={modal.pg.items.length}
 						bind:value={modal.count}
 						oninput={(e) => {
-							if (modal) modal.count = Math.min(Math.max(1, +e.currentTarget.value), modal.pg.items.length);
+							if (modal)
+								modal.count = Math.min(Math.max(1, +e.currentTarget.value), modal.pg.items.length);
 						}}
-						class="w-24 rounded-md border border-input bg-background px-3 py-2 text-center text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+						class="w-24 rounded-md border border-input bg-background px-3 py-2 text-center text-sm focus:ring-1 focus:ring-ring focus:outline-none"
 					/>
 					<span class="text-sm text-muted-foreground">of {modal.pg.items.length}</span>
 				</div>
@@ -129,7 +139,8 @@
 						variant={modal.action === 'approve' ? 'default' : 'destructive'}
 						onclick={confirmModal}
 					>
-						{modal.action === 'approve' ? 'Approve' : 'Decline'} {modal.count}
+						{modal.action === 'approve' ? 'Approve' : 'Decline'}
+						{modal.count}
 					</Button>
 				</div>
 			{/if}
@@ -144,15 +155,8 @@
 			Manage your equipment across organizations seamlessly.
 		</p>
 		<div class="mt-8 flex gap-4">
-			<Button
-				href={resolve('/auth/login')}
-				size="lg">Login</Button
-			>
-			<Button
-				href={resolve('/auth/register')}
-				variant="outline"
-				size="lg">Sign Up</Button
-			>
+			<Button href={resolve('/auth/login')} size="lg">Login</Button>
+			<Button href={resolve('/auth/register')} variant="outline" size="lg">Sign Up</Button>
 		</div>
 	</div>
 {:else}
@@ -165,7 +169,8 @@
 		<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 			<Card.Root>
 				<Card.Header class="pb-2">
-					<Card.Title class="text-sm font-medium text-muted-foreground">My Organizations</Card.Title>
+					<Card.Title class="text-sm font-medium text-muted-foreground">My Organizations</Card.Title
+					>
 				</Card.Header>
 				<Card.Content>
 					<div class="text-2xl font-bold">{orgs.length}</div>
@@ -174,7 +179,9 @@
 
 			<Card.Root>
 				<Card.Header class="pb-2">
-					<Card.Title class="text-sm font-medium text-muted-foreground">Pending Approvals</Card.Title>
+					<Card.Title class="text-sm font-medium text-muted-foreground"
+						>Pending Approvals</Card.Title
+					>
 				</Card.Header>
 				<Card.Content>
 					<div class="text-2xl font-bold">{pending.length}</div>
@@ -197,11 +204,13 @@
 							<Card.Header class="flex flex-row items-start justify-between gap-4 pb-3">
 								<div>
 									<a
-										href={group.productionHref}
+										href={resolve(`/productions/${group.productionId}`)}
 										class="font-semibold hover:underline">{group.productionName}</a
 									>
 									<p class="mt-0.5 text-sm text-muted-foreground">
-										Requested by <span class="font-medium text-foreground">{group.requesterOrg}</span>
+										Requested by <span class="font-medium text-foreground"
+											>{group.requesterOrg}</span
+										>
 										&middot;
 										{group.allItems.length}
 										{group.allItems.length === 1 ? 'asset' : 'assets'}
@@ -213,9 +222,8 @@
 										size="sm"
 										onclick={() => handleDeclineAll(group.allItems)}>Decline all</Button
 									>
-									<Button
-										size="sm"
-										onclick={() => handleApproveAll(group.allItems)}>Approve all</Button
+									<Button size="sm" onclick={() => handleApproveAll(group.allItems)}
+										>Approve all</Button
 									>
 								</div>
 							</Card.Header>
@@ -230,15 +238,14 @@
 												{pg.productName}
 											</span>
 											<div class="flex items-center gap-1.5">
-												<Button
-													variant="ghost"
-													size="sm"
-													onclick={() => handleDeclineAll(pg.items)}>Decline{pg.items.length > 1 ? ' all' : ''}</Button
+												<Button variant="ghost" size="sm" onclick={() => handleDeclineAll(pg.items)}
+													>Decline{pg.items.length > 1 ? ' all' : ''}</Button
 												>
 												<Button
 													variant="outline"
 													size="sm"
-													onclick={() => handleApproveAll(pg.items)}>Approve{pg.items.length > 1 ? ' all' : ''}</Button
+													onclick={() => handleApproveAll(pg.items)}
+													>Approve{pg.items.length > 1 ? ' all' : ''}</Button
 												>
 												{#if pg.items.length > 1}
 													<DropdownMenu.Root>
@@ -248,8 +255,18 @@
 																class="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 																aria-label="Partial actions"
 															>
-																<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-																	<circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+																<svg
+																	xmlns="http://www.w3.org/2000/svg"
+																	width="15"
+																	height="15"
+																	viewBox="0 0 24 24"
+																	fill="currentColor"
+																>
+																	<circle cx="12" cy="5" r="1.5" /><circle
+																		cx="12"
+																		cy="12"
+																		r="1.5"
+																	/><circle cx="12" cy="19" r="1.5" />
 																</svg>
 															</button>
 														</DropdownMenu.Trigger>
@@ -261,13 +278,13 @@
 															>
 																<DropdownMenu.Item
 																	onSelect={() => openModal(pg, 'approve')}
-																	class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent data-[highlighted]:bg-accent"
-																>Approve some…</DropdownMenu.Item
+																	class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+																	>Approve some…</DropdownMenu.Item
 																>
 																<DropdownMenu.Item
 																	onSelect={() => openModal(pg, 'decline')}
-																	class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm text-destructive outline-none transition-colors hover:bg-accent data-[highlighted]:bg-accent"
-																>Decline some…</DropdownMenu.Item
+																	class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm text-destructive transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+																	>Decline some…</DropdownMenu.Item
 																>
 															</DropdownMenu.Content>
 														</DropdownMenu.Portal>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 declare module '@event-calendar/core' {
 	const Calendar: any;
 	const DayGrid: any;

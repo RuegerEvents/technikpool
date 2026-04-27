@@ -12,9 +12,24 @@
 
 	const columns: Column<Production>[] = [
 		{ key: 'name', label: 'Name', sortable: true, accessor: (r: Production) => r.name },
-		{ key: 'startDate', label: 'Start Date', sortable: true, accessor: (r: Production) => r.startDate?.toISOString() ?? '' },
-		{ key: 'endDate', label: 'End Date', sortable: true, accessor: (r: Production) => r.endDate?.toISOString() ?? '' },
-		{ key: 'items', label: 'Items Booked', sortable: true, accessor: (r: Production) => r.items?.length ?? 0 }
+		{
+			key: 'startDate',
+			label: 'Start Date',
+			sortable: true,
+			accessor: (r: Production) => r.startDate?.toISOString() ?? ''
+		},
+		{
+			key: 'endDate',
+			label: 'End Date',
+			sortable: true,
+			accessor: (r: Production) => r.endDate?.toISOString() ?? ''
+		},
+		{
+			key: 'items',
+			label: 'Items Booked',
+			sortable: true,
+			accessor: (r: Production) => r.items?.length ?? 0
+		}
 	];
 
 	function formatDate(d: Date | null | undefined): string {
@@ -32,13 +47,13 @@
 		{#if true}
 			{@const orgs = await getMyOrgs()}
 			{#if !filterOrgId && orgs[0]}
-				{(filterOrgId = orgs[0].id, '')}
+				{((filterOrgId = orgs[0].id), '')}
 			{/if}
 			<select
 				bind:value={filterOrgId}
-				class="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+				class="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
 			>
-				{#each orgs as org}
+				{#each orgs as org (org.id)}
 					<option value={org.id}>{org.name}</option>
 				{/each}
 			</select>

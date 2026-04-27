@@ -34,20 +34,21 @@ export const createProduction = command(schema, async (data) => {
 ```
 
 Auth guard pattern used in every remote file:
+
 ```ts
 async function requireAuth() {
-  const event = await getRequestEvent();
-  if (!event?.locals.user) throw new Error('Unauthorized');
-  return event.locals.user;
+	const event = await getRequestEvent();
+	if (!event?.locals.user) throw new Error('Unauthorized');
+	return event.locals.user;
 }
 ```
 
 ## Remote Files
 
-| File | Exports |
-|------|---------|
-| `src/lib/remote/orgs.remote.ts` | `getMyOrgs`, `getOrg`, `getOrgUsers`, `getOrgWithMembers`, `createOrg`, `addUserToOrg`, `removeUserFromOrg`, `updateMemberRole`, `getAllUsers`, `setUserAdmin` |
-| `src/lib/remote/assets.remote.ts` | `getAssets`, `getInventorySummary`, `getManufacturers`, `getProducts`, `createAssets`, `getAssetHistory`, `getBundles`, `getBundle`, `createBundle`, `addAssetToBundle`, `removeAssetFromBundle` |
+| File                                   | Exports                                                                                                                                                                                                        |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/lib/remote/orgs.remote.ts`        | `getMyOrgs`, `getOrg`, `getOrgUsers`, `getOrgWithMembers`, `createOrg`, `addUserToOrg`, `removeUserFromOrg`, `updateMemberRole`, `getAllUsers`, `setUserAdmin`                                                 |
+| `src/lib/remote/assets.remote.ts`      | `getAssets`, `getInventorySummary`, `getManufacturers`, `getProducts`, `createAssets`, `getAssetHistory`, `getBundles`, `getBundle`, `createBundle`, `addAssetToBundle`, `removeAssetFromBundle`               |
 | `src/lib/remote/productions.remote.ts` | `getProductions`, `getProduction`, `createProduction`, `addAssetToProduction`, `approveProductionItem`, `getPendingApprovals`, `addBundleToProduction`, `addCrewMember`, `removeCrewMember`, `getCalendarData` |
 
 ## Auth & Session
@@ -126,12 +127,14 @@ Located in `src/lib/components/ui/`: `button`, `card`, `input`, `label`, `creata
 ## Svelte 5 Reactivity
 
 **DO** use `$derived(await getData())` for async data — no manual loading state, no `onMount`, no `$effect` for fetching:
+
 ```svelte
-let production = $derived(await getProduction(productionId));
-let allAssets = $derived(await getAssets());
+let production = $derived(await getProduction(productionId)); let allAssets = $derived(await
+getAssets());
 ```
 
 **DON'T** use the Svelte 4 pattern of `$state + onMount + loading flag`:
+
 ```svelte
 // DON'T
 let data = $state(null);
@@ -140,6 +143,7 @@ onMount(async () => { data = await getData(); loading = false; });
 ```
 
 **DO** use `$derived` for reactive route params:
+
 ```svelte
 const productionId = $derived(page.params.id as string);
 ```
@@ -153,9 +157,9 @@ const productionId = $derived(page.params.id as string);
 ## Links and Paths
 
 **DO** wrap all internal hrefs with `resolve()` from `$app/paths`:
+
 ```svelte
-import { resolve } from '$app/paths';
-href={resolve('/productions')}
+import {resolve} from '$app/paths'; href={resolve('/productions')}
 href={resolve(`/productions/${id}/packing-list`)}
 ```
 
@@ -174,10 +178,11 @@ href={resolve(`/productions/${id}/packing-list`)}
 ## Template Structure
 
 **DO** remove outer loading/not-found guards when using `$derived(await ...)` and `findUniqueOrThrow` — the page renders once data is available:
+
 ```svelte
 <div class="space-y-8">
-  <h1>{production.name}</h1>
-  ...
+	<h1>{production.name}</h1>
+	...
 </div>
 ```
 
@@ -186,16 +191,60 @@ href={resolve(`/productions/${id}/packing-list`)}
 ## `#each` Keys
 
 **DO** always provide a key in `{#each}` blocks:
+
 ```svelte
 {#each items as item (item.id)}
 {#each users as u (u.id)}
+{#each columns as col (col.key)}
+{#each items as item, i (i)}   ← index key when no stable id (e.g. form row arrays)
 ```
 
 **DON'T** use keyless `{#each items as item}`.
 
+## Error Handling
+
+**DO** omit the type annotation in catch blocks and cast when accessing `.message`:
+
+```ts
+} catch (err) {
+  toast.error((err as Error).message);
+}
+```
+
+**DON'T** annotate catch params with `any`: `catch (err: any)`.
+
+## Third-party Library Type Declarations
+
+**DO** add a file-level `/* eslint-disable @typescript-eslint/no-explicit-any */` to `.d.ts` files that declare untyped third-party modules (e.g. `src/event-calendar.d.ts`).
+
+## Generic Svelte Components
+
+**DO** use block-level eslint-disable/enable for rules that can't be suppressed with a single `next-line` comment (e.g. multi-line elements):
+
+```svelte
+<!-- eslint-disable svelte/no-navigation-without-resolve -->
+<a href={passedThroughHref}>...</a>
+<!-- eslint-enable svelte/no-navigation-without-resolve -->
+```
+
+**DO** add `<!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->` above the `<script>` tag for generic components that use `any` in their `generics` attribute.
+
+## `goto()` calls
+
+**DO** wrap all `goto()` destinations with `resolve()`:
+
+```ts
+import { resolve } from '$app/paths';
+goto(resolve('/auth/login'));
+goto(resolve(`/productions/${id}`));
+```
+
+**DON'T** use bare string paths: `goto('/auth/login')`.
+
 ## Tailwind Class Ordering
 
 **DO** order Tailwind classes: layout → box → typography → colors → borders → states/variants last:
+
 ```
 border-b bg-background transition-colors last:border-0 hover:bg-muted/30
 ```
@@ -205,19 +254,19 @@ border-b bg-background transition-colors last:border-0 hover:bg-muted/30
 ## Element Formatting
 
 **DO** put each attribute on its own line for elements with 3+ attributes, with the closing `>` on the last attribute's line (Svelte convention):
+
 ```svelte
-<Button
-  variant="secondary"
-  href={resolve(`/productions/${id}/packing-list`)}
-  target="_blank">Packing List</Button
+<Button variant="secondary" href={resolve(`/productions/${id}/packing-list`)} target="_blank"
+	>Packing List</Button
 >
 ```
 
 **DON'T** put multiple attributes inline on one long line.
 
 **DO** break long ternary class expressions across lines:
+
 ```svelte
 class="px-3 py-1.5 {tab === 'assets'
-  ? 'bg-primary text-primary-foreground'
-  : 'bg-background hover:bg-muted'}"
+	? 'bg-primary text-primary-foreground'
+	: 'bg-background hover:bg-muted'}"
 ```

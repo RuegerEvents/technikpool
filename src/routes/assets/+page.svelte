@@ -5,6 +5,7 @@
 	import { getAssets } from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { page } from '$app/stores';
+	import { resolve } from '$app/paths';
 
 	let filterOrgId = $state($page.url.searchParams.get('org') || '');
 
@@ -12,12 +13,22 @@
 
 	const columns: Column<Asset>[] = [
 		{ key: 'product', label: 'Product', sortable: true, accessor: (r: Asset) => r.product.name },
-		{ key: 'manufacturer', label: 'Manufacturer', sortable: true, accessor: (r: Asset) => r.product.manufacturer.name },
+		{
+			key: 'manufacturer',
+			label: 'Manufacturer',
+			sortable: true,
+			accessor: (r: Asset) => r.product.manufacturer.name
+		},
 		{ key: 'serialNumber', label: 'Serial Number', accessor: (r: Asset) => r.serialNumber },
 		{ key: 'assetTag', label: 'Asset Tag', accessor: (r: Asset) => r.assetTag },
 		{ key: 'bundle', label: 'Bundle', accessor: (r: Asset) => r.bundle?.name },
 		{ key: 'status', label: 'Status', sortable: true, accessor: (r: Asset) => r.status },
-		{ key: 'organization', label: 'Organization', sortable: true, accessor: (r: Asset) => r.organization.name }
+		{
+			key: 'organization',
+			label: 'Organization',
+			sortable: true,
+			accessor: (r: Asset) => r.organization.name
+		}
 	];
 
 	const statusClass: Record<string, string> = {
@@ -35,10 +46,10 @@
 		</div>
 		<select
 			bind:value={filterOrgId}
-			class="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+			class="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
 		>
 			<option value="">All Organizations</option>
-			{#each await getMyOrgs() as org}
+			{#each await getMyOrgs() as org (org.id)}
 				<option value={org.id}>{org.name}</option>
 			{/each}
 		</select>
@@ -75,7 +86,11 @@
 						<div class="space-y-1 text-sm">
 							<div class="flex items-center justify-between">
 								<span class="text-muted-foreground">Status</span>
-								<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {statusClass[asset.status] ?? statusClass.MAINTENANCE}">
+								<span
+									class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {statusClass[
+										asset.status
+									] ?? statusClass.MAINTENANCE}"
+								>
 									{asset.status}
 								</span>
 							</div>
@@ -109,7 +124,11 @@
 				{:else if key === 'manufacturer'}
 					{asset.product.manufacturer.name}
 				{:else if key === 'status'}
-					<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {statusClass[asset.status] ?? statusClass.MAINTENANCE}">
+					<span
+						class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {statusClass[
+							asset.status
+						] ?? statusClass.MAINTENANCE}"
+					>
 						{asset.status}
 					</span>
 				{:else if key === 'organization'}
@@ -120,7 +139,9 @@
 					<span class="font-mono text-xs">{asset.assetTag ?? '—'}</span>
 				{:else if key === 'bundle'}
 					{#if asset.bundle}
-						<a href="/assets/bundles/{asset.bundle.id}" class="text-xs hover:underline">{asset.bundle.name}</a>
+						<a href={resolve(`/assets/bundles/${asset.bundle.id}`)} class="text-xs hover:underline"
+							>{asset.bundle.name}</a
+						>
 					{:else}
 						<span class="text-muted-foreground">—</span>
 					{/if}

@@ -33,8 +33,8 @@
 			await addUserToOrg({ orgId, email: addEmail, role: addRole });
 			toast.success(`${addEmail} added to organization`);
 			addEmail = '';
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err) {
+			toast.error((err as Error).message);
 		} finally {
 			adding = false;
 		}
@@ -44,8 +44,8 @@
 		try {
 			await removeUserFromOrg({ orgId, userId });
 			toast.success(`${name} removed from organization`);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err) {
+			toast.error((err as Error).message);
 		}
 	}
 
@@ -57,8 +57,8 @@
 				role: role as 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER'
 			});
 			toast.success('Role updated');
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err) {
+			toast.error((err as Error).message);
 		}
 	}
 
@@ -75,9 +75,20 @@
 		<Button
 			variant="ghost"
 			href={resolve('/orgs')}
-			class="flex items-center gap-1 text-muted-foreground">
-			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<path d="m15 18-6-6 6-6"/>
+			class="flex items-center gap-1 text-muted-foreground"
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="16"
+				height="16"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<path d="m15 18-6-6 6-6" />
 			</svg>
 			Organizations
 		</Button>
@@ -104,14 +115,16 @@
 								type="email"
 								bind:value={addEmail}
 								placeholder="user@example.com"
-								required />
+								required
+							/>
 						</div>
 						<div class="space-y-2">
 							<Label for="addRole">Role</Label>
 							<select
 								id="addRole"
 								bind:value={addRole}
-								class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+								class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+							>
 								<option value="VIEWER">Viewer</option>
 								<option value="MEMBER">Member</option>
 								<option value="ADMIN">Admin</option>
@@ -138,7 +151,9 @@
 										{membership.user.name || membership.user.email}
 									</p>
 									{#if membership.user.isAdmin}
-										<span class="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
+										<span
+											class="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary"
+										>
 											System Admin
 										</span>
 									{/if}
@@ -149,8 +164,10 @@
 								{#if canManage && membership.userId !== data.user?.id}
 									<select
 										value={membership.role}
-										onchange={(e) => handleRoleChange(membership.userId, (e.target as HTMLSelectElement).value)}
-										class="h-8 rounded-md border border-input bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+										onchange={(e) =>
+											handleRoleChange(membership.userId, (e.target as HTMLSelectElement).value)}
+										class="h-8 rounded-md border border-input bg-background px-2 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+									>
 										<option value="VIEWER">Viewer</option>
 										<option value="MEMBER">Member</option>
 										<option value="ADMIN">Admin</option>
@@ -159,11 +176,18 @@
 									<Button
 										variant="destructive"
 										size="sm"
-										onclick={() => handleRemove(membership.userId, membership.user.name || membership.user.email)}>
+										onclick={() =>
+											handleRemove(
+												membership.userId,
+												membership.user.name || membership.user.email
+											)}
+									>
 										Remove
 									</Button>
 								{:else}
-									<span class="rounded-md border border-input bg-background px-2 py-1 text-sm text-muted-foreground">
+									<span
+										class="rounded-md border border-input bg-background px-2 py-1 text-sm text-muted-foreground"
+									>
 										{roleLabels[membership.role]}
 									</span>
 								{/if}

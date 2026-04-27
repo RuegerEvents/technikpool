@@ -39,8 +39,8 @@
 		working = true;
 		try {
 			await addAssetToProduction({ productionId, assetId });
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err) {
+			toast.error((err as Error).message);
 		} finally {
 			working = false;
 		}
@@ -52,8 +52,8 @@
 			const result = await addBundleToProduction({ productionId, bundleId });
 			addedBundleIds = new Set([...addedBundleIds, bundleId]);
 			toast.success(`Added ${result.added} asset${result.added !== 1 ? 's' : ''} from bundle`);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err) {
+			toast.error((err as Error).message);
 		} finally {
 			working = false;
 		}
@@ -119,8 +119,8 @@
 			crewRole = '';
 			showCrewForm = false;
 			toast.success('Crew member added');
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err) {
+			toast.error((err as Error).message);
 		} finally {
 			savingCrew = false;
 		}
@@ -129,8 +129,8 @@
 	async function handleRemoveCrew(id: string) {
 		try {
 			await removeCrewMember(id);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err) {
+			toast.error((err as Error).message);
 		}
 	}
 

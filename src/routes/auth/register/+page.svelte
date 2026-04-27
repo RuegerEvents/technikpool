@@ -5,6 +5,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import * as Card from '$lib/components/ui/card';
 	import { goto, invalidateAll } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	let name = $state('');
 	let email = $state('');
@@ -29,7 +30,7 @@
 					success = true;
 					loading = false;
 					await invalidateAll();
-					goto('/');
+					goto(resolve('/'));
 				},
 				onError: (ctx) => {
 					error = ctx.error.message;
@@ -54,13 +55,7 @@
 				</div>
 				<div class="space-y-2">
 					<Label for="email">Email</Label>
-					<Input
-						id="email"
-						type="email"
-						placeholder="m@example.com"
-						bind:value={email}
-						required
-					/>
+					<Input id="email" type="email" placeholder="m@example.com" bind:value={email} required />
 				</div>
 				<div class="space-y-2">
 					<Label for="password">Password</Label>
@@ -78,7 +73,7 @@
 			</form>
 			<div class="mt-4 text-center text-sm">
 				Already have an account?
-				<a href="/auth/login" class="underline"> Login </a>
+				<a href={resolve('/auth/login')} class="underline"> Login </a>
 			</div>
 		</Card.Content>
 	</Card.Root>

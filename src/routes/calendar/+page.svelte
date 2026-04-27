@@ -9,15 +9,20 @@
 	async function buildCalendar() {
 		const assets = await getCalendarData();
 
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const resources = assets.map((a: any) => ({
 			id: a.id,
 			title: `${a.product.name} (${a.product.manufacturer.name})`
 		}));
 
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const events: any[] = [];
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		assets.forEach((a: any) => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			a.productionItems.forEach((item: any) => {
 				if (item.production.startDate && item.production.endDate) {
+					// eslint-disable-next-line svelte/prefer-svelte-reactivity
 					const end = new Date(item.production.endDate);
 					end.setDate(end.getDate() + 1);
 					events.push({
@@ -57,7 +62,9 @@
 	<Card.Root>
 		<Card.Content class="p-0 sm:p-6">
 			{@const options = await buildCalendar()}
-			<div class="ec-theme-default bg-background text-foreground h-[600px] overflow-hidden rounded-md border">
+			<div
+				class="ec-theme-default h-[600px] overflow-hidden rounded-md border bg-background text-foreground"
+			>
 				<Calendar {plugins} {options} />
 			</div>
 		</Card.Content>

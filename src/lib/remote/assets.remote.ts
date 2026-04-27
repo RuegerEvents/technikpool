@@ -35,34 +35,37 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 	});
 });
 
-export const getInventorySummary = query(v.optional(v.string()), async (organizationId?: string) => {
-	const user = await requireAuth();
-	const orgIds = await userOrgIds(user.id);
-	const queryOrgIds = organizationId ? [organizationId] : orgIds;
+export const getInventorySummary = query(
+	v.optional(v.string()),
+	async (organizationId?: string) => {
+		const user = await requireAuth();
+		const orgIds = await userOrgIds(user.id);
+		const queryOrgIds = organizationId ? [organizationId] : orgIds;
 
-	const products = await prisma.product.findMany({
-		include: {
-			manufacturer: true,
-			assets: {
-				where: { organizationId: { in: queryOrgIds } },
-				select: { id: true, status: true }
-			}
-		},
-		orderBy: { name: 'asc' }
-	});
+		const products = await prisma.product.findMany({
+			include: {
+				manufacturer: true,
+				assets: {
+					where: { organizationId: { in: queryOrgIds } },
+					select: { id: true, status: true }
+				}
+			},
+			orderBy: { name: 'asc' }
+		});
 
-	return products
-		.filter((p) => p.assets.length > 0)
-		.map((p) => ({
-			id: p.id,
-			name: p.name,
-			manufacturer: p.manufacturer,
-			total: p.assets.length,
-			available: p.assets.filter((a) => a.status === 'AVAILABLE').length,
-			maintenance: p.assets.filter((a) => a.status === 'MAINTENANCE').length,
-			broken: p.assets.filter((a) => a.status === 'BROKEN').length
-		}));
-});
+		return products
+			.filter((p) => p.assets.length > 0)
+			.map((p) => ({
+				id: p.id,
+				name: p.name,
+				manufacturer: p.manufacturer,
+				total: p.assets.length,
+				available: p.assets.filter((a) => a.status === 'AVAILABLE').length,
+				maintenance: p.assets.filter((a) => a.status === 'MAINTENANCE').length,
+				broken: p.assets.filter((a) => a.status === 'BROKEN').length
+			}));
+	}
+);
 
 export const getManufacturers = query(async () => {
 	await requireAuth();

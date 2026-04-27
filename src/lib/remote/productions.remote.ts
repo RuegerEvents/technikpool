@@ -89,7 +89,9 @@ const addAssetSchema = v.object({
 export const addAssetToProduction = command(addAssetSchema, async (data) => {
 	const user = await requireAuth();
 
-	const production = await prisma.production.findUniqueOrThrow({ where: { id: data.productionId } });
+	const production = await prisma.production.findUniqueOrThrow({
+		where: { id: data.productionId }
+	});
 	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: data.assetId } });
 
 	const isCrossOrg = production.organizationId !== asset.organizationId;
@@ -222,7 +224,9 @@ const addBundleSchema = v.object({
 export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	const user = await requireAuth();
 
-	const production = await prisma.production.findUniqueOrThrow({ where: { id: data.productionId } });
+	const production = await prisma.production.findUniqueOrThrow({
+		where: { id: data.productionId }
+	});
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id: data.bundleId },
 		include: { assets: true }

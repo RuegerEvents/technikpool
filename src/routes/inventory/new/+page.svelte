@@ -7,6 +7,7 @@
 	import { getManufacturers, getProducts, createAssets } from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { browser } from '$app/environment';
 
@@ -44,9 +45,7 @@
 		}
 	}
 
-	let createMore = $state(
-		browser ? localStorage.getItem('asset_create_more') === 'true' : false
-	);
+	let createMore = $state(browser ? localStorage.getItem('asset_create_more') === 'true' : false);
 
 	$effect(() => {
 		if (browser) localStorage.setItem('asset_create_more', String(createMore));
@@ -61,8 +60,14 @@
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
-		if (!manufacturer) { toast.error('Please select a manufacturer'); return; }
-		if (!product) { toast.error('Please select a product'); return; }
+		if (!manufacturer) {
+			toast.error('Please select a manufacturer');
+			return;
+		}
+		if (!product) {
+			toast.error('Please select a product');
+			return;
+		}
 
 		saving = true;
 		try {
@@ -85,10 +90,10 @@
 				resetForm();
 				saving = false;
 			} else {
-				goto(count === 1 ? `/inventory/${created[0].id}` : '/inventory');
+				goto(resolve(count === 1 ? `/inventory/${created[0].id}` : '/inventory'));
 			}
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err) {
+			toast.error((err as Error).message);
 			saving = false;
 		}
 	}
@@ -105,7 +110,7 @@
 			{#if true}
 				{@const orgs = await getMyOrgs()}
 				{#if !selectedOrgId && orgs[0]}
-					{(selectedOrgId = orgs[0].id, '')}
+					{((selectedOrgId = orgs[0].id), '')}
 				{/if}
 				<form onsubmit={handleSubmit} class="space-y-6">
 					<div class="space-y-2">
@@ -113,10 +118,10 @@
 						<select
 							id="org"
 							bind:value={selectedOrgId}
-							class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+							class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
 							required
 						>
-							{#each orgs as org}
+							{#each orgs as org (org.id)}
 								<option value={org.id}>{org.name}</option>
 							{/each}
 						</select>
@@ -137,9 +142,7 @@
 
 					{#if manufacturer}
 						{#key manufacturerKey}
-							{@const products = await getProducts(
-								manufacturer.id ?? undefined
-							)}
+							{@const products = await getProducts(manufacturer.id ?? undefined)}
 							<div class="space-y-2">
 								<Label>Product Model</Label>
 								<CreatableSelect
@@ -166,17 +169,19 @@
 					</div>
 
 					{#if quantity > 1}
-						<div class="rounded-lg border overflow-hidden">
+						<div class="overflow-hidden rounded-lg border">
 							<table class="w-full text-sm">
 								<thead>
 									<tr class="border-b bg-muted/40">
-										<th class="px-3 py-2 text-left font-medium text-muted-foreground w-10">#</th>
-										<th class="px-3 py-2 text-left font-medium text-muted-foreground">Serial Number</th>
+										<th class="w-10 px-3 py-2 text-left font-medium text-muted-foreground">#</th>
+										<th class="px-3 py-2 text-left font-medium text-muted-foreground"
+											>Serial Number</th
+										>
 										<th class="px-3 py-2 text-left font-medium text-muted-foreground">Asset Tag</th>
 									</tr>
 								</thead>
 								<tbody>
-									{#each items as item, i}
+									{#each items as item, i (i)}
 										<tr class="border-b last:border-0">
 											<td class="px-3 py-2 text-muted-foreground tabular-nums">{i + 1}</td>
 											<td class="px-3 py-2">
@@ -211,13 +216,17 @@
 						</div>
 					{/if}
 
-					<div class="pt-2 flex flex-col gap-4">
-						<label class="flex items-center gap-2 text-sm cursor-pointer select-none">
-							<input type="checkbox" bind:checked={createMore} class="h-4 w-4 rounded border-input" />
+					<div class="flex flex-col gap-4 pt-2">
+						<label class="flex cursor-pointer items-center gap-2 text-sm select-none">
+							<input
+								type="checkbox"
+								bind:checked={createMore}
+								class="h-4 w-4 rounded border-input"
+							/>
 							Create another after saving
 						</label>
 						<div class="flex justify-end gap-4">
-							<Button type="button" variant="outline" href="/inventory">Cancel</Button>
+							<Button type="button" variant="outline" href={resolve('/inventory')}>Cancel</Button>
 							<Button type="submit" disabled={saving}>
 								{saving ? 'Saving…' : quantity > 1 ? `Add ${quantity} Assets` : 'Add Asset'}
 							</Button>

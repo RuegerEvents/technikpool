@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { getProduction } from '$lib/remote/productions.remote';
 	import { onMount } from 'svelte';
+	import { resolve } from '$app/paths';
 
 	const productionId = $page.params.id as string;
 
@@ -18,15 +19,21 @@
 {#if true}
 	{@const production = await getProduction(productionId)}
 
-	<div class="max-w-4xl mx-auto p-8 bg-white text-black min-h-screen font-serif">
+	<div class="mx-auto min-h-screen max-w-4xl bg-white p-8 font-serif text-black">
 		<div class="no-print mb-8">
-			<button class="px-4 py-2 bg-zinc-900 text-white rounded font-sans" onclick={() => window.print()}>Print</button>
-			<a href="/productions/{productionId}" class="ml-4 text-zinc-600 underline font-sans">Back</a>
+			<button
+				class="rounded bg-zinc-900 px-4 py-2 font-sans text-white"
+				onclick={() => window.print()}>Print</button
+			>
+			<a
+				href={resolve(`/productions/${productionId}`)}
+				class="ml-4 font-sans text-zinc-600 underline">Back</a
+			>
 		</div>
 
-		<div class="flex justify-between items-start mb-16">
+		<div class="mb-16 flex items-start justify-between">
 			<div>
-				<h1 class="text-3xl font-bold uppercase tracking-widest text-zinc-800">Delivery Note</h1>
+				<h1 class="text-3xl font-bold tracking-widest text-zinc-800 uppercase">Delivery Note</h1>
 				<p class="mt-2 text-zinc-600">No. DN-{production?.id.slice(0, 8).toUpperCase()}</p>
 			</div>
 			<div class="text-right">
@@ -35,35 +42,37 @@
 			</div>
 		</div>
 
-		<div class="grid grid-cols-2 gap-12 mb-12">
+		<div class="mb-12 grid grid-cols-2 gap-12">
 			<div>
-				<h3 class="font-bold border-b border-black mb-2 uppercase text-sm tracking-wider">Delivery To</h3>
-				<p class="font-medium text-lg">{production?.name}</p>
-				<p class="text-zinc-700 mt-1">
-					Production Period:<br/>
+				<h3 class="mb-2 border-b border-black text-sm font-bold tracking-wider uppercase">
+					Delivery To
+				</h3>
+				<p class="text-lg font-medium">{production?.name}</p>
+				<p class="mt-1 text-zinc-700">
+					Production Period:<br />
 					{#if production?.startDate}{new Date(production.startDate).toLocaleDateString()}{/if} –
 					{#if production?.endDate}{new Date(production.endDate).toLocaleDateString()}{/if}
 				</p>
 			</div>
 			<div>
-				<h3 class="font-bold border-b border-black mb-2 uppercase text-sm tracking-wider">Date</h3>
+				<h3 class="mb-2 border-b border-black text-sm font-bold tracking-wider uppercase">Date</h3>
 				<p>{new Date().toLocaleDateString()}</p>
 			</div>
 		</div>
 
-		<table class="w-full text-left border-collapse mt-8">
+		<table class="mt-8 w-full border-collapse text-left">
 			<thead>
 				<tr class="border-y-2 border-black">
-					<th class="py-3 px-2">Qty</th>
+					<th class="px-2 py-3">Qty</th>
 					<th class="py-3">Description</th>
 					<th class="py-3">Serial Number</th>
 					<th class="py-3 text-right">Remarks</th>
 				</tr>
 			</thead>
 			<tbody>
-				{#each production?.items as item}
+				{#each production?.items as item (item.id)}
 					<tr class="border-b border-zinc-200">
-						<td class="py-4 px-2 font-bold text-center">1</td>
+						<td class="px-2 py-4 text-center font-bold">1</td>
 						<td class="py-4">
 							<p class="font-medium">{item.asset.product.name}</p>
 							<p class="text-sm text-zinc-600">{item.asset.product.manufacturer.name}</p>
@@ -75,16 +84,16 @@
 			</tbody>
 		</table>
 
-		<div class="mt-24 pt-8 border-t border-zinc-300 grid grid-cols-2 gap-16">
+		<div class="mt-24 grid grid-cols-2 gap-16 border-t border-zinc-300 pt-8">
 			<div class="text-center">
-				<div class="border-b border-black h-16 mb-2"></div>
-				<p class="uppercase text-xs tracking-wider font-bold">Delivered By</p>
-				<p class="text-sm text-zinc-600 mt-1">Signature & Date</p>
+				<div class="mb-2 h-16 border-b border-black"></div>
+				<p class="text-xs font-bold tracking-wider uppercase">Delivered By</p>
+				<p class="mt-1 text-sm text-zinc-600">Signature & Date</p>
 			</div>
 			<div class="text-center">
-				<div class="border-b border-black h-16 mb-2"></div>
-				<p class="uppercase text-xs tracking-wider font-bold">Received By</p>
-				<p class="text-sm text-zinc-600 mt-1">Signature & Date</p>
+				<div class="mb-2 h-16 border-b border-black"></div>
+				<p class="text-xs font-bold tracking-wider uppercase">Received By</p>
+				<p class="mt-1 text-sm text-zinc-600">Signature & Date</p>
 			</div>
 		</div>
 

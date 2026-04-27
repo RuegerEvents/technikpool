@@ -48,12 +48,10 @@
 
 	let showCreate = $derived(inputValue.trim().length > 0 && !exactMatch);
 
-	let options = $derived<Array<{ type: 'item'; item: Item } | { type: 'create'; name: string }>>(
-		[
-			...filtered.map((item) => ({ type: 'item' as const, item })),
-			...(showCreate ? [{ type: 'create' as const, name: inputValue.trim() }] : [])
-		]
-	);
+	let options = $derived<Array<{ type: 'item'; item: Item } | { type: 'create'; name: string }>>([
+		...filtered.map((item) => ({ type: 'item' as const, item })),
+		...(showCreate ? [{ type: 'create' as const, name: inputValue.trim() }] : [])
+	]);
 
 	function selectOption(opt: (typeof options)[number]) {
 		if (opt.type === 'item') {
@@ -75,7 +73,7 @@
 		// If user clears input, clear value
 		if (!inputValue.trim()) {
 			value = null;
-			onchange?.(null as any);
+			onchange?.(null);
 		}
 	}
 
@@ -134,7 +132,7 @@
 		{required}
 		{disabled}
 		autocomplete="off"
-		class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+		class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 	/>
 
 	{#if open && options.length > 0}
@@ -142,9 +140,8 @@
 			class="absolute z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md"
 		>
 			<ul class="max-h-60 overflow-y-auto py-1">
-				{#each options as opt, i}
+				{#each options as opt, i (opt.type === 'item' ? opt.item.id : `create-${opt.name}`)}
 					<li>
-						<!-- svelte-ignore a11y_click_events_have_key_events -->
 						<!-- svelte-ignore a11y_interactive_supports_focus -->
 						<div
 							role="option"
@@ -177,7 +174,7 @@
 		<div
 			class="absolute z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md"
 		>
-			<div class="px-3 py-4 text-sm text-muted-foreground text-center">No results</div>
+			<div class="px-3 py-4 text-center text-sm text-muted-foreground">No results</div>
 		</div>
 	{/if}
 </div>

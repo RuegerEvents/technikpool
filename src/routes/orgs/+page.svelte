@@ -21,8 +21,8 @@
 			await createOrg(newOrgName);
 			toast.success(`Organization "${newOrgName}" created!`);
 			newOrgName = '';
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err) {
+			toast.error((err as Error).message);
 		} finally {
 			creating = false;
 		}
@@ -34,7 +34,9 @@
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">Organizations</h1>
 			<p class="text-muted-foreground">
-				{data.isAdmin ? 'All organizations in the system.' : 'Manage your organizations and memberships.'}
+				{data.isAdmin
+					? 'All organizations in the system.'
+					: 'Manage your organizations and memberships.'}
 			</p>
 		</div>
 	</div>
@@ -66,7 +68,9 @@
 			</h2>
 			{#if orgs.length === 0}
 				<p class="text-muted-foreground">
-					{data.isAdmin ? 'No organizations exist yet.' : 'You are not a member of any organization yet.'}
+					{data.isAdmin
+						? 'No organizations exist yet.'
+						: 'You are not a member of any organization yet.'}
 				</p>
 			{:else}
 				<div class="grid gap-4">
@@ -85,14 +89,10 @@
 								</div>
 								<div class="flex gap-2">
 									{#if org.role === 'OWNER' || data.isAdmin}
-										<Button
-											variant="outline"
-											href={resolve(`/orgs/${org.id}`)}>Manage</Button
-										>
+										<Button variant="outline" href={resolve(`/orgs/${org.id}`)}>Manage</Button>
 									{/if}
-									<Button
-										variant="outline"
-										href={resolve(`/inventory?org=${org.id}`)}>View Assets</Button
+									<Button variant="outline" href={resolve(`/inventory?org=${org.id}`)}
+										>View Assets</Button
 									>
 								</div>
 							</Card.Content>

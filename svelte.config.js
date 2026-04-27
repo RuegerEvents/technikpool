@@ -16,8 +16,8 @@ const config = {
 		adapter: adapter(),
 		experimental: {
 			remoteFunctions: true
-		},
-	},
+		}
+	}
 };
 
 export default config;

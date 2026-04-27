@@ -8,4 +8,4 @@ services:
       POSTGRES_PASSWORD: technikpool_password
       POSTGRES_DB: technikpool_db
     ports:
-      - "7493:5432"
+      - '7493:5432'

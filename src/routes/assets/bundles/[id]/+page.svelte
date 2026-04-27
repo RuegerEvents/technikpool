@@ -1,8 +1,14 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
-	import { getBundle, getAssets, addAssetToBundle, removeAssetFromBundle } from '$lib/remote/assets.remote';
+	import {
+		getBundle,
+		getAssets,
+		addAssetToBundle,
+		removeAssetFromBundle
+	} from '$lib/remote/assets.remote';
 	import { page } from '$app/stores';
+	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 
 	const bundleId = $page.params.id as string;
@@ -16,7 +22,10 @@
 
 	$effect(() => {
 		if (showAddModal && !assetsLoaded) {
-			getAssets().then((a) => { allAssets = a; assetsLoaded = true; });
+			getAssets().then((a) => {
+				allAssets = a;
+				assetsLoaded = true;
+			});
 		}
 	});
 
@@ -25,8 +34,8 @@
 		try {
 			await addAssetToBundle({ bundleId, assetId });
 			toast.success('Asset added to bundle');
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err) {
+			toast.error((err as Error).message);
 		} finally {
 			working = false;
 		}
@@ -37,8 +46,8 @@
 		try {
 			await removeAssetFromBundle({ bundleId, assetId });
 			toast.success('Asset removed from bundle');
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err) {
+			toast.error((err as Error).message);
 		} finally {
 			working = false;
 		}
@@ -60,10 +69,12 @@
 			<div class="flex items-center justify-between">
 				<div>
 					<h1 class="text-3xl font-bold tracking-tight">{bundle.name}</h1>
-					<p class="text-muted-foreground">{bundle.organization.name}{bundle.description ? ` — ${bundle.description}` : ''}</p>
+					<p class="text-muted-foreground">
+						{bundle.organization.name}{bundle.description ? ` — ${bundle.description}` : ''}
+					</p>
 				</div>
 				<div class="flex gap-2">
-					<Button variant="outline" href="/assets/bundles">Back</Button>
+					<Button variant="outline" href={resolve('/assets/bundles')}>Back</Button>
 					<Button onclick={() => (showAddModal = !showAddModal)}>
 						{showAddModal ? 'Close' : 'Add Assets'}
 					</Button>
@@ -79,7 +90,7 @@
 								type="search"
 								bind:value={searchQuery}
 								placeholder="Search assets…"
-								class="h-9 w-full max-w-sm rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+								class="h-9 w-full max-w-sm rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
 							/>
 						</div>
 					</Card.Header>
@@ -92,9 +103,11 @@
 							{@const available = allAssets.filter((a) => {
 								if (bundleAssetIds.has(a.id)) return false;
 								if (!q) return true;
-								return a.product.name.toLowerCase().includes(q) ||
+								return (
+									a.product.name.toLowerCase().includes(q) ||
 									a.product.manufacturer.name.toLowerCase().includes(q) ||
-									(a.serialNumber?.toLowerCase().includes(q) ?? false);
+									(a.serialNumber?.toLowerCase().includes(q) ?? false)
+								);
 							})}
 							{#if available.length === 0}
 								<p class="text-sm text-muted-foreground">No assets available to add.</p>
@@ -103,23 +116,31 @@
 									<table class="w-full text-sm">
 										<thead class="sticky top-0 bg-muted/80 backdrop-blur-sm">
 											<tr class="border-b">
-												<th class="px-3 py-2 text-left font-medium text-muted-foreground">Product</th>
+												<th class="px-3 py-2 text-left font-medium text-muted-foreground"
+													>Product</th
+												>
 												<th class="px-3 py-2 text-left font-medium text-muted-foreground">S/N</th>
 												<th class="px-3 py-2 text-left font-medium text-muted-foreground">Org</th>
 												<th class="px-3 py-2"></th>
 											</tr>
 										</thead>
 										<tbody>
-											{#each available as asset}
-												<tr class="border-b last:border-0 bg-background hover:bg-muted/30">
+											{#each available as asset (asset.id)}
+												<tr class="border-b bg-background last:border-0 hover:bg-muted/30">
 													<td class="px-3 py-2">
 														<p class="font-medium">{asset.product.name}</p>
-														<p class="text-xs text-muted-foreground">{asset.product.manufacturer.name}</p>
+														<p class="text-xs text-muted-foreground">
+															{asset.product.manufacturer.name}
+														</p>
 													</td>
 													<td class="px-3 py-2 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
-													<td class="px-3 py-2 text-xs text-muted-foreground">{asset.organization.name}</td>
+													<td class="px-3 py-2 text-xs text-muted-foreground"
+														>{asset.organization.name}</td
+													>
 													<td class="px-3 py-2 text-right">
-														<Button size="sm" disabled={working} onclick={() => handleAdd(asset.id)}>Add</Button>
+														<Button size="sm" disabled={working} onclick={() => handleAdd(asset.id)}
+															>Add</Button
+														>
 													</td>
 												</tr>
 											{/each}
@@ -145,27 +166,43 @@
 							<thead>
 								<tr class="border-b bg-muted/30">
 									<th class="px-4 py-3 text-left font-medium text-muted-foreground">Product</th>
-									<th class="px-4 py-3 text-left font-medium text-muted-foreground">Manufacturer</th>
-									<th class="px-4 py-3 text-left font-medium text-muted-foreground">Serial Number</th>
+									<th class="px-4 py-3 text-left font-medium text-muted-foreground">Manufacturer</th
+									>
+									<th class="px-4 py-3 text-left font-medium text-muted-foreground"
+										>Serial Number</th
+									>
 									<th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
 									<th class="px-4 py-3 text-left font-medium text-muted-foreground">Org</th>
 									<th class="px-4 py-3"></th>
 								</tr>
 							</thead>
 							<tbody>
-								{#each bundle.assets as asset}
-									<tr class="border-b last:border-0 hover:bg-muted/30 transition-colors">
+								{#each bundle.assets as asset (asset.id)}
+									<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
 										<td class="px-4 py-3 font-medium">{asset.product.name}</td>
-										<td class="px-4 py-3 text-muted-foreground">{asset.product.manufacturer.name}</td>
+										<td class="px-4 py-3 text-muted-foreground"
+											>{asset.product.manufacturer.name}</td
+										>
 										<td class="px-4 py-3 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
 										<td class="px-4 py-3">
-											<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {statusClass[asset.status] ?? ''}">
+											<span
+												class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {statusClass[
+													asset.status
+												] ?? ''}"
+											>
 												{asset.status}
 											</span>
 										</td>
-										<td class="px-4 py-3 text-sm text-muted-foreground">{asset.organization.name}</td>
+										<td class="px-4 py-3 text-sm text-muted-foreground"
+											>{asset.organization.name}</td
+										>
 										<td class="px-4 py-3 text-right">
-											<Button size="sm" variant="outline" disabled={working} onclick={() => handleRemove(asset.id)}>Remove</Button>
+											<Button
+												size="sm"
+												variant="outline"
+												disabled={working}
+												onclick={() => handleRemove(asset.id)}>Remove</Button
+											>
 										</td>
 									</tr>
 								{/each}
