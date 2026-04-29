@@ -20,6 +20,7 @@
 	let isPrintRoute = $derived(
 		/\/(packing-list|delivery-note|crew-passes)$/.test(page.url.pathname)
 	);
+	let isCalendarRoute = $derived(page.url.pathname.startsWith('/calendar'));
 
 	// Dark mode
 	let dark = $state(browser ? document.documentElement.classList.contains('dark') : false);
@@ -46,9 +47,9 @@
 {#if isAuthRoute || isPrintRoute}
 	{@render children()}
 {:else}
-	<div class="flex min-h-screen flex-col bg-zinc-50 dark:bg-zinc-950">
+	<div class="flex h-dvh flex-col bg-zinc-50 dark:bg-zinc-950">
 		<header class="sticky top-0 z-40 border-b bg-background shadow-sm">
-			<div class="container mx-auto flex h-16 items-center justify-between px-4 py-4 md:px-6">
+			<div class="flex h-16 w-full items-center justify-between px-4 py-4 md:px-6">
 				<div class="flex items-center gap-6 md:gap-10">
 					<a href={resolve('/')} class="flex items-center space-x-2">
 						<span class="inline-block text-xl font-bold tracking-tight">Technikpool</span>
@@ -57,24 +58,36 @@
 						<nav class="hidden gap-6 md:flex">
 							<a
 								href={resolve('/inventory')}
-								class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-								>Inventory</a
+								class="text-sm font-medium transition-colors {page.url.pathname.startsWith(
+									'/inventory'
+								) || page.url.pathname.startsWith('/assets')
+									? 'text-foreground'
+									: 'text-muted-foreground hover:text-foreground'}">Inventory</a
 							>
 							<a
 								href={resolve('/productions')}
-								class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-								>Productions</a
+								class="text-sm font-medium transition-colors {page.url.pathname.startsWith(
+									'/productions'
+								)
+									? 'text-foreground'
+									: 'text-muted-foreground hover:text-foreground'}">Productions</a
 							>
 							<a
 								href={resolve('/calendar')}
-								class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-								>Calendar</a
+								class="text-sm font-medium transition-colors {page.url.pathname.startsWith(
+									'/calendar'
+								)
+									? 'text-foreground'
+									: 'text-muted-foreground hover:text-foreground'}">Calendar</a
 							>
 							{#if data.isAdmin}
 								<a
 									href={resolve('/admin/users')}
-									class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-									>Admin</a
+									class="text-sm font-medium transition-colors {page.url.pathname.startsWith(
+										'/admin'
+									)
+										? 'text-foreground'
+										: 'text-muted-foreground hover:text-foreground'}">Admin</a
 								>
 							{/if}
 						</nav>
@@ -89,15 +102,13 @@
 							onclick={() => switchLocale('de')}
 							class="px-2.5 py-1.5 transition-colors {locale === 'de'
 								? 'bg-primary text-primary-foreground'
-								: 'bg-background text-muted-foreground hover:bg-muted'}"
-						>DE</button
+								: 'bg-background text-muted-foreground hover:bg-muted'}">DE</button
 						><button
 							type="button"
 							onclick={() => switchLocale('en')}
 							class="px-2.5 py-1.5 transition-colors {locale === 'en'
 								? 'bg-primary text-primary-foreground'
-								: 'bg-background text-muted-foreground hover:bg-muted'}"
-						>EN</button
+								: 'bg-background text-muted-foreground hover:bg-muted'}">EN</button
 						>
 					</div>
 					<!-- Theme toggle -->
@@ -241,7 +252,11 @@
 				</div>
 			</div>
 		</header>
-		<main class="container mx-auto flex-1 px-4 py-6 md:px-6 md:py-8">
+		<main
+			class="min-h-0 flex-1 {isCalendarRoute
+				? 'overflow-hidden p-0'
+				: 'overflow-auto px-4 py-6 md:px-6 md:py-8'}"
+		>
 			{@render children()}
 		</main>
 	</div>

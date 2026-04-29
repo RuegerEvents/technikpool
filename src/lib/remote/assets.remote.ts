@@ -18,6 +18,11 @@ async function userOrgIds(userId: string) {
 	return memberships.map((m) => m.organizationId);
 }
 
+async function isSystemAdmin(userId: string) {
+	const user = await prisma.user.findUnique({ where: { id: userId }, select: { isAdmin: true } });
+	return user?.isAdmin ?? false;
+}
+
 export const getAssets = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
 	const orgIds = await userOrgIds(user.id);
@@ -33,6 +38,28 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 		},
 		orderBy: [{ product: { name: 'asc' } }]
 	});
+});
+
+export const getAsset = query(v.string(), async (assetId: string) => {
+	const user = await requireAuth();
+	const orgIds = await userOrgIds(user.id);
+	const systemAdmin = await isSystemAdmin(user.id);
+
+	const asset = await prisma.asset.findUniqueOrThrow({
+		where: { id: assetId },
+		include: {
+			product: { include: { manufacturer: true } },
+			location: true,
+			organization: true,
+			bundle: { select: { id: true, name: true, organizationId: true } }
+		}
+	});
+
+	if (!systemAdmin && !orgIds.includes(asset.organizationId)) {
+		throw new Error('Unauthorized');
+	}
+
+	return asset;
 });
 
 export const getInventorySummary = query(
@@ -70,6 +97,22 @@ export const getInventorySummary = query(
 export const getManufacturers = query(async () => {
 	await requireAuth();
 	return await prisma.manufacturer.findMany({ orderBy: { name: 'asc' } });
+});
+
+export const getLocations = query(v.optional(v.string()), async (organizationId?: string) => {
+	const user = await requireAuth();
+	const orgIds = await userOrgIds(user.id);
+	const queryOrgIds = organizationId ? [organizationId] : orgIds;
+	const systemAdmin = await isSystemAdmin(user.id);
+
+	if (!systemAdmin && organizationId && !orgIds.includes(organizationId)) {
+		throw new Error('Unauthorized');
+	}
+
+	return await prisma.location.findMany({
+		where: { organizationId: { in: queryOrgIds } },
+		orderBy: { name: 'asc' }
+	});
 });
 
 export const getProducts = query(v.optional(v.string()), async (manufacturerId?: string) => {
@@ -150,7 +193,18 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 });
 
 export const getAssetHistory = query(v.string(), async (assetId: string) => {
-	await requireAuth();
+	const user = await requireAuth();
+	const orgIds = await userOrgIds(user.id);
+	const systemAdmin = await isSystemAdmin(user.id);
+
+	const asset = await prisma.asset.findUniqueOrThrow({
+		where: { id: assetId },
+		select: { organizationId: true }
+	});
+	if (!systemAdmin && !orgIds.includes(asset.organizationId)) {
+		throw new Error('Unauthorized');
+	}
+
 	return await prisma.assetTransaction.findMany({
 		where: { assetId },
 		include: {
@@ -159,6 +213,121 @@ export const getAssetHistory = query(v.string(), async (assetId: string) => {
 		},
 		orderBy: { createdAt: 'desc' }
 	});
+});
+
+const updateAssetSchema = v.object({
+	assetId: v.string(),
+	serialNumber: v.optional(v.string()),
+	assetTag: v.optional(v.string()),
+	status: v.optional(v.picklist(['AVAILABLE', 'MAINTENANCE', 'BROKEN'])),
+	imageUrl: v.optional(v.string()),
+	locationId: v.optional(v.nullable(v.string()))
+});
+
+export const updateAsset = command(updateAssetSchema, async (input) => {
+	const user = await requireAuth();
+	const systemAdmin = await isSystemAdmin(user.id);
+
+	const asset = await prisma.asset.findUniqueOrThrow({
+		where: { id: input.assetId },
+		include: { location: true, product: true }
+	});
+
+	if (!systemAdmin) {
+		const membership = await prisma.orgMembership.findUnique({
+			where: {
+				userId_organizationId: { userId: user.id, organizationId: asset.organizationId }
+			}
+		});
+		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
+			throw new Error('Unauthorized');
+		}
+	}
+
+	let nextLocationId: string | null | undefined = undefined;
+	if ('locationId' in input) {
+		if (input.locationId === null) {
+			nextLocationId = null;
+		} else if (input.locationId) {
+			const location = await prisma.location.findUniqueOrThrow({
+				where: { id: input.locationId }
+			});
+			if (location.organizationId !== asset.organizationId) {
+				throw new Error('Invalid location');
+			}
+			nextLocationId = location.id;
+		} else {
+			nextLocationId = null;
+		}
+	}
+
+	const updateData: {
+		serialNumber?: string | null;
+		assetTag?: string | null;
+		status?: string;
+		imageUrl?: string | null;
+		locationId?: string | null;
+	} = {};
+
+	const changes: string[] = [];
+	if ('serialNumber' in input) {
+		const serialNumber = input.serialNumber?.trim() || null;
+		updateData.serialNumber = serialNumber;
+		if (serialNumber !== asset.serialNumber)
+			changes.push(`serialNumber: ${asset.serialNumber ?? '—'} → ${serialNumber ?? '—'}`);
+	}
+	if ('assetTag' in input) {
+		const assetTag = input.assetTag?.trim() || null;
+		updateData.assetTag = assetTag;
+		if (assetTag !== asset.assetTag)
+			changes.push(`assetTag: ${asset.assetTag ?? '—'} → ${assetTag ?? '—'}`);
+	}
+	if ('status' in input && input.status) {
+		updateData.status = input.status;
+		if (input.status !== asset.status) changes.push(`status: ${asset.status} → ${input.status}`);
+	}
+	if ('imageUrl' in input) {
+		const imageUrl = input.imageUrl?.trim() || null;
+		updateData.imageUrl = imageUrl;
+		if (imageUrl !== asset.imageUrl)
+			changes.push(`imageUrl: ${asset.imageUrl ?? '—'} → ${imageUrl ?? '—'}`);
+	}
+	if ('locationId' in input && nextLocationId !== undefined) {
+		updateData.locationId = nextLocationId;
+		if (nextLocationId !== asset.locationId)
+			changes.push(`location: ${asset.location?.name ?? '—'} → ${nextLocationId ? 'set' : '—'}`);
+	}
+
+	const updated = await prisma.asset.update({
+		where: { id: input.assetId },
+		data: updateData,
+		include: {
+			product: { include: { manufacturer: true } },
+			location: true,
+			organization: true,
+			bundle: { select: { id: true, name: true, organizationId: true } }
+		}
+	});
+
+	if (changes.length > 0) {
+		await prisma.assetTransaction.create({
+			data: {
+				assetId: asset.id,
+				userId: user.id,
+				action: 'UPDATED',
+				notes: changes.join('\n')
+			}
+		});
+	}
+
+	getAsset(input.assetId).refresh();
+	getAssetHistory(input.assetId).refresh();
+	getAssets(asset.organizationId).refresh();
+	getInventorySummary(asset.organizationId).refresh();
+	getInventorySummary().refresh();
+	getLocations(asset.organizationId).refresh();
+
+	return updated;
 });
 
 // ── Bundles ───────────────────────────────────────────────────────────────────

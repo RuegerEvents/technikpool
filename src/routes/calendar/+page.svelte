@@ -1,5 +1,4 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
 	import { getCalendarData } from '$lib/remote/productions.remote';
 	import { Calendar, ResourceTimeline } from '@event-calendar/core';
 	import '@event-calendar/core/index.css';
@@ -51,24 +50,12 @@
 			resourceAreaWidth: '25%'
 		};
 	}
+	const options = $derived(await buildCalendar());
 </script>
 
-<div class="space-y-6">
-	<div>
-		<h1 class="text-3xl font-bold tracking-tight">Availability Calendar</h1>
-		<p class="text-muted-foreground">View equipment bookings across all your organizations.</p>
-	</div>
-
-	<Card.Root>
-		<Card.Content class="p-0 sm:p-6">
-			{@const options = await buildCalendar()}
-			<div
-				class="ec-theme-default h-[600px] overflow-hidden rounded-md border bg-background text-foreground"
-			>
-				<Calendar {plugins} {options} />
-			</div>
-		</Card.Content>
-	</Card.Root>
+<!-- use rest available from navbar -->
+<div class="ec-theme-default h-full min-h-0 overflow-hidden p-4 text-foreground">
+	<Calendar {plugins} {options} />
 </div>
 
 <style>
@@ -83,6 +70,10 @@
 		--ec-button-active-border-color: hsl(var(--border));
 		--ec-button-active-text-color: hsl(var(--accent-foreground));
 		--ec-today-bg-color: hsl(var(--muted));
+	}
+
+	:global(.ec-theme-default .ec) {
+		height: 100%;
 	}
 
 	:global(.ec-resource-area) {

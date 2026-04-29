@@ -269,6 +269,13 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	return { added: newAssets.length };
 });
 
+export const removeProductionItem = command(v.string(), async (itemId: string) => {
+	await requireAuth();
+	const item = await prisma.productionItem.delete({ where: { id: itemId } });
+	getProduction(item.productionId).refresh();
+	return item;
+});
+
 // ── Crew ─────────────────────────────────────────────────────────────────────
 
 const addCrewSchema = v.object({
