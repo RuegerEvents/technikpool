@@ -14,6 +14,14 @@
 	let organizationId = $state('');
 	let startDate = $state('');
 	let endDate = $state('');
+	let address = $state({
+		line1: '',
+		line2: '',
+		postalCode: '',
+		city: '',
+		region: '',
+		country: ''
+	});
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -23,7 +31,8 @@
 				name,
 				organizationId,
 				startDate: startDate ? new Date(startDate) : undefined,
-				endDate: endDate ? new Date(endDate) : undefined
+				endDate: endDate ? new Date(endDate) : undefined,
+				address
 			});
 			toast.success('Production created!');
 			goto(resolve(`/productions/${production.id}`));
@@ -74,6 +83,38 @@
 					<div class="space-y-2">
 						<Label for="endDate">End Date</Label>
 						<Input id="endDate" type="date" bind:value={endDate} required />
+					</div>
+				</div>
+
+				<div class="space-y-2">
+					<h2 class="text-base font-semibold">Address</h2>
+					<p class="text-sm text-muted-foreground">Optional delivery / venue address.</p>
+				</div>
+
+				<div class="grid gap-4 sm:grid-cols-2">
+					<div class="space-y-2 sm:col-span-2">
+						<Label for="line1">Address line 1</Label>
+						<Input id="line1" bind:value={address.line1} placeholder="Street and number" />
+					</div>
+					<div class="space-y-2 sm:col-span-2">
+						<Label for="line2">Address line 2</Label>
+						<Input id="line2" bind:value={address.line2} placeholder="Building, floor, c/o" />
+					</div>
+					<div class="space-y-2">
+						<Label for="postal">Postal code</Label>
+						<Input id="postal" bind:value={address.postalCode} placeholder="12345" />
+					</div>
+					<div class="space-y-2">
+						<Label for="city">City</Label>
+						<Input id="city" bind:value={address.city} placeholder="Berlin" />
+					</div>
+					<div class="space-y-2">
+						<Label for="region">Region/State</Label>
+						<Input id="region" bind:value={address.region} placeholder="BE" />
+					</div>
+					<div class="space-y-2">
+						<Label for="country">Country</Label>
+						<Input id="country" bind:value={address.country} placeholder="DE" />
 					</div>
 				</div>
 

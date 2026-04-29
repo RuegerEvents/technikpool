@@ -119,10 +119,8 @@
 											>{asset.organization.name}</td
 										>
 										<td class="px-3 py-2 text-right">
-											<Button
-												size="sm"
-												disabled={working}
-												onclick={() => handleAdd(asset.id)}>Add</Button
+											<Button size="sm" disabled={working} onclick={() => handleAdd(asset.id)}
+												>Add</Button
 											>
 										</td>
 									</tr>

@@ -33,7 +33,7 @@
 			serialNumber: asset.serialNumber ?? '',
 			assetTag: asset.assetTag ?? '',
 			status: asset.status as AssetStatus,
-			locationId: asset.locationId ?? '',
+			locationId: asset.locationId,
 			imageUrl: asset.imageUrl ?? ''
 		};
 	});
@@ -48,7 +48,7 @@
 				assetTag: draft.assetTag,
 				status: draft.status,
 				imageUrl: draft.imageUrl,
-				locationId: draft.locationId || null
+				locationId: draft.locationId
 			});
 			toast.success('Asset updated');
 			editing = false;
@@ -129,7 +129,6 @@
 							disabled={!editing}
 							class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 						>
-							<option value="">—</option>
 							{#each locations as loc (loc.id)}
 								<option value={loc.id}>{loc.name}</option>
 							{/each}

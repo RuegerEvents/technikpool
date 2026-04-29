@@ -4,7 +4,12 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
-	import { getManufacturers, getProducts, createAssets } from '$lib/remote/assets.remote';
+	import {
+		getManufacturers,
+		getProducts,
+		getLocations,
+		createAssets
+	} from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -14,6 +19,22 @@
 	let saving = $state(false);
 
 	let selectedOrgId = $state('');
+	let locationId = $state('');
+	let locations = $derived(selectedOrgId ? await getLocations(selectedOrgId) : []);
+
+	$effect(() => {
+		if (!selectedOrgId) {
+			locationId = '';
+			return;
+		}
+		if (locations.length === 0) {
+			locationId = '';
+			return;
+		}
+		if (!locationId || !locations.some((l) => l.id === locationId)) {
+			locationId = locations[0].id;
+		}
+	});
 
 	// Each holds either an existing item (id: string) or a new one (id: null)
 	type SelectionOrNew = { id: string; name: string } | { id: null; name: string } | null;
@@ -60,6 +81,10 @@
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
+		if (!locationId) {
+			toast.error('Please select a location');
+			return;
+		}
 		if (!manufacturer) {
 			toast.error('Please select a manufacturer');
 			return;
@@ -73,6 +98,7 @@
 		try {
 			const created = await createAssets({
 				organizationId: selectedOrgId,
+				locationId,
 				manufacturerId: manufacturer.id ?? undefined,
 				newManufacturerName: manufacturer.id ? undefined : manufacturer.name,
 				productId: product.id ?? undefined,
@@ -126,6 +152,32 @@
 							{/each}
 						</select>
 					</div>
+
+					{#if selectedOrgId}
+						<div class="space-y-2">
+							<Label for="location">Location</Label>
+							<select
+								id="location"
+								bind:value={locationId}
+								required
+								class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+							>
+								{#if locations.length === 0}
+									<option value="" disabled>—</option>
+								{:else}
+									{#each locations as loc (loc.id)}<option value={loc.id}>{loc.name}</option>{/each}
+								{/if}
+							</select>
+							{#if locations.length === 0}
+								<p class="text-sm text-muted-foreground">
+									No locations yet. Create one in
+									<a class="underline" href={resolve(`/orgs/${selectedOrgId}/locations`)}
+										>Locations</a
+									>.
+								</p>
+							{/if}
+						</div>
+					{/if}
 
 					{#if true}
 						{@const manufacturers = await getManufacturers()}

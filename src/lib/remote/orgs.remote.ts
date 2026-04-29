@@ -145,16 +145,29 @@ export const updateMemberRole = command(
 export const createOrg = command(v.string(), async (name: string) => {
 	const user = await requireAuth();
 
-	const org = await prisma.organization.create({
-		data: {
-			name,
-			members: {
-				create: {
-					userId: user.id,
-					role: 'OWNER'
+	const org = await prisma.$transaction(async (tx) => {
+		const created = await tx.organization.create({
+			data: {
+				name,
+				members: {
+					create: {
+						userId: user.id,
+						role: 'OWNER'
+					}
 				}
 			}
-		}
+		});
+
+		const address = await tx.address.create({ data: {} });
+		await tx.location.create({
+			data: {
+				organizationId: created.id,
+				name: 'Default Location',
+				addressId: address.id
+			}
+		});
+
+		return created;
 	});
 
 	getMyOrgs().refresh();

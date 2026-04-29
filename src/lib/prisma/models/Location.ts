@@ -28,6 +28,7 @@ export type LocationMinAggregateOutputType = {
   id: string | null
   name: string | null
   organizationId: string | null
+  addressId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -36,6 +37,7 @@ export type LocationMaxAggregateOutputType = {
   id: string | null
   name: string | null
   organizationId: string | null
+  addressId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -44,6 +46,7 @@ export type LocationCountAggregateOutputType = {
   id: number
   name: number
   organizationId: number
+  addressId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -54,6 +57,7 @@ export type LocationMinAggregateInputType = {
   id?: true
   name?: true
   organizationId?: true
+  addressId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -62,6 +66,7 @@ export type LocationMaxAggregateInputType = {
   id?: true
   name?: true
   organizationId?: true
+  addressId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -70,6 +75,7 @@ export type LocationCountAggregateInputType = {
   id?: true
   name?: true
   organizationId?: true
+  addressId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -151,6 +157,7 @@ export type LocationGroupByOutputType = {
   id: string
   name: string
   organizationId: string
+  addressId: string
   createdAt: Date
   updatedAt: Date
   _count: LocationCountAggregateOutputType | null
@@ -180,9 +187,11 @@ export type LocationWhereInput = {
   id?: Prisma.StringFilter<"Location"> | string
   name?: Prisma.StringFilter<"Location"> | string
   organizationId?: Prisma.StringFilter<"Location"> | string
+  addressId?: Prisma.StringFilter<"Location"> | string
   createdAt?: Prisma.DateTimeFilter<"Location"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Location"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
+  address?: Prisma.XOR<Prisma.AddressScalarRelationFilter, Prisma.AddressWhereInput>
   assets?: Prisma.AssetListRelationFilter
 }
 
@@ -190,9 +199,11 @@ export type LocationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  addressId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
+  address?: Prisma.AddressOrderByWithRelationInput
   assets?: Prisma.AssetOrderByRelationAggregateInput
 }
 
@@ -203,9 +214,11 @@ export type LocationWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.LocationWhereInput | Prisma.LocationWhereInput[]
   name?: Prisma.StringFilter<"Location"> | string
   organizationId?: Prisma.StringFilter<"Location"> | string
+  addressId?: Prisma.StringFilter<"Location"> | string
   createdAt?: Prisma.DateTimeFilter<"Location"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Location"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
+  address?: Prisma.XOR<Prisma.AddressScalarRelationFilter, Prisma.AddressWhereInput>
   assets?: Prisma.AssetListRelationFilter
 }, "id">
 
@@ -213,6 +226,7 @@ export type LocationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  addressId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.LocationCountOrderByAggregateInput
@@ -227,6 +241,7 @@ export type LocationScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Location"> | string
   name?: Prisma.StringWithAggregatesFilter<"Location"> | string
   organizationId?: Prisma.StringWithAggregatesFilter<"Location"> | string
+  addressId?: Prisma.StringWithAggregatesFilter<"Location"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Location"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Location"> | Date | string
 }
@@ -237,6 +252,7 @@ export type LocationCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutLocationsInput
+  address: Prisma.AddressCreateNestedOneWithoutLocationsInput
   assets?: Prisma.AssetCreateNestedManyWithoutLocationInput
 }
 
@@ -244,6 +260,7 @@ export type LocationUncheckedCreateInput = {
   id?: string
   name: string
   organizationId: string
+  addressId: string
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutLocationInput
@@ -255,6 +272,7 @@ export type LocationUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutLocationsNestedInput
+  address?: Prisma.AddressUpdateOneRequiredWithoutLocationsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutLocationNestedInput
 }
 
@@ -262,6 +280,7 @@ export type LocationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  addressId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutLocationNestedInput
@@ -271,6 +290,7 @@ export type LocationCreateManyInput = {
   id?: string
   name: string
   organizationId: string
+  addressId: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -286,6 +306,7 @@ export type LocationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  addressId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -304,6 +325,7 @@ export type LocationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  addressId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -312,6 +334,7 @@ export type LocationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  addressId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -320,13 +343,14 @@ export type LocationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  addressId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
-export type LocationNullableScalarRelationFilter = {
-  is?: Prisma.LocationWhereInput | null
-  isNot?: Prisma.LocationWhereInput | null
+export type LocationScalarRelationFilter = {
+  is?: Prisma.LocationWhereInput
+  isNot?: Prisma.LocationWhereInput
 }
 
 export type LocationCreateNestedManyWithoutOrganizationInput = {
@@ -371,18 +395,58 @@ export type LocationUncheckedUpdateManyWithoutOrganizationNestedInput = {
   deleteMany?: Prisma.LocationScalarWhereInput | Prisma.LocationScalarWhereInput[]
 }
 
+export type LocationCreateNestedManyWithoutAddressInput = {
+  create?: Prisma.XOR<Prisma.LocationCreateWithoutAddressInput, Prisma.LocationUncheckedCreateWithoutAddressInput> | Prisma.LocationCreateWithoutAddressInput[] | Prisma.LocationUncheckedCreateWithoutAddressInput[]
+  connectOrCreate?: Prisma.LocationCreateOrConnectWithoutAddressInput | Prisma.LocationCreateOrConnectWithoutAddressInput[]
+  createMany?: Prisma.LocationCreateManyAddressInputEnvelope
+  connect?: Prisma.LocationWhereUniqueInput | Prisma.LocationWhereUniqueInput[]
+}
+
+export type LocationUncheckedCreateNestedManyWithoutAddressInput = {
+  create?: Prisma.XOR<Prisma.LocationCreateWithoutAddressInput, Prisma.LocationUncheckedCreateWithoutAddressInput> | Prisma.LocationCreateWithoutAddressInput[] | Prisma.LocationUncheckedCreateWithoutAddressInput[]
+  connectOrCreate?: Prisma.LocationCreateOrConnectWithoutAddressInput | Prisma.LocationCreateOrConnectWithoutAddressInput[]
+  createMany?: Prisma.LocationCreateManyAddressInputEnvelope
+  connect?: Prisma.LocationWhereUniqueInput | Prisma.LocationWhereUniqueInput[]
+}
+
+export type LocationUpdateManyWithoutAddressNestedInput = {
+  create?: Prisma.XOR<Prisma.LocationCreateWithoutAddressInput, Prisma.LocationUncheckedCreateWithoutAddressInput> | Prisma.LocationCreateWithoutAddressInput[] | Prisma.LocationUncheckedCreateWithoutAddressInput[]
+  connectOrCreate?: Prisma.LocationCreateOrConnectWithoutAddressInput | Prisma.LocationCreateOrConnectWithoutAddressInput[]
+  upsert?: Prisma.LocationUpsertWithWhereUniqueWithoutAddressInput | Prisma.LocationUpsertWithWhereUniqueWithoutAddressInput[]
+  createMany?: Prisma.LocationCreateManyAddressInputEnvelope
+  set?: Prisma.LocationWhereUniqueInput | Prisma.LocationWhereUniqueInput[]
+  disconnect?: Prisma.LocationWhereUniqueInput | Prisma.LocationWhereUniqueInput[]
+  delete?: Prisma.LocationWhereUniqueInput | Prisma.LocationWhereUniqueInput[]
+  connect?: Prisma.LocationWhereUniqueInput | Prisma.LocationWhereUniqueInput[]
+  update?: Prisma.LocationUpdateWithWhereUniqueWithoutAddressInput | Prisma.LocationUpdateWithWhereUniqueWithoutAddressInput[]
+  updateMany?: Prisma.LocationUpdateManyWithWhereWithoutAddressInput | Prisma.LocationUpdateManyWithWhereWithoutAddressInput[]
+  deleteMany?: Prisma.LocationScalarWhereInput | Prisma.LocationScalarWhereInput[]
+}
+
+export type LocationUncheckedUpdateManyWithoutAddressNestedInput = {
+  create?: Prisma.XOR<Prisma.LocationCreateWithoutAddressInput, Prisma.LocationUncheckedCreateWithoutAddressInput> | Prisma.LocationCreateWithoutAddressInput[] | Prisma.LocationUncheckedCreateWithoutAddressInput[]
+  connectOrCreate?: Prisma.LocationCreateOrConnectWithoutAddressInput | Prisma.LocationCreateOrConnectWithoutAddressInput[]
+  upsert?: Prisma.LocationUpsertWithWhereUniqueWithoutAddressInput | Prisma.LocationUpsertWithWhereUniqueWithoutAddressInput[]
+  createMany?: Prisma.LocationCreateManyAddressInputEnvelope
+  set?: Prisma.LocationWhereUniqueInput | Prisma.LocationWhereUniqueInput[]
+  disconnect?: Prisma.LocationWhereUniqueInput | Prisma.LocationWhereUniqueInput[]
+  delete?: Prisma.LocationWhereUniqueInput | Prisma.LocationWhereUniqueInput[]
+  connect?: Prisma.LocationWhereUniqueInput | Prisma.LocationWhereUniqueInput[]
+  update?: Prisma.LocationUpdateWithWhereUniqueWithoutAddressInput | Prisma.LocationUpdateWithWhereUniqueWithoutAddressInput[]
+  updateMany?: Prisma.LocationUpdateManyWithWhereWithoutAddressInput | Prisma.LocationUpdateManyWithWhereWithoutAddressInput[]
+  deleteMany?: Prisma.LocationScalarWhereInput | Prisma.LocationScalarWhereInput[]
+}
+
 export type LocationCreateNestedOneWithoutAssetsInput = {
   create?: Prisma.XOR<Prisma.LocationCreateWithoutAssetsInput, Prisma.LocationUncheckedCreateWithoutAssetsInput>
   connectOrCreate?: Prisma.LocationCreateOrConnectWithoutAssetsInput
   connect?: Prisma.LocationWhereUniqueInput
 }
 
-export type LocationUpdateOneWithoutAssetsNestedInput = {
+export type LocationUpdateOneRequiredWithoutAssetsNestedInput = {
   create?: Prisma.XOR<Prisma.LocationCreateWithoutAssetsInput, Prisma.LocationUncheckedCreateWithoutAssetsInput>
   connectOrCreate?: Prisma.LocationCreateOrConnectWithoutAssetsInput
   upsert?: Prisma.LocationUpsertWithoutAssetsInput
-  disconnect?: Prisma.LocationWhereInput | boolean
-  delete?: Prisma.LocationWhereInput | boolean
   connect?: Prisma.LocationWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.LocationUpdateToOneWithWhereWithoutAssetsInput, Prisma.LocationUpdateWithoutAssetsInput>, Prisma.LocationUncheckedUpdateWithoutAssetsInput>
 }
@@ -392,12 +456,14 @@ export type LocationCreateWithoutOrganizationInput = {
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  address: Prisma.AddressCreateNestedOneWithoutLocationsInput
   assets?: Prisma.AssetCreateNestedManyWithoutLocationInput
 }
 
 export type LocationUncheckedCreateWithoutOrganizationInput = {
   id?: string
   name: string
+  addressId: string
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutLocationInput
@@ -436,8 +502,53 @@ export type LocationScalarWhereInput = {
   id?: Prisma.StringFilter<"Location"> | string
   name?: Prisma.StringFilter<"Location"> | string
   organizationId?: Prisma.StringFilter<"Location"> | string
+  addressId?: Prisma.StringFilter<"Location"> | string
   createdAt?: Prisma.DateTimeFilter<"Location"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Location"> | Date | string
+}
+
+export type LocationCreateWithoutAddressInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutLocationsInput
+  assets?: Prisma.AssetCreateNestedManyWithoutLocationInput
+}
+
+export type LocationUncheckedCreateWithoutAddressInput = {
+  id?: string
+  name: string
+  organizationId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutLocationInput
+}
+
+export type LocationCreateOrConnectWithoutAddressInput = {
+  where: Prisma.LocationWhereUniqueInput
+  create: Prisma.XOR<Prisma.LocationCreateWithoutAddressInput, Prisma.LocationUncheckedCreateWithoutAddressInput>
+}
+
+export type LocationCreateManyAddressInputEnvelope = {
+  data: Prisma.LocationCreateManyAddressInput | Prisma.LocationCreateManyAddressInput[]
+  skipDuplicates?: boolean
+}
+
+export type LocationUpsertWithWhereUniqueWithoutAddressInput = {
+  where: Prisma.LocationWhereUniqueInput
+  update: Prisma.XOR<Prisma.LocationUpdateWithoutAddressInput, Prisma.LocationUncheckedUpdateWithoutAddressInput>
+  create: Prisma.XOR<Prisma.LocationCreateWithoutAddressInput, Prisma.LocationUncheckedCreateWithoutAddressInput>
+}
+
+export type LocationUpdateWithWhereUniqueWithoutAddressInput = {
+  where: Prisma.LocationWhereUniqueInput
+  data: Prisma.XOR<Prisma.LocationUpdateWithoutAddressInput, Prisma.LocationUncheckedUpdateWithoutAddressInput>
+}
+
+export type LocationUpdateManyWithWhereWithoutAddressInput = {
+  where: Prisma.LocationScalarWhereInput
+  data: Prisma.XOR<Prisma.LocationUpdateManyMutationInput, Prisma.LocationUncheckedUpdateManyWithoutAddressInput>
 }
 
 export type LocationCreateWithoutAssetsInput = {
@@ -446,12 +557,14 @@ export type LocationCreateWithoutAssetsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutLocationsInput
+  address: Prisma.AddressCreateNestedOneWithoutLocationsInput
 }
 
 export type LocationUncheckedCreateWithoutAssetsInput = {
   id?: string
   name: string
   organizationId: string
+  addressId: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -478,12 +591,14 @@ export type LocationUpdateWithoutAssetsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutLocationsNestedInput
+  address?: Prisma.AddressUpdateOneRequiredWithoutLocationsNestedInput
 }
 
 export type LocationUncheckedUpdateWithoutAssetsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  addressId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -491,6 +606,7 @@ export type LocationUncheckedUpdateWithoutAssetsInput = {
 export type LocationCreateManyOrganizationInput = {
   id?: string
   name: string
+  addressId: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -500,12 +616,14 @@ export type LocationUpdateWithoutOrganizationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  address?: Prisma.AddressUpdateOneRequiredWithoutLocationsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationUncheckedUpdateWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  addressId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutLocationNestedInput
@@ -514,6 +632,41 @@ export type LocationUncheckedUpdateWithoutOrganizationInput = {
 export type LocationUncheckedUpdateManyWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  addressId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LocationCreateManyAddressInput = {
+  id?: string
+  name: string
+  organizationId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type LocationUpdateWithoutAddressInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutLocationsNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutLocationNestedInput
+}
+
+export type LocationUncheckedUpdateWithoutAddressInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutLocationNestedInput
+}
+
+export type LocationUncheckedUpdateManyWithoutAddressInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -553,9 +706,11 @@ export type LocationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   id?: boolean
   name?: boolean
   organizationId?: boolean
+  addressId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  address?: boolean | Prisma.AddressDefaultArgs<ExtArgs>
   assets?: boolean | Prisma.Location$assetsArgs<ExtArgs>
   _count?: boolean | Prisma.LocationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["location"]>
@@ -564,51 +719,61 @@ export type LocationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   id?: boolean
   name?: boolean
   organizationId?: boolean
+  addressId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  address?: boolean | Prisma.AddressDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["location"]>
 
 export type LocationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
   organizationId?: boolean
+  addressId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  address?: boolean | Prisma.AddressDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["location"]>
 
 export type LocationSelectScalar = {
   id?: boolean
   name?: boolean
   organizationId?: boolean
+  addressId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type LocationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "organizationId" | "createdAt" | "updatedAt", ExtArgs["result"]["location"]>
+export type LocationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "organizationId" | "addressId" | "createdAt" | "updatedAt", ExtArgs["result"]["location"]>
 export type LocationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  address?: boolean | Prisma.AddressDefaultArgs<ExtArgs>
   assets?: boolean | Prisma.Location$assetsArgs<ExtArgs>
   _count?: boolean | Prisma.LocationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type LocationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  address?: boolean | Prisma.AddressDefaultArgs<ExtArgs>
 }
 export type LocationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  address?: boolean | Prisma.AddressDefaultArgs<ExtArgs>
 }
 
 export type $LocationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Location"
   objects: {
     organization: Prisma.$OrganizationPayload<ExtArgs>
+    address: Prisma.$AddressPayload<ExtArgs>
     assets: Prisma.$AssetPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
     organizationId: string
+    addressId: string
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["location"]>
@@ -1006,6 +1171,7 @@ readonly fields: LocationFieldRefs;
 export interface Prisma__LocationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  address<T extends Prisma.AddressDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AddressDefaultArgs<ExtArgs>>): Prisma.Prisma__AddressClient<runtime.Types.Result.GetResult<Prisma.$AddressPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   assets<T extends Prisma.Location$assetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Location$assetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1039,6 +1205,7 @@ export interface LocationFieldRefs {
   readonly id: Prisma.FieldRef<"Location", 'String'>
   readonly name: Prisma.FieldRef<"Location", 'String'>
   readonly organizationId: Prisma.FieldRef<"Location", 'String'>
+  readonly addressId: Prisma.FieldRef<"Location", 'String'>
   readonly createdAt: Prisma.FieldRef<"Location", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Location", 'DateTime'>
 }

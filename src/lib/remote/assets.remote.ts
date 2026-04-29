@@ -111,8 +111,119 @@ export const getLocations = query(v.optional(v.string()), async (organizationId?
 
 	return await prisma.location.findMany({
 		where: { organizationId: { in: queryOrgIds } },
+		include: { address: true },
 		orderBy: { name: 'asc' }
 	});
+});
+
+const addressInputSchema = v.object({
+	line1: v.optional(v.string()),
+	line2: v.optional(v.string()),
+	postalCode: v.optional(v.string()),
+	city: v.optional(v.string()),
+	region: v.optional(v.string()),
+	country: v.optional(v.string())
+});
+
+const createLocationSchema = v.object({
+	organizationId: v.string(),
+	name: v.string(),
+	address: addressInputSchema
+});
+
+export const createLocation = command(createLocationSchema, async (input) => {
+	const user = await requireAuth();
+	const systemAdmin = await isSystemAdmin(user.id);
+
+	if (!systemAdmin) {
+		const membership = await prisma.orgMembership.findUnique({
+			where: {
+				userId_organizationId: { userId: user.id, organizationId: input.organizationId }
+			}
+		});
+		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
+			throw new Error('Unauthorized');
+		}
+	}
+
+	const location = await prisma.$transaction(async (tx) => {
+		const address = await tx.address.create({
+			data: {
+				line1: input.address.line1?.trim() || null,
+				line2: input.address.line2?.trim() || null,
+				postalCode: input.address.postalCode?.trim() || null,
+				city: input.address.city?.trim() || null,
+				region: input.address.region?.trim() || null,
+				country: input.address.country?.trim() || null
+			}
+		});
+
+		return await tx.location.create({
+			data: {
+				organizationId: input.organizationId,
+				name: input.name.trim(),
+				addressId: address.id
+			},
+			include: { address: true }
+		});
+	});
+
+	getLocations(input.organizationId).refresh();
+	getLocations().refresh();
+	return location;
+});
+
+const updateLocationSchema = v.object({
+	locationId: v.string(),
+	name: v.optional(v.string()),
+	address: v.optional(addressInputSchema)
+});
+
+export const updateLocation = command(updateLocationSchema, async (input) => {
+	const user = await requireAuth();
+	const systemAdmin = await isSystemAdmin(user.id);
+
+	const location = await prisma.location.findUniqueOrThrow({
+		where: { id: input.locationId },
+		select: { id: true, organizationId: true, addressId: true }
+	});
+
+	if (!systemAdmin) {
+		const membership = await prisma.orgMembership.findUnique({
+			where: {
+				userId_organizationId: { userId: user.id, organizationId: location.organizationId }
+			}
+		});
+		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
+			throw new Error('Unauthorized');
+		}
+	}
+
+	const updated = await prisma.$transaction(async (tx) => {
+		if (input.address) {
+			await tx.address.update({
+				where: { id: location.addressId },
+				data: {
+					line1: input.address.line1?.trim() || null,
+					line2: input.address.line2?.trim() || null,
+					postalCode: input.address.postalCode?.trim() || null,
+					city: input.address.city?.trim() || null,
+					region: input.address.region?.trim() || null,
+					country: input.address.country?.trim() || null
+				}
+			});
+		}
+
+		return await tx.location.update({
+			where: { id: input.locationId },
+			data: input.name ? { name: input.name.trim() } : {},
+			include: { address: true }
+		});
+	});
+
+	getLocations(location.organizationId).refresh();
+	getLocations().refresh();
+	return updated;
 });
 
 export const getProducts = query(v.optional(v.string()), async (manufacturerId?: string) => {
@@ -126,6 +237,7 @@ export const getProducts = query(v.optional(v.string()), async (manufacturerId?:
 
 const createAssetsSchema = v.object({
 	organizationId: v.string(),
+	locationId: v.string(),
 	productId: v.optional(v.string()),
 	newProductName: v.optional(v.string()),
 	manufacturerId: v.optional(v.string()),
@@ -167,12 +279,16 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 
 	if (!productId) throw new Error('Product is required');
 
+	const location = await prisma.location.findUniqueOrThrow({ where: { id: data.locationId } });
+	if (location.organizationId !== data.organizationId) throw new Error('Invalid location');
+
 	const assets = await Promise.all(
 		data.items.map((item) =>
 			prisma.asset.create({
 				data: {
 					organizationId: data.organizationId,
 					productId: productId!,
+					locationId: location.id,
 					serialNumber: item.serialNumber || null,
 					assetTag: item.assetTag || null,
 					status: 'AVAILABLE',
@@ -180,7 +296,7 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 						create: { userId: user.id, action: 'CREATED', notes: 'Asset initialized' }
 					}
 				},
-				include: { product: { include: { manufacturer: true } } }
+				include: { product: { include: { manufacturer: true } }, location: true }
 			})
 		)
 	);
@@ -221,7 +337,7 @@ const updateAssetSchema = v.object({
 	assetTag: v.optional(v.string()),
 	status: v.optional(v.picklist(['AVAILABLE', 'MAINTENANCE', 'BROKEN'])),
 	imageUrl: v.optional(v.string()),
-	locationId: v.optional(v.nullable(v.string()))
+	locationId: v.optional(v.string())
 });
 
 export const updateAsset = command(updateAssetSchema, async (input) => {
@@ -244,11 +360,9 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 		}
 	}
 
-	let nextLocationId: string | null | undefined = undefined;
+	let nextLocationId: string | undefined = undefined;
 	if ('locationId' in input) {
-		if (input.locationId === null) {
-			nextLocationId = null;
-		} else if (input.locationId) {
+		if (input.locationId) {
 			const location = await prisma.location.findUniqueOrThrow({
 				where: { id: input.locationId }
 			});
@@ -257,7 +371,7 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 			}
 			nextLocationId = location.id;
 		} else {
-			nextLocationId = null;
+			throw new Error('Location is required');
 		}
 	}
 
@@ -266,7 +380,7 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 		assetTag?: string | null;
 		status?: string;
 		imageUrl?: string | null;
-		locationId?: string | null;
+		locationId?: string;
 	} = {};
 
 	const changes: string[] = [];

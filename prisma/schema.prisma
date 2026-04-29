@@ -26,7 +26,7 @@ model User {
 
   // App-specific relations
   homeOrgId       String?
-  homeOrg         Organization?   @relation("HomeOrg", fields: [homeOrgId], references: [id])
+  homeOrg         Organization?      @relation("HomeOrg", fields: [homeOrgId], references: [id])
   memberships     OrgMembership[]
   transactions    AssetTransaction[]
   crewAssignments ProductionCrew[]
@@ -139,11 +139,29 @@ model Product {
   assets         Asset[]
 }
 
+model Address {
+  id         String  @id @default(cuid())
+  line1      String?
+  line2      String?
+  postalCode String?
+  city       String?
+  region     String?
+  country    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  locations   Location[]
+  productions Production[]
+}
+
 model Location {
   id             String       @id @default(cuid())
   name           String
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  addressId      String
+  address        Address      @relation(fields: [addressId], references: [id], onDelete: Restrict)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   assets         Asset[]
@@ -155,8 +173,8 @@ model Asset {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   productId      String
   product        Product      @relation(fields: [productId], references: [id])
-  locationId     String?
-  location       Location?    @relation(fields: [locationId], references: [id])
+  locationId     String
+  location       Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
 
   serialNumber String?
   assetTag     String?
@@ -174,12 +192,12 @@ model Asset {
 }
 
 model AssetBundle {
-  id             String       @id @default(cuid())
-  name           String
-  description    String?
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  assets         Asset[]
+  id              String           @id @default(cuid())
+  name            String
+  description     String?
+  organizationId  String
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assets          Asset[]
   productionItems ProductionItem[]
 
   createdAt DateTime @default(now())
@@ -194,6 +212,9 @@ model Production {
 
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
+
+  addressId String?
+  address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
 
   items        ProductionItem[]
   crew         ProductionCrew[]

@@ -58,6 +58,11 @@ export type Manufacturer = Prisma.ManufacturerModel
  */
 export type Product = Prisma.ProductModel
 /**
+ * Model Address
+ * 
+ */
+export type Address = Prisma.AddressModel
+/**
  * Model Location
  * 
  */

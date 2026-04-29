@@ -67,6 +67,7 @@ The app supports **German** (default) and **English** via [wuchale](https://wuch
 **How it works:** wuchale extracts translatable strings at build time (no runtime key lookups). Strings in Svelte templates and `<script>` blocks are extracted automatically; variables, enums, and internal identifiers stay in English.
 
 **Files:**
+
 - `wuchale.config.js` — config: `locales: ['en', 'de']`, SvelteKit adapter
 - `src/locales/en.po` — English source strings (auto-updated by wuchale)
 - `src/locales/de.po` — German translations (edit this to add/fix translations)
@@ -75,12 +76,15 @@ The app supports **German** (default) and **English** via [wuchale](https://wuch
 **Locale state:** stored in the `locale` cookie (defaults to `de`). The DE/EN switcher in the header sets the cookie and reloads.
 
 **Workflow — after adding new user-facing strings:**
+
 ```sh
 npx wuchale   # extracts new strings into en.po and de.po
 ```
+
 Then fill in the empty `msgstr ""` entries in `de.po`.
 
 **Extraction rules (what gets extracted):**
+
 - All text content in Svelte markup (except inside `<style>`, `<path>`, `<code>`, `<pre>`)
 - Attributes that start with an uppercase letter (e.g. `title="Profile Picture"`)
 - Strings inside functions in `<script>` that start with an uppercase letter

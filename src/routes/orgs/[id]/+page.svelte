@@ -95,8 +95,15 @@
 	</div>
 
 	<div>
-		<h1 class="text-3xl font-bold tracking-tight">{org.name}</h1>
-		<p class="text-muted-foreground">Manage members and roles.</p>
+		<div class="flex flex-wrap items-start justify-between gap-3">
+			<div>
+				<h1 class="text-3xl font-bold tracking-tight">{org.name}</h1>
+				<p class="text-muted-foreground">Manage members and roles.</p>
+			</div>
+			{#if canManage}
+				<Button variant="outline" href={resolve(`/orgs/${orgId}/locations`)}>Locations</Button>
+			{/if}
+		</div>
 	</div>
 
 	<div class="grid gap-6 lg:grid-cols-3">

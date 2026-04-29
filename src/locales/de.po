@@ -171,6 +171,8 @@ msgstr "Crew"
 #: src/routes/assets/new/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/new/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/new/+page.svelte
@@ -217,6 +219,8 @@ msgstr "Noch keine Crewmitglieder hinzugefügt."
 
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/auth/register/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/productions/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
@@ -628,6 +632,8 @@ msgstr "<0/> Nach dem Speichern weiteres erstellen"
 #: src/routes/assets/new/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/new/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 msgid "Saving…"
 msgstr "Wird gespeichert…"
 
@@ -666,6 +672,7 @@ msgstr "Was ist in diesem Bundle?"
 
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
 msgid "Creating…"
 msgstr "Wird erstellt…"
 
@@ -1179,10 +1186,15 @@ msgid "Update serial, tag, status, and location."
 msgstr ""
 
 #: src/routes/inventory/[id]/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 msgid "Edit"
 msgstr ""
 
+#: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
+#: src/routes/inventory/new/+page.svelte
 msgid "Location"
 msgstr ""
 
@@ -1191,5 +1203,136 @@ msgid "Image URL"
 msgstr ""
 
 #: src/routes/inventory/[id]/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 msgid "Save"
 msgstr ""
+
+#: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Please select a location"
+msgstr "Bitte einen Standort auswählen"
+
+#: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "No locations yet. Create one in <0>Locations</0>."
+msgstr "Noch keine Standorte. Erstelle einen unter <0>Standorte</0>."
+
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Address"
+msgstr "Adresse"
+
+#: src/routes/productions/new/+page.svelte
+msgid "Optional delivery / venue address."
+msgstr "Optionale Liefer- / Veranstaltungsadresse."
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Address line 1"
+msgstr "Adresszeile 1"
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Street and number"
+msgstr "Straße und Hausnummer"
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Address line 2"
+msgstr "Adresszeile 2"
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Building, floor, c/o"
+msgstr "Gebäude, Etage, c/o"
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Postal code"
+msgstr "Postleitzahl"
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "City"
+msgstr "Stadt"
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Berlin"
+msgstr "Berlin"
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Region/State"
+msgstr "Bundesland/Region"
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Country"
+msgstr "Land"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Address updated"
+msgstr "Adresse aktualisiert"
+
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "Locations"
+msgstr "Standorte"
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "Location created"
+msgstr "Standort erstellt"
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "Location updated"
+msgstr "Standort aktualisiert"
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "← Organization"
+msgstr "← Organisation"
+
+#. 0: org.name
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "Manage locations for {0}."
+msgstr "Standorte für {0} verwalten."
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "You don’t have permission to manage locations."
+msgstr "Du hast keine Berechtigung, Standorte zu verwalten."
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "Create Location"
+msgstr "Standort erstellen"
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "Add a new storage or pickup location."
+msgstr "Neuen Lager- oder Abholstandort hinzufügen."
+
+#. 0: locations.length
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "Existing Locations ({0})"
+msgstr "Bestehende Standorte ({0})"
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "No locations yet."
+msgstr "Noch keine Standorte."

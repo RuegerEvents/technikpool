@@ -8,6 +8,7 @@
 	import {
 		getAssets,
 		getManufacturers,
+		getLocations,
 		getProducts,
 		createAssets,
 		createBundle,
@@ -47,6 +48,7 @@
 	});
 
 	let availableAssets = $derived(selectedOrgId ? await getAssets(selectedOrgId) : []);
+	let orgLocations = $derived(selectedOrgId ? await getLocations(selectedOrgId) : []);
 	let selectedIds = $derived(new Set(selectedAssets.map((a) => a.id)));
 
 	type ExistingAsset = (typeof availableAssets)[number];
@@ -87,6 +89,7 @@
 	type SelectionOrNew = { id: string | null; name: string } | null;
 
 	let showModal = $state(false);
+	let modalLocationId = $state('');
 	let modalManufacturer = $state<SelectionOrNew>(null);
 	let modalProduct = $state<SelectionOrNew>(null);
 	let modalManufacturerKey = $state(0);
@@ -97,6 +100,20 @@
 	let modalProducts = $derived(
 		modalManufacturer?.id ? await getProducts(modalManufacturer.id) : []
 	);
+
+	$effect(() => {
+		if (!selectedOrgId) {
+			modalLocationId = '';
+			return;
+		}
+		if (orgLocations.length === 0) {
+			modalLocationId = '';
+			return;
+		}
+		if (!modalLocationId || !orgLocations.some((l) => l.id === modalLocationId)) {
+			modalLocationId = orgLocations[0].id;
+		}
+	});
 
 	function handleModalManufacturerChange(sel: SelectionOrNew) {
 		modalManufacturer = sel;
@@ -114,6 +131,10 @@
 
 	async function handleNewAsset(e: Event) {
 		e.preventDefault();
+		if (!modalLocationId) {
+			toast.error('Please select a location');
+			return;
+		}
 		if (!modalManufacturer || !modalProduct) {
 			toast.error('Please select a manufacturer and product');
 			return;
@@ -122,6 +143,7 @@
 		try {
 			const created = await createAssets({
 				organizationId: selectedOrgId,
+				locationId: modalLocationId,
 				manufacturerId: modalManufacturer.id ?? undefined,
 				newManufacturerName: modalManufacturer.id ? undefined : modalManufacturer.name,
 				productId: modalProduct.id ?? undefined,
@@ -180,7 +202,7 @@
 
 <div class="space-y-6">
 	<div>
-		<Button variant="ghost" href={resolve('/assets/bundles')} class="-ml-3 mb-2">
+		<Button variant="ghost" href={resolve('/assets/bundles')} class="mb-2 -ml-3">
 			← Back to Bundles
 		</Button>
 		<h1 class="text-3xl font-bold tracking-tight">Create Bundle</h1>
@@ -216,8 +238,8 @@
 					</div>
 				</div>
 				<div class="space-y-2">
-					<Label for="bundle-desc">Description <span class="text-muted-foreground">(optional)</span
-						></Label
+					<Label for="bundle-desc"
+						>Description <span class="text-muted-foreground">(optional)</span></Label
 					>
 					<Input
 						id="bundle-desc"
@@ -379,6 +401,30 @@
 
 			<form onsubmit={handleNewAsset} class="space-y-4">
 				<div class="space-y-2">
+					<Label for="modal-location">Location</Label>
+					<select
+						id="modal-location"
+						bind:value={modalLocationId}
+						required
+						class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+					>
+						{#if orgLocations.length === 0}
+							<option value="" disabled>—</option>
+						{:else}
+							{#each orgLocations as loc (loc.id)}
+								<option value={loc.id}>{loc.name}</option>
+							{/each}
+						{/if}
+					</select>
+					{#if orgLocations.length === 0}
+						<p class="text-sm text-muted-foreground">
+							No locations yet. Create one in
+							<a class="underline" href={resolve(`/orgs/${selectedOrgId}/locations`)}>Locations</a>.
+						</p>
+					{/if}
+				</div>
+
+				<div class="space-y-2">
 					<Label>Manufacturer</Label>
 					<CreatableSelect
 						items={manufacturers}
@@ -417,7 +463,10 @@
 					<Dialog.Close>
 						<Button type="button" variant="outline">Cancel</Button>
 					</Dialog.Close>
-					<Button type="submit" disabled={modalSaving || !modalManufacturer || !modalProduct}>
+					<Button
+						type="submit"
+						disabled={modalSaving || !modalLocationId || !modalManufacturer || !modalProduct}
+					>
 						{modalSaving ? 'Creating…' : 'Add Asset'}
 					</Button>
 				</div>

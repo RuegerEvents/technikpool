@@ -167,7 +167,9 @@
 							<td class="px-4 py-3 text-right font-mono tabular-nums">
 								{group.assets.length}
 							</td>
-							<td class="px-4 py-3 text-right font-mono tabular-nums text-green-700 dark:text-green-400">
+							<td
+								class="px-4 py-3 text-right font-mono text-green-700 tabular-nums dark:text-green-400"
+							>
 								{group.available}
 							</td>
 							<td

@@ -48,6 +48,21 @@
 					Delivery To
 				</h3>
 				<p class="text-lg font-medium">{production?.name}</p>
+				{#if production?.address}
+					<p class="mt-1 text-zinc-700">
+						{#if production.address.line1}{production.address.line1}<br />{/if}
+						{#if production.address.line2}{production.address.line2}<br />{/if}
+						{#if production.address.postalCode || production.address.city}
+							{production.address.postalCode ?? ''} {production.address.city ?? ''}<br />
+						{/if}
+						{#if production.address.region || production.address.country}
+							{production.address.region ?? ''}{production.address.region &&
+							production.address.country
+								? ', '
+								: ''}{production.address.country ?? ''}
+						{/if}
+					</p>
+				{/if}
 				<p class="mt-1 text-zinc-700">
 					Production Period:<br />
 					{#if production?.startDate}{new Date(production.startDate).toLocaleDateString()}{/if} –

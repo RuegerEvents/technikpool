@@ -43,6 +43,7 @@ export const getProduction = query(v.string(), async (id: string) => {
 					sourceBundle: { select: { id: true, name: true } }
 				}
 			},
+			address: true,
 			crew: {
 				orderBy: { createdAt: 'asc' },
 				include: { user: { select: { id: true, name: true, email: true } } }
@@ -52,11 +53,21 @@ export const getProduction = query(v.string(), async (id: string) => {
 	});
 });
 
+const addressInputSchema = v.object({
+	line1: v.optional(v.string()),
+	line2: v.optional(v.string()),
+	postalCode: v.optional(v.string()),
+	city: v.optional(v.string()),
+	region: v.optional(v.string()),
+	country: v.optional(v.string())
+});
+
 const createProductionSchema = v.object({
 	name: v.string(),
 	organizationId: v.string(),
 	startDate: v.optional(v.any()),
-	endDate: v.optional(v.any())
+	endDate: v.optional(v.any()),
+	address: v.optional(addressInputSchema)
 });
 
 export const createProduction = command(createProductionSchema, async (data) => {
@@ -68,17 +79,108 @@ export const createProduction = command(createProductionSchema, async (data) => 
 
 	if (!membership) throw new Error('Not a member');
 
-	const production = await prisma.production.create({
-		data: {
-			name: data.name,
-			organizationId: data.organizationId,
-			startDate: data.startDate,
-			endDate: data.endDate
-		}
+	const hasAnyAddress =
+		!!data.address &&
+		Object.values(data.address).some((v) => (typeof v === 'string' ? v.trim().length > 0 : false));
+
+	const production = await prisma.$transaction(async (tx) => {
+		const address = hasAnyAddress
+			? await tx.address.create({
+					data: {
+						line1: data.address?.line1?.trim() || null,
+						line2: data.address?.line2?.trim() || null,
+						postalCode: data.address?.postalCode?.trim() || null,
+						city: data.address?.city?.trim() || null,
+						region: data.address?.region?.trim() || null,
+						country: data.address?.country?.trim() || null
+					}
+				})
+			: null;
+
+		return await tx.production.create({
+			data: {
+				name: data.name,
+				organizationId: data.organizationId,
+				startDate: data.startDate,
+				endDate: data.endDate,
+				addressId: address?.id
+			},
+			include: { address: true }
+		});
 	});
 
 	getProductions(data.organizationId).refresh();
 	return production;
+});
+
+const updateProductionAddressSchema = v.object({
+	productionId: v.string(),
+	address: addressInputSchema
+});
+
+export const updateProductionAddress = command(updateProductionAddressSchema, async (input) => {
+	const user = await requireAuth();
+
+	const production = await prisma.production.findUniqueOrThrow({
+		where: { id: input.productionId },
+		select: { id: true, organizationId: true, addressId: true }
+	});
+
+	const membership = await prisma.orgMembership.findUnique({
+		where: {
+			userId_organizationId: { userId: user.id, organizationId: production.organizationId }
+		}
+	});
+	if (!membership) throw new Error('Not a member');
+
+	const hasAny = Object.values(input.address).some((v) => (v?.trim()?.length ?? 0) > 0);
+
+	const updated = await prisma.$transaction(async (tx) => {
+		if (!hasAny) {
+			return await tx.production.update({
+				where: { id: input.productionId },
+				data: { addressId: null },
+				include: { address: true, organization: true }
+			});
+		}
+
+		const addressId = production.addressId
+			? (
+					await tx.address.update({
+						where: { id: production.addressId },
+						data: {
+							line1: input.address.line1?.trim() || null,
+							line2: input.address.line2?.trim() || null,
+							postalCode: input.address.postalCode?.trim() || null,
+							city: input.address.city?.trim() || null,
+							region: input.address.region?.trim() || null,
+							country: input.address.country?.trim() || null
+						}
+					})
+				).id
+			: (
+					await tx.address.create({
+						data: {
+							line1: input.address.line1?.trim() || null,
+							line2: input.address.line2?.trim() || null,
+							postalCode: input.address.postalCode?.trim() || null,
+							city: input.address.city?.trim() || null,
+							region: input.address.region?.trim() || null,
+							country: input.address.country?.trim() || null
+						}
+					})
+				).id;
+
+		return await tx.production.update({
+			where: { id: input.productionId },
+			data: { addressId },
+			include: { address: true, organization: true }
+		});
+	});
+
+	getProduction(input.productionId).refresh();
+	getProductions(production.organizationId).refresh();
+	return updated;
 });
 
 const addAssetSchema = v.object({

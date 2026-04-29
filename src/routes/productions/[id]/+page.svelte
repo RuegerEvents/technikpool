@@ -9,13 +9,14 @@
 		addBundleToProduction,
 		addCrewMember,
 		removeCrewMember,
-		removeProductionItem
+		removeProductionItem,
+		updateProductionAddress
 	} from '$lib/remote/productions.remote';
 	import { getAssets, getBundles } from '$lib/remote/assets.remote';
 	import { getOrgUsers } from '$lib/remote/orgs.remote';
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
-	import type { Prisma } from '@prisma/client';
+	import type { Prisma } from '$lib/prisma/client';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { resolve } from '$app/paths';
 
@@ -31,9 +32,7 @@
 
 	let addedAssetIds = $derived(new Set<string>(production.items.map((i) => i.assetId)));
 	let addedBundleIds = $derived(
-		new Set<string>(
-			production.items.filter((i) => i.sourceBundle).map((i) => i.sourceBundle!.id)
-		)
+		new Set<string>(production.items.filter((i) => i.sourceBundle).map((i) => i.sourceBundle!.id))
 	);
 
 	type BundleRow = { kind: 'bundle'; id: string; name: string; orgName: string; count: number };
@@ -49,23 +48,27 @@
 	};
 
 	let allAddRows = $derived.by((): (BundleRow | AssetRow)[] => [
-		...allBundles.map((b): BundleRow => ({
-			kind: 'bundle',
-			id: b.id,
-			name: b.name,
-			orgName: b.organization.name,
-			count: b.assets.length
-		})),
-		...allAssets.map((a): AssetRow => ({
-			kind: 'asset',
-			id: a.id,
-			productName: a.product.name,
-			manufacturerName: a.product.manufacturer.name,
-			serialNumber: a.serialNumber,
-			assetTag: a.assetTag,
-			orgName: a.organization.name,
-			status: a.status
-		}))
+		...allBundles.map(
+			(b): BundleRow => ({
+				kind: 'bundle',
+				id: b.id,
+				name: b.name,
+				orgName: b.organization.name,
+				count: b.assets.length
+			})
+		),
+		...allAssets.map(
+			(a): AssetRow => ({
+				kind: 'asset',
+				id: a.id,
+				productName: a.product.name,
+				manufacturerName: a.product.manufacturer.name,
+				serialNumber: a.serialNumber,
+				assetTag: a.assetTag,
+				orgName: a.organization.name,
+				status: a.status
+			})
+		)
 	]);
 
 	let filteredAddRows = $derived.by(() => {
@@ -126,7 +129,7 @@
 	};
 
 	let productGroups = $derived.by((): ProductGroup[] => {
-		const map = new Map<string, ProductGroup>();
+		const map = new SvelteMap<string, ProductGroup>();
 		for (const item of production.items) {
 			const pid = item.asset.product.id;
 			if (!map.has(pid)) {
@@ -206,6 +209,54 @@
 		MAINTENANCE: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
 		BROKEN: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
 	};
+
+	let editingAddress = $state(false);
+	let savingAddress = $state(false);
+	let addressDraft = $state({
+		line1: '',
+		line2: '',
+		postalCode: '',
+		city: '',
+		region: '',
+		country: ''
+	});
+
+	$effect(() => {
+		if (editingAddress) return;
+		addressDraft = {
+			line1: production.address?.line1 ?? '',
+			line2: production.address?.line2 ?? '',
+			postalCode: production.address?.postalCode ?? '',
+			city: production.address?.city ?? '',
+			region: production.address?.region ?? '',
+			country: production.address?.country ?? ''
+		};
+	});
+
+	async function handleSaveAddress(e: Event) {
+		e.preventDefault();
+		savingAddress = true;
+		try {
+			await updateProductionAddress({ productionId, address: addressDraft });
+			toast.success('Address updated');
+			editingAddress = false;
+		} catch (err) {
+			toast.error((err as Error).message);
+		} finally {
+			savingAddress = false;
+		}
+	}
+
+	function formatAddress(addr: typeof production.address) {
+		if (!addr) return '—';
+		const parts = [
+			addr.line1?.trim(),
+			addr.line2?.trim(),
+			[addr.postalCode?.trim(), addr.city?.trim()].filter(Boolean).join(' '),
+			[addr.region?.trim(), addr.country?.trim()].filter(Boolean).join(', ')
+		].filter(Boolean);
+		return parts.length ? parts.join(' · ') : '—';
+	}
 </script>
 
 <div class="space-y-8">
@@ -234,6 +285,70 @@
 			>
 		</div>
 	</div>
+
+	<!-- Address -->
+	<Card.Root>
+		<Card.Header>
+			<div class="flex items-start justify-between gap-4">
+				<div>
+					<Card.Title>Address</Card.Title>
+					<Card.Description>{formatAddress(production.address)}</Card.Description>
+				</div>
+				{#if !editingAddress}
+					<Button variant="outline" onclick={() => (editingAddress = true)}>Edit</Button>
+				{/if}
+			</div>
+		</Card.Header>
+		{#if editingAddress}
+			<Card.Content>
+				<form class="space-y-4" onsubmit={handleSaveAddress}>
+					<div class="grid gap-4 sm:grid-cols-2">
+						<div class="space-y-2 sm:col-span-2">
+							<Label for="addr-line1">Address line 1</Label>
+							<Input
+								id="addr-line1"
+								bind:value={addressDraft.line1}
+								placeholder="Street and number"
+							/>
+						</div>
+						<div class="space-y-2 sm:col-span-2">
+							<Label for="addr-line2">Address line 2</Label>
+							<Input
+								id="addr-line2"
+								bind:value={addressDraft.line2}
+								placeholder="Building, floor, c/o"
+							/>
+						</div>
+						<div class="space-y-2">
+							<Label for="addr-postal">Postal code</Label>
+							<Input id="addr-postal" bind:value={addressDraft.postalCode} placeholder="12345" />
+						</div>
+						<div class="space-y-2">
+							<Label for="addr-city">City</Label>
+							<Input id="addr-city" bind:value={addressDraft.city} placeholder="Berlin" />
+						</div>
+						<div class="space-y-2">
+							<Label for="addr-region">Region/State</Label>
+							<Input id="addr-region" bind:value={addressDraft.region} placeholder="BE" />
+						</div>
+						<div class="space-y-2">
+							<Label for="addr-country">Country</Label>
+							<Input id="addr-country" bind:value={addressDraft.country} placeholder="DE" />
+						</div>
+					</div>
+
+					<div class="flex justify-end gap-2">
+						<Button type="button" variant="outline" onclick={() => (editingAddress = false)}>
+							Cancel
+						</Button>
+						<Button type="submit" disabled={savingAddress}>
+							{savingAddress ? 'Saving…' : 'Save'}
+						</Button>
+					</div>
+				</form>
+			</Card.Content>
+		{/if}
+	</Card.Root>
 
 	<!-- Equipment section -->
 	<div>
@@ -269,8 +384,7 @@
 										<th class="px-3 py-2 text-left font-medium text-muted-foreground">Info</th>
 										<th class="px-3 py-2 text-left font-medium text-muted-foreground">Org</th>
 										<th class="px-3 py-2 text-left font-medium text-muted-foreground">Status</th>
-										<th class="w-12 px-3 py-2 text-center font-medium text-muted-foreground"
-											>Add</th
+										<th class="w-12 px-3 py-2 text-center font-medium text-muted-foreground">Add</th
 										>
 									</tr>
 								</thead>
@@ -339,8 +453,7 @@
 															stroke="currentColor"
 															stroke-width="3"
 															stroke-linecap="round"
-															stroke-linejoin="round"
-															><polyline points="20 6 9 17 4 12" /></svg
+															stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg
 														>
 													{/if}
 												</button>
@@ -409,22 +522,19 @@
 								<td
 									class="px-4 py-3 text-right font-mono tabular-nums {group.pending > 0
 										? 'text-yellow-600 dark:text-yellow-400'
-										: 'text-muted-foreground'}"
-									>{group.pending > 0 ? group.pending : '—'}</td
+										: 'text-muted-foreground'}">{group.pending > 0 ? group.pending : '—'}</td
 								>
 								<td
 									class="px-4 py-3 text-right font-mono tabular-nums {group.approved > 0
 										? 'text-green-700 dark:text-green-400'
-										: 'text-muted-foreground'}"
-									>{group.approved > 0 ? group.approved : '—'}</td
+										: 'text-muted-foreground'}">{group.approved > 0 ? group.approved : '—'}</td
 								>
 								<td
 									class="px-4 py-3 text-right font-mono tabular-nums {group.checkedOut > 0
 										? 'text-blue-600 dark:text-blue-400'
-										: 'text-muted-foreground'}"
-									>{group.checkedOut > 0 ? group.checkedOut : '—'}</td
+										: 'text-muted-foreground'}">{group.checkedOut > 0 ? group.checkedOut : '—'}</td
 								>
-								<td class="px-4 py-3 text-right font-mono tabular-nums text-muted-foreground"
+								<td class="px-4 py-3 text-right font-mono text-muted-foreground tabular-nums"
 									>{group.returned > 0 ? group.returned : '—'}</td
 								>
 							</tr>
@@ -440,8 +550,7 @@
 													>{item.asset.organization.name}</span
 												>
 												{#if item.sourceBundle}
-													<span class="text-xs text-muted-foreground"
-														>{item.sourceBundle.name}</span
+													<span class="text-xs text-muted-foreground">{item.sourceBundle.name}</span
 													>
 												{/if}
 												<span
