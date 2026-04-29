@@ -41,6 +41,8 @@
 	}
 </script>
 
+<svelte:head><title>Register | Technikpool</title></svelte:head>
+
 <div class="flex min-h-screen items-center justify-center bg-zinc-50 p-4 dark:bg-zinc-950">
 	<Card.Root class="w-full max-w-md">
 		<Card.Header>

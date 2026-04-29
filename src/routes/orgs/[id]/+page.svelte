@@ -70,6 +70,8 @@
 	};
 </script>
 
+<svelte:head><title>{org.name} | Technikpool</title></svelte:head>
+
 <div class="space-y-6">
 	<div class="flex items-center gap-4">
 		<Button

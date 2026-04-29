@@ -115,6 +115,8 @@
 	}
 </script>
 
+<svelte:head><title>New Asset | Technikpool</title></svelte:head>
+
 <div class="space-y-6">
 	<div>
 		<h1 class="text-3xl font-bold tracking-tight">Add New Asset</h1>

@@ -128,6 +128,8 @@
 	}
 </script>
 
+<svelte:head><title>Locations – {org.name} | Technikpool</title></svelte:head>
+
 <div class="space-y-6">
 	<div class="flex items-center gap-4">
 		<Button variant="ghost" href={resolve(`/orgs/${orgId}`)} class="-ml-3 text-muted-foreground">

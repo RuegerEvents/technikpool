@@ -18,6 +18,8 @@
 	}
 </script>
 
+<svelte:head><title>User Management | Technikpool</title></svelte:head>
+
 <div class="space-y-6">
 	<div>
 		<h1 class="text-3xl font-bold tracking-tight">User Management</h1>

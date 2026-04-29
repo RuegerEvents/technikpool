@@ -200,6 +200,8 @@
 	};
 </script>
 
+<svelte:head><title>Create Bundle | Technikpool</title></svelte:head>
+
 <div class="space-y-6">
 	<div>
 		<Button variant="ghost" href={resolve('/assets/bundles')} class="mb-2 -ml-3">

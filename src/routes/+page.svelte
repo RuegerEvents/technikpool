@@ -98,6 +98,8 @@
 	}
 </script>
 
+<svelte:head><title>Technikpool</title></svelte:head>
+
 <!-- Count picker modal -->
 <Dialog.Root
 	open={modal !== null}

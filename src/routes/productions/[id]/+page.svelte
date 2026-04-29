@@ -259,6 +259,8 @@
 	}
 </script>
 
+<svelte:head><title>{production.name} | Technikpool</title></svelte:head>
+
 <div class="space-y-8">
 	<!-- Header -->
 	<div class="flex flex-wrap items-center justify-between gap-4">

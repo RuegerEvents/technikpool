@@ -53,7 +53,8 @@
 	const options = $derived(await buildCalendar());
 </script>
 
-<!-- use rest available from navbar -->
+<svelte:head><title>Calendar | Technikpool</title></svelte:head>
+
 <div class="ec-theme-default h-full min-h-0 overflow-hidden p-4 text-foreground">
 	<Calendar {plugins} {options} />
 </div>

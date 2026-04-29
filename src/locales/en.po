@@ -8,6 +8,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: src/routes/+layout.svelte
+#: src/routes/+page.svelte
 msgid "Technikpool"
 msgstr "Technikpool"
 
@@ -1336,3 +1337,88 @@ msgstr "Existing Locations ({0})"
 #: src/routes/orgs/[id]/locations/+page.svelte
 msgid "No locations yet."
 msgstr "No locations yet."
+
+#~ msgid "Asset Bundles – Technikpool"
+#~ msgstr "Asset Bundles – Technikpool"
+
+#~ msgid "Inventory – Technikpool"
+#~ msgstr "Inventory – Technikpool"
+
+#~ msgid "{0} – Technikpool"
+#~ msgstr "{0} – Technikpool"
+
+#~ msgid "User Management – Technikpool"
+#~ msgstr "User Management – Technikpool"
+
+#~ msgid "Organizations – Technikpool"
+#~ msgstr "Organizations – Technikpool"
+
+#~ msgid "Productions – Technikpool"
+#~ msgstr "Productions – Technikpool"
+
+#~ msgid "Locations – {0} – Technikpool"
+#~ msgstr "Locations – {0} – Technikpool"
+
+#~ msgid "Create Bundle – Technikpool"
+#~ msgstr "Create Bundle – Technikpool"
+
+#~ msgid "New Asset – Technikpool"
+#~ msgstr "New Asset – Technikpool"
+
+#~ msgid "Create Production – Technikpool"
+#~ msgstr "Create Production – Technikpool"
+
+#~ msgid "Calendar – Technikpool"
+#~ msgstr "Calendar – Technikpool"
+
+#: src/routes/assets/bundles/+page.svelte
+msgid "Asset Bundles | Technikpool"
+msgstr "Asset Bundles | Technikpool"
+
+#: src/routes/inventory/+page.svelte
+msgid "Inventory | Technikpool"
+msgstr "Inventory | Technikpool"
+
+#. 0: bundle.name
+#. 0: asset.product.name
+#. 0: org.name
+#. 0: production.name
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/inventory/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "{0} | Technikpool"
+msgstr "{0} | Technikpool"
+
+#: src/routes/admin/users/+page.svelte
+msgid "User Management | Technikpool"
+msgstr "User Management | Technikpool"
+
+#: src/routes/orgs/+page.svelte
+msgid "Organizations | Technikpool"
+msgstr "Organizations | Technikpool"
+
+#: src/routes/productions/+page.svelte
+msgid "Productions | Technikpool"
+msgstr "Productions | Technikpool"
+
+#. 0: org.name
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "Locations – {0} | Technikpool"
+msgstr "Locations – {0} | Technikpool"
+
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "Create Bundle | Technikpool"
+msgstr "Create Bundle | Technikpool"
+
+#: src/routes/assets/new/+page.svelte
+msgid "New Asset | Technikpool"
+msgstr "New Asset | Technikpool"
+
+#: src/routes/productions/new/+page.svelte
+msgid "Create Production | Technikpool"
+msgstr "Create Production | Technikpool"
+
+#: src/routes/calendar/+page.svelte
+msgid "Calendar | Technikpool"
+msgstr "Calendar | Technikpool"

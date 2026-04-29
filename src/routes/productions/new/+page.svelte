@@ -43,6 +43,8 @@
 	}
 </script>
 
+<svelte:head><title>Create Production | Technikpool</title></svelte:head>
+
 <div class="space-y-6">
 	<div>
 		<h1 class="text-3xl font-bold tracking-tight">Create Production</h1>
