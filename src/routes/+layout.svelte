@@ -61,11 +61,6 @@
 								>Inventory</a
 							>
 							<a
-								href={resolve('/assets')}
-								class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-								>Assets</a
-							>
-							<a
 								href={resolve('/productions')}
 								class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
 								>Productions</a

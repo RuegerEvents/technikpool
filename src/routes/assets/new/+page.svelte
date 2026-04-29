@@ -81,7 +81,7 @@
 			if (createMore) {
 				resetForm();
 				saving = false;
-			} else goto(resolve(count === 1 ? `/inventory/${created[0].id}` : '/assets'));
+			} else goto(resolve(count === 1 ? `/inventory/${created[0].id}` : '/inventory'));
 		} catch (err) {
 			toast.error((err as Error).message);
 			saving = false;
@@ -212,7 +212,7 @@
 							Create another after saving
 						</label>
 						<div class="flex justify-end gap-4">
-							<Button type="button" variant="outline" href={resolve('/assets')}>Cancel</Button>
+							<Button type="button" variant="outline" href={resolve('/inventory')}>Cancel</Button>
 							<Button type="submit" disabled={saving}>
 								{saving ? 'Saving…' : quantity > 1 ? `Add ${quantity} Assets` : 'Add Asset'}
 							</Button>
