@@ -34,6 +34,13 @@
 			localStorage.setItem('theme', 'light');
 		}
 	}
+
+	let locale = $derived(data.locale ?? 'de');
+
+	function switchLocale(newLocale: string) {
+		document.cookie = `locale=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
+		window.location.reload();
+	}
 </script>
 
 {#if isAuthRoute || isPrintRoute}
@@ -80,6 +87,24 @@
 				</div>
 
 				<div class="flex items-center gap-2">
+					<!-- Language switcher -->
+					<div class="flex overflow-hidden rounded-md border border-input text-xs font-medium">
+						<button
+							type="button"
+							onclick={() => switchLocale('de')}
+							class="px-2.5 py-1.5 transition-colors {locale === 'de'
+								? 'bg-primary text-primary-foreground'
+								: 'bg-background text-muted-foreground hover:bg-muted'}"
+						>DE</button
+						><button
+							type="button"
+							onclick={() => switchLocale('en')}
+							class="px-2.5 py-1.5 transition-colors {locale === 'en'
+								? 'bg-primary text-primary-foreground'
+								: 'bg-background text-muted-foreground hover:bg-muted'}"
+						>EN</button
+						>
+					</div>
 					<!-- Theme toggle -->
 					<button
 						type="button"

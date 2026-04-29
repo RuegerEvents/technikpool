@@ -1,7 +1,7 @@
 import type { LayoutServerLoad } from './$types';
 import { prisma } from '$lib/server/auth';
 
-export const load: LayoutServerLoad = async ({ locals }) => {
+export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 	let isAdmin = false;
 	if (locals.user?.id) {
 		const dbUser = await prisma.user.findUnique({
@@ -13,6 +13,7 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 	return {
 		user: locals.user,
 		session: locals.session,
-		isAdmin
+		isAdmin,
+		locale: cookies.get('locale') ?? 'de'
 	};
 };

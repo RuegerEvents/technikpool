@@ -54,10 +54,39 @@ async function requireAuth() {
 ## Auth & Session
 
 - `src/lib/server/auth.ts` — Better-Auth init + exports `prisma` client (use this everywhere, not a separate Prisma instance)
-- `src/hooks.server.ts` — populates `event.locals.user` and `event.locals.session` on every request
-- `src/routes/+layout.server.ts` — passes `user`, `session`, and `isAdmin` to all pages via `data`
+- `src/hooks.server.ts` — populates `event.locals.user` and `event.locals.session` on every request; also loads wuchale catalogs and sets locale per request
+- `src/routes/+layout.server.ts` — passes `user`, `session`, `isAdmin`, and `locale` to all pages via `data`
+- `src/routes/+layout.ts` — loads wuchale catalog on the client; re-exports all server layout data
 - Auth routes: `/auth/login`, `/auth/register`
 - API handler: `/api/auth/[...all]/+server.ts`
+
+## Internationalisation (wuchale)
+
+The app supports **German** (default) and **English** via [wuchale](https://wuchale.dev/) — a compile-time i18n toolkit.
+
+**How it works:** wuchale extracts translatable strings at build time (no runtime key lookups). Strings in Svelte templates and `<script>` blocks are extracted automatically; variables, enums, and internal identifiers stay in English.
+
+**Files:**
+- `wuchale.config.js` — config: `locales: ['en', 'de']`, SvelteKit adapter
+- `src/locales/en.po` — English source strings (auto-updated by wuchale)
+- `src/locales/de.po` — German translations (edit this to add/fix translations)
+- `src/locales/main.loader.svelte.js` / `main.loader.server.svelte.js` — generated loaders (do not edit)
+
+**Locale state:** stored in the `locale` cookie (defaults to `de`). The DE/EN switcher in the header sets the cookie and reloads.
+
+**Workflow — after adding new user-facing strings:**
+```sh
+npx wuchale   # extracts new strings into en.po and de.po
+```
+Then fill in the empty `msgstr ""` entries in `de.po`.
+
+**Extraction rules (what gets extracted):**
+- All text content in Svelte markup (except inside `<style>`, `<path>`, `<code>`, `<pre>`)
+- Attributes that start with an uppercase letter (e.g. `title="Profile Picture"`)
+- Strings inside functions in `<script>` that start with an uppercase letter
+- Strings starting with lowercase are **not** extracted — keep internal/technical strings lowercase to avoid extraction
+
+**DO NOT** translate enum values (`OWNER`, `APPROVED`, etc.), variable names, or internal keys — wuchale won't touch them as long as they start with a lowercase letter or are not inside a function.
 
 ## Authorization Model
 
@@ -70,8 +99,9 @@ async function requireAuth() {
 
 ```
 src/routes/
-├── +layout.svelte          # App shell: nav, theme toggle, user menu
-├── +layout.server.ts       # Loads user, session, isAdmin for all pages
+├── +layout.svelte          # App shell: nav, language switcher, theme toggle, user menu
+├── +layout.server.ts       # Loads user, session, isAdmin, locale for all pages
+├── +layout.ts              # Client-side wuchale catalog loader; re-exports server data
 ├── +page.svelte            # Dashboard: pending approvals
 ├── auth/
 │   ├── login/+page.svelte

@@ -1,0 +1,1060 @@
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=2; plural=n == 1 ? 0 : 1;\n"
+"Source-Language: en\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/routes/+layout.svelte
+msgid "Technikpool"
+msgstr "Technikpool"
+
+#: src/routes/+layout.svelte
+#: src/routes/inventory/+page.svelte
+msgid "Inventory"
+msgstr "Inventar"
+
+#: src/routes/+layout.svelte
+#: src/routes/assets/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "Assets"
+msgstr "Geräte"
+
+#: src/routes/+layout.svelte
+#: src/routes/productions/+page.svelte
+msgid "Productions"
+msgstr "Produktionen"
+
+#: src/routes/+layout.svelte
+msgid "Calendar"
+msgstr "Kalender"
+
+#: src/routes/+layout.svelte
+#: src/routes/admin/users/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Admin"
+msgstr "Admin"
+
+#: src/routes/+layout.svelte
+msgid "Toggle theme"
+msgstr "Design wechseln"
+
+#: src/routes/+layout.svelte
+#: src/routes/orgs/[id]/+page.svelte
+msgid "<0/> Organizations"
+msgstr "<0/> Organisationen"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Sign out"
+msgstr "<0/> Abmelden"
+
+#: src/routes/+layout.svelte
+#: src/routes/+page.svelte
+#: src/routes/auth/login/+page.svelte
+msgid "Login"
+msgstr "Anmelden"
+
+#: src/routes/+layout.svelte
+msgid "Sign up"
+msgstr "Registrieren"
+
+#. 0: result.added; 1: result.added !== 1 ? 's' \\: ''
+#: src/routes/productions/[id]/+page.svelte
+msgid "Added {0} asset{1} from bundle"
+msgstr "{0} Gerät{1} aus Bundle hinzugefügt"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Crew member added"
+msgstr "Crewmitglied hinzugefügt"
+
+#. 0: production.organization.name
+#: src/routes/productions/[id]/+page.svelte
+msgid "Owned by {0}"
+msgstr "Organisation: {0}"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/crew-passes/+page.svelte
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+#: src/routes/productions/[id]/packing-list/+page.svelte
+msgid "Back"
+msgstr "Zurück"
+
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/packing-list/+page.svelte
+msgid "Packing List"
+msgstr "Packliste"
+
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+msgid "Delivery Note"
+msgstr "Lieferschein"
+
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/crew-passes/+page.svelte
+msgid "Crew Passes"
+msgstr "Crew-Ausweise"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Booked Equipment"
+msgstr "Gebuchte Geräte"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Done"
+msgstr "Fertig"
+
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "Add Equipment"
+msgstr "Gerät hinzufügen"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Bundles"
+msgstr "Bundles"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Search by name, manufacturer, S/N…"
+msgstr "Nach Name, Hersteller, S/N suchen…"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "No assets found."
+msgstr "Keine Geräte gefunden."
+
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/inventory/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "Product"
+msgstr "Produkt"
+
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/packing-list/+page.svelte
+msgid "S/N"
+msgstr "S/N"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "Org"
+msgstr "Org"
+
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "Status"
+msgstr "Status"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Added"
+msgstr "Hinzugefügt"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "No bundles found. <0>Create one</0>."
+msgstr "Keine Bundles gefunden. <0>Bundle erstellen</0>."
+
+#. 0: bundle.organization.name; 1: bundle.assets.length; 2: bundle.assets .length !== 1 ? 's' \\: ''
+#: src/routes/productions/[id]/+page.svelte
+msgid "{0} · {1} item{2}"
+msgstr "{0} · {1} Gerät{2}"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "No equipment booked yet."
+msgstr "Noch keine Geräte gebucht."
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Crew"
+msgstr "Crew"
+
+#: src/routes/+page.svelte
+#: src/routes/assets/bundles/+page.svelte
+#: src/routes/assets/bundles/+page.svelte
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Add Crew Member"
+msgstr "Crewmitglied hinzufügen"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "User *"
+msgstr "Person *"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Select a user…"
+msgstr "Person auswählen…"
+
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "Role"
+msgstr "Rolle"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Camera Operator"
+msgstr "Kameramann"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Adding…"
+msgstr "Wird hinzugefügt…"
+
+#: src/lib/components/ui/data-view/DataView.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "Add"
+msgstr "Hinzufügen"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "No crew members added yet."
+msgstr "Noch keine Crewmitglieder hinzugefügt."
+
+#: src/routes/auth/register/+page.svelte
+#: src/routes/productions/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "Name"
+msgstr "Name"
+
+#: src/routes/auth/login/+page.svelte
+#: src/routes/auth/register/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "Email"
+msgstr "E-Mail"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "Remove"
+msgstr "Entfernen"
+
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/packing-list/+page.svelte
+msgid "Manufacturer"
+msgstr "Hersteller"
+
+#: src/routes/+page.svelte
+#: src/routes/+page.svelte
+msgid "Approve"
+msgstr "Genehmigen"
+
+#: src/routes/+page.svelte
+#: src/routes/+page.svelte
+msgid "Decline"
+msgstr "Ablehnen"
+
+#. 0: modal.action === 'approve' ? 'Approve' \\: 'Decline'; 1: modal.pg.productName
+#: src/routes/+page.svelte
+msgid "{0} some {1}"
+msgstr "{0} einige {1}"
+
+#. 0: modal.pg.items.length; 1: modal.action
+#: src/routes/+page.svelte
+msgid "How many of the {0} units do you want to {1}?"
+msgstr "Wie viele der {0} Einheiten möchten Sie {1}?"
+
+#. 0: modal.pg.items.length
+#: src/routes/+page.svelte
+msgid "of {0}"
+msgstr "von {0}"
+
+#: src/routes/+page.svelte
+msgid "Welcome to Technikpool"
+msgstr "Willkommen im Technikpool"
+
+#: src/routes/+page.svelte
+msgid "Manage your equipment across organizations seamlessly."
+msgstr "Verwalten Sie Ihr Equipment nahtlos über alle Organisationen hinweg."
+
+#: src/routes/+page.svelte
+msgid "Sign Up"
+msgstr "Registrieren"
+
+#: src/routes/+page.svelte
+msgid "Dashboard"
+msgstr "Dashboard"
+
+#. 0: data.user.name || data.user.email
+#: src/routes/+page.svelte
+msgid "Welcome back, {0}."
+msgstr "Willkommen zurück, {0}."
+
+#: src/routes/+page.svelte
+msgid "My Organizations"
+msgstr "Meine Organisationen"
+
+#: src/routes/+page.svelte
+msgid "Pending Approvals"
+msgstr "Offene Genehmigungen"
+
+#: src/routes/+page.svelte
+msgid "Action Required"
+msgstr "Handlungsbedarf"
+
+#: src/routes/+page.svelte
+msgid "No pending approvals at this time."
+msgstr "Derzeit keine offenen Genehmigungen."
+
+#. 0: group.allItems.length; 1: group.allItems.length === 1 ? 'asset' \\: 'assets'
+#: src/routes/+page.svelte
+msgid "Requested by <0/> · {0} {1}"
+msgstr "Angefragt von <0/> · {0} {1}"
+
+#: src/routes/+page.svelte
+msgid "Decline all"
+msgstr "Alle ablehnen"
+
+#: src/routes/+page.svelte
+msgid "Approve all"
+msgstr "Alle genehmigen"
+
+#. 0: pg.items.length > 1 ? ' all' \\: ''
+#: src/routes/+page.svelte
+msgid "Decline{0}"
+msgstr "Ablehnen{0}"
+
+#. 0: pg.items.length > 1 ? ' all' \\: ''
+#: src/routes/+page.svelte
+msgid "Approve{0}"
+msgstr "Genehmigen{0}"
+
+#: src/routes/+page.svelte
+msgid "Partial actions"
+msgstr "Teilaktionen"
+
+#: src/routes/+page.svelte
+msgid "Approve some…"
+msgstr "Einige genehmigen…"
+
+#: src/routes/+page.svelte
+msgid "Decline some…"
+msgstr "Einige ablehnen…"
+
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+msgid "Serial Number"
+msgstr "Seriennummer"
+
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Asset Tag"
+msgstr "Asset-Tag"
+
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/+page.svelte
+msgid "Bundle"
+msgstr "Bundle"
+
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/bundles/+page.svelte
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Organization"
+msgstr "Organisation"
+
+#: src/routes/assets/+page.svelte
+msgid "All individual equipment units across your organizations."
+msgstr "Alle einzelnen Geräteeinheiten Ihrer Organisationen."
+
+#: src/routes/assets/+page.svelte
+#: src/routes/inventory/+page.svelte
+msgid "All Organizations"
+msgstr "Alle Organisationen"
+
+#: src/routes/assets/+page.svelte
+msgid "Search by product, S/N, bundle…"
+msgstr "Nach Produkt, S/N, Bundle suchen…"
+
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Add Asset"
+msgstr "Gerät hinzufügen"
+
+#: src/routes/assets/+page.svelte
+msgid "No assets found"
+msgstr "Keine Geräte gefunden"
+
+#: src/routes/assets/+page.svelte
+msgid "No equipment units in the selected organization."
+msgstr "Keine Geräte in der ausgewählten Organisation."
+
+#: src/routes/assets/+page.svelte
+msgid "Tag"
+msgstr "Tag"
+
+#: src/routes/inventory/+page.svelte
+#: src/routes/inventory/+page.svelte
+msgid "Total"
+msgstr "Gesamt"
+
+#: src/routes/inventory/+page.svelte
+#: src/routes/inventory/+page.svelte
+msgid "Available"
+msgstr "Verfügbar"
+
+#: src/routes/inventory/+page.svelte
+msgid "Maintenance"
+msgstr "Wartung"
+
+#: src/routes/inventory/+page.svelte
+msgid "Broken"
+msgstr "Defekt"
+
+#: src/routes/inventory/+page.svelte
+msgid "Product catalog — equipment models and their stock levels."
+msgstr "Produktkatalog – Gerätemodelle und deren Lagerbestand."
+
+#: src/routes/inventory/+page.svelte
+msgid "Search products…"
+msgstr "Produkte suchen…"
+
+#: src/routes/inventory/+page.svelte
+msgid "No products in inventory"
+msgstr "Keine Produkte im Inventar"
+
+#: src/routes/inventory/+page.svelte
+msgid "Add assets to see your product catalog."
+msgstr "Fügen Sie Geräte hinzu, um den Produktkatalog zu sehen."
+
+#: src/routes/calendar/+page.svelte
+msgid "Availability Calendar"
+msgstr "Verfügbarkeitskalender"
+
+#: src/routes/calendar/+page.svelte
+msgid "View equipment bookings across all your organizations."
+msgstr "Gerätebuchungen aller Organisationen im Überblick."
+
+#: src/routes/productions/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Start Date"
+msgstr "Startdatum"
+
+#: src/routes/productions/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "End Date"
+msgstr "Enddatum"
+
+#: src/routes/productions/+page.svelte
+#: src/routes/productions/+page.svelte
+msgid "Items Booked"
+msgstr "Gebuchte Artikel"
+
+#: src/routes/productions/+page.svelte
+msgid "Manage events and equipment bookings."
+msgstr "Veranstaltungen und Gerätebuchungen verwalten."
+
+#: src/routes/productions/+page.svelte
+msgid "Search productions…"
+msgstr "Produktionen suchen…"
+
+#: src/routes/productions/+page.svelte
+msgid "New Production"
+msgstr "Neue Produktion"
+
+#: src/routes/productions/+page.svelte
+msgid "No productions found"
+msgstr "Keine Produktionen gefunden"
+
+#: src/routes/productions/+page.svelte
+msgid "Create a new production to start checking out equipment."
+msgstr "Erstellen Sie eine neue Produktion, um Geräte auszuleihen."
+
+#. 0: newOrgName
+#: src/routes/orgs/+page.svelte
+msgid "Organization \"{0}\" created!"
+msgstr "Organisation „{0}\" erstellt!"
+
+#: src/routes/orgs/+page.svelte
+msgid "Organizations"
+msgstr "Organisationen"
+
+#: src/routes/orgs/+page.svelte
+msgid "All organizations in the system."
+msgstr "Alle Organisationen im System."
+
+#: src/routes/orgs/+page.svelte
+msgid "Manage your organizations and memberships."
+msgstr "Organisationen und Mitgliedschaften verwalten."
+
+#: src/routes/orgs/+page.svelte
+#: src/routes/orgs/+page.svelte
+msgid "Create Organization"
+msgstr "Organisation erstellen"
+
+#: src/routes/orgs/+page.svelte
+msgid "Create a new organization to manage assets and productions."
+msgstr "Erstellen Sie eine neue Organisation zur Verwaltung von Geräten und Produktionen."
+
+#: src/routes/orgs/+page.svelte
+msgid "Organization Name"
+msgstr "Organisationsname"
+
+#: src/routes/orgs/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Creating..."
+msgstr "Wird erstellt..."
+
+#. 0: orgs.length
+#: src/routes/orgs/+page.svelte
+msgid "All Organizations ({0})"
+msgstr "Alle Organisationen ({0})"
+
+#: src/routes/orgs/+page.svelte
+msgid "Your Organizations"
+msgstr "Ihre Organisationen"
+
+#: src/routes/orgs/+page.svelte
+msgid "No organizations exist yet."
+msgstr "Noch keine Organisationen vorhanden."
+
+#: src/routes/orgs/+page.svelte
+msgid "You are not a member of any organization yet."
+msgstr "Sie sind noch Mitglied keiner Organisation."
+
+#. 0: org.role
+#: src/routes/orgs/+page.svelte
+msgid "Role: {0}"
+msgstr "Rolle: {0}"
+
+#: src/routes/orgs/+page.svelte
+msgid "Manage"
+msgstr "Verwalten"
+
+#: src/routes/orgs/+page.svelte
+msgid "View Assets"
+msgstr "Geräte anzeigen"
+
+#: src/routes/admin/users/+page.svelte
+msgid "User Management"
+msgstr "Benutzerverwaltung"
+
+#: src/routes/admin/users/+page.svelte
+msgid "Manage system admin privileges for all users."
+msgstr "Systemadministratorrechte für alle Benutzer verwalten."
+
+#. 0: users.length
+#: src/routes/admin/users/+page.svelte
+msgid "All Users ({0})"
+msgstr "Alle Benutzer ({0})"
+
+#: src/routes/admin/users/+page.svelte
+msgid "System admins can manage all organizations and grant admin access to others."
+msgstr "Systemadministratoren können alle Organisationen verwalten und anderen Adminrechte vergeben."
+
+#: src/routes/admin/users/+page.svelte
+msgid "You"
+msgstr "Sie"
+
+#. 0: new Date(user.createdAt).toLocaleDateString()
+#: src/routes/admin/users/+page.svelte
+msgid "Joined {0}"
+msgstr "Beigetreten {0}"
+
+#: src/routes/admin/users/+page.svelte
+msgid "Revoke Admin"
+msgstr "Admin entziehen"
+
+#: src/routes/admin/users/+page.svelte
+msgid "Make Admin"
+msgstr "Zum Admin machen"
+
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Please select a manufacturer"
+msgstr "Bitte Hersteller auswählen"
+
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Please select a product"
+msgstr "Bitte Produkt auswählen"
+
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Asset created!"
+msgstr "Gerät erstellt!"
+
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Add New Asset"
+msgstr "Neues Gerät hinzufügen"
+
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Register new equipment into your organization's inventory."
+msgstr "Neues Equipment in das Inventar Ihrer Organisation aufnehmen."
+
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Search or create manufacturer…"
+msgstr "Hersteller suchen oder erstellen…"
+
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Product Model"
+msgstr "Produktmodell"
+
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Search or create product…"
+msgstr "Produkt suchen oder erstellen…"
+
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Quantity"
+msgstr "Menge"
+
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "<0/> Create another after saving"
+msgstr "<0/> Nach dem Speichern weiteres erstellen"
+
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Saving…"
+msgstr "Wird gespeichert…"
+
+#. 0: quantity
+#. 0: quantity
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Add {0} Assets"
+msgstr "{0} Geräte hinzufügen"
+
+#: src/routes/assets/bundles/+page.svelte
+msgid "Bundle created!"
+msgstr "Bundle erstellt!"
+
+#: src/routes/assets/bundles/+page.svelte
+msgid "Asset Bundles"
+msgstr "Gerätebundles"
+
+#: src/routes/assets/bundles/+page.svelte
+msgid "Grouped sets of equipment that can be booked together."
+msgstr "Gruppierte Gerätesätze, die gemeinsam gebucht werden können."
+
+#: src/routes/assets/bundles/+page.svelte
+msgid "New Bundle"
+msgstr "Neues Bundle"
+
+#: src/routes/assets/bundles/+page.svelte
+msgid "Bundle Name"
+msgstr "Bundle-Name"
+
+#: src/routes/assets/bundles/+page.svelte
+msgid "Description (optional)"
+msgstr "Beschreibung (optional)"
+
+#: src/routes/assets/bundles/+page.svelte
+msgid "What's in this bundle?"
+msgstr "Was ist in diesem Bundle?"
+
+#: src/routes/assets/bundles/+page.svelte
+msgid "Creating…"
+msgstr "Wird erstellt…"
+
+#: src/routes/assets/bundles/+page.svelte
+msgid "Create Bundle"
+msgstr "Bundle erstellen"
+
+#: src/routes/assets/bundles/+page.svelte
+msgid "No bundles yet"
+msgstr "Noch keine Bundles"
+
+#: src/routes/assets/bundles/+page.svelte
+msgid "Create bundles to group equipment for easy booking."
+msgstr "Erstellen Sie Bundles, um Geräte einfach zusammen zu buchen."
+
+#: src/routes/assets/bundles/+page.svelte
+msgid "Create your first bundle"
+msgstr "Erstes Bundle erstellen"
+
+#. 0: bundle.assets.length !== 1 ? 's' \\: ''
+#: src/routes/assets/bundles/+page.svelte
+msgid "item{0}"
+msgstr "Gerät{0}"
+
+#: src/routes/auth/login/+page.svelte
+msgid "Login to Technikpool"
+msgstr "Anmelden im Technikpool"
+
+#: src/routes/auth/login/+page.svelte
+msgid "Enter your email below to login to your account"
+msgstr "E-Mail-Adresse eingeben, um sich anzumelden"
+
+#: src/routes/auth/login/+page.svelte
+#: src/routes/auth/register/+page.svelte
+msgid "Password"
+msgstr "Passwort"
+
+#: src/routes/auth/login/+page.svelte
+msgid "Logging in..."
+msgstr "Anmeldung läuft..."
+
+#: src/routes/auth/login/+page.svelte
+msgid "Don't have an account? <0>Sign up</0>"
+msgstr "Noch kein Konto? <0>Registrieren</0>"
+
+#: src/routes/auth/register/+page.svelte
+msgid "Sign up for Technikpool"
+msgstr "Im Technikpool registrieren"
+
+#: src/routes/auth/register/+page.svelte
+msgid "Enter your information to create an account"
+msgstr "Daten eingeben, um ein Konto zu erstellen"
+
+#: src/routes/auth/register/+page.svelte
+msgid "John Doe"
+msgstr "Max Mustermann"
+
+#: src/routes/auth/register/+page.svelte
+msgid "Account created! Redirecting…"
+msgstr "Konto erstellt! Weiterleitung…"
+
+#: src/routes/auth/register/+page.svelte
+msgid "Creating account..."
+msgstr "Konto wird erstellt..."
+
+#: src/routes/auth/register/+page.svelte
+msgid "Create an account"
+msgstr "Konto erstellen"
+
+#: src/routes/auth/register/+page.svelte
+msgid "Already have an account? <0>Login</0>"
+msgstr "Bereits ein Konto? <0>Anmelden</0>"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Asset Details"
+msgstr "Gerätedetails"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "View asset information and history."
+msgstr "Geräteinformationen und Verlauf anzeigen."
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Back to Inventory"
+msgstr "Zurück zum Inventar"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Audit Log"
+msgstr "Protokoll"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "History of transactions and status changes for this asset."
+msgstr "Verlauf der Transaktionen und Statusänderungen dieses Geräts."
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "No history available for this asset."
+msgstr "Kein Verlauf für dieses Gerät vorhanden."
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "for production <0/>"
+msgstr "für Produktion <0/>"
+
+#. 0: item.user.name || item.user.email; 1: new Date( item.createdAt ).toLocaleString()
+#: src/routes/inventory/[id]/+page.svelte
+msgid "By {0} on {1}"
+msgstr "Von {0} am {1}"
+
+#: src/routes/productions/new/+page.svelte
+msgid "Production created!"
+msgstr "Produktion erstellt!"
+
+#: src/routes/productions/new/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Create Production"
+msgstr "Produktion erstellen"
+
+#: src/routes/productions/new/+page.svelte
+msgid "Start a new project or event to book equipment."
+msgstr "Neues Projekt oder Event starten und Geräte buchen."
+
+#: src/routes/productions/new/+page.svelte
+msgid "Production Name"
+msgstr "Produktionsname"
+
+#: src/routes/productions/new/+page.svelte
+msgid "Owning Organization"
+msgstr "Zugehörige Organisation"
+
+#: src/lib/components/ui/creatable-select/creatable-select.svelte
+#: src/lib/components/ui/data-view/DataView.svelte
+msgid "Search…"
+msgstr "Suchen…"
+
+#: src/lib/components/ui/creatable-select/creatable-select.svelte
+#: src/lib/components/ui/creatable-select/creatable-select.svelte
+msgid "ArrowDown"
+msgstr "ArrowDown"
+
+#: src/lib/components/ui/creatable-select/creatable-select.svelte
+#: src/lib/components/ui/creatable-select/creatable-select.svelte
+msgid "Enter"
+msgstr "Enter"
+
+#: src/lib/components/ui/creatable-select/creatable-select.svelte
+msgid "ArrowUp"
+msgstr "ArrowUp"
+
+#: src/lib/components/ui/creatable-select/creatable-select.svelte
+msgid "Escape"
+msgstr "Escape"
+
+#: src/lib/components/ui/creatable-select/creatable-select.svelte
+msgid "Create"
+msgstr "Erstellen"
+
+#: src/lib/components/ui/creatable-select/creatable-select.svelte
+msgid "No results"
+msgstr "Keine Ergebnisse"
+
+#: src/lib/components/ui/data-view/DataView.svelte
+msgid "Nothing here yet"
+msgstr "Noch nichts vorhanden"
+
+#: src/lib/components/ui/data-view/DataView.svelte
+msgid "Card view"
+msgstr "Kartenansicht"
+
+#: src/lib/components/ui/data-view/DataView.svelte
+msgid "Table view"
+msgstr "Tabellenansicht"
+
+#. 0: search
+#: src/lib/components/ui/data-view/DataView.svelte
+msgid "No results for \"{0}\""
+msgstr "Keine Ergebnisse für „{0}\""
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Role updated"
+msgstr "Rolle aktualisiert"
+
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Owner"
+msgstr "Inhaber"
+
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Member"
+msgstr "Mitglied"
+
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Viewer"
+msgstr "Betrachter"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Manage members and roles."
+msgstr "Mitglieder und Rollen verwalten."
+
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Add Member"
+msgstr "Mitglied hinzufügen"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Add a registered user to this organization by email."
+msgstr "Registrierten Benutzer per E-Mail zur Organisation hinzufügen."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Email address"
+msgstr "E-Mail-Adresse"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Adding..."
+msgstr "Wird hinzugefügt..."
+
+#. 0: org.members.length
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Members ({0})"
+msgstr "Mitglieder ({0})"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "System Admin"
+msgstr "Systemadministrator"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Asset added to bundle"
+msgstr "Gerät zum Bundle hinzugefügt"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Asset removed from bundle"
+msgstr "Gerät aus Bundle entfernt"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Bundle not found."
+msgstr "Bundle nicht gefunden."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Close"
+msgstr "Schließen"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Add Assets"
+msgstr "Geräte hinzufügen"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Add Assets to Bundle"
+msgstr "Geräte zum Bundle hinzufügen"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Search assets…"
+msgstr "Geräte suchen…"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Loading…"
+msgstr "Wird geladen…"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "No assets available to add."
+msgstr "Keine verfügbaren Geräte zum Hinzufügen."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "No assets in this bundle yet. Click \"Add Assets\" to get started."
+msgstr "Noch keine Geräte in diesem Bundle. Klicken Sie auf „Geräte hinzufügen\"."
+
+#: src/routes/productions/[id]/crew-passes/+page.svelte
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+#: src/routes/productions/[id]/packing-list/+page.svelte
+msgid "Print"
+msgstr "Drucken"
+
+#: src/routes/productions/[id]/crew-passes/+page.svelte
+msgid "No crew members added to this production yet."
+msgstr "Noch keine Crewmitglieder zu dieser Produktion hinzugefügt."
+
+#: src/routes/productions/[id]/crew-passes/+page.svelte
+msgid "Crew Pass"
+msgstr "Crew-Ausweis"
+
+#: src/routes/productions/[id]/crew-passes/+page.svelte
+msgid "From: <0/>"
+msgstr "Von: <0/>"
+
+#: src/routes/productions/[id]/crew-passes/+page.svelte
+msgid "To: <0/>"
+msgstr "Bis: <0/>"
+
+#. 0: (await getProduction(productionId))?.name
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+msgid "Delivery Note - {0}"
+msgstr "Lieferschein – {0}"
+
+#. 0: production?.id.slice(0, 8).toUpperCase()
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+msgid "No. DN-{0}"
+msgstr "Nr. LS-{0}"
+
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+msgid "Equipment Management"
+msgstr "Geräteverwaltung"
+
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+msgid "Delivery To"
+msgstr "Lieferung an"
+
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+msgid "Production Period:<0/> <1/> – <2/>"
+msgstr "Produktionszeitraum:<0/> <1/> – <2/>"
+
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+msgid "Date"
+msgstr "Datum"
+
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+msgid "Qty"
+msgstr "Menge"
+
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+msgid "Description"
+msgstr "Beschreibung"
+
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+msgid "Remarks"
+msgstr "Bemerkungen"
+
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+msgid "Delivered By"
+msgstr "Ausgeliefert von"
+
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+msgid "Signature & Date"
+msgstr "Unterschrift & Datum"
+
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+msgid "Received By"
+msgstr "Empfangen von"
+
+#: src/routes/productions/[id]/delivery-note/+page.svelte
+msgid "Please verify all equipment is present and in good condition before signing."
+msgstr "Bitte alle Geräte auf Vollständigkeit und einwandfreien Zustand prüfen, bevor Sie unterschreiben."
+
+#. 0: (await getProduction(productionId))?.name
+#: src/routes/productions/[id]/packing-list/+page.svelte
+msgid "Packing List - {0}"
+msgstr "Packliste – {0}"
+
+#. 0: new Date().toLocaleDateString()
+#: src/routes/productions/[id]/packing-list/+page.svelte
+msgid "Date: {0}"
+msgstr "Datum: {0}"
+
+#: src/routes/productions/[id]/packing-list/+page.svelte
+msgid "Check"
+msgstr "Haken"
+
+#: src/routes/productions/[id]/packing-list/+page.svelte
+msgid "Item Description"
+msgstr "Artikelbeschreibung"
+
+#: src/routes/productions/[id]/packing-list/+page.svelte
+msgid "Source Org"
+msgstr "Herkunftsorg."
+
+#: src/routes/productions/[id]/packing-list/+page.svelte
+msgid "Prepared By:"
+msgstr "Vorbereitet von:"
+
+#: src/routes/productions/[id]/packing-list/+page.svelte
+msgid "Checked By:"
+msgstr "Geprüft von:"
+
+#: src/routes/+layout.svelte
+msgid "DE"
+msgstr ""
+
+#: src/routes/+layout.svelte
+msgid "EN"
+msgstr ""
