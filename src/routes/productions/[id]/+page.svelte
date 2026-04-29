@@ -7,6 +7,7 @@
 		getProduction,
 		addAssetToProduction,
 		addBundleToProduction,
+		removeBundleFromProduction,
 		addCrewMember,
 		removeCrewMember,
 		removeProductionItem,
@@ -109,6 +110,14 @@
 		}
 	}
 
+	async function handleRemoveBundle(bundleId: string) {
+		try {
+			await removeBundleFromProduction({ productionId, bundleId });
+		} catch (err) {
+			toast.error((err as Error).message);
+		}
+	}
+
 	type ItemPayload = Prisma.ProductionItemGetPayload<{
 		include: {
 			asset: { include: { product: { include: { manufacturer: true } }; organization: true } };
@@ -116,7 +125,20 @@
 		};
 	}>;
 
-	type ProductGroup = {
+	type BundleSection = {
+		kind: 'bundle';
+		bundleId: string;
+		bundleName: string;
+		total: number;
+		pending: number;
+		approved: number;
+		checkedOut: number;
+		returned: number;
+		items: ItemPayload[];
+	};
+
+	type ProductSection = {
+		kind: 'product';
 		productId: string;
 		productName: string;
 		manufacturerName: string;
@@ -128,38 +150,66 @@
 		items: ItemPayload[];
 	};
 
-	let productGroups = $derived.by((): ProductGroup[] => {
-		const map = new SvelteMap<string, ProductGroup>();
+	type DisplaySection = BundleSection | ProductSection;
+
+	let displaySections = $derived.by((): DisplaySection[] => {
+		const bundleMap = new SvelteMap<string, BundleSection>();
+		const productMap = new SvelteMap<string, ProductSection>();
 		for (const item of production.items) {
-			const pid = item.asset.product.id;
-			if (!map.has(pid)) {
-				map.set(pid, {
-					productId: pid,
-					productName: item.asset.product.name,
-					manufacturerName: item.asset.product.manufacturer.name,
-					total: 0,
-					pending: 0,
-					approved: 0,
-					checkedOut: 0,
-					returned: 0,
-					items: []
-				});
+			if (item.sourceBundle) {
+				const bid = item.sourceBundle.id;
+				if (!bundleMap.has(bid)) {
+					bundleMap.set(bid, {
+						kind: 'bundle',
+						bundleId: bid,
+						bundleName: item.sourceBundle.name,
+						total: 0,
+						pending: 0,
+						approved: 0,
+						checkedOut: 0,
+						returned: 0,
+						items: []
+					});
+				}
+				const g = bundleMap.get(bid)!;
+				g.total++;
+				g.items.push(item);
+				if (item.status === 'PENDING') g.pending++;
+				else if (item.status === 'APPROVED') g.approved++;
+				else if (item.status === 'CHECKED_OUT') g.checkedOut++;
+				else if (item.status === 'RETURNED') g.returned++;
+			} else {
+				const pid = item.asset.product.id;
+				if (!productMap.has(pid)) {
+					productMap.set(pid, {
+						kind: 'product',
+						productId: pid,
+						productName: item.asset.product.name,
+						manufacturerName: item.asset.product.manufacturer.name,
+						total: 0,
+						pending: 0,
+						approved: 0,
+						checkedOut: 0,
+						returned: 0,
+						items: []
+					});
+				}
+				const g = productMap.get(pid)!;
+				g.total++;
+				g.items.push(item);
+				if (item.status === 'PENDING') g.pending++;
+				else if (item.status === 'APPROVED') g.approved++;
+				else if (item.status === 'CHECKED_OUT') g.checkedOut++;
+				else if (item.status === 'RETURNED') g.returned++;
 			}
-			const g = map.get(pid)!;
-			g.total++;
-			g.items.push(item);
-			if (item.status === 'PENDING') g.pending++;
-			else if (item.status === 'APPROVED') g.approved++;
-			else if (item.status === 'CHECKED_OUT') g.checkedOut++;
-			else if (item.status === 'RETURNED') g.returned++;
 		}
-		return [...map.values()];
+		return [...bundleMap.values(), ...productMap.values()];
 	});
 
 	let expanded = new SvelteMap<string, boolean>();
 
-	function toggleProduct(productId: string) {
-		expanded.set(productId, !expanded.get(productId));
+	function toggleSection(id: string) {
+		expanded.set(id, !expanded.get(id));
 	}
 
 	let showCrewForm = $state(false);
@@ -491,10 +541,11 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each productGroups as group (group.productId)}
+						{#each displaySections as section (section.kind === 'bundle' ? section.bundleId : section.productId)}
+							{@const sectionId = section.kind === 'bundle' ? section.bundleId : section.productId}
 							<tr
 								class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
-								onclick={() => toggleProduct(group.productId)}
+								onclick={() => toggleSection(sectionId)}
 							>
 								<td class="px-4 py-3">
 									<div class="flex items-center gap-2">
@@ -509,52 +560,72 @@
 											stroke-linecap="round"
 											stroke-linejoin="round"
 											class="shrink-0 text-muted-foreground transition-transform {expanded.get(
-												group.productId
+												sectionId
 											)
 												? 'rotate-90'
 												: ''}"
 										>
 											<path d="m9 18 6-6-6-6" />
 										</svg>
-										<span class="font-medium">{group.productName}</span>
+										{#if section.kind === 'bundle'}
+											<span
+												class="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground"
+												>Bundle</span
+											>
+											<span class="font-medium">{section.bundleName}</span>
+											<button
+												type="button"
+												onclick={(e) => {
+													e.stopPropagation();
+													handleRemoveBundle(section.bundleId);
+												}}
+												class="ml-auto text-xs text-muted-foreground transition-colors hover:text-destructive"
+											>
+												Remove
+											</button>
+										{:else}
+											<span class="font-medium">{section.productName}</span>
+										{/if}
 									</div>
 								</td>
-								<td class="px-4 py-3 text-muted-foreground">{group.manufacturerName}</td>
-								<td class="px-4 py-3 text-right font-mono tabular-nums">{group.total}</td>
+								<td class="px-4 py-3 text-muted-foreground">
+									{section.kind === 'bundle' ? '—' : section.manufacturerName}
+								</td>
+								<td class="px-4 py-3 text-right font-mono tabular-nums">{section.total}</td>
 								<td
-									class="px-4 py-3 text-right font-mono tabular-nums {group.pending > 0
+									class="px-4 py-3 text-right font-mono tabular-nums {section.pending > 0
 										? 'text-yellow-600 dark:text-yellow-400'
-										: 'text-muted-foreground'}">{group.pending > 0 ? group.pending : '—'}</td
+										: 'text-muted-foreground'}">{section.pending > 0 ? section.pending : '—'}</td
 								>
 								<td
-									class="px-4 py-3 text-right font-mono tabular-nums {group.approved > 0
+									class="px-4 py-3 text-right font-mono tabular-nums {section.approved > 0
 										? 'text-green-700 dark:text-green-400'
-										: 'text-muted-foreground'}">{group.approved > 0 ? group.approved : '—'}</td
+										: 'text-muted-foreground'}">{section.approved > 0 ? section.approved : '—'}</td
 								>
 								<td
-									class="px-4 py-3 text-right font-mono tabular-nums {group.checkedOut > 0
+									class="px-4 py-3 text-right font-mono tabular-nums {section.checkedOut > 0
 										? 'text-blue-600 dark:text-blue-400'
-										: 'text-muted-foreground'}">{group.checkedOut > 0 ? group.checkedOut : '—'}</td
+										: 'text-muted-foreground'}"
+									>{section.checkedOut > 0 ? section.checkedOut : '—'}</td
 								>
 								<td class="px-4 py-3 text-right font-mono text-muted-foreground tabular-nums"
-									>{group.returned > 0 ? group.returned : '—'}</td
+									>{section.returned > 0 ? section.returned : '—'}</td
 								>
 							</tr>
-							{#if expanded.get(group.productId)}
-								{#each group.items as item (item.id)}
+							{#if expanded.get(sectionId)}
+								{#each section.items as item (item.id)}
 									<tr class="border-b bg-muted/10 last:border-0">
 										<td colspan="7" class="px-4 py-2">
 											<div class="flex items-center gap-4 pl-5 text-sm">
+												{#if section.kind === 'bundle'}
+													<span class="font-medium">{item.asset.product.name}</span>
+												{/if}
 												<span class="w-36 font-mono text-xs text-muted-foreground">
 													{item.asset.serialNumber ? `S/N: ${item.asset.serialNumber}` : '—'}
 												</span>
 												<span class="text-xs text-muted-foreground"
 													>{item.asset.organization.name}</span
 												>
-												{#if item.sourceBundle}
-													<span class="text-xs text-muted-foreground">{item.sourceBundle.name}</span
-													>
-												{/if}
 												<span
 													class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {statusClass[
 														item.status

@@ -378,6 +378,22 @@ export const removeProductionItem = command(v.string(), async (itemId: string) =
 	return item;
 });
 
+const removeBundleFromProductionSchema = v.object({
+	productionId: v.string(),
+	bundleId: v.string()
+});
+
+export const removeBundleFromProduction = command(
+	removeBundleFromProductionSchema,
+	async (data) => {
+		await requireAuth();
+		await prisma.productionItem.deleteMany({
+			where: { productionId: data.productionId, sourceBundleId: data.bundleId }
+		});
+		getProduction(data.productionId).refresh();
+	}
+);
+
 // ── Crew ─────────────────────────────────────────────────────────────────────
 
 const addCrewSchema = v.object({

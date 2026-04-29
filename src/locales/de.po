@@ -239,6 +239,7 @@ msgstr "E-Mail"
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 msgid "Remove"
 msgstr "Entfernen"
 
@@ -371,6 +372,7 @@ msgid "Asset Tag"
 msgstr "Asset-Tag"
 
 #: src/routes/inventory/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Bundle"
 msgstr "Bundle"
@@ -1018,7 +1020,7 @@ msgstr "Empfangen von"
 msgid "Please verify all equipment is present and in good condition before signing."
 msgstr "Bitte alle Geräte auf Vollständigkeit und einwandfreien Zustand prüfen, bevor Sie unterschreiben."
 
-#. 0: (await getProduction(productionId))?.name
+#. 0: production.name
 #: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Packing List - {0}"
 msgstr "Packliste – {0}"
@@ -1421,4 +1423,9 @@ msgstr ""
 
 #: src/routes/calendar/+page.svelte
 msgid "Calendar | Technikpool"
+msgstr ""
+
+#. 0: group.productCounts.map((p) => `${p.count}× ${p.name}`).join(', ')
+#: src/routes/productions/[id]/packing-list/+page.svelte
+msgid "Contains: {0}"
 msgstr ""
