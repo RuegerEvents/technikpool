@@ -6,7 +6,7 @@
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { page } from '$app/state';
 
-	let filterOrgId = $state($page.url.searchParams.get('org') || '');
+	let filterOrgId = $state(page.url.searchParams.get('org') || '');
 
 	type Production = Awaited<ReturnType<typeof getProductions>>[number];
 

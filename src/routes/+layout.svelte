@@ -80,6 +80,14 @@
 									? 'text-foreground'
 									: 'text-muted-foreground hover:text-foreground'}">Calendar</a
 							>
+							<a
+								href={resolve('/checkout')}
+								class="text-sm font-medium transition-colors {page.url.pathname.startsWith(
+									'/checkout'
+								)
+									? 'text-foreground'
+									: 'text-muted-foreground hover:text-foreground'}">Checkout</a
+							>
 							{#if data.isAdmin}
 								<a
 									href={resolve('/admin/users')}

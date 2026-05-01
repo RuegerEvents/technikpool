@@ -126,6 +126,7 @@ msgstr "Bundles"
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/checkout/+page.svelte
 #: src/routes/inventory/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
@@ -146,6 +147,7 @@ msgstr "Org"
 
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/checkout/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Status"
@@ -412,8 +414,9 @@ msgstr "Gerät hinzufügen"
 #~ msgid "No equipment units in the selected organization."
 #~ msgstr "Keine Geräte in der ausgewählten Organisation."
 
-#~ msgid "Tag"
-#~ msgstr "Tag"
+#: src/routes/checkout/+page.svelte
+msgid "Tag"
+msgstr "Tag"
 
 #: src/routes/inventory/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
@@ -1176,9 +1179,10 @@ msgstr ""
 msgid "Out"
 msgstr ""
 
+#: src/routes/checkout/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Returned"
-msgstr ""
+msgstr "Zurückgegeben"
 
 #: src/routes/inventory/[id]/+page.svelte
 msgid "Asset updated"
@@ -1201,6 +1205,8 @@ msgstr ""
 
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
+#: src/routes/checkout/+page.svelte
+#: src/routes/checkout/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/new/+page.svelte
 msgid "Location"
@@ -1507,6 +1513,8 @@ msgid "Collapse all"
 msgstr "Alle einklappen"
 
 #: src/routes/calendar/+page.svelte
+#: src/routes/checkout/+page.svelte
+#: src/routes/checkout/+page.svelte
 msgid "Production"
 msgstr "Produktion"
 
@@ -1531,3 +1539,156 @@ msgstr ""
 #: src/routes/admin/users/+page.svelte
 msgid "Joined"
 msgstr ""
+
+#: src/routes/+layout.svelte
+msgid "Checkout"
+msgstr "Checkout"
+
+#: src/routes/checkout/+page.svelte
+msgid "Please select a target first"
+msgstr "Bitte zuerst ein Ziel auswählen"
+
+#: src/routes/checkout/+page.svelte
+msgid "Camera access denied. Switched to text input."
+msgstr "Kamerazugriff verweigert. Auf Texteingabe gewechselt."
+
+#~ msgid "BarcodeDetector"
+#~ msgstr "BarcodeDetector"
+
+#~ msgid "QR scanning not supported in this browser. Switched to text input."
+#~ msgstr "QR-Scan wird in diesem Browser nicht unterstützt. Auf Texteingabe gewechselt."
+
+#: src/routes/checkout/+page.svelte
+msgid "Assigned to location"
+msgstr "Standort zugewiesen"
+
+#: src/routes/checkout/+page.svelte
+msgid "Checked out"
+msgstr "Ausgecheckt"
+
+#: src/routes/checkout/+page.svelte
+msgid "Checkout | Technikpool"
+msgstr "Checkout | Technikpool"
+
+#: src/routes/checkout/+page.svelte
+msgid "Checkout / Check-in"
+msgstr "Checkout / Einbuchen"
+
+#: src/routes/checkout/+page.svelte
+msgid "Scan asset tags to book equipment to a location or production."
+msgstr "Asset-Tags scannen, um Geräte einem Standort oder einer Produktion zuzuordnen."
+
+#: src/routes/checkout/+page.svelte
+msgid "Session Setup"
+msgstr "Sitzung einrichten"
+
+#: src/routes/checkout/+page.svelte
+msgid "Target"
+msgstr "Ziel"
+
+#~ msgid "Select a location…"
+#~ msgstr "Standort auswählen…"
+
+#: src/routes/checkout/+page.svelte
+msgid "Select a production…"
+msgstr "Produktion auswählen…"
+
+#: src/routes/checkout/+page.svelte
+msgid "Action"
+msgstr "Aktion"
+
+#~ msgid "Check Out"
+#~ msgstr "Ausgabe"
+
+#~ msgid "Check In"
+#~ msgstr "Rückgabe"
+
+#: src/routes/checkout/+page.svelte
+msgid "Input Mode"
+msgstr "Eingabemodus"
+
+#: src/routes/checkout/+page.svelte
+msgid "QR Scanner"
+msgstr "QR-Scanner"
+
+#: src/routes/checkout/+page.svelte
+msgid "Text Input"
+msgstr "Texteingabe"
+
+#: src/routes/checkout/+page.svelte
+msgid "Start Session"
+msgstr "Sitzung starten"
+
+#: src/routes/checkout/+page.svelte
+msgid "Active Session"
+msgstr "Aktive Sitzung"
+
+#: src/routes/checkout/+page.svelte
+msgid "End Session"
+msgstr "Sitzung beenden"
+
+#: src/routes/checkout/+page.svelte
+msgid "Processing…"
+msgstr "Verarbeitung…"
+
+#: src/routes/checkout/+page.svelte
+msgid "Type or scan asset tag…"
+msgstr "Asset-Tag eingeben oder scannen…"
+
+#: src/routes/checkout/+page.svelte
+msgid "Submit"
+msgstr "Übernehmen"
+
+#: src/routes/checkout/+page.svelte
+msgid "Checkout Session Report"
+msgstr "Checkout-Sitzungsbericht"
+
+#: src/routes/checkout/+page.svelte
+msgid "Target:"
+msgstr "Ziel:"
+
+#: src/routes/checkout/+page.svelte
+msgid "Started:"
+msgstr "Gestartet:"
+
+#: src/routes/checkout/+page.svelte
+msgid "Ended:"
+msgstr "Beendet:"
+
+#. 0: sessionLog.length; 1: successCount; 2: errorCount
+#: src/routes/checkout/+page.svelte
+msgid "<0>Total:</0> {0} scans — {1} success, {2} errors"
+msgstr "<0>Gesamt:</0> {0} Scans — {1} erfolgreich, {2} Fehler"
+
+#: src/routes/checkout/+page.svelte
+msgid "Session Log"
+msgstr "Sitzungsprotokoll"
+
+#. 0: sessionLog.length; 1: sessionLog.length !== 1 ? 's' \\: ''; 2: successCount; 3: successCount !== 1 ? 'es' \\: ''; 4: errorCount; 5: errorCount !== 1 ? 's' \\: ''
+#: src/routes/checkout/+page.svelte
+msgid "{0} scan{1} — {2} success{3}, {4} error{5}"
+msgstr "{0} Scan{1} — {2} erfolgreich{3}, {4} Fehler{5}"
+
+#: src/routes/checkout/+page.svelte
+msgid "Print Report"
+msgstr "Bericht drucken"
+
+#: src/routes/checkout/+page.svelte
+msgid "New Session"
+msgstr "Neue Sitzung"
+
+#: src/routes/checkout/+page.svelte
+msgid "Time"
+msgstr "Uhrzeit"
+
+#: src/routes/checkout/+page.svelte
+msgid "OK"
+msgstr "OK"
+
+#: src/routes/checkout/+page.svelte
+msgid "Error"
+msgstr "Fehler"
+
+#: src/routes/checkout/+page.svelte
+msgid "Search locations…"
+msgstr "Standort suchen…"

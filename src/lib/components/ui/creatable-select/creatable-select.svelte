@@ -22,6 +22,7 @@
 		placeholder = 'Search…',
 		required = false,
 		disabled = false,
+		allowCreate = true,
 		class: className
 	}: Props = $props();
 
@@ -46,7 +47,7 @@
 		items.some((i) => i.name.toLowerCase() === inputValue.toLowerCase().trim())
 	);
 
-	let showCreate = $derived(inputValue.trim().length > 0 && !exactMatch);
+	let showCreate = $derived(allowCreate && inputValue.trim().length > 0 && !exactMatch);
 
 	let options = $derived<Array<{ type: 'item'; item: Item } | { type: 'create'; name: string }>>([
 		...filtered.map((item) => ({ type: 'item' as const, item })),

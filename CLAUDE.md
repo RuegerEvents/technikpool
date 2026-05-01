@@ -12,6 +12,7 @@ Multi-tenant equipment/asset management app. Organizations own assets and produc
 - **Tailwind CSS 4** + **shadcn-svelte** components + **bits-ui** primitives
 - **Valibot 1** for input validation in remote functions
 - **svelte-sonner** for toast notifications
+- **Package manager: pnpm** — always use `pnpm` (not `npm` or `yarn`)
 
 ## Data Layer: Remote Functions
 
