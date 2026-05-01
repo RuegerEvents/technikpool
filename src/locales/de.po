@@ -18,10 +18,12 @@ msgid "Inventory"
 msgstr "Inventar"
 
 #: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/calendar/+page.svelte
 msgid "Assets"
 msgstr "Geräte"
 
 #: src/routes/+layout.svelte
+#: src/routes/calendar/+page.svelte
 #: src/routes/productions/+page.svelte
 msgid "Productions"
 msgstr "Produktionen"
@@ -965,12 +967,12 @@ msgstr "Von: <0/>"
 msgid "To: <0/>"
 msgstr "Bis: <0/>"
 
-#. 0: (await getProduction(productionId))?.name
+#. 0: production.name
 #: src/routes/productions/[id]/delivery-note/+page.svelte
 msgid "Delivery Note - {0}"
 msgstr "Lieferschein – {0}"
 
-#. 0: production?.id.slice(0, 8).toUpperCase()
+#. 0: production.id.slice(0, 8).toUpperCase()
 #: src/routes/productions/[id]/delivery-note/+page.svelte
 msgid "No. DN-{0}"
 msgstr "Nr. LS-{0}"
@@ -1180,9 +1182,10 @@ msgstr ""
 msgid "Asset updated"
 msgstr ""
 
+#: src/routes/calendar/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 msgid "Asset"
-msgstr ""
+msgstr "Gerät"
 
 #: src/routes/inventory/[id]/+page.svelte
 msgid "Update serial, tag, status, and location."
@@ -1414,6 +1417,7 @@ msgid "Create Bundle | Technikpool"
 msgstr ""
 
 #: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
 msgid "New Asset | Technikpool"
 msgstr ""
 
@@ -1426,6 +1430,98 @@ msgid "Calendar | Technikpool"
 msgstr ""
 
 #. 0: group.productCounts.map((p) => `${p.count}× ${p.name}`).join(', ')
+#. 0: group.productCounts.map((p) => `${p.count}× ${p.name}`).join(', ')
+#: src/routes/productions/[id]/delivery-note/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Contains: {0}"
+msgstr ""
+
+#: src/routes/calendar/+page.svelte
+msgid "Jan"
+msgstr "Jan"
+
+#: src/routes/calendar/+page.svelte
+msgid "Feb"
+msgstr "Feb"
+
+#: src/routes/calendar/+page.svelte
+msgid "Mar"
+msgstr "Mär"
+
+#: src/routes/calendar/+page.svelte
+msgid "Apr"
+msgstr "Apr"
+
+#: src/routes/calendar/+page.svelte
+msgid "May"
+msgstr "Mai"
+
+#: src/routes/calendar/+page.svelte
+msgid "Jun"
+msgstr "Jun"
+
+#: src/routes/calendar/+page.svelte
+msgid "Jul"
+msgstr "Jul"
+
+#: src/routes/calendar/+page.svelte
+msgid "Aug"
+msgstr "Aug"
+
+#: src/routes/calendar/+page.svelte
+msgid "Sep"
+msgstr "Sep"
+
+#: src/routes/calendar/+page.svelte
+msgid "Oct"
+msgstr "Okt"
+
+#: src/routes/calendar/+page.svelte
+msgid "Nov"
+msgstr "Nov"
+
+#: src/routes/calendar/+page.svelte
+msgid "Dec"
+msgstr "Dez"
+
+#: src/routes/calendar/+page.svelte
+msgid "Today"
+msgstr "Heute"
+
+#: src/routes/calendar/+page.svelte
+msgid "Day"
+msgstr "Tag"
+
+#: src/routes/calendar/+page.svelte
+msgid "Week"
+msgstr "Woche"
+
+#: src/routes/calendar/+page.svelte
+msgid "Expand all"
+msgstr "Alle aufklappen"
+
+#: src/routes/calendar/+page.svelte
+msgid "Collapse all"
+msgstr "Alle einklappen"
+
+#: src/routes/calendar/+page.svelte
+msgid "Production"
+msgstr "Produktion"
+
+#: src/routes/calendar/+page.svelte
+msgid "No assets with scheduled productions found."
+msgstr "Keine Geräte mit geplanten Produktionen gefunden."
+
+#~ msgid "Previous"
+#~ msgstr ""
+
+#~ msgid "Next"
+#~ msgstr ""
+
+#: src/routes/auth/login/+page.svelte
+msgid "Login | Technikpool"
+msgstr ""
+
+#: src/routes/auth/register/+page.svelte
+msgid "Register | Technikpool"
 msgstr ""

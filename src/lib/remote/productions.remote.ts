@@ -449,3 +449,20 @@ export const getCalendarData = query(async () => {
 
 	return assets;
 });
+
+export const getProductionsCalendar = query(async () => {
+	const user = await requireAuth();
+	const memberships = await prisma.orgMembership.findMany({
+		where: { userId: user.id }
+	});
+	const orgIds = memberships.map((m) => m.organizationId);
+	return await prisma.production.findMany({
+		where: {
+			organizationId: { in: orgIds },
+			startDate: { not: null },
+			endDate: { not: null }
+		},
+		include: { organization: { select: { name: true } } },
+		orderBy: { startDate: 'asc' }
+	});
+});

@@ -3,6 +3,7 @@
 	import { getProduction } from '$lib/remote/productions.remote';
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
+	import { SvelteMap } from 'svelte/reactivity';
 
 	const productionId = $derived(page.params.id as string);
 	let production = $derived(await getProduction(productionId));
@@ -19,7 +20,7 @@
 	};
 
 	let bundleGroups = $derived.by((): BundleGroup[] => {
-		const map = new Map<string, BundleGroup>();
+		const map = new SvelteMap<string, BundleGroup>();
 		for (const item of production.items) {
 			if (!item.sourceBundle) continue;
 			const bid = item.sourceBundle.id;
