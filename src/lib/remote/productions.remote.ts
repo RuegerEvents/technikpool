@@ -15,6 +15,7 @@ export const getProductions = query(v.string(), async (organizationId: string) =
 	return await prisma.production.findMany({
 		where: { organizationId },
 		include: {
+			organization: { select: { name: true } },
 			items: {
 				include: {
 					asset: {

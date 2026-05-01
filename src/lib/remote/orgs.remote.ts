@@ -202,7 +202,17 @@ export const getAllUsers = query(async () => {
 	const user = await requireAuth();
 	if (!(await isUserAdmin(user.id))) throw new Error('Admin access required');
 	return prisma.user.findMany({
-		select: { id: true, name: true, email: true, isAdmin: true, createdAt: true },
+		select: {
+			id: true,
+			name: true,
+			email: true,
+			isAdmin: true,
+			createdAt: true,
+			memberships: {
+				select: { role: true, organization: { select: { id: true, name: true } } },
+				orderBy: { role: 'asc' }
+			}
+		},
 		orderBy: { createdAt: 'desc' }
 	});
 });

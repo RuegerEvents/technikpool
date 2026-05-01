@@ -220,6 +220,7 @@ msgstr "Hinzufügen"
 msgid "No crew members added yet."
 msgstr "Noch keine Crewmitglieder hinzugefügt."
 
+#: src/routes/admin/users/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/auth/register/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
@@ -230,6 +231,7 @@ msgstr "Noch keine Crewmitglieder hinzugefügt."
 msgid "Name"
 msgstr "Name"
 
+#: src/routes/admin/users/+page.svelte
 #: src/routes/auth/login/+page.svelte
 #: src/routes/auth/register/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
@@ -383,6 +385,7 @@ msgstr "Bundle"
 #: src/routes/assets/new/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/new/+page.svelte
+#: src/routes/productions/+page.svelte
 msgid "Organization"
 msgstr "Organisation"
 
@@ -487,6 +490,7 @@ msgstr "Erstellen Sie eine neue Produktion, um Geräte auszuleihen."
 msgid "Organization \"{0}\" created!"
 msgstr "Organisation „{0}\" erstellt!"
 
+#: src/routes/admin/users/+page.svelte
 #: src/routes/orgs/+page.svelte
 msgid "Organizations"
 msgstr "Organisationen"
@@ -568,10 +572,8 @@ msgstr "Systemadministratoren können alle Organisationen verwalten und anderen 
 msgid "You"
 msgstr "Sie"
 
-#. 0: new Date(user.createdAt).toLocaleDateString()
-#: src/routes/admin/users/+page.svelte
-msgid "Joined {0}"
-msgstr "Beigetreten {0}"
+#~ msgid "Joined {0}"
+#~ msgstr "Beigetreten {0}"
 
 #: src/routes/admin/users/+page.svelte
 msgid "Revoke Admin"
@@ -1524,4 +1526,8 @@ msgstr ""
 
 #: src/routes/auth/register/+page.svelte
 msgid "Register | Technikpool"
+msgstr ""
+
+#: src/routes/admin/users/+page.svelte
+msgid "Joined"
 msgstr ""

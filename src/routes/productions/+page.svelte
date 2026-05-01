@@ -4,7 +4,7 @@
 	import type { Column } from '$lib/components/ui/data-view';
 	import { getProductions } from '$lib/remote/productions.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	let filterOrgId = $state($page.url.searchParams.get('org') || '');
 
@@ -12,6 +12,12 @@
 
 	const columns: Column<Production>[] = [
 		{ key: 'name', label: 'Name', sortable: true, accessor: (r: Production) => r.name },
+		{
+			key: 'org',
+			label: 'Organization',
+			sortable: true,
+			accessor: (r: Production) => r.organization.name
+		},
 		{
 			key: 'startDate',
 			label: 'Start Date',
@@ -83,6 +89,7 @@
 						<Card.Header>
 							<Card.Title class="text-lg">{prod.name}</Card.Title>
 							<Card.Description>
+								<span class="block">{prod.organization.name}</span>
 								{formatDate(prod.startDate)}{prod.endDate ? ` – ${formatDate(prod.endDate)}` : ''}
 							</Card.Description>
 						</Card.Header>
@@ -98,6 +105,8 @@
 				{#snippet cell(prod, key)}
 					{#if key === 'name'}
 						<span class="font-medium">{prod.name}</span>
+					{:else if key === 'org'}
+						{prod.organization.name}
 					{:else if key === 'startDate'}
 						{formatDate(prod.startDate)}
 					{:else if key === 'endDate'}
