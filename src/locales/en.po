@@ -65,10 +65,8 @@ msgstr "Login"
 msgid "Sign up"
 msgstr "Sign up"
 
-#. 0: result.added; 1: result.added !== 1 ? 's' \\: ''
-#: src/routes/productions/[id]/+page.svelte
-msgid "Added {0} asset{1} from bundle"
-msgstr "Added {0} asset{1} from bundle"
+#~ msgid "Added {0} asset{1} from bundle"
+#~ msgstr "Added {0} asset{1} from bundle"
 
 #: src/routes/productions/[id]/+page.svelte
 msgid "Crew member added"
@@ -1749,3 +1747,18 @@ msgstr "Select target…"
 #: src/lib/components/ui/checkout-bar.svelte
 msgid "Checking out…"
 msgstr "Checking out…"
+
+#. 0: result.added; 1: result.added !== 1 ? 's' \\: ''; 2: conflictNote
+#: src/routes/productions/[id]/+page.svelte
+msgid "Added {0} asset{1} from bundle{2}"
+msgstr "Added {0} asset{1} from bundle{2}"
+
+#. 0: conflictInfo
+#: src/routes/productions/[id]/+page.svelte
+msgid "Booked: {0}"
+msgstr "Booked: {0}"
+
+#. 0: conflictInfo
+#: src/routes/productions/[id]/+page.svelte
+msgid "Blocked by {0}"
+msgstr "Blocked by {0}"

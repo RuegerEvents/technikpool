@@ -107,8 +107,8 @@
 		return COLORS[h % COLORS.length];
 	}
 
-	type Bar = { id: string; productionId: string; label: string; left: number; width: number; color: string };
-	type CollapsedBar = { productionId: string; label: string; left: number; width: number; color: string; fraction: number };
+	type Bar = { id: string; productionId: string; label: string; left: number; width: number; color: string; pending: boolean };
+	type CollapsedBar = { productionId: string; label: string; left: number; width: number; color: string; fraction: number; allPending: boolean };
 	type HeaderRow = { kind: 'header'; id: string; name: string; mfr: string; count: number; collapsed: boolean; collapsedBars: CollapsedBar[] };
 	type AssetRow = { kind: 'asset'; id: string; label: string; org: string; bars: Bar[] };
 	type ProdRow = { kind: 'prod'; id: string; name: string; start: Date; end: Date; bars: Bar[] };
@@ -144,7 +144,7 @@
 			const collapsed = !expandedProducts.has(pid);
 
 			// Aggregate productions across all assets in this product group for collapsed view
-			const prodAgg = new Map<string, { label: string; start: Date; end: Date; count: number }>();
+			const prodAgg = new Map<string, { label: string; start: Date; end: Date; count: number; pendingCount: number }>();
 			for (const a of pg.assets) {
 				for (const pi of a.productionItems) {
 					if (!pi.production.startDate || !pi.production.endDate) continue;
@@ -153,9 +153,11 @@
 							label: pi.production.name,
 							start: new Date(pi.production.startDate),
 							end: new Date(pi.production.endDate),
-							count: 0
+							count: 0,
+							pendingCount: 0
 						});
 					prodAgg.get(pi.production.id)!.count++;
+					if (pi.status === 'PENDING') prodAgg.get(pi.production.id)!.pendingCount++;
 				}
 			}
 			const collapsedBars: CollapsedBar[] = [...prodAgg.entries()].map(([id, p]) => ({
@@ -163,7 +165,8 @@
 				label: p.label,
 				...barDims(p.start, p.end),
 				color: prodColor(id),
-				fraction: p.count / pg.assets.length
+				fraction: p.count / pg.assets.length,
+				allPending: p.pendingCount === p.count
 			}));
 
 			rows.push({ kind: 'header', id: pid, name: pg.name, mfr: pg.mfr, count: pg.assets.length, collapsed, collapsedBars });
@@ -176,7 +179,8 @@
 							productionId: pi.production.id,
 							label: pi.production.name,
 							...barDims(pi.production.startDate!, pi.production.endDate!),
-							color: prodColor(pi.production.id)
+							color: prodColor(pi.production.id),
+							pending: pi.status === 'PENDING'
 						}));
 					rows.push({
 						kind: 'asset',
@@ -494,9 +498,9 @@
 							{#each row.bars as bar (bar.id)}
 								<a
 									href={resolve(`/productions/${bar.productionId}`)}
-									title={bar.label}
+									title="{bar.label}{bar.pending ? ' (pending)' : ''}"
 									class="absolute top-1 flex items-center overflow-hidden rounded px-1.5 text-[11px] font-medium text-white no-underline hover:brightness-110"
-									style="left: {bar.left}px; width: {bar.width}px; height: {h - 8}px; background-color: {bar.color}"
+									style="left: {bar.left}px; width: {bar.width}px; height: {h - 8}px; background-color: {bar.color}; {bar.pending ? 'background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px); opacity: 0.75;' : ''}"
 								>
 									{bar.label}
 								</a>
@@ -509,9 +513,9 @@
 								{@const barH = Math.max(3, Math.round(bar.fraction * (PRODUCT_H - 6)))}
 								<a
 									href={resolve(`/productions/${bar.productionId}`)}
-									title="{bar.label} ({Math.round(bar.fraction * 100)}%)"
+									title="{bar.label} ({Math.round(bar.fraction * 100)}%){bar.allPending ? ' · pending' : ''}"
 									class="absolute flex items-center overflow-hidden rounded-sm px-1 no-underline hover:brightness-110"
-									style="left: {bar.left}px; width: {bar.width}px; height: {barH}px; top: 3px; background-color: {bar.color}; opacity: 0.75"
+									style="left: {bar.left}px; width: {bar.width}px; height: {barH}px; top: 3px; background-color: {bar.color}; opacity: 0.75; {bar.allPending ? 'background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px);' : ''}"
 								>
 									<span class="truncate text-[9px] font-medium leading-none text-white">{bar.label}</span>
 								</a>

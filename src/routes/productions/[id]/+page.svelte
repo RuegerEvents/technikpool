@@ -5,6 +5,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import {
 		getProduction,
+		getBookedAssets,
 		addAssetToProduction,
 		addBundleToProduction,
 		removeBundleFromProduction,
@@ -36,8 +37,20 @@
 	let addedBundleIds = $derived(
 		new Set<string>(production.items.filter((i) => i.sourceBundle).map((i) => i.sourceBundle!.id))
 	);
+	let bookedAssets = $derived(
+		new Map<string, string>(
+			(await getBookedAssets(productionId)).map((b) => [b.assetId, b.productionName])
+		)
+	);
 
-	type BundleRow = { kind: 'bundle'; id: string; name: string; orgName: string; count: number };
+	type BundleRow = {
+		kind: 'bundle';
+		id: string;
+		name: string;
+		orgName: string;
+		count: number;
+		assetIds: string[];
+	};
 	type AssetRow = {
 		kind: 'asset';
 		id: string;
@@ -56,7 +69,8 @@
 				id: b.id,
 				name: b.name,
 				orgName: b.organization.name,
-				count: b.assets.length
+				count: b.assets.length,
+				assetIds: b.assets.map((a) => a.id)
 			})
 		),
 		...allAssets.map(
@@ -92,7 +106,13 @@
 		try {
 			if (row.kind === 'bundle') {
 				const result = await addBundleToProduction({ productionId, bundleId: row.id });
-				toast.success(`Added ${result.added} asset${result.added !== 1 ? 's' : ''} from bundle`);
+				const conflictNote =
+					result.skippedConflicts > 0
+						? `, ${result.skippedConflicts} skipped due to time conflicts`
+						: '';
+				toast.success(
+					`Added ${result.added} asset${result.added !== 1 ? 's' : ''} from bundle${conflictNote}`
+				);
 			} else {
 				await addAssetToProduction({ productionId, assetId: row.id });
 			}
@@ -474,10 +494,33 @@
 											row.kind === 'bundle'
 												? addedBundleIds.has(row.id)
 												: addedAssetIds.has(row.id)}
+										{@const nonAddedBundleAssets =
+											row.kind === 'bundle'
+												? row.assetIds.filter((id) => !addedAssetIds.has(id))
+												: []}
+										{@const isConflict =
+											row.kind === 'asset'
+												? bookedAssets.has(row.id)
+												: nonAddedBundleAssets.length > 0 &&
+													nonAddedBundleAssets.every((id) => bookedAssets.has(id))}
+										{@const conflictInfo =
+											row.kind === 'asset'
+												? (bookedAssets.get(row.id) ?? null)
+												: (() => {
+														const names = [
+															...new Set(
+																nonAddedBundleAssets
+																	.filter((id) => bookedAssets.has(id))
+																	.map((id) => bookedAssets.get(id)!)
+															)
+														];
+														return names.length ? names.join(', ') : null;
+													})()}
+										{@const isDisabled = isAdded || isConflict}
 										<tr
-											class="border-b bg-background transition-colors last:border-0 hover:bg-muted/30 {isAdded
+											class="border-b bg-background transition-colors last:border-0 {isDisabled
 												? 'opacity-60'
-												: ''}"
+												: 'hover:bg-muted/30'}"
 										>
 											<td class="px-3 py-2">
 												{#if row.kind === 'bundle'}
@@ -502,7 +545,11 @@
 											</td>
 											<td class="px-3 py-2 text-xs text-muted-foreground">{row.orgName}</td>
 											<td class="px-3 py-2">
-												{#if row.kind === 'asset'}
+												{#if isConflict && conflictInfo}
+													<span class="text-xs text-destructive" title={conflictInfo}
+														>Booked: {conflictInfo}</span
+													>
+												{:else if row.kind === 'asset'}
 													<span
 														class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {assetStatusClass[
 															row.status
@@ -515,13 +562,18 @@
 											<td class="px-3 py-2 text-center">
 												<button
 													type="button"
-													disabled={working}
+													disabled={working || isDisabled}
+													title={isConflict && conflictInfo
+														? `Blocked by ${conflictInfo}`
+														: undefined}
 													onclick={() => {
-														if (!isAdded) handleAdd(row);
+														if (!isDisabled) handleAdd(row);
 													}}
 													class="mx-auto flex h-5 w-5 items-center justify-center rounded border-2 transition-colors {isAdded
 														? 'cursor-default border-primary bg-primary text-primary-foreground'
-														: 'cursor-pointer border-input hover:border-primary'}"
+														: isConflict
+															? 'cursor-not-allowed border-destructive/50 bg-destructive/10 text-destructive'
+															: 'cursor-pointer border-input hover:border-primary'}"
 												>
 													{#if isAdded}
 														<svg
@@ -534,6 +586,24 @@
 															stroke-width="3"
 															stroke-linecap="round"
 															stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg
+														>
+													{:else if isConflict}
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															width="10"
+															height="10"
+															viewBox="0 0 24 24"
+															fill="none"
+															stroke="currentColor"
+															stroke-width="3"
+															stroke-linecap="round"
+															stroke-linejoin="round"
+														><line x1="18" y1="6" x2="6" y2="18" /><line
+																x1="6"
+																y1="6"
+																x2="18"
+																y2="18"
+															/></svg
 														>
 													{/if}
 												</button>

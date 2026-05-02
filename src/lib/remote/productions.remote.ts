@@ -197,6 +197,30 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 	});
 	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: data.assetId } });
 
+	if (production.startDate && production.endDate) {
+		const conflict = await prisma.productionItem.findFirst({
+			where: {
+				assetId: data.assetId,
+				productionId: { not: data.productionId },
+				status: { in: ['PENDING', 'APPROVED', 'CHECKED_OUT'] },
+				production: {
+					AND: [
+						{ startDate: { not: null } },
+						{ endDate: { not: null } },
+						{ startDate: { lte: production.endDate } },
+						{ endDate: { gte: production.startDate } }
+					]
+				}
+			},
+			include: { production: { select: { name: true } } }
+		});
+		if (conflict) {
+			throw new Error(
+				`Asset is already booked for "${conflict.production.name}" during this time`
+			);
+		}
+	}
+
 	const isCrossOrg = production.organizationId !== asset.organizationId;
 	const initialStatus = isCrossOrg ? 'PENDING' : 'APPROVED';
 
@@ -341,8 +365,36 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	});
 	const existingAssetIds = new Set(existingItems.map((i) => i.assetId));
 
-	const newAssets = bundle.assets.filter((a) => !existingAssetIds.has(a.id));
+	let newAssets = bundle.assets.filter((a) => !existingAssetIds.has(a.id));
 	if (newAssets.length === 0) throw new Error('All bundle assets are already in this production');
+
+	let skippedConflicts = 0;
+	if (production.startDate && production.endDate) {
+		const start = production.startDate;
+		const end = production.endDate;
+		const conflictingItems = await prisma.productionItem.findMany({
+			where: {
+				assetId: { in: newAssets.map((a) => a.id) },
+				productionId: { not: data.productionId },
+				status: { in: ['PENDING', 'APPROVED', 'CHECKED_OUT'] },
+				production: {
+					AND: [
+						{ startDate: { not: null } },
+						{ endDate: { not: null } },
+						{ startDate: { lte: end } },
+						{ endDate: { gte: start } }
+					]
+				}
+			},
+			select: { assetId: true }
+		});
+		const conflictIds = new Set(conflictingItems.map((i) => i.assetId));
+		skippedConflicts = conflictIds.size;
+		newAssets = newAssets.filter((a) => !conflictIds.has(a.id));
+	}
+
+	if (newAssets.length === 0)
+		throw new Error('All bundle assets are already booked during this production');
 
 	await prisma.$transaction(
 		newAssets.map((asset) => {
@@ -369,7 +421,7 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	});
 
 	getProduction(data.productionId).refresh();
-	return { added: newAssets.length };
+	return { added: newAssets.length, skippedConflicts };
 });
 
 export const removeProductionItem = command(v.string(), async (itemId: string) => {
@@ -420,6 +472,38 @@ export const removeCrewMember = command(v.string(), async (id: string) => {
 	return member;
 });
 
+export const getBookedAssets = query(
+	v.string(),
+	async (productionId: string): Promise<{ assetId: string; productionName: string }[]> => {
+		await requireAuth();
+		const production = await prisma.production.findUniqueOrThrow({
+			where: { id: productionId },
+			select: { startDate: true, endDate: true }
+		});
+		if (!production.startDate || !production.endDate) return [];
+		const items = await prisma.productionItem.findMany({
+			where: {
+				productionId: { not: productionId },
+				status: { in: ['PENDING', 'APPROVED', 'CHECKED_OUT'] },
+				production: {
+					AND: [
+						{ startDate: { not: null } },
+						{ endDate: { not: null } },
+						{ startDate: { lte: production.endDate } },
+						{ endDate: { gte: production.startDate } }
+					]
+				}
+			},
+			select: { assetId: true, production: { select: { name: true } } }
+		});
+		const seen = new Map<string, string>();
+		for (const item of items) {
+			if (!seen.has(item.assetId)) seen.set(item.assetId, item.production.name);
+		}
+		return [...seen.entries()].map(([assetId, productionName]) => ({ assetId, productionName }));
+	}
+);
+
 export const getCalendarData = query(async () => {
 	const user = await requireAuth();
 
@@ -437,7 +521,7 @@ export const getCalendarData = query(async () => {
 			organization: true,
 			productionItems: {
 				where: {
-					status: { in: ['APPROVED', 'CHECKED_OUT'] },
+					status: { in: ['APPROVED', 'CHECKED_OUT', 'PENDING'] },
 					production: {
 						startDate: { not: null },
 						endDate: { not: null }
