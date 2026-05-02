@@ -424,12 +424,15 @@ msgid "Total"
 msgstr "Total"
 
 #: src/routes/inventory/+page.svelte
+#: src/routes/inventory/+page.svelte
 msgid "Available"
 msgstr "Available"
 
-#~ msgid "Maintenance"
-#~ msgstr "Maintenance"
+#: src/routes/inventory/+page.svelte
+msgid "Maintenance"
+msgstr "Maintenance"
 
+#: src/routes/inventory/+page.svelte
 #: src/routes/inventory/+page.svelte
 msgid "Broken"
 msgstr "Broken"
@@ -1077,9 +1080,8 @@ msgstr "Search by product, manufacturer, S/N, tag, bundle…"
 msgid "No assets yet"
 msgstr "No assets yet"
 
-#: src/routes/inventory/+page.svelte
-msgid "Try a different search term."
-msgstr "Try a different search term."
+#~ msgid "Try a different search term."
+#~ msgstr "Try a different search term."
 
 #: src/routes/inventory/+page.svelte
 msgid "Add your first asset"
@@ -1203,6 +1205,7 @@ msgstr "Update serial, tag, status, and location."
 msgid "Edit"
 msgstr "Edit"
 
+#: src/lib/components/ui/checkout-bar.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/checkout/+page.svelte
@@ -1512,6 +1515,7 @@ msgstr "Expand all"
 msgid "Collapse all"
 msgstr "Collapse all"
 
+#: src/lib/components/ui/checkout-bar.svelte
 #: src/routes/calendar/+page.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/checkout/+page.svelte
@@ -1540,6 +1544,7 @@ msgstr "Register | Technikpool"
 msgid "Joined"
 msgstr "Joined"
 
+#: src/lib/components/ui/checkout-bar.svelte
 #: src/routes/+layout.svelte
 msgid "Checkout"
 msgstr "Checkout"
@@ -1692,3 +1697,34 @@ msgstr "Error"
 #: src/routes/checkout/+page.svelte
 msgid "Search locations…"
 msgstr "Search locations…"
+
+#: src/routes/inventory/+page.svelte
+msgid "All"
+msgstr "All"
+
+#~ msgid "Select all"
+#~ msgstr "Select all"
+
+#~ msgid "Deselect all"
+#~ msgstr "Deselect all"
+
+#: src/routes/inventory/+page.svelte
+msgid "Try a different search term or filter."
+msgstr "Try a different search term or filter."
+
+#. 0: selectedIds.size; 1: selectedIds.size !== 1 ? 's' \\: ''
+#: src/lib/components/ui/checkout-bar.svelte
+msgid "{0} asset{1} selected"
+msgstr "{0} asset{1} selected"
+
+#: src/lib/components/ui/checkout-bar.svelte
+msgid "Clear"
+msgstr "Clear"
+
+#: src/lib/components/ui/checkout-bar.svelte
+msgid "Select target…"
+msgstr "Select target…"
+
+#: src/lib/components/ui/checkout-bar.svelte
+msgid "Checking out…"
+msgstr "Checking out…"

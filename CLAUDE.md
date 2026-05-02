@@ -84,6 +84,8 @@ npx wuchale   # extracts new strings into en.po and de.po
 
 Then fill in the empty `msgstr ""` entries in `de.po`.
 
+**MANDATORY: Never leave translations empty.** Every task that adds or changes user-facing strings MUST run `npx wuchale` and fill in all new `msgstr ""` entries in `de.po` before the task is complete.
+
 **Extraction rules (what gets extracted):**
 
 - All text content in Svelte markup (except inside `<style>`, `<path>`, `<code>`, `<pre>`)

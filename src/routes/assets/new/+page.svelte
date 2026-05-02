@@ -153,7 +153,12 @@
 								{#if locations.length === 0}
 									<option value="" disabled>—</option>
 								{:else}
-									{#each locations as loc (loc.id)}<option value={loc.id}>{loc.name}</option>{/each}
+									{#each locations as loc (loc.id)}
+											{@const city = loc.address?.city?.trim()}
+											{@const line1 = loc.address?.line1?.trim()}
+											{@const addrParts = [line1, city].filter(Boolean).join(', ')}
+											<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option>
+										{/each}
 								{/if}
 							</select>
 							{#if locations.length === 0}

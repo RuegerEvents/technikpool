@@ -3,11 +3,14 @@
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { Button } from '$lib/components/ui/button';
 	import { resolve } from '$app/paths';
-	import { SvelteMap } from 'svelte/reactivity';
+	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
+	import CheckoutBar from '$lib/components/ui/checkout-bar.svelte';
 
 	let filterOrgId = $state('');
 	let searchQuery = $state('');
+	let statusFilter = $state('');
 	let expanded = new SvelteMap<string, boolean>();
+	let selectedAssetIds = new SvelteSet<string>();
 
 	let orgs = $derived(await getMyOrgs());
 	let assets = $derived(await getAssets(filterOrgId || undefined));
@@ -23,9 +26,13 @@
 		assets: Asset[];
 	};
 
+	let visibleAssets = $derived(
+		!statusFilter ? assets : assets.filter((a) => a.status === statusFilter)
+	);
+
 	let groups = $derived(
 		Object.values(
-			assets.reduce<Record<string, Group>>((acc, asset) => {
+			visibleAssets.reduce<Record<string, Group>>((acc, asset) => {
 				const pid = asset.product.id;
 				if (!acc[pid]) {
 					acc[pid] = {
@@ -70,6 +77,32 @@
 		expanded.set(productId, !expanded.get(productId));
 	}
 
+	let allFilteredAssetIds = $derived(filteredGroups.flatMap((g) => g.assets.map((a) => a.id)));
+	let allFilteredSelected = $derived(
+		allFilteredAssetIds.length > 0 && allFilteredAssetIds.every((id) => selectedAssetIds.has(id))
+	);
+	let someFilteredSelected = $derived(allFilteredAssetIds.some((id) => selectedAssetIds.has(id)));
+
+	function toggleSelectAll() {
+		if (allFilteredSelected) {
+			allFilteredAssetIds.forEach((id) => selectedAssetIds.delete(id));
+		} else {
+			allFilteredAssetIds.forEach((id) => selectedAssetIds.add(id));
+		}
+	}
+
+	function indeterminate(node: HTMLInputElement, value: boolean) {
+		node.indeterminate = value;
+		return { update(v: boolean) { node.indeterminate = v; } };
+	}
+
+	const statusFilterOptions = [
+		['', 'All'],
+		['AVAILABLE', 'Available'],
+		['MAINTENANCE', 'Maintenance'],
+		['BROKEN', 'Broken']
+	] as const;
+
 	const statusClass: Record<string, string> = {
 		AVAILABLE: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
 		MAINTENANCE: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
@@ -79,7 +112,7 @@
 
 <svelte:head><title>Inventory | Technikpool</title></svelte:head>
 
-<div class="space-y-6">
+<div class="space-y-6 {selectedAssetIds.size > 0 ? 'pb-20' : ''}">
 	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">Inventory</h1>
@@ -98,12 +131,25 @@
 		</div>
 	</div>
 
-	<input
-		type="search"
-		bind:value={searchQuery}
-		placeholder="Search by product, manufacturer, S/N, tag, bundle…"
-		class="h-10 w-full max-w-sm rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-	/>
+	<div class="flex flex-wrap items-center gap-2">
+		<input
+			type="search"
+			bind:value={searchQuery}
+			placeholder="Search by product, manufacturer, S/N, tag, bundle…"
+			class="h-10 w-64 rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+		/>
+		<div class="flex items-center gap-1">
+			{#each statusFilterOptions as [val, label] (val)}
+				<button
+					type="button"
+					onclick={() => (statusFilter = val)}
+					class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {statusFilter === val
+						? 'bg-primary text-primary-foreground'
+						: 'bg-muted text-muted-foreground hover:bg-muted/70'}"
+				>{label}</button>
+			{/each}
+		</div>
+	</div>
 
 	{#if filteredGroups.length === 0}
 		<div class="rounded-md border">
@@ -114,7 +160,7 @@
 				<p class="text-sm text-muted-foreground">
 					{assets.length === 0
 						? 'Add assets to see your product catalog.'
-						: 'Try a different search term.'}
+						: 'Try a different search term or filter.'}
 				</p>
 				{#if assets.length === 0}
 					<Button class="mt-4" variant="outline" href={resolve('/assets/new')}
@@ -128,6 +174,15 @@
 			<table class="w-full text-sm">
 				<thead>
 					<tr class="border-b bg-muted/30">
+						<th class="w-10 px-4 py-3">
+							<input
+								type="checkbox"
+								checked={allFilteredSelected}
+								use:indeterminate={someFilteredSelected && !allFilteredSelected}
+								onclick={toggleSelectAll}
+								class="h-4 w-4 cursor-pointer rounded border-input"
+							/>
+						</th>
 						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Product</th>
 						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Manufacturer</th>
 						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Total</th>
@@ -138,10 +193,29 @@
 				</thead>
 				<tbody>
 					{#each filteredGroups as group (group.productId)}
+						{@const groupAssetIds = group.assets.map((a) => a.id)}
+						{@const allInGroupSelected =
+							groupAssetIds.length > 0 &&
+							groupAssetIds.every((id) => selectedAssetIds.has(id))}
 						<tr
 							class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
 							onclick={() => toggle(group.productId)}
 						>
+							<td class="px-4 py-3">
+								<input
+									type="checkbox"
+									checked={allInGroupSelected}
+									onclick={(e) => {
+										e.stopPropagation();
+										if (allInGroupSelected) {
+											groupAssetIds.forEach((id) => selectedAssetIds.delete(id));
+										} else {
+											groupAssetIds.forEach((id) => selectedAssetIds.add(id));
+										}
+									}}
+									class="h-4 w-4 cursor-pointer rounded border-input"
+								/>
+							</td>
 							<td class="px-4 py-3">
 								<div class="flex items-center gap-2">
 									<svg
@@ -192,8 +266,22 @@
 						{#if expanded.get(group.productId)}
 							{#each group.assets as asset (asset.id)}
 								<tr class="border-b bg-muted/10 last:border-0">
+									<td class="px-4 py-2">
+										<input
+											type="checkbox"
+											checked={selectedAssetIds.has(asset.id)}
+											onclick={() => {
+												if (selectedAssetIds.has(asset.id)) {
+													selectedAssetIds.delete(asset.id);
+												} else {
+													selectedAssetIds.add(asset.id);
+												}
+											}}
+											class="h-4 w-4 cursor-pointer rounded border-input"
+										/>
+									</td>
 									<td colspan="6" class="px-4 py-2">
-										<div class="flex items-center gap-6 pl-5 text-sm">
+										<div class="flex items-center gap-6 text-sm">
 											<span class="w-36 font-mono text-xs text-muted-foreground">
 												{asset.serialNumber ? `S/N: ${asset.serialNumber}` : '—'}
 											</span>
@@ -237,3 +325,5 @@
 		</div>
 	{/if}
 </div>
+
+<CheckoutBar selectedIds={selectedAssetIds} onClear={() => selectedAssetIds.clear()} />

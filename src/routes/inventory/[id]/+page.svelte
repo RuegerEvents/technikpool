@@ -132,7 +132,10 @@
 							class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 						>
 							{#each locations as loc (loc.id)}
-								<option value={loc.id}>{loc.name}</option>
+								{@const city = loc.address?.city?.trim()}
+								{@const line1 = loc.address?.line1?.trim()}
+								{@const addrParts = [line1, city].filter(Boolean).join(', ')}
+								<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option>
 							{/each}
 						</select>
 					</div>

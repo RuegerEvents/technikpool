@@ -4,6 +4,7 @@ import * as v from 'valibot';
 import { getAsset, getAssets } from './assets.remote';
 import { getProduction } from './productions.remote';
 
+
 async function requireAuth() {
 	const event = await getRequestEvent();
 	if (!event?.locals.user) throw new Error('Unauthorized');
@@ -164,5 +165,111 @@ export const scanAsset = command(scanAssetSchema, async (input) => {
 			targetName: production.name,
 			returnedFrom: [] as string[]
 		};
+	}
+});
+
+const checkoutAssetsSchema = v.object({
+	assetIds: v.array(v.string()),
+	targetType: v.picklist(['location', 'production']),
+	targetId: v.string()
+});
+
+export const checkoutAssets = command(checkoutAssetsSchema, async (input) => {
+	const user = await requireAuth();
+	const orgIds = await userOrgIds(user.id);
+	const systemAdmin = await isSystemAdmin(user.id);
+
+	const assets = await prisma.asset.findMany({
+		where: { id: { in: input.assetIds } },
+		select: { id: true, organizationId: true }
+	});
+
+	for (const asset of assets) {
+		if (!systemAdmin && !orgIds.includes(asset.organizationId)) {
+			throw new Error('No access to one or more assets');
+		}
+	}
+
+	if (input.targetType === 'location') {
+		const location = await prisma.location.findUniqueOrThrow({ where: { id: input.targetId } });
+
+		for (const asset of assets) {
+			if (!systemAdmin && location.organizationId !== asset.organizationId) {
+				throw new Error('Location belongs to a different organisation');
+			}
+
+			const checkedOutItems = await prisma.productionItem.findMany({
+				where: { assetId: asset.id, status: 'CHECKED_OUT' },
+				include: { production: { select: { id: true, name: true } } }
+			});
+
+			await prisma.$transaction(async (tx) => {
+				await tx.asset.update({ where: { id: asset.id }, data: { locationId: input.targetId } });
+				await tx.assetTransaction.create({
+					data: {
+						assetId: asset.id,
+						userId: user.id,
+						action: 'LOCATION_ASSIGNED',
+						notes: `Checked in to ${location.name}`
+					}
+				});
+				for (const item of checkedOutItems) {
+					await tx.productionItem.update({ where: { id: item.id }, data: { status: 'RETURNED' } });
+					await tx.assetTransaction.create({
+						data: {
+							assetId: asset.id,
+							userId: user.id,
+							productionId: item.production.id,
+							action: 'RETURNED',
+							notes: `Returned from "${item.production.name}" via location check-in`
+						}
+					});
+				}
+			});
+
+			for (const item of checkedOutItems) {
+				getProduction(item.production.id).refresh();
+			}
+			getAsset(asset.id).refresh();
+			getAssets(asset.organizationId).refresh();
+		}
+
+		return { count: assets.length, targetName: location.name };
+	} else {
+		const production = await prisma.production.findUniqueOrThrow({ where: { id: input.targetId } });
+
+		for (const asset of assets) {
+			const existing = await prisma.productionItem.findFirst({
+				where: { productionId: input.targetId, assetId: asset.id }
+			});
+
+			if (existing) {
+				await prisma.productionItem.update({
+					where: { id: existing.id },
+					data: { status: 'CHECKED_OUT' }
+				});
+			} else {
+				await prisma.productionItem.create({
+					data: { productionId: input.targetId, assetId: asset.id, status: 'CHECKED_OUT' }
+				});
+			}
+
+			await prisma.assetTransaction.create({
+				data: {
+					assetId: asset.id,
+					userId: user.id,
+					productionId: input.targetId,
+					action: 'CHECKED_OUT',
+					notes: `Checked out for "${production.name}"`
+				}
+			});
+
+			getAsset(asset.id).refresh();
+			getAssets(asset.organizationId).refresh();
+		}
+
+		getProduction(input.targetId).refresh();
+
+		return { count: assets.length, targetName: production.name };
 	}
 });

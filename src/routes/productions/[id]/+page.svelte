@@ -18,8 +18,9 @@
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
 	import type { Prisma } from '$lib/prisma/client';
-	import { SvelteMap } from 'svelte/reactivity';
+	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { resolve } from '$app/paths';
+	import CheckoutBar from '$lib/components/ui/checkout-bar.svelte';
 
 	const productionId = $derived(page.params.id as string);
 	let production = $derived(await getProduction(productionId));
@@ -207,6 +208,26 @@
 	});
 
 	let expanded = new SvelteMap<string, boolean>();
+	let selectedItemAssetIds = new SvelteSet<string>();
+
+	let allItemAssetIds = $derived(production.items.map((i) => i.asset.id));
+	let allItemsSelected = $derived(
+		allItemAssetIds.length > 0 && allItemAssetIds.every((id) => selectedItemAssetIds.has(id))
+	);
+	let someItemsSelected = $derived(allItemAssetIds.some((id) => selectedItemAssetIds.has(id)));
+
+	function toggleSelectAllItems() {
+		if (allItemsSelected) {
+			allItemAssetIds.forEach((id) => selectedItemAssetIds.delete(id));
+		} else {
+			allItemAssetIds.forEach((id) => selectedItemAssetIds.add(id));
+		}
+	}
+
+	function indeterminate(node: HTMLInputElement, value: boolean) {
+		node.indeterminate = value;
+		return { update(v: boolean) { node.indeterminate = v; } };
+	}
 
 	function toggleSection(id: string) {
 		expanded.set(id, !expanded.get(id));
@@ -311,7 +332,7 @@
 
 <svelte:head><title>{production.name} | Technikpool</title></svelte:head>
 
-<div class="space-y-8">
+<div class="space-y-8 {selectedItemAssetIds.size > 0 ? 'pb-20' : ''}">
 	<!-- Header -->
 	<div class="flex flex-wrap items-center justify-between gap-4">
 		<div>
@@ -531,6 +552,15 @@
 				<table class="w-full text-sm">
 					<thead>
 						<tr class="border-b bg-muted/30">
+							<th class="w-10 px-4 py-3">
+								<input
+									type="checkbox"
+									checked={allItemsSelected}
+									use:indeterminate={someItemsSelected && !allItemsSelected}
+									onclick={toggleSelectAllItems}
+									class="h-4 w-4 cursor-pointer rounded border-input"
+								/>
+							</th>
 							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Product</th>
 							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Manufacturer</th>
 							<th class="px-4 py-3 text-right font-medium text-muted-foreground">Total</th>
@@ -543,10 +573,29 @@
 					<tbody>
 						{#each displaySections as section (section.kind === 'bundle' ? section.bundleId : section.productId)}
 							{@const sectionId = section.kind === 'bundle' ? section.bundleId : section.productId}
+							{@const sectionAssetIds = section.items.map((i) => i.asset.id)}
+							{@const allInSectionSelected =
+								sectionAssetIds.length > 0 &&
+								sectionAssetIds.every((id) => selectedItemAssetIds.has(id))}
 							<tr
 								class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
 								onclick={() => toggleSection(sectionId)}
 							>
+								<td class="px-4 py-3">
+									<input
+										type="checkbox"
+										checked={allInSectionSelected}
+										onclick={(e) => {
+											e.stopPropagation();
+											if (allInSectionSelected) {
+												sectionAssetIds.forEach((id) => selectedItemAssetIds.delete(id));
+											} else {
+												sectionAssetIds.forEach((id) => selectedItemAssetIds.add(id));
+											}
+										}}
+										class="h-4 w-4 cursor-pointer rounded border-input"
+									/>
+								</td>
 								<td class="px-4 py-3">
 									<div class="flex items-center gap-2">
 										<svg
@@ -615,8 +664,22 @@
 							{#if expanded.get(sectionId)}
 								{#each section.items as item (item.id)}
 									<tr class="border-b bg-muted/10 last:border-0">
+										<td class="px-4 py-2">
+											<input
+												type="checkbox"
+												checked={selectedItemAssetIds.has(item.asset.id)}
+												onclick={() => {
+													if (selectedItemAssetIds.has(item.asset.id)) {
+														selectedItemAssetIds.delete(item.asset.id);
+													} else {
+														selectedItemAssetIds.add(item.asset.id);
+													}
+												}}
+												class="h-4 w-4 cursor-pointer rounded border-input"
+											/>
+										</td>
 										<td colspan="7" class="px-4 py-2">
-											<div class="flex items-center gap-4 pl-5 text-sm">
+											<div class="flex items-center gap-4 text-sm">
 												{#if section.kind === 'bundle'}
 													<span class="font-medium">{item.asset.product.name}</span>
 												{/if}
@@ -737,3 +800,5 @@
 		{/if}
 	</div>
 </div>
+
+<CheckoutBar selectedIds={selectedItemAssetIds} onClear={() => selectedItemAssetIds.clear()} />

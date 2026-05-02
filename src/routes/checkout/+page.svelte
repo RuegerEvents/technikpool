@@ -19,7 +19,8 @@
 			const city = loc.address?.city?.trim();
 			const country = loc.address?.country?.trim();
 			const addr = [city, country].filter(Boolean).join(', ');
-			return { id: loc.id, name: addr ? `${loc.name} (${addr})` : loc.name };
+			const detail = [loc.organization.name, addr].filter(Boolean).join(' · ');
+			return { id: loc.id, name: detail ? `${loc.name} (${detail})` : loc.name };
 		})
 	);
 	let locationSelection = $state<{ id: string | null; name: string } | null>(null);

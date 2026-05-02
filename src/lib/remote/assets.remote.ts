@@ -111,7 +111,7 @@ export const getLocations = query(v.optional(v.string()), async (organizationId?
 
 	return await prisma.location.findMany({
 		where: { organizationId: { in: queryOrgIds } },
-		include: { address: true },
+		include: { address: true, organization: { select: { name: true } } },
 		orderBy: { name: 'asc' }
 	});
 });

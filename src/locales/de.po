@@ -424,12 +424,15 @@ msgid "Total"
 msgstr "Gesamt"
 
 #: src/routes/inventory/+page.svelte
+#: src/routes/inventory/+page.svelte
 msgid "Available"
 msgstr "Verfügbar"
 
-#~ msgid "Maintenance"
-#~ msgstr "Wartung"
+#: src/routes/inventory/+page.svelte
+msgid "Maintenance"
+msgstr "Wartung"
 
+#: src/routes/inventory/+page.svelte
 #: src/routes/inventory/+page.svelte
 msgid "Broken"
 msgstr "Defekt"
@@ -1059,125 +1062,124 @@ msgstr "Geprüft von:"
 
 #: src/routes/+layout.svelte
 msgid "DE"
-msgstr ""
+msgstr "DE"
 
 #: src/routes/+layout.svelte
 msgid "EN"
-msgstr ""
+msgstr "EN"
 
 #: src/routes/inventory/+page.svelte
 msgid "Product catalog — click a row to see individual units."
-msgstr ""
+msgstr "Produktkatalog — klicke auf eine Zeile für einzelne Geräte."
 
 #: src/routes/inventory/+page.svelte
 msgid "Search by product, manufacturer, S/N, tag, bundle…"
-msgstr ""
+msgstr "Suche nach Produkt, Hersteller, S/N, Tag, Bundle…"
 
 #: src/routes/inventory/+page.svelte
 msgid "No assets yet"
-msgstr ""
+msgstr "Noch keine Geräte"
 
-#: src/routes/inventory/+page.svelte
-msgid "Try a different search term."
-msgstr ""
+#~ msgid "Try a different search term."
+#~ msgstr ""
 
 #: src/routes/inventory/+page.svelte
 msgid "Add your first asset"
-msgstr ""
+msgstr "Erstes Gerät hinzufügen"
 
 #: src/routes/inventory/+page.svelte
 msgid "Maint."
-msgstr ""
+msgstr "Wartung"
 
 #. 0: asset.assetTag
 #: src/routes/inventory/+page.svelte
 msgid "Tag: {0}"
-msgstr ""
+msgstr "Tag: {0}"
 
 #: src/routes/inventory/+page.svelte
 msgid "View →"
-msgstr ""
+msgstr "Ansehen →"
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "Please select a manufacturer and product"
-msgstr ""
+msgstr "Bitte Hersteller und Produkt auswählen"
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "Asset created and added to bundle"
-msgstr ""
+msgstr "Gerät erstellt und zum Bundle hinzugefügt"
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "← Back to Bundles"
-msgstr ""
+msgstr "← Zurück zu Bundles"
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "Bundle Details"
-msgstr ""
+msgstr "Bundle-Details"
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "Description <0>(optional)</0>"
-msgstr ""
+msgstr "Beschreibung <0>(optional)</0>"
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "Add existing assets or create new ones."
-msgstr ""
+msgstr "Bestehende Geräte hinzufügen oder neue erstellen."
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "+ New Asset"
-msgstr ""
+msgstr "+ Neues Gerät"
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "Selected <0/>"
-msgstr ""
+msgstr "Ausgewählt <0/>"
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "Search existing assets…"
-msgstr ""
+msgstr "Bestehende Geräte suchen…"
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "No assets match your search."
-msgstr ""
+msgstr "Keine Geräte entsprechen der Suche."
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "No assets in this organization yet. Use \"+ New Asset\" to create one."
-msgstr ""
+msgstr "Noch keine Geräte in dieser Organisation. Nutze \"+ Neues Gerät\" zum Erstellen."
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "New Asset"
-msgstr ""
+msgstr "Neues Gerät"
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "Create a new asset and add it to this bundle."
-msgstr ""
+msgstr "Neues Gerät erstellen und zum Bundle hinzufügen."
 
 #: src/routes/productions/[id]/+page.svelte
 msgid "Search assets and bundles…"
-msgstr ""
+msgstr "Geräte und Bundles suchen…"
 
 #: src/routes/productions/[id]/+page.svelte
 msgid "No results."
-msgstr ""
+msgstr "Keine Ergebnisse."
 
 #: src/routes/productions/[id]/+page.svelte
 msgid "Info"
-msgstr ""
+msgstr "Info"
 
 #. 0: row.count; 1: row.count !== 1 ? 's' \\: ''
 #: src/routes/productions/[id]/+page.svelte
 msgid "{0} item{1}"
-msgstr ""
+msgstr "{0} Gerät(e)"
 
 #: src/routes/productions/[id]/+page.svelte
 msgid "Pending"
-msgstr ""
+msgstr "Ausstehend"
 
 #: src/routes/productions/[id]/+page.svelte
 msgid "Approved"
-msgstr ""
+msgstr "Genehmigt"
 
 #: src/routes/productions/[id]/+page.svelte
 msgid "Out"
-msgstr ""
+msgstr "Ausgecheckt"
 
 #: src/routes/checkout/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
@@ -1186,7 +1188,7 @@ msgstr "Zurückgegeben"
 
 #: src/routes/inventory/[id]/+page.svelte
 msgid "Asset updated"
-msgstr ""
+msgstr "Gerät aktualisiert"
 
 #: src/routes/calendar/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
@@ -1195,14 +1197,15 @@ msgstr "Gerät"
 
 #: src/routes/inventory/[id]/+page.svelte
 msgid "Update serial, tag, status, and location."
-msgstr ""
+msgstr "Seriennummer, Tag, Status und Standort bearbeiten."
 
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Edit"
-msgstr ""
+msgstr "Bearbeiten"
 
+#: src/lib/components/ui/checkout-bar.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/checkout/+page.svelte
@@ -1210,17 +1213,17 @@ msgstr ""
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/new/+page.svelte
 msgid "Location"
-msgstr ""
+msgstr "Standort"
 
 #: src/routes/inventory/[id]/+page.svelte
 msgid "Image URL"
-msgstr ""
+msgstr "Bild-URL"
 
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Save"
-msgstr ""
+msgstr "Speichern"
 
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
@@ -1386,11 +1389,11 @@ msgstr "Noch keine Standorte."
 
 #: src/routes/assets/bundles/+page.svelte
 msgid "Asset Bundles | Technikpool"
-msgstr ""
+msgstr "Gerätebundles | Technikpool"
 
 #: src/routes/inventory/+page.svelte
 msgid "Inventory | Technikpool"
-msgstr ""
+msgstr "Inventar | Technikpool"
 
 #. 0: bundle.name
 #. 0: asset.product.name
@@ -1401,48 +1404,48 @@ msgstr ""
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "{0} | Technikpool"
-msgstr ""
+msgstr "{0} | Technikpool"
 
 #: src/routes/admin/users/+page.svelte
 msgid "User Management | Technikpool"
-msgstr ""
+msgstr "Benutzerverwaltung | Technikpool"
 
 #: src/routes/orgs/+page.svelte
 msgid "Organizations | Technikpool"
-msgstr ""
+msgstr "Organisationen | Technikpool"
 
 #: src/routes/productions/+page.svelte
 msgid "Productions | Technikpool"
-msgstr ""
+msgstr "Produktionen | Technikpool"
 
 #. 0: org.name
 #: src/routes/orgs/[id]/locations/+page.svelte
 msgid "Locations – {0} | Technikpool"
-msgstr ""
+msgstr "Standorte – {0} | Technikpool"
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "Create Bundle | Technikpool"
-msgstr ""
+msgstr "Bundle erstellen | Technikpool"
 
 #: src/routes/assets/new/+page.svelte
 #: src/routes/inventory/new/+page.svelte
 msgid "New Asset | Technikpool"
-msgstr ""
+msgstr "Neues Gerät | Technikpool"
 
 #: src/routes/productions/new/+page.svelte
 msgid "Create Production | Technikpool"
-msgstr ""
+msgstr "Produktion erstellen | Technikpool"
 
 #: src/routes/calendar/+page.svelte
 msgid "Calendar | Technikpool"
-msgstr ""
+msgstr "Kalender | Technikpool"
 
 #. 0: group.productCounts.map((p) => `${p.count}× ${p.name}`).join(', ')
 #. 0: group.productCounts.map((p) => `${p.count}× ${p.name}`).join(', ')
 #: src/routes/productions/[id]/delivery-note/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Contains: {0}"
-msgstr ""
+msgstr "Enthält: {0}"
 
 #: src/routes/calendar/+page.svelte
 msgid "Jan"
@@ -1512,6 +1515,7 @@ msgstr "Alle aufklappen"
 msgid "Collapse all"
 msgstr "Alle einklappen"
 
+#: src/lib/components/ui/checkout-bar.svelte
 #: src/routes/calendar/+page.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/checkout/+page.svelte
@@ -1530,16 +1534,17 @@ msgstr "Keine Geräte mit geplanten Produktionen gefunden."
 
 #: src/routes/auth/login/+page.svelte
 msgid "Login | Technikpool"
-msgstr ""
+msgstr "Anmelden | Technikpool"
 
 #: src/routes/auth/register/+page.svelte
 msgid "Register | Technikpool"
-msgstr ""
+msgstr "Registrieren | Technikpool"
 
 #: src/routes/admin/users/+page.svelte
 msgid "Joined"
-msgstr ""
+msgstr "Beigetreten"
 
+#: src/lib/components/ui/checkout-bar.svelte
 #: src/routes/+layout.svelte
 msgid "Checkout"
 msgstr "Checkout"
@@ -1692,3 +1697,34 @@ msgstr "Fehler"
 #: src/routes/checkout/+page.svelte
 msgid "Search locations…"
 msgstr "Standort suchen…"
+
+#: src/routes/inventory/+page.svelte
+msgid "All"
+msgstr "Alle"
+
+#~ msgid "Select all"
+#~ msgstr ""
+
+#~ msgid "Deselect all"
+#~ msgstr ""
+
+#: src/routes/inventory/+page.svelte
+msgid "Try a different search term or filter."
+msgstr "Versuche einen anderen Suchbegriff oder Filter."
+
+#. 0: selectedIds.size; 1: selectedIds.size !== 1 ? 's' \\: ''
+#: src/lib/components/ui/checkout-bar.svelte
+msgid "{0} asset{1} selected"
+msgstr "{0} Gerät(e) ausgewählt"
+
+#: src/lib/components/ui/checkout-bar.svelte
+msgid "Clear"
+msgstr "Leeren"
+
+#: src/lib/components/ui/checkout-bar.svelte
+msgid "Select target…"
+msgstr "Ziel auswählen…"
+
+#: src/lib/components/ui/checkout-bar.svelte
+msgid "Checking out…"
+msgstr "Wird ausgecheckt…"
