@@ -379,6 +379,7 @@ msgstr "Serial Number"
 msgid "Asset Tag"
 msgstr "Asset Tag"
 
+#: src/routes/inventory/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
@@ -1110,10 +1111,13 @@ msgid "Maint."
 msgstr "Maint."
 
 #. 0: asset.assetTag
+#. 0: asset.assetTag
+#: src/routes/inventory/+page.svelte
 #: src/routes/inventory/+page.svelte
 msgid "Tag: {0}"
 msgstr "Tag: {0}"
 
+#: src/routes/inventory/+page.svelte
 #: src/routes/inventory/+page.svelte
 msgid "View →"
 msgstr "View →"
@@ -1228,10 +1232,12 @@ msgid "Edit"
 msgstr "Edit"
 
 #: src/lib/components/ui/checkout-bar.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/checkout/+page.svelte
+#: src/routes/inventory/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/new/+page.svelte
 msgid "Location"
@@ -1916,3 +1922,19 @@ msgstr "Fill in the details for the new product model."
 #: src/routes/inventory/new/+page.svelte
 msgid "Add Product"
 msgstr "Add Product"
+
+#: src/routes/inventory/+page.svelte
+msgid "Bundle View"
+msgstr "Bundle View"
+
+#: src/routes/inventory/+page.svelte
+msgid "All Products"
+msgstr "All Products"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Bundle location updated"
+msgstr "Bundle location updated"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "No location"
+msgstr "No location"

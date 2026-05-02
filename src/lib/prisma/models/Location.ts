@@ -193,6 +193,7 @@ export type LocationWhereInput = {
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   address?: Prisma.XOR<Prisma.AddressScalarRelationFilter, Prisma.AddressWhereInput>
   assets?: Prisma.AssetListRelationFilter
+  assetBundles?: Prisma.AssetBundleListRelationFilter
 }
 
 export type LocationOrderByWithRelationInput = {
@@ -205,6 +206,7 @@ export type LocationOrderByWithRelationInput = {
   organization?: Prisma.OrganizationOrderByWithRelationInput
   address?: Prisma.AddressOrderByWithRelationInput
   assets?: Prisma.AssetOrderByRelationAggregateInput
+  assetBundles?: Prisma.AssetBundleOrderByRelationAggregateInput
 }
 
 export type LocationWhereUniqueInput = Prisma.AtLeast<{
@@ -220,6 +222,7 @@ export type LocationWhereUniqueInput = Prisma.AtLeast<{
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   address?: Prisma.XOR<Prisma.AddressScalarRelationFilter, Prisma.AddressWhereInput>
   assets?: Prisma.AssetListRelationFilter
+  assetBundles?: Prisma.AssetBundleListRelationFilter
 }, "id">
 
 export type LocationOrderByWithAggregationInput = {
@@ -254,6 +257,7 @@ export type LocationCreateInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutLocationsInput
   address: Prisma.AddressCreateNestedOneWithoutLocationsInput
   assets?: Prisma.AssetCreateNestedManyWithoutLocationInput
+  assetBundles?: Prisma.AssetBundleCreateNestedManyWithoutLocationInput
 }
 
 export type LocationUncheckedCreateInput = {
@@ -264,6 +268,7 @@ export type LocationUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutLocationInput
+  assetBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type LocationUpdateInput = {
@@ -274,6 +279,7 @@ export type LocationUpdateInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutLocationsNestedInput
   address?: Prisma.AddressUpdateOneRequiredWithoutLocationsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutLocationNestedInput
+  assetBundles?: Prisma.AssetBundleUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationUncheckedUpdateInput = {
@@ -284,6 +290,7 @@ export type LocationUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutLocationNestedInput
+  assetBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationCreateManyInput = {
@@ -351,6 +358,11 @@ export type LocationMinOrderByAggregateInput = {
 export type LocationScalarRelationFilter = {
   is?: Prisma.LocationWhereInput
   isNot?: Prisma.LocationWhereInput
+}
+
+export type LocationNullableScalarRelationFilter = {
+  is?: Prisma.LocationWhereInput | null
+  isNot?: Prisma.LocationWhereInput | null
 }
 
 export type LocationCreateNestedManyWithoutOrganizationInput = {
@@ -451,6 +463,22 @@ export type LocationUpdateOneRequiredWithoutAssetsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.LocationUpdateToOneWithWhereWithoutAssetsInput, Prisma.LocationUpdateWithoutAssetsInput>, Prisma.LocationUncheckedUpdateWithoutAssetsInput>
 }
 
+export type LocationCreateNestedOneWithoutAssetBundlesInput = {
+  create?: Prisma.XOR<Prisma.LocationCreateWithoutAssetBundlesInput, Prisma.LocationUncheckedCreateWithoutAssetBundlesInput>
+  connectOrCreate?: Prisma.LocationCreateOrConnectWithoutAssetBundlesInput
+  connect?: Prisma.LocationWhereUniqueInput
+}
+
+export type LocationUpdateOneWithoutAssetBundlesNestedInput = {
+  create?: Prisma.XOR<Prisma.LocationCreateWithoutAssetBundlesInput, Prisma.LocationUncheckedCreateWithoutAssetBundlesInput>
+  connectOrCreate?: Prisma.LocationCreateOrConnectWithoutAssetBundlesInput
+  upsert?: Prisma.LocationUpsertWithoutAssetBundlesInput
+  disconnect?: Prisma.LocationWhereInput | boolean
+  delete?: Prisma.LocationWhereInput | boolean
+  connect?: Prisma.LocationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LocationUpdateToOneWithWhereWithoutAssetBundlesInput, Prisma.LocationUpdateWithoutAssetBundlesInput>, Prisma.LocationUncheckedUpdateWithoutAssetBundlesInput>
+}
+
 export type LocationCreateWithoutOrganizationInput = {
   id?: string
   name: string
@@ -458,6 +486,7 @@ export type LocationCreateWithoutOrganizationInput = {
   updatedAt?: Date | string
   address: Prisma.AddressCreateNestedOneWithoutLocationsInput
   assets?: Prisma.AssetCreateNestedManyWithoutLocationInput
+  assetBundles?: Prisma.AssetBundleCreateNestedManyWithoutLocationInput
 }
 
 export type LocationUncheckedCreateWithoutOrganizationInput = {
@@ -467,6 +496,7 @@ export type LocationUncheckedCreateWithoutOrganizationInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutLocationInput
+  assetBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type LocationCreateOrConnectWithoutOrganizationInput = {
@@ -514,6 +544,7 @@ export type LocationCreateWithoutAddressInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutLocationsInput
   assets?: Prisma.AssetCreateNestedManyWithoutLocationInput
+  assetBundles?: Prisma.AssetBundleCreateNestedManyWithoutLocationInput
 }
 
 export type LocationUncheckedCreateWithoutAddressInput = {
@@ -523,6 +554,7 @@ export type LocationUncheckedCreateWithoutAddressInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutLocationInput
+  assetBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type LocationCreateOrConnectWithoutAddressInput = {
@@ -558,6 +590,7 @@ export type LocationCreateWithoutAssetsInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutLocationsInput
   address: Prisma.AddressCreateNestedOneWithoutLocationsInput
+  assetBundles?: Prisma.AssetBundleCreateNestedManyWithoutLocationInput
 }
 
 export type LocationUncheckedCreateWithoutAssetsInput = {
@@ -567,6 +600,7 @@ export type LocationUncheckedCreateWithoutAssetsInput = {
   addressId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  assetBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type LocationCreateOrConnectWithoutAssetsInput = {
@@ -592,6 +626,7 @@ export type LocationUpdateWithoutAssetsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutLocationsNestedInput
   address?: Prisma.AddressUpdateOneRequiredWithoutLocationsNestedInput
+  assetBundles?: Prisma.AssetBundleUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationUncheckedUpdateWithoutAssetsInput = {
@@ -601,6 +636,63 @@ export type LocationUncheckedUpdateWithoutAssetsInput = {
   addressId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assetBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutLocationNestedInput
+}
+
+export type LocationCreateWithoutAssetBundlesInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutLocationsInput
+  address: Prisma.AddressCreateNestedOneWithoutLocationsInput
+  assets?: Prisma.AssetCreateNestedManyWithoutLocationInput
+}
+
+export type LocationUncheckedCreateWithoutAssetBundlesInput = {
+  id?: string
+  name: string
+  organizationId: string
+  addressId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutLocationInput
+}
+
+export type LocationCreateOrConnectWithoutAssetBundlesInput = {
+  where: Prisma.LocationWhereUniqueInput
+  create: Prisma.XOR<Prisma.LocationCreateWithoutAssetBundlesInput, Prisma.LocationUncheckedCreateWithoutAssetBundlesInput>
+}
+
+export type LocationUpsertWithoutAssetBundlesInput = {
+  update: Prisma.XOR<Prisma.LocationUpdateWithoutAssetBundlesInput, Prisma.LocationUncheckedUpdateWithoutAssetBundlesInput>
+  create: Prisma.XOR<Prisma.LocationCreateWithoutAssetBundlesInput, Prisma.LocationUncheckedCreateWithoutAssetBundlesInput>
+  where?: Prisma.LocationWhereInput
+}
+
+export type LocationUpdateToOneWithWhereWithoutAssetBundlesInput = {
+  where?: Prisma.LocationWhereInput
+  data: Prisma.XOR<Prisma.LocationUpdateWithoutAssetBundlesInput, Prisma.LocationUncheckedUpdateWithoutAssetBundlesInput>
+}
+
+export type LocationUpdateWithoutAssetBundlesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutLocationsNestedInput
+  address?: Prisma.AddressUpdateOneRequiredWithoutLocationsNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutLocationNestedInput
+}
+
+export type LocationUncheckedUpdateWithoutAssetBundlesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  addressId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationCreateManyOrganizationInput = {
@@ -618,6 +710,7 @@ export type LocationUpdateWithoutOrganizationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   address?: Prisma.AddressUpdateOneRequiredWithoutLocationsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutLocationNestedInput
+  assetBundles?: Prisma.AssetBundleUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationUncheckedUpdateWithoutOrganizationInput = {
@@ -627,6 +720,7 @@ export type LocationUncheckedUpdateWithoutOrganizationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutLocationNestedInput
+  assetBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationUncheckedUpdateManyWithoutOrganizationInput = {
@@ -652,6 +746,7 @@ export type LocationUpdateWithoutAddressInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutLocationsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutLocationNestedInput
+  assetBundles?: Prisma.AssetBundleUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationUncheckedUpdateWithoutAddressInput = {
@@ -661,6 +756,7 @@ export type LocationUncheckedUpdateWithoutAddressInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutLocationNestedInput
+  assetBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationUncheckedUpdateManyWithoutAddressInput = {
@@ -678,10 +774,12 @@ export type LocationUncheckedUpdateManyWithoutAddressInput = {
 
 export type LocationCountOutputType = {
   assets: number
+  assetBundles: number
 }
 
 export type LocationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assets?: boolean | LocationCountOutputTypeCountAssetsArgs
+  assetBundles?: boolean | LocationCountOutputTypeCountAssetBundlesArgs
 }
 
 /**
@@ -701,6 +799,13 @@ export type LocationCountOutputTypeCountAssetsArgs<ExtArgs extends runtime.Types
   where?: Prisma.AssetWhereInput
 }
 
+/**
+ * LocationCountOutputType without action
+ */
+export type LocationCountOutputTypeCountAssetBundlesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssetBundleWhereInput
+}
+
 
 export type LocationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -712,6 +817,7 @@ export type LocationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   address?: boolean | Prisma.AddressDefaultArgs<ExtArgs>
   assets?: boolean | Prisma.Location$assetsArgs<ExtArgs>
+  assetBundles?: boolean | Prisma.Location$assetBundlesArgs<ExtArgs>
   _count?: boolean | Prisma.LocationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["location"]>
 
@@ -751,6 +857,7 @@ export type LocationInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   address?: boolean | Prisma.AddressDefaultArgs<ExtArgs>
   assets?: boolean | Prisma.Location$assetsArgs<ExtArgs>
+  assetBundles?: boolean | Prisma.Location$assetBundlesArgs<ExtArgs>
   _count?: boolean | Prisma.LocationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type LocationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -768,6 +875,7 @@ export type $LocationPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     organization: Prisma.$OrganizationPayload<ExtArgs>
     address: Prisma.$AddressPayload<ExtArgs>
     assets: Prisma.$AssetPayload<ExtArgs>[]
+    assetBundles: Prisma.$AssetBundlePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1173,6 +1281,7 @@ export interface Prisma__LocationClient<T, Null = never, ExtArgs extends runtime
   organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   address<T extends Prisma.AddressDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AddressDefaultArgs<ExtArgs>>): Prisma.Prisma__AddressClient<runtime.Types.Result.GetResult<Prisma.$AddressPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   assets<T extends Prisma.Location$assetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Location$assetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assetBundles<T extends Prisma.Location$assetBundlesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Location$assetBundlesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetBundlePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1630,6 +1739,30 @@ export type Location$assetsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.AssetScalarFieldEnum | Prisma.AssetScalarFieldEnum[]
+}
+
+/**
+ * Location.assetBundles
+ */
+export type Location$assetBundlesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AssetBundle
+   */
+  select?: Prisma.AssetBundleSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AssetBundle
+   */
+  omit?: Prisma.AssetBundleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetBundleInclude<ExtArgs> | null
+  where?: Prisma.AssetBundleWhereInput
+  orderBy?: Prisma.AssetBundleOrderByWithRelationInput | Prisma.AssetBundleOrderByWithRelationInput[]
+  cursor?: Prisma.AssetBundleWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssetBundleScalarFieldEnum | Prisma.AssetBundleScalarFieldEnum[]
 }
 
 /**

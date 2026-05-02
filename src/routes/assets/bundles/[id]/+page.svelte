@@ -7,8 +7,10 @@
 		getBundle,
 		getCategories,
 		getAssets,
+		getLocations,
 		addAssetToBundle,
-		removeAssetFromBundle
+		removeAssetFromBundle,
+		updateBundle
 	} from '$lib/remote/assets.remote';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
@@ -24,6 +26,7 @@
 	let bundle = $derived(await getBundle(bundleId));
 	let allAssets = $derived(await getAssets());
 	let categories = $derived(await getCategories());
+	let locations = $derived(await getLocations(bundle.organizationId));
 
 	let visibleBundleAssets = $derived(
 		!categoryFilter
@@ -48,6 +51,18 @@
 		try {
 			await removeAssetFromBundle({ bundleId, assetId });
 			toast.success('Asset removed from bundle');
+		} catch (err) {
+			toast.error((err as Error).message);
+		} finally {
+			working = false;
+		}
+	}
+
+	async function handleLocationChange(locationId: string | null) {
+		working = true;
+		try {
+			await updateBundle({ bundleId, locationId });
+			toast.success('Bundle location updated');
 		} catch (err) {
 			toast.error((err as Error).message);
 		} finally {
@@ -82,7 +97,18 @@
 				/>{bundle.description ? ` — ${bundle.description}` : ''}
 			</p>
 		</div>
-		<div class="flex gap-2">
+		<div class="flex items-center gap-2">
+			<select
+				value={bundle.locationId ?? ''}
+				onchange={(e) => handleLocationChange((e.currentTarget as HTMLSelectElement).value || null)}
+				disabled={working}
+				class="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+			>
+				<option value="">No location</option>
+				{#each locations as loc (loc.id)}
+					<option value={loc.id}>{loc.name}</option>
+				{/each}
+			</select>
 			<CategorySelect
 				class="w-56"
 				{categories}
@@ -180,6 +206,7 @@
 							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
 							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Serial Number</th>
 							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Location</th>
 							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Org</th>
 							<th class="px-4 py-3"></th>
 						</tr>
@@ -204,6 +231,9 @@
 									>
 										{statusLabels[asset.status] ?? asset.status}
 									</span>
+								</td>
+								<td class="px-4 py-3 text-sm text-muted-foreground">
+									{asset.location?.name ?? '—'}
 								</td>
 								<td class="px-4 py-3 text-sm text-muted-foreground">{asset.organization.name}</td>
 								<td class="px-4 py-3 text-right">

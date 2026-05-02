@@ -1,7 +1,7 @@
 import { query, command, getRequestEvent } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
-import { getAsset, getAssets } from './assets.remote';
+import { getAsset, getAssets, getBundle, getBundles } from './assets.remote';
 import { getProduction } from './productions.remote';
 
 async function requireAuth() {
@@ -110,10 +110,22 @@ export const scanAsset = command(scanAssetSchema, async (input) => {
 					}
 				});
 			}
+
+			// If this asset belongs to a bundle, update the bundle's location too
+			if (asset.bundleId) {
+				await tx.assetBundle.update({
+					where: { id: asset.bundleId },
+					data: { locationId: input.targetId }
+				});
+			}
 		});
 
 		for (const item of checkedOutItems) {
 			getProduction(item.production.id).refresh();
+		}
+		if (asset.bundleId) {
+			getBundle(asset.bundleId).refresh();
+			getBundles(asset.organizationId).refresh();
 		}
 		getAsset(asset.id).refresh();
 		getAssets(asset.organizationId).refresh();
@@ -186,7 +198,7 @@ export const checkoutAssets = command(checkoutAssetsSchema, async (input) => {
 
 	const assets = await prisma.asset.findMany({
 		where: { id: { in: input.assetIds } },
-		select: { id: true, organizationId: true }
+		select: { id: true, organizationId: true, bundleId: true }
 	});
 
 	for (const asset of assets) {
@@ -197,6 +209,18 @@ export const checkoutAssets = command(checkoutAssetsSchema, async (input) => {
 
 	if (input.targetType === 'location') {
 		const location = await prisma.location.findUniqueOrThrow({ where: { id: input.targetId } });
+
+		// Collect bundle IDs whose assets are all being moved to this location
+		const bundleIds = [...new Set(assets.map((a) => a.bundleId).filter(Boolean))] as string[];
+		const updatedBundleIds: string[] = [];
+		for (const bundleId of bundleIds) {
+			const bundleAssets = await prisma.asset.findMany({
+				where: { bundleId },
+				select: { id: true }
+			});
+			const allInCheckout = bundleAssets.every((ba) => input.assetIds.includes(ba.id));
+			if (allInCheckout) updatedBundleIds.push(bundleId);
+		}
 
 		for (const asset of assets) {
 			if (!systemAdmin && location.organizationId !== asset.organizationId) {
@@ -247,6 +271,17 @@ export const checkoutAssets = command(checkoutAssetsSchema, async (input) => {
 			}
 			getAsset(asset.id).refresh();
 			getAssets(asset.organizationId).refresh();
+		}
+
+		// Update location on bundles where all assets were moved together
+		if (updatedBundleIds.length > 0) {
+			const orgId = assets[0].organizationId;
+			await prisma.assetBundle.updateMany({
+				where: { id: { in: updatedBundleIds } },
+				data: { locationId: input.targetId }
+			});
+			updatedBundleIds.forEach((id) => getBundle(id).refresh());
+			getBundles(orgId).refresh();
 		}
 
 		return { count: assets.length, targetName: location.name };

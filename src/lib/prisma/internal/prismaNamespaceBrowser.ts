@@ -253,6 +253,7 @@ export const AssetBundleScalarFieldEnum = {
   description: 'description',
   organizationId: 'organizationId',
   categoryId: 'categoryId',
+  locationId: 'locationId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

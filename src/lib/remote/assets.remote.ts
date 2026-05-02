@@ -505,8 +505,9 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 		include: {
 			organization: true,
 			category: true,
+			location: true,
 			assets: {
-				include: { product: { include: { manufacturer: true, category: true } } }
+				include: { product: { include: { manufacturer: true, category: true } }, location: true }
 			}
 		},
 		orderBy: { name: 'asc' }
@@ -520,10 +521,12 @@ export const getBundle = query(v.string(), async (id: string) => {
 		include: {
 			organization: true,
 			category: true,
+			location: true,
 			assets: {
 				include: {
 					product: { include: { manufacturer: true, category: true } },
-					organization: true
+					organization: true,
+					location: true
 				}
 			}
 		}
@@ -560,12 +563,67 @@ export const createBundle = command(createBundleSchema, async (data) => {
 	return bundle;
 });
 
+const updateBundleSchema = v.object({
+	bundleId: v.string(),
+	name: v.optional(v.string()),
+	description: v.optional(v.string()),
+	categoryId: v.optional(v.string()),
+	locationId: v.optional(v.nullable(v.string()))
+});
+
+export const updateBundle = command(updateBundleSchema, async (input) => {
+	const user = await requireAuth();
+	const bundle = await prisma.assetBundle.findUniqueOrThrow({
+		where: { id: input.bundleId },
+		include: { assets: { select: { id: true } } }
+	});
+	const membership = await prisma.orgMembership.findUnique({
+		where: { userId_organizationId: { userId: user.id, organizationId: bundle.organizationId } }
+	});
+	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
+		throw new Error('Unauthorized');
+	}
+
+	const data: {
+		name?: string;
+		description?: string | null;
+		categoryId?: string;
+		locationId?: string | null;
+	} = {};
+	if (input.name !== undefined) data.name = input.name.trim();
+	if ('description' in input) data.description = input.description?.trim() || null;
+	if (input.categoryId !== undefined) data.categoryId = input.categoryId;
+	if ('locationId' in input) data.locationId = input.locationId ?? null;
+
+	const updated = await prisma.$transaction(async (tx) => {
+		const result = await tx.assetBundle.update({
+			where: { id: input.bundleId },
+			data,
+			include: { organization: true, category: true, location: true }
+		});
+		if (input.locationId) {
+			await tx.asset.updateMany({
+				where: { bundleId: input.bundleId },
+				data: { locationId: input.locationId }
+			});
+		}
+		return result;
+	});
+
+	getBundles(bundle.organizationId).refresh();
+	getBundle(input.bundleId).refresh();
+	getAssets(bundle.organizationId).refresh();
+	return updated;
+});
+
 const bundleAssetSchema = v.object({ bundleId: v.string(), assetId: v.string() });
 
 export const addAssetToBundle = command(bundleAssetSchema, async ({ bundleId, assetId }) => {
 	await requireAuth();
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({ where: { id: bundleId } });
-	await prisma.asset.update({ where: { id: assetId }, data: { bundleId } });
+	const updateData: { bundleId: string; locationId?: string } = { bundleId };
+	if (bundle.locationId) updateData.locationId = bundle.locationId;
+	await prisma.asset.update({ where: { id: assetId }, data: updateData });
 	getBundles(bundle.organizationId).refresh();
 	getBundle(bundleId).refresh();
 	getAssets(bundle.organizationId).refresh();
