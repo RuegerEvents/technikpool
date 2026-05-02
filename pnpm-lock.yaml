@@ -29,6 +29,9 @@ importers:
       pg:
         specifier: ^8.20.0
         version: 8.20.0
+      prisma-prefixed-ids:
+        specifier: ^2.1.0
+        version: 2.1.0(@prisma/client@7.7.0(prisma@7.7.0(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@6.0.3))(typescript@6.0.3))
       svelte-sonner:
         specifier: ^1.1.0
         version: 1.1.0(svelte@5.55.4(@typescript-eslint/types@8.59.0))
@@ -1486,6 +1489,11 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  nanoid@5.1.11:
+    resolution: {integrity: sha512-v+KEsUv2ps74PaSKv0gHTxTCgMXOIfBEbaqa6w6ISIGC7ZsvHN4N9oJ8d4cmf0n5oTzQz2SLmThbQWhjd/8eKg==}
+    engines: {node: ^18 || >=20}
+    hasBin: true
+
   nanostores@1.3.0:
     resolution: {integrity: sha512-XPUa/jz+P1oJvN9VBxw4L9MtdFfaH3DAryqPssqhb2kXjmb9npz0dly6rCsgFWOPr4Yg9mTfM3MDZgZZ+7A3lA==}
     engines: {node: ^20.0.0 || >=22.0.0}
@@ -1711,6 +1719,11 @@ packages:
     resolution: {integrity: sha512-7igPTM53cGHMW8xWuVTydi2KO233VFiTNyF5hLJqpilHfmn8C8gPf+PS7dUT64YcXFbiMGZxS9pCSxL/Dxm/Jw==}
     engines: {node: '>=14'}
     hasBin: true
+
+  prisma-prefixed-ids@2.1.0:
+    resolution: {integrity: sha512-fvUleSq04zzuZkaLh8fgcv/MTFCnFrgjHSq/Dszzycnz59k21RvZ+3fXdOLsPvbL7QmIbmx10XNnFedjS7XsZA==}
+    peerDependencies:
+      '@prisma/client': ^6.0.0 || ^7.0.0
 
   prisma@7.7.0:
     resolution: {integrity: sha512-HlgwRBt1uEFB9LStHL4HLYDvoi4BNu1rYA0hPG0zCAEyK9SaZBqp7E5Rjpc3Qh8Lex/ye/svoHZ0OWoFNhWxuQ==}
@@ -3270,6 +3283,8 @@ snapshots:
 
   nanoid@3.3.11: {}
 
+  nanoid@5.1.11: {}
+
   nanostores@1.3.0: {}
 
   natural-compare@1.4.0: {}
@@ -3420,6 +3435,11 @@ snapshots:
       prettier-plugin-svelte: 3.5.1(prettier@3.8.3)(svelte@5.55.4(@typescript-eslint/types@8.59.0))
 
   prettier@3.8.3: {}
+
+  prisma-prefixed-ids@2.1.0(@prisma/client@7.7.0(prisma@7.7.0(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@6.0.3))(typescript@6.0.3)):
+    dependencies:
+      '@prisma/client': 7.7.0(prisma@7.7.0(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@6.0.3))(typescript@6.0.3)
+      nanoid: 5.1.11
 
   prisma@7.7.0(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@6.0.3):
     dependencies:

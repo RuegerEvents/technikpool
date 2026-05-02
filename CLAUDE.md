@@ -157,6 +157,8 @@ Located in `src/lib/components/ui/`: `button`, `card`, `input`, `label`, `creata
 - `ProductionItem.status` — `PENDING` for cross-org requests, `APPROVED|CHECKED_OUT|RETURNED` otherwise
 - `AssetTransaction` — audit log for all asset actions
 
+**MANDATORY:** When adding a new table, ensure that in auth.ts the prefix for the type id is added to the `prefixes` object passed to `extendPrismaClient` (e.g. `Production: 'prdn'`) to maintain consistent prefixed IDs across all tables.
+
 ---
 
 # Code Style Guidelines
