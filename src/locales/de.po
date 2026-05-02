@@ -793,9 +793,8 @@ msgstr "Verlauf der Transaktionen und Statusänderungen dieses Geräts."
 msgid "No history available for this asset."
 msgstr "Kein Verlauf für dieses Gerät vorhanden."
 
-#: src/routes/inventory/[id]/+page.svelte
-msgid "for production <0/>"
-msgstr "für Produktion <0/>"
+#~ msgid "for production <0/>"
+#~ msgstr "für Produktion <0/>"
 
 #. 0: item.user.name || item.user.email; 1: new Date( item.createdAt ).toLocaleString()
 #: src/routes/inventory/[id]/+page.svelte
@@ -1205,6 +1204,7 @@ msgstr "Ausgecheckt"
 msgid "Returned"
 msgstr "Zurückgegeben"
 
+#: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 msgid "Asset updated"
 msgstr "Gerät aktualisiert"
@@ -1807,8 +1807,40 @@ msgstr "Kategorie auswählen"
 #. 0: bundle.organization.name; 1: bundle.description ? ` — ${bundle.description}` \\: ''
 #: src/routes/assets/bundles/[id]/+page.svelte
 msgid "{0} — Category: <0/>{1}"
-msgstr ""
+msgstr "{0} — Kategorie: <0/>{1}"
 
 #: src/routes/assets/bundles/+page.svelte
 msgid "Category:"
-msgstr ""
+msgstr "Kategorie:"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Asset created"
+msgstr "Asset angelegt"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Checked in to <0/>"
+msgstr "Eingecheckt bei <0/>"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Checked out for <0/>"
+msgstr "Ausgecheckt für <0/>"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Returned from <0/> <1>to <0/></1>"
+msgstr "Zurückgegeben von <0/> <1>nach <0/></1>"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Requested for <0/> <1>by <0/></1>"
+msgstr "Angefragt für <0/> <1>von <0/></1>"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Added to <0/>"
+msgstr "Hinzugefügt zu <0/>"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Approved for <0/>"
+msgstr "Genehmigt für <0/>"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Declined for <0/>"
+msgstr "Abgelehnt für <0/>"

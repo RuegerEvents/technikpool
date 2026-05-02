@@ -793,9 +793,8 @@ msgstr "History of transactions and status changes for this asset."
 msgid "No history available for this asset."
 msgstr "No history available for this asset."
 
-#: src/routes/inventory/[id]/+page.svelte
-msgid "for production <0/>"
-msgstr "for production <0/>"
+#~ msgid "for production <0/>"
+#~ msgstr "for production <0/>"
 
 #. 0: item.user.name || item.user.email; 1: new Date( item.createdAt ).toLocaleString()
 #: src/routes/inventory/[id]/+page.svelte
@@ -1205,6 +1204,7 @@ msgstr "Out"
 msgid "Returned"
 msgstr "Returned"
 
+#: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 msgid "Asset updated"
 msgstr "Asset updated"
@@ -1812,3 +1812,35 @@ msgstr "{0} — Category: <0/>{1}"
 #: src/routes/assets/bundles/+page.svelte
 msgid "Category:"
 msgstr "Category:"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Asset created"
+msgstr "Asset created"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Checked in to <0/>"
+msgstr "Checked in to <0/>"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Checked out for <0/>"
+msgstr "Checked out for <0/>"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Returned from <0/> <1>to <0/></1>"
+msgstr "Returned from <0/> <1>to <0/></1>"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Requested for <0/> <1>by <0/></1>"
+msgstr "Requested for <0/> <1>by <0/></1>"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Added to <0/>"
+msgstr "Added to <0/>"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Approved for <0/>"
+msgstr "Approved for <0/>"
+
+#: src/routes/inventory/[id]/+page.svelte
+msgid "Declined for <0/>"
+msgstr "Declined for <0/>"

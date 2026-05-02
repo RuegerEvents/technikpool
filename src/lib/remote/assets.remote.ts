@@ -1,6 +1,7 @@
 import { query, command, getRequestEvent } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
+import type { FieldChange } from '$lib/types/asset-transaction';
 
 async function requireAuth() {
 	const event = await getRequestEvent();
@@ -301,7 +302,7 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 					assetTag: item.assetTag || null,
 					status: 'AVAILABLE',
 					transactions: {
-						create: { userId: user.id, action: 'CREATED', notes: 'Asset initialized' }
+						create: { userId: user.id, action: 'CREATED', data: { type: 'CREATED' } }
 					}
 				},
 				include: { product: { include: { manufacturer: true, category: true } }, location: true }
@@ -368,16 +369,12 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 		}
 	}
 
-	let nextLocationId: string | undefined = undefined;
+	let nextLocation: { id: string; name: string } | undefined = undefined;
 	if ('locationId' in input) {
 		if (input.locationId) {
-			const location = await prisma.location.findUniqueOrThrow({
-				where: { id: input.locationId }
-			});
-			if (location.organizationId !== asset.organizationId) {
-				throw new Error('Invalid location');
-			}
-			nextLocationId = location.id;
+			const loc = await prisma.location.findUniqueOrThrow({ where: { id: input.locationId } });
+			if (loc.organizationId !== asset.organizationId) throw new Error('Invalid location');
+			nextLocation = loc;
 		} else {
 			throw new Error('Location is required');
 		}
@@ -391,33 +388,40 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 		locationId?: string;
 	} = {};
 
-	const changes: string[] = [];
+	const changes: FieldChange[] = [];
 	if ('serialNumber' in input) {
 		const serialNumber = input.serialNumber?.trim() || null;
 		updateData.serialNumber = serialNumber;
 		if (serialNumber !== asset.serialNumber)
-			changes.push(`serialNumber: ${asset.serialNumber ?? '—'} → ${serialNumber ?? '—'}`);
+			changes.push({ field: 'serialNumber', from: asset.serialNumber, to: serialNumber });
 	}
 	if ('assetTag' in input) {
 		const assetTag = input.assetTag?.trim() || null;
 		updateData.assetTag = assetTag;
 		if (assetTag !== asset.assetTag)
-			changes.push(`assetTag: ${asset.assetTag ?? '—'} → ${assetTag ?? '—'}`);
+			changes.push({ field: 'assetTag', from: asset.assetTag, to: assetTag });
 	}
 	if ('status' in input && input.status) {
 		updateData.status = input.status;
-		if (input.status !== asset.status) changes.push(`status: ${asset.status} → ${input.status}`);
+		if (input.status !== asset.status)
+			changes.push({ field: 'status', from: asset.status, to: input.status });
 	}
 	if ('imageUrl' in input) {
 		const imageUrl = input.imageUrl?.trim() || null;
 		updateData.imageUrl = imageUrl;
 		if (imageUrl !== asset.imageUrl)
-			changes.push(`imageUrl: ${asset.imageUrl ?? '—'} → ${imageUrl ?? '—'}`);
+			changes.push({ field: 'imageUrl', from: asset.imageUrl, to: imageUrl });
 	}
-	if ('locationId' in input && nextLocationId !== undefined) {
-		updateData.locationId = nextLocationId;
-		if (nextLocationId !== asset.locationId)
-			changes.push(`location: ${asset.location?.name ?? '—'} → ${nextLocationId ? 'set' : '—'}`);
+	if (nextLocation !== undefined) {
+		updateData.locationId = nextLocation.id;
+		if (nextLocation.id !== asset.locationId)
+			changes.push({
+				field: 'location',
+				from: asset.location?.name ?? null,
+				to: nextLocation.name,
+				fromRef: asset.locationId ? { type: 'location', id: asset.locationId } : null,
+				toRef: { type: 'location', id: nextLocation.id }
+			});
 	}
 
 	const updated = await prisma.asset.update({
@@ -437,7 +441,7 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 				assetId: asset.id,
 				userId: user.id,
 				action: 'UPDATED',
-				notes: changes.join('\n')
+				data: { type: 'UPDATED', changes }
 			}
 		});
 	}

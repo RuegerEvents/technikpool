@@ -158,15 +158,6 @@ export const createOrg = command(v.string(), async (name: string) => {
 			}
 		});
 
-		const address = await tx.address.create({ data: {} });
-		await tx.location.create({
-			data: {
-				organizationId: created.id,
-				name: 'Default Location',
-				addressId: address.id
-			}
-		});
-
 		return created;
 	});
 

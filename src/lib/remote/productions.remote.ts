@@ -193,7 +193,8 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 	const user = await requireAuth();
 
 	const production = await prisma.production.findUniqueOrThrow({
-		where: { id: data.productionId }
+		where: { id: data.productionId },
+		include: { organization: { select: { id: true, name: true } } }
 	});
 	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: data.assetId } });
 
@@ -236,7 +237,19 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 			userId: user.id,
 			productionId: data.productionId,
 			action: isCrossOrg ? 'REQUESTED' : 'ADDED_TO_PRODUCTION',
-			notes: isCrossOrg ? `Requested for cross-org production ${production.name}` : undefined
+			data: isCrossOrg
+				? {
+						type: 'REQUESTED',
+						productionId: data.productionId,
+						productionName: production.name,
+						requestingOrgId: production.organization.id,
+						requestingOrgName: production.organization.name
+					}
+				: {
+						type: 'ADDED_TO_PRODUCTION',
+						productionId: data.productionId,
+						productionName: production.name
+					}
 		}
 	});
 
@@ -271,7 +284,11 @@ export const approveProductionItem = command(v.string(), async (itemId: string) 
 			userId: user.id,
 			productionId: item.productionId,
 			action: 'APPROVED',
-			notes: `Approved for production ${item.production.name}`
+			data: {
+				type: 'APPROVED',
+				productionId: item.productionId,
+				productionName: item.production.name
+			}
 		}
 	});
 
@@ -307,7 +324,11 @@ export const declineProductionItem = command(v.string(), async (itemId: string) 
 			userId: user.id,
 			productionId: item.productionId,
 			action: 'DECLINED',
-			notes: `Declined for production ${item.production.name}`
+			data: {
+				type: 'DECLINED',
+				productionId: item.productionId,
+				productionName: item.production.name
+			}
 		}
 	});
 

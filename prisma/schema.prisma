@@ -277,10 +277,10 @@ model AssetTransaction {
   user   User   @relation(fields: [userId], references: [id])
 
   productionId String?
-  production   Production? @relation(fields: [productionId], references: [id], onDelete: Cascade)
+  production   Production? @relation(fields: [productionId], references: [id], onDelete: SetNull)
 
-  action String // e.g., STATUS_CHANGE, CHECK_OUT, RETURN, APPROVE, REQUEST
-  notes  String?
+  action String
+  data   Json?
 
   createdAt DateTime @default(now())
 }

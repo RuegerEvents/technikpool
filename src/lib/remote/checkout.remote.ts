@@ -85,7 +85,7 @@ export const scanAsset = command(scanAssetSchema, async (input) => {
 					assetId: asset.id,
 					userId: user.id,
 					action: 'LOCATION_ASSIGNED',
-					notes: `Checked in to ${location.name}`
+					data: { type: 'LOCATION_ASSIGNED', locationId: location.id, locationName: location.name }
 				}
 			});
 
@@ -100,7 +100,13 @@ export const scanAsset = command(scanAssetSchema, async (input) => {
 						userId: user.id,
 						productionId: item.production.id,
 						action: 'RETURNED',
-						notes: `Returned from "${item.production.name}" via location check-in`
+						data: {
+							type: 'RETURNED',
+							fromProductionId: item.production.id,
+							fromProductionName: item.production.name,
+							toLocationId: location.id,
+							toLocationName: location.name
+						}
 					}
 				});
 			}
@@ -147,7 +153,7 @@ export const scanAsset = command(scanAssetSchema, async (input) => {
 				userId: user.id,
 				productionId: input.targetId,
 				action: 'CHECKED_OUT',
-				notes: `Checked out for "${production.name}"`
+				data: { type: 'CHECKED_OUT', productionId: production.id, productionName: production.name }
 			}
 		});
 
@@ -209,7 +215,11 @@ export const checkoutAssets = command(checkoutAssetsSchema, async (input) => {
 						assetId: asset.id,
 						userId: user.id,
 						action: 'LOCATION_ASSIGNED',
-						notes: `Checked in to ${location.name}`
+						data: {
+							type: 'LOCATION_ASSIGNED',
+							locationId: location.id,
+							locationName: location.name
+						}
 					}
 				});
 				for (const item of checkedOutItems) {
@@ -220,7 +230,13 @@ export const checkoutAssets = command(checkoutAssetsSchema, async (input) => {
 							userId: user.id,
 							productionId: item.production.id,
 							action: 'RETURNED',
-							notes: `Returned from "${item.production.name}" via location check-in`
+							data: {
+								type: 'RETURNED',
+								fromProductionId: item.production.id,
+								fromProductionName: item.production.name,
+								toLocationId: location.id,
+								toLocationName: location.name
+							}
 						}
 					});
 				}
@@ -259,7 +275,11 @@ export const checkoutAssets = command(checkoutAssetsSchema, async (input) => {
 					userId: user.id,
 					productionId: input.targetId,
 					action: 'CHECKED_OUT',
-					notes: `Checked out for "${production.name}"`
+					data: {
+						type: 'CHECKED_OUT',
+						productionId: production.id,
+						productionName: production.name
+					}
 				}
 			});
 

@@ -8,6 +8,7 @@
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { getAsset, getAssetHistory, getLocations, updateAsset } from '$lib/remote/assets.remote';
+	import type { TransactionData } from '$lib/types/asset-transaction';
 
 	let assetId = $derived(page.params.id as string);
 	let asset = $derived(await getAsset(assetId));
@@ -195,19 +196,64 @@
 			{:else}
 				<div class="relative ml-3 space-y-8 border-l border-muted-foreground/20 py-4">
 					{#each history as item (item.id)}
+						{@const tx = item.data as TransactionData | null}
 						<div class="relative pl-6">
 							<div
 								class="absolute top-1 -left-[5px] h-2.5 w-2.5 rounded-full bg-primary ring-4 ring-background"
 							></div>
 							<div class="flex flex-col gap-1">
 								<div class="text-sm font-medium">
-									{item.action}
-									{#if item.production}
+									{#if tx?.type === 'CREATED'}
+										Asset created
+									{:else if tx?.type === 'UPDATED'}
+										Asset updated
+									{:else if tx?.type === 'LOCATION_ASSIGNED'}
+										Checked in to <span class="text-foreground">{tx.locationName}</span>
+									{:else if tx?.type === 'CHECKED_OUT'}
+										Checked out for
+										<a
+											href={resolve(`/productions/${tx.productionId}`)}
+											class="text-foreground underline underline-offset-2">{tx.productionName}</a
+										>
+									{:else if tx?.type === 'RETURNED'}
+										Returned from
+										<a
+											href={resolve(`/productions/${tx.fromProductionId}`)}
+											class="text-foreground underline underline-offset-2"
+											>{tx.fromProductionName}</a
+										>
 										<span class="font-normal text-muted-foreground">
-											for production <span class="font-medium text-foreground"
-												>{item.production.name}</span
-											>
+											to <span class="font-medium text-foreground">{tx.toLocationName}</span>
 										</span>
+									{:else if tx?.type === 'REQUESTED'}
+										Requested for
+										<a
+											href={resolve(`/productions/${tx.productionId}`)}
+											class="text-foreground underline underline-offset-2">{tx.productionName}</a
+										>
+										<span class="font-normal text-muted-foreground">
+											by <span class="font-medium text-foreground">{tx.requestingOrgName}</span>
+										</span>
+									{:else if tx?.type === 'ADDED_TO_PRODUCTION'}
+										Added to
+										<a
+											href={resolve(`/productions/${tx.productionId}`)}
+											class="text-foreground underline underline-offset-2">{tx.productionName}</a
+										>
+									{:else if tx?.type === 'APPROVED'}
+										Approved for
+										<a
+											href={resolve(`/productions/${tx.productionId}`)}
+											class="text-foreground underline underline-offset-2">{tx.productionName}</a
+										>
+									{:else if tx?.type === 'DECLINED'}
+										Declined for
+										<a
+											href={resolve(`/productions/${tx.productionId}`)}
+											class="text-foreground underline underline-offset-2">{tx.productionName}</a
+										>
+									{:else}
+										{item.action}
 									{/if}
 								</div>
 								<div class="text-xs text-muted-foreground">
@@ -215,12 +261,16 @@
 										item.createdAt
 									).toLocaleString()}
 								</div>
-								{#if item.notes}
-									<p
-										class="mt-2 rounded-md bg-muted/50 p-2 text-sm whitespace-pre-line text-muted-foreground"
-									>
-										{item.notes}
-									</p>
+								{#if tx?.type === 'UPDATED' && tx.changes.length > 0}
+									<div class="mt-2 space-y-1 rounded-md bg-muted/50 p-2">
+										{#each tx.changes as change (change.field)}
+											<div class="text-sm text-muted-foreground">
+												<span class="font-medium text-foreground">{change.field}:</span>
+												{change.from ?? '—'} →
+												<span class="font-medium text-foreground">{change.to ?? '—'}</span>
+											</div>
+										{/each}
+									</div>
 								{/if}
 							</div>
 						</div>
