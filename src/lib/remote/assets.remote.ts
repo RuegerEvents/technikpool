@@ -246,6 +246,7 @@ const createAssetsSchema = v.object({
 	locationId: v.string(),
 	productId: v.optional(v.string()),
 	newProductName: v.optional(v.string()),
+	newProductImageUrl: v.optional(v.string()),
 	categoryId: v.optional(v.string()),
 	manufacturerId: v.optional(v.string()),
 	newManufacturerName: v.optional(v.string()),
@@ -280,7 +281,12 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 		if (!data.categoryId) throw new Error('Category is required when creating a new product');
 		await prisma.category.findUniqueOrThrow({ where: { id: data.categoryId } });
 		const p = await prisma.product.create({
-			data: { name: data.newProductName, manufacturerId, categoryId: data.categoryId }
+			data: {
+				name: data.newProductName,
+				manufacturerId,
+				categoryId: data.categoryId,
+				imageUrl: data.newProductImageUrl?.trim() || null
+			}
 		});
 		productId = p.id;
 		getProducts(manufacturerId).refresh();
@@ -345,7 +351,6 @@ const updateAssetSchema = v.object({
 	serialNumber: v.optional(v.string()),
 	assetTag: v.optional(v.string()),
 	status: v.optional(v.picklist(['AVAILABLE', 'MAINTENANCE', 'BROKEN'])),
-	imageUrl: v.optional(v.string()),
 	locationId: v.optional(v.string())
 });
 
@@ -384,7 +389,6 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 		serialNumber?: string | null;
 		assetTag?: string | null;
 		status?: string;
-		imageUrl?: string | null;
 		locationId?: string;
 	} = {};
 
@@ -405,12 +409,6 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 		updateData.status = input.status;
 		if (input.status !== asset.status)
 			changes.push({ field: 'status', from: asset.status, to: input.status });
-	}
-	if ('imageUrl' in input) {
-		const imageUrl = input.imageUrl?.trim() || null;
-		updateData.imageUrl = imageUrl;
-		if (imageUrl !== asset.imageUrl)
-			changes.push({ field: 'imageUrl', from: asset.imageUrl, to: imageUrl });
 	}
 	if (nextLocation !== undefined) {
 		updateData.locationId = nextLocation.id;
@@ -454,6 +452,45 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 	getLocations(asset.organizationId).refresh();
 
 	return updated;
+});
+
+const updateProductSchema = v.object({
+	productId: v.string(),
+	name: v.optional(v.string()),
+	categoryId: v.optional(v.string()),
+	imageUrl: v.optional(v.string())
+});
+
+export const updateProduct = command(updateProductSchema, async (input) => {
+	const user = await requireAuth();
+	const systemAdmin = await isSystemAdmin(user.id);
+	if (!systemAdmin) {
+		const memberships = await prisma.orgMembership.findMany({
+			where: { userId: user.id, role: { in: ['ADMIN', 'OWNER'] } }
+		});
+		if (memberships.length === 0) throw new Error('Unauthorized');
+	}
+
+	const product = await prisma.product.update({
+		where: { id: input.productId },
+		data: {
+			...(input.name ? { name: input.name.trim() } : {}),
+			...(input.categoryId ? { categoryId: input.categoryId } : {}),
+			imageUrl: input.imageUrl !== undefined ? input.imageUrl?.trim() || null : undefined
+		},
+		include: { manufacturer: true, category: true }
+	});
+
+	getProducts(product.manufacturerId).refresh();
+	getProducts().refresh();
+
+	const affectedAssets = await prisma.asset.findMany({
+		where: { productId: product.id },
+		select: { id: true }
+	});
+	affectedAssets.forEach((a) => getAsset(a.id).refresh());
+
+	return product;
 });
 
 // ── Bundles ───────────────────────────────────────────────────────────────────

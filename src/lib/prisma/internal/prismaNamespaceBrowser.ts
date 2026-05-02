@@ -196,6 +196,7 @@ export const ProductScalarFieldEnum = {
   name: 'name',
   manufacturerId: 'manufacturerId',
   categoryId: 'categoryId',
+  imageUrl: 'imageUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -238,7 +239,6 @@ export const AssetScalarFieldEnum = {
   serialNumber: 'serialNumber',
   assetTag: 'assetTag',
   status: 'status',
-  imageUrl: 'imageUrl',
   bundleId: 'bundleId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

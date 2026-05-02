@@ -32,7 +32,6 @@ export type AssetMinAggregateOutputType = {
   serialNumber: string | null
   assetTag: string | null
   status: string | null
-  imageUrl: string | null
   bundleId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -46,7 +45,6 @@ export type AssetMaxAggregateOutputType = {
   serialNumber: string | null
   assetTag: string | null
   status: string | null
-  imageUrl: string | null
   bundleId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -60,7 +58,6 @@ export type AssetCountAggregateOutputType = {
   serialNumber: number
   assetTag: number
   status: number
-  imageUrl: number
   bundleId: number
   createdAt: number
   updatedAt: number
@@ -76,7 +73,6 @@ export type AssetMinAggregateInputType = {
   serialNumber?: true
   assetTag?: true
   status?: true
-  imageUrl?: true
   bundleId?: true
   createdAt?: true
   updatedAt?: true
@@ -90,7 +86,6 @@ export type AssetMaxAggregateInputType = {
   serialNumber?: true
   assetTag?: true
   status?: true
-  imageUrl?: true
   bundleId?: true
   createdAt?: true
   updatedAt?: true
@@ -104,7 +99,6 @@ export type AssetCountAggregateInputType = {
   serialNumber?: true
   assetTag?: true
   status?: true
-  imageUrl?: true
   bundleId?: true
   createdAt?: true
   updatedAt?: true
@@ -191,7 +185,6 @@ export type AssetGroupByOutputType = {
   serialNumber: string | null
   assetTag: string | null
   status: string
-  imageUrl: string | null
   bundleId: string | null
   createdAt: Date
   updatedAt: Date
@@ -226,7 +219,6 @@ export type AssetWhereInput = {
   serialNumber?: Prisma.StringNullableFilter<"Asset"> | string | null
   assetTag?: Prisma.StringNullableFilter<"Asset"> | string | null
   status?: Prisma.StringFilter<"Asset"> | string
-  imageUrl?: Prisma.StringNullableFilter<"Asset"> | string | null
   bundleId?: Prisma.StringNullableFilter<"Asset"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
@@ -246,7 +238,6 @@ export type AssetOrderByWithRelationInput = {
   serialNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   assetTag?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
-  imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   bundleId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -269,7 +260,6 @@ export type AssetWhereUniqueInput = Prisma.AtLeast<{
   serialNumber?: Prisma.StringNullableFilter<"Asset"> | string | null
   assetTag?: Prisma.StringNullableFilter<"Asset"> | string | null
   status?: Prisma.StringFilter<"Asset"> | string
-  imageUrl?: Prisma.StringNullableFilter<"Asset"> | string | null
   bundleId?: Prisma.StringNullableFilter<"Asset"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
@@ -289,7 +279,6 @@ export type AssetOrderByWithAggregationInput = {
   serialNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   assetTag?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
-  imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   bundleId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -309,7 +298,6 @@ export type AssetScalarWhereWithAggregatesInput = {
   serialNumber?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
   assetTag?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
   status?: Prisma.StringWithAggregatesFilter<"Asset"> | string
-  imageUrl?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
   bundleId?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Asset"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Asset"> | Date | string
@@ -320,7 +308,6 @@ export type AssetCreateInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutAssetsInput
@@ -339,7 +326,6 @@ export type AssetUncheckedCreateInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   bundleId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -352,7 +338,6 @@ export type AssetUpdateInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutAssetsNestedInput
@@ -371,7 +356,6 @@ export type AssetUncheckedUpdateInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -387,7 +371,6 @@ export type AssetCreateManyInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   bundleId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -398,7 +381,6 @@ export type AssetUpdateManyMutationInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -411,7 +393,6 @@ export type AssetUncheckedUpdateManyInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -435,7 +416,6 @@ export type AssetCountOrderByAggregateInput = {
   serialNumber?: Prisma.SortOrder
   assetTag?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  imageUrl?: Prisma.SortOrder
   bundleId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -449,7 +429,6 @@ export type AssetMaxOrderByAggregateInput = {
   serialNumber?: Prisma.SortOrder
   assetTag?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  imageUrl?: Prisma.SortOrder
   bundleId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -463,7 +442,6 @@ export type AssetMinOrderByAggregateInput = {
   serialNumber?: Prisma.SortOrder
   assetTag?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  imageUrl?: Prisma.SortOrder
   bundleId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -675,7 +653,6 @@ export type AssetCreateWithoutOrganizationInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   product: Prisma.ProductCreateNestedOneWithoutAssetsInput
@@ -692,7 +669,6 @@ export type AssetUncheckedCreateWithoutOrganizationInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   bundleId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -737,7 +713,6 @@ export type AssetScalarWhereInput = {
   serialNumber?: Prisma.StringNullableFilter<"Asset"> | string | null
   assetTag?: Prisma.StringNullableFilter<"Asset"> | string | null
   status?: Prisma.StringFilter<"Asset"> | string
-  imageUrl?: Prisma.StringNullableFilter<"Asset"> | string | null
   bundleId?: Prisma.StringNullableFilter<"Asset"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
@@ -748,7 +723,6 @@ export type AssetCreateWithoutProductInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutAssetsInput
@@ -765,7 +739,6 @@ export type AssetUncheckedCreateWithoutProductInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   bundleId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -804,7 +777,6 @@ export type AssetCreateWithoutLocationInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutAssetsInput
@@ -821,7 +793,6 @@ export type AssetUncheckedCreateWithoutLocationInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   bundleId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -860,7 +831,6 @@ export type AssetCreateWithoutBundleInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutAssetsInput
@@ -878,7 +848,6 @@ export type AssetUncheckedCreateWithoutBundleInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
@@ -916,7 +885,6 @@ export type AssetCreateWithoutProductionItemsInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutAssetsInput
@@ -934,7 +902,6 @@ export type AssetUncheckedCreateWithoutProductionItemsInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   bundleId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -962,7 +929,6 @@ export type AssetUpdateWithoutProductionItemsInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutAssetsNestedInput
@@ -980,7 +946,6 @@ export type AssetUncheckedUpdateWithoutProductionItemsInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -992,7 +957,6 @@ export type AssetCreateWithoutTransactionsInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutAssetsInput
@@ -1010,7 +974,6 @@ export type AssetUncheckedCreateWithoutTransactionsInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   bundleId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1038,7 +1001,6 @@ export type AssetUpdateWithoutTransactionsInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutAssetsNestedInput
@@ -1056,7 +1018,6 @@ export type AssetUncheckedUpdateWithoutTransactionsInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1070,7 +1031,6 @@ export type AssetCreateManyOrganizationInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   bundleId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1081,7 +1041,6 @@ export type AssetUpdateWithoutOrganizationInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   product?: Prisma.ProductUpdateOneRequiredWithoutAssetsNestedInput
@@ -1098,7 +1057,6 @@ export type AssetUncheckedUpdateWithoutOrganizationInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1113,7 +1071,6 @@ export type AssetUncheckedUpdateManyWithoutOrganizationInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1126,7 +1083,6 @@ export type AssetCreateManyProductInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   bundleId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1137,7 +1093,6 @@ export type AssetUpdateWithoutProductInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutAssetsNestedInput
@@ -1154,7 +1109,6 @@ export type AssetUncheckedUpdateWithoutProductInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1169,7 +1123,6 @@ export type AssetUncheckedUpdateManyWithoutProductInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1182,7 +1135,6 @@ export type AssetCreateManyLocationInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   bundleId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1193,7 +1145,6 @@ export type AssetUpdateWithoutLocationInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutAssetsNestedInput
@@ -1210,7 +1161,6 @@ export type AssetUncheckedUpdateWithoutLocationInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1225,7 +1175,6 @@ export type AssetUncheckedUpdateManyWithoutLocationInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1239,7 +1188,6 @@ export type AssetCreateManyBundleInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
-  imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1249,7 +1197,6 @@ export type AssetUpdateWithoutBundleInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutAssetsNestedInput
@@ -1267,7 +1214,6 @@ export type AssetUncheckedUpdateWithoutBundleInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
@@ -1282,7 +1228,6 @@ export type AssetUncheckedUpdateManyWithoutBundleInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1335,7 +1280,6 @@ export type AssetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   serialNumber?: boolean
   assetTag?: boolean
   status?: boolean
-  imageUrl?: boolean
   bundleId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1356,7 +1300,6 @@ export type AssetSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   serialNumber?: boolean
   assetTag?: boolean
   status?: boolean
-  imageUrl?: boolean
   bundleId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1374,7 +1317,6 @@ export type AssetSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   serialNumber?: boolean
   assetTag?: boolean
   status?: boolean
-  imageUrl?: boolean
   bundleId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1392,13 +1334,12 @@ export type AssetSelectScalar = {
   serialNumber?: boolean
   assetTag?: boolean
   status?: boolean
-  imageUrl?: boolean
   bundleId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AssetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "productId" | "locationId" | "serialNumber" | "assetTag" | "status" | "imageUrl" | "bundleId" | "createdAt" | "updatedAt", ExtArgs["result"]["asset"]>
+export type AssetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "productId" | "locationId" | "serialNumber" | "assetTag" | "status" | "bundleId" | "createdAt" | "updatedAt", ExtArgs["result"]["asset"]>
 export type AssetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
@@ -1439,7 +1380,6 @@ export type $AssetPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     serialNumber: string | null
     assetTag: string | null
     status: string
-    imageUrl: string | null
     bundleId: string | null
     createdAt: Date
     updatedAt: Date
@@ -1879,7 +1819,6 @@ export interface AssetFieldRefs {
   readonly serialNumber: Prisma.FieldRef<"Asset", 'String'>
   readonly assetTag: Prisma.FieldRef<"Asset", 'String'>
   readonly status: Prisma.FieldRef<"Asset", 'String'>
-  readonly imageUrl: Prisma.FieldRef<"Asset", 'String'>
   readonly bundleId: Prisma.FieldRef<"Asset", 'String'>
   readonly createdAt: Prisma.FieldRef<"Asset", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Asset", 'DateTime'>

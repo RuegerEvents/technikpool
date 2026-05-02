@@ -148,6 +148,7 @@ model Product {
   manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
   categoryId     String
   category       Category     @relation(fields: [categoryId], references: [id])
+  imageUrl       String?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   assets         Asset[]
@@ -193,7 +194,6 @@ model Asset {
   serialNumber String?
   assetTag     String?
   status       String  @default("AVAILABLE") // AVAILABLE, MAINTENANCE, BROKEN
-  imageUrl     String?
 
   bundleId String?
   bundle   AssetBundle? @relation(fields: [bundleId], references: [id])

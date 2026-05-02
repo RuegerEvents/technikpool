@@ -8,6 +8,7 @@
 		items: Item[];
 		value?: Selection | null;
 		onchange?: (item: Selection | null) => void;
+		oncreate?: (name: string) => void;
 		placeholder?: string;
 		required?: boolean;
 		disabled?: boolean;
@@ -19,6 +20,7 @@
 		items,
 		value = $bindable(null),
 		onchange,
+		oncreate,
 		placeholder = 'Search…',
 		required = false,
 		disabled = false,
@@ -59,13 +61,19 @@
 			value = opt.item;
 			inputValue = opt.item.name;
 			onchange?.(opt.item);
+			open = false;
+			highlightedIndex = -1;
+		} else if (oncreate) {
+			open = false;
+			highlightedIndex = -1;
+			oncreate(opt.name);
 		} else {
 			value = null;
 			inputValue = opt.name;
 			onchange?.({ id: null, name: opt.name });
+			open = false;
+			highlightedIndex = -1;
 		}
-		open = false;
-		highlightedIndex = -1;
 	}
 
 	function handleInput() {
@@ -91,7 +99,7 @@
 		} else if (e.key === 'ArrowUp') {
 			e.preventDefault();
 			highlightedIndex = Math.max(highlightedIndex - 1, -1);
-		} else if (e.key === 'Enter') {
+		} else if (e.key === 'Enter' || (e.key.toLowerCase() === 'tab' && showCreate && oncreate)) {
 			e.preventDefault();
 			if (highlightedIndex >= 0 && options[highlightedIndex]) {
 				selectOption(options[highlightedIndex]);

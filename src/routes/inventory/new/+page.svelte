@@ -38,27 +38,59 @@
 		}
 	});
 
-	// Each holds either an existing item (id: string) or a new one (id: null)
 	type SelectionOrNew = { id: string; name: string } | { id: null; name: string } | null;
 
 	let manufacturer = $state<SelectionOrNew>(null);
 	let product = $state<SelectionOrNew>(null);
-	let newProductCategoryId = $state('');
 	let categories = $derived(await getCategories());
 
-	$effect(() => {
-		if (newProductCategoryId) return;
-		const misc = categories.find((c) => c.name.toLowerCase() === 'miscellaneous');
-		if (misc) newProductCategoryId = misc.id;
+	// New product modal state
+	let newProductModal = $state({
+		open: false,
+		name: '',
+		categoryId: '',
+		imageUrl: ''
 	});
 
-	// When manufacturer changes, reset product
+	$effect(() => {
+		if (newProductModal.categoryId) return;
+		const misc = categories.find((c) => c.name.toLowerCase() === 'miscellaneous');
+		if (misc) newProductModal.categoryId = misc.id;
+	});
+
+	// Extra data for a pending new product (collected in modal)
+	let pendingProduct = $state<{ name: string; categoryId: string; imageUrl: string } | null>(null);
+
 	let manufacturerKey = $state(0);
 
 	function handleManufacturerChange(sel: SelectionOrNew) {
 		manufacturer = sel;
 		product = null;
+		pendingProduct = null;
 		manufacturerKey++;
+	}
+
+	function handleProductCreate(name: string) {
+		newProductModal.name = name;
+		newProductModal.open = true;
+	}
+
+	function confirmNewProduct() {
+		if (!newProductModal.categoryId) {
+			toast.error('Please select a category');
+			return;
+		}
+		product = { id: null, name: newProductModal.name };
+		pendingProduct = {
+			name: newProductModal.name,
+			categoryId: newProductModal.categoryId,
+			imageUrl: newProductModal.imageUrl
+		};
+		newProductModal.open = false;
+	}
+
+	function cancelNewProduct() {
+		newProductModal.open = false;
 	}
 
 	let quantity = $state(1);
@@ -85,6 +117,7 @@
 	function resetForm() {
 		manufacturer = null;
 		product = null;
+		pendingProduct = null;
 		manufacturerKey++;
 		items = Array.from({ length: quantity }, () => ({ serialNumber: '', assetTag: '' }));
 	}
@@ -103,8 +136,8 @@
 			toast.error('Please select a product');
 			return;
 		}
-		if (product.id === null && !newProductCategoryId) {
-			toast.error('Please select a category');
+		if (product.id === null && !pendingProduct?.categoryId) {
+			toast.error('Please complete the new product details');
 			return;
 		}
 
@@ -116,8 +149,9 @@
 				manufacturerId: manufacturer.id ?? undefined,
 				newManufacturerName: manufacturer.id ? undefined : manufacturer.name,
 				productId: product.id ?? undefined,
-				newProductName: product.id ? undefined : product.name,
-				categoryId: product.id ? undefined : newProductCategoryId,
+				newProductName: product.id ? undefined : (pendingProduct?.name ?? product.name),
+				newProductImageUrl: product.id ? undefined : pendingProduct?.imageUrl || undefined,
+				categoryId: product.id ? undefined : pendingProduct?.categoryId,
 				items: items.map((item) => ({
 					serialNumber: item.serialNumber || undefined,
 					assetTag: item.assetTag || undefined
@@ -217,23 +251,22 @@
 								<CreatableSelect
 									items={products}
 									value={product}
-									onchange={(sel) => (product = sel)}
+									onchange={(sel) => {
+										product = sel;
+										pendingProduct = null;
+									}}
+									oncreate={handleProductCreate}
 									placeholder="Search or create product…"
 								/>
+								{#if product && product.id === null && pendingProduct}
+									<p class="text-xs text-muted-foreground">
+										New product · {categories.find((c) => c.id === pendingProduct?.categoryId)
+											?.name ?? ''}
+										{#if pendingProduct.imageUrl}· has image{/if}
+									</p>
+								{/if}
 							</div>
 						{/key}
-					{/if}
-
-					{#if product && product.id === null}
-						<div class="space-y-2">
-							<Label for="category">Category</Label>
-							<CategorySelect
-								id="category"
-								{categories}
-								bind:value={newProductCategoryId}
-								placeholder="Select a category"
-							/>
-						</div>
 					{/if}
 
 					<div class="space-y-2">
@@ -318,3 +351,59 @@
 		</Card.Content>
 	</Card.Root>
 </div>
+
+<!-- New Product Modal -->
+{#if newProductModal.open}
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+		onkeydown={(e) => e.key === 'Escape' && cancelNewProduct()}
+	>
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div
+			class="mx-4 w-full max-w-md rounded-lg border bg-background p-6 shadow-lg"
+			onkeydown={(e) => e.stopPropagation()}
+		>
+			<h2 class="mb-1 text-lg font-semibold">Create New Product</h2>
+			<p class="mb-5 text-sm text-muted-foreground">
+				Fill in the details for the new product model.
+			</p>
+
+			<div class="space-y-4">
+				<div class="space-y-2">
+					<Label for="modal-product-name">Product Name</Label>
+					<Input
+						id="modal-product-name"
+						bind:value={newProductModal.name}
+						placeholder="e.g. SM58"
+						required
+					/>
+				</div>
+
+				<div class="space-y-2">
+					<Label>Category</Label>
+					<CategorySelect
+						{categories}
+						bind:value={newProductModal.categoryId}
+						placeholder="Select a category"
+					/>
+				</div>
+
+				<div class="space-y-2">
+					<Label for="modal-product-image">Image URL</Label>
+					<Input
+						id="modal-product-image"
+						type="url"
+						placeholder="https://…"
+						bind:value={newProductModal.imageUrl}
+					/>
+				</div>
+			</div>
+
+			<div class="mt-6 flex justify-end gap-3">
+				<Button type="button" variant="outline" onclick={cancelNewProduct}>Cancel</Button>
+				<Button type="button" onclick={confirmNewProduct}>Add Product</Button>
+			</div>
+		</div>
+	</div>
+{/if}
