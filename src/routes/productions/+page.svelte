@@ -19,6 +19,12 @@
 			accessor: (r: Production) => r.organization.name
 		},
 		{
+			key: 'kw',
+			label: 'KW',
+			sortable: true,
+			accessor: (r: Production) => (r.startDate ? getISOWeek(r.startDate) : 0)
+		},
+		{
 			key: 'startDate',
 			label: 'Start Date',
 			sortable: true,
@@ -38,9 +44,18 @@
 		}
 	];
 
+	function getISOWeek(d: Date): number {
+		const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+		date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+		const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+		return Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+	}
+
 	function formatDate(d: Date | null | undefined): string {
 		if (!d) return '—';
-		return new Date(d).toLocaleDateString();
+		const date = new Date(d);
+		const weekday = date.toLocaleDateString(undefined, { weekday: 'short' });
+		return `${weekday} ${date.toLocaleDateString()}`;
 	}
 </script>
 
@@ -90,7 +105,13 @@
 							<Card.Title class="text-lg">{prod.name}</Card.Title>
 							<Card.Description>
 								<span class="block">{prod.organization.name}</span>
-								{formatDate(prod.startDate)}{prod.endDate ? ` – ${formatDate(prod.endDate)}` : ''}
+								{#if prod.startDate}
+									<span class="block"
+										>KW {getISOWeek(prod.startDate)} · {formatDate(prod.startDate)}{prod.endDate
+											? ` – ${formatDate(prod.endDate)}`
+											: ''}</span
+									>
+								{/if}
 							</Card.Description>
 						</Card.Header>
 						<Card.Content>
@@ -107,6 +128,8 @@
 						<span class="font-medium">{prod.name}</span>
 					{:else if key === 'org'}
 						{prod.organization.name}
+					{:else if key === 'kw'}
+						{prod.startDate ? getISOWeek(prod.startDate) : '—'}
 					{:else if key === 'startDate'}
 						{formatDate(prod.startDate)}
 					{:else if key === 'endDate'}

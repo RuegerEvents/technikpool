@@ -1951,3 +1951,8 @@ msgstr "Bundle name"
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "← Back to Inventory"
 msgstr "← Back to Inventory"
+
+#. 0: getISOWeek(prod.startDate); 1: formatDate(prod.startDate); 2: prod.endDate ? ` – ${formatDate(prod.endDate)}` \\: ''
+#: src/routes/productions/+page.svelte
+msgid "KW {0} · {1}{2}"
+msgstr "KW {0} · {1}{2}"

@@ -24,7 +24,7 @@ export const getProductions = query(v.string(), async (organizationId: string) =
 				}
 			}
 		},
-		orderBy: { startDate: 'desc' }
+		orderBy: { startDate: 'asc' }
 	});
 });
 
@@ -542,6 +542,7 @@ export const getCalendarData = query(async () => {
 		include: {
 			product: { include: { manufacturer: true } },
 			organization: true,
+			bundle: { select: { id: true, name: true } },
 			productionItems: {
 				where: {
 					status: { in: ['APPROVED', 'CHECKED_OUT', 'PENDING'] },
