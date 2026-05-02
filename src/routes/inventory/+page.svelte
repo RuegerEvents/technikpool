@@ -206,7 +206,7 @@
 				<option value="">All Organizations</option>
 				{#each orgs as org (org.id)}<option value={org.id}>{org.name}</option>{/each}
 			</select>
-			<Button variant="outline" href={resolve('/assets/bundles')}>Bundles</Button>
+			<Button variant="outline" href={resolve('/assets/bundles/new')}>Add Bundle</Button>
 			<Button href={resolve('/assets/new')}>Add Asset</Button>
 		</div>
 	</div>
@@ -346,6 +346,13 @@
 											class="rounded-full border border-border px-1.5 py-0.5 text-xs text-muted-foreground"
 											>Bundle</span
 										>
+										<a
+											href={resolve(`/assets/bundles/${bundle.id}`)}
+											class="ml-auto text-xs text-muted-foreground hover:text-foreground"
+											onclick={(e) => e.stopPropagation()}
+										>
+											View →
+										</a>
 									</div>
 								</td>
 								<td class="px-4 py-3 text-muted-foreground">—</td>

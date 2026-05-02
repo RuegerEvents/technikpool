@@ -113,9 +113,8 @@ msgstr "Done"
 msgid "Add Equipment"
 msgstr "Add Equipment"
 
-#: src/routes/inventory/+page.svelte
-msgid "Bundles"
-msgstr "Bundles"
+#~ msgid "Bundles"
+#~ msgstr "Bundles"
 
 #~ msgid "Search by name, manufacturer, S/N…"
 #~ msgstr "Search by name, manufacturer, S/N…"
@@ -225,6 +224,7 @@ msgid "No crew members added yet."
 msgstr "No crew members added yet."
 
 #: src/routes/admin/users/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/auth/register/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
@@ -674,17 +674,14 @@ msgstr "Add {0} Assets"
 msgid "Bundle created!"
 msgstr "Bundle created!"
 
-#: src/routes/assets/bundles/+page.svelte
-msgid "Asset Bundles"
-msgstr "Asset Bundles"
+#~ msgid "Asset Bundles"
+#~ msgstr "Asset Bundles"
 
-#: src/routes/assets/bundles/+page.svelte
-msgid "Grouped sets of equipment that can be booked together."
-msgstr "Grouped sets of equipment that can be booked together."
+#~ msgid "Grouped sets of equipment that can be booked together."
+#~ msgstr "Grouped sets of equipment that can be booked together."
 
-#: src/routes/assets/bundles/+page.svelte
-msgid "New Bundle"
-msgstr "New Bundle"
+#~ msgid "New Bundle"
+#~ msgstr "New Bundle"
 
 #~ msgid "Bundle Name"
 #~ msgstr "Bundle Name"
@@ -707,22 +704,17 @@ msgstr "Creating…"
 msgid "Create Bundle"
 msgstr "Create Bundle"
 
-#: src/routes/assets/bundles/+page.svelte
-msgid "No bundles yet"
-msgstr "No bundles yet"
+#~ msgid "No bundles yet"
+#~ msgstr "No bundles yet"
 
-#: src/routes/assets/bundles/+page.svelte
-msgid "Create bundles to group equipment for easy booking."
-msgstr "Create bundles to group equipment for easy booking."
+#~ msgid "Create bundles to group equipment for easy booking."
+#~ msgstr "Create bundles to group equipment for easy booking."
 
-#: src/routes/assets/bundles/+page.svelte
-msgid "Create your first bundle"
-msgstr "Create your first bundle"
+#~ msgid "Create your first bundle"
+#~ msgstr "Create your first bundle"
 
-#. 0: bundle.assets.length !== 1 ? 's' \\: ''
-#: src/routes/assets/bundles/+page.svelte
-msgid "item{0}"
-msgstr "item{0}"
+#~ msgid "item{0}"
+#~ msgstr "item{0}"
 
 #: src/routes/auth/login/+page.svelte
 msgid "Login to Technikpool"
@@ -1119,6 +1111,7 @@ msgstr "Tag: {0}"
 
 #: src/routes/inventory/+page.svelte
 #: src/routes/inventory/+page.svelte
+#: src/routes/inventory/+page.svelte
 msgid "View →"
 msgstr "View →"
 
@@ -1130,9 +1123,8 @@ msgstr "Please select a manufacturer and product"
 msgid "Asset created and added to bundle"
 msgstr "Asset created and added to bundle"
 
-#: src/routes/assets/bundles/new/+page.svelte
-msgid "← Back to Bundles"
-msgstr "← Back to Bundles"
+#~ msgid "← Back to Bundles"
+#~ msgstr "← Back to Bundles"
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "Bundle Details"
@@ -1224,6 +1216,7 @@ msgstr "Asset"
 #~ msgid "Update serial, tag, status, and location."
 #~ msgstr "Update serial, tag, status, and location."
 
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
@@ -1247,6 +1240,7 @@ msgstr "Location"
 msgid "Image URL"
 msgstr "Image URL"
 
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
@@ -1416,9 +1410,8 @@ msgstr "No locations yet."
 #~ msgid "Calendar – Technikpool"
 #~ msgstr "Calendar – Technikpool"
 
-#: src/routes/assets/bundles/+page.svelte
-msgid "Asset Bundles | Technikpool"
-msgstr "Asset Bundles | Technikpool"
+#~ msgid "Asset Bundles | Technikpool"
+#~ msgstr "Asset Bundles | Technikpool"
 
 #: src/routes/inventory/+page.svelte
 msgid "Inventory | Technikpool"
@@ -1781,6 +1774,7 @@ msgid "All Categories"
 msgstr "All Categories"
 
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
@@ -1821,9 +1815,8 @@ msgstr "Select a category"
 msgid "{0} — Category: <0/>{1}"
 msgstr "{0} — Category: <0/>{1}"
 
-#: src/routes/assets/bundles/+page.svelte
-msgid "Category:"
-msgstr "Category:"
+#~ msgid "Category:"
+#~ msgstr "Category:"
 
 #: src/routes/inventory/[id]/+page.svelte
 msgid "Asset created"
@@ -1938,3 +1931,23 @@ msgstr "Bundle location updated"
 #: src/routes/assets/bundles/[id]/+page.svelte
 msgid "No location"
 msgstr "No location"
+
+#: src/routes/inventory/+page.svelte
+msgid "Add Bundle"
+msgstr "Add Bundle"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Bundle updated"
+msgstr "Bundle updated"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Cancel Edit"
+msgstr "Cancel Edit"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Bundle name"
+msgstr "Bundle name"
+
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "← Back to Inventory"
+msgstr "← Back to Inventory"

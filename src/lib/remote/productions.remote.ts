@@ -384,6 +384,7 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	});
 	const existingAssetIds = new Set(existingItems.map((i) => i.assetId));
 
+	if (bundle.assets.length === 0) throw new Error('Bundle has no assets');
 	let newAssets = bundle.assets.filter((a) => !existingAssetIds.has(a.id));
 	if (newAssets.length === 0) throw new Error('All bundle assets are already in this production');
 
@@ -435,7 +436,10 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 			userId: user.id,
 			productionId: data.productionId,
 			action: 'ADDED_TO_PRODUCTION',
-			notes: `Added via bundle "${bundle.name}"`
+			data: {
+				productionId: data.productionId,
+				productionName: production.name
+			}
 		}))
 	});
 

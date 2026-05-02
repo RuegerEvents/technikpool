@@ -1,6 +1,8 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
 	import { CategorySelect } from '$lib/components/ui/category-select';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import {
@@ -22,6 +24,9 @@
 	let searchQuery = $state('');
 	let working = $state(false);
 	let categoryFilter = $state('');
+	let editMode = $state(false);
+	let editName = $state('');
+	let editCategoryId = $state('');
 
 	let bundle = $derived(await getBundle(bundleId));
 	let allAssets = $derived(await getAssets());
@@ -51,6 +56,20 @@
 		try {
 			await removeAssetFromBundle({ bundleId, assetId });
 			toast.success('Asset removed from bundle');
+		} catch (err) {
+			toast.error((err as Error).message);
+		} finally {
+			working = false;
+		}
+	}
+
+	async function handleEditSave() {
+		if (!editName.trim()) return;
+		working = true;
+		try {
+			await updateBundle({ bundleId, name: editName.trim(), categoryId: editCategoryId });
+			editMode = false;
+			toast.success('Bundle updated');
 		} catch (err) {
 			toast.error((err as Error).message);
 		} finally {
@@ -116,12 +135,40 @@
 				allowEmpty
 				allLabel="All Categories"
 			/>
-			<Button variant="outline" href={resolve('/assets/bundles')}>Back</Button>
+			<Button
+				variant="outline"
+				onclick={() => {
+					if (!editMode) {
+						editName = bundle.name;
+						editCategoryId = bundle.categoryId;
+					}
+					editMode = !editMode;
+				}}
+			>
+				{editMode ? 'Cancel Edit' : 'Edit'}
+			</Button>
+			<Button variant="outline" href={resolve('/inventory')}>Back</Button>
 			<Button onclick={() => (showAddModal = !showAddModal)}>
 				{showAddModal ? 'Close' : 'Add Assets'}
 			</Button>
 		</div>
 	</div>
+
+	{#if editMode}
+		<Card.Root class="bg-muted/30">
+			<Card.Content class="flex flex-wrap items-end gap-4 pt-6">
+				<div class="space-y-2">
+					<Label for="edit-name">Name</Label>
+					<Input id="edit-name" bind:value={editName} class="w-64" placeholder="Bundle name" />
+				</div>
+				<div class="space-y-2">
+					<Label>Category</Label>
+					<CategorySelect {categories} bind:value={editCategoryId} class="w-56" />
+				</div>
+				<Button onclick={handleEditSave} disabled={working || !editName.trim()}>Save</Button>
+			</Card.Content>
+		</Card.Root>
+	{/if}
 
 	{#if showAddModal}
 		<Card.Root class="bg-muted/30">
@@ -141,6 +188,7 @@
 				{@const q = searchQuery.toLowerCase().trim()}
 				{@const available = allAssets.filter((a) => {
 					if (bundleAssetIds.has(a.id)) return false;
+					if (a.bundle) return false;
 					if (!q) return true;
 					return (
 						a.product.name.toLowerCase().includes(q) ||

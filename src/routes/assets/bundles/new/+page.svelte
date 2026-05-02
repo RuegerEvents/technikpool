@@ -238,8 +238,8 @@
 
 <div class="space-y-6">
 	<div>
-		<Button variant="ghost" href={resolve('/assets/bundles')} class="mb-2 -ml-3">
-			← Back to Bundles
+		<Button variant="ghost" href={resolve('/inventory')} class="mb-2 -ml-3">
+			← Back to Inventory
 		</Button>
 		<h1 class="text-3xl font-bold tracking-tight">Create Bundle</h1>
 	</div>
@@ -416,7 +416,7 @@
 		</Card.Root>
 
 		<div class="flex justify-end gap-3">
-			<Button type="button" variant="outline" href={resolve('/assets/bundles')}>Cancel</Button>
+			<Button type="button" variant="outline" href={resolve('/inventory')}>Cancel</Button>
 			<Button type="submit" disabled={saving || !bundleName.trim() || !selectedOrgId}>
 				{saving ? 'Creating…' : 'Create Bundle'}
 			</Button>

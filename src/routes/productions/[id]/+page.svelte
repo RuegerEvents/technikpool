@@ -63,28 +63,32 @@
 	};
 
 	let allAddRows = $derived.by((): (BundleRow | AssetRow)[] => [
-		...allBundles.map(
-			(b): BundleRow => ({
-				kind: 'bundle',
-				id: b.id,
-				name: b.name,
-				orgName: b.organization.name,
-				count: b.assets.length,
-				assetIds: b.assets.map((a) => a.id)
-			})
-		),
-		...allAssets.map(
-			(a): AssetRow => ({
-				kind: 'asset',
-				id: a.id,
-				productName: a.product.name,
-				manufacturerName: a.product.manufacturer.name,
-				serialNumber: a.serialNumber,
-				assetTag: a.assetTag,
-				orgName: a.organization.name,
-				status: a.status
-			})
-		)
+		...allBundles
+			.filter((b) => b.assets.length > 0 && !b.assets.every((a) => addedAssetIds.has(a.id)))
+			.map(
+				(b): BundleRow => ({
+					kind: 'bundle',
+					id: b.id,
+					name: b.name,
+					orgName: b.organization.name,
+					count: b.assets.length,
+					assetIds: b.assets.map((a) => a.id)
+				})
+			),
+		...allAssets
+			.filter((a) => !a.bundle)
+			.map(
+				(a): AssetRow => ({
+					kind: 'asset',
+					id: a.id,
+					productName: a.product.name,
+					manufacturerName: a.product.manufacturer.name,
+					serialNumber: a.serialNumber,
+					assetTag: a.assetTag,
+					orgName: a.organization.name,
+					status: a.status
+				})
+			)
 	]);
 
 	let filteredAddRows = $derived.by(() => {
