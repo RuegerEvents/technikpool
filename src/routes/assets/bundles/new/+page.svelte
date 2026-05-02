@@ -198,6 +198,12 @@
 		MAINTENANCE: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
 		BROKEN: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
 	};
+
+	const statusLabels: Record<string, string> = {
+		AVAILABLE: 'Available',
+		MAINTENANCE: 'Maintenance',
+		BROKEN: 'Broken'
+	};
 </script>
 
 <svelte:head><title>Create Bundle | Technikpool</title></svelte:head>
@@ -289,7 +295,7 @@
 												<span
 													class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {statusClass[
 														asset.status
-													] ?? ''}">{asset.status}</span
+													] ?? ''}">{statusLabels[asset.status] ?? asset.status}</span
 												>
 											</td>
 											<td class="px-3 py-2 text-right">
@@ -348,7 +354,7 @@
 												<span
 													class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {statusClass[
 														asset.status
-													] ?? ''}">{asset.status}</span
+													] ?? ''}">{statusLabels[asset.status] ?? asset.status}</span
 												>
 											</td>
 											<td class="px-3 py-2 text-right">

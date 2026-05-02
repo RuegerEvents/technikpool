@@ -13,6 +13,13 @@
 	let newOrgName = $state('');
 	let creating = $state(false);
 
+	const roleLabels: Record<string, string> = {
+		OWNER: 'Owner',
+		ADMIN: 'Admin',
+		MEMBER: 'Member',
+		VIEWER: 'Viewer'
+	};
+
 	async function handleCreateOrg(e: Event) {
 		e.preventDefault();
 		if (!newOrgName) return;
@@ -83,7 +90,7 @@
 									<p class="font-medium">{org.name}</p>
 									<p class="text-sm text-muted-foreground">
 										{#if org.role}
-											Role: {org.role}
+											Role: {roleLabels[org.role] ?? org.role}
 										{:else if data.isAdmin && 'memberCount' in org}
 											{org.memberCount} {org.memberCount === 1 ? 'member' : 'members'}
 										{/if}

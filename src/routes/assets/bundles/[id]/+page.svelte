@@ -49,6 +49,12 @@
 		MAINTENANCE: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
 		BROKEN: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
 	};
+
+	const statusLabels: Record<string, string> = {
+		AVAILABLE: 'Available',
+		MAINTENANCE: 'Maintenance',
+		BROKEN: 'Broken'
+	};
 </script>
 
 <svelte:head><title>{bundle.name} | Technikpool</title></svelte:head>
@@ -167,8 +173,8 @@
 											asset.status
 										] ?? ''}"
 									>
-										{asset.status}
-									</span>
+										{statusLabels[asset.status] ?? asset.status}
+</span>
 								</td>
 								<td class="px-4 py-3 text-sm text-muted-foreground">{asset.organization.name}</td>
 								<td class="px-4 py-3 text-right">

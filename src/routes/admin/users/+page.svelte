@@ -9,6 +9,13 @@
 
 	let users = $derived(await getAllUsers());
 
+	const roleLabels: Record<string, string> = {
+		OWNER: 'Owner',
+		ADMIN: 'Admin',
+		MEMBER: 'Member',
+		VIEWER: 'Viewer'
+	};
+
 	async function handleToggleAdmin(userId: string, currentIsAdmin: boolean, name: string) {
 		try {
 			await setUserAdmin({ userId, isAdmin: !currentIsAdmin });
@@ -76,7 +83,7 @@
 												class="rounded border px-1.5 py-0.5 text-xs hover:bg-muted"
 											>
 												{m.organization.name}
-												<span class="text-muted-foreground">({m.role})</span>
+												<span class="text-muted-foreground">({roleLabels[m.role] ?? m.role})</span>
 											</a>
 										{/each}
 									</div>

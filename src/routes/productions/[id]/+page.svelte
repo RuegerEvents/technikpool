@@ -275,6 +275,13 @@
 		RETURNED: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
 	};
 
+	const statusLabels: Record<string, string> = {
+		APPROVED: 'Approved',
+		PENDING: 'Pending',
+		CHECKED_OUT: 'Checked out',
+		RETURNED: 'Returned'
+	};
+
 	const assetStatusClass: Record<string, string> = {
 		AVAILABLE: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
 		MAINTENANCE: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
@@ -692,7 +699,7 @@
 												<span
 													class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {statusClass[
 														item.status
-													] ?? ''}">{item.status}</span
+													] ?? ''}">{statusLabels[item.status] ?? item.status}</span
 												>
 												<button
 													type="button"

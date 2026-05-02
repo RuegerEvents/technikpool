@@ -34,6 +34,8 @@ msgstr "Kalender"
 
 #: src/routes/+layout.svelte
 #: src/routes/admin/users/+page.svelte
+#: src/routes/admin/users/+page.svelte
+#: src/routes/orgs/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
@@ -423,15 +425,24 @@ msgstr "Tag"
 msgid "Total"
 msgstr "Gesamt"
 
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/inventory/+page.svelte
 #: src/routes/inventory/+page.svelte
 #: src/routes/inventory/+page.svelte
 msgid "Available"
 msgstr "Verfügbar"
 
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/inventory/+page.svelte
 #: src/routes/inventory/+page.svelte
 msgid "Maintenance"
 msgstr "Wartung"
 
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/inventory/+page.svelte
 #: src/routes/inventory/+page.svelte
 #: src/routes/inventory/+page.svelte
 msgid "Broken"
@@ -544,7 +555,7 @@ msgstr "Noch keine Organisationen vorhanden."
 msgid "You are not a member of any organization yet."
 msgstr "Sie sind noch Mitglied keiner Organisation."
 
-#. 0: org.role
+#. 0: roleLabels[org.role] ?? org.role
 #: src/routes/orgs/+page.svelte
 msgid "Role: {0}"
 msgstr "Rolle: {0}"
@@ -867,18 +878,24 @@ msgstr "Keine Ergebnisse für „{0}\""
 msgid "Role updated"
 msgstr "Rolle aktualisiert"
 
+#: src/routes/admin/users/+page.svelte
+#: src/routes/orgs/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Owner"
 msgstr "Inhaber"
 
+#: src/routes/admin/users/+page.svelte
+#: src/routes/orgs/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Member"
 msgstr "Mitglied"
 
+#: src/routes/admin/users/+page.svelte
+#: src/routes/orgs/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
@@ -1170,9 +1187,11 @@ msgid "{0} item{1}"
 msgstr "{0} Gerät(e)"
 
 #: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 msgid "Pending"
 msgstr "Ausstehend"
 
+#: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Approved"
 msgstr "Genehmigt"
@@ -1182,6 +1201,7 @@ msgid "Out"
 msgstr "Ausgecheckt"
 
 #: src/routes/checkout/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Returned"
 msgstr "Zurückgegeben"
@@ -1568,6 +1588,7 @@ msgid "Assigned to location"
 msgstr "Standort zugewiesen"
 
 #: src/routes/checkout/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 msgid "Checked out"
 msgstr "Ausgecheckt"
 
