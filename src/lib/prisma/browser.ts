@@ -53,6 +53,11 @@ export type OrgMembership = Prisma.OrgMembershipModel
  */
 export type Manufacturer = Prisma.ManufacturerModel
 /**
+ * Model Category
+ * 
+ */
+export type Category = Prisma.CategoryModel
+/**
  * Model Product
  * 
  */

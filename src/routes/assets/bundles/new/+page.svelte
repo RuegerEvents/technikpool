@@ -4,9 +4,11 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
+	import { CategorySelect } from '$lib/components/ui/category-select';
 	import { Dialog } from 'bits-ui';
 	import {
 		getAssets,
+		getCategories,
 		getManufacturers,
 		getLocations,
 		getProducts,
@@ -23,6 +25,7 @@
 	let bundleName = $state('');
 	let bundleDescription = $state('');
 	let selectedOrgId = $state('');
+	let bundleCategoryId = $state('');
 	let saving = $state(false);
 
 	// Asset picker
@@ -42,6 +45,13 @@
 	// Remote data
 	let orgs = $derived(await getMyOrgs());
 	let manufacturers = $derived(await getManufacturers());
+	let categories = $derived(await getCategories());
+
+	$effect(() => {
+		if (bundleCategoryId) return;
+		const misc = categories.find((c) => c.name.toLowerCase() === 'miscellaneous');
+		if (misc) bundleCategoryId = misc.id;
+	});
 
 	$effect(() => {
 		if (!selectedOrgId && orgs[0]) selectedOrgId = orgs[0].id;
@@ -92,6 +102,7 @@
 	let modalLocationId = $state('');
 	let modalManufacturer = $state<SelectionOrNew>(null);
 	let modalProduct = $state<SelectionOrNew>(null);
+	let modalCategoryId = $state('');
 	let modalManufacturerKey = $state(0);
 	let modalSerial = $state('');
 	let modalTag = $state('');
@@ -124,10 +135,17 @@
 	function resetModal() {
 		modalManufacturer = null;
 		modalProduct = null;
+		modalCategoryId = '';
 		modalManufacturerKey++;
 		modalSerial = '';
 		modalTag = '';
 	}
+
+	$effect(() => {
+		if (modalCategoryId) return;
+		const misc = categories.find((c) => c.name.toLowerCase() === 'miscellaneous');
+		if (misc) modalCategoryId = misc.id;
+	});
 
 	async function handleNewAsset(e: Event) {
 		e.preventDefault();
@@ -139,6 +157,10 @@
 			toast.error('Please select a manufacturer and product');
 			return;
 		}
+		if (modalProduct.id === null && !modalCategoryId) {
+			toast.error('Please select a category');
+			return;
+		}
 		modalSaving = true;
 		try {
 			const created = await createAssets({
@@ -148,6 +170,7 @@
 				newManufacturerName: modalManufacturer.id ? undefined : modalManufacturer.name,
 				productId: modalProduct.id ?? undefined,
 				newProductName: modalProduct.id ? undefined : modalProduct.name,
+				categoryId: modalProduct.id ? undefined : modalCategoryId,
 				items: [{ serialNumber: modalSerial || undefined, assetTag: modalTag || undefined }]
 			});
 			const asset = created[0];
@@ -175,12 +198,17 @@
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
 		if (!bundleName.trim() || !selectedOrgId) return;
+		if (!bundleCategoryId) {
+			toast.error('Please select a category');
+			return;
+		}
 		saving = true;
 		try {
 			const bundle = await createBundle({
 				name: bundleName.trim(),
 				description: bundleDescription.trim() || undefined,
-				organizationId: selectedOrgId
+				organizationId: selectedOrgId,
+				categoryId: bundleCategoryId
 			});
 			await Promise.all(
 				selectedAssets.map((a) => addAssetToBundle({ bundleId: bundle.id, assetId: a.id }))
@@ -243,6 +271,15 @@
 						>
 							{#each orgs as org (org.id)}<option value={org.id}>{org.name}</option>{/each}
 						</select>
+					</div>
+					<div class="space-y-2">
+						<Label for="bundle-category">Category</Label>
+						<CategorySelect
+							id="bundle-category"
+							{categories}
+							bind:value={bundleCategoryId}
+							placeholder="Select a category"
+						/>
 					</div>
 				</div>
 				<div class="space-y-2">
@@ -454,6 +491,18 @@
 							/>
 						</div>
 					{/key}
+				{/if}
+
+				{#if modalProduct && modalProduct.id === null}
+					<div class="space-y-2">
+						<Label for="modal-category">Category</Label>
+						<CategorySelect
+							id="modal-category"
+							{categories}
+							bind:value={modalCategoryId}
+							placeholder="Select a category"
+						/>
+					</div>
 				{/if}
 
 				<div class="grid grid-cols-2 gap-3">

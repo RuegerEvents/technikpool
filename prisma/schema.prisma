@@ -129,11 +129,25 @@ model Manufacturer {
   products  Product[]
 }
 
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String   @default("#ffffff")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+  bundles  AssetBundle[]
+}
+
 model Product {
   id             String       @id @default(cuid())
   name           String
   manufacturerId String
   manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
+  categoryId     String
+  category       Category     @relation(fields: [categoryId], references: [id])
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   assets         Asset[]
@@ -197,6 +211,8 @@ model AssetBundle {
   description     String?
   organizationId  String
   organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  categoryId      String
+  category        Category         @relation(fields: [categoryId], references: [id])
   assets          Asset[]
   productionItems ProductionItem[]
 

@@ -4,8 +4,10 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
+	import { CategorySelect } from '$lib/components/ui/category-select';
 	import {
 		getManufacturers,
+		getCategories,
 		getProducts,
 		getLocations,
 		createAssets
@@ -41,6 +43,14 @@
 
 	let manufacturer = $state<SelectionOrNew>(null);
 	let product = $state<SelectionOrNew>(null);
+	let newProductCategoryId = $state('');
+	let categories = $derived(await getCategories());
+
+	$effect(() => {
+		if (newProductCategoryId) return;
+		const misc = categories.find((c) => c.name.toLowerCase() === 'miscellaneous');
+		if (misc) newProductCategoryId = misc.id;
+	});
 
 	// When manufacturer changes, reset product
 	let manufacturerKey = $state(0);
@@ -93,6 +103,10 @@
 			toast.error('Please select a product');
 			return;
 		}
+		if (product.id === null && !newProductCategoryId) {
+			toast.error('Please select a category');
+			return;
+		}
 
 		saving = true;
 		try {
@@ -103,6 +117,7 @@
 				newManufacturerName: manufacturer.id ? undefined : manufacturer.name,
 				productId: product.id ?? undefined,
 				newProductName: product.id ? undefined : product.name,
+				categoryId: product.id ? undefined : newProductCategoryId,
 				items: items.map((item) => ({
 					serialNumber: item.serialNumber || undefined,
 					assetTag: item.assetTag || undefined
@@ -207,6 +222,18 @@
 								/>
 							</div>
 						{/key}
+					{/if}
+
+					{#if product && product.id === null}
+						<div class="space-y-2">
+							<Label for="category">Category</Label>
+							<CategorySelect
+								id="category"
+								{categories}
+								bind:value={newProductCategoryId}
+								placeholder="Select a category"
+							/>
+						</div>
 					{/if}
 
 					<div class="space-y-2">

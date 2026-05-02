@@ -4,7 +4,6 @@ import * as v from 'valibot';
 import { getAsset, getAssets } from './assets.remote';
 import { getProduction } from './productions.remote';
 
-
 async function requireAuth() {
 	const event = await getRequestEvent();
 	if (!event?.locals.user) throw new Error('Unauthorized');

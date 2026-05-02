@@ -86,11 +86,7 @@
 						<option value={t.id}>{t.label}</option>
 					{/each}
 				</select>
-				<Button
-					onclick={handleCheckout}
-					disabled={!targetId || working}
-					size="sm"
-				>
+				<Button onclick={handleCheckout} disabled={!targetId || working} size="sm">
 					{working ? 'Checking out…' : 'Checkout'}
 				</Button>
 			</div>

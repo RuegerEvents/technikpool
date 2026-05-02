@@ -1,7 +1,9 @@
 <script lang="ts">
-	import { getAssets } from '$lib/remote/assets.remote';
+	import { getAssets, getCategories } from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { Button } from '$lib/components/ui/button';
+	import { CategorySelect } from '$lib/components/ui/category-select';
+	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import { resolve } from '$app/paths';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import CheckoutBar from '$lib/components/ui/checkout-bar.svelte';
@@ -9,17 +11,22 @@
 	let filterOrgId = $state('');
 	let searchQuery = $state('');
 	let statusFilter = $state('');
+	let categoryFilter = $state('');
 	let expanded = new SvelteMap<string, boolean>();
 	let selectedAssetIds = new SvelteSet<string>();
 
 	let orgs = $derived(await getMyOrgs());
 	let assets = $derived(await getAssets(filterOrgId || undefined));
+	let categories = $derived(await getCategories());
 
 	type Asset = Awaited<ReturnType<typeof getAssets>>[number];
 	type Group = {
 		productId: string;
 		name: string;
 		manufacturerName: string;
+		categoryId: string;
+		categoryName: string;
+		categoryColor: string;
 		available: number;
 		maintenance: number;
 		broken: number;
@@ -27,7 +34,9 @@
 	};
 
 	let visibleAssets = $derived(
-		!statusFilter ? assets : assets.filter((a) => a.status === statusFilter)
+		assets
+			.filter((a) => (!statusFilter ? true : a.status === statusFilter))
+			.filter((a) => (!categoryFilter ? true : a.product.categoryId === categoryFilter))
 	);
 
 	let groups = $derived(
@@ -39,6 +48,9 @@
 						productId: pid,
 						name: asset.product.name,
 						manufacturerName: asset.product.manufacturer.name,
+						categoryId: asset.product.categoryId,
+						categoryName: asset.product.category.name,
+						categoryColor: asset.product.category.color,
 						available: 0,
 						maintenance: 0,
 						broken: 0,
@@ -63,6 +75,7 @@
 					(g) =>
 						g.name.toLowerCase().includes(searchTrimmed) ||
 						g.manufacturerName.toLowerCase().includes(searchTrimmed) ||
+						g.categoryName.toLowerCase().includes(searchTrimmed) ||
 						g.assets.some(
 							(a) =>
 								(a.serialNumber?.toLowerCase().includes(searchTrimmed) ?? false) ||
@@ -93,7 +106,11 @@
 
 	function indeterminate(node: HTMLInputElement, value: boolean) {
 		node.indeterminate = value;
-		return { update(v: boolean) { node.indeterminate = v; } };
+		return {
+			update(v: boolean) {
+				node.indeterminate = v;
+			}
+		};
 	}
 
 	const statusFilterOptions = [
@@ -144,6 +161,13 @@
 			placeholder="Search by product, manufacturer, S/N, tag, bundle…"
 			class="h-10 w-64 rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
 		/>
+		<CategorySelect
+			class="w-64"
+			{categories}
+			bind:value={categoryFilter}
+			allowEmpty
+			allLabel="All Categories"
+		/>
 		<div class="flex items-center gap-1">
 			{#each statusFilterOptions as [val, label] (val)}
 				<button
@@ -151,8 +175,8 @@
 					onclick={() => (statusFilter = val)}
 					class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {statusFilter === val
 						? 'bg-primary text-primary-foreground'
-						: 'bg-muted text-muted-foreground hover:bg-muted/70'}"
-				>{label}</button>
+						: 'bg-muted text-muted-foreground hover:bg-muted/70'}">{label}</button
+				>
 			{/each}
 		</div>
 	</div>
@@ -191,6 +215,7 @@
 						</th>
 						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Product</th>
 						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Manufacturer</th>
+						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
 						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Total</th>
 						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Available</th>
 						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Maint.</th>
@@ -201,8 +226,7 @@
 					{#each filteredGroups as group (group.productId)}
 						{@const groupAssetIds = group.assets.map((a) => a.id)}
 						{@const allInGroupSelected =
-							groupAssetIds.length > 0 &&
-							groupAssetIds.every((id) => selectedAssetIds.has(id))}
+							groupAssetIds.length > 0 && groupAssetIds.every((id) => selectedAssetIds.has(id))}
 						<tr
 							class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
 							onclick={() => toggle(group.productId)}
@@ -246,6 +270,9 @@
 								</div>
 							</td>
 							<td class="px-4 py-3 text-muted-foreground">{group.manufacturerName}</td>
+							<td class="px-4 py-3">
+								<CategoryPill name={group.categoryName} color={group.categoryColor} />
+							</td>
 							<td class="px-4 py-3 text-right font-mono tabular-nums">
 								{group.assets.length}
 							</td>

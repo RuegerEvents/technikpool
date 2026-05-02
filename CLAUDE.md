@@ -163,6 +163,10 @@ Located in `src/lib/components/ui/`: `button`, `card`, `input`, `label`, `creata
 
 # Code Style Guidelines
 
+## Prettier
+
+**MANDATORY:** Use Prettier for consistent code formatting. Run `npx prettier --write .` after changes to format all files. Run `npm run lint` to check for linting errors.
+
 ## Svelte 5 Reactivity
 
 **DO** use `$derived(await getData())` for async data — no manual loading state, no `onMount`, no `$effect` for fetching:

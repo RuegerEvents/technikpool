@@ -1,8 +1,11 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
+	import { CategorySelect } from '$lib/components/ui/category-select';
+	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import {
 		getBundle,
+		getCategories,
 		getAssets,
 		addAssetToBundle,
 		removeAssetFromBundle
@@ -16,9 +19,17 @@
 	let showAddModal = $state(false);
 	let searchQuery = $state('');
 	let working = $state(false);
+	let categoryFilter = $state('');
 
 	let bundle = $derived(await getBundle(bundleId));
 	let allAssets = $derived(await getAssets());
+	let categories = $derived(await getCategories());
+
+	let visibleBundleAssets = $derived(
+		!categoryFilter
+			? bundle.assets
+			: bundle.assets.filter((a) => a.product.categoryId === categoryFilter)
+	);
 
 	async function handleAdd(assetId: string) {
 		working = true;
@@ -64,10 +75,21 @@
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">{bundle.name}</h1>
 			<p class="text-muted-foreground">
-				{bundle.organization.name}{bundle.description ? ` — ${bundle.description}` : ''}
+				{bundle.organization.name} — Category:
+				<CategoryPill
+					name={bundle.category.name}
+					color={bundle.category.color}
+				/>{bundle.description ? ` — ${bundle.description}` : ''}
 			</p>
 		</div>
 		<div class="flex gap-2">
+			<CategorySelect
+				class="w-56"
+				{categories}
+				bind:value={categoryFilter}
+				allowEmpty
+				allLabel="All Categories"
+			/>
 			<Button variant="outline" href={resolve('/assets/bundles')}>Back</Button>
 			<Button onclick={() => (showAddModal = !showAddModal)}>
 				{showAddModal ? 'Close' : 'Add Assets'}
@@ -155,6 +177,7 @@
 						<tr class="border-b bg-muted/30">
 							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Product</th>
 							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Manufacturer</th>
+							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
 							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Serial Number</th>
 							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
 							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Org</th>
@@ -162,10 +185,16 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each bundle.assets as asset (asset.id)}
+						{#each visibleBundleAssets as asset (asset.id)}
 							<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
 								<td class="px-4 py-3 font-medium">{asset.product.name}</td>
 								<td class="px-4 py-3 text-muted-foreground">{asset.product.manufacturer.name}</td>
+								<td class="px-4 py-3">
+									<CategoryPill
+										name={asset.product.category.name}
+										color={asset.product.category.color}
+									/>
+								</td>
 								<td class="px-4 py-3 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
 								<td class="px-4 py-3">
 									<span
@@ -174,7 +203,7 @@
 										] ?? ''}"
 									>
 										{statusLabels[asset.status] ?? asset.status}
-</span>
+									</span>
 								</td>
 								<td class="px-4 py-3 text-sm text-muted-foreground">{asset.organization.name}</td>
 								<td class="px-4 py-3 text-right">

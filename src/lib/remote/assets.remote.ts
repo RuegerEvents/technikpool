@@ -31,7 +31,7 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 	return await prisma.asset.findMany({
 		where: { organizationId: { in: queryOrgIds } },
 		include: {
-			product: { include: { manufacturer: true } },
+			product: { include: { manufacturer: true, category: true } },
 			location: true,
 			organization: true,
 			bundle: { select: { id: true, name: true } }
@@ -48,7 +48,7 @@ export const getAsset = query(v.string(), async (assetId: string) => {
 	const asset = await prisma.asset.findUniqueOrThrow({
 		where: { id: assetId },
 		include: {
-			product: { include: { manufacturer: true } },
+			product: { include: { manufacturer: true, category: true } },
 			location: true,
 			organization: true,
 			bundle: { select: { id: true, name: true, organizationId: true } }
@@ -97,6 +97,11 @@ export const getInventorySummary = query(
 export const getManufacturers = query(async () => {
 	await requireAuth();
 	return await prisma.manufacturer.findMany({ orderBy: { name: 'asc' } });
+});
+
+export const getCategories = query(async () => {
+	await requireAuth();
+	return await prisma.category.findMany({ orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }] });
 });
 
 export const getLocations = query(v.optional(v.string()), async (organizationId?: string) => {
@@ -231,7 +236,7 @@ export const getProducts = query(v.optional(v.string()), async (manufacturerId?:
 	return await prisma.product.findMany({
 		where: manufacturerId ? { manufacturerId } : undefined,
 		orderBy: { name: 'asc' },
-		include: { manufacturer: true }
+		include: { manufacturer: true, category: true }
 	});
 });
 
@@ -240,6 +245,7 @@ const createAssetsSchema = v.object({
 	locationId: v.string(),
 	productId: v.optional(v.string()),
 	newProductName: v.optional(v.string()),
+	categoryId: v.optional(v.string()),
 	manufacturerId: v.optional(v.string()),
 	newManufacturerName: v.optional(v.string()),
 	items: v.array(
@@ -270,8 +276,10 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 
 	let productId = data.productId;
 	if (data.newProductName && !productId && manufacturerId) {
+		if (!data.categoryId) throw new Error('Category is required when creating a new product');
+		await prisma.category.findUniqueOrThrow({ where: { id: data.categoryId } });
 		const p = await prisma.product.create({
-			data: { name: data.newProductName, manufacturerId }
+			data: { name: data.newProductName, manufacturerId, categoryId: data.categoryId }
 		});
 		productId = p.id;
 		getProducts(manufacturerId).refresh();
@@ -296,7 +304,7 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 						create: { userId: user.id, action: 'CREATED', notes: 'Asset initialized' }
 					}
 				},
-				include: { product: { include: { manufacturer: true } }, location: true }
+				include: { product: { include: { manufacturer: true, category: true } }, location: true }
 			})
 		)
 	);
@@ -455,8 +463,9 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 		where: { organizationId: { in: queryOrgIds } },
 		include: {
 			organization: true,
+			category: true,
 			assets: {
-				include: { product: { include: { manufacturer: true } } }
+				include: { product: { include: { manufacturer: true, category: true } } }
 			}
 		},
 		orderBy: { name: 'asc' }
@@ -469,9 +478,10 @@ export const getBundle = query(v.string(), async (id: string) => {
 		where: { id },
 		include: {
 			organization: true,
+			category: true,
 			assets: {
 				include: {
-					product: { include: { manufacturer: true } },
+					product: { include: { manufacturer: true, category: true } },
 					organization: true
 				}
 			}
@@ -482,7 +492,8 @@ export const getBundle = query(v.string(), async (id: string) => {
 const createBundleSchema = v.object({
 	name: v.string(),
 	description: v.optional(v.string()),
-	organizationId: v.string()
+	organizationId: v.string(),
+	categoryId: v.string()
 });
 
 export const createBundle = command(createBundleSchema, async (data) => {
@@ -493,9 +504,15 @@ export const createBundle = command(createBundleSchema, async (data) => {
 	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
 		throw new Error('Unauthorized');
 	}
+	await prisma.category.findUniqueOrThrow({ where: { id: data.categoryId } });
 	const bundle = await prisma.assetBundle.create({
-		data: { name: data.name, description: data.description, organizationId: data.organizationId },
-		include: { organization: true, assets: true }
+		data: {
+			name: data.name,
+			description: data.description,
+			organizationId: data.organizationId,
+			categoryId: data.categoryId
+		},
+		include: { organization: true, assets: true, category: true }
 	});
 	getBundles(data.organizationId).refresh();
 	getBundles().refresh();

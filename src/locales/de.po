@@ -842,6 +842,7 @@ msgstr "Enter"
 msgid "ArrowUp"
 msgstr "ArrowUp"
 
+#: src/lib/components/ui/category-select/category-select.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 msgid "Escape"
 msgstr "Escape"
@@ -1751,7 +1752,7 @@ msgstr "Wird ausgecheckt…"
 #. 0: result.added; 1: result.added !== 1 ? 's' \\: ''; 2: conflictNote
 #: src/routes/productions/[id]/+page.svelte
 msgid "Added {0} asset{1} from bundle{2}"
-msgstr ""
+msgstr "{0} Asset{1} aus dem Bundle hinzugefügt{2}"
 
 #. 0: conflictInfo
 #: src/routes/productions/[id]/+page.svelte
@@ -1761,4 +1762,53 @@ msgstr "Gebucht: {0}"
 #. 0: conflictInfo
 #: src/routes/productions/[id]/+page.svelte
 msgid "Blocked by {0}"
+msgstr "Blockiert durch {0}"
+
+#: src/lib/components/ui/category-select/category-select.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/inventory/+page.svelte
+msgid "All Categories"
+msgstr "Alle Kategorien"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/+page.svelte
+#: src/routes/inventory/[id]/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Category"
+msgstr "Kategorie"
+
+#~ msgid "Category: {0}"
+#~ msgstr "Kategorie: {0}"
+
+#~ msgid "Miscellaneous"
+#~ msgstr ""
+
+#: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Please select a category"
+msgstr "Bitte eine Kategorie auswählen"
+
+#: src/lib/components/ui/category-select/category-select.svelte
+#: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inventory/new/+page.svelte
+msgid "Select a category"
+msgstr "Kategorie auswählen"
+
+#~ msgid "{0} — Category: {1}{2}"
+#~ msgstr "{0} — Kategorie: {1}{2}"
+
+#. 0: bundle.organization.name; 1: bundle.description ? ` — ${bundle.description}` \\: ''
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "{0} — Category: <0/>{1}"
+msgstr ""
+
+#: src/routes/assets/bundles/+page.svelte
+msgid "Category:"
 msgstr ""

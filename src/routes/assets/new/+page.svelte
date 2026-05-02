@@ -4,8 +4,10 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
+	import { CategorySelect } from '$lib/components/ui/category-select';
 	import {
 		getManufacturers,
+		getCategories,
 		getProducts,
 		getLocations,
 		createAssets
@@ -40,6 +42,14 @@
 	let manufacturer = $state<SelectionOrNew>(null);
 	let product = $state<SelectionOrNew>(null);
 	let manufacturerKey = $state(0);
+	let newProductCategoryId = $state('');
+	let categories = $derived(await getCategories());
+
+	$effect(() => {
+		if (newProductCategoryId) return;
+		const misc = categories.find((c) => c.name.toLowerCase() === 'miscellaneous');
+		if (misc) newProductCategoryId = misc.id;
+	});
 
 	function handleManufacturerChange(sel: SelectionOrNew) {
 		manufacturer = sel;
@@ -88,6 +98,10 @@
 			toast.error('Please select a product');
 			return;
 		}
+		if (product.id === null && !newProductCategoryId) {
+			toast.error('Please select a category');
+			return;
+		}
 		saving = true;
 		try {
 			const created = await createAssets({
@@ -97,6 +111,7 @@
 				newManufacturerName: manufacturer.id ? undefined : manufacturer.name,
 				productId: product.id ?? undefined,
 				newProductName: product.id ? undefined : product.name,
+				categoryId: product.id ? undefined : newProductCategoryId,
 				items: items.map((item) => ({
 					serialNumber: item.serialNumber || undefined,
 					assetTag: item.assetTag || undefined
@@ -154,11 +169,13 @@
 									<option value="" disabled>—</option>
 								{:else}
 									{#each locations as loc (loc.id)}
-											{@const city = loc.address?.city?.trim()}
-											{@const line1 = loc.address?.line1?.trim()}
-											{@const addrParts = [line1, city].filter(Boolean).join(', ')}
-											<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option>
-										{/each}
+										{@const city = loc.address?.city?.trim()}
+										{@const line1 = loc.address?.line1?.trim()}
+										{@const addrParts = [line1, city].filter(Boolean).join(', ')}
+										<option value={loc.id}
+											>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option
+										>
+									{/each}
 								{/if}
 							</select>
 							{#if locations.length === 0}
@@ -198,6 +215,18 @@
 								/>
 							</div>
 						{/key}
+					{/if}
+
+					{#if product && product.id === null}
+						<div class="space-y-2">
+							<Label for="category">Category</Label>
+							<CategorySelect
+								id="category"
+								{categories}
+								bind:value={newProductCategoryId}
+								placeholder="Select a category"
+							/>
+						</div>
 					{/if}
 
 					<div class="space-y-2">

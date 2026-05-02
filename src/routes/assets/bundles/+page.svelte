@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
+	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import { getBundles } from '$lib/remote/assets.remote';
 	import { resolve } from '$app/paths';
 
@@ -40,6 +41,10 @@
 							<Card.Description>{bundle.organization.name}</Card.Description>
 						</Card.Header>
 						<Card.Content>
+							<p class="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
+								<span>Category:</span>
+								<CategoryPill name={bundle.category.name} color={bundle.category.color} />
+							</p>
 							{#if bundle.description}
 								<p class="mb-2 text-sm text-muted-foreground">{bundle.description}</p>
 							{/if}

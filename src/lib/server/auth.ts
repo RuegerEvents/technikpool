@@ -19,6 +19,7 @@ const prefixes: Partial<Record<ModelName, string>> = {
 	Asset: 'asset',
 	AssetBundle: 'astb',
 	AssetTransaction: 'astx',
+	Category: 'catg',
 	Manufacturer: 'mfr',
 	Organization: 'org',
 	OrgMembership: 'orgm',

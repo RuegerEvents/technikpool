@@ -112,7 +112,7 @@
 				{ facingMode: 'environment' },
 				{ fps: 10, qrbox: { width: 250, height: 250 } },
 				onScanSuccess,
-				() => {}
+				() => undefined
 			);
 		} catch {
 			toast.error('Camera access denied. Switched to text input.');
@@ -127,7 +127,9 @@
 		if (s) {
 			try {
 				await s.stop();
-			} catch {}
+			} catch {
+				// ignore
+			}
 		}
 	}
 
@@ -237,7 +239,9 @@
 	<!-- Page title -->
 	<div class="no-print">
 		<h1 class="text-3xl font-bold tracking-tight">Checkout / Check-in</h1>
-		<p class="text-muted-foreground">Scan asset tags to book equipment to a location or production.</p>
+		<p class="text-muted-foreground">
+			Scan asset tags to book equipment to a location or production.
+		</p>
 	</div>
 
 	<!-- Setup card — hidden when session active or ended -->
@@ -297,7 +301,6 @@
 							{/each}
 						</select>
 					</div>
-
 				{/if}
 
 				<!-- Input mode -->
@@ -392,7 +395,7 @@
 				</p>
 			</div>
 
-			<div class="mb-3 flex items-center justify-between gap-4 no-print">
+			<div class="no-print mb-3 flex items-center justify-between gap-4">
 				<div>
 					<h2 class="text-lg font-semibold">Session Log</h2>
 					<p class="text-sm text-muted-foreground">

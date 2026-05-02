@@ -246,7 +246,11 @@
 
 	function indeterminate(node: HTMLInputElement, value: boolean) {
 		node.indeterminate = value;
-		return { update(v: boolean) { node.indeterminate = v; } };
+		return {
+			update(v: boolean) {
+				node.indeterminate = v;
+			}
+		};
 	}
 
 	function toggleSection(id: string) {
@@ -598,7 +602,7 @@
 															stroke-width="3"
 															stroke-linecap="round"
 															stroke-linejoin="round"
-														><line x1="18" y1="6" x2="6" y2="18" /><line
+															><line x1="18" y1="6" x2="6" y2="18" /><line
 																x1="6"
 																y1="6"
 																x2="18"

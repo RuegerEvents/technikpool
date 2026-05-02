@@ -59,7 +59,8 @@
 								<div class="flex items-center gap-2">
 									<span class="font-medium">{user.name || '—'}</span>
 									{#if user.isAdmin}
-										<span class="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary"
+										<span
+											class="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary"
 											>Admin</span
 										>
 									{/if}

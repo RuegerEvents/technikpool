@@ -1,5 +1,5 @@
-<!-- eslint-disable svelte/prefer-svelte-reactivity -->
 <script lang="ts">
+	/* eslint-disable svelte/prefer-svelte-reactivity */
 	import { getCalendarData, getProductionsCalendar } from '$lib/remote/productions.remote';
 	import { resolve } from '$app/paths';
 
@@ -107,29 +107,58 @@
 		return COLORS[h % COLORS.length];
 	}
 
-	type Bar = { id: string; productionId: string; label: string; left: number; width: number; color: string; pending: boolean };
-	type CollapsedBar = { productionId: string; label: string; left: number; width: number; color: string; fraction: number; allPending: boolean };
-	type HeaderRow = { kind: 'header'; id: string; name: string; mfr: string; count: number; collapsed: boolean; collapsedBars: CollapsedBar[] };
+	type Bar = {
+		id: string;
+		productionId: string;
+		label: string;
+		left: number;
+		width: number;
+		color: string;
+		pending: boolean;
+	};
+	type CollapsedBar = {
+		productionId: string;
+		label: string;
+		left: number;
+		width: number;
+		color: string;
+		fraction: number;
+		allPending: boolean;
+	};
+	type HeaderRow = {
+		kind: 'header';
+		id: string;
+		name: string;
+		mfr: string;
+		count: number;
+		collapsed: boolean;
+		collapsedBars: CollapsedBar[];
+	};
 	type AssetRow = { kind: 'asset'; id: string; label: string; org: string; bars: Bar[] };
 	type ProdRow = { kind: 'prod'; id: string; name: string; start: Date; end: Date; bars: Bar[] };
 	type Row = HeaderRow | AssetRow | ProdRow;
 
 	let displayRows = $derived.by((): Row[] => {
 		if (viewMode === 'productions') {
-			return prodCalData.map((p): ProdRow => ({
-				kind: 'prod',
-				id: p.id,
-				name: p.name,
-				start: new Date(p.startDate!),
-				end: new Date(p.endDate!),
-				bars: [{
+			return prodCalData.map(
+				(p): ProdRow => ({
+					kind: 'prod',
 					id: p.id,
-					productionId: p.id,
-					label: p.name,
-					...barDims(p.startDate!, p.endDate!),
-					color: prodColor(p.id)
-				}]
-			}));
+					name: p.name,
+					start: new Date(p.startDate!),
+					end: new Date(p.endDate!),
+					bars: [
+						{
+							id: p.id,
+							productionId: p.id,
+							label: p.name,
+							...barDims(p.startDate!, p.endDate!),
+							color: prodColor(p.id),
+							pending: false
+						}
+					]
+				})
+			);
 		}
 
 		const rows: Row[] = [];
@@ -144,7 +173,10 @@
 			const collapsed = !expandedProducts.has(pid);
 
 			// Aggregate productions across all assets in this product group for collapsed view
-			const prodAgg = new Map<string, { label: string; start: Date; end: Date; count: number; pendingCount: number }>();
+			const prodAgg = new Map<
+				string,
+				{ label: string; start: Date; end: Date; count: number; pendingCount: number }
+			>();
 			for (const a of pg.assets) {
 				for (const pi of a.productionItems) {
 					if (!pi.production.startDate || !pi.production.endDate) continue;
@@ -169,7 +201,15 @@
 				allPending: p.pendingCount === p.count
 			}));
 
-			rows.push({ kind: 'header', id: pid, name: pg.name, mfr: pg.mfr, count: pg.assets.length, collapsed, collapsedBars });
+			rows.push({
+				kind: 'header',
+				id: pid,
+				name: pg.name,
+				mfr: pg.mfr,
+				count: pg.assets.length,
+				collapsed,
+				collapsedBars
+			});
 			if (!collapsed) {
 				for (const a of pg.assets) {
 					const bars: Bar[] = a.productionItems
@@ -195,7 +235,20 @@
 		return rows;
 	});
 
-	const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	const MONTHS = [
+		'Jan',
+		'Feb',
+		'Mar',
+		'Apr',
+		'May',
+		'Jun',
+		'Jul',
+		'Aug',
+		'Sep',
+		'Oct',
+		'Nov',
+		'Dec'
+	];
 
 	type Span = { label: string; col: number; span: number };
 
@@ -348,11 +401,7 @@
 	</div>
 
 	<!-- Gantt body -->
-	<div
-		class="flex-1 overflow-auto"
-		bind:this={scrollEl}
-		onscroll={handleScroll}
-	>
+	<div class="flex-1 overflow-auto" bind:this={scrollEl} onscroll={handleScroll}>
 		<div style="min-width: {SIDEBAR + totalWidth}px">
 			<!-- Sticky date header -->
 			<div class="sticky top-0 z-20 flex border-b bg-background shadow-sm">
@@ -372,7 +421,7 @@
 					<div class="absolute inset-x-0 top-0 border-b" style="height: 24px">
 						{#each monthSpans as span (span.col)}
 							<div
-								class="absolute top-0 h-full overflow-hidden whitespace-nowrap border-l px-1.5 text-xs font-medium leading-6 text-muted-foreground"
+								class="absolute top-0 h-full overflow-hidden border-l px-1.5 text-xs leading-6 font-medium whitespace-nowrap text-muted-foreground"
 								style="left: {span.col * colWidth}px; width: {span.span * colWidth}px"
 							>
 								{span.label}
@@ -408,10 +457,7 @@
 
 						<!-- Today vertical marker line -->
 						{#if todayX >= 0 && todayX <= totalWidth}
-							<div
-								class="absolute top-0 h-full w-px bg-primary/40"
-								style="left: {todayX}px"
-							></div>
+							<div class="absolute top-0 h-full w-px bg-primary/40" style="left: {todayX}px"></div>
 						{/if}
 					</div>
 				</div>
@@ -466,7 +512,9 @@
 								onclick={() => row.bars[0] && scrollToBar(row.bars[0])}
 							>
 								<p class="truncate text-sm font-medium">{row.name}</p>
-								<p class="truncate text-[10px] text-muted-foreground">{fmtDateRange(row.start, row.end)}</p>
+								<p class="truncate text-[10px] text-muted-foreground">
+									{fmtDateRange(row.start, row.end)}
+								</p>
 							</button>
 						{/if}
 					</div>
@@ -487,10 +535,7 @@
 
 						<!-- Today line -->
 						{#if todayX >= 0 && todayX <= totalWidth}
-							<div
-								class="absolute top-0 h-full w-px bg-primary/20"
-								style="left: {todayX}px"
-							></div>
+							<div class="absolute top-0 h-full w-px bg-primary/20" style="left: {todayX}px"></div>
 						{/if}
 
 						<!-- Bars (asset / production rows) -->
@@ -500,7 +545,10 @@
 									href={resolve(`/productions/${bar.productionId}`)}
 									title="{bar.label}{bar.pending ? ' (pending)' : ''}"
 									class="absolute top-1 flex items-center overflow-hidden rounded px-1.5 text-[11px] font-medium text-white no-underline hover:brightness-110"
-									style="left: {bar.left}px; width: {bar.width}px; height: {h - 8}px; background-color: {bar.color}; {bar.pending ? 'background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px); opacity: 0.75;' : ''}"
+									style="left: {bar.left}px; width: {bar.width}px; height: {h -
+										8}px; background-color: {bar.color}; {bar.pending
+										? 'background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px); opacity: 0.75;'
+										: ''}"
 								>
 									{bar.label}
 								</a>
@@ -513,11 +561,17 @@
 								{@const barH = Math.max(3, Math.round(bar.fraction * (PRODUCT_H - 6)))}
 								<a
 									href={resolve(`/productions/${bar.productionId}`)}
-									title="{bar.label} ({Math.round(bar.fraction * 100)}%){bar.allPending ? ' · pending' : ''}"
+									title="{bar.label} ({Math.round(bar.fraction * 100)}%){bar.allPending
+										? ' · pending'
+										: ''}"
 									class="absolute flex items-center overflow-hidden rounded-sm px-1 no-underline hover:brightness-110"
-									style="left: {bar.left}px; width: {bar.width}px; height: {barH}px; top: 3px; background-color: {bar.color}; opacity: 0.75; {bar.allPending ? 'background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px);' : ''}"
+									style="left: {bar.left}px; width: {bar.width}px; height: {barH}px; top: 3px; background-color: {bar.color}; opacity: 0.75; {bar.allPending
+										? 'background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px);'
+										: ''}"
 								>
-									<span class="truncate text-[9px] font-medium leading-none text-white">{bar.label}</span>
+									<span class="truncate text-[9px] leading-none font-medium text-white"
+										>{bar.label}</span
+									>
 								</a>
 							{/each}
 						{/if}

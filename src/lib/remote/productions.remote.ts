@@ -215,9 +215,7 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 			include: { production: { select: { name: true } } }
 		});
 		if (conflict) {
-			throw new Error(
-				`Asset is already booked for "${conflict.production.name}" during this time`
-			);
+			throw new Error(`Asset is already booked for "${conflict.production.name}" during this time`);
 		}
 	}
 

@@ -55,9 +55,8 @@
 			class="rounded bg-zinc-900 px-4 py-2 font-sans text-white"
 			onclick={() => window.print()}>Print</button
 		>
-		<a
-			href={resolve(`/productions/${productionId}`)}
-			class="ml-4 font-sans text-zinc-600 underline">Back</a
+		<a href={resolve(`/productions/${productionId}`)} class="ml-4 font-sans text-zinc-600 underline"
+			>Back</a
 		>
 	</div>
 
@@ -86,7 +85,8 @@
 						{production.address.postalCode ?? ''} {production.address.city ?? ''}<br />
 					{/if}
 					{#if production.address.region || production.address.country}
-						{production.address.region ?? ''}{production.address.region && production.address.country
+						{production.address.region ?? ''}{production.address.region &&
+						production.address.country
 							? ', '
 							: ''}{production.address.country ?? ''}
 					{/if}

@@ -58,6 +58,7 @@ export const ModelName = {
   Organization: 'Organization',
   OrgMembership: 'OrgMembership',
   Manufacturer: 'Manufacturer',
+  Category: 'Category',
   Product: 'Product',
   Address: 'Address',
   Location: 'Location',
@@ -178,10 +179,23 @@ export const ManufacturerScalarFieldEnum = {
 export type ManufacturerScalarFieldEnum = (typeof ManufacturerScalarFieldEnum)[keyof typeof ManufacturerScalarFieldEnum]
 
 
+export const CategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  color: 'color',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
+
+
 export const ProductScalarFieldEnum = {
   id: 'id',
   name: 'name',
   manufacturerId: 'manufacturerId',
+  categoryId: 'categoryId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -238,6 +252,7 @@ export const AssetBundleScalarFieldEnum = {
   name: 'name',
   description: 'description',
   organizationId: 'organizationId',
+  categoryId: 'categoryId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

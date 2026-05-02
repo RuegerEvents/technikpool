@@ -3,6 +3,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
@@ -103,6 +104,17 @@
 						<Input value={asset.product.name} disabled />
 					</div>
 					<div class="space-y-2">
+						<Label>Category</Label>
+						<div
+							class="flex h-10 items-center rounded-md border border-input bg-background px-3 py-2 text-sm"
+						>
+							<CategoryPill
+								name={asset.product.category.name}
+								color={asset.product.category.color}
+							/>
+						</div>
+					</div>
+					<div class="space-y-2">
 						<Label for="serial">Serial Number</Label>
 						<Input id="serial" bind:value={draft.serialNumber} disabled={!editing} />
 					</div>
@@ -135,7 +147,8 @@
 								{@const city = loc.address?.city?.trim()}
 								{@const line1 = loc.address?.line1?.trim()}
 								{@const addrParts = [line1, city].filter(Boolean).join(', ')}
-								<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option>
+								<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option
+								>
 							{/each}
 						</select>
 					</div>
