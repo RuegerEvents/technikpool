@@ -84,12 +84,6 @@
 					{#if production.address.postalCode || production.address.city}
 						{production.address.postalCode ?? ''} {production.address.city ?? ''}<br />
 					{/if}
-					{#if production.address.region || production.address.country}
-						{production.address.region ?? ''}{production.address.region &&
-						production.address.country
-							? ', '
-							: ''}{production.address.country ?? ''}
-					{/if}
 				</p>
 			{/if}
 			<p class="mt-1 text-zinc-700">

@@ -25,12 +25,10 @@
 		line2: string;
 		postalCode: string;
 		city: string;
-		region: string;
-		country: string;
 	};
 
 	function emptyAddress(): AddressDraft {
-		return { line1: '', line2: '', postalCode: '', city: '', region: '', country: '' };
+		return { line1: '', line2: '', postalCode: '', city: '' };
 	}
 
 	let creating = $state(false);
@@ -49,9 +47,7 @@
 					line1: newAddress.line1,
 					line2: newAddress.line2,
 					postalCode: newAddress.postalCode,
-					city: newAddress.city,
-					region: newAddress.region,
-					country: newAddress.country
+					city: newAddress.city
 				}
 			});
 			toast.success('Location created');
@@ -77,9 +73,7 @@
 			line1: loc.address?.line1 ?? '',
 			line2: loc.address?.line2 ?? '',
 			postalCode: loc.address?.postalCode ?? '',
-			city: loc.address?.city ?? '',
-			region: loc.address?.region ?? '',
-			country: loc.address?.country ?? ''
+			city: loc.address?.city ?? ''
 		};
 	}
 
@@ -103,9 +97,7 @@
 					line1: editAddress.line1,
 					line2: editAddress.line2,
 					postalCode: editAddress.postalCode,
-					city: editAddress.city,
-					region: editAddress.region,
-					country: editAddress.country
+					city: editAddress.city
 				}
 			});
 			toast.success('Location updated');
@@ -122,8 +114,7 @@
 		const line1 = addr.line1?.trim();
 		const line2 = addr.line2?.trim();
 		const cityLine = [addr.postalCode?.trim(), addr.city?.trim()].filter(Boolean).join(' ');
-		const regionCountry = [addr.region?.trim(), addr.country?.trim()].filter(Boolean).join(', ');
-		const parts = [line1, line2, cityLine, regionCountry].filter(Boolean);
+		const parts = [line1, line2, cityLine].filter(Boolean);
 		return parts.length ? parts.join(' · ') : '—';
 	}
 </script>
@@ -177,14 +168,6 @@
 						<div class="space-y-2">
 							<Label for="city">City</Label>
 							<Input id="city" bind:value={newAddress.city} placeholder="Berlin" />
-						</div>
-						<div class="space-y-2">
-							<Label for="region">Region/State</Label>
-							<Input id="region" bind:value={newAddress.region} placeholder="BE" />
-						</div>
-						<div class="space-y-2">
-							<Label for="country">Country</Label>
-							<Input id="country" bind:value={newAddress.country} placeholder="DE" />
 						</div>
 					</div>
 
@@ -248,14 +231,6 @@
 										<div class="space-y-2">
 											<Label for={`edit-city-${loc.id}`}>City</Label>
 											<Input id={`edit-city-${loc.id}`} bind:value={editAddress.city} />
-										</div>
-										<div class="space-y-2">
-											<Label for={`edit-region-${loc.id}`}>Region/State</Label>
-											<Input id={`edit-region-${loc.id}`} bind:value={editAddress.region} />
-										</div>
-										<div class="space-y-2">
-											<Label for={`edit-country-${loc.id}`}>Country</Label>
-											<Input id={`edit-country-${loc.id}`} bind:value={editAddress.country} />
 										</div>
 									</div>
 

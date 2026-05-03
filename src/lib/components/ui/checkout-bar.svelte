@@ -21,9 +21,9 @@
 	let targets = $derived(
 		targetType === 'location'
 			? locations.map((l) => {
-					const city = l.address?.city?.trim();
-					const country = l.address?.country?.trim();
-					const addr = [city, country].filter(Boolean).join(', ');
+					const addr = [l.address?.postalCode?.trim(), l.address?.city?.trim()]
+						.filter(Boolean)
+						.join(' ');
 					const detail = [l.organization.name, addr].filter(Boolean).join(' · ');
 					return { id: l.id, label: detail ? `${l.name} (${detail})` : l.name };
 				})

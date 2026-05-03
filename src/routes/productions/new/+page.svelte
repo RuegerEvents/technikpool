@@ -18,9 +18,7 @@
 		line1: '',
 		line2: '',
 		postalCode: '',
-		city: '',
-		region: '',
-		country: ''
+		city: ''
 	});
 
 	async function handleSubmit(e: Event) {
@@ -109,14 +107,6 @@
 					<div class="space-y-2">
 						<Label for="city">City</Label>
 						<Input id="city" bind:value={address.city} placeholder="Berlin" />
-					</div>
-					<div class="space-y-2">
-						<Label for="region">Region/State</Label>
-						<Input id="region" bind:value={address.region} placeholder="BE" />
-					</div>
-					<div class="space-y-2">
-						<Label for="country">Country</Label>
-						<Input id="country" bind:value={address.country} placeholder="DE" />
 					</div>
 				</div>
 

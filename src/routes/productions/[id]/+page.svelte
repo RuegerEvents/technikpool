@@ -322,9 +322,7 @@
 		line1: '',
 		line2: '',
 		postalCode: '',
-		city: '',
-		region: '',
-		country: ''
+		city: ''
 	});
 
 	$effect(() => {
@@ -333,9 +331,7 @@
 			line1: production.address?.line1 ?? '',
 			line2: production.address?.line2 ?? '',
 			postalCode: production.address?.postalCode ?? '',
-			city: production.address?.city ?? '',
-			region: production.address?.region ?? '',
-			country: production.address?.country ?? ''
+			city: production.address?.city ?? ''
 		};
 	});
 
@@ -358,8 +354,7 @@
 		const parts = [
 			addr.line1?.trim(),
 			addr.line2?.trim(),
-			[addr.postalCode?.trim(), addr.city?.trim()].filter(Boolean).join(' '),
-			[addr.region?.trim(), addr.country?.trim()].filter(Boolean).join(', ')
+			[addr.postalCode?.trim(), addr.city?.trim()].filter(Boolean).join(' ')
 		].filter(Boolean);
 		return parts.length ? parts.join(' · ') : '—';
 	}
@@ -434,14 +429,6 @@
 						<div class="space-y-2">
 							<Label for="addr-city">City</Label>
 							<Input id="addr-city" bind:value={addressDraft.city} placeholder="Berlin" />
-						</div>
-						<div class="space-y-2">
-							<Label for="addr-region">Region/State</Label>
-							<Input id="addr-region" bind:value={addressDraft.region} placeholder="BE" />
-						</div>
-						<div class="space-y-2">
-							<Label for="addr-country">Country</Label>
-							<Input id="addr-country" bind:value={addressDraft.country} placeholder="DE" />
 						</div>
 					</div>
 

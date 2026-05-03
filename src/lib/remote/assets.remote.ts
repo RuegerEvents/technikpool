@@ -123,12 +123,10 @@ export const getLocations = query(v.optional(v.string()), async (organizationId?
 });
 
 const addressInputSchema = v.object({
-	line1: v.optional(v.string()),
+	line1: v.string(),
 	line2: v.optional(v.string()),
-	postalCode: v.optional(v.string()),
-	city: v.optional(v.string()),
-	region: v.optional(v.string()),
-	country: v.optional(v.string())
+	postalCode: v.string(),
+	city: v.string()
 });
 
 const createLocationSchema = v.object({
@@ -155,12 +153,10 @@ export const createLocation = command(createLocationSchema, async (input) => {
 	const location = await prisma.$transaction(async (tx) => {
 		const address = await tx.address.create({
 			data: {
-				line1: input.address.line1?.trim() || null,
+				line1: input.address.line1.trim(),
 				line2: input.address.line2?.trim() || null,
-				postalCode: input.address.postalCode?.trim() || null,
-				city: input.address.city?.trim() || null,
-				region: input.address.region?.trim() || null,
-				country: input.address.country?.trim() || null
+				postalCode: input.address.postalCode.trim(),
+				city: input.address.city.trim()
 			}
 		});
 
@@ -210,12 +206,10 @@ export const updateLocation = command(updateLocationSchema, async (input) => {
 			await tx.address.update({
 				where: { id: location.addressId },
 				data: {
-					line1: input.address.line1?.trim() || null,
+					line1: input.address.line1.trim(),
 					line2: input.address.line2?.trim() || null,
-					postalCode: input.address.postalCode?.trim() || null,
-					city: input.address.city?.trim() || null,
-					region: input.address.region?.trim() || null,
-					country: input.address.country?.trim() || null
+					postalCode: input.address.postalCode.trim(),
+					city: input.address.city.trim()
 				}
 			});
 		}

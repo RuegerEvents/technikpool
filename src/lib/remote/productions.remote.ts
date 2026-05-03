@@ -55,12 +55,10 @@ export const getProduction = query(v.string(), async (id: string) => {
 });
 
 const addressInputSchema = v.object({
-	line1: v.optional(v.string()),
+	line1: v.string(),
 	line2: v.optional(v.string()),
-	postalCode: v.optional(v.string()),
-	city: v.optional(v.string()),
-	region: v.optional(v.string()),
-	country: v.optional(v.string())
+	postalCode: v.string(),
+	city: v.string()
 });
 
 const createProductionSchema = v.object({
@@ -88,12 +86,10 @@ export const createProduction = command(createProductionSchema, async (data) => 
 		const address = hasAnyAddress
 			? await tx.address.create({
 					data: {
-						line1: data.address?.line1?.trim() || null,
+						line1: data.address!.line1.trim(),
 						line2: data.address?.line2?.trim() || null,
-						postalCode: data.address?.postalCode?.trim() || null,
-						city: data.address?.city?.trim() || null,
-						region: data.address?.region?.trim() || null,
-						country: data.address?.country?.trim() || null
+						postalCode: data.address!.postalCode.trim(),
+						city: data.address!.city.trim()
 					}
 				})
 			: null;
@@ -150,24 +146,20 @@ export const updateProductionAddress = command(updateProductionAddressSchema, as
 					await tx.address.update({
 						where: { id: production.addressId },
 						data: {
-							line1: input.address.line1?.trim() || null,
+							line1: input.address.line1.trim(),
 							line2: input.address.line2?.trim() || null,
-							postalCode: input.address.postalCode?.trim() || null,
-							city: input.address.city?.trim() || null,
-							region: input.address.region?.trim() || null,
-							country: input.address.country?.trim() || null
+							postalCode: input.address.postalCode.trim(),
+							city: input.address.city.trim()
 						}
 					})
 				).id
 			: (
 					await tx.address.create({
 						data: {
-							line1: input.address.line1?.trim() || null,
+							line1: input.address.line1.trim(),
 							line2: input.address.line2?.trim() || null,
-							postalCode: input.address.postalCode?.trim() || null,
-							city: input.address.city?.trim() || null,
-							region: input.address.region?.trim() || null,
-							country: input.address.country?.trim() || null
+							postalCode: input.address.postalCode.trim(),
+							city: input.address.city.trim()
 						}
 					})
 				).id;
