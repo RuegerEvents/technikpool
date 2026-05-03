@@ -7,6 +7,9 @@
 	import { resolve } from '$app/paths';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import CheckoutBar from '$lib/components/ui/checkout-bar.svelte';
+	import CsvImportModal from '$lib/components/CsvImportModal.svelte';
+
+	let showImportModal = $state(false);
 
 	let filterOrgId = $state('');
 	let searchQuery = $state('');
@@ -206,6 +209,7 @@
 				<option value="">All Organizations</option>
 				{#each orgs as org (org.id)}<option value={org.id}>{org.name}</option>{/each}
 			</select>
+			<Button variant="outline" onclick={() => (showImportModal = true)}>Import CSV</Button>
 			<Button variant="outline" href={resolve('/assets/bundles/new')}>Add Bundle</Button>
 			<Button href={resolve('/assets/new')}>Add Asset</Button>
 		</div>
@@ -581,3 +585,7 @@
 </div>
 
 <CheckoutBar selectedIds={selectedAssetIds} onClear={() => selectedAssetIds.clear()} />
+
+{#if showImportModal}
+	<CsvImportModal onClose={() => (showImportModal = false)} />
+{/if}

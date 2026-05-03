@@ -633,3 +633,138 @@ export const removeAssetFromBundle = command(bundleAssetSchema, async ({ bundleI
 	getAssets(bundle.organizationId).refresh();
 	return { bundleId, assetId };
 });
+
+// ── CSV Import ────────────────────────────────────────────────────────────────
+
+const importRowSchema = v.object({
+	manufacturerName: v.string(),
+	productName: v.string(),
+	categoryId: v.optional(v.string()),
+	serialNumber: v.optional(v.string()),
+	assetTag: v.optional(v.string())
+});
+
+const importAssetsSchema = v.object({
+	organizationId: v.string(),
+	locationId: v.string(),
+	rows: v.array(importRowSchema)
+});
+
+export type ImportResult = {
+	created: number;
+	skipped: number;
+	errors: { rowIndex: number; message: string }[];
+};
+
+export const importAssets = command(importAssetsSchema, async (data): Promise<ImportResult> => {
+	const user = await requireAuth();
+
+	const membership = await prisma.orgMembership.findUnique({
+		where: { userId_organizationId: { userId: user.id, organizationId: data.organizationId } }
+	});
+	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
+		throw new Error('Unauthorized to create assets in this organization');
+	}
+
+	const location = await prisma.location.findUniqueOrThrow({ where: { id: data.locationId } });
+	if (location.organizationId !== data.organizationId) throw new Error('Invalid location');
+
+	const existingTagRows = await prisma.asset.findMany({
+		where: { organizationId: data.organizationId, assetTag: { not: null } },
+		select: { assetTag: true }
+	});
+	const existingTags = new Set(existingTagRows.map((a) => a.assetTag!.toLowerCase()));
+
+	// Upsert manufacturers (case-insensitive)
+	const manufacturerCache = new Map<string, string>();
+	for (const row of data.rows) {
+		const key = row.manufacturerName.trim().toLowerCase();
+		if (!key || manufacturerCache.has(key)) continue;
+		let m = await prisma.manufacturer.findFirst({
+			where: { name: { equals: row.manufacturerName.trim(), mode: 'insensitive' } }
+		});
+		if (!m) m = await prisma.manufacturer.create({ data: { name: row.manufacturerName.trim() } });
+		manufacturerCache.set(key, m.id);
+	}
+
+	// Upsert products (case-insensitive, keyed by name+manufacturerId)
+	const productCache = new Map<string, string>();
+	const seenProducts = new Set<string>();
+	for (const row of data.rows) {
+		const mfKey = row.manufacturerName.trim().toLowerCase();
+		const manufacturerId = manufacturerCache.get(mfKey);
+		if (!manufacturerId) continue;
+		const prodKey = `${row.productName.trim().toLowerCase()}::${manufacturerId}`;
+		if (seenProducts.has(prodKey)) continue;
+		seenProducts.add(prodKey);
+		let p = await prisma.product.findFirst({
+			where: { name: { equals: row.productName.trim(), mode: 'insensitive' }, manufacturerId }
+		});
+		if (!p) {
+			if (!row.categoryId) continue;
+			p = await prisma.product.create({
+				data: { name: row.productName.trim(), manufacturerId, categoryId: row.categoryId }
+			});
+		}
+		productCache.set(prodKey, p.id);
+	}
+
+	let created = 0;
+	let skipped = 0;
+	const errors: { rowIndex: number; message: string }[] = [];
+
+	for (let i = 0; i < data.rows.length; i++) {
+		const row = data.rows[i];
+		try {
+			const mfKey = row.manufacturerName.trim().toLowerCase();
+			const manufacturerId = manufacturerCache.get(mfKey);
+			if (!manufacturerId) {
+				errors.push({ rowIndex: i, message: `Manufacturer "${row.manufacturerName}" not found` });
+				continue;
+			}
+			const prodKey = `${row.productName.trim().toLowerCase()}::${manufacturerId}`;
+			const productId = productCache.get(prodKey);
+			if (!productId) {
+				errors.push({
+					rowIndex: i,
+					message: row.categoryId
+						? `Product "${row.productName}" could not be created`
+						: `Product "${row.productName}" not found — no category provided to create it`
+				});
+				continue;
+			}
+			const assetTag = row.assetTag?.trim() || null;
+			if (assetTag && existingTags.has(assetTag.toLowerCase())) {
+				skipped++;
+				continue;
+			}
+			await prisma.asset.create({
+				data: {
+					organizationId: data.organizationId,
+					productId,
+					locationId: data.locationId,
+					serialNumber: row.serialNumber?.trim() || null,
+					assetTag,
+					status: 'AVAILABLE',
+					transactions: {
+						create: { userId: user.id, action: 'CREATED', data: { type: 'CREATED' } }
+					}
+				}
+			});
+			created++;
+			if (assetTag) existingTags.add(assetTag.toLowerCase());
+		} catch (err) {
+			errors.push({ rowIndex: i, message: (err as Error).message });
+		}
+	}
+
+	if (created > 0) {
+		getAssets(data.organizationId).refresh();
+		getInventorySummary(data.organizationId).refresh();
+		getInventorySummary().refresh();
+		getManufacturers().refresh();
+		getProducts().refresh();
+	}
+
+	return { created, skipped, errors };
+});

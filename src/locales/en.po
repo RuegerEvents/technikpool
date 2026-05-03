@@ -77,6 +77,7 @@ msgstr "Crew member added"
 msgid "Owned by {0}"
 msgstr "Owned by {0}"
 
+#: src/lib/components/CsvImportModal.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/crew-passes/+page.svelte
@@ -169,6 +170,7 @@ msgstr "No equipment booked yet."
 msgid "Crew"
 msgstr "Crew"
 
+#: src/lib/components/CsvImportModal.svelte
 #: src/routes/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
@@ -251,6 +253,7 @@ msgstr "Email"
 msgid "Remove"
 msgstr "Remove"
 
+#: src/lib/components/CsvImportModal.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
@@ -359,6 +362,7 @@ msgstr "Approve some…"
 msgid "Decline some…"
 msgstr "Decline some…"
 
+#: src/lib/components/CsvImportModal.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
@@ -370,6 +374,7 @@ msgstr "Decline some…"
 msgid "Serial Number"
 msgstr "Serial Number"
 
+#: src/lib/components/CsvImportModal.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
@@ -386,6 +391,7 @@ msgstr "Asset Tag"
 msgid "Bundle"
 msgstr "Bundle"
 
+#: src/lib/components/CsvImportModal.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
@@ -826,6 +832,7 @@ msgstr "Search…"
 msgid "ArrowDown"
 msgstr "ArrowDown"
 
+#: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 msgid "Enter"
@@ -937,6 +944,8 @@ msgstr "Asset removed from bundle"
 #~ msgid "Bundle not found."
 #~ msgstr "Bundle not found."
 
+#: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/CsvImportModal.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 msgid "Close"
 msgstr "Close"
@@ -1224,6 +1233,7 @@ msgstr "Asset"
 msgid "Edit"
 msgstr "Edit"
 
+#: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/checkout-bar.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
@@ -1315,19 +1325,11 @@ msgstr "City"
 msgid "Berlin"
 msgstr "Berlin"
 
-#: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/new/+page.svelte
-msgid "Region/State"
-msgstr "Region/State"
+#~ msgid "Region/State"
+#~ msgstr "Region/State"
 
-#: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/new/+page.svelte
-msgid "Country"
-msgstr "Country"
+#~ msgid "Country"
+#~ msgstr "Country"
 
 #: src/routes/productions/[id]/+page.svelte
 msgid "Address updated"
@@ -1773,6 +1775,7 @@ msgstr "Blocked by {0}"
 msgid "All Categories"
 msgstr "All Categories"
 
+#: src/lib/components/CsvImportModal.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
@@ -1965,3 +1968,123 @@ msgstr "<0/> Show archive"
 #: src/routes/productions/+page.svelte
 msgid "{0} {1} older than 1 month hidden"
 msgstr "{0} {1} older than 1 month hidden"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Could not parse CSV file"
+msgstr "Could not parse CSV file"
+
+#. 0: unmapped.join(', ')
+#: src/lib/components/CsvImportModal.svelte
+msgid "Please map all category values: {0}"
+msgstr "Please map all category values: {0}"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Skip"
+msgstr "Skip"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Product / Model"
+msgstr "Product / Model"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Import Assets from CSV"
+msgstr "Import Assets from CSV"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Configure Import"
+msgstr "Configure Import"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Importing…"
+msgstr "Importing…"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Import Complete"
+msgstr "Import Complete"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Drag and drop a CSV file here, or <0>click to browse</0>"
+msgstr "Drag and drop a CSV file here, or <0>click to browse</0>"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Supported: .csv files with column headers"
+msgstr "Supported: .csv files with column headers"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "No locations"
+msgstr "No locations"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Column Mapping"
+msgstr "Column Mapping"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "CSV Column"
+msgstr "CSV Column"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Maps To"
+msgstr "Maps To"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Sample"
+msgstr "Sample"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Category Values"
+msgstr "Category Values"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Value in CSV"
+msgstr "Value in CSV"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Maps To Category"
+msgstr "Maps To Category"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "— Unassigned —"
+msgstr "— Unassigned —"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Preview <0>(first {0} of {1} rows)</0>"
+msgstr "Preview <0>(first {0} of {1} rows)</0>"
+
+#. 0: csvRows.length
+#: src/lib/components/CsvImportModal.svelte
+msgid "Processing {0} rows…"
+msgstr "Processing {0} rows…"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Assets created"
+msgstr "Assets created"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Assets skipped (existing tag)"
+msgstr "Assets skipped (existing tag)"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Errors"
+msgstr "Errors"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Error details"
+msgstr "Error details"
+
+#. 0: err.rowIndex + 2
+#: src/lib/components/CsvImportModal.svelte
+msgid "Row {0}:"
+msgstr "Row {0}:"
+
+#. 0: csvRows.length
+#: src/lib/components/CsvImportModal.svelte
+msgid "{0} rows"
+msgstr "{0} rows"
+
+#: src/lib/components/CsvImportModal.svelte
+msgid "Import"
+msgstr "Import"
+
+#: src/routes/inventory/+page.svelte
+msgid "Import CSV"
+msgstr "Import CSV"
