@@ -35,7 +35,7 @@ export function getContrastingTextColor(background: string): '#000000' | '#fffff
 	);
 	const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
 
-	return luminance > 0.179 ? '#000000' : '#ffffff';
+	return luminance > 0.3 ? '#000000' : '#ffffff';
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
