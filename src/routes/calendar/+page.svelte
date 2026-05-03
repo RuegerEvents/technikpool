@@ -3,7 +3,7 @@
 	import { getCalendarData, getProductionsCalendar } from '$lib/remote/productions.remote';
 	import { resolve } from '$app/paths';
 
-	type Granularity = 'day' | 'week';
+	type Granularity = 'day' | 'week' | 'month' | 'year';
 	type ViewMode = 'assets' | 'productions';
 
 	let rawData = $derived(await getCalendarData());
@@ -12,6 +12,7 @@
 	let granularity = $state<Granularity>('week');
 	let viewMode = $state<ViewMode>('assets');
 	let expandedProducts = $state(new Set<string>());
+	let viewDate = $state(new Date());
 
 	let scrollEl = $state<HTMLDivElement | null>(null);
 	let scrollLeft = $state(0);
@@ -22,6 +23,16 @@
 	const PRODUCT_H = 28;
 	const MS_DAY = 86_400_000;
 	const BUFFER = 5;
+
+	// Month grid view constants
+	const DAY_NUM_H = 28;
+	const MONTH_BAR_H = 18;
+	const MONTH_BAR_GAP = 2;
+
+	// Year grid view constants
+	const YEAR_DAY_NUM_H = 10;
+	const YEAR_BAR_H = 4;
+	const YEAR_BAR_GAP = 1;
 
 	const colWidth = $derived(granularity === 'day' ? 40 : 120);
 
@@ -182,7 +193,13 @@
 			}
 		}
 
-		function addGroupRows(groupId: string, groupName: string, mfr: string, assets: typeof rawData) {
+		function addGroupRows(
+			groupId: string,
+			groupName: string,
+			mfr: string,
+			assets: typeof rawData,
+			isBundle: boolean
+		) {
 			const collapsed = !expandedProducts.has(groupId);
 			const prodAgg = new Map<
 				string,
@@ -221,30 +238,66 @@
 				collapsedBars
 			});
 			if (!collapsed) {
-				for (const a of assets) {
-					const bars: Bar[] = a.productionItems
-						.filter((pi) => pi.production.startDate && pi.production.endDate)
-						.map((pi) => ({
-							id: pi.id,
-							productionId: pi.production.id,
-							label: pi.production.name,
-							...barDims(pi.production.startDate!, pi.production.endDate!),
-							color: prodColor(pi.production.id),
-							pending: pi.status === 'PENDING'
-						}));
-					rows.push({
-						kind: 'asset',
-						id: a.id,
-						label: a.serialNumber ?? a.assetTag ?? `#${a.id.slice(0, 6)}`,
-						org: a.organization.name,
-						bars
-					});
+				if (isBundle) {
+					// Group assets by product, show product name + count
+					const byProd = new Map<string, { name: string; assets: typeof rawData }>();
+					for (const a of assets) {
+						if (!byProd.has(a.product.id))
+							byProd.set(a.product.id, { name: a.product.name, assets: [] });
+						byProd.get(a.product.id)!.assets.push(a);
+					}
+					for (const [productId, pg] of byProd) {
+						const seenProds = new Set<string>();
+						const bars: Bar[] = [];
+						for (const a of pg.assets) {
+							for (const pi of a.productionItems) {
+								if (!pi.production.startDate || !pi.production.endDate) continue;
+								if (seenProds.has(pi.production.id)) continue;
+								seenProds.add(pi.production.id);
+								bars.push({
+									id: pi.id,
+									productionId: pi.production.id,
+									label: pi.production.name,
+									...barDims(pi.production.startDate!, pi.production.endDate!),
+									color: prodColor(pi.production.id),
+									pending: pi.status === 'PENDING'
+								});
+							}
+						}
+						rows.push({
+							kind: 'asset',
+							id: `${groupId}-${productId}`,
+							label: pg.name,
+							org: `×${pg.assets.length}`,
+							bars
+						});
+					}
+				} else {
+					for (const a of assets) {
+						const bars: Bar[] = a.productionItems
+							.filter((pi) => pi.production.startDate && pi.production.endDate)
+							.map((pi) => ({
+								id: pi.id,
+								productionId: pi.production.id,
+								label: pi.production.name,
+								...barDims(pi.production.startDate!, pi.production.endDate!),
+								color: prodColor(pi.production.id),
+								pending: pi.status === 'PENDING'
+							}));
+						rows.push({
+							kind: 'asset',
+							id: a.id,
+							label: a.serialNumber ?? a.assetTag ?? `#${a.id.slice(0, 6)}`,
+							org: a.organization.name,
+							bars
+						});
+					}
 				}
 			}
 		}
 
-		for (const [bid, bg] of byBundle) addGroupRows(bid, bg.name, '', bg.assets);
-		for (const [pid, pg] of byProduct) addGroupRows(pid, pg.name, pg.mfr, pg.assets);
+		for (const [bid, bg] of byBundle) addGroupRows(bid, bg.name, '', bg.assets, true);
+		for (const [pid, pg] of byProduct) addGroupRows(pid, pg.name, pg.mfr, pg.assets, false);
 
 		return rows;
 	});
@@ -330,7 +383,11 @@
 	}
 
 	function goToday() {
-		scrollEl?.scrollTo({ left: Math.max(0, todayX - viewportWidth / 2), behavior: 'smooth' });
+		if (granularity === 'day' || granularity === 'week') {
+			scrollEl?.scrollTo({ left: Math.max(0, todayX - viewportWidth / 2), behavior: 'smooth' });
+		} else {
+			viewDate = new Date();
+		}
 	}
 
 	function scrollToBar(bar: Bar) {
@@ -354,6 +411,173 @@
 			if (scrollEl) scrollEl.scrollLeft = Math.max(0, todayX - viewportWidth / 2);
 		}, 0);
 	});
+
+	// Grid view (month/year) helpers
+
+	const effectiveViewMode = $derived(
+		granularity === 'month' || granularity === 'year' ? ('productions' as const) : viewMode
+	);
+
+	type GridEvent = { id: string; name: string; color: string; startTs: number; endTs: number };
+
+	let gridEvents = $derived.by((): GridEvent[] => {
+		if (effectiveViewMode === 'productions') {
+			return prodCalData
+				.filter((p) => p.startDate && p.endDate)
+				.map((p) => ({
+					id: p.id,
+					name: p.name,
+					color: prodColor(p.id),
+					startTs: startOfDay(new Date(p.startDate!)).getTime(),
+					endTs: startOfDay(new Date(p.endDate!)).getTime()
+				}));
+		}
+		const seen = new Set<string>();
+		const result: GridEvent[] = [];
+		for (const a of rawData) {
+			for (const pi of a.productionItems) {
+				if (!pi.production.startDate || !pi.production.endDate) continue;
+				if (seen.has(pi.production.id)) continue;
+				seen.add(pi.production.id);
+				result.push({
+					id: pi.production.id,
+					name: pi.production.name,
+					color: prodColor(pi.production.id),
+					startTs: startOfDay(new Date(pi.production.startDate)).getTime(),
+					endTs: startOfDay(new Date(pi.production.endDate)).getTime()
+				});
+			}
+		}
+		return result;
+	});
+
+	type EventBar = {
+		event: GridEvent;
+		startCol: number;
+		endCol: number;
+		lane: number;
+		startsInRow: boolean;
+		endsInRow: boolean;
+		dimmed: boolean;
+	};
+
+	type WeekRowData = {
+		days: Array<{ date: Date; isCurrentMonth: boolean }>;
+		bars: EventBar[];
+	};
+
+	function computeWeekBars(
+		week: Array<{ date: Date; isCurrentMonth: boolean }>,
+		events: GridEvent[],
+		monthStart = -Infinity,
+		monthEnd = Infinity
+	): EventBar[] {
+		const rowStartTs = startOfDay(week[0].date).getTime();
+		const rowEndTs = rowStartTs + 6 * MS_DAY;
+
+		const items = events
+			.filter((e) => e.startTs <= rowEndTs && e.endTs >= rowStartTs)
+			.map((e) => ({
+				event: e,
+				startCol: Math.max(0, Math.round((e.startTs - rowStartTs) / MS_DAY)),
+				endCol: Math.min(6, Math.round((e.endTs - rowStartTs) / MS_DAY)),
+				startsInRow: e.startTs >= rowStartTs,
+				endsInRow: e.endTs <= rowEndTs,
+				dimmed: e.endTs < monthStart || e.startTs > monthEnd
+			}));
+
+		items.sort(
+			(a, b) => a.startCol - b.startCol || b.endCol - b.startCol - (a.endCol - a.startCol)
+		);
+
+		const result: EventBar[] = [];
+		const laneEndCols: number[] = [];
+		for (const item of items) {
+			let lane = 0;
+			while (lane < laneEndCols.length && laneEndCols[lane] >= item.startCol) lane++;
+			laneEndCols[lane] = item.endCol;
+			result.push({ ...item, lane });
+		}
+		return result;
+	}
+
+	function buildMonthWeeks(year: number, month: number, forceWeeks = 0) {
+		const firstDay = new Date(year, month, 1);
+		const startDow = firstDay.getDay();
+		const gridStart = new Date(firstDay);
+		gridStart.setDate(1 - (startDow === 0 ? 6 : startDow - 1));
+
+		let numWeeks = forceWeeks;
+		if (!numWeeks) {
+			const lastDay = new Date(year, month + 1, 0);
+			const endDow = lastDay.getDay();
+			const gridEnd = new Date(lastDay);
+			if (endDow !== 0) gridEnd.setDate(lastDay.getDate() + (7 - endDow));
+			numWeeks = Math.round((gridEnd.getTime() - gridStart.getTime()) / (MS_DAY * 7)) + 1;
+		}
+
+		const weeks: Array<Array<{ date: Date; isCurrentMonth: boolean }>> = [];
+		const cur = new Date(gridStart);
+		for (let w = 0; w < numWeeks; w++) {
+			const week: Array<{ date: Date; isCurrentMonth: boolean }> = [];
+			for (let i = 0; i < 7; i++) {
+				week.push({ date: new Date(cur), isCurrentMonth: cur.getMonth() === month });
+				cur.setDate(cur.getDate() + 1);
+			}
+			weeks.push(week);
+		}
+		return weeks;
+	}
+
+	let monthGridData = $derived.by((): WeekRowData[] => {
+		if (granularity !== 'month') return [];
+		const y = viewDate.getFullYear();
+		const m = viewDate.getMonth();
+		const monthStart = new Date(y, m, 1).getTime();
+		const monthEnd = new Date(y, m + 1, 0).getTime();
+		const weeks = buildMonthWeeks(y, m);
+		return weeks.map((week) => ({
+			days: week,
+			bars: computeWeekBars(week, gridEvents, monthStart, monthEnd)
+		}));
+	});
+
+	let yearGridData = $derived.by(() => {
+		if (granularity !== 'year') return [];
+		const year = viewDate.getFullYear();
+		return Array.from({ length: 12 }, (_, m) => {
+			const monthStart = new Date(year, m, 1).getTime();
+			const monthEnd = new Date(year, m + 1, 0).getTime();
+			return {
+				month: m,
+				year,
+				weeks: buildMonthWeeks(year, m, 6).map((week) => ({
+					days: week,
+					bars: computeWeekBars(week, gridEvents, monthStart, monthEnd)
+				}))
+			};
+		});
+	});
+
+	let viewTitle = $derived.by(() => {
+		if (granularity === 'month') return `${MONTHS[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+		if (granularity === 'year') return String(viewDate.getFullYear());
+		return '';
+	});
+
+	function prevPeriod() {
+		const d = new Date(viewDate);
+		if (granularity === 'month') d.setMonth(d.getMonth() - 1);
+		else d.setFullYear(d.getFullYear() - 1);
+		viewDate = d;
+	}
+
+	function nextPeriod() {
+		const d = new Date(viewDate);
+		if (granularity === 'month') d.setMonth(d.getMonth() + 1);
+		else d.setFullYear(d.getFullYear() + 1);
+		viewDate = d;
+	}
 </script>
 
 <svelte:head><title>Calendar | Technikpool</title></svelte:head>
@@ -361,13 +585,7 @@
 <div class="flex h-full flex-col overflow-hidden">
 	<!-- Controls -->
 	<div class="flex flex-wrap items-center gap-3 border-b px-4 py-2">
-		<button
-			onclick={goToday}
-			class="h-8 rounded-md border bg-background px-3 text-sm hover:bg-muted"
-		>
-			Today
-		</button>
-
+		<!-- 1. View selector -->
 		<div class="flex overflow-hidden rounded-md border text-sm">
 			<button
 				class="px-3 py-1.5 {granularity === 'day'
@@ -381,24 +599,90 @@
 					: 'bg-background hover:bg-muted'}"
 				onclick={() => (granularity = 'week')}>Week</button
 			>
-		</div>
-
-		<div class="flex overflow-hidden rounded-md border text-sm">
 			<button
-				class="px-3 py-1.5 {viewMode === 'assets'
+				class="border-l px-3 py-1.5 {granularity === 'month'
 					? 'bg-primary text-primary-foreground'
 					: 'bg-background hover:bg-muted'}"
-				onclick={() => (viewMode = 'assets')}>Assets</button
+				onclick={() => (granularity = 'month')}>Month</button
 			>
 			<button
-				class="border-l px-3 py-1.5 {viewMode === 'productions'
+				class="border-l px-3 py-1.5 {granularity === 'year'
 					? 'bg-primary text-primary-foreground'
 					: 'bg-background hover:bg-muted'}"
-				onclick={() => (viewMode = 'productions')}>Productions</button
+				onclick={() => (granularity = 'year')}>Year</button
 			>
 		</div>
 
-		{#if viewMode === 'assets' && displayRows.some((r) => r.kind === 'header')}
+		<!-- 2. Mode selector (day/week only) -->
+		{#if granularity === 'day' || granularity === 'week'}
+			<div class="flex overflow-hidden rounded-md border text-sm">
+				<button
+					class="px-3 py-1.5 {viewMode === 'assets'
+						? 'bg-primary text-primary-foreground'
+						: 'bg-background hover:bg-muted'}"
+					onclick={() => (viewMode = 'assets')}>Assets</button
+				>
+				<button
+					class="border-l px-3 py-1.5 {viewMode === 'productions'
+						? 'bg-primary text-primary-foreground'
+						: 'bg-background hover:bg-muted'}"
+					onclick={() => (viewMode = 'productions')}>Productions</button
+				>
+			</div>
+		{/if}
+
+		<!-- 3. Today + period navigation -->
+		<button
+			onclick={goToday}
+			class="h-8 rounded-md border bg-background px-3 text-sm hover:bg-muted"
+		>
+			Today
+		</button>
+
+		{#if granularity === 'month' || granularity === 'year'}
+			<div class="flex items-center gap-1">
+				<button
+					onclick={prevPeriod}
+					class="flex h-8 w-8 items-center justify-center rounded-md border bg-background hover:bg-muted"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="14"
+						height="14"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2.5"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					>
+						<path d="m15 18-6-6 6-6" />
+					</svg>
+				</button>
+				<span class="min-w-[120px] text-center text-sm font-medium">{viewTitle}</span>
+				<button
+					onclick={nextPeriod}
+					class="flex h-8 w-8 items-center justify-center rounded-md border bg-background hover:bg-muted"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="14"
+						height="14"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2.5"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					>
+						<path d="m9 18 6-6-6-6" />
+					</svg>
+				</button>
+			</div>
+		{/if}
+
+		<!-- 4. Expand/collapse (day/week assets only) -->
+		{#if (granularity === 'day' || granularity === 'week') && viewMode === 'assets' && displayRows.some((r) => r.kind === 'header')}
 			<button
 				class="text-xs text-muted-foreground hover:text-foreground"
 				onclick={() => {
@@ -414,190 +698,355 @@
 		{/if}
 	</div>
 
-	<!-- Gantt body -->
-	<div class="flex-1 overflow-auto" bind:this={scrollEl} onscroll={handleScroll}>
-		<div style="min-width: {SIDEBAR + totalWidth}px">
-			<!-- Sticky date header -->
-			<div class="sticky top-0 z-20 flex border-b bg-background shadow-sm">
-				<!-- Corner cell -->
-				<div
-					class="sticky left-0 z-30 flex shrink-0 items-end border-r bg-background px-3 pb-1"
-					style="width: {SIDEBAR}px"
-				>
-					<span class="text-xs text-muted-foreground">
-						{viewMode === 'assets' ? 'Asset' : 'Production'}
-					</span>
-				</div>
-
-				<!-- Header columns -->
-				<div class="relative shrink-0" style="width: {totalWidth}px; height: 56px">
-					<!-- Month spans -->
-					<div class="absolute inset-x-0 top-0 border-b" style="height: 24px">
-						{#each monthSpans as span (span.col)}
-							<div
-								class="absolute top-0 h-full overflow-hidden border-l px-1.5 text-xs leading-6 font-medium whitespace-nowrap text-muted-foreground"
-								style="left: {span.col * colWidth}px; width: {span.span * colWidth}px"
-							>
-								{span.label}
-							</div>
-						{/each}
-					</div>
-
-					<!-- Day/Week labels -->
-					<div class="absolute inset-x-0 bottom-0" style="height: 32px">
-						{#each visibleCols as col (col)}
-							{@const d = colDate(col)}
-							{@const today = isToday(d)}
-							{@const weekend = granularity === 'day' && isWeekend(d)}
-							<div
-								class="absolute flex h-full items-center justify-center border-l text-xs {today
-									? 'font-bold text-primary'
-									: weekend
-										? 'text-muted-foreground/60'
-										: 'text-muted-foreground'} {weekend ? 'bg-muted/20' : ''}"
-								style="left: {col * colWidth}px; width: {colWidth}px"
-							>
-								{#if today}
-									<span
-										class="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground"
-									>
-										{colLabel(d)}
-									</span>
-								{:else}
-									{colLabel(d)}
-								{/if}
-							</div>
-						{/each}
-
-						<!-- Today vertical marker line -->
-						{#if todayX >= 0 && todayX <= totalWidth}
-							<div class="absolute top-0 h-full w-px bg-primary/40" style="left: {todayX}px"></div>
-						{/if}
-					</div>
-				</div>
-			</div>
-
-			<!-- Rows -->
-			{#each displayRows as row, idx (row.id)}
-				{@const h = rowH(row)}
-				<div
-					class="flex border-b {idx % 2 === 0 ? '' : 'bg-muted/10'} {row.kind === 'header'
-						? 'bg-muted/30'
-						: ''}"
-					style="height: {h}px"
-				>
-					<!-- Label (sticky left) -->
+	<!-- Month Grid View -->
+	{#if granularity === 'month'}
+		<div class="flex flex-1 flex-col overflow-hidden">
+			<!-- Day-of-week header -->
+			<div class="grid shrink-0 grid-cols-7 border-b">
+				{#each ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as dow, i (i)}
 					<div
-						class="sticky left-0 z-10 shrink-0 border-r bg-background"
+						class="py-2 text-center text-xs font-medium text-muted-foreground {i < 6
+							? 'border-r'
+							: ''}"
+					>
+						{dow}
+					</div>
+				{/each}
+			</div>
+			<!-- Week rows -->
+			<div class="flex flex-1 flex-col">
+				{#each monthGridData as weekRow, wi (wi)}
+					<div
+						class="relative flex-1 overflow-hidden border-b {wi === monthGridData.length - 1
+							? 'border-b-0'
+							: ''}"
+					>
+						<!-- Background: day cells -->
+						<div class="pointer-events-none absolute inset-0 grid grid-cols-7">
+							{#each weekRow.days as day, di (day.date.toISOString())}
+								{@const todayDay = isToday(day.date)}
+								{@const weekend = isWeekend(day.date)}
+								<div
+									class="h-full {di < 6 ? 'border-r' : ''} {!day.isCurrentMonth
+										? 'bg-muted/10'
+										: weekend
+											? 'bg-muted/5'
+											: ''}"
+								>
+									<div class="flex h-7 items-center px-1.5">
+										{#if todayDay}
+											<span
+												class="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground"
+											>
+												{day.date.getDate()}
+											</span>
+										{:else}
+											<span
+												class="text-xs {day.isCurrentMonth
+													? weekend
+														? 'text-muted-foreground'
+														: 'text-foreground'
+													: 'text-muted-foreground/30'}"
+											>
+												{day.date.getDate()}
+											</span>
+										{/if}
+									</div>
+								</div>
+							{/each}
+						</div>
+						<!-- Event bars spanning columns -->
+						{#each weekRow.bars as bar (bar.event.id)}
+							<a
+								href={resolve(`/productions/${bar.event.id}`)}
+								title={bar.event.name}
+								class="absolute flex items-center overflow-hidden px-1.5 text-[11px] font-medium text-white no-underline hover:brightness-110 {bar.startsInRow
+									? 'rounded-l'
+									: ''} {bar.endsInRow ? 'rounded-r' : ''} {bar.dimmed ? 'opacity-20' : ''}"
+								style="left: calc({bar.startCol} / 7 * 100% + {bar.startsInRow
+									? 2
+									: 0}px); width: calc({bar.endCol -
+									bar.startCol +
+									1} / 7 * 100% - {(bar.startsInRow ? 2 : 0) +
+									(bar.endsInRow ? 2 : 0)}px); top: {DAY_NUM_H +
+									bar.lane *
+										(MONTH_BAR_H +
+											MONTH_BAR_GAP)}px; height: {MONTH_BAR_H}px; background-color: {bar.event
+									.color}"
+							>
+								{bar.event.name}
+							</a>
+						{/each}
+					</div>
+				{/each}
+			</div>
+		</div>
+
+		<!-- Year Grid View -->
+	{:else if granularity === 'year'}
+		<div class="flex-1 overflow-hidden p-2">
+			<div class="grid h-full grid-cols-4 grid-rows-3 gap-1">
+				{#each yearGridData as mg (mg.month)}
+					<div class="flex flex-col overflow-hidden rounded-lg border">
+						<!-- Month name header -->
+						<div class="shrink-0 border-b py-1 text-center text-xs font-semibold">
+							{MONTHS[mg.month]}
+						</div>
+						<!-- Week rows filling remaining height -->
+						<div class="flex flex-1 flex-col">
+							{#each mg.weeks as weekRow, wi (wi)}
+								<div
+									class="relative flex-1 overflow-hidden {wi < mg.weeks.length - 1
+										? 'border-b'
+										: ''}"
+								>
+									<!-- Background: day cells (always faintly visible) -->
+									<div class="pointer-events-none absolute inset-0 grid grid-cols-7">
+										{#each weekRow.days as day, di (day.date.toISOString())}
+											<div
+												class="h-full {di < 6
+													? 'border-r border-border/30'
+													: ''} {day.isCurrentMonth
+													? isWeekend(day.date)
+														? 'bg-muted/30'
+														: 'bg-muted/15'
+													: 'bg-muted/5'}"
+											></div>
+										{/each}
+									</div>
+									<!-- Event bars spanning columns -->
+									{#each weekRow.bars as bar (bar.event.id)}
+										<a
+											href={resolve(`/productions/${bar.event.id}`)}
+											title={bar.event.name}
+											class="absolute no-underline hover:brightness-110 {bar.startsInRow
+												? 'rounded-l-sm'
+												: ''} {bar.endsInRow ? 'rounded-r-sm' : ''} {bar.dimmed
+												? 'opacity-20'
+												: ''}"
+											style="left: calc({bar.startCol} / 7 * 100%); width: calc({bar.endCol -
+												bar.startCol +
+												1} / 7 * 100%); top: {YEAR_DAY_NUM_H +
+												bar.lane *
+													(YEAR_BAR_H +
+														YEAR_BAR_GAP)}px; height: {YEAR_BAR_H}px; background-color: {bar.event
+												.color}"
+										></a>
+									{/each}
+									<!-- Day numbers on top -->
+									<div class="pointer-events-none absolute inset-0 grid grid-cols-7">
+										{#each weekRow.days as day (day.date.toISOString())}
+											<div class="flex items-start justify-start px-0.5 pt-0.5">
+												<span
+													class="text-[7px] leading-none {isToday(day.date)
+														? 'font-bold text-primary'
+														: day.isCurrentMonth
+															? 'text-foreground/50'
+															: 'text-foreground/20'}">{day.date.getDate()}</span
+												>
+											</div>
+										{/each}
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/each}
+			</div>
+		</div>
+
+		<!-- Gantt chart (day/week) -->
+	{:else}
+		<div class="flex-1 overflow-auto" bind:this={scrollEl} onscroll={handleScroll}>
+			<div style="min-width: {SIDEBAR + totalWidth}px">
+				<!-- Sticky date header -->
+				<div class="sticky top-0 z-20 flex border-b bg-background shadow-sm">
+					<!-- Corner cell -->
+					<div
+						class="sticky left-0 z-30 flex shrink-0 items-end border-r bg-background px-3 pb-1"
 						style="width: {SIDEBAR}px"
 					>
-						{#if row.kind === 'header'}
-							<button
-								class="flex h-full w-full cursor-pointer items-center gap-1.5 px-2 text-left"
-								onclick={() => toggleCollapse(row.id)}
-							>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="10"
-									height="10"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2.5"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									class="shrink-0 text-muted-foreground transition-transform {row.collapsed
-										? ''
-										: 'rotate-90'}"
-								>
-									<path d="m9 18 6-6-6-6" />
-								</svg>
-								<span class="truncate text-xs font-semibold">{row.name}</span>
-								<span class="ml-auto shrink-0 text-xs text-muted-foreground">×{row.count}</span>
-							</button>
-						{:else if row.kind === 'asset'}
-							<div class="flex h-full flex-col justify-center px-3">
-								<p class="truncate text-xs font-medium">{row.label}</p>
-								<p class="truncate text-[10px] text-muted-foreground">{row.org}</p>
-							</div>
-						{:else}
-							<button
-								class="flex h-full w-full cursor-pointer flex-col justify-center px-3 text-left hover:bg-muted/20"
-								onclick={() => row.bars[0] && scrollToBar(row.bars[0])}
-							>
-								<p class="truncate text-sm font-medium">{row.name}</p>
-								<p class="truncate text-[10px] text-muted-foreground">
-									{fmtDateRange(row.start, row.end)}
-								</p>
-							</button>
-						{/if}
+						<span class="text-xs text-muted-foreground">
+							{viewMode === 'assets' ? 'Asset' : 'Production'}
+						</span>
 					</div>
 
-					<!-- Timeline area -->
-					<div class="relative shrink-0" style="width: {totalWidth}px; height: {h}px">
-						<!-- Weekend column shading (day granularity only) -->
-						{#if granularity === 'day' && row.kind !== 'header'}
+					<!-- Header columns -->
+					<div class="relative shrink-0" style="width: {totalWidth}px; height: 56px">
+						<!-- Month spans -->
+						<div class="absolute inset-x-0 top-0 border-b" style="height: 24px">
+							{#each monthSpans as span (span.col)}
+								<div
+									class="absolute top-0 h-full overflow-hidden border-l px-1.5 text-xs leading-6 font-medium whitespace-nowrap text-muted-foreground"
+									style="left: {span.col * colWidth}px; width: {span.span * colWidth}px"
+								>
+									{span.label}
+								</div>
+							{/each}
+						</div>
+
+						<!-- Day/Week labels -->
+						<div class="absolute inset-x-0 bottom-0" style="height: 32px">
 							{#each visibleCols as col (col)}
-								{#if isWeekend(colDate(col))}
-									<div
-										class="absolute top-0 h-full bg-muted/20"
-										style="left: {col * colWidth}px; width: {colWidth}px"
-									></div>
-								{/if}
-							{/each}
-						{/if}
-
-						<!-- Today line -->
-						{#if todayX >= 0 && todayX <= totalWidth}
-							<div class="absolute top-0 h-full w-px bg-primary/20" style="left: {todayX}px"></div>
-						{/if}
-
-						<!-- Bars (asset / production rows) -->
-						{#if row.kind !== 'header'}
-							{#each row.bars as bar (bar.id)}
-								<a
-									href={resolve(`/productions/${bar.productionId}`)}
-									title="{bar.label}{bar.pending ? ' (pending)' : ''}"
-									class="absolute top-1 flex items-center overflow-hidden rounded px-1.5 text-[11px] font-medium text-white no-underline hover:brightness-110"
-									style="left: {bar.left}px; width: {bar.width}px; height: {h -
-										8}px; background-color: {bar.color}; {bar.pending
-										? 'background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px); opacity: 0.75;'
-										: ''}"
+								{@const d = colDate(col)}
+								{@const today = isToday(d)}
+								{@const weekend = granularity === 'day' && isWeekend(d)}
+								<div
+									class="absolute flex h-full items-center justify-center border-l text-xs {today
+										? 'font-bold text-primary'
+										: weekend
+											? 'text-muted-foreground/60'
+											: 'text-muted-foreground'} {weekend ? 'bg-muted/20' : ''}"
+									style="left: {col * colWidth}px; width: {colWidth}px"
 								>
-									{bar.label}
-								</a>
+									{#if today}
+										<span
+											class="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground"
+										>
+											{colLabel(d)}
+										</span>
+									{:else}
+										{colLabel(d)}
+									{/if}
+								</div>
 							{/each}
-						{/if}
 
-						<!-- Collapsed product bars: height proportional to booked/total fraction -->
-						{#if row.kind === 'header' && row.collapsed}
-							{#each row.collapsedBars as bar (bar.productionId)}
-								{@const barH = Math.max(3, Math.round(bar.fraction * (PRODUCT_H - 6)))}
-								<a
-									href={resolve(`/productions/${bar.productionId}`)}
-									title="{bar.label} ({Math.round(bar.fraction * 100)}%){bar.allPending
-										? ' · pending'
-										: ''}"
-									class="absolute flex items-center overflow-hidden rounded-sm px-1 no-underline hover:brightness-110"
-									style="left: {bar.left}px; width: {bar.width}px; height: {barH}px; top: 3px; background-color: {bar.color}; opacity: 0.75; {bar.allPending
-										? 'background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px);'
-										: ''}"
-								>
-									<span class="truncate text-[9px] leading-none font-medium text-white"
-										>{bar.label}</span
-									>
-								</a>
-							{/each}
-						{/if}
+							<!-- Today vertical marker line -->
+							{#if todayX >= 0 && todayX <= totalWidth}
+								<div
+									class="absolute top-0 h-full w-px bg-primary/40"
+									style="left: {todayX}px"
+								></div>
+							{/if}
+						</div>
 					</div>
 				</div>
-			{/each}
 
-			{#if displayRows.length === 0}
-				<div class="py-16 text-center text-sm text-muted-foreground">
-					No assets with scheduled productions found.
-				</div>
-			{/if}
+				<!-- Rows -->
+				{#each displayRows as row, idx (row.id)}
+					{@const h = rowH(row)}
+					<div
+						class="flex border-b {idx % 2 === 0 ? '' : 'bg-muted/10'} {row.kind === 'header'
+							? 'bg-muted/30'
+							: ''}"
+						style="height: {h}px"
+					>
+						<!-- Label (sticky left) -->
+						<div
+							class="sticky left-0 z-10 shrink-0 border-r bg-background"
+							style="width: {SIDEBAR}px"
+						>
+							{#if row.kind === 'header'}
+								<button
+									class="flex h-full w-full cursor-pointer items-center gap-1.5 px-2 text-left"
+									onclick={() => toggleCollapse(row.id)}
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="10"
+										height="10"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2.5"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										class="shrink-0 text-muted-foreground transition-transform {row.collapsed
+											? ''
+											: 'rotate-90'}"
+									>
+										<path d="m9 18 6-6-6-6" />
+									</svg>
+									<span class="truncate text-xs font-semibold">{row.name}</span>
+									<span class="ml-auto shrink-0 text-xs text-muted-foreground">×{row.count}</span>
+								</button>
+							{:else if row.kind === 'asset'}
+								<div class="flex h-full flex-col justify-center px-3">
+									<p class="truncate text-xs font-medium">{row.label}</p>
+									<p class="truncate text-[10px] text-muted-foreground">{row.org}</p>
+								</div>
+							{:else}
+								<button
+									class="flex h-full w-full cursor-pointer flex-col justify-center px-3 text-left hover:bg-muted/20"
+									onclick={() => row.bars[0] && scrollToBar(row.bars[0])}
+								>
+									<p class="truncate text-sm font-medium">{row.name}</p>
+									<p class="truncate text-[10px] text-muted-foreground">
+										{fmtDateRange(row.start, row.end)}
+									</p>
+								</button>
+							{/if}
+						</div>
+
+						<!-- Timeline area -->
+						<div class="relative shrink-0" style="width: {totalWidth}px; height: {h}px">
+							<!-- Weekend column shading (day granularity only) -->
+							{#if granularity === 'day' && row.kind !== 'header'}
+								{#each visibleCols as col (col)}
+									{#if isWeekend(colDate(col))}
+										<div
+											class="absolute top-0 h-full bg-muted/20"
+											style="left: {col * colWidth}px; width: {colWidth}px"
+										></div>
+									{/if}
+								{/each}
+							{/if}
+
+							<!-- Today line -->
+							{#if todayX >= 0 && todayX <= totalWidth}
+								<div
+									class="absolute top-0 h-full w-px bg-primary/20"
+									style="left: {todayX}px"
+								></div>
+							{/if}
+
+							<!-- Bars (asset / production rows) -->
+							{#if row.kind !== 'header'}
+								{#each row.bars as bar (bar.id)}
+									<a
+										href={resolve(`/productions/${bar.productionId}`)}
+										title="{bar.label}{bar.pending ? ' (pending)' : ''}"
+										class="absolute top-1 flex items-center overflow-hidden rounded px-1.5 text-[11px] font-medium text-white no-underline hover:brightness-110"
+										style="left: {bar.left}px; width: {bar.width}px; height: {h -
+											8}px; background-color: {bar.color}; {bar.pending
+											? 'background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px); opacity: 0.75;'
+											: ''}"
+									>
+										{bar.label}
+									</a>
+								{/each}
+							{/if}
+
+							<!-- Collapsed product bars: height proportional to booked/total fraction -->
+							{#if row.kind === 'header' && row.collapsed}
+								{#each row.collapsedBars as bar (bar.productionId)}
+									{@const barH = Math.max(3, Math.round(bar.fraction * (PRODUCT_H - 6)))}
+									<a
+										href={resolve(`/productions/${bar.productionId}`)}
+										title="{bar.label} ({Math.round(bar.fraction * 100)}%){bar.allPending
+											? ' · pending'
+											: ''}"
+										class="absolute flex items-center overflow-hidden rounded-sm px-1 no-underline hover:brightness-110"
+										style="left: {bar.left}px; width: {bar.width}px; height: {barH}px; top: 3px; background-color: {bar.color}; {bar.allPending
+											? 'background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px);'
+											: ''}"
+									>
+										<span class="truncate text-[9px] leading-none font-medium text-white"
+											>{bar.label}</span
+										>
+									</a>
+								{/each}
+							{/if}
+						</div>
+					</div>
+				{/each}
+
+				{#if displayRows.length === 0}
+					<div class="py-16 text-center text-sm text-muted-foreground">
+						No assets with scheduled productions found.
+					</div>
+				{/if}
+			</div>
 		</div>
-	</div>
+	{/if}
 </div>

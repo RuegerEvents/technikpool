@@ -2088,3 +2088,42 @@ msgstr "Importieren"
 #: src/routes/inventory/+page.svelte
 msgid "Import CSV"
 msgstr "CSV importieren"
+
+#: src/routes/calendar/+page.svelte
+msgid "Month"
+msgstr "Monat"
+
+#: src/routes/calendar/+page.svelte
+msgid "Year"
+msgstr "Jahr"
+
+#: src/routes/calendar/+page.svelte
+msgid "Mon"
+msgstr "Mo"
+
+#: src/routes/calendar/+page.svelte
+msgid "Tue"
+msgstr "Di"
+
+#: src/routes/calendar/+page.svelte
+msgid "Wed"
+msgstr "Mi"
+
+#: src/routes/calendar/+page.svelte
+msgid "Thu"
+msgstr "Do"
+
+#: src/routes/calendar/+page.svelte
+msgid "Fri"
+msgstr "Fr"
+
+#: src/routes/calendar/+page.svelte
+msgid "Sat"
+msgstr "Sa"
+
+#: src/routes/calendar/+page.svelte
+msgid "Sun"
+msgstr "So"
+
+#~ msgid "+{0} more"
+#~ msgstr "+{0} weitere"
