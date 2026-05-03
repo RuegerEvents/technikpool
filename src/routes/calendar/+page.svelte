@@ -162,22 +162,33 @@
 		}
 
 		const rows: Row[] = [];
+		const byBundle = new Map<string, { name: string; assets: typeof rawData }>();
 		const byProduct = new Map<string, { name: string; mfr: string; assets: typeof rawData }>();
-		for (const a of rawData) {
-			const pid = a.product.id;
-			if (!byProduct.has(pid))
-				byProduct.set(pid, { name: a.product.name, mfr: a.product.manufacturer.name, assets: [] });
-			byProduct.get(pid)!.assets.push(a);
-		}
-		for (const [pid, pg] of byProduct) {
-			const collapsed = !expandedProducts.has(pid);
 
-			// Aggregate productions across all assets in this product group for collapsed view
+		for (const a of rawData) {
+			if (a.bundle) {
+				if (!byBundle.has(a.bundle.id))
+					byBundle.set(a.bundle.id, { name: a.bundle.name, assets: [] });
+				byBundle.get(a.bundle.id)!.assets.push(a);
+			} else {
+				const pid = a.product.id;
+				if (!byProduct.has(pid))
+					byProduct.set(pid, {
+						name: a.product.name,
+						mfr: a.product.manufacturer.name,
+						assets: []
+					});
+				byProduct.get(pid)!.assets.push(a);
+			}
+		}
+
+		function addGroupRows(groupId: string, groupName: string, mfr: string, assets: typeof rawData) {
+			const collapsed = !expandedProducts.has(groupId);
 			const prodAgg = new Map<
 				string,
 				{ label: string; start: Date; end: Date; count: number; pendingCount: number }
 			>();
-			for (const a of pg.assets) {
+			for (const a of assets) {
 				for (const pi of a.productionItems) {
 					if (!pi.production.startDate || !pi.production.endDate) continue;
 					if (!prodAgg.has(pi.production.id))
@@ -197,21 +208,20 @@
 				label: p.label,
 				...barDims(p.start, p.end),
 				color: prodColor(id),
-				fraction: p.count / pg.assets.length,
+				fraction: p.count / assets.length,
 				allPending: p.pendingCount === p.count
 			}));
-
 			rows.push({
 				kind: 'header',
-				id: pid,
-				name: pg.name,
-				mfr: pg.mfr,
-				count: pg.assets.length,
+				id: groupId,
+				name: groupName,
+				mfr,
+				count: assets.length,
 				collapsed,
 				collapsedBars
 			});
 			if (!collapsed) {
-				for (const a of pg.assets) {
+				for (const a of assets) {
 					const bars: Bar[] = a.productionItems
 						.filter((pi) => pi.production.startDate && pi.production.endDate)
 						.map((pi) => ({
@@ -232,6 +242,10 @@
 				}
 			}
 		}
+
+		for (const [bid, bg] of byBundle) addGroupRows(bid, bg.name, '', bg.assets);
+		for (const [pid, pg] of byProduct) addGroupRows(pid, pg.name, pg.mfr, pg.assets);
+
 		return rows;
 	});
 

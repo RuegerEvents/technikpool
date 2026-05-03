@@ -28,6 +28,8 @@
 		card: Snippet<[T]>;
 		/** Optional — custom cell renderer; receives (row, columnKey) */
 		cell?: Snippet<[T, string]>;
+		/** Optional — extra classes applied to each card wrapper and table row */
+		rowClass?: (row: T) => string;
 		emptyTitle?: string;
 		emptyDescription?: string;
 		addHref?: string;
@@ -44,6 +46,7 @@
 		defaultView = 'table',
 		card,
 		cell,
+		rowClass,
 		emptyTitle = 'Nothing here yet',
 		emptyDescription,
 		addHref,
@@ -217,11 +220,13 @@
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 			{#each displayed as row (row['id'])}
 				{#if href}
-					<a href={resolveHref(href(row))} class="group block h-full">
+					<a href={resolveHref(href(row))} class="group block h-full {rowClass?.(row) ?? ''}">
 						{@render card(row)}
 					</a>
 				{:else}
-					{@render card(row)}
+					<div class={rowClass?.(row) ?? ''}>
+						{@render card(row)}
+					</div>
 				{/if}
 			{/each}
 		</div>
@@ -256,7 +261,9 @@
 					{#each displayed as row (row['id'])}
 						{#if href}
 							<tr
-								class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/50"
+								class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/50 {rowClass?.(
+									row
+								) ?? ''}"
 								onclick={() => goto(resolveHref(href!(row)))}
 							>
 								{#each columns as col (col.key)}
@@ -270,7 +277,7 @@
 								{/each}
 							</tr>
 						{:else}
-							<tr class="border-b last:border-0">
+							<tr class="border-b last:border-0 {rowClass?.(row) ?? ''}">
 								{#each columns as col (col.key)}
 									<td class="px-4 py-3 {col.class ?? ''}">
 										{#if cell}

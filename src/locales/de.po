@@ -1956,3 +1956,12 @@ msgstr "← Zurück zum Inventar"
 #: src/routes/productions/+page.svelte
 msgid "KW {0} · {1}{2}"
 msgstr ""
+
+#: src/routes/productions/+page.svelte
+msgid "<0/> Show archive"
+msgstr "<0/> Archiv anzeigen"
+
+#. 0: archivedCount; 1: archivedCount === 1 ? 'production' \\: 'productions'
+#: src/routes/productions/+page.svelte
+msgid "{0} {1} older than 1 month hidden"
+msgstr "{0} {1} älter als 1 Monat verborgen"
