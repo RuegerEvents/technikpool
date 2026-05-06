@@ -1,0 +1,12 @@
+node_modules
+.pnpm-store
+.svelte-kit
+build
+.vercel
+.netlify
+.DS_Store
+.env
+.env.*
+.git
+.github
+.vscode

@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+set -e
+
+pnpm -s prettier --check . || (echo "Prettier check failed. Please run 'pnpm prettier --check .' to see the issues." && exit 1)
