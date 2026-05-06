@@ -5,6 +5,7 @@ import { Prisma, PrismaClient } from '$lib/prisma/client';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { extendPrismaClient } from 'prisma-prefixed-ids';
+import { building } from '$app/environment';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -38,11 +39,13 @@ export const prisma = extendPrismaClient(originalPrisma, {
 	prefixes
 });
 
-export const auth = betterAuth({
-	database: prismaAdapter(prisma, {
-		provider: 'postgresql'
-	}),
-	emailAndPassword: {
-		enabled: true
-	}
-});
+export const auth = building
+	? (null as unknown as ReturnType<typeof betterAuth>)
+	: betterAuth({
+			database: prismaAdapter(prisma, {
+				provider: 'postgresql'
+			}),
+			emailAndPassword: {
+				enabled: true
+			}
+		});
