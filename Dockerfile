@@ -18,16 +18,14 @@ COPY . .
 RUN pnpm build
 
 FROM node:24-alpine AS runner
-WORKDIR /app
 ENV NODE_ENV=production
+ENV HUSKY=0
+
+WORKDIR /app
 
 COPY --from=build /app/build ./build
-
-# Install runtime dependencies based on the build output package.json
-WORKDIR /app/build
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable && pnpm install --prod --no-frozen-lockfile
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=build /app/package.json ./package.json
 
 EXPOSE 3000
-CMD ["node", "index.js"]
+CMD ["node", "build/index.js"]
