@@ -147,7 +147,7 @@
 			>
 				{editMode ? 'Cancel Edit' : 'Edit'}
 			</Button>
-			<Button variant="outline" href={resolve('/inventory')}>Back</Button>
+			<Button variant="outline" href={resolve('/assets')}>Back</Button>
 			<Button onclick={() => (showAddModal = !showAddModal)}>
 				{showAddModal ? 'Close' : 'Add Assets'}
 			</Button>

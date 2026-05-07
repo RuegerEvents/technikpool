@@ -57,12 +57,12 @@
 					{#if data.user}
 						<nav class="hidden gap-6 md:flex">
 							<a
-								href={resolve('/inventory')}
+								href={resolve('/assets')}
 								class="text-sm font-medium transition-colors {page.url.pathname.startsWith(
-									'/inventory'
-								) || page.url.pathname.startsWith('/assets')
+									'/assets'
+								)
 									? 'text-foreground'
-									: 'text-muted-foreground hover:text-foreground'}">Inventory</a
+									: 'text-muted-foreground hover:text-foreground'}">Devices</a
 							>
 							<a
 								href={resolve('/productions')}

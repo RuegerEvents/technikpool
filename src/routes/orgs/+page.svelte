@@ -117,7 +117,7 @@
 									{#if org.role === 'OWNER' || data.isAdmin}
 										<Button variant="outline" href={resolve(`/orgs/${org.id}`)}>Manage</Button>
 									{/if}
-									<Button variant="outline" href={resolve(`/inventory?org=${org.id}`)}
+									<Button variant="outline" href={resolve(`/assets?org=${org.id}`)}
 										>View Assets</Button
 									>
 								</div>

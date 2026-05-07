@@ -193,12 +193,12 @@
 	);
 </script>
 
-<svelte:head><title>Inventory | Technikpool</title></svelte:head>
+<svelte:head><title>Devices | Technikpool</title></svelte:head>
 
 <div class="space-y-6 {selectedAssetIds.size > 0 ? 'pb-20' : ''}">
 	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 		<div>
-			<h1 class="text-3xl font-bold tracking-tight">Inventory</h1>
+			<h1 class="text-3xl font-bold tracking-tight">Devices</h1>
 			<p class="text-muted-foreground">Product catalog — click a row to see individual units.</p>
 		</div>
 		<div class="flex items-center gap-2">
@@ -430,7 +430,7 @@
 													<span class="text-xs text-muted-foreground">{asset.location.name}</span>
 												{/if}
 												<a
-													href={resolve(`/inventory/${asset.id}`)}
+													href={resolve(`/assets/${asset.id}`)}
 													class="text-xs text-muted-foreground hover:text-foreground"
 													onclick={(e) => e.stopPropagation()}
 												>
@@ -566,7 +566,7 @@
 												</a>
 											{/if}
 											<a
-												href={resolve(`/inventory/${asset.id}`)}
+												href={resolve(`/assets/${asset.id}`)}
 												class="text-xs text-muted-foreground hover:text-foreground"
 												onclick={(e) => e.stopPropagation()}
 											>

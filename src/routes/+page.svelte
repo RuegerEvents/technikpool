@@ -410,13 +410,13 @@
 							Asset Calendar
 						</a>
 						<a
-							href={resolve('/inventory')}
+							href={resolve('/assets')}
 							class="flex items-center gap-3 rounded-lg border bg-card px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/50"
 						>
 							<div class="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">
 								<Layers class="h-4 w-4 text-primary" />
 							</div>
-							Inventory
+							Devices
 						</a>
 						<a
 							href={resolve('/orgs')}

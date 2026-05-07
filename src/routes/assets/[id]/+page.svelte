@@ -113,7 +113,7 @@
 			<h1 class="text-3xl font-bold tracking-tight">{asset.product.name}</h1>
 			<p class="text-muted-foreground">{asset.product.manufacturer.name}</p>
 		</div>
-		<Button variant="outline" href={resolve('/inventory')}>Back to Inventory</Button>
+		<Button variant="outline" href={resolve('/assets')}>Back to Devices</Button>
 	</div>
 
 	<div class="grid gap-6 lg:grid-cols-2">
