@@ -7,6 +7,7 @@ ENV PATH="$PNPM_HOME:$PATH"
 # Avoid git-hook install failures in container builds
 ENV HUSKY=0
 RUN corepack enable
+RUN corepack prepare pnpm@10.26.2 --activate
 
 FROM base AS deps
 COPY package.json pnpm-lock.yaml ./
