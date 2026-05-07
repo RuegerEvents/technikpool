@@ -170,8 +170,8 @@ export const createLocation = command(createLocationSchema, async (input) => {
 		});
 	});
 
-	getLocations(input.organizationId).refresh();
-	getLocations().refresh();
+	await getLocations(input.organizationId).refresh();
+	await getLocations().refresh();
 	return location;
 });
 
@@ -221,8 +221,8 @@ export const updateLocation = command(updateLocationSchema, async (input) => {
 		});
 	});
 
-	getLocations(location.organizationId).refresh();
-	getLocations().refresh();
+	await getLocations(location.organizationId).refresh();
+	await getLocations().refresh();
 	return updated;
 });
 
@@ -266,8 +266,8 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 	if (data.newManufacturerName && !manufacturerId) {
 		const m = await prisma.manufacturer.create({ data: { name: data.newManufacturerName } });
 		manufacturerId = m.id;
-		getManufacturers().refresh();
-		getProducts().refresh();
+		await getManufacturers().refresh();
+		await getProducts().refresh();
 	}
 
 	let productId = data.productId;
@@ -283,7 +283,7 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 			}
 		});
 		productId = p.id;
-		getProducts(manufacturerId).refresh();
+		await getProducts(manufacturerId).refresh();
 	}
 
 	if (!productId) throw new Error('Product is required');
@@ -310,9 +310,9 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 		)
 	);
 
-	getAssets(data.organizationId).refresh();
-	getInventorySummary(data.organizationId).refresh();
-	getInventorySummary().refresh();
+	await getAssets(data.organizationId).refresh();
+	await getInventorySummary(data.organizationId).refresh();
+	await getInventorySummary().refresh();
 
 	return assets;
 });
@@ -438,12 +438,12 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 		});
 	}
 
-	getAsset(input.assetId).refresh();
-	getAssetHistory(input.assetId).refresh();
-	getAssets(asset.organizationId).refresh();
-	getInventorySummary(asset.organizationId).refresh();
-	getInventorySummary().refresh();
-	getLocations(asset.organizationId).refresh();
+	await getAsset(input.assetId).refresh();
+	await getAssetHistory(input.assetId).refresh();
+	await getAssets(asset.organizationId).refresh();
+	await getInventorySummary(asset.organizationId).refresh();
+	await getInventorySummary().refresh();
+	await getLocations(asset.organizationId).refresh();
 
 	return updated;
 });
@@ -475,14 +475,14 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		include: { manufacturer: true, category: true }
 	});
 
-	getProducts(product.manufacturerId).refresh();
-	getProducts().refresh();
+	await getProducts(product.manufacturerId).refresh();
+	await getProducts().refresh();
 
 	const affectedAssets = await prisma.asset.findMany({
 		where: { productId: product.id },
 		select: { id: true }
 	});
-	affectedAssets.forEach((a) => getAsset(a.id).refresh());
+	await Promise.all(affectedAssets.map((a) => getAsset(a.id).refresh()));
 
 	return product;
 });
@@ -552,8 +552,8 @@ export const createBundle = command(createBundleSchema, async (data) => {
 		},
 		include: { organization: true, assets: true, category: true }
 	});
-	getBundles(data.organizationId).refresh();
-	getBundles().refresh();
+	await getBundles(data.organizationId).refresh();
+	await getBundles().refresh();
 	return bundle;
 });
 
@@ -604,9 +604,9 @@ export const updateBundle = command(updateBundleSchema, async (input) => {
 		return result;
 	});
 
-	getBundles(bundle.organizationId).refresh();
-	getBundle(input.bundleId).refresh();
-	getAssets(bundle.organizationId).refresh();
+	await getBundles(bundle.organizationId).refresh();
+	await getBundle(input.bundleId).refresh();
+	await getAssets(bundle.organizationId).refresh();
 	return updated;
 });
 
@@ -618,9 +618,9 @@ export const addAssetToBundle = command(bundleAssetSchema, async ({ bundleId, as
 	const updateData: { bundleId: string; locationId?: string } = { bundleId };
 	if (bundle.locationId) updateData.locationId = bundle.locationId;
 	await prisma.asset.update({ where: { id: assetId }, data: updateData });
-	getBundles(bundle.organizationId).refresh();
-	getBundle(bundleId).refresh();
-	getAssets(bundle.organizationId).refresh();
+	await getBundles(bundle.organizationId).refresh();
+	await getBundle(bundleId).refresh();
+	await getAssets(bundle.organizationId).refresh();
 	return { bundleId, assetId };
 });
 
@@ -628,9 +628,9 @@ export const removeAssetFromBundle = command(bundleAssetSchema, async ({ bundleI
 	await requireAuth();
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({ where: { id: bundleId } });
 	await prisma.asset.update({ where: { id: assetId }, data: { bundleId: null } });
-	getBundles(bundle.organizationId).refresh();
-	getBundle(bundleId).refresh();
-	getAssets(bundle.organizationId).refresh();
+	await getBundles(bundle.organizationId).refresh();
+	await getBundle(bundleId).refresh();
+	await getAssets(bundle.organizationId).refresh();
 	return { bundleId, assetId };
 });
 
@@ -759,11 +759,11 @@ export const importAssets = command(importAssetsSchema, async (data): Promise<Im
 	}
 
 	if (created > 0) {
-		getAssets(data.organizationId).refresh();
-		getInventorySummary(data.organizationId).refresh();
-		getInventorySummary().refresh();
-		getManufacturers().refresh();
-		getProducts().refresh();
+		await getAssets(data.organizationId).refresh();
+		await getInventorySummary(data.organizationId).refresh();
+		await getInventorySummary().refresh();
+		await getManufacturers().refresh();
+		await getProducts().refresh();
 	}
 
 	return { created, skipped, errors };

@@ -106,7 +106,7 @@ export const createProduction = command(createProductionSchema, async (data) => 
 		});
 	});
 
-	getProductions(data.organizationId).refresh();
+	await getProductions(data.organizationId).refresh();
 	return production;
 });
 
@@ -171,8 +171,8 @@ export const updateProductionAddress = command(updateProductionAddressSchema, as
 		});
 	});
 
-	getProduction(input.productionId).refresh();
-	getProductions(production.organizationId).refresh();
+	await getProduction(input.productionId).refresh();
+	await getProductions(production.organizationId).refresh();
 	return updated;
 });
 
@@ -245,7 +245,7 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 		}
 	});
 
-	getProduction(data.productionId).refresh();
+	await getProduction(data.productionId).refresh();
 	return item;
 });
 
@@ -284,8 +284,8 @@ export const approveProductionItem = command(v.string(), async (itemId: string) 
 		}
 	});
 
-	getProduction(item.productionId).refresh();
-	getPendingApprovals(item.asset.organizationId).refresh();
+	await getProduction(item.productionId).refresh();
+	await getPendingApprovals(item.asset.organizationId).refresh();
 	return updated;
 });
 
@@ -324,8 +324,8 @@ export const declineProductionItem = command(v.string(), async (itemId: string) 
 		}
 	});
 
-	getProduction(item.productionId).refresh();
-	getPendingApprovals(item.asset.organizationId).refresh();
+	await getProduction(item.productionId).refresh();
+	await getPendingApprovals(item.asset.organizationId).refresh();
 	return updated;
 });
 
@@ -435,14 +435,14 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 		}))
 	});
 
-	getProduction(data.productionId).refresh();
+	await getProduction(data.productionId).refresh();
 	return { added: newAssets.length, skippedConflicts };
 });
 
 export const removeProductionItem = command(v.string(), async (itemId: string) => {
 	await requireAuth();
 	const item = await prisma.productionItem.delete({ where: { id: itemId } });
-	getProduction(item.productionId).refresh();
+	await getProduction(item.productionId).refresh();
 	return item;
 });
 
@@ -458,7 +458,7 @@ export const removeBundleFromProduction = command(
 		await prisma.productionItem.deleteMany({
 			where: { productionId: data.productionId, sourceBundleId: data.bundleId }
 		});
-		getProduction(data.productionId).refresh();
+		await getProduction(data.productionId).refresh();
 	}
 );
 
@@ -476,14 +476,14 @@ export const addCrewMember = command(addCrewSchema, async (data) => {
 		data,
 		include: { user: { select: { id: true, name: true, email: true } } }
 	});
-	getProduction(data.productionId).refresh();
+	await getProduction(data.productionId).refresh();
 	return member;
 });
 
 export const removeCrewMember = command(v.string(), async (id: string) => {
 	await requireAuth();
 	const member = await prisma.productionCrew.delete({ where: { id } });
-	getProduction(member.productionId).refresh();
+	await getProduction(member.productionId).refresh();
 	return member;
 });
 

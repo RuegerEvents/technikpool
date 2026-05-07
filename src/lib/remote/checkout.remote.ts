@@ -120,15 +120,13 @@ export const scanAsset = command(scanAssetSchema, async (input) => {
 			}
 		});
 
-		for (const item of checkedOutItems) {
-			getProduction(item.production.id).refresh();
-		}
+		await Promise.all(checkedOutItems.map((item) => getProduction(item.production.id).refresh()));
 		if (asset.bundleId) {
-			getBundle(asset.bundleId).refresh();
-			getBundles(asset.organizationId).refresh();
+			await getBundle(asset.bundleId).refresh();
+			await getBundles(asset.organizationId).refresh();
 		}
-		getAsset(asset.id).refresh();
-		getAssets(asset.organizationId).refresh();
+		await getAsset(asset.id).refresh();
+		await getAssets(asset.organizationId).refresh();
 
 		return {
 			asset: {
@@ -169,7 +167,7 @@ export const scanAsset = command(scanAssetSchema, async (input) => {
 			}
 		});
 
-		getProduction(input.targetId).refresh();
+		await getProduction(input.targetId).refresh();
 
 		return {
 			asset: {
@@ -266,11 +264,9 @@ export const checkoutAssets = command(checkoutAssetsSchema, async (input) => {
 				}
 			});
 
-			for (const item of checkedOutItems) {
-				getProduction(item.production.id).refresh();
-			}
-			getAsset(asset.id).refresh();
-			getAssets(asset.organizationId).refresh();
+			await Promise.all(checkedOutItems.map((item) => getProduction(item.production.id).refresh()));
+			await getAsset(asset.id).refresh();
+			await getAssets(asset.organizationId).refresh();
 		}
 
 		// Update location on bundles where all assets were moved together
@@ -280,8 +276,8 @@ export const checkoutAssets = command(checkoutAssetsSchema, async (input) => {
 				where: { id: { in: updatedBundleIds } },
 				data: { locationId: input.targetId }
 			});
-			updatedBundleIds.forEach((id) => getBundle(id).refresh());
-			getBundles(orgId).refresh();
+			await Promise.all(updatedBundleIds.map((id) => getBundle(id).refresh()));
+			await getBundles(orgId).refresh();
 		}
 
 		return { count: assets.length, targetName: location.name };
@@ -318,11 +314,11 @@ export const checkoutAssets = command(checkoutAssetsSchema, async (input) => {
 				}
 			});
 
-			getAsset(asset.id).refresh();
-			getAssets(asset.organizationId).refresh();
+			await getAsset(asset.id).refresh();
+			await getAssets(asset.organizationId).refresh();
 		}
 
-		getProduction(input.targetId).refresh();
+		await getProduction(input.targetId).refresh();
 
 		return { count: assets.length, targetName: production.name };
 	}

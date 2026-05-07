@@ -114,7 +114,7 @@ export const addUserToOrg = command(
 			create: { userId: target.id, organizationId: orgId, role },
 			update: { role }
 		});
-		getOrgWithMembers(orgId).refresh();
+		await getOrgWithMembers(orgId).refresh();
 	}
 );
 
@@ -126,7 +126,7 @@ export const removeUserFromOrg = command(
 		await prisma.orgMembership.delete({
 			where: { userId_organizationId: { userId, organizationId: orgId } }
 		});
-		getOrgWithMembers(orgId).refresh();
+		await getOrgWithMembers(orgId).refresh();
 	}
 );
 
@@ -138,7 +138,7 @@ export const updateMemberRole = command(
 			where: { userId_organizationId: { userId, organizationId: orgId } },
 			data: { role }
 		});
-		getOrgWithMembers(orgId).refresh();
+		await getOrgWithMembers(orgId).refresh();
 	}
 );
 
@@ -161,7 +161,7 @@ export const createOrg = command(v.string(), async (name: string) => {
 		return created;
 	});
 
-	getMyOrgs().refresh();
+	await getMyOrgs().refresh();
 	return org;
 });
 
@@ -215,6 +215,6 @@ export const setUserAdmin = command(
 		if (!(await isUserAdmin(current.id))) throw new Error('Admin access required');
 		if (userId === current.id) throw new Error('Cannot change your own admin status');
 		await prisma.user.update({ where: { id: userId }, data: { isAdmin } });
-		getAllUsers().refresh();
+		await getAllUsers().refresh();
 	}
 );
