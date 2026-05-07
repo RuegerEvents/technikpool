@@ -6,6 +6,7 @@
 	import { getMyOrgs, getAllOrgs, createOrg } from '$lib/remote/orgs.remote';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
+	import { plural } from '$lib/utils';
 
 	let { data } = $props();
 
@@ -108,7 +109,7 @@
 										{#if org.role}
 											Role: {roleLabels[org.role] ?? org.role}
 										{:else if data.isAdmin && 'memberCount' in org}
-											{org.memberCount} {org.memberCount === 1 ? 'member' : 'members'}
+											{plural(org.memberCount, ['# member', '# members'])}
 										{/if}
 									</p>
 								</div>

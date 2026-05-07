@@ -6,6 +6,7 @@
 	import { getProductions } from '$lib/remote/productions.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { page } from '$app/state';
+	import { plural } from '$lib/utils';
 
 	let filterOrgId = $state(page.url.searchParams.get('org') || '');
 
@@ -181,8 +182,10 @@
 			</DataView>
 			{#if !showArchive && archivedCount > 0}
 				<p class="text-center text-xs text-muted-foreground">
-					{archivedCount}
-					{archivedCount === 1 ? 'production' : 'productions'} older than 1 month hidden
+					{plural(archivedCount, [
+						'# production older than 1 month hidden',
+						'# productions older than 1 month hidden'
+					])}
 				</p>
 			{/if}
 		{/if}

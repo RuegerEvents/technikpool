@@ -11,6 +11,7 @@
 	} from '$lib/remote/productions.remote';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
+	import { plural } from '$lib/utils';
 	import {
 		Package,
 		Layers,
@@ -98,7 +99,7 @@
 		const results = await Promise.allSettled(items.map((i) => approveProductionItem(i.id)));
 		const failed = results.filter((r) => r.status === 'rejected').length;
 		if (failed === 0)
-			toast.success(`${items.length} asset${items.length !== 1 ? 's' : ''} approved.`);
+			toast.success(plural(items.length, ['# asset approved.', '# assets approved.']));
 		else toast.error(`${failed} of ${items.length} approvals failed.`);
 	}
 
@@ -106,7 +107,7 @@
 		const results = await Promise.allSettled(items.map((i) => declineProductionItem(i.id)));
 		const failed = results.filter((r) => r.status === 'rejected').length;
 		if (failed === 0)
-			toast.success(`${items.length} asset${items.length !== 1 ? 's' : ''} declined.`);
+			toast.success(plural(items.length, ['# asset declined.', '# assets declined.']));
 		else toast.error(`${failed} of ${items.length} declines failed.`);
 	}
 
@@ -274,8 +275,7 @@
 						<Card.Content>
 							<div class="text-2xl font-bold">{stats.bundleCount}</div>
 							<p class="mt-1 text-xs text-muted-foreground">
-								Across {orgs.length}
-								{orgs.length === 1 ? 'organization' : 'organizations'}
+								{plural(orgs.length, ['Across # organization', 'Across # organizations'])}
 							</p>
 						</Card.Content>
 					</Card.Root>
@@ -301,7 +301,10 @@
 								{pending.length}
 							</div>
 							<p class="mt-1 text-xs text-muted-foreground">
-								{pending.length === 1 ? 'Request needs' : 'Requests need'} your attention
+								{plural(pending.length, [
+									'Request needs your attention',
+									'Requests need your attention'
+								])}
 							</p>
 						</Card.Content>
 					</Card.Root>
@@ -453,8 +456,7 @@
 											>{group.requesterOrg}</span
 										>
 										&middot;
-										{group.allItems.length}
-										{group.allItems.length === 1 ? 'asset' : 'assets'}
+										{plural(group.allItems.length, ['# asset', '# assets'])}
 									</p>
 								</div>
 								<div class="flex shrink-0 gap-2">

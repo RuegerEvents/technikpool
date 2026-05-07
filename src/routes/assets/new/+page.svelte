@@ -16,6 +16,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
+	import { plural } from '$lib/utils';
 	import { browser } from '$app/environment';
 
 	let saving = $state(false);
@@ -159,7 +160,7 @@
 			});
 
 			const count = created.length;
-			toast.success(count === 1 ? 'Asset created!' : `${count} assets created!`);
+			toast.success(plural(count, ['Asset created!', '# assets created!']));
 
 			if (createMore) {
 				resetForm();

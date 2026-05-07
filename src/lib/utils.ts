@@ -1,6 +1,10 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+export function plural(num: number, candidates: string[], rule = (n: number) => (n === 1 ? 0 : 1)) {
+	return candidates[rule(num)].replace('#', String(num));
+}
+
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }

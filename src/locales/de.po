@@ -326,10 +326,8 @@ msgstr "Handlungsbedarf"
 msgid "No pending approvals at this time."
 msgstr "Derzeit keine offenen Genehmigungen."
 
-#. 0: group.allItems.length; 1: group.allItems.length === 1 ? 'asset' \\: 'assets'
-#: src/routes/+page.svelte
-msgid "Requested by <0/> · {0} {1}"
-msgstr "Angefragt von <0/> · {0} {1}"
+#~ msgid "Requested by <0/> · {0} {1}"
+#~ msgstr "Angefragt von <0/> · {0} {1}"
 
 #: src/routes/+page.svelte
 msgid "Decline all"
@@ -608,9 +606,8 @@ msgstr "Bitte Hersteller auswählen"
 msgid "Please select a product"
 msgstr "Bitte Produkt auswählen"
 
-#: src/routes/assets/new/+page.svelte
-msgid "Asset created!"
-msgstr "Gerät erstellt!"
+#~ msgid "Asset created!"
+#~ msgstr "Gerät erstellt!"
 
 #: src/routes/assets/new/+page.svelte
 msgid "Add New Asset"
@@ -1941,10 +1938,8 @@ msgstr "KW {0} · {1}{2}"
 msgid "<0/> Show archive"
 msgstr "<0/> Archiv anzeigen"
 
-#. 0: archivedCount; 1: archivedCount === 1 ? 'production' \\: 'productions'
-#: src/routes/productions/+page.svelte
-msgid "{0} {1} older than 1 month hidden"
-msgstr "{0} {1} älter als 1 Monat verborgen"
+#~ msgid "{0} {1} older than 1 month hidden"
+#~ msgstr "{0} {1} älter als 1 Monat verborgen"
 
 #: src/lib/components/CsvImportModal.svelte
 msgid "Could not parse CSV file"
@@ -2192,23 +2187,17 @@ msgstr "Nächste: {0}"
 msgid "No upcoming productions"
 msgstr "Keine bevorstehenden Produktionen"
 
-#. 0: orgs.length; 1: orgs.length === 1 ? 'organization' \\: 'organizations'
-#: src/routes/+page.svelte
-msgid "Across {0} {1}"
-msgstr "In {0} {1}"
+#~ msgid "Across {0} {1}"
+#~ msgstr "In {0} {1}"
 
-#: src/routes/+page.svelte
-msgid "Request needs"
-msgstr "Anfrage benötigt"
+#~ msgid "Request needs"
+#~ msgstr "Anfrage benötigt"
 
-#: src/routes/+page.svelte
-msgid "Requests need"
-msgstr "Anfragen benötigen"
+#~ msgid "Requests need"
+#~ msgstr "Anfragen benötigen"
 
-#. 0: pending.length === 1 ? 'Request needs' \\: 'Requests need'
-#: src/routes/+page.svelte
-msgid "{0} your attention"
-msgstr "{0} Ihre Aufmerksamkeit"
+#~ msgid "{0} your attention"
+#~ msgstr "{0} Ihre Aufmerksamkeit"
 
 #: src/routes/+page.svelte
 msgid "<0/> New"
@@ -2241,3 +2230,56 @@ msgstr "<0/> Gerätekalender"
 #: src/routes/+page.svelte
 msgid "<0/> Inventory"
 msgstr "<0/> Inventar"
+
+#: src/routes/+page.svelte
+msgid "# asset approved."
+msgid_plural "# assets approved."
+msgstr[0] "# Gerät genehmigt."
+msgstr[1] "# Geräte genehmigt."
+
+#: src/routes/+page.svelte
+msgid "# asset declined."
+msgid_plural "# assets declined."
+msgstr[0] "# Gerät abgelehnt."
+msgstr[1] "# Geräte abgelehnt."
+
+#: src/routes/+page.svelte
+msgid "Across # organization"
+msgid_plural "Across # organizations"
+msgstr[0] "In # Organisation"
+msgstr[1] "In # Organisationen"
+
+#: src/routes/+page.svelte
+msgid "Request needs your attention"
+msgid_plural "Requests need your attention"
+msgstr[0] "Anfrage erfordert Aufmerksamkeit"
+msgstr[1] "Anfragen erfordern Aufmerksamkeit"
+
+#: src/routes/+page.svelte
+msgid "# asset"
+msgid_plural "# assets"
+msgstr[0] "# Gerät"
+msgstr[1] "# Geräte"
+
+#. 0: plural(group.allItems.length, ['# asset', '# assets'])
+#: src/routes/+page.svelte
+msgid "Requested by <0/> · {0}"
+msgstr "Angefragt von <0/> · {0}"
+
+#: src/routes/orgs/+page.svelte
+msgid "# member"
+msgid_plural "# members"
+msgstr[0] "# Mitglied"
+msgstr[1] "# Mitglieder"
+
+#: src/routes/productions/+page.svelte
+msgid "# production older than 1 month hidden"
+msgid_plural "# productions older than 1 month hidden"
+msgstr[0] "# Produktion älter als 1 Monat ausgeblendet"
+msgstr[1] "# Produktionen älter als 1 Monat ausgeblendet"
+
+#: src/routes/assets/new/+page.svelte
+msgid "Asset created!"
+msgid_plural "# assets created!"
+msgstr[0] "Gerät erstellt!"
+msgstr[1] "# Geräte erstellt!"
