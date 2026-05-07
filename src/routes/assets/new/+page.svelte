@@ -37,27 +37,62 @@
 		}
 	});
 
-	type SelectionOrNew = { id: string | null; name: string } | null;
+	type SelectionOrNew = { id: string; name: string } | { id: null; name: string } | null;
 
 	let manufacturer = $state<SelectionOrNew>(null);
 	let product = $state<SelectionOrNew>(null);
-	let manufacturerKey = $state(0);
-	let newProductCategoryId = $state('');
 	let categories = $derived(await getCategories());
 
-	$effect(() => {
-		if (newProductCategoryId) return;
-		const misc = categories.find((c) => c.name.toLowerCase() === 'miscellaneous');
-		if (misc) newProductCategoryId = misc.id;
+	// New product modal state
+	let newProductModal = $state({
+		open: false,
+		name: '',
+		categoryId: '',
+		imageUrl: ''
 	});
+
+	$effect(() => {
+		if (newProductModal.categoryId) return;
+		const misc = categories.find((c) => c.name.toLowerCase() === 'miscellaneous');
+		if (misc) newProductModal.categoryId = misc.id;
+	});
+
+	let pendingProduct = $state<{ name: string; categoryId: string; imageUrl: string } | null>(null);
+
+	let manufacturerKey = $state(0);
 
 	function handleManufacturerChange(sel: SelectionOrNew) {
 		manufacturer = sel;
 		product = null;
+		pendingProduct = null;
 		manufacturerKey++;
 	}
 
+	function handleProductCreate(name: string) {
+		newProductModal.name = name;
+		newProductModal.open = true;
+	}
+
+	function confirmNewProduct() {
+		if (!newProductModal.categoryId) {
+			toast.error('Please select a category');
+			return;
+		}
+		product = { id: null, name: newProductModal.name };
+		pendingProduct = {
+			name: newProductModal.name,
+			categoryId: newProductModal.categoryId,
+			imageUrl: newProductModal.imageUrl
+		};
+		newProductModal.open = false;
+	}
+
+	function cancelNewProduct() {
+		newProductModal.open = false;
+	}
+
 	let quantity = $state(1);
+	let noAssetTag = $state(false);
 	let items = $state<{ serialNumber: string; assetTag: string }[]>([
 		{ serialNumber: '', assetTag: '' }
 	]);
@@ -73,6 +108,7 @@
 	}
 
 	let createMore = $state(browser ? localStorage.getItem('asset_create_more') === 'true' : false);
+
 	$effect(() => {
 		if (browser) localStorage.setItem('asset_create_more', String(createMore));
 	});
@@ -80,6 +116,7 @@
 	function resetForm() {
 		manufacturer = null;
 		product = null;
+		pendingProduct = null;
 		manufacturerKey++;
 		items = Array.from({ length: quantity }, () => ({ serialNumber: '', assetTag: '' }));
 	}
@@ -98,10 +135,11 @@
 			toast.error('Please select a product');
 			return;
 		}
-		if (product.id === null && !newProductCategoryId) {
-			toast.error('Please select a category');
+		if (product.id === null && !pendingProduct?.categoryId) {
+			toast.error('Please complete the new product details');
 			return;
 		}
+
 		saving = true;
 		try {
 			const created = await createAssets({
@@ -110,19 +148,25 @@
 				manufacturerId: manufacturer.id ?? undefined,
 				newManufacturerName: manufacturer.id ? undefined : manufacturer.name,
 				productId: product.id ?? undefined,
-				newProductName: product.id ? undefined : product.name,
-				categoryId: product.id ? undefined : newProductCategoryId,
+				newProductName: product.id ? undefined : (pendingProduct?.name ?? product.name),
+				newProductImageUrl: product.id ? undefined : pendingProduct?.imageUrl || undefined,
+				categoryId: product.id ? undefined : pendingProduct?.categoryId,
 				items: items.map((item) => ({
 					serialNumber: item.serialNumber || undefined,
-					assetTag: item.assetTag || undefined
+					assetTag: noAssetTag ? undefined : item.assetTag || undefined,
+					noAssetTag: noAssetTag || undefined
 				}))
 			});
+
 			const count = created.length;
 			toast.success(count === 1 ? 'Asset created!' : `${count} assets created!`);
+
 			if (createMore) {
 				resetForm();
 				saving = false;
-			} else goto(resolve(count === 1 ? `/inventory/${created[0].id}` : '/inventory'));
+			} else {
+				goto(resolve(count === 1 ? `/inventory/${created[0].id}` : '/inventory'));
+			}
 		} catch (err) {
 			toast.error((err as Error).message);
 			saving = false;
@@ -211,23 +255,22 @@
 								<CreatableSelect
 									items={products}
 									value={product}
-									onchange={(sel) => (product = sel)}
+									onchange={(sel) => {
+										product = sel;
+										pendingProduct = null;
+									}}
+									oncreate={handleProductCreate}
 									placeholder="Search or create product…"
 								/>
+								{#if product && product.id === null && pendingProduct}
+									<p class="text-xs text-muted-foreground">
+										New product · {categories.find((c) => c.id === pendingProduct?.categoryId)
+											?.name ?? ''}
+										{#if pendingProduct.imageUrl}· has image{/if}
+									</p>
+								{/if}
 							</div>
 						{/key}
-					{/if}
-
-					{#if product && product.id === null}
-						<div class="space-y-2">
-							<Label for="category">Category</Label>
-							<CategorySelect
-								id="category"
-								{categories}
-								bind:value={newProductCategoryId}
-								placeholder="Select a category"
-							/>
-						</div>
 					{/if}
 
 					<div class="space-y-2">
@@ -243,44 +286,53 @@
 						/>
 					</div>
 
+					<label class="flex cursor-pointer items-center gap-2 text-sm select-none">
+						<input type="checkbox" bind:checked={noAssetTag} class="h-4 w-4 rounded border-input" />
+						No asset tag (e.g. cables, consumables)
+					</label>
+
 					{#if quantity > 1}
-						<div class="overflow-hidden rounded-lg border">
-							<table class="w-full text-sm">
-								<thead>
-									<tr class="border-b bg-muted/40">
-										<th class="w-10 px-3 py-2 text-left font-medium text-muted-foreground">#</th>
-										<th class="px-3 py-2 text-left font-medium text-muted-foreground">Asset Tag</th>
-										<th class="px-3 py-2 text-left font-medium text-muted-foreground"
-											>Serial Number</th
-										>
-									</tr>
-								</thead>
-								<tbody>
-									{#each items as item, i (i)}
-										<tr class="border-b last:border-0">
-											<td class="px-3 py-2 text-muted-foreground tabular-nums">{i + 1}</td>
-											<td class="px-3 py-2">
-												<Input
-													bind:value={item.assetTag}
-													placeholder={orgPrefix
-														? `${orgPrefix}${String(i + 1).padStart(5, '0')}`
-														: 'TAG-001'}
-													class="h-8 font-mono text-sm"
-												/>
-											</td>
-											<td class="px-3 py-2"
-												><Input
-													bind:value={item.serialNumber}
-													placeholder="S/N 123456"
-													class="h-8 text-sm"
-												/></td
+						{#if !noAssetTag}
+							<div class="overflow-hidden rounded-lg border">
+								<table class="w-full text-sm">
+									<thead>
+										<tr class="border-b bg-muted/40">
+											<th class="w-10 px-3 py-2 text-left font-medium text-muted-foreground">#</th>
+											<th class="px-3 py-2 text-left font-medium text-muted-foreground"
+												>Asset Tag</th
+											>
+											<th class="px-3 py-2 text-left font-medium text-muted-foreground"
+												>Serial Number</th
 											>
 										</tr>
-									{/each}
-								</tbody>
-							</table>
-						</div>
-					{:else}
+									</thead>
+									<tbody>
+										{#each items as item, i (i)}
+											<tr class="border-b last:border-0">
+												<td class="px-3 py-2 text-muted-foreground tabular-nums">{i + 1}</td>
+												<td class="px-3 py-2">
+													<Input
+														bind:value={item.assetTag}
+														placeholder={orgPrefix
+															? `${orgPrefix}${String(i + 1).padStart(5, '0')}`
+															: 'TAG-001'}
+														class="h-8 font-mono text-sm"
+													/>
+												</td>
+												<td class="px-3 py-2">
+													<Input
+														bind:value={item.serialNumber}
+														placeholder="S/N 123456"
+														class="h-8 text-sm"
+													/>
+												</td>
+											</tr>
+										{/each}
+									</tbody>
+								</table>
+							</div>
+						{/if}
+					{:else if !noAssetTag}
 						<div class="grid grid-cols-2 gap-3">
 							<div class="col-span-2 space-y-2">
 								<Label for="tag-0">Asset Tag</Label>
@@ -321,3 +373,59 @@
 		</Card.Content>
 	</Card.Root>
 </div>
+
+<!-- New Product Modal -->
+{#if newProductModal.open}
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+		onkeydown={(e) => e.key === 'Escape' && cancelNewProduct()}
+	>
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div
+			class="mx-4 w-full max-w-md rounded-lg border bg-background p-6 shadow-lg"
+			onkeydown={(e) => e.stopPropagation()}
+		>
+			<h2 class="mb-1 text-lg font-semibold">Create New Product</h2>
+			<p class="mb-5 text-sm text-muted-foreground">
+				Fill in the details for the new product model.
+			</p>
+
+			<div class="space-y-4">
+				<div class="space-y-2">
+					<Label for="modal-product-name">Product Name</Label>
+					<Input
+						id="modal-product-name"
+						bind:value={newProductModal.name}
+						placeholder="e.g. SM58"
+						required
+					/>
+				</div>
+
+				<div class="space-y-2">
+					<Label>Category</Label>
+					<CategorySelect
+						{categories}
+						bind:value={newProductModal.categoryId}
+						placeholder="Select a category"
+					/>
+				</div>
+
+				<div class="space-y-2">
+					<Label for="modal-product-image">Image URL</Label>
+					<Input
+						id="modal-product-image"
+						type="url"
+						placeholder="https://…"
+						bind:value={newProductModal.imageUrl}
+					/>
+				</div>
+			</div>
+
+			<div class="mt-6 flex justify-end gap-3">
+				<Button type="button" variant="outline" onclick={cancelNewProduct}>Cancel</Button>
+				<Button type="button" onclick={confirmNewProduct}>Add Product</Button>
+			</div>
+		</div>
+	</div>
+{/if}

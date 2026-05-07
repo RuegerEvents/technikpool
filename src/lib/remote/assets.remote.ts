@@ -247,7 +247,8 @@ const createAssetsSchema = v.object({
 	items: v.array(
 		v.object({
 			serialNumber: v.optional(v.string()),
-			assetTag: v.optional(v.string())
+			assetTag: v.optional(v.string()),
+			noAssetTag: v.optional(v.boolean())
 		})
 	)
 });
@@ -308,16 +309,19 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 			if (!isNaN(parsed)) nextNum = parsed + 1;
 		}
 
+		let autoTagIdx = 0;
 		return Promise.all(
-			data.items.map((item, idx) => {
-				let resolvedTag: string;
-				if (item.assetTag?.trim()) {
+			data.items.map((item) => {
+				let resolvedTag: string | null;
+				if (item.noAssetTag) {
+					resolvedTag = null;
+				} else if (item.assetTag?.trim()) {
 					const tag = item.assetTag.trim();
 					if (!tag.startsWith(prefix))
 						throw new Error(`Asset tag "${tag}" must start with org prefix "${prefix}"`);
 					resolvedTag = tag;
 				} else {
-					resolvedTag = `${prefix}${String(nextNum + idx).padStart(5, '0')}`;
+					resolvedTag = `${prefix}${String(nextNum + autoTagIdx++).padStart(5, '0')}`;
 				}
 
 				return tx.asset.create({

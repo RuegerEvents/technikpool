@@ -175,10 +175,9 @@ msgstr "Crew"
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
-#: src/routes/inventory/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
@@ -260,7 +259,6 @@ msgstr "Entfernen"
 #: src/routes/assets/new/+page.svelte
 #: src/routes/inventory/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Manufacturer"
@@ -369,8 +367,6 @@ msgstr "Einige ablehnen…"
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
-#: src/routes/inventory/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 #: src/routes/productions/[id]/delivery-note/+page.svelte
 msgid "Serial Number"
 msgstr "Seriennummer"
@@ -380,8 +376,6 @@ msgstr "Seriennummer"
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
-#: src/routes/inventory/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Asset Tag"
 msgstr "Asset-Tag"
 
@@ -396,7 +390,6 @@ msgstr "Bundle"
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 #: src/routes/productions/+page.svelte
 msgid "Organization"
 msgstr "Organisation"
@@ -414,7 +407,6 @@ msgstr "Alle Organisationen"
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/inventory/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Add Asset"
 msgstr "Gerät hinzufügen"
 
@@ -609,62 +601,51 @@ msgid "Make Admin"
 msgstr "Zum Admin machen"
 
 #: src/routes/assets/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Please select a manufacturer"
 msgstr "Bitte Hersteller auswählen"
 
 #: src/routes/assets/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Please select a product"
 msgstr "Bitte Produkt auswählen"
 
 #: src/routes/assets/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Asset created!"
 msgstr "Gerät erstellt!"
 
 #: src/routes/assets/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Add New Asset"
 msgstr "Neues Gerät hinzufügen"
 
 #: src/routes/assets/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Register new equipment into your organization's inventory."
 msgstr "Neues Equipment in das Inventar Ihrer Organisation aufnehmen."
 
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Search or create manufacturer…"
 msgstr "Hersteller suchen oder erstellen…"
 
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Product Model"
 msgstr "Produktmodell"
 
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Search or create product…"
 msgstr "Produkt suchen oder erstellen…"
 
 #: src/routes/assets/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Quantity"
 msgstr "Menge"
 
 #: src/routes/assets/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "<0/> Create another after saving"
 msgstr "<0/> Nach dem Speichern weiteres erstellen"
 
 #: src/routes/assets/new/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
@@ -672,9 +653,7 @@ msgid "Saving…"
 msgstr "Wird gespeichert…"
 
 #. 0: quantity
-#. 0: quantity
 #: src/routes/assets/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Add {0} Assets"
 msgstr "{0} Geräte hinzufügen"
 
@@ -846,8 +825,8 @@ msgstr "ArrowUp"
 
 #: src/lib/components/ui/category-select/category-select.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
+#: src/routes/assets/new/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Escape"
 msgstr "Escape"
 
@@ -1245,11 +1224,10 @@ msgstr "Bearbeiten"
 #: src/routes/checkout/+page.svelte
 #: src/routes/inventory/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Location"
 msgstr "Standort"
 
-#: src/routes/inventory/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
 msgid "Image URL"
 msgstr "Bild-URL"
 
@@ -1264,13 +1242,11 @@ msgstr "Speichern"
 
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Please select a location"
 msgstr "Bitte einen Standort auswählen"
 
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "No locations yet. Create one in <0>Locations</0>."
 msgstr "Noch keine Standorte. Erstelle einen unter <0>Standorte</0>."
 
@@ -1456,7 +1432,6 @@ msgid "Create Bundle | Technikpool"
 msgstr "Bundle erstellen | Technikpool"
 
 #: src/routes/assets/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "New Asset | Technikpool"
 msgstr "Neues Gerät | Technikpool"
 
@@ -1788,7 +1763,6 @@ msgstr "Alle Kategorien"
 #: src/routes/inventory/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Category"
 msgstr "Kategorie"
 
@@ -1801,7 +1775,6 @@ msgstr "Kategorie"
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Please select a category"
 msgstr "Bitte eine Kategorie auswählen"
 
@@ -1810,7 +1783,6 @@ msgstr "Bitte eine Kategorie auswählen"
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Select a category"
 msgstr "Kategorie auswählen"
 
@@ -1875,9 +1847,9 @@ msgstr "Seriennummer, Tag, Status und Lagerort."
 msgid "Shared product details for this asset type."
 msgstr "Gemeinsame Produktdetails für diesen Asset-Typ."
 
+#: src/routes/assets/new/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
-#: src/routes/inventory/new/+page.svelte
 msgid "Product Name"
 msgstr "Produktname"
 
@@ -1898,28 +1870,28 @@ msgstr "Produkt bearbeiten"
 msgid "Changes apply to all assets of this product type."
 msgstr "Änderungen gelten für alle Assets dieses Produkttyps."
 
-#: src/routes/inventory/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
 msgid "Please complete the new product details"
 msgstr "Bitte Produktdetails vervollständigen"
 
-#: src/routes/inventory/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
 msgid "· has image"
 msgstr "· hat Bild"
 
 #. 0: categories.find((c) => c.id === pendingProduct?.categoryId) ?.name ?? ''
-#: src/routes/inventory/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
 msgid "New product · {0} <0/>"
 msgstr "Neues Produkt · {0} <0/>"
 
-#: src/routes/inventory/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
 msgid "Create New Product"
 msgstr "Neues Produkt erstellen"
 
-#: src/routes/inventory/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
 msgid "Fill in the details for the new product model."
 msgstr "Details für das neue Produktmodell eingeben."
 
-#: src/routes/inventory/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
 msgid "Add Product"
 msgstr "Produkt hinzufügen"
 
@@ -2178,3 +2150,7 @@ msgstr "Bundle geändert"
 #: src/routes/productions/[id]/+page.svelte
 msgid "Update from bundle"
 msgstr "Mit Bundle aktualisieren"
+
+#: src/routes/assets/new/+page.svelte
+msgid "<0/> No asset tag (e.g. cables, consumables)"
+msgstr "<0/> Kein Inventaraufkleber (z. B. Kabel, Verbrauchsmaterial)"
