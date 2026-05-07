@@ -47,6 +47,7 @@ msgid "Toggle theme"
 msgstr "Design wechseln"
 
 #: src/routes/+layout.svelte
+#: src/routes/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 msgid "<0/> Organizations"
 msgstr "<0/> Organisationen"
@@ -310,9 +311,8 @@ msgstr "Dashboard"
 msgid "Welcome back, {0}."
 msgstr "Willkommen zurück, {0}."
 
-#: src/routes/+page.svelte
-msgid "My Organizations"
-msgstr "Meine Organisationen"
+#~ msgid "My Organizations"
+#~ msgstr "Meine Organisationen"
 
 #: src/routes/+page.svelte
 msgid "Pending Approvals"
@@ -661,8 +661,9 @@ msgstr "{0} Geräte hinzufügen"
 msgid "Bundle created!"
 msgstr "Bundle erstellt!"
 
-#~ msgid "Asset Bundles"
-#~ msgstr "Gerätebundles"
+#: src/routes/+page.svelte
+msgid "Asset Bundles"
+msgstr "Gerätebundles"
 
 #~ msgid "Grouped sets of equipment that can be booked together."
 #~ msgstr "Gruppierte Gerätesätze, die gemeinsam gebucht werden können."
@@ -2154,3 +2155,89 @@ msgstr "Mit Bundle aktualisieren"
 #: src/routes/assets/new/+page.svelte
 msgid "<0/> No asset tag (e.g. cables, consumables)"
 msgstr "<0/> Kein Inventaraufkleber (z. B. Kabel, Verbrauchsmaterial)"
+
+#~ msgid "No date set"
+#~ msgstr "Kein Datum"
+
+#: src/routes/+page.svelte
+msgid "Total Assets"
+msgstr "Geräte gesamt"
+
+#. 0: stats.assetsByStatus.available
+#: src/routes/+page.svelte
+msgid "<0/> {0} available"
+msgstr "<0/> {0} verfügbar"
+
+#. 0: stats.assetsByStatus.maintenance
+#: src/routes/+page.svelte
+msgid "<0/> {0} maintenance"
+msgstr "<0/> {0} Wartung"
+
+#. 0: stats.assetsByStatus.broken
+#: src/routes/+page.svelte
+msgid "<0/> {0} broken"
+msgstr "<0/> {0} defekt"
+
+#: src/routes/+page.svelte
+#: src/routes/+page.svelte
+msgid "Upcoming Productions"
+msgstr "Bevorstehende Produktionen"
+
+#. 0: stats.upcomingProductions[0].name
+#: src/routes/+page.svelte
+msgid "Next: {0}"
+msgstr "Nächste: {0}"
+
+#: src/routes/+page.svelte
+msgid "No upcoming productions"
+msgstr "Keine bevorstehenden Produktionen"
+
+#. 0: orgs.length; 1: orgs.length === 1 ? 'organization' \\: 'organizations'
+#: src/routes/+page.svelte
+msgid "Across {0} {1}"
+msgstr "In {0} {1}"
+
+#: src/routes/+page.svelte
+msgid "Request needs"
+msgstr "Anfrage benötigt"
+
+#: src/routes/+page.svelte
+msgid "Requests need"
+msgstr "Anfragen benötigen"
+
+#. 0: pending.length === 1 ? 'Request needs' \\: 'Requests need'
+#: src/routes/+page.svelte
+msgid "{0} your attention"
+msgstr "{0} Ihre Aufmerksamkeit"
+
+#: src/routes/+page.svelte
+msgid "<0/> New"
+msgstr "<0/> Neu"
+
+#: src/routes/+page.svelte
+msgid "No upcoming productions scheduled. <0/> <1>Create your first production →</1>"
+msgstr "Keine Produktionen geplant. <0/> <1>Erste Produktion erstellen →</1>"
+
+#: src/routes/+page.svelte
+msgid "View all productions <0/>"
+msgstr "Alle Produktionen anzeigen <0/>"
+
+#: src/routes/+page.svelte
+msgid "Quick Links"
+msgstr "Schnellzugriff"
+
+#: src/routes/+page.svelte
+msgid "<0/> Add Assets"
+msgstr "<0/> Geräte hinzufügen"
+
+#: src/routes/+page.svelte
+msgid "<0/> New Production"
+msgstr "<0/> Neue Produktion"
+
+#: src/routes/+page.svelte
+msgid "<0/> Asset Calendar"
+msgstr "<0/> Gerätekalender"
+
+#: src/routes/+page.svelte
+msgid "<0/> Inventory"
+msgstr "<0/> Inventar"

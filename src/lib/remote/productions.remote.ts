@@ -659,3 +659,49 @@ export const getProductionsCalendar = query(async () => {
 		orderBy: { startDate: 'asc' }
 	});
 });
+
+export const getDashboardStats = query(async () => {
+	const user = await requireAuth();
+	const memberships = await prisma.orgMembership.findMany({ where: { userId: user.id } });
+	const orgIds = memberships.map((m) => m.organizationId);
+	const now = new Date();
+
+	const [
+		totalAssets,
+		availableAssets,
+		maintenanceAssets,
+		brokenAssets,
+		upcomingProductions,
+		bundleCount
+	] = await Promise.all([
+		prisma.asset.count({ where: { organizationId: { in: orgIds } } }),
+		prisma.asset.count({ where: { organizationId: { in: orgIds }, status: 'AVAILABLE' } }),
+		prisma.asset.count({ where: { organizationId: { in: orgIds }, status: 'MAINTENANCE' } }),
+		prisma.asset.count({ where: { organizationId: { in: orgIds }, status: 'BROKEN' } }),
+		prisma.production.findMany({
+			where: { organizationId: { in: orgIds }, startDate: { gte: now } },
+			orderBy: { startDate: 'asc' },
+			take: 5,
+			select: {
+				id: true,
+				name: true,
+				startDate: true,
+				endDate: true,
+				organization: { select: { name: true } },
+				_count: { select: { items: true, crew: true } }
+			}
+		}),
+		prisma.assetBundle.count({ where: { organizationId: { in: orgIds } } })
+	]);
+
+	return {
+		totalAssets,
+		assetsByStatus: {
+			available: availableAssets,
+			maintenance: maintenanceAssets,
+			broken: brokenAssets
+		},
+		upcomingProductions,
+		bundleCount
+	};
+});

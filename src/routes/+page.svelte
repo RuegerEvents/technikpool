@@ -6,10 +6,22 @@
 	import {
 		getPendingApprovals,
 		approveProductionItem,
-		declineProductionItem
+		declineProductionItem,
+		getDashboardStats
 	} from '$lib/remote/productions.remote';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
+	import {
+		Package,
+		Layers,
+		CalendarDays,
+		CircleAlert,
+		ArrowRight,
+		Clapperboard,
+		Users,
+		Building2,
+		Plus
+	} from '@lucide/svelte';
 
 	let { data } = $props();
 
@@ -18,6 +30,7 @@
 	let pending = $derived(
 		data.user ? (await Promise.all(adminOrgs.map((o) => getPendingApprovals(o.id)))).flat() : []
 	);
+	let stats = $derived(data.user ? await getDashboardStats() : null);
 
 	type PendingItem = (typeof pending)[number];
 
@@ -96,6 +109,14 @@
 			toast.success(`${items.length} asset${items.length !== 1 ? 's' : ''} declined.`);
 		else toast.error(`${failed} of ${items.length} declines failed.`);
 	}
+
+	function formatDate(d: Date | null | undefined) {
+		if (!d) return '—';
+		return new Date(d).toLocaleDateString(data.locale === 'en' ? 'en-GB' : 'de-DE', {
+			day: '2-digit',
+			month: 'short'
+		});
+	}
 </script>
 
 <svelte:head><title>Technikpool</title></svelte:head>
@@ -162,36 +183,254 @@
 		</div>
 	</div>
 {:else}
-	<div class="space-y-6">
+	<div class="space-y-8">
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">Dashboard</h1>
 			<p class="text-muted-foreground">Welcome back, {data.user.name || data.user.email}.</p>
 		</div>
 
-		<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-			<Card.Root>
-				<Card.Header class="pb-2">
-					<Card.Title class="text-sm font-medium text-muted-foreground">My Organizations</Card.Title
-					>
-				</Card.Header>
-				<Card.Content>
-					<div class="text-2xl font-bold">{orgs.length}</div>
-				</Card.Content>
-			</Card.Root>
+		<!-- Stats row -->
+		{#if stats}
+			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+				<!-- Assets -->
+				<a href={resolve('/assets')} class="group block">
+					<Card.Root class="transition-shadow hover:shadow-md">
+						<Card.Header class="flex flex-row items-center justify-between pb-2">
+							<Card.Title class="text-sm font-medium text-muted-foreground">Total Assets</Card.Title
+							>
+							<Package class="h-4 w-4 text-muted-foreground" />
+						</Card.Header>
+						<Card.Content class="space-y-3">
+							<div class="text-2xl font-bold">{stats.totalAssets}</div>
+							{#if stats.totalAssets > 0}
+								<div class="flex h-1.5 w-full overflow-hidden rounded-full bg-muted">
+									<div
+										class="bg-emerald-500"
+										style="width: {(stats.assetsByStatus.available / stats.totalAssets) * 100}%"
+									></div>
+									<div
+										class="bg-amber-400"
+										style="width: {(stats.assetsByStatus.maintenance / stats.totalAssets) * 100}%"
+									></div>
+									<div
+										class="bg-red-500"
+										style="width: {(stats.assetsByStatus.broken / stats.totalAssets) * 100}%"
+									></div>
+								</div>
+								<div class="flex gap-3 text-xs text-muted-foreground">
+									<span class="flex items-center gap-1">
+										<span class="inline-block h-2 w-2 rounded-full bg-emerald-500"></span>
+										{stats.assetsByStatus.available} available
+									</span>
+									{#if stats.assetsByStatus.maintenance > 0}
+										<span class="flex items-center gap-1">
+											<span class="inline-block h-2 w-2 rounded-full bg-amber-400"></span>
+											{stats.assetsByStatus.maintenance} maintenance
+										</span>
+									{/if}
+									{#if stats.assetsByStatus.broken > 0}
+										<span class="flex items-center gap-1">
+											<span class="inline-block h-2 w-2 rounded-full bg-red-500"></span>
+											{stats.assetsByStatus.broken} broken
+										</span>
+									{/if}
+								</div>
+							{/if}
+						</Card.Content>
+					</Card.Root>
+				</a>
 
-			<Card.Root>
-				<Card.Header class="pb-2">
-					<Card.Title class="text-sm font-medium text-muted-foreground"
-						>Pending Approvals</Card.Title
-					>
-				</Card.Header>
-				<Card.Content>
-					<div class="text-2xl font-bold">{pending.length}</div>
-				</Card.Content>
-			</Card.Root>
-		</div>
+				<!-- Upcoming productions -->
+				<a href={resolve('/productions')} class="group block">
+					<Card.Root class="transition-shadow hover:shadow-md">
+						<Card.Header class="flex flex-row items-center justify-between pb-2">
+							<Card.Title class="text-sm font-medium text-muted-foreground"
+								>Upcoming Productions</Card.Title
+							>
+							<Clapperboard class="h-4 w-4 text-muted-foreground" />
+						</Card.Header>
+						<Card.Content>
+							<div class="text-2xl font-bold">{stats.upcomingProductions.length}</div>
+							{#if stats.upcomingProductions.length > 0}
+								<p class="mt-1 text-xs text-muted-foreground">
+									Next: {stats.upcomingProductions[0].name}
+								</p>
+							{:else}
+								<p class="mt-1 text-xs text-muted-foreground">No upcoming productions</p>
+							{/if}
+						</Card.Content>
+					</Card.Root>
+				</a>
 
-		<div class="mt-8">
+				<!-- Bundles -->
+				<a href={resolve('/assets/bundles')} class="group block">
+					<Card.Root class="transition-shadow hover:shadow-md">
+						<Card.Header class="flex flex-row items-center justify-between pb-2">
+							<Card.Title class="text-sm font-medium text-muted-foreground"
+								>Asset Bundles</Card.Title
+							>
+							<Layers class="h-4 w-4 text-muted-foreground" />
+						</Card.Header>
+						<Card.Content>
+							<div class="text-2xl font-bold">{stats.bundleCount}</div>
+							<p class="mt-1 text-xs text-muted-foreground">
+								Across {orgs.length}
+								{orgs.length === 1 ? 'organization' : 'organizations'}
+							</p>
+						</Card.Content>
+					</Card.Root>
+				</a>
+
+				<!-- Pending approvals -->
+				<div class="block">
+					<Card.Root
+						class={pending.length > 0
+							? 'border-amber-500/40 bg-amber-50/50 dark:bg-amber-950/20'
+							: ''}
+					>
+						<Card.Header class="flex flex-row items-center justify-between pb-2">
+							<Card.Title class="text-sm font-medium text-muted-foreground"
+								>Pending Approvals</Card.Title
+							>
+							<CircleAlert
+								class="h-4 w-4 {pending.length > 0 ? 'text-amber-500' : 'text-muted-foreground'}"
+							/>
+						</Card.Header>
+						<Card.Content>
+							<div class="text-2xl font-bold {pending.length > 0 ? 'text-amber-600' : ''}">
+								{pending.length}
+							</div>
+							<p class="mt-1 text-xs text-muted-foreground">
+								{pending.length === 1 ? 'Request needs' : 'Requests need'} your attention
+							</p>
+						</Card.Content>
+					</Card.Root>
+				</div>
+			</div>
+
+			<!-- Middle row: upcoming productions + quick links -->
+			<div class="grid gap-6 lg:grid-cols-3">
+				<!-- Upcoming productions list -->
+				<div class="lg:col-span-2">
+					<div class="mb-3 flex items-center justify-between">
+						<h2 class="text-lg font-semibold">Upcoming Productions</h2>
+						<Button variant="ghost" size="sm" href={resolve('/productions/new')}>
+							<Plus class="mr-1 h-4 w-4" />
+							New
+						</Button>
+					</div>
+					<Card.Root>
+						{#if stats.upcomingProductions.length === 0}
+							<Card.Content class="py-8 text-center text-sm text-muted-foreground">
+								No upcoming productions scheduled.
+								<br />
+								<a
+									href={resolve('/productions/new')}
+									class="mt-2 inline-block text-primary hover:underline"
+									>Create your first production →</a
+								>
+							</Card.Content>
+						{:else}
+							<div class="divide-y">
+								{#each stats.upcomingProductions as prod (prod.id)}
+									<a
+										href={resolve(`/productions/${prod.id}`)}
+										class="flex items-center justify-between px-4 py-3 transition-colors hover:bg-muted/40"
+									>
+										<div class="min-w-0">
+											<p class="truncate font-medium">{prod.name}</p>
+											<p class="text-xs text-muted-foreground">{prod.organization.name}</p>
+										</div>
+										<div class="ml-4 flex shrink-0 items-center gap-4 text-right">
+											<div class="hidden text-xs text-muted-foreground sm:block">
+												<div class="flex items-center gap-1">
+													<Package class="h-3 w-3" />
+													{prod._count.items}
+												</div>
+												<div class="flex items-center gap-1">
+													<Users class="h-3 w-3" />
+													{prod._count.crew}
+												</div>
+											</div>
+											<div class="text-right">
+												<p class="text-sm font-medium">{formatDate(prod.startDate)}</p>
+												{#if prod.endDate}
+													<p class="text-xs text-muted-foreground">– {formatDate(prod.endDate)}</p>
+												{/if}
+											</div>
+											<ArrowRight class="h-4 w-4 text-muted-foreground" />
+										</div>
+									</a>
+								{/each}
+							</div>
+							<div class="border-t px-4 py-2">
+								<a
+									href={resolve('/productions')}
+									class="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+								>
+									View all productions <ArrowRight class="h-3 w-3" />
+								</a>
+							</div>
+						{/if}
+					</Card.Root>
+				</div>
+
+				<!-- Quick links -->
+				<div>
+					<h2 class="mb-3 text-lg font-semibold">Quick Links</h2>
+					<div class="space-y-2">
+						<a
+							href={resolve('/assets/new')}
+							class="flex items-center gap-3 rounded-lg border bg-card px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/50"
+						>
+							<div class="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">
+								<Package class="h-4 w-4 text-primary" />
+							</div>
+							Add Assets
+						</a>
+						<a
+							href={resolve('/productions/new')}
+							class="flex items-center gap-3 rounded-lg border bg-card px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/50"
+						>
+							<div class="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">
+								<Clapperboard class="h-4 w-4 text-primary" />
+							</div>
+							New Production
+						</a>
+						<a
+							href={resolve('/calendar')}
+							class="flex items-center gap-3 rounded-lg border bg-card px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/50"
+						>
+							<div class="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">
+								<CalendarDays class="h-4 w-4 text-primary" />
+							</div>
+							Asset Calendar
+						</a>
+						<a
+							href={resolve('/inventory')}
+							class="flex items-center gap-3 rounded-lg border bg-card px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/50"
+						>
+							<div class="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">
+								<Layers class="h-4 w-4 text-primary" />
+							</div>
+							Inventory
+						</a>
+						<a
+							href={resolve('/orgs')}
+							class="flex items-center gap-3 rounded-lg border bg-card px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/50"
+						>
+							<div class="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">
+								<Building2 class="h-4 w-4 text-primary" />
+							</div>
+							Organizations
+						</a>
+					</div>
+				</div>
+			</div>
+		{/if}
+
+		<!-- Action Required -->
+		<div>
 			<h2 class="mb-4 text-xl font-semibold">Action Required</h2>
 			{#if groups.length === 0}
 				<Card.Root>
