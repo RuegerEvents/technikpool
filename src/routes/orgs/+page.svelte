@@ -11,6 +11,7 @@
 
 	let orgs = $derived(await (data.isAdmin ? getAllOrgs() : getMyOrgs()));
 	let newOrgName = $state('');
+	let newOrgPrefix = $state('');
 	let creating = $state(false);
 
 	const roleLabels: Record<string, string> = {
@@ -25,9 +26,10 @@
 		if (!newOrgName) return;
 		try {
 			creating = true;
-			await createOrg(newOrgName);
+			await createOrg({ name: newOrgName, assetIdPrefix: newOrgPrefix });
 			toast.success(`Organization "${newOrgName}" created!`);
 			newOrgName = '';
+			newOrgPrefix = '';
 		} catch (err) {
 			toast.error((err as Error).message);
 		} finally {
@@ -63,6 +65,20 @@
 					<div class="space-y-2">
 						<Label for="orgName">Organization Name</Label>
 						<Input id="orgName" bind:value={newOrgName} placeholder="e.g. Acme Corp" required />
+					</div>
+					<div class="space-y-2">
+						<Label for="orgPrefix">Asset ID Prefix</Label>
+						<Input
+							id="orgPrefix"
+							bind:value={newOrgPrefix}
+							placeholder="e.g. 123"
+							maxlength={3}
+							required
+							class="w-24"
+						/>
+						<p class="text-xs text-muted-foreground">
+							3-digit prefix for asset IDs (e.g. 123 → 12300001).
+						</p>
 					</div>
 					<Button type="submit" disabled={creating}>
 						{creating ? 'Creating...' : 'Create Organization'}

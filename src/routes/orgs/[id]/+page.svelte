@@ -7,7 +7,8 @@
 		getOrgWithMembers,
 		addUserToOrg,
 		removeUserFromOrg,
-		updateMemberRole
+		updateMemberRole,
+		updateOrg
 	} from '$lib/remote/orgs.remote';
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
@@ -62,6 +63,28 @@
 		}
 	}
 
+	let editingPrefix = $state(false);
+	let prefixDraft = $state('');
+	let savingPrefix = $state(false);
+
+	$effect(() => {
+		if (!editingPrefix) prefixDraft = org.assetIdPrefix;
+	});
+
+	async function handlePrefixSave(e: Event) {
+		e.preventDefault();
+		savingPrefix = true;
+		try {
+			await updateOrg({ orgId, assetIdPrefix: prefixDraft });
+			toast.success('Asset ID prefix updated');
+			editingPrefix = false;
+		} catch (err) {
+			toast.error((err as Error).message);
+		} finally {
+			savingPrefix = false;
+		}
+	}
+
 	const roleLabels: Record<string, string> = {
 		OWNER: 'Owner',
 		ADMIN: 'Admin',
@@ -110,42 +133,89 @@
 
 	<div class="grid gap-6 lg:grid-cols-3">
 		{#if canManage}
-			<Card.Root>
-				<Card.Header>
-					<Card.Title>Add Member</Card.Title>
-					<Card.Description>Add a registered user to this organization by email.</Card.Description>
-				</Card.Header>
-				<Card.Content>
-					<form onsubmit={handleAddUser} class="space-y-4">
-						<div class="space-y-2">
-							<Label for="addEmail">Email address</Label>
-							<Input
-								id="addEmail"
-								type="email"
-								bind:value={addEmail}
-								placeholder="user@example.com"
-								required
-							/>
-						</div>
-						<div class="space-y-2">
-							<Label for="addRole">Role</Label>
-							<select
-								id="addRole"
-								bind:value={addRole}
-								class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
-							>
-								<option value="VIEWER">Viewer</option>
-								<option value="MEMBER">Member</option>
-								<option value="ADMIN">Admin</option>
-								<option value="OWNER">Owner</option>
-							</select>
-						</div>
-						<Button type="submit" disabled={adding} class="w-full">
-							{adding ? 'Adding...' : 'Add Member'}
-						</Button>
-					</form>
-				</Card.Content>
-			</Card.Root>
+			<div class="space-y-6">
+				<Card.Root>
+					<Card.Header>
+						<Card.Title>Asset ID Prefix</Card.Title>
+						<Card.Description>
+							3-digit prefix for auto-generated asset IDs (e.g. 123 → 12300001).
+						</Card.Description>
+					</Card.Header>
+					<Card.Content>
+						{#if editingPrefix}
+							<form onsubmit={handlePrefixSave} class="space-y-4">
+								<div class="space-y-2">
+									<Label for="prefixInput">Prefix</Label>
+									<Input
+										id="prefixInput"
+										bind:value={prefixDraft}
+										placeholder="123"
+										maxlength={3}
+										required
+										class="w-24"
+									/>
+								</div>
+								<div class="flex gap-2">
+									<Button type="submit" disabled={savingPrefix}>
+										{savingPrefix ? 'Saving…' : 'Save'}
+									</Button>
+									<Button type="button" variant="outline" onclick={() => (editingPrefix = false)}>
+										Cancel
+									</Button>
+								</div>
+							</form>
+						{:else}
+							<div class="flex items-center justify-between">
+								<span class="font-mono text-lg">
+									{org.assetIdPrefix}
+								</span>
+								<Button variant="outline" size="sm" onclick={() => (editingPrefix = true)}>
+									Edit
+								</Button>
+							</div>
+						{/if}
+					</Card.Content>
+				</Card.Root>
+
+				<Card.Root>
+					<Card.Header>
+						<Card.Title>Add Member</Card.Title>
+						<Card.Description>
+							Add a registered user to this organization by email.
+						</Card.Description>
+					</Card.Header>
+					<Card.Content>
+						<form onsubmit={handleAddUser} class="space-y-4">
+							<div class="space-y-2">
+								<Label for="addEmail">Email address</Label>
+								<Input
+									id="addEmail"
+									type="email"
+									bind:value={addEmail}
+									placeholder="user@example.com"
+									required
+								/>
+							</div>
+							<div class="space-y-2">
+								<Label for="addRole">Role</Label>
+								<select
+									id="addRole"
+									bind:value={addRole}
+									class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+								>
+									<option value="VIEWER">Viewer</option>
+									<option value="MEMBER">Member</option>
+									<option value="ADMIN">Admin</option>
+									<option value="OWNER">Owner</option>
+								</select>
+							</div>
+							<Button type="submit" disabled={adding} class="w-full">
+								{adding ? 'Adding...' : 'Add Member'}
+							</Button>
+						</form>
+					</Card.Content>
+				</Card.Root>
+			</div>
 		{/if}
 
 		<div class="space-y-4 {canManage ? 'lg:col-span-2' : 'lg:col-span-3'}">

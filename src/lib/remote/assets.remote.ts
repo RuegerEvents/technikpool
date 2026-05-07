@@ -291,24 +291,52 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 	const location = await prisma.location.findUniqueOrThrow({ where: { id: data.locationId } });
 	if (location.organizationId !== data.organizationId) throw new Error('Invalid location');
 
-	const assets = await Promise.all(
-		data.items.map((item) =>
-			prisma.asset.create({
-				data: {
-					organizationId: data.organizationId,
-					productId: productId!,
-					locationId: location.id,
-					serialNumber: item.serialNumber || null,
-					assetTag: item.assetTag || null,
-					status: 'AVAILABLE',
-					transactions: {
-						create: { userId: user.id, action: 'CREATED', data: { type: 'CREATED' } }
-					}
-				},
-				include: { product: { include: { manufacturer: true, category: true } }, location: true }
+	const assets = await prisma.$transaction(async (tx) => {
+		const { assetIdPrefix: prefix } = await tx.organization.findUniqueOrThrow({
+			where: { id: data.organizationId },
+			select: { assetIdPrefix: true }
+		});
+
+		const last = await tx.asset.findFirst({
+			where: { assetTag: { startsWith: prefix } },
+			orderBy: { assetTag: 'desc' },
+			select: { assetTag: true }
+		});
+		let nextNum = 1;
+		if (last?.assetTag) {
+			const parsed = parseInt(last.assetTag.slice(prefix.length), 10);
+			if (!isNaN(parsed)) nextNum = parsed + 1;
+		}
+
+		return Promise.all(
+			data.items.map((item, idx) => {
+				let resolvedTag: string;
+				if (item.assetTag?.trim()) {
+					const tag = item.assetTag.trim();
+					if (!tag.startsWith(prefix))
+						throw new Error(`Asset tag "${tag}" must start with org prefix "${prefix}"`);
+					resolvedTag = tag;
+				} else {
+					resolvedTag = `${prefix}${String(nextNum + idx).padStart(5, '0')}`;
+				}
+
+				return tx.asset.create({
+					data: {
+						organizationId: data.organizationId,
+						productId: productId!,
+						locationId: location.id,
+						serialNumber: item.serialNumber || null,
+						assetTag: resolvedTag,
+						status: 'AVAILABLE',
+						transactions: {
+							create: { userId: user.id, action: 'CREATED', data: { type: 'CREATED' } }
+						}
+					},
+					include: { product: { include: { manufacturer: true, category: true } }, location: true }
+				});
 			})
-		)
-	);
+		);
+	});
 
 	await getAssets(data.organizationId).refresh();
 	await getInventorySummary(data.organizationId).refresh();
@@ -669,11 +697,23 @@ export const importAssets = command(importAssetsSchema, async (data): Promise<Im
 	const location = await prisma.location.findUniqueOrThrow({ where: { id: data.locationId } });
 	if (location.organizationId !== data.organizationId) throw new Error('Invalid location');
 
-	const existingTagRows = await prisma.asset.findMany({
-		where: { organizationId: data.organizationId, assetTag: { not: null } },
+	const org = await prisma.organization.findUniqueOrThrow({
+		where: { id: data.organizationId },
+		select: { assetIdPrefix: true }
+	});
+	const prefix = org.assetIdPrefix;
+
+	// Determine next auto-tag number for this org's prefix
+	const lastByPrefix = await prisma.asset.findFirst({
+		where: { assetTag: { startsWith: prefix } },
+		orderBy: { assetTag: 'desc' },
 		select: { assetTag: true }
 	});
-	const existingTags = new Set(existingTagRows.map((a) => a.assetTag!.toLowerCase()));
+	let nextIdNum = 1;
+	if (lastByPrefix?.assetTag) {
+		const parsed = parseInt(lastByPrefix.assetTag.slice(prefix.length), 10);
+		if (!isNaN(parsed)) nextIdNum = parsed + 1;
+	}
 
 	// Upsert manufacturers (case-insensitive)
 	const manufacturerCache = new Map<string, string>();
@@ -710,7 +750,7 @@ export const importAssets = command(importAssetsSchema, async (data): Promise<Im
 	}
 
 	let created = 0;
-	let skipped = 0;
+	const skipped = 0;
 	const errors: { rowIndex: number; message: string }[] = [];
 
 	for (let i = 0; i < data.rows.length; i++) {
@@ -733,10 +773,26 @@ export const importAssets = command(importAssetsSchema, async (data): Promise<Im
 				});
 				continue;
 			}
-			const assetTag = row.assetTag?.trim() || null;
-			if (assetTag && existingTags.has(assetTag.toLowerCase())) {
-				skipped++;
-				continue;
+
+			// Resolve asset tag (serves as unique ID)
+			const rowTag = row.assetTag?.trim() || null;
+			let resolvedTag: string;
+			if (rowTag) {
+				if (!rowTag.startsWith(prefix)) {
+					errors.push({
+						rowIndex: i,
+						message: `Asset tag "${rowTag}" must start with org prefix "${prefix}"`
+					});
+					continue;
+				}
+				const existing = await prisma.asset.findUnique({ where: { assetTag: rowTag } });
+				if (existing) {
+					errors.push({ rowIndex: i, message: `Asset tag "${rowTag}" already exists` });
+					continue;
+				}
+				resolvedTag = rowTag;
+			} else {
+				resolvedTag = `${prefix}${String(nextIdNum++).padStart(5, '0')}`;
 			}
 			await prisma.asset.create({
 				data: {
@@ -744,7 +800,7 @@ export const importAssets = command(importAssetsSchema, async (data): Promise<Im
 					productId,
 					locationId: data.locationId,
 					serialNumber: row.serialNumber?.trim() || null,
-					assetTag,
+					assetTag: resolvedTag,
 					status: 'AVAILABLE',
 					transactions: {
 						create: { userId: user.id, action: 'CREATED', data: { type: 'CREATED' } }
@@ -752,7 +808,6 @@ export const importAssets = command(importAssetsSchema, async (data): Promise<Im
 				}
 			});
 			created++;
-			if (assetTag) existingTags.add(assetTag.toLowerCase());
 		} catch (err) {
 			errors.push({ rowIndex: i, message: (err as Error).message });
 		}

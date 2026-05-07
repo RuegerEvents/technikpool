@@ -251,6 +251,7 @@ export type AssetOrderByWithRelationInput = {
 
 export type AssetWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  assetTag?: string
   AND?: Prisma.AssetWhereInput | Prisma.AssetWhereInput[]
   OR?: Prisma.AssetWhereInput[]
   NOT?: Prisma.AssetWhereInput | Prisma.AssetWhereInput[]
@@ -258,7 +259,6 @@ export type AssetWhereUniqueInput = Prisma.AtLeast<{
   productId?: Prisma.StringFilter<"Asset"> | string
   locationId?: Prisma.StringFilter<"Asset"> | string
   serialNumber?: Prisma.StringNullableFilter<"Asset"> | string | null
-  assetTag?: Prisma.StringNullableFilter<"Asset"> | string | null
   status?: Prisma.StringFilter<"Asset"> | string
   bundleId?: Prisma.StringNullableFilter<"Asset"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
@@ -269,7 +269,7 @@ export type AssetWhereUniqueInput = Prisma.AtLeast<{
   bundle?: Prisma.XOR<Prisma.AssetBundleNullableScalarRelationFilter, Prisma.AssetBundleWhereInput> | null
   productionItems?: Prisma.ProductionItemListRelationFilter
   transactions?: Prisma.AssetTransactionListRelationFilter
-}, "id">
+}, "id" | "assetTag">
 
 export type AssetOrderByWithAggregationInput = {
   id?: Prisma.SortOrder

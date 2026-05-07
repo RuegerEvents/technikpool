@@ -1780,6 +1780,7 @@ export type VerificationScalarFieldEnum = (typeof VerificationScalarFieldEnum)[k
 export const OrganizationScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  assetIdPrefix: 'assetIdPrefix',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   defaultAssetVisibility: 'defaultAssetVisibility'

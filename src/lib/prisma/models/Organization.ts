@@ -27,6 +27,7 @@ export type AggregateOrganization = {
 export type OrganizationMinAggregateOutputType = {
   id: string | null
   name: string | null
+  assetIdPrefix: string | null
   createdAt: Date | null
   updatedAt: Date | null
   defaultAssetVisibility: string | null
@@ -35,6 +36,7 @@ export type OrganizationMinAggregateOutputType = {
 export type OrganizationMaxAggregateOutputType = {
   id: string | null
   name: string | null
+  assetIdPrefix: string | null
   createdAt: Date | null
   updatedAt: Date | null
   defaultAssetVisibility: string | null
@@ -43,6 +45,7 @@ export type OrganizationMaxAggregateOutputType = {
 export type OrganizationCountAggregateOutputType = {
   id: number
   name: number
+  assetIdPrefix: number
   createdAt: number
   updatedAt: number
   defaultAssetVisibility: number
@@ -53,6 +56,7 @@ export type OrganizationCountAggregateOutputType = {
 export type OrganizationMinAggregateInputType = {
   id?: true
   name?: true
+  assetIdPrefix?: true
   createdAt?: true
   updatedAt?: true
   defaultAssetVisibility?: true
@@ -61,6 +65,7 @@ export type OrganizationMinAggregateInputType = {
 export type OrganizationMaxAggregateInputType = {
   id?: true
   name?: true
+  assetIdPrefix?: true
   createdAt?: true
   updatedAt?: true
   defaultAssetVisibility?: true
@@ -69,6 +74,7 @@ export type OrganizationMaxAggregateInputType = {
 export type OrganizationCountAggregateInputType = {
   id?: true
   name?: true
+  assetIdPrefix?: true
   createdAt?: true
   updatedAt?: true
   defaultAssetVisibility?: true
@@ -150,6 +156,7 @@ export type OrganizationGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 export type OrganizationGroupByOutputType = {
   id: string
   name: string
+  assetIdPrefix: string
   createdAt: Date
   updatedAt: Date
   defaultAssetVisibility: string
@@ -179,6 +186,7 @@ export type OrganizationWhereInput = {
   NOT?: Prisma.OrganizationWhereInput | Prisma.OrganizationWhereInput[]
   id?: Prisma.StringFilter<"Organization"> | string
   name?: Prisma.StringFilter<"Organization"> | string
+  assetIdPrefix?: Prisma.StringFilter<"Organization"> | string
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   defaultAssetVisibility?: Prisma.StringFilter<"Organization"> | string
@@ -193,6 +201,7 @@ export type OrganizationWhereInput = {
 export type OrganizationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  assetIdPrefix?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   defaultAssetVisibility?: Prisma.SortOrder
@@ -206,6 +215,7 @@ export type OrganizationOrderByWithRelationInput = {
 
 export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  assetIdPrefix?: string
   AND?: Prisma.OrganizationWhereInput | Prisma.OrganizationWhereInput[]
   OR?: Prisma.OrganizationWhereInput[]
   NOT?: Prisma.OrganizationWhereInput | Prisma.OrganizationWhereInput[]
@@ -219,11 +229,12 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   assets?: Prisma.AssetListRelationFilter
   bundles?: Prisma.AssetBundleListRelationFilter
   productions?: Prisma.ProductionListRelationFilter
-}, "id">
+}, "id" | "assetIdPrefix">
 
 export type OrganizationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  assetIdPrefix?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   defaultAssetVisibility?: Prisma.SortOrder
@@ -238,6 +249,7 @@ export type OrganizationScalarWhereWithAggregatesInput = {
   NOT?: Prisma.OrganizationScalarWhereWithAggregatesInput | Prisma.OrganizationScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Organization"> | string
   name?: Prisma.StringWithAggregatesFilter<"Organization"> | string
+  assetIdPrefix?: Prisma.StringWithAggregatesFilter<"Organization"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Organization"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Organization"> | Date | string
   defaultAssetVisibility?: Prisma.StringWithAggregatesFilter<"Organization"> | string
@@ -246,6 +258,7 @@ export type OrganizationScalarWhereWithAggregatesInput = {
 export type OrganizationCreateInput = {
   id?: string
   name: string
+  assetIdPrefix: string
   createdAt?: Date | string
   updatedAt?: Date | string
   defaultAssetVisibility?: string
@@ -260,6 +273,7 @@ export type OrganizationCreateInput = {
 export type OrganizationUncheckedCreateInput = {
   id?: string
   name: string
+  assetIdPrefix: string
   createdAt?: Date | string
   updatedAt?: Date | string
   defaultAssetVisibility?: string
@@ -274,6 +288,7 @@ export type OrganizationUncheckedCreateInput = {
 export type OrganizationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
@@ -288,6 +303,7 @@ export type OrganizationUpdateInput = {
 export type OrganizationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
@@ -302,6 +318,7 @@ export type OrganizationUncheckedUpdateInput = {
 export type OrganizationCreateManyInput = {
   id?: string
   name: string
+  assetIdPrefix: string
   createdAt?: Date | string
   updatedAt?: Date | string
   defaultAssetVisibility?: string
@@ -310,6 +327,7 @@ export type OrganizationCreateManyInput = {
 export type OrganizationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
@@ -318,6 +336,7 @@ export type OrganizationUpdateManyMutationInput = {
 export type OrganizationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
@@ -331,6 +350,7 @@ export type OrganizationNullableScalarRelationFilter = {
 export type OrganizationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  assetIdPrefix?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   defaultAssetVisibility?: Prisma.SortOrder
@@ -339,6 +359,7 @@ export type OrganizationCountOrderByAggregateInput = {
 export type OrganizationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  assetIdPrefix?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   defaultAssetVisibility?: Prisma.SortOrder
@@ -347,6 +368,7 @@ export type OrganizationMaxOrderByAggregateInput = {
 export type OrganizationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  assetIdPrefix?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   defaultAssetVisibility?: Prisma.SortOrder
@@ -446,6 +468,7 @@ export type OrganizationUpdateOneRequiredWithoutProductionsNestedInput = {
 export type OrganizationCreateWithoutHomeUsersInput = {
   id?: string
   name: string
+  assetIdPrefix: string
   createdAt?: Date | string
   updatedAt?: Date | string
   defaultAssetVisibility?: string
@@ -459,6 +482,7 @@ export type OrganizationCreateWithoutHomeUsersInput = {
 export type OrganizationUncheckedCreateWithoutHomeUsersInput = {
   id?: string
   name: string
+  assetIdPrefix: string
   createdAt?: Date | string
   updatedAt?: Date | string
   defaultAssetVisibility?: string
@@ -488,6 +512,7 @@ export type OrganizationUpdateToOneWithWhereWithoutHomeUsersInput = {
 export type OrganizationUpdateWithoutHomeUsersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
@@ -501,6 +526,7 @@ export type OrganizationUpdateWithoutHomeUsersInput = {
 export type OrganizationUncheckedUpdateWithoutHomeUsersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
@@ -514,6 +540,7 @@ export type OrganizationUncheckedUpdateWithoutHomeUsersInput = {
 export type OrganizationCreateWithoutMembersInput = {
   id?: string
   name: string
+  assetIdPrefix: string
   createdAt?: Date | string
   updatedAt?: Date | string
   defaultAssetVisibility?: string
@@ -527,6 +554,7 @@ export type OrganizationCreateWithoutMembersInput = {
 export type OrganizationUncheckedCreateWithoutMembersInput = {
   id?: string
   name: string
+  assetIdPrefix: string
   createdAt?: Date | string
   updatedAt?: Date | string
   defaultAssetVisibility?: string
@@ -556,6 +584,7 @@ export type OrganizationUpdateToOneWithWhereWithoutMembersInput = {
 export type OrganizationUpdateWithoutMembersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
@@ -569,6 +598,7 @@ export type OrganizationUpdateWithoutMembersInput = {
 export type OrganizationUncheckedUpdateWithoutMembersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
@@ -582,6 +612,7 @@ export type OrganizationUncheckedUpdateWithoutMembersInput = {
 export type OrganizationCreateWithoutLocationsInput = {
   id?: string
   name: string
+  assetIdPrefix: string
   createdAt?: Date | string
   updatedAt?: Date | string
   defaultAssetVisibility?: string
@@ -595,6 +626,7 @@ export type OrganizationCreateWithoutLocationsInput = {
 export type OrganizationUncheckedCreateWithoutLocationsInput = {
   id?: string
   name: string
+  assetIdPrefix: string
   createdAt?: Date | string
   updatedAt?: Date | string
   defaultAssetVisibility?: string
@@ -624,6 +656,7 @@ export type OrganizationUpdateToOneWithWhereWithoutLocationsInput = {
 export type OrganizationUpdateWithoutLocationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
@@ -637,6 +670,7 @@ export type OrganizationUpdateWithoutLocationsInput = {
 export type OrganizationUncheckedUpdateWithoutLocationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
@@ -650,6 +684,7 @@ export type OrganizationUncheckedUpdateWithoutLocationsInput = {
 export type OrganizationCreateWithoutAssetsInput = {
   id?: string
   name: string
+  assetIdPrefix: string
   createdAt?: Date | string
   updatedAt?: Date | string
   defaultAssetVisibility?: string
@@ -663,6 +698,7 @@ export type OrganizationCreateWithoutAssetsInput = {
 export type OrganizationUncheckedCreateWithoutAssetsInput = {
   id?: string
   name: string
+  assetIdPrefix: string
   createdAt?: Date | string
   updatedAt?: Date | string
   defaultAssetVisibility?: string
@@ -692,6 +728,7 @@ export type OrganizationUpdateToOneWithWhereWithoutAssetsInput = {
 export type OrganizationUpdateWithoutAssetsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
@@ -705,6 +742,7 @@ export type OrganizationUpdateWithoutAssetsInput = {
 export type OrganizationUncheckedUpdateWithoutAssetsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
@@ -718,6 +756,7 @@ export type OrganizationUncheckedUpdateWithoutAssetsInput = {
 export type OrganizationCreateWithoutBundlesInput = {
   id?: string
   name: string
+  assetIdPrefix: string
   createdAt?: Date | string
   updatedAt?: Date | string
   defaultAssetVisibility?: string
@@ -731,6 +770,7 @@ export type OrganizationCreateWithoutBundlesInput = {
 export type OrganizationUncheckedCreateWithoutBundlesInput = {
   id?: string
   name: string
+  assetIdPrefix: string
   createdAt?: Date | string
   updatedAt?: Date | string
   defaultAssetVisibility?: string
@@ -760,6 +800,7 @@ export type OrganizationUpdateToOneWithWhereWithoutBundlesInput = {
 export type OrganizationUpdateWithoutBundlesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
@@ -773,6 +814,7 @@ export type OrganizationUpdateWithoutBundlesInput = {
 export type OrganizationUncheckedUpdateWithoutBundlesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
@@ -786,6 +828,7 @@ export type OrganizationUncheckedUpdateWithoutBundlesInput = {
 export type OrganizationCreateWithoutProductionsInput = {
   id?: string
   name: string
+  assetIdPrefix: string
   createdAt?: Date | string
   updatedAt?: Date | string
   defaultAssetVisibility?: string
@@ -799,6 +842,7 @@ export type OrganizationCreateWithoutProductionsInput = {
 export type OrganizationUncheckedCreateWithoutProductionsInput = {
   id?: string
   name: string
+  assetIdPrefix: string
   createdAt?: Date | string
   updatedAt?: Date | string
   defaultAssetVisibility?: string
@@ -828,6 +872,7 @@ export type OrganizationUpdateToOneWithWhereWithoutProductionsInput = {
 export type OrganizationUpdateWithoutProductionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
@@ -841,6 +886,7 @@ export type OrganizationUpdateWithoutProductionsInput = {
 export type OrganizationUncheckedUpdateWithoutProductionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
@@ -930,6 +976,7 @@ export type OrganizationCountOutputTypeCountProductionsArgs<ExtArgs extends runt
 export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  assetIdPrefix?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   defaultAssetVisibility?: boolean
@@ -945,6 +992,7 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
 export type OrganizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  assetIdPrefix?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   defaultAssetVisibility?: boolean
@@ -953,6 +1001,7 @@ export type OrganizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
 export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  assetIdPrefix?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   defaultAssetVisibility?: boolean
@@ -961,12 +1010,13 @@ export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
 export type OrganizationSelectScalar = {
   id?: boolean
   name?: boolean
+  assetIdPrefix?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   defaultAssetVisibility?: boolean
 }
 
-export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "createdAt" | "updatedAt" | "defaultAssetVisibility", ExtArgs["result"]["organization"]>
+export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "assetIdPrefix" | "createdAt" | "updatedAt" | "defaultAssetVisibility", ExtArgs["result"]["organization"]>
 export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   homeUsers?: boolean | Prisma.Organization$homeUsersArgs<ExtArgs>
   members?: boolean | Prisma.Organization$membersArgs<ExtArgs>
@@ -992,6 +1042,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
+    assetIdPrefix: string
     createdAt: Date
     updatedAt: Date
     defaultAssetVisibility: string
@@ -1426,6 +1477,7 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
 export interface OrganizationFieldRefs {
   readonly id: Prisma.FieldRef<"Organization", 'String'>
   readonly name: Prisma.FieldRef<"Organization", 'String'>
+  readonly assetIdPrefix: Prisma.FieldRef<"Organization", 'String'>
   readonly createdAt: Prisma.FieldRef<"Organization", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Organization", 'DateTime'>
   readonly defaultAssetVisibility: Prisma.FieldRef<"Organization", 'String'>

@@ -142,13 +142,29 @@ export const updateMemberRole = command(
 	}
 );
 
-export const createOrg = command(v.string(), async (name: string) => {
+function normalizePrefix(raw: string): string {
+	const prefix = raw
+		.trim()
+		.replace(/[^0-9]/g, '')
+		.slice(0, 3);
+	if (prefix.length !== 3) throw new Error('Asset ID prefix must be exactly 3 digits');
+	return prefix;
+}
+
+const createOrgSchema = v.object({
+	name: v.string(),
+	assetIdPrefix: v.string()
+});
+
+export const createOrg = command(createOrgSchema, async ({ name, assetIdPrefix }) => {
 	const user = await requireAuth();
+	const prefix = normalizePrefix(assetIdPrefix);
 
 	const org = await prisma.$transaction(async (tx) => {
-		const created = await tx.organization.create({
+		return await tx.organization.create({
 			data: {
 				name,
+				assetIdPrefix: prefix,
 				members: {
 					create: {
 						userId: user.id,
@@ -157,10 +173,27 @@ export const createOrg = command(v.string(), async (name: string) => {
 				}
 			}
 		});
-
-		return created;
 	});
 
+	await getMyOrgs().refresh();
+	return org;
+});
+
+const updateOrgSchema = v.object({
+	orgId: v.string(),
+	assetIdPrefix: v.string()
+});
+
+export const updateOrg = command(updateOrgSchema, async ({ orgId, assetIdPrefix }) => {
+	await requireOrgManageAccess(orgId);
+	const prefix = normalizePrefix(assetIdPrefix);
+
+	const org = await prisma.organization.update({
+		where: { id: orgId },
+		data: { assetIdPrefix: prefix }
+	});
+
+	await getOrgWithMembers(orgId).refresh();
 	await getMyOrgs().refresh();
 	return org;
 });

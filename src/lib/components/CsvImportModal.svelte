@@ -151,8 +151,17 @@
 			// Serial Number — EN + DE (Seriennummer)
 			if (n.includes('serial') || n === 'sn' || n === 'serialno' || n.includes('serienr'))
 				return 'serialNumber';
-			// Asset Tag — EN + DE (ID column used as internal asset number)
-			if (n.includes('tag') || n.includes('assetnumber') || n.includes('assetno') || n === 'id')
+			// Asset Tag / ID — the unique asset identifier
+			if (
+				n === 'id' ||
+				n === 'assetid' ||
+				n.includes('assetnr') ||
+				n.includes('inventarnr') ||
+				n.includes('inventarno') ||
+				n.includes('tag') ||
+				n.includes('assetnumber') ||
+				n.includes('assetno')
+			)
 				return 'assetTag';
 			return 'skip';
 		});

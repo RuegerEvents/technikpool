@@ -143,6 +143,7 @@
 			{#if true}
 				{@const orgs = await getMyOrgs()}
 				{#if !selectedOrgId && orgs[0]}{((selectedOrgId = orgs[0].id), '')}{/if}
+				{@const orgPrefix = orgs.find((o) => o.id === selectedOrgId)?.assetIdPrefix ?? null}
 				<form onsubmit={handleSubmit} class="space-y-6">
 					<div class="space-y-2">
 						<Label for="org">Organization</Label>
@@ -248,27 +249,29 @@
 								<thead>
 									<tr class="border-b bg-muted/40">
 										<th class="w-10 px-3 py-2 text-left font-medium text-muted-foreground">#</th>
+										<th class="px-3 py-2 text-left font-medium text-muted-foreground">Asset Tag</th>
 										<th class="px-3 py-2 text-left font-medium text-muted-foreground"
 											>Serial Number</th
 										>
-										<th class="px-3 py-2 text-left font-medium text-muted-foreground">Asset Tag</th>
 									</tr>
 								</thead>
 								<tbody>
 									{#each items as item, i (i)}
 										<tr class="border-b last:border-0">
 											<td class="px-3 py-2 text-muted-foreground tabular-nums">{i + 1}</td>
+											<td class="px-3 py-2">
+												<Input
+													bind:value={item.assetTag}
+													placeholder={orgPrefix
+														? `${orgPrefix}${String(i + 1).padStart(5, '0')}`
+														: 'TAG-001'}
+													class="h-8 font-mono text-sm"
+												/>
+											</td>
 											<td class="px-3 py-2"
 												><Input
 													bind:value={item.serialNumber}
 													placeholder="S/N 123456"
-													class="h-8 text-sm"
-												/></td
-											>
-											<td class="px-3 py-2"
-												><Input
-													bind:value={item.assetTag}
-													placeholder="TAG-001"
 													class="h-8 text-sm"
 												/></td
 											>
@@ -279,13 +282,20 @@
 						</div>
 					{:else}
 						<div class="grid grid-cols-2 gap-3">
-							<div class="space-y-2">
+							<div class="col-span-2 space-y-2">
+								<Label for="tag-0">Asset Tag</Label>
+								<Input
+									id="tag-0"
+									bind:value={items[0].assetTag}
+									placeholder={orgPrefix
+										? `${orgPrefix}00001 (leave blank to auto-generate)`
+										: 'TAG-001'}
+									class="font-mono"
+								/>
+							</div>
+							<div class="col-span-2 space-y-2">
 								<Label for="serial-0">Serial Number</Label>
 								<Input id="serial-0" bind:value={items[0].serialNumber} placeholder="S/N 123456" />
-							</div>
-							<div class="space-y-2">
-								<Label for="tag-0">Asset Tag</Label>
-								<Input id="tag-0" bind:value={items[0].assetTag} placeholder="TAG-001" />
 							</div>
 						</div>
 					{/if}

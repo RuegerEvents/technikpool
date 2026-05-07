@@ -84,8 +84,10 @@ model Verification {
 // ----------------------------------------------------
 
 model Organization {
-  id        String   @id @default(cuid())
-  name      String
+  id            String  @id @default(cuid())
+  name          String
+  assetIdPrefix String @unique
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -191,7 +193,7 @@ model Asset {
   location       Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
 
   serialNumber String?
-  assetTag     String?
+  assetTag     String? @unique
   status       String  @default("AVAILABLE") // AVAILABLE, MAINTENANCE, BROKEN
 
   bundleId String?

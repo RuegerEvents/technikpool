@@ -179,6 +179,7 @@ msgstr "Crew"
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/new/+page.svelte
 #: src/routes/inventory/new/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
@@ -664,6 +665,7 @@ msgstr "<0/> Create another after saving"
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/new/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Saving…"
@@ -1228,6 +1230,7 @@ msgstr "Asset"
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Edit"
@@ -1253,6 +1256,7 @@ msgstr "Image URL"
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
 #: src/routes/inventory/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Save"
@@ -2127,3 +2131,33 @@ msgstr "Sun"
 
 #~ msgid "+{0} more"
 #~ msgstr "+{0} more"
+
+#~ msgid "Asset ID"
+#~ msgstr "Asset ID"
+
+#: src/routes/orgs/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Asset ID Prefix"
+msgstr "Asset ID Prefix"
+
+#~ msgid "3-letter prefix for asset IDs (e.g. ABC → ABC-00001)."
+#~ msgstr "3-letter prefix for asset IDs (e.g. ABC → ABC-00001)."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Asset ID prefix updated"
+msgstr "Asset ID prefix updated"
+
+#~ msgid "3-letter prefix for auto-generated asset IDs (e.g. ABC → ABC-00001)."
+#~ msgstr "3-letter prefix for auto-generated asset IDs (e.g. ABC → ABC-00001)."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Prefix"
+msgstr "Prefix"
+
+#: src/routes/orgs/+page.svelte
+msgid "3-digit prefix for asset IDs (e.g. 123 → 12300001)."
+msgstr "3-digit prefix for asset IDs (e.g. 123 → 12300001)."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "3-digit prefix for auto-generated asset IDs (e.g. 123 → 12300001)."
+msgstr "3-digit prefix for auto-generated asset IDs (e.g. 123 → 12300001)."
