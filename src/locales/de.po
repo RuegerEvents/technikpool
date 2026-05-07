@@ -2161,3 +2161,20 @@ msgstr "3-stelliger Präfix für Inventar-IDs (z. B. 123 → 12300001)."
 #: src/routes/orgs/[id]/+page.svelte
 msgid "3-digit prefix for auto-generated asset IDs (e.g. 123 → 12300001)."
 msgstr "3-stelliger Präfix für automatisch generierte Inventar-IDs (z. B. 123 → 12300001)."
+
+#. 0: parts.join(', ')
+#: src/routes/productions/[id]/+page.svelte
+msgid "Bundle updated: {0}"
+msgstr "Bundle aktualisiert: {0}"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Bundle already in sync"
+msgstr "Bundle bereits synchron"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Bundle changed"
+msgstr "Bundle geändert"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Update from bundle"
+msgstr "Mit Bundle aktualisieren"

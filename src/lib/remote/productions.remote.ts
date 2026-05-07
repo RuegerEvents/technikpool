@@ -462,6 +462,98 @@ export const removeBundleFromProduction = command(
 	}
 );
 
+const syncBundleSchema = v.object({
+	productionId: v.string(),
+	bundleId: v.string()
+});
+
+export const syncBundleInProduction = command(syncBundleSchema, async (data) => {
+	const user = await requireAuth();
+
+	const production = await prisma.production.findUniqueOrThrow({
+		where: { id: data.productionId },
+		include: { organization: { select: { id: true, name: true } } }
+	});
+	const bundle = await prisma.assetBundle.findUniqueOrThrow({
+		where: { id: data.bundleId },
+		include: { assets: true }
+	});
+
+	const currentItems = await prisma.productionItem.findMany({
+		where: { productionId: data.productionId, sourceBundleId: data.bundleId }
+	});
+
+	const currentItemAssetIds = new Set(currentItems.map((i) => i.assetId));
+	const bundleAssetIds = new Set(bundle.assets.map((a) => a.id));
+
+	const toRemove = currentItems.filter((i) => !bundleAssetIds.has(i.assetId));
+
+	const allProductionItems = await prisma.productionItem.findMany({
+		where: { productionId: data.productionId },
+		select: { assetId: true }
+	});
+	const allProductionAssetIds = new Set(allProductionItems.map((i) => i.assetId));
+
+	let toAdd = bundle.assets.filter(
+		(a) => !currentItemAssetIds.has(a.id) && !allProductionAssetIds.has(a.id)
+	);
+
+	let skippedConflicts = 0;
+	if (production.startDate && production.endDate) {
+		const start = production.startDate;
+		const end = production.endDate;
+		const conflictingItems = await prisma.productionItem.findMany({
+			where: {
+				assetId: { in: toAdd.map((a) => a.id) },
+				productionId: { not: data.productionId },
+				status: { in: ['PENDING', 'APPROVED', 'CHECKED_OUT'] },
+				production: {
+					AND: [
+						{ startDate: { not: null } },
+						{ endDate: { not: null } },
+						{ startDate: { lte: end } },
+						{ endDate: { gte: start } }
+					]
+				}
+			},
+			select: { assetId: true }
+		});
+		const conflictIds = new Set(conflictingItems.map((i) => i.assetId));
+		skippedConflicts = conflictIds.size;
+		toAdd = toAdd.filter((a) => !conflictIds.has(a.id));
+	}
+
+	await prisma.$transaction([
+		...toRemove.map((item) => prisma.productionItem.delete({ where: { id: item.id } })),
+		...toAdd.map((asset) => {
+			const isCrossOrg = production.organizationId !== asset.organizationId;
+			return prisma.productionItem.create({
+				data: {
+					productionId: data.productionId,
+					assetId: asset.id,
+					sourceBundleId: data.bundleId,
+					status: isCrossOrg ? 'PENDING' : 'APPROVED'
+				}
+			});
+		})
+	]);
+
+	if (toAdd.length > 0) {
+		await prisma.assetTransaction.createMany({
+			data: toAdd.map((asset) => ({
+				assetId: asset.id,
+				userId: user.id,
+				productionId: data.productionId,
+				action: 'ADDED_TO_PRODUCTION',
+				data: { productionId: data.productionId, productionName: production.name }
+			}))
+		});
+	}
+
+	await getProduction(data.productionId).refresh();
+	return { removed: toRemove.length, added: toAdd.length, skippedConflicts };
+});
+
 // ── Crew ─────────────────────────────────────────────────────────────────────
 
 const addCrewSchema = v.object({

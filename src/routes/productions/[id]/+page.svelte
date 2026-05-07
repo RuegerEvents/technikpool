@@ -9,6 +9,7 @@
 		addAssetToProduction,
 		addBundleToProduction,
 		removeBundleFromProduction,
+		syncBundleInProduction,
 		addCrewMember,
 		removeCrewMember,
 		removeProductionItem,
@@ -142,6 +143,43 @@
 			toast.error((err as Error).message);
 		}
 	}
+
+	async function handleSyncBundle(bundleId: string) {
+		working = true;
+		try {
+			const result = await syncBundleInProduction({ productionId, bundleId });
+			const parts: string[] = [];
+			if (result.added > 0)
+				parts.push(`${result.added} asset${result.added !== 1 ? 's' : ''} added`);
+			if (result.removed > 0)
+				parts.push(`${result.removed} asset${result.removed !== 1 ? 's' : ''} removed`);
+			if (result.skippedConflicts > 0) parts.push(`${result.skippedConflicts} skipped (conflict)`);
+			toast.success(
+				parts.length ? `Bundle updated: ${parts.join(', ')}` : 'Bundle already in sync'
+			);
+		} catch (err) {
+			toast.error((err as Error).message);
+		} finally {
+			working = false;
+		}
+	}
+
+	let bundleDivergence = $derived.by(() => {
+		const map = new SvelteMap<string, { addedCount: number; removedCount: number }>();
+		for (const section of displaySections) {
+			if (section.kind !== 'bundle') continue;
+			const currentBundle = allBundles.find((b) => b.id === section.bundleId);
+			if (!currentBundle) continue;
+			const bundleAssetIds = new Set(currentBundle.assets.map((a) => a.id));
+			const productionAssetIds = new Set(section.items.map((i) => i.assetId));
+			const addedCount = currentBundle.assets.filter((a) => !productionAssetIds.has(a.id)).length;
+			const removedCount = section.items.filter((i) => !bundleAssetIds.has(i.assetId)).length;
+			if (addedCount > 0 || removedCount > 0) {
+				map.set(section.bundleId, { addedCount, removedCount });
+			}
+		}
+		return map;
+	});
 
 	type ItemPayload = Prisma.ProductionItemGetPayload<{
 		include: {
@@ -649,6 +687,8 @@
 							{@const allInSectionSelected =
 								sectionAssetIds.length > 0 &&
 								sectionAssetIds.every((id) => selectedItemAssetIds.has(id))}
+							{@const divergence =
+								section.kind === 'bundle' ? bundleDivergence.get(section.bundleId) : null}
 							<tr
 								class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
 								onclick={() => toggleSection(sectionId)}
@@ -694,6 +734,29 @@
 												>Bundle</span
 											>
 											<span class="font-medium">{section.bundleName}</span>
+											{#if divergence}
+												<span
+													class="rounded bg-yellow-100 px-1.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+													title="{divergence.addedCount > 0
+														? `${divergence.addedCount} new asset${divergence.addedCount !== 1 ? 's' : ''} in bundle`
+														: ''}{divergence.addedCount > 0 && divergence.removedCount > 0
+														? ', '
+														: ''}{divergence.removedCount > 0
+														? `${divergence.removedCount} asset${divergence.removedCount !== 1 ? 's' : ''} removed from bundle`
+														: ''}">Bundle changed</span
+												>
+												<button
+													type="button"
+													disabled={working}
+													onclick={(e) => {
+														e.stopPropagation();
+														handleSyncBundle(section.bundleId);
+													}}
+													class="rounded border border-yellow-400 px-2 py-0.5 text-xs text-yellow-800 transition-colors hover:bg-yellow-100 dark:border-yellow-600 dark:text-yellow-300 dark:hover:bg-yellow-900/40"
+												>
+													Update from bundle
+												</button>
+											{/if}
 											<button
 												type="button"
 												onclick={(e) => {
