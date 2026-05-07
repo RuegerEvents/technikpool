@@ -24,8 +24,9 @@ ENV HUSKY=0
 WORKDIR /app
 
 COPY --from=build /app/build ./build
+COPY --from=build /app/prisma ./prisma
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./package.json
 
 EXPOSE 3000
-CMD ["node", "build/index.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node build/index.js"]
