@@ -387,6 +387,8 @@ msgstr "Bundle"
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/productions/+page.svelte
+#: src/routes/stickers/+page.svelte
+#: src/routes/stickers/+page.svelte
 msgid "Organization"
 msgstr "Organization"
 
@@ -2118,6 +2120,7 @@ msgstr "Asset ID prefix updated"
 #~ msgstr "3-letter prefix for auto-generated asset IDs (e.g. ABC → ABC-00001)."
 
 #: src/routes/orgs/[id]/+page.svelte
+#: src/routes/stickers/+page.svelte
 msgid "Prefix"
 msgstr "Prefix"
 
@@ -2324,3 +2327,229 @@ msgstr "<0/> Devices"
 #: src/routes/assets/[id]/+page.svelte
 msgid "Back to Devices"
 msgstr "Back to Devices"
+
+#: src/routes/+layout.svelte
+msgid "Stickers"
+msgstr "Stickers"
+
+#: src/routes/stickers/+page.svelte
+msgid "Rüger Events"
+msgstr "Rüger Events"
+
+#: src/routes/stickers/+page.svelte
+msgid "End number must be greater than or equal to start number"
+msgstr "End number must be greater than or equal to start number"
+
+#: src/routes/stickers/+page.svelte
+#: src/routes/stickers/+page.svelte
+msgid "Could not generate sticker sheet"
+msgstr "Could not generate sticker sheet"
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker sheet generated"
+msgstr "Sticker sheet generated"
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker Sheets | Technikpool"
+msgstr "Sticker Sheets | Technikpool"
+
+#: src/routes/stickers/+page.svelte
+msgid "<0/> Print-ready PDF generator"
+msgstr "<0/> Print-ready PDF generator"
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker sheets"
+msgstr "Sticker sheets"
+
+#: src/routes/stickers/+page.svelte
+msgid "Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for wir-machen-druck.de square stickers and flag labels."
+msgstr "Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for wir-machen-druck.de square stickers and flag labels."
+
+#: src/routes/stickers/+page.svelte
+msgid "Labels"
+msgstr "Labels"
+
+#: src/routes/stickers/+page.svelte
+msgid "Per page"
+msgstr "Per page"
+
+#: src/routes/stickers/+page.svelte
+msgid "Pages"
+msgstr "Pages"
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker configuration"
+msgstr "Sticker configuration"
+
+#: src/routes/stickers/+page.svelte
+msgid "Choose the format, numbering, branding, and Data Matrix payload."
+msgstr "Choose the format, numbering, branding, and Data Matrix payload."
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker type"
+msgstr "Sticker type"
+
+#: src/routes/stickers/+page.svelte
+msgid "Square stickers"
+msgstr "Square stickers"
+
+#: src/routes/stickers/+page.svelte
+msgid "Dense 15 × 10 sheets for compact asset labels."
+msgstr "Dense 15 × 10 sheets for compact asset labels."
+
+#: src/routes/stickers/+page.svelte
+msgid "Flag labels"
+msgstr "Flag labels"
+
+#: src/routes/stickers/+page.svelte
+msgid "Long labels with a fold marker for cables and small gear."
+msgstr "Long labels with a fold marker for cables and small gear."
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker color"
+msgstr "Sticker color"
+
+#: src/routes/stickers/+page.svelte
+msgid "Header brand"
+msgstr "Header brand"
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker logo text"
+msgstr "Sticker logo text"
+
+#: src/routes/stickers/+page.svelte
+msgid "Number range"
+msgstr "Number range"
+
+#: src/routes/stickers/+page.svelte
+msgid "Use <0/> for the full visible asset tag or <1/> for just the number."
+msgstr "Use <0/> for the full visible asset tag or <1/> for just the number."
+
+#: src/routes/stickers/+page.svelte
+msgid "Use org prefix"
+msgstr "Use org prefix"
+
+#: src/routes/stickers/+page.svelte
+msgid "From"
+msgstr "From"
+
+#: src/routes/stickers/+page.svelte
+msgid "To"
+msgstr "To"
+
+#: src/routes/stickers/+page.svelte
+msgid "Padding"
+msgstr "Padding"
+
+#: src/routes/stickers/+page.svelte
+msgid "Copies each"
+msgstr "Copies each"
+
+#: src/routes/stickers/+page.svelte
+msgid "Data Matrix payload template"
+msgstr "Data Matrix payload template"
+
+#: src/routes/stickers/+page.svelte
+msgid "Example payload: <0/>"
+msgstr "Example payload: <0/>"
+
+#: src/routes/stickers/+page.svelte
+msgid "Hide print layout settings"
+msgstr "Hide print layout settings"
+
+#: src/routes/stickers/+page.svelte
+msgid "Show print layout settings"
+msgstr "Show print layout settings"
+
+#: src/routes/stickers/+page.svelte
+msgid "Page width mm"
+msgstr "Page width mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Page height mm"
+msgstr "Page height mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker width mm"
+msgstr "Sticker width mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker height mm"
+msgstr "Sticker height mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Flag tail mm"
+msgstr "Flag tail mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Columns"
+msgstr "Columns"
+
+#: src/routes/stickers/+page.svelte
+msgid "Rows"
+msgstr "Rows"
+
+#: src/routes/stickers/+page.svelte
+msgid "Left margin mm"
+msgstr "Left margin mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Top margin mm"
+msgstr "Top margin mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Horizontal gap mm"
+msgstr "Horizontal gap mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Vertical gap mm"
+msgstr "Vertical gap mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Matrix scale"
+msgstr "Matrix scale"
+
+#: src/routes/stickers/+page.svelte
+msgid "Quiet zone mm"
+msgstr "Quiet zone mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "<0/> Show cut line overlay"
+msgstr "<0/> Show cut line overlay"
+
+#: src/routes/stickers/+page.svelte
+msgid "Back to devices"
+msgstr "Back to devices"
+
+#: src/routes/stickers/+page.svelte
+msgid "Generating…"
+msgstr "Generating…"
+
+#: src/routes/stickers/+page.svelte
+msgid "Generate PDF"
+msgstr "Generate PDF"
+
+#: src/routes/stickers/+page.svelte
+msgid "Live preview"
+msgstr "Live preview"
+
+#: src/routes/stickers/+page.svelte
+msgid "Approximate visual preview. The downloaded file is the print PDF."
+msgstr "Approximate visual preview. The downloaded file is the print PDF."
+
+#: src/routes/stickers/+page.svelte
+msgid "First label"
+msgstr "First label"
+
+#: src/routes/stickers/+page.svelte
+msgid "Sheet size"
+msgstr "Sheet size"
+
+#. 0: pageWidthMm; 1: pageHeightMm
+#: src/routes/stickers/+page.svelte
+msgid "{0} × {1} mm"
+msgstr "{0} × {1} mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Grid"
+msgstr "Grid"

@@ -88,6 +88,14 @@
 									? 'text-foreground'
 									: 'text-muted-foreground hover:text-foreground'}">Checkout</a
 							>
+							<a
+								href={resolve('/stickers')}
+								class="text-sm font-medium transition-colors {page.url.pathname.startsWith(
+									'/stickers'
+								)
+									? 'text-foreground'
+									: 'text-muted-foreground hover:text-foreground'}">Stickers</a
+							>
 							{#if data.isAdmin}
 								<a
 									href={resolve('/admin/users')}
