@@ -387,6 +387,8 @@ msgstr "Bundle"
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/productions/+page.svelte
+#: src/routes/stickers/+page.svelte
+#: src/routes/stickers/+page.svelte
 msgid "Organization"
 msgstr "Organization"
 
@@ -2118,6 +2120,7 @@ msgstr "Asset ID prefix updated"
 #~ msgstr "3-letter prefix for auto-generated asset IDs (e.g. ABC → ABC-00001)."
 
 #: src/routes/orgs/[id]/+page.svelte
+#: src/routes/stickers/+page.svelte
 msgid "Prefix"
 msgstr "Prefix"
 
@@ -2324,3 +2327,303 @@ msgstr "<0/> Devices"
 #: src/routes/assets/[id]/+page.svelte
 msgid "Back to Devices"
 msgstr "Back to Devices"
+
+#: src/routes/+layout.svelte
+msgid "Stickers"
+msgstr "Stickers"
+
+#: src/routes/stickers/+page.svelte
+msgid "Rüger Events"
+msgstr "Rüger Events"
+
+#: src/routes/stickers/+page.svelte
+msgid "End number must be greater than or equal to start number"
+msgstr "End number must be greater than or equal to start number"
+
+#: src/routes/stickers/+page.svelte
+#: src/routes/stickers/+page.svelte
+msgid "Could not generate sticker sheet"
+msgstr "Could not generate sticker sheet"
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker sheet generated"
+msgstr "Sticker sheet generated"
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker Sheets | Technikpool"
+msgstr "Sticker Sheets | Technikpool"
+
+#~ msgid "<0/> Print-ready PDF generator"
+#~ msgstr "<0/> Print-ready PDF generator"
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker sheets"
+msgstr "Sticker sheets"
+
+#: src/routes/stickers/+page.svelte
+msgid "Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for wir-machen-druck.de square stickers and flag labels."
+msgstr "Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for wir-machen-druck.de square stickers and flag labels."
+
+#~ msgid "Labels"
+#~ msgstr "Labels"
+
+#~ msgid "Per page"
+#~ msgstr "Per page"
+
+#: src/routes/stickers/+page.svelte
+msgid "Pages"
+msgstr "Pages"
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker configuration"
+msgstr "Sticker configuration"
+
+#: src/routes/stickers/+page.svelte
+msgid "Choose the format, numbering, branding, and Data Matrix payload."
+msgstr "Choose the format, numbering, branding, and Data Matrix payload."
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker type"
+msgstr "Sticker type"
+
+#: src/routes/stickers/+page.svelte
+msgid "Square stickers"
+msgstr "Square stickers"
+
+#: src/routes/stickers/+page.svelte
+msgid "Dense 15 × 10 sheets for compact asset labels."
+msgstr "Dense 15 × 10 sheets for compact asset labels."
+
+#: src/routes/stickers/+page.svelte
+msgid "Flag labels"
+msgstr "Flag labels"
+
+#: src/routes/stickers/+page.svelte
+msgid "Long labels with a fold marker for cables and small gear."
+msgstr "Long labels with a fold marker for cables and small gear."
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker color"
+msgstr "Sticker color"
+
+#: src/routes/stickers/+page.svelte
+msgid "Header brand"
+msgstr "Header brand"
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker logo text"
+msgstr "Sticker logo text"
+
+#: src/routes/stickers/+page.svelte
+msgid "Number range"
+msgstr "Number range"
+
+#: src/routes/stickers/+page.svelte
+msgid "Use <0/> for the full visible asset tag or <1/> for just the number."
+msgstr "Use <0/> for the full visible asset tag or <1/> for just the number."
+
+#: src/routes/stickers/+page.svelte
+msgid "Use org prefix"
+msgstr "Use org prefix"
+
+#: src/routes/stickers/+page.svelte
+msgid "From"
+msgstr "From"
+
+#: src/routes/stickers/+page.svelte
+msgid "To"
+msgstr "To"
+
+#: src/routes/stickers/+page.svelte
+msgid "Padding"
+msgstr "Padding"
+
+#: src/routes/stickers/+page.svelte
+msgid "Copies each"
+msgstr "Copies each"
+
+#: src/routes/stickers/+page.svelte
+msgid "Data Matrix payload template"
+msgstr "Data Matrix payload template"
+
+#: src/routes/stickers/+page.svelte
+msgid "Example payload: <0/>"
+msgstr "Example payload: <0/>"
+
+#: src/routes/stickers/+page.svelte
+msgid "Hide print layout settings"
+msgstr "Hide print layout settings"
+
+#: src/routes/stickers/+page.svelte
+msgid "Show print layout settings"
+msgstr "Show print layout settings"
+
+#: src/routes/stickers/+page.svelte
+msgid "Page width mm"
+msgstr "Page width mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Page height mm"
+msgstr "Page height mm"
+
+#~ msgid "Sticker width mm"
+#~ msgstr "Sticker width mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker height mm"
+msgstr "Sticker height mm"
+
+#~ msgid "Flag tail mm"
+#~ msgstr "Flag tail mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Columns"
+msgstr "Columns"
+
+#: src/routes/stickers/+page.svelte
+msgid "Rows"
+msgstr "Rows"
+
+#: src/routes/stickers/+page.svelte
+msgid "Left margin mm"
+msgstr "Left margin mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Top margin mm"
+msgstr "Top margin mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Horizontal gap mm"
+msgstr "Horizontal gap mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Vertical gap mm"
+msgstr "Vertical gap mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Matrix scale"
+msgstr "Matrix scale"
+
+#: src/routes/stickers/+page.svelte
+msgid "Quiet zone mm"
+msgstr "Quiet zone mm"
+
+#~ msgid "<0/> Show cut line overlay"
+#~ msgstr "<0/> Show cut line overlay"
+
+#: src/routes/stickers/+page.svelte
+msgid "Back to devices"
+msgstr "Back to devices"
+
+#: src/routes/stickers/+page.svelte
+msgid "Generating…"
+msgstr "Generating…"
+
+#: src/routes/stickers/+page.svelte
+msgid "Generate PDF"
+msgstr "Generate PDF"
+
+#: src/routes/stickers/+page.svelte
+msgid "Live preview"
+msgstr "Live preview"
+
+#: src/routes/stickers/+page.svelte
+msgid "Approximate visual preview. The downloaded file is the print PDF."
+msgstr "Approximate visual preview. The downloaded file is the print PDF."
+
+#: src/routes/stickers/+page.svelte
+msgid "First label"
+msgstr "First label"
+
+#: src/routes/stickers/+page.svelte
+msgid "Sheet size"
+msgstr "Sheet size"
+
+#. 0: pageWidthMm; 1: pageHeightMm
+#: src/routes/stickers/+page.svelte
+msgid "{0} × {1} mm"
+msgstr "{0} × {1} mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Grid"
+msgstr "Grid"
+
+#: src/routes/stickers/+page.svelte
+msgid "Cable tail"
+msgstr "Cable tail"
+
+#~ msgid "The tail wraps once around the cable and folds back between the two halves. Its length is computed automatically so it reaches at least halfway back for the thickest cable, without sticking out past the body for the thinnest."
+#~ msgstr "The tail wraps once around the cable and folds back between the two halves. Its length is computed automatically so it reaches at least halfway back for the thickest cable, without sticking out past the body for the thinnest."
+
+#~ msgid "Min cable diameter (mm)"
+#~ msgstr "Min cable diameter (mm)"
+
+#~ msgid "Max cable diameter (mm)"
+#~ msgstr "Max cable diameter (mm)"
+
+#~ msgid "Computed tail length"
+#~ msgstr "Computed tail length"
+
+#. 0: minSupportedDiameterMm.toFixed(1)
+#. 0: tailTooShort ? '—' \\: maxSupportedDiameterMm.toFixed(1)
+#: src/routes/stickers/+page.svelte
+#: src/routes/stickers/+page.svelte
+msgid "{0} mm"
+msgstr "{0} mm"
+
+#. 0: type === 'faehnchen' ? ' (body only)' \\: ''
+#: src/routes/stickers/+page.svelte
+msgid "Sticker width mm{0}"
+msgstr "Sticker width mm{0}"
+
+#: src/routes/+layout.svelte
+msgid "Tools <0/>"
+msgstr "Tools <0/>"
+
+#: src/routes/stickers/+page.svelte
+msgid "Total labels"
+msgstr "Total labels"
+
+#: src/routes/stickers/+page.svelte
+msgid "The tail wraps once around the cable and folds back between the two halves. Pick a tail length and see which cable diameters it supports below."
+msgstr "The tail wraps once around the cable and folds back between the two halves. Pick a tail length and see which cable diameters it supports below."
+
+#: src/routes/stickers/+page.svelte
+msgid "Tail length (mm)"
+msgstr "Tail length (mm)"
+
+#: src/routes/stickers/+page.svelte
+msgid "Supports diameter down to"
+msgstr "Supports diameter down to"
+
+#: src/routes/stickers/+page.svelte
+msgid "Supports diameter up to"
+msgstr "Supports diameter up to"
+
+#: src/routes/stickers/+page.svelte
+msgid "This tail is too short to reliably wrap any cable and still overlap the body — increase the tail length or reduce the sticker width."
+msgstr "This tail is too short to reliably wrap any cable and still overlap the body — increase the tail length or reduce the sticker width."
+
+#: src/routes/stickers/+page.svelte
+msgid "Enter a color as #RRGGBB, e.g. #0069c9."
+msgstr "Enter a color as #RRGGBB, e.g. #0069c9."
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker color must be a #RRGGBB hex value"
+msgstr "Sticker color must be a #RRGGBB hex value"
+
+#: src/routes/stickers/+page.svelte
+msgid "Bleed mm"
+msgstr "Bleed mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Smaller bleed allows a smaller gap between stickers."
+msgstr "Smaller bleed allows a smaller gap between stickers."
+
+#: src/routes/stickers/+page.svelte
+msgid "<0/> Nest every second tail to save space"
+msgstr "<0/> Nest every second tail to save space"
+
+#: src/routes/stickers/+page.svelte
+msgid "Rotates every second sticker 180° so its tail nests against its neighbor's, instead of each sticker needing its own full tail length of sheet width. Needs enough sticker height that the two tails' bleeds don't touch."
+msgstr "Rotates every second sticker 180° so its tail nests against its neighbor's, instead of each sticker needing its own full tail length of sheet width. Needs enough sticker height that the two tails' bleeds don't touch."
