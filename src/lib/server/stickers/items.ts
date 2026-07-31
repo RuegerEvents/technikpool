@@ -86,12 +86,15 @@ function columnLayout(col: number, options: GeneratorOptions): { xMm: number; ro
 
 	const numPairs = Math.floor(columns / 2);
 	const pairIndex = Math.floor(col / 2);
-	const pairWidthMm = 2 * bodyWidthMm + tailLenMm;
+	// The tail zone itself needs the same clearance as any other gap, or the
+	// tail tip touches the next sticker's body — so it's tailLen + gapXMm wide,
+	// not just tailLen.
+	const pairWidthMm = 2 * bodyWidthMm + tailLenMm + gapXMm;
 
 	if (pairIndex < numPairs) {
 		const pairStartX = marginLeftMm + pairIndex * (pairWidthMm + gapXMm);
 		return col % 2 === 1
-			? { xMm: pairStartX + bodyWidthMm, rotated: true }
+			? { xMm: pairStartX + bodyWidthMm + gapXMm, rotated: true }
 			: { xMm: pairStartX, rotated: false };
 	}
 

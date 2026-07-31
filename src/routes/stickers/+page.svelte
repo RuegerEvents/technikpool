@@ -81,9 +81,10 @@
 	let gapYMm = $state(saved.gapYMm ?? 10);
 	let matrixScale = $state(saved.matrixScale ?? 0.68);
 	let quietZoneMm = $state(saved.quietZoneMm ?? 1.1);
-	let bleedMm = $state(saved.bleedMm ?? 3);
+	const initialType = saved.type ?? 'quadratisch';
+	let bleedMm = $state(saved.bleedMm ?? (initialType === 'faehnchen' ? 1.3 : 3));
 	let tailLenMm = $state(saved.tailLenMm ?? 31);
-	let nestFlagTails = $state(saved.nestFlagTails ?? false);
+	let nestFlagTails = $state(saved.nestFlagTails ?? initialType === 'faehnchen');
 
 	let selectedOrg = $derived(orgs.find((org) => org.id === selectedOrgId));
 	let totalLabels = $derived(Math.max(0, to - from + 1) * copies);
@@ -146,6 +147,7 @@
 			marginTopMm = 13;
 			gapXMm = 10;
 			gapYMm = 10;
+			bleedMm = 3;
 		} else {
 			widthMm = 25;
 			heightMm = 15;
@@ -156,6 +158,11 @@
 			gapXMm = 10;
 			gapYMm = 10;
 			tailLenMm = 31;
+			nestFlagTails = true;
+			// Nesting needs bleed <= height * 0.09 (see the tail geometry note in
+			// pdf.ts) — 15mm's default 3mm bleed doesn't fit that, so use a
+			// smaller nesting-safe default instead.
+			bleedMm = 1.3;
 		}
 	}
 

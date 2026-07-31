@@ -42,7 +42,9 @@ function flagGridWidthMm(
 	}
 	const numPairs = Math.floor(columns / 2);
 	const hasTrailingSingle = columns % 2 === 1;
-	const pairWidthMm = 2 * bodyWidthMm + tailLenMm;
+	// The tail zone needs the same clearance as any other gap before the next
+	// body, or the tail tip touches it — tailLen + gapXMm wide, not just tailLen.
+	const pairWidthMm = 2 * bodyWidthMm + tailLenMm + gapXMm;
 	const blockWidths = Array<number>(numPairs).fill(pairWidthMm);
 	if (hasTrailingSingle) blockWidths.push(footprintWidthMm);
 	return blockWidths.reduce((sum, w) => sum + w, 0) + (blockWidths.length - 1) * gapXMm;
