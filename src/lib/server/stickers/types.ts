@@ -40,6 +40,8 @@ export interface GeneratorOptions {
 	matrixScale: number;
 	quietZoneMm: number;
 	bleedMm: number;
+	/** Only meaningful for the 'faehnchen' type: rotates every second sticker 180° and nests its tail against its neighbor's, saving sheet width. */
+	nestFlagTails: boolean;
 }
 
 export interface StickerItem {
@@ -57,6 +59,10 @@ export interface StickerItem {
  * `groupIndex`/`groupSize` identify which same-number copies a position
  * belongs to, so the sheet can draw a box around each group — `groupSize`
  * is 1 (or 0 for blanks) when there's nothing to box.
+ *
+ * `rotated` is only set when nestFlagTails is on: the sticker at this
+ * position is drawn rotated 180° about its own bounding-box center so its
+ * tail nests against the neighboring (unrotated) sticker's tail.
  */
 export interface GridPosition {
 	indexOnPage: number;
@@ -65,6 +71,7 @@ export interface GridPosition {
 	sticker: StickerItem | null;
 	groupIndex: number;
 	groupSize: number;
+	rotated: boolean;
 }
 
 export interface SheetPage {

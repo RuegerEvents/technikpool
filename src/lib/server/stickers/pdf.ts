@@ -1,5 +1,8 @@
 import {
 	PDFDocument,
+	PDFNumber,
+	PDFOperator,
+	PDFOperatorNames,
 	StandardFonts,
 	rgb,
 	type PDFFont,
@@ -9,14 +12,18 @@ import {
 } from 'pdf-lib';
 import { normalizeOptions, parseHexColor, type RawGeneratorOptions } from './config';
 import { createDataMatrixPng } from './datamatrix';
-import { CORNER_RADIUS_MM, flagCutPath, roundedRectPath } from './geometry';
+import {
+	CORNER_RADIUS_MM,
+	FLAG_TAIL_HALF_HEIGHT_RATIO,
+	flagCutPath,
+	roundedRectPath
+} from './geometry';
 import { fillPathRgb, registerKissCutColorSpace, strokeKissCutPath } from './kisscut';
 import { paginateStickers } from './items';
 import type { GeneratorOptions, GridPosition, SheetPage } from './types';
 import { mm } from './units';
 
 const KISS_CUT_LINE_WIDTH_PT = 0.5;
-const FLAG_TAIL_HALF_HEIGHT_RATIO = 0.16;
 /** How far beyond the bleed the group box sits, so it never overlaps the bleed fill. */
 const GROUP_BOX_CLEARANCE_BEYOND_BLEED_MM = 1;
 
@@ -190,6 +197,26 @@ async function drawGridPosition(
 		// structurally belongs to the half that doesn't carry the Data Matrix.
 		const tailCenterY = y + halfH / 2;
 
+		// Nested-tail pairing rotates every second sticker 180° about its own
+		// bounding-box center — everything below is drawn in normal
+		// orientation and this transform flips the lot, tail included, so no
+		// geometry math needs to change for the rotated case.
+		if (position.rotated) {
+			const cx = x + w / 2 + tailLen / 2;
+			const cy = y + h / 2;
+			page.pushOperators(
+				PDFOperator.of(PDFOperatorNames.PushGraphicsState),
+				PDFOperator.of(PDFOperatorNames.ConcatTransformationMatrix, [
+					PDFNumber.of(-1),
+					PDFNumber.of(0),
+					PDFNumber.of(0),
+					PDFNumber.of(-1),
+					PDFNumber.of(2 * cx),
+					PDFNumber.of(2 * cy)
+				])
+			);
+		}
+
 		const bleedPath = flagCutPath(
 			x - bleed,
 			y - bleed,
@@ -241,6 +268,10 @@ async function drawGridPosition(
 				font,
 				color: rgb(1, 1, 1)
 			});
+		}
+
+		if (position.rotated) {
+			page.pushOperators(PDFOperator.of(PDFOperatorNames.PopGraphicsState));
 		}
 	}
 }

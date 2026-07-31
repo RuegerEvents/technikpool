@@ -1,4 +1,9 @@
-import { DEFAULT_BLEED_MM, MIN_STICKER_SIZE_MM, minCutLineGapMm } from './geometry';
+import {
+	DEFAULT_BLEED_MM,
+	FLAG_TAIL_HALF_HEIGHT_RATIO,
+	MIN_STICKER_SIZE_MM,
+	minCutLineGapMm
+} from './geometry';
 import type { GeneratorOptions, SheetLayout, StickerSize } from './types';
 
 export interface RawGeneratorOptions {
@@ -20,6 +25,27 @@ export interface RawGeneratorOptions {
 	matrixScale?: number;
 	quietZoneMm?: number;
 	bleedMm?: number;
+	nestFlagTails?: boolean;
+}
+
+/** Total grid width for a row of flag stickers, accounting for nested pairs sharing their tail space. */
+function flagGridWidthMm(
+	bodyWidthMm: number,
+	tailLenMm: number,
+	columns: number,
+	gapXMm: number,
+	nestFlagTails: boolean
+): number {
+	const footprintWidthMm = bodyWidthMm + tailLenMm;
+	if (!nestFlagTails) {
+		return columns * footprintWidthMm + (columns - 1) * gapXMm;
+	}
+	const numPairs = Math.floor(columns / 2);
+	const hasTrailingSingle = columns % 2 === 1;
+	const pairWidthMm = 2 * bodyWidthMm + tailLenMm;
+	const blockWidths = Array<number>(numPairs).fill(pairWidthMm);
+	if (hasTrailingSingle) blockWidths.push(footprintWidthMm);
+	return blockWidths.reduce((sum, w) => sum + w, 0) + (blockWidths.length - 1) * gapXMm;
 }
 
 const defaultSquareSize: StickerSize = { widthMm: 15, heightMm: 15 };
@@ -119,8 +145,30 @@ export function normalizeOptions(raw: RawGeneratorOptions): GeneratorOptions {
 		);
 	}
 
+	const nestFlagTails = type === 'faehnchen' && (raw.nestFlagTails ?? false);
+	if (nestFlagTails) {
+		const tailHalfHeightMm = size.heightMm * FLAG_TAIL_HALF_HEIGHT_RATIO;
+		const maxBleedForNestingMm = size.heightMm / 4 - tailHalfHeightMm;
+		if (bleedMm > maxBleedForNestingMm) {
+			throw new Error(
+				`Nesting tails needs the two adjacent tails' bleeds not to touch: with a ${size.heightMm}mm ` +
+					`sticker height, bleed must be at most ${maxBleedForNestingMm.toFixed(2)}mm (currently ${bleedMm}mm). ` +
+					`Increase sticker height or reduce bleed.`
+			);
+		}
+	}
+
 	const footprintWidthMm = size.widthMm + (size.flagTailMm ?? 0);
-	const gridWidthMm = layout.columns * footprintWidthMm + (layout.columns - 1) * layout.gapXMm;
+	const gridWidthMm =
+		type === 'faehnchen'
+			? flagGridWidthMm(
+					size.widthMm,
+					size.flagTailMm ?? 0,
+					layout.columns,
+					layout.gapXMm,
+					nestFlagTails
+				)
+			: layout.columns * footprintWidthMm + (layout.columns - 1) * layout.gapXMm;
 	const gridHeightMm = layout.rows * size.heightMm + (layout.rows - 1) * layout.gapYMm;
 	if (layout.marginLeftMm * 2 + gridWidthMm > layout.pageWidthMm) {
 		throw new Error(
@@ -149,7 +197,8 @@ export function normalizeOptions(raw: RawGeneratorOptions): GeneratorOptions {
 		layout,
 		matrixScale: raw.matrixScale ?? 0.68,
 		quietZoneMm: raw.quietZoneMm ?? 1.1,
-		bleedMm
+		bleedMm,
+		nestFlagTails
 	};
 }
 

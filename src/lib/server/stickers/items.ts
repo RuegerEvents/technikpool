@@ -64,6 +64,41 @@ function packIntoGridCells(groups: StickerItem[][], perPage: number): PackedCell
 	return cells;
 }
 
+/**
+ * Column x-position and rotation. Normally each column just gets its own
+ * footprint (body + tail) plus a gap. When nestFlagTails is on, columns are
+ * grouped into pairs sharing one tail-length's worth of space: the first
+ * sticker of a pair sits normally, the second is rotated 180° about its own
+ * center and placed so its (now left-pointing, top-half) tail lines up with
+ * the first's (right-pointing, bottom-half) tail — see the PR discussion for
+ * the geometry. A trailing unpaired column (only when columns is odd) is
+ * placed normally, right after the last pair.
+ */
+function columnLayout(col: number, options: GeneratorOptions): { xMm: number; rotated: boolean } {
+	const { marginLeftMm, gapXMm, columns } = options.layout;
+	const bodyWidthMm = options.size.widthMm;
+	const tailLenMm = options.size.flagTailMm ?? 0;
+	const footprintWidthMm = bodyWidthMm + tailLenMm;
+
+	if (options.type !== 'faehnchen' || !options.nestFlagTails) {
+		return { xMm: marginLeftMm + col * (footprintWidthMm + gapXMm), rotated: false };
+	}
+
+	const numPairs = Math.floor(columns / 2);
+	const pairIndex = Math.floor(col / 2);
+	const pairWidthMm = 2 * bodyWidthMm + tailLenMm;
+
+	if (pairIndex < numPairs) {
+		const pairStartX = marginLeftMm + pairIndex * (pairWidthMm + gapXMm);
+		return col % 2 === 1
+			? { xMm: pairStartX + bodyWidthMm, rotated: true }
+			: { xMm: pairStartX, rotated: false };
+	}
+
+	const trailingStartX = marginLeftMm + numPairs * (pairWidthMm + gapXMm);
+	return { xMm: trailingStartX, rotated: false };
+}
+
 export function paginateStickers(options: GeneratorOptions): SheetPage[] {
 	const groups = expandStickerGroups(options);
 	const { columns, rows } = options.layout;
@@ -71,7 +106,6 @@ export function paginateStickers(options: GeneratorOptions): SheetPage[] {
 	const cells = packIntoGridCells(groups, perPage);
 	const totalPages = Math.max(1, cells.length / perPage);
 	const pages: SheetPage[] = [];
-	const footprintWidthMm = options.size.widthMm + (options.size.flagTailMm ?? 0);
 
 	for (let pageIndex = 0; pageIndex < totalPages; pageIndex += 1) {
 		const pageCells = cells.slice(pageIndex * perPage, (pageIndex + 1) * perPage);
@@ -81,16 +115,18 @@ export function paginateStickers(options: GeneratorOptions): SheetPage[] {
 			positions: pageCells.map((cell, indexOnPage): GridPosition => {
 				const col = indexOnPage % columns;
 				const row = Math.floor(indexOnPage / columns);
+				const { xMm, rotated } = columnLayout(col, options);
 				return {
 					indexOnPage,
-					xMm: options.layout.marginLeftMm + col * (footprintWidthMm + options.layout.gapXMm),
+					xMm,
 					yMm:
 						options.layout.marginTopMm +
 						options.layout.headerHeightMm +
 						row * (options.size.heightMm + options.layout.gapYMm),
 					sticker: cell.sticker,
 					groupIndex: cell.groupIndex,
-					groupSize: cell.groupSize
+					groupSize: cell.groupSize,
+					rotated
 				};
 			})
 		});

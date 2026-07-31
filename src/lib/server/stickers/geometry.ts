@@ -5,6 +5,8 @@ export const CORNER_RADIUS_MM = 3;
 export const MIN_BLEED_GAP_MM = 4;
 export const SAFETY_MARGIN_MM = 3;
 export const MIN_STICKER_SIZE_MM = 10;
+/** Flag tail half-height, as a fraction of the sticker's full height. */
+export const FLAG_TAIL_HALF_HEIGHT_RATIO = 0.16;
 
 /** The minimum cut-line-to-cut-line gap that keeps bleeds from overlapping and meets MIN_BLEED_GAP_MM. */
 export function minCutLineGapMm(bleedMm: number): number {

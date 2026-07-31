@@ -38,6 +38,7 @@
 		quietZoneMm?: number;
 		bleedMm?: number;
 		tailLenMm?: number;
+		nestFlagTails?: boolean;
 	}
 
 	function loadSavedSettings(): PersistedSettings {
@@ -82,6 +83,7 @@
 	let quietZoneMm = $state(saved.quietZoneMm ?? 1.1);
 	let bleedMm = $state(saved.bleedMm ?? 3);
 	let tailLenMm = $state(saved.tailLenMm ?? 31);
+	let nestFlagTails = $state(saved.nestFlagTails ?? false);
 
 	let selectedOrg = $derived(orgs.find((org) => org.id === selectedOrgId));
 	let totalLabels = $derived(Math.max(0, to - from + 1) * copies);
@@ -127,7 +129,8 @@
 			matrixScale,
 			quietZoneMm,
 			bleedMm,
-			tailLenMm
+			tailLenMm,
+			nestFlagTails
 		};
 		localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 	});
@@ -194,7 +197,8 @@
 					},
 					matrixScale,
 					quietZoneMm,
-					bleedMm
+					bleedMm,
+					nestFlagTails: type === 'faehnchen' ? nestFlagTails : undefined
 				})
 			});
 
@@ -350,6 +354,19 @@
 									increase the tail length or reduce the sticker width.
 								</p>
 							{/if}
+							<label class="mt-4 flex items-center gap-2 text-sm">
+								<input
+									type="checkbox"
+									bind:checked={nestFlagTails}
+									class="h-4 w-4 rounded border-input"
+								/>
+								Nest every second tail to save space
+							</label>
+							<p class="mt-1 text-xs text-muted-foreground">
+								Rotates every second sticker 180° so its tail nests against its neighbor's, instead
+								of each sticker needing its own full tail length of sheet width. Needs enough
+								sticker height that the two tails' bleeds don't touch.
+							</p>
 						</div>
 					{/if}
 

@@ -2619,3 +2619,11 @@ msgstr "Beschnitt mm"
 #: src/routes/stickers/+page.svelte
 msgid "Smaller bleed allows a smaller gap between stickers."
 msgstr "Ein kleinerer Beschnitt erlaubt einen kleineren Abstand zwischen den Stickern."
+
+#: src/routes/stickers/+page.svelte
+msgid "<0/> Nest every second tail to save space"
+msgstr "<0/> Jede zweite Lasche verschachteln, um Platz zu sparen"
+
+#: src/routes/stickers/+page.svelte
+msgid "Rotates every second sticker 180° so its tail nests against its neighbor's, instead of each sticker needing its own full tail length of sheet width. Needs enough sticker height that the two tails' bleeds don't touch."
+msgstr "Dreht jeden zweiten Sticker um 180°, sodass sich seine Lasche mit der des Nachbarn verschachtelt, statt dass jeder Sticker seine eigene volle Laschenlänge an Bogenbreite braucht. Erfordert genug Stickerhöhe, damit sich die Beschnitte der beiden Laschen nicht berühren."
