@@ -5,40 +5,83 @@
 	import { Label } from '$lib/components/ui/label';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { toast } from 'svelte-sonner';
+	import { browser } from '$app/environment';
 
 	const orgs = await getMyOrgs();
 
-	let selectedOrgId = $state(orgs[0]?.id ?? '');
-	let type = $state<'quadratisch' | 'faehnchen'>('quadratisch');
-	let color = $state('#0069c9');
-	let brandText = $state(orgs[0]?.name ?? '');
-	let logoText = $state('RE');
-	let from = $state(1);
-	let to = $state(150);
-	let copies = $state(1);
-	let payloadTemplate = $state('{label}');
-	let labelPrefix = $state(orgs[0]?.assetIdPrefix ?? 'RE');
-	let padLength = $state(5);
-	let showCutLines = $state(false);
-	let advanced = $state(false);
+	const SETTINGS_KEY = 'stickers.settings.v1';
+
+	interface PersistedSettings {
+		selectedOrgId?: string;
+		type?: 'quadratisch' | 'faehnchen';
+		color?: string;
+		brandText?: string;
+		logoText?: string;
+		from?: number;
+		to?: number;
+		copies?: number;
+		payloadTemplate?: string;
+		labelPrefix?: string;
+		padLength?: number;
+		advanced?: boolean;
+		pageWidthMm?: number;
+		pageHeightMm?: number;
+		widthMm?: number;
+		heightMm?: number;
+		columns?: number;
+		rows?: number;
+		marginLeftMm?: number;
+		marginTopMm?: number;
+		gapXMm?: number;
+		gapYMm?: number;
+		matrixScale?: number;
+		quietZoneMm?: number;
+		bleedMm?: number;
+		tailLenMm?: number;
+	}
+
+	function loadSavedSettings(): PersistedSettings {
+		if (!browser) return {};
+		try {
+			const raw = localStorage.getItem(SETTINGS_KEY);
+			return raw ? (JSON.parse(raw) as PersistedSettings) : {};
+		} catch {
+			return {};
+		}
+	}
+
+	const saved = loadSavedSettings();
+
+	let selectedOrgId = $state(saved.selectedOrgId ?? orgs[0]?.id ?? '');
+	let type = $state<'quadratisch' | 'faehnchen'>(saved.type ?? 'quadratisch');
+	let color = $state(saved.color ?? '#0069c9');
+	let brandText = $state(saved.brandText ?? orgs[0]?.name ?? '');
+	let logoText = $state(saved.logoText ?? 'RE');
+	let from = $state(saved.from ?? 1);
+	let to = $state(saved.to ?? 150);
+	let copies = $state(saved.copies ?? 1);
+	let payloadTemplate = $state(saved.payloadTemplate ?? '{label}');
+	let labelPrefix = $state(saved.labelPrefix ?? orgs[0]?.assetIdPrefix ?? 'RE');
+	let padLength = $state(saved.padLength ?? 5);
+	let advanced = $state(saved.advanced ?? false);
 	const payloadPlaceholder = 'https://technik.example/assets/{label}';
-	const heroPreviewCells = Array.from({ length: 20 }, (_value, index) => index);
 	const matrixPreviewCells = Array.from({ length: 25 }, (_value, index) => index);
 	let generating = $state(false);
 
-	let pageWidthMm = $state(303);
-	let pageHeightMm = $state(216);
-	let widthMm = $state(15);
-	let heightMm = $state(15);
-	let flagTailMm = $state(12);
-	let columns = $state(15);
-	let rows = $state(10);
-	let marginLeftMm = $state(6);
-	let marginTopMm = $state(13);
-	let gapXMm = $state(3.5);
-	let gapYMm = $state(3.5);
-	let matrixScale = $state(0.68);
-	let quietZoneMm = $state(1.1);
+	let pageWidthMm = $state(saved.pageWidthMm ?? 303);
+	let pageHeightMm = $state(saved.pageHeightMm ?? 216);
+	let widthMm = $state(saved.widthMm ?? 15);
+	let heightMm = $state(saved.heightMm ?? 15);
+	let columns = $state(saved.columns ?? 15);
+	let rows = $state(saved.rows ?? 10);
+	let marginLeftMm = $state(saved.marginLeftMm ?? 6);
+	let marginTopMm = $state(saved.marginTopMm ?? 13);
+	let gapXMm = $state(saved.gapXMm ?? 10);
+	let gapYMm = $state(saved.gapYMm ?? 10);
+	let matrixScale = $state(saved.matrixScale ?? 0.68);
+	let quietZoneMm = $state(saved.quietZoneMm ?? 1.1);
+	let bleedMm = $state(saved.bleedMm ?? 3);
+	let tailLenMm = $state(saved.tailLenMm ?? 31);
 
 	let selectedOrg = $derived(orgs.find((org) => org.id === selectedOrgId));
 	let totalLabels = $derived(Math.max(0, to - from + 1) * copies);
@@ -48,28 +91,68 @@
 	let samplePayload = $derived(
 		payloadTemplate.replaceAll('{label}', sampleLabel).replaceAll('{number}', String(from))
 	);
+	// Inverse of the wrap-around-cable formula: given a tail length, what cable
+	// diameters does it support? Reaches at least halfway back for the max
+	// diameter without overshooting the body's left edge for the min diameter.
+	let maxSupportedDiameterMm = $derived((tailLenMm - widthMm / 2) / Math.PI);
+	let minSupportedDiameterMm = $derived(Math.max(0, (tailLenMm - widthMm) / Math.PI));
+	let tailTooShort = $derived(maxSupportedDiameterMm < 0);
+	let colorValid = $derived(/^#[0-9a-fA-F]{6}$/.test(color));
+
+	$effect(() => {
+		if (!browser) return;
+		const settings: PersistedSettings = {
+			selectedOrgId,
+			type,
+			color,
+			brandText,
+			logoText,
+			from,
+			to,
+			copies,
+			payloadTemplate,
+			labelPrefix,
+			padLength,
+			advanced,
+			pageWidthMm,
+			pageHeightMm,
+			widthMm,
+			heightMm,
+			columns,
+			rows,
+			marginLeftMm,
+			marginTopMm,
+			gapXMm,
+			gapYMm,
+			matrixScale,
+			quietZoneMm,
+			bleedMm,
+			tailLenMm
+		};
+		localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+	});
 
 	function applyTypeDefaults(nextType: 'quadratisch' | 'faehnchen') {
 		type = nextType;
 		if (nextType === 'quadratisch') {
 			widthMm = 15;
 			heightMm = 15;
-			columns = 15;
-			rows = 10;
+			columns = 12;
+			rows = 8;
 			marginLeftMm = 6;
 			marginTopMm = 13;
-			gapXMm = 3.5;
-			gapYMm = 3.5;
+			gapXMm = 10;
+			gapYMm = 10;
 		} else {
-			widthMm = 28;
+			widthMm = 25;
 			heightMm = 15;
-			flagTailMm = 12;
-			columns = 5;
-			rows = 6;
+			columns = 4;
+			rows = 7;
 			marginLeftMm = 8;
 			marginTopMm = 16;
 			gapXMm = 10;
-			gapYMm = 8;
+			gapYMm = 10;
+			tailLenMm = 31;
 		}
 	}
 
@@ -80,6 +163,10 @@
 	async function generatePdf() {
 		if (to < from) {
 			toast.error('End number must be greater than or equal to start number');
+			return;
+		}
+		if (!colorValid) {
+			toast.error('Sticker color must be a #RRGGBB hex value');
 			return;
 		}
 		generating = true;
@@ -93,7 +180,7 @@
 					brandText,
 					logoText,
 					items: [{ from, to, copies, payloadTemplate, labelPrefix, padLength }],
-					size: { widthMm, heightMm, flagTailMm: type === 'faehnchen' ? flagTailMm : undefined },
+					size: { widthMm, heightMm, flagTailMm: type === 'faehnchen' ? tailLenMm : undefined },
 					layout: {
 						pageWidthMm,
 						pageHeightMm,
@@ -107,7 +194,7 @@
 					},
 					matrixScale,
 					quietZoneMm,
-					showCutLines
+					bleedMm
 				})
 			});
 
@@ -140,65 +227,13 @@
 <svelte:head><title>Sticker Sheets | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
-	<section class="overflow-hidden rounded-3xl border bg-background shadow-sm">
-		<div class="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
-			<div class="space-y-5 p-6 md:p-8">
-				<div
-					class="inline-flex items-center gap-2 rounded-full border bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground"
-				>
-					<span class="h-2 w-2 rounded-full" style:background-color={color}></span>
-					Print-ready PDF generator
-				</div>
-				<div class="space-y-3">
-					<h1 class="text-3xl font-bold tracking-tight md:text-4xl">Sticker sheets</h1>
-					<p class="max-w-2xl text-muted-foreground">
-						Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for
-						wir-machen-druck.de square stickers and flag labels.
-					</p>
-				</div>
-				<div class="grid gap-3 sm:grid-cols-3">
-					<div class="rounded-2xl border bg-muted/30 p-4">
-						<p class="text-xs font-medium text-muted-foreground">Labels</p>
-						<p class="mt-1 text-2xl font-semibold tabular-nums">{totalLabels}</p>
-					</div>
-					<div class="rounded-2xl border bg-muted/30 p-4">
-						<p class="text-xs font-medium text-muted-foreground">Per page</p>
-						<p class="mt-1 text-2xl font-semibold tabular-nums">{labelsPerPage}</p>
-					</div>
-					<div class="rounded-2xl border bg-muted/30 p-4">
-						<p class="text-xs font-medium text-muted-foreground">Pages</p>
-						<p class="mt-1 text-2xl font-semibold tabular-nums">{pageCount}</p>
-					</div>
-				</div>
-			</div>
-
-			<div
-				class="relative min-h-72 border-t bg-gradient-to-br from-sky-50 via-blue-50 to-zinc-100 p-6 lg:border-t-0 lg:border-l dark:from-sky-950/40 dark:via-blue-950/20 dark:to-zinc-900"
-			>
-				<div
-					class="absolute inset-6 rounded-[2rem] border border-white/70 bg-white/70 shadow-xl backdrop-blur dark:border-white/10 dark:bg-zinc-950/60"
-				></div>
-				<div class="relative mx-auto flex h-full max-w-sm items-center justify-center py-6">
-					<div
-						class="grid rotate-[-3deg] grid-cols-5 gap-2 rounded-xl bg-white p-4 shadow-2xl dark:bg-zinc-900"
-					>
-						{#each heroPreviewCells as i (i)}
-							<div
-								class="relative h-10 w-10 overflow-hidden rounded-md shadow-sm ring-1 ring-black/10"
-								style:background-color={color}
-							>
-								<div class="absolute top-1 left-1 h-5 w-5 rounded-sm bg-white"></div>
-								<div class="absolute bottom-1 left-1 h-1 w-5 rounded bg-white/90"></div>
-								<div class="absolute right-1 bottom-1 text-[6px] font-bold text-white">
-									{logoText || i + 1}
-								</div>
-							</div>
-						{/each}
-					</div>
-				</div>
-			</div>
-		</div>
-	</section>
+	<div>
+		<h1 class="text-2xl font-semibold tracking-tight">Sticker sheets</h1>
+		<p class="text-sm text-muted-foreground">
+			Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for
+			wir-machen-druck.de square stickers and flag labels.
+		</p>
+	</div>
 
 	<div class="grid gap-6 lg:grid-cols-[1fr_360px]">
 		<Card.Root>
@@ -264,8 +299,15 @@
 							<Label for="color">Sticker color</Label>
 							<div class="flex gap-2">
 								<Input id="color" type="color" bind:value={color} class="h-10 w-14 p-1" />
-								<Input bind:value={color} pattern="^#[0-9a-fA-F]{6}$" class="font-mono" />
+								<Input
+									bind:value={color}
+									class="font-mono {colorValid ? '' : 'border-destructive'}"
+									aria-invalid={!colorValid}
+								/>
 							</div>
+							{#if !colorValid}
+								<p class="text-sm text-destructive">Enter a color as #RRGGBB, e.g. #0069c9.</p>
+							{/if}
 						</div>
 						<div class="space-y-2">
 							<Label for="brand">Header brand</Label>
@@ -276,6 +318,40 @@
 							<Input id="logo" bind:value={logoText} placeholder="RE" maxlength={12} />
 						</div>
 					</div>
+
+					{#if type === 'faehnchen'}
+						<div class="rounded-2xl border bg-muted/20 p-4">
+							<h2 class="font-semibold">Cable tail</h2>
+							<p class="text-sm text-muted-foreground">
+								The tail wraps once around the cable and folds back between the two halves. Pick a
+								tail length and see which cable diameters it supports below.
+							</p>
+							<div class="mt-4 grid gap-4 sm:grid-cols-3">
+								<div class="space-y-2">
+									<Label for="tailLen">Tail length (mm)</Label>
+									<Input id="tailLen" type="number" min="1" step="0.5" bind:value={tailLenMm} />
+								</div>
+								<div class="space-y-2">
+									<Label>Supports diameter down to</Label>
+									<p class="flex h-10 items-center font-mono text-sm">
+										{minSupportedDiameterMm.toFixed(1)} mm
+									</p>
+								</div>
+								<div class="space-y-2">
+									<Label>Supports diameter up to</Label>
+									<p class="flex h-10 items-center font-mono text-sm">
+										{tailTooShort ? '—' : maxSupportedDiameterMm.toFixed(1)} mm
+									</p>
+								</div>
+							</div>
+							{#if tailTooShort}
+								<p class="mt-2 text-sm text-destructive">
+									This tail is too short to reliably wrap any cable and still overlap the body —
+									increase the tail length or reduce the sticker width.
+								</p>
+							{/if}
+						</div>
+					{/if}
 
 					<div class="rounded-2xl border bg-muted/20 p-4">
 						<div class="mb-4 flex items-center justify-between gap-3">
@@ -344,7 +420,7 @@
 									/>
 								</div>
 								<div class="space-y-2">
-									<Label>Sticker width mm</Label><Input
+									<Label>Sticker width mm{type === 'faehnchen' ? ' (body only)' : ''}</Label><Input
 										type="number"
 										step="0.1"
 										bind:value={widthMm}
@@ -357,13 +433,6 @@
 										bind:value={heightMm}
 									/>
 								</div>
-								{#if type === 'faehnchen'}<div class="space-y-2">
-										<Label>Flag tail mm</Label><Input
-											type="number"
-											step="0.1"
-											bind:value={flagTailMm}
-										/>
-									</div>{/if}
 								<div class="space-y-2">
 									<Label>Columns</Label><Input type="number" min="1" bind:value={columns} />
 								</div>
@@ -415,13 +484,17 @@
 										bind:value={quietZoneMm}
 									/>
 								</div>
-								<label class="flex items-center gap-2 text-sm md:col-span-2"
-									><input
-										type="checkbox"
-										bind:checked={showCutLines}
-										class="h-4 w-4 rounded border-input"
-									/> Show cut line overlay</label
-								>
+								<div class="space-y-2">
+									<Label>Bleed mm</Label><Input
+										type="number"
+										min="0.5"
+										step="0.5"
+										bind:value={bleedMm}
+									/>
+									<p class="text-xs text-muted-foreground">
+										Smaller bleed allows a smaller gap between stickers.
+									</p>
+								</div>
 							</div>
 						{/if}
 					</div>
@@ -488,6 +561,14 @@
 						<div class="flex justify-between gap-4">
 							<dt class="text-muted-foreground">Grid</dt>
 							<dd>{columns} × {rows}</dd>
+						</div>
+						<div class="flex justify-between gap-4">
+							<dt class="text-muted-foreground">Total labels</dt>
+							<dd>{totalLabels}</dd>
+						</div>
+						<div class="flex justify-between gap-4">
+							<dt class="text-muted-foreground">Pages</dt>
+							<dd>{pageCount}</dd>
 						</div>
 					</dl>
 				</Card.Content>

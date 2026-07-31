@@ -1,3 +1,4 @@
+import { DEFAULT_BLEED_MM, MIN_STICKER_SIZE_MM, minCutLineGapMm } from './geometry';
 import type { GeneratorOptions, SheetLayout, StickerSize } from './types';
 
 export interface RawGeneratorOptions {
@@ -18,21 +19,21 @@ export interface RawGeneratorOptions {
 	layout?: Partial<SheetLayout>;
 	matrixScale?: number;
 	quietZoneMm?: number;
-	showCutLines?: boolean;
+	bleedMm?: number;
 }
 
 const defaultSquareSize: StickerSize = { widthMm: 15, heightMm: 15 };
-const defaultFlagSize: StickerSize = { widthMm: 28, heightMm: 15, flagTailMm: 12 };
+const defaultFlagSize: StickerSize = { widthMm: 25, heightMm: 15, flagTailMm: 31 };
 
 const defaultSquareLayout: SheetLayout = {
 	pageWidthMm: 303,
 	pageHeightMm: 216,
 	marginLeftMm: 6,
 	marginTopMm: 13,
-	gapXMm: 3.5,
-	gapYMm: 3.5,
-	columns: 15,
-	rows: 10,
+	gapXMm: 10,
+	gapYMm: 10,
+	columns: 12,
+	rows: 8,
 	headerHeightMm: 10
 };
 
@@ -42,9 +43,9 @@ const defaultFlagLayout: SheetLayout = {
 	marginLeftMm: 8,
 	marginTopMm: 16,
 	gapXMm: 10,
-	gapYMm: 8,
-	columns: 5,
-	rows: 6,
+	gapYMm: 10,
+	columns: 4,
+	rows: 7,
 	headerHeightMm: 10
 };
 
@@ -87,7 +88,17 @@ export function normalizeOptions(raw: RawGeneratorOptions): GeneratorOptions {
 	const defaultSize = type === 'quadratisch' ? defaultSquareSize : defaultFlagSize;
 	const size = { ...defaultSize, ...raw.size };
 	const layout = { ...defaultLayout, ...raw.layout };
-	for (const [key, value] of Object.entries(size)) assertPositive(Number(value), `size.${key}`);
+
+	for (const [key, value] of Object.entries(size)) {
+		if (key === 'flagTailMm' && type !== 'faehnchen') continue;
+		assertPositive(Number(value), `size.${key}`);
+	}
+	if (size.widthMm < MIN_STICKER_SIZE_MM || size.heightMm < MIN_STICKER_SIZE_MM) {
+		throw new Error(
+			`Sticker size must be at least ${MIN_STICKER_SIZE_MM}mm per side (print shop minimum)`
+		);
+	}
+
 	for (const [key, value] of Object.entries(layout)) {
 		if (key === 'columns' || key === 'rows') {
 			if (!Number.isInteger(value) || Number(value) <= 0)
@@ -97,6 +108,34 @@ export function normalizeOptions(raw: RawGeneratorOptions): GeneratorOptions {
 		} else {
 			assertPositive(Number(value), `layout.${key}`);
 		}
+	}
+	const bleedMm = raw.bleedMm ?? DEFAULT_BLEED_MM;
+	assertPositive(bleedMm, 'bleedMm');
+	const minGapMm = minCutLineGapMm(bleedMm);
+	if (layout.gapXMm < minGapMm || layout.gapYMm < minGapMm) {
+		throw new Error(
+			`Gap between stickers must be at least ${minGapMm}mm for a ${bleedMm}mm bleed — the bleed on ` +
+				`each sticker extends outward, so a smaller gap would make adjacent stickers' bleeds overlap.`
+		);
+	}
+
+	const footprintWidthMm = size.widthMm + (size.flagTailMm ?? 0);
+	const gridWidthMm = layout.columns * footprintWidthMm + (layout.columns - 1) * layout.gapXMm;
+	const gridHeightMm = layout.rows * size.heightMm + (layout.rows - 1) * layout.gapYMm;
+	if (layout.marginLeftMm * 2 + gridWidthMm > layout.pageWidthMm) {
+		throw new Error(
+			`Grid is too wide for the page: ${layout.columns} columns of ${footprintWidthMm.toFixed(1)}mm ` +
+				`need ${gridWidthMm.toFixed(1)}mm, but only ${(layout.pageWidthMm - layout.marginLeftMm * 2).toFixed(1)}mm is available. ` +
+				`Reduce columns or sticker/tail size.`
+		);
+	}
+	if (layout.marginTopMm + layout.headerHeightMm + gridHeightMm > layout.pageHeightMm) {
+		throw new Error(
+			`Grid is too tall for the page: ${layout.rows} rows of ${size.heightMm}mm ` +
+				`need ${gridHeightMm.toFixed(1)}mm, but only ` +
+				`${(layout.pageHeightMm - layout.marginTopMm - layout.headerHeightMm).toFixed(1)}mm is available. ` +
+				`Reduce rows or sticker height.`
+		);
 	}
 
 	return {
@@ -110,7 +149,7 @@ export function normalizeOptions(raw: RawGeneratorOptions): GeneratorOptions {
 		layout,
 		matrixScale: raw.matrixScale ?? 0.68,
 		quietZoneMm: raw.quietZoneMm ?? 1.1,
-		showCutLines: raw.showCutLines ?? false
+		bleedMm
 	};
 }
 

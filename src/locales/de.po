@@ -2353,9 +2353,8 @@ msgstr "Stickerbogen erzeugt"
 msgid "Sticker Sheets | Technikpool"
 msgstr "Stickerbögen | Technikpool"
 
-#: src/routes/stickers/+page.svelte
-msgid "<0/> Print-ready PDF generator"
-msgstr "<0/> Druckfertiger PDF-Generator"
+#~ msgid "<0/> Print-ready PDF generator"
+#~ msgstr "<0/> Druckfertiger PDF-Generator"
 
 #: src/routes/stickers/+page.svelte
 msgid "Sticker sheets"
@@ -2365,13 +2364,11 @@ msgstr "Stickerbögen"
 msgid "Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for wir-machen-druck.de square stickers and flag labels."
 msgstr "Erzeuge Data-Matrix-Stickerbögen für Technikpool-Inventarnummern, mit Presets für quadratische Sticker und Fähnchen-Etiketten von wir-machen-druck.de."
 
-#: src/routes/stickers/+page.svelte
-msgid "Labels"
-msgstr "Etiketten"
+#~ msgid "Labels"
+#~ msgstr "Etiketten"
 
-#: src/routes/stickers/+page.svelte
-msgid "Per page"
-msgstr "Pro Seite"
+#~ msgid "Per page"
+#~ msgstr "Pro Seite"
 
 #: src/routes/stickers/+page.svelte
 msgid "Pages"
@@ -2469,17 +2466,15 @@ msgstr "Seitenbreite mm"
 msgid "Page height mm"
 msgstr "Seitenhöhe mm"
 
-#: src/routes/stickers/+page.svelte
-msgid "Sticker width mm"
-msgstr "Stickerbreite mm"
+#~ msgid "Sticker width mm"
+#~ msgstr "Stickerbreite mm"
 
 #: src/routes/stickers/+page.svelte
 msgid "Sticker height mm"
 msgstr "Stickerhöhe mm"
 
-#: src/routes/stickers/+page.svelte
-msgid "Flag tail mm"
-msgstr "Fähnchen-Ende mm"
+#~ msgid "Flag tail mm"
+#~ msgstr "Fähnchen-Ende mm"
 
 #: src/routes/stickers/+page.svelte
 msgid "Columns"
@@ -2513,9 +2508,8 @@ msgstr "Matrix-Skalierung"
 msgid "Quiet zone mm"
 msgstr "Ruhezone mm"
 
-#: src/routes/stickers/+page.svelte
-msgid "<0/> Show cut line overlay"
-msgstr "<0/> Schnittlinien anzeigen"
+#~ msgid "<0/> Show cut line overlay"
+#~ msgstr "<0/> Schnittlinien anzeigen"
 
 #: src/routes/stickers/+page.svelte
 msgid "Back to devices"
@@ -2553,3 +2547,75 @@ msgstr "{0} × {1} mm"
 #: src/routes/stickers/+page.svelte
 msgid "Grid"
 msgstr "Raster"
+
+#: src/routes/stickers/+page.svelte
+msgid "Cable tail"
+msgstr "Kabellasche"
+
+#~ msgid "The tail wraps once around the cable and folds back between the two halves. Its length is computed automatically so it reaches at least halfway back for the thickest cable, without sticking out past the body for the thinnest."
+#~ msgstr ""
+
+#~ msgid "Min cable diameter (mm)"
+#~ msgstr ""
+
+#~ msgid "Max cable diameter (mm)"
+#~ msgstr ""
+
+#~ msgid "Computed tail length"
+#~ msgstr ""
+
+#. 0: minSupportedDiameterMm.toFixed(1)
+#. 0: tailTooShort ? '—' \\: maxSupportedDiameterMm.toFixed(1)
+#: src/routes/stickers/+page.svelte
+#: src/routes/stickers/+page.svelte
+msgid "{0} mm"
+msgstr "{0} mm"
+
+#. 0: type === 'faehnchen' ? ' (body only)' \\: ''
+#: src/routes/stickers/+page.svelte
+msgid "Sticker width mm{0}"
+msgstr "Stickerbreite mm{0}"
+
+#: src/routes/+layout.svelte
+msgid "Tools <0/>"
+msgstr "Werkzeuge <0/>"
+
+#: src/routes/stickers/+page.svelte
+msgid "Total labels"
+msgstr "Etiketten gesamt"
+
+#: src/routes/stickers/+page.svelte
+msgid "The tail wraps once around the cable and folds back between the two halves. Pick a tail length and see which cable diameters it supports below."
+msgstr "Die Lasche wickelt sich einmal um das Kabel und faltet sich zwischen den beiden Hälften zurück. Wähle eine Laschenlänge und sieh unten, welche Kabeldurchmesser sie unterstützt."
+
+#: src/routes/stickers/+page.svelte
+msgid "Tail length (mm)"
+msgstr "Laschenlänge (mm)"
+
+#: src/routes/stickers/+page.svelte
+msgid "Supports diameter down to"
+msgstr "Unterstützt Durchmesser ab"
+
+#: src/routes/stickers/+page.svelte
+msgid "Supports diameter up to"
+msgstr "Unterstützt Durchmesser bis"
+
+#: src/routes/stickers/+page.svelte
+msgid "This tail is too short to reliably wrap any cable and still overlap the body — increase the tail length or reduce the sticker width."
+msgstr "Diese Lasche ist zu kurz, um zuverlässig ein Kabel zu umwickeln und dabei noch den Sticker-Körper zu überlappen – verlängere die Lasche oder verkleinere die Stickerbreite."
+
+#: src/routes/stickers/+page.svelte
+msgid "Enter a color as #RRGGBB, e.g. #0069c9."
+msgstr "Gib eine Farbe als #RRGGBB an, z. B. #0069c9."
+
+#: src/routes/stickers/+page.svelte
+msgid "Sticker color must be a #RRGGBB hex value"
+msgstr "Die Stickerfarbe muss ein #RRGGBB-Hex-Wert sein"
+
+#: src/routes/stickers/+page.svelte
+msgid "Bleed mm"
+msgstr "Beschnitt mm"
+
+#: src/routes/stickers/+page.svelte
+msgid "Smaller bleed allows a smaller gap between stickers."
+msgstr "Ein kleinerer Beschnitt erlaubt einen kleineren Abstand zwischen den Stickern."

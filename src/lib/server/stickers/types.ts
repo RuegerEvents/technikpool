@@ -12,6 +12,7 @@ export interface InventoryRange {
 export interface StickerSize {
 	widthMm: number;
 	heightMm: number;
+	/** Only meaningful for the 'faehnchen' type. */
 	flagTailMm?: number;
 }
 
@@ -38,7 +39,7 @@ export interface GeneratorOptions {
 	layout: SheetLayout;
 	matrixScale: number;
 	quietZoneMm: number;
-	showCutLines: boolean;
+	bleedMm: number;
 }
 
 export interface StickerItem {
@@ -47,14 +48,27 @@ export interface StickerItem {
 	payload: string;
 }
 
-export interface PageSticker extends StickerItem {
+/**
+ * One grid position on a page. `sticker` is null for a blank position — kept
+ * only to avoid splitting a multi-copy group across a page boundary (the
+ * rest of the page is padded blank so the group starts fresh on the next
+ * page); blank positions are not drawn at all.
+ *
+ * `groupIndex`/`groupSize` identify which same-number copies a position
+ * belongs to, so the sheet can draw a box around each group — `groupSize`
+ * is 1 (or 0 for blanks) when there's nothing to box.
+ */
+export interface GridPosition {
 	indexOnPage: number;
 	xMm: number;
 	yMm: number;
+	sticker: StickerItem | null;
+	groupIndex: number;
+	groupSize: number;
 }
 
 export interface SheetPage {
 	pageIndex: number;
 	totalPages: number;
-	stickers: PageSticker[];
+	positions: GridPosition[];
 }

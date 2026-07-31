@@ -88,14 +88,50 @@
 									? 'text-foreground'
 									: 'text-muted-foreground hover:text-foreground'}">Checkout</a
 							>
-							<a
-								href={resolve('/stickers')}
-								class="text-sm font-medium transition-colors {page.url.pathname.startsWith(
-									'/stickers'
-								)
-									? 'text-foreground'
-									: 'text-muted-foreground hover:text-foreground'}">Stickers</a
-							>
+							<DropdownMenu.Root>
+								<DropdownMenu.Trigger>
+									{#snippet child({ props })}
+										<button
+											{...props}
+											type="button"
+											class="flex items-center gap-1 text-sm font-medium transition-colors {page.url.pathname.startsWith(
+												'/stickers'
+											)
+												? 'text-foreground'
+												: 'text-muted-foreground hover:text-foreground'}"
+										>
+											Tools
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="13"
+												height="13"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="2"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+											>
+												<path d="m6 9 6 6 6-6" />
+											</svg>
+										</button>
+									{/snippet}
+								</DropdownMenu.Trigger>
+								<DropdownMenu.Portal>
+									<DropdownMenu.Content
+										align="start"
+										sideOffset={6}
+										class="z-50 min-w-[180px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+									>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/stickers'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											Stickers
+										</DropdownMenu.Item>
+									</DropdownMenu.Content>
+								</DropdownMenu.Portal>
+							</DropdownMenu.Root>
 							{#if data.isAdmin}
 								<a
 									href={resolve('/admin/users')}
@@ -172,38 +208,41 @@
 					{#if data.user}
 						<DropdownMenu.Root>
 							<DropdownMenu.Trigger>
-								<button
-									type="button"
-									class="flex h-9 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="15"
-										height="15"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-										stroke-linecap="round"
-										stroke-linejoin="round"
+								{#snippet child({ props })}
+									<button
+										{...props}
+										type="button"
+										class="flex h-9 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
 									>
-										<circle cx="12" cy="8" r="4" /><path d="M20 21a8 8 0 1 0-16 0" />
-									</svg>
-									<span class="hidden md:inline">{data.user.name || data.user.email}</span>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="13"
-										height="13"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-									>
-										<path d="m6 9 6 6 6-6" />
-									</svg>
-								</button>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="15"
+											height="15"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2"
+											stroke-linecap="round"
+											stroke-linejoin="round"
+										>
+											<circle cx="12" cy="8" r="4" /><path d="M20 21a8 8 0 1 0-16 0" />
+										</svg>
+										<span class="hidden md:inline">{data.user?.name || data.user?.email}</span>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="13"
+											height="13"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2"
+											stroke-linecap="round"
+											stroke-linejoin="round"
+										>
+											<path d="m6 9 6 6 6-6" />
+										</svg>
+									</button>
+								{/snippet}
 							</DropdownMenu.Trigger>
 							<DropdownMenu.Portal>
 								<DropdownMenu.Content
