@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -13,6 +14,7 @@
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
+	import { OrgBadge } from '$lib/components/ui/org-badge';
 
 	let { data } = $props();
 
@@ -35,7 +37,7 @@
 			toast.success(`${addEmail} added to organization`);
 			addEmail = '';
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		} finally {
 			adding = false;
 		}
@@ -46,7 +48,7 @@
 			await removeUserFromOrg({ orgId, userId });
 			toast.success(`${name} removed from organization`);
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		}
 	}
 
@@ -59,29 +61,111 @@
 			});
 			toast.success('Role updated');
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		}
 	}
 
-	let editingPrefix = $state(false);
+	let editingSettings = $state(false);
 	let prefixDraft = $state('');
-	let savingPrefix = $state(false);
+	let colorDraft = $state('');
+	let avatarLabelDraft = $state('');
+	let inspectionIntervalDraft = $state('');
+	let isKleinunternehmerDraft = $state(false);
+	let savingSettings = $state(false);
 
 	$effect(() => {
-		if (!editingPrefix) prefixDraft = org.assetIdPrefix;
+		if (!editingSettings) {
+			prefixDraft = org.assetIdPrefix;
+			colorDraft = org.color;
+			avatarLabelDraft = org.avatarLabel;
+			inspectionIntervalDraft = org.defaultInspectionIntervalMonths?.toString() ?? '';
+			isKleinunternehmerDraft = org.isKleinunternehmer;
+		}
 	});
 
-	async function handlePrefixSave(e: Event) {
+	async function handleSettingsSave(e: Event) {
 		e.preventDefault();
-		savingPrefix = true;
+		savingSettings = true;
 		try {
-			await updateOrg({ orgId, assetIdPrefix: prefixDraft });
-			toast.success('Asset ID prefix updated');
-			editingPrefix = false;
+			await updateOrg({
+				orgId,
+				assetIdPrefix: prefixDraft,
+				color: colorDraft,
+				avatarLabel: avatarLabelDraft,
+				defaultInspectionIntervalMonths: inspectionIntervalDraft
+					? Number(inspectionIntervalDraft)
+					: null,
+				isKleinunternehmer: isKleinunternehmerDraft
+			});
+			toast.success('Organization settings updated');
+			editingSettings = false;
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		} finally {
-			savingPrefix = false;
+			savingSettings = false;
+		}
+	}
+
+	let editingBilling = $state(false);
+	let savingBilling = $state(false);
+	let billingDraft = $state({
+		line1: '',
+		line2: '',
+		postalCode: '',
+		city: '',
+		taxId: '',
+		bankAccountHolder: '',
+		iban: '',
+		bic: '',
+		bankName: ''
+	});
+
+	$effect(() => {
+		if (!editingBilling) {
+			billingDraft = {
+				line1: org.address?.line1 ?? '',
+				line2: org.address?.line2 ?? '',
+				postalCode: org.address?.postalCode ?? '',
+				city: org.address?.city ?? '',
+				taxId: org.taxId ?? '',
+				bankAccountHolder: org.bankAccountHolder ?? '',
+				iban: org.iban ?? '',
+				bic: org.bic ?? '',
+				bankName: org.bankName ?? ''
+			};
+		}
+	});
+
+	async function handleBillingSave(e: Event) {
+		e.preventDefault();
+		savingBilling = true;
+		try {
+			const hasAddress = billingDraft.line1 || billingDraft.postalCode || billingDraft.city;
+			await updateOrg({
+				orgId,
+				assetIdPrefix: org.assetIdPrefix,
+				color: org.color,
+				avatarLabel: org.avatarLabel,
+				address: hasAddress
+					? {
+							line1: billingDraft.line1,
+							line2: billingDraft.line2 || undefined,
+							postalCode: billingDraft.postalCode,
+							city: billingDraft.city
+						}
+					: null,
+				taxId: billingDraft.taxId || null,
+				bankAccountHolder: billingDraft.bankAccountHolder || null,
+				iban: billingDraft.iban || null,
+				bic: billingDraft.bic || null,
+				bankName: billingDraft.bankName || null
+			});
+			toast.success('Billing details updated');
+			editingBilling = false;
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			savingBilling = false;
 		}
 	}
 
@@ -127,6 +211,7 @@
 			</div>
 			{#if canManage}
 				<Button variant="outline" href={resolve(`/orgs/${orgId}/locations`)}>Locations</Button>
+				<Button variant="outline" href={resolve(`/orgs/${orgId}/rates`)}>Rental Rates</Button>
 			{/if}
 		</div>
 	</div>
@@ -136,16 +221,16 @@
 			<div class="space-y-6">
 				<Card.Root>
 					<Card.Header>
-						<Card.Title>Asset ID Prefix</Card.Title>
+						<Card.Title>Organization Settings</Card.Title>
 						<Card.Description>
-							3-digit prefix for auto-generated asset IDs (e.g. 123 → 12300001).
+							Asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer status.
 						</Card.Description>
 					</Card.Header>
 					<Card.Content>
-						{#if editingPrefix}
-							<form onsubmit={handlePrefixSave} class="space-y-4">
+						{#if editingSettings}
+							<form onsubmit={handleSettingsSave} class="space-y-4">
 								<div class="space-y-2">
-									<Label for="prefixInput">Prefix</Label>
+									<Label for="prefixInput">Asset ID prefix</Label>
 									<Input
 										id="prefixInput"
 										bind:value={prefixDraft}
@@ -155,21 +240,192 @@
 										class="w-24"
 									/>
 								</div>
+								<div class="flex gap-4">
+									<div class="space-y-2">
+										<Label for="colorInput">Color</Label>
+										<div class="flex gap-2">
+											<Input
+												id="colorInput"
+												type="color"
+												bind:value={colorDraft}
+												class="h-10 w-14 p-1"
+											/>
+											<Input bind:value={colorDraft} class="w-28 font-mono" required />
+										</div>
+									</div>
+									<div class="space-y-2">
+										<Label for="avatarLabelInput">Avatar label</Label>
+										<Input
+											id="avatarLabelInput"
+											bind:value={avatarLabelDraft}
+											maxlength={2}
+											required
+											class="w-20 font-mono uppercase"
+										/>
+									</div>
+								</div>
+								<div class="space-y-2">
+									<Label for="inspectionIntervalInput"
+										>Default DGUV inspection interval (months)</Label
+									>
+									<Input
+										id="inspectionIntervalInput"
+										type="number"
+										min="1"
+										bind:value={inspectionIntervalDraft}
+										placeholder="e.g. 12"
+										class="w-28"
+									/>
+									<p class="text-xs text-muted-foreground">
+										Copied onto new assets at creation; leave blank to not track inspections by
+										default.
+									</p>
+								</div>
+								<label class="flex items-center gap-2 text-sm">
+									<input
+										type="checkbox"
+										bind:checked={isKleinunternehmerDraft}
+										class="h-4 w-4 rounded border-input"
+									/>
+									Kleinunternehmer (§19 UStG) — no VAT charged
+								</label>
 								<div class="flex gap-2">
-									<Button type="submit" disabled={savingPrefix}>
-										{savingPrefix ? 'Saving…' : 'Save'}
+									<Button type="submit" disabled={savingSettings}>
+										{savingSettings ? 'Saving…' : 'Save'}
 									</Button>
-									<Button type="button" variant="outline" onclick={() => (editingPrefix = false)}>
+									<Button type="button" variant="outline" onclick={() => (editingSettings = false)}>
 										Cancel
 									</Button>
 								</div>
 							</form>
 						{:else}
-							<div class="flex items-center justify-between">
-								<span class="font-mono text-lg">
-									{org.assetIdPrefix}
-								</span>
-								<Button variant="outline" size="sm" onclick={() => (editingPrefix = true)}>
+							<div class="space-y-3">
+								<div class="flex items-center justify-between">
+									<span class="text-sm text-muted-foreground">Asset ID prefix</span>
+									<span class="font-mono">{org.assetIdPrefix}</span>
+								</div>
+								<div class="flex items-center justify-between">
+									<span class="text-sm text-muted-foreground">Visual identity</span>
+									<OrgBadge name={org.name} color={org.color} avatarLabel={org.avatarLabel} />
+								</div>
+								<div class="flex items-center justify-between">
+									<span class="text-sm text-muted-foreground">DGUV default interval</span>
+									<span>
+										{org.defaultInspectionIntervalMonths
+											? `${org.defaultInspectionIntervalMonths} months`
+											: 'Not tracked'}
+									</span>
+								</div>
+								<div class="flex items-center justify-between">
+									<span class="text-sm text-muted-foreground">Kleinunternehmer</span>
+									<span>{org.isKleinunternehmer ? 'Yes' : 'No'}</span>
+								</div>
+								<Button
+									variant="outline"
+									size="sm"
+									class="w-full"
+									onclick={() => (editingSettings = true)}
+								>
+									Edit
+								</Button>
+							</div>
+						{/if}
+					</Card.Content>
+				</Card.Root>
+
+				<Card.Root>
+					<Card.Header>
+						<Card.Title>Billing Details</Card.Title>
+						<Card.Description
+							>Address, tax ID, and bank account — used on generated offers/invoices.</Card.Description
+						>
+					</Card.Header>
+					<Card.Content>
+						{#if editingBilling}
+							<form onsubmit={handleBillingSave} class="space-y-4">
+								<div class="space-y-2">
+									<Label for="billingLine1">Address line 1</Label>
+									<Input id="billingLine1" bind:value={billingDraft.line1} />
+								</div>
+								<div class="space-y-2">
+									<Label for="billingLine2">Address line 2</Label>
+									<Input id="billingLine2" bind:value={billingDraft.line2} placeholder="Optional" />
+								</div>
+								<div class="flex gap-4">
+									<div class="space-y-2">
+										<Label for="billingPostal">Postal code</Label>
+										<Input id="billingPostal" bind:value={billingDraft.postalCode} class="w-28" />
+									</div>
+									<div class="flex-1 space-y-2">
+										<Label for="billingCity">City</Label>
+										<Input id="billingCity" bind:value={billingDraft.city} />
+									</div>
+								</div>
+								<div class="space-y-2">
+									<Label for="billingTaxId">Tax ID (Steuernummer / USt-IdNr.)</Label>
+									<Input id="billingTaxId" bind:value={billingDraft.taxId} />
+								</div>
+								<div class="space-y-2">
+									<Label for="billingHolder">Bank account holder</Label>
+									<Input id="billingHolder" bind:value={billingDraft.bankAccountHolder} />
+								</div>
+								<div class="flex gap-4">
+									<div class="flex-1 space-y-2">
+										<Label for="billingIban">IBAN</Label>
+										<Input id="billingIban" bind:value={billingDraft.iban} class="font-mono" />
+									</div>
+									<div class="space-y-2">
+										<Label for="billingBic">BIC</Label>
+										<Input id="billingBic" bind:value={billingDraft.bic} class="w-32 font-mono" />
+									</div>
+								</div>
+								<div class="space-y-2">
+									<Label for="billingBankName">Bank name</Label>
+									<Input id="billingBankName" bind:value={billingDraft.bankName} />
+								</div>
+								<div class="flex gap-2">
+									<Button type="submit" disabled={savingBilling}>
+										{savingBilling ? 'Saving…' : 'Save'}
+									</Button>
+									<Button type="button" variant="outline" onclick={() => (editingBilling = false)}>
+										Cancel
+									</Button>
+								</div>
+							</form>
+						{:else}
+							<div class="space-y-3 text-sm">
+								<div>
+									<p class="text-muted-foreground">Address</p>
+									<p>
+										{#if org.address}
+											{org.address.line1}{#if org.address.line2}, {org.address.line2}{/if},
+											{org.address.postalCode}
+											{org.address.city}
+										{:else}
+											Not set
+										{/if}
+									</p>
+								</div>
+								<div>
+									<p class="text-muted-foreground">Tax ID</p>
+									<p>{org.taxId ?? 'Not set'}</p>
+								</div>
+								<div>
+									<p class="text-muted-foreground">Bank account</p>
+									<p>
+										{#if org.iban}
+											{org.bankAccountHolder ?? ''} · {org.iban} · {org.bic ?? ''}
+										{:else}
+											Not set
+										{/if}
+									</p>
+								</div>
+								<Button
+									variant="outline"
+									size="sm"
+									class="w-full"
+									onclick={() => (editingBilling = true)}
+								>
 									Edit
 								</Button>
 							</div>

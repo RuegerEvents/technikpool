@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -189,7 +190,7 @@
 			showModal = false;
 			toast.success('Asset created and added to bundle');
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		} finally {
 			modalSaving = false;
 		}
@@ -216,7 +217,7 @@
 			toast.success('Bundle created!');
 			goto(resolve(`/assets/bundles/${bundle.id}`));
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 			saving = false;
 		}
 	}

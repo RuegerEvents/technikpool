@@ -1,10 +1,13 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { AddressInput } from '$lib/components/ui/address-input';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { createProduction } from '$lib/remote/productions.remote';
+	import { getCustomers, createCustomer } from '$lib/remote/customers.remote';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
@@ -14,6 +17,9 @@
 	let organizationId = $state('');
 	let startDate = $state('');
 	let endDate = $state('');
+	let sameAsTotalDuration = $state(true);
+	let showStartDate = $state('');
+	let showEndDate = $state('');
 	let address = $state({
 		line1: '',
 		line2: '',
@@ -21,21 +27,45 @@
 		city: ''
 	});
 
+	let customers = $derived(organizationId ? await getCustomers(organizationId) : []);
+	let customerId = $state('');
+	let creatingCustomer = $state(false);
+	let newCustomer = $state({ companyName: '', contactPerson: '', email: '' });
+	let newCustomerAddress = $state({ line1: '', line2: '', postalCode: '', city: '' });
+
+	function customerLabel(c: { companyName: string | null; contactPerson: string | null }) {
+		return c.companyName || c.contactPerson || 'Unnamed customer';
+	}
+
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
 		saving = true;
 		try {
+			let finalCustomerId = customerId || undefined;
+			if (creatingCustomer) {
+				const created = await createCustomer({
+					organizationId,
+					companyName: newCustomer.companyName || undefined,
+					contactPerson: newCustomer.contactPerson || undefined,
+					email: newCustomer.email || undefined,
+					address: newCustomerAddress
+				});
+				finalCustomerId = created.id;
+			}
 			const production = await createProduction({
 				name,
 				organizationId,
 				startDate: startDate ? new Date(startDate) : undefined,
 				endDate: endDate ? new Date(endDate) : undefined,
-				address
+				showStartDate: !sameAsTotalDuration && showStartDate ? new Date(showStartDate) : undefined,
+				showEndDate: !sameAsTotalDuration && showEndDate ? new Date(showEndDate) : undefined,
+				address,
+				customerId: finalCustomerId
 			});
 			toast.success('Production created!');
 			goto(resolve(`/productions/${production.id}`));
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 			saving = false;
 		}
 	}
@@ -82,8 +112,50 @@
 					</div>
 					<div class="space-y-2">
 						<Label for="endDate">End Date</Label>
-						<Input id="endDate" type="date" bind:value={endDate} required />
+						<Input id="endDate" type="date" bind:value={endDate} min={startDate} required />
 					</div>
+				</div>
+
+				<div class="space-y-3">
+					<div>
+						<h2 class="text-base font-semibold">Show Duration</h2>
+						<p class="text-sm text-muted-foreground">
+							The billable show days, used for offer/invoice day count. Must fall within the total
+							duration above.
+						</p>
+					</div>
+					<label class="flex cursor-pointer items-center gap-2 text-sm select-none">
+						<input
+							type="checkbox"
+							bind:checked={sameAsTotalDuration}
+							class="h-4 w-4 rounded border-input"
+						/>
+						Same as total duration
+					</label>
+					{#if !sameAsTotalDuration}
+						<div class="grid grid-cols-2 gap-4">
+							<div class="space-y-2">
+								<Label for="showStartDate">Show Start Date</Label>
+								<Input
+									id="showStartDate"
+									type="date"
+									bind:value={showStartDate}
+									min={startDate}
+									max={endDate}
+								/>
+							</div>
+							<div class="space-y-2">
+								<Label for="showEndDate">Show End Date</Label>
+								<Input
+									id="showEndDate"
+									type="date"
+									bind:value={showEndDate}
+									min={showStartDate || startDate}
+									max={endDate}
+								/>
+							</div>
+						</div>
+					{/if}
 				</div>
 
 				<div class="space-y-2">
@@ -91,23 +163,61 @@
 					<p class="text-sm text-muted-foreground">Optional delivery / venue address.</p>
 				</div>
 
-				<div class="grid gap-4 sm:grid-cols-2">
-					<div class="space-y-2 sm:col-span-2">
-						<Label for="line1">Address line 1</Label>
-						<Input id="line1" bind:value={address.line1} placeholder="Street and number" />
+				<AddressInput bind:value={address} idPrefix="addr" />
+
+				<div class="space-y-3">
+					<div>
+						<h2 class="text-base font-semibold">Customer</h2>
+						<p class="text-sm text-muted-foreground">
+							Optional — reused to auto-populate offers/invoices for this production.
+						</p>
 					</div>
-					<div class="space-y-2 sm:col-span-2">
-						<Label for="line2">Address line 2</Label>
-						<Input id="line2" bind:value={address.line2} placeholder="Building, floor, c/o" />
-					</div>
-					<div class="space-y-2">
-						<Label for="postal">Postal code</Label>
-						<Input id="postal" bind:value={address.postalCode} placeholder="12345" />
-					</div>
-					<div class="space-y-2">
-						<Label for="city">City</Label>
-						<Input id="city" bind:value={address.city} placeholder="Berlin" />
-					</div>
+
+					{#if !creatingCustomer}
+						<div class="space-y-2">
+							<select
+								id="customer"
+								bind:value={customerId}
+								class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+							>
+								<option value="">— None —</option>
+								{#each customers as c (c.id)}
+									<option value={c.id}>{customerLabel(c)}</option>
+								{/each}
+							</select>
+							<Button
+								type="button"
+								variant="outline"
+								onclick={() => {
+									creatingCustomer = true;
+									customerId = '';
+								}}
+							>
+								+ New customer
+							</Button>
+						</div>
+					{:else}
+						<div class="space-y-4 rounded-md border p-4">
+							<div class="grid gap-4 sm:grid-cols-2">
+								<div class="space-y-2">
+									<Label for="cust-company">Company name</Label>
+									<Input id="cust-company" bind:value={newCustomer.companyName} />
+								</div>
+								<div class="space-y-2">
+									<Label for="cust-contact">Contact person</Label>
+									<Input id="cust-contact" bind:value={newCustomer.contactPerson} />
+								</div>
+								<div class="space-y-2 sm:col-span-2">
+									<Label for="cust-email">Email</Label>
+									<Input id="cust-email" type="email" bind:value={newCustomer.email} />
+								</div>
+							</div>
+							<AddressInput bind:value={newCustomerAddress} idPrefix="cust-addr" />
+							<Button type="button" variant="outline" onclick={() => (creatingCustomer = false)}>
+								Cancel new customer
+							</Button>
+						</div>
+					{/if}
 				</div>
 
 				<div class="flex justify-end gap-4 pt-4">

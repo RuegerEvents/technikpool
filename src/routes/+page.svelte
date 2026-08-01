@@ -21,7 +21,8 @@
 		Clapperboard,
 		Users,
 		Building2,
-		Plus
+		Plus,
+		ClipboardCheck
 	} from '@lucide/svelte';
 
 	let { data } = $props();
@@ -192,7 +193,7 @@
 
 		<!-- Stats row -->
 		{#if stats}
-			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
 				<!-- Assets -->
 				<a href={resolve('/assets')} class="group block">
 					<Card.Root class="transition-shadow hover:shadow-md">
@@ -276,6 +277,28 @@
 							<div class="text-2xl font-bold">{stats.bundleCount}</div>
 							<p class="mt-1 text-xs text-muted-foreground">
 								{plural(orgs.length, ['Across # organization', 'Across # organizations'])}
+							</p>
+						</Card.Content>
+					</Card.Root>
+				</a>
+
+				<!-- Overdue DGUV inspections -->
+				<a href={resolve('/inspections')} class="group block">
+					<Card.Root
+						class="transition-shadow hover:shadow-md {stats.overdueInspections > 0
+							? 'border-amber-500/40 bg-amber-50/50 dark:bg-amber-950/20'
+							: ''}"
+					>
+						<Card.Header class="flex flex-row items-center justify-between pb-2">
+							<Card.Title class="text-sm font-medium text-muted-foreground"
+								>Overdue Inspections</Card.Title
+							>
+							<ClipboardCheck class="h-4 w-4 text-muted-foreground" />
+						</Card.Header>
+						<Card.Content>
+							<div class="text-2xl font-bold">{stats.overdueInspections}</div>
+							<p class="mt-1 text-xs text-muted-foreground">
+								{stats.overdueInspections > 0 ? 'DGUV inspection due' : 'All up to date'}
 							</p>
 						</Card.Content>
 					</Card.Root>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -54,7 +55,7 @@
 			newName = '';
 			newAddress = emptyAddress();
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		} finally {
 			creating = false;
 		}
@@ -103,7 +104,7 @@
 			toast.success('Location updated');
 			editingId = null;
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		} finally {
 			saving = false;
 		}

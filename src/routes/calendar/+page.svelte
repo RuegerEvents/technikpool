@@ -2,6 +2,10 @@
 	/* eslint-disable svelte/prefer-svelte-reactivity */
 	import { getCalendarData, getProductionsCalendar } from '$lib/remote/productions.remote';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
+	import { OrgBadge } from '$lib/components/ui/org-badge';
+	import { FilterPopover } from '$lib/components/ui/filter-popover';
 
 	type Granularity = 'day' | 'week' | 'month' | 'year';
 	type ViewMode = 'assets' | 'productions';
@@ -9,10 +13,94 @@
 	let rawData = $derived(await getCalendarData());
 	let prodCalData = $derived(await getProductionsCalendar());
 
-	let granularity = $state<Granularity>('week');
-	let viewMode = $state<ViewMode>('assets');
+	// View state is persisted in URL query params (?view=&mode=&date=&orgs=) so
+	// a refresh or shared link keeps the same view.
+	function updateUrl(params: Record<string, string | null>) {
+		const url = new URL(page.url);
+		for (const [k, v] of Object.entries(params)) {
+			if (v === null) url.searchParams.delete(k);
+			else url.searchParams.set(k, v);
+		}
+		// eslint-disable-next-line svelte/no-navigation-without-resolve -- updating query params on the current route, not navigating to a typed path
+		goto(url, { replaceState: true, noScroll: true, keepFocus: true });
+	}
+
+	const GRANULARITIES: Granularity[] = ['day', 'week', 'month', 'year'];
+	const VIEW_MODES: ViewMode[] = ['assets', 'productions'];
+
+	function parseDateParam(v: string | null): Date | null {
+		if (!v || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return null;
+		const [y, m, d] = v.split('-').map(Number);
+		const parsed = new Date(y, m - 1, d);
+		return Number.isNaN(parsed.getTime()) ? null : parsed;
+	}
+
+	function dateParam(d: Date): string {
+		return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+			d.getDate()
+		).padStart(2, '0')}`;
+	}
+
+	const initialGranularity = page.url.searchParams.get('view');
+	let granularity = $state<Granularity>(
+		GRANULARITIES.includes(initialGranularity as Granularity)
+			? (initialGranularity as Granularity)
+			: 'week'
+	);
+	const initialViewMode = page.url.searchParams.get('mode');
+	let viewMode = $state<ViewMode>(
+		VIEW_MODES.includes(initialViewMode as ViewMode) ? (initialViewMode as ViewMode) : 'assets'
+	);
 	let expandedProducts = $state(new Set<string>());
-	let viewDate = $state(new Date());
+	let viewDate = $state(parseDateParam(page.url.searchParams.get('date')) ?? new Date());
+
+	function setGranularity(g: Granularity) {
+		granularity = g;
+		updateUrl({ view: g });
+	}
+
+	function setViewMode(m: ViewMode) {
+		viewMode = m;
+		updateUrl({ mode: m });
+	}
+
+	function setViewDate(d: Date) {
+		viewDate = d;
+		updateUrl({ date: dateParam(d) });
+	}
+
+	// Org filter (assets mode only) — persisted in the ?orgs= URL query param.
+	let selectedOrgIds = $state(new Set<string>(page.url.searchParams.get('orgs')?.split(',') ?? []));
+	let availableOrgs = $derived.by(() => {
+		const seen = new Map<
+			string,
+			{ id: string; name: string; color: string; avatarLabel: string }
+		>();
+		for (const a of rawData) {
+			if (!seen.has(a.organization.id)) {
+				seen.set(a.organization.id, {
+					id: a.organization.id,
+					name: a.organization.name,
+					color: a.organization.color,
+					avatarLabel: a.organization.avatarLabel
+				});
+			}
+		}
+		return [...seen.values()].sort((a, b) => a.name.localeCompare(b.name));
+	});
+	let filteredData = $derived(
+		selectedOrgIds.size === 0
+			? rawData
+			: rawData.filter((a) => selectedOrgIds.has(a.organization.id))
+	);
+
+	function toggleOrgFilter(orgId: string) {
+		const next = new Set(selectedOrgIds);
+		if (next.has(orgId)) next.delete(orgId);
+		else next.add(orgId);
+		selectedOrgIds = next;
+		updateUrl({ orgs: next.size === 0 ? null : [...next].join(',') });
+	}
 
 	let scrollEl = $state<HTMLDivElement | null>(null);
 	let scrollLeft = $state(0);
@@ -101,6 +189,77 @@
 		return { left, width };
 	}
 
+	// Adds the show-day sub-range (clamped within start/end) to a bar's pixel
+	// dims, so the Gantt view can render get-in/get-out days distinctly from
+	// the actual show days.
+	function barDimsWithShow(
+		start: Date | string,
+		end: Date | string,
+		showStart: Date | string | null,
+		showEnd: Date | string | null
+	) {
+		const s = new Date(start);
+		const e = new Date(end);
+		const ss = showStart
+			? new Date(Math.min(Math.max(new Date(showStart).getTime(), s.getTime()), e.getTime()))
+			: s;
+		const se = showEnd
+			? new Date(Math.min(Math.max(new Date(showEnd).getTime(), ss.getTime()), e.getTime()))
+			: e;
+		const show = barDims(ss, se);
+		return { ...barDims(s, e), showLeft: show.left, showWidth: show.width };
+	}
+
+	type GanttSegment = {
+		left: number;
+		width: number;
+		kind: 'setup' | 'show';
+		roundedLeft: boolean;
+		roundedRight: boolean;
+	};
+
+	function ganttSegments(bar: {
+		left: number;
+		width: number;
+		showLeft: number;
+		showWidth: number;
+	}): GanttSegment[] {
+		const setupBefore = bar.showLeft - bar.left;
+		const setupAfter = bar.left + bar.width - (bar.showLeft + bar.showWidth);
+		if (setupBefore < 1 && setupAfter < 1) {
+			return [
+				{ left: bar.left, width: bar.width, kind: 'show', roundedLeft: true, roundedRight: true }
+			];
+		}
+		const segs: GanttSegment[] = [];
+		if (setupBefore >= 1) {
+			segs.push({
+				left: bar.left,
+				width: setupBefore,
+				kind: 'setup',
+				roundedLeft: true,
+				roundedRight: false
+			});
+		}
+		segs.push({
+			left: bar.showLeft,
+			width: bar.showWidth,
+			kind: 'show',
+			roundedLeft: setupBefore < 1,
+			roundedRight: setupAfter < 1
+		});
+		if (setupAfter >= 1) {
+			segs.push({
+				left: bar.showLeft + bar.showWidth,
+				width: setupAfter,
+				kind: 'setup',
+				roundedLeft: false,
+				roundedRight: true
+			});
+		}
+		return segs;
+	}
+
 	const COLORS = [
 		'#3b82f6',
 		'#10b981',
@@ -124,6 +283,8 @@
 		label: string;
 		left: number;
 		width: number;
+		showLeft: number;
+		showWidth: number;
 		color: string;
 		pending: boolean;
 	};
@@ -132,6 +293,8 @@
 		label: string;
 		left: number;
 		width: number;
+		showLeft: number;
+		showWidth: number;
 		color: string;
 		fraction: number;
 		allPending: boolean;
@@ -145,38 +308,43 @@
 		collapsed: boolean;
 		collapsedBars: CollapsedBar[];
 	};
-	type AssetRow = { kind: 'asset'; id: string; label: string; org: string; bars: Bar[] };
+	type AssetRow = {
+		kind: 'asset';
+		id: string;
+		label: string;
+		org: string;
+		orgInfo?: { id: string; name: string; color: string; avatarLabel: string };
+		bars: Bar[];
+	};
 	type ProdRow = { kind: 'prod'; id: string; name: string; start: Date; end: Date; bars: Bar[] };
 	type Row = HeaderRow | AssetRow | ProdRow;
 
 	let displayRows = $derived.by((): Row[] => {
 		if (viewMode === 'productions') {
-			return prodCalData.map(
-				(p): ProdRow => ({
-					kind: 'prod',
-					id: p.id,
-					name: p.name,
-					start: new Date(p.startDate!),
-					end: new Date(p.endDate!),
-					bars: [
-						{
-							id: p.id,
-							productionId: p.id,
-							label: p.name,
-							...barDims(p.startDate!, p.endDate!),
-							color: prodColor(p.id),
-							pending: false
-						}
-					]
-				})
-			);
+			return prodCalData.map((p): ProdRow => ({
+				kind: 'prod',
+				id: p.id,
+				name: p.name,
+				start: new Date(p.startDate!),
+				end: new Date(p.endDate!),
+				bars: [
+					{
+						id: p.id,
+						productionId: p.id,
+						label: p.name,
+						...barDimsWithShow(p.startDate!, p.endDate!, p.showStartDate, p.showEndDate),
+						color: prodColor(p.id),
+						pending: false
+					}
+				]
+			}));
 		}
 
 		const rows: Row[] = [];
 		const byBundle = new Map<string, { name: string; assets: typeof rawData }>();
 		const byProduct = new Map<string, { name: string; mfr: string; assets: typeof rawData }>();
 
-		for (const a of rawData) {
+		for (const a of filteredData) {
 			if (a.bundle) {
 				if (!byBundle.has(a.bundle.id))
 					byBundle.set(a.bundle.id, { name: a.bundle.name, assets: [] });
@@ -203,7 +371,15 @@
 			const collapsed = !expandedProducts.has(groupId);
 			const prodAgg = new Map<
 				string,
-				{ label: string; start: Date; end: Date; count: number; pendingCount: number }
+				{
+					label: string;
+					start: Date;
+					end: Date;
+					showStart: Date | null;
+					showEnd: Date | null;
+					count: number;
+					pendingCount: number;
+				}
 			>();
 			for (const a of assets) {
 				for (const pi of a.productionItems) {
@@ -213,6 +389,8 @@
 							label: pi.production.name,
 							start: new Date(pi.production.startDate),
 							end: new Date(pi.production.endDate),
+							showStart: pi.production.showStartDate,
+							showEnd: pi.production.showEndDate,
 							count: 0,
 							pendingCount: 0
 						});
@@ -223,7 +401,7 @@
 			const collapsedBars: CollapsedBar[] = [...prodAgg.entries()].map(([id, p]) => ({
 				productionId: id,
 				label: p.label,
-				...barDims(p.start, p.end),
+				...barDimsWithShow(p.start, p.end, p.showStart, p.showEnd),
 				color: prodColor(id),
 				fraction: p.count / assets.length,
 				allPending: p.pendingCount === p.count
@@ -258,7 +436,12 @@
 									id: pi.id,
 									productionId: pi.production.id,
 									label: pi.production.name,
-									...barDims(pi.production.startDate!, pi.production.endDate!),
+									...barDimsWithShow(
+										pi.production.startDate!,
+										pi.production.endDate!,
+										pi.production.showStartDate,
+										pi.production.showEndDate
+									),
 									color: prodColor(pi.production.id),
 									pending: pi.status === 'PENDING'
 								});
@@ -280,7 +463,12 @@
 								id: pi.id,
 								productionId: pi.production.id,
 								label: pi.production.name,
-								...barDims(pi.production.startDate!, pi.production.endDate!),
+								...barDimsWithShow(
+									pi.production.startDate!,
+									pi.production.endDate!,
+									pi.production.showStartDate,
+									pi.production.showEndDate
+								),
 								color: prodColor(pi.production.id),
 								pending: pi.status === 'PENDING'
 							}));
@@ -289,6 +477,12 @@
 							id: a.id,
 							label: a.serialNumber ?? a.assetTag ?? `#${a.id.slice(0, 6)}`,
 							org: a.organization.name,
+							orgInfo: {
+								id: a.organization.id,
+								name: a.organization.name,
+								color: a.organization.color,
+								avatarLabel: a.organization.avatarLabel
+							},
 							bars
 						});
 					}
@@ -386,7 +580,7 @@
 		if (granularity === 'day' || granularity === 'week') {
 			scrollEl?.scrollTo({ left: Math.max(0, todayX - viewportWidth / 2), behavior: 'smooth' });
 		} else {
-			viewDate = new Date();
+			setViewDate(new Date());
 		}
 	}
 
@@ -418,19 +612,51 @@
 		granularity === 'month' || granularity === 'year' ? ('productions' as const) : viewMode
 	);
 
-	type GridEvent = { id: string; name: string; color: string; startTs: number; endTs: number };
+	type GridEvent = {
+		id: string;
+		name: string;
+		color: string;
+		startTs: number;
+		endTs: number;
+		showStartTs: number;
+		showEndTs: number;
+	};
+
+	// Show dates narrow the full booked/loaded range down to the actual event
+	// days; days outside that window (get-in/get-out) render as "setup".
+	// Clamped to the full range so bad data never produces a show window wider
+	// than the booking itself.
+	function showRange(
+		startTs: number,
+		endTs: number,
+		showStart: Date | string | null,
+		showEnd: Date | string | null
+	) {
+		const showStartTs = showStart
+			? Math.min(Math.max(startOfDay(new Date(showStart)).getTime(), startTs), endTs)
+			: startTs;
+		const showEndTs = showEnd
+			? Math.max(Math.min(startOfDay(new Date(showEnd)).getTime(), endTs), showStartTs)
+			: endTs;
+		return { showStartTs, showEndTs };
+	}
 
 	let gridEvents = $derived.by((): GridEvent[] => {
 		if (effectiveViewMode === 'productions') {
 			return prodCalData
 				.filter((p) => p.startDate && p.endDate)
-				.map((p) => ({
-					id: p.id,
-					name: p.name,
-					color: prodColor(p.id),
-					startTs: startOfDay(new Date(p.startDate!)).getTime(),
-					endTs: startOfDay(new Date(p.endDate!)).getTime()
-				}));
+				.map((p) => {
+					const startTs = startOfDay(new Date(p.startDate!)).getTime();
+					const endTs = startOfDay(new Date(p.endDate!)).getTime();
+					return {
+						id: p.id,
+						name: p.name,
+						color: prodColor(p.id),
+						startTs,
+						endTs,
+						...showRange(startTs, endTs, p.showStartDate, p.showEndDate)
+					};
+				});
 		}
 		const seen = new Set<string>();
 		const result: GridEvent[] = [];
@@ -439,12 +665,15 @@
 				if (!pi.production.startDate || !pi.production.endDate) continue;
 				if (seen.has(pi.production.id)) continue;
 				seen.add(pi.production.id);
+				const startTs = startOfDay(new Date(pi.production.startDate)).getTime();
+				const endTs = startOfDay(new Date(pi.production.endDate)).getTime();
 				result.push({
 					id: pi.production.id,
 					name: pi.production.name,
 					color: prodColor(pi.production.id),
-					startTs: startOfDay(new Date(pi.production.startDate)).getTime(),
-					endTs: startOfDay(new Date(pi.production.endDate)).getTime()
+					startTs,
+					endTs,
+					...showRange(startTs, endTs, pi.production.showStartDate, pi.production.showEndDate)
 				});
 			}
 		}
@@ -459,6 +688,10 @@
 		startsInRow: boolean;
 		endsInRow: boolean;
 		dimmed: boolean;
+		// Show-day segment clipped to this row's columns; null when this row
+		// contains no show days at all (i.e. it's entirely setup/get-out).
+		showStartCol: number | null;
+		showEndCol: number | null;
 	};
 
 	type WeekRowData = {
@@ -477,14 +710,27 @@
 
 		const items = events
 			.filter((e) => e.startTs <= rowEndTs && e.endTs >= rowStartTs)
-			.map((e) => ({
-				event: e,
-				startCol: Math.max(0, Math.round((e.startTs - rowStartTs) / MS_DAY)),
-				endCol: Math.min(6, Math.round((e.endTs - rowStartTs) / MS_DAY)),
-				startsInRow: e.startTs >= rowStartTs,
-				endsInRow: e.endTs <= rowEndTs,
-				dimmed: e.endTs < monthStart || e.startTs > monthEnd
-			}));
+			.map((e) => {
+				const startCol = Math.max(0, Math.round((e.startTs - rowStartTs) / MS_DAY));
+				const endCol = Math.min(6, Math.round((e.endTs - rowStartTs) / MS_DAY));
+				const hasShowInRow = e.showEndTs >= rowStartTs && e.showStartTs <= rowEndTs;
+				const showStartCol = hasShowInRow
+					? Math.max(startCol, Math.round((e.showStartTs - rowStartTs) / MS_DAY))
+					: null;
+				const showEndCol = hasShowInRow
+					? Math.min(endCol, Math.round((e.showEndTs - rowStartTs) / MS_DAY))
+					: null;
+				return {
+					event: e,
+					startCol,
+					endCol,
+					startsInRow: e.startTs >= rowStartTs,
+					endsInRow: e.endTs <= rowEndTs,
+					dimmed: e.endTs < monthStart || e.startTs > monthEnd,
+					showStartCol,
+					showEndCol
+				};
+			});
 
 		items.sort(
 			(a, b) => a.startCol - b.startCol || b.endCol - b.startCol - (a.endCol - a.startCol)
@@ -499,6 +745,68 @@
 			result.push({ ...item, lane });
 		}
 		return result;
+	}
+
+	// Splits a bar into show/setup segments for rendering — setup segments
+	// (get-in/get-out days outside the show window) get a hatched treatment
+	// distinct from the plain opacity-20 used for out-of-month dimming.
+	type BarSegment = {
+		colStart: number;
+		colEnd: number;
+		kind: 'setup' | 'show';
+		roundedLeft: boolean;
+		roundedRight: boolean;
+	};
+
+	function barSegments(bar: EventBar): BarSegment[] {
+		if (bar.showStartCol === null || bar.showEndCol === null) {
+			return [
+				{
+					colStart: bar.startCol,
+					colEnd: bar.endCol,
+					kind: 'setup',
+					roundedLeft: bar.startsInRow,
+					roundedRight: bar.endsInRow
+				}
+			];
+		}
+		const segs: BarSegment[] = [];
+		if (bar.showStartCol > bar.startCol) {
+			segs.push({
+				colStart: bar.startCol,
+				colEnd: bar.showStartCol - 1,
+				kind: 'setup',
+				roundedLeft: bar.startsInRow,
+				roundedRight: false
+			});
+		}
+		segs.push({
+			colStart: bar.showStartCol,
+			colEnd: bar.showEndCol,
+			kind: 'show',
+			roundedLeft: bar.startsInRow && bar.showStartCol === bar.startCol,
+			roundedRight: bar.endsInRow && bar.showEndCol === bar.endCol
+		});
+		if (bar.showEndCol < bar.endCol) {
+			segs.push({
+				colStart: bar.showEndCol + 1,
+				colEnd: bar.endCol,
+				kind: 'setup',
+				roundedLeft: false,
+				roundedRight: bar.endsInRow
+			});
+		}
+		return segs;
+	}
+
+	// Dimming (event outside the visible month) always wins over the setup
+	// hatch treatment — they'd otherwise fight over `opacity`.
+	function segmentStyle(bar: EventBar, seg: BarSegment): string {
+		if (bar.dimmed) return 'opacity: 0.2;';
+		if (seg.kind === 'setup') {
+			return 'opacity: 0.65; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 4px, transparent 4px, transparent 8px);';
+		}
+		return '';
 	}
 
 	function buildMonthWeeks(year: number, month: number, forceWeeks = 0) {
@@ -569,14 +877,14 @@
 		const d = new Date(viewDate);
 		if (granularity === 'month') d.setMonth(d.getMonth() - 1);
 		else d.setFullYear(d.getFullYear() - 1);
-		viewDate = d;
+		setViewDate(d);
 	}
 
 	function nextPeriod() {
 		const d = new Date(viewDate);
 		if (granularity === 'month') d.setMonth(d.getMonth() + 1);
 		else d.setFullYear(d.getFullYear() + 1);
-		viewDate = d;
+		setViewDate(d);
 	}
 </script>
 
@@ -591,25 +899,25 @@
 				class="px-3 py-1.5 {granularity === 'day'
 					? 'bg-primary text-primary-foreground'
 					: 'bg-background hover:bg-muted'}"
-				onclick={() => (granularity = 'day')}>Day</button
+				onclick={() => setGranularity('day')}>Day</button
 			>
 			<button
 				class="border-l px-3 py-1.5 {granularity === 'week'
 					? 'bg-primary text-primary-foreground'
 					: 'bg-background hover:bg-muted'}"
-				onclick={() => (granularity = 'week')}>Week</button
+				onclick={() => setGranularity('week')}>Week</button
 			>
 			<button
 				class="border-l px-3 py-1.5 {granularity === 'month'
 					? 'bg-primary text-primary-foreground'
 					: 'bg-background hover:bg-muted'}"
-				onclick={() => (granularity = 'month')}>Month</button
+				onclick={() => setGranularity('month')}>Month</button
 			>
 			<button
 				class="border-l px-3 py-1.5 {granularity === 'year'
 					? 'bg-primary text-primary-foreground'
 					: 'bg-background hover:bg-muted'}"
-				onclick={() => (granularity = 'year')}>Year</button
+				onclick={() => setGranularity('year')}>Year</button
 			>
 		</div>
 
@@ -620,15 +928,43 @@
 					class="px-3 py-1.5 {viewMode === 'assets'
 						? 'bg-primary text-primary-foreground'
 						: 'bg-background hover:bg-muted'}"
-					onclick={() => (viewMode = 'assets')}>Assets</button
+					onclick={() => setViewMode('assets')}>Assets</button
 				>
 				<button
 					class="border-l px-3 py-1.5 {viewMode === 'productions'
 						? 'bg-primary text-primary-foreground'
 						: 'bg-background hover:bg-muted'}"
-					onclick={() => (viewMode = 'productions')}>Productions</button
+					onclick={() => setViewMode('productions')}>Productions</button
 				>
 			</div>
+		{/if}
+
+		<!-- 2b. Org filter (assets mode only) -->
+		{#if (granularity === 'day' || granularity === 'week') && viewMode === 'assets' && availableOrgs.length > 0}
+			<FilterPopover align="start">
+				{#snippet trigger()}
+					Orgs
+					{#if selectedOrgIds.size > 0}
+						<span
+							class="rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground"
+							>{selectedOrgIds.size}</span
+						>
+					{/if}
+				{/snippet}
+				{#each availableOrgs as org (org.id)}
+					<label
+						class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
+					>
+						<input
+							type="checkbox"
+							checked={selectedOrgIds.has(org.id)}
+							onchange={() => toggleOrgFilter(org.id)}
+							class="h-4 w-4 rounded border-input"
+						/>
+						<OrgBadge name={org.name} color={org.color} avatarLabel={org.avatarLabel} />
+					</label>
+				{/each}
+			</FilterPopover>
 		{/if}
 
 		<!-- 3. Today + period navigation -->
@@ -757,25 +1093,30 @@
 						</div>
 						<!-- Event bars spanning columns -->
 						{#each weekRow.bars as bar (bar.event.id)}
-							<a
-								href={resolve(`/productions/${bar.event.id}`)}
-								title={bar.event.name}
-								class="absolute flex items-center overflow-hidden px-1.5 text-[11px] font-medium text-white no-underline hover:brightness-110 {bar.startsInRow
-									? 'rounded-l'
-									: ''} {bar.endsInRow ? 'rounded-r' : ''} {bar.dimmed ? 'opacity-20' : ''}"
-								style="left: calc({bar.startCol} / 7 * 100% + {bar.startsInRow
-									? 2
-									: 0}px); width: calc({bar.endCol -
-									bar.startCol +
-									1} / 7 * 100% - {(bar.startsInRow ? 2 : 0) +
-									(bar.endsInRow ? 2 : 0)}px); top: {DAY_NUM_H +
-									bar.lane *
-										(MONTH_BAR_H +
-											MONTH_BAR_GAP)}px; height: {MONTH_BAR_H}px; background-color: {bar.event
-									.color}"
-							>
-								{bar.event.name}
-							</a>
+							{@const segments = barSegments(bar)}
+							{#each segments as seg, si (si)}
+								<a
+									href={resolve(`/productions/${bar.event.id}`)}
+									title={bar.event.name}
+									class="absolute flex items-center overflow-hidden px-1.5 text-[11px] font-medium text-white no-underline hover:brightness-110 {seg.roundedLeft
+										? 'rounded-l'
+										: ''} {seg.roundedRight ? 'rounded-r' : ''}"
+									style="left: calc({seg.colStart} / 7 * 100% + {seg.roundedLeft
+										? 2
+										: 0}px); width: calc({seg.colEnd -
+										seg.colStart +
+										1} / 7 * 100% - {(seg.roundedLeft ? 2 : 0) +
+										(seg.roundedRight ? 2 : 0)}px); top: {DAY_NUM_H +
+										bar.lane *
+											(MONTH_BAR_H +
+												MONTH_BAR_GAP)}px; height: {MONTH_BAR_H}px; background-color: {bar.event
+										.color}; {segmentStyle(bar, seg)}"
+								>
+									{#if seg.kind === 'show' || segments.length === 1}
+										{bar.event.name}
+									{/if}
+								</a>
+							{/each}
 						{/each}
 					</div>
 				{/each}
@@ -816,22 +1157,22 @@
 									</div>
 									<!-- Event bars spanning columns -->
 									{#each weekRow.bars as bar (bar.event.id)}
-										<a
-											href={resolve(`/productions/${bar.event.id}`)}
-											title={bar.event.name}
-											class="absolute no-underline hover:brightness-110 {bar.startsInRow
-												? 'rounded-l-sm'
-												: ''} {bar.endsInRow ? 'rounded-r-sm' : ''} {bar.dimmed
-												? 'opacity-20'
-												: ''}"
-											style="left: calc({bar.startCol} / 7 * 100%); width: calc({bar.endCol -
-												bar.startCol +
-												1} / 7 * 100%); top: {YEAR_DAY_NUM_H +
-												bar.lane *
-													(YEAR_BAR_H +
-														YEAR_BAR_GAP)}px; height: {YEAR_BAR_H}px; background-color: {bar.event
-												.color}"
-										></a>
+										{#each barSegments(bar) as seg, si (si)}
+											<a
+												href={resolve(`/productions/${bar.event.id}`)}
+												title={bar.event.name}
+												class="absolute no-underline hover:brightness-110 {seg.roundedLeft
+													? 'rounded-l-sm'
+													: ''} {seg.roundedRight ? 'rounded-r-sm' : ''}"
+												style="left: calc({seg.colStart} / 7 * 100%); width: calc({seg.colEnd -
+													seg.colStart +
+													1} / 7 * 100%); top: {YEAR_DAY_NUM_H +
+													bar.lane *
+														(YEAR_BAR_H +
+															YEAR_BAR_GAP)}px; height: {YEAR_BAR_H}px; background-color: {bar.event
+													.color}; {segmentStyle(bar, seg)}"
+											></a>
+										{/each}
 									{/each}
 									<!-- Day numbers on top -->
 									<div class="pointer-events-none absolute inset-0 grid grid-cols-7">
@@ -963,7 +1304,17 @@
 							{:else if row.kind === 'asset'}
 								<div class="flex h-full flex-col justify-center px-3">
 									<p class="truncate text-xs font-medium">{row.label}</p>
-									<p class="truncate text-[10px] text-muted-foreground">{row.org}</p>
+									<p class="truncate text-[10px] text-muted-foreground">
+										{#if row.orgInfo}
+											<OrgBadge
+												name={row.orgInfo.name}
+												color={row.orgInfo.color}
+												avatarLabel={row.orgInfo.avatarLabel}
+											/>
+										{:else}
+											{row.org}
+										{/if}
+									</p>
 								</div>
 							{:else}
 								<button
@@ -1003,17 +1354,36 @@
 							<!-- Bars (asset / production rows) -->
 							{#if row.kind !== 'header'}
 								{#each row.bars as bar (bar.id)}
-									<a
-										href={resolve(`/productions/${bar.productionId}`)}
-										title="{bar.label}{bar.pending ? ' (pending)' : ''}"
-										class="absolute top-1 flex items-center overflow-hidden rounded px-1.5 text-[11px] font-medium text-white no-underline hover:brightness-110"
-										style="left: {bar.left}px; width: {bar.width}px; height: {h -
-											8}px; background-color: {bar.color}; {bar.pending
-											? 'background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px); opacity: 0.75;'
-											: ''}"
-									>
-										{bar.label}
-									</a>
+									{#if bar.pending}
+										<a
+											href={resolve(`/productions/${bar.productionId}`)}
+											title="{bar.label} (pending)"
+											class="absolute top-1 flex items-center overflow-hidden rounded px-1.5 text-[11px] font-medium text-white no-underline hover:brightness-110"
+											style="left: {bar.left}px; width: {bar.width}px; height: {h -
+												8}px; background-color: {bar.color}; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px); opacity: 0.75;"
+										>
+											{bar.label}
+										</a>
+									{:else}
+										{@const segs = ganttSegments(bar)}
+										{#each segs as seg, si (si)}
+											<a
+												href={resolve(`/productions/${bar.productionId}`)}
+												title={bar.label}
+												class="absolute top-1 flex items-center overflow-hidden px-1.5 text-[11px] font-medium text-white no-underline hover:brightness-110 {seg.roundedLeft
+													? 'rounded-l'
+													: ''} {seg.roundedRight ? 'rounded-r' : ''}"
+												style="left: {seg.left}px; width: {seg.width}px; height: {h -
+													8}px; background-color: {bar.color}; {seg.kind === 'setup'
+													? 'opacity: 0.65; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 4px, transparent 4px, transparent 8px);'
+													: ''}"
+											>
+												{#if seg.kind === 'show' || segs.length === 1}
+													{bar.label}
+												{/if}
+											</a>
+										{/each}
+									{/if}
 								{/each}
 							{/if}
 
@@ -1021,20 +1391,39 @@
 							{#if row.kind === 'header' && row.collapsed}
 								{#each row.collapsedBars as bar (bar.productionId)}
 									{@const barH = Math.max(3, Math.round(bar.fraction * (PRODUCT_H - 6)))}
-									<a
-										href={resolve(`/productions/${bar.productionId}`)}
-										title="{bar.label} ({Math.round(bar.fraction * 100)}%){bar.allPending
-											? ' · pending'
-											: ''}"
-										class="absolute flex items-center overflow-hidden rounded-sm px-1 no-underline hover:brightness-110"
-										style="left: {bar.left}px; width: {bar.width}px; height: {barH}px; top: 3px; background-color: {bar.color}; {bar.allPending
-											? 'background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px);'
-											: ''}"
-									>
-										<span class="truncate text-[9px] leading-none font-medium text-white"
-											>{bar.label}</span
+									{#if bar.allPending}
+										<a
+											href={resolve(`/productions/${bar.productionId}`)}
+											title="{bar.label} ({Math.round(bar.fraction * 100)}%) · pending"
+											class="absolute flex items-center overflow-hidden rounded-sm px-1 no-underline hover:brightness-110"
+											style="left: {bar.left}px; width: {bar.width}px; height: {barH}px; top: 3px; background-color: {bar.color}; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px);"
 										>
-									</a>
+											<span class="truncate text-[9px] leading-none font-medium text-white"
+												>{bar.label}</span
+											>
+										</a>
+									{:else}
+										{@const segs = ganttSegments(bar)}
+										{#each segs as seg, si (si)}
+											<a
+												href={resolve(`/productions/${bar.productionId}`)}
+												title="{bar.label} ({Math.round(bar.fraction * 100)}%)"
+												class="absolute flex items-center overflow-hidden px-1 no-underline hover:brightness-110 {seg.roundedLeft
+													? 'rounded-l-sm'
+													: ''} {seg.roundedRight ? 'rounded-r-sm' : ''}"
+												style="left: {seg.left}px; width: {seg.width}px; height: {barH}px; top: 3px; background-color: {bar.color}; {seg.kind ===
+												'setup'
+													? 'opacity: 0.65; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 4px, transparent 4px, transparent 8px);'
+													: ''}"
+											>
+												{#if seg.kind === 'show' || segs.length === 1}
+													<span class="truncate text-[9px] leading-none font-medium text-white"
+														>{bar.label}</span
+													>
+												{/if}
+											</a>
+										{/each}
+									{/if}
 								{/each}
 							{/if}
 						</div>

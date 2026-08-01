@@ -29,8 +29,11 @@ export type ProductionMinAggregateOutputType = {
   name: string | null
   startDate: Date | null
   endDate: Date | null
+  showStartDate: Date | null
+  showEndDate: Date | null
   organizationId: string | null
   addressId: string | null
+  customerId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -40,8 +43,11 @@ export type ProductionMaxAggregateOutputType = {
   name: string | null
   startDate: Date | null
   endDate: Date | null
+  showStartDate: Date | null
+  showEndDate: Date | null
   organizationId: string | null
   addressId: string | null
+  customerId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -51,8 +57,11 @@ export type ProductionCountAggregateOutputType = {
   name: number
   startDate: number
   endDate: number
+  showStartDate: number
+  showEndDate: number
   organizationId: number
   addressId: number
+  customerId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -64,8 +73,11 @@ export type ProductionMinAggregateInputType = {
   name?: true
   startDate?: true
   endDate?: true
+  showStartDate?: true
+  showEndDate?: true
   organizationId?: true
   addressId?: true
+  customerId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -75,8 +87,11 @@ export type ProductionMaxAggregateInputType = {
   name?: true
   startDate?: true
   endDate?: true
+  showStartDate?: true
+  showEndDate?: true
   organizationId?: true
   addressId?: true
+  customerId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -86,8 +101,11 @@ export type ProductionCountAggregateInputType = {
   name?: true
   startDate?: true
   endDate?: true
+  showStartDate?: true
+  showEndDate?: true
   organizationId?: true
   addressId?: true
+  customerId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -170,8 +188,11 @@ export type ProductionGroupByOutputType = {
   name: string
   startDate: Date | null
   endDate: Date | null
+  showStartDate: Date | null
+  showEndDate: Date | null
   organizationId: string
   addressId: string | null
+  customerId: string | null
   createdAt: Date
   updatedAt: Date
   _count: ProductionCountAggregateOutputType | null
@@ -202,15 +223,21 @@ export type ProductionWhereInput = {
   name?: Prisma.StringFilter<"Production"> | string
   startDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
   endDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
+  showStartDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
+  showEndDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
   organizationId?: Prisma.StringFilter<"Production"> | string
   addressId?: Prisma.StringNullableFilter<"Production"> | string | null
+  customerId?: Prisma.StringNullableFilter<"Production"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Production"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Production"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   address?: Prisma.XOR<Prisma.AddressNullableScalarRelationFilter, Prisma.AddressWhereInput> | null
+  customer?: Prisma.XOR<Prisma.CustomerNullableScalarRelationFilter, Prisma.CustomerWhereInput> | null
   items?: Prisma.ProductionItemListRelationFilter
   crew?: Prisma.ProductionCrewListRelationFilter
   transactions?: Prisma.AssetTransactionListRelationFilter
+  offers?: Prisma.OfferListRelationFilter
+  invoices?: Prisma.InvoiceListRelationFilter
 }
 
 export type ProductionOrderByWithRelationInput = {
@@ -218,15 +245,21 @@ export type ProductionOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   startDate?: Prisma.SortOrderInput | Prisma.SortOrder
   endDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  showStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  showEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   addressId?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
   address?: Prisma.AddressOrderByWithRelationInput
+  customer?: Prisma.CustomerOrderByWithRelationInput
   items?: Prisma.ProductionItemOrderByRelationAggregateInput
   crew?: Prisma.ProductionCrewOrderByRelationAggregateInput
   transactions?: Prisma.AssetTransactionOrderByRelationAggregateInput
+  offers?: Prisma.OfferOrderByRelationAggregateInput
+  invoices?: Prisma.InvoiceOrderByRelationAggregateInput
 }
 
 export type ProductionWhereUniqueInput = Prisma.AtLeast<{
@@ -237,15 +270,21 @@ export type ProductionWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Production"> | string
   startDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
   endDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
+  showStartDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
+  showEndDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
   organizationId?: Prisma.StringFilter<"Production"> | string
   addressId?: Prisma.StringNullableFilter<"Production"> | string | null
+  customerId?: Prisma.StringNullableFilter<"Production"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Production"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Production"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   address?: Prisma.XOR<Prisma.AddressNullableScalarRelationFilter, Prisma.AddressWhereInput> | null
+  customer?: Prisma.XOR<Prisma.CustomerNullableScalarRelationFilter, Prisma.CustomerWhereInput> | null
   items?: Prisma.ProductionItemListRelationFilter
   crew?: Prisma.ProductionCrewListRelationFilter
   transactions?: Prisma.AssetTransactionListRelationFilter
+  offers?: Prisma.OfferListRelationFilter
+  invoices?: Prisma.InvoiceListRelationFilter
 }, "id">
 
 export type ProductionOrderByWithAggregationInput = {
@@ -253,8 +292,11 @@ export type ProductionOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   startDate?: Prisma.SortOrderInput | Prisma.SortOrder
   endDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  showStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  showEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   addressId?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ProductionCountOrderByAggregateInput
@@ -270,8 +312,11 @@ export type ProductionScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Production"> | string
   startDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Production"> | Date | string | null
   endDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Production"> | Date | string | null
+  showStartDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Production"> | Date | string | null
+  showEndDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Production"> | Date | string | null
   organizationId?: Prisma.StringWithAggregatesFilter<"Production"> | string
   addressId?: Prisma.StringNullableWithAggregatesFilter<"Production"> | string | null
+  customerId?: Prisma.StringNullableWithAggregatesFilter<"Production"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Production"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Production"> | Date | string
 }
@@ -281,13 +326,18 @@ export type ProductionCreateInput = {
   name: string
   startDate?: Date | string | null
   endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
   address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
 
 export type ProductionUncheckedCreateInput = {
@@ -295,13 +345,18 @@ export type ProductionUncheckedCreateInput = {
   name: string
   startDate?: Date | string | null
   endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
   organizationId: string
   addressId?: string | null
+  customerId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
 
 export type ProductionUpdateInput = {
@@ -309,13 +364,18 @@ export type ProductionUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
   address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
 
 export type ProductionUncheckedUpdateInput = {
@@ -323,13 +383,18 @@ export type ProductionUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
 
 export type ProductionCreateManyInput = {
@@ -337,8 +402,11 @@ export type ProductionCreateManyInput = {
   name: string
   startDate?: Date | string | null
   endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
   organizationId: string
   addressId?: string | null
+  customerId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -348,6 +416,8 @@ export type ProductionUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -357,8 +427,11 @@ export type ProductionUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -378,8 +451,11 @@ export type ProductionCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrder
+  showStartDate?: Prisma.SortOrder
+  showEndDate?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
+  customerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -389,8 +465,11 @@ export type ProductionMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrder
+  showStartDate?: Prisma.SortOrder
+  showEndDate?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
+  customerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -400,8 +479,11 @@ export type ProductionMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrder
+  showStartDate?: Prisma.SortOrder
+  showEndDate?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
+  customerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -500,6 +582,48 @@ export type ProductionUncheckedUpdateManyWithoutAddressNestedInput = {
   deleteMany?: Prisma.ProductionScalarWhereInput | Prisma.ProductionScalarWhereInput[]
 }
 
+export type ProductionCreateNestedManyWithoutCustomerInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutCustomerInput, Prisma.ProductionUncheckedCreateWithoutCustomerInput> | Prisma.ProductionCreateWithoutCustomerInput[] | Prisma.ProductionUncheckedCreateWithoutCustomerInput[]
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutCustomerInput | Prisma.ProductionCreateOrConnectWithoutCustomerInput[]
+  createMany?: Prisma.ProductionCreateManyCustomerInputEnvelope
+  connect?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+}
+
+export type ProductionUncheckedCreateNestedManyWithoutCustomerInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutCustomerInput, Prisma.ProductionUncheckedCreateWithoutCustomerInput> | Prisma.ProductionCreateWithoutCustomerInput[] | Prisma.ProductionUncheckedCreateWithoutCustomerInput[]
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutCustomerInput | Prisma.ProductionCreateOrConnectWithoutCustomerInput[]
+  createMany?: Prisma.ProductionCreateManyCustomerInputEnvelope
+  connect?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+}
+
+export type ProductionUpdateManyWithoutCustomerNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutCustomerInput, Prisma.ProductionUncheckedCreateWithoutCustomerInput> | Prisma.ProductionCreateWithoutCustomerInput[] | Prisma.ProductionUncheckedCreateWithoutCustomerInput[]
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutCustomerInput | Prisma.ProductionCreateOrConnectWithoutCustomerInput[]
+  upsert?: Prisma.ProductionUpsertWithWhereUniqueWithoutCustomerInput | Prisma.ProductionUpsertWithWhereUniqueWithoutCustomerInput[]
+  createMany?: Prisma.ProductionCreateManyCustomerInputEnvelope
+  set?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+  disconnect?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+  delete?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+  connect?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+  update?: Prisma.ProductionUpdateWithWhereUniqueWithoutCustomerInput | Prisma.ProductionUpdateWithWhereUniqueWithoutCustomerInput[]
+  updateMany?: Prisma.ProductionUpdateManyWithWhereWithoutCustomerInput | Prisma.ProductionUpdateManyWithWhereWithoutCustomerInput[]
+  deleteMany?: Prisma.ProductionScalarWhereInput | Prisma.ProductionScalarWhereInput[]
+}
+
+export type ProductionUncheckedUpdateManyWithoutCustomerNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutCustomerInput, Prisma.ProductionUncheckedCreateWithoutCustomerInput> | Prisma.ProductionCreateWithoutCustomerInput[] | Prisma.ProductionUncheckedCreateWithoutCustomerInput[]
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutCustomerInput | Prisma.ProductionCreateOrConnectWithoutCustomerInput[]
+  upsert?: Prisma.ProductionUpsertWithWhereUniqueWithoutCustomerInput | Prisma.ProductionUpsertWithWhereUniqueWithoutCustomerInput[]
+  createMany?: Prisma.ProductionCreateManyCustomerInputEnvelope
+  set?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+  disconnect?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+  delete?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+  connect?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+  update?: Prisma.ProductionUpdateWithWhereUniqueWithoutCustomerInput | Prisma.ProductionUpdateWithWhereUniqueWithoutCustomerInput[]
+  updateMany?: Prisma.ProductionUpdateManyWithWhereWithoutCustomerInput | Prisma.ProductionUpdateManyWithWhereWithoutCustomerInput[]
+  deleteMany?: Prisma.ProductionScalarWhereInput | Prisma.ProductionScalarWhereInput[]
+}
+
 export type ProductionCreateNestedOneWithoutItemsInput = {
   create?: Prisma.XOR<Prisma.ProductionCreateWithoutItemsInput, Prisma.ProductionUncheckedCreateWithoutItemsInput>
   connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutItemsInput
@@ -544,17 +668,54 @@ export type ProductionUpdateOneWithoutTransactionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProductionUpdateToOneWithWhereWithoutTransactionsInput, Prisma.ProductionUpdateWithoutTransactionsInput>, Prisma.ProductionUncheckedUpdateWithoutTransactionsInput>
 }
 
+export type ProductionCreateNestedOneWithoutOffersInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutOffersInput, Prisma.ProductionUncheckedCreateWithoutOffersInput>
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutOffersInput
+  connect?: Prisma.ProductionWhereUniqueInput
+}
+
+export type ProductionUpdateOneWithoutOffersNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutOffersInput, Prisma.ProductionUncheckedCreateWithoutOffersInput>
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutOffersInput
+  upsert?: Prisma.ProductionUpsertWithoutOffersInput
+  disconnect?: Prisma.ProductionWhereInput | boolean
+  delete?: Prisma.ProductionWhereInput | boolean
+  connect?: Prisma.ProductionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProductionUpdateToOneWithWhereWithoutOffersInput, Prisma.ProductionUpdateWithoutOffersInput>, Prisma.ProductionUncheckedUpdateWithoutOffersInput>
+}
+
+export type ProductionCreateNestedOneWithoutInvoicesInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutInvoicesInput, Prisma.ProductionUncheckedCreateWithoutInvoicesInput>
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutInvoicesInput
+  connect?: Prisma.ProductionWhereUniqueInput
+}
+
+export type ProductionUpdateOneWithoutInvoicesNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutInvoicesInput, Prisma.ProductionUncheckedCreateWithoutInvoicesInput>
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutInvoicesInput
+  upsert?: Prisma.ProductionUpsertWithoutInvoicesInput
+  disconnect?: Prisma.ProductionWhereInput | boolean
+  delete?: Prisma.ProductionWhereInput | boolean
+  connect?: Prisma.ProductionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProductionUpdateToOneWithWhereWithoutInvoicesInput, Prisma.ProductionUpdateWithoutInvoicesInput>, Prisma.ProductionUncheckedUpdateWithoutInvoicesInput>
+}
+
 export type ProductionCreateWithoutOrganizationInput = {
   id?: string
   name: string
   startDate?: Date | string | null
   endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
 
 export type ProductionUncheckedCreateWithoutOrganizationInput = {
@@ -562,12 +723,17 @@ export type ProductionUncheckedCreateWithoutOrganizationInput = {
   name: string
   startDate?: Date | string | null
   endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
   addressId?: string | null
+  customerId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
 
 export type ProductionCreateOrConnectWithoutOrganizationInput = {
@@ -604,8 +770,11 @@ export type ProductionScalarWhereInput = {
   name?: Prisma.StringFilter<"Production"> | string
   startDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
   endDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
+  showStartDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
+  showEndDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
   organizationId?: Prisma.StringFilter<"Production"> | string
   addressId?: Prisma.StringNullableFilter<"Production"> | string | null
+  customerId?: Prisma.StringNullableFilter<"Production"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Production"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Production"> | Date | string
 }
@@ -615,12 +784,17 @@ export type ProductionCreateWithoutAddressInput = {
   name: string
   startDate?: Date | string | null
   endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
 
 export type ProductionUncheckedCreateWithoutAddressInput = {
@@ -628,12 +802,17 @@ export type ProductionUncheckedCreateWithoutAddressInput = {
   name: string
   startDate?: Date | string | null
   endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
   organizationId: string
+  customerId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
 
 export type ProductionCreateOrConnectWithoutAddressInput = {
@@ -662,17 +841,84 @@ export type ProductionUpdateManyWithWhereWithoutAddressInput = {
   data: Prisma.XOR<Prisma.ProductionUpdateManyMutationInput, Prisma.ProductionUncheckedUpdateManyWithoutAddressInput>
 }
 
+export type ProductionCreateWithoutCustomerInput = {
+  id?: string
+  name: string
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
+  address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
+  items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
+  crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
+}
+
+export type ProductionUncheckedCreateWithoutCustomerInput = {
+  id?: string
+  name: string
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
+  organizationId: string
+  addressId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
+  crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
+}
+
+export type ProductionCreateOrConnectWithoutCustomerInput = {
+  where: Prisma.ProductionWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductionCreateWithoutCustomerInput, Prisma.ProductionUncheckedCreateWithoutCustomerInput>
+}
+
+export type ProductionCreateManyCustomerInputEnvelope = {
+  data: Prisma.ProductionCreateManyCustomerInput | Prisma.ProductionCreateManyCustomerInput[]
+  skipDuplicates?: boolean
+}
+
+export type ProductionUpsertWithWhereUniqueWithoutCustomerInput = {
+  where: Prisma.ProductionWhereUniqueInput
+  update: Prisma.XOR<Prisma.ProductionUpdateWithoutCustomerInput, Prisma.ProductionUncheckedUpdateWithoutCustomerInput>
+  create: Prisma.XOR<Prisma.ProductionCreateWithoutCustomerInput, Prisma.ProductionUncheckedCreateWithoutCustomerInput>
+}
+
+export type ProductionUpdateWithWhereUniqueWithoutCustomerInput = {
+  where: Prisma.ProductionWhereUniqueInput
+  data: Prisma.XOR<Prisma.ProductionUpdateWithoutCustomerInput, Prisma.ProductionUncheckedUpdateWithoutCustomerInput>
+}
+
+export type ProductionUpdateManyWithWhereWithoutCustomerInput = {
+  where: Prisma.ProductionScalarWhereInput
+  data: Prisma.XOR<Prisma.ProductionUpdateManyMutationInput, Prisma.ProductionUncheckedUpdateManyWithoutCustomerInput>
+}
+
 export type ProductionCreateWithoutItemsInput = {
   id?: string
   name: string
   startDate?: Date | string | null
   endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
   address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
 
 export type ProductionUncheckedCreateWithoutItemsInput = {
@@ -680,12 +926,17 @@ export type ProductionUncheckedCreateWithoutItemsInput = {
   name: string
   startDate?: Date | string | null
   endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
   organizationId: string
   addressId?: string | null
+  customerId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
 
 export type ProductionCreateOrConnectWithoutItemsInput = {
@@ -709,12 +960,17 @@ export type ProductionUpdateWithoutItemsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
   address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
 
 export type ProductionUncheckedUpdateWithoutItemsInput = {
@@ -722,12 +978,17 @@ export type ProductionUncheckedUpdateWithoutItemsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
 
 export type ProductionCreateWithoutCrewInput = {
@@ -735,12 +996,17 @@ export type ProductionCreateWithoutCrewInput = {
   name: string
   startDate?: Date | string | null
   endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
   address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
 
 export type ProductionUncheckedCreateWithoutCrewInput = {
@@ -748,12 +1014,17 @@ export type ProductionUncheckedCreateWithoutCrewInput = {
   name: string
   startDate?: Date | string | null
   endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
   organizationId: string
   addressId?: string | null
+  customerId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
 
 export type ProductionCreateOrConnectWithoutCrewInput = {
@@ -777,12 +1048,17 @@ export type ProductionUpdateWithoutCrewInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
   address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
 
 export type ProductionUncheckedUpdateWithoutCrewInput = {
@@ -790,12 +1066,17 @@ export type ProductionUncheckedUpdateWithoutCrewInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
 
 export type ProductionCreateWithoutTransactionsInput = {
@@ -803,12 +1084,17 @@ export type ProductionCreateWithoutTransactionsInput = {
   name: string
   startDate?: Date | string | null
   endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
   address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
 
 export type ProductionUncheckedCreateWithoutTransactionsInput = {
@@ -816,12 +1102,17 @@ export type ProductionUncheckedCreateWithoutTransactionsInput = {
   name: string
   startDate?: Date | string | null
   endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
   organizationId: string
   addressId?: string | null
+  customerId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
 
 export type ProductionCreateOrConnectWithoutTransactionsInput = {
@@ -845,12 +1136,17 @@ export type ProductionUpdateWithoutTransactionsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
   address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
 
 export type ProductionUncheckedUpdateWithoutTransactionsInput = {
@@ -858,12 +1154,193 @@ export type ProductionUncheckedUpdateWithoutTransactionsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
+}
+
+export type ProductionCreateWithoutOffersInput = {
+  id?: string
+  name: string
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
+  address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
+  items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
+  crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
+}
+
+export type ProductionUncheckedCreateWithoutOffersInput = {
+  id?: string
+  name: string
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
+  organizationId: string
+  addressId?: string | null
+  customerId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
+  crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
+}
+
+export type ProductionCreateOrConnectWithoutOffersInput = {
+  where: Prisma.ProductionWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductionCreateWithoutOffersInput, Prisma.ProductionUncheckedCreateWithoutOffersInput>
+}
+
+export type ProductionUpsertWithoutOffersInput = {
+  update: Prisma.XOR<Prisma.ProductionUpdateWithoutOffersInput, Prisma.ProductionUncheckedUpdateWithoutOffersInput>
+  create: Prisma.XOR<Prisma.ProductionCreateWithoutOffersInput, Prisma.ProductionUncheckedCreateWithoutOffersInput>
+  where?: Prisma.ProductionWhereInput
+}
+
+export type ProductionUpdateToOneWithWhereWithoutOffersInput = {
+  where?: Prisma.ProductionWhereInput
+  data: Prisma.XOR<Prisma.ProductionUpdateWithoutOffersInput, Prisma.ProductionUncheckedUpdateWithoutOffersInput>
+}
+
+export type ProductionUpdateWithoutOffersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
+  address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
+  items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
+  crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
+}
+
+export type ProductionUncheckedUpdateWithoutOffersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
+  crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
+}
+
+export type ProductionCreateWithoutInvoicesInput = {
+  id?: string
+  name: string
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
+  address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
+  items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
+  crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
+}
+
+export type ProductionUncheckedCreateWithoutInvoicesInput = {
+  id?: string
+  name: string
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
+  organizationId: string
+  addressId?: string | null
+  customerId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
+  crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
+}
+
+export type ProductionCreateOrConnectWithoutInvoicesInput = {
+  where: Prisma.ProductionWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductionCreateWithoutInvoicesInput, Prisma.ProductionUncheckedCreateWithoutInvoicesInput>
+}
+
+export type ProductionUpsertWithoutInvoicesInput = {
+  update: Prisma.XOR<Prisma.ProductionUpdateWithoutInvoicesInput, Prisma.ProductionUncheckedUpdateWithoutInvoicesInput>
+  create: Prisma.XOR<Prisma.ProductionCreateWithoutInvoicesInput, Prisma.ProductionUncheckedCreateWithoutInvoicesInput>
+  where?: Prisma.ProductionWhereInput
+}
+
+export type ProductionUpdateToOneWithWhereWithoutInvoicesInput = {
+  where?: Prisma.ProductionWhereInput
+  data: Prisma.XOR<Prisma.ProductionUpdateWithoutInvoicesInput, Prisma.ProductionUncheckedUpdateWithoutInvoicesInput>
+}
+
+export type ProductionUpdateWithoutInvoicesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
+  address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
+  items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
+  crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
+}
+
+export type ProductionUncheckedUpdateWithoutInvoicesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
+  crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
 }
 
 export type ProductionCreateManyOrganizationInput = {
@@ -871,7 +1348,10 @@ export type ProductionCreateManyOrganizationInput = {
   name: string
   startDate?: Date | string | null
   endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
   addressId?: string | null
+  customerId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -881,12 +1361,17 @@ export type ProductionUpdateWithoutOrganizationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
 
 export type ProductionUncheckedUpdateWithoutOrganizationInput = {
@@ -894,12 +1379,17 @@ export type ProductionUncheckedUpdateWithoutOrganizationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
 
 export type ProductionUncheckedUpdateManyWithoutOrganizationInput = {
@@ -907,7 +1397,10 @@ export type ProductionUncheckedUpdateManyWithoutOrganizationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -917,7 +1410,10 @@ export type ProductionCreateManyAddressInput = {
   name: string
   startDate?: Date | string | null
   endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
   organizationId: string
+  customerId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -927,12 +1423,17 @@ export type ProductionUpdateWithoutAddressInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
 
 export type ProductionUncheckedUpdateWithoutAddressInput = {
@@ -940,12 +1441,17 @@ export type ProductionUncheckedUpdateWithoutAddressInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
 
 export type ProductionUncheckedUpdateManyWithoutAddressInput = {
@@ -953,7 +1459,72 @@ export type ProductionUncheckedUpdateManyWithoutAddressInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ProductionCreateManyCustomerInput = {
+  id?: string
+  name: string
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
+  organizationId: string
+  addressId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ProductionUpdateWithoutCustomerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
+  address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
+  items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
+  crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
+}
+
+export type ProductionUncheckedUpdateWithoutCustomerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
+  crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
+}
+
+export type ProductionUncheckedUpdateManyWithoutCustomerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -967,12 +1538,16 @@ export type ProductionCountOutputType = {
   items: number
   crew: number
   transactions: number
+  offers: number
+  invoices: number
 }
 
 export type ProductionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   items?: boolean | ProductionCountOutputTypeCountItemsArgs
   crew?: boolean | ProductionCountOutputTypeCountCrewArgs
   transactions?: boolean | ProductionCountOutputTypeCountTransactionsArgs
+  offers?: boolean | ProductionCountOutputTypeCountOffersArgs
+  invoices?: boolean | ProductionCountOutputTypeCountInvoicesArgs
 }
 
 /**
@@ -1006,21 +1581,41 @@ export type ProductionCountOutputTypeCountTransactionsArgs<ExtArgs extends runti
   where?: Prisma.AssetTransactionWhereInput
 }
 
+/**
+ * ProductionCountOutputType without action
+ */
+export type ProductionCountOutputTypeCountOffersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OfferWhereInput
+}
+
+/**
+ * ProductionCountOutputType without action
+ */
+export type ProductionCountOutputTypeCountInvoicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InvoiceWhereInput
+}
+
 
 export type ProductionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
   startDate?: boolean
   endDate?: boolean
+  showStartDate?: boolean
+  showEndDate?: boolean
   organizationId?: boolean
   addressId?: boolean
+  customerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   address?: boolean | Prisma.Production$addressArgs<ExtArgs>
+  customer?: boolean | Prisma.Production$customerArgs<ExtArgs>
   items?: boolean | Prisma.Production$itemsArgs<ExtArgs>
   crew?: boolean | Prisma.Production$crewArgs<ExtArgs>
   transactions?: boolean | Prisma.Production$transactionsArgs<ExtArgs>
+  offers?: boolean | Prisma.Production$offersArgs<ExtArgs>
+  invoices?: boolean | Prisma.Production$invoicesArgs<ExtArgs>
   _count?: boolean | Prisma.ProductionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["production"]>
 
@@ -1029,12 +1624,16 @@ export type ProductionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   name?: boolean
   startDate?: boolean
   endDate?: boolean
+  showStartDate?: boolean
+  showEndDate?: boolean
   organizationId?: boolean
   addressId?: boolean
+  customerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   address?: boolean | Prisma.Production$addressArgs<ExtArgs>
+  customer?: boolean | Prisma.Production$customerArgs<ExtArgs>
 }, ExtArgs["result"]["production"]>
 
 export type ProductionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1042,12 +1641,16 @@ export type ProductionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   name?: boolean
   startDate?: boolean
   endDate?: boolean
+  showStartDate?: boolean
+  showEndDate?: boolean
   organizationId?: boolean
   addressId?: boolean
+  customerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   address?: boolean | Prisma.Production$addressArgs<ExtArgs>
+  customer?: boolean | Prisma.Production$customerArgs<ExtArgs>
 }, ExtArgs["result"]["production"]>
 
 export type ProductionSelectScalar = {
@@ -1055,28 +1658,36 @@ export type ProductionSelectScalar = {
   name?: boolean
   startDate?: boolean
   endDate?: boolean
+  showStartDate?: boolean
+  showEndDate?: boolean
   organizationId?: boolean
   addressId?: boolean
+  customerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProductionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "startDate" | "endDate" | "organizationId" | "addressId" | "createdAt" | "updatedAt", ExtArgs["result"]["production"]>
+export type ProductionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "startDate" | "endDate" | "showStartDate" | "showEndDate" | "organizationId" | "addressId" | "customerId" | "createdAt" | "updatedAt", ExtArgs["result"]["production"]>
 export type ProductionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   address?: boolean | Prisma.Production$addressArgs<ExtArgs>
+  customer?: boolean | Prisma.Production$customerArgs<ExtArgs>
   items?: boolean | Prisma.Production$itemsArgs<ExtArgs>
   crew?: boolean | Prisma.Production$crewArgs<ExtArgs>
   transactions?: boolean | Prisma.Production$transactionsArgs<ExtArgs>
+  offers?: boolean | Prisma.Production$offersArgs<ExtArgs>
+  invoices?: boolean | Prisma.Production$invoicesArgs<ExtArgs>
   _count?: boolean | Prisma.ProductionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ProductionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   address?: boolean | Prisma.Production$addressArgs<ExtArgs>
+  customer?: boolean | Prisma.Production$customerArgs<ExtArgs>
 }
 export type ProductionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   address?: boolean | Prisma.Production$addressArgs<ExtArgs>
+  customer?: boolean | Prisma.Production$customerArgs<ExtArgs>
 }
 
 export type $ProductionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1084,17 +1695,23 @@ export type $ProductionPayload<ExtArgs extends runtime.Types.Extensions.Internal
   objects: {
     organization: Prisma.$OrganizationPayload<ExtArgs>
     address: Prisma.$AddressPayload<ExtArgs> | null
+    customer: Prisma.$CustomerPayload<ExtArgs> | null
     items: Prisma.$ProductionItemPayload<ExtArgs>[]
     crew: Prisma.$ProductionCrewPayload<ExtArgs>[]
     transactions: Prisma.$AssetTransactionPayload<ExtArgs>[]
+    offers: Prisma.$OfferPayload<ExtArgs>[]
+    invoices: Prisma.$InvoicePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
     startDate: Date | null
     endDate: Date | null
+    showStartDate: Date | null
+    showEndDate: Date | null
     organizationId: string
     addressId: string | null
+    customerId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["production"]>
@@ -1493,9 +2110,12 @@ export interface Prisma__ProductionClient<T, Null = never, ExtArgs extends runti
   readonly [Symbol.toStringTag]: "PrismaPromise"
   organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   address<T extends Prisma.Production$addressArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$addressArgs<ExtArgs>>): Prisma.Prisma__AddressClient<runtime.Types.Result.GetResult<Prisma.$AddressPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  customer<T extends Prisma.Production$customerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$customerArgs<ExtArgs>>): Prisma.Prisma__CustomerClient<runtime.Types.Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   items<T extends Prisma.Production$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   crew<T extends Prisma.Production$crewArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$crewArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionCrewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   transactions<T extends Prisma.Production$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  offers<T extends Prisma.Production$offersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$offersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OfferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  invoices<T extends Prisma.Production$invoicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1529,8 +2149,11 @@ export interface ProductionFieldRefs {
   readonly name: Prisma.FieldRef<"Production", 'String'>
   readonly startDate: Prisma.FieldRef<"Production", 'DateTime'>
   readonly endDate: Prisma.FieldRef<"Production", 'DateTime'>
+  readonly showStartDate: Prisma.FieldRef<"Production", 'DateTime'>
+  readonly showEndDate: Prisma.FieldRef<"Production", 'DateTime'>
   readonly organizationId: Prisma.FieldRef<"Production", 'String'>
   readonly addressId: Prisma.FieldRef<"Production", 'String'>
+  readonly customerId: Prisma.FieldRef<"Production", 'String'>
   readonly createdAt: Prisma.FieldRef<"Production", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Production", 'DateTime'>
 }
@@ -1953,6 +2576,25 @@ export type Production$addressArgs<ExtArgs extends runtime.Types.Extensions.Inte
 }
 
 /**
+ * Production.customer
+ */
+export type Production$customerArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Customer
+   */
+  select?: Prisma.CustomerSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Customer
+   */
+  omit?: Prisma.CustomerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CustomerInclude<ExtArgs> | null
+  where?: Prisma.CustomerWhereInput
+}
+
+/**
  * Production.items
  */
 export type Production$itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2022,6 +2664,54 @@ export type Production$transactionsArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.AssetTransactionScalarFieldEnum | Prisma.AssetTransactionScalarFieldEnum[]
+}
+
+/**
+ * Production.offers
+ */
+export type Production$offersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Offer
+   */
+  select?: Prisma.OfferSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Offer
+   */
+  omit?: Prisma.OfferOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OfferInclude<ExtArgs> | null
+  where?: Prisma.OfferWhereInput
+  orderBy?: Prisma.OfferOrderByWithRelationInput | Prisma.OfferOrderByWithRelationInput[]
+  cursor?: Prisma.OfferWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OfferScalarFieldEnum | Prisma.OfferScalarFieldEnum[]
+}
+
+/**
+ * Production.invoices
+ */
+export type Production$invoicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Invoice
+   */
+  select?: Prisma.InvoiceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Invoice
+   */
+  omit?: Prisma.InvoiceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InvoiceInclude<ExtArgs> | null
+  where?: Prisma.InvoiceWhereInput
+  orderBy?: Prisma.InvoiceOrderByWithRelationInput | Prisma.InvoiceOrderByWithRelationInput[]
+  cursor?: Prisma.InvoiceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InvoiceScalarFieldEnum | Prisma.InvoiceScalarFieldEnum[]
 }
 
 /**

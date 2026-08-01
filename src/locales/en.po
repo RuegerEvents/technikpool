@@ -77,7 +77,10 @@ msgid "Owned by {0}"
 msgstr "Owned by {0}"
 
 #: src/lib/components/CsvImportModal.svelte
-#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/lib/components/ui/image-upload/image-upload.svelte
+#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/crew-passes/+page.svelte
 #: src/routes/productions/[id]/delivery-note/+page.svelte
@@ -104,14 +107,11 @@ msgstr "Crew Passes"
 msgid "Booked Equipment"
 msgstr "Booked Equipment"
 
-#: src/routes/productions/[id]/+page.svelte
-msgid "Done"
-msgstr "Done"
+#~ msgid "Done"
+#~ msgstr "Done"
 
-#: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
-msgid "Add Equipment"
-msgstr "Add Equipment"
+#~ msgid "Add Equipment"
+#~ msgstr "Add Equipment"
 
 #~ msgid "Bundles"
 #~ msgstr "Bundles"
@@ -133,14 +133,17 @@ msgid "Product"
 msgstr "Product"
 
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "S/N"
 msgstr "S/N"
 
 #: src/routes/assets/bundles/[id]/+page.svelte
-#: src/routes/assets/bundles/[id]/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
+#: src/routes/inspections/+page.svelte
+#: src/routes/inspections/+page.svelte
+#: src/routes/invoices/+page.svelte
+#: src/routes/offers/+page.svelte
 msgid "Org"
 msgstr "Org"
 
@@ -148,12 +151,13 @@ msgstr "Org"
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/checkout/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
+#: src/routes/offers/+page.svelte
 msgid "Status"
 msgstr "Status"
 
-#~ msgid "Added"
-#~ msgstr "Added"
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Added"
+msgstr "Added"
 
 #~ msgid "No bundles found. <0>Create one</0>."
 #~ msgstr "No bundles found. <0>Create one</0>."
@@ -170,15 +174,26 @@ msgid "Crew"
 msgstr "Crew"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/ui/image-upload/image-upload.svelte
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 #: src/routes/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
+#: src/routes/inspections/+page.svelte
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
@@ -216,7 +231,6 @@ msgstr "Adding…"
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
 msgid "Add"
 msgstr "Add"
 
@@ -232,14 +246,20 @@ msgstr "No crew members added yet."
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/productions/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
 msgid "Name"
 msgstr "Name"
 
 #: src/routes/admin/users/+page.svelte
+#: src/routes/auth/forgot-password/+page.svelte
 #: src/routes/auth/login/+page.svelte
 #: src/routes/auth/register/+page.svelte
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/new/+page.svelte
+#: src/routes/offers/new/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
 msgid "Email"
 msgstr "Email"
 
@@ -255,7 +275,7 @@ msgstr "Remove"
 #: src/lib/components/CsvImportModal.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
-#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
@@ -284,7 +304,9 @@ msgid "How many of the {0} units do you want to {1}?"
 msgstr "How many of the {0} units do you want to {1}?"
 
 #. 0: modal.pg.items.length
+#. 0: max
 #: src/routes/+page.svelte
+#: src/routes/productions/[id]/equipment/+page.svelte
 msgid "of {0}"
 msgstr "of {0}"
 
@@ -359,7 +381,6 @@ msgstr "Decline some…"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/routes/assets/[id]/+page.svelte
-#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
@@ -377,15 +398,17 @@ msgstr "Asset Tag"
 
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Bundle"
 msgstr "Bundle"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
+#: src/routes/offers/new/+page.svelte
 #: src/routes/productions/+page.svelte
 #: src/routes/stickers/+page.svelte
 #: src/routes/stickers/+page.svelte
@@ -414,11 +437,20 @@ msgstr "Add Asset"
 #~ msgid "No equipment units in the selected organization."
 #~ msgstr "No equipment units in the selected organization."
 
+#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/checkout/+page.svelte
 msgid "Tag"
 msgstr "Tag"
 
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/routes/assets/+page.svelte
+#: src/routes/invoices/+page.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Total"
 msgstr "Total"
@@ -466,11 +498,13 @@ msgstr "Add assets to see your product catalog."
 #~ msgstr "View equipment bookings across all your organizations."
 
 #: src/routes/productions/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/new/+page.svelte
 msgid "Start Date"
 msgstr "Start Date"
 
 #: src/routes/productions/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/new/+page.svelte
 msgid "End Date"
 msgstr "End Date"
@@ -642,9 +676,17 @@ msgstr "<0/> Create another after saving"
 
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/new/+page.svelte
+#: src/routes/inspections/+page.svelte
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Saving…"
 msgstr "Saving…"
@@ -682,6 +724,7 @@ msgstr "What's in this bundle?"
 
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/offers/new/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 msgid "Creating…"
 msgstr "Creating…"
@@ -804,6 +847,7 @@ msgstr "Owning Organization"
 
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 #: src/lib/components/ui/data-view/DataView.svelte
+#: src/routes/productions/[id]/equipment/+page.svelte
 msgid "Search…"
 msgstr "Search…"
 
@@ -824,7 +868,10 @@ msgstr "ArrowUp"
 
 #: src/lib/components/ui/category-select/category-select.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
+#: src/lib/components/ui/org-multi-select/org-multi-select.svelte
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Escape"
 msgstr "Escape"
@@ -953,6 +1000,11 @@ msgstr "No assets available to add."
 msgid "No assets in this bundle yet. Click \"Add Assets\" to get started."
 msgstr "No assets in this bundle yet. Click \"Add Assets\" to get started."
 
+#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
 #: src/routes/productions/[id]/crew-passes/+page.svelte
 #: src/routes/productions/[id]/delivery-note/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
@@ -997,6 +1049,8 @@ msgstr "Delivery To"
 msgid "Production Period:<0/> <1/> – <2/>"
 msgstr "Production Period:<0/> <1/> – <2/>"
 
+#: src/routes/inspections/+page.svelte
+#: src/routes/invoices/+page.svelte
 #: src/routes/productions/[id]/delivery-note/+page.svelte
 msgid "Date"
 msgstr "Date"
@@ -1036,14 +1090,22 @@ msgid "Packing List - {0}"
 msgstr "Packing List - {0}"
 
 #. 0: new Date().toLocaleDateString()
+#. 0: new Date(invoice.issueDate).toLocaleDateString('de-DE')
+#. 0: new Date(offer.createdAt).toLocaleDateString('de-DE')
+#. 0: new Date().toLocaleDateString()
+#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Date: {0}"
 msgstr "Date: {0}"
 
+#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Check"
 msgstr "Check"
 
+#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Item Description"
 msgstr "Item Description"
@@ -1056,6 +1118,7 @@ msgstr "Source Org"
 msgid "Prepared By:"
 msgstr "Prepared By:"
 
+#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Checked By:"
 msgstr "Checked By:"
@@ -1155,22 +1218,17 @@ msgstr "New Asset"
 msgid "Create a new asset and add it to this bundle."
 msgstr "Create a new asset and add it to this bundle."
 
-#: src/routes/productions/[id]/+page.svelte
-msgid "Search assets and bundles…"
-msgstr "Search assets and bundles…"
+#~ msgid "Search assets and bundles…"
+#~ msgstr "Search assets and bundles…"
 
-#: src/routes/productions/[id]/+page.svelte
-msgid "No results."
-msgstr "No results."
+#~ msgid "No results."
+#~ msgstr "No results."
 
-#: src/routes/productions/[id]/+page.svelte
-msgid "Info"
-msgstr "Info"
+#~ msgid "Info"
+#~ msgstr "Info"
 
-#. 0: row.count; 1: row.count !== 1 ? 's' \\: ''
-#: src/routes/productions/[id]/+page.svelte
-msgid "{0} item{1}"
-msgstr "{0} item{1}"
+#~ msgid "{0} item{1}"
+#~ msgstr "{0} item{1}"
 
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
@@ -1199,6 +1257,8 @@ msgstr "Asset updated"
 
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/calendar/+page.svelte
+#: src/routes/inspections/+page.svelte
+#: src/routes/inspections/+page.svelte
 msgid "Asset"
 msgstr "Asset"
 
@@ -1207,9 +1267,13 @@ msgstr "Asset"
 
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Edit"
 msgstr "Edit"
@@ -1219,22 +1283,34 @@ msgstr "Edit"
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/checkout/+page.svelte
+#: src/routes/inspections/+page.svelte
+#: src/routes/inspections/+page.svelte
 msgid "Location"
 msgstr "Location"
 
-#: src/routes/assets/new/+page.svelte
-msgid "Image URL"
-msgstr "Image URL"
+#~ msgid "Image URL"
+#~ msgstr "Image URL"
 
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/rates/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Save"
 msgstr "Save"
@@ -1249,6 +1325,7 @@ msgstr "Please select a location"
 msgid "No locations yet. Create one in <0>Locations</0>."
 msgstr "No locations yet. Create one in <0>Locations</0>."
 
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/new/+page.svelte
 msgid "Address"
@@ -1258,49 +1335,47 @@ msgstr "Address"
 msgid "Optional delivery / venue address."
 msgstr "Optional delivery / venue address."
 
+#: src/lib/components/ui/address-input/address-input.svelte
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/new/+page.svelte
 msgid "Address line 1"
 msgstr "Address line 1"
 
+#: src/lib/components/ui/address-input/address-input.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/new/+page.svelte
 msgid "Street and number"
 msgstr "Street and number"
 
+#: src/lib/components/ui/address-input/address-input.svelte
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/new/+page.svelte
 msgid "Address line 2"
 msgstr "Address line 2"
 
+#: src/lib/components/ui/address-input/address-input.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/new/+page.svelte
 msgid "Building, floor, c/o"
 msgstr "Building, floor, c/o"
 
+#: src/lib/components/ui/address-input/address-input.svelte
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/new/+page.svelte
 msgid "Postal code"
 msgstr "Postal code"
 
+#: src/lib/components/ui/address-input/address-input.svelte
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/new/+page.svelte
+#: src/routes/productions/[id]/equipment/+page.svelte
 msgid "City"
 msgstr "City"
 
+#: src/lib/components/ui/address-input/address-input.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/new/+page.svelte
 msgid "Berlin"
 msgstr "Berlin"
 
@@ -1316,6 +1391,8 @@ msgstr "Address updated"
 
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/equipment/+page.svelte
+#: src/routes/productions/[id]/equipment/+page.svelte
 msgid "Locations"
 msgstr "Locations"
 
@@ -1521,6 +1598,8 @@ msgstr "Collapse all"
 #: src/routes/calendar/+page.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/checkout/+page.svelte
+#: src/routes/offers/+page.svelte
+#: src/routes/offers/new/+page.svelte
 msgid "Production"
 msgstr "Production"
 
@@ -1705,8 +1784,9 @@ msgstr "Search locations…"
 msgid "All"
 msgstr "All"
 
-#~ msgid "Select all"
-#~ msgstr "Select all"
+#: src/lib/components/ui/org-multi-select/org-multi-select.svelte
+msgid "Select all"
+msgstr "Select all"
 
 #~ msgid "Deselect all"
 #~ msgstr "Deselect all"
@@ -1732,20 +1812,14 @@ msgstr "Select target…"
 msgid "Checking out…"
 msgstr "Checking out…"
 
-#. 0: result.added; 1: result.added !== 1 ? 's' \\: ''; 2: conflictNote
-#: src/routes/productions/[id]/+page.svelte
-msgid "Added {0} asset{1} from bundle{2}"
-msgstr "Added {0} asset{1} from bundle{2}"
+#~ msgid "Added {0} asset{1} from bundle{2}"
+#~ msgstr "Added {0} asset{1} from bundle{2}"
 
-#. 0: conflictInfo
-#: src/routes/productions/[id]/+page.svelte
-msgid "Booked: {0}"
-msgstr "Booked: {0}"
+#~ msgid "Booked: {0}"
+#~ msgstr "Booked: {0}"
 
-#. 0: conflictInfo
-#: src/routes/productions/[id]/+page.svelte
-msgid "Blocked by {0}"
-msgstr "Blocked by {0}"
+#~ msgid "Blocked by {0}"
+#~ msgstr "Blocked by {0}"
 
 #: src/lib/components/ui/category-select/category-select.svelte
 #: src/routes/assets/+page.svelte
@@ -1757,7 +1831,6 @@ msgstr "All Categories"
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
-#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
@@ -1788,10 +1861,8 @@ msgstr "Select a category"
 #~ msgid "{0} — Category: {1}{2}"
 #~ msgstr "{0} — Category: {1}{2}"
 
-#. 0: bundle.organization.name; 1: bundle.description ? ` — ${bundle.description}` \\: ''
-#: src/routes/assets/bundles/[id]/+page.svelte
-msgid "{0} — Category: <0/>{1}"
-msgstr "{0} — Category: <0/>{1}"
+#~ msgid "{0} — Category: <0/>{1}"
+#~ msgstr "{0} — Category: <0/>{1}"
 
 #~ msgid "Category:"
 #~ msgstr "Category:"
@@ -1902,9 +1973,8 @@ msgstr "Bundle View"
 msgid "All Products"
 msgstr "All Products"
 
-#: src/routes/assets/bundles/[id]/+page.svelte
-msgid "Bundle location updated"
-msgstr "Bundle location updated"
+#~ msgid "Bundle location updated"
+#~ msgstr "Bundle location updated"
 
 #: src/routes/assets/bundles/[id]/+page.svelte
 msgid "No location"
@@ -1918,13 +1988,11 @@ msgstr "Add Bundle"
 msgid "Bundle updated"
 msgstr "Bundle updated"
 
-#: src/routes/assets/bundles/[id]/+page.svelte
-msgid "Cancel Edit"
-msgstr "Cancel Edit"
+#~ msgid "Cancel Edit"
+#~ msgstr "Cancel Edit"
 
-#: src/routes/assets/bundles/[id]/+page.svelte
-msgid "Bundle name"
-msgstr "Bundle name"
+#~ msgid "Bundle name"
+#~ msgstr "Bundle name"
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "← Back to Inventory"
@@ -2105,21 +2173,18 @@ msgstr "Sun"
 #~ msgstr "Asset ID"
 
 #: src/routes/orgs/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
 msgid "Asset ID Prefix"
 msgstr "Asset ID Prefix"
 
 #~ msgid "3-letter prefix for asset IDs (e.g. ABC → ABC-00001)."
 #~ msgstr "3-letter prefix for asset IDs (e.g. ABC → ABC-00001)."
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Asset ID prefix updated"
-msgstr "Asset ID prefix updated"
+#~ msgid "Asset ID prefix updated"
+#~ msgstr "Asset ID prefix updated"
 
 #~ msgid "3-letter prefix for auto-generated asset IDs (e.g. ABC → ABC-00001)."
 #~ msgstr "3-letter prefix for auto-generated asset IDs (e.g. ABC → ABC-00001)."
 
-#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/stickers/+page.svelte
 msgid "Prefix"
 msgstr "Prefix"
@@ -2128,9 +2193,8 @@ msgstr "Prefix"
 msgid "3-digit prefix for asset IDs (e.g. 123 → 12300001)."
 msgstr "3-digit prefix for asset IDs (e.g. 123 → 12300001)."
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "3-digit prefix for auto-generated asset IDs (e.g. 123 → 12300001)."
-msgstr "3-digit prefix for auto-generated asset IDs (e.g. 123 → 12300001)."
+#~ msgid "3-digit prefix for auto-generated asset IDs (e.g. 123 → 12300001)."
+#~ msgstr "3-digit prefix for auto-generated asset IDs (e.g. 123 → 12300001)."
 
 #. 0: parts.join(', ')
 #: src/routes/productions/[id]/+page.svelte
@@ -2325,6 +2389,7 @@ msgid "<0/> Devices"
 msgstr "<0/> Devices"
 
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 msgid "Back to Devices"
 msgstr "Back to Devices"
 
@@ -2627,3 +2692,1229 @@ msgstr "<0/> Nest every second tail to save space"
 #: src/routes/stickers/+page.svelte
 msgid "Rotates every second sticker 180° so its tail nests against its neighbor's, instead of each sticker needing its own full tail length of sheet width. Needs enough sticker height that the two tails' bleeds don't touch."
 msgstr "Rotates every second sticker 180° so its tail nests against its neighbor's, instead of each sticker needing its own full tail length of sheet width. Needs enough sticker height that the two tails' bleeds don't touch."
+
+#: src/routes/+layout.svelte
+msgid "Inspections"
+msgstr "Inspections"
+
+#: src/routes/+layout.svelte
+#: src/routes/offers/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "Offers"
+msgstr "Offers"
+
+#: src/routes/+layout.svelte
+#: src/routes/invoices/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "Invoices"
+msgstr "Invoices"
+
+#: src/routes/+page.svelte
+msgid "Overdue Inspections"
+msgstr "Overdue Inspections"
+
+#: src/routes/+page.svelte
+msgid "DGUV inspection due"
+msgstr "DGUV inspection due"
+
+#: src/routes/+page.svelte
+msgid "All up to date"
+msgstr "All up to date"
+
+#: src/routes/calendar/+page.svelte
+msgid "Orgs <0/>"
+msgstr "Orgs <0/>"
+
+#: src/routes/inspections/+page.svelte
+msgid "Inspection logged"
+msgstr "Inspection logged"
+
+#: src/routes/inspections/+page.svelte
+msgid "Inspections | Technikpool"
+msgstr "Inspections | Technikpool"
+
+#. 0: modalAsset.product.name
+#: src/routes/inspections/+page.svelte
+msgid "Log inspection — {0}"
+msgstr "Log inspection — {0}"
+
+#: src/routes/inspections/+page.svelte
+msgid "Result"
+msgstr "Result"
+
+#: src/routes/inspections/+page.svelte
+msgid "Passed"
+msgstr "Passed"
+
+#: src/routes/inspections/+page.svelte
+msgid "Failed"
+msgstr "Failed"
+
+#: src/routes/inspections/+page.svelte
+msgid "Inspector"
+msgstr "Inspector"
+
+#: src/routes/inspections/+page.svelte
+msgid "Notes"
+msgstr "Notes"
+
+#: src/routes/inspections/+page.svelte
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/new/+page.svelte
+#: src/routes/offers/new/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Optional"
+msgstr "Optional"
+
+#: src/routes/inspections/+page.svelte
+#: src/routes/inspections/+page.svelte
+#: src/routes/inspections/+page.svelte
+msgid "Log inspection"
+msgstr "Log inspection"
+
+#: src/routes/inspections/+page.svelte
+msgid "DGUV Inspections"
+msgstr "DGUV Inspections"
+
+#: src/routes/inspections/+page.svelte
+msgid "Overdue and upcoming asset inspections across your orgs."
+msgstr "Overdue and upcoming asset inspections across your orgs."
+
+#. 0: data.overdue.length
+#: src/routes/inspections/+page.svelte
+msgid "Overdue ({0})"
+msgstr "Overdue ({0})"
+
+#: src/routes/inspections/+page.svelte
+msgid "Nothing overdue."
+msgstr "Nothing overdue."
+
+#: src/routes/inspections/+page.svelte
+#: src/routes/inspections/+page.svelte
+msgid "Due"
+msgstr "Due"
+
+#. 0: data.upcoming.length
+#: src/routes/inspections/+page.svelte
+msgid "Due soon ({0})"
+msgstr "Due soon ({0})"
+
+#: src/routes/inspections/+page.svelte
+msgid "Nothing due in the next 30 days."
+msgstr "Nothing due in the next 30 days."
+
+#: src/routes/offers/+page.svelte
+msgid "Offers | Technikpool"
+msgstr "Offers | Technikpool"
+
+#: src/routes/offers/+page.svelte
+msgid "Angebote generated from production equipment bookings."
+msgstr "Angebote generated from production equipment bookings."
+
+#: src/routes/offers/+page.svelte
+#: src/routes/offers/new/+page.svelte
+msgid "New Offer"
+msgstr "New Offer"
+
+#: src/routes/offers/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "No offers yet."
+msgstr "No offers yet."
+
+#: src/routes/invoices/+page.svelte
+#: src/routes/offers/+page.svelte
+#: src/routes/offers/new/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Customer"
+msgstr "Customer"
+
+#: src/routes/offers/+page.svelte
+msgid "Invoiced"
+msgstr "Invoiced"
+
+#: src/routes/offers/+page.svelte
+msgid "Offer"
+msgstr "Offer"
+
+#: src/routes/invoices/+page.svelte
+#: src/routes/offers/+page.svelte
+msgid "View"
+msgstr "View"
+
+#: src/routes/invoices/+page.svelte
+msgid "Invoices | Technikpool"
+msgstr "Invoices | Technikpool"
+
+#: src/routes/invoices/+page.svelte
+msgid "Rechnungen — persisted, sequentially numbered documents."
+msgstr "Rechnungen — persisted, sequentially numbered documents."
+
+#: src/routes/invoices/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "No invoices yet."
+msgstr "No invoices yet."
+
+#: src/routes/invoices/+page.svelte
+msgid "Number"
+msgstr "Number"
+
+#: src/routes/orgs/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Color"
+msgstr "Color"
+
+#: src/routes/orgs/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Avatar label"
+msgstr "Avatar label"
+
+#: src/routes/orgs/+page.svelte
+msgid "Color and a 2-letter label identify this org at a glance in the calendar and device lists."
+msgstr "Color and a 2-letter label identify this org at a glance in the calendar and device lists."
+
+#: src/routes/assets/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
+msgid "Manufacturer logo"
+msgstr "Manufacturer logo"
+
+#: src/routes/assets/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
+msgid "Product photo"
+msgstr "Product photo"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Pricing & inspection updated"
+msgstr "Pricing & inspection updated"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Pricing & Inspection"
+msgstr "Pricing & Inspection"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Feeds offer/invoice pricing and DGUV due-date tracking."
+msgstr "Feeds offer/invoice pricing and DGUV due-date tracking."
+
+#: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Net purchase price (€)"
+msgstr "Net purchase price (€)"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Purchase date"
+msgstr "Purchase date"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "DGUV inspection interval (months)"
+msgstr "DGUV inspection interval (months)"
+
+#. 0: new Date(asset.nextInspectionDue).toLocaleDateString('de-DE')
+#: src/routes/assets/[id]/+page.svelte
+msgid "Next due: {0}"
+msgstr "Next due: {0}"
+
+#. 0: invoice.number
+#: src/routes/invoices/[id]/+page.svelte
+msgid "Invoice {0} | Technikpool"
+msgstr "Invoice {0} | Technikpool"
+
+#. 0: invoice.number
+#. 0: invoice.number
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+msgid "Invoice {0}"
+msgstr "Invoice {0}"
+
+#~ msgid "Invoices are immutable once issued (GoBD/§14 UStG) — this record can't be edited. Corrections require a new document."
+#~ msgstr "Invoices are immutable once issued (GoBD/§14 UStG) — this record can't be edited. Corrections require a new document."
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
+msgid "Item"
+msgstr "Item"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
+msgid "Rate %/day"
+msgstr "Rate %/day"
+
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
+msgid "Days"
+msgstr "Days"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
+msgid "Subtotal"
+msgstr "Subtotal"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
+msgid "Discount"
+msgstr "Discount"
+
+#~ msgid "Gross — no VAT charged (§19 UStG Kleinunternehmer)"
+#~ msgstr "Gross — no VAT charged (§19 UStG Kleinunternehmer)"
+
+#~ msgid "Net — VAT not yet calculated by this app"
+#~ msgstr "Net — VAT not yet calculated by this app"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Please select a production"
+msgstr "Please select a production"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Offer created"
+msgstr "Offer created"
+
+#: src/routes/offers/new/+page.svelte
+msgid "New Offer | Technikpool"
+msgstr "New Offer | Technikpool"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Generates line items from a production's currently booked equipment."
+msgstr "Generates line items from a production's currently booked equipment."
+
+#: src/routes/offers/new/+page.svelte
+msgid "Select an organization"
+msgstr "Select an organization"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Select a production"
+msgstr "Select a production"
+
+#. 0: p.name; 1: p.items.length
+#: src/routes/offers/new/+page.svelte
+msgid "{0} ({1} items)"
+msgstr "{0} ({1} items)"
+
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/new/+page.svelte
+msgid "Customer name"
+msgstr "Customer name"
+
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/new/+page.svelte
+msgid "Customer address"
+msgstr "Customer address"
+
+#: src/routes/offers/new/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "Create Offer"
+msgstr "Create Offer"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Day count updated"
+msgstr "Day count updated"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Discount updated"
+msgstr "Discount updated"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/orgs/[id]/rates/+page.svelte
+msgid "Rate updated"
+msgstr "Rate updated"
+
+#: src/routes/offers/[id]/+page.svelte
+msgid "Offer copied"
+msgstr "Offer copied"
+
+#. 0: invoice.number
+#: src/routes/offers/[id]/+page.svelte
+msgid "Invoice {0} created"
+msgstr "Invoice {0} created"
+
+#. 0: offer.customerName
+#: src/routes/offers/[id]/+page.svelte
+msgid "Offer — {0} | Technikpool"
+msgstr "Offer — {0} | Technikpool"
+
+#. 0: offer.customerName
+#: src/routes/offers/[id]/+page.svelte
+msgid "Offer — {0}"
+msgstr "Offer — {0}"
+
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+msgid "Copy to new customer"
+msgstr "Copy to new customer"
+
+#: src/routes/offers/[id]/+page.svelte
+msgid "Converting…"
+msgstr "Converting…"
+
+#: src/routes/offers/[id]/+page.svelte
+msgid "Convert to invoice"
+msgstr "Convert to invoice"
+
+#. 0: offer.invoices[0].number
+#: src/routes/offers/[id]/+page.svelte
+msgid "View invoice {0}"
+msgstr "View invoice {0}"
+
+#: src/routes/offers/[id]/+page.svelte
+msgid "Duplicates all line items into a new offer."
+msgstr "Duplicates all line items into a new offer."
+
+#: src/routes/offers/[id]/+page.svelte
+msgid "Copying…"
+msgstr "Copying…"
+
+#: src/routes/offers/[id]/+page.svelte
+msgid "Copy"
+msgstr "Copy"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Purchase price"
+msgstr "Purchase price"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Daily rate"
+msgstr "Daily rate"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Line total"
+msgstr "Line total"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Day count"
+msgstr "Day count"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Applies to all line items."
+msgstr "Applies to all line items."
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "No discount"
+msgstr "No discount"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Percent"
+msgstr "Percent"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Amount (€)"
+msgstr "Amount (€)"
+
+#~ msgid "Gross — no VAT (§19 UStG Kleinunternehmer)"
+#~ msgstr "Gross — no VAT (§19 UStG Kleinunternehmer)"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Organization settings updated"
+msgstr "Organization settings updated"
+
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/rates/+page.svelte
+msgid "Rental Rates"
+msgstr "Rental Rates"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Organization Settings"
+msgstr "Organization Settings"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer status."
+msgstr "Asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer status."
+
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Asset ID prefix"
+msgstr "Asset ID prefix"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Default DGUV inspection interval (months)"
+msgstr "Default DGUV inspection interval (months)"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Copied onto new assets at creation; leave blank to not track inspections by default."
+msgstr "Copied onto new assets at creation; leave blank to not track inspections by default."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "<0/> Kleinunternehmer (§19 UStG) — no VAT charged"
+msgstr "<0/> Kleinunternehmer (§19 UStG) — no VAT charged"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Visual identity"
+msgstr "Visual identity"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "DGUV default interval"
+msgstr "DGUV default interval"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Not tracked"
+msgstr "Not tracked"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Kleinunternehmer"
+msgstr "Kleinunternehmer"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Yes"
+msgstr "Yes"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "No"
+msgstr "No"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Manage Equipment"
+msgstr "Manage Equipment"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Image"
+msgstr "Image"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Please choose an image file"
+msgstr "Please choose an image file"
+
+#. 0: getErrorMessage(err)
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Background removal failed: {0}"
+msgstr "Background removal failed: {0}"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Upload failed"
+msgstr "Upload failed"
+
+#. 0: label.toLowerCase()
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Drop {0} here, or click to choose"
+msgstr "Drop {0} here, or click to choose"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Square crop. Drag to reposition, use the handle to resize — pull out to fit the whole image, in to crop tighter."
+msgstr "Square crop. Drag to reposition, use the handle to resize — pull out to fit the whole image, in to crop tighter."
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Continue"
+msgstr "Continue"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Optionally remove the background (runs in your browser — the image never leaves your device until you upload it)."
+msgstr "Optionally remove the background (runs in your browser — the image never leaves your device until you upload it)."
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Cropped"
+msgstr "Cropped"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Background removed"
+msgstr "Background removed"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Removing…"
+msgstr "Removing…"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Remove background"
+msgstr "Remove background"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Keep background"
+msgstr "Keep background"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Uploading…"
+msgstr "Uploading…"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Use this image"
+msgstr "Use this image"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Replace"
+msgstr "Replace"
+
+#. 0: offer.customerName
+#: src/routes/offers/[id]/print/+page.svelte
+msgid "Offer - {0}"
+msgstr "Offer - {0}"
+
+#: src/routes/offers/[id]/print/+page.svelte
+msgid "Angebot"
+msgstr "Angebot"
+
+#~ msgid "Net — plus applicable VAT"
+#~ msgstr "Net — plus applicable VAT"
+
+#. 0: data.production.name
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "Equipment | {0} | Technikpool"
+msgstr "Equipment | {0} | Technikpool"
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "Equipment"
+msgstr "Equipment"
+
+#. 0: totalBooked; 1: totalBooked !== 1 ? 's' \\: ''
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "{0} device{1} booked"
+msgstr "{0} device{1} booked"
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "Categories"
+msgstr "Categories"
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "All categories"
+msgstr "All categories"
+
+#. 0: categories.find((c) => c.id === activeCat)?.name
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "Available — {0}"
+msgstr "Available — {0}"
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "Available devices"
+msgstr "Available devices"
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "Org <0/>"
+msgstr "Org <0/>"
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "Location <0/>"
+msgstr "Location <0/>"
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "No matching devices."
+msgstr "No matching devices."
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "Booked for this production"
+msgstr "Booked for this production"
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "Orgs"
+msgstr "Orgs"
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "Nothing booked yet."
+msgstr "Nothing booked yet."
+
+#: src/routes/invoices/[id]/print/+page.svelte
+msgid "Rechnung"
+msgstr "Rechnung"
+
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
+msgid "Gemäß § 19 UStG wird keine Umsatzsteuer berechnet."
+msgstr "Gemäß § 19 UStG wird keine Umsatzsteuer berechnet."
+
+#. 0: org.name
+#: src/routes/orgs/[id]/rates/+page.svelte
+msgid "Rental Rates | {0} | Technikpool"
+msgstr "Rental Rates | {0} | Technikpool"
+
+#: src/routes/orgs/[id]/rates/+page.svelte
+msgid "Default daily rental rate per category, as a percentage of an asset's net purchase price. Feeds offer/invoice pricing."
+msgstr "Default daily rental rate per category, as a percentage of an asset's net purchase price. Feeds offer/invoice pricing."
+
+#: src/routes/orgs/[id]/rates/+page.svelte
+msgid "% / day"
+msgstr "% / day"
+
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/rates/+page.svelte
+msgid "Not set"
+msgstr "Not set"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
+msgid "Net total"
+msgstr "Net total"
+
+#. 0: vatRatePercent
+#. 0: invoice.vatRatePercent
+#. 0: offer.vatRatePercent
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
+msgid "VAT ({0}%)"
+msgstr "VAT ({0}%)"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "No VAT charged (§19 UStG Kleinunternehmer) — net = gross"
+msgstr "No VAT charged (§19 UStG Kleinunternehmer) — net = gross"
+
+#. 0: vatRatePercent
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Includes {0}% German VAT"
+msgstr "Includes {0}% German VAT"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Billing details updated"
+msgstr "Billing details updated"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Billing Details"
+msgstr "Billing Details"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Address, tax ID, and bank account — used on generated offers/invoices."
+msgstr "Address, tax ID, and bank account — used on generated offers/invoices."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Tax ID (Steuernummer / USt-IdNr.)"
+msgstr "Tax ID (Steuernummer / USt-IdNr.)"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Bank account holder"
+msgstr "Bank account holder"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "IBAN"
+msgstr "IBAN"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "BIC"
+msgstr "BIC"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Bank name"
+msgstr "Bank name"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Tax ID"
+msgstr "Tax ID"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Bank account"
+msgstr "Bank account"
+
+#. 0: invoice.organization.taxId
+#. 0: offer.organization.taxId
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
+msgid "Steuer-ID: {0}"
+msgstr "Steuer-ID: {0}"
+
+#. 0: invoice.vatRatePercent
+#. 0: offer.vatRatePercent
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
+msgid "Enthält {0}% USt."
+msgstr "Enthält {0}% USt."
+
+#: src/routes/invoices/[id]/print/+page.svelte
+msgid "Payment details"
+msgstr "Payment details"
+
+#: src/routes/invoices/[id]/print/+page.svelte
+msgid "Please transfer the total amount to:"
+msgstr "Please transfer the total amount to:"
+
+#. 0: invoice.organization.bic
+#: src/routes/invoices/[id]/print/+page.svelte
+msgid "· BIC: {0}"
+msgstr "· BIC: {0}"
+
+#. 0: invoice.organization.iban
+#: src/routes/invoices/[id]/print/+page.svelte
+msgid "IBAN: {0}<0/>"
+msgstr "IBAN: {0}<0/>"
+
+#. 0: invoice.number
+#: src/routes/invoices/[id]/print/+page.svelte
+msgid "Reference: {0}"
+msgstr "Reference: {0}"
+
+#: src/routes/auth/forgot-password/+page.svelte
+msgid "Forgot password | Technikpool"
+msgstr "Forgot password | Technikpool"
+
+#: src/routes/auth/forgot-password/+page.svelte
+msgid "Reset your password"
+msgstr "Reset your password"
+
+#: src/routes/auth/forgot-password/+page.svelte
+msgid "Enter your email and we'll send you a link to reset your password."
+msgstr "Enter your email and we'll send you a link to reset your password."
+
+#: src/routes/auth/forgot-password/+page.svelte
+msgid "If that email exists in our system, a reset link is on its way."
+msgstr "If that email exists in our system, a reset link is on its way."
+
+#: src/routes/auth/forgot-password/+page.svelte
+msgid "Sending..."
+msgstr "Sending..."
+
+#: src/routes/auth/forgot-password/+page.svelte
+msgid "Send reset link"
+msgstr "Send reset link"
+
+#: src/routes/auth/forgot-password/+page.svelte
+msgid "Back to login"
+msgstr "Back to login"
+
+#: src/routes/auth/login/+page.svelte
+msgid "Forgot password?"
+msgstr "Forgot password?"
+
+#: src/routes/auth/reset-password/+page.svelte
+msgid "Passwords do not match"
+msgstr "Passwords do not match"
+
+#: src/routes/auth/reset-password/+page.svelte
+msgid "Reset password | Technikpool"
+msgstr "Reset password | Technikpool"
+
+#: src/routes/auth/reset-password/+page.svelte
+msgid "Choose a new password"
+msgstr "Choose a new password"
+
+#: src/routes/auth/reset-password/+page.svelte
+msgid "Enter a new password for your account."
+msgstr "Enter a new password for your account."
+
+#: src/routes/auth/reset-password/+page.svelte
+msgid "This reset link is invalid or has expired."
+msgstr "This reset link is invalid or has expired."
+
+#: src/routes/auth/reset-password/+page.svelte
+msgid "Request a new reset link"
+msgstr "Request a new reset link"
+
+#: src/routes/auth/reset-password/+page.svelte
+msgid "New password"
+msgstr "New password"
+
+#: src/routes/auth/reset-password/+page.svelte
+msgid "Confirm password"
+msgstr "Confirm password"
+
+#: src/routes/auth/reset-password/+page.svelte
+msgid "Saving..."
+msgstr "Saving..."
+
+#: src/routes/auth/reset-password/+page.svelte
+msgid "Save new password"
+msgstr "Save new password"
+
+#: src/routes/assets/new/+page.svelte
+msgid "Duplicating <0/> — organization, location, manufacturer and product are prefilled. Serial number and asset tag are left blank."
+msgstr "Duplicating <0/> — organization, location, manufacturer and product are prefilled. Serial number and asset tag are left blank."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Duplicate"
+msgstr "Duplicate"
+
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Show Duration"
+msgstr "Show Duration"
+
+#: src/routes/productions/new/+page.svelte
+msgid "The billable show days, used for offer/invoice day count. Must fall within the total duration above."
+msgstr "The billable show days, used for offer/invoice day count. Must fall within the total duration above."
+
+#: src/routes/productions/new/+page.svelte
+msgid "<0/> Same as total duration"
+msgstr "<0/> Same as total duration"
+
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Show Start Date"
+msgstr "Show Start Date"
+
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Show End Date"
+msgstr "Show End Date"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Duration updated"
+msgstr "Duration updated"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Production Info"
+msgstr "Production Info"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Duration and address for this production."
+msgstr "Duration and address for this production."
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Total Duration"
+msgstr "Total Duration"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "<0/> Show duration same as total duration"
+msgstr "<0/> Show duration same as total duration"
+
+#. 0: result.added; 1: result.added !== 1 ? 's' \\: ''; 2: result.skippedConflicts
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "Added {0} asset{1} ({2} skipped — already booked elsewhere)"
+msgstr "Added {0} asset{1} ({2} skipped — already booked elsewhere)"
+
+#. 0: result.added; 1: result.added !== 1 ? 's' \\: ''; 2: b.name
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "Added {0} asset{1} from \"{2}\""
+msgstr "Added {0} asset{1} from \"{2}\""
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "<0/> Show items in bundles"
+msgstr "<0/> Show items in bundles"
+
+#. 0: b.name
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "<0/> Bundle · {0}"
+msgstr "<0/> Bundle · {0}"
+
+#. 0: b.organizationName; 1: b.locationName ? ` · ${b.locationName}` \\: ''; 2: b.availableCount; 3: b.totalAssets
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "{0}{1} · {2} of {3} available"
+msgstr "{0}{1} · {2} of {3} available"
+
+#~ msgid "Add bundle"
+#~ msgstr "Add bundle"
+
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/new/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Unnamed customer"
+msgstr "Unnamed customer"
+
+#: src/routes/productions/new/+page.svelte
+msgid "Optional — reused to auto-populate offers/invoices for this production."
+msgstr "Optional — reused to auto-populate offers/invoices for this production."
+
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/new/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "— None —"
+msgstr "— None —"
+
+#: src/routes/offers/new/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "+ New customer"
+msgstr "+ New customer"
+
+#: src/routes/offers/new/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Company name"
+msgstr "Company name"
+
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/new/+page.svelte
+#: src/routes/offers/new/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Contact person"
+msgstr "Contact person"
+
+#: src/routes/offers/new/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/new/+page.svelte
+msgid "Cancel new customer"
+msgstr "Cancel new customer"
+
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "Customer updated"
+msgstr "Customer updated"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Assets to include"
+msgstr "Assets to include"
+
+#: src/lib/components/ui/org-multi-select/org-multi-select.svelte
+#: src/routes/offers/new/+page.svelte
+msgid "All organizations"
+msgstr "All organizations"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Only this organization's own assets"
+msgstr "Only this organization's own assets"
+
+#: src/routes/offers/new/+page.svelte
+msgid "This production has equipment loaned in from other organizations. Choose \"Only this organization's own assets\" to bill just your own equipment separately."
+msgstr "This production has equipment loaned in from other organizations. Choose \"Only this organization's own assets\" to bill just your own equipment separately."
+
+#~ msgid "import {0} from '$lib/utils'; <0/> <1>Checkout / Check-inScan asset tags to book equipment to a location or production.Session SetupTargetLocationProductionLocationProductionSelect a production…Input ModeQR ScannerText InputStart SessionActive SessionEnd SessionProcessing…Checkout Session ReportTarget:Started:Ended:<0>Total:</0> {0} scans — {1} success, {2} errorsSession Log{0} scan{1} — {2} success{3}, {4} error{5}Print ReportNew SessionTimeTagProductActionStatusOKError</1>"
+#~ msgstr "import {0} from '$lib/utils'; <0/> <1>Checkout / Check-inScan asset tags to book equipment to a location or production.Session SetupTargetLocationProductionLocationProductionSelect a production…Input ModeQR ScannerText InputStart SessionActive SessionEnd SessionProcessing…Checkout Session ReportTarget:Started:Ended:<0>Total:</0> {0} scans — {1} success, {2} errorsSession Log{0} scan{1} — {2} success{3}, {4} error{5}Print ReportNew SessionTimeTagProductActionStatusOKError</1>"
+
+#~ msgid "import {0} from '$lib/utils'; <0/> <1>Equipment{0} device{1} bookedCategoriesAll categories<0/> Show items in bundlesOrg <0/>Location <0/>LocationsCityNo matching devices.<0/> Bundle · {0}{0}{1} · {2} of {3} availableBooked for this productionOrgsLocationsNothing booked yet.</1>"
+#~ msgstr "import {0} from '$lib/utils'; <0/> <1>Equipment{0} device{1} bookedCategoriesAll categories<0/> Show items in bundlesOrg <0/>Location <0/>LocationsCityNo matching devices.<0/> Bundle · {0}{0}{1} · {2} of {3} availableBooked for this productionOrgsLocationsNothing booked yet.</1>"
+
+#~ msgid "import {0} from '$lib/utils'; <0/> <1>Owned by {0}BackPacking ListDelivery NoteCrew PassesCreate OfferProduction InfoDuration and address for this production.Total DurationShow DurationEditStart DateEnd Date<0/> Show duration same as total durationShow Start DateShow End DateCancelAddressEditCancelCustomerEdit— None —+ New customerCompany nameContact personEmailCancel new customerCancelBooked EquipmentManage EquipmentNo equipment booked yet.ProductManufacturerTotalPendingApprovedOutReturnedBundleBundle changedUpdate from bundleRemoveRemoveCrewUser *Select a user…RoleCancelNo crew members added yet.NameRoleEmailRemove</1> <2/>"
+#~ msgstr "import {0} from '$lib/utils'; <0/> <1>Owned by {0}BackPacking ListDelivery NoteCrew PassesCreate OfferProduction InfoDuration and address for this production.Total DurationShow DurationEditStart DateEnd Date<0/> Show duration same as total durationShow Start DateShow End DateCancelAddressEditCancelCustomerEdit— None —+ New customerCompany nameContact personEmailCancel new customerCancelBooked EquipmentManage EquipmentNo equipment booked yet.ProductManufacturerTotalPendingApprovedOutReturnedBundleBundle changedUpdate from bundleRemoveRemoveCrewUser *Select a user…RoleCancelNo crew members added yet.NameRoleEmailRemove</1> <2/>"
+
+#~ msgid "import {0} from '$lib/utils'; <0/> <1>DuplicateBack to DevicesAssetSerial number, tag, status, and location.EditOrganizationBundleSerial NumberAsset TagStatusLocationCancelPricing & InspectionFeeds offer/invoice pricing and DGUV due-date tracking.EditNet purchase price (€)Purchase dateDGUV inspection interval (months)Next due: {0}CancelProductShared product details for this asset type.EditManufacturerProduct NameCategoryProduct ImageProduct Image URLAudit LogHistory of transactions and status changes for this asset.No history available for this asset.Asset createdAsset updatedChecked in to <0/>Checked out for <0/>Returned from <0/> <1>to <0/></1>Requested for <0/> <1>by <0/></1>Added to <0/>Approved for <0/>Declined for <0/>By {0} on {1}</1> <2/>"
+#~ msgstr "import {0} from '$lib/utils'; <0/> <1>DuplicateBack to DevicesAssetSerial number, tag, status, and location.EditOrganizationBundleSerial NumberAsset TagStatusLocationCancelPricing & InspectionFeeds offer/invoice pricing and DGUV due-date tracking.EditNet purchase price (€)Purchase dateDGUV inspection interval (months)Next due: {0}CancelProductShared product details for this asset type.EditManufacturerProduct NameCategoryProduct ImageProduct Image URLAudit LogHistory of transactions and status changes for this asset.No history available for this asset.Asset createdAsset updatedChecked in to <0/>Checked out for <0/>Returned from <0/> <1>to <0/></1>Requested for <0/> <1>by <0/></1>Added to <0/>Approved for <0/>Declined for <0/>By {0} on {1}</1> <2/>"
+
+#~ msgid "import {0} from '$lib/utils'; <0/> <1>{0} — Category: <0/>{1}No locationBackNameCategorySaveAdd Assets to BundleNo assets available to add.ProductS/NOrgAddNo assets in this bundle yet. Click \"Add Assets\" to get started.ProductManufacturerCategorySerial NumberStatusLocationOrgRemove</1>"
+#~ msgstr "import {0} from '$lib/utils'; <0/> <1>{0} — Category: <0/>{1}No locationBackNameCategorySaveAdd Assets to BundleNo assets available to add.ProductS/NOrgAddNo assets in this bundle yet. Click \"Add Assets\" to get started.ProductManufacturerCategorySerial NumberStatusLocationOrgRemove</1>"
+
+#~ msgid "import {0} from '$lib/utils'; <0>Drag and drop a CSV file here, or <0>click to browse</0>Supported: .csv files with column headersOrganizationLocationNo locationsColumn MappingCSV ColumnMaps ToSampleCategory ValuesValue in CSVMaps To Category— Unassigned —Preview <0>(first {0} of {1} rows)</0>Processing {0} rows…Assets createdAssets skipped (existing tag)ErrorsError detailsRow {0}:CancelBack{0} rowsImportClose</0>"
+#~ msgstr "import {0} from '$lib/utils'; <0>Drag and drop a CSV file here, or <0>click to browse</0>Supported: .csv files with column headersOrganizationLocationNo locationsColumn MappingCSV ColumnMaps ToSampleCategory ValuesValue in CSVMaps To Category— Unassigned —Preview <0>(first {0} of {1} rows)</0>Processing {0} rows…Assets createdAssets skipped (existing tag)ErrorsError detailsRow {0}:CancelBack{0} rowsImportClose</0>"
+
+#~ msgid "import {0} from '$lib/utils'; <0/>"
+#~ msgstr "import {0} from '$lib/utils'; <0/>"
+
+#: src/lib/components/ui/org-multi-select/org-multi-select.svelte
+msgid "No organizations"
+msgstr "No organizations"
+
+#: src/lib/components/ui/org-multi-select/org-multi-select.svelte
+msgid "Select none"
+msgstr "Select none"
+
+#. 0: b.name
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "Removed \"{0}\" from production"
+msgstr "Removed \"{0}\" from production"
+
+#. 0: b.name
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "Bundle · {0}"
+msgstr "Bundle · {0}"
+
+#~ msgid "— €{0} net (billed as one line on offers)"
+#~ msgstr "— €{0} net (billed as one line on offers)"
+
+#~ msgid "{0} — Category: <0/>{1} <1/>"
+#~ msgstr "{0} — Category: <0/>{1} <1/>"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Name, category, pricing, and location."
+msgstr "Name, category, pricing, and location."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Billed as one line on offers."
+msgstr "Billed as one line on offers."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Contained Assets"
+msgstr "Contained Assets"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Devices that belong to this bundle."
+msgstr "Devices that belong to this bundle."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Serial"
+msgstr "Serial"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Only devices without a bundle can be added."
+msgstr "Only devices without a bundle can be added."
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Items updated"
+msgstr "Items updated"
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Can't check for updates"
+msgstr "Can't check for updates"
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Items are out of date"
+msgstr "Items are out of date"
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "The production's booked equipment has changed since these items were set."
+msgstr "The production's booked equipment has changed since these items were set."
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Review & Update"
+msgstr "Review & Update"
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Update items"
+msgstr "Update items"
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "This replaces the current line items with what's booked on the production now."
+msgstr "This replaces the current line items with what's booked on the production now."
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Removed"
+msgstr "Removed"
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Changed"
+msgstr "Changed"
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Updating…"
+msgstr "Updating…"
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Update Items"
+msgstr "Update Items"
+
+#: src/routes/offers/[id]/+page.svelte
+msgid "No items on this offer yet."
+msgstr "No items on this offer yet."
+
+#: src/routes/invoices/[id]/+page.svelte
+msgid "Invoice marked as sent"
+msgstr "Invoice marked as sent"
+
+#: src/routes/invoices/[id]/+page.svelte
+msgid "Marking…"
+msgstr "Marking…"
+
+#: src/routes/invoices/[id]/+page.svelte
+msgid "Mark as Sent"
+msgstr "Mark as Sent"
+
+#. 0: new Date(invoice.sentAt).toLocaleDateString('de-DE')
+#: src/routes/invoices/[id]/+page.svelte
+msgid "Sent on {0} — invoices are immutable once sent (GoBD/§14 UStG). Corrections require a new document."
+msgstr "Sent on {0} — invoices are immutable once sent (GoBD/§14 UStG). Corrections require a new document."
+
+#: src/routes/invoices/[id]/+page.svelte
+msgid "This invoice hasn't been sent yet — items can still be corrected or resynced from the production. Once marked as sent, it becomes immutable (GoBD/§14 UStG)."
+msgstr "This invoice hasn't been sent yet — items can still be corrected or resynced from the production. Once marked as sent, it becomes immutable (GoBD/§14 UStG)."
+
+#: src/routes/invoices/[id]/+page.svelte
+msgid "No items on this invoice yet."
+msgstr "No items on this invoice yet."
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Full production duration"
+msgstr "Full production duration"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Show duration"
+msgstr "Show duration"
+
+#. 0: dayCount
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "{0} d billed"
+msgstr "{0} d billed"
+
+#. 0: offer.invoices[0].number
+#: src/routes/productions/[id]/+page.svelte
+msgid "· Invoiced ({0})"
+msgstr "· Invoiced ({0})"
+
+#. 0: offer.dayCount
+#: src/routes/productions/[id]/+page.svelte
+msgid "{0} d <0/>"
+msgstr "{0} d <0/>"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Sent"
+msgstr "Sent"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Draft"
+msgstr "Draft"
+
+#. 0: invoice.dayCount; 1: invoice.sentAt ? 'Sent' \\: 'Draft'
+#: src/routes/productions/[id]/+page.svelte
+msgid "{0} d · {1}"
+msgstr "{0} d · {1}"
+
+#~ msgid "Back to production"
+#~ msgstr "Back to production"
+
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+msgid "Edit customer"
+msgstr "Edit customer"
+
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+msgid "Existing customer"
+msgstr "Existing customer"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
+msgid "Uncategorized"
+msgstr "Uncategorized"
+
+#. 0: group.name
+#. 0: group.name
+#. 0: group.name
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
+msgid "Subtotal {0}"
+msgstr "Subtotal {0}"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Until (fixed price)"
+msgstr "Until (fixed price)"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Target price"
+msgstr "Target price"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Net"
+msgstr "Net"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Gross"
+msgstr "Gross"
+
+#. 0: fmtEUR(untilComputedDiscount)
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Computed discount: {0}"
+msgstr "Computed discount: {0}"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Enter a target amount"
+msgstr "Enter a target amount"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Print Inventory List"
+msgstr "Print Inventory List"
+
+#. 0: bundle.name
+#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
+msgid "Inventory List - {0}"
+msgstr "Inventory List - {0}"
+
+#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
+msgid "Inventory List"
+msgstr "Inventory List"
+
+#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
+msgid "This bundle has no items yet."
+msgstr "This bundle has no items yet."
+
+#. 0: bundle.assets.length
+#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
+msgid "Total items: {0}"
+msgstr "Total items: {0}"
+
+#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
+msgid "Date:"
+msgstr "Date:"

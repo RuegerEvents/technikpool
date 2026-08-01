@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
 	import { getLocations } from '$lib/remote/assets.remote';
 	import { getAllProductions, checkoutAssets } from '$lib/remote/checkout.remote';
@@ -45,7 +46,7 @@
 			onClear();
 			targetId = '';
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		} finally {
 			working = false;
 		}

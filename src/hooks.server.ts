@@ -6,8 +6,13 @@ import { sequence } from '@sveltejs/kit/hooks';
 import * as main from './locales/main.loader.server.svelte.js';
 import { runWithLocale, loadLocales } from 'wuchale/load-utils/server';
 import { locales } from './locales/data.js';
+import { ensureBucket } from '$lib/server/storage';
 
 loadLocales(main.key, main.loadIDs, main.loadCatalog, locales);
+
+if (!building) {
+	ensureBucket();
+}
 
 const localeHandle: Handle = async ({ event, resolve }) => {
 	const locale = event.cookies.get('locale') ?? 'de';

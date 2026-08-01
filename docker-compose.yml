@@ -9,3 +9,26 @@ services:
       POSTGRES_DB: technikpool_db
     ports:
       - '7493:5432'
+
+  # Self-hosted, S3-compatible object storage for product images/manufacturer
+  # logos (wayfinder issue #10). App code talks to it generically via
+  # @aws-sdk/client-s3, so any S3-compatible server works here.
+  #
+  # NOTE: RustFS is a newer project — verify the image tag, env var names, and
+  # default ports against https://rustfs.com/docs before relying on this in
+  # anything beyond local dev. MinIO (minio/minio) is a drop-in swap if this
+  # image/config turns out to be wrong.
+  rustfs:
+    image: rustfs/rustfs:latest
+    restart: always
+    environment:
+      RUSTFS_ACCESS_KEY: technikpool
+      RUSTFS_SECRET_KEY: technikpool_password
+      RUSTFS_VOLUMES: /data
+    ports:
+      - '7494:9000'
+    volumes:
+      - rustfs_data:/data
+
+volumes:
+  rustfs_data:

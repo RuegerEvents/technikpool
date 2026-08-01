@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/utils';
 	import { getLocations } from '$lib/remote/assets.remote';
 	import { getAllProductions, scanAsset } from '$lib/remote/checkout.remote';
 	import { Button } from '$lib/components/ui/button';
@@ -175,12 +176,12 @@
 					action: '',
 					targetName: '',
 					status: 'error',
-					message: (err as Error).message,
+					message: getErrorMessage(err),
 					timestamp: new Date()
 				},
 				...sessionLog
 			];
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		} finally {
 			processing = false;
 			textInput = '';

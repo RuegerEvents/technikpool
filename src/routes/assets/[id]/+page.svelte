@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -62,9 +63,52 @@
 			toast.success('Asset updated');
 			editingAsset = false;
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		} finally {
 			savingAsset = false;
+		}
+	}
+
+	// ── Pricing & inspection editing ─────────────────────────────────────────
+	let editingPricing = $state(false);
+	let savingPricing = $state(false);
+	let pricingDraft = $state({
+		netPurchasePrice: '',
+		purchaseDate: '',
+		inspectionIntervalMonths: ''
+	});
+
+	$effect(() => {
+		if (editingPricing) return;
+		pricingDraft = {
+			netPurchasePrice: asset.netPurchasePrice?.toString() ?? '',
+			purchaseDate: asset.purchaseDate
+				? new Date(asset.purchaseDate).toISOString().slice(0, 10)
+				: '',
+			inspectionIntervalMonths: asset.inspectionIntervalMonths?.toString() ?? ''
+		};
+	});
+
+	async function handlePricingSave(e: Event) {
+		e.preventDefault();
+		savingPricing = true;
+		try {
+			await updateAsset({
+				assetId,
+				netPurchasePrice: pricingDraft.netPurchasePrice
+					? Number(pricingDraft.netPurchasePrice)
+					: null,
+				purchaseDate: pricingDraft.purchaseDate || null,
+				inspectionIntervalMonths: pricingDraft.inspectionIntervalMonths
+					? Number(pricingDraft.inspectionIntervalMonths)
+					: null
+			});
+			toast.success('Pricing & inspection updated');
+			editingPricing = false;
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			savingPricing = false;
 		}
 	}
 
@@ -98,7 +142,7 @@
 			toast.success('Product updated');
 			productModal.open = false;
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		} finally {
 			savingProduct = false;
 		}
@@ -113,7 +157,12 @@
 			<h1 class="text-3xl font-bold tracking-tight">{asset.product.name}</h1>
 			<p class="text-muted-foreground">{asset.product.manufacturer.name}</p>
 		</div>
-		<Button variant="outline" href={resolve('/assets')}>Back to Devices</Button>
+		<div class="flex gap-2">
+			<Button variant="outline" href={resolve(`/assets/new?duplicateFrom=${asset.id}`)}
+				>Duplicate</Button
+			>
+			<Button variant="outline" href={resolve('/assets')}>Back to Devices</Button>
+		</div>
 	</div>
 
 	<div class="grid gap-6 lg:grid-cols-2">
@@ -190,6 +239,77 @@
 							</Button>
 							<Button type="submit" disabled={savingAsset}>
 								{savingAsset ? 'Saving…' : 'Save'}
+							</Button>
+						</div>
+					{/if}
+				</form>
+			</Card.Content>
+		</Card.Root>
+
+		<!-- Pricing & inspection -->
+		<Card.Root>
+			<Card.Header>
+				<div class="flex items-start justify-between gap-4">
+					<div>
+						<Card.Title>Pricing & Inspection</Card.Title>
+						<Card.Description
+							>Feeds offer/invoice pricing and DGUV due-date tracking.</Card.Description
+						>
+					</div>
+					{#if !editingPricing}
+						<Button variant="outline" onclick={() => (editingPricing = true)}>Edit</Button>
+					{/if}
+				</div>
+			</Card.Header>
+			<Card.Content>
+				<form class="space-y-4" onsubmit={handlePricingSave}>
+					<div class="space-y-2">
+						<Label for="netPurchasePrice">Net purchase price (€)</Label>
+						<Input
+							id="netPurchasePrice"
+							type="number"
+							min="0"
+							step="0.01"
+							bind:value={pricingDraft.netPurchasePrice}
+							disabled={!editingPricing}
+						/>
+					</div>
+					<div class="space-y-2">
+						<Label for="purchaseDate">Purchase date</Label>
+						<Input
+							id="purchaseDate"
+							type="date"
+							bind:value={pricingDraft.purchaseDate}
+							disabled={!editingPricing}
+						/>
+					</div>
+					<div class="space-y-2">
+						<Label for="inspectionInterval">DGUV inspection interval (months)</Label>
+						<Input
+							id="inspectionInterval"
+							type="number"
+							min="1"
+							bind:value={pricingDraft.inspectionIntervalMonths}
+							disabled={!editingPricing}
+						/>
+						{#if asset.nextInspectionDue}
+							<p class="text-xs text-muted-foreground">
+								Next due: {new Date(asset.nextInspectionDue).toLocaleDateString('de-DE')}
+							</p>
+						{/if}
+					</div>
+					{#if editingPricing}
+						<div class="flex justify-end gap-4 pt-2">
+							<Button
+								type="button"
+								variant="outline"
+								onclick={() => (editingPricing = false)}
+								disabled={savingPricing}
+							>
+								Cancel
+							</Button>
+							<Button type="submit" disabled={savingPricing}>
+								{savingPricing ? 'Saving…' : 'Save'}
 							</Button>
 						</div>
 					{/if}

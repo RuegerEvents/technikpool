@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -20,18 +21,59 @@
 
 	const bundleId = $derived(page.params.id as string);
 
-	let showAddModal = $state(false);
-	let searchQuery = $state('');
-	let working = $state(false);
-	let categoryFilter = $state('');
-	let editMode = $state(false);
-	let editName = $state('');
-	let editCategoryId = $state('');
-
 	let bundle = $derived(await getBundle(bundleId));
 	let allAssets = $derived(await getAssets());
 	let categories = $derived(await getCategories());
 	let locations = $derived(await getLocations(bundle.organizationId));
+
+	// ── Bundle editing ───────────────────────────────────────────────────────
+	let editingBundle = $state(false);
+	let savingBundle = $state(false);
+
+	let bundleDraft = $state({
+		name: '',
+		categoryId: '',
+		netPurchasePrice: '',
+		locationId: ''
+	});
+
+	$effect(() => {
+		if (editingBundle) return;
+		bundleDraft = {
+			name: bundle.name,
+			categoryId: bundle.categoryId,
+			netPurchasePrice: bundle.netPurchasePrice?.toString() ?? '',
+			locationId: bundle.locationId ?? ''
+		};
+	});
+
+	async function handleBundleSave(e: Event) {
+		e.preventDefault();
+		savingBundle = true;
+		try {
+			await updateBundle({
+				bundleId,
+				name: bundleDraft.name,
+				categoryId: bundleDraft.categoryId,
+				netPurchasePrice: bundleDraft.netPurchasePrice
+					? Number(bundleDraft.netPurchasePrice)
+					: null,
+				locationId: bundleDraft.locationId || null
+			});
+			toast.success('Bundle updated');
+			editingBundle = false;
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			savingBundle = false;
+		}
+	}
+
+	// ── Contained assets ─────────────────────────────────────────────────────
+	let showAddModal = $state(false);
+	let searchQuery = $state('');
+	let categoryFilter = $state('');
+	let working = $state(false);
 
 	let visibleBundleAssets = $derived(
 		!categoryFilter
@@ -39,13 +81,28 @@
 			: bundle.assets.filter((a) => a.product.categoryId === categoryFilter)
 	);
 
+	let availableToAdd = $derived.by(() => {
+		const bundleAssetIds = new Set(bundle.assets.map((a) => a.id));
+		const q = searchQuery.toLowerCase().trim();
+		return allAssets.filter((a) => {
+			if (bundleAssetIds.has(a.id)) return false;
+			if (a.bundle) return false;
+			if (!q) return true;
+			return (
+				a.product.name.toLowerCase().includes(q) ||
+				a.product.manufacturer.name.toLowerCase().includes(q) ||
+				(a.serialNumber?.toLowerCase().includes(q) ?? false)
+			);
+		});
+	});
+
 	async function handleAdd(assetId: string) {
 		working = true;
 		try {
 			await addAssetToBundle({ bundleId, assetId });
 			toast.success('Asset added to bundle');
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		} finally {
 			working = false;
 		}
@@ -57,33 +114,7 @@
 			await removeAssetFromBundle({ bundleId, assetId });
 			toast.success('Asset removed from bundle');
 		} catch (err) {
-			toast.error((err as Error).message);
-		} finally {
-			working = false;
-		}
-	}
-
-	async function handleEditSave() {
-		if (!editName.trim()) return;
-		working = true;
-		try {
-			await updateBundle({ bundleId, name: editName.trim(), categoryId: editCategoryId });
-			editMode = false;
-			toast.success('Bundle updated');
-		} catch (err) {
-			toast.error((err as Error).message);
-		} finally {
-			working = false;
-		}
-	}
-
-	async function handleLocationChange(locationId: string | null) {
-		working = true;
-		try {
-			await updateBundle({ bundleId, locationId });
-			toast.success('Bundle location updated');
-		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		} finally {
 			working = false;
 		}
@@ -108,123 +139,169 @@
 	<div class="flex items-center justify-between">
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">{bundle.name}</h1>
-			<p class="text-muted-foreground">
-				{bundle.organization.name} — Category:
-				<CategoryPill
-					name={bundle.category.name}
-					color={bundle.category.color}
-				/>{bundle.description ? ` — ${bundle.description}` : ''}
-			</p>
+			<p class="text-muted-foreground">{bundle.organization.name}</p>
 		</div>
-		<div class="flex items-center gap-2">
-			<select
-				value={bundle.locationId ?? ''}
-				onchange={(e) => handleLocationChange((e.currentTarget as HTMLSelectElement).value || null)}
-				disabled={working}
-				class="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-			>
-				<option value="">No location</option>
-				{#each locations as loc (loc.id)}
-					<option value={loc.id}>{loc.name}</option>
-				{/each}
-			</select>
-			<CategorySelect
-				class="w-56"
-				{categories}
-				bind:value={categoryFilter}
-				allowEmpty
-				allLabel="All Categories"
-			/>
+		<div class="flex gap-2">
 			<Button
 				variant="outline"
-				onclick={() => {
-					if (!editMode) {
-						editName = bundle.name;
-						editCategoryId = bundle.categoryId;
-					}
-					editMode = !editMode;
-				}}
+				href={resolve(`/assets/bundles/${bundleId}/inventory-list`)}
+				target="_blank"
 			>
-				{editMode ? 'Cancel Edit' : 'Edit'}
+				Print Inventory List
 			</Button>
-			<Button variant="outline" href={resolve('/assets')}>Back</Button>
-			<Button onclick={() => (showAddModal = !showAddModal)}>
-				{showAddModal ? 'Close' : 'Add Assets'}
-			</Button>
+			<Button variant="outline" href={resolve('/assets')}>Back to Devices</Button>
 		</div>
 	</div>
 
-	{#if editMode}
-		<Card.Root class="bg-muted/30">
-			<Card.Content class="flex flex-wrap items-end gap-4 pt-6">
-				<div class="space-y-2">
-					<Label for="edit-name">Name</Label>
-					<Input id="edit-name" bind:value={editName} class="w-64" placeholder="Bundle name" />
-				</div>
-				<div class="space-y-2">
-					<Label>Category</Label>
-					<CategorySelect {categories} bind:value={editCategoryId} class="w-56" />
-				</div>
-				<Button onclick={handleEditSave} disabled={working || !editName.trim()}>Save</Button>
-			</Card.Content>
-		</Card.Root>
-	{/if}
-
-	{#if showAddModal}
-		<Card.Root class="bg-muted/30">
+	<div class="grid gap-6 lg:grid-cols-2">
+		<!-- Bundle details (left) -->
+		<Card.Root>
 			<Card.Header>
-				<Card.Title>Add Assets to Bundle</Card.Title>
-				<div class="mt-2">
-					<input
-						type="search"
-						bind:value={searchQuery}
-						placeholder="Search assets…"
-						class="h-9 w-full max-w-sm rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-					/>
+				<div class="flex items-start justify-between gap-4">
+					<div>
+						<Card.Title>Bundle</Card.Title>
+						<Card.Description>Name, category, pricing, and location.</Card.Description>
+					</div>
+					{#if !editingBundle}
+						<Button variant="outline" onclick={() => (editingBundle = true)}>Edit</Button>
+					{/if}
 				</div>
 			</Card.Header>
 			<Card.Content>
-				{@const bundleAssetIds = new Set(bundle.assets.map((a) => a.id))}
-				{@const q = searchQuery.toLowerCase().trim()}
-				{@const available = allAssets.filter((a) => {
-					if (bundleAssetIds.has(a.id)) return false;
-					if (a.bundle) return false;
-					if (!q) return true;
-					return (
-						a.product.name.toLowerCase().includes(q) ||
-						a.product.manufacturer.name.toLowerCase().includes(q) ||
-						(a.serialNumber?.toLowerCase().includes(q) ?? false)
-					);
-				})}
-				{#if available.length === 0}
-					<p class="text-sm text-muted-foreground">No assets available to add.</p>
+				<form class="space-y-4" onsubmit={handleBundleSave}>
+					<div class="space-y-2">
+						<Label>Organization</Label>
+						<Input value={bundle.organization.name} disabled />
+					</div>
+					<div class="space-y-2">
+						<Label for="name">Name</Label>
+						<Input id="name" bind:value={bundleDraft.name} disabled={!editingBundle} />
+					</div>
+					<div class="space-y-2">
+						<Label>Category</Label>
+						<CategorySelect
+							{categories}
+							bind:value={bundleDraft.categoryId}
+							disabled={!editingBundle}
+						/>
+					</div>
+					<div class="space-y-2">
+						<Label for="netPurchasePrice">Net purchase price (€)</Label>
+						<Input
+							id="netPurchasePrice"
+							type="number"
+							min="0"
+							step="0.01"
+							bind:value={bundleDraft.netPurchasePrice}
+							disabled={!editingBundle}
+						/>
+						<p class="text-xs text-muted-foreground">Billed as one line on offers.</p>
+					</div>
+					<div class="space-y-2">
+						<Label for="location">Location</Label>
+						<select
+							id="location"
+							bind:value={bundleDraft.locationId}
+							disabled={!editingBundle}
+							class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+						>
+							<option value="">No location</option>
+							{#each locations as loc (loc.id)}
+								{@const city = loc.address?.city?.trim()}
+								{@const line1 = loc.address?.line1?.trim()}
+								{@const addrParts = [line1, city].filter(Boolean).join(', ')}
+								<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option
+								>
+							{/each}
+						</select>
+					</div>
+					{#if editingBundle}
+						<div class="flex justify-end gap-4 pt-2">
+							<Button
+								type="button"
+								variant="outline"
+								onclick={() => (editingBundle = false)}
+								disabled={savingBundle}
+							>
+								Cancel
+							</Button>
+							<Button type="submit" disabled={savingBundle || !bundleDraft.name.trim()}>
+								{savingBundle ? 'Saving…' : 'Save'}
+							</Button>
+						</div>
+					{/if}
+				</form>
+			</Card.Content>
+		</Card.Root>
+
+		<!-- Contained assets (right) -->
+		<Card.Root>
+			<Card.Header>
+				<div class="flex items-start justify-between gap-4">
+					<div>
+						<Card.Title>Contained Assets</Card.Title>
+						<Card.Description>Devices that belong to this bundle.</Card.Description>
+					</div>
+					<div class="flex items-center gap-2">
+						<CategorySelect
+							class="w-44"
+							{categories}
+							bind:value={categoryFilter}
+							allowEmpty
+							allLabel="All Categories"
+						/>
+						<Button size="sm" onclick={() => (showAddModal = true)}>Add Assets</Button>
+					</div>
+				</div>
+			</Card.Header>
+			<Card.Content>
+				{#if bundle.assets.length === 0}
+					<p class="py-8 text-center text-muted-foreground">
+						No assets in this bundle yet. Click "Add Assets" to get started.
+					</p>
 				{:else}
-					<div class="max-h-64 overflow-y-auto rounded-md border">
+					<div class="overflow-x-auto">
 						<table class="w-full text-sm">
-							<thead class="sticky top-0 bg-muted/80 backdrop-blur-sm">
-								<tr class="border-b">
-									<th class="px-3 py-2 text-left font-medium text-muted-foreground">Product</th>
-									<th class="px-3 py-2 text-left font-medium text-muted-foreground">S/N</th>
-									<th class="px-3 py-2 text-left font-medium text-muted-foreground">Org</th>
-									<th class="px-3 py-2"></th>
+							<thead>
+								<tr class="border-b bg-muted/30">
+									<th class="px-4 py-3 text-left font-medium text-muted-foreground">Product</th>
+									<th class="px-4 py-3 text-left font-medium text-muted-foreground">Serial</th>
+									<th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+									<th class="px-4 py-3 text-left font-medium text-muted-foreground">Location</th>
+									<th class="px-4 py-3"></th>
 								</tr>
 							</thead>
 							<tbody>
-								{#each available as asset (asset.id)}
-									<tr class="border-b bg-background last:border-0 hover:bg-muted/30">
-										<td class="px-3 py-2">
-											<p class="font-medium">{asset.product.name}</p>
-											<p class="text-xs text-muted-foreground">
-												{asset.product.manufacturer.name}
-											</p>
+								{#each visibleBundleAssets as asset (asset.id)}
+									<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
+										<td class="px-4 py-3">
+											<div class="flex items-center gap-2">
+												<CategoryPill
+													name={asset.product.category.name}
+													color={asset.product.category.color}
+												/>
+												<span class="font-medium">{asset.product.name}</span>
+											</div>
 										</td>
-										<td class="px-3 py-2 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
-										<td class="px-3 py-2 text-xs text-muted-foreground"
-											>{asset.organization.name}</td
-										>
-										<td class="px-3 py-2 text-right">
-											<Button size="sm" disabled={working} onclick={() => handleAdd(asset.id)}
-												>Add</Button
+										<td class="px-4 py-3 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
+										<td class="px-4 py-3">
+											<span
+												class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {statusClass[
+													asset.status
+												] ?? ''}"
+											>
+												{statusLabels[asset.status] ?? asset.status}
+											</span>
+										</td>
+										<td class="px-4 py-3 text-sm text-muted-foreground">
+											{asset.location?.name ?? '—'}
+										</td>
+										<td class="px-4 py-3 text-right">
+											<Button
+												size="sm"
+												variant="outline"
+												disabled={working}
+												onclick={() => handleRemove(asset.id)}>Remove</Button
 											>
 										</td>
 									</tr>
@@ -235,68 +312,71 @@
 				{/if}
 			</Card.Content>
 		</Card.Root>
-	{/if}
-
-	{#if bundle.assets.length === 0}
-		<Card.Root>
-			<Card.Content class="py-12 text-center text-muted-foreground">
-				No assets in this bundle yet. Click "Add Assets" to get started.
-			</Card.Content>
-		</Card.Root>
-	{:else}
-		<Card.Root>
-			<div class="overflow-x-auto">
-				<table class="w-full text-sm">
-					<thead>
-						<tr class="border-b bg-muted/30">
-							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Product</th>
-							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Manufacturer</th>
-							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
-							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Serial Number</th>
-							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
-							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Location</th>
-							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Org</th>
-							<th class="px-4 py-3"></th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each visibleBundleAssets as asset (asset.id)}
-							<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
-								<td class="px-4 py-3 font-medium">{asset.product.name}</td>
-								<td class="px-4 py-3 text-muted-foreground">{asset.product.manufacturer.name}</td>
-								<td class="px-4 py-3">
-									<CategoryPill
-										name={asset.product.category.name}
-										color={asset.product.category.color}
-									/>
-								</td>
-								<td class="px-4 py-3 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
-								<td class="px-4 py-3">
-									<span
-										class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {statusClass[
-											asset.status
-										] ?? ''}"
-									>
-										{statusLabels[asset.status] ?? asset.status}
-									</span>
-								</td>
-								<td class="px-4 py-3 text-sm text-muted-foreground">
-									{asset.location?.name ?? '—'}
-								</td>
-								<td class="px-4 py-3 text-sm text-muted-foreground">{asset.organization.name}</td>
-								<td class="px-4 py-3 text-right">
-									<Button
-										size="sm"
-										variant="outline"
-										disabled={working}
-										onclick={() => handleRemove(asset.id)}>Remove</Button
-									>
-								</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
-		</Card.Root>
-	{/if}
+	</div>
 </div>
+
+<!-- Add Assets Modal -->
+{#if showAddModal}
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+		onkeydown={(e) => e.key === 'Escape' && (showAddModal = false)}
+	>
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div
+			class="mx-4 w-full max-w-2xl rounded-lg border bg-background p-6 shadow-lg"
+			onkeydown={(e) => e.stopPropagation()}
+		>
+			<div class="mb-4 flex items-start justify-between gap-4">
+				<div>
+					<h2 class="text-lg font-semibold">Add Assets to Bundle</h2>
+					<p class="text-sm text-muted-foreground">Only devices without a bundle can be added.</p>
+				</div>
+				<Button variant="outline" size="sm" onclick={() => (showAddModal = false)}>Close</Button>
+			</div>
+
+			<input
+				type="search"
+				bind:value={searchQuery}
+				placeholder="Search assets…"
+				class="mb-3 h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+			/>
+
+			{#if availableToAdd.length === 0}
+				<p class="text-sm text-muted-foreground">No assets available to add.</p>
+			{:else}
+				<div class="max-h-80 overflow-y-auto rounded-md border">
+					<table class="w-full text-sm">
+						<thead class="sticky top-0 bg-muted/80 backdrop-blur-sm">
+							<tr class="border-b">
+								<th class="px-3 py-2 text-left font-medium text-muted-foreground">Product</th>
+								<th class="px-3 py-2 text-left font-medium text-muted-foreground">S/N</th>
+								<th class="px-3 py-2 text-left font-medium text-muted-foreground">Org</th>
+								<th class="px-3 py-2"></th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each availableToAdd as asset (asset.id)}
+								<tr class="border-b bg-background last:border-0 hover:bg-muted/30">
+									<td class="px-3 py-2">
+										<p class="font-medium">{asset.product.name}</p>
+										<p class="text-xs text-muted-foreground">
+											{asset.product.manufacturer.name}
+										</p>
+									</td>
+									<td class="px-3 py-2 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
+									<td class="px-3 py-2 text-xs text-muted-foreground">{asset.organization.name}</td>
+									<td class="px-3 py-2 text-right">
+										<Button size="sm" disabled={working} onclick={() => handleAdd(asset.id)}
+											>Add</Button
+										>
+									</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			{/if}
+		</div>
+	</div>
+{/if}

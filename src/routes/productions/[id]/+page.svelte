@@ -1,22 +1,25 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { AddressInput } from '$lib/components/ui/address-input';
 	import {
 		getProduction,
-		getBookedAssets,
-		addAssetToProduction,
-		addBundleToProduction,
 		removeBundleFromProduction,
 		syncBundleInProduction,
 		addCrewMember,
 		removeCrewMember,
 		removeProductionItem,
-		updateProductionAddress
+		updateProductionAddress,
+		updateProductionDuration,
+		updateProductionCustomer
 	} from '$lib/remote/productions.remote';
-	import { getAssets, getBundles } from '$lib/remote/assets.remote';
+	import { getBundles } from '$lib/remote/assets.remote';
 	import { getOrgUsers } from '$lib/remote/orgs.remote';
+	import { getCustomers, createCustomer } from '$lib/remote/customers.remote';
+	import { getOffersForProduction, getInvoicesForProduction } from '$lib/remote/offers.remote';
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
 	import type { Prisma } from '$lib/prisma/client';
@@ -27,112 +30,29 @@
 	const productionId = $derived(page.params.id as string);
 	let production = $derived(await getProduction(productionId));
 
-	let showAddPanel = $state(false);
-	let searchQuery = $state('');
 	let working = $state(false);
 
-	let allAssets = $derived(await getAssets());
 	let allBundles = $derived(await getBundles());
+	let offers = $derived(await getOffersForProduction(productionId));
+	let invoices = $derived(await getInvoicesForProduction(productionId));
 
-	let addedAssetIds = $derived(new Set<string>(production.items.map((i) => i.assetId)));
-	let addedBundleIds = $derived(
-		new Set<string>(production.items.filter((i) => i.sourceBundle).map((i) => i.sourceBundle!.id))
-	);
-	let bookedAssets = $derived(
-		new Map<string, string>(
-			(await getBookedAssets(productionId)).map((b) => [b.assetId, b.productionName])
-		)
-	);
+	function fmtEUR(n: number): string {
+		return n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+	}
 
-	type BundleRow = {
-		kind: 'bundle';
-		id: string;
-		name: string;
-		orgName: string;
-		count: number;
-		assetIds: string[];
-	};
-	type AssetRow = {
-		kind: 'asset';
-		id: string;
-		productName: string;
-		manufacturerName: string;
-		serialNumber: string | null;
-		assetTag: string | null;
-		orgName: string;
-		status: string;
-	};
+	function offerTotal(offer: (typeof offers)[number]): number {
+		return offer.items.reduce((sum, i) => sum + Number(i.lineTotal), 0);
+	}
 
-	let allAddRows = $derived.by((): (BundleRow | AssetRow)[] => [
-		...allBundles
-			.filter((b) => b.assets.length > 0 && !b.assets.every((a) => addedAssetIds.has(a.id)))
-			.map(
-				(b): BundleRow => ({
-					kind: 'bundle',
-					id: b.id,
-					name: b.name,
-					orgName: b.organization.name,
-					count: b.assets.length,
-					assetIds: b.assets.map((a) => a.id)
-				})
-			),
-		...allAssets
-			.filter((a) => !a.bundle)
-			.map(
-				(a): AssetRow => ({
-					kind: 'asset',
-					id: a.id,
-					productName: a.product.name,
-					manufacturerName: a.product.manufacturer.name,
-					serialNumber: a.serialNumber,
-					assetTag: a.assetTag,
-					orgName: a.organization.name,
-					status: a.status
-				})
-			)
-	]);
-
-	let filteredAddRows = $derived.by(() => {
-		const q = searchQuery.toLowerCase().trim();
-		if (!q) return allAddRows;
-		return allAddRows.filter((r) =>
-			r.kind === 'bundle'
-				? r.name.toLowerCase().includes(q) || r.orgName.toLowerCase().includes(q)
-				: r.productName.toLowerCase().includes(q) ||
-					r.manufacturerName.toLowerCase().includes(q) ||
-					(r.serialNumber?.toLowerCase().includes(q) ?? false) ||
-					(r.assetTag?.toLowerCase().includes(q) ?? false) ||
-					r.orgName.toLowerCase().includes(q)
-		);
-	});
-
-	async function handleAdd(row: BundleRow | AssetRow) {
-		working = true;
-		try {
-			if (row.kind === 'bundle') {
-				const result = await addBundleToProduction({ productionId, bundleId: row.id });
-				const conflictNote =
-					result.skippedConflicts > 0
-						? `, ${result.skippedConflicts} skipped due to time conflicts`
-						: '';
-				toast.success(
-					`Added ${result.added} asset${result.added !== 1 ? 's' : ''} from bundle${conflictNote}`
-				);
-			} else {
-				await addAssetToProduction({ productionId, assetId: row.id });
-			}
-		} catch (err) {
-			toast.error((err as Error).message);
-		} finally {
-			working = false;
-		}
+	function invoiceTotal(invoice: (typeof invoices)[number]): number {
+		return invoice.items.reduce((sum, i) => sum + Number(i.lineTotal), 0);
 	}
 
 	async function handleRemoveItem(itemId: string) {
 		try {
 			await removeProductionItem(itemId);
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		}
 	}
 
@@ -140,7 +60,7 @@
 		try {
 			await removeBundleFromProduction({ productionId, bundleId });
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		}
 	}
 
@@ -158,7 +78,7 @@
 				parts.length ? `Bundle updated: ${parts.join(', ')}` : 'Bundle already in sync'
 			);
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		} finally {
 			working = false;
 		}
@@ -320,7 +240,7 @@
 			showCrewForm = false;
 			toast.success('Crew member added');
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		} finally {
 			savingCrew = false;
 		}
@@ -330,7 +250,7 @@
 		try {
 			await removeCrewMember(id);
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		}
 	}
 
@@ -346,12 +266,6 @@
 		PENDING: 'Pending',
 		CHECKED_OUT: 'Checked out',
 		RETURNED: 'Returned'
-	};
-
-	const assetStatusClass: Record<string, string> = {
-		AVAILABLE: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-		MAINTENANCE: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-		BROKEN: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
 	};
 
 	let editingAddress = $state(false);
@@ -381,7 +295,7 @@
 			toast.success('Address updated');
 			editingAddress = false;
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		} finally {
 			savingAddress = false;
 		}
@@ -395,6 +309,113 @@
 			[addr.postalCode?.trim(), addr.city?.trim()].filter(Boolean).join(' ')
 		].filter(Boolean);
 		return parts.length ? parts.join(' · ') : '—';
+	}
+
+	let editingCustomer = $state(false);
+	let savingCustomer = $state(false);
+	let creatingCustomer = $state(false);
+	let customerDraftId = $state('');
+	let newCustomer = $state({ companyName: '', contactPerson: '', email: '' });
+	let newCustomerAddress = $state({ line1: '', line2: '', postalCode: '', city: '' });
+	let orgCustomers = $derived(await getCustomers(production.organizationId));
+
+	$effect(() => {
+		if (editingCustomer) return;
+		customerDraftId = production.customerId ?? '';
+	});
+
+	function customerLabel(c: { companyName: string | null; contactPerson: string | null }) {
+		return c.companyName || c.contactPerson || 'Unnamed customer';
+	}
+
+	async function handleSaveCustomer(e: Event) {
+		e.preventDefault();
+		savingCustomer = true;
+		try {
+			let finalCustomerId = customerDraftId || undefined;
+			if (creatingCustomer) {
+				const created = await createCustomer({
+					organizationId: production.organizationId,
+					companyName: newCustomer.companyName || undefined,
+					contactPerson: newCustomer.contactPerson || undefined,
+					email: newCustomer.email || undefined,
+					address: newCustomerAddress
+				});
+				finalCustomerId = created.id;
+			}
+			await updateProductionCustomer({ productionId, customerId: finalCustomerId });
+			toast.success('Customer updated');
+			editingCustomer = false;
+			creatingCustomer = false;
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			savingCustomer = false;
+		}
+	}
+
+	function toDateInput(d: Date | string | null | undefined) {
+		if (!d) return '';
+		return new Date(d).toISOString().slice(0, 10);
+	}
+
+	function formatDateRange(
+		start: Date | string | null | undefined,
+		end: Date | string | null | undefined
+	) {
+		if (!start && !end) return '—';
+		const fmt = (d: Date | string) => new Date(d).toLocaleDateString('de-DE');
+		if (start && end)
+			return start === end || fmt(start) === fmt(end) ? fmt(start) : `${fmt(start)} – ${fmt(end)}`;
+		return fmt((start ?? end)!);
+	}
+
+	let editingDuration = $state(false);
+	let savingDuration = $state(false);
+	let durationDraft = $state({
+		startDate: '',
+		endDate: '',
+		sameAsTotalDuration: true,
+		showStartDate: '',
+		showEndDate: ''
+	});
+
+	$effect(() => {
+		if (editingDuration) return;
+		const hasCustomShow = !!(production.showStartDate || production.showEndDate);
+		durationDraft = {
+			startDate: toDateInput(production.startDate),
+			endDate: toDateInput(production.endDate),
+			sameAsTotalDuration: !hasCustomShow,
+			showStartDate: toDateInput(production.showStartDate),
+			showEndDate: toDateInput(production.showEndDate)
+		};
+	});
+
+	async function handleSaveDuration(e: Event) {
+		e.preventDefault();
+		savingDuration = true;
+		try {
+			await updateProductionDuration({
+				productionId,
+				startDate: durationDraft.startDate ? new Date(durationDraft.startDate) : undefined,
+				endDate: durationDraft.endDate ? new Date(durationDraft.endDate) : undefined,
+				showStartDate:
+					!durationDraft.sameAsTotalDuration && durationDraft.showStartDate
+						? new Date(durationDraft.showStartDate)
+						: undefined,
+				showEndDate:
+					!durationDraft.sameAsTotalDuration && durationDraft.showEndDate
+						? new Date(durationDraft.showEndDate)
+						: undefined
+			});
+			toast.success('Duration updated');
+			editingDuration = false;
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			savingDuration = false;
+		}
 	}
 </script>
 
@@ -424,232 +445,285 @@
 				href={resolve(`/productions/${production.id}/crew-passes`)}
 				target="_blank">Crew Passes</Button
 			>
+			<Button href={resolve(`/offers/new?productionId=${production.id}`)}>Create Offer</Button>
 		</div>
 	</div>
 
-	<!-- Address -->
+	<!-- Offers & Invoices -->
+	{#if offers.length > 0 || invoices.length > 0}
+		<div class="grid gap-4 sm:grid-cols-2">
+			<Card.Root>
+				<Card.Header>
+					<Card.Title>Offers</Card.Title>
+				</Card.Header>
+				<Card.Content>
+					{#if offers.length === 0}
+						<p class="text-sm text-muted-foreground">No offers yet.</p>
+					{:else}
+						<div class="space-y-2">
+							{#each offers as offer (offer.id)}
+								<a
+									href={resolve(`/offers/${offer.id}`)}
+									class="flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
+								>
+									<div>
+										<p class="font-medium">{offer.customerName}</p>
+										<p class="text-xs text-muted-foreground">
+											{offer.dayCount} d
+											{#if offer.invoices.length > 0}
+												· Invoiced ({offer.invoices[0].number})
+											{/if}
+										</p>
+									</div>
+									<span class="font-medium tabular-nums">{fmtEUR(offerTotal(offer))}</span>
+								</a>
+							{/each}
+						</div>
+					{/if}
+				</Card.Content>
+			</Card.Root>
+
+			<Card.Root>
+				<Card.Header>
+					<Card.Title>Invoices</Card.Title>
+				</Card.Header>
+				<Card.Content>
+					{#if invoices.length === 0}
+						<p class="text-sm text-muted-foreground">No invoices yet.</p>
+					{:else}
+						<div class="space-y-2">
+							{#each invoices as invoice (invoice.id)}
+								<a
+									href={resolve(`/invoices/${invoice.id}`)}
+									class="flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
+								>
+									<div>
+										<p class="font-medium">{invoice.number}</p>
+										<p class="text-xs text-muted-foreground">
+											{invoice.dayCount} d · {invoice.sentAt ? 'Sent' : 'Draft'}
+										</p>
+									</div>
+									<span class="font-medium tabular-nums">{fmtEUR(invoiceTotal(invoice))}</span>
+								</a>
+							{/each}
+						</div>
+					{/if}
+				</Card.Content>
+			</Card.Root>
+		</div>
+	{/if}
+
+	<!-- Main info -->
 	<Card.Root>
 		<Card.Header>
-			<div class="flex items-start justify-between gap-4">
-				<div>
-					<Card.Title>Address</Card.Title>
-					<Card.Description>{formatAddress(production.address)}</Card.Description>
+			<Card.Title>Production Info</Card.Title>
+			<Card.Description>Duration and address for this production.</Card.Description>
+		</Card.Header>
+		<Card.Content class="space-y-6">
+			<!-- Duration -->
+			<div class="space-y-3">
+				<div class="flex items-start justify-between gap-4">
+					<div class="grid flex-1 gap-4 sm:grid-cols-2">
+						<div>
+							<h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+								Total Duration
+							</h3>
+							<p class="text-sm">{formatDateRange(production.startDate, production.endDate)}</p>
+						</div>
+						<div>
+							<h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+								Show Duration
+							</h3>
+							<p class="text-sm">
+								{formatDateRange(
+									production.showStartDate ?? production.startDate,
+									production.showEndDate ?? production.endDate
+								)}
+							</p>
+						</div>
+					</div>
+					{#if !editingDuration}
+						<Button variant="outline" onclick={() => (editingDuration = true)}>Edit</Button>
+					{/if}
 				</div>
-				{#if !editingAddress}
-					<Button variant="outline" onclick={() => (editingAddress = true)}>Edit</Button>
+
+				{#if editingDuration}
+					<form class="space-y-4" onsubmit={handleSaveDuration}>
+						<div class="grid grid-cols-2 gap-4">
+							<div class="space-y-2">
+								<Label for="dur-startDate">Start Date</Label>
+								<Input id="dur-startDate" type="date" bind:value={durationDraft.startDate} />
+							</div>
+							<div class="space-y-2">
+								<Label for="dur-endDate">End Date</Label>
+								<Input
+									id="dur-endDate"
+									type="date"
+									bind:value={durationDraft.endDate}
+									min={durationDraft.startDate}
+								/>
+							</div>
+						</div>
+
+						<label class="flex cursor-pointer items-center gap-2 text-sm select-none">
+							<input
+								type="checkbox"
+								bind:checked={durationDraft.sameAsTotalDuration}
+								class="h-4 w-4 rounded border-input"
+							/>
+							Show duration same as total duration
+						</label>
+
+						{#if !durationDraft.sameAsTotalDuration}
+							<div class="grid grid-cols-2 gap-4">
+								<div class="space-y-2">
+									<Label for="dur-showStartDate">Show Start Date</Label>
+									<Input
+										id="dur-showStartDate"
+										type="date"
+										bind:value={durationDraft.showStartDate}
+										min={durationDraft.startDate}
+										max={durationDraft.endDate}
+									/>
+								</div>
+								<div class="space-y-2">
+									<Label for="dur-showEndDate">Show End Date</Label>
+									<Input
+										id="dur-showEndDate"
+										type="date"
+										bind:value={durationDraft.showEndDate}
+										min={durationDraft.showStartDate || durationDraft.startDate}
+										max={durationDraft.endDate}
+									/>
+								</div>
+							</div>
+						{/if}
+
+						<div class="flex justify-end gap-2">
+							<Button type="button" variant="outline" onclick={() => (editingDuration = false)}>
+								Cancel
+							</Button>
+							<Button type="submit" disabled={savingDuration}>
+								{savingDuration ? 'Saving…' : 'Save'}
+							</Button>
+						</div>
+					</form>
 				{/if}
 			</div>
-		</Card.Header>
-		{#if editingAddress}
-			<Card.Content>
-				<form class="space-y-4" onsubmit={handleSaveAddress}>
-					<div class="grid gap-4 sm:grid-cols-2">
-						<div class="space-y-2 sm:col-span-2">
-							<Label for="addr-line1">Address line 1</Label>
-							<Input
-								id="addr-line1"
-								bind:value={addressDraft.line1}
-								placeholder="Street and number"
-							/>
-						</div>
-						<div class="space-y-2 sm:col-span-2">
-							<Label for="addr-line2">Address line 2</Label>
-							<Input
-								id="addr-line2"
-								bind:value={addressDraft.line2}
-								placeholder="Building, floor, c/o"
-							/>
-						</div>
-						<div class="space-y-2">
-							<Label for="addr-postal">Postal code</Label>
-							<Input id="addr-postal" bind:value={addressDraft.postalCode} placeholder="12345" />
-						</div>
-						<div class="space-y-2">
-							<Label for="addr-city">City</Label>
-							<Input id="addr-city" bind:value={addressDraft.city} placeholder="Berlin" />
-						</div>
-					</div>
 
-					<div class="flex justify-end gap-2">
-						<Button type="button" variant="outline" onclick={() => (editingAddress = false)}>
-							Cancel
-						</Button>
-						<Button type="submit" disabled={savingAddress}>
-							{savingAddress ? 'Saving…' : 'Save'}
-						</Button>
+			<!-- Address -->
+			<div class="space-y-3 border-t pt-6">
+				<div class="flex items-start justify-between gap-4">
+					<div>
+						<h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+							Address
+						</h3>
+						<p class="text-sm">{formatAddress(production.address)}</p>
 					</div>
-				</form>
-			</Card.Content>
-		{/if}
+					{#if !editingAddress}
+						<Button variant="outline" onclick={() => (editingAddress = true)}>Edit</Button>
+					{/if}
+				</div>
+
+				{#if editingAddress}
+					<form class="space-y-4" onsubmit={handleSaveAddress}>
+						<AddressInput bind:value={addressDraft} idPrefix="addr" />
+
+						<div class="flex justify-end gap-2">
+							<Button type="button" variant="outline" onclick={() => (editingAddress = false)}>
+								Cancel
+							</Button>
+							<Button type="submit" disabled={savingAddress}>
+								{savingAddress ? 'Saving…' : 'Save'}
+							</Button>
+						</div>
+					</form>
+				{/if}
+			</div>
+
+			<!-- Customer -->
+			<div class="space-y-3 border-t pt-6">
+				<div class="flex items-start justify-between gap-4">
+					<div>
+						<h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+							Customer
+						</h3>
+						<p class="text-sm">
+							{production.customer ? customerLabel(production.customer) : '—'}
+						</p>
+					</div>
+					{#if !editingCustomer}
+						<Button variant="outline" onclick={() => (editingCustomer = true)}>Edit</Button>
+					{/if}
+				</div>
+
+				{#if editingCustomer}
+					<form class="space-y-4" onsubmit={handleSaveCustomer}>
+						{#if !creatingCustomer}
+							<div class="space-y-2">
+								<select
+									bind:value={customerDraftId}
+									class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+								>
+									<option value="">— None —</option>
+									{#each orgCustomers as c (c.id)}
+										<option value={c.id}>{customerLabel(c)}</option>
+									{/each}
+								</select>
+								<Button type="button" variant="outline" onclick={() => (creatingCustomer = true)}>
+									+ New customer
+								</Button>
+							</div>
+						{:else}
+							<div class="space-y-4 rounded-md border p-4">
+								<div class="grid gap-4 sm:grid-cols-2">
+									<div class="space-y-2">
+										<Label for="cust-company">Company name</Label>
+										<Input id="cust-company" bind:value={newCustomer.companyName} />
+									</div>
+									<div class="space-y-2">
+										<Label for="cust-contact">Contact person</Label>
+										<Input id="cust-contact" bind:value={newCustomer.contactPerson} />
+									</div>
+									<div class="space-y-2 sm:col-span-2">
+										<Label for="cust-email">Email</Label>
+										<Input id="cust-email" type="email" bind:value={newCustomer.email} />
+									</div>
+								</div>
+								<AddressInput bind:value={newCustomerAddress} idPrefix="cust-addr" />
+								<Button type="button" variant="outline" onclick={() => (creatingCustomer = false)}>
+									Cancel new customer
+								</Button>
+							</div>
+						{/if}
+
+						<div class="flex justify-end gap-2">
+							<Button
+								type="button"
+								variant="outline"
+								onclick={() => {
+									editingCustomer = false;
+									creatingCustomer = false;
+								}}
+							>
+								Cancel
+							</Button>
+							<Button type="submit" disabled={savingCustomer}>
+								{savingCustomer ? 'Saving…' : 'Save'}
+							</Button>
+						</div>
+					</form>
+				{/if}
+			</div>
+		</Card.Content>
 	</Card.Root>
 
 	<!-- Equipment section -->
 	<div>
 		<div class="mb-4 flex items-center justify-between">
 			<h2 class="text-xl font-semibold">Booked Equipment</h2>
-			<Button onclick={() => (showAddPanel = !showAddPanel)}>
-				{showAddPanel ? 'Done' : 'Add Equipment'}
-			</Button>
+			<Button href={resolve(`/productions/${productionId}/equipment`)}>Manage Equipment</Button>
 		</div>
-
-		{#if showAddPanel}
-			<Card.Root class="mb-6 bg-muted/30">
-				<Card.Header>
-					<Card.Title>Add Equipment</Card.Title>
-					<div class="mt-2">
-						<Input
-							type="search"
-							placeholder="Search assets and bundles…"
-							bind:value={searchQuery}
-							class="max-w-sm"
-						/>
-					</div>
-				</Card.Header>
-				<Card.Content>
-					{#if filteredAddRows.length === 0}
-						<p class="text-sm text-muted-foreground">No results.</p>
-					{:else}
-						<div class="max-h-72 overflow-y-auto rounded-md border">
-							<table class="w-full text-sm">
-								<thead class="sticky top-0 bg-muted/80 backdrop-blur-sm">
-									<tr class="border-b">
-										<th class="px-3 py-2 text-left font-medium text-muted-foreground">Name</th>
-										<th class="px-3 py-2 text-left font-medium text-muted-foreground">Info</th>
-										<th class="px-3 py-2 text-left font-medium text-muted-foreground">Org</th>
-										<th class="px-3 py-2 text-left font-medium text-muted-foreground">Status</th>
-										<th class="w-12 px-3 py-2 text-center font-medium text-muted-foreground">Add</th
-										>
-									</tr>
-								</thead>
-								<tbody>
-									{#each filteredAddRows as row (row.id)}
-										{@const isAdded =
-											row.kind === 'bundle'
-												? addedBundleIds.has(row.id)
-												: addedAssetIds.has(row.id)}
-										{@const nonAddedBundleAssets =
-											row.kind === 'bundle'
-												? row.assetIds.filter((id) => !addedAssetIds.has(id))
-												: []}
-										{@const isConflict =
-											row.kind === 'asset'
-												? bookedAssets.has(row.id)
-												: nonAddedBundleAssets.length > 0 &&
-													nonAddedBundleAssets.every((id) => bookedAssets.has(id))}
-										{@const conflictInfo =
-											row.kind === 'asset'
-												? (bookedAssets.get(row.id) ?? null)
-												: (() => {
-														const names = [
-															...new Set(
-																nonAddedBundleAssets
-																	.filter((id) => bookedAssets.has(id))
-																	.map((id) => bookedAssets.get(id)!)
-															)
-														];
-														return names.length ? names.join(', ') : null;
-													})()}
-										{@const isDisabled = isAdded || isConflict}
-										<tr
-											class="border-b bg-background transition-colors last:border-0 {isDisabled
-												? 'opacity-60'
-												: 'hover:bg-muted/30'}"
-										>
-											<td class="px-3 py-2">
-												{#if row.kind === 'bundle'}
-													<div class="flex items-center gap-2">
-														<span
-															class="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground"
-															>Bundle</span
-														>
-														<span class="font-medium">{row.name}</span>
-													</div>
-												{:else}
-													<p class="font-medium">{row.productName}</p>
-													<p class="text-xs text-muted-foreground">{row.manufacturerName}</p>
-												{/if}
-											</td>
-											<td class="px-3 py-2 font-mono text-xs text-muted-foreground">
-												{#if row.kind === 'bundle'}
-													{row.count} item{row.count !== 1 ? 's' : ''}
-												{:else}
-													{row.serialNumber ?? row.assetTag ?? '—'}
-												{/if}
-											</td>
-											<td class="px-3 py-2 text-xs text-muted-foreground">{row.orgName}</td>
-											<td class="px-3 py-2">
-												{#if isConflict && conflictInfo}
-													<span class="text-xs text-destructive" title={conflictInfo}
-														>Booked: {conflictInfo}</span
-													>
-												{:else if row.kind === 'asset'}
-													<span
-														class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {assetStatusClass[
-															row.status
-														] ?? ''}">{row.status}</span
-													>
-												{:else}
-													<span class="text-muted-foreground">—</span>
-												{/if}
-											</td>
-											<td class="px-3 py-2 text-center">
-												<button
-													type="button"
-													disabled={working || isDisabled}
-													title={isConflict && conflictInfo
-														? `Blocked by ${conflictInfo}`
-														: undefined}
-													onclick={() => {
-														if (!isDisabled) handleAdd(row);
-													}}
-													class="mx-auto flex h-5 w-5 items-center justify-center rounded border-2 transition-colors {isAdded
-														? 'cursor-default border-primary bg-primary text-primary-foreground'
-														: isConflict
-															? 'cursor-not-allowed border-destructive/50 bg-destructive/10 text-destructive'
-															: 'cursor-pointer border-input hover:border-primary'}"
-												>
-													{#if isAdded}
-														<svg
-															xmlns="http://www.w3.org/2000/svg"
-															width="12"
-															height="12"
-															viewBox="0 0 24 24"
-															fill="none"
-															stroke="currentColor"
-															stroke-width="3"
-															stroke-linecap="round"
-															stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg
-														>
-													{:else if isConflict}
-														<svg
-															xmlns="http://www.w3.org/2000/svg"
-															width="10"
-															height="10"
-															viewBox="0 0 24 24"
-															fill="none"
-															stroke="currentColor"
-															stroke-width="3"
-															stroke-linecap="round"
-															stroke-linejoin="round"
-															><line x1="18" y1="6" x2="6" y2="18" /><line
-																x1="6"
-																y1="6"
-																x2="18"
-																y2="18"
-															/></svg
-														>
-													{/if}
-												</button>
-											</td>
-										</tr>
-									{/each}
-								</tbody>
-							</table>
-						</div>
-					{/if}
-				</Card.Content>
-			</Card.Root>
-		{/if}
 
 		{#if production.items.length === 0}
 			<Card.Root>

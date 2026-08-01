@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { getAllUsers, setUserAdmin } from '$lib/remote/orgs.remote';
@@ -21,7 +22,7 @@
 			await setUserAdmin({ userId, isAdmin: !currentIsAdmin });
 			toast.success(`${name} ${!currentIsAdmin ? 'granted' : 'revoked'} admin access`);
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		}
 	}
 </script>

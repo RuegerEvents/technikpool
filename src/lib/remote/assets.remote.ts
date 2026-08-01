@@ -244,6 +244,7 @@ const createAssetsSchema = v.object({
 	categoryId: v.optional(v.string()),
 	manufacturerId: v.optional(v.string()),
 	newManufacturerName: v.optional(v.string()),
+	newManufacturerLogoUrl: v.optional(v.string()),
 	items: v.array(
 		v.object({
 			serialNumber: v.optional(v.string()),
@@ -265,7 +266,12 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 
 	let manufacturerId = data.manufacturerId;
 	if (data.newManufacturerName && !manufacturerId) {
-		const m = await prisma.manufacturer.create({ data: { name: data.newManufacturerName } });
+		const m = await prisma.manufacturer.create({
+			data: {
+				name: data.newManufacturerName,
+				logoUrl: data.newManufacturerLogoUrl?.trim() || null
+			}
+		});
 		manufacturerId = m.id;
 		await getManufacturers().refresh();
 		await getProducts().refresh();
@@ -293,10 +299,20 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 	if (location.organizationId !== data.organizationId) throw new Error('Invalid location');
 
 	const assets = await prisma.$transaction(async (tx) => {
-		const { assetIdPrefix: prefix } = await tx.organization.findUniqueOrThrow({
-			where: { id: data.organizationId },
-			select: { assetIdPrefix: true }
-		});
+		const { assetIdPrefix: prefix, defaultInspectionIntervalMonths } =
+			await tx.organization.findUniqueOrThrow({
+				where: { id: data.organizationId },
+				select: { assetIdPrefix: true, defaultInspectionIntervalMonths: true }
+			});
+
+		const createdAt = new Date();
+		const nextInspectionDue = defaultInspectionIntervalMonths
+			? new Date(
+					createdAt.getFullYear(),
+					createdAt.getMonth() + defaultInspectionIntervalMonths,
+					createdAt.getDate()
+				)
+			: null;
 
 		const last = await tx.asset.findFirst({
 			where: { assetTag: { startsWith: prefix } },
@@ -332,6 +348,9 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 						serialNumber: item.serialNumber || null,
 						assetTag: resolvedTag,
 						status: 'AVAILABLE',
+						// Snapshot, not a live reference — see Organization.defaultInspectionIntervalMonths.
+						inspectionIntervalMonths: defaultInspectionIntervalMonths,
+						nextInspectionDue,
 						transactions: {
 							create: { userId: user.id, action: 'CREATED', data: { type: 'CREATED' } }
 						}
@@ -377,7 +396,10 @@ const updateAssetSchema = v.object({
 	serialNumber: v.optional(v.string()),
 	assetTag: v.optional(v.string()),
 	status: v.optional(v.picklist(['AVAILABLE', 'MAINTENANCE', 'BROKEN'])),
-	locationId: v.optional(v.string())
+	locationId: v.optional(v.string()),
+	netPurchasePrice: v.optional(v.nullable(v.number())),
+	purchaseDate: v.optional(v.nullable(v.string())),
+	inspectionIntervalMonths: v.optional(v.nullable(v.number()))
 });
 
 export const updateAsset = command(updateAssetSchema, async (input) => {
@@ -416,9 +438,37 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 		assetTag?: string | null;
 		status?: string;
 		locationId?: string;
+		netPurchasePrice?: number | null;
+		purchaseDate?: Date | null;
+		inspectionIntervalMonths?: number | null;
+		nextInspectionDue?: Date | null;
 	} = {};
 
 	const changes: FieldChange[] = [];
+	if ('netPurchasePrice' in input) {
+		updateData.netPurchasePrice = input.netPurchasePrice ?? null;
+	}
+	if ('purchaseDate' in input) {
+		updateData.purchaseDate = input.purchaseDate ? new Date(input.purchaseDate) : null;
+	}
+	if ('inspectionIntervalMonths' in input) {
+		const interval = input.inspectionIntervalMonths ?? null;
+		updateData.inspectionIntervalMonths = interval;
+		if (interval) {
+			const lastInspection = await prisma.inspection.findFirst({
+				where: { assetId: asset.id },
+				orderBy: { performedAt: 'desc' }
+			});
+			const base = lastInspection?.performedAt ?? asset.createdAt;
+			updateData.nextInspectionDue = new Date(
+				base.getFullYear(),
+				base.getMonth() + interval,
+				base.getDate()
+			);
+		} else {
+			updateData.nextInspectionDue = null;
+		}
+	}
 	if ('serialNumber' in input) {
 		const serialNumber = input.serialNumber?.trim() || null;
 		updateData.serialNumber = serialNumber;
@@ -594,7 +644,8 @@ const updateBundleSchema = v.object({
 	name: v.optional(v.string()),
 	description: v.optional(v.string()),
 	categoryId: v.optional(v.string()),
-	locationId: v.optional(v.nullable(v.string()))
+	locationId: v.optional(v.nullable(v.string())),
+	netPurchasePrice: v.optional(v.nullable(v.number()))
 });
 
 export const updateBundle = command(updateBundleSchema, async (input) => {
@@ -615,11 +666,13 @@ export const updateBundle = command(updateBundleSchema, async (input) => {
 		description?: string | null;
 		categoryId?: string;
 		locationId?: string | null;
+		netPurchasePrice?: number | null;
 	} = {};
 	if (input.name !== undefined) data.name = input.name.trim();
 	if ('description' in input) data.description = input.description?.trim() || null;
 	if (input.categoryId !== undefined) data.categoryId = input.categoryId;
 	if ('locationId' in input) data.locationId = input.locationId ?? null;
+	if ('netPurchasePrice' in input) data.netPurchasePrice = input.netPurchasePrice ?? null;
 
 	const updated = await prisma.$transaction(async (tx) => {
 		const result = await tx.assetBundle.update({

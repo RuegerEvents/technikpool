@@ -24,3 +24,6 @@ vite.config.ts.timestamp-*
 
 /../generated/prisma
 src/locales/.wuchale
+
+# Dev emails saved as .eml instead of sent (see src/lib/server/mail.ts)
+/.mail-dev

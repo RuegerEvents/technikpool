@@ -6,13 +6,16 @@
 	import { getMyOrgs, getAllOrgs, createOrg } from '$lib/remote/orgs.remote';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
-	import { plural } from '$lib/utils';
+	import { plural, getErrorMessage } from '$lib/utils';
+	import { OrgBadge } from '$lib/components/ui/org-badge';
 
 	let { data } = $props();
 
 	let orgs = $derived(await (data.isAdmin ? getAllOrgs() : getMyOrgs()));
 	let newOrgName = $state('');
 	let newOrgPrefix = $state('');
+	let newOrgColor = $state('#0069c9');
+	let newOrgAvatarLabel = $state('');
 	let creating = $state(false);
 
 	const roleLabels: Record<string, string> = {
@@ -27,12 +30,19 @@
 		if (!newOrgName) return;
 		try {
 			creating = true;
-			await createOrg({ name: newOrgName, assetIdPrefix: newOrgPrefix });
+			await createOrg({
+				name: newOrgName,
+				assetIdPrefix: newOrgPrefix,
+				color: newOrgColor,
+				avatarLabel: newOrgAvatarLabel
+			});
 			toast.success(`Organization "${newOrgName}" created!`);
 			newOrgName = '';
 			newOrgPrefix = '';
+			newOrgColor = '#0069c9';
+			newOrgAvatarLabel = '';
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 		} finally {
 			creating = false;
 		}
@@ -81,6 +91,30 @@
 							3-digit prefix for asset IDs (e.g. 123 → 12300001).
 						</p>
 					</div>
+					<div class="flex gap-4">
+						<div class="space-y-2">
+							<Label for="orgColor">Color</Label>
+							<div class="flex gap-2">
+								<Input id="orgColor" type="color" bind:value={newOrgColor} class="h-10 w-14 p-1" />
+								<Input bind:value={newOrgColor} class="w-28 font-mono" required />
+							</div>
+						</div>
+						<div class="space-y-2">
+							<Label for="orgAvatarLabel">Avatar label</Label>
+							<Input
+								id="orgAvatarLabel"
+								bind:value={newOrgAvatarLabel}
+								placeholder="e.g. RE"
+								maxlength={2}
+								required
+								class="w-20 font-mono uppercase"
+							/>
+						</div>
+					</div>
+					<p class="text-xs text-muted-foreground">
+						Color and a 2-letter label identify this org at a glance in the calendar and device
+						lists.
+					</p>
 					<Button type="submit" disabled={creating}>
 						{creating ? 'Creating...' : 'Create Organization'}
 					</Button>
@@ -104,7 +138,9 @@
 						<Card.Root>
 							<Card.Content class="flex items-center justify-between py-4">
 								<div>
-									<p class="font-medium">{org.name}</p>
+									<p class="font-medium">
+										<OrgBadge name={org.name} color={org.color} avatarLabel={org.avatarLabel} />
+									</p>
 									<p class="text-sm text-muted-foreground">
 										{#if org.role}
 											Role: {roleLabels[org.role] ?? org.role}

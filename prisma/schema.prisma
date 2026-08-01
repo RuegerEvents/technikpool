@@ -84,7 +84,7 @@ model Verification {
 // ----------------------------------------------------
 
 model Organization {
-  id            String  @id @default(cuid())
+  id            String @id @default(cuid())
   name          String
   assetIdPrefix String @unique
 
@@ -93,13 +93,34 @@ model Organization {
 
   defaultAssetVisibility String @default("PUBLIC")
 
+  // Visual identity: always manually set by an org owner/admin (issue #13).
+  color       String @unique
+  avatarLabel String @unique
+
+  defaultInspectionIntervalMonths Int?
+  isKleinunternehmer              Boolean @default(false)
+
+  // Billing details for offer/invoice generation (issue #9 follow-up).
+  addressId String?
+  address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  taxId     String? // Steuernummer or USt-IdNr
+
+  bankAccountHolder String?
+  iban              String?
+  bic               String?
+  bankName          String?
+
   homeUsers User[]          @relation("HomeOrg")
   members   OrgMembership[]
 
-  locations   Location[]
-  assets      Asset[]
-  bundles     AssetBundle[]
-  productions Production[]
+  locations     Location[]
+  assets        Asset[]
+  bundles       AssetBundle[]
+  productions   Production[]
+  categoryRates OrgCategoryRate[]
+  offers        Offer[]
+  invoices      Invoice[]
+  customers     Customer[]
 }
 
 enum Role {
@@ -126,6 +147,7 @@ model OrgMembership {
 model Manufacturer {
   id        String    @id @default(cuid())
   name      String
+  logoUrl   String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   products  Product[]
@@ -141,6 +163,7 @@ model Category {
 
   products Product[]
   bundles  AssetBundle[]
+  orgRates OrgCategoryRate[]
 }
 
 model Product {
@@ -166,19 +189,21 @@ model Address {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  locations   Location[]
-  productions Production[]
+  locations     Location[]
+  productions   Production[]
+  organizations Organization[]
+  customers     Customer[]
 }
 
 model Location {
-  id             String       @id @default(cuid())
+  id             String        @id @default(cuid())
   name           String
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   addressId      String
-  address        Address      @relation(fields: [addressId], references: [id], onDelete: Restrict)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  address        Address       @relation(fields: [addressId], references: [id], onDelete: Restrict)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   assets         Asset[]
   assetBundles   AssetBundle[]
 }
@@ -199,11 +224,22 @@ model Asset {
   bundleId String?
   bundle   AssetBundle? @relation(fields: [bundleId], references: [id])
 
+  // Pricing (issue #9): purchase price feeds offer/invoice rate calculation.
+  // Nullable — historical assets may have no known purchase price/date.
+  netPurchasePrice Decimal?  @db.Decimal(10, 2)
+  purchaseDate     DateTime?
+
+  // DGUV inspection tracking (issue #7). Snapshotted from the org's default
+  // at creation, not a live reference — see Organization.defaultInspectionIntervalMonths.
+  inspectionIntervalMonths Int?
+  nextInspectionDue        DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   productionItems ProductionItem[]
   transactions    AssetTransaction[]
+  inspections     Inspection[]
 }
 
 model AssetBundle {
@@ -219,6 +255,10 @@ model AssetBundle {
   assets          Asset[]
   productionItems ProductionItem[]
 
+  // If set, offers/invoices bill this bundle as a single line at this price —
+  // the individual assets in the bundle don't each need their own price.
+  netPurchasePrice Decimal? @db.Decimal(10, 2)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -229,15 +269,49 @@ model Production {
   startDate DateTime?
   endDate   DateTime?
 
+  // Show duration (issue backlog): the subset of the total duration that is
+  // actually billable show days, used for offer/invoice day-count. Total
+  // duration (startDate/endDate) still governs asset blocking/calendar.
+  showStartDate DateTime?
+  showEndDate   DateTime?
+
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
 
   addressId String?
   address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
 
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
   items        ProductionItem[]
   crew         ProductionCrew[]
   transactions AssetTransaction[]
+  offers       Offer[]
+  invoices     Invoice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Reusable, org-scoped customer record — optionally attached to a Production
+// so its details can auto-populate offers/invoices. Offer/Invoice keep their
+// own snapshot fields (customerName etc.) so issued documents stay fixed even
+// if the Customer record is edited later; customerId there is a soft
+// reference only, same pattern as OfferItem.assetId.
+model Customer {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  companyName   String?
+  contactPerson String?
+  email         String?
+
+  addressId String?
+  address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
+
+  productions Production[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -284,6 +358,187 @@ model AssetTransaction {
 
   action String
   data   Json?
+
+  createdAt DateTime @default(now())
+}
+
+// ----------------------------------------------------
+// DGUV inspection tracking (issue #7)
+// ----------------------------------------------------
+
+model Inspection {
+  id      String @id @default(cuid())
+  assetId String
+  asset   Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  performedAt   DateTime
+  result        String // e.g. "PASSED", "FAILED"
+  notes         String?
+  inspectorName String? // the certifying inspector is typically external, not an app user
+  nextDueDate   DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+// ----------------------------------------------------
+// Offers & invoices (issues #8, #9)
+// ----------------------------------------------------
+
+model OrgCategoryRate {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  categoryId     String
+  category       Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  // Daily rental rate as a percentage of an asset's net purchase price, e.g. 2.50 = 2.5%/day
+  percentage Decimal @db.Decimal(5, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, categoryId])
+}
+
+model Offer {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  productionId   String?
+  production     Production?  @relation(fields: [productionId], references: [id], onDelete: SetNull)
+
+  // Soft reference only (no FK/relation) — see OfferItem.assetId. Lets an
+  // offer point back at the Customer it was populated from without pinning
+  // the issued document's snapshot fields below to that record.
+  customerId            String?
+  customerName          String
+  customerAddress       String?
+  customerContactPerson String?
+  customerEmail         String?
+
+  dayCount      Int
+  discountType  String? // "PERCENT" | "AMOUNT"
+  discountValue Decimal? @db.Decimal(10, 2)
+
+  // Which of the production's booked assets were billed — "ALL" or
+  // "OWN_ORG_ONLY" (excludes assets loaned in from partner orgs). Persisted
+  // so a later re-sync from the production recomputes the same scope the
+  // offer was originally created with.
+  assetScope String @default("ALL")
+
+  // Snapshot at creation — 19% German VAT, 0% for Kleinunternehmer orgs
+  // (§19 UStG). Kept as its own field rather than derived, so a future VAT
+  // rate change in the app doesn't retroactively alter existing documents.
+  vatRatePercent Decimal @default(19) @db.Decimal(4, 2)
+
+  items    OfferItem[]
+  invoices Invoice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OfferItem {
+  id      String @id @default(cuid())
+  offerId String
+  offer   Offer  @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  // Soft reference only (no FK/relation): a line must survive the asset it
+  // was priced from being edited or deleted later.
+  assetId String?
+  // Soft reference only — set instead of assetId for bundle-priced lines, so
+  // re-syncing from the production can match a bundle line across updates
+  // even as its member count/description changes.
+  bundleId String?
+
+  // Category snapshot (soft reference, no FK) — grouping/display stays
+  // stable even if the category is later renamed or the source asset/bundle
+  // is recategorized.
+  categoryId    String?
+  categoryName  String?
+  categoryColor String?
+
+  description      String
+  netPurchasePrice Decimal @db.Decimal(10, 2)
+  ratePercent      Decimal @db.Decimal(5, 2)
+  dailyRate        Decimal @db.Decimal(10, 2)
+  lineTotal        Decimal @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+}
+
+// Gapless-not-required-but-never-duplicated sequential invoice numbering
+// (§14(4) Nr. 4 UStG) — one counter row per year, incremented in a transaction.
+model InvoiceSequence {
+  id         String @id @default(cuid())
+  year       Int    @unique
+  lastNumber Int    @default(0)
+}
+
+model Invoice {
+  id     String @id @default(cuid())
+  number String @unique // e.g. "2026-0007"
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  productionId   String?
+  production     Production?  @relation(fields: [productionId], references: [id], onDelete: SetNull)
+  offerId        String?
+  offer          Offer?       @relation(fields: [offerId], references: [id], onDelete: SetNull)
+
+  // Soft reference only — see OfferItem.assetId / Offer.customerId.
+  customerId            String?
+  customerName          String
+  customerAddress       String?
+  customerContactPerson String?
+  customerEmail         String?
+
+  issueDate DateTime @default(now())
+  dayCount  Int
+
+  discountType  String?
+  discountValue Decimal? @db.Decimal(10, 2)
+
+  // Same purpose as Offer.assetScope — lets a pre-send invoice re-sync its
+  // items from the production using the original billing scope.
+  assetScope String @default("ALL")
+
+  // Null while the invoice is still a draft — items can be corrected and
+  // re-synced from the production. Once set, the invoice is immutable
+  // (GoBD/§14 UStG): no more item updates, no more field edits.
+  sentAt DateTime?
+
+  // Snapshot of the org's Kleinunternehmer status at issuance — GoBD requires
+  // the issued document's content to stay fixed even if the org flag changes later.
+  isKleinunternehmerSnapshot Boolean @default(false)
+  vatRatePercent             Decimal @default(19) @db.Decimal(4, 2)
+
+  items InvoiceItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InvoiceItem {
+  id        String  @id @default(cuid())
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  // Soft reference only — see OfferItem.assetId.
+  assetId String?
+  // Soft reference only — see OfferItem.bundleId.
+  bundleId String?
+
+  // Soft reference only — see OfferItem.categoryId.
+  categoryId    String?
+  categoryName  String?
+  categoryColor String?
+
+  description      String
+  netPurchasePrice Decimal @db.Decimal(10, 2)
+  ratePercent      Decimal @db.Decimal(5, 2)
+  dailyRate        Decimal @db.Decimal(10, 2)
+  lineTotal        Decimal @db.Decimal(10, 2)
 
   createdAt DateTime @default(now())
 }

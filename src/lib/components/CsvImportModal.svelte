@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { getLocations, getCategories, importAssets } from '$lib/remote/assets.remote';
@@ -281,7 +282,7 @@
 			});
 			step = 'results';
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 			step = 'mapping';
 		}
 	}

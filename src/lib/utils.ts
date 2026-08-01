@@ -5,8 +5,55 @@ export function plural(num: number, candidates: string[], rule = (n: number) => 
 	return candidates[rule(num)].replace('#', String(num));
 }
 
+// Inclusive day count between two dates (a single day counts as 1, not 0).
+export function dayCountBetween(
+	start: Date | string | null | undefined,
+	end: Date | string | null | undefined
+): number | null {
+	if (!start || !end) return null;
+	const startMs = new Date(start).getTime();
+	const endMs = new Date(end).getTime();
+	return Math.max(1, Math.round((endMs - startMs) / 86_400_000) + 1);
+}
+
+// SvelteKit remote functions reject with an `HttpError` (`{status, body: {message}}`),
+// not a plain `Error` — `(err as Error).message` is always undefined for those.
+export function getErrorMessage(err: unknown): string {
+	if (err && typeof err === 'object') {
+		if ('body' in err && err.body && typeof err.body === 'object' && 'message' in err.body) {
+			const message = (err.body as { message?: unknown }).message;
+			if (typeof message === 'string' && message) return message;
+		}
+		if ('message' in err) {
+			const message = (err as { message?: unknown }).message;
+			if (typeof message === 'string' && message) return message;
+		}
+	}
+	return 'An unexpected error occurred';
+}
+
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
+}
+
+export function formatAddress(
+	addr:
+		| {
+				line1?: string | null;
+				line2?: string | null;
+				postalCode?: string | null;
+				city?: string | null;
+		  }
+		| null
+		| undefined
+): string {
+	if (!addr) return '';
+	const parts = [
+		addr.line1?.trim(),
+		addr.line2?.trim(),
+		[addr.postalCode?.trim(), addr.city?.trim()].filter(Boolean).join(' ')
+	].filter(Boolean);
+	return parts.join(' · ');
 }
 
 function parseHexColor(input: string): [number, number, number] | null {

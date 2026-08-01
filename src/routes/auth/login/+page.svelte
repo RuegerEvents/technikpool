@@ -51,8 +51,11 @@
 					<Input id="email" type="email" placeholder="m@example.com" bind:value={email} required />
 				</div>
 				<div class="space-y-2">
-					<div class="flex items-center">
+					<div class="flex items-center justify-between">
 						<Label for="password">Password</Label>
+						<a href={resolve('/auth/forgot-password')} class="text-sm underline">
+							Forgot password?
+						</a>
 					</div>
 					<Input id="password" type="password" bind:value={password} required />
 				</div>

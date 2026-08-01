@@ -20,8 +20,18 @@ export type AssetBundleModel = runtime.Types.Result.DefaultSelection<Prisma.$Ass
 
 export type AggregateAssetBundle = {
   _count: AssetBundleCountAggregateOutputType | null
+  _avg: AssetBundleAvgAggregateOutputType | null
+  _sum: AssetBundleSumAggregateOutputType | null
   _min: AssetBundleMinAggregateOutputType | null
   _max: AssetBundleMaxAggregateOutputType | null
+}
+
+export type AssetBundleAvgAggregateOutputType = {
+  netPurchasePrice: runtime.Decimal | null
+}
+
+export type AssetBundleSumAggregateOutputType = {
+  netPurchasePrice: runtime.Decimal | null
 }
 
 export type AssetBundleMinAggregateOutputType = {
@@ -31,6 +41,7 @@ export type AssetBundleMinAggregateOutputType = {
   organizationId: string | null
   categoryId: string | null
   locationId: string | null
+  netPurchasePrice: runtime.Decimal | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -42,6 +53,7 @@ export type AssetBundleMaxAggregateOutputType = {
   organizationId: string | null
   categoryId: string | null
   locationId: string | null
+  netPurchasePrice: runtime.Decimal | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -53,11 +65,20 @@ export type AssetBundleCountAggregateOutputType = {
   organizationId: number
   categoryId: number
   locationId: number
+  netPurchasePrice: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
+
+export type AssetBundleAvgAggregateInputType = {
+  netPurchasePrice?: true
+}
+
+export type AssetBundleSumAggregateInputType = {
+  netPurchasePrice?: true
+}
 
 export type AssetBundleMinAggregateInputType = {
   id?: true
@@ -66,6 +87,7 @@ export type AssetBundleMinAggregateInputType = {
   organizationId?: true
   categoryId?: true
   locationId?: true
+  netPurchasePrice?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -77,6 +99,7 @@ export type AssetBundleMaxAggregateInputType = {
   organizationId?: true
   categoryId?: true
   locationId?: true
+  netPurchasePrice?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -88,6 +111,7 @@ export type AssetBundleCountAggregateInputType = {
   organizationId?: true
   categoryId?: true
   locationId?: true
+  netPurchasePrice?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -131,6 +155,18 @@ export type AssetBundleAggregateArgs<ExtArgs extends runtime.Types.Extensions.In
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: AssetBundleAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: AssetBundleSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: AssetBundleMinAggregateInputType
@@ -161,6 +197,8 @@ export type AssetBundleGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   _count?: AssetBundleCountAggregateInputType | true
+  _avg?: AssetBundleAvgAggregateInputType
+  _sum?: AssetBundleSumAggregateInputType
   _min?: AssetBundleMinAggregateInputType
   _max?: AssetBundleMaxAggregateInputType
 }
@@ -172,9 +210,12 @@ export type AssetBundleGroupByOutputType = {
   organizationId: string
   categoryId: string
   locationId: string | null
+  netPurchasePrice: runtime.Decimal | null
   createdAt: Date
   updatedAt: Date
   _count: AssetBundleCountAggregateOutputType | null
+  _avg: AssetBundleAvgAggregateOutputType | null
+  _sum: AssetBundleSumAggregateOutputType | null
   _min: AssetBundleMinAggregateOutputType | null
   _max: AssetBundleMaxAggregateOutputType | null
 }
@@ -204,6 +245,7 @@ export type AssetBundleWhereInput = {
   organizationId?: Prisma.StringFilter<"AssetBundle"> | string
   categoryId?: Prisma.StringFilter<"AssetBundle"> | string
   locationId?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
+  netPurchasePrice?: Prisma.DecimalNullableFilter<"AssetBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -220,6 +262,7 @@ export type AssetBundleOrderByWithRelationInput = {
   organizationId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   locationId?: Prisma.SortOrderInput | Prisma.SortOrder
+  netPurchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
@@ -239,6 +282,7 @@ export type AssetBundleWhereUniqueInput = Prisma.AtLeast<{
   organizationId?: Prisma.StringFilter<"AssetBundle"> | string
   categoryId?: Prisma.StringFilter<"AssetBundle"> | string
   locationId?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
+  netPurchasePrice?: Prisma.DecimalNullableFilter<"AssetBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -255,11 +299,14 @@ export type AssetBundleOrderByWithAggregationInput = {
   organizationId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   locationId?: Prisma.SortOrderInput | Prisma.SortOrder
+  netPurchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AssetBundleCountOrderByAggregateInput
+  _avg?: Prisma.AssetBundleAvgOrderByAggregateInput
   _max?: Prisma.AssetBundleMaxOrderByAggregateInput
   _min?: Prisma.AssetBundleMinOrderByAggregateInput
+  _sum?: Prisma.AssetBundleSumOrderByAggregateInput
 }
 
 export type AssetBundleScalarWhereWithAggregatesInput = {
@@ -272,6 +319,7 @@ export type AssetBundleScalarWhereWithAggregatesInput = {
   organizationId?: Prisma.StringWithAggregatesFilter<"AssetBundle"> | string
   categoryId?: Prisma.StringWithAggregatesFilter<"AssetBundle"> | string
   locationId?: Prisma.StringNullableWithAggregatesFilter<"AssetBundle"> | string | null
+  netPurchasePrice?: Prisma.DecimalNullableWithAggregatesFilter<"AssetBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AssetBundle"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AssetBundle"> | Date | string
 }
@@ -280,6 +328,7 @@ export type AssetBundleCreateInput = {
   id?: string
   name: string
   description?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBundlesInput
@@ -296,6 +345,7 @@ export type AssetBundleUncheckedCreateInput = {
   organizationId: string
   categoryId: string
   locationId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput
@@ -306,6 +356,7 @@ export type AssetBundleUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundlesNestedInput
@@ -322,6 +373,7 @@ export type AssetBundleUncheckedUpdateInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput
@@ -335,6 +387,7 @@ export type AssetBundleCreateManyInput = {
   organizationId: string
   categoryId: string
   locationId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -343,6 +396,7 @@ export type AssetBundleUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -354,6 +408,7 @@ export type AssetBundleUncheckedUpdateManyInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -380,8 +435,13 @@ export type AssetBundleCountOrderByAggregateInput = {
   organizationId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   locationId?: Prisma.SortOrder
+  netPurchasePrice?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type AssetBundleAvgOrderByAggregateInput = {
+  netPurchasePrice?: Prisma.SortOrder
 }
 
 export type AssetBundleMaxOrderByAggregateInput = {
@@ -391,6 +451,7 @@ export type AssetBundleMaxOrderByAggregateInput = {
   organizationId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   locationId?: Prisma.SortOrder
+  netPurchasePrice?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -402,8 +463,13 @@ export type AssetBundleMinOrderByAggregateInput = {
   organizationId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   locationId?: Prisma.SortOrder
+  netPurchasePrice?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type AssetBundleSumOrderByAggregateInput = {
+  netPurchasePrice?: Prisma.SortOrder
 }
 
 export type AssetBundleCreateNestedManyWithoutOrganizationInput = {
@@ -568,6 +634,7 @@ export type AssetBundleCreateWithoutOrganizationInput = {
   id?: string
   name: string
   description?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   category: Prisma.CategoryCreateNestedOneWithoutBundlesInput
@@ -582,6 +649,7 @@ export type AssetBundleUncheckedCreateWithoutOrganizationInput = {
   description?: string | null
   categoryId: string
   locationId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput
@@ -624,6 +692,7 @@ export type AssetBundleScalarWhereInput = {
   organizationId?: Prisma.StringFilter<"AssetBundle"> | string
   categoryId?: Prisma.StringFilter<"AssetBundle"> | string
   locationId?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
+  netPurchasePrice?: Prisma.DecimalNullableFilter<"AssetBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
 }
@@ -632,6 +701,7 @@ export type AssetBundleCreateWithoutCategoryInput = {
   id?: string
   name: string
   description?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBundlesInput
@@ -646,6 +716,7 @@ export type AssetBundleUncheckedCreateWithoutCategoryInput = {
   description?: string | null
   organizationId: string
   locationId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput
@@ -682,6 +753,7 @@ export type AssetBundleCreateWithoutLocationInput = {
   id?: string
   name: string
   description?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBundlesInput
@@ -696,6 +768,7 @@ export type AssetBundleUncheckedCreateWithoutLocationInput = {
   description?: string | null
   organizationId: string
   categoryId: string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput
@@ -732,6 +805,7 @@ export type AssetBundleCreateWithoutAssetsInput = {
   id?: string
   name: string
   description?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBundlesInput
@@ -747,6 +821,7 @@ export type AssetBundleUncheckedCreateWithoutAssetsInput = {
   organizationId: string
   categoryId: string
   locationId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutSourceBundleInput
@@ -772,6 +847,7 @@ export type AssetBundleUpdateWithoutAssetsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundlesNestedInput
@@ -787,6 +863,7 @@ export type AssetBundleUncheckedUpdateWithoutAssetsInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutSourceBundleNestedInput
@@ -796,6 +873,7 @@ export type AssetBundleCreateWithoutProductionItemsInput = {
   id?: string
   name: string
   description?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBundlesInput
@@ -811,6 +889,7 @@ export type AssetBundleUncheckedCreateWithoutProductionItemsInput = {
   organizationId: string
   categoryId: string
   locationId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput
@@ -836,6 +915,7 @@ export type AssetBundleUpdateWithoutProductionItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundlesNestedInput
@@ -851,6 +931,7 @@ export type AssetBundleUncheckedUpdateWithoutProductionItemsInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput
@@ -862,6 +943,7 @@ export type AssetBundleCreateManyOrganizationInput = {
   description?: string | null
   categoryId: string
   locationId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -870,6 +952,7 @@ export type AssetBundleUpdateWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.CategoryUpdateOneRequiredWithoutBundlesNestedInput
@@ -884,6 +967,7 @@ export type AssetBundleUncheckedUpdateWithoutOrganizationInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput
@@ -896,6 +980,7 @@ export type AssetBundleUncheckedUpdateManyWithoutOrganizationInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -906,6 +991,7 @@ export type AssetBundleCreateManyCategoryInput = {
   description?: string | null
   organizationId: string
   locationId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -914,6 +1000,7 @@ export type AssetBundleUpdateWithoutCategoryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundlesNestedInput
@@ -928,6 +1015,7 @@ export type AssetBundleUncheckedUpdateWithoutCategoryInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput
@@ -940,6 +1028,7 @@ export type AssetBundleUncheckedUpdateManyWithoutCategoryInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -950,6 +1039,7 @@ export type AssetBundleCreateManyLocationInput = {
   description?: string | null
   organizationId: string
   categoryId: string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -958,6 +1048,7 @@ export type AssetBundleUpdateWithoutLocationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundlesNestedInput
@@ -972,6 +1063,7 @@ export type AssetBundleUncheckedUpdateWithoutLocationInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput
@@ -984,6 +1076,7 @@ export type AssetBundleUncheckedUpdateManyWithoutLocationInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1035,6 +1128,7 @@ export type AssetBundleSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   organizationId?: boolean
   categoryId?: boolean
   locationId?: boolean
+  netPurchasePrice?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1052,6 +1146,7 @@ export type AssetBundleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   organizationId?: boolean
   categoryId?: boolean
   locationId?: boolean
+  netPurchasePrice?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1066,6 +1161,7 @@ export type AssetBundleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   organizationId?: boolean
   categoryId?: boolean
   locationId?: boolean
+  netPurchasePrice?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1080,11 +1176,12 @@ export type AssetBundleSelectScalar = {
   organizationId?: boolean
   categoryId?: boolean
   locationId?: boolean
+  netPurchasePrice?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AssetBundleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "organizationId" | "categoryId" | "locationId" | "createdAt" | "updatedAt", ExtArgs["result"]["assetBundle"]>
+export type AssetBundleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "organizationId" | "categoryId" | "locationId" | "netPurchasePrice" | "createdAt" | "updatedAt", ExtArgs["result"]["assetBundle"]>
 export type AssetBundleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
@@ -1120,6 +1217,7 @@ export type $AssetBundlePayload<ExtArgs extends runtime.Types.Extensions.Interna
     organizationId: string
     categoryId: string
     locationId: string | null
+    netPurchasePrice: runtime.Decimal | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["assetBundle"]>
@@ -1556,6 +1654,7 @@ export interface AssetBundleFieldRefs {
   readonly organizationId: Prisma.FieldRef<"AssetBundle", 'String'>
   readonly categoryId: Prisma.FieldRef<"AssetBundle", 'String'>
   readonly locationId: Prisma.FieldRef<"AssetBundle", 'String'>
+  readonly netPurchasePrice: Prisma.FieldRef<"AssetBundle", 'Decimal'>
   readonly createdAt: Prisma.FieldRef<"AssetBundle", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AssetBundle", 'DateTime'>
 }

@@ -20,8 +20,20 @@ export type AssetModel = runtime.Types.Result.DefaultSelection<Prisma.$AssetPayl
 
 export type AggregateAsset = {
   _count: AssetCountAggregateOutputType | null
+  _avg: AssetAvgAggregateOutputType | null
+  _sum: AssetSumAggregateOutputType | null
   _min: AssetMinAggregateOutputType | null
   _max: AssetMaxAggregateOutputType | null
+}
+
+export type AssetAvgAggregateOutputType = {
+  netPurchasePrice: runtime.Decimal | null
+  inspectionIntervalMonths: number | null
+}
+
+export type AssetSumAggregateOutputType = {
+  netPurchasePrice: runtime.Decimal | null
+  inspectionIntervalMonths: number | null
 }
 
 export type AssetMinAggregateOutputType = {
@@ -33,6 +45,10 @@ export type AssetMinAggregateOutputType = {
   assetTag: string | null
   status: string | null
   bundleId: string | null
+  netPurchasePrice: runtime.Decimal | null
+  purchaseDate: Date | null
+  inspectionIntervalMonths: number | null
+  nextInspectionDue: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -46,6 +62,10 @@ export type AssetMaxAggregateOutputType = {
   assetTag: string | null
   status: string | null
   bundleId: string | null
+  netPurchasePrice: runtime.Decimal | null
+  purchaseDate: Date | null
+  inspectionIntervalMonths: number | null
+  nextInspectionDue: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -59,11 +79,25 @@ export type AssetCountAggregateOutputType = {
   assetTag: number
   status: number
   bundleId: number
+  netPurchasePrice: number
+  purchaseDate: number
+  inspectionIntervalMonths: number
+  nextInspectionDue: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
+
+export type AssetAvgAggregateInputType = {
+  netPurchasePrice?: true
+  inspectionIntervalMonths?: true
+}
+
+export type AssetSumAggregateInputType = {
+  netPurchasePrice?: true
+  inspectionIntervalMonths?: true
+}
 
 export type AssetMinAggregateInputType = {
   id?: true
@@ -74,6 +108,10 @@ export type AssetMinAggregateInputType = {
   assetTag?: true
   status?: true
   bundleId?: true
+  netPurchasePrice?: true
+  purchaseDate?: true
+  inspectionIntervalMonths?: true
+  nextInspectionDue?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -87,6 +125,10 @@ export type AssetMaxAggregateInputType = {
   assetTag?: true
   status?: true
   bundleId?: true
+  netPurchasePrice?: true
+  purchaseDate?: true
+  inspectionIntervalMonths?: true
+  nextInspectionDue?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -100,6 +142,10 @@ export type AssetCountAggregateInputType = {
   assetTag?: true
   status?: true
   bundleId?: true
+  netPurchasePrice?: true
+  purchaseDate?: true
+  inspectionIntervalMonths?: true
+  nextInspectionDue?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -143,6 +189,18 @@ export type AssetAggregateArgs<ExtArgs extends runtime.Types.Extensions.Internal
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: AssetAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: AssetSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: AssetMinAggregateInputType
@@ -173,6 +231,8 @@ export type AssetGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
   take?: number
   skip?: number
   _count?: AssetCountAggregateInputType | true
+  _avg?: AssetAvgAggregateInputType
+  _sum?: AssetSumAggregateInputType
   _min?: AssetMinAggregateInputType
   _max?: AssetMaxAggregateInputType
 }
@@ -186,9 +246,15 @@ export type AssetGroupByOutputType = {
   assetTag: string | null
   status: string
   bundleId: string | null
+  netPurchasePrice: runtime.Decimal | null
+  purchaseDate: Date | null
+  inspectionIntervalMonths: number | null
+  nextInspectionDue: Date | null
   createdAt: Date
   updatedAt: Date
   _count: AssetCountAggregateOutputType | null
+  _avg: AssetAvgAggregateOutputType | null
+  _sum: AssetSumAggregateOutputType | null
   _min: AssetMinAggregateOutputType | null
   _max: AssetMaxAggregateOutputType | null
 }
@@ -220,6 +286,10 @@ export type AssetWhereInput = {
   assetTag?: Prisma.StringNullableFilter<"Asset"> | string | null
   status?: Prisma.StringFilter<"Asset"> | string
   bundleId?: Prisma.StringNullableFilter<"Asset"> | string | null
+  netPurchasePrice?: Prisma.DecimalNullableFilter<"Asset"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
+  inspectionIntervalMonths?: Prisma.IntNullableFilter<"Asset"> | number | null
+  nextInspectionDue?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -228,6 +298,7 @@ export type AssetWhereInput = {
   bundle?: Prisma.XOR<Prisma.AssetBundleNullableScalarRelationFilter, Prisma.AssetBundleWhereInput> | null
   productionItems?: Prisma.ProductionItemListRelationFilter
   transactions?: Prisma.AssetTransactionListRelationFilter
+  inspections?: Prisma.InspectionListRelationFilter
 }
 
 export type AssetOrderByWithRelationInput = {
@@ -239,6 +310,10 @@ export type AssetOrderByWithRelationInput = {
   assetTag?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   bundleId?: Prisma.SortOrderInput | Prisma.SortOrder
+  netPurchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  purchaseDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  inspectionIntervalMonths?: Prisma.SortOrderInput | Prisma.SortOrder
+  nextInspectionDue?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
@@ -247,6 +322,7 @@ export type AssetOrderByWithRelationInput = {
   bundle?: Prisma.AssetBundleOrderByWithRelationInput
   productionItems?: Prisma.ProductionItemOrderByRelationAggregateInput
   transactions?: Prisma.AssetTransactionOrderByRelationAggregateInput
+  inspections?: Prisma.InspectionOrderByRelationAggregateInput
 }
 
 export type AssetWhereUniqueInput = Prisma.AtLeast<{
@@ -261,6 +337,10 @@ export type AssetWhereUniqueInput = Prisma.AtLeast<{
   serialNumber?: Prisma.StringNullableFilter<"Asset"> | string | null
   status?: Prisma.StringFilter<"Asset"> | string
   bundleId?: Prisma.StringNullableFilter<"Asset"> | string | null
+  netPurchasePrice?: Prisma.DecimalNullableFilter<"Asset"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
+  inspectionIntervalMonths?: Prisma.IntNullableFilter<"Asset"> | number | null
+  nextInspectionDue?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -269,6 +349,7 @@ export type AssetWhereUniqueInput = Prisma.AtLeast<{
   bundle?: Prisma.XOR<Prisma.AssetBundleNullableScalarRelationFilter, Prisma.AssetBundleWhereInput> | null
   productionItems?: Prisma.ProductionItemListRelationFilter
   transactions?: Prisma.AssetTransactionListRelationFilter
+  inspections?: Prisma.InspectionListRelationFilter
 }, "id" | "assetTag">
 
 export type AssetOrderByWithAggregationInput = {
@@ -280,11 +361,17 @@ export type AssetOrderByWithAggregationInput = {
   assetTag?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   bundleId?: Prisma.SortOrderInput | Prisma.SortOrder
+  netPurchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  purchaseDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  inspectionIntervalMonths?: Prisma.SortOrderInput | Prisma.SortOrder
+  nextInspectionDue?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AssetCountOrderByAggregateInput
+  _avg?: Prisma.AssetAvgOrderByAggregateInput
   _max?: Prisma.AssetMaxOrderByAggregateInput
   _min?: Prisma.AssetMinOrderByAggregateInput
+  _sum?: Prisma.AssetSumOrderByAggregateInput
 }
 
 export type AssetScalarWhereWithAggregatesInput = {
@@ -299,6 +386,10 @@ export type AssetScalarWhereWithAggregatesInput = {
   assetTag?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
   status?: Prisma.StringWithAggregatesFilter<"Asset"> | string
   bundleId?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
+  netPurchasePrice?: Prisma.DecimalNullableWithAggregatesFilter<"Asset"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Asset"> | Date | string | null
+  inspectionIntervalMonths?: Prisma.IntNullableWithAggregatesFilter<"Asset"> | number | null
+  nextInspectionDue?: Prisma.DateTimeNullableWithAggregatesFilter<"Asset"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Asset"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Asset"> | Date | string
 }
@@ -308,6 +399,10 @@ export type AssetCreateInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutAssetsInput
@@ -316,6 +411,7 @@ export type AssetCreateInput = {
   bundle?: Prisma.AssetBundleCreateNestedOneWithoutAssetsInput
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutAssetInput
+  inspections?: Prisma.InspectionCreateNestedManyWithoutAssetInput
 }
 
 export type AssetUncheckedCreateInput = {
@@ -327,10 +423,15 @@ export type AssetUncheckedCreateInput = {
   assetTag?: string | null
   status?: string
   bundleId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutAssetInput
+  inspections?: Prisma.InspectionUncheckedCreateNestedManyWithoutAssetInput
 }
 
 export type AssetUpdateInput = {
@@ -338,6 +439,10 @@ export type AssetUpdateInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutAssetsNestedInput
@@ -346,6 +451,7 @@ export type AssetUpdateInput = {
   bundle?: Prisma.AssetBundleUpdateOneWithoutAssetsNestedInput
   productionItems?: Prisma.ProductionItemUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutAssetNestedInput
+  inspections?: Prisma.InspectionUpdateManyWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateInput = {
@@ -357,10 +463,15 @@ export type AssetUncheckedUpdateInput = {
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutAssetNestedInput
+  inspections?: Prisma.InspectionUncheckedUpdateManyWithoutAssetNestedInput
 }
 
 export type AssetCreateManyInput = {
@@ -372,6 +483,10 @@ export type AssetCreateManyInput = {
   assetTag?: string | null
   status?: string
   bundleId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -381,6 +496,10 @@ export type AssetUpdateManyMutationInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -394,6 +513,10 @@ export type AssetUncheckedUpdateManyInput = {
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -417,8 +540,17 @@ export type AssetCountOrderByAggregateInput = {
   assetTag?: Prisma.SortOrder
   status?: Prisma.SortOrder
   bundleId?: Prisma.SortOrder
+  netPurchasePrice?: Prisma.SortOrder
+  purchaseDate?: Prisma.SortOrder
+  inspectionIntervalMonths?: Prisma.SortOrder
+  nextInspectionDue?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type AssetAvgOrderByAggregateInput = {
+  netPurchasePrice?: Prisma.SortOrder
+  inspectionIntervalMonths?: Prisma.SortOrder
 }
 
 export type AssetMaxOrderByAggregateInput = {
@@ -430,6 +562,10 @@ export type AssetMaxOrderByAggregateInput = {
   assetTag?: Prisma.SortOrder
   status?: Prisma.SortOrder
   bundleId?: Prisma.SortOrder
+  netPurchasePrice?: Prisma.SortOrder
+  purchaseDate?: Prisma.SortOrder
+  inspectionIntervalMonths?: Prisma.SortOrder
+  nextInspectionDue?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -443,8 +579,17 @@ export type AssetMinOrderByAggregateInput = {
   assetTag?: Prisma.SortOrder
   status?: Prisma.SortOrder
   bundleId?: Prisma.SortOrder
+  netPurchasePrice?: Prisma.SortOrder
+  purchaseDate?: Prisma.SortOrder
+  inspectionIntervalMonths?: Prisma.SortOrder
+  nextInspectionDue?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type AssetSumOrderByAggregateInput = {
+  netPurchasePrice?: Prisma.SortOrder
+  inspectionIntervalMonths?: Prisma.SortOrder
 }
 
 export type AssetScalarRelationFilter = {
@@ -578,6 +723,14 @@ export type AssetUncheckedUpdateManyWithoutLocationNestedInput = {
   deleteMany?: Prisma.AssetScalarWhereInput | Prisma.AssetScalarWhereInput[]
 }
 
+export type NullableDecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
 export type AssetCreateNestedManyWithoutBundleInput = {
   create?: Prisma.XOR<Prisma.AssetCreateWithoutBundleInput, Prisma.AssetUncheckedCreateWithoutBundleInput> | Prisma.AssetCreateWithoutBundleInput[] | Prisma.AssetUncheckedCreateWithoutBundleInput[]
   connectOrCreate?: Prisma.AssetCreateOrConnectWithoutBundleInput | Prisma.AssetCreateOrConnectWithoutBundleInput[]
@@ -648,11 +801,29 @@ export type AssetUpdateOneRequiredWithoutTransactionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AssetUpdateToOneWithWhereWithoutTransactionsInput, Prisma.AssetUpdateWithoutTransactionsInput>, Prisma.AssetUncheckedUpdateWithoutTransactionsInput>
 }
 
+export type AssetCreateNestedOneWithoutInspectionsInput = {
+  create?: Prisma.XOR<Prisma.AssetCreateWithoutInspectionsInput, Prisma.AssetUncheckedCreateWithoutInspectionsInput>
+  connectOrCreate?: Prisma.AssetCreateOrConnectWithoutInspectionsInput
+  connect?: Prisma.AssetWhereUniqueInput
+}
+
+export type AssetUpdateOneRequiredWithoutInspectionsNestedInput = {
+  create?: Prisma.XOR<Prisma.AssetCreateWithoutInspectionsInput, Prisma.AssetUncheckedCreateWithoutInspectionsInput>
+  connectOrCreate?: Prisma.AssetCreateOrConnectWithoutInspectionsInput
+  upsert?: Prisma.AssetUpsertWithoutInspectionsInput
+  connect?: Prisma.AssetWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AssetUpdateToOneWithWhereWithoutInspectionsInput, Prisma.AssetUpdateWithoutInspectionsInput>, Prisma.AssetUncheckedUpdateWithoutInspectionsInput>
+}
+
 export type AssetCreateWithoutOrganizationInput = {
   id?: string
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   product: Prisma.ProductCreateNestedOneWithoutAssetsInput
@@ -660,6 +831,7 @@ export type AssetCreateWithoutOrganizationInput = {
   bundle?: Prisma.AssetBundleCreateNestedOneWithoutAssetsInput
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutAssetInput
+  inspections?: Prisma.InspectionCreateNestedManyWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutOrganizationInput = {
@@ -670,10 +842,15 @@ export type AssetUncheckedCreateWithoutOrganizationInput = {
   assetTag?: string | null
   status?: string
   bundleId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutAssetInput
+  inspections?: Prisma.InspectionUncheckedCreateNestedManyWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutOrganizationInput = {
@@ -714,6 +891,10 @@ export type AssetScalarWhereInput = {
   assetTag?: Prisma.StringNullableFilter<"Asset"> | string | null
   status?: Prisma.StringFilter<"Asset"> | string
   bundleId?: Prisma.StringNullableFilter<"Asset"> | string | null
+  netPurchasePrice?: Prisma.DecimalNullableFilter<"Asset"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
+  inspectionIntervalMonths?: Prisma.IntNullableFilter<"Asset"> | number | null
+  nextInspectionDue?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
 }
@@ -723,6 +904,10 @@ export type AssetCreateWithoutProductInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutAssetsInput
@@ -730,6 +915,7 @@ export type AssetCreateWithoutProductInput = {
   bundle?: Prisma.AssetBundleCreateNestedOneWithoutAssetsInput
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutAssetInput
+  inspections?: Prisma.InspectionCreateNestedManyWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutProductInput = {
@@ -740,10 +926,15 @@ export type AssetUncheckedCreateWithoutProductInput = {
   assetTag?: string | null
   status?: string
   bundleId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutAssetInput
+  inspections?: Prisma.InspectionUncheckedCreateNestedManyWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutProductInput = {
@@ -777,6 +968,10 @@ export type AssetCreateWithoutLocationInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutAssetsInput
@@ -784,6 +979,7 @@ export type AssetCreateWithoutLocationInput = {
   bundle?: Prisma.AssetBundleCreateNestedOneWithoutAssetsInput
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutAssetInput
+  inspections?: Prisma.InspectionCreateNestedManyWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutLocationInput = {
@@ -794,10 +990,15 @@ export type AssetUncheckedCreateWithoutLocationInput = {
   assetTag?: string | null
   status?: string
   bundleId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutAssetInput
+  inspections?: Prisma.InspectionUncheckedCreateNestedManyWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutLocationInput = {
@@ -831,6 +1032,10 @@ export type AssetCreateWithoutBundleInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutAssetsInput
@@ -838,6 +1043,7 @@ export type AssetCreateWithoutBundleInput = {
   location: Prisma.LocationCreateNestedOneWithoutAssetsInput
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutAssetInput
+  inspections?: Prisma.InspectionCreateNestedManyWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutBundleInput = {
@@ -848,10 +1054,15 @@ export type AssetUncheckedCreateWithoutBundleInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutAssetInput
+  inspections?: Prisma.InspectionUncheckedCreateNestedManyWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutBundleInput = {
@@ -885,6 +1096,10 @@ export type AssetCreateWithoutProductionItemsInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutAssetsInput
@@ -892,6 +1107,7 @@ export type AssetCreateWithoutProductionItemsInput = {
   location: Prisma.LocationCreateNestedOneWithoutAssetsInput
   bundle?: Prisma.AssetBundleCreateNestedOneWithoutAssetsInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutAssetInput
+  inspections?: Prisma.InspectionCreateNestedManyWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutProductionItemsInput = {
@@ -903,9 +1119,14 @@ export type AssetUncheckedCreateWithoutProductionItemsInput = {
   assetTag?: string | null
   status?: string
   bundleId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutAssetInput
+  inspections?: Prisma.InspectionUncheckedCreateNestedManyWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutProductionItemsInput = {
@@ -929,6 +1150,10 @@ export type AssetUpdateWithoutProductionItemsInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutAssetsNestedInput
@@ -936,6 +1161,7 @@ export type AssetUpdateWithoutProductionItemsInput = {
   location?: Prisma.LocationUpdateOneRequiredWithoutAssetsNestedInput
   bundle?: Prisma.AssetBundleUpdateOneWithoutAssetsNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutAssetNestedInput
+  inspections?: Prisma.InspectionUpdateManyWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutProductionItemsInput = {
@@ -947,9 +1173,14 @@ export type AssetUncheckedUpdateWithoutProductionItemsInput = {
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutAssetNestedInput
+  inspections?: Prisma.InspectionUncheckedUpdateManyWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutTransactionsInput = {
@@ -957,6 +1188,10 @@ export type AssetCreateWithoutTransactionsInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutAssetsInput
@@ -964,6 +1199,7 @@ export type AssetCreateWithoutTransactionsInput = {
   location: Prisma.LocationCreateNestedOneWithoutAssetsInput
   bundle?: Prisma.AssetBundleCreateNestedOneWithoutAssetsInput
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutAssetInput
+  inspections?: Prisma.InspectionCreateNestedManyWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutTransactionsInput = {
@@ -975,9 +1211,14 @@ export type AssetUncheckedCreateWithoutTransactionsInput = {
   assetTag?: string | null
   status?: string
   bundleId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
+  inspections?: Prisma.InspectionUncheckedCreateNestedManyWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutTransactionsInput = {
@@ -1001,6 +1242,10 @@ export type AssetUpdateWithoutTransactionsInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutAssetsNestedInput
@@ -1008,6 +1253,7 @@ export type AssetUpdateWithoutTransactionsInput = {
   location?: Prisma.LocationUpdateOneRequiredWithoutAssetsNestedInput
   bundle?: Prisma.AssetBundleUpdateOneWithoutAssetsNestedInput
   productionItems?: Prisma.ProductionItemUpdateManyWithoutAssetNestedInput
+  inspections?: Prisma.InspectionUpdateManyWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutTransactionsInput = {
@@ -1019,9 +1265,106 @@ export type AssetUncheckedUpdateWithoutTransactionsInput = {
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
+  inspections?: Prisma.InspectionUncheckedUpdateManyWithoutAssetNestedInput
+}
+
+export type AssetCreateWithoutInspectionsInput = {
+  id?: string
+  serialNumber?: string | null
+  assetTag?: string | null
+  status?: string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutAssetsInput
+  product: Prisma.ProductCreateNestedOneWithoutAssetsInput
+  location: Prisma.LocationCreateNestedOneWithoutAssetsInput
+  bundle?: Prisma.AssetBundleCreateNestedOneWithoutAssetsInput
+  productionItems?: Prisma.ProductionItemCreateNestedManyWithoutAssetInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutAssetInput
+}
+
+export type AssetUncheckedCreateWithoutInspectionsInput = {
+  id?: string
+  organizationId: string
+  productId: string
+  locationId: string
+  serialNumber?: string | null
+  assetTag?: string | null
+  status?: string
+  bundleId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutAssetInput
+}
+
+export type AssetCreateOrConnectWithoutInspectionsInput = {
+  where: Prisma.AssetWhereUniqueInput
+  create: Prisma.XOR<Prisma.AssetCreateWithoutInspectionsInput, Prisma.AssetUncheckedCreateWithoutInspectionsInput>
+}
+
+export type AssetUpsertWithoutInspectionsInput = {
+  update: Prisma.XOR<Prisma.AssetUpdateWithoutInspectionsInput, Prisma.AssetUncheckedUpdateWithoutInspectionsInput>
+  create: Prisma.XOR<Prisma.AssetCreateWithoutInspectionsInput, Prisma.AssetUncheckedCreateWithoutInspectionsInput>
+  where?: Prisma.AssetWhereInput
+}
+
+export type AssetUpdateToOneWithWhereWithoutInspectionsInput = {
+  where?: Prisma.AssetWhereInput
+  data: Prisma.XOR<Prisma.AssetUpdateWithoutInspectionsInput, Prisma.AssetUncheckedUpdateWithoutInspectionsInput>
+}
+
+export type AssetUpdateWithoutInspectionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutAssetsNestedInput
+  product?: Prisma.ProductUpdateOneRequiredWithoutAssetsNestedInput
+  location?: Prisma.LocationUpdateOneRequiredWithoutAssetsNestedInput
+  bundle?: Prisma.AssetBundleUpdateOneWithoutAssetsNestedInput
+  productionItems?: Prisma.ProductionItemUpdateManyWithoutAssetNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutAssetNestedInput
+}
+
+export type AssetUncheckedUpdateWithoutInspectionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  productId?: Prisma.StringFieldUpdateOperationsInput | string
+  locationId?: Prisma.StringFieldUpdateOperationsInput | string
+  serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutAssetNestedInput
 }
 
 export type AssetCreateManyOrganizationInput = {
@@ -1032,6 +1375,10 @@ export type AssetCreateManyOrganizationInput = {
   assetTag?: string | null
   status?: string
   bundleId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1041,6 +1388,10 @@ export type AssetUpdateWithoutOrganizationInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   product?: Prisma.ProductUpdateOneRequiredWithoutAssetsNestedInput
@@ -1048,6 +1399,7 @@ export type AssetUpdateWithoutOrganizationInput = {
   bundle?: Prisma.AssetBundleUpdateOneWithoutAssetsNestedInput
   productionItems?: Prisma.ProductionItemUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutAssetNestedInput
+  inspections?: Prisma.InspectionUpdateManyWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutOrganizationInput = {
@@ -1058,10 +1410,15 @@ export type AssetUncheckedUpdateWithoutOrganizationInput = {
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutAssetNestedInput
+  inspections?: Prisma.InspectionUncheckedUpdateManyWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateManyWithoutOrganizationInput = {
@@ -1072,6 +1429,10 @@ export type AssetUncheckedUpdateManyWithoutOrganizationInput = {
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1084,6 +1445,10 @@ export type AssetCreateManyProductInput = {
   assetTag?: string | null
   status?: string
   bundleId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1093,6 +1458,10 @@ export type AssetUpdateWithoutProductInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutAssetsNestedInput
@@ -1100,6 +1469,7 @@ export type AssetUpdateWithoutProductInput = {
   bundle?: Prisma.AssetBundleUpdateOneWithoutAssetsNestedInput
   productionItems?: Prisma.ProductionItemUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutAssetNestedInput
+  inspections?: Prisma.InspectionUpdateManyWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutProductInput = {
@@ -1110,10 +1480,15 @@ export type AssetUncheckedUpdateWithoutProductInput = {
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutAssetNestedInput
+  inspections?: Prisma.InspectionUncheckedUpdateManyWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateManyWithoutProductInput = {
@@ -1124,6 +1499,10 @@ export type AssetUncheckedUpdateManyWithoutProductInput = {
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1136,6 +1515,10 @@ export type AssetCreateManyLocationInput = {
   assetTag?: string | null
   status?: string
   bundleId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1145,6 +1528,10 @@ export type AssetUpdateWithoutLocationInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutAssetsNestedInput
@@ -1152,6 +1539,7 @@ export type AssetUpdateWithoutLocationInput = {
   bundle?: Prisma.AssetBundleUpdateOneWithoutAssetsNestedInput
   productionItems?: Prisma.ProductionItemUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutAssetNestedInput
+  inspections?: Prisma.InspectionUpdateManyWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutLocationInput = {
@@ -1162,10 +1550,15 @@ export type AssetUncheckedUpdateWithoutLocationInput = {
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutAssetNestedInput
+  inspections?: Prisma.InspectionUncheckedUpdateManyWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateManyWithoutLocationInput = {
@@ -1176,6 +1569,10 @@ export type AssetUncheckedUpdateManyWithoutLocationInput = {
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1188,6 +1585,10 @@ export type AssetCreateManyBundleInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1197,6 +1598,10 @@ export type AssetUpdateWithoutBundleInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutAssetsNestedInput
@@ -1204,6 +1609,7 @@ export type AssetUpdateWithoutBundleInput = {
   location?: Prisma.LocationUpdateOneRequiredWithoutAssetsNestedInput
   productionItems?: Prisma.ProductionItemUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutAssetNestedInput
+  inspections?: Prisma.InspectionUpdateManyWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutBundleInput = {
@@ -1214,10 +1620,15 @@ export type AssetUncheckedUpdateWithoutBundleInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutAssetNestedInput
+  inspections?: Prisma.InspectionUncheckedUpdateManyWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateManyWithoutBundleInput = {
@@ -1228,6 +1639,10 @@ export type AssetUncheckedUpdateManyWithoutBundleInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1240,11 +1655,13 @@ export type AssetUncheckedUpdateManyWithoutBundleInput = {
 export type AssetCountOutputType = {
   productionItems: number
   transactions: number
+  inspections: number
 }
 
 export type AssetCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   productionItems?: boolean | AssetCountOutputTypeCountProductionItemsArgs
   transactions?: boolean | AssetCountOutputTypeCountTransactionsArgs
+  inspections?: boolean | AssetCountOutputTypeCountInspectionsArgs
 }
 
 /**
@@ -1271,6 +1688,13 @@ export type AssetCountOutputTypeCountTransactionsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.AssetTransactionWhereInput
 }
 
+/**
+ * AssetCountOutputType without action
+ */
+export type AssetCountOutputTypeCountInspectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InspectionWhereInput
+}
+
 
 export type AssetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1281,6 +1705,10 @@ export type AssetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   assetTag?: boolean
   status?: boolean
   bundleId?: boolean
+  netPurchasePrice?: boolean
+  purchaseDate?: boolean
+  inspectionIntervalMonths?: boolean
+  nextInspectionDue?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1289,6 +1717,7 @@ export type AssetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   bundle?: boolean | Prisma.Asset$bundleArgs<ExtArgs>
   productionItems?: boolean | Prisma.Asset$productionItemsArgs<ExtArgs>
   transactions?: boolean | Prisma.Asset$transactionsArgs<ExtArgs>
+  inspections?: boolean | Prisma.Asset$inspectionsArgs<ExtArgs>
   _count?: boolean | Prisma.AssetCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["asset"]>
 
@@ -1301,6 +1730,10 @@ export type AssetSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   assetTag?: boolean
   status?: boolean
   bundleId?: boolean
+  netPurchasePrice?: boolean
+  purchaseDate?: boolean
+  inspectionIntervalMonths?: boolean
+  nextInspectionDue?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1318,6 +1751,10 @@ export type AssetSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   assetTag?: boolean
   status?: boolean
   bundleId?: boolean
+  netPurchasePrice?: boolean
+  purchaseDate?: boolean
+  inspectionIntervalMonths?: boolean
+  nextInspectionDue?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1335,11 +1772,15 @@ export type AssetSelectScalar = {
   assetTag?: boolean
   status?: boolean
   bundleId?: boolean
+  netPurchasePrice?: boolean
+  purchaseDate?: boolean
+  inspectionIntervalMonths?: boolean
+  nextInspectionDue?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AssetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "productId" | "locationId" | "serialNumber" | "assetTag" | "status" | "bundleId" | "createdAt" | "updatedAt", ExtArgs["result"]["asset"]>
+export type AssetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "productId" | "locationId" | "serialNumber" | "assetTag" | "status" | "bundleId" | "netPurchasePrice" | "purchaseDate" | "inspectionIntervalMonths" | "nextInspectionDue" | "createdAt" | "updatedAt", ExtArgs["result"]["asset"]>
 export type AssetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
@@ -1347,6 +1788,7 @@ export type AssetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   bundle?: boolean | Prisma.Asset$bundleArgs<ExtArgs>
   productionItems?: boolean | Prisma.Asset$productionItemsArgs<ExtArgs>
   transactions?: boolean | Prisma.Asset$transactionsArgs<ExtArgs>
+  inspections?: boolean | Prisma.Asset$inspectionsArgs<ExtArgs>
   _count?: boolean | Prisma.AssetCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AssetIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1371,6 +1813,7 @@ export type $AssetPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     bundle: Prisma.$AssetBundlePayload<ExtArgs> | null
     productionItems: Prisma.$ProductionItemPayload<ExtArgs>[]
     transactions: Prisma.$AssetTransactionPayload<ExtArgs>[]
+    inspections: Prisma.$InspectionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1381,6 +1824,10 @@ export type $AssetPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     assetTag: string | null
     status: string
     bundleId: string | null
+    netPurchasePrice: runtime.Decimal | null
+    purchaseDate: Date | null
+    inspectionIntervalMonths: number | null
+    nextInspectionDue: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["asset"]>
@@ -1783,6 +2230,7 @@ export interface Prisma__AssetClient<T, Null = never, ExtArgs extends runtime.Ty
   bundle<T extends Prisma.Asset$bundleArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$bundleArgs<ExtArgs>>): Prisma.Prisma__AssetBundleClient<runtime.Types.Result.GetResult<Prisma.$AssetBundlePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   productionItems<T extends Prisma.Asset$productionItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$productionItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   transactions<T extends Prisma.Asset$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  inspections<T extends Prisma.Asset$inspectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$inspectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InspectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1820,6 +2268,10 @@ export interface AssetFieldRefs {
   readonly assetTag: Prisma.FieldRef<"Asset", 'String'>
   readonly status: Prisma.FieldRef<"Asset", 'String'>
   readonly bundleId: Prisma.FieldRef<"Asset", 'String'>
+  readonly netPurchasePrice: Prisma.FieldRef<"Asset", 'Decimal'>
+  readonly purchaseDate: Prisma.FieldRef<"Asset", 'DateTime'>
+  readonly inspectionIntervalMonths: Prisma.FieldRef<"Asset", 'Int'>
+  readonly nextInspectionDue: Prisma.FieldRef<"Asset", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Asset", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Asset", 'DateTime'>
 }
@@ -2287,6 +2739,30 @@ export type Asset$transactionsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.AssetTransactionScalarFieldEnum | Prisma.AssetTransactionScalarFieldEnum[]
+}
+
+/**
+ * Asset.inspections
+ */
+export type Asset$inspectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Inspection
+   */
+  select?: Prisma.InspectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Inspection
+   */
+  omit?: Prisma.InspectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InspectionInclude<ExtArgs> | null
+  where?: Prisma.InspectionWhereInput
+  orderBy?: Prisma.InspectionOrderByWithRelationInput | Prisma.InspectionOrderByWithRelationInput[]
+  cursor?: Prisma.InspectionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InspectionScalarFieldEnum | Prisma.InspectionScalarFieldEnum[]
 }
 
 /**

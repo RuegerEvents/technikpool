@@ -1,5 +1,8 @@
 import { query, command, getRequestEvent } from '$app/server';
 import { prisma } from '$lib/server/auth';
+import { sendMail } from '$lib/server/mail';
+import { appBaseUrl } from '$lib/server/app-url';
+import { addedToOrgEmail } from '$lib/server/emails/added-to-org';
 import * as v from 'valibot';
 
 async function requireAuth() {
@@ -91,6 +94,7 @@ export const getOrgWithMembers = query(v.string(), async (orgId: string) => {
 	return prisma.organization.findUniqueOrThrow({
 		where: { id: orgId },
 		include: {
+			address: true,
 			members: {
 				include: {
 					user: { select: { id: true, name: true, email: true, isAdmin: true } }
@@ -109,11 +113,35 @@ export const addUserToOrg = command(
 		await requireOrgManageAccess(orgId);
 		const target = await prisma.user.findUnique({ where: { email } });
 		if (!target) throw new Error('No user found with that email');
+
+		const existing = await prisma.orgMembership.findUnique({
+			where: { userId_organizationId: { userId: target.id, organizationId: orgId } }
+		});
+
 		await prisma.orgMembership.upsert({
 			where: { userId_organizationId: { userId: target.id, organizationId: orgId } },
 			create: { userId: target.id, organizationId: orgId, role },
 			update: { role }
 		});
+
+		if (!existing) {
+			try {
+				const org = await prisma.organization.findUniqueOrThrow({
+					where: { id: orgId },
+					select: { name: true }
+				});
+				const { subject, html, text } = addedToOrgEmail({
+					name: target.name,
+					orgName: org.name,
+					role,
+					url: appBaseUrl
+				});
+				await sendMail({ to: target.email, subject, html, text });
+			} catch (err) {
+				console.error(`Failed to send added-to-org email for org ${orgId}:`, err);
+			}
+		}
+
 		await getOrgWithMembers(orgId).refresh();
 	}
 );
@@ -151,52 +179,155 @@ function normalizePrefix(raw: string): string {
 	return prefix;
 }
 
+function normalizeAvatarLabel(raw: string): string {
+	const label = raw
+		.trim()
+		.toUpperCase()
+		.replace(/[^A-Z]/g, '')
+		.slice(0, 2);
+	if (label.length !== 2) throw new Error('Avatar label must be exactly 2 letters');
+	return label;
+}
+
+function normalizeColor(raw: string): string {
+	const color = raw.trim();
+	if (!/^#[0-9a-fA-F]{6}$/.test(color)) {
+		throw new Error('Color must be a #RRGGBB hex value');
+	}
+	return color.toLowerCase();
+}
+
 const createOrgSchema = v.object({
 	name: v.string(),
-	assetIdPrefix: v.string()
+	assetIdPrefix: v.string(),
+	color: v.string(),
+	avatarLabel: v.string()
 });
 
-export const createOrg = command(createOrgSchema, async ({ name, assetIdPrefix }) => {
-	const user = await requireAuth();
-	const prefix = normalizePrefix(assetIdPrefix);
+export const createOrg = command(
+	createOrgSchema,
+	async ({ name, assetIdPrefix, color, avatarLabel }) => {
+		const user = await requireAuth();
+		const prefix = normalizePrefix(assetIdPrefix);
+		const normalizedColor = normalizeColor(color);
+		const normalizedLabel = normalizeAvatarLabel(avatarLabel);
 
-	const org = await prisma.$transaction(async (tx) => {
-		return await tx.organization.create({
-			data: {
-				name,
-				assetIdPrefix: prefix,
-				members: {
-					create: {
-						userId: user.id,
-						role: 'OWNER'
+		const org = await prisma.$transaction(async (tx) => {
+			return await tx.organization.create({
+				data: {
+					name,
+					assetIdPrefix: prefix,
+					color: normalizedColor,
+					avatarLabel: normalizedLabel,
+					members: {
+						create: {
+							userId: user.id,
+							role: 'OWNER'
+						}
 					}
 				}
-			}
+			});
 		});
-	});
 
-	await getMyOrgs().refresh();
-	return org;
+		await getMyOrgs().refresh();
+		return org;
+	}
+);
+
+const billingAddressSchema = v.object({
+	line1: v.string(),
+	line2: v.optional(v.string()),
+	postalCode: v.string(),
+	city: v.string()
 });
 
 const updateOrgSchema = v.object({
 	orgId: v.string(),
-	assetIdPrefix: v.string()
+	assetIdPrefix: v.string(),
+	color: v.string(),
+	avatarLabel: v.string(),
+	defaultInspectionIntervalMonths: v.optional(v.nullable(v.number())),
+	isKleinunternehmer: v.optional(v.boolean()),
+	address: v.optional(v.nullable(billingAddressSchema)),
+	taxId: v.optional(v.nullable(v.string())),
+	bankAccountHolder: v.optional(v.nullable(v.string())),
+	iban: v.optional(v.nullable(v.string())),
+	bic: v.optional(v.nullable(v.string())),
+	bankName: v.optional(v.nullable(v.string()))
 });
 
-export const updateOrg = command(updateOrgSchema, async ({ orgId, assetIdPrefix }) => {
-	await requireOrgManageAccess(orgId);
-	const prefix = normalizePrefix(assetIdPrefix);
+export const updateOrg = command(
+	updateOrgSchema,
+	async ({
+		orgId,
+		assetIdPrefix,
+		color,
+		avatarLabel,
+		defaultInspectionIntervalMonths,
+		isKleinunternehmer,
+		address,
+		taxId,
+		bankAccountHolder,
+		iban,
+		bic,
+		bankName
+	}) => {
+		await requireOrgManageAccess(orgId);
+		const prefix = normalizePrefix(assetIdPrefix);
+		const normalizedColor = normalizeColor(color);
+		const normalizedLabel = normalizeAvatarLabel(avatarLabel);
 
-	const org = await prisma.organization.update({
-		where: { id: orgId },
-		data: { assetIdPrefix: prefix }
-	});
+		const org = await prisma.$transaction(async (tx) => {
+			let addressId: string | null | undefined = undefined;
+			if (address !== undefined) {
+				if (address === null) {
+					addressId = null;
+				} else {
+					const current = await tx.organization.findUniqueOrThrow({
+						where: { id: orgId },
+						select: { addressId: true }
+					});
+					const addressData = {
+						line1: address.line1.trim(),
+						line2: address.line2?.trim() || null,
+						postalCode: address.postalCode.trim(),
+						city: address.city.trim()
+					};
+					if (current.addressId) {
+						await tx.address.update({ where: { id: current.addressId }, data: addressData });
+						addressId = current.addressId;
+					} else {
+						const created = await tx.address.create({ data: addressData });
+						addressId = created.id;
+					}
+				}
+			}
 
-	await getOrgWithMembers(orgId).refresh();
-	await getMyOrgs().refresh();
-	return org;
-});
+			return await tx.organization.update({
+				where: { id: orgId },
+				data: {
+					assetIdPrefix: prefix,
+					color: normalizedColor,
+					avatarLabel: normalizedLabel,
+					...(defaultInspectionIntervalMonths !== undefined
+						? { defaultInspectionIntervalMonths }
+						: {}),
+					...(isKleinunternehmer !== undefined ? { isKleinunternehmer } : {}),
+					...(addressId !== undefined ? { addressId } : {}),
+					...(taxId !== undefined ? { taxId } : {}),
+					...(bankAccountHolder !== undefined ? { bankAccountHolder } : {}),
+					...(iban !== undefined ? { iban } : {}),
+					...(bic !== undefined ? { bic } : {}),
+					...(bankName !== undefined ? { bankName } : {})
+				}
+			});
+		});
+
+		await getOrgWithMembers(orgId).refresh();
+		await getMyOrgs().refresh();
+		return org;
+	}
+);
 
 // ── Admin-only ────────────────────────────────────────────────────────────────
 
@@ -249,5 +380,39 @@ export const setUserAdmin = command(
 		if (userId === current.id) throw new Error('Cannot change your own admin status');
 		await prisma.user.update({ where: { id: userId }, data: { isAdmin } });
 		await getAllUsers().refresh();
+	}
+);
+
+// ── Category rental rates (offers/invoices pricing, issue #9) ─────────────────
+
+export const getOrgCategoryRates = query(v.string(), async (orgId: string) => {
+	await requireOrgManageAccess(orgId);
+	const [categories, rates] = await Promise.all([
+		prisma.category.findMany({ orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }] }),
+		prisma.orgCategoryRate.findMany({ where: { organizationId: orgId } })
+	]);
+	const rateByCategory = new Map(rates.map((r) => [r.categoryId, r]));
+	return categories.map((c) => ({
+		category: c,
+		percentage: rateByCategory.get(c.id)?.percentage.toString() ?? null
+	}));
+});
+
+const setOrgCategoryRateSchema = v.object({
+	orgId: v.string(),
+	categoryId: v.string(),
+	percentage: v.number()
+});
+
+export const setOrgCategoryRate = command(
+	setOrgCategoryRateSchema,
+	async ({ orgId, categoryId, percentage }) => {
+		await requireOrgManageAccess(orgId);
+		await prisma.orgCategoryRate.upsert({
+			where: { organizationId_categoryId: { organizationId: orgId, categoryId } },
+			create: { organizationId: orgId, categoryId, percentage },
+			update: { percentage }
+		});
+		await getOrgCategoryRates(orgId).refresh();
 	}
 );

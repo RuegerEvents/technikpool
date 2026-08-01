@@ -18,9 +18,10 @@
 
 	let isAuthRoute = $derived(page.url.pathname.startsWith('/auth'));
 	let isPrintRoute = $derived(
-		/\/(packing-list|delivery-note|crew-passes)$/.test(page.url.pathname)
+		/\/(packing-list|delivery-note|crew-passes|inventory-list|print)$/.test(page.url.pathname)
 	);
 	let isCalendarRoute = $derived(page.url.pathname.startsWith('/calendar'));
+	let isEquipmentRoute = $derived(/\/equipment$/.test(page.url.pathname));
 
 	// Dark mode
 	let dark = $state(browser ? document.documentElement.classList.contains('dark') : false);
@@ -128,6 +129,24 @@
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											Stickers
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/inspections'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											Inspections
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/offers'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											Offers
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/invoices'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											Invoices
 										</DropdownMenu.Item>
 									</DropdownMenu.Content>
 								</DropdownMenu.Portal>
@@ -310,7 +329,9 @@
 		<main
 			class="min-h-0 flex-1 {isCalendarRoute
 				? 'overflow-hidden p-0'
-				: 'overflow-auto px-4 py-6 md:px-6 md:py-8'}"
+				: isEquipmentRoute
+					? 'overflow-auto lg:overflow-hidden lg:p-0'
+					: 'overflow-auto px-4 py-6 md:px-6 md:py-8'}"
 		>
 			{@render children()}
 		</main>

@@ -1,5 +1,10 @@
 import { query, command, getRequestEvent } from '$app/server';
 import { prisma } from '$lib/server/auth';
+import { sendMail } from '$lib/server/mail';
+import { appBaseUrl } from '$lib/server/app-url';
+import { pendingApprovalEmail } from '$lib/server/emails/pending-approval';
+import { bookingReviewedEmail } from '$lib/server/emails/booking-reviewed';
+import { addedAsCrewEmail } from '$lib/server/emails/added-as-crew';
 import * as v from 'valibot';
 
 async function requireAuth() {
@@ -8,6 +13,111 @@ async function requireAuth() {
 		throw new Error('Unauthorized');
 	}
 	return event.locals.user;
+}
+
+// Returns which of `ownerOrgIds` do NOT currently have any PENDING item in
+// this production — i.e. the orgs for which a new PENDING item would be the
+// first one, and thus warrants a notification email. Must be called BEFORE
+// creating the new items.
+async function getOrgIdsNeedingApprovalNotification(productionId: string, ownerOrgIds: string[]) {
+	if (ownerOrgIds.length === 0) return [];
+	const alreadyPending = await prisma.productionItem.findMany({
+		where: {
+			productionId,
+			status: 'PENDING',
+			asset: { organizationId: { in: ownerOrgIds } }
+		},
+		select: { asset: { select: { organizationId: true } } }
+	});
+	const alreadyPendingOrgIds = new Set(alreadyPending.map((i) => i.asset.organizationId));
+	return ownerOrgIds.filter((id) => !alreadyPendingOrgIds.has(id));
+}
+
+// Emails the OWNER/ADMIN members of each owning org once per "batch" of
+// approval requests — the caller only passes orgs for which this is the
+// first pending item in the production, so the next email only goes out
+// once the queue is cleared and refilled.
+async function notifyPendingApproval(
+	productionId: string,
+	productionName: string,
+	requestingOrgName: string,
+	ownerOrgIds: string[]
+) {
+	await Promise.all(
+		ownerOrgIds.map(async (ownerOrgId) => {
+			try {
+				const [pendingCount, org, recipients] = await Promise.all([
+					prisma.productionItem.count({
+						where: { productionId, status: 'PENDING', asset: { organizationId: ownerOrgId } }
+					}),
+					prisma.organization.findUniqueOrThrow({
+						where: { id: ownerOrgId },
+						select: { name: true }
+					}),
+					prisma.orgMembership.findMany({
+						where: { organizationId: ownerOrgId, role: { in: ['OWNER', 'ADMIN'] } },
+						include: { user: { select: { email: true, name: true } } }
+					})
+				]);
+
+				await Promise.all(
+					recipients.map((membership) => {
+						const { subject, html, text } = pendingApprovalEmail({
+							name: membership.user.name,
+							ownerOrgName: org.name,
+							requestingOrgName,
+							productionName,
+							pendingCount,
+							url: appBaseUrl
+						});
+						return sendMail({ to: membership.user.email, subject, html, text });
+					})
+				);
+			} catch (err) {
+				console.error(`Failed to send pending-approval email for org ${ownerOrgId}:`, err);
+			}
+		})
+	);
+}
+
+// Called after an item is approved/declined. Once the (production, ownerOrg)
+// PENDING queue is fully cleared, tells the requesting org's OWNER/ADMIN
+// members that their requests were reviewed — a single email regardless of
+// how many items were resolved in this batch (e.g. via "approve all").
+async function notifyRequesterIfQueueCleared(
+	productionId: string,
+	requestingOrgId: string,
+	ownerOrgId: string
+) {
+	try {
+		const remainingPending = await prisma.productionItem.count({
+			where: { productionId, status: 'PENDING', asset: { organizationId: ownerOrgId } }
+		});
+		if (remainingPending > 0) return;
+
+		const [production, ownerOrg, recipients] = await Promise.all([
+			prisma.production.findUniqueOrThrow({ where: { id: productionId }, select: { name: true } }),
+			prisma.organization.findUniqueOrThrow({ where: { id: ownerOrgId }, select: { name: true } }),
+			prisma.orgMembership.findMany({
+				where: { organizationId: requestingOrgId, role: { in: ['OWNER', 'ADMIN'] } },
+				include: { user: { select: { email: true, name: true } } }
+			})
+		]);
+
+		await Promise.all(
+			recipients.map((membership) => {
+				const { subject, html, text } = bookingReviewedEmail({
+					name: membership.user.name,
+					ownerOrgName: ownerOrg.name,
+					productionName: production.name,
+					url: `${appBaseUrl}/productions/${productionId}`
+				});
+				return sendMail({ to: membership.user.email, subject, html, text });
+			})
+		);
+	} catch (err) {
+		console.error(`Failed to send booking-reviewed email for production ${productionId}:`, err);
+	}
 }
 
 export const getProductions = query(v.string(), async (organizationId: string) => {
@@ -45,6 +155,7 @@ export const getProduction = query(v.string(), async (id: string) => {
 				}
 			},
 			address: true,
+			customer: { include: { address: true } },
 			crew: {
 				orderBy: { createdAt: 'asc' },
 				include: { user: { select: { id: true, name: true, email: true } } }
@@ -66,8 +177,34 @@ const createProductionSchema = v.object({
 	organizationId: v.string(),
 	startDate: v.optional(v.any()),
 	endDate: v.optional(v.any()),
-	address: v.optional(addressInputSchema)
+	showStartDate: v.optional(v.any()),
+	showEndDate: v.optional(v.any()),
+	address: v.optional(addressInputSchema),
+	customerId: v.optional(v.string())
 });
+
+// Total duration governs asset blocking/calendar; show duration (if set) must
+// fall inside it and is used for offer/invoice day-count.
+function validateDuration(input: {
+	startDate?: Date | null;
+	endDate?: Date | null;
+	showStartDate?: Date | null;
+	showEndDate?: Date | null;
+}) {
+	const { startDate, endDate, showStartDate, showEndDate } = input;
+	if (startDate && endDate && endDate.getTime() < startDate.getTime()) {
+		throw new Error('End date cannot be before start date');
+	}
+	if (showStartDate && showEndDate && showEndDate.getTime() < showStartDate.getTime()) {
+		throw new Error('Show end date cannot be before show start date');
+	}
+	if (showStartDate && startDate && showStartDate.getTime() < startDate.getTime()) {
+		throw new Error('Show start date cannot be before the total start date');
+	}
+	if (showEndDate && endDate && showEndDate.getTime() > endDate.getTime()) {
+		throw new Error('Show end date cannot be after the total end date');
+	}
+}
 
 export const createProduction = command(createProductionSchema, async (data) => {
 	const user = await requireAuth();
@@ -77,6 +214,12 @@ export const createProduction = command(createProductionSchema, async (data) => 
 	});
 
 	if (!membership) throw new Error('Not a member');
+
+	const startDate = data.startDate ? new Date(data.startDate) : null;
+	const endDate = data.endDate ? new Date(data.endDate) : null;
+	const showStartDate = data.showStartDate ? new Date(data.showStartDate) : null;
+	const showEndDate = data.showEndDate ? new Date(data.showEndDate) : null;
+	validateDuration({ startDate, endDate, showStartDate, showEndDate });
 
 	const hasAnyAddress =
 		!!data.address &&
@@ -98,11 +241,14 @@ export const createProduction = command(createProductionSchema, async (data) => 
 			data: {
 				name: data.name,
 				organizationId: data.organizationId,
-				startDate: data.startDate,
-				endDate: data.endDate,
-				addressId: address?.id
+				startDate,
+				endDate,
+				showStartDate,
+				showEndDate,
+				addressId: address?.id,
+				customerId: data.customerId || null
 			},
-			include: { address: true }
+			include: { address: true, customer: { include: { address: true } } }
 		});
 	});
 
@@ -176,6 +322,75 @@ export const updateProductionAddress = command(updateProductionAddressSchema, as
 	return updated;
 });
 
+const updateProductionDurationSchema = v.object({
+	productionId: v.string(),
+	startDate: v.optional(v.any()),
+	endDate: v.optional(v.any()),
+	showStartDate: v.optional(v.any()),
+	showEndDate: v.optional(v.any())
+});
+
+export const updateProductionDuration = command(updateProductionDurationSchema, async (input) => {
+	const user = await requireAuth();
+
+	const production = await prisma.production.findUniqueOrThrow({
+		where: { id: input.productionId },
+		select: { id: true, organizationId: true }
+	});
+
+	const membership = await prisma.orgMembership.findUnique({
+		where: {
+			userId_organizationId: { userId: user.id, organizationId: production.organizationId }
+		}
+	});
+	if (!membership) throw new Error('Not a member');
+
+	const startDate = input.startDate ? new Date(input.startDate) : null;
+	const endDate = input.endDate ? new Date(input.endDate) : null;
+	const showStartDate = input.showStartDate ? new Date(input.showStartDate) : null;
+	const showEndDate = input.showEndDate ? new Date(input.showEndDate) : null;
+	validateDuration({ startDate, endDate, showStartDate, showEndDate });
+
+	const updated = await prisma.production.update({
+		where: { id: input.productionId },
+		data: { startDate, endDate, showStartDate, showEndDate }
+	});
+
+	await getProduction(input.productionId).refresh();
+	await getProductions(production.organizationId).refresh();
+	return updated;
+});
+
+const updateProductionCustomerSchema = v.object({
+	productionId: v.string(),
+	customerId: v.optional(v.string())
+});
+
+export const updateProductionCustomer = command(updateProductionCustomerSchema, async (input) => {
+	const user = await requireAuth();
+
+	const production = await prisma.production.findUniqueOrThrow({
+		where: { id: input.productionId },
+		select: { id: true, organizationId: true }
+	});
+
+	const membership = await prisma.orgMembership.findUnique({
+		where: {
+			userId_organizationId: { userId: user.id, organizationId: production.organizationId }
+		}
+	});
+	if (!membership) throw new Error('Not a member');
+
+	const updated = await prisma.production.update({
+		where: { id: input.productionId },
+		data: { customerId: input.customerId || null },
+		include: { customer: { include: { address: true } } }
+	});
+
+	await getProduction(input.productionId).refresh();
+	return updated;
+});
+
 const addAssetSchema = v.object({
 	productionId: v.string(),
 	assetId: v.string()
@@ -215,6 +430,10 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 	const isCrossOrg = production.organizationId !== asset.organizationId;
 	const initialStatus = isCrossOrg ? 'PENDING' : 'APPROVED';
 
+	const orgsToNotify = isCrossOrg
+		? await getOrgIdsNeedingApprovalNotification(data.productionId, [asset.organizationId])
+		: [];
+
 	const item = await prisma.productionItem.create({
 		data: {
 			productionId: data.productionId,
@@ -244,6 +463,15 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 					}
 		}
 	});
+
+	if (orgsToNotify.length > 0) {
+		await notifyPendingApproval(
+			data.productionId,
+			production.name,
+			production.organization.name,
+			orgsToNotify
+		);
+	}
 
 	await getProduction(data.productionId).refresh();
 	return item;
@@ -283,6 +511,12 @@ export const approveProductionItem = command(v.string(), async (itemId: string) 
 			}
 		}
 	});
+
+	await notifyRequesterIfQueueCleared(
+		item.productionId,
+		item.production.organizationId,
+		item.asset.organizationId
+	);
 
 	await getProduction(item.productionId).refresh();
 	await getPendingApprovals(item.asset.organizationId).refresh();
@@ -324,6 +558,12 @@ export const declineProductionItem = command(v.string(), async (itemId: string) 
 		}
 	});
 
+	await notifyRequesterIfQueueCleared(
+		item.productionId,
+		item.production.organizationId,
+		item.asset.organizationId
+	);
+
 	await getProduction(item.productionId).refresh();
 	await getPendingApprovals(item.asset.organizationId).refresh();
 	return updated;
@@ -363,7 +603,8 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	const user = await requireAuth();
 
 	const production = await prisma.production.findUniqueOrThrow({
-		where: { id: data.productionId }
+		where: { id: data.productionId },
+		include: { organization: { select: { name: true } } }
 	});
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id: data.bundleId },
@@ -408,6 +649,15 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	if (newAssets.length === 0)
 		throw new Error('All bundle assets are already booked during this production');
 
+	const crossOrgIds = [
+		...new Set(
+			newAssets
+				.filter((a) => a.organizationId !== production.organizationId)
+				.map((a) => a.organizationId)
+		)
+	];
+	const orgsToNotify = await getOrgIdsNeedingApprovalNotification(data.productionId, crossOrgIds);
+
 	await prisma.$transaction(
 		newAssets.map((asset) => {
 			const isCrossOrg = production.organizationId !== asset.organizationId;
@@ -434,6 +684,15 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 			}
 		}))
 	});
+
+	if (orgsToNotify.length > 0) {
+		await notifyPendingApproval(
+			data.productionId,
+			production.name,
+			production.organization.name,
+			orgsToNotify
+		);
+	}
 
 	await getProduction(data.productionId).refresh();
 	return { added: newAssets.length, skippedConflicts };
@@ -523,6 +782,15 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 		toAdd = toAdd.filter((a) => !conflictIds.has(a.id));
 	}
 
+	const crossOrgIds = [
+		...new Set(
+			toAdd
+				.filter((a) => a.organizationId !== production.organizationId)
+				.map((a) => a.organizationId)
+		)
+	];
+	const orgsToNotify = await getOrgIdsNeedingApprovalNotification(data.productionId, crossOrgIds);
+
 	await prisma.$transaction([
 		...toRemove.map((item) => prisma.productionItem.delete({ where: { id: item.id } })),
 		...toAdd.map((asset) => {
@@ -550,6 +818,15 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 		});
 	}
 
+	if (orgsToNotify.length > 0) {
+		await notifyPendingApproval(
+			data.productionId,
+			production.name,
+			production.organization.name,
+			orgsToNotify
+		);
+	}
+
 	await getProduction(data.productionId).refresh();
 	return { removed: toRemove.length, added: toAdd.length, skippedConflicts };
 });
@@ -568,6 +845,26 @@ export const addCrewMember = command(addCrewSchema, async (data) => {
 		data,
 		include: { user: { select: { id: true, name: true, email: true } } }
 	});
+
+	const production = await prisma.production.findUniqueOrThrow({
+		where: { id: data.productionId },
+		select: { name: true, startDate: true, endDate: true }
+	});
+
+	try {
+		const { subject, html, text } = addedAsCrewEmail({
+			name: member.user.name,
+			productionName: production.name,
+			role: member.role,
+			startDate: production.startDate,
+			endDate: production.endDate,
+			url: `${appBaseUrl}/productions/${data.productionId}`
+		});
+		await sendMail({ to: member.user.email, subject, html, text });
+	} catch (err) {
+		console.error(`Failed to send added-as-crew email for production ${data.productionId}:`, err);
+	}
+
 	await getProduction(data.productionId).refresh();
 	return member;
 });
@@ -672,7 +969,8 @@ export const getDashboardStats = query(async () => {
 		maintenanceAssets,
 		brokenAssets,
 		upcomingProductions,
-		bundleCount
+		bundleCount,
+		overdueInspections
 	] = await Promise.all([
 		prisma.asset.count({ where: { organizationId: { in: orgIds } } }),
 		prisma.asset.count({ where: { organizationId: { in: orgIds }, status: 'AVAILABLE' } }),
@@ -691,7 +989,10 @@ export const getDashboardStats = query(async () => {
 				_count: { select: { items: true, crew: true } }
 			}
 		}),
-		prisma.assetBundle.count({ where: { organizationId: { in: orgIds } } })
+		prisma.assetBundle.count({ where: { organizationId: { in: orgIds } } }),
+		prisma.asset.count({
+			where: { organizationId: { in: orgIds }, nextInspectionDue: { not: null, lt: now } }
+		})
 	]);
 
 	return {
@@ -702,6 +1003,7 @@ export const getDashboardStats = query(async () => {
 			broken: brokenAssets
 		},
 		upcomingProductions,
-		bundleCount
+		bundleCount,
+		overdueInspections
 	};
 });

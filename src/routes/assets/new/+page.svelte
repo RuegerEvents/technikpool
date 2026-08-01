@@ -5,24 +5,30 @@
 	import { Label } from '$lib/components/ui/label';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { CategorySelect } from '$lib/components/ui/category-select';
+	import { ImageUpload } from '$lib/components/ui/image-upload';
 	import {
 		getManufacturers,
 		getCategories,
 		getProducts,
 		getLocations,
+		getAsset,
 		createAssets
 	} from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
-	import { plural } from '$lib/utils';
+	import { plural, getErrorMessage } from '$lib/utils';
 	import { browser } from '$app/environment';
 
 	let saving = $state(false);
 	let selectedOrgId = $state('');
 	let locationId = $state('');
 	let locations = $derived(selectedOrgId ? await getLocations(selectedOrgId) : []);
+
+	let duplicateFromId = $derived(page.url.searchParams.get('duplicateFrom'));
+	let duplicateSource = $derived(duplicateFromId ? await getAsset(duplicateFromId) : null);
 
 	$effect(() => {
 		if (!selectedOrgId) {
@@ -34,15 +40,30 @@
 			return;
 		}
 		if (!locationId || !locations.some((l) => l.id === locationId)) {
-			locationId = locations[0].id;
+			const preferred = duplicateSource?.locationId;
+			locationId =
+				preferred && locations.some((l) => l.id === preferred) ? preferred : locations[0].id;
 		}
 	});
 
 	type SelectionOrNew = { id: string; name: string } | { id: null; name: string } | null;
 
 	let manufacturer = $state<SelectionOrNew>(null);
+	let newManufacturerLogoUrl = $state('');
 	let product = $state<SelectionOrNew>(null);
 	let categories = $derived(await getCategories());
+
+	let duplicatePrefilled = $state(false);
+	$effect(() => {
+		if (!duplicateSource || duplicatePrefilled) return;
+		selectedOrgId = duplicateSource.organizationId;
+		manufacturer = {
+			id: duplicateSource.product.manufacturerId,
+			name: duplicateSource.product.manufacturer.name
+		};
+		product = { id: duplicateSource.productId, name: duplicateSource.product.name };
+		duplicatePrefilled = true;
+	});
 
 	// New product modal state
 	let newProductModal = $state({
@@ -116,6 +137,7 @@
 
 	function resetForm() {
 		manufacturer = null;
+		newManufacturerLogoUrl = '';
 		product = null;
 		pendingProduct = null;
 		manufacturerKey++;
@@ -148,6 +170,7 @@
 				locationId,
 				manufacturerId: manufacturer.id ?? undefined,
 				newManufacturerName: manufacturer.id ? undefined : manufacturer.name,
+				newManufacturerLogoUrl: manufacturer.id ? undefined : newManufacturerLogoUrl || undefined,
 				productId: product.id ?? undefined,
 				newProductName: product.id ? undefined : (pendingProduct?.name ?? product.name),
 				newProductImageUrl: product.id ? undefined : pendingProduct?.imageUrl || undefined,
@@ -169,7 +192,7 @@
 				goto(resolve(count === 1 ? `/assets/${created[0].id}` : '/assets'));
 			}
 		} catch (err) {
-			toast.error((err as Error).message);
+			toast.error(getErrorMessage(err));
 			saving = false;
 		}
 	}
@@ -182,6 +205,16 @@
 		<h1 class="text-3xl font-bold tracking-tight">Add New Asset</h1>
 		<p class="text-muted-foreground">Register new equipment into your organization's inventory.</p>
 	</div>
+
+	{#if duplicateSource}
+		<div class="max-w-3xl rounded-md border bg-muted/40 px-4 py-3 text-sm">
+			Duplicating <span class="font-medium"
+				>{duplicateSource.product.manufacturer.name} {duplicateSource.product.name}</span
+			>
+			— organization, location, manufacturer and product are prefilled. Serial number and asset tag are
+			left blank.
+		</div>
+	{/if}
 
 	<Card.Root class="max-w-3xl">
 		<Card.Content class="pt-6">
@@ -245,6 +278,13 @@
 								onchange={handleManufacturerChange}
 								placeholder="Search or create manufacturer…"
 							/>
+						</div>
+					{/if}
+
+					{#if manufacturer && manufacturer.id === null}
+						<div class="space-y-2">
+							<Label>Manufacturer logo</Label>
+							<ImageUpload bind:value={newManufacturerLogoUrl} label="Manufacturer logo" />
 						</div>
 					{/if}
 
@@ -413,13 +453,8 @@
 				</div>
 
 				<div class="space-y-2">
-					<Label for="modal-product-image">Image URL</Label>
-					<Input
-						id="modal-product-image"
-						type="url"
-						placeholder="https://…"
-						bind:value={newProductModal.imageUrl}
-					/>
+					<Label>Product photo</Label>
+					<ImageUpload bind:value={newProductModal.imageUrl} label="Product photo" />
 				</div>
 			</div>
 
