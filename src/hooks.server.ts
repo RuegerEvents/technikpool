@@ -8,7 +8,7 @@ import { runWithLocale, loadLocales } from 'wuchale/load-utils/server';
 import { locales } from './locales/data.js';
 import { ensureBucket } from '$lib/server/storage';
 
-loadLocales(main.key, main.loadIDs, main.loadCatalog, locales);
+loadLocales(main.key, main.loadCount, main.loadCatalog, locales);
 
 if (!building) {
 	ensureBucket();

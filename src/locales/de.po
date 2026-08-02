@@ -2087,6 +2087,7 @@ msgstr "Zugeordnete Kategorie"
 msgid "— Unassigned —"
 msgstr "— Nicht zugeordnet —"
 
+#. 0.0: previewRows.length; 0.1: csvRows.length
 #: src/lib/components/CsvImportModal.svelte
 msgid "Preview <0>(first {0} of {1} rows)</0>"
 msgstr "Vorschau <0>(erste {0} von {1} Zeilen)</0>"
@@ -3918,3 +3919,73 @@ msgstr "Gesamtanzahl: {0}"
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 msgid "Date:"
 msgstr "Datum:"
+
+#. 0: failed; 1: items.length
+#: src/routes/+page.svelte
+msgid "{0} of {1} approvals failed."
+msgstr ""
+
+#. 0: failed; 1: items.length
+#: src/routes/+page.svelte
+msgid "{0} of {1} declines failed."
+msgstr ""
+
+#~ msgid "{0} {1} admin access"
+#~ msgstr ""
+
+#~ msgid "{0}00001 (leave blank to auto-generate)"
+#~ msgstr ""
+
+#. 0: result.count; 1: result.count !== 1 ? 's' \\: ''; 2: result.targetName
+#: src/lib/components/ui/checkout-bar.svelte
+msgid "{0} asset{1} checked out to {2}"
+msgstr ""
+
+#. 0: result.added; 1: result.added !== 1 ? 's' \\: ''
+#: src/routes/productions/[id]/+page.svelte
+msgid "{0} asset{1} added"
+msgstr ""
+
+#. 0: result.removed; 1: result.removed !== 1 ? 's' \\: ''
+#: src/routes/productions/[id]/+page.svelte
+msgid "{0} asset{1} removed"
+msgstr ""
+
+#. 0: result.skippedConflicts
+#: src/routes/productions/[id]/+page.svelte
+msgid "{0} skipped (conflict)"
+msgstr ""
+
+#. 0: divergence.addedCount; 1: divergence.addedCount !== 1 ? 's' \\: ''
+#: src/routes/productions/[id]/+page.svelte
+msgid "{0} new asset{1} in bundle"
+msgstr ""
+
+#. 0: divergence.removedCount; 1: divergence.removedCount !== 1 ? 's' \\: ''
+#: src/routes/productions/[id]/+page.svelte
+msgid "{0} asset{1} removed from bundle"
+msgstr ""
+
+#~ msgid "{0} added to organization"
+#~ msgstr ""
+
+#~ msgid "{0} removed from organization"
+#~ msgstr ""
+
+#~ msgid "{0} months"
+#~ msgstr ""
+
+#. 0: fullDuration.days
+#. 0: showDuration.days
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "{0} d"
+msgstr ""
+
+#. 0: value.length
+#: src/lib/components/ui/org-multi-select/org-multi-select.svelte
+msgid "{0} organizations"
+msgstr ""
+
+#~ msgid "{0}% / day"
+#~ msgstr ""

@@ -2087,6 +2087,7 @@ msgstr "Maps To Category"
 msgid "— Unassigned —"
 msgstr "— Unassigned —"
 
+#. 0.0: previewRows.length; 0.1: csvRows.length
 #: src/lib/components/CsvImportModal.svelte
 msgid "Preview <0>(first {0} of {1} rows)</0>"
 msgstr "Preview <0>(first {0} of {1} rows)</0>"
@@ -3918,3 +3919,73 @@ msgstr "Total items: {0}"
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 msgid "Date:"
 msgstr "Date:"
+
+#. 0: failed; 1: items.length
+#: src/routes/+page.svelte
+msgid "{0} of {1} approvals failed."
+msgstr "{0} of {1} approvals failed."
+
+#. 0: failed; 1: items.length
+#: src/routes/+page.svelte
+msgid "{0} of {1} declines failed."
+msgstr "{0} of {1} declines failed."
+
+#~ msgid "{0} {1} admin access"
+#~ msgstr "{0} {1} admin access"
+
+#~ msgid "{0}00001 (leave blank to auto-generate)"
+#~ msgstr "{0}00001 (leave blank to auto-generate)"
+
+#. 0: result.count; 1: result.count !== 1 ? 's' \\: ''; 2: result.targetName
+#: src/lib/components/ui/checkout-bar.svelte
+msgid "{0} asset{1} checked out to {2}"
+msgstr "{0} asset{1} checked out to {2}"
+
+#. 0: result.added; 1: result.added !== 1 ? 's' \\: ''
+#: src/routes/productions/[id]/+page.svelte
+msgid "{0} asset{1} added"
+msgstr "{0} asset{1} added"
+
+#. 0: result.removed; 1: result.removed !== 1 ? 's' \\: ''
+#: src/routes/productions/[id]/+page.svelte
+msgid "{0} asset{1} removed"
+msgstr "{0} asset{1} removed"
+
+#. 0: result.skippedConflicts
+#: src/routes/productions/[id]/+page.svelte
+msgid "{0} skipped (conflict)"
+msgstr "{0} skipped (conflict)"
+
+#. 0: divergence.addedCount; 1: divergence.addedCount !== 1 ? 's' \\: ''
+#: src/routes/productions/[id]/+page.svelte
+msgid "{0} new asset{1} in bundle"
+msgstr "{0} new asset{1} in bundle"
+
+#. 0: divergence.removedCount; 1: divergence.removedCount !== 1 ? 's' \\: ''
+#: src/routes/productions/[id]/+page.svelte
+msgid "{0} asset{1} removed from bundle"
+msgstr "{0} asset{1} removed from bundle"
+
+#~ msgid "{0} added to organization"
+#~ msgstr "{0} added to organization"
+
+#~ msgid "{0} removed from organization"
+#~ msgstr "{0} removed from organization"
+
+#~ msgid "{0} months"
+#~ msgstr "{0} months"
+
+#. 0: fullDuration.days
+#. 0: showDuration.days
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "{0} d"
+msgstr "{0} d"
+
+#. 0: value.length
+#: src/lib/components/ui/org-multi-select/org-multi-select.svelte
+msgid "{0} organizations"
+msgstr "{0} organizations"
+
+#~ msgid "{0}% / day"
+#~ msgstr "{0}% / day"
