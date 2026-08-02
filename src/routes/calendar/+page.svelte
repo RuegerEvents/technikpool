@@ -106,6 +106,11 @@
 	let scrollLeft = $state(0);
 	let viewportWidth = $state(900);
 
+	// Tracks the hovered event across week rows (month/year views split a
+	// multi-week event into a separate bar per row, so CSS-only :hover can't
+	// span them — this drives the "highlight the whole event" behavior instead.
+	let hoveredEventId = $state<string | null>(null);
+
 	const SIDEBAR = 220;
 	const ROW_H = 36;
 	const PRODUCT_H = 28;
@@ -1098,9 +1103,14 @@
 								<a
 									href={resolve(`/productions/${bar.event.id}`)}
 									title={bar.event.name}
-									class="absolute flex items-center overflow-hidden px-1.5 text-[11px] font-medium text-white no-underline hover:brightness-110 {seg.roundedLeft
-										? 'rounded-l'
-										: ''} {seg.roundedRight ? 'rounded-r' : ''}"
+									onmouseenter={() => (hoveredEventId = bar.event.id)}
+									onmouseleave={() => (hoveredEventId = null)}
+									class="absolute flex items-center overflow-hidden px-1.5 text-[11px] font-medium text-white no-underline {hoveredEventId ===
+									bar.event.id
+										? 'brightness-110'
+										: ''} {seg.roundedLeft ? 'rounded-l' : ''} {seg.roundedRight
+										? 'rounded-r'
+										: ''}"
 									style="left: calc({seg.colStart} / 7 * 100% + {seg.roundedLeft
 										? 2
 										: 0}px); width: calc({seg.colEnd -
@@ -1161,9 +1171,13 @@
 											<a
 												href={resolve(`/productions/${bar.event.id}`)}
 												title={bar.event.name}
-												class="absolute no-underline hover:brightness-110 {seg.roundedLeft
-													? 'rounded-l-sm'
-													: ''} {seg.roundedRight ? 'rounded-r-sm' : ''}"
+												onmouseenter={() => (hoveredEventId = bar.event.id)}
+												onmouseleave={() => (hoveredEventId = null)}
+												class="absolute no-underline {hoveredEventId === bar.event.id
+													? 'brightness-110'
+													: ''} {seg.roundedLeft ? 'rounded-l-sm' : ''} {seg.roundedRight
+													? 'rounded-r-sm'
+													: ''}"
 												style="left: calc({seg.colStart} / 7 * 100%); width: calc({seg.colEnd -
 													seg.colStart +
 													1} / 7 * 100%); top: {YEAR_DAY_NUM_H +
@@ -1366,23 +1380,25 @@
 										</a>
 									{:else}
 										{@const segs = ganttSegments(bar)}
-										{#each segs as seg, si (si)}
-											<a
-												href={resolve(`/productions/${bar.productionId}`)}
-												title={bar.label}
-												class="absolute top-1 flex items-center overflow-hidden px-1.5 text-[11px] font-medium text-white no-underline hover:brightness-110 {seg.roundedLeft
-													? 'rounded-l'
-													: ''} {seg.roundedRight ? 'rounded-r' : ''}"
-												style="left: {seg.left}px; width: {seg.width}px; height: {h -
-													8}px; background-color: {bar.color}; {seg.kind === 'setup'
-													? 'opacity: 0.65; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 4px, transparent 4px, transparent 8px);'
-													: ''}"
-											>
-												{#if seg.kind === 'show' || segs.length === 1}
-													{bar.label}
-												{/if}
-											</a>
-										{/each}
+										<div class="group/bar">
+											{#each segs as seg, si (si)}
+												<a
+													href={resolve(`/productions/${bar.productionId}`)}
+													title={bar.label}
+													class="absolute top-1 flex items-center overflow-hidden px-1.5 text-[11px] font-medium text-white no-underline group-hover/bar:brightness-110 {seg.roundedLeft
+														? 'rounded-l'
+														: ''} {seg.roundedRight ? 'rounded-r' : ''}"
+													style="left: {seg.left}px; width: {seg.width}px; height: {h -
+														8}px; background-color: {bar.color}; {seg.kind === 'setup'
+														? 'opacity: 0.65; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 4px, transparent 4px, transparent 8px);'
+														: ''}"
+												>
+													{#if seg.kind === 'show' || segs.length === 1}
+														{bar.label}
+													{/if}
+												</a>
+											{/each}
+										</div>
 									{/if}
 								{/each}
 							{/if}
@@ -1404,25 +1420,27 @@
 										</a>
 									{:else}
 										{@const segs = ganttSegments(bar)}
-										{#each segs as seg, si (si)}
-											<a
-												href={resolve(`/productions/${bar.productionId}`)}
-												title="{bar.label} ({Math.round(bar.fraction * 100)}%)"
-												class="absolute flex items-center overflow-hidden px-1 no-underline hover:brightness-110 {seg.roundedLeft
-													? 'rounded-l-sm'
-													: ''} {seg.roundedRight ? 'rounded-r-sm' : ''}"
-												style="left: {seg.left}px; width: {seg.width}px; height: {barH}px; top: 3px; background-color: {bar.color}; {seg.kind ===
-												'setup'
-													? 'opacity: 0.65; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 4px, transparent 4px, transparent 8px);'
-													: ''}"
-											>
-												{#if seg.kind === 'show' || segs.length === 1}
-													<span class="truncate text-[9px] leading-none font-medium text-white"
-														>{bar.label}</span
-													>
-												{/if}
-											</a>
-										{/each}
+										<div class="group/bar">
+											{#each segs as seg, si (si)}
+												<a
+													href={resolve(`/productions/${bar.productionId}`)}
+													title="{bar.label} ({Math.round(bar.fraction * 100)}%)"
+													class="absolute flex items-center overflow-hidden px-1 no-underline group-hover/bar:brightness-110 {seg.roundedLeft
+														? 'rounded-l-sm'
+														: ''} {seg.roundedRight ? 'rounded-r-sm' : ''}"
+													style="left: {seg.left}px; width: {seg.width}px; height: {barH}px; top: 3px; background-color: {bar.color}; {seg.kind ===
+													'setup'
+														? 'opacity: 0.65; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 4px, transparent 4px, transparent 8px);'
+														: ''}"
+												>
+													{#if seg.kind === 'show' || segs.length === 1}
+														<span class="truncate text-[9px] leading-none font-medium text-white"
+															>{bar.label}</span
+														>
+													{/if}
+												</a>
+											{/each}
+										</div>
 									{/if}
 								{/each}
 							{/if}
