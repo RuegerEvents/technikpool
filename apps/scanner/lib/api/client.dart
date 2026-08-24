@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/misc.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import 'generated/export.dart';
 
 /// A failure the server described. [code] is the machine-readable identifier —
@@ -112,27 +113,29 @@ class ApiClient {
   }
 }
 
-/// German text for the error codes the API defines. The API itself stays
-/// language-neutral — that's what the stable `code` is for — so localisation
-/// happens here rather than on the server.
-const _germanMessages = <String, String>{
-  'asset_not_found': 'Dieses Etikett ist unbekannt.',
-  'forbidden': 'Kein Zugriff auf diesen Artikel.',
-  'wrong_organization': 'Der Lagerort gehört zu einer anderen Organisation.',
-  'unauthorized': 'Die Sitzung ist abgelaufen. Bitte erneut verbinden.',
-  'invalid_request': 'Ungültige Anfrage.',
-  'invalid_limit': 'Ungültige Seitengröße.',
-  'network': 'Server nicht erreichbar.',
-  'internal_error': 'Serverfehler.',
-};
-
-/// The message to show for a failure: the German text when the code is one we
-/// know, otherwise the server's own wording — which is better than a generic
-/// fallback, since it may explain something we haven't anticipated.
-String localisedMessage(Object error) {
+/// The message to show for a failure.
+///
+/// The API stays language-neutral — that is what the stable `code` is for — so
+/// the wording lives in the catalogues and is resolved here. An unrecognised
+/// code falls back to the server's own message rather than to something
+/// generic: it may explain a case we haven't anticipated, and English detail
+/// beats a translated shrug.
+String describeError(S l10n, Object error) {
   final err = unwrapError(error);
-  if (err is ApiException) return _germanMessages[err.code] ?? err.message;
-  return err.toString();
+  if (err is! ApiException) return err.toString();
+
+  return switch (err.code) {
+    'asset_not_found' => l10n.errorAssetNotFound,
+    'forbidden' => l10n.errorForbidden,
+    'wrong_organization' => l10n.errorWrongOrganization,
+    'unauthorized' => l10n.errorUnauthorized,
+    'invalid_request' => l10n.errorInvalidRequest,
+    'invalid_limit' => l10n.errorInvalidLimit,
+    'network' => l10n.errorNetwork,
+    'internal_error' => l10n.errorInternal,
+    'no_token' => l10n.errorNoToken,
+    _ => err.message,
+  };
 }
 
 /// Unwraps whatever Dio or Riverpod wrapped so callers can branch on
@@ -159,5 +162,3 @@ Object unwrapError(Object raw) {
   }
   return error;
 }
-
-String describeError(Object error) => localisedMessage(error);

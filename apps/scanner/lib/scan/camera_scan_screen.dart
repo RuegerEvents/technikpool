@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import '../l10n/strings.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../state/providers.dart';
 import '../theme.dart';
 import 'scan_bus.dart';
@@ -126,14 +126,18 @@ class _CameraScanScreenState extends ConsumerState<CameraScanScreen> {
     setState(() => _count++);
   }
 
-  String _describe(MobileScannerException error) => switch (error.errorCode) {
-    MobileScannerErrorCode.permissionDenied => S.cameraDenied,
-    MobileScannerErrorCode.unsupported => S.cameraUnsupported,
-    _ => S.cameraFailed,
-  };
+  String _describe(S l10n, MobileScannerException error) {
+    final l10n = S.of(context);
+    return switch (error.errorCode) {
+      MobileScannerErrorCode.permissionDenied => l10n.cameraDenied,
+      MobileScannerErrorCode.unsupported => l10n.cameraUnsupported,
+      _ => l10n.cameraFailed,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = S.of(context);
     return Scaffold(
       backgroundColor: Colors.black,
       // The app bar floats over the preview rather than sitting on a surface.
@@ -147,7 +151,7 @@ class _CameraScanScreenState extends ConsumerState<CameraScanScreen> {
                 return const SizedBox.shrink();
               }
               return IconButton(
-                tooltip: S.torch,
+                tooltip: l10n.torch,
                 onPressed: _controller.toggleTorch,
                 icon: Icon(
                   state.torchState == TorchState.on
@@ -181,7 +185,7 @@ class _CameraScanScreenState extends ConsumerState<CameraScanScreen> {
                       child: Padding(
                         padding: const EdgeInsets.all(32),
                         child: Text(
-                          _describe(error),
+                          _describe(l10n, error),
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             color: OverlayColors.foreground,
@@ -208,6 +212,7 @@ class _CameraScanScreenState extends ConsumerState<CameraScanScreen> {
   }
 
   Widget _banner() {
+    final l10n = S.of(context);
     final last = _last;
     return SafeArea(
       child: Container(
@@ -238,7 +243,7 @@ class _CameraScanScreenState extends ConsumerState<CameraScanScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    last?.title ?? S.cameraHint,
+                    last?.title ?? l10n.cameraHint,
                     style: const TextStyle(
                       color: OverlayColors.foreground,
                       fontSize: 16,

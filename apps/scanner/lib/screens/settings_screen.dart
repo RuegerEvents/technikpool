@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../l10n/strings.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../scan/scan_channel.dart';
 import '../scan/scan_settings.dart';
 import '../state/providers.dart';
@@ -12,17 +12,18 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = S.of(context);
     final creds = ref.watch(credentialsProvider).value;
     final user = ref.watch(currentUserProvider);
     final config = ref.watch(scannerConfigProvider).value;
     final settings = ref.watch(scanSettingsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text(S.settings)),
+      appBar: AppBar(title: Text(l10n.settings)),
       body: ListView(
         children: [
           ListTile(
-            title: const Text(S.connectedAs),
+            title: Text(l10n.connectedAs),
             subtitle: Text(
               user.when(
                 data: (u) =>
@@ -33,9 +34,32 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
           ),
-          ListTile(title: const Text(S.server), subtitle: Text(creds?.baseUrl ?? '—')),
+          ListTile(title: Text(l10n.server), subtitle: Text(creds?.baseUrl ?? '—')),
           const Divider(),
-          const _SectionHeader(S.scanInput),
+          _SectionHeader(l10n.language),
+          RadioGroup<Locale?>(
+            groupValue: ref.watch(localeProvider).value,
+            onChanged: (picked) => ref.read(localeProvider.notifier).save(picked),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RadioListTile<Locale?>(value: null, title: Text(l10n.languageSystem)),
+                // Endonyms on purpose: someone hunting for their own language
+                // scans for the word they would write, not its translation.
+                for (final locale in S.supportedLocales)
+                  RadioListTile<Locale?>(
+                    value: locale,
+                    title: Text(switch (locale.languageCode) {
+                      'de' => 'Deutsch',
+                      'en' => 'English',
+                      _ => locale.languageCode,
+                    }),
+                  ),
+              ],
+            ),
+          ),
+          const Divider(),
+          _SectionHeader(l10n.scanInput),
           RadioGroup<ScanMode>(
             groupValue: settings.mode,
             onChanged: (picked) {
@@ -48,14 +72,14 @@ class SettingsScreen extends ConsumerWidget {
                   RadioListTile<ScanMode>(
                     value: mode,
                     title: Text(switch (mode) {
-                      ScanMode.auto => S.scanModeAuto,
-                      ScanMode.hardware => S.scanModeHardware,
-                      ScanMode.camera => S.scanModeCamera,
+                      ScanMode.auto => l10n.scanModeAuto,
+                      ScanMode.hardware => l10n.scanModeHardware,
+                      ScanMode.camera => l10n.scanModeCamera,
                     }),
                     subtitle: Text(switch (mode) {
-                      ScanMode.auto => S.scanModeAutoHint,
-                      ScanMode.hardware => S.scanModeHardwareHint,
-                      ScanMode.camera => S.scanModeCameraHint,
+                      ScanMode.auto => l10n.scanModeAutoHint,
+                      ScanMode.hardware => l10n.scanModeHardwareHint,
+                      ScanMode.camera => l10n.scanModeCameraHint,
                     }),
                     // A device with no broadcast bridge cannot honour either of
                     // the hardware answers, so it is not offered them.
@@ -72,15 +96,15 @@ class SettingsScreen extends ConsumerWidget {
                     : Icons.help_outline,
               ),
               title: Text(switch (settings) {
-                ScanSettings(hardwareSeen: true) => S.hardwareDetected,
-                ScanSettings(isKnownPda: true) => S.knownPdaModel,
-                _ => S.hardwareNotDetected,
+                ScanSettings(hardwareSeen: true) => l10n.hardwareDetected,
+                ScanSettings(isKnownPda: true) => l10n.knownPdaModel,
+                _ => l10n.hardwareNotDetected,
               }),
               subtitle: Text(settings.device?.toString() ?? '…'),
               trailing: settings.hardwareSeen
                   ? TextButton(
                       onPressed: () => ref.read(hardwareSeenProvider.notifier).forget(),
-                      child: const Text(S.reset),
+                      child: Text(l10n.reset),
                     )
                   : null,
             ),
@@ -89,7 +113,7 @@ class SettingsScreen extends ConsumerWidget {
           if (ScanChannel.isSupported) ...[
             const Divider(),
             ListTile(
-              title: const Text(S.scannerConfig),
+              title: Text(l10n.scannerConfig),
               subtitle: Text(
                 config == null
                     ? '…'
@@ -101,8 +125,8 @@ class SettingsScreen extends ConsumerWidget {
               ).push(MaterialPageRoute<void>(builder: (_) => const _ScannerConfigScreen())),
             ),
             ListTile(
-              title: const Text(S.diagnostics),
-              subtitle: const Text(S.diagnosticsHint),
+              title: Text(l10n.diagnostics),
+              subtitle: Text(l10n.diagnosticsHint),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context)
                   .push(MaterialPageRoute<void>(builder: (_) => const DiagnosticsScreen())),
@@ -113,7 +137,7 @@ class SettingsScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: OutlinedButton.icon(
               icon: const Icon(Icons.logout),
-              label: const Text(S.disconnect),
+              label: Text(l10n.disconnect),
               onPressed: () => ref.read(credentialsProvider.notifier).signOut(),
             ),
           ),
@@ -171,36 +195,40 @@ class _ScannerConfigScreenState extends ConsumerState<_ScannerConfigScreen> {
       value.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
 
   Future<void> _save() async {
+    final l10n = S.of(context);
     await ref
         .read(scannerConfigProvider.notifier)
         .save(ScannerConfig(actions: _split(_actions.text), extraKeys: _split(_keys.text)));
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(S.saved)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.saved)));
     }
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text(S.scannerConfig)),
-    body: ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        const Text(S.configHint),
-        const SizedBox(height: 20),
-        TextField(
-          controller: _actions,
-          maxLines: 4,
-          decoration: const InputDecoration(labelText: S.broadcastActions),
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: _keys,
-          maxLines: 3,
-          decoration: const InputDecoration(labelText: S.extraKeys),
-        ),
-        const SizedBox(height: 24),
-        FilledButton(onPressed: _save, child: const Text(S.save)),
-      ],
-    ),
-  );
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.scannerConfig)),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(l10n.configHint),
+          const SizedBox(height: 20),
+          TextField(
+            controller: _actions,
+            maxLines: 4,
+            decoration: InputDecoration(labelText: l10n.broadcastActions),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _keys,
+            maxLines: 3,
+            decoration: InputDecoration(labelText: l10n.extraKeys),
+          ),
+          const SizedBox(height: 24),
+          FilledButton(onPressed: _save, child: Text(l10n.save)),
+        ],
+      ),
+    );
+  }
 }

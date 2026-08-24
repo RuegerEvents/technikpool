@@ -6,7 +6,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../api/auth_service.dart';
 import '../api/client.dart';
-import '../l10n/strings.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../scan/camera_scan_screen.dart';
 import '../state/providers.dart';
 
@@ -78,6 +78,9 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
     final url = _normalisedUrl();
     if (url.isEmpty) return;
 
+    // Read before the awaits below: this resumes after a round trip.
+    final l10n = S.of(context);
+
     setState(() {
       _baseUrl = url;
       _busy = true;
@@ -98,13 +101,14 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = describeError(error);
+        _error = describeError(l10n, error);
         _busy = false;
       });
     }
   }
 
   Future<void> _awaitApproval(AuthService auth, PendingDeviceAuth pending) async {
+    final l10n = S.of(context);
     try {
       final token = await auth.awaitApproval(
         pending,
@@ -113,17 +117,19 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
       if (!mounted) return;
       await ref.read(credentialsProvider.notifier).save(baseUrl: _baseUrl, token: token);
     } on DeviceAuthDenied {
-      if (mounted) setState(() => _error = S.accessDenied);
+      if (mounted) setState(() => _error = l10n.accessDenied);
     } on DeviceAuthExpired {
-      if (mounted) setState(() => _error = S.codeExpired);
+      if (mounted) setState(() => _error = l10n.codeExpired);
     } catch (error) {
-      if (mounted) setState(() => _error = describeError(error));
+      if (mounted) setState(() => _error = describeError(l10n, error));
     }
   }
 
   Future<void> _signInWithPassword() async {
     final url = _normalisedUrl();
     if (url.isEmpty) return;
+
+    final l10n = S.of(context);
 
     setState(() {
       _busy = true;
@@ -144,7 +150,7 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
       // Surface better-auth's own wording — an unverified address produces a
       // specific message the operator needs to read, not "login failed".
       setState(() {
-        _error = describeError(error);
+        _error = describeError(l10n, error);
         _busy = false;
       });
     }
@@ -162,8 +168,43 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = S.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text(S.connectTitle)),
+      appBar: AppBar(
+        title: Text(l10n.connectTitle),
+        // The language setting proper lives under Settings, which is behind
+        // pairing — so it is unreachable exactly when someone who cannot read
+        // the device's language needs it. The web keeps its switcher in the
+        // header on every page for the same reason.
+        actions: [
+          // Language codes rather than Locale?, with '' for "follow the
+          // device". A PopupMenuItem whose value is null is indistinguishable
+          // from dismissing the menu, so PopupMenuButton reports it as a
+          // cancel and onSelected never fires — the system option looked like
+          // it worked and silently did nothing.
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.language),
+            tooltip: l10n.language,
+            initialValue: ref.watch(localeProvider).value?.languageCode ?? '',
+            onSelected: (code) =>
+                ref.read(localeProvider.notifier).save(code.isEmpty ? null : Locale(code)),
+            itemBuilder: (_) => [
+              PopupMenuItem(value: '', child: Text(l10n.languageSystem)),
+              // Endonyms: someone hunting for their own language scans for the
+              // word they would write, not its translation.
+              for (final locale in S.supportedLocales)
+                PopupMenuItem(
+                  value: locale.languageCode,
+                  child: Text(switch (locale.languageCode) {
+                    'de' => 'Deutsch',
+                    'en' => 'English',
+                    _ => locale.languageCode,
+                  }),
+                ),
+            ],
+          ),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -177,65 +218,69 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
     );
   }
 
-  Widget _serverStep() => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      const Text(S.scanServerQr, style: TextStyle(fontSize: 16)),
-      if (ref.watch(scanSettingsProvider).cameraEnabled) ...[
-        const SizedBox(height: 16),
-        OutlinedButton.icon(
+  Widget _serverStep() {
+    final l10n = S.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(l10n.scanServerQr, style: TextStyle(fontSize: 16)),
+        if (ref.watch(scanSettingsProvider).cameraEnabled) ...[
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: _busy
+                ? null
+                : () => CameraScanScreen.once(
+                    context,
+                    title: l10n.scanQrWithCamera,
+                    formats: const [BarcodeFormat.qrCode],
+                  ),
+            icon: const Icon(Icons.photo_camera_outlined),
+            label: Text(l10n.scanQrWithCamera),
+          ),
+        ],
+        const SizedBox(height: 20),
+        TextField(
+          controller: _urlController,
+          keyboardType: TextInputType.url,
+          autocorrect: false,
+          decoration: InputDecoration(
+            labelText: l10n.serverAddress,
+            hintText: l10n.serverAddressHint,
+          ),
+        ),
+        const SizedBox(height: 20),
+        if (_error != null) _errorBox(_error!),
+        FilledButton(
+          onPressed: _busy ? null : _startDeviceFlow,
+          child: _busy
+              ? const SizedBox(
+                  height: 22,
+                  width: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(l10n.continueLabel),
+        ),
+        const SizedBox(height: 8),
+        TextButton(
           onPressed: _busy
               ? null
-              : () => CameraScanScreen.once(
-                  context,
-                  title: S.scanQrWithCamera,
-                  formats: const [BarcodeFormat.qrCode],
-                ),
-          icon: const Icon(Icons.photo_camera_outlined),
-          label: const Text(S.scanQrWithCamera),
+              : () => setState(() {
+                  _step = _Step.password;
+                  _error = null;
+                }),
+          child: Text(l10n.signInWithPassword),
         ),
       ],
-      const SizedBox(height: 20),
-      TextField(
-        controller: _urlController,
-        keyboardType: TextInputType.url,
-        autocorrect: false,
-        decoration: const InputDecoration(
-          labelText: S.serverAddress,
-          hintText: S.serverAddressHint,
-        ),
-      ),
-      const SizedBox(height: 20),
-      if (_error != null) _errorBox(_error!),
-      FilledButton(
-        onPressed: _busy ? null : _startDeviceFlow,
-        child: _busy
-            ? const SizedBox(
-                height: 22,
-                width: 22,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Text(S.continueLabel),
-      ),
-      const SizedBox(height: 8),
-      TextButton(
-        onPressed: _busy
-            ? null
-            : () => setState(() {
-                _step = _Step.password;
-                _error = null;
-              }),
-        child: const Text(S.signInWithPassword),
-      ),
-    ],
-  );
+    );
+  }
 
   Widget _deviceCodeStep() {
+    final l10n = S.of(context);
     final pending = _pending;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(S.codeInstructions, style: TextStyle(fontSize: 16)),
+        Text(l10n.codeInstructions, style: TextStyle(fontSize: 16)),
         const SizedBox(height: 24),
         Container(
           padding: const EdgeInsets.symmetric(vertical: 28),
@@ -265,7 +310,7 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
         if (_error != null)
           _errorBox(_error!)
         else
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
@@ -274,62 +319,65 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
               SizedBox(width: 12),
-              Text(S.waitingForApproval),
+              Text(l10n.waitingForApproval),
             ],
           ),
         const SizedBox(height: 24),
-        OutlinedButton(onPressed: _restart, child: const Text(S.startOver)),
+        OutlinedButton(onPressed: _restart, child: Text(l10n.startOver)),
       ],
     );
   }
 
-  Widget _passwordStep() => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      TextField(
-        controller: _urlController,
-        keyboardType: TextInputType.url,
-        autocorrect: false,
-        decoration: const InputDecoration(labelText: S.serverAddress),
-      ),
-      const SizedBox(height: 14),
-      TextField(
-        controller: _emailController,
-        keyboardType: TextInputType.emailAddress,
-        autocorrect: false,
-        decoration: const InputDecoration(labelText: S.email),
-      ),
-      const SizedBox(height: 14),
-      TextField(
-        controller: _passwordController,
-        obscureText: true,
-        decoration: const InputDecoration(labelText: S.password),
-        onSubmitted: (_) => _signInWithPassword(),
-      ),
-      const SizedBox(height: 20),
-      if (_error != null) _errorBox(_error!),
-      FilledButton(
-        onPressed: _busy ? null : _signInWithPassword,
-        child: _busy
-            ? const SizedBox(
-                height: 22,
-                width: 22,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Text(S.signIn),
-      ),
-      const SizedBox(height: 8),
-      TextButton(
-        onPressed: _busy
-            ? null
-            : () => setState(() {
-                _step = _Step.server;
-                _error = null;
-              }),
-        child: const Text(S.useDeviceCode),
-      ),
-    ],
-  );
+  Widget _passwordStep() {
+    final l10n = S.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          controller: _urlController,
+          keyboardType: TextInputType.url,
+          autocorrect: false,
+          decoration: InputDecoration(labelText: l10n.serverAddress),
+        ),
+        const SizedBox(height: 14),
+        TextField(
+          controller: _emailController,
+          keyboardType: TextInputType.emailAddress,
+          autocorrect: false,
+          decoration: InputDecoration(labelText: l10n.email),
+        ),
+        const SizedBox(height: 14),
+        TextField(
+          controller: _passwordController,
+          obscureText: true,
+          decoration: InputDecoration(labelText: l10n.password),
+          onSubmitted: (_) => _signInWithPassword(),
+        ),
+        const SizedBox(height: 20),
+        if (_error != null) _errorBox(_error!),
+        FilledButton(
+          onPressed: _busy ? null : _signInWithPassword,
+          child: _busy
+              ? const SizedBox(
+                  height: 22,
+                  width: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(l10n.signIn),
+        ),
+        const SizedBox(height: 8),
+        TextButton(
+          onPressed: _busy
+              ? null
+              : () => setState(() {
+                  _step = _Step.server;
+                  _error = null;
+                }),
+          child: Text(l10n.useDeviceCode),
+        ),
+      ],
+    );
+  }
 
   Widget _errorBox(String message) => Container(
     margin: const EdgeInsets.only(bottom: 16),

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/client.dart';
 import '../api/generated/export.dart';
-import '../l10n/strings.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../state/providers.dart';
 import '../widgets/category_pill.dart';
 
@@ -36,6 +36,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     final api = ref.read(apiClientProvider);
     if (api == null) return;
 
+    final l10n = S.of(context);
+
     setState(() {
       _loading = true;
       _error = null;
@@ -61,7 +63,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         _exhausted = page.nextCursor == null;
       });
     } catch (error) {
-      if (mounted) setState(() => _error = describeError(error));
+      if (mounted) setState(() => _error = describeError(l10n, error));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -69,18 +71,19 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = S.of(context);
     final locations = ref.watch(locationsProvider).value ?? const <Location>[];
     final categories = ref.watch(categoriesProvider).value ?? const <Category>[];
 
     return Scaffold(
-      appBar: AppBar(title: const Text(S.inventory)),
+      appBar: AppBar(title: Text(l10n.inventory)),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
             child: TextField(
-              decoration: const InputDecoration(
-                labelText: S.search,
+              decoration: InputDecoration(
+                labelText: l10n.search,
                 prefixIcon: Icon(Icons.search),
                 isDense: true,
               ),
@@ -102,12 +105,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   child: DropdownButtonFormField<String?>(
                     initialValue: _locationId,
                     isExpanded: true,
-                    decoration: const InputDecoration(
-                      labelText: S.filterByLocation,
+                    decoration: InputDecoration(
+                      labelText: l10n.filterByLocation,
                       isDense: true,
                     ),
                     items: [
-                      const DropdownMenuItem(value: null, child: Text(S.all)),
+                      DropdownMenuItem(value: null, child: Text(l10n.all)),
                       for (final loc in locations)
                         DropdownMenuItem(
                           value: loc.id,
@@ -124,12 +127,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   child: DropdownButtonFormField<String?>(
                     initialValue: _categoryId,
                     isExpanded: true,
-                    decoration: const InputDecoration(
-                      labelText: S.filterByCategory,
+                    decoration: InputDecoration(
+                      labelText: l10n.filterByCategory,
                       isDense: true,
                     ),
                     items: [
-                      const DropdownMenuItem(value: null, child: Text(S.all)),
+                      DropdownMenuItem(value: null, child: Text(l10n.all)),
                       for (final category in categories)
                         DropdownMenuItem(
                           value: category.id,
@@ -170,10 +173,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                     if (_exhausted) return const SizedBox(height: 24);
                     return Padding(
                       padding: const EdgeInsets.all(16),
-                      child: OutlinedButton(
-                        onPressed: _load,
-                        child: const Text(S.loadMore),
-                      ),
+                      child: OutlinedButton(onPressed: _load, child: Text(l10n.loadMore)),
                     );
                   }
                   final asset = _assets[i];

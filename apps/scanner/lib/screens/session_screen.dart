@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../api/client.dart';
 import '../api/generated/export.dart';
 import '../l10n/labels.dart';
-import '../l10n/strings.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../scan/camera_scan_screen.dart';
 import '../state/providers.dart';
 import '../theme.dart';
@@ -83,6 +83,11 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
     final api = ref.read(apiClientProvider);
     if (api == null) return;
 
+    // Read before the await: this runs on after a round trip, and reaching for
+    // an InheritedWidget through a possibly-unmounted context is how that ends
+    // in a crash rather than a label.
+    final l10n = S.of(context);
+
     if (mounted) setState(() => _busy = true);
     try {
       final result = await api.scanning.createScan(
@@ -99,8 +104,9 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
           ok: true,
           title: '${result.asset.manufacturerName} ${result.asset.productName}',
           detail: returned.isEmpty
-              ? Labels.scanAction(result.action)
-              : '${Labels.scanAction(result.action)} · zurück von ${returned.join(', ')}',
+              ? Labels.scanAction(l10n, result.action)
+              : '${Labels.scanAction(l10n, result.action)} · '
+                    '${l10n.returnedFrom(returned.join(', '))}',
         ),
       );
       // Warehouse users watch the shelf, not the screen — the feedback has to
@@ -108,7 +114,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
       unawaited(SystemSound.play(SystemSoundType.click));
       unawaited(HapticFeedback.lightImpact());
     } catch (error) {
-      _push(_Entry(tag: tag, ok: false, title: tag, detail: describeError(error)));
+      _push(_Entry(tag: tag, ok: false, title: tag, detail: describeError(l10n, error)));
       unawaited(HapticFeedback.heavyImpact());
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -141,6 +147,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = S.of(context);
     final scheme = Theme.of(context).colorScheme;
     final status = StatusColors.of(context);
     final camera = ref.watch(scanSettingsProvider).cameraEnabled;
@@ -151,7 +158,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
         actions: [
           if (camera)
             IconButton(
-              tooltip: S.scanWithCamera,
+              tooltip: l10n.scanWithCamera,
               onPressed: _openCamera,
               icon: const Icon(Icons.photo_camera_outlined),
             ),
@@ -161,7 +168,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
           child: Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(
-              '${_entries.length} ${S.scansLabel} · $_okCount ${S.okLabel} · $_errorCount ${S.errorLabel}',
+              '${_entries.length} ${l10n.scansLabel} · $_okCount ${l10n.okLabel} · $_errorCount ${l10n.errorLabel}',
             ),
           ),
         ),
@@ -174,7 +181,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
               child: FilledButton.icon(
                 onPressed: _openCamera,
                 icon: const Icon(Icons.photo_camera_outlined),
-                label: const Text(S.scanWithCamera),
+                label: Text(l10n.scanWithCamera),
               ),
             )
           else
@@ -187,7 +194,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
               padding: const EdgeInsets.symmetric(vertical: 14),
               child: Center(
                 child: Text(
-                  _busy ? '…' : S.scanNow,
+                  _busy ? '…' : l10n.scanNow,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -198,7 +205,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
             ),
           Expanded(
             child: _entries.isEmpty
-                ? const Center(child: Text(S.sessionEmpty))
+                ? Center(child: Text(l10n.sessionEmpty))
                 : ListView.separated(
                     itemCount: _entries.length,
                     separatorBuilder: (_, _) => const Divider(height: 1),
@@ -234,10 +241,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
                   child: TextField(
                     controller: _manualController,
                     textInputAction: TextInputAction.send,
-                    decoration: const InputDecoration(
-                      labelText: S.manualEntry,
-                      isDense: true,
-                    ),
+                    decoration: InputDecoration(labelText: l10n.manualEntry, isDense: true),
                     onSubmitted: (_) => _submitManual(),
                   ),
                 ),

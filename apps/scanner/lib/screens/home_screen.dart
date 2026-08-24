@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/client.dart';
-import '../l10n/strings.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../state/providers.dart';
 import 'inventory_screen.dart';
 import 'lookup_screen.dart';
@@ -21,6 +21,7 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = S.of(context);
     // A 401 means the token was revoked or expired; drop it and the root widget
     // swaps back to pairing. Checked against the typed status rather than the
     // message, which is localised and would never have matched.
@@ -43,11 +44,14 @@ class HomeScreen extends ConsumerWidget {
         selectedIndex: tab.index,
         onDestinationSelected: (i) =>
             ref.read(activeTabProvider.notifier).select(HomeTab.values[i]),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.qr_code_scanner), label: S.scansLabel),
-          NavigationDestination(icon: Icon(Icons.search), label: S.lookup),
-          NavigationDestination(icon: Icon(Icons.inventory_2_outlined), label: S.inventory),
-          NavigationDestination(icon: Icon(Icons.settings_outlined), label: S.settings),
+        destinations: [
+          NavigationDestination(icon: Icon(Icons.qr_code_scanner), label: l10n.scansLabel),
+          NavigationDestination(icon: Icon(Icons.search), label: l10n.lookup),
+          NavigationDestination(
+            icon: Icon(Icons.inventory_2_outlined),
+            label: l10n.inventory,
+          ),
+          NavigationDestination(icon: Icon(Icons.settings_outlined), label: l10n.settings),
         ],
       ),
     );

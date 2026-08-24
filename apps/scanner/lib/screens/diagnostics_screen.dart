@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../l10n/strings.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../scan/scan_channel.dart';
 import '../state/providers.dart';
 
@@ -57,60 +57,64 @@ class _DiagnosticsScreenState extends ConsumerState<DiagnosticsScreen> {
   }
 
   Future<void> _adopt(DiagnosticEvent event, String key) async {
+    final l10n = S.of(context);
     await ref
         .read(scannerConfigProvider.notifier)
         .save(ScannerConfig(actions: [event.action], extraKeys: [key]));
     _restore = null;
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(S.saved)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.saved)));
       Navigator.of(context).pop();
     }
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text(S.diagnostics)),
-    body: Column(
-      children: [
-        const Padding(padding: EdgeInsets.all(16), child: Text(S.diagnosticsHint)),
-        const Divider(height: 1),
-        Expanded(
-          child: _events.isEmpty
-              ? const Center(child: Text(S.diagnosticsEmpty))
-              : ListView.separated(
-                  itemCount: _events.length,
-                  separatorBuilder: (_, _) => const Divider(height: 1),
-                  itemBuilder: (_, i) {
-                    final event = _events[i];
-                    return ExpansionTile(
-                      title: Text(
-                        event.action,
-                        style: const TextStyle(
-                          fontFamily: 'monospace',
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Text('${event.extras.length} Extras'),
-                      children: [
-                        for (final entry in event.extras.entries)
-                          ListTile(
-                            dense: true,
-                            title: Text(
-                              entry.key,
-                              style: const TextStyle(fontFamily: 'monospace'),
-                            ),
-                            subtitle: Text(entry.value),
-                            trailing: TextButton(
-                              onPressed: () => _adopt(event, entry.key),
-                              child: const Text(S.useThisPair),
-                            ),
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.diagnostics)),
+      body: Column(
+        children: [
+          Padding(padding: EdgeInsets.all(16), child: Text(l10n.diagnosticsHint)),
+          const Divider(height: 1),
+          Expanded(
+            child: _events.isEmpty
+                ? Center(child: Text(l10n.diagnosticsEmpty))
+                : ListView.separated(
+                    itemCount: _events.length,
+                    separatorBuilder: (_, _) => const Divider(height: 1),
+                    itemBuilder: (_, i) {
+                      final event = _events[i];
+                      return ExpansionTile(
+                        title: Text(
+                          event.action,
+                          style: const TextStyle(
+                            fontFamily: 'monospace',
+                            fontWeight: FontWeight.w600,
                           ),
-                      ],
-                    );
-                  },
-                ),
-        ),
-      ],
-    ),
-  );
+                        ),
+                        subtitle: Text('${event.extras.length} Extras'),
+                        children: [
+                          for (final entry in event.extras.entries)
+                            ListTile(
+                              dense: true,
+                              title: Text(
+                                entry.key,
+                                style: const TextStyle(fontFamily: 'monospace'),
+                              ),
+                              subtitle: Text(entry.value),
+                              trailing: TextButton(
+                                onPressed: () => _adopt(event, entry.key),
+                                child: Text(l10n.useThisPair),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -40,6 +40,9 @@ dependencies:
   flutter_riverpod: ^3.4.2
   flutter_secure_storage: ^11.0.0
   mobile_scanner: ^7.4.0
+  flutter_localizations:
+    sdk: flutter
+  intl: any
 
 dev_dependencies:
   flutter_test:
@@ -76,6 +79,8 @@ flutter_launcher_icons:
 
 # The following section is specific to Flutter packages.
 flutter:
+  # Runs gen_l10n over lib/l10n/*.arb on every build, per l10n.yaml.
+  generate: true
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

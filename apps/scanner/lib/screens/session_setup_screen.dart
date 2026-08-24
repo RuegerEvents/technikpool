@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/client.dart';
 import '../api/generated/export.dart';
-import '../l10n/strings.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../state/providers.dart';
 import 'session_screen.dart';
 
@@ -30,27 +30,28 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = S.of(context);
     final isLocation = _type == ScanRequestTargetType.location;
     final async = isLocation
         ? ref.watch(locationsProvider)
         : ref.watch(productionsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text(S.startSession)),
+      appBar: AppBar(title: Text(l10n.startSession)),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: SegmentedButton<ScanRequestTargetType>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: ScanRequestTargetType.location,
-                  label: Text(S.location),
+                  label: Text(l10n.location),
                   icon: Icon(Icons.warehouse_outlined),
                 ),
                 ButtonSegment(
                   value: ScanRequestTargetType.production,
-                  label: Text(S.production),
+                  label: Text(l10n.production),
                   icon: Icon(Icons.event_outlined),
                 ),
               ],
@@ -61,8 +62,8 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: TextField(
-              decoration: const InputDecoration(
-                labelText: S.search,
+              decoration: InputDecoration(
+                labelText: l10n.search,
                 prefixIcon: Icon(Icons.search),
               ),
               onChanged: (v) => setState(() => _query = v.toLowerCase().trim()),
@@ -72,7 +73,7 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
             child: async.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => _ErrorView(
-                message: describeError(error),
+                message: describeError(l10n, error),
                 onRetry: () =>
                     ref.invalidate(isLocation ? locationsProvider : productionsProvider),
               ),
@@ -104,7 +105,7 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
                         .toList();
 
                 if (rows.isEmpty) {
-                  return const Center(child: Text(S.noResults));
+                  return Center(child: Text(l10n.noResults));
                 }
                 return ListView.separated(
                   itemCount: rows.length,
@@ -142,17 +143,20 @@ class _ErrorView extends StatelessWidget {
   final VoidCallback onRetry;
 
   @override
-  Widget build(BuildContext context) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(message, textAlign: TextAlign.center),
-          const SizedBox(height: 16),
-          OutlinedButton(onPressed: onRetry, child: const Text(S.retry)),
-        ],
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(message, textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            OutlinedButton(onPressed: onRetry, child: Text(l10n.retry)),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }

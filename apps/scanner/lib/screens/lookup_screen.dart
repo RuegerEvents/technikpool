@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../api/client.dart';
 import '../api/generated/export.dart';
 import '../l10n/labels.dart';
-import '../l10n/strings.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../scan/camera_scan_screen.dart';
 import '../state/providers.dart';
 import '../widgets/category_pill.dart';
@@ -50,6 +50,8 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
     final api = ref.read(apiClientProvider);
     if (api == null) return;
 
+    final l10n = S.of(context);
+
     setState(() {
       _busy = true;
       _error = null;
@@ -61,7 +63,7 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
       if (mounted) {
         setState(() {
           _asset = null;
-          _error = describeError(error);
+          _error = describeError(l10n, error);
         });
       }
     } finally {
@@ -71,14 +73,15 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = S.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text(S.lookup),
+        title: Text(l10n.lookup),
         actions: [
           if (ref.watch(scanSettingsProvider).cameraEnabled)
             IconButton(
-              tooltip: S.scanWithCamera,
-              onPressed: () => CameraScanScreen.once(context, title: S.lookup),
+              tooltip: l10n.scanWithCamera,
+              onPressed: () => CameraScanScreen.once(context, title: l10n.lookup),
               icon: const Icon(Icons.photo_camera_outlined),
             ),
         ],
@@ -90,8 +93,8 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
             child: TextField(
               controller: _controller,
               textInputAction: TextInputAction.search,
-              decoration: const InputDecoration(
-                labelText: S.manualEntry,
+              decoration: InputDecoration(
+                labelText: l10n.manualEntry,
                 prefixIcon: Icon(Icons.qr_code_scanner),
               ),
               onSubmitted: (v) => _lookup(v.trim()),
@@ -105,6 +108,7 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
   }
 
   Widget _body() {
+    final l10n = S.of(context);
     if (_error != null) {
       return Center(
         child: Padding(
@@ -115,7 +119,7 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
     }
     final asset = _asset;
     if (asset == null) {
-      return const Center(child: Text(S.lookupHint));
+      return Center(child: Text(l10n.lookupHint));
     }
 
     return ListView(
@@ -139,19 +143,19 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
           ],
         ),
         const SizedBox(height: 20),
-        _row(S.status, Labels.assetStatus(asset.status)),
-        _row(S.serialNumber, asset.serialNumber ?? '—'),
-        _row(S.currentLocation, asset.location.name),
+        _row(l10n.status, Labels.assetStatus(l10n, asset.status)),
+        _row(l10n.serialNumber, asset.serialNumber ?? '—'),
+        _row(l10n.currentLocation, asset.location.name),
         if (asset.currentProduction != null)
-          _row(S.checkedOutTo, asset.currentProduction!.name),
+          _row(l10n.checkedOutTo, asset.currentProduction!.name),
         const SizedBox(height: 24),
-        const Text(S.history, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(l10n.history, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         for (final tx in asset.history)
           ListTile(
             dense: true,
             contentPadding: EdgeInsets.zero,
-            title: Text(Labels.transactionAction(tx.action)),
+            title: Text(Labels.transactionAction(l10n, tx.action)),
             subtitle: Text(
               [
                 tx.createdAt.toLocal().toString().substring(0, 16),

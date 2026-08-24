@@ -408,8 +408,8 @@ coordinates — never `stroke-width`, since a thicker bracket reads as a differe
 
 Android + iOS app. It is built for warehouse PDAs (tested against a Chainway C90; Munbyn resells
 the same class of hardware) and falls back to the camera on ordinary phones, so the same build
-runs on a rugged handheld, an Android phone and an iPhone. German-only UI — strings in
-`lib/l10n/strings.dart`, server enum labels in `lib/l10n/labels.dart`.
+runs on a rugged handheld, an Android phone and an iPhone. German and English, like the web —
+see "Localisation" below.
 
 **The API client is generated** into `lib/api/generated/` from `apps/web/openapi.yaml`. Don't
 hand-edit it; regenerate after any spec change:
@@ -418,6 +418,32 @@ hand-edit it; regenerate after any spec change:
 cd apps/scanner
 dart run swagger_parser && dart run build_runner build
 ```
+
+## Localisation
+
+`flutter_localizations` + gen_l10n, configured in `l10n.yaml`. `flutter: generate: true` in
+`pubspec.yaml` is what makes it run on build; without it `flutter gen-l10n` refuses outright.
+
+- `lib/l10n/app_en.arb` — **the source catalogue.** English is what strings are authored in,
+  mirroring the web, where `en.po` is the source and `de.po` the translation.
+- `lib/l10n/app_de.arb` — German. Never leave an entry missing: German is the language the
+  warehouse actually works in, so a gap here is a gap in production, not a fallback.
+- `lib/l10n/generated/` — generated, committed, do not edit.
+- `lib/l10n/labels.dart` — server vocabulary (`CHECKED_OUT`, `AVAILABLE`). Kept apart from UI
+  copy because the value on the wire never moves; only its display name does.
+
+The generated class is called `S`, so call sites read `S.of(context).lookup` — the same name the
+old flat constants class used. Convention is one `final l10n = S.of(context);` per method.
+**In an async method, read it before the first `await`**: resuming through a context that may no
+longer be mounted is how that ends in a crash rather than a label.
+
+API error text is localised client-side (`describeError` in `lib/api/client.dart`). The API
+stays language-neutral — that is what the stable `code` is for — and an unrecognised code falls
+back to the server's own message, which may explain something we haven't anticipated.
+
+Language follows the device, with an override persisted by `localeProvider`. The picker is in
+Settings _and_ in the pairing screen's app bar, because Settings sits behind pairing and is
+therefore unreachable exactly when someone who cannot read the device's language needs it.
 
 ## Theme
 
@@ -526,6 +552,10 @@ the receiver — sharing one notifier would tear the receiver down at exactly th
 - **iOS signs with `DEVELOPMENT_TEAM = M273PG74WU`** (Hannes Rueger). `flutter create` stamps in
   whichever team Xcode used last, which is not this one — check `ios/Runner.xcodeproj` after any
   regeneration of the iOS target.
+- **A `PopupMenuItem` whose value is `null` never fires `onSelected`.** Popping with null is
+  how the menu reports being dismissed, so the two are indistinguishable and the item silently
+  does nothing. The language menu uses `''` for "follow the device" instead. `RadioGroup` has no
+  such limitation, which is why the Settings copy of the same choice can use `Locale?`.
 - **`flutter_launcher_icons` corrupts a build setting on every run.** It writes
   `ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = AppIcon` into
   `ios/Runner.xcodeproj/project.pbxproj`, where the value is a boolean. Set the two occurrences

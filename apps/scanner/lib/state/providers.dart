@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -15,6 +16,7 @@ const _kToken = 'session_token';
 const _kScannerConfig = 'scanner_config';
 const _kScanMode = 'scan_mode';
 const _kHardwareSeen = 'hardware_seen';
+const _kLocale = 'locale';
 
 final storageProvider = Provider((_) => const FlutterSecureStorage());
 
@@ -169,6 +171,33 @@ class HardwareSeenNotifier extends AsyncNotifier<bool> {
 final hardwareSeenProvider = AsyncNotifierProvider<HardwareSeenNotifier, bool>(
   HardwareSeenNotifier.new,
 );
+
+/// The language the app is pinned to, or null to follow the device.
+///
+/// The web keeps this in a cookie that defaults to German regardless of the
+/// browser. A phone is more personal than a browser profile, so the default
+/// here is the device language and German is only the fallback when the device
+/// asks for something we don't have.
+class LocaleNotifier extends AsyncNotifier<Locale?> {
+  FlutterSecureStorage get _storage => ref.read(storageProvider);
+
+  @override
+  Future<Locale?> build() async {
+    final code = await _storage.read(key: _kLocale);
+    return code == null ? null : Locale(code);
+  }
+
+  Future<void> save(Locale? locale) async {
+    if (locale == null) {
+      await _storage.delete(key: _kLocale);
+    } else {
+      await _storage.write(key: _kLocale, value: locale.languageCode);
+    }
+    state = AsyncData(locale);
+  }
+}
+
+final localeProvider = AsyncNotifierProvider<LocaleNotifier, Locale?>(LocaleNotifier.new);
 
 /// What this device calls itself, so a known PDA model can be trigger-first
 /// from first launch instead of from first scan.

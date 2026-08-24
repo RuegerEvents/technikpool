@@ -127,7 +127,9 @@ class AuthService {
 
     throw const ApiException(
       code: 'no_token',
-      message: 'Der Server hat kein Sitzungs-Token zurückgegeben.',
+      // Codes carry the meaning and describeError does the wording; this is
+      // only the fallback shown if that mapping ever misses.
+      message: 'The server returned no session token.',
     );
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'api/client.dart';
-import 'l10n/strings.dart';
+import 'l10n/generated/app_localizations.dart';
 import 'screens/home_screen.dart';
 import 'screens/pairing_screen.dart';
 import 'state/providers.dart';
@@ -28,13 +28,18 @@ void main() {
   runApp(ProviderScope(retry: _retry, child: const ScannerApp()));
 }
 
-class ScannerApp extends StatelessWidget {
+class ScannerApp extends ConsumerWidget {
   const ScannerApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
-      title: S.appTitle,
+      // Resolved below the Localizations widget, which is the only place a
+      // translated title can come from.
+      onGenerateTitle: (context) => S.of(context).appTitle,
+      locale: ref.watch(localeProvider).value,
+      localizationsDelegates: S.localizationsDelegates,
+      supportedLocales: S.supportedLocales,
       debugShowCheckedModeBanner: false,
       theme: technikpoolTheme(Brightness.light),
       darkTheme: technikpoolTheme(Brightness.dark),
