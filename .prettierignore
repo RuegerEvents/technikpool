@@ -18,6 +18,10 @@ apps/web/src/locales
 # Unanchored so it matches at any depth.
 prisma
 
+# Generated from openapi.yaml by openapi-typescript. Formatting it here would
+# make every regeneration show up as a diff.
+apps/web/src/lib/api/schema.d.ts
+
 # Dart/Flutter is formatted by `dart format`
 apps/scanner/
 
