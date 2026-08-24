@@ -541,6 +541,18 @@ abstract class S {
   /// **'Broken'**
   String get statusBroken;
 
+  /// No description provided for @statusSold.
+  ///
+  /// In en, this message translates to:
+  /// **'Sold'**
+  String get statusSold;
+
+  /// No description provided for @statusDecommissioned.
+  ///
+  /// In en, this message translates to:
+  /// **'Decommissioned'**
+  String get statusDecommissioned;
+
   /// No description provided for @actionCreated.
   ///
   /// In en, this message translates to:
@@ -624,6 +636,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'That location belongs to a different organisation.'**
   String get errorWrongOrganization;
+
+  /// No description provided for @errorAssetRetired.
+  ///
+  /// In en, this message translates to:
+  /// **'This device has been sold or decommissioned and can no longer be booked.'**
+  String get errorAssetRetired;
 
   /// No description provided for @errorUnauthorized.
   ///

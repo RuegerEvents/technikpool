@@ -11,6 +11,8 @@ class Labels {
     AssetStatus.available => l10n.statusAvailable,
     AssetStatus.maintenance => l10n.statusMaintenance,
     AssetStatus.broken => l10n.statusBroken,
+    AssetStatus.sold => l10n.statusSold,
+    AssetStatus.decommissioned => l10n.statusDecommissioned,
     _ => status.name,
   };
 

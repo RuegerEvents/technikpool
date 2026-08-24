@@ -242,6 +242,9 @@ paths:
       operationId: listAssets
       tags: [inventory]
       summary: Browse assets
+      description: |
+        Sold and decommissioned assets are left out — this is the pool that can
+        still be worked with. Look one up by tag to see a retired unit.
       parameters:
         - name: locationId
           in: query
@@ -343,6 +346,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
 
 components:
   securitySchemes:
@@ -366,6 +371,14 @@ components:
             $ref: '#/components/schemas/Error'
     Forbidden:
       description: The record exists but belongs to another organization.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: |
+        The record exists but its state forbids the operation — a sold or
+        decommissioned asset can no longer be booked (`asset_retired`).
       content:
         application/json:
           schema:
@@ -395,7 +408,7 @@ components:
             code:
               type: string
               description: Stable machine-readable identifier.
-              examples: [unauthorized, asset_not_found, forbidden]
+              examples: [unauthorized, asset_not_found, forbidden, asset_retired]
             message:
               type: string
               description: Human-readable text, safe to show to the operator.
@@ -593,7 +606,14 @@ components:
           type: [string, 'null']
         status:
           type: string
-          enum: [AVAILABLE, MAINTENANCE, BROKEN]
+          description: |
+            `SOLD` and `DECOMMISSIONED` are end of life: the unit has left the
+            pool, cannot be booked or scanned onto anything, and is omitted from
+            listAssets. getAssetByTag still returns it, so a scan of a retired
+            sticker explains itself instead of reading as an unknown tag. Such a
+            unit is no longer *at* its `location` — that is where it stood when
+            it went.
+          enum: [AVAILABLE, MAINTENANCE, BROKEN, SOLD, DECOMMISSIONED]
         product:
           $ref: '#/components/schemas/Product'
         location:

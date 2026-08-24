@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { orgLabel } from '$lib/utils';
-	import { getAssets, getCategories, getBundleTemplates } from '$lib/remote/assets.remote';
+	import {
+		getAssets,
+		getCategories,
+		getBundleTemplates,
+		getRetiredAssets
+	} from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { Button } from '$lib/components/ui/button';
 	import { CategorySelect } from '$lib/components/ui/category-select';
@@ -9,6 +14,7 @@
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import CheckoutBar from '$lib/components/ui/checkout-bar.svelte';
 	import CsvImportModal from '$lib/components/CsvImportModal.svelte';
+	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
 
 	let showImportModal = $state(false);
 
@@ -20,8 +26,17 @@
 	let expanded = new SvelteMap<string, boolean>();
 	let selectedAssetIds = new SvelteSet<string>();
 
+	// Sold and decommissioned units are out of the pool, so they get their own
+	// filter rather than a share of the normal list.
+	const RETIRED_FILTER = 'RETIRED';
+	let showingRetired = $derived(statusFilter === RETIRED_FILTER);
+
 	let orgs = $derived(await getMyOrgs());
-	let assets = $derived(await getAssets(filterOrgId || undefined));
+	let assets = $derived(
+		showingRetired
+			? await getRetiredAssets(filterOrgId || undefined)
+			: await getAssets(filterOrgId || undefined)
+	);
 	let categories = $derived(await getCategories());
 
 	type Asset = Awaited<ReturnType<typeof getAssets>>[number];
@@ -30,7 +45,9 @@
 	type BundleAsset = BundleInstance['assets'][number];
 
 	let templates = $derived(
-		showBundleView ? await getBundleTemplates(filterOrgId || undefined) : ([] as TemplateData[])
+		showBundleView && !showingRetired
+			? await getBundleTemplates(filterOrgId || undefined)
+			: ([] as TemplateData[])
 	);
 
 	type Group = {
@@ -69,7 +86,7 @@
 
 	let visibleAssets = $derived(
 		baseAssets
-			.filter((a) => (!statusFilter ? true : a.status === statusFilter))
+			.filter((a) => (!statusFilter || showingRetired ? true : a.status === statusFilter))
 			.filter((a) => (!categoryFilter ? true : a.product.categoryId === categoryFilter))
 	);
 
@@ -122,7 +139,7 @@
 	);
 
 	let filteredBundles = $derived(
-		!showBundleView
+		!showBundleView || showingRetired
 			? ([] as TemplateGroup[])
 			: templates
 					.map((t) => {
@@ -205,20 +222,16 @@
 		['', 'All'],
 		['AVAILABLE', 'Available'],
 		['MAINTENANCE', 'Maintenance'],
-		['BROKEN', 'Broken']
+		['BROKEN', 'Broken'],
+		[RETIRED_FILTER, 'Sold / Decommissioned']
 	] as const;
 
-	const statusClass: Record<string, string> = {
-		AVAILABLE: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-		MAINTENANCE: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-		BROKEN: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-	};
-
-	const statusLabels: Record<string, string> = {
-		AVAILABLE: 'Available',
-		MAINTENANCE: 'Maintenance',
-		BROKEN: 'Broken'
-	};
+	// Nothing in the retired list can be checked out, so a selection carried
+	// across the filter would only offer an action the server refuses.
+	function setStatusFilter(value: string) {
+		if ((value === RETIRED_FILTER) !== showingRetired) selectedAssetIds.clear();
+		statusFilter = value;
+	}
 
 	let hasResults = $derived(
 		showBundleView
@@ -267,7 +280,7 @@
 			{#each statusFilterOptions as [val, label] (val)}
 				<button
 					type="button"
-					onclick={() => (statusFilter = val)}
+					onclick={() => setStatusFilter(val)}
 					class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {statusFilter === val
 						? 'bg-primary text-primary-foreground'
 						: 'bg-muted text-muted-foreground hover:bg-muted/70'}">{label}</button
@@ -530,13 +543,7 @@
 																>Tag: {asset.assetTag}</span
 															>
 														{/if}
-														<span
-															class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {statusClass[
-																asset.status
-															] ?? ''}"
-														>
-															{statusLabels[asset.status] ?? asset.status}
-														</span>
+														<AssetStatusBadge status={asset.status} />
 														{#if asset.location}
 															<span class="text-xs text-muted-foreground"
 																>{asset.location.name}</span
@@ -658,14 +665,8 @@
 											{#if asset.assetTag}
 												<span class="text-xs text-muted-foreground">Tag: {asset.assetTag}</span>
 											{/if}
-											<span
-												class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {statusClass[
-													asset.status
-												] ?? ''}"
-											>
-												{statusLabels[asset.status] ?? asset.status}
-											</span>
-											{#if asset.location}
+											<AssetStatusBadge status={asset.status} />
+											{#if asset.location && !showingRetired}
 												<span class="text-xs text-muted-foreground">{asset.location.name}</span>
 											{/if}
 											<span class="flex-1 text-xs text-muted-foreground"
@@ -699,7 +700,9 @@
 	{/if}
 </div>
 
-<CheckoutBar selectedIds={selectedAssetIds} onClear={() => selectedAssetIds.clear()} />
+{#if !showingRetired}
+	<CheckoutBar selectedIds={selectedAssetIds} onClear={() => selectedAssetIds.clear()} />
+{/if}
 
 {#if showImportModal}
 	<CsvImportModal onClose={() => (showImportModal = false)} />

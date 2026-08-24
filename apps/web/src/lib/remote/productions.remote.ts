@@ -7,6 +7,7 @@ import { bookingReviewedEmail } from '$lib/server/emails/booking-reviewed';
 import { addedAsCrewEmail } from '$lib/server/emails/added-as-crew';
 import * as v from 'valibot';
 import { requireAuth } from '$lib/server/services/access';
+import { ACTIVE_ASSET_WHERE, isRetiredStatus } from '$lib/asset-status';
 
 // Returns which of `ownerOrgIds` do NOT currently have any PENDING item in
 // this production — i.e. the orgs for which a new PENDING item would be the
@@ -405,6 +406,9 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 		include: { organization: { select: { id: true, name: true, shortName: true } } }
 	});
 	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: data.assetId } });
+	if (isRetiredStatus(asset.status)) {
+		throw new Error('This asset is sold or decommissioned and can no longer be booked');
+	}
 
 	if (production.startDate && production.endDate) {
 		const conflict = await prisma.productionItem.findFirst({
@@ -619,7 +623,9 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	const existingAssetIds = new Set(existingItems.map((i) => i.assetId));
 
 	if (bundle.assets.length === 0) throw new Error('Bundle has no assets');
-	let newAssets = bundle.assets.filter((a) => !existingAssetIds.has(a.id));
+	let newAssets = bundle.assets.filter(
+		(a) => !existingAssetIds.has(a.id) && !isRetiredStatus(a.status)
+	);
 	if (newAssets.length === 0) throw new Error('All bundle assets are already in this production');
 
 	let skippedConflicts = 0;
@@ -920,7 +926,7 @@ export const getCalendarData = query(async () => {
 	const orgIds = memberships.map((m) => m.organizationId);
 
 	const assets = await prisma.asset.findMany({
-		where: { organizationId: { in: orgIds } },
+		where: { organizationId: { in: orgIds }, ...ACTIVE_ASSET_WHERE },
 		include: {
 			product: { include: { manufacturer: true } },
 			organization: true,
@@ -973,7 +979,7 @@ export const getDashboardStats = query(async () => {
 		bundleCount,
 		overdueInspections
 	] = await Promise.all([
-		prisma.asset.count({ where: { organizationId: { in: orgIds } } }),
+		prisma.asset.count({ where: { organizationId: { in: orgIds }, ...ACTIVE_ASSET_WHERE } }),
 		prisma.asset.count({ where: { organizationId: { in: orgIds }, status: 'AVAILABLE' } }),
 		prisma.asset.count({ where: { organizationId: { in: orgIds }, status: 'MAINTENANCE' } }),
 		prisma.asset.count({ where: { organizationId: { in: orgIds }, status: 'BROKEN' } }),
@@ -992,7 +998,11 @@ export const getDashboardStats = query(async () => {
 		}),
 		prisma.assetBundle.count({ where: { template: { organizationId: { in: orgIds } } } }),
 		prisma.asset.count({
-			where: { organizationId: { in: orgIds }, nextInspectionDue: { not: null, lt: now } }
+			where: {
+				organizationId: { in: orgIds },
+				...ACTIVE_ASSET_WHERE,
+				nextInspectionDue: { not: null, lt: now }
+			}
 		})
 	]);
 

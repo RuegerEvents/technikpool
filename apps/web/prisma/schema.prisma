@@ -249,7 +249,7 @@ model Asset {
 
   serialNumber String?
   assetTag     String? @unique
-  status       String  @default("AVAILABLE") // AVAILABLE, MAINTENANCE, BROKEN
+  status       String  @default("AVAILABLE") // see src/lib/asset-status.ts
 
   bundleId String?
   bundle   AssetBundle? @relation(fields: [bundleId], references: [id])

@@ -22,6 +22,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
+	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
 
 	// Bundle fields
 	type SelectionOrNew = { id: string | null; name: string } | null;
@@ -228,18 +229,6 @@
 			saving = false;
 		}
 	}
-
-	const statusClass: Record<string, string> = {
-		AVAILABLE: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-		MAINTENANCE: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-		BROKEN: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-	};
-
-	const statusLabels: Record<string, string> = {
-		AVAILABLE: 'Available',
-		MAINTENANCE: 'Maintenance',
-		BROKEN: 'Broken'
-	};
 </script>
 
 <svelte:head><title>Create Bundle | Technikpool</title></svelte:head>
@@ -348,11 +337,7 @@
 											<td class="px-3 py-2 text-muted-foreground">{asset.manufacturerName}</td>
 											<td class="px-3 py-2 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
 											<td class="px-3 py-2">
-												<span
-													class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {statusClass[
-														asset.status
-													] ?? ''}">{statusLabels[asset.status] ?? asset.status}</span
-												>
+												<AssetStatusBadge status={asset.status} />
 											</td>
 											<td class="px-3 py-2 text-right">
 												<button
@@ -407,11 +392,7 @@
 											</td>
 											<td class="px-3 py-2 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
 											<td class="px-3 py-2">
-												<span
-													class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {statusClass[
-														asset.status
-													] ?? ''}">{statusLabels[asset.status] ?? asset.status}</span
-												>
+												<AssetStatusBadge status={asset.status} />
 											</td>
 											<td class="px-3 py-2 text-right">
 												<Button size="sm" type="button" onclick={() => addExisting(asset)}

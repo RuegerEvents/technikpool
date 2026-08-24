@@ -454,26 +454,20 @@ msgstr "Tag"
 msgid "Total"
 msgstr "Total"
 
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
-#: src/routes/assets/+page.svelte
-#: src/routes/assets/bundles/[id]/+page.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 msgid "Available"
 msgstr "Available"
 
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
 #: src/routes/assets/+page.svelte
-#: src/routes/assets/+page.svelte
-#: src/routes/assets/bundles/[id]/+page.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 msgid "Maintenance"
 msgstr "Maintenance"
 
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
-#: src/routes/assets/+page.svelte
-#: src/routes/assets/bundles/[id]/+page.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 msgid "Broken"
 msgstr "Broken"
 
@@ -4174,3 +4168,23 @@ msgstr "Scanners | Technikpool"
 #: src/routes/devices/+page.svelte
 msgid "Scanners"
 msgstr "Scanners"
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+msgid "Sold"
+msgstr "Sold"
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+msgid "Decommissioned"
+msgstr "Decommissioned"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "This unit has left the pool. It can't be booked or edited — set the status back to bring it into service again."
+msgstr "This unit has left the pool. It can't be booked or edited — set the status back to bring it into service again."
+
+#: src/routes/assets/+page.svelte
+msgid "Sold / Decommissioned"
+msgstr "Sold / Decommissioned"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Last known location"
+msgstr "Last known location"

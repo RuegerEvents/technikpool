@@ -35,6 +35,14 @@ class AssetDetail {
   /// The printed tag. Null for assets that have never been labelled.
   final String? assetTag;
   final String? serialNumber;
+
+  /// `SOLD` and `DECOMMISSIONED` are end of life: the unit has left the.
+  /// pool, cannot be booked or scanned onto anything, and is omitted from.
+  /// listAssets. getAssetByTag still returns it, so a scan of a retired.
+  /// sticker explains itself instead of reading as an unknown tag. Such a.
+  /// unit is no longer *at* its `location` — that is where it stood when.
+  /// it went.
+  ///
   final AssetStatus status;
   final Product product;
   final Location location;

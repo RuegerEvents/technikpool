@@ -170,7 +170,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Browse assets */
+        /**
+         * Browse assets
+         * @description Sold and decommissioned assets are left out — this is the pool that can
+         *     still be worked with. Look one up by tag to see a retired unit.
+         */
         get: operations["listAssets"];
         put?: never;
         post?: never;
@@ -230,6 +234,7 @@ export interface components {
                  * @example unauthorized
                  * @example asset_not_found
                  * @example forbidden
+                 * @example asset_retired
                  */
                 code: string;
                 /** @description Human-readable text, safe to show to the operator. */
@@ -332,8 +337,16 @@ export interface components {
             /** @description The printed tag. Null for assets that have never been labelled. */
             assetTag?: string | null;
             serialNumber?: string | null;
-            /** @enum {string} */
-            status: "AVAILABLE" | "MAINTENANCE" | "BROKEN";
+            /**
+             * @description `SOLD` and `DECOMMISSIONED` are end of life: the unit has left the
+             *     pool, cannot be booked or scanned onto anything, and is omitted from
+             *     listAssets. getAssetByTag still returns it, so a scan of a retired
+             *     sticker explains itself instead of reading as an unknown tag. Such a
+             *     unit is no longer *at* its `location` — that is where it stood when
+             *     it went.
+             * @enum {string}
+             */
+            status: "AVAILABLE" | "MAINTENANCE" | "BROKEN" | "SOLD" | "DECOMMISSIONED";
             product: components["schemas"]["Product"];
             location: components["schemas"]["Location"];
             organization: components["schemas"]["Organization"];
@@ -427,6 +440,18 @@ export interface components {
         };
         /** @description The record exists but belongs to another organization. */
         Forbidden: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Error"];
+            };
+        };
+        /**
+         * @description The record exists but its state forbids the operation — a sold or
+         *     decommissioned asset can no longer be booked (`asset_retired`).
+         */
+        Conflict: {
             headers: {
                 [name: string]: unknown;
             };
@@ -741,6 +766,7 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
         };
     };
 }

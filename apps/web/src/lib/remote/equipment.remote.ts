@@ -4,6 +4,7 @@ import * as v from 'valibot';
 import { orgLabel } from '$lib/utils';
 import { getProduction } from './productions.remote';
 import { requireAuth, userOrgIds } from '$lib/server/services/access';
+import { ACTIVE_ASSET_WHERE } from '$lib/asset-status';
 
 const ACTIVE_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT', 'RETURNED'] as const;
 const CONFLICT_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT'] as const;
@@ -20,7 +21,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 	});
 
 	const assets = await prisma.asset.findMany({
-		where: { organizationId: { in: orgIds } },
+		where: { organizationId: { in: orgIds }, ...ACTIVE_ASSET_WHERE },
 		include: {
 			product: { include: { manufacturer: true, category: true } },
 			organization: {
@@ -216,6 +217,7 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 				productId: data.productId,
 				organizationId: data.organizationId,
 				locationId: data.locationId,
+				...ACTIVE_ASSET_WHERE,
 				id: { notIn: currentItems.map((i) => i.assetId) },
 				...(data.includeBundled ? {} : { bundleId: null })
 			},

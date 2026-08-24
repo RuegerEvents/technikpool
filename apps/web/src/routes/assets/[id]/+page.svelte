@@ -18,6 +18,8 @@
 		updateProduct
 	} from '$lib/remote/assets.remote';
 	import type { TransactionData } from '$lib/types/asset-transaction';
+	import { ASSET_STATUSES, isRetiredStatus, type AssetStatus } from '$lib/asset-status';
+	import { assetStatusLabel } from '$lib/components/ui/asset-status';
 
 	let assetId = $derived(page.params.id as string);
 	let asset = $derived(await getAsset(assetId));
@@ -25,8 +27,9 @@
 	let locations = $derived(await getLocations(asset.organizationId));
 	let categories = $derived(await getCategories());
 
-	const STATUSES = ['AVAILABLE', 'MAINTENANCE', 'BROKEN'] as const;
-	type AssetStatus = (typeof STATUSES)[number];
+	// Sold and decommissioned freeze everything but the status itself, so the
+	// unit can be brought back if it was retired by mistake.
+	let retired = $derived(isRetiredStatus(asset.status));
 
 	// ── Asset editing ─────────────────────────────────────────────────────────
 	let editingAsset = $state(false);
@@ -53,13 +56,17 @@
 		e.preventDefault();
 		savingAsset = true;
 		try {
-			await updateAsset({
-				assetId,
-				serialNumber: assetDraft.serialNumber,
-				assetTag: assetDraft.assetTag,
-				status: assetDraft.status,
-				locationId: assetDraft.locationId
-			});
+			await updateAsset(
+				retired
+					? { assetId, status: assetDraft.status }
+					: {
+							assetId,
+							serialNumber: assetDraft.serialNumber,
+							assetTag: assetDraft.assetTag,
+							status: assetDraft.status,
+							locationId: assetDraft.locationId
+						}
+			);
 			toast.success('Asset updated');
 			editingAsset = false;
 		} catch (err) {
@@ -172,7 +179,14 @@
 				<div class="flex items-start justify-between gap-4">
 					<div>
 						<Card.Title>Asset</Card.Title>
-						<Card.Description>Serial number, tag, status, and location.</Card.Description>
+						<Card.Description>
+							{#if retired}
+								This unit has left the pool. It can't be booked or edited — set the status back to
+								bring it into service again.
+							{:else}
+								Serial number, tag, status, and location.
+							{/if}
+						</Card.Description>
 					</div>
 					{#if !editingAsset}
 						<Button variant="outline" onclick={() => (editingAsset = true)}>Edit</Button>
@@ -191,11 +205,15 @@
 					</div>
 					<div class="space-y-2">
 						<Label for="serial">Serial Number</Label>
-						<Input id="serial" bind:value={assetDraft.serialNumber} disabled={!editingAsset} />
+						<Input
+							id="serial"
+							bind:value={assetDraft.serialNumber}
+							disabled={!editingAsset || retired}
+						/>
 					</div>
 					<div class="space-y-2">
 						<Label for="tag">Asset Tag</Label>
-						<Input id="tag" bind:value={assetDraft.assetTag} disabled={!editingAsset} />
+						<Input id="tag" bind:value={assetDraft.assetTag} disabled={!editingAsset || retired} />
 					</div>
 					<div class="space-y-2">
 						<Label for="status">Status</Label>
@@ -205,27 +223,35 @@
 							disabled={!editingAsset}
 							class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 						>
-							{#each STATUSES as s (s)}
-								<option value={s}>{s}</option>
+							{#each ASSET_STATUSES as s (s)}
+								<option value={s}>{assetStatusLabel(s)}</option>
 							{/each}
 						</select>
 					</div>
 					<div class="space-y-2">
-						<Label for="location">Location</Label>
-						<select
-							id="location"
-							bind:value={assetDraft.locationId}
-							disabled={!editingAsset}
-							class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-						>
-							{#each locations as loc (loc.id)}
-								{@const city = loc.address?.city?.trim()}
-								{@const line1 = loc.address?.line1?.trim()}
-								{@const addrParts = [line1, city].filter(Boolean).join(', ')}
-								<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option
-								>
-							{/each}
-						</select>
+						{#if retired}
+							<!-- A unit that has left the pool isn't anywhere any more; the stored
+							     location is only where it stood when it went. -->
+							<Label for="location">Last known location</Label>
+							<Input id="location" value={asset.location?.name ?? '—'} disabled />
+						{:else}
+							<Label for="location">Location</Label>
+							<select
+								id="location"
+								bind:value={assetDraft.locationId}
+								disabled={!editingAsset}
+								class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+							>
+								{#each locations as loc (loc.id)}
+									{@const city = loc.address?.city?.trim()}
+									{@const line1 = loc.address?.line1?.trim()}
+									{@const addrParts = [line1, city].filter(Boolean).join(', ')}
+									<option value={loc.id}
+										>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option
+									>
+								{/each}
+							</select>
+						{/if}
 					</div>
 					{#if editingAsset}
 						<div class="flex justify-end gap-4 pt-2">
@@ -256,7 +282,7 @@
 							>Feeds offer/invoice pricing and DGUV due-date tracking.</Card.Description
 						>
 					</div>
-					{#if !editingPricing}
+					{#if !editingPricing && !retired}
 						<Button variant="outline" onclick={() => (editingPricing = true)}>Edit</Button>
 					{/if}
 				</div>

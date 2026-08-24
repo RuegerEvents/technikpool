@@ -454,26 +454,20 @@ msgstr "Tag"
 msgid "Total"
 msgstr "Gesamt"
 
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
-#: src/routes/assets/+page.svelte
-#: src/routes/assets/bundles/[id]/+page.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 msgid "Available"
 msgstr "Verfügbar"
 
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
 #: src/routes/assets/+page.svelte
-#: src/routes/assets/+page.svelte
-#: src/routes/assets/bundles/[id]/+page.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 msgid "Maintenance"
 msgstr "Wartung"
 
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
-#: src/routes/assets/+page.svelte
-#: src/routes/assets/bundles/[id]/+page.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 msgid "Broken"
 msgstr "Defekt"
 
@@ -4174,3 +4168,23 @@ msgstr "Scanner | Technikpool"
 #: src/routes/devices/+page.svelte
 msgid "Scanners"
 msgstr "Scanner"
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+msgid "Sold"
+msgstr "Verkauft"
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+msgid "Decommissioned"
+msgstr "Ausgemustert"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "This unit has left the pool. It can't be booked or edited — set the status back to bring it into service again."
+msgstr "Dieses Gerät ist nicht mehr im Bestand. Es kann weder gebucht noch bearbeitet werden — setzen Sie den Status zurück, um es wieder in Betrieb zu nehmen."
+
+#: src/routes/assets/+page.svelte
+msgid "Sold / Decommissioned"
+msgstr "Verkauft / Ausgemustert"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Last known location"
+msgstr "Zuletzt bekannter Standort"

@@ -1,5 +1,6 @@
 import { prisma } from '$lib/server/auth';
 import { isSystemAdmin, userOrgIds } from './access';
+import { isRetiredStatus } from '$lib/asset-status';
 
 // Scan/checkout behaviour lives here rather than in checkout.remote.ts so the
 // /api/v1 endpoints and the web UI share one implementation. These functions
@@ -59,7 +60,7 @@ function mergeAffected(into: AffectedRecords, from: Partial<AffectedRecords>) {
  */
 export class CheckoutError extends Error {
 	constructor(
-		readonly code: 'asset_not_found' | 'forbidden' | 'wrong_organization',
+		readonly code: 'asset_not_found' | 'forbidden' | 'wrong_organization' | 'asset_retired',
 		message: string
 	) {
 		super(message);
@@ -100,6 +101,13 @@ export async function performScan(
 	}
 
 	const systemAdmin = await assertAssetAccess(userId, asset.organizationId);
+
+	if (isRetiredStatus(asset.status)) {
+		throw new CheckoutError(
+			'asset_retired',
+			`Tag "${input.assetTag}" is sold or decommissioned and can no longer be booked`
+		);
+	}
 
 	const scannedAsset: ScannedAsset = {
 		id: asset.id,
@@ -239,12 +247,18 @@ export async function performBulkCheckout(
 
 	const assets = await prisma.asset.findMany({
 		where: { id: { in: input.assetIds } },
-		select: { id: true, organizationId: true, bundleId: true }
+		select: { id: true, organizationId: true, bundleId: true, status: true }
 	});
 
 	for (const asset of assets) {
 		if (!systemAdmin && !orgIds.includes(asset.organizationId)) {
 			throw new CheckoutError('forbidden', 'No access to one or more assets');
+		}
+		if (isRetiredStatus(asset.status)) {
+			throw new CheckoutError(
+				'asset_retired',
+				'One or more assets are sold or decommissioned and can no longer be booked'
+			);
 		}
 	}
 

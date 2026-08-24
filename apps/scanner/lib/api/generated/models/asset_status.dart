@@ -4,6 +4,13 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+/// `SOLD` and `DECOMMISSIONED` are end of life: the unit has left the.
+/// pool, cannot be booked or scanned onto anything, and is omitted from.
+/// listAssets. getAssetByTag still returns it, so a scan of a retired.
+/// sticker explains itself instead of reading as an unknown tag. Such a.
+/// unit is no longer *at* its `location` — that is where it stood when.
+/// it went.
+///
 @JsonEnum()
 enum AssetStatus {
   @JsonValue('AVAILABLE')
@@ -12,6 +19,10 @@ enum AssetStatus {
   maintenance('MAINTENANCE'),
   @JsonValue('BROKEN')
   broken('BROKEN'),
+  @JsonValue('SOLD')
+  sold('SOLD'),
+  @JsonValue('DECOMMISSIONED')
+  decommissioned('DECOMMISSIONED'),
   /// Default value for all unparsed values, allows backward compatibility when adding new values on the backend.
   $unknown(null);
 

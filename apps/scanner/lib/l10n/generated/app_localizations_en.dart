@@ -239,6 +239,12 @@ class SEn extends S {
   String get statusBroken => 'Broken';
 
   @override
+  String get statusSold => 'Sold';
+
+  @override
+  String get statusDecommissioned => 'Decommissioned';
+
+  @override
   String get actionCreated => 'Created';
 
   @override
@@ -282,6 +288,10 @@ class SEn extends S {
   @override
   String get errorWrongOrganization =>
       'That location belongs to a different organisation.';
+
+  @override
+  String get errorAssetRetired =>
+      'This device has been sold or decommissioned and can no longer be booked.';
 
   @override
   String get errorUnauthorized =>

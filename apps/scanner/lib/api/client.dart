@@ -128,6 +128,7 @@ String describeError(S l10n, Object error) {
     'asset_not_found' => l10n.errorAssetNotFound,
     'forbidden' => l10n.errorForbidden,
     'wrong_organization' => l10n.errorWrongOrganization,
+    'asset_retired' => l10n.errorAssetRetired,
     'unauthorized' => l10n.errorUnauthorized,
     'invalid_request' => l10n.errorInvalidRequest,
     'invalid_limit' => l10n.errorInvalidLimit,

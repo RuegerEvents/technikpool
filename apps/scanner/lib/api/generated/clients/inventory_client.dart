@@ -34,6 +34,9 @@ abstract class InventoryClient {
 
   /// Browse assets.
   ///
+  /// Sold and decommissioned assets are left out — this is the pool that can.
+  /// still be worked with. Look one up by tag to see a retired unit.
+  ///
   /// [locationId] - Only assets currently at this location.
   ///
   /// [productionId] - Only assets booked to this production.

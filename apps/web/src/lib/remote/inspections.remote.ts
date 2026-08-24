@@ -2,6 +2,7 @@ import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import { isSystemAdmin, requireAuth, userOrgIds } from '$lib/server/services/access';
+import { ACTIVE_ASSET_WHERE, isRetiredStatus } from '$lib/asset-status';
 
 const UPCOMING_WINDOW_DAYS = 30;
 
@@ -16,6 +17,7 @@ export const getOverdueAssets = query(async () => {
 	const assets = await prisma.asset.findMany({
 		where: {
 			...(orgIds ? { organizationId: { in: orgIds } } : {}),
+			...ACTIVE_ASSET_WHERE,
 			nextInspectionDue: { not: null, lte: upcomingCutoff }
 		},
 		include: {
@@ -42,6 +44,7 @@ export const getOverdueInspectionCount = query(async () => {
 	return prisma.asset.count({
 		where: {
 			...(orgIds ? { organizationId: { in: orgIds } } : {}),
+			...ACTIVE_ASSET_WHERE,
 			nextInspectionDue: { not: null, lt: new Date() }
 		}
 	});
@@ -76,6 +79,9 @@ const logInspectionSchema = v.object({
 export const logInspection = command(logInspectionSchema, async (input) => {
 	const user = await requireAuth();
 	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: input.assetId } });
+	if (isRetiredStatus(asset.status)) {
+		throw new Error('This asset is sold or decommissioned and can no longer be inspected');
+	}
 
 	const systemAdmin = await isSystemAdmin(user.id);
 	if (!systemAdmin) {

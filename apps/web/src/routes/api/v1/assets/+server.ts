@@ -5,6 +5,7 @@ import { isSystemAdmin, userOrgIds } from '$lib/server/services/access';
 import { toAsset } from '$lib/server/services/api-mappers';
 import { ApiResponse } from '$lib/server/api';
 import type { Prisma } from '$lib/prisma/client';
+import { ACTIVE_ASSET_WHERE } from '$lib/asset-status';
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 200;
@@ -37,6 +38,8 @@ export const GET: RequestHandler = ({ locals, url }) =>
 
 		const where: Prisma.AssetWhereInput = {
 			...(admin ? {} : { organizationId: { in: orgIds } }),
+			// Sold and decommissioned units are out of the pool — see openapi.yaml.
+			...ACTIVE_ASSET_WHERE,
 			...(locationId ? { locationId } : {}),
 			// "Booked to this production" means an item row that hasn't come back yet.
 			...(productionId

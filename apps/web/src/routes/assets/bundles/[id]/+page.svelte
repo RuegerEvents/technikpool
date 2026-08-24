@@ -19,6 +19,7 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
+	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
 
 	const bundleId = $derived(page.params.id as string);
 
@@ -141,18 +142,6 @@
 			working = false;
 		}
 	}
-
-	const statusClass: Record<string, string> = {
-		AVAILABLE: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-		MAINTENANCE: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-		BROKEN: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-	};
-
-	const statusLabels: Record<string, string> = {
-		AVAILABLE: 'Available',
-		MAINTENANCE: 'Maintenance',
-		BROKEN: 'Broken'
-	};
 </script>
 
 <svelte:head><title>{bundle.template.name} | Technikpool</title></svelte:head>
@@ -335,13 +324,7 @@
 										</td>
 										<td class="px-4 py-3 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
 										<td class="px-4 py-3">
-											<span
-												class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {statusClass[
-													asset.status
-												] ?? ''}"
-											>
-												{statusLabels[asset.status] ?? asset.status}
-											</span>
+											<AssetStatusBadge status={asset.status} class="px-2.5" />
 										</td>
 										<td class="px-4 py-3 text-sm text-muted-foreground">
 											{asset.location?.name ?? '—'}

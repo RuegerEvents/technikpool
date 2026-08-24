@@ -3,6 +3,12 @@ import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import type { FieldChange } from '$lib/types/asset-transaction';
 import { isSystemAdmin, requireAuth, userOrgIds } from '$lib/server/services/access';
+import {
+	ACTIVE_ASSET_WHERE,
+	ASSET_STATUSES,
+	RETIRED_ASSET_WHERE,
+	isRetiredStatus
+} from '$lib/asset-status';
 
 export const getAssets = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
@@ -10,7 +16,29 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 	const queryOrgIds = organizationId ? [organizationId] : orgIds;
 
 	return await prisma.asset.findMany({
-		where: { organizationId: { in: queryOrgIds } },
+		where: { organizationId: { in: queryOrgIds }, ...ACTIVE_ASSET_WHERE },
+		include: {
+			product: { include: { manufacturer: true, category: true } },
+			location: true,
+			organization: true,
+			bundle: { select: { id: true, template: { select: { name: true } } } }
+		},
+		orderBy: [{ product: { name: 'asc' } }]
+	});
+});
+
+/**
+ * Sold and decommissioned units, which `getAssets` deliberately leaves out.
+ * Kept as its own query rather than a flag on `getAssets` so the two caches
+ * stay separate — a refresh after a status change invalidates both.
+ */
+export const getRetiredAssets = query(v.optional(v.string()), async (organizationId?: string) => {
+	const user = await requireAuth();
+	const orgIds = await userOrgIds(user.id);
+	const queryOrgIds = organizationId ? [organizationId] : orgIds;
+
+	return await prisma.asset.findMany({
+		where: { organizationId: { in: queryOrgIds }, ...RETIRED_ASSET_WHERE },
 		include: {
 			product: { include: { manufacturer: true, category: true } },
 			location: true,
@@ -54,7 +82,7 @@ export const getInventorySummary = query(
 			include: {
 				manufacturer: true,
 				assets: {
-					where: { organizationId: { in: queryOrgIds } },
+					where: { organizationId: { in: queryOrgIds }, ...ACTIVE_ASSET_WHERE },
 					select: { id: true, status: true }
 				}
 			},
@@ -375,7 +403,7 @@ const updateAssetSchema = v.object({
 	assetId: v.string(),
 	serialNumber: v.optional(v.string()),
 	assetTag: v.optional(v.string()),
-	status: v.optional(v.picklist(['AVAILABLE', 'MAINTENANCE', 'BROKEN'])),
+	status: v.optional(v.picklist(ASSET_STATUSES)),
 	locationId: v.optional(v.string()),
 	netPurchasePrice: v.optional(v.nullable(v.number())),
 	purchaseDate: v.optional(v.nullable(v.string())),
@@ -388,7 +416,7 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 
 	const asset = await prisma.asset.findUniqueOrThrow({
 		where: { id: input.assetId },
-		include: { location: true, product: true }
+		include: { location: true, product: true, bundle: { include: { template: true } } }
 	});
 
 	if (!systemAdmin) {
@@ -399,6 +427,27 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 		});
 		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
 			throw new Error('Unauthorized');
+		}
+	}
+
+	// A sold or decommissioned unit is a historical record. Its status stays
+	// editable so a mis-click can be undone; everything else is frozen.
+	const nextStatus = input.status;
+	const editedFields = Object.keys(input).filter((k) => k !== 'assetId' && k !== 'status');
+	if (isRetiredStatus(asset.status) && editedFields.length > 0) {
+		throw new Error('This asset is sold or decommissioned — only its status can be changed');
+	}
+
+	const retiring = !!nextStatus && isRetiredStatus(nextStatus) && !isRetiredStatus(asset.status);
+	if (retiring) {
+		const openItem = await prisma.productionItem.findFirst({
+			where: { assetId: asset.id, status: { in: ['PENDING', 'APPROVED', 'CHECKED_OUT'] } },
+			include: { production: { select: { name: true } } }
+		});
+		if (openItem) {
+			throw new Error(
+				`Asset is still booked for "${openItem.production.name}" — remove it there first`
+			);
 		}
 	}
 
@@ -418,6 +467,7 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 		assetTag?: string | null;
 		status?: string;
 		locationId?: string;
+		bundleId?: string | null;
 		netPurchasePrice?: number | null;
 		purchaseDate?: Date | null;
 		inspectionIntervalMonths?: number | null;
@@ -461,10 +511,16 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 		if (assetTag !== asset.assetTag)
 			changes.push({ field: 'assetTag', from: asset.assetTag, to: assetTag });
 	}
-	if ('status' in input && input.status) {
-		updateData.status = input.status;
-		if (input.status !== asset.status)
-			changes.push({ field: 'status', from: asset.status, to: input.status });
+	if (nextStatus) {
+		updateData.status = nextStatus;
+		if (nextStatus !== asset.status)
+			changes.push({ field: 'status', from: asset.status, to: nextStatus });
+	}
+	// A unit that has left the pool has left its kit with it. Un-retiring won't
+	// put it back — it has to be added to a bundle again like any other asset.
+	if (retiring && asset.bundleId) {
+		updateData.bundleId = null;
+		changes.push({ field: 'bundle', from: asset.bundle?.template.name ?? null, to: null });
 	}
 	if (nextLocation !== undefined) {
 		updateData.locationId = nextLocation.id;
@@ -503,9 +559,18 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 	await getAsset(input.assetId).refresh();
 	await getAssetHistory(input.assetId).refresh();
 	await getAssets(asset.organizationId).refresh();
+	await getAssets().refresh();
+	await getRetiredAssets(asset.organizationId).refresh();
+	await getRetiredAssets().refresh();
 	await getInventorySummary(asset.organizationId).refresh();
 	await getInventorySummary().refresh();
 	await getLocations(asset.organizationId).refresh();
+	if (retiring && asset.bundleId) {
+		await getBundles(asset.organizationId).refresh();
+		await getBundle(asset.bundleId).refresh();
+		await getBundleTemplates(asset.organizationId).refresh();
+		await getBundleTemplates().refresh();
+	}
 
 	return updated;
 });
@@ -792,6 +857,13 @@ export const addAssetToBundle = command(bundleAssetSchema, async ({ bundleId, as
 		where: { id: bundleId },
 		include: { template: true }
 	});
+	const asset = await prisma.asset.findUniqueOrThrow({
+		where: { id: assetId },
+		select: { status: true }
+	});
+	if (isRetiredStatus(asset.status)) {
+		throw new Error('This asset is sold or decommissioned and cannot be added to a bundle');
+	}
 	const updateData: { bundleId: string; locationId?: string } = { bundleId };
 	if (bundle.locationId) updateData.locationId = bundle.locationId;
 	await prisma.asset.update({ where: { id: assetId }, data: updateData });

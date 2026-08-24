@@ -240,6 +240,12 @@ class SDe extends S {
   String get statusBroken => 'Defekt';
 
   @override
+  String get statusSold => 'Verkauft';
+
+  @override
+  String get statusDecommissioned => 'Ausgemustert';
+
+  @override
   String get actionCreated => 'Angelegt';
 
   @override
@@ -283,6 +289,10 @@ class SDe extends S {
   @override
   String get errorWrongOrganization =>
       'Der Lagerort gehört zu einer anderen Organisation.';
+
+  @override
+  String get errorAssetRetired =>
+      'Dieses Gerät ist verkauft oder ausgemustert und kann nicht mehr gebucht werden.';
 
   @override
   String get errorUnauthorized =>
