@@ -5,8 +5,18 @@ yarn.lock
 bun.lock
 bun.lockb
 
+# Build output
+apps/web/.svelte-kit
+apps/web/build
+
 # Miscellaneous
-/static/
-prisma
-src/locales
+apps/web/static/
+apps/web/src/locales
 .claude
+
+# Prisma schema + the client it generates into src/lib/prisma.
+# Unanchored so it matches at any depth.
+prisma
+
+# Dart/Flutter is formatted by `dart format`
+apps/scanner/

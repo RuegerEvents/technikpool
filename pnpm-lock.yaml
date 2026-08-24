@@ -7,6 +7,21 @@ settings:
 importers:
 
   .:
+    devDependencies:
+      husky:
+        specifier: ^9.1.7
+        version: 9.1.7
+      prettier:
+        specifier: ^3.9.6
+        version: 3.9.6
+      prettier-plugin-svelte:
+        specifier: ^4.1.1
+        version: 4.1.1(prettier@3.9.6)(svelte@5.56.10(@typescript-eslint/types@8.67.0))
+      prettier-plugin-tailwindcss:
+        specifier: ^0.8.1
+        version: 0.8.1(prettier-plugin-svelte@4.1.1(prettier@3.9.6)(svelte@5.56.10(@typescript-eslint/types@8.67.0)))(prettier@3.9.6)
+
+  apps/web:
     dependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.1116.0
@@ -126,18 +141,6 @@ importers:
       globals:
         specifier: ^17.11.0
         version: 17.11.0
-      husky:
-        specifier: ^9.1.7
-        version: 9.1.7
-      prettier:
-        specifier: ^3.9.6
-        version: 3.9.6
-      prettier-plugin-svelte:
-        specifier: ^4.1.1
-        version: 4.1.1(prettier@3.9.6)(svelte@5.56.10(@typescript-eslint/types@8.67.0))
-      prettier-plugin-tailwindcss:
-        specifier: ^0.8.1
-        version: 0.8.1(prettier-plugin-svelte@4.1.1(prettier@3.9.6)(svelte@5.56.10(@typescript-eslint/types@8.67.0)))(prettier@3.9.6)
       shadcn-svelte:
         specifier: ^1.5.0
         version: 1.5.0(svelte@5.56.10(@typescript-eslint/types@8.67.0))
