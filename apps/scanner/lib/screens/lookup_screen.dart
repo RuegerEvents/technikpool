@@ -9,6 +9,7 @@ import '../l10n/labels.dart';
 import '../l10n/strings.dart';
 import '../scan/camera_scan_screen.dart';
 import '../state/providers.dart';
+import '../widgets/category_pill.dart';
 
 /// Scan a tag outside a session to see what the thing is and where it's been —
 /// without booking it anywhere.
@@ -124,10 +125,18 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
           '${asset.product.manufacturerName} ${asset.product.name}',
           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 4),
-        Text(
-          asset.assetTag ?? '—',
-          style: const TextStyle(fontFamily: 'monospace', fontSize: 16),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            CategoryPill(asset.product.category),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                asset.assetTag ?? '—',
+                style: const TextStyle(fontFamily: 'monospace', fontSize: 16),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 20),
         _row(S.status, Labels.assetStatus(asset.status)),

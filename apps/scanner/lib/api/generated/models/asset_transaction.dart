@@ -15,10 +15,9 @@ class AssetTransaction {
     this.userName,
     this.productionName,
   });
-
-  factory AssetTransaction.fromJson(Map<String, Object?> json) =>
-      _$AssetTransactionFromJson(json);
-
+  
+  factory AssetTransaction.fromJson(Map<String, Object?> json) => _$AssetTransactionFromJson(json);
+  
   final String id;
   final String action;
   final DateTime createdAt;

@@ -10,10 +10,13 @@ part 'o_auth_error.g.dart';
 
 @JsonSerializable()
 class OAuthError {
-  const OAuthError({required this.error, this.errorDescription});
-
+  const OAuthError({
+    required this.error,
+    this.errorDescription,
+  });
+  
   factory OAuthError.fromJson(Map<String, Object?> json) => _$OAuthErrorFromJson(json);
-
+  
   final OAuthErrorError error;
   @JsonKey(name: 'error_description')
   final String? errorDescription;

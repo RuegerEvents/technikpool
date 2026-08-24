@@ -14,8 +14,9 @@ CurrentUser _$CurrentUserFromJson(Map<String, dynamic> json) => CurrentUser(
       .toList(),
 );
 
-Map<String, dynamic> _$CurrentUserToJson(CurrentUser instance) => <String, dynamic>{
-  'user': instance.user,
-  'isAdmin': instance.isAdmin,
-  'organizations': instance.organizations,
-};
+Map<String, dynamic> _$CurrentUserToJson(CurrentUser instance) =>
+    <String, dynamic>{
+      'user': instance.user,
+      'isAdmin': instance.isAdmin,
+      'organizations': instance.organizations,
+    };

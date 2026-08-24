@@ -14,10 +14,9 @@ class ScannedAsset {
     required this.productName,
     required this.manufacturerName,
   });
-
-  factory ScannedAsset.fromJson(Map<String, Object?> json) =>
-      _$ScannedAssetFromJson(json);
-
+  
+  factory ScannedAsset.fromJson(Map<String, Object?> json) => _$ScannedAssetFromJson(json);
+  
   final String id;
   final String assetTag;
   final String productName;

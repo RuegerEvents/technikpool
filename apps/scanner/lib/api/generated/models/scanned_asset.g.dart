@@ -13,9 +13,10 @@ ScannedAsset _$ScannedAssetFromJson(Map<String, dynamic> json) => ScannedAsset(
   manufacturerName: json['manufacturerName'] as String,
 );
 
-Map<String, dynamic> _$ScannedAssetToJson(ScannedAsset instance) => <String, dynamic>{
-  'id': instance.id,
-  'assetTag': instance.assetTag,
-  'productName': instance.productName,
-  'manufacturerName': instance.manufacturerName,
-};
+Map<String, dynamic> _$ScannedAssetToJson(ScannedAsset instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'assetTag': instance.assetTag,
+      'productName': instance.productName,
+      'manufacturerName': instance.manufacturerName,
+    };

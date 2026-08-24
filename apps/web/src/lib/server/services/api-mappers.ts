@@ -75,12 +75,28 @@ export function toProduction(production: ProductionRow): Schemas['Production'] {
 	};
 }
 
+type CategoryRow = {
+	id: string;
+	name: string;
+	color: string;
+	sortOrder: number;
+};
+
+export function toCategory(category: CategoryRow): Schemas['Category'] {
+	return {
+		id: category.id,
+		name: category.name,
+		color: category.color,
+		sortOrder: category.sortOrder
+	};
+}
+
 type ProductRow = {
 	id: string;
 	name: string;
 	imageUrl: string | null;
 	manufacturer: { name: string };
-	category: { name: string };
+	category: CategoryRow;
 };
 
 export function toProduct(product: ProductRow): Schemas['Product'] {
@@ -88,7 +104,7 @@ export function toProduct(product: ProductRow): Schemas['Product'] {
 		id: product.id,
 		name: product.name,
 		manufacturerName: product.manufacturer.name,
-		categoryName: product.category.name,
+		category: toCategory(product.category),
 		imageUrl: product.imageUrl
 	};
 }

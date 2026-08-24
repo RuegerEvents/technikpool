@@ -17,9 +17,9 @@ class Production {
     this.startDate,
     this.endDate,
   });
-
+  
   factory Production.fromJson(Map<String, Object?> json) => _$ProductionFromJson(json);
-
+  
   final String id;
   final String name;
   final DateTime? startDate;

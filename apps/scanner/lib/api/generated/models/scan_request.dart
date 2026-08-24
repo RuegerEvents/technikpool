@@ -15,9 +15,9 @@ class ScanRequest {
     required this.targetType,
     required this.targetId,
   });
-
+  
   factory ScanRequest.fromJson(Map<String, Object?> json) => _$ScanRequestFromJson(json);
-
+  
   /// Exactly what the barcode decoded to.
   final String assetTag;
   final ScanRequestTargetType targetType;

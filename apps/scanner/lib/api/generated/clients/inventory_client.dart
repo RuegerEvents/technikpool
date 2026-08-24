@@ -7,6 +7,7 @@ import 'package:retrofit/retrofit.dart';
 
 import '../models/asset_detail.dart';
 import '../models/asset_page.dart';
+import '../models/category.dart';
 import '../models/location.dart';
 import '../models/production.dart';
 
@@ -24,11 +25,20 @@ abstract class InventoryClient {
   @GET('/api/v1/productions')
   Future<List<Production>> listProductions();
 
+  /// Product categories.
+  ///
+  /// Global rather than per-organization: a category is a kind of equipment,.
+  /// and two orgs lending each other a moving light agree on what it is.
+  @GET('/api/v1/categories')
+  Future<List<Category>> listCategories();
+
   /// Browse assets.
   ///
   /// [locationId] - Only assets currently at this location.
   ///
   /// [productionId] - Only assets booked to this production.
+  ///
+  /// [categoryId] - Only assets whose product is in this category.
   ///
   /// [q] - Case-insensitive match on asset tag, serial number, product or manufacturer name.
   ///
@@ -38,6 +48,7 @@ abstract class InventoryClient {
     @Query('limit') int? limit = 50,
     @Query('locationId') String? locationId,
     @Query('productionId') String? productionId,
+    @Query('categoryId') String? categoryId,
     @Query('q') String? q,
     @Query('cursor') String? cursor,
   });
@@ -46,5 +57,7 @@ abstract class InventoryClient {
   ///
   /// [tag] - The asset tag as encoded in the sticker's barcode.
   @GET('/api/v1/assets/by-tag/{tag}')
-  Future<AssetDetail> getAssetByTag({@Path('tag') required String tag});
+  Future<AssetDetail> getAssetByTag({
+    @Path('tag') required String tag,
+  });
 }

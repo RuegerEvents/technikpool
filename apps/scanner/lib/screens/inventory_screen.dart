@@ -5,6 +5,7 @@ import '../api/client.dart';
 import '../api/generated/export.dart';
 import '../l10n/strings.dart';
 import '../state/providers.dart';
+import '../widgets/category_pill.dart';
 
 /// Browse what's where, without scanning anything.
 class InventoryScreen extends ConsumerStatefulWidget {
@@ -17,6 +18,7 @@ class InventoryScreen extends ConsumerStatefulWidget {
 class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   final _assets = <Asset>[];
   String? _locationId;
+  String? _categoryId;
   String _query = '';
   String? _cursor;
   bool _loading = false;
@@ -48,6 +50,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       final page = await api.inventory.listAssets(
         limit: 50,
         locationId: _locationId,
+        categoryId: _categoryId,
         q: _query.isEmpty ? null : _query,
         cursor: _cursor,
       );
@@ -67,6 +70,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   @override
   Widget build(BuildContext context) {
     final locations = ref.watch(locationsProvider).value ?? const <Location>[];
+    final categories = ref.watch(categoriesProvider).value ?? const <Category>[];
 
     return Scaffold(
       appBar: AppBar(title: const Text(S.inventory)),
@@ -87,24 +91,58 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               },
             ),
           ),
+          // Side by side rather than stacked: a third full-width row would eat
+          // most of a PDA screen before a single result showed.
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-            child: DropdownButtonFormField<String?>(
-              initialValue: _locationId,
-              isExpanded: true,
-              decoration: const InputDecoration(
-                labelText: S.filterByLocation,
-                isDense: true,
-              ),
-              items: [
-                const DropdownMenuItem(value: null, child: Text(S.all)),
-                for (final loc in locations)
-                  DropdownMenuItem(value: loc.id, child: Text(loc.name)),
+            child: Row(
+              spacing: 8,
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String?>(
+                    initialValue: _locationId,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      labelText: S.filterByLocation,
+                      isDense: true,
+                    ),
+                    items: [
+                      const DropdownMenuItem(value: null, child: Text(S.all)),
+                      for (final loc in locations)
+                        DropdownMenuItem(
+                          value: loc.id,
+                          child: Text(loc.name, overflow: TextOverflow.ellipsis),
+                        ),
+                    ],
+                    onChanged: (v) {
+                      _locationId = v;
+                      _load(reset: true);
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: DropdownButtonFormField<String?>(
+                    initialValue: _categoryId,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      labelText: S.filterByCategory,
+                      isDense: true,
+                    ),
+                    items: [
+                      const DropdownMenuItem(value: null, child: Text(S.all)),
+                      for (final category in categories)
+                        DropdownMenuItem(
+                          value: category.id,
+                          child: Text(category.name, overflow: TextOverflow.ellipsis),
+                        ),
+                    ],
+                    onChanged: (v) {
+                      _categoryId = v;
+                      _load(reset: true);
+                    },
+                  ),
+                ),
               ],
-              onChanged: (v) {
-                _locationId = v;
-                _load(reset: true);
-              },
             ),
           ),
           if (_error != null)
@@ -144,8 +182,20 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       '${asset.product.manufacturerName} ${asset.product.name}',
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
-                    subtitle: Text(
-                      [asset.assetTag ?? '—', asset.location.name].join(' · '),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 3),
+                      child: Row(
+                        spacing: 8,
+                        children: [
+                          CategoryPill(asset.product.category, dense: true),
+                          Expanded(
+                            child: Text(
+                              [asset.assetTag ?? '—', asset.location.name].join(' · '),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },

@@ -12,8 +12,9 @@ ScanRequest _$ScanRequestFromJson(Map<String, dynamic> json) => ScanRequest(
   targetId: json['targetId'] as String,
 );
 
-Map<String, dynamic> _$ScanRequestToJson(ScanRequest instance) => <String, dynamic>{
-  'assetTag': instance.assetTag,
-  'targetType': instance.targetType,
-  'targetId': instance.targetId,
-};
+Map<String, dynamic> _$ScanRequestToJson(ScanRequest instance) =>
+    <String, dynamic>{
+      'assetTag': instance.assetTag,
+      'targetType': instance.targetType,
+      'targetId': instance.targetId,
+    };

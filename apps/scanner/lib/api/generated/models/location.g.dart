@@ -9,7 +9,9 @@ part of 'location.dart';
 Location _$LocationFromJson(Map<String, dynamic> json) => Location(
   id: json['id'] as String,
   name: json['name'] as String,
-  organization: Organization.fromJson(json['organization'] as Map<String, dynamic>),
+  organization: Organization.fromJson(
+    json['organization'] as Map<String, dynamic>,
+  ),
   address: json['address'] == null
       ? null
       : Address.fromJson(json['address'] as Map<String, dynamic>),

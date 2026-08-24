@@ -11,7 +11,8 @@ OAuthError _$OAuthErrorFromJson(Map<String, dynamic> json) => OAuthError(
   errorDescription: json['error_description'] as String?,
 );
 
-Map<String, dynamic> _$OAuthErrorToJson(OAuthError instance) => <String, dynamic>{
-  'error': instance.error,
-  'error_description': ?instance.errorDescription,
-};
+Map<String, dynamic> _$OAuthErrorToJson(OAuthError instance) =>
+    <String, dynamic>{
+      'error': instance.error,
+      'error_description': ?instance.errorDescription,
+    };

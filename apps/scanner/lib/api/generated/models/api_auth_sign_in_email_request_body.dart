@@ -8,11 +8,13 @@ part 'api_auth_sign_in_email_request_body.g.dart';
 
 @JsonSerializable()
 class ApiAuthSignInEmailRequestBody {
-  const ApiAuthSignInEmailRequestBody({required this.email, required this.password});
-
-  factory ApiAuthSignInEmailRequestBody.fromJson(Map<String, Object?> json) =>
-      _$ApiAuthSignInEmailRequestBodyFromJson(json);
-
+  const ApiAuthSignInEmailRequestBody({
+    required this.email,
+    required this.password,
+  });
+  
+  factory ApiAuthSignInEmailRequestBody.fromJson(Map<String, Object?> json) => _$ApiAuthSignInEmailRequestBodyFromJson(json);
+  
   final String email;
   final String password;
 

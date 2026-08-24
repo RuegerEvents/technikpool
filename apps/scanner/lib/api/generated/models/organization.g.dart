@@ -14,10 +14,11 @@ Organization _$OrganizationFromJson(Map<String, dynamic> json) => Organization(
   shortName: json['shortName'] as String?,
 );
 
-Map<String, dynamic> _$OrganizationToJson(Organization instance) => <String, dynamic>{
-  'id': instance.id,
-  'name': instance.name,
-  'shortName': ?instance.shortName,
-  'color': instance.color,
-  'avatarLabel': instance.avatarLabel,
-};
+Map<String, dynamic> _$OrganizationToJson(Organization instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'shortName': ?instance.shortName,
+      'color': instance.color,
+      'avatarLabel': instance.avatarLabel,
+    };

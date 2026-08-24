@@ -8,11 +8,12 @@ part 'post_api_auth_device_approve_response.g.dart';
 
 @JsonSerializable()
 class PostApiAuthDeviceApproveResponse {
-  const PostApiAuthDeviceApproveResponse({this.success});
-
-  factory PostApiAuthDeviceApproveResponse.fromJson(Map<String, Object?> json) =>
-      _$PostApiAuthDeviceApproveResponseFromJson(json);
-
+  const PostApiAuthDeviceApproveResponse({
+    this.success,
+  });
+  
+  factory PostApiAuthDeviceApproveResponse.fromJson(Map<String, Object?> json) => _$PostApiAuthDeviceApproveResponseFromJson(json);
+  
   final bool? success;
 
   Map<String, Object?> toJson() => _$PostApiAuthDeviceApproveResponseToJson(this);

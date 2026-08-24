@@ -15,9 +15,9 @@ class User {
     this.name,
     this.image,
   });
-
+  
   factory User.fromJson(Map<String, Object?> json) => _$UserFromJson(json);
-
+  
   final String id;
   final String email;
   final String? name;

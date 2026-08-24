@@ -14,10 +14,11 @@ DeviceTokenResponse _$DeviceTokenResponseFromJson(Map<String, dynamic> json) =>
       scope: json['scope'] as String?,
     );
 
-Map<String, dynamic> _$DeviceTokenResponseToJson(DeviceTokenResponse instance) =>
-    <String, dynamic>{
-      'access_token': instance.accessToken,
-      'token_type': instance.tokenType,
-      'expires_in': ?instance.expiresIn,
-      'scope': ?instance.scope,
-    };
+Map<String, dynamic> _$DeviceTokenResponseToJson(
+  DeviceTokenResponse instance,
+) => <String, dynamic>{
+  'access_token': instance.accessToken,
+  'token_type': instance.tokenType,
+  'expires_in': ?instance.expiresIn,
+  'scope': ?instance.scope,
+};

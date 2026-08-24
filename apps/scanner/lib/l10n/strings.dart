@@ -45,6 +45,7 @@ class S {
   static const lookupHint = 'Etikett scannen, um Details zu sehen.';
   static const serialNumber = 'Seriennummer';
   static const status = 'Status';
+  static const category = 'Kategorie';
   static const currentLocation = 'Aktueller Lagerort';
   static const checkedOutTo = 'Ausgebucht an';
   static const history = 'Verlauf';
@@ -53,6 +54,7 @@ class S {
   static const inventory = 'Bestand';
   static const filterByLocation = 'Nach Lagerort filtern';
   static const filterByProduction = 'Nach Produktion filtern';
+  static const filterByCategory = 'Kategorie';
   static const all = 'Alle';
   static const loadMore = 'Mehr laden';
 

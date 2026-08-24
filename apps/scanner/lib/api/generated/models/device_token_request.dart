@@ -13,10 +13,9 @@ class DeviceTokenRequest {
     required this.deviceCode,
     required this.clientId,
   });
-
-  factory DeviceTokenRequest.fromJson(Map<String, Object?> json) =>
-      _$DeviceTokenRequestFromJson(json);
-
+  
+  factory DeviceTokenRequest.fromJson(Map<String, Object?> json) => _$DeviceTokenRequestFromJson(json);
+  
   /// Always `urn:ietf:params:oauth:grant-type:device_code`.
   @JsonKey(name: 'grant_type')
   final String grantType;

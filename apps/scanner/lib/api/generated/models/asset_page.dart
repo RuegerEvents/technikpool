@@ -10,10 +10,13 @@ part 'asset_page.g.dart';
 
 @JsonSerializable()
 class AssetPage {
-  const AssetPage({required this.items, required this.nextCursor});
-
+  const AssetPage({
+    required this.items,
+    required this.nextCursor,
+  });
+  
   factory AssetPage.fromJson(Map<String, Object?> json) => _$AssetPageFromJson(json);
-
+  
   final List<Asset> items;
 
   /// Pass as `cursor` for the next page. Null on the last page.

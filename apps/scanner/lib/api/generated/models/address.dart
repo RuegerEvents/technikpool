@@ -15,9 +15,9 @@ class Address {
     required this.city,
     this.line2,
   });
-
+  
   factory Address.fromJson(Map<String, Object?> json) => _$AddressFromJson(json);
-
+  
   final String id;
   final String line1;
   final String? line2;

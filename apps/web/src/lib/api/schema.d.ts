@@ -142,6 +142,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Product categories
+         * @description Global rather than per-organization: a category is a kind of equipment,
+         *     and two orgs lending each other a moving light agree on what it is.
+         */
+        get: operations["listCategories"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/assets": {
         parameters: {
             query?: never;
@@ -322,8 +343,20 @@ export interface components {
             id: string;
             name: string;
             manufacturerName: string;
-            categoryName: string;
+            category: components["schemas"]["Category"];
             imageUrl?: string | null;
+        };
+        Category: {
+            id: string;
+            name: string;
+            /**
+             * @description Hex, `#rrggbb`. User-chosen and unconstrained, so it runs from white
+             *     to near-black — derive the text colour from its luminance rather
+             *     than assuming a dark background.
+             */
+            color: string;
+            /** @description Ascending, ties broken by name. listCategories applies both. */
+            sortOrder: number;
         };
         AssetDetail: components["schemas"]["Asset"] & {
             /** @description The production this asset is currently checked out to, if any. */
@@ -601,6 +634,27 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
         };
     };
+    listCategories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Categories, already in display order */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Category"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
     listAssets: {
         parameters: {
             query?: {
@@ -608,6 +662,8 @@ export interface operations {
                 locationId?: string;
                 /** @description Only assets booked to this production. */
                 productionId?: string;
+                /** @description Only assets whose product is in this category. */
+                categoryId?: string;
                 /** @description Case-insensitive match on asset tag, serial number, product or manufacturer name. */
                 q?: string;
                 limit?: number;

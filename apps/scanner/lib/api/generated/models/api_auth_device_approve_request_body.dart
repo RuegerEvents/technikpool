@@ -8,11 +8,12 @@ part 'api_auth_device_approve_request_body.g.dart';
 
 @JsonSerializable()
 class ApiAuthDeviceApproveRequestBody {
-  const ApiAuthDeviceApproveRequestBody({required this.userCode});
-
-  factory ApiAuthDeviceApproveRequestBody.fromJson(Map<String, Object?> json) =>
-      _$ApiAuthDeviceApproveRequestBodyFromJson(json);
-
+  const ApiAuthDeviceApproveRequestBody({
+    required this.userCode,
+  });
+  
+  factory ApiAuthDeviceApproveRequestBody.fromJson(Map<String, Object?> json) => _$ApiAuthDeviceApproveRequestBodyFromJson(json);
+  
   final String userCode;
 
   Map<String, Object?> toJson() => _$ApiAuthDeviceApproveRequestBodyToJson(this);

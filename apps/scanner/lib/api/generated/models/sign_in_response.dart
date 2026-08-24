@@ -10,11 +10,13 @@ part 'sign_in_response.g.dart';
 
 @JsonSerializable()
 class SignInResponse {
-  const SignInResponse({this.user, this.redirect});
-
-  factory SignInResponse.fromJson(Map<String, Object?> json) =>
-      _$SignInResponseFromJson(json);
-
+  const SignInResponse({
+    this.user,
+    this.redirect,
+  });
+  
+  factory SignInResponse.fromJson(Map<String, Object?> json) => _$SignInResponseFromJson(json);
+  
   final User? user;
   final bool? redirect;
 

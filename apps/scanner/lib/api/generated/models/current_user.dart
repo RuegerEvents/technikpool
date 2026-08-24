@@ -16,9 +16,9 @@ class CurrentUser {
     required this.isAdmin,
     required this.organizations,
   });
-
+  
   factory CurrentUser.fromJson(Map<String, Object?> json) => _$CurrentUserFromJson(json);
-
+  
   final User user;
 
   /// System-level admin, sees every organization.

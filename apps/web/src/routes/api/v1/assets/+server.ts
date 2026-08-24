@@ -31,6 +31,7 @@ export const GET: RequestHandler = ({ locals, url }) =>
 
 		const locationId = url.searchParams.get('locationId');
 		const productionId = url.searchParams.get('productionId');
+		const categoryId = url.searchParams.get('categoryId');
 		const q = url.searchParams.get('q')?.trim();
 		const cursor = url.searchParams.get('cursor');
 
@@ -45,6 +46,7 @@ export const GET: RequestHandler = ({ locals, url }) =>
 						}
 					}
 				: {}),
+			...(categoryId ? { product: { categoryId } } : {}),
 			...(q
 				? {
 						OR: [

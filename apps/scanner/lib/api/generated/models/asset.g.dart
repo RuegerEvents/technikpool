@@ -11,7 +11,9 @@ Asset _$AssetFromJson(Map<String, dynamic> json) => Asset(
   status: AssetStatus.fromJson(json['status'] as String),
   product: Product.fromJson(json['product'] as Map<String, dynamic>),
   location: Location.fromJson(json['location'] as Map<String, dynamic>),
-  organization: Organization.fromJson(json['organization'] as Map<String, dynamic>),
+  organization: Organization.fromJson(
+    json['organization'] as Map<String, dynamic>,
+  ),
   assetTag: json['assetTag'] as String?,
   serialNumber: json['serialNumber'] as String?,
   bundleId: json['bundleId'] as String?,

@@ -15,10 +15,9 @@ class Organization {
     required this.avatarLabel,
     this.shortName,
   });
-
-  factory Organization.fromJson(Map<String, Object?> json) =>
-      _$OrganizationFromJson(json);
-
+  
+  factory Organization.fromJson(Map<String, Object?> json) => _$OrganizationFromJson(json);
+  
   final String id;
   final String name;
 

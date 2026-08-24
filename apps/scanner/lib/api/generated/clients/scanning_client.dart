@@ -20,5 +20,7 @@ abstract class ScanningClient {
   /// is currently checked out to — putting kit back on the shelf is what.
   /// "returned" means in practice.
   @POST('/api/v1/scans')
-  Future<ScanResult> createScan({@Body() required ScanRequest body});
+  Future<ScanResult> createScan({
+    @Body() required ScanRequest body,
+  });
 }

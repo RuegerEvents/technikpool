@@ -16,10 +16,9 @@ class DeviceCodeResponse {
     required this.interval,
     this.verificationUriComplete,
   });
-
-  factory DeviceCodeResponse.fromJson(Map<String, Object?> json) =>
-      _$DeviceCodeResponseFromJson(json);
-
+  
+  factory DeviceCodeResponse.fromJson(Map<String, Object?> json) => _$DeviceCodeResponseFromJson(json);
+  
   /// Secret. Sent when polling; never shown to the user.
   @JsonKey(name: 'device_code')
   final String deviceCode;

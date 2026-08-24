@@ -220,3 +220,9 @@ final locationsProvider = FutureProvider<List<Location>>(
 final productionsProvider = FutureProvider<List<Production>>(
   (ref) => _requireApi(ref).inventory.listProductions(),
 );
+
+/// Equipment categories. Global rather than per-organization, and the server
+/// already returns them in display order.
+final categoriesProvider = FutureProvider<List<Category>>(
+  (ref) => _requireApi(ref).inventory.listCategories(),
+);

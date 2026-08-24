@@ -78,10 +78,40 @@ class _InventoryClient implements InventoryClient {
   }
 
   @override
+  Future<List<Category>> listCategories() async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<List<Category>>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/categories',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<Category> _value;
+    try {
+      _value = _result.data!
+          .map((dynamic i) => Category.fromJson(i as Map<String, dynamic>))
+          .toList();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<AssetPage> listAssets({
     int? limit = 50,
     String? locationId,
     String? productionId,
+    String? categoryId,
     String? q,
     String? cursor,
   }) async {
@@ -90,6 +120,7 @@ class _InventoryClient implements InventoryClient {
       r'limit': limit,
       r'locationId': locationId,
       r'productionId': productionId,
+      r'categoryId': categoryId,
       r'q': q,
       r'cursor': cursor,
     };

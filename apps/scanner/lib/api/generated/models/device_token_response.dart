@@ -14,10 +14,9 @@ class DeviceTokenResponse {
     this.expiresIn,
     this.scope,
   });
-
-  factory DeviceTokenResponse.fromJson(Map<String, Object?> json) =>
-      _$DeviceTokenResponseFromJson(json);
-
+  
+  factory DeviceTokenResponse.fromJson(Map<String, Object?> json) => _$DeviceTokenResponseFromJson(json);
+  
   /// A better-auth session token. Use as the bearer credential.
   @JsonKey(name: 'access_token')
   final String accessToken;

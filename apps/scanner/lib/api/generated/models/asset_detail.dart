@@ -27,9 +27,9 @@ class AssetDetail {
     this.serialNumber,
     this.bundleId,
   });
-
+  
   factory AssetDetail.fromJson(Map<String, Object?> json) => _$AssetDetailFromJson(json);
-
+  
   final String id;
 
   /// The printed tag. Null for assets that have never been labelled.

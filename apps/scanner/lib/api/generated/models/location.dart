@@ -17,9 +17,9 @@ class Location {
     required this.organization,
     this.address,
   });
-
+  
   factory Location.fromJson(Map<String, Object?> json) => _$LocationFromJson(json);
-
+  
   final String id;
   final String name;
   final Organization organization;

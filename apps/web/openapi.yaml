@@ -217,6 +217,26 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  /api/v1/categories:
+    get:
+      operationId: listCategories
+      tags: [inventory]
+      summary: Product categories
+      description: |
+        Global rather than per-organization: a category is a kind of equipment,
+        and two orgs lending each other a moving light agree on what it is.
+      responses:
+        '200':
+          description: Categories, already in display order
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
   /api/v1/assets:
     get:
       operationId: listAssets
@@ -231,6 +251,11 @@ paths:
         - name: productionId
           in: query
           description: Only assets booked to this production.
+          schema:
+            type: string
+        - name: categoryId
+          in: query
+          description: Only assets whose product is in this category.
           schema:
             type: string
         - name: q
@@ -580,7 +605,7 @@ components:
 
     Product:
       type: object
-      required: [id, name, manufacturerName, categoryName]
+      required: [id, name, manufacturerName, category]
       properties:
         id:
           type: string
@@ -588,10 +613,28 @@ components:
           type: string
         manufacturerName:
           type: string
-        categoryName:
-          type: string
+        category:
+          $ref: '#/components/schemas/Category'
         imageUrl:
           type: [string, 'null']
+
+    Category:
+      type: object
+      required: [id, name, color, sortOrder]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        color:
+          type: string
+          description: |
+            Hex, `#rrggbb`. User-chosen and unconstrained, so it runs from white
+            to near-black — derive the text colour from its luminance rather
+            than assuming a dark background.
+        sortOrder:
+          type: integer
+          description: Ascending, ties broken by name. listCategories applies both.
 
     AssetDetail:
       allOf:

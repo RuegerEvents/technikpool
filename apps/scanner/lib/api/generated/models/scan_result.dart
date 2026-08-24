@@ -17,9 +17,9 @@ class ScanResult {
     required this.targetName,
     required this.returnedFrom,
   });
-
+  
   factory ScanResult.fromJson(Map<String, Object?> json) => _$ScanResultFromJson(json);
-
+  
   final ScannedAsset asset;
   final ScanResultAction action;
 

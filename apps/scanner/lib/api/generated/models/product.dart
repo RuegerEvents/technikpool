@@ -4,6 +4,8 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import 'category.dart';
+
 part 'product.g.dart';
 
 @JsonSerializable()
@@ -12,16 +14,16 @@ class Product {
     required this.id,
     required this.name,
     required this.manufacturerName,
-    required this.categoryName,
+    required this.category,
     this.imageUrl,
   });
-
+  
   factory Product.fromJson(Map<String, Object?> json) => _$ProductFromJson(json);
-
+  
   final String id;
   final String name;
   final String manufacturerName;
-  final String categoryName;
+  final Category category;
   final String? imageUrl;
 
   Map<String, Object?> toJson() => _$ProductToJson(this);

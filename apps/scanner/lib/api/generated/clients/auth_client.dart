@@ -22,7 +22,9 @@ abstract class AuthClient {
 
   /// Start the device authorization flow
   @POST('/api/auth/device/code')
-  Future<DeviceCodeResponse> requestDeviceCode({@Body() required DeviceCodeRequest body});
+  Future<DeviceCodeResponse> requestDeviceCode({
+    @Body() required DeviceCodeRequest body,
+  });
 
   /// Exchange an approved device code for a session token.
   ///
@@ -31,7 +33,9 @@ abstract class AuthClient {
   /// polling too fast answers `slow_down`; an expired code answers.
   /// `expired_token`; a denied one `access_denied`.
   @POST('/api/auth/device/token')
-  Future<DeviceTokenResponse> pollDeviceToken({@Body() required DeviceTokenRequest body});
+  Future<DeviceTokenResponse> pollDeviceToken({
+    @Body() required DeviceTokenRequest body,
+  });
 
   /// Approve a pending device code (browser, signed in).
   ///

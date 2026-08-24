@@ -8,11 +8,13 @@ part 'device_code_request.g.dart';
 
 @JsonSerializable()
 class DeviceCodeRequest {
-  const DeviceCodeRequest({required this.clientId, this.scope});
-
-  factory DeviceCodeRequest.fromJson(Map<String, Object?> json) =>
-      _$DeviceCodeRequestFromJson(json);
-
+  const DeviceCodeRequest({
+    required this.clientId,
+    this.scope,
+  });
+  
+  factory DeviceCodeRequest.fromJson(Map<String, Object?> json) => _$DeviceCodeRequestFromJson(json);
+  
   @JsonKey(name: 'client_id')
   final String clientId;
   final String? scope;
