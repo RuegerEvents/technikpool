@@ -2,11 +2,16 @@
 # the .gitignore next to this file already covers key.properties and *.jks.
 #
 # Create the upload key once:
-#   keytool -genkey -v -keystore ~/technikpool-upload.jks \
-#     -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+#   keytool -genkeypair -keystore ~/technikpool-upload.jks -storetype PKCS12 \
+#     -alias upload -keyalg RSA -keysize 2048 -validity 10000
 #
 # Google Play signs the app itself; this is the *upload* key. If it is lost,
 # Play support can reset it — the app signing key is the one that can't be.
+# storePassword and keyPassword are the SAME value. The keystore is PKCS12,
+# which holds one password for the whole file; keytool accepts a separate
+# -keypass and silently ignores it, so a distinct key password looks like it
+# worked and then fails at signing time with "Given final block not properly
+# padded".
 storeFile=/absolute/path/to/technikpool-upload.jks
 storePassword=
 keyAlias=upload

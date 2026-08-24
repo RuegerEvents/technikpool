@@ -613,7 +613,7 @@ Repository secrets the workflow needs:
 | `ANDROID_KEY_ALIAS`         | `ASC_KEY_P8` (base64 of the .p8) |
 | `ANDROID_KEY_PASSWORD`      | `MATCH_GIT_URL`                  |
 | `GOOGLE_PLAY_JSON_KEY`      | `MATCH_PASSWORD`                 |
-|                             | `MATCH_GIT_BASIC_AUTHORIZATION`  |
+|                             | `MATCH_GIT_PRIVATE_KEY`          |
 
 `key.properties` is assembled in CI from the four Android secrets rather than being a secret of
 its own, so the same file works locally and on a runner without ever being committed. The App
@@ -646,9 +646,10 @@ bundle exec fastlane certificates   # creates the identity and pushes it, encryp
 bundle exec fastlane validate       # proves both credentials work, uploads nothing
 ```
 
-Then set the three iOS secrets above. `MATCH_GIT_BASIC_AUTHORIZATION` is
-`base64 <<< "user:TOKEN"` with a PAT scoped to the certificates repo alone, so a runner never
-holds a credential that reaches the code.
+`MATCH_GIT_PRIVATE_KEY` is a **read-only deploy key** on the certificates repo, not a PAT: a
+deploy key reaches exactly one repo, where a token carries everything its account can see. It is
+only for CI — a laptop uses your own git access, and the local `certificates` lane needs write,
+which the deploy key deliberately does not have.
 
 `build` deliberately does **not** use `flutter build ipa`: that signs with Xcode's _automatic_
 signing, which picks its own profile and ignores the one match installed. Instead Flutter builds

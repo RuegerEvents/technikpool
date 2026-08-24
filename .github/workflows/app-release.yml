@@ -115,6 +115,14 @@ jobs:
       # repo and decrypted at build time, so there is no .p12 to export, rotate
       # by hand, or keep in step across machines. The lane runs `setup_ci`,
       # which puts it in a throwaway keychain that dies with the runner.
+      # A macOS runner starts with no known_hosts, so the first clone of the
+      # certificates repo would stop on an interactive host-key prompt.
+      - name: Trust github.com for ssh
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts
+
       - name: Write the App Store Connect key
         env:
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
@@ -134,10 +142,10 @@ jobs:
           ASC_KEY_PATH: ${{ runner.temp }}/asc_key.p8
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          # Read access to the certificates repo. base64 of "user:token" with a
-          # PAT scoped to that one private repo — the runner never gets a
-          # credential that reaches this monorepo.
-          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          # A read-only deploy key on the certificates repo — not a PAT, which
+          # would carry whatever else the issuing account can reach. match takes
+          # the key's contents directly and loads it into an ssh-agent itself.
+          MATCH_GIT_PRIVATE_KEY: ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
         run: bundle exec fastlane beta
 
       - name: Shred credentials
