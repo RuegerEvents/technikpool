@@ -4191,3 +4191,44 @@ msgstr "Last known location"
 #: src/lib/components/ui/image-upload/image-upload.svelte
 msgid "Drop {0} here, paste it, or click to choose"
 msgstr "Drop {0} here, paste it, or click to choose"
+
+#: src/routes/devices/+page.svelte
+msgid "Device disconnected"
+msgstr "Device disconnected"
+
+#: src/routes/devices/+page.svelte
+msgid "Connected devices"
+msgstr "Connected devices"
+
+#: src/routes/devices/+page.svelte
+msgid "Everything currently signed in as you. Disconnecting a device ends its session immediately — it has to be paired again to book anything."
+msgstr "Everything currently signed in as you. Disconnecting a device ends its session immediately — it has to be paired again to book anything."
+
+#: src/routes/devices/+page.svelte
+msgid "No devices are connected."
+msgstr "No devices are connected."
+
+#: src/routes/devices/+page.svelte
+msgid "Scanner"
+msgstr "Scanner"
+
+#: src/routes/devices/+page.svelte
+msgid "Browser"
+msgstr "Browser"
+
+#: src/routes/devices/+page.svelte
+msgid "· this one"
+msgstr "· this one"
+
+#. 0: dateFormat.format(new Date(device.connectedAt)); 1: dateFormat.format( new Date(device.lastSeenAt) )
+#: src/routes/devices/+page.svelte
+msgid "Connected {0} · last used {1}<0/>"
+msgstr "Connected {0} · last used {1}<0/>"
+
+#: src/routes/devices/+page.svelte
+msgid "Disconnecting…"
+msgstr "Disconnecting…"
+
+#: src/routes/devices/+page.svelte
+msgid "Disconnect"
+msgstr "Disconnect"

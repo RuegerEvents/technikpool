@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
-	import { getPairingInfo, approveDevice, denyDevice } from '$lib/remote/devices.remote';
+	import {
+		getPairingInfo,
+		approveDevice,
+		denyDevice,
+		getConnectedDevices,
+		disconnectDevice
+	} from '$lib/remote/devices.remote';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -10,6 +16,26 @@
 	import { getErrorMessage } from '$lib/utils';
 
 	let pairing = $derived(await getPairingInfo());
+	let devices = $derived(await getConnectedDevices());
+
+	let disconnecting = $state<string | null>(null);
+
+	async function disconnect(sessionId: string) {
+		disconnecting = sessionId;
+		try {
+			await disconnectDevice({ sessionId });
+			toast.success('Device disconnected');
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			disconnecting = null;
+		}
+	}
+
+	const dateFormat = new Intl.DateTimeFormat('de-DE', {
+		dateStyle: 'short',
+		timeStyle: 'short'
+	});
 
 	// The device flow can link straight here with the code pre-filled
 	// (verification_uri_complete), so accept it from the query string.
@@ -147,5 +173,56 @@
 				</Button>
 			</Card.Footer>
 		{/if}
+	</Card.Root>
+
+	<Card.Root>
+		<Card.Header>
+			<Card.Title>Connected devices</Card.Title>
+			<Card.Description>
+				Everything currently signed in as you. Disconnecting a device ends its session immediately —
+				it has to be paired again to book anything.
+			</Card.Description>
+		</Card.Header>
+		<Card.Content>
+			{#if devices.length === 0}
+				<p class="text-sm text-muted-foreground">No devices are connected.</p>
+			{:else}
+				<ul class="divide-y">
+					{#each devices as device (device.id)}
+						<li class="flex flex-wrap items-center gap-3 py-3 first:pt-0 last:pb-0">
+							<span
+								class="rounded-full px-2 py-0.5 text-xs font-semibold {device.kind === 'scanner'
+									? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+									: 'bg-muted text-muted-foreground'}"
+							>
+								{device.kind === 'scanner' ? 'Scanner' : 'Browser'}
+							</span>
+							<div class="min-w-40 flex-1">
+								<p class="text-sm font-medium">
+									{device.label}
+									{#if device.current}
+										<span class="text-xs font-normal text-muted-foreground">· this one</span>
+									{/if}
+								</p>
+								<p class="text-xs text-muted-foreground">
+									Connected {dateFormat.format(new Date(device.connectedAt))} · last used {dateFormat.format(
+										new Date(device.lastSeenAt)
+									)}{#if device.ipAddress}
+										· {device.ipAddress}{/if}
+								</p>
+							</div>
+							<Button
+								variant="outline"
+								size="sm"
+								disabled={device.current || disconnecting === device.id}
+								onclick={() => disconnect(device.id)}
+							>
+								{disconnecting === device.id ? 'Disconnecting…' : 'Disconnect'}
+							</Button>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</Card.Content>
 	</Card.Root>
 </div>

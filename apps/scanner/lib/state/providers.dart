@@ -220,12 +220,24 @@ final scanSettingsProvider = Provider<ScanSettings>((ref) {
 final apiClientProvider = Provider<ApiClient?>((ref) {
   final creds = ref.watch(credentialsProvider).value;
   if (creds?.baseUrl == null) return null;
-  return ApiClient(baseUrl: creds!.baseUrl!, token: creds.token);
+  return ApiClient(
+    baseUrl: creds!.baseUrl!,
+    token: creds.token,
+    userAgent: ref.watch(_userAgentProvider),
+  );
 });
+
+/// The session the web lists as a connected device is created during pairing,
+/// so the agent string has to be right on *this* client, not just the one used
+/// afterwards. The model may still be resolving; a missing one costs the label
+/// its detail, never the identification.
+final _userAgentProvider = Provider<String>(
+  (ref) => scannerUserAgent(ref.watch(deviceIdentityProvider).value?.label),
+);
 
 /// A client for pairing, before any token exists.
 final pairingApiProvider = Provider.family<ApiClient, String>(
-  (ref, baseUrl) => ApiClient(baseUrl: baseUrl),
+  (ref, baseUrl) => ApiClient(baseUrl: baseUrl, userAgent: ref.watch(_userAgentProvider)),
 );
 
 final authServiceProvider = Provider.family<AuthService, String>(

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/misc.dart';
 
@@ -20,16 +22,32 @@ class ApiException implements Exception {
   String toString() => message;
 }
 
+/// How this app names itself in the User-Agent.
+///
+/// The web's "Connected devices" list has nothing else to go on: a session row
+/// carries an agent string and not much more, so this prefix is what tells a
+/// handheld apart from a browser, and the detail in brackets is what tells two
+/// handhelds apart. The web side parses it in devices.remote.ts — keep the two
+/// in step.
+String scannerUserAgent(String? deviceModel) {
+  final platform = Platform.isAndroid ? 'Android' : Platform.operatingSystem;
+  final model = deviceModel?.trim();
+  final detail = model == null || model.isEmpty ? platform : '$platform; $model';
+  return 'Technikpool-Scanner ($detail)';
+}
+
 /// Thin hand-written wrapper around the generated clients: base URL, the bearer
 /// header, and turning the API's error envelopes into [ApiException].
 class ApiClient {
-  ApiClient({required String baseUrl, String? token, Dio? dio}) : _dio = dio ?? Dio() {
+  ApiClient({required String baseUrl, String? token, Dio? dio, String? userAgent})
+    : _dio = dio ?? Dio() {
     _dio.options
       ..baseUrl = baseUrl
       ..connectTimeout = const Duration(seconds: 10)
       ..receiveTimeout = const Duration(seconds: 20)
       // Handle every status ourselves so error bodies can be read out.
       ..validateStatus = (_) => true;
+    if (userAgent != null) _dio.options.headers['User-Agent'] = userAgent;
     _token = token;
 
     _dio.interceptors.add(

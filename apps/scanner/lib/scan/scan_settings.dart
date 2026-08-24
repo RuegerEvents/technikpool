@@ -43,8 +43,19 @@ class DeviceIdentity {
     return model.toLowerCase().contains('c90');
   }
 
+  /// How to name this device to a person — in Settings, and in the web's
+  /// "Connected devices" list, which is where someone picks one handheld out of
+  /// several to disconnect. Some makers already repeat themselves in the model
+  /// ("Sunmi L2"), so only prefix the maker when it isn't there already.
+  String get label {
+    final name = model.trim();
+    if (manufacturer.isEmpty) return name;
+    if (name.toLowerCase().startsWith(manufacturer.toLowerCase())) return name;
+    return '$manufacturer $name'.trim();
+  }
+
   @override
-  String toString() => '$manufacturer $model';
+  String toString() => label;
 }
 
 /// How this particular device scans.
