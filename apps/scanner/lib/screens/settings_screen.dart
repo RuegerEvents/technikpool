@@ -1,0 +1,134 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../l10n/strings.dart';
+import '../scan/scan_channel.dart';
+import '../state/providers.dart';
+import 'diagnostics_screen.dart';
+
+class SettingsScreen extends ConsumerWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final creds = ref.watch(credentialsProvider).value;
+    final user = ref.watch(currentUserProvider);
+    final config = ref.watch(scannerConfigProvider).value;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text(S.settings)),
+      body: ListView(
+        children: [
+          ListTile(
+            title: const Text(S.connectedAs),
+            subtitle: Text(
+              user.when(
+                data: (u) =>
+                    '${u.user.name ?? u.user.email} · '
+                    '${u.organizations.map((o) => o.shortName ?? o.name).join(', ')}',
+                loading: () => '…',
+                error: (e, _) => '$e',
+              ),
+            ),
+          ),
+          ListTile(title: const Text(S.server), subtitle: Text(creds?.baseUrl ?? '—')),
+          const Divider(),
+          ListTile(
+            title: const Text(S.scannerConfig),
+            subtitle: Text(
+              config == null
+                  ? '…'
+                  : '${config.actions.length} Actions · ${config.extraKeys.length} Keys',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute<void>(builder: (_) => const _ScannerConfigScreen())),
+          ),
+          ListTile(
+            title: const Text(S.diagnostics),
+            subtitle: const Text(S.diagnosticsHint),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context)
+                .push(MaterialPageRoute<void>(builder: (_) => const DiagnosticsScreen())),
+          ),
+          const Divider(),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: OutlinedButton.icon(
+              icon: const Icon(Icons.logout),
+              label: const Text(S.disconnect),
+              onPressed: () => ref.read(credentialsProvider.notifier).signOut(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ScannerConfigScreen extends ConsumerStatefulWidget {
+  const _ScannerConfigScreen();
+
+  @override
+  ConsumerState<_ScannerConfigScreen> createState() => _ScannerConfigScreenState();
+}
+
+class _ScannerConfigScreenState extends ConsumerState<_ScannerConfigScreen> {
+  late final TextEditingController _actions;
+  late final TextEditingController _keys;
+
+  @override
+  void initState() {
+    super.initState();
+    final config = ref.read(scannerConfigProvider).value ?? ScannerConfig.defaults;
+    _actions = TextEditingController(text: config.actions.join(', '));
+    _keys = TextEditingController(text: config.extraKeys.join(', '));
+  }
+
+  @override
+  void dispose() {
+    _actions.dispose();
+    _keys.dispose();
+    super.dispose();
+  }
+
+  List<String> _split(String value) =>
+      value.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+
+  Future<void> _save() async {
+    await ref
+        .read(scannerConfigProvider.notifier)
+        .save(
+          ScannerConfig(actions: _split(_actions.text), extraKeys: _split(_keys.text)),
+        );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(S.saved)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text(S.scannerConfig)),
+    body: ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        const Text(S.configHint),
+        const SizedBox(height: 20),
+        TextField(
+          controller: _actions,
+          maxLines: 4,
+          decoration: const InputDecoration(labelText: S.broadcastActions),
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _keys,
+          maxLines: 3,
+          decoration: const InputDecoration(labelText: S.extraKeys),
+        ),
+        const SizedBox(height: 24),
+        FilledButton(onPressed: _save, child: const Text(S.save)),
+      ],
+    ),
+  );
+}

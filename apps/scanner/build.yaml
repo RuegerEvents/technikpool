@@ -1,0 +1,10 @@
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          # Omit null fields from toJson rather than sending them as explicit
+          # nulls. Optional request fields (device-flow `scope`, asset filters)
+          # must be *absent* when unset — better-auth's validator rejects an
+          # explicit null where it expects a string or nothing.
+          include_if_null: false

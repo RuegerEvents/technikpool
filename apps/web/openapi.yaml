@@ -430,7 +430,10 @@ components:
       properties:
         grant_type:
           type: string
-          enum: ['urn:ietf:params:oauth:grant-type:device_code']
+          # A single-value enum here generates an unusable identifier in Dart
+          # (the URN can't be one), so this stays a documented constant string.
+          description: Always `urn:ietf:params:oauth:grant-type:device_code`.
+          examples: ['urn:ietf:params:oauth:grant-type:device_code']
         device_code:
           type: string
         client_id:

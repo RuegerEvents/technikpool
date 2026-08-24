@@ -248,8 +248,11 @@ export interface components {
 			interval: number;
 		};
 		DeviceTokenRequest: {
-			/** @enum {string} */
-			grant_type: 'urn:ietf:params:oauth:grant-type:device_code';
+			/**
+			 * @description Always `urn:ietf:params:oauth:grant-type:device_code`.
+			 * @example urn:ietf:params:oauth:grant-type:device_code
+			 */
+			grant_type: string;
 			device_code: string;
 			client_id: string;
 		};

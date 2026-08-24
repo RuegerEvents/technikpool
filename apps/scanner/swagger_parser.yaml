@@ -1,0 +1,12 @@
+swagger_parser:
+  # The web app's spec is the single source of truth for this client.
+  schema_path: ../web/openapi.yaml
+  output_directory: lib/api/generated
+  language: dart
+  json_serializer: json_serializable
+  root_client: false
+  put_clients_in_folder: true
+  enums_to_json: true
+  unknown_enum_value: true
+  use_freezed3: false
+  replacement_rules: []
