@@ -1,0 +1,682 @@
+openapi: 3.1.0
+
+info:
+  title: Technikpool API
+  version: 1.0.0
+  description: |
+    Read and scan access to Technikpool inventory for external clients — chiefly
+    the Flutter app running on warehouse PDA scanners.
+
+    This document is the contract. Server response types are generated from it
+    (`pnpm openapi:types`) and so is the Dart client (`dart run swagger_parser`),
+    so an endpoint that drifts from this file fails the build rather than the
+    device.
+
+    ## Authentication
+
+    Every /api/v1 operation needs `Authorization: Bearer <session token>`.
+    A token is obtained in one of two ways, both documented below:
+
+    1. **Device authorization grant** (preferred for shared devices). POST
+       /api/auth/device/code, show the returned `user_code` to the operator,
+       and poll POST /api/auth/device/token until it stops answering
+       `authorization_pending`. Meanwhile a signed-in user approves the code in
+       a browser. Respect `interval`: polling faster earns `slow_down`.
+    2. **Password sign-in.** POST /api/auth/sign-in/email. The token comes back
+       in the `set-auth-token` *response header*, not the body.
+
+    Reads are scoped to the organizations the authenticated user belongs to.
+    System admins see everything.
+
+servers:
+  - url: /
+    description: Same origin as the app
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: auth
+    description: Obtaining a session token. Not under /api/v1 — these are better-auth routes.
+  - name: identity
+    description: Who the caller is and what they can see.
+  - name: inventory
+    description: Reading locations, productions and assets.
+  - name: scanning
+    description: Booking scanned assets in and out.
+
+paths:
+  /api/auth/device/code:
+    post:
+      operationId: requestDeviceCode
+      tags: [auth]
+      summary: Start the device authorization flow
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceCodeRequest'
+      responses:
+        '200':
+          description: Device and user codes issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceCodeResponse'
+        '400':
+          $ref: '#/components/responses/OAuthError'
+
+  /api/auth/device/token:
+    post:
+      operationId: pollDeviceToken
+      tags: [auth]
+      summary: Exchange an approved device code for a session token
+      description: |
+        Poll no faster than the `interval` from the code response. Until the
+        user approves, this answers 400 with `error: authorization_pending`;
+        polling too fast answers `slow_down`; an expired code answers
+        `expired_token`; a denied one `access_denied`.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceTokenRequest'
+      responses:
+        '200':
+          description: Session token issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceTokenResponse'
+        '400':
+          $ref: '#/components/responses/OAuthError'
+
+  /api/auth/device/approve:
+    post:
+      operationId: approveDeviceCode
+      tags: [auth]
+      summary: Approve a pending device code (browser, signed in)
+      description: |
+        Requires a signed-in session cookie, and the session must already have
+        claimed the code via `GET /api/auth/device?user_code=...`. Used by the
+        web UI, not by the device.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userCode]
+              properties:
+                userCode:
+                  type: string
+      responses:
+        '200':
+          description: Approved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '400':
+          $ref: '#/components/responses/OAuthError'
+
+  /api/auth/sign-in/email:
+    post:
+      operationId: signInWithEmail
+      tags: [auth]
+      summary: Sign in with email and password
+      description: |
+        The session token is returned in the `set-auth-token` response header.
+        Native clients must read it from there.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Signed in
+          headers:
+            set-auth-token:
+              description: The session token to use as a bearer credential.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignInResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/me:
+    get:
+      operationId: getCurrentUser
+      tags: [identity]
+      summary: The authenticated user and their organizations
+      description: |
+        Also the cheapest way for a client to check whether its stored token is
+        still valid — a 401 here means unpair and sign in again.
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentUser'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/locations:
+    get:
+      operationId: listLocations
+      tags: [inventory]
+      summary: Locations across the user's organizations
+      responses:
+        '200':
+          description: Locations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Location'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/productions:
+    get:
+      operationId: listProductions
+      tags: [inventory]
+      summary: Productions across the user's organizations
+      responses:
+        '200':
+          description: Productions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Production'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/assets:
+    get:
+      operationId: listAssets
+      tags: [inventory]
+      summary: Browse assets
+      parameters:
+        - name: locationId
+          in: query
+          description: Only assets currently at this location.
+          schema:
+            type: string
+        - name: productionId
+          in: query
+          description: Only assets booked to this production.
+          schema:
+            type: string
+        - name: q
+          in: query
+          description: Case-insensitive match on asset tag, serial number, product or manufacturer name.
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: cursor
+          in: query
+          description: The `nextCursor` from a previous page.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A page of assets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/assets/by-tag/{tag}:
+    get:
+      operationId: getAssetByTag
+      tags: [inventory]
+      summary: Look up one asset by its printed tag
+      parameters:
+        - name: tag
+          in: path
+          required: true
+          description: The asset tag as encoded in the sticker's barcode.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The asset, with recent history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/scans:
+    post:
+      operationId: createScan
+      tags: [scanning]
+      summary: Book a scanned asset to a location or production
+      description: |
+        Assigning an asset to a location also returns it from any production it
+        is currently checked out to — putting kit back on the shelf is what
+        "returned" means in practice.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanRequest'
+      responses:
+        '200':
+          description: The asset was booked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: A better-auth session token.
+
+  responses:
+    BadRequest:
+      description: The request was malformed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Missing, expired or invalid token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: The record exists but belongs to another organization.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: No such record.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    OAuthError:
+      description: An RFC 8628 error response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OAuthError'
+
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Stable machine-readable identifier.
+              examples: [unauthorized, asset_not_found, forbidden]
+            message:
+              type: string
+              description: Human-readable text, safe to show to the operator.
+
+    OAuthError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          enum:
+            - authorization_pending
+            - slow_down
+            - access_denied
+            - expired_token
+            - invalid_request
+            - invalid_grant
+        error_description:
+          type: string
+
+    DeviceCodeRequest:
+      type: object
+      required: [client_id]
+      properties:
+        client_id:
+          type: string
+          examples: [technikpool-scanner]
+        scope:
+          type: string
+
+    DeviceCodeResponse:
+      type: object
+      required: [device_code, user_code, verification_uri, expires_in, interval]
+      properties:
+        device_code:
+          type: string
+          description: Secret. Sent when polling; never shown to the user.
+        user_code:
+          type: string
+          description: Short code shown on the device for a human to type.
+          examples: [W8CSZRHS]
+        verification_uri:
+          type: string
+        verification_uri_complete:
+          type: string
+          description: verification_uri with the user code pre-filled.
+        expires_in:
+          type: integer
+          description: Seconds until the device code expires.
+        interval:
+          type: integer
+          description: Minimum seconds between polls.
+
+    DeviceTokenRequest:
+      type: object
+      required: [grant_type, device_code, client_id]
+      properties:
+        grant_type:
+          type: string
+          enum: ['urn:ietf:params:oauth:grant-type:device_code']
+        device_code:
+          type: string
+        client_id:
+          type: string
+
+    DeviceTokenResponse:
+      type: object
+      required: [access_token, token_type]
+      properties:
+        access_token:
+          type: string
+          description: A better-auth session token. Use as the bearer credential.
+        token_type:
+          type: string
+          examples: [Bearer]
+        expires_in:
+          type: integer
+        scope:
+          type: string
+
+    SignInResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        redirect:
+          type: boolean
+
+    User:
+      type: object
+      required: [id, email, emailVerified]
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        name:
+          type: [string, 'null']
+        emailVerified:
+          type: boolean
+        image:
+          type: [string, 'null']
+
+    Organization:
+      type: object
+      required: [id, name, color, avatarLabel]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        shortName:
+          type: [string, 'null']
+          description: Abbreviation to prefer wherever space is tight.
+        color:
+          type: string
+          description: Hex colour for the org badge.
+        avatarLabel:
+          type: string
+
+    CurrentUser:
+      type: object
+      required: [user, isAdmin, organizations]
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        isAdmin:
+          type: boolean
+          description: System-level admin, sees every organization.
+        organizations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Organization'
+
+    Address:
+      type: object
+      required: [id, line1, postalCode, city]
+      properties:
+        id:
+          type: string
+        line1:
+          type: string
+        line2:
+          type: [string, 'null']
+        postalCode:
+          type: string
+        city:
+          type: string
+
+    Location:
+      type: object
+      required: [id, name, organization]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        organization:
+          $ref: '#/components/schemas/Organization'
+        address:
+          oneOf:
+            - $ref: '#/components/schemas/Address'
+            - type: 'null'
+
+    Production:
+      type: object
+      required: [id, name, organization]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        startDate:
+          type: [string, 'null']
+          format: date-time
+        endDate:
+          type: [string, 'null']
+          format: date-time
+        organization:
+          $ref: '#/components/schemas/Organization'
+
+    Asset:
+      type: object
+      required: [id, status, product, location, organization]
+      properties:
+        id:
+          type: string
+        assetTag:
+          type: [string, 'null']
+          description: The printed tag. Null for assets that have never been labelled.
+        serialNumber:
+          type: [string, 'null']
+        status:
+          type: string
+          enum: [AVAILABLE, MAINTENANCE, BROKEN]
+        product:
+          $ref: '#/components/schemas/Product'
+        location:
+          $ref: '#/components/schemas/Location'
+        organization:
+          $ref: '#/components/schemas/Organization'
+        bundleId:
+          type: [string, 'null']
+
+    Product:
+      type: object
+      required: [id, name, manufacturerName, categoryName]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        manufacturerName:
+          type: string
+        categoryName:
+          type: string
+        imageUrl:
+          type: [string, 'null']
+
+    AssetDetail:
+      allOf:
+        - $ref: '#/components/schemas/Asset'
+        - type: object
+          required: [history, currentProduction]
+          properties:
+            currentProduction:
+              description: The production this asset is currently checked out to, if any.
+              oneOf:
+                - $ref: '#/components/schemas/Production'
+                - type: 'null'
+            history:
+              type: array
+              description: Most recent transactions first.
+              items:
+                $ref: '#/components/schemas/AssetTransaction'
+
+    AssetTransaction:
+      type: object
+      required: [id, action, createdAt]
+      properties:
+        id:
+          type: string
+        action:
+          type: string
+          examples: [CHECKED_OUT, RETURNED, LOCATION_ASSIGNED]
+        createdAt:
+          type: string
+          format: date-time
+        userName:
+          type: [string, 'null']
+          description: Who performed it. Null if the account has since been removed.
+        productionName:
+          type: [string, 'null']
+
+    AssetPage:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Asset'
+        nextCursor:
+          type: [string, 'null']
+          description: Pass as `cursor` for the next page. Null on the last page.
+
+    ScanRequest:
+      type: object
+      required: [assetTag, targetType, targetId]
+      properties:
+        assetTag:
+          type: string
+          description: Exactly what the barcode decoded to.
+        targetType:
+          type: string
+          enum: [location, production]
+        targetId:
+          type: string
+
+    ScanResult:
+      type: object
+      required: [asset, action, targetName, returnedFrom]
+      properties:
+        asset:
+          $ref: '#/components/schemas/ScannedAsset'
+        action:
+          type: string
+          enum: [LOCATION_ASSIGNED, CHECKED_OUT]
+        targetName:
+          type: string
+          description: Name of the location or production, for the session log.
+        returnedFrom:
+          type: array
+          description: Productions the asset was automatically returned from.
+          items:
+            type: string
+
+    ScannedAsset:
+      type: object
+      required: [id, assetTag, productName, manufacturerName]
+      properties:
+        id:
+          type: string
+        assetTag:
+          type: string
+        productName:
+          type: string
+        manufacturerName:
+          type: string

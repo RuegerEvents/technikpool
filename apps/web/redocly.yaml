@@ -1,0 +1,3 @@
+# Private, same-origin API — a license field on the spec would be noise.
+rules:
+  info-license: off
