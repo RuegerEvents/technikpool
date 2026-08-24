@@ -1,73 +1,78 @@
-# sv
+# Technikpool
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Multi-tenant equipment and asset management for event production. Organizations own assets and
+productions; assets can be loaned across organizations through a request/approval workflow.
 
-## Creating a project
+## Layout
 
-If you're seeing this, you've probably already done this step. Congrats!
+pnpm workspace:
 
-```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-pnpm dlx sv@0.15.1 create --template minimal --types ts --add tailwindcss="plugins:none" prettier eslint --install pnpm ./
-```
+| Path           | What                                                                |
+| -------------- | ------------------------------------------------------------------- |
+| `apps/web`     | SvelteKit app — the web UI, the database, and the `/api/v1` surface |
+| `apps/scanner` | Flutter app for Android PDA barcode scanners                        |
+| `scripts`      | Release and deployment helpers                                      |
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
 ```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+pnpm install
+docker compose up -d      # postgres + S3-compatible storage
+pnpm dev                  # http://localhost:5179
 ```
 
-## Building
+Other scripts run from the root too: `pnpm build`, `pnpm check`, `pnpm lint`, `pnpm format`.
+Anything web-specific goes through `pnpm --filter web <script>`.
 
-To create a production version of your app:
+Database config lives in `apps/web/.env`. Migrations:
 
 ```sh
-npm run build
+pnpm --filter web exec prisma migrate dev
 ```
 
-You can preview the production build with `npm run preview`.
+## API
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+`/api/v1` serves clients that can't use SvelteKit remote functions — chiefly the scanner app.
+**`apps/web/openapi.yaml` is the contract**: the server's response types and the Dart client are
+both generated from it, so an endpoint that drifts from the spec fails the build.
+
+```sh
+pnpm --filter web openapi:lint      # validate the spec
+pnpm --filter web openapi:types     # regenerate server types
+pnpm --filter web openapi:preview   # browsable docs
+```
+
+Clients authenticate with a bearer token, obtained either through the OAuth 2.0 device
+authorization grant (a code approved at `/devices`) or by signing in with email and password.
+
+## Scanner app
+
+```sh
+cd apps/scanner
+dart run swagger_parser && dart run build_runner build   # regenerate the API client
+flutter run
+```
+
+See the Flutter section of `CLAUDE.md` for how scans are read off the hardware and how to
+discover a given PDA's broadcast configuration.
 
 ## Docker
 
-Build and run the app locally:
+The Dockerfile lives in `apps/web` but builds from the repo root, since it needs the workspace
+manifest and lockfile:
 
 ```sh
-docker build -t technikpool:dev .
+docker build -f apps/web/Dockerfile -t technikpool:dev .
 docker run --rm -p 3000:3000 technikpool:dev
 ```
 
 ## Releasing
 
-This repo includes a release helper that updates `package.json` version, commits, tags, and pushes.
-
 ```sh
-pnpm release patch
-pnpm release minor
-pnpm release major
-
-# or set an explicit version
-pnpm release 1.2.3
+pnpm release patch     # or minor | major | 1.2.3
 ```
 
-Pushing a git tag like `v1.2.3` triggers the GitHub Action that builds and pushes a Docker Hub image tagged as `dev` and `1.2.3`.
+Bumps the root `package.json`, commits, tags, and pushes. Pushing a `v1.2.3` tag triggers the
+GitHub Action that publishes `docker.io/hrueger/technikpool`, tagged `dev` and the version.
 
-GitHub repository configuration required for Docker Hub publishing:
-
-- `DOCKERHUB_TOKEN` (secret): Docker Hub access token
-- `DOCKERHUB_USERNAME` (secret): Docker Hub username
-
-The workflow publishes `docker.io/hrueger/technikpool` and tags images as `dev` and the semver version (e.g. `1.2.3` for git tag `v1.2.3`).
+Repository secrets required: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`.

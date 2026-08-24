@@ -4,6 +4,28 @@
 
 Multi-tenant equipment/asset management app. Organizations own assets and productions (events). Assets can be loaned across orgs via a request/approval workflow.
 
+## Monorepo Layout
+
+pnpm workspace. **All paths below are relative to `apps/web/` unless stated otherwise.**
+
+```
+technikpool/
+├── package.json            # root: prettier, husky, release script; delegates to workspaces
+├── pnpm-workspace.yaml     # packages: apps/*
+├── scripts/                # release.mjs, upgrade.sh (repo-level)
+├── apps/
+│   ├── web/                # the SvelteKit app — src/, prisma/, openapi.yaml, Dockerfile, .env
+│   └── scanner/            # Flutter app for Android PDA barcode scanners
+└── .prettierrc .prettierignore .husky/
+```
+
+Run everything from the root: `pnpm dev`, `pnpm build`, `pnpm check`, `pnpm lint`, `pnpm format`.
+Anything web-specific goes through `pnpm --filter web <script>`.
+
+The Dockerfile lives at `apps/web/Dockerfile` but its **build context is the repo root**
+(it needs the workspace manifest and lockfile):
+`docker build -f apps/web/Dockerfile .`
+
 ## Tech Stack
 
 - **SvelteKit** + **Svelte 5** (runes: `$state`, `$derived`, `$props`)
@@ -52,9 +74,47 @@ async function requireAuth() {
 | `src/lib/remote/assets.remote.ts`      | `getAssets`, `getInventorySummary`, `getManufacturers`, `getProducts`, `createAssets`, `getAssetHistory`, `getBundles`, `getBundle`, `createBundle`, `addAssetToBundle`, `removeAssetFromBundle`               |
 | `src/lib/remote/productions.remote.ts` | `getProductions`, `getProduction`, `createProduction`, `addAssetToProduction`, `approveProductionItem`, `getPendingApprovals`, `addBundleToProduction`, `addCrewMember`, `removeCrewMember`, `getCalendarData` |
 
+## External API (`/api/v1`)
+
+Remote functions live at hashed `/_app/remote/<hash>/<name>` URLs that change on every build,
+so they cannot serve non-SvelteKit clients. Those go through `/api/v1` instead.
+
+**`apps/web/openapi.yaml` is the contract, not documentation written afterwards.** Both sides
+are generated from it:
+
+- `pnpm --filter web openapi:types` → `src/lib/api/schema.d.ts`, which every `+server.ts`
+  handler types its response against. A handler that drifts from the spec fails `pnpm check`.
+- `cd apps/scanner && dart run swagger_parser && dart run build_runner build` → the Dart client.
+
+`pnpm lint` runs `redocly lint openapi.yaml` first. `pnpm --filter web openapi:preview` serves
+browsable docs; `/api/v1/openapi.json` serves the spec itself.
+
+**MANDATORY when changing `/api/v1`:** edit `openapi.yaml` first, then regenerate both sides.
+
+- Endpoints: `src/routes/api/v1/**/+server.ts`
+- Helpers: `src/lib/server/api.ts` (`requireApiUser`, `apiError`, `handleApi`)
+- Prisma → response mapping: `src/lib/server/services/api-mappers.ts`. **Never return Prisma
+  payloads directly** — they carry fields the API doesn't promise, so a new column would
+  silently widen every response.
+
+## Service Layer
+
+Logic needed by both remote functions and `/api/v1` lives in `src/lib/server/services/`:
+
+- `access.ts` — `requireAuth`, `userOrgIds`, `isSystemAdmin`. Both surfaces scope reads through
+  these so the API can never see more than the web UI.
+- `checkout.ts` — `performScan`, `performBulkCheckout`. Framework-agnostic: they take a user id
+  and report touched records via `affected`, and the caller decides what to invalidate
+  (`query().refresh()` only means something in the remote-function layer).
+
 ## Auth & Session
 
-- `src/lib/server/auth.ts` — Better-Auth init + exports `prisma` client (use this everywhere, not a separate Prisma instance)
+- `src/lib/server/auth.ts` — Better-Auth init + exports `prisma` client (use this everywhere, not a separate Prisma instance).
+  Built through a `createAuth()` factory so `auth` is typed as the _configured_ instance —
+  `ReturnType<typeof betterAuth>` erases plugin endpoints like `auth.api.deviceApprove`.
+  Plugins: `bearer()` (turns `Authorization: Bearer <token>` into the session cookie, which is
+  why `/api/v1` endpoints need no auth code of their own) and `deviceAuthorization()` (RFC 8628,
+  so a PDA can be paired without typing a password).
 - `src/hooks.server.ts` — populates `event.locals.user` and `event.locals.session` on every request; also loads wuchale catalogs and sets locale per request
 - `src/routes/+layout.server.ts` — passes `user`, `session`, `isAdmin`, and `locale` to all pages via `data`
 - `src/routes/+layout.ts` — loads wuchale catalog on the client; re-exports all server layout data
@@ -138,6 +198,10 @@ src/routes/
 │       ├── crew-passes/+page.svelte   # Print layout
 │       ├── packing-list/+page.svelte  # Print layout
 │       └── delivery-note/+page.svelte # Print layout
+├── devices/                # Pair a handheld scanner: QR of the server URL + code entry
+│   ├── +page.svelte
+│   └── qr.png/+server.ts
+├── api/v1/                 # External REST surface — see "External API" above
 └── calendar/+page.svelte
 ```
 
@@ -313,3 +377,48 @@ class="px-3 py-1.5 {tab === 'assets'
 	? 'bg-primary text-primary-foreground'
 	: 'bg-background hover:bg-muted'}"
 ```
+
+---
+
+# Flutter Scanner App (`apps/scanner`)
+
+Android app for warehouse PDAs (tested against a Chainway C90; Munbyn resells the same class of
+hardware). German-only UI — strings in `lib/l10n/strings.dart`, server enum labels in
+`lib/l10n/labels.dart`.
+
+**The API client is generated** into `lib/api/generated/` from `apps/web/openapi.yaml`. Don't
+hand-edit it; regenerate after any spec change:
+
+```sh
+cd apps/scanner
+dart run swagger_parser && dart run build_runner build
+```
+
+## Scan intake
+
+The PDA's barcode engine emits scans as Android broadcast Intents. `ScanReceiver.kt` registers a
+BroadcastReceiver and forwards decoded text over an EventChannel.
+
+**The action string and extra key are not knowable in advance** — they differ between PDA vendors
+and between firmware revisions of one model. So they are configurable (Settings › Scanner-
+Konfiguration), seeded with the pairs we've seen, and the Diagnose screen dumps every broadcast
+received with all its extras so the real values can be read off the device. Never hardcode a guess.
+
+Simulate a scan without hardware (works on an emulator too):
+
+```sh
+adb shell am broadcast -a com.scanner.broadcast --es data "40000001"
+```
+
+## Gotchas
+
+- **One platform subscription, fanned out.** `ScanChannel.scans` subscribes to the EventChannel
+  once and never cancels it. `EventChannel.receiveBroadcastStream()` builds a new controller per
+  call and re-fires the platform's onListen/onCancel, so subscribing per screen means the newest
+  listener replaces the Kotlin sink and the first disposal clears it for everyone.
+- **`build.yaml` sets `include_if_null: false`.** Optional request fields must be _absent_ when
+  unset; better-auth rejects an explicit null where it expects a string or nothing.
+- **`compileSdk` is pinned to 36** and `flutter_secure_storage` to 9.x. Newer SDK installs name
+  the platform `android-37.0`, which AGP can't resolve from the hash string `android-37`.
+- Avoid single-value enums in `openapi.yaml` — they generate unusable Dart identifiers when the
+  value isn't a valid identifier (e.g. a URN). Use a documented constant string.
