@@ -17,7 +17,8 @@ Duration? _retry(int attempt, Object error) {
   final err = unwrapError(error);
   if (err is ApiException) {
     final status = err.status;
-    final retryable = err.code == 'network' || (status != null && status >= 500);
+    final retryable =
+        err.code == 'network' || (status != null && status >= 500);
     if (!retryable) return null;
   }
   if (attempt >= 5) return null;
@@ -40,7 +41,7 @@ class ScannerApp extends ConsumerWidget {
       locale: ref.watch(localeProvider).value,
       localizationsDelegates: S.localizationsDelegates,
       supportedLocales: S.supportedLocales,
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: true,
       theme: technikpoolTheme(Brightness.light),
       darkTheme: technikpoolTheme(Brightness.dark),
       // The web remembers a per-user choice in localStorage. A shared handheld
@@ -65,7 +66,8 @@ class _Root extends ConsumerWidget {
     ref.watch(scanBusProvider);
 
     return creds.when(
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (err, _) => Scaffold(body: Center(child: Text('$err'))),
       data: (c) => c.isPaired ? const HomeScreen() : const PairingScreen(),
     );
