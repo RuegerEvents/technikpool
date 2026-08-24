@@ -46,8 +46,13 @@ const guardHandle: Handle = async ({ event, resolve }) => {
 		pathname.startsWith('/api/auth');
 
 	// Only guard page navigations — remote-function and data requests carry their
-	// own auth errors, and redirecting them would swallow the real failure.
-	const isPageRequest = event.request.method === 'GET' && !pathname.startsWith('/_app');
+	// own auth errors, and redirecting them would swallow the real failure. The
+	// same goes for /api: a native client asking for JSON needs a 401 it can act
+	// on, not an HTML login page with a 200 in front of it.
+	const isPageRequest =
+		event.request.method === 'GET' &&
+		!pathname.startsWith('/_app') &&
+		!pathname.startsWith('/api/');
 
 	if (!event.locals.user && !isPublic && isPageRequest) {
 		const target = `${pathname}${search}`;

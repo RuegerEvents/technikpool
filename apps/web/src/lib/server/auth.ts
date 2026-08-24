@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { bearer, deviceAuthorization } from 'better-auth/plugins';
 import { Prisma, PrismaClient } from '$lib/prisma/client';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -27,6 +28,7 @@ const prefixes: Partial<Record<ModelName, string>> = {
 	BundleTemplate: 'bndt',
 	Category: 'catg',
 	Customer: 'cust',
+	DeviceCode: 'dvc',
 	Manufacturer: 'mfr',
 	Organization: 'org',
 	OrgMembership: 'orgm',
@@ -76,5 +78,24 @@ export const auth = building
 					const { subject, html, text } = emailVerificationEmail({ name: user.name, url });
 					await sendMail({ to: user.email, subject, html, text });
 				}
-			}
+			},
+			plugins: [
+				// Lets non-browser clients (the Flutter scanner) authenticate with
+				// `Authorization: Bearer <session token>`. The plugin rewrites that header
+				// into the session cookie before better-auth reads it, so hooks.server.ts
+				// populates locals.user for API requests without any extra work. It also
+				// mirrors the token into a `set-auth-token` response header on sign-in,
+				// which is how a native client gets hold of it in the first place.
+				bearer(),
+				// RFC 8628 device flow: the PDA shows a short code, a signed-in user
+				// approves it at /devices, and the PDA polls until it receives a session
+				// token. Beats typing a password on a rugged keypad.
+				deviceAuthorization({
+					expiresIn: '15m',
+					interval: '5s',
+					// Where the plugin tells devices to send their user. Must match the
+					// route below; it also ends up in verification_uri_complete.
+					verificationUri: '/devices'
+				})
+			]
 		});
