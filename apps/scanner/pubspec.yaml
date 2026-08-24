@@ -55,6 +55,21 @@ dev_dependencies:
   retrofit_generator: ^10.2.9
   json_serializable: ^6.14.1
   swagger_parser: ^1.44.1
+  flutter_launcher_icons: ^0.14.4
+
+# Icon sets for both platforms, generated from brand/mark.svg. Don't edit the
+# mipmaps or Assets.xcassets by hand — run ./scripts/brand.sh from the repo
+# root, then `dart run flutter_launcher_icons`.
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "assets/icon/icon.png"
+  # Modern Android crops the foreground to a mask of its own choosing, so the
+  # tile is a flat colour here rather than part of the artwork.
+  adaptive_icon_background: "#171717"
+  adaptive_icon_foreground: "assets/icon/icon-foreground.png"
+  # The App Store rejects an icon with an alpha channel.
+  remove_alpha_ios: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

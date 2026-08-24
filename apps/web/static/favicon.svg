@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="Technikpool">
+  <!-- Technikpool. Corner brackets read at once as a flightcase's corner
+       protectors and as a scanner's viewfinder; the T inside ties the mark to
+       the name so it still says Technikpool alone on a home screen.
+
+       Full-bleed square on purpose: iOS and Android apply their own corner
+       mask, and a pre-rounded source would show transparent corners through it.
+       scripts/brand.sh rounds it for the web favicon.
+
+       Geometry: brackets on a 182..842 box, arc r=80, arms 85, stroke 76.
+       The T is a 336 box centred on 512 with a 92 stem. Scaling the mark means
+       moving those coordinates, never the stroke-width — a thicker bracket
+       reads as a different logo. -->
+  <rect width="1024" height="1024" rx="180" fill="#171717"/>
+  <g fill="none" stroke="#fafafa" stroke-width="76" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M182 347 V262 a80 80 0 0 1 80-80 h85"/>
+    <path d="M842 347 V262 a80 80 0 0 0-80-80 h-85"/>
+    <path d="M182 677 V762 a80 80 0 0 0 80 80 h85"/>
+    <path d="M842 677 V762 a80 80 0 0 1-80 80 h-85"/>
+  </g>
+  <path fill="#fafafa" d="M344 344 h336 v92 h-122 v244 h-92 v-244 h-122 z"/>
+</svg>

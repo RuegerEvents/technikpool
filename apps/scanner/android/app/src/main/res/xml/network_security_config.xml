@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Release builds. Cleartext HTTP stays off, with one exception: the loopback
+  address, which is how a device reaches a dev server through
+  `adb reverse tcp:5179 tcp:5179`. That tunnel is a USB cable, so nothing
+  travels over a network in the clear, and it is the one dev flow worth
+  supporting in a build that ships — hand-testing happens on release builds.
+
+  A LAN address cannot be listed here: this file takes domains and literal
+  addresses, not ranges, and a dev machine's address changes. Debug and profile
+  builds override this whole file (see src/debug/res/xml) with a permissive one
+  for that case.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <!-- The host machine, as seen from an Android emulator. -->
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>

@@ -380,6 +380,30 @@ class="px-3 py-1.5 {tab === 'assets'
 
 ---
 
+# Brand
+
+`brand/mark.svg` is the **single master** for every icon in the repo — corner brackets
+(a flightcase's corner protectors, and a scanner's viewfinder) around a T. Nothing else is
+hand-drawn: `./scripts/brand.sh` regenerates all of it.
+
+| Output                                         | Consumer                                                 |
+| ---------------------------------------------- | -------------------------------------------------------- |
+| `apps/web/static/favicon.svg`                  | browser tab (rounded — a tab applies no mask of its own) |
+| `apps/web/static/apple-touch-icon.png`         | iOS home-screen bookmark                                 |
+| `apps/scanner/assets/icon/icon.png`            | `flutter_launcher_icons` → iOS + legacy Android          |
+| `apps/scanner/assets/icon/icon-foreground.png` | Android adaptive icon foreground                         |
+
+```sh
+./scripts/brand.sh                                  # from the repo root
+cd apps/scanner && dart run flutter_launcher_icons  # then stamp the platform sets
+```
+
+The master is **full-bleed square** because iOS and Android apply their own corner mask; a
+pre-rounded source shows transparent corners through it. To resize the mark, move the
+coordinates — never `stroke-width`, since a thicker bracket reads as a different logo.
+
+---
+
 # Flutter Scanner App (`apps/scanner`)
 
 Android + iOS app. It is built for warehouse PDAs (tested against a Chainway C90; Munbyn resells
@@ -450,6 +474,10 @@ the receiver — sharing one notifier would tear the receiver down at exactly th
 ## Running against a dev server on a real device
 
 - **Android** — `adb reverse tcp:5179 tcp:5179`, then the device reaches `http://localhost:5179`.
+  Cleartext HTTP is off in release builds except for loopback, which is exactly this flow (the
+  tunnel is a USB cable). Debug and profile builds override
+  `res/xml/network_security_config.xml` with a permissive one, so a LAN address works there —
+  use `flutter run --profile` when pointing a phone at `pnpm --filter web dev --host`.
 - **iOS** — no `adb reverse` equivalent. Use the Mac's LAN address (`pnpm --filter web dev --host`).
   `NSAllowsLocalNetworking` in `ios/Runner/Info.plist` is what lets ATS allow plain HTTP to a
   private address; everything outside private ranges still requires HTTPS.
@@ -472,6 +500,10 @@ the receiver — sharing one notifier would tear the receiver down at exactly th
 - **iOS signs with `DEVELOPMENT_TEAM = M273PG74WU`** (Hannes Rueger). `flutter create` stamps in
   whichever team Xcode used last, which is not this one — check `ios/Runner.xcodeproj` after any
   regeneration of the iOS target.
+- **`flutter_launcher_icons` corrupts a build setting on every run.** It writes
+  `ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = AppIcon` into
+  `ios/Runner.xcodeproj/project.pbxproj`, where the value is a boolean. Set the two occurrences
+  back to `YES` after running it.
 - **Never run `dart format` over `lib/` wholesale.** It rewrites `lib/api/generated/`, which is
   generated from `openapi.yaml` and deliberately left unformatted. Format the files you touched.
 - **`build.yaml` sets `include_if_null: false`.** Optional request fields must be _absent_ when

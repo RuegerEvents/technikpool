@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Overrides the release config in src/main for debug builds only: any cleartext
+  host, so `pnpm - -filter web dev` on 0.0.0.0 can be reached at the dev
+  machine's LAN address without knowing it in advance. Never merged into a
+  release build.
+-->
+<network-security-config>
+  <base-config cleartextTrafficPermitted="true" />
+</network-security-config>
