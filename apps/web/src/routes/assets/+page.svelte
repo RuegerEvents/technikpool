@@ -11,6 +11,8 @@
 	import { CategorySelect } from '$lib/components/ui/category-select';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import CheckoutBar from '$lib/components/ui/checkout-bar.svelte';
 	import CsvImportModal from '$lib/components/CsvImportModal.svelte';
@@ -18,18 +20,55 @@
 
 	let showImportModal = $state(false);
 
-	let filterOrgId = $state('');
-	let searchQuery = $state('');
-	let statusFilter = $state('');
-	let categoryFilter = $state('');
-	let showBundleView = $state(true);
-	let expanded = new SvelteMap<string, boolean>();
-	let selectedAssetIds = new SvelteSet<string>();
-
 	// Sold and decommissioned units are out of the pool, so they get their own
 	// filter rather than a share of the normal list.
 	const RETIRED_FILTER = 'RETIRED';
+
+	const statusFilterOptions = [
+		['', 'All'],
+		['AVAILABLE', 'Available'],
+		['MAINTENANCE', 'Maintenance'],
+		['BROKEN', 'Broken'],
+		[RETIRED_FILTER, 'Sold / Decommissioned']
+	] as const;
+
+	// The filters live in the query string, so clicking into an asset and coming
+	// back lands on the list as it was left. Read once here; the effect below
+	// writes changes back.
+	const initial = page.url.searchParams;
+	const initialStatus = initial.get('status') ?? '';
+
+	let filterOrgId = $state(initial.get('org') ?? '');
+	let searchQuery = $state(initial.get('q') ?? '');
+	let statusFilter = $state(
+		statusFilterOptions.some(([value]) => value === initialStatus) ? initialStatus : ''
+	);
+	let categoryFilter = $state(initial.get('category') ?? '');
+	let showBundleView = $state(initial.get('bundles') !== '0');
+	let expanded = new SvelteMap<string, boolean>();
+	let selectedAssetIds = new SvelteSet<string>();
+
 	let showingRetired = $derived(statusFilter === RETIRED_FILTER);
+
+	// replaceState, not a new history entry: every keystroke in the search box
+	// would otherwise need its own Back press to get past.
+	$effect(() => {
+		const url = new URL(page.url);
+		const params = {
+			org: filterOrgId,
+			q: searchQuery,
+			status: statusFilter,
+			category: categoryFilter,
+			bundles: showBundleView ? '' : '0'
+		};
+		for (const [key, value] of Object.entries(params)) {
+			if (value) url.searchParams.set(key, value);
+			else url.searchParams.delete(key);
+		}
+		if (url.href === page.url.href) return;
+		// eslint-disable-next-line svelte/no-navigation-without-resolve -- updating query params on the current route, not navigating to a typed path
+		goto(url, { replaceState: true, noScroll: true, keepFocus: true });
+	});
 
 	let orgs = $derived(await getMyOrgs());
 	let assets = $derived(
@@ -217,14 +256,6 @@
 			}
 		};
 	}
-
-	const statusFilterOptions = [
-		['', 'All'],
-		['AVAILABLE', 'Available'],
-		['MAINTENANCE', 'Maintenance'],
-		['BROKEN', 'Broken'],
-		[RETIRED_FILTER, 'Sold / Decommissioned']
-	] as const;
 
 	// Nothing in the retired list can be checked out, so a selection carried
 	// across the filter would only offer an action the server refuses.
