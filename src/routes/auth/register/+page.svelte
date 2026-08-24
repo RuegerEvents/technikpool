@@ -90,6 +90,7 @@
 			</form>
 			<div class="mt-4 text-center text-sm">
 				Already have an account?
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a href={loginHref} class="underline"> Login </a>
 			</div>
 		</Card.Content>

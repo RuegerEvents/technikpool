@@ -35,10 +35,10 @@
 
 	let activeCat = $state<string | null>(null);
 	let search = $state('');
-	let selectedOrgs = $state(new SvelteSet<string>());
+	let selectedOrgs = new SvelteSet<string>();
 	let locMode = $state<'locations' | 'city'>('locations');
-	let selectedLocs = $state(new SvelteSet<string>());
-	let selectedCities = $state(new SvelteSet<string>());
+	let selectedLocs = new SvelteSet<string>();
+	let selectedCities = new SvelteSet<string>();
 	let showBundledItems = $state(false);
 
 	let categories = $derived.by(() => {
@@ -476,10 +476,8 @@
 								type="checkbox"
 								checked={selectedOrgs.has(org.id)}
 								onchange={() => {
-									const next = new SvelteSet(selectedOrgs);
-									if (next.has(org.id)) next.delete(org.id);
-									else next.add(org.id);
-									selectedOrgs = next;
+									if (selectedOrgs.has(org.id)) selectedOrgs.delete(org.id);
+									else selectedOrgs.add(org.id);
 								}}
 								class="h-4 w-4 rounded border-input"
 							/>
@@ -528,10 +526,8 @@
 									type="checkbox"
 									checked={selectedLocs.has(loc.id)}
 									onchange={() => {
-										const next = new SvelteSet(selectedLocs);
-										if (next.has(loc.id)) next.delete(loc.id);
-										else next.add(loc.id);
-										selectedLocs = next;
+										if (selectedLocs.has(loc.id)) selectedLocs.delete(loc.id);
+										else selectedLocs.add(loc.id);
 									}}
 									class="h-4 w-4 rounded border-input"
 								/>
@@ -545,10 +541,8 @@
 									type="checkbox"
 									checked={selectedCities.has(city)}
 									onchange={() => {
-										const next = new SvelteSet(selectedCities);
-										if (next.has(city)) next.delete(city);
-										else next.add(city);
-										selectedCities = next;
+										if (selectedCities.has(city)) selectedCities.delete(city);
+										else selectedCities.add(city);
 									}}
 									class="h-4 w-4 rounded border-input"
 								/>

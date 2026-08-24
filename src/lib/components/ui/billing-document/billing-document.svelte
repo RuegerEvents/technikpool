@@ -93,11 +93,8 @@
 	let grossTotal = $derived(netTotal + vatAmount);
 
 	// ── Day count ──
-	let dayCountDraft = $state('');
+	let dayCountDraft = $derived(String(dayCount));
 	let savingDayCount = $state(false);
-	$effect(() => {
-		dayCountDraft = String(dayCount);
-	});
 	async function saveDayCount() {
 		savingDayCount = true;
 		try {

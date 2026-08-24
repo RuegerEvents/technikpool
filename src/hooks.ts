@@ -10,7 +10,7 @@ import { Prisma } from '$lib/prisma/browser';
 // bundled runtime), so `instanceof` silently fails to match real values.
 // Decimal.js instances carry a static `isDecimal` that duck-types across
 // module instances — use that instead.
-function isDecimalLike(value: unknown): value is Prisma.Decimal {
+function isDecimalLike(value: unknown): value is InstanceType<typeof Prisma.Decimal> {
 	return (
 		value !== null &&
 		typeof value === 'object' &&

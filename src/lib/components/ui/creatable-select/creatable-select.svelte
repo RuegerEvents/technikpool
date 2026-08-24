@@ -28,16 +28,11 @@
 		class: className
 	}: Props = $props();
 
-	let inputValue = $state(value?.name ?? '');
+	let inputValue = $derived(value?.name ?? '');
 	let open = $state(false);
 	let highlightedIndex = $state(-1);
 	let containerEl: HTMLDivElement;
 	let inputEl: HTMLInputElement;
-
-	// Sync inputValue when value changes externally
-	$effect(() => {
-		inputValue = value?.name ?? '';
-	});
 
 	let filtered = $derived(
 		inputValue.trim()

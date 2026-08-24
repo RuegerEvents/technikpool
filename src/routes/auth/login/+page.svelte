@@ -84,6 +84,7 @@
 			</form>
 			<div class="mt-4 text-center text-sm">
 				Don't have an account?
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a href={registerHref} class="underline"> Sign up </a>
 			</div>
 		</Card.Content>
