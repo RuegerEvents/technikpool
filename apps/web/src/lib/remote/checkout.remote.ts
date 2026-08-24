@@ -1,41 +1,42 @@
-import { query, command, getRequestEvent } from '$app/server';
+import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import { getAsset, getAssets, getBundle, getBundles } from './assets.remote';
 import { getProduction } from './productions.remote';
-
-async function requireAuth() {
-	const event = await getRequestEvent();
-	if (!event?.locals.user) throw new Error('Unauthorized');
-	return event.locals.user;
-}
-
-async function userOrgIds(userId: string) {
-	const memberships = await prisma.orgMembership.findMany({
-		where: { userId },
-		select: { organizationId: true }
-	});
-	return memberships.map((m) => m.organizationId);
-}
-
-async function isSystemAdmin(userId: string) {
-	const user = await prisma.user.findUnique({ where: { id: userId }, select: { isAdmin: true } });
-	return user?.isAdmin ?? false;
-}
+import { requireAuth, userOrgIds } from '$lib/server/services/access';
+import {
+	performBulkCheckout,
+	performScan,
+	type AffectedRecords
+} from '$lib/server/services/checkout';
 
 export const getAllProductions = query(async () => {
 	const user = await requireAuth();
-	const memberships = await prisma.orgMembership.findMany({
-		where: { userId: user.id },
-		select: { organizationId: true }
-	});
-	const orgIds = memberships.map((m) => m.organizationId);
+	const orgIds = await userOrgIds(user.id);
 	return await prisma.production.findMany({
 		where: { organizationId: { in: orgIds } },
 		include: { organization: { select: { name: true, shortName: true } } },
 		orderBy: [{ startDate: 'desc' }, { name: 'asc' }]
 	});
 });
+
+/**
+ * Invalidate the queries backing whatever the service just changed. The service
+ * itself is framework-agnostic and only reports which records it touched.
+ */
+async function refreshAffected(affected: AffectedRecords) {
+	await Promise.all([
+		...affected.assetIds.map((id) => getAsset(id).refresh()),
+		...affected.organizationIds.map((id) => getAssets(id).refresh()),
+		...affected.bundleIds.map((id) => getBundle(id).refresh()),
+		// Only when a bundle actually moved — the org-wide bundle list is a
+		// heavy query and most scans don't touch one.
+		...(affected.bundleIds.length > 0
+			? affected.organizationIds.map((id) => getBundles(id).refresh())
+			: []),
+		...affected.productionIds.map((id) => getProduction(id).refresh())
+	]);
+}
 
 const scanAssetSchema = v.object({
 	assetTag: v.string(),
@@ -45,142 +46,9 @@ const scanAssetSchema = v.object({
 
 export const scanAsset = command(scanAssetSchema, async (input) => {
 	const user = await requireAuth();
-
-	const asset = await prisma.asset.findFirst({
-		where: { assetTag: input.assetTag },
-		include: {
-			product: { include: { manufacturer: true } },
-			location: true
-		}
-	});
-
-	if (!asset) throw new Error(`Tag "${input.assetTag}" not found`);
-
-	const orgIds = await userOrgIds(user.id);
-	const systemAdmin = await isSystemAdmin(user.id);
-	if (!systemAdmin && !orgIds.includes(asset.organizationId)) {
-		throw new Error('No access to this asset');
-	}
-
-	if (input.targetType === 'location') {
-		const location = await prisma.location.findUniqueOrThrow({ where: { id: input.targetId } });
-		if (!systemAdmin && location.organizationId !== asset.organizationId) {
-			throw new Error('Location belongs to a different organisation');
-		}
-
-		// Auto-return any CHECKED_OUT production items for this asset
-		const checkedOutItems = await prisma.productionItem.findMany({
-			where: { assetId: asset.id, status: 'CHECKED_OUT' },
-			include: { production: { select: { id: true, name: true } } }
-		});
-
-		await prisma.$transaction(async (tx) => {
-			await tx.asset.update({
-				where: { id: asset.id },
-				data: { locationId: input.targetId }
-			});
-
-			await tx.assetTransaction.create({
-				data: {
-					assetId: asset.id,
-					userId: user.id,
-					action: 'LOCATION_ASSIGNED',
-					data: { type: 'LOCATION_ASSIGNED', locationId: location.id, locationName: location.name }
-				}
-			});
-
-			for (const item of checkedOutItems) {
-				await tx.productionItem.update({
-					where: { id: item.id },
-					data: { status: 'RETURNED' }
-				});
-				await tx.assetTransaction.create({
-					data: {
-						assetId: asset.id,
-						userId: user.id,
-						productionId: item.production.id,
-						action: 'RETURNED',
-						data: {
-							type: 'RETURNED',
-							fromProductionId: item.production.id,
-							fromProductionName: item.production.name,
-							toLocationId: location.id,
-							toLocationName: location.name
-						}
-					}
-				});
-			}
-
-			// If this asset belongs to a bundle, update the bundle's location too
-			if (asset.bundleId) {
-				await tx.assetBundle.update({
-					where: { id: asset.bundleId },
-					data: { locationId: input.targetId }
-				});
-			}
-		});
-
-		await Promise.all(checkedOutItems.map((item) => getProduction(item.production.id).refresh()));
-		if (asset.bundleId) {
-			await getBundle(asset.bundleId).refresh();
-			await getBundles(asset.organizationId).refresh();
-		}
-		await getAsset(asset.id).refresh();
-		await getAssets(asset.organizationId).refresh();
-
-		return {
-			asset: {
-				id: asset.id,
-				assetTag: asset.assetTag,
-				productName: asset.product.name,
-				manufacturerName: asset.product.manufacturer.name
-			},
-			action: 'LOCATION_ASSIGNED' as const,
-			targetName: location.name,
-			returnedFrom: checkedOutItems.map((i) => i.production.name)
-		};
-	} else {
-		const production = await prisma.production.findUniqueOrThrow({ where: { id: input.targetId } });
-
-		const existingItem = await prisma.productionItem.findFirst({
-			where: { productionId: input.targetId, assetId: asset.id }
-		});
-
-		if (existingItem) {
-			await prisma.productionItem.update({
-				where: { id: existingItem.id },
-				data: { status: 'CHECKED_OUT' }
-			});
-		} else {
-			await prisma.productionItem.create({
-				data: { productionId: input.targetId, assetId: asset.id, status: 'CHECKED_OUT' }
-			});
-		}
-
-		await prisma.assetTransaction.create({
-			data: {
-				assetId: asset.id,
-				userId: user.id,
-				productionId: input.targetId,
-				action: 'CHECKED_OUT',
-				data: { type: 'CHECKED_OUT', productionId: production.id, productionName: production.name }
-			}
-		});
-
-		await getProduction(input.targetId).refresh();
-
-		return {
-			asset: {
-				id: asset.id,
-				assetTag: asset.assetTag,
-				productName: asset.product.name,
-				manufacturerName: asset.product.manufacturer.name
-			},
-			action: 'CHECKED_OUT' as const,
-			targetName: production.name,
-			returnedFrom: [] as string[]
-		};
-	}
+	const { result, affected } = await performScan(user.id, input);
+	await refreshAffected(affected);
+	return result;
 });
 
 const checkoutAssetsSchema = v.object({
@@ -191,135 +59,7 @@ const checkoutAssetsSchema = v.object({
 
 export const checkoutAssets = command(checkoutAssetsSchema, async (input) => {
 	const user = await requireAuth();
-	const orgIds = await userOrgIds(user.id);
-	const systemAdmin = await isSystemAdmin(user.id);
-
-	const assets = await prisma.asset.findMany({
-		where: { id: { in: input.assetIds } },
-		select: { id: true, organizationId: true, bundleId: true }
-	});
-
-	for (const asset of assets) {
-		if (!systemAdmin && !orgIds.includes(asset.organizationId)) {
-			throw new Error('No access to one or more assets');
-		}
-	}
-
-	if (input.targetType === 'location') {
-		const location = await prisma.location.findUniqueOrThrow({ where: { id: input.targetId } });
-
-		// Collect bundle IDs whose assets are all being moved to this location
-		const bundleIds = [...new Set(assets.map((a) => a.bundleId).filter(Boolean))] as string[];
-		const updatedBundleIds: string[] = [];
-		for (const bundleId of bundleIds) {
-			const bundleAssets = await prisma.asset.findMany({
-				where: { bundleId },
-				select: { id: true }
-			});
-			const allInCheckout = bundleAssets.every((ba) => input.assetIds.includes(ba.id));
-			if (allInCheckout) updatedBundleIds.push(bundleId);
-		}
-
-		for (const asset of assets) {
-			if (!systemAdmin && location.organizationId !== asset.organizationId) {
-				throw new Error('Location belongs to a different organisation');
-			}
-
-			const checkedOutItems = await prisma.productionItem.findMany({
-				where: { assetId: asset.id, status: 'CHECKED_OUT' },
-				include: { production: { select: { id: true, name: true } } }
-			});
-
-			await prisma.$transaction(async (tx) => {
-				await tx.asset.update({ where: { id: asset.id }, data: { locationId: input.targetId } });
-				await tx.assetTransaction.create({
-					data: {
-						assetId: asset.id,
-						userId: user.id,
-						action: 'LOCATION_ASSIGNED',
-						data: {
-							type: 'LOCATION_ASSIGNED',
-							locationId: location.id,
-							locationName: location.name
-						}
-					}
-				});
-				for (const item of checkedOutItems) {
-					await tx.productionItem.update({ where: { id: item.id }, data: { status: 'RETURNED' } });
-					await tx.assetTransaction.create({
-						data: {
-							assetId: asset.id,
-							userId: user.id,
-							productionId: item.production.id,
-							action: 'RETURNED',
-							data: {
-								type: 'RETURNED',
-								fromProductionId: item.production.id,
-								fromProductionName: item.production.name,
-								toLocationId: location.id,
-								toLocationName: location.name
-							}
-						}
-					});
-				}
-			});
-
-			await Promise.all(checkedOutItems.map((item) => getProduction(item.production.id).refresh()));
-			await getAsset(asset.id).refresh();
-			await getAssets(asset.organizationId).refresh();
-		}
-
-		// Update location on bundles where all assets were moved together
-		if (updatedBundleIds.length > 0) {
-			const orgId = assets[0].organizationId;
-			await prisma.assetBundle.updateMany({
-				where: { id: { in: updatedBundleIds } },
-				data: { locationId: input.targetId }
-			});
-			await Promise.all(updatedBundleIds.map((id) => getBundle(id).refresh()));
-			await getBundles(orgId).refresh();
-		}
-
-		return { count: assets.length, targetName: location.name };
-	} else {
-		const production = await prisma.production.findUniqueOrThrow({ where: { id: input.targetId } });
-
-		for (const asset of assets) {
-			const existing = await prisma.productionItem.findFirst({
-				where: { productionId: input.targetId, assetId: asset.id }
-			});
-
-			if (existing) {
-				await prisma.productionItem.update({
-					where: { id: existing.id },
-					data: { status: 'CHECKED_OUT' }
-				});
-			} else {
-				await prisma.productionItem.create({
-					data: { productionId: input.targetId, assetId: asset.id, status: 'CHECKED_OUT' }
-				});
-			}
-
-			await prisma.assetTransaction.create({
-				data: {
-					assetId: asset.id,
-					userId: user.id,
-					productionId: input.targetId,
-					action: 'CHECKED_OUT',
-					data: {
-						type: 'CHECKED_OUT',
-						productionId: production.id,
-						productionName: production.name
-					}
-				}
-			});
-
-			await getAsset(asset.id).refresh();
-			await getAssets(asset.organizationId).refresh();
-		}
-
-		await getProduction(input.targetId).refresh();
-
-		return { count: assets.length, targetName: production.name };
-	}
+	const { result, affected } = await performBulkCheckout(user.id, input);
+	await refreshAffected(affected);
+	return result;
 });

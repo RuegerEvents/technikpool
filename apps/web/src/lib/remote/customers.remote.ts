@@ -1,14 +1,7 @@
-import { query, command, getRequestEvent } from '$app/server';
+import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
-
-async function requireAuth() {
-	const event = await getRequestEvent();
-	if (!event?.locals.user) {
-		throw new Error('Unauthorized');
-	}
-	return event.locals.user;
-}
+import { requireAuth } from '$lib/server/services/access';
 
 async function requireOrgMembership(userId: string, organizationId: string) {
 	const membership = await prisma.orgMembership.findUnique({

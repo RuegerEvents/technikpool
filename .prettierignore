@@ -20,3 +20,6 @@ prisma
 
 # Dart/Flutter is formatted by `dart format`
 apps/scanner/
+
+# Local throwaway DB probes
+apps/web/.probe/

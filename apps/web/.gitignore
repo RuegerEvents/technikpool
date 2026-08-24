@@ -14,3 +14,6 @@ src/locales/.wuchale
 
 # Dev emails saved as .eml instead of sent (see src/lib/server/mail.ts)
 /.mail-dev
+
+# Local throwaway DB probes (see .probe/probe.mjs)
+/.probe

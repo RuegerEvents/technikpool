@@ -1,24 +1,9 @@
-import { query, command, getRequestEvent } from '$app/server';
+import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import { orgLabel } from '$lib/utils';
 import { getProduction } from './productions.remote';
-
-async function requireAuth() {
-	const event = await getRequestEvent();
-	if (!event?.locals.user) {
-		throw new Error('Unauthorized');
-	}
-	return event.locals.user;
-}
-
-async function userOrgIds(userId: string) {
-	const memberships = await prisma.orgMembership.findMany({
-		where: { userId },
-		select: { organizationId: true }
-	});
-	return memberships.map((m) => m.organizationId);
-}
+import { requireAuth, userOrgIds } from '$lib/server/services/access';
 
 const ACTIVE_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT', 'RETURNED'] as const;
 const CONFLICT_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT'] as const;

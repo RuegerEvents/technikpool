@@ -1,17 +1,10 @@
-import { query, command, getRequestEvent } from '$app/server';
+import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import { sendMail } from '$lib/server/mail';
 import { appBaseUrl } from '$lib/server/app-url';
 import { addedToOrgEmail } from '$lib/server/emails/added-to-org';
 import * as v from 'valibot';
-
-async function requireAuth() {
-	const event = await getRequestEvent();
-	if (!event?.locals.user) {
-		throw new Error('Unauthorized');
-	}
-	return event.locals.user;
-}
+import { requireAuth } from '$lib/server/services/access';
 
 async function isUserAdmin(userId: string) {
 	const u = await prisma.user.findUnique({ where: { id: userId }, select: { isAdmin: true } });

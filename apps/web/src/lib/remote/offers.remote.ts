@@ -1,28 +1,8 @@
-import { query, command, getRequestEvent } from '$app/server';
+import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import { dayCountBetween } from '$lib/utils';
-
-async function requireAuth() {
-	const event = await getRequestEvent();
-	if (!event?.locals.user) {
-		throw new Error('Unauthorized');
-	}
-	return event.locals.user;
-}
-
-async function userOrgIds(userId: string) {
-	const memberships = await prisma.orgMembership.findMany({
-		where: { userId },
-		select: { organizationId: true }
-	});
-	return memberships.map((m) => m.organizationId);
-}
-
-async function isSystemAdmin(userId: string) {
-	const user = await prisma.user.findUnique({ where: { id: userId }, select: { isAdmin: true } });
-	return user?.isAdmin ?? false;
-}
+import { isSystemAdmin, requireAuth, userOrgIds } from '$lib/server/services/access';
 
 async function requireOrgManageAccess(orgId: string) {
 	const user = await requireAuth();
