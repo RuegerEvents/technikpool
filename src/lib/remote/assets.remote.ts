@@ -35,7 +35,7 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 			product: { include: { manufacturer: true, category: true } },
 			location: true,
 			organization: true,
-			bundle: { select: { id: true, name: true } }
+			bundle: { select: { id: true, template: { select: { name: true } } } }
 		},
 		orderBy: [{ product: { name: 'asc' } }]
 	});
@@ -52,7 +52,7 @@ export const getAsset = query(v.string(), async (assetId: string) => {
 			product: { include: { manufacturer: true, category: true } },
 			location: true,
 			organization: true,
-			bundle: { select: { id: true, name: true, organizationId: true } }
+			bundle: { select: { id: true, template: { select: { name: true } } } }
 		}
 	});
 
@@ -505,7 +505,7 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 			product: { include: { manufacturer: true } },
 			location: true,
 			organization: true,
-			bundle: { select: { id: true, name: true, organizationId: true } }
+			bundle: { select: { id: true, template: { select: { name: true } } } }
 		}
 	});
 
@@ -569,7 +569,35 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 	return product;
 });
 
-// ── Bundles ───────────────────────────────────────────────────────────────────
+// ── Bundle templates ─────────────────────────────────────────────────────────
+
+export const getBundleTemplates = query(v.optional(v.string()), async (organizationId?: string) => {
+	const user = await requireAuth();
+	const orgIds = await userOrgIds(user.id);
+	const queryOrgIds = organizationId ? [organizationId] : orgIds;
+
+	return await prisma.bundleTemplate.findMany({
+		where: { organizationId: { in: queryOrgIds } },
+		include: {
+			organization: true,
+			category: true,
+			instances: {
+				include: {
+					location: true,
+					assets: {
+						include: {
+							product: { include: { manufacturer: true, category: true } },
+							location: true
+						}
+					}
+				}
+			}
+		},
+		orderBy: { name: 'asc' }
+	});
+});
+
+// ── Bundles (instances) ──────────────────────────────────────────────────────
 
 export const getBundles = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
@@ -577,16 +605,15 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 	const queryOrgIds = organizationId ? [organizationId] : orgIds;
 
 	return await prisma.assetBundle.findMany({
-		where: { organizationId: { in: queryOrgIds } },
+		where: { template: { organizationId: { in: queryOrgIds } } },
 		include: {
-			organization: true,
-			category: true,
+			template: { include: { organization: true, category: true } },
 			location: true,
 			assets: {
 				include: { product: { include: { manufacturer: true, category: true } }, location: true }
 			}
 		},
-		orderBy: { name: 'asc' }
+		orderBy: { template: { name: 'asc' } }
 	});
 });
 
@@ -595,8 +622,7 @@ export const getBundle = query(v.string(), async (id: string) => {
 	return await prisma.assetBundle.findUniqueOrThrow({
 		where: { id },
 		include: {
-			organization: true,
-			category: true,
+			template: { include: { organization: true, category: true } },
 			location: true,
 			assets: {
 				include: {
@@ -609,14 +635,29 @@ export const getBundle = query(v.string(), async (id: string) => {
 	});
 });
 
-const createBundleSchema = v.object({
-	name: v.string(),
-	description: v.optional(v.string()),
+// AssetBundle.tag is globally unique like Asset.assetTag — check up front so the
+// user gets a readable message instead of a raw constraint violation.
+async function assertBundleTagAvailable(tag: string | null, exceptBundleId?: string) {
+	if (!tag) return;
+	const clash = await prisma.assetBundle.findUnique({
+		where: { tag },
+		select: { id: true }
+	});
+	if (clash && clash.id !== exceptBundleId) {
+		throw new Error(`Tag "${tag}" is already used by another bundle`);
+	}
+}
+
+const createBundleInstanceSchema = v.object({
 	organizationId: v.string(),
-	categoryId: v.string()
+	templateId: v.optional(v.string()),
+	newTemplateName: v.optional(v.string()),
+	description: v.optional(v.string()),
+	categoryId: v.optional(v.string()),
+	tag: v.optional(v.string())
 });
 
-export const createBundle = command(createBundleSchema, async (data) => {
+export const createBundleInstance = command(createBundleInstanceSchema, async (data) => {
 	const user = await requireAuth();
 	const membership = await prisma.orgMembership.findUnique({
 		where: { userId_organizationId: { userId: user.id, organizationId: data.organizationId } }
@@ -624,26 +665,93 @@ export const createBundle = command(createBundleSchema, async (data) => {
 	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
 		throw new Error('Unauthorized');
 	}
-	await prisma.category.findUniqueOrThrow({ where: { id: data.categoryId } });
+
+	// An existing template must belong to the org the caller was authorized for —
+	// otherwise ADMIN in one org could hang instances off another org's template.
+	if (data.templateId) {
+		const existing = await prisma.bundleTemplate.findUniqueOrThrow({
+			where: { id: data.templateId },
+			select: { organizationId: true }
+		});
+		if (existing.organizationId !== data.organizationId) throw new Error('Unauthorized');
+	}
+
+	await assertBundleTagAvailable(data.tag?.trim() || null);
+
+	let templateId = data.templateId;
+	if (data.newTemplateName && !templateId) {
+		if (!data.categoryId) throw new Error('Category is required when creating a new bundle type');
+		await prisma.category.findUniqueOrThrow({ where: { id: data.categoryId } });
+		const template = await prisma.bundleTemplate.create({
+			data: {
+				name: data.newTemplateName,
+				description: data.description?.trim() || undefined,
+				organizationId: data.organizationId,
+				categoryId: data.categoryId
+			}
+		});
+		templateId = template.id;
+		await getBundleTemplates(data.organizationId).refresh();
+		await getBundleTemplates().refresh();
+	}
+
+	if (!templateId) throw new Error('Bundle type is required');
+
 	const bundle = await prisma.assetBundle.create({
 		data: {
-			name: data.name,
-			description: data.description,
-			organizationId: data.organizationId,
-			categoryId: data.categoryId
+			templateId,
+			tag: data.tag?.trim() || undefined
 		},
-		include: { organization: true, assets: true, category: true }
+		include: { template: { include: { organization: true, category: true } }, assets: true }
 	});
+	await getBundleTemplates(data.organizationId).refresh();
+	await getBundleTemplates().refresh();
 	await getBundles(data.organizationId).refresh();
 	await getBundles().refresh();
 	return bundle;
 });
 
-const updateBundleSchema = v.object({
-	bundleId: v.string(),
+const updateBundleTemplateSchema = v.object({
+	templateId: v.string(),
 	name: v.optional(v.string()),
 	description: v.optional(v.string()),
-	categoryId: v.optional(v.string()),
+	categoryId: v.optional(v.string())
+});
+
+export const updateBundleTemplate = command(updateBundleTemplateSchema, async (input) => {
+	const user = await requireAuth();
+	const template = await prisma.bundleTemplate.findUniqueOrThrow({
+		where: { id: input.templateId }
+	});
+	const membership = await prisma.orgMembership.findUnique({
+		where: {
+			userId_organizationId: { userId: user.id, organizationId: template.organizationId }
+		}
+	});
+	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
+		throw new Error('Unauthorized');
+	}
+
+	const data: { name?: string; description?: string | null; categoryId?: string } = {};
+	if (input.name !== undefined) data.name = input.name.trim();
+	if ('description' in input) data.description = input.description?.trim() || null;
+	if (input.categoryId !== undefined) data.categoryId = input.categoryId;
+
+	const updated = await prisma.bundleTemplate.update({
+		where: { id: input.templateId },
+		data,
+		include: { organization: true, category: true }
+	});
+
+	await getBundleTemplates(template.organizationId).refresh();
+	await getBundleTemplates().refresh();
+	await getBundles(template.organizationId).refresh();
+	return updated;
+});
+
+const updateBundleSchema = v.object({
+	bundleId: v.string(),
+	tag: v.optional(v.nullable(v.string())),
 	locationId: v.optional(v.nullable(v.string())),
 	netPurchasePrice: v.optional(v.nullable(v.number()))
 });
@@ -652,25 +760,26 @@ export const updateBundle = command(updateBundleSchema, async (input) => {
 	const user = await requireAuth();
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id: input.bundleId },
-		include: { assets: { select: { id: true } } }
+		include: { template: true, assets: { select: { id: true } } }
 	});
 	const membership = await prisma.orgMembership.findUnique({
-		where: { userId_organizationId: { userId: user.id, organizationId: bundle.organizationId } }
+		where: {
+			userId_organizationId: { userId: user.id, organizationId: bundle.template.organizationId }
+		}
 	});
 	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
 		throw new Error('Unauthorized');
 	}
 
 	const data: {
-		name?: string;
-		description?: string | null;
-		categoryId?: string;
+		tag?: string | null;
 		locationId?: string | null;
 		netPurchasePrice?: number | null;
 	} = {};
-	if (input.name !== undefined) data.name = input.name.trim();
-	if ('description' in input) data.description = input.description?.trim() || null;
-	if (input.categoryId !== undefined) data.categoryId = input.categoryId;
+	if ('tag' in input) {
+		data.tag = input.tag?.trim() || null;
+		await assertBundleTagAvailable(data.tag, input.bundleId);
+	}
 	if ('locationId' in input) data.locationId = input.locationId ?? null;
 	if ('netPurchasePrice' in input) data.netPurchasePrice = input.netPurchasePrice ?? null;
 
@@ -678,7 +787,7 @@ export const updateBundle = command(updateBundleSchema, async (input) => {
 		const result = await tx.assetBundle.update({
 			where: { id: input.bundleId },
 			data,
-			include: { organization: true, category: true, location: true }
+			include: { template: { include: { organization: true, category: true } }, location: true }
 		});
 		if (input.locationId) {
 			await tx.asset.updateMany({
@@ -689,9 +798,9 @@ export const updateBundle = command(updateBundleSchema, async (input) => {
 		return result;
 	});
 
-	await getBundles(bundle.organizationId).refresh();
+	await getBundles(bundle.template.organizationId).refresh();
 	await getBundle(input.bundleId).refresh();
-	await getAssets(bundle.organizationId).refresh();
+	await getAssets(bundle.template.organizationId).refresh();
 	return updated;
 });
 
@@ -699,23 +808,31 @@ const bundleAssetSchema = v.object({ bundleId: v.string(), assetId: v.string() }
 
 export const addAssetToBundle = command(bundleAssetSchema, async ({ bundleId, assetId }) => {
 	await requireAuth();
-	const bundle = await prisma.assetBundle.findUniqueOrThrow({ where: { id: bundleId } });
+	const bundle = await prisma.assetBundle.findUniqueOrThrow({
+		where: { id: bundleId },
+		include: { template: true }
+	});
 	const updateData: { bundleId: string; locationId?: string } = { bundleId };
 	if (bundle.locationId) updateData.locationId = bundle.locationId;
 	await prisma.asset.update({ where: { id: assetId }, data: updateData });
-	await getBundles(bundle.organizationId).refresh();
+	await getBundleTemplates(bundle.template.organizationId).refresh();
+	await getBundles(bundle.template.organizationId).refresh();
 	await getBundle(bundleId).refresh();
-	await getAssets(bundle.organizationId).refresh();
+	await getAssets(bundle.template.organizationId).refresh();
 	return { bundleId, assetId };
 });
 
 export const removeAssetFromBundle = command(bundleAssetSchema, async ({ bundleId, assetId }) => {
 	await requireAuth();
-	const bundle = await prisma.assetBundle.findUniqueOrThrow({ where: { id: bundleId } });
+	const bundle = await prisma.assetBundle.findUniqueOrThrow({
+		where: { id: bundleId },
+		include: { template: true }
+	});
 	await prisma.asset.update({ where: { id: assetId }, data: { bundleId: null } });
-	await getBundles(bundle.organizationId).refresh();
+	await getBundleTemplates(bundle.template.organizationId).refresh();
+	await getBundles(bundle.template.organizationId).refresh();
 	await getBundle(bundleId).refresh();
-	await getAssets(bundle.organizationId).refresh();
+	await getAssets(bundle.template.organizationId).refresh();
 	return { bundleId, assetId };
 });
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getAssets, getCategories, getBundles } from '$lib/remote/assets.remote';
+	import { getAssets, getCategories, getBundleTemplates } from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { Button } from '$lib/components/ui/button';
 	import { CategorySelect } from '$lib/components/ui/category-select';
@@ -24,11 +24,12 @@
 	let categories = $derived(await getCategories());
 
 	type Asset = Awaited<ReturnType<typeof getAssets>>[number];
-	type BundleData = Awaited<ReturnType<typeof getBundles>>[number];
-	type BundleAsset = BundleData['assets'][number];
+	type TemplateData = Awaited<ReturnType<typeof getBundleTemplates>>[number];
+	type BundleInstance = TemplateData['instances'][number];
+	type BundleAsset = BundleInstance['assets'][number];
 
-	let bundles = $derived(
-		showBundleView ? await getBundles(filterOrgId || undefined) : ([] as BundleData[])
+	let templates = $derived(
+		showBundleView ? await getBundleTemplates(filterOrgId || undefined) : ([] as TemplateData[])
 	);
 
 	type Group = {
@@ -44,11 +45,22 @@
 		assets: Asset[];
 	};
 
-	type BundleGroup = BundleData & {
+	type InstanceGroup = BundleInstance & {
 		filteredAssets: BundleAsset[];
 		available: number;
 		maintenance: number;
 		broken: number;
+	};
+
+	type TemplateGroup = TemplateData & {
+		instanceGroups: InstanceGroup[];
+		totalAssets: number;
+		// Bundle-instance counts (not asset counts) — how many physical kits of
+		// this type are ready to send out vs. need attention.
+		totalInstances: number;
+		availableInstances: number;
+		maintenanceInstances: number;
+		brokenInstances: number;
 	};
 
 	// In bundle view, exclude bundled assets from product groups
@@ -101,7 +113,7 @@
 							(a) =>
 								(a.serialNumber?.toLowerCase().includes(searchTrimmed) ?? false) ||
 								(a.assetTag?.toLowerCase().includes(searchTrimmed) ?? false) ||
-								(a.bundle?.name.toLowerCase().includes(searchTrimmed) ?? false) ||
+								(a.bundle?.template.name.toLowerCase().includes(searchTrimmed) ?? false) ||
 								a.organization.name.toLowerCase().includes(searchTrimmed)
 						)
 				)
@@ -109,30 +121,48 @@
 
 	let filteredBundles = $derived(
 		!showBundleView
-			? ([] as BundleGroup[])
-			: bundles
-					.map((b) => {
-						const filteredAssets = b.assets
-							.filter((a) => !statusFilter || a.status === statusFilter)
-							.filter((a) => !categoryFilter || a.product.categoryId === categoryFilter);
+			? ([] as TemplateGroup[])
+			: templates
+					.map((t) => {
+						const instanceGroups: InstanceGroup[] = t.instances.map((inst) => {
+							const filteredAssets = inst.assets
+								.filter((a) => !statusFilter || a.status === statusFilter)
+								.filter((a) => !categoryFilter || a.product.categoryId === categoryFilter);
+							return {
+								...inst,
+								filteredAssets,
+								available: filteredAssets.filter((a) => a.status === 'AVAILABLE').length,
+								maintenance: filteredAssets.filter((a) => a.status === 'MAINTENANCE').length,
+								broken: filteredAssets.filter((a) => a.status === 'BROKEN').length
+							};
+						});
 						return {
-							...b,
-							filteredAssets,
-							available: filteredAssets.filter((a) => a.status === 'AVAILABLE').length,
-							maintenance: filteredAssets.filter((a) => a.status === 'MAINTENANCE').length,
-							broken: filteredAssets.filter((a) => a.status === 'BROKEN').length
+							...t,
+							instanceGroups,
+							totalAssets: instanceGroups.reduce((sum, i) => sum + i.filteredAssets.length, 0),
+							totalInstances: instanceGroups.length,
+							availableInstances: instanceGroups.filter(
+								(i) => i.filteredAssets.length > 0 && i.maintenance === 0 && i.broken === 0
+							).length,
+							maintenanceInstances: instanceGroups.filter(
+								(i) => i.broken === 0 && i.maintenance > 0
+							).length,
+							brokenInstances: instanceGroups.filter((i) => i.broken > 0).length
 						};
 					})
-					.filter((b) => {
-						if (!searchTrimmed) return b.filteredAssets.length > 0;
-						if (b.name.toLowerCase().includes(searchTrimmed)) return true;
+					.filter((t) => {
+						if (!searchTrimmed) return t.totalAssets > 0;
+						if (t.name.toLowerCase().includes(searchTrimmed)) return true;
+						if (t.instances.some((i) => i.tag?.toLowerCase().includes(searchTrimmed))) return true;
 						// Search full asset list so bundles surface even when status/category filter hides the match
-						return b.assets.some(
-							(a) =>
-								a.product.name.toLowerCase().includes(searchTrimmed) ||
-								a.product.manufacturer.name.toLowerCase().includes(searchTrimmed) ||
-								(a.serialNumber?.toLowerCase().includes(searchTrimmed) ?? false) ||
-								(a.assetTag?.toLowerCase().includes(searchTrimmed) ?? false)
+						return t.instances.some((inst) =>
+							inst.assets.some(
+								(a) =>
+									a.product.name.toLowerCase().includes(searchTrimmed) ||
+									a.product.manufacturer.name.toLowerCase().includes(searchTrimmed) ||
+									(a.serialNumber?.toLowerCase().includes(searchTrimmed) ?? false) ||
+									(a.assetTag?.toLowerCase().includes(searchTrimmed) ?? false)
+							)
 						);
 					})
 	);
@@ -142,7 +172,9 @@
 	}
 
 	let allFilteredAssetIds = $derived([
-		...filteredBundles.flatMap((b) => b.filteredAssets.map((a) => a.id)),
+		...filteredBundles.flatMap((t) =>
+			t.instanceGroups.flatMap((i) => i.filteredAssets.map((a) => a.id))
+		),
 		...filteredGroups.flatMap((g) => g.assets.map((a) => a.id))
 	]);
 	let allFilteredSelected = $derived(
@@ -302,24 +334,27 @@
 				</thead>
 				<tbody>
 					{#if showBundleView}
-						{#each filteredBundles as bundle (bundle.id)}
-							{@const bundleAssetIds = bundle.filteredAssets.map((a) => a.id)}
-							{@const allInBundleSelected =
-								bundleAssetIds.length > 0 && bundleAssetIds.every((id) => selectedAssetIds.has(id))}
+						{#each filteredBundles as template (template.id)}
+							{@const templateAssetIds = template.instanceGroups.flatMap((i) =>
+								i.filteredAssets.map((a) => a.id)
+							)}
+							{@const allInTemplateSelected =
+								templateAssetIds.length > 0 &&
+								templateAssetIds.every((id) => selectedAssetIds.has(id))}
 							<tr
 								class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
-								onclick={() => toggle(bundle.id)}
+								onclick={() => toggle(template.id)}
 							>
 								<td class="px-4 py-3">
 									<input
 										type="checkbox"
-										checked={allInBundleSelected}
+										checked={allInTemplateSelected}
 										onclick={(e) => {
 											e.stopPropagation();
-											if (allInBundleSelected) {
-												bundleAssetIds.forEach((id) => selectedAssetIds.delete(id));
+											if (allInTemplateSelected) {
+												templateAssetIds.forEach((id) => selectedAssetIds.delete(id));
 											} else {
-												bundleAssetIds.forEach((id) => selectedAssetIds.add(id));
+												templateAssetIds.forEach((id) => selectedAssetIds.add(id));
 											}
 										}}
 										class="h-4 w-4 cursor-pointer rounded border-input"
@@ -338,71 +373,71 @@
 											stroke-linecap="round"
 											stroke-linejoin="round"
 											class="shrink-0 text-muted-foreground transition-transform {expanded.get(
-												bundle.id
+												template.id
 											)
 												? 'rotate-90'
 												: ''}"
 										>
 											<path d="m9 18 6-6-6-6" />
 										</svg>
-										<span class="font-medium">{bundle.name}</span>
+										<span class="font-medium">{template.name}</span>
 										<span
 											class="rounded-full border border-border px-1.5 py-0.5 text-xs text-muted-foreground"
 											>Bundle</span
 										>
-										<a
-											href={resolve(`/assets/bundles/${bundle.id}`)}
-											class="ml-auto text-xs text-muted-foreground hover:text-foreground"
-											onclick={(e) => e.stopPropagation()}
-										>
-											View →
-										</a>
 									</div>
 								</td>
 								<td class="px-4 py-3 text-muted-foreground">—</td>
-								<td class="px-4 py-3 text-muted-foreground">
-									{bundle.location?.name ?? '—'}
-								</td>
+								<td class="px-4 py-3 text-muted-foreground">—</td>
 								<td class="px-4 py-3">
-									{#if bundle.category}
-										<CategoryPill name={bundle.category.name} color={bundle.category.color} />
+									{#if template.category}
+										<CategoryPill name={template.category.name} color={template.category.color} />
 									{/if}
 								</td>
 								<td class="px-4 py-3 text-right font-mono tabular-nums">
-									{bundle.filteredAssets.length}
+									{template.totalInstances}
 								</td>
 								<td
 									class="px-4 py-3 text-right font-mono text-green-700 tabular-nums dark:text-green-400"
 								>
-									{bundle.available}
+									{template.availableInstances}
 								</td>
 								<td
-									class="px-4 py-3 text-right font-mono tabular-nums {bundle.maintenance > 0
+									class="px-4 py-3 text-right font-mono tabular-nums {template.maintenanceInstances >
+									0
 										? 'text-yellow-600 dark:text-yellow-400'
 										: 'text-muted-foreground'}"
 								>
-									{bundle.maintenance}
+									{template.maintenanceInstances}
 								</td>
 								<td
-									class="px-4 py-3 text-right font-mono tabular-nums {bundle.broken > 0
+									class="px-4 py-3 text-right font-mono tabular-nums {template.brokenInstances > 0
 										? 'text-red-600 dark:text-red-400'
 										: 'text-muted-foreground'}"
 								>
-									{bundle.broken}
+									{template.brokenInstances}
 								</td>
 							</tr>
-							{#if expanded.get(bundle.id)}
-								{#each bundle.filteredAssets as asset (asset.id)}
-									<tr class="border-b bg-muted/10 last:border-0">
+							{#if expanded.get(template.id)}
+								{#each template.instanceGroups as instance, i (instance.id)}
+									{@const instanceAssetIds = instance.filteredAssets.map((a) => a.id)}
+									{@const allInInstanceSelected =
+										instanceAssetIds.length > 0 &&
+										instanceAssetIds.every((id) => selectedAssetIds.has(id))}
+									<tr
+										class="cursor-pointer border-b bg-muted/10 transition-colors last:border-0 hover:bg-muted/30"
+										onclick={() => toggle(instance.id)}
+									>
 										<td class="px-4 py-2">
 											<input
 												type="checkbox"
-												checked={selectedAssetIds.has(asset.id)}
-												onclick={() => {
-													if (selectedAssetIds.has(asset.id)) {
-														selectedAssetIds.delete(asset.id);
+												checked={allInInstanceSelected}
+												onclick={(e) => {
+													e.stopPropagation();
+													if (allInInstanceSelected) {
+														instanceAssetIds.forEach((id) => selectedAssetIds.delete(id));
 													} else {
-														selectedAssetIds.add(asset.id);
+														instanceAssetIds.forEach((id) => selectedAssetIds.add(id));
 													}
 												}}
 												class="h-4 w-4 cursor-pointer rounded border-input"
@@ -410,28 +445,52 @@
 										</td>
 										<td colspan="7" class="px-4 py-2">
 											<div class="flex items-center gap-6 text-sm">
-												<span class="w-40 truncate text-xs font-medium">
-													{asset.product.name}
+												<span class="flex w-40 min-w-0 items-center gap-1.5">
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														width="12"
+														height="12"
+														viewBox="0 0 24 24"
+														fill="none"
+														stroke="currentColor"
+														stroke-width="2"
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														class="shrink-0 text-muted-foreground transition-transform {expanded.get(
+															instance.id
+														)
+															? 'rotate-90'
+															: ''}"
+													>
+														<path d="m9 18 6-6-6-6" />
+													</svg>
+													<span class="truncate text-xs font-medium">
+														{instance.tag ?? `Instance ${i + 1}`}
+													</span>
 												</span>
-												<span class="w-36 font-mono text-xs text-muted-foreground">
-													{asset.serialNumber ? `S/N: ${asset.serialNumber}` : '—'}
-												</span>
-												{#if asset.assetTag}
-													<span class="text-xs text-muted-foreground">Tag: {asset.assetTag}</span>
+												{#if instance.location}
+													<span class="text-xs text-muted-foreground">{instance.location.name}</span
+													>
 												{/if}
-												<span
-													class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {statusClass[
-														asset.status
-													] ?? ''}"
-												>
-													{statusLabels[asset.status] ?? asset.status}
+												<span class="text-xs text-muted-foreground">
+													{instance.filteredAssets.length} items
 												</span>
-												{#if asset.location}
-													<span class="text-xs text-muted-foreground">{asset.location.name}</span>
+												<span class="text-xs text-green-700 dark:text-green-400">
+													{instance.available} available
+												</span>
+												{#if instance.maintenance > 0}
+													<span class="text-xs text-yellow-600 dark:text-yellow-400">
+														{instance.maintenance} maint.
+													</span>
+												{/if}
+												{#if instance.broken > 0}
+													<span class="text-xs text-red-600 dark:text-red-400">
+														{instance.broken} broken
+													</span>
 												{/if}
 												<a
-													href={resolve(`/assets/${asset.id}`)}
-													class="text-xs text-muted-foreground hover:text-foreground"
+													href={resolve(`/assets/bundles/${instance.id}`)}
+													class="ml-auto text-xs text-muted-foreground hover:text-foreground"
 													onclick={(e) => e.stopPropagation()}
 												>
 													View →
@@ -439,6 +498,60 @@
 											</div>
 										</td>
 									</tr>
+									{#if expanded.get(instance.id)}
+										{#each instance.filteredAssets as asset (asset.id)}
+											<tr class="border-b bg-muted/20 last:border-0">
+												<td class="px-4 py-2 pl-8">
+													<input
+														type="checkbox"
+														checked={selectedAssetIds.has(asset.id)}
+														onclick={() => {
+															if (selectedAssetIds.has(asset.id)) {
+																selectedAssetIds.delete(asset.id);
+															} else {
+																selectedAssetIds.add(asset.id);
+															}
+														}}
+														class="h-4 w-4 cursor-pointer rounded border-input"
+													/>
+												</td>
+												<td colspan="7" class="px-4 py-2">
+													<div class="flex items-center gap-6 text-sm">
+														<span class="w-40 truncate text-xs font-medium">
+															{asset.product.name}
+														</span>
+														<span class="w-36 font-mono text-xs text-muted-foreground">
+															{asset.serialNumber ? `S/N: ${asset.serialNumber}` : '—'}
+														</span>
+														{#if asset.assetTag}
+															<span class="text-xs text-muted-foreground"
+																>Tag: {asset.assetTag}</span
+															>
+														{/if}
+														<span
+															class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {statusClass[
+																asset.status
+															] ?? ''}"
+														>
+															{statusLabels[asset.status] ?? asset.status}
+														</span>
+														{#if asset.location}
+															<span class="text-xs text-muted-foreground"
+																>{asset.location.name}</span
+															>
+														{/if}
+														<a
+															href={resolve(`/assets/${asset.id}`)}
+															class="ml-auto text-xs text-muted-foreground hover:text-foreground"
+															onclick={(e) => e.stopPropagation()}
+														>
+															View →
+														</a>
+													</div>
+												</td>
+											</tr>
+										{/each}
+									{/if}
 								{/each}
 							{/if}
 						{/each}
@@ -562,7 +675,7 @@
 													class="text-xs text-muted-foreground hover:underline"
 													onclick={(e) => e.stopPropagation()}
 												>
-													{asset.bundle.name}
+													{asset.bundle.template.name}
 												</a>
 											{/if}
 											<a

@@ -129,7 +129,7 @@ async function computeProductionBillingLines(
 					asset: {
 						include: {
 							product: { include: { manufacturer: true, category: true } },
-							bundle: { include: { category: true } }
+							bundle: { include: { template: { include: { category: true } } } }
 						}
 					}
 				}
@@ -199,20 +199,20 @@ async function computeProductionBillingLines(
 	}
 	const bundleLines: BillingLine[] = [...itemsByBundleId.entries()].map(([bundleId, items]) => {
 		const bundle = priceByBundleId.get(bundleId)!;
-		const ratePercent = rateByCategory.get(bundle.categoryId);
+		const ratePercent = rateByCategory.get(bundle.template.categoryId);
 		if (ratePercent == null) {
 			throw new Error(
-				`No rental rate set for category "${bundle.category.name}" — set it in org settings first`
+				`No rental rate set for category "${bundle.template.category.name}" — set it in org settings first`
 			);
 		}
 		const netPrice = Number(bundle.netPurchasePrice);
 		return {
 			assetId: null,
 			bundleId,
-			categoryId: bundle.categoryId,
-			categoryName: bundle.category.name,
-			categoryColor: bundle.category.color,
-			description: `Bundle: ${bundle.name} (${items.length} item${items.length !== 1 ? 's' : ''})`,
+			categoryId: bundle.template.categoryId,
+			categoryName: bundle.template.category.name,
+			categoryColor: bundle.template.category.color,
+			description: `Bundle: ${bundle.template.name} (${items.length} item${items.length !== 1 ? 's' : ''})`,
 			netPurchasePrice: netPrice,
 			ratePercent,
 			dailyRate: netPrice * (ratePercent / 100)

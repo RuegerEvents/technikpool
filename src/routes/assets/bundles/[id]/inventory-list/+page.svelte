@@ -14,7 +14,7 @@
 </script>
 
 <svelte:head>
-	<title>Inventory List - {bundle.name}</title>
+	<title>Inventory List - {bundle.template.name}</title>
 	<style>
 		@page {
 			size: A4;
@@ -35,14 +35,16 @@
 		<div class="flex items-end justify-between">
 			<div>
 				<h1 class="text-4xl font-bold tracking-wider uppercase">Inventory List</h1>
-				<h2 class="mt-2 text-2xl">{bundle.name}</h2>
+				<h2 class="mt-2 text-2xl">
+					{bundle.template.name}{bundle.tag ? ` — ${bundle.tag}` : ''}
+				</h2>
 				{#if bundle.location}
 					<p class="mt-2 text-sm text-zinc-700">{bundle.location.name}</p>
 				{/if}
 			</div>
 			<div class="text-right">
-				<p class="font-bold">{bundle.organization.name}</p>
-				<p>{bundle.category.name}</p>
+				<p class="font-bold">{bundle.template.organization.name}</p>
+				<p>{bundle.template.category.name}</p>
 				<p>Date: {new Date().toLocaleDateString()}</p>
 			</div>
 		</div>

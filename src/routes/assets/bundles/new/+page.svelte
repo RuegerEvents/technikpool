@@ -13,8 +13,9 @@
 		getManufacturers,
 		getLocations,
 		getProducts,
+		getBundleTemplates,
 		createAssets,
-		createBundle,
+		createBundleInstance,
 		addAssetToBundle
 	} from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
@@ -23,7 +24,10 @@
 	import { toast } from 'svelte-sonner';
 
 	// Bundle fields
-	let bundleName = $state('');
+	type SelectionOrNew = { id: string | null; name: string } | null;
+
+	let bundleType = $state<SelectionOrNew>(null);
+	let bundleTag = $state('');
 	let bundleDescription = $state('');
 	let selectedOrgId = $state('');
 	let bundleCategoryId = $state('');
@@ -47,9 +51,12 @@
 	let orgs = $derived(await getMyOrgs());
 	let manufacturers = $derived(await getManufacturers());
 	let categories = $derived(await getCategories());
+	let bundleTypes = $derived(selectedOrgId ? await getBundleTemplates(selectedOrgId) : []);
+
+	let isNewBundleType = $derived(bundleType !== null && bundleType.id === null);
 
 	$effect(() => {
-		if (bundleCategoryId) return;
+		if (!isNewBundleType || bundleCategoryId) return;
 		const misc = categories.find((c) => c.name.toLowerCase() === 'miscellaneous');
 		if (misc) bundleCategoryId = misc.id;
 	});
@@ -97,8 +104,6 @@
 	}
 
 	// New asset modal
-	type SelectionOrNew = { id: string | null; name: string } | null;
-
 	let showModal = $state(false);
 	let modalLocationId = $state('');
 	let modalManufacturer = $state<SelectionOrNew>(null);
@@ -198,18 +203,20 @@
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
-		if (!bundleName.trim() || !selectedOrgId) return;
-		if (!bundleCategoryId) {
+		if (!bundleType || !bundleType.name.trim() || !selectedOrgId) return;
+		if (isNewBundleType && !bundleCategoryId) {
 			toast.error('Please select a category');
 			return;
 		}
 		saving = true;
 		try {
-			const bundle = await createBundle({
-				name: bundleName.trim(),
-				description: bundleDescription.trim() || undefined,
+			const bundle = await createBundleInstance({
 				organizationId: selectedOrgId,
-				categoryId: bundleCategoryId
+				templateId: bundleType.id ?? undefined,
+				newTemplateName: bundleType.id ? undefined : bundleType.name.trim(),
+				description: isNewBundleType ? bundleDescription.trim() || undefined : undefined,
+				categoryId: isNewBundleType ? bundleCategoryId : undefined,
+				tag: bundleTag.trim() || undefined
 			});
 			await Promise.all(
 				selectedAssets.map((a) => addAssetToBundle({ bundleId: bundle.id, assetId: a.id }))
@@ -254,15 +261,6 @@
 			<Card.Content class="space-y-4">
 				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 					<div class="space-y-2">
-						<Label for="bundle-name">Name</Label>
-						<Input
-							id="bundle-name"
-							bind:value={bundleName}
-							placeholder="e.g. Camera A Kit"
-							required
-						/>
-					</div>
-					<div class="space-y-2">
 						<Label for="bundle-org">Organization</Label>
 						<select
 							id="bundle-org"
@@ -274,25 +272,45 @@
 						</select>
 					</div>
 					<div class="space-y-2">
-						<Label for="bundle-category">Category</Label>
-						<CategorySelect
-							id="bundle-category"
-							{categories}
-							bind:value={bundleCategoryId}
-							placeholder="Select a category"
+						<Label>Bundle Type</Label>
+						<CreatableSelect
+							items={bundleTypes}
+							bind:value={bundleType}
+							placeholder="Search or create bundle type…"
 						/>
 					</div>
+					{#if isNewBundleType}
+						<div class="space-y-2">
+							<Label for="bundle-category">Category</Label>
+							<CategorySelect
+								id="bundle-category"
+								{categories}
+								bind:value={bundleCategoryId}
+								placeholder="Select a category"
+							/>
+						</div>
+					{/if}
+					<div class="space-y-2">
+						<Label for="bundle-tag">Tag <span class="text-muted-foreground">(optional)</span></Label
+						>
+						<Input id="bundle-tag" bind:value={bundleTag} placeholder="e.g. Kit A" />
+						<p class="text-xs text-muted-foreground">
+							Distinguishes this physical instance from others of the same type.
+						</p>
+					</div>
 				</div>
-				<div class="space-y-2">
-					<Label for="bundle-desc"
-						>Description <span class="text-muted-foreground">(optional)</span></Label
-					>
-					<Input
-						id="bundle-desc"
-						bind:value={bundleDescription}
-						placeholder="What's in this bundle?"
-					/>
-				</div>
+				{#if isNewBundleType}
+					<div class="space-y-2">
+						<Label for="bundle-desc"
+							>Description <span class="text-muted-foreground">(optional)</span></Label
+						>
+						<Input
+							id="bundle-desc"
+							bind:value={bundleDescription}
+							placeholder="What's in this bundle?"
+						/>
+					</div>
+				{/if}
 			</Card.Content>
 		</Card.Root>
 
@@ -418,7 +436,7 @@
 
 		<div class="flex justify-end gap-3">
 			<Button type="button" variant="outline" href={resolve('/assets')}>Cancel</Button>
-			<Button type="submit" disabled={saving || !bundleName.trim() || !selectedOrgId}>
+			<Button type="submit" disabled={saving || !bundleType?.name.trim() || !selectedOrgId}>
 				{saving ? 'Creating…' : 'Create Bundle'}
 			</Button>
 		</div>

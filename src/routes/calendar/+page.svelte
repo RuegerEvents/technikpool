@@ -352,7 +352,7 @@
 		for (const a of filteredData) {
 			if (a.bundle) {
 				if (!byBundle.has(a.bundle.id))
-					byBundle.set(a.bundle.id, { name: a.bundle.name, assets: [] });
+					byBundle.set(a.bundle.id, { name: a.bundle.template.name, assets: [] });
 				byBundle.get(a.bundle.id)!.assets.push(a);
 			} else {
 				const pid = a.product.id;

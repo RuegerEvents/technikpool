@@ -187,7 +187,7 @@
 					</div>
 					<div class="space-y-2">
 						<Label>Bundle</Label>
-						<Input value={asset.bundle?.name ?? '—'} disabled />
+						<Input value={asset.bundle?.template.name ?? '—'} disabled />
 					</div>
 					<div class="space-y-2">
 						<Label for="serial">Serial Number</Label>

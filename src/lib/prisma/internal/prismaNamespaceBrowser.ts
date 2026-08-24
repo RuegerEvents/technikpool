@@ -63,6 +63,7 @@ export const ModelName = {
   Address: 'Address',
   Location: 'Location',
   Asset: 'Asset',
+  BundleTemplate: 'BundleTemplate',
   AssetBundle: 'AssetBundle',
   Production: 'Production',
   Customer: 'Customer',
@@ -269,12 +270,23 @@ export const AssetScalarFieldEnum = {
 export type AssetScalarFieldEnum = (typeof AssetScalarFieldEnum)[keyof typeof AssetScalarFieldEnum]
 
 
-export const AssetBundleScalarFieldEnum = {
+export const BundleTemplateScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
   organizationId: 'organizationId',
   categoryId: 'categoryId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BundleTemplateScalarFieldEnum = (typeof BundleTemplateScalarFieldEnum)[keyof typeof BundleTemplateScalarFieldEnum]
+
+
+export const AssetBundleScalarFieldEnum = {
+  id: 'id',
+  templateId: 'templateId',
+  tag: 'tag',
   locationId: 'locationId',
   netPurchasePrice: 'netPurchasePrice',
   createdAt: 'createdAt',

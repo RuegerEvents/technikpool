@@ -240,7 +240,6 @@ msgstr "No crew members added yet."
 
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/auth/register/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
@@ -718,6 +717,7 @@ msgstr "New Bundle"
 #~ msgid "Description (optional)"
 #~ msgstr "Description (optional)"
 
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "What's in this bundle?"
 msgstr "What's in this bundle?"
@@ -1182,6 +1182,7 @@ msgstr "Asset created and added to bundle"
 msgid "Bundle Details"
 msgstr "Bundle Details"
 
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "Description <0>(optional)</0>"
 msgstr "Description <0>(optional)</0>"
@@ -1370,7 +1371,6 @@ msgstr "Postal code"
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/productions/[id]/equipment/+page.svelte
 msgid "City"
 msgstr "City"
 
@@ -1391,7 +1391,6 @@ msgstr "Address updated"
 
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/productions/[id]/equipment/+page.svelte
 #: src/routes/productions/[id]/equipment/+page.svelte
 msgid "Locations"
 msgstr "Locations"
@@ -1476,7 +1475,7 @@ msgstr "Asset Bundles | Technikpool"
 #~ msgstr "Inventory | Technikpool"
 
 #. 0: asset.product.name
-#. 0: bundle.name
+#. 0: bundle.template.name
 #. 0: org.name
 #. 0: production.name
 #: src/routes/assets/[id]/+page.svelte
@@ -3578,15 +3577,13 @@ msgstr "Added {0} asset{1} from \"{2}\""
 msgid "<0/> Show items in bundles"
 msgstr "<0/> Show items in bundles"
 
-#. 0: b.name
+#. 0: row.name
 #: src/routes/productions/[id]/equipment/+page.svelte
 msgid "<0/> Bundle · {0}"
 msgstr "<0/> Bundle · {0}"
 
-#. 0: b.organizationName; 1: b.locationName ? ` · ${b.locationName}` \\: ''; 2: b.availableCount; 3: b.totalAssets
-#: src/routes/productions/[id]/equipment/+page.svelte
-msgid "{0}{1} · {2} of {3} available"
-msgstr "{0}{1} · {2} of {3} available"
+#~ msgid "{0}{1} · {2} of {3} available"
+#~ msgstr "{0}{1} · {2} of {3} available"
 
 #~ msgid "Add bundle"
 #~ msgstr "Add bundle"
@@ -3661,6 +3658,12 @@ msgstr "Only this organization's own assets"
 msgid "This production has equipment loaned in from other organizations. Choose \"Only this organization's own assets\" to bill just your own equipment separately."
 msgstr "This production has equipment loaned in from other organizations. Choose \"Only this organization's own assets\" to bill just your own equipment separately."
 
+#~ msgid "import {0} from '$lib/utils'; <0/>"
+#~ msgstr "import {0} from '$lib/utils'; <0/>"
+
+#~ msgid "import {0} from '$lib/utils'; <0>Drag and drop a CSV file here, or <0>click to browse</0>Supported: .csv files with column headersOrganizationLocationNo locationsColumn MappingCSV ColumnMaps ToSampleCategory ValuesValue in CSVMaps To Category— Unassigned —Preview <0>(first {0} of {1} rows)</0>Processing {0} rows…Assets createdAssets skipped (existing tag)ErrorsError detailsRow {0}:CancelBack{0} rowsImportClose</0>"
+#~ msgstr "import {0} from '$lib/utils'; <0>Drag and drop a CSV file here, or <0>click to browse</0>Supported: .csv files with column headersOrganizationLocationNo locationsColumn MappingCSV ColumnMaps ToSampleCategory ValuesValue in CSVMaps To Category— Unassigned —Preview <0>(first {0} of {1} rows)</0>Processing {0} rows…Assets createdAssets skipped (existing tag)ErrorsError detailsRow {0}:CancelBack{0} rowsImportClose</0>"
+
 #~ msgid "import {0} from '$lib/utils'; <0/> <1>Checkout / Check-inScan asset tags to book equipment to a location or production.Session SetupTargetLocationProductionLocationProductionSelect a production…Input ModeQR ScannerText InputStart SessionActive SessionEnd SessionProcessing…Checkout Session ReportTarget:Started:Ended:<0>Total:</0> {0} scans — {1} success, {2} errorsSession Log{0} scan{1} — {2} success{3}, {4} error{5}Print ReportNew SessionTimeTagProductActionStatusOKError</1>"
 #~ msgstr "import {0} from '$lib/utils'; <0/> <1>Checkout / Check-inScan asset tags to book equipment to a location or production.Session SetupTargetLocationProductionLocationProductionSelect a production…Input ModeQR ScannerText InputStart SessionActive SessionEnd SessionProcessing…Checkout Session ReportTarget:Started:Ended:<0>Total:</0> {0} scans — {1} success, {2} errorsSession Log{0} scan{1} — {2} success{3}, {4} error{5}Print ReportNew SessionTimeTagProductActionStatusOKError</1>"
 
@@ -3676,12 +3679,6 @@ msgstr "This production has equipment loaned in from other organizations. Choose
 #~ msgid "import {0} from '$lib/utils'; <0/> <1>{0} — Category: <0/>{1}No locationBackNameCategorySaveAdd Assets to BundleNo assets available to add.ProductS/NOrgAddNo assets in this bundle yet. Click \"Add Assets\" to get started.ProductManufacturerCategorySerial NumberStatusLocationOrgRemove</1>"
 #~ msgstr "import {0} from '$lib/utils'; <0/> <1>{0} — Category: <0/>{1}No locationBackNameCategorySaveAdd Assets to BundleNo assets available to add.ProductS/NOrgAddNo assets in this bundle yet. Click \"Add Assets\" to get started.ProductManufacturerCategorySerial NumberStatusLocationOrgRemove</1>"
 
-#~ msgid "import {0} from '$lib/utils'; <0>Drag and drop a CSV file here, or <0>click to browse</0>Supported: .csv files with column headersOrganizationLocationNo locationsColumn MappingCSV ColumnMaps ToSampleCategory ValuesValue in CSVMaps To Category— Unassigned —Preview <0>(first {0} of {1} rows)</0>Processing {0} rows…Assets createdAssets skipped (existing tag)ErrorsError detailsRow {0}:CancelBack{0} rowsImportClose</0>"
-#~ msgstr "import {0} from '$lib/utils'; <0>Drag and drop a CSV file here, or <0>click to browse</0>Supported: .csv files with column headersOrganizationLocationNo locationsColumn MappingCSV ColumnMaps ToSampleCategory ValuesValue in CSVMaps To Category— Unassigned —Preview <0>(first {0} of {1} rows)</0>Processing {0} rows…Assets createdAssets skipped (existing tag)ErrorsError detailsRow {0}:CancelBack{0} rowsImportClose</0>"
-
-#~ msgid "import {0} from '$lib/utils'; <0/>"
-#~ msgstr "import {0} from '$lib/utils'; <0/>"
-
 #: src/lib/components/ui/org-multi-select/org-multi-select.svelte
 msgid "No organizations"
 msgstr "No organizations"
@@ -3695,10 +3692,8 @@ msgstr "Select none"
 msgid "Removed \"{0}\" from production"
 msgstr "Removed \"{0}\" from production"
 
-#. 0: b.name
-#: src/routes/productions/[id]/equipment/+page.svelte
-msgid "Bundle · {0}"
-msgstr "Bundle · {0}"
+#~ msgid "Bundle · {0}"
+#~ msgstr "Bundle · {0}"
 
 #~ msgid "— €{0} net (billed as one line on offers)"
 #~ msgstr "— €{0} net (billed as one line on offers)"
@@ -3898,7 +3893,7 @@ msgstr "Enter a target amount"
 msgid "Print Inventory List"
 msgstr "Print Inventory List"
 
-#. 0: bundle.name
+#. 0: bundle.template.name
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 msgid "Inventory List - {0}"
 msgstr "Inventory List - {0}"
@@ -3930,11 +3925,15 @@ msgstr "{0} of {1} approvals failed."
 msgid "{0} of {1} declines failed."
 msgstr "{0} of {1} declines failed."
 
-#~ msgid "{0} {1} admin access"
-#~ msgstr "{0} {1} admin access"
+#. 0: name; 1: !currentIsAdmin ? 'granted' \\: 'revoked'
+#: src/routes/admin/users/+page.svelte
+msgid "{0} {1} admin access"
+msgstr "{0} {1} admin access"
 
-#~ msgid "{0}00001 (leave blank to auto-generate)"
-#~ msgstr "{0}00001 (leave blank to auto-generate)"
+#. 0: orgPrefix
+#: src/routes/assets/new/+page.svelte
+msgid "{0}00001 (leave blank to auto-generate)"
+msgstr "{0}00001 (leave blank to auto-generate)"
 
 #. 0: result.count; 1: result.count !== 1 ? 's' \\: ''; 2: result.targetName
 #: src/lib/components/ui/checkout-bar.svelte
@@ -3966,14 +3965,20 @@ msgstr "{0} new asset{1} in bundle"
 msgid "{0} asset{1} removed from bundle"
 msgstr "{0} asset{1} removed from bundle"
 
-#~ msgid "{0} added to organization"
-#~ msgstr "{0} added to organization"
+#. 0: addEmail
+#: src/routes/orgs/[id]/+page.svelte
+msgid "{0} added to organization"
+msgstr "{0} added to organization"
 
-#~ msgid "{0} removed from organization"
-#~ msgstr "{0} removed from organization"
+#. 0: name
+#: src/routes/orgs/[id]/+page.svelte
+msgid "{0} removed from organization"
+msgstr "{0} removed from organization"
 
-#~ msgid "{0} months"
-#~ msgstr "{0} months"
+#. 0: org.defaultInspectionIntervalMonths
+#: src/routes/orgs/[id]/+page.svelte
+msgid "{0} months"
+msgstr "{0} months"
 
 #. 0: fullDuration.days
 #. 0: showDuration.days
@@ -3987,5 +3992,81 @@ msgstr "{0} d"
 msgid "{0} organizations"
 msgstr "{0} organizations"
 
-#~ msgid "{0}% / day"
-#~ msgstr "{0}% / day"
+#. 0: row.percentage
+#: src/routes/orgs/[id]/rates/+page.svelte
+msgid "{0}% / day"
+msgstr "{0}% / day"
+
+#~ msgid "<0/> Bundle · {0}{1}"
+#~ msgstr "<0/> Bundle · {0}{1}"
+
+#. 0: row.name; 1: tags ? ` (${tags})` \\: ''
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "Bundle · {0}{1}"
+msgstr "Bundle · {0}{1}"
+
+#. 0: i + 1
+#. 0: i + 1
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/bundles/+page.svelte
+msgid "Instance {0}"
+msgstr "Instance {0}"
+
+#. 0: instance.filteredAssets.length
+#: src/routes/assets/+page.svelte
+msgid "{0} items"
+msgstr "{0} items"
+
+#. 0: instance.available
+#: src/routes/assets/+page.svelte
+msgid "{0} available"
+msgstr "{0} available"
+
+#. 0: instance.maintenance
+#: src/routes/assets/+page.svelte
+msgid "{0} maint."
+msgstr "{0} maint."
+
+#. 0: instance.broken
+#: src/routes/assets/+page.svelte
+msgid "{0} broken"
+msgstr "{0} broken"
+
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "Bundle Type"
+msgstr "Bundle Type"
+
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "Search or create bundle type…"
+msgstr "Search or create bundle type…"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "Tag <0>(optional)</0>"
+msgstr "Tag <0>(optional)</0>"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "Distinguishes this physical instance from others of the same type."
+msgstr "Distinguishes this physical instance from others of the same type."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Shared with every instance of this bundle type."
+msgstr "Shared with every instance of this bundle type."
+
+#. 0: template.instances.length
+#: src/routes/assets/bundles/+page.svelte
+msgid "{0} instance"
+msgstr "{0} instance"
+
+#. 0: template.instances.length
+#: src/routes/assets/bundles/+page.svelte
+msgid "{0} instances"
+msgstr "{0} instances"
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "# component"
+msgid_plural "# components"
+msgstr[0] "# component"
+msgstr[1] "# components"

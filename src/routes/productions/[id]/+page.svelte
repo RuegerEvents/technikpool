@@ -104,7 +104,7 @@
 	type ItemPayload = Prisma.ProductionItemGetPayload<{
 		include: {
 			asset: { include: { product: { include: { manufacturer: true } }; organization: true } };
-			sourceBundle: { select: { id: true; name: true } };
+			sourceBundle: { select: { id: true; template: { select: { name: true } } } };
 		};
 	}>;
 
@@ -145,7 +145,7 @@
 					bundleMap.set(bid, {
 						kind: 'bundle',
 						bundleId: bid,
-						bundleName: item.sourceBundle.name,
+						bundleName: item.sourceBundle.template.name,
 						total: 0,
 						pending: 0,
 						approved: 0,

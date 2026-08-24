@@ -113,14 +113,14 @@ model Organization {
   homeUsers User[]          @relation("HomeOrg")
   members   OrgMembership[]
 
-  locations     Location[]
-  assets        Asset[]
-  bundles       AssetBundle[]
-  productions   Production[]
-  categoryRates OrgCategoryRate[]
-  offers        Offer[]
-  invoices      Invoice[]
-  customers     Customer[]
+  locations       Location[]
+  assets          Asset[]
+  bundleTemplates BundleTemplate[]
+  productions     Production[]
+  categoryRates   OrgCategoryRate[]
+  offers          Offer[]
+  invoices        Invoice[]
+  customers       Customer[]
 }
 
 enum Role {
@@ -161,9 +161,9 @@ model Category {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  products Product[]
-  bundles  AssetBundle[]
-  orgRates OrgCategoryRate[]
+  products        Product[]
+  bundleTemplates BundleTemplate[]
+  orgRates        OrgCategoryRate[]
 }
 
 model Product {
@@ -242,14 +242,34 @@ model Asset {
   inspections     Inspection[]
 }
 
+// The catalog entry for a kind of bundle (e.g. "Standard Lighting Kit") — like
+// Product is to Asset. Org- and category-scoped since bundles are curated kits
+// specific to one org, not a shared real-world catalog.
+model BundleTemplate {
+  id             String       @id @default(cuid())
+  name           String
+  description    String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  categoryId     String
+  category       Category     @relation(fields: [categoryId], references: [id])
+
+  instances AssetBundle[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// A physical instance of a BundleTemplate — like Asset is to Product.
 model AssetBundle {
-  id              String           @id @default(cuid())
-  name            String
-  description     String?
-  organizationId  String
-  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  categoryId      String
-  category        Category         @relation(fields: [categoryId], references: [id])
+  id         String         @id @default(cuid())
+  templateId String
+  template   BundleTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  // Optional, like Asset.assetTag — distinguishes multiple physical instances
+  // of the same template.
+  tag String? @unique
+
   locationId      String?
   location        Location?        @relation(fields: [locationId], references: [id])
   assets          Asset[]

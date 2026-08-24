@@ -120,10 +120,15 @@ async function notifyRequesterIfQueueCleared(
 	}
 }
 
-export const getProductions = query(v.string(), async (organizationId: string) => {
-	await requireAuth();
+export const getProductions = query(v.optional(v.string()), async (organizationId?: string) => {
+	const user = await requireAuth();
+	const memberships = await prisma.orgMembership.findMany({
+		where: { userId: user.id },
+		select: { organizationId: true }
+	});
+	const orgIds = organizationId ? [organizationId] : memberships.map((m) => m.organizationId);
 	return await prisma.production.findMany({
-		where: { organizationId },
+		where: { organizationId: { in: orgIds } },
 		include: {
 			organization: { select: { name: true } },
 			items: {
@@ -151,7 +156,7 @@ export const getProduction = query(v.string(), async (id: string) => {
 							organization: true
 						}
 					},
-					sourceBundle: { select: { id: true, name: true } }
+					sourceBundle: { select: { id: true, template: { select: { name: true } } } }
 				}
 			},
 			address: true,
@@ -253,6 +258,7 @@ export const createProduction = command(createProductionSchema, async (data) => 
 	});
 
 	await getProductions(data.organizationId).refresh();
+	await getProductions().refresh();
 	return production;
 });
 
@@ -319,6 +325,7 @@ export const updateProductionAddress = command(updateProductionAddressSchema, as
 
 	await getProduction(input.productionId).refresh();
 	await getProductions(production.organizationId).refresh();
+	await getProductions().refresh();
 	return updated;
 });
 
@@ -358,6 +365,7 @@ export const updateProductionDuration = command(updateProductionDurationSchema, 
 
 	await getProduction(input.productionId).refresh();
 	await getProductions(production.organizationId).refresh();
+	await getProductions().refresh();
 	return updated;
 });
 
@@ -923,7 +931,7 @@ export const getCalendarData = query(async () => {
 		include: {
 			product: { include: { manufacturer: true } },
 			organization: true,
-			bundle: { select: { id: true, name: true } },
+			bundle: { select: { id: true, template: { select: { name: true } } } },
 			productionItems: {
 				where: {
 					status: { in: ['APPROVED', 'CHECKED_OUT', 'PENDING'] },
@@ -989,7 +997,7 @@ export const getDashboardStats = query(async () => {
 				_count: { select: { items: true, crew: true } }
 			}
 		}),
-		prisma.assetBundle.count({ where: { organizationId: { in: orgIds } } }),
+		prisma.assetBundle.count({ where: { template: { organizationId: { in: orgIds } } } }),
 		prisma.asset.count({
 			where: { organizationId: { in: orgIds }, nextInspectionDue: { not: null, lt: now } }
 		})

@@ -13,6 +13,7 @@
 		getLocations,
 		addAssetToBundle,
 		removeAssetFromBundle,
+		updateBundleTemplate,
 		updateBundle
 	} from '$lib/remote/assets.remote';
 	import { page } from '$app/state';
@@ -24,7 +25,7 @@
 	let bundle = $derived(await getBundle(bundleId));
 	let allAssets = $derived(await getAssets());
 	let categories = $derived(await getCategories());
-	let locations = $derived(await getLocations(bundle.organizationId));
+	let locations = $derived(await getLocations(bundle.template.organizationId));
 
 	// ── Bundle editing ───────────────────────────────────────────────────────
 	let editingBundle = $state(false);
@@ -33,6 +34,8 @@
 	let bundleDraft = $state({
 		name: '',
 		categoryId: '',
+		description: '',
+		tag: '',
 		netPurchasePrice: '',
 		locationId: ''
 	});
@@ -40,26 +43,45 @@
 	$effect(() => {
 		if (editingBundle) return;
 		bundleDraft = {
-			name: bundle.name,
-			categoryId: bundle.categoryId,
+			name: bundle.template.name,
+			categoryId: bundle.template.categoryId,
+			description: bundle.template.description ?? '',
+			tag: bundle.tag ?? '',
 			netPurchasePrice: bundle.netPurchasePrice?.toString() ?? '',
 			locationId: bundle.locationId ?? ''
 		};
 	});
 
+	// Template fields are shared by every instance, so only write them when they
+	// actually changed — saving a tag must not rewrite the whole bundle type.
+	let templateDirty = $derived(
+		bundleDraft.name !== bundle.template.name ||
+			bundleDraft.categoryId !== bundle.template.categoryId ||
+			bundleDraft.description !== (bundle.template.description ?? '')
+	);
+
 	async function handleBundleSave(e: Event) {
 		e.preventDefault();
 		savingBundle = true;
 		try {
-			await updateBundle({
-				bundleId,
-				name: bundleDraft.name,
-				categoryId: bundleDraft.categoryId,
-				netPurchasePrice: bundleDraft.netPurchasePrice
-					? Number(bundleDraft.netPurchasePrice)
-					: null,
-				locationId: bundleDraft.locationId || null
-			});
+			await Promise.all([
+				templateDirty
+					? updateBundleTemplate({
+							templateId: bundle.templateId,
+							name: bundleDraft.name,
+							description: bundleDraft.description,
+							categoryId: bundleDraft.categoryId
+						})
+					: Promise.resolve(),
+				updateBundle({
+					bundleId,
+					tag: bundleDraft.tag || null,
+					netPurchasePrice: bundleDraft.netPurchasePrice
+						? Number(bundleDraft.netPurchasePrice)
+						: null,
+					locationId: bundleDraft.locationId || null
+				})
+			]);
 			toast.success('Bundle updated');
 			editingBundle = false;
 		} catch (err) {
@@ -133,13 +155,15 @@
 	};
 </script>
 
-<svelte:head><title>{bundle.name} | Technikpool</title></svelte:head>
+<svelte:head><title>{bundle.template.name} | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
 	<div class="flex items-center justify-between">
 		<div>
-			<h1 class="text-3xl font-bold tracking-tight">{bundle.name}</h1>
-			<p class="text-muted-foreground">{bundle.organization.name}</p>
+			<h1 class="text-3xl font-bold tracking-tight">
+				{bundle.template.name}{bundle.tag ? ` — ${bundle.tag}` : ''}
+			</h1>
+			<p class="text-muted-foreground">{bundle.template.organization.name}</p>
 		</div>
 		<div class="flex gap-2">
 			<Button
@@ -171,11 +195,14 @@
 				<form class="space-y-4" onsubmit={handleBundleSave}>
 					<div class="space-y-2">
 						<Label>Organization</Label>
-						<Input value={bundle.organization.name} disabled />
+						<Input value={bundle.template.organization.name} disabled />
 					</div>
 					<div class="space-y-2">
 						<Label for="name">Name</Label>
 						<Input id="name" bind:value={bundleDraft.name} disabled={!editingBundle} />
+						<p class="text-xs text-muted-foreground">
+							Shared with every instance of this bundle type.
+						</p>
 					</div>
 					<div class="space-y-2">
 						<Label>Category</Label>
@@ -184,6 +211,29 @@
 							bind:value={bundleDraft.categoryId}
 							disabled={!editingBundle}
 						/>
+					</div>
+					<div class="space-y-2">
+						<Label for="description"
+							>Description <span class="text-muted-foreground">(optional)</span></Label
+						>
+						<Input
+							id="description"
+							bind:value={bundleDraft.description}
+							disabled={!editingBundle}
+							placeholder="What's in this bundle?"
+						/>
+					</div>
+					<div class="space-y-2">
+						<Label for="tag">Tag <span class="text-muted-foreground">(optional)</span></Label>
+						<Input
+							id="tag"
+							bind:value={bundleDraft.tag}
+							disabled={!editingBundle}
+							placeholder="e.g. Kit A"
+						/>
+						<p class="text-xs text-muted-foreground">
+							Distinguishes this physical instance from others of the same type.
+						</p>
 					</div>
 					<div class="space-y-2">
 						<Label for="netPurchasePrice">Net purchase price (€)</Label>

@@ -78,6 +78,11 @@ export type Location = Prisma.LocationModel
  */
 export type Asset = Prisma.AssetModel
 /**
+ * Model BundleTemplate
+ * 
+ */
+export type BundleTemplate = Prisma.BundleTemplateModel
+/**
  * Model AssetBundle
  * 
  */

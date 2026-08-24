@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getErrorMessage } from '$lib/utils';
+	import { getErrorMessage, plural } from '$lib/utils';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { Button } from '$lib/components/ui/button';
@@ -18,6 +18,20 @@
 
 	type Group = (typeof data)['groups'][number];
 	type Bundle = (typeof data)['bundles'][number];
+
+	// One picker row per bundle type, holding that type's physical instances.
+	type BundleTemplateRow = {
+		templateId: string;
+		name: string;
+		categoryId: string;
+		categoryColor: string;
+		organizationName: string;
+		instances: Bundle[];
+		/** Instances with assets booked into this production */
+		booked: Bundle[];
+		/** Instances that could still be added */
+		addable: Bundle[];
+	};
 
 	let activeCat = $state<string | null>(null);
 	let search = $state('');
@@ -171,14 +185,58 @@
 	let availableGroups = $derived(
 		data.groups.filter(matchesFilters).sort((a, b) => a.productName.localeCompare(b.productName))
 	);
-	let availableBundles = $derived(
-		data.bundles.filter(matchesBundleFilters).sort((a, b) => a.name.localeCompare(b.name))
-	);
+	// Bundles are picked by type, not by physical kit: two instances of "Camera A
+	// Kit" read as "2 of 2 available", and +/− books or releases one whole kit.
+	function groupByTemplate(instances: Bundle[]): BundleTemplateRow[] {
+		const rows = new SvelteMap<string, BundleTemplateRow>();
+		for (const b of instances) {
+			let row = rows.get(b.templateId);
+			if (!row) {
+				row = {
+					templateId: b.templateId,
+					name: b.name,
+					categoryId: b.categoryId,
+					categoryColor: b.categoryColor,
+					organizationName: b.organizationName,
+					instances: [],
+					booked: [],
+					addable: []
+				};
+				rows.set(b.templateId, row);
+			}
+			row.instances.push(b);
+			if (b.bookedHere > 0) row.booked.push(b);
+			else if (b.availableCount > 0) row.addable.push(b);
+		}
+		return [...rows.values()].sort((a, b) => a.name.localeCompare(b.name));
+	}
+
+	// Only when every instance sits in the same place — otherwise the row spans
+	// locations and naming one of them would be misleading.
+	function sharedLocationName(row: BundleTemplateRow): string | null {
+		const names = new SvelteSet(row.instances.map((b) => b.locationName));
+		return names.size === 1 ? [...names][0] : null;
+	}
+
+	// How many assets one kit of this type holds. Instances of a type hold the
+	// same kit, so the largest only differs while one is being filled up.
+	function memberCount(row: BundleTemplateRow): number {
+		return Math.max(...row.instances.map((b) => b.totalAssets));
+	}
+
+	function bookedTags(row: BundleTemplateRow): string | null {
+		const tags = row.booked.map((b) => b.tag).filter((t): t is string => !!t);
+		return tags.length > 0 ? tags.join(', ') : null;
+	}
+
+	let availableBundles = $derived(groupByTemplate(data.bundles.filter(matchesBundleFilters)));
 
 	// Never filtered by the center pane's search/category/org/location — always
 	// shows everything booked for this production.
 	let bookedGroups = $derived(data.groups.filter((g) => g.bookedHere > 0));
-	let bookedBundles = $derived(data.bundles.filter((b) => b.bookedHere > 0));
+	// Grouped from every instance, not just the booked ones, so the stepper here
+	// can still add a second kit of a type that's already in the production.
+	let bookedBundles = $derived(groupByTemplate(data.bundles).filter((r) => r.booked.length > 0));
 	let bookedSummary = $derived.by(() => {
 		const orgNames = [...new SvelteSet(bookedGroups.map((g) => g.organizationName))].sort();
 		const locNames = [...new SvelteSet(bookedGroups.map((g) => g.locationName))].sort();
@@ -287,14 +345,15 @@
 	)}
 {/snippet}
 
-{#snippet bundleStepper(b: Bundle)}
+{#snippet bundleStepper(row: BundleTemplateRow)}
+	{@const busy = row.instances.some((b) => bundlePending.has(b.id))}
 	{@render countStepper(
-		b.bookedHere > 0 ? 1 : 0,
-		1,
-		bundlePending.has(b.id) || b.bookedHere <= 0,
-		bundlePending.has(b.id) || b.availableCount <= 0,
-		() => handleRemoveBundle(b),
-		() => handleAddBundle(b)
+		row.booked.length,
+		row.booked.length + row.addable.length,
+		busy || row.booked.length === 0,
+		busy || row.addable.length === 0,
+		() => handleRemoveBundle(row.booked[row.booked.length - 1]),
+		() => handleAddBundle(row.addable[0])
 	)}
 {/snippet}
 
@@ -503,28 +562,32 @@
 				{#if availableBundles.length === 0 && availableGroups.length === 0}
 					<p class="p-6 text-center text-sm text-muted-foreground">No matching devices.</p>
 				{:else}
-					{#each availableBundles as b (b.id)}
-						{@const bundleAddDisabled = bundlePending.has(b.id) || b.availableCount <= 0}
+					{#each availableBundles as row (row.templateId)}
+						{@const bundleAddDisabled =
+							row.instances.some((b) => bundlePending.has(b.id)) || row.addable.length === 0}
+						{@const locationName = sharedLocationName(row)}
 						<div
 							class="flex items-center gap-2 border-b bg-muted/20 px-3 py-2 last:border-0 {bundleAddDisabled
 								? 'opacity-50'
 								: 'cursor-pointer hover:bg-muted/40'}"
-							onclick={() => !bundleAddDisabled && handleAddBundle(b)}
+							onclick={() => !bundleAddDisabled && handleAddBundle(row.addable[0])}
 						>
 							<div class="min-w-0 flex-1">
 								<p class="truncate text-sm font-medium">
 									<span
 										class="mr-1 inline-block h-1.5 w-1.5 rounded-full"
-										style="background-color: {b.categoryColor}"
+										style="background-color: {row.categoryColor}"
 									></span>
-									Bundle · {b.name}
+									Bundle · {row.name}
 								</p>
 								<p class="truncate text-xs text-muted-foreground">
-									{b.organizationName}{b.locationName ? ` · ${b.locationName}` : ''} · {b.availableCount}
-									of {b.totalAssets} available
+									{row.organizationName}{locationName ? ` · ${locationName}` : ''} · {plural(
+										memberCount(row),
+										['# component', '# components']
+									)}
 								</p>
 							</div>
-							{@render bundleStepper(b)}
+							{@render bundleStepper(row)}
 						</div>
 					{/each}
 					{#each availableGroups as g (g.key)}
@@ -596,15 +659,22 @@
 								<span class="h-2 w-2 rounded-full" style="background-color: {cat.color}"></span>
 								{cat.name} ({catTotal})
 							</div>
-							{#each catBundles as b (b.id)}
+							{#each catBundles as row (row.templateId)}
+								{@const tags = bookedTags(row)}
+								{@const locationName = sharedLocationName(row)}
 								<div class="flex items-center gap-2 border-b bg-muted/20 px-3 py-2 last:border-0">
 									<div class="min-w-0 flex-1">
-										<p class="truncate text-sm font-medium">Bundle · {b.name}</p>
+										<p class="truncate text-sm font-medium">
+											Bundle · {row.name}{tags ? ` (${tags})` : ''}
+										</p>
 										<p class="truncate text-xs text-muted-foreground">
-											{b.organizationName}{b.locationName ? ` · ${b.locationName}` : ''}
+											{row.organizationName}{locationName ? ` · ${locationName}` : ''} · {plural(
+												memberCount(row),
+												['# component', '# components']
+											)}
 										</p>
 									</div>
-									{@render bundleStepper(b)}
+									{@render bundleStepper(row)}
 								</div>
 							{/each}
 							{#each rows as g (g.key)}

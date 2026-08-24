@@ -25,7 +25,11 @@
 			if (!item.sourceBundle) continue;
 			const bid = item.sourceBundle.id;
 			if (!map.has(bid)) {
-				map.set(bid, { bundleId: bid, bundleName: item.sourceBundle.name, productCounts: [] });
+				map.set(bid, {
+					bundleId: bid,
+					bundleName: item.sourceBundle.template.name,
+					productCounts: []
+				});
 			}
 			const g = map.get(bid)!;
 			const pc = g.productCounts.find((p) => p.name === item.asset.product.name);

@@ -309,7 +309,7 @@ export type OrganizationWhereInput = {
   members?: Prisma.OrgMembershipListRelationFilter
   locations?: Prisma.LocationListRelationFilter
   assets?: Prisma.AssetListRelationFilter
-  bundles?: Prisma.AssetBundleListRelationFilter
+  bundleTemplates?: Prisma.BundleTemplateListRelationFilter
   productions?: Prisma.ProductionListRelationFilter
   categoryRates?: Prisma.OrgCategoryRateListRelationFilter
   offers?: Prisma.OfferListRelationFilter
@@ -339,7 +339,7 @@ export type OrganizationOrderByWithRelationInput = {
   members?: Prisma.OrgMembershipOrderByRelationAggregateInput
   locations?: Prisma.LocationOrderByRelationAggregateInput
   assets?: Prisma.AssetOrderByRelationAggregateInput
-  bundles?: Prisma.AssetBundleOrderByRelationAggregateInput
+  bundleTemplates?: Prisma.BundleTemplateOrderByRelationAggregateInput
   productions?: Prisma.ProductionOrderByRelationAggregateInput
   categoryRates?: Prisma.OrgCategoryRateOrderByRelationAggregateInput
   offers?: Prisma.OfferOrderByRelationAggregateInput
@@ -372,7 +372,7 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   members?: Prisma.OrgMembershipListRelationFilter
   locations?: Prisma.LocationListRelationFilter
   assets?: Prisma.AssetListRelationFilter
-  bundles?: Prisma.AssetBundleListRelationFilter
+  bundleTemplates?: Prisma.BundleTemplateListRelationFilter
   productions?: Prisma.ProductionListRelationFilter
   categoryRates?: Prisma.OrgCategoryRateListRelationFilter
   offers?: Prisma.OfferListRelationFilter
@@ -447,7 +447,7 @@ export type OrganizationCreateInput = {
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -476,7 +476,7 @@ export type OrganizationUncheckedCreateInput = {
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -505,7 +505,7 @@ export type OrganizationUpdateInput = {
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -534,7 +534,7 @@ export type OrganizationUncheckedUpdateInput = {
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -791,18 +791,18 @@ export type OrganizationUpdateOneRequiredWithoutAssetsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutAssetsInput, Prisma.OrganizationUpdateWithoutAssetsInput>, Prisma.OrganizationUncheckedUpdateWithoutAssetsInput>
 }
 
-export type OrganizationCreateNestedOneWithoutBundlesInput = {
-  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutBundlesInput, Prisma.OrganizationUncheckedCreateWithoutBundlesInput>
-  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutBundlesInput
+export type OrganizationCreateNestedOneWithoutBundleTemplatesInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutBundleTemplatesInput, Prisma.OrganizationUncheckedCreateWithoutBundleTemplatesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutBundleTemplatesInput
   connect?: Prisma.OrganizationWhereUniqueInput
 }
 
-export type OrganizationUpdateOneRequiredWithoutBundlesNestedInput = {
-  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutBundlesInput, Prisma.OrganizationUncheckedCreateWithoutBundlesInput>
-  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutBundlesInput
-  upsert?: Prisma.OrganizationUpsertWithoutBundlesInput
+export type OrganizationUpdateOneRequiredWithoutBundleTemplatesNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutBundleTemplatesInput, Prisma.OrganizationUncheckedCreateWithoutBundleTemplatesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutBundleTemplatesInput
+  upsert?: Prisma.OrganizationUpsertWithoutBundleTemplatesInput
   connect?: Prisma.OrganizationWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutBundlesInput, Prisma.OrganizationUpdateWithoutBundlesInput>, Prisma.OrganizationUncheckedUpdateWithoutBundlesInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutBundleTemplatesInput, Prisma.OrganizationUpdateWithoutBundleTemplatesInput>, Prisma.OrganizationUncheckedUpdateWithoutBundleTemplatesInput>
 }
 
 export type OrganizationCreateNestedOneWithoutProductionsInput = {
@@ -895,7 +895,7 @@ export type OrganizationCreateWithoutHomeUsersInput = {
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -923,7 +923,7 @@ export type OrganizationUncheckedCreateWithoutHomeUsersInput = {
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -967,7 +967,7 @@ export type OrganizationUpdateWithoutHomeUsersInput = {
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -995,7 +995,7 @@ export type OrganizationUncheckedUpdateWithoutHomeUsersInput = {
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1023,7 +1023,7 @@ export type OrganizationCreateWithoutMembersInput = {
   homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -1051,7 +1051,7 @@ export type OrganizationUncheckedCreateWithoutMembersInput = {
   homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1095,7 +1095,7 @@ export type OrganizationUpdateWithoutMembersInput = {
   homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -1123,7 +1123,7 @@ export type OrganizationUncheckedUpdateWithoutMembersInput = {
   homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1151,7 +1151,7 @@ export type OrganizationCreateWithoutAddressInput = {
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -1179,7 +1179,7 @@ export type OrganizationUncheckedCreateWithoutAddressInput = {
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1255,7 +1255,7 @@ export type OrganizationCreateWithoutLocationsInput = {
   homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -1283,7 +1283,7 @@ export type OrganizationUncheckedCreateWithoutLocationsInput = {
   homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1327,7 +1327,7 @@ export type OrganizationUpdateWithoutLocationsInput = {
   homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -1355,7 +1355,7 @@ export type OrganizationUncheckedUpdateWithoutLocationsInput = {
   homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1383,7 +1383,7 @@ export type OrganizationCreateWithoutAssetsInput = {
   homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -1411,7 +1411,7 @@ export type OrganizationUncheckedCreateWithoutAssetsInput = {
   homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1455,7 +1455,7 @@ export type OrganizationUpdateWithoutAssetsInput = {
   homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -1483,7 +1483,7 @@ export type OrganizationUncheckedUpdateWithoutAssetsInput = {
   homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1491,7 +1491,7 @@ export type OrganizationUncheckedUpdateWithoutAssetsInput = {
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
-export type OrganizationCreateWithoutBundlesInput = {
+export type OrganizationCreateWithoutBundleTemplatesInput = {
   id?: string
   name: string
   assetIdPrefix: string
@@ -1519,7 +1519,7 @@ export type OrganizationCreateWithoutBundlesInput = {
   customers?: Prisma.CustomerCreateNestedManyWithoutOrganizationInput
 }
 
-export type OrganizationUncheckedCreateWithoutBundlesInput = {
+export type OrganizationUncheckedCreateWithoutBundleTemplatesInput = {
   id?: string
   name: string
   assetIdPrefix: string
@@ -1547,23 +1547,23 @@ export type OrganizationUncheckedCreateWithoutBundlesInput = {
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
-export type OrganizationCreateOrConnectWithoutBundlesInput = {
+export type OrganizationCreateOrConnectWithoutBundleTemplatesInput = {
   where: Prisma.OrganizationWhereUniqueInput
-  create: Prisma.XOR<Prisma.OrganizationCreateWithoutBundlesInput, Prisma.OrganizationUncheckedCreateWithoutBundlesInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutBundleTemplatesInput, Prisma.OrganizationUncheckedCreateWithoutBundleTemplatesInput>
 }
 
-export type OrganizationUpsertWithoutBundlesInput = {
-  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutBundlesInput, Prisma.OrganizationUncheckedUpdateWithoutBundlesInput>
-  create: Prisma.XOR<Prisma.OrganizationCreateWithoutBundlesInput, Prisma.OrganizationUncheckedCreateWithoutBundlesInput>
+export type OrganizationUpsertWithoutBundleTemplatesInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutBundleTemplatesInput, Prisma.OrganizationUncheckedUpdateWithoutBundleTemplatesInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutBundleTemplatesInput, Prisma.OrganizationUncheckedCreateWithoutBundleTemplatesInput>
   where?: Prisma.OrganizationWhereInput
 }
 
-export type OrganizationUpdateToOneWithWhereWithoutBundlesInput = {
+export type OrganizationUpdateToOneWithWhereWithoutBundleTemplatesInput = {
   where?: Prisma.OrganizationWhereInput
-  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutBundlesInput, Prisma.OrganizationUncheckedUpdateWithoutBundlesInput>
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutBundleTemplatesInput, Prisma.OrganizationUncheckedUpdateWithoutBundleTemplatesInput>
 }
 
-export type OrganizationUpdateWithoutBundlesInput = {
+export type OrganizationUpdateWithoutBundleTemplatesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1591,7 +1591,7 @@ export type OrganizationUpdateWithoutBundlesInput = {
   customers?: Prisma.CustomerUpdateManyWithoutOrganizationNestedInput
 }
 
-export type OrganizationUncheckedUpdateWithoutBundlesInput = {
+export type OrganizationUncheckedUpdateWithoutBundleTemplatesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1640,7 +1640,7 @@ export type OrganizationCreateWithoutProductionsInput = {
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOrganizationInput
@@ -1668,7 +1668,7 @@ export type OrganizationUncheckedCreateWithoutProductionsInput = {
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1712,7 +1712,7 @@ export type OrganizationUpdateWithoutProductionsInput = {
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutOrganizationNestedInput
@@ -1740,7 +1740,7 @@ export type OrganizationUncheckedUpdateWithoutProductionsInput = {
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1768,7 +1768,7 @@ export type OrganizationCreateWithoutCustomersInput = {
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -1796,7 +1796,7 @@ export type OrganizationUncheckedCreateWithoutCustomersInput = {
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1840,7 +1840,7 @@ export type OrganizationUpdateWithoutCustomersInput = {
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -1868,7 +1868,7 @@ export type OrganizationUncheckedUpdateWithoutCustomersInput = {
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1896,7 +1896,7 @@ export type OrganizationCreateWithoutCategoryRatesInput = {
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOrganizationInput
@@ -1924,7 +1924,7 @@ export type OrganizationUncheckedCreateWithoutCategoryRatesInput = {
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1968,7 +1968,7 @@ export type OrganizationUpdateWithoutCategoryRatesInput = {
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutOrganizationNestedInput
@@ -1996,7 +1996,7 @@ export type OrganizationUncheckedUpdateWithoutCategoryRatesInput = {
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2024,7 +2024,7 @@ export type OrganizationCreateWithoutOffersInput = {
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOrganizationInput
@@ -2052,7 +2052,7 @@ export type OrganizationUncheckedCreateWithoutOffersInput = {
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2096,7 +2096,7 @@ export type OrganizationUpdateWithoutOffersInput = {
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutOrganizationNestedInput
@@ -2124,7 +2124,7 @@ export type OrganizationUncheckedUpdateWithoutOffersInput = {
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2152,7 +2152,7 @@ export type OrganizationCreateWithoutInvoicesInput = {
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -2180,7 +2180,7 @@ export type OrganizationUncheckedCreateWithoutInvoicesInput = {
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
-  bundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2224,7 +2224,7 @@ export type OrganizationUpdateWithoutInvoicesInput = {
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -2252,7 +2252,7 @@ export type OrganizationUncheckedUpdateWithoutInvoicesInput = {
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2297,7 +2297,7 @@ export type OrganizationUpdateWithoutAddressInput = {
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -2325,7 +2325,7 @@ export type OrganizationUncheckedUpdateWithoutAddressInput = {
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
-  bundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2361,7 +2361,7 @@ export type OrganizationCountOutputType = {
   members: number
   locations: number
   assets: number
-  bundles: number
+  bundleTemplates: number
   productions: number
   categoryRates: number
   offers: number
@@ -2374,7 +2374,7 @@ export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   members?: boolean | OrganizationCountOutputTypeCountMembersArgs
   locations?: boolean | OrganizationCountOutputTypeCountLocationsArgs
   assets?: boolean | OrganizationCountOutputTypeCountAssetsArgs
-  bundles?: boolean | OrganizationCountOutputTypeCountBundlesArgs
+  bundleTemplates?: boolean | OrganizationCountOutputTypeCountBundleTemplatesArgs
   productions?: boolean | OrganizationCountOutputTypeCountProductionsArgs
   categoryRates?: boolean | OrganizationCountOutputTypeCountCategoryRatesArgs
   offers?: boolean | OrganizationCountOutputTypeCountOffersArgs
@@ -2423,8 +2423,8 @@ export type OrganizationCountOutputTypeCountAssetsArgs<ExtArgs extends runtime.T
 /**
  * OrganizationCountOutputType without action
  */
-export type OrganizationCountOutputTypeCountBundlesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AssetBundleWhereInput
+export type OrganizationCountOutputTypeCountBundleTemplatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BundleTemplateWhereInput
 }
 
 /**
@@ -2485,7 +2485,7 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   members?: boolean | Prisma.Organization$membersArgs<ExtArgs>
   locations?: boolean | Prisma.Organization$locationsArgs<ExtArgs>
   assets?: boolean | Prisma.Organization$assetsArgs<ExtArgs>
-  bundles?: boolean | Prisma.Organization$bundlesArgs<ExtArgs>
+  bundleTemplates?: boolean | Prisma.Organization$bundleTemplatesArgs<ExtArgs>
   productions?: boolean | Prisma.Organization$productionsArgs<ExtArgs>
   categoryRates?: boolean | Prisma.Organization$categoryRatesArgs<ExtArgs>
   offers?: boolean | Prisma.Organization$offersArgs<ExtArgs>
@@ -2560,7 +2560,7 @@ export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.Interna
   members?: boolean | Prisma.Organization$membersArgs<ExtArgs>
   locations?: boolean | Prisma.Organization$locationsArgs<ExtArgs>
   assets?: boolean | Prisma.Organization$assetsArgs<ExtArgs>
-  bundles?: boolean | Prisma.Organization$bundlesArgs<ExtArgs>
+  bundleTemplates?: boolean | Prisma.Organization$bundleTemplatesArgs<ExtArgs>
   productions?: boolean | Prisma.Organization$productionsArgs<ExtArgs>
   categoryRates?: boolean | Prisma.Organization$categoryRatesArgs<ExtArgs>
   offers?: boolean | Prisma.Organization$offersArgs<ExtArgs>
@@ -2583,7 +2583,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     members: Prisma.$OrgMembershipPayload<ExtArgs>[]
     locations: Prisma.$LocationPayload<ExtArgs>[]
     assets: Prisma.$AssetPayload<ExtArgs>[]
-    bundles: Prisma.$AssetBundlePayload<ExtArgs>[]
+    bundleTemplates: Prisma.$BundleTemplatePayload<ExtArgs>[]
     productions: Prisma.$ProductionPayload<ExtArgs>[]
     categoryRates: Prisma.$OrgCategoryRatePayload<ExtArgs>[]
     offers: Prisma.$OfferPayload<ExtArgs>[]
@@ -3006,7 +3006,7 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
   members<T extends Prisma.Organization$membersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$membersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrgMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   locations<T extends Prisma.Organization$locationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$locationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LocationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assets<T extends Prisma.Organization$assetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$assetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  bundles<T extends Prisma.Organization$bundlesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$bundlesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetBundlePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  bundleTemplates<T extends Prisma.Organization$bundleTemplatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$bundleTemplatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BundleTemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   productions<T extends Prisma.Organization$productionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$productionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   categoryRates<T extends Prisma.Organization$categoryRatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$categoryRatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrgCategoryRatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   offers<T extends Prisma.Organization$offersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$offersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OfferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3573,27 +3573,27 @@ export type Organization$assetsArgs<ExtArgs extends runtime.Types.Extensions.Int
 }
 
 /**
- * Organization.bundles
+ * Organization.bundleTemplates
  */
-export type Organization$bundlesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type Organization$bundleTemplatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the AssetBundle
+   * Select specific fields to fetch from the BundleTemplate
    */
-  select?: Prisma.AssetBundleSelect<ExtArgs> | null
+  select?: Prisma.BundleTemplateSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the AssetBundle
+   * Omit specific fields from the BundleTemplate
    */
-  omit?: Prisma.AssetBundleOmit<ExtArgs> | null
+  omit?: Prisma.BundleTemplateOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.AssetBundleInclude<ExtArgs> | null
-  where?: Prisma.AssetBundleWhereInput
-  orderBy?: Prisma.AssetBundleOrderByWithRelationInput | Prisma.AssetBundleOrderByWithRelationInput[]
-  cursor?: Prisma.AssetBundleWhereUniqueInput
+  include?: Prisma.BundleTemplateInclude<ExtArgs> | null
+  where?: Prisma.BundleTemplateWhereInput
+  orderBy?: Prisma.BundleTemplateOrderByWithRelationInput | Prisma.BundleTemplateOrderByWithRelationInput[]
+  cursor?: Prisma.BundleTemplateWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.AssetBundleScalarFieldEnum | Prisma.AssetBundleScalarFieldEnum[]
+  distinct?: Prisma.BundleTemplateScalarFieldEnum | Prisma.BundleTemplateScalarFieldEnum[]
 }
 
 /**

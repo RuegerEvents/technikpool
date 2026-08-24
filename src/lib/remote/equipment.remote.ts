@@ -129,10 +129,14 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 	}
 
 	const assetBundles = await prisma.assetBundle.findMany({
-		where: { organizationId: { in: orgIds } },
+		where: { template: { organizationId: { in: orgIds } } },
 		include: {
-			category: { select: { id: true, name: true, color: true, sortOrder: true } },
-			organization: { select: { id: true, name: true, color: true, avatarLabel: true } },
+			template: {
+				include: {
+					category: { select: { id: true, name: true, color: true, sortOrder: true } },
+					organization: { select: { id: true, name: true, color: true, avatarLabel: true } }
+				}
+			},
 			location: { select: { id: true, name: true, address: { select: { city: true } } } },
 			assets: {
 				include: { product: { include: { manufacturer: true } } }
@@ -151,15 +155,17 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 			}
 			return {
 				id: b.id,
-				name: b.name,
-				categoryId: b.categoryId,
-				categoryName: b.category.name,
-				categoryColor: b.category.color,
-				categorySortOrder: b.category.sortOrder,
-				organizationId: b.organizationId,
-				organizationName: b.organization.name,
-				organizationColor: b.organization.color,
-				organizationAvatarLabel: b.organization.avatarLabel,
+				templateId: b.templateId,
+				name: b.template.name,
+				tag: b.tag,
+				categoryId: b.template.categoryId,
+				categoryName: b.template.category.name,
+				categoryColor: b.template.category.color,
+				categorySortOrder: b.template.category.sortOrder,
+				organizationId: b.template.organizationId,
+				organizationName: b.template.organization.name,
+				organizationColor: b.template.organization.color,
+				organizationAvatarLabel: b.template.organization.avatarLabel,
 				locationId: b.locationId,
 				locationName: b.location?.name ?? null,
 				city: b.location?.address.city ?? null,

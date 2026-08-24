@@ -32,6 +32,21 @@
 
 	type Production = Awaited<ReturnType<typeof getProductions>>[number];
 
+	// One query for every org the user belongs to; the org filter is applied
+	// client-side so toggling it never refetches.
+	let orgs = $derived(await getMyOrgs());
+	let allProductions = $derived(await getProductions());
+
+	let selectedOrgIds = $derived(
+		storedOrgIds
+			? storedOrgIds.filter((id) => orgs.some((o) => o.id === id))
+			: orgs.map((o) => o.id)
+	);
+
+	let productions = $derived(
+		allProductions.filter((p) => selectedOrgIds.includes(p.organizationId))
+	);
+
 	const columns: Column<Production>[] = [
 		{ key: 'name', label: 'Name', sortable: true, accessor: (r: Production) => r.name },
 		{
@@ -89,6 +104,11 @@
 		return !!ref && new Date(ref) < cutoff;
 	}
 
+	let visibleProductions = $derived(
+		showArchive ? productions : productions.filter((p) => !isArchived(p))
+	);
+	let archivedCount = $derived(productions.filter(isArchived).length);
+
 	function prodStatus(p: Production): 'past' | 'active' | 'upcoming' {
 		const now = new Date();
 		if (p.endDate && new Date(p.endDate) < now) return 'past';
@@ -108,102 +128,86 @@
 <svelte:head><title>Productions | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
-	{#if true}
-		{@const orgs = await getMyOrgs()}
-		{@const selectedOrgIds = storedOrgIds
-			? storedOrgIds.filter((id) => orgs.some((o) => o.id === id))
-			: orgs.map((o) => o.id)}
-		<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-			<div>
-				<h1 class="text-3xl font-bold tracking-tight">Productions</h1>
-				<p class="text-muted-foreground">Manage events and equipment bookings.</p>
-			</div>
-			<div class="flex items-center gap-4">
-				<label class="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
-					<input type="checkbox" bind:checked={showArchive} class="h-4 w-4 rounded border" />
-					Show archive
-				</label>
-				<OrgMultiSelect {orgs} value={selectedOrgIds} class="w-56" onchange={setSelectedOrgIds} />
-			</div>
+	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+		<div>
+			<h1 class="text-3xl font-bold tracking-tight">Productions</h1>
+			<p class="text-muted-foreground">Manage events and equipment bookings.</p>
 		</div>
+		<div class="flex items-center gap-4">
+			<label class="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+				<input type="checkbox" bind:checked={showArchive} class="h-4 w-4 rounded border" />
+				Show archive
+			</label>
+			<OrgMultiSelect {orgs} value={selectedOrgIds} class="w-56" onchange={setSelectedOrgIds} />
+		</div>
+	</div>
 
-		{#key selectedOrgIds.join(',')}
-			{#if selectedOrgIds.length > 0}
-				{@const productionsPerOrg = await Promise.all(
-					selectedOrgIds.map((id) => getProductions(id))
-				)}
-				{@const productions = productionsPerOrg.flat()}
-				{@const visibleProductions = showArchive
-					? productions
-					: productions.filter((p) => !isArchived(p))}
-				{@const archivedCount = productions.filter(isArchived).length}
-				<DataView
-					rows={visibleProductions}
-					{columns}
-					storageKey="productions_view"
-					defaultView="cards"
-					href={(p) => `/productions/${p.id}`}
-					searchFn={(p, q) => p.name.toLowerCase().includes(q)}
-					searchPlaceholder="Search productions…"
-					addHref="/productions/new"
-					addLabel="New Production"
-					emptyTitle="No productions found"
-					emptyDescription="Create a new production to start checking out equipment."
-					rowClass={prodRowClass}
+	{#if selectedOrgIds.length > 0}
+		<DataView
+			rows={visibleProductions}
+			{columns}
+			storageKey="productions_view"
+			defaultView="cards"
+			href={(p) => `/productions/${p.id}`}
+			searchFn={(p, q) => p.name.toLowerCase().includes(q)}
+			searchPlaceholder="Search productions…"
+			addHref="/productions/new"
+			addLabel="New Production"
+			emptyTitle="No productions found"
+			emptyDescription="Create a new production to start checking out equipment."
+			rowClass={prodRowClass}
+		>
+			{#snippet card(prod)}
+				<Card.Root
+					class="h-full transition-colors group-hover:bg-muted/50 {prodStatus(prod) === 'active'
+						? 'ring-1 ring-primary/50'
+						: ''}"
 				>
-					{#snippet card(prod)}
-						<Card.Root
-							class="h-full transition-colors group-hover:bg-muted/50 {prodStatus(prod) === 'active'
-								? 'ring-1 ring-primary/50'
-								: ''}"
-						>
-							<Card.Header>
-								<Card.Title class="text-lg">{prod.name}</Card.Title>
-								<Card.Description>
-									<span class="block">{prod.organization.name}</span>
-									{#if prod.startDate}
-										<span class="block"
-											>KW {getISOWeek(prod.startDate)} · {formatDate(prod.startDate)}{prod.endDate
-												? ` – ${formatDate(prod.endDate)}`
-												: ''}</span
-										>
-									{/if}
-								</Card.Description>
-							</Card.Header>
-							<Card.Content>
-								<div class="flex items-center justify-between text-sm">
-									<span class="text-muted-foreground">Items Booked</span>
-									<span class="font-medium">{prod.items?.length ?? 0}</span>
-								</div>
-							</Card.Content>
-						</Card.Root>
-					{/snippet}
+					<Card.Header>
+						<Card.Title class="text-lg">{prod.name}</Card.Title>
+						<Card.Description>
+							<span class="block">{prod.organization.name}</span>
+							{#if prod.startDate}
+								<span class="block"
+									>KW {getISOWeek(prod.startDate)} · {formatDate(prod.startDate)}{prod.endDate
+										? ` – ${formatDate(prod.endDate)}`
+										: ''}</span
+								>
+							{/if}
+						</Card.Description>
+					</Card.Header>
+					<Card.Content>
+						<div class="flex items-center justify-between text-sm">
+							<span class="text-muted-foreground">Items Booked</span>
+							<span class="font-medium">{prod.items?.length ?? 0}</span>
+						</div>
+					</Card.Content>
+				</Card.Root>
+			{/snippet}
 
-					{#snippet cell(prod, key)}
-						{#if key === 'name'}
-							<span class="font-medium">{prod.name}</span>
-						{:else if key === 'org'}
-							{prod.organization.name}
-						{:else if key === 'kw'}
-							{prod.startDate ? getISOWeek(prod.startDate) : '—'}
-						{:else if key === 'startDate'}
-							{formatDate(prod.startDate)}
-						{:else if key === 'endDate'}
-							{formatDate(prod.endDate)}
-						{:else if key === 'items'}
-							{prod.items?.length ?? 0}
-						{/if}
-					{/snippet}
-				</DataView>
-				{#if !showArchive && archivedCount > 0}
-					<p class="text-center text-xs text-muted-foreground">
-						{plural(archivedCount, [
-							'# production older than 1 month hidden',
-							'# productions older than 1 month hidden'
-						])}
-					</p>
+			{#snippet cell(prod, key)}
+				{#if key === 'name'}
+					<span class="font-medium">{prod.name}</span>
+				{:else if key === 'org'}
+					{prod.organization.name}
+				{:else if key === 'kw'}
+					{prod.startDate ? getISOWeek(prod.startDate) : '—'}
+				{:else if key === 'startDate'}
+					{formatDate(prod.startDate)}
+				{:else if key === 'endDate'}
+					{formatDate(prod.endDate)}
+				{:else if key === 'items'}
+					{prod.items?.length ?? 0}
 				{/if}
-			{/if}
-		{/key}
+			{/snippet}
+		</DataView>
+		{#if !showArchive && archivedCount > 0}
+			<p class="text-center text-xs text-muted-foreground">
+				{plural(archivedCount, [
+					'# production older than 1 month hidden',
+					'# productions older than 1 month hidden'
+				])}
+			</p>
+		{/if}
 	{/if}
 </div>

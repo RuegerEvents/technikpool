@@ -36,10 +36,8 @@ export type AssetBundleSumAggregateOutputType = {
 
 export type AssetBundleMinAggregateOutputType = {
   id: string | null
-  name: string | null
-  description: string | null
-  organizationId: string | null
-  categoryId: string | null
+  templateId: string | null
+  tag: string | null
   locationId: string | null
   netPurchasePrice: runtime.Decimal | null
   createdAt: Date | null
@@ -48,10 +46,8 @@ export type AssetBundleMinAggregateOutputType = {
 
 export type AssetBundleMaxAggregateOutputType = {
   id: string | null
-  name: string | null
-  description: string | null
-  organizationId: string | null
-  categoryId: string | null
+  templateId: string | null
+  tag: string | null
   locationId: string | null
   netPurchasePrice: runtime.Decimal | null
   createdAt: Date | null
@@ -60,10 +56,8 @@ export type AssetBundleMaxAggregateOutputType = {
 
 export type AssetBundleCountAggregateOutputType = {
   id: number
-  name: number
-  description: number
-  organizationId: number
-  categoryId: number
+  templateId: number
+  tag: number
   locationId: number
   netPurchasePrice: number
   createdAt: number
@@ -82,10 +76,8 @@ export type AssetBundleSumAggregateInputType = {
 
 export type AssetBundleMinAggregateInputType = {
   id?: true
-  name?: true
-  description?: true
-  organizationId?: true
-  categoryId?: true
+  templateId?: true
+  tag?: true
   locationId?: true
   netPurchasePrice?: true
   createdAt?: true
@@ -94,10 +86,8 @@ export type AssetBundleMinAggregateInputType = {
 
 export type AssetBundleMaxAggregateInputType = {
   id?: true
-  name?: true
-  description?: true
-  organizationId?: true
-  categoryId?: true
+  templateId?: true
+  tag?: true
   locationId?: true
   netPurchasePrice?: true
   createdAt?: true
@@ -106,10 +96,8 @@ export type AssetBundleMaxAggregateInputType = {
 
 export type AssetBundleCountAggregateInputType = {
   id?: true
-  name?: true
-  description?: true
-  organizationId?: true
-  categoryId?: true
+  templateId?: true
+  tag?: true
   locationId?: true
   netPurchasePrice?: true
   createdAt?: true
@@ -205,10 +193,8 @@ export type AssetBundleGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
 
 export type AssetBundleGroupByOutputType = {
   id: string
-  name: string
-  description: string | null
-  organizationId: string
-  categoryId: string
+  templateId: string
+  tag: string | null
   locationId: string | null
   netPurchasePrice: runtime.Decimal | null
   createdAt: Date
@@ -240,16 +226,13 @@ export type AssetBundleWhereInput = {
   OR?: Prisma.AssetBundleWhereInput[]
   NOT?: Prisma.AssetBundleWhereInput | Prisma.AssetBundleWhereInput[]
   id?: Prisma.StringFilter<"AssetBundle"> | string
-  name?: Prisma.StringFilter<"AssetBundle"> | string
-  description?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
-  organizationId?: Prisma.StringFilter<"AssetBundle"> | string
-  categoryId?: Prisma.StringFilter<"AssetBundle"> | string
+  templateId?: Prisma.StringFilter<"AssetBundle"> | string
+  tag?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
   locationId?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
   netPurchasePrice?: Prisma.DecimalNullableFilter<"AssetBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
-  organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
-  category?: Prisma.XOR<Prisma.CategoryScalarRelationFilter, Prisma.CategoryWhereInput>
+  template?: Prisma.XOR<Prisma.BundleTemplateScalarRelationFilter, Prisma.BundleTemplateWhereInput>
   location?: Prisma.XOR<Prisma.LocationNullableScalarRelationFilter, Prisma.LocationWhereInput> | null
   assets?: Prisma.AssetListRelationFilter
   productionItems?: Prisma.ProductionItemListRelationFilter
@@ -257,16 +240,13 @@ export type AssetBundleWhereInput = {
 
 export type AssetBundleOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  name?: Prisma.SortOrder
-  description?: Prisma.SortOrderInput | Prisma.SortOrder
-  organizationId?: Prisma.SortOrder
-  categoryId?: Prisma.SortOrder
+  templateId?: Prisma.SortOrder
+  tag?: Prisma.SortOrderInput | Prisma.SortOrder
   locationId?: Prisma.SortOrderInput | Prisma.SortOrder
   netPurchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  organization?: Prisma.OrganizationOrderByWithRelationInput
-  category?: Prisma.CategoryOrderByWithRelationInput
+  template?: Prisma.BundleTemplateOrderByWithRelationInput
   location?: Prisma.LocationOrderByWithRelationInput
   assets?: Prisma.AssetOrderByRelationAggregateInput
   productionItems?: Prisma.ProductionItemOrderByRelationAggregateInput
@@ -274,30 +254,25 @@ export type AssetBundleOrderByWithRelationInput = {
 
 export type AssetBundleWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tag?: string
   AND?: Prisma.AssetBundleWhereInput | Prisma.AssetBundleWhereInput[]
   OR?: Prisma.AssetBundleWhereInput[]
   NOT?: Prisma.AssetBundleWhereInput | Prisma.AssetBundleWhereInput[]
-  name?: Prisma.StringFilter<"AssetBundle"> | string
-  description?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
-  organizationId?: Prisma.StringFilter<"AssetBundle"> | string
-  categoryId?: Prisma.StringFilter<"AssetBundle"> | string
+  templateId?: Prisma.StringFilter<"AssetBundle"> | string
   locationId?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
   netPurchasePrice?: Prisma.DecimalNullableFilter<"AssetBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
-  organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
-  category?: Prisma.XOR<Prisma.CategoryScalarRelationFilter, Prisma.CategoryWhereInput>
+  template?: Prisma.XOR<Prisma.BundleTemplateScalarRelationFilter, Prisma.BundleTemplateWhereInput>
   location?: Prisma.XOR<Prisma.LocationNullableScalarRelationFilter, Prisma.LocationWhereInput> | null
   assets?: Prisma.AssetListRelationFilter
   productionItems?: Prisma.ProductionItemListRelationFilter
-}, "id">
+}, "id" | "tag">
 
 export type AssetBundleOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  name?: Prisma.SortOrder
-  description?: Prisma.SortOrderInput | Prisma.SortOrder
-  organizationId?: Prisma.SortOrder
-  categoryId?: Prisma.SortOrder
+  templateId?: Prisma.SortOrder
+  tag?: Prisma.SortOrderInput | Prisma.SortOrder
   locationId?: Prisma.SortOrderInput | Prisma.SortOrder
   netPurchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -314,10 +289,8 @@ export type AssetBundleScalarWhereWithAggregatesInput = {
   OR?: Prisma.AssetBundleScalarWhereWithAggregatesInput[]
   NOT?: Prisma.AssetBundleScalarWhereWithAggregatesInput | Prisma.AssetBundleScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"AssetBundle"> | string
-  name?: Prisma.StringWithAggregatesFilter<"AssetBundle"> | string
-  description?: Prisma.StringNullableWithAggregatesFilter<"AssetBundle"> | string | null
-  organizationId?: Prisma.StringWithAggregatesFilter<"AssetBundle"> | string
-  categoryId?: Prisma.StringWithAggregatesFilter<"AssetBundle"> | string
+  templateId?: Prisma.StringWithAggregatesFilter<"AssetBundle"> | string
+  tag?: Prisma.StringNullableWithAggregatesFilter<"AssetBundle"> | string | null
   locationId?: Prisma.StringNullableWithAggregatesFilter<"AssetBundle"> | string | null
   netPurchasePrice?: Prisma.DecimalNullableWithAggregatesFilter<"AssetBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AssetBundle"> | Date | string
@@ -326,13 +299,11 @@ export type AssetBundleScalarWhereWithAggregatesInput = {
 
 export type AssetBundleCreateInput = {
   id?: string
-  name: string
-  description?: string | null
+  tag?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  organization: Prisma.OrganizationCreateNestedOneWithoutBundlesInput
-  category: Prisma.CategoryCreateNestedOneWithoutBundlesInput
+  template: Prisma.BundleTemplateCreateNestedOneWithoutInstancesInput
   location?: Prisma.LocationCreateNestedOneWithoutAssetBundlesInput
   assets?: Prisma.AssetCreateNestedManyWithoutBundleInput
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutSourceBundleInput
@@ -340,10 +311,8 @@ export type AssetBundleCreateInput = {
 
 export type AssetBundleUncheckedCreateInput = {
   id?: string
-  name: string
-  description?: string | null
-  organizationId: string
-  categoryId: string
+  templateId: string
+  tag?: string | null
   locationId?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
@@ -354,13 +323,11 @@ export type AssetBundleUncheckedCreateInput = {
 
 export type AssetBundleUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundlesNestedInput
-  category?: Prisma.CategoryUpdateOneRequiredWithoutBundlesNestedInput
+  template?: Prisma.BundleTemplateUpdateOneRequiredWithoutInstancesNestedInput
   location?: Prisma.LocationUpdateOneWithoutAssetBundlesNestedInput
   assets?: Prisma.AssetUpdateManyWithoutBundleNestedInput
   productionItems?: Prisma.ProductionItemUpdateManyWithoutSourceBundleNestedInput
@@ -368,10 +335,8 @@ export type AssetBundleUpdateInput = {
 
 export type AssetBundleUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
-  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  templateId?: Prisma.StringFieldUpdateOperationsInput | string
+  tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -382,10 +347,8 @@ export type AssetBundleUncheckedUpdateInput = {
 
 export type AssetBundleCreateManyInput = {
   id?: string
-  name: string
-  description?: string | null
-  organizationId: string
-  categoryId: string
+  templateId: string
+  tag?: string | null
   locationId?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
@@ -394,8 +357,7 @@ export type AssetBundleCreateManyInput = {
 
 export type AssetBundleUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -403,10 +365,8 @@ export type AssetBundleUpdateManyMutationInput = {
 
 export type AssetBundleUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
-  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  templateId?: Prisma.StringFieldUpdateOperationsInput | string
+  tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -430,10 +390,8 @@ export type AssetBundleNullableScalarRelationFilter = {
 
 export type AssetBundleCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  name?: Prisma.SortOrder
-  description?: Prisma.SortOrder
-  organizationId?: Prisma.SortOrder
-  categoryId?: Prisma.SortOrder
+  templateId?: Prisma.SortOrder
+  tag?: Prisma.SortOrder
   locationId?: Prisma.SortOrder
   netPurchasePrice?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -446,10 +404,8 @@ export type AssetBundleAvgOrderByAggregateInput = {
 
 export type AssetBundleMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  name?: Prisma.SortOrder
-  description?: Prisma.SortOrder
-  organizationId?: Prisma.SortOrder
-  categoryId?: Prisma.SortOrder
+  templateId?: Prisma.SortOrder
+  tag?: Prisma.SortOrder
   locationId?: Prisma.SortOrder
   netPurchasePrice?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -458,10 +414,8 @@ export type AssetBundleMaxOrderByAggregateInput = {
 
 export type AssetBundleMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  name?: Prisma.SortOrder
-  description?: Prisma.SortOrder
-  organizationId?: Prisma.SortOrder
-  categoryId?: Prisma.SortOrder
+  templateId?: Prisma.SortOrder
+  tag?: Prisma.SortOrder
   locationId?: Prisma.SortOrder
   netPurchasePrice?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -470,90 +424,6 @@ export type AssetBundleMinOrderByAggregateInput = {
 
 export type AssetBundleSumOrderByAggregateInput = {
   netPurchasePrice?: Prisma.SortOrder
-}
-
-export type AssetBundleCreateNestedManyWithoutOrganizationInput = {
-  create?: Prisma.XOR<Prisma.AssetBundleCreateWithoutOrganizationInput, Prisma.AssetBundleUncheckedCreateWithoutOrganizationInput> | Prisma.AssetBundleCreateWithoutOrganizationInput[] | Prisma.AssetBundleUncheckedCreateWithoutOrganizationInput[]
-  connectOrCreate?: Prisma.AssetBundleCreateOrConnectWithoutOrganizationInput | Prisma.AssetBundleCreateOrConnectWithoutOrganizationInput[]
-  createMany?: Prisma.AssetBundleCreateManyOrganizationInputEnvelope
-  connect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-}
-
-export type AssetBundleUncheckedCreateNestedManyWithoutOrganizationInput = {
-  create?: Prisma.XOR<Prisma.AssetBundleCreateWithoutOrganizationInput, Prisma.AssetBundleUncheckedCreateWithoutOrganizationInput> | Prisma.AssetBundleCreateWithoutOrganizationInput[] | Prisma.AssetBundleUncheckedCreateWithoutOrganizationInput[]
-  connectOrCreate?: Prisma.AssetBundleCreateOrConnectWithoutOrganizationInput | Prisma.AssetBundleCreateOrConnectWithoutOrganizationInput[]
-  createMany?: Prisma.AssetBundleCreateManyOrganizationInputEnvelope
-  connect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-}
-
-export type AssetBundleUpdateManyWithoutOrganizationNestedInput = {
-  create?: Prisma.XOR<Prisma.AssetBundleCreateWithoutOrganizationInput, Prisma.AssetBundleUncheckedCreateWithoutOrganizationInput> | Prisma.AssetBundleCreateWithoutOrganizationInput[] | Prisma.AssetBundleUncheckedCreateWithoutOrganizationInput[]
-  connectOrCreate?: Prisma.AssetBundleCreateOrConnectWithoutOrganizationInput | Prisma.AssetBundleCreateOrConnectWithoutOrganizationInput[]
-  upsert?: Prisma.AssetBundleUpsertWithWhereUniqueWithoutOrganizationInput | Prisma.AssetBundleUpsertWithWhereUniqueWithoutOrganizationInput[]
-  createMany?: Prisma.AssetBundleCreateManyOrganizationInputEnvelope
-  set?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-  disconnect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-  delete?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-  connect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-  update?: Prisma.AssetBundleUpdateWithWhereUniqueWithoutOrganizationInput | Prisma.AssetBundleUpdateWithWhereUniqueWithoutOrganizationInput[]
-  updateMany?: Prisma.AssetBundleUpdateManyWithWhereWithoutOrganizationInput | Prisma.AssetBundleUpdateManyWithWhereWithoutOrganizationInput[]
-  deleteMany?: Prisma.AssetBundleScalarWhereInput | Prisma.AssetBundleScalarWhereInput[]
-}
-
-export type AssetBundleUncheckedUpdateManyWithoutOrganizationNestedInput = {
-  create?: Prisma.XOR<Prisma.AssetBundleCreateWithoutOrganizationInput, Prisma.AssetBundleUncheckedCreateWithoutOrganizationInput> | Prisma.AssetBundleCreateWithoutOrganizationInput[] | Prisma.AssetBundleUncheckedCreateWithoutOrganizationInput[]
-  connectOrCreate?: Prisma.AssetBundleCreateOrConnectWithoutOrganizationInput | Prisma.AssetBundleCreateOrConnectWithoutOrganizationInput[]
-  upsert?: Prisma.AssetBundleUpsertWithWhereUniqueWithoutOrganizationInput | Prisma.AssetBundleUpsertWithWhereUniqueWithoutOrganizationInput[]
-  createMany?: Prisma.AssetBundleCreateManyOrganizationInputEnvelope
-  set?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-  disconnect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-  delete?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-  connect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-  update?: Prisma.AssetBundleUpdateWithWhereUniqueWithoutOrganizationInput | Prisma.AssetBundleUpdateWithWhereUniqueWithoutOrganizationInput[]
-  updateMany?: Prisma.AssetBundleUpdateManyWithWhereWithoutOrganizationInput | Prisma.AssetBundleUpdateManyWithWhereWithoutOrganizationInput[]
-  deleteMany?: Prisma.AssetBundleScalarWhereInput | Prisma.AssetBundleScalarWhereInput[]
-}
-
-export type AssetBundleCreateNestedManyWithoutCategoryInput = {
-  create?: Prisma.XOR<Prisma.AssetBundleCreateWithoutCategoryInput, Prisma.AssetBundleUncheckedCreateWithoutCategoryInput> | Prisma.AssetBundleCreateWithoutCategoryInput[] | Prisma.AssetBundleUncheckedCreateWithoutCategoryInput[]
-  connectOrCreate?: Prisma.AssetBundleCreateOrConnectWithoutCategoryInput | Prisma.AssetBundleCreateOrConnectWithoutCategoryInput[]
-  createMany?: Prisma.AssetBundleCreateManyCategoryInputEnvelope
-  connect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-}
-
-export type AssetBundleUncheckedCreateNestedManyWithoutCategoryInput = {
-  create?: Prisma.XOR<Prisma.AssetBundleCreateWithoutCategoryInput, Prisma.AssetBundleUncheckedCreateWithoutCategoryInput> | Prisma.AssetBundleCreateWithoutCategoryInput[] | Prisma.AssetBundleUncheckedCreateWithoutCategoryInput[]
-  connectOrCreate?: Prisma.AssetBundleCreateOrConnectWithoutCategoryInput | Prisma.AssetBundleCreateOrConnectWithoutCategoryInput[]
-  createMany?: Prisma.AssetBundleCreateManyCategoryInputEnvelope
-  connect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-}
-
-export type AssetBundleUpdateManyWithoutCategoryNestedInput = {
-  create?: Prisma.XOR<Prisma.AssetBundleCreateWithoutCategoryInput, Prisma.AssetBundleUncheckedCreateWithoutCategoryInput> | Prisma.AssetBundleCreateWithoutCategoryInput[] | Prisma.AssetBundleUncheckedCreateWithoutCategoryInput[]
-  connectOrCreate?: Prisma.AssetBundleCreateOrConnectWithoutCategoryInput | Prisma.AssetBundleCreateOrConnectWithoutCategoryInput[]
-  upsert?: Prisma.AssetBundleUpsertWithWhereUniqueWithoutCategoryInput | Prisma.AssetBundleUpsertWithWhereUniqueWithoutCategoryInput[]
-  createMany?: Prisma.AssetBundleCreateManyCategoryInputEnvelope
-  set?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-  disconnect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-  delete?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-  connect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-  update?: Prisma.AssetBundleUpdateWithWhereUniqueWithoutCategoryInput | Prisma.AssetBundleUpdateWithWhereUniqueWithoutCategoryInput[]
-  updateMany?: Prisma.AssetBundleUpdateManyWithWhereWithoutCategoryInput | Prisma.AssetBundleUpdateManyWithWhereWithoutCategoryInput[]
-  deleteMany?: Prisma.AssetBundleScalarWhereInput | Prisma.AssetBundleScalarWhereInput[]
-}
-
-export type AssetBundleUncheckedUpdateManyWithoutCategoryNestedInput = {
-  create?: Prisma.XOR<Prisma.AssetBundleCreateWithoutCategoryInput, Prisma.AssetBundleUncheckedCreateWithoutCategoryInput> | Prisma.AssetBundleCreateWithoutCategoryInput[] | Prisma.AssetBundleUncheckedCreateWithoutCategoryInput[]
-  connectOrCreate?: Prisma.AssetBundleCreateOrConnectWithoutCategoryInput | Prisma.AssetBundleCreateOrConnectWithoutCategoryInput[]
-  upsert?: Prisma.AssetBundleUpsertWithWhereUniqueWithoutCategoryInput | Prisma.AssetBundleUpsertWithWhereUniqueWithoutCategoryInput[]
-  createMany?: Prisma.AssetBundleCreateManyCategoryInputEnvelope
-  set?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-  disconnect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-  delete?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-  connect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
-  update?: Prisma.AssetBundleUpdateWithWhereUniqueWithoutCategoryInput | Prisma.AssetBundleUpdateWithWhereUniqueWithoutCategoryInput[]
-  updateMany?: Prisma.AssetBundleUpdateManyWithWhereWithoutCategoryInput | Prisma.AssetBundleUpdateManyWithWhereWithoutCategoryInput[]
-  deleteMany?: Prisma.AssetBundleScalarWhereInput | Prisma.AssetBundleScalarWhereInput[]
 }
 
 export type AssetBundleCreateNestedManyWithoutLocationInput = {
@@ -614,6 +484,48 @@ export type AssetBundleUpdateOneWithoutAssetsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AssetBundleUpdateToOneWithWhereWithoutAssetsInput, Prisma.AssetBundleUpdateWithoutAssetsInput>, Prisma.AssetBundleUncheckedUpdateWithoutAssetsInput>
 }
 
+export type AssetBundleCreateNestedManyWithoutTemplateInput = {
+  create?: Prisma.XOR<Prisma.AssetBundleCreateWithoutTemplateInput, Prisma.AssetBundleUncheckedCreateWithoutTemplateInput> | Prisma.AssetBundleCreateWithoutTemplateInput[] | Prisma.AssetBundleUncheckedCreateWithoutTemplateInput[]
+  connectOrCreate?: Prisma.AssetBundleCreateOrConnectWithoutTemplateInput | Prisma.AssetBundleCreateOrConnectWithoutTemplateInput[]
+  createMany?: Prisma.AssetBundleCreateManyTemplateInputEnvelope
+  connect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
+}
+
+export type AssetBundleUncheckedCreateNestedManyWithoutTemplateInput = {
+  create?: Prisma.XOR<Prisma.AssetBundleCreateWithoutTemplateInput, Prisma.AssetBundleUncheckedCreateWithoutTemplateInput> | Prisma.AssetBundleCreateWithoutTemplateInput[] | Prisma.AssetBundleUncheckedCreateWithoutTemplateInput[]
+  connectOrCreate?: Prisma.AssetBundleCreateOrConnectWithoutTemplateInput | Prisma.AssetBundleCreateOrConnectWithoutTemplateInput[]
+  createMany?: Prisma.AssetBundleCreateManyTemplateInputEnvelope
+  connect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
+}
+
+export type AssetBundleUpdateManyWithoutTemplateNestedInput = {
+  create?: Prisma.XOR<Prisma.AssetBundleCreateWithoutTemplateInput, Prisma.AssetBundleUncheckedCreateWithoutTemplateInput> | Prisma.AssetBundleCreateWithoutTemplateInput[] | Prisma.AssetBundleUncheckedCreateWithoutTemplateInput[]
+  connectOrCreate?: Prisma.AssetBundleCreateOrConnectWithoutTemplateInput | Prisma.AssetBundleCreateOrConnectWithoutTemplateInput[]
+  upsert?: Prisma.AssetBundleUpsertWithWhereUniqueWithoutTemplateInput | Prisma.AssetBundleUpsertWithWhereUniqueWithoutTemplateInput[]
+  createMany?: Prisma.AssetBundleCreateManyTemplateInputEnvelope
+  set?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
+  disconnect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
+  delete?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
+  connect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
+  update?: Prisma.AssetBundleUpdateWithWhereUniqueWithoutTemplateInput | Prisma.AssetBundleUpdateWithWhereUniqueWithoutTemplateInput[]
+  updateMany?: Prisma.AssetBundleUpdateManyWithWhereWithoutTemplateInput | Prisma.AssetBundleUpdateManyWithWhereWithoutTemplateInput[]
+  deleteMany?: Prisma.AssetBundleScalarWhereInput | Prisma.AssetBundleScalarWhereInput[]
+}
+
+export type AssetBundleUncheckedUpdateManyWithoutTemplateNestedInput = {
+  create?: Prisma.XOR<Prisma.AssetBundleCreateWithoutTemplateInput, Prisma.AssetBundleUncheckedCreateWithoutTemplateInput> | Prisma.AssetBundleCreateWithoutTemplateInput[] | Prisma.AssetBundleUncheckedCreateWithoutTemplateInput[]
+  connectOrCreate?: Prisma.AssetBundleCreateOrConnectWithoutTemplateInput | Prisma.AssetBundleCreateOrConnectWithoutTemplateInput[]
+  upsert?: Prisma.AssetBundleUpsertWithWhereUniqueWithoutTemplateInput | Prisma.AssetBundleUpsertWithWhereUniqueWithoutTemplateInput[]
+  createMany?: Prisma.AssetBundleCreateManyTemplateInputEnvelope
+  set?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
+  disconnect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
+  delete?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
+  connect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[]
+  update?: Prisma.AssetBundleUpdateWithWhereUniqueWithoutTemplateInput | Prisma.AssetBundleUpdateWithWhereUniqueWithoutTemplateInput[]
+  updateMany?: Prisma.AssetBundleUpdateManyWithWhereWithoutTemplateInput | Prisma.AssetBundleUpdateManyWithWhereWithoutTemplateInput[]
+  deleteMany?: Prisma.AssetBundleScalarWhereInput | Prisma.AssetBundleScalarWhereInput[]
+}
+
 export type AssetBundleCreateNestedOneWithoutProductionItemsInput = {
   create?: Prisma.XOR<Prisma.AssetBundleCreateWithoutProductionItemsInput, Prisma.AssetBundleUncheckedCreateWithoutProductionItemsInput>
   connectOrCreate?: Prisma.AssetBundleCreateOrConnectWithoutProductionItemsInput
@@ -630,144 +542,21 @@ export type AssetBundleUpdateOneWithoutProductionItemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AssetBundleUpdateToOneWithWhereWithoutProductionItemsInput, Prisma.AssetBundleUpdateWithoutProductionItemsInput>, Prisma.AssetBundleUncheckedUpdateWithoutProductionItemsInput>
 }
 
-export type AssetBundleCreateWithoutOrganizationInput = {
-  id?: string
-  name: string
-  description?: string | null
-  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  category: Prisma.CategoryCreateNestedOneWithoutBundlesInput
-  location?: Prisma.LocationCreateNestedOneWithoutAssetBundlesInput
-  assets?: Prisma.AssetCreateNestedManyWithoutBundleInput
-  productionItems?: Prisma.ProductionItemCreateNestedManyWithoutSourceBundleInput
-}
-
-export type AssetBundleUncheckedCreateWithoutOrganizationInput = {
-  id?: string
-  name: string
-  description?: string | null
-  categoryId: string
-  locationId?: string | null
-  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput
-  productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutSourceBundleInput
-}
-
-export type AssetBundleCreateOrConnectWithoutOrganizationInput = {
-  where: Prisma.AssetBundleWhereUniqueInput
-  create: Prisma.XOR<Prisma.AssetBundleCreateWithoutOrganizationInput, Prisma.AssetBundleUncheckedCreateWithoutOrganizationInput>
-}
-
-export type AssetBundleCreateManyOrganizationInputEnvelope = {
-  data: Prisma.AssetBundleCreateManyOrganizationInput | Prisma.AssetBundleCreateManyOrganizationInput[]
-  skipDuplicates?: boolean
-}
-
-export type AssetBundleUpsertWithWhereUniqueWithoutOrganizationInput = {
-  where: Prisma.AssetBundleWhereUniqueInput
-  update: Prisma.XOR<Prisma.AssetBundleUpdateWithoutOrganizationInput, Prisma.AssetBundleUncheckedUpdateWithoutOrganizationInput>
-  create: Prisma.XOR<Prisma.AssetBundleCreateWithoutOrganizationInput, Prisma.AssetBundleUncheckedCreateWithoutOrganizationInput>
-}
-
-export type AssetBundleUpdateWithWhereUniqueWithoutOrganizationInput = {
-  where: Prisma.AssetBundleWhereUniqueInput
-  data: Prisma.XOR<Prisma.AssetBundleUpdateWithoutOrganizationInput, Prisma.AssetBundleUncheckedUpdateWithoutOrganizationInput>
-}
-
-export type AssetBundleUpdateManyWithWhereWithoutOrganizationInput = {
-  where: Prisma.AssetBundleScalarWhereInput
-  data: Prisma.XOR<Prisma.AssetBundleUpdateManyMutationInput, Prisma.AssetBundleUncheckedUpdateManyWithoutOrganizationInput>
-}
-
-export type AssetBundleScalarWhereInput = {
-  AND?: Prisma.AssetBundleScalarWhereInput | Prisma.AssetBundleScalarWhereInput[]
-  OR?: Prisma.AssetBundleScalarWhereInput[]
-  NOT?: Prisma.AssetBundleScalarWhereInput | Prisma.AssetBundleScalarWhereInput[]
-  id?: Prisma.StringFilter<"AssetBundle"> | string
-  name?: Prisma.StringFilter<"AssetBundle"> | string
-  description?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
-  organizationId?: Prisma.StringFilter<"AssetBundle"> | string
-  categoryId?: Prisma.StringFilter<"AssetBundle"> | string
-  locationId?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
-  netPurchasePrice?: Prisma.DecimalNullableFilter<"AssetBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  createdAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
-}
-
-export type AssetBundleCreateWithoutCategoryInput = {
-  id?: string
-  name: string
-  description?: string | null
-  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  organization: Prisma.OrganizationCreateNestedOneWithoutBundlesInput
-  location?: Prisma.LocationCreateNestedOneWithoutAssetBundlesInput
-  assets?: Prisma.AssetCreateNestedManyWithoutBundleInput
-  productionItems?: Prisma.ProductionItemCreateNestedManyWithoutSourceBundleInput
-}
-
-export type AssetBundleUncheckedCreateWithoutCategoryInput = {
-  id?: string
-  name: string
-  description?: string | null
-  organizationId: string
-  locationId?: string | null
-  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput
-  productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutSourceBundleInput
-}
-
-export type AssetBundleCreateOrConnectWithoutCategoryInput = {
-  where: Prisma.AssetBundleWhereUniqueInput
-  create: Prisma.XOR<Prisma.AssetBundleCreateWithoutCategoryInput, Prisma.AssetBundleUncheckedCreateWithoutCategoryInput>
-}
-
-export type AssetBundleCreateManyCategoryInputEnvelope = {
-  data: Prisma.AssetBundleCreateManyCategoryInput | Prisma.AssetBundleCreateManyCategoryInput[]
-  skipDuplicates?: boolean
-}
-
-export type AssetBundleUpsertWithWhereUniqueWithoutCategoryInput = {
-  where: Prisma.AssetBundleWhereUniqueInput
-  update: Prisma.XOR<Prisma.AssetBundleUpdateWithoutCategoryInput, Prisma.AssetBundleUncheckedUpdateWithoutCategoryInput>
-  create: Prisma.XOR<Prisma.AssetBundleCreateWithoutCategoryInput, Prisma.AssetBundleUncheckedCreateWithoutCategoryInput>
-}
-
-export type AssetBundleUpdateWithWhereUniqueWithoutCategoryInput = {
-  where: Prisma.AssetBundleWhereUniqueInput
-  data: Prisma.XOR<Prisma.AssetBundleUpdateWithoutCategoryInput, Prisma.AssetBundleUncheckedUpdateWithoutCategoryInput>
-}
-
-export type AssetBundleUpdateManyWithWhereWithoutCategoryInput = {
-  where: Prisma.AssetBundleScalarWhereInput
-  data: Prisma.XOR<Prisma.AssetBundleUpdateManyMutationInput, Prisma.AssetBundleUncheckedUpdateManyWithoutCategoryInput>
-}
-
 export type AssetBundleCreateWithoutLocationInput = {
   id?: string
-  name: string
-  description?: string | null
+  tag?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  organization: Prisma.OrganizationCreateNestedOneWithoutBundlesInput
-  category: Prisma.CategoryCreateNestedOneWithoutBundlesInput
+  template: Prisma.BundleTemplateCreateNestedOneWithoutInstancesInput
   assets?: Prisma.AssetCreateNestedManyWithoutBundleInput
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutSourceBundleInput
 }
 
 export type AssetBundleUncheckedCreateWithoutLocationInput = {
   id?: string
-  name: string
-  description?: string | null
-  organizationId: string
-  categoryId: string
+  templateId: string
+  tag?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -801,25 +590,34 @@ export type AssetBundleUpdateManyWithWhereWithoutLocationInput = {
   data: Prisma.XOR<Prisma.AssetBundleUpdateManyMutationInput, Prisma.AssetBundleUncheckedUpdateManyWithoutLocationInput>
 }
 
+export type AssetBundleScalarWhereInput = {
+  AND?: Prisma.AssetBundleScalarWhereInput | Prisma.AssetBundleScalarWhereInput[]
+  OR?: Prisma.AssetBundleScalarWhereInput[]
+  NOT?: Prisma.AssetBundleScalarWhereInput | Prisma.AssetBundleScalarWhereInput[]
+  id?: Prisma.StringFilter<"AssetBundle"> | string
+  templateId?: Prisma.StringFilter<"AssetBundle"> | string
+  tag?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
+  locationId?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
+  netPurchasePrice?: Prisma.DecimalNullableFilter<"AssetBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  createdAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
+}
+
 export type AssetBundleCreateWithoutAssetsInput = {
   id?: string
-  name: string
-  description?: string | null
+  tag?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  organization: Prisma.OrganizationCreateNestedOneWithoutBundlesInput
-  category: Prisma.CategoryCreateNestedOneWithoutBundlesInput
+  template: Prisma.BundleTemplateCreateNestedOneWithoutInstancesInput
   location?: Prisma.LocationCreateNestedOneWithoutAssetBundlesInput
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutSourceBundleInput
 }
 
 export type AssetBundleUncheckedCreateWithoutAssetsInput = {
   id?: string
-  name: string
-  description?: string | null
-  organizationId: string
-  categoryId: string
+  templateId: string
+  tag?: string | null
   locationId?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
@@ -845,23 +643,19 @@ export type AssetBundleUpdateToOneWithWhereWithoutAssetsInput = {
 
 export type AssetBundleUpdateWithoutAssetsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundlesNestedInput
-  category?: Prisma.CategoryUpdateOneRequiredWithoutBundlesNestedInput
+  template?: Prisma.BundleTemplateUpdateOneRequiredWithoutInstancesNestedInput
   location?: Prisma.LocationUpdateOneWithoutAssetBundlesNestedInput
   productionItems?: Prisma.ProductionItemUpdateManyWithoutSourceBundleNestedInput
 }
 
 export type AssetBundleUncheckedUpdateWithoutAssetsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
-  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  templateId?: Prisma.StringFieldUpdateOperationsInput | string
+  tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -869,25 +663,69 @@ export type AssetBundleUncheckedUpdateWithoutAssetsInput = {
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutSourceBundleNestedInput
 }
 
-export type AssetBundleCreateWithoutProductionItemsInput = {
+export type AssetBundleCreateWithoutTemplateInput = {
   id?: string
-  name: string
-  description?: string | null
+  tag?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  organization: Prisma.OrganizationCreateNestedOneWithoutBundlesInput
-  category: Prisma.CategoryCreateNestedOneWithoutBundlesInput
+  location?: Prisma.LocationCreateNestedOneWithoutAssetBundlesInput
+  assets?: Prisma.AssetCreateNestedManyWithoutBundleInput
+  productionItems?: Prisma.ProductionItemCreateNestedManyWithoutSourceBundleInput
+}
+
+export type AssetBundleUncheckedCreateWithoutTemplateInput = {
+  id?: string
+  tag?: string | null
+  locationId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput
+  productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutSourceBundleInput
+}
+
+export type AssetBundleCreateOrConnectWithoutTemplateInput = {
+  where: Prisma.AssetBundleWhereUniqueInput
+  create: Prisma.XOR<Prisma.AssetBundleCreateWithoutTemplateInput, Prisma.AssetBundleUncheckedCreateWithoutTemplateInput>
+}
+
+export type AssetBundleCreateManyTemplateInputEnvelope = {
+  data: Prisma.AssetBundleCreateManyTemplateInput | Prisma.AssetBundleCreateManyTemplateInput[]
+  skipDuplicates?: boolean
+}
+
+export type AssetBundleUpsertWithWhereUniqueWithoutTemplateInput = {
+  where: Prisma.AssetBundleWhereUniqueInput
+  update: Prisma.XOR<Prisma.AssetBundleUpdateWithoutTemplateInput, Prisma.AssetBundleUncheckedUpdateWithoutTemplateInput>
+  create: Prisma.XOR<Prisma.AssetBundleCreateWithoutTemplateInput, Prisma.AssetBundleUncheckedCreateWithoutTemplateInput>
+}
+
+export type AssetBundleUpdateWithWhereUniqueWithoutTemplateInput = {
+  where: Prisma.AssetBundleWhereUniqueInput
+  data: Prisma.XOR<Prisma.AssetBundleUpdateWithoutTemplateInput, Prisma.AssetBundleUncheckedUpdateWithoutTemplateInput>
+}
+
+export type AssetBundleUpdateManyWithWhereWithoutTemplateInput = {
+  where: Prisma.AssetBundleScalarWhereInput
+  data: Prisma.XOR<Prisma.AssetBundleUpdateManyMutationInput, Prisma.AssetBundleUncheckedUpdateManyWithoutTemplateInput>
+}
+
+export type AssetBundleCreateWithoutProductionItemsInput = {
+  id?: string
+  tag?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  template: Prisma.BundleTemplateCreateNestedOneWithoutInstancesInput
   location?: Prisma.LocationCreateNestedOneWithoutAssetBundlesInput
   assets?: Prisma.AssetCreateNestedManyWithoutBundleInput
 }
 
 export type AssetBundleUncheckedCreateWithoutProductionItemsInput = {
   id?: string
-  name: string
-  description?: string | null
-  organizationId: string
-  categoryId: string
+  templateId: string
+  tag?: string | null
   locationId?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
@@ -913,132 +751,30 @@ export type AssetBundleUpdateToOneWithWhereWithoutProductionItemsInput = {
 
 export type AssetBundleUpdateWithoutProductionItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundlesNestedInput
-  category?: Prisma.CategoryUpdateOneRequiredWithoutBundlesNestedInput
+  template?: Prisma.BundleTemplateUpdateOneRequiredWithoutInstancesNestedInput
   location?: Prisma.LocationUpdateOneWithoutAssetBundlesNestedInput
   assets?: Prisma.AssetUpdateManyWithoutBundleNestedInput
 }
 
 export type AssetBundleUncheckedUpdateWithoutProductionItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
-  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  templateId?: Prisma.StringFieldUpdateOperationsInput | string
+  tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput
-}
-
-export type AssetBundleCreateManyOrganizationInput = {
-  id?: string
-  name: string
-  description?: string | null
-  categoryId: string
-  locationId?: string | null
-  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-}
-
-export type AssetBundleUpdateWithoutOrganizationInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  category?: Prisma.CategoryUpdateOneRequiredWithoutBundlesNestedInput
-  location?: Prisma.LocationUpdateOneWithoutAssetBundlesNestedInput
-  assets?: Prisma.AssetUpdateManyWithoutBundleNestedInput
-  productionItems?: Prisma.ProductionItemUpdateManyWithoutSourceBundleNestedInput
-}
-
-export type AssetBundleUncheckedUpdateWithoutOrganizationInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
-  locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput
-  productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutSourceBundleNestedInput
-}
-
-export type AssetBundleUncheckedUpdateManyWithoutOrganizationInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
-  locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type AssetBundleCreateManyCategoryInput = {
-  id?: string
-  name: string
-  description?: string | null
-  organizationId: string
-  locationId?: string | null
-  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-}
-
-export type AssetBundleUpdateWithoutCategoryInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundlesNestedInput
-  location?: Prisma.LocationUpdateOneWithoutAssetBundlesNestedInput
-  assets?: Prisma.AssetUpdateManyWithoutBundleNestedInput
-  productionItems?: Prisma.ProductionItemUpdateManyWithoutSourceBundleNestedInput
-}
-
-export type AssetBundleUncheckedUpdateWithoutCategoryInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
-  locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput
-  productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutSourceBundleNestedInput
-}
-
-export type AssetBundleUncheckedUpdateManyWithoutCategoryInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
-  locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AssetBundleCreateManyLocationInput = {
   id?: string
-  name: string
-  description?: string | null
-  organizationId: string
-  categoryId: string
+  templateId: string
+  tag?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1046,23 +782,19 @@ export type AssetBundleCreateManyLocationInput = {
 
 export type AssetBundleUpdateWithoutLocationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundlesNestedInput
-  category?: Prisma.CategoryUpdateOneRequiredWithoutBundlesNestedInput
+  template?: Prisma.BundleTemplateUpdateOneRequiredWithoutInstancesNestedInput
   assets?: Prisma.AssetUpdateManyWithoutBundleNestedInput
   productionItems?: Prisma.ProductionItemUpdateManyWithoutSourceBundleNestedInput
 }
 
 export type AssetBundleUncheckedUpdateWithoutLocationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
-  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  templateId?: Prisma.StringFieldUpdateOperationsInput | string
+  tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1072,10 +804,48 @@ export type AssetBundleUncheckedUpdateWithoutLocationInput = {
 
 export type AssetBundleUncheckedUpdateManyWithoutLocationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
-  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  templateId?: Prisma.StringFieldUpdateOperationsInput | string
+  tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type AssetBundleCreateManyTemplateInput = {
+  id?: string
+  tag?: string | null
+  locationId?: string | null
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type AssetBundleUpdateWithoutTemplateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.LocationUpdateOneWithoutAssetBundlesNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutBundleNestedInput
+  productionItems?: Prisma.ProductionItemUpdateManyWithoutSourceBundleNestedInput
+}
+
+export type AssetBundleUncheckedUpdateWithoutTemplateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput
+  productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutSourceBundleNestedInput
+}
+
+export type AssetBundleUncheckedUpdateManyWithoutTemplateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1123,16 +893,13 @@ export type AssetBundleCountOutputTypeCountProductionItemsArgs<ExtArgs extends r
 
 export type AssetBundleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  name?: boolean
-  description?: boolean
-  organizationId?: boolean
-  categoryId?: boolean
+  templateId?: boolean
+  tag?: boolean
   locationId?: boolean
   netPurchasePrice?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
-  category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
+  template?: boolean | Prisma.BundleTemplateDefaultArgs<ExtArgs>
   location?: boolean | Prisma.AssetBundle$locationArgs<ExtArgs>
   assets?: boolean | Prisma.AssetBundle$assetsArgs<ExtArgs>
   productionItems?: boolean | Prisma.AssetBundle$productionItemsArgs<ExtArgs>
@@ -1141,81 +908,67 @@ export type AssetBundleSelect<ExtArgs extends runtime.Types.Extensions.InternalA
 
 export type AssetBundleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  name?: boolean
-  description?: boolean
-  organizationId?: boolean
-  categoryId?: boolean
+  templateId?: boolean
+  tag?: boolean
   locationId?: boolean
   netPurchasePrice?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
-  category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
+  template?: boolean | Prisma.BundleTemplateDefaultArgs<ExtArgs>
   location?: boolean | Prisma.AssetBundle$locationArgs<ExtArgs>
 }, ExtArgs["result"]["assetBundle"]>
 
 export type AssetBundleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  name?: boolean
-  description?: boolean
-  organizationId?: boolean
-  categoryId?: boolean
+  templateId?: boolean
+  tag?: boolean
   locationId?: boolean
   netPurchasePrice?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
-  category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
+  template?: boolean | Prisma.BundleTemplateDefaultArgs<ExtArgs>
   location?: boolean | Prisma.AssetBundle$locationArgs<ExtArgs>
 }, ExtArgs["result"]["assetBundle"]>
 
 export type AssetBundleSelectScalar = {
   id?: boolean
-  name?: boolean
-  description?: boolean
-  organizationId?: boolean
-  categoryId?: boolean
+  templateId?: boolean
+  tag?: boolean
   locationId?: boolean
   netPurchasePrice?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AssetBundleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "organizationId" | "categoryId" | "locationId" | "netPurchasePrice" | "createdAt" | "updatedAt", ExtArgs["result"]["assetBundle"]>
+export type AssetBundleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "templateId" | "tag" | "locationId" | "netPurchasePrice" | "createdAt" | "updatedAt", ExtArgs["result"]["assetBundle"]>
 export type AssetBundleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
-  category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
+  template?: boolean | Prisma.BundleTemplateDefaultArgs<ExtArgs>
   location?: boolean | Prisma.AssetBundle$locationArgs<ExtArgs>
   assets?: boolean | Prisma.AssetBundle$assetsArgs<ExtArgs>
   productionItems?: boolean | Prisma.AssetBundle$productionItemsArgs<ExtArgs>
   _count?: boolean | Prisma.AssetBundleCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AssetBundleIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
-  category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
+  template?: boolean | Prisma.BundleTemplateDefaultArgs<ExtArgs>
   location?: boolean | Prisma.AssetBundle$locationArgs<ExtArgs>
 }
 export type AssetBundleIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
-  category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
+  template?: boolean | Prisma.BundleTemplateDefaultArgs<ExtArgs>
   location?: boolean | Prisma.AssetBundle$locationArgs<ExtArgs>
 }
 
 export type $AssetBundlePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AssetBundle"
   objects: {
-    organization: Prisma.$OrganizationPayload<ExtArgs>
-    category: Prisma.$CategoryPayload<ExtArgs>
+    template: Prisma.$BundleTemplatePayload<ExtArgs>
     location: Prisma.$LocationPayload<ExtArgs> | null
     assets: Prisma.$AssetPayload<ExtArgs>[]
     productionItems: Prisma.$ProductionItemPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    name: string
-    description: string | null
-    organizationId: string
-    categoryId: string
+    templateId: string
+    tag: string | null
     locationId: string | null
     netPurchasePrice: runtime.Decimal | null
     createdAt: Date
@@ -1614,8 +1367,7 @@ readonly fields: AssetBundleFieldRefs;
  */
 export interface Prisma__AssetBundleClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  category<T extends Prisma.CategoryDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CategoryDefaultArgs<ExtArgs>>): Prisma.Prisma__CategoryClient<runtime.Types.Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  template<T extends Prisma.BundleTemplateDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BundleTemplateDefaultArgs<ExtArgs>>): Prisma.Prisma__BundleTemplateClient<runtime.Types.Result.GetResult<Prisma.$BundleTemplatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   location<T extends Prisma.AssetBundle$locationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssetBundle$locationArgs<ExtArgs>>): Prisma.Prisma__LocationClient<runtime.Types.Result.GetResult<Prisma.$LocationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   assets<T extends Prisma.AssetBundle$assetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssetBundle$assetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   productionItems<T extends Prisma.AssetBundle$productionItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssetBundle$productionItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1649,10 +1401,8 @@ export interface Prisma__AssetBundleClient<T, Null = never, ExtArgs extends runt
  */
 export interface AssetBundleFieldRefs {
   readonly id: Prisma.FieldRef<"AssetBundle", 'String'>
-  readonly name: Prisma.FieldRef<"AssetBundle", 'String'>
-  readonly description: Prisma.FieldRef<"AssetBundle", 'String'>
-  readonly organizationId: Prisma.FieldRef<"AssetBundle", 'String'>
-  readonly categoryId: Prisma.FieldRef<"AssetBundle", 'String'>
+  readonly templateId: Prisma.FieldRef<"AssetBundle", 'String'>
+  readonly tag: Prisma.FieldRef<"AssetBundle", 'String'>
   readonly locationId: Prisma.FieldRef<"AssetBundle", 'String'>
   readonly netPurchasePrice: Prisma.FieldRef<"AssetBundle", 'Decimal'>
   readonly createdAt: Prisma.FieldRef<"AssetBundle", 'DateTime'>

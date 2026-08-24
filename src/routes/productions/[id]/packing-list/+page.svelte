@@ -28,7 +28,7 @@
 			if (!map.has(bid)) {
 				map.set(bid, {
 					bundleId: bid,
-					bundleName: item.sourceBundle.name,
+					bundleName: item.sourceBundle.template.name,
 					orgName: item.asset.organization.name,
 					productCounts: []
 				});
