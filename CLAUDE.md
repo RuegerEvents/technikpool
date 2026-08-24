@@ -425,5 +425,11 @@ adb shell am broadcast -a com.scanner.broadcast --es data "40000001"
 - **Flutter's Gradle migration rewrites `android/app/build.gradle.kts` on build** and will revert
   hand-edited values in `defaultConfig` (it silently put `minSdk` back to `flutter.minSdkVersion`
   once). Re-check the file after a build if you changed something there.
+- **Riverpod 3 wraps provider errors in `ProviderException`,** and nests them across dependent
+  providers, so `unwrapError` peels those before type-checking. Any new `is ApiException` check
+  must go through it or it will silently stop matching.
+- **Riverpod 3 retries failed providers automatically.** The policy is set once on `ProviderScope`
+  in `main.dart`: retry transport failures and 5xx, give up immediately on 4xx. Retrying a 401
+  just burns battery.
 - Avoid single-value enums in `openapi.yaml` — they generate unusable Dart identifiers when the
   value isn't a valid identifier (e.g. a URN). Use a documented constant string.

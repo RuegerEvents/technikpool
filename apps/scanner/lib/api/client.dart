@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/misc.dart';
 
 import 'generated/export.dart';
 
@@ -134,8 +135,18 @@ String localisedMessage(Object error) {
   return err.toString();
 }
 
-/// Unwraps whatever Dio wrapped so callers can branch on [ApiException].
-Object unwrapError(Object error) {
+/// Unwraps whatever Dio or Riverpod wrapped so callers can branch on
+/// [ApiException].
+///
+/// Riverpod 3 wraps errors rethrown by a provider in [ProviderException], and
+/// nests them when providers depend on each other, so peel those first —
+/// otherwise every `is ApiException` check silently stops matching.
+Object unwrapError(Object raw) {
+  var error = raw;
+  while (error is ProviderException) {
+    error = error.exception;
+  }
+
   if (error is DioException) {
     final inner = error.error;
     if (inner is ApiException) return inner;

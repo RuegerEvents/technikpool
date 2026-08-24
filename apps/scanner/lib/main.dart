@@ -1,13 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'api/client.dart';
 import 'l10n/strings.dart';
 import 'screens/home_screen.dart';
 import 'screens/pairing_screen.dart';
 import 'state/providers.dart';
 
+/// Riverpod 3 retries failed providers automatically. That's genuinely useful
+/// on a warehouse PDA drifting in and out of wifi, but only for failures that
+/// might succeed on a second attempt: retrying a 401 or a 404 just burns
+/// battery and hammers the server. Retry transport failures and 5xx, give up on
+/// anything the client did wrong.
+Duration? _retry(int attempt, Object error) {
+  final err = unwrapError(error);
+  if (err is ApiException) {
+    final status = err.status;
+    final retryable = err.code == 'network' || (status != null && status >= 500);
+    if (!retryable) return null;
+  }
+  if (attempt >= 5) return null;
+  return Duration(seconds: 1 << attempt); // 1s, 2s, 4s, 8s, 16s
+}
+
 void main() {
-  runApp(const ProviderScope(child: ScannerApp()));
+  runApp(ProviderScope(retry: _retry, child: const ScannerApp()));
 }
 
 class ScannerApp extends StatelessWidget {
