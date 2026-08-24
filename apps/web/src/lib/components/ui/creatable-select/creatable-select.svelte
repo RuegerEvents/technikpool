@@ -63,9 +63,12 @@
 			highlightedIndex = -1;
 			oncreate(opt.name);
 		} else {
-			value = null;
+			// No oncreate handler: report the new entry as a selection with no id
+			// yet. It has to land in `value` too — a consumer that binds has
+			// nothing else to read, and clearing it here loses what was typed.
+			value = { id: null, name: opt.name };
 			inputValue = opt.name;
-			onchange?.({ id: null, name: opt.name });
+			onchange?.(value);
 			open = false;
 			highlightedIndex = -1;
 		}
