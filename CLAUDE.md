@@ -418,7 +418,12 @@ adb shell am broadcast -a com.scanner.broadcast --es data "40000001"
   listener replaces the Kotlin sink and the first disposal clears it for everyone.
 - **`build.yaml` sets `include_if_null: false`.** Optional request fields must be _absent_ when
   unset; better-auth rejects an explicit null where it expects a string or nothing.
-- **`compileSdk` is pinned to 36** and `flutter_secure_storage` to 9.x. Newer SDK installs name
-  the platform `android-37.0`, which AGP can't resolve from the hash string `android-37`.
+- **`compileSdk = 37` must be paired with `compileSdkMinor = 0`.** API 37 ships under Android's
+  minor-SDK-version scheme, so the platform installs as `android-37.0`; `compileSdk` alone looks
+  for `android-37` and the build fails with "Failed to find target with hash string". Needs
+  AGP 9+. `minSdk` is 24, required by `flutter_secure_storage`.
+- **Flutter's Gradle migration rewrites `android/app/build.gradle.kts` on build** and will revert
+  hand-edited values in `defaultConfig` (it silently put `minSdk` back to `flutter.minSdkVersion`
+  once). Re-check the file after a build if you changed something there.
 - Avoid single-value enums in `openapi.yaml` — they generate unusable Dart identifiers when the
   value isn't a valid identifier (e.g. a URN). Use a documented constant string.
