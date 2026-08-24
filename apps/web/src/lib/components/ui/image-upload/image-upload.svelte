@@ -9,7 +9,9 @@
 	let step = $state<Step>(value ? 'done' : 'idle');
 
 	let fileInput = $state<HTMLInputElement | null>(null);
+	let container = $state<HTMLDivElement | null>(null);
 	let dragOver = $state(false);
+	let hovered = $state(false);
 
 	let cropSrc = $state('');
 	let naturalW = 0;
@@ -78,6 +80,31 @@
 		dragOver = false;
 		const file = e.dataTransfer?.files?.[0];
 		if (file) onFileChosen(file);
+	}
+
+	function imageFromClipboard(data: DataTransfer | null): File | null {
+		if (!data) return null;
+		for (let i = 0; i < data.items.length; i++) {
+			const item = data.items[i];
+			if (item.kind !== 'file' || !item.type.startsWith('image/')) continue;
+			const file = item.getAsFile();
+			if (file) return file;
+		}
+		return null;
+	}
+
+	// Paste is listened for on the window, because the drop zone is a button and
+	// nothing here is a text field the caret could sit in. A page can hold more
+	// than one uploader (the new-product modal opens over the manufacturer logo
+	// one), so a paste only belongs to this instance while the user is pointing
+	// at this drop zone — hovering it, or having tabbed to it.
+	function handlePaste(e: ClipboardEvent) {
+		if (step !== 'idle') return;
+		if (!hovered && !container?.contains(document.activeElement)) return;
+		const file = imageFromClipboard(e.clipboardData);
+		if (!file) return;
+		e.preventDefault();
+		onFileChosen(file);
 	}
 
 	function clampBox() {
@@ -198,9 +225,9 @@
 	}
 </script>
 
-<svelte:window onpointermove={onPointerMove} onpointerup={onPointerUp} />
+<svelte:window onpointermove={onPointerMove} onpointerup={onPointerUp} onpaste={handlePaste} />
 
-<div class="space-y-2">
+<div bind:this={container} class="space-y-2">
 	<input
 		bind:this={fileInput}
 		type="file"
@@ -222,11 +249,13 @@
 			}}
 			ondragleave={() => (dragOver = false)}
 			ondrop={handleDrop}
-			class="w-full rounded-lg border-2 border-dashed p-6 text-center text-sm transition-colors {dragOver
+			onpointerenter={() => (hovered = true)}
+			onpointerleave={() => (hovered = false)}
+			class="w-full rounded-lg border-2 border-dashed p-6 text-center text-sm ring-offset-background transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none {dragOver
 				? 'border-primary bg-primary/5'
 				: 'border-input hover:bg-muted/40'}"
 		>
-			Drop {label.toLowerCase()} here, or click to choose
+			Drop {label.toLowerCase()} here, paste it, or click to choose
 		</button>
 	{:else if step === 'crop'}
 		<div class="space-y-2 rounded-lg border p-3">

@@ -3188,10 +3188,8 @@ msgstr "Hintergrundentfernung fehlgeschlagen: {0}"
 msgid "Upload failed"
 msgstr "Upload fehlgeschlagen"
 
-#. 0: label.toLowerCase()
-#: src/lib/components/ui/image-upload/image-upload.svelte
-msgid "Drop {0} here, or click to choose"
-msgstr "{0} hier ablegen oder klicken zum Auswählen"
+#~ msgid "Drop {0} here, or click to choose"
+#~ msgstr "{0} hier ablegen oder klicken zum Auswählen"
 
 #: src/lib/components/ui/image-upload/image-upload.svelte
 msgid "Square crop. Drag to reposition, use the handle to resize — pull out to fit the whole image, in to crop tighter."
@@ -4188,3 +4186,8 @@ msgstr "Verkauft / Ausgemustert"
 #: src/routes/assets/[id]/+page.svelte
 msgid "Last known location"
 msgstr "Zuletzt bekannter Standort"
+
+#. 0: label.toLowerCase()
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Drop {0} here, paste it, or click to choose"
+msgstr "{0} hier ablegen, einfügen oder klicken zum Auswählen"
