@@ -30,14 +30,22 @@ class ScanBus {
   final _controller = StreamController<ScanEvent>.broadcast();
   StreamSubscription<String>? _hardwareSubscription;
 
-  String? _lastCode;
-  DateTime _lastAt = DateTime.fromMillisecondsSinceEpoch(0);
+  /// When each code was last let through. Keyed by the code rather than just
+  /// remembering the previous one: with the camera pointed at a shelf, A B A
+  /// comes back inside a second, and the B in the middle must not make the
+  /// second A look new.
+  final _lastAccepted = <String, DateTime>{};
 
-  /// A hardware trigger commonly fires twice on one pull, and the camera
-  /// re-reads the same label on every frame it stays in view. Both are one
-  /// scan as far as the operator is concerned, so the echo is dropped here
-  /// rather than in each screen.
-  static const _echoWindow = Duration(seconds: 2);
+  /// A hardware trigger commonly fires twice on one pull — milliseconds apart,
+  /// and anything longer is the operator deliberately pulling again.
+  static const _hardwareEchoWindow = Duration(seconds: 2);
+
+  /// The camera re-reads the same label on every frame it stays in view, and a
+  /// label stays in view for as long as it takes to move the phone. Ten seconds
+  /// is the operator's own pace: long enough that a shelf can be worked through
+  /// without the same sticker landing twice, short enough that deliberately
+  /// coming back to one isn't a fight.
+  static const _cameraEchoWindow = Duration(seconds: 10);
 
   Stream<ScanEvent> get events {
     _hardwareSubscription ??= _channel.scans.listen(
@@ -55,16 +63,25 @@ class ScanBus {
   /// Typed entry deliberately does not come through here: repeating a tag by
   /// hand is something the operator meant to do, so it must not be swallowed
   /// as an echo.
-  void add(String raw, ScanSource source) {
+  ///
+  /// Returns whether the code was passed on, so a caller showing a running
+  /// count doesn't count the echoes it can't see.
+  bool add(String raw, ScanSource source) {
     final code = raw.trim();
-    if (code.isEmpty) return;
+    if (code.isEmpty) return false;
 
     final now = DateTime.now();
-    if (code == _lastCode && now.difference(_lastAt) < _echoWindow) return;
-    _lastCode = code;
-    _lastAt = now;
+    // Prune on the longest window, so the map stays bounded over a long session
+    // without expiring an entry either window still cares about.
+    _lastAccepted.removeWhere((_, at) => now.difference(at) > _cameraEchoWindow);
+
+    final window = source == ScanSource.camera ? _cameraEchoWindow : _hardwareEchoWindow;
+    final last = _lastAccepted[code];
+    if (last != null && now.difference(last) < window) return false;
+    _lastAccepted[code] = now;
 
     _controller.add(ScanEvent(code: code, source: source));
+    return true;
   }
 
   Future<void> dispose() async {

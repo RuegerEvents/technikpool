@@ -116,14 +116,16 @@ class _CameraScanScreenState extends ConsumerState<CameraScanScreen> {
         );
     if (code == null) return;
 
-    ref.read(scanBusProvider).add(code, ScanSource.camera);
+    final accepted = ref.read(scanBusProvider).add(code, ScanSource.camera);
 
     if (!widget.continuous) {
       _closing = true;
       Navigator.of(context).maybePop();
       return;
     }
-    setState(() => _count++);
+    // The same label sits in front of the lens for many frames, so most
+    // detections are echoes the bus drops. Counting those would race away.
+    if (accepted) setState(() => _count++);
   }
 
   String _describe(S l10n, MobileScannerException error) {

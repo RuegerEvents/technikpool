@@ -476,8 +476,10 @@ handheld has no per-user anything.
 Two inputs, one path. **`ScanBus` (`lib/scan/scan_bus.dart`) is the only place a decoded barcode
 enters the app**, and every screen listens to it — never to `ScanChannel.scans` directly. That is
 what keeps one screen working on all three device classes without knowing which it is on, and it
-is where the echo suppression lives (a trigger fires twice per pull; the camera re-reads a label
-every frame).
+is where the echo suppression lives, keyed per code with a window that depends on the source: a
+trigger fires twice per pull, so **2s** is enough there, while the camera re-reads a label on
+every frame it stays in view and gets **10s**. `add()` returns whether the code was passed on, so
+a caller with a running count doesn't count the echoes it can't see.
 
 - **Hardware** — the PDA's engine emits scans as Android broadcast Intents. `ScanReceiver.kt`
   registers a BroadcastReceiver and forwards decoded text over an EventChannel. Android only:
