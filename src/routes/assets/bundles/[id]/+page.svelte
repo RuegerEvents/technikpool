@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getErrorMessage } from '$lib/utils';
+	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -163,7 +163,7 @@
 			<h1 class="text-3xl font-bold tracking-tight">
 				{bundle.template.name}{bundle.tag ? ` — ${bundle.tag}` : ''}
 			</h1>
-			<p class="text-muted-foreground">{bundle.template.organization.name}</p>
+			<p class="text-muted-foreground">{orgLabel(bundle.template.organization)}</p>
 		</div>
 		<div class="flex gap-2">
 			<Button
@@ -195,7 +195,7 @@
 				<form class="space-y-4" onsubmit={handleBundleSave}>
 					<div class="space-y-2">
 						<Label>Organization</Label>
-						<Input value={bundle.template.organization.name} disabled />
+						<Input value={orgLabel(bundle.template.organization)} disabled />
 					</div>
 					<div class="space-y-2">
 						<Label for="name">Name</Label>
@@ -415,7 +415,9 @@
 										</p>
 									</td>
 									<td class="px-3 py-2 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
-									<td class="px-3 py-2 text-xs text-muted-foreground">{asset.organization.name}</td>
+									<td class="px-3 py-2 text-xs text-muted-foreground"
+										>{orgLabel(asset.organization)}</td
+									>
 									<td class="px-3 py-2 text-right">
 										<Button size="sm" disabled={working} onclick={() => handleAdd(asset.id)}
 											>Add</Button

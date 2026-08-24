@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { getInvoices } from '$lib/remote/offers.remote';
@@ -53,7 +54,7 @@
 						<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
 							<td class="px-4 py-3 font-mono font-medium">{invoice.number}</td>
 							<td class="px-4 py-3">{invoice.customerName}</td>
-							<td class="px-4 py-3 text-muted-foreground">{invoice.organization.name}</td>
+							<td class="px-4 py-3 text-muted-foreground">{orgLabel(invoice.organization)}</td>
 							<td class="px-4 py-3 text-muted-foreground"
 								>{new Date(invoice.issueDate).toLocaleDateString('de-DE')}</td
 							>

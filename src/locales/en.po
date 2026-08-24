@@ -71,7 +71,7 @@ msgstr "Sign up"
 msgid "Crew member added"
 msgstr "Crew member added"
 
-#. 0: production.organization.name
+#. 0: orgLabel(production.organization)
 #: src/routes/productions/[id]/+page.svelte
 msgid "Owned by {0}"
 msgstr "Owned by {0}"
@@ -4070,3 +4070,26 @@ msgid "# component"
 msgid_plural "# components"
 msgstr[0] "# component"
 msgstr[1] "# components"
+
+#~ msgid "Probe string for HMR check"
+#~ msgstr "Probe string for HMR check"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Short name <0>(optional)</0>"
+msgstr "Short name <0>(optional)</0>"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Shown instead of the full name in tables and pickers. Invoices and offers always use the full name."
+msgstr "Shown instead of the full name in tables and pickers. Invoices and offers always use the full name."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Short name"
+msgstr "Short name"
+
+#: src/routes/orgs/+page.svelte
+msgid "Short Name <0>(optional)</0>"
+msgstr "Short Name <0>(optional)</0>"
+
+#: src/routes/orgs/+page.svelte
+msgid "Shown instead of the full name in tables and pickers."
+msgstr "Shown instead of the full name in tables and pickers."

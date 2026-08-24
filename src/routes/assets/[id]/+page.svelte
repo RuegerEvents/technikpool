@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getErrorMessage } from '$lib/utils';
+	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -183,7 +183,7 @@
 				<form class="space-y-4" onsubmit={handleAssetSave}>
 					<div class="space-y-2">
 						<Label>Organization</Label>
-						<Input value={asset.organization.name} disabled />
+						<Input value={orgLabel(asset.organization)} disabled />
 					</div>
 					<div class="space-y-2">
 						<Label>Bundle</Label>

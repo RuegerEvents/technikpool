@@ -1,6 +1,7 @@
 import { query, command, getRequestEvent } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
+import { orgLabel } from '$lib/utils';
 import { getProduction } from './productions.remote';
 
 async function requireAuth() {
@@ -37,7 +38,9 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 		where: { organizationId: { in: orgIds } },
 		include: {
 			product: { include: { manufacturer: true, category: true } },
-			organization: { select: { id: true, name: true, color: true, avatarLabel: true } },
+			organization: {
+				select: { id: true, name: true, shortName: true, color: true, avatarLabel: true }
+			},
 			location: { select: { id: true, name: true, address: { select: { city: true } } } },
 			productionItems: {
 				where: {
@@ -102,7 +105,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 				categoryColor: a.product.category.color,
 				categorySortOrder: a.product.category.sortOrder,
 				organizationId: a.organizationId,
-				organizationName: a.organization.name,
+				organizationName: orgLabel(a.organization),
 				organizationColor: a.organization.color,
 				organizationAvatarLabel: a.organization.avatarLabel,
 				locationId: a.locationId,
@@ -134,7 +137,9 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 			template: {
 				include: {
 					category: { select: { id: true, name: true, color: true, sortOrder: true } },
-					organization: { select: { id: true, name: true, color: true, avatarLabel: true } }
+					organization: {
+						select: { id: true, name: true, shortName: true, color: true, avatarLabel: true }
+					}
 				}
 			},
 			location: { select: { id: true, name: true, address: { select: { city: true } } } },
@@ -163,7 +168,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 				categoryColor: b.template.category.color,
 				categorySortOrder: b.template.category.sortOrder,
 				organizationId: b.template.organizationId,
-				organizationName: b.template.organization.name,
+				organizationName: orgLabel(b.template.organization),
 				organizationColor: b.template.organization.color,
 				organizationAvatarLabel: b.template.organization.avatarLabel,
 				locationId: b.locationId,

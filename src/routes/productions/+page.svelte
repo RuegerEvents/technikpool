@@ -7,7 +7,7 @@
 	import { getProductions } from '$lib/remote/productions.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { page } from '$app/state';
-	import { plural } from '$lib/utils';
+	import { plural, orgLabel } from '$lib/utils';
 	import { browser } from '$app/environment';
 
 	const ORG_FILTER_STORAGE_KEY = 'productions.selectedOrgIds';
@@ -53,7 +53,7 @@
 			key: 'org',
 			label: 'Organization',
 			sortable: true,
-			accessor: (r: Production) => r.organization.name
+			accessor: (r: Production) => orgLabel(r.organization)
 		},
 		{
 			key: 'kw',
@@ -166,7 +166,7 @@
 					<Card.Header>
 						<Card.Title class="text-lg">{prod.name}</Card.Title>
 						<Card.Description>
-							<span class="block">{prod.organization.name}</span>
+							<span class="block">{orgLabel(prod.organization)}</span>
 							{#if prod.startDate}
 								<span class="block"
 									>KW {getISOWeek(prod.startDate)} · {formatDate(prod.startDate)}{prod.endDate
@@ -189,7 +189,7 @@
 				{#if key === 'name'}
 					<span class="font-medium">{prod.name}</span>
 				{:else if key === 'org'}
-					{prod.organization.name}
+					{orgLabel(prod.organization)}
 				{:else if key === 'kw'}
 					{prod.startDate ? getISOWeek(prod.startDate) : '—'}
 				{:else if key === 'startDate'}

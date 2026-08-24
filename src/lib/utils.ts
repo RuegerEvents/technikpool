@@ -5,6 +5,12 @@ export function plural(num: number, candidates: string[], rule = (n: number) => 
 	return candidates[rule(num)].replace('#', String(num));
 }
 
+// What to call an org in the UI: its short name when one is set, otherwise the
+// full name. Legal documents (offers, invoices) always print the full name.
+export function orgLabel(org: { name: string; shortName?: string | null }): string {
+	return org.shortName?.trim() || org.name;
+}
+
 // Inclusive day count between two dates (a single day counts as 1, not 0).
 export function dayCountBetween(
 	start: Date | string | null | undefined,

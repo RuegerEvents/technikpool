@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { cn } from '$lib/utils';
+	import { cn, orgLabel } from '$lib/utils';
 
-	type Org = { id: string; name: string };
+	type Org = { id: string; name: string; shortName?: string | null };
 
 	type Props = {
 		orgs: Org[];
@@ -23,7 +23,10 @@
 			: value.length === orgs.length
 				? 'All organizations'
 				: value.length === 1
-					? (orgs.find((o) => o.id === value[0])?.name ?? '1 organization')
+					? (() => {
+							const org = orgs.find((o) => o.id === value[0]);
+							return org ? orgLabel(org) : '1 organization';
+						})()
 					: `${value.length} organizations`
 	);
 
@@ -116,7 +119,7 @@
 							onchange={() => toggleOrg(org.id)}
 							class="h-4 w-4 rounded border"
 						/>
-						{org.name}
+						{orgLabel(org)}
 					</label>
 				{/each}
 			</div>

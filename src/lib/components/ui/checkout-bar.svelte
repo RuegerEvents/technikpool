@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getErrorMessage } from '$lib/utils';
+	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
 	import { getLocations } from '$lib/remote/assets.remote';
 	import { getAllProductions, checkoutAssets } from '$lib/remote/checkout.remote';
@@ -25,10 +25,10 @@
 					const addr = [l.address?.postalCode?.trim(), l.address?.city?.trim()]
 						.filter(Boolean)
 						.join(' ');
-					const detail = [l.organization.name, addr].filter(Boolean).join(' · ');
+					const detail = [orgLabel(l.organization), addr].filter(Boolean).join(' · ');
 					return { id: l.id, label: detail ? `${l.name} (${detail})` : l.name };
 				})
-			: productions.map((p) => ({ id: p.id, label: `${p.name} (${p.organization.name})` }))
+			: productions.map((p) => ({ id: p.id, label: `${p.name} (${orgLabel(p.organization)})` }))
 	);
 
 	async function handleCheckout() {

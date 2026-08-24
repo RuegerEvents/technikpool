@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { orgLabel } from '$lib/utils';
 	import { getAssets, getCategories, getBundleTemplates } from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { Button } from '$lib/components/ui/button';
@@ -114,6 +115,7 @@
 								(a.serialNumber?.toLowerCase().includes(searchTrimmed) ?? false) ||
 								(a.assetTag?.toLowerCase().includes(searchTrimmed) ?? false) ||
 								(a.bundle?.template.name.toLowerCase().includes(searchTrimmed) ?? false) ||
+								orgLabel(a.organization).toLowerCase().includes(searchTrimmed) ||
 								a.organization.name.toLowerCase().includes(searchTrimmed)
 						)
 				)
@@ -239,7 +241,7 @@
 				class="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
 			>
 				<option value="">All Organizations</option>
-				{#each orgs as org (org.id)}<option value={org.id}>{org.name}</option>{/each}
+				{#each orgs as org (org.id)}<option value={org.id}>{orgLabel(org)}</option>{/each}
 			</select>
 			<Button variant="outline" onclick={() => (showImportModal = true)}>Import CSV</Button>
 			<Button variant="outline" href={resolve('/assets/bundles/new')}>Add Bundle</Button>
@@ -667,7 +669,7 @@
 												<span class="text-xs text-muted-foreground">{asset.location.name}</span>
 											{/if}
 											<span class="flex-1 text-xs text-muted-foreground"
-												>{asset.organization.name}</span
+												>{orgLabel(asset.organization)}</span
 											>
 											{#if asset.bundle}
 												<a

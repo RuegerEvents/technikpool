@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getErrorMessage } from '$lib/utils';
+	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import { getLocations } from '$lib/remote/assets.remote';
 	import { getAllProductions, scanAsset } from '$lib/remote/checkout.remote';
 	import { Button } from '$lib/components/ui/button';
@@ -20,7 +20,7 @@
 			const addr = [loc.address?.postalCode?.trim(), loc.address?.city?.trim()]
 				.filter(Boolean)
 				.join(' ');
-			const detail = [loc.organization.name, addr].filter(Boolean).join(' · ');
+			const detail = [orgLabel(loc.organization), addr].filter(Boolean).join(' · ');
 			return { id: loc.id, name: detail ? `${loc.name} (${detail})` : loc.name };
 		})
 	);
@@ -59,7 +59,7 @@
 			? (locationSelection?.name ?? '')
 			: (() => {
 					const p = productions.find((p) => p.id === targetId);
-					return p ? `${p.name} (${p.organization.name})` : '';
+					return p ? `${p.name} (${orgLabel(p.organization)})` : '';
 				})()
 	);
 
@@ -298,7 +298,7 @@
 						>
 							<option value="" disabled>Select a production…</option>
 							{#each productions as prod (prod.id)}
-								<option value={prod.id}>{prod.name} — {prod.organization.name}</option>
+								<option value={prod.id}>{prod.name} — {orgLabel(prod.organization)}</option>
 							{/each}
 						</select>
 					</div>

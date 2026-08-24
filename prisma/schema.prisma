@@ -84,8 +84,13 @@ model Verification {
 // ----------------------------------------------------
 
 model Organization {
-  id            String @id @default(cuid())
-  name          String
+  id   String @id @default(cuid())
+  name String
+
+  // Optional abbreviation shown instead of `name` wherever space is tight
+  // (pickers, tables, badges). Legal documents always use `name`.
+  shortName String?
+
   assetIdPrefix String @unique
 
   createdAt DateTime @default(now())

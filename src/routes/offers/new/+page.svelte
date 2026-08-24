@@ -12,7 +12,7 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
-	import { formatAddress, getErrorMessage } from '$lib/utils';
+	import { formatAddress, getErrorMessage, orgLabel } from '$lib/utils';
 
 	const preselectedProductionId = page.url.searchParams.get('productionId');
 
@@ -159,7 +159,7 @@
 						class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
 					>
 						<option value="" disabled>Select an organization</option>
-						{#each orgs as org (org.id)}<option value={org.id}>{org.name}</option>{/each}
+						{#each orgs as org (org.id)}<option value={org.id}>{orgLabel(org)}</option>{/each}
 					</select>
 				</div>
 

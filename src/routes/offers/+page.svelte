@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { getOffers } from '$lib/remote/offers.remote';
@@ -56,7 +57,7 @@
 						<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
 							<td class="px-4 py-3 font-medium">{offer.customerName}</td>
 							<td class="px-4 py-3 text-muted-foreground">{offer.production?.name ?? '—'}</td>
-							<td class="px-4 py-3 text-muted-foreground">{offer.organization.name}</td>
+							<td class="px-4 py-3 text-muted-foreground">{orgLabel(offer.organization)}</td>
 							<td class="px-4 py-3 text-right font-medium tabular-nums"
 								>{fmtEUR(offerTotal(offer))}</td
 							>

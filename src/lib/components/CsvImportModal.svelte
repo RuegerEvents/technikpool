@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getErrorMessage } from '$lib/utils';
+	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { getLocations, getCategories, importAssets } from '$lib/remote/assets.remote';
@@ -414,7 +414,7 @@
 								<label class="text-sm font-medium" for="import-org">Organization</label>
 								<select id="import-org" bind:value={selectedOrgId} class={selectClass}>
 									{#each orgs as org (org.id)}
-										<option value={org.id}>{org.name}</option>
+										<option value={org.id}>{orgLabel(org)}</option>
 									{/each}
 								</select>
 							</div>

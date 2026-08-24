@@ -6,13 +6,14 @@
 	import { getMyOrgs, getAllOrgs, createOrg } from '$lib/remote/orgs.remote';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
-	import { plural, getErrorMessage } from '$lib/utils';
+	import { plural, getErrorMessage, orgLabel } from '$lib/utils';
 	import { OrgBadge } from '$lib/components/ui/org-badge';
 
 	let { data } = $props();
 
 	let orgs = $derived(await (data.isAdmin ? getAllOrgs() : getMyOrgs()));
 	let newOrgName = $state('');
+	let newOrgShortName = $state('');
 	let newOrgPrefix = $state('');
 	let newOrgColor = $state('#0069c9');
 	let newOrgAvatarLabel = $state('');
@@ -32,12 +33,14 @@
 			creating = true;
 			await createOrg({
 				name: newOrgName,
+				shortName: newOrgShortName || undefined,
 				assetIdPrefix: newOrgPrefix,
 				color: newOrgColor,
 				avatarLabel: newOrgAvatarLabel
 			});
 			toast.success(`Organization "${newOrgName}" created!`);
 			newOrgName = '';
+			newOrgShortName = '';
 			newOrgPrefix = '';
 			newOrgColor = '#0069c9';
 			newOrgAvatarLabel = '';
@@ -76,6 +79,20 @@
 					<div class="space-y-2">
 						<Label for="orgName">Organization Name</Label>
 						<Input id="orgName" bind:value={newOrgName} placeholder="e.g. Acme Corp" required />
+					</div>
+					<div class="space-y-2">
+						<Label for="orgShortName"
+							>Short Name <span class="text-muted-foreground">(optional)</span></Label
+						>
+						<Input
+							id="orgShortName"
+							bind:value={newOrgShortName}
+							placeholder="e.g. Acme"
+							maxlength={24}
+						/>
+						<p class="text-xs text-muted-foreground">
+							Shown instead of the full name in tables and pickers.
+						</p>
 					</div>
 					<div class="space-y-2">
 						<Label for="orgPrefix">Asset ID Prefix</Label>
@@ -139,7 +156,11 @@
 							<Card.Content class="flex items-center justify-between py-4">
 								<div>
 									<p class="font-medium">
-										<OrgBadge name={org.name} color={org.color} avatarLabel={org.avatarLabel} />
+										<OrgBadge
+											name={orgLabel(org)}
+											color={org.color}
+											avatarLabel={org.avatarLabel}
+										/>
 									</p>
 									<p class="text-sm text-muted-foreground">
 										{#if org.role}

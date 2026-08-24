@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getErrorMessage } from '$lib/utils';
+	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { getAllUsers, setUserAdmin } from '$lib/remote/orgs.remote';
@@ -84,7 +84,7 @@
 												href={resolve(`/orgs/${m.organization.id}`)}
 												class="rounded border px-1.5 py-0.5 text-xs hover:bg-muted"
 											>
-												{m.organization.name}
+												{orgLabel(m.organization)}
 												<span class="text-muted-foreground">({roleLabels[m.role] ?? m.role})</span>
 											</a>
 										{/each}

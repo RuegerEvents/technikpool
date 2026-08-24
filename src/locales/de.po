@@ -71,7 +71,7 @@ msgstr "Registrieren"
 msgid "Crew member added"
 msgstr "Crewmitglied hinzugefügt"
 
-#. 0: production.organization.name
+#. 0: orgLabel(production.organization)
 #: src/routes/productions/[id]/+page.svelte
 msgid "Owned by {0}"
 msgstr "Organisation: {0}"
@@ -4070,3 +4070,26 @@ msgid "# component"
 msgid_plural "# components"
 msgstr[0] "# Bestandteil"
 msgstr[1] "# Bestandteile"
+
+#~ msgid "Probe string for HMR check"
+#~ msgstr "Zweite Probe live"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Short name <0>(optional)</0>"
+msgstr "Kurzname <0>(optional)</0>"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Shown instead of the full name in tables and pickers. Invoices and offers always use the full name."
+msgstr "Wird in Tabellen und Auswahllisten anstelle des vollständigen Namens angezeigt. Rechnungen und Angebote verwenden immer den vollständigen Namen."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Short name"
+msgstr "Kurzname"
+
+#: src/routes/orgs/+page.svelte
+msgid "Short Name <0>(optional)</0>"
+msgstr "Kurzname <0>(optional)</0>"
+
+#: src/routes/orgs/+page.svelte
+msgid "Shown instead of the full name in tables and pickers."
+msgstr "Wird in Tabellen und Auswahllisten anstelle des vollständigen Namens angezeigt."

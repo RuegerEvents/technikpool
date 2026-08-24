@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { orgLabel } from '$lib/utils';
 	import { page } from '$app/state';
 	import { getProduction } from '$lib/remote/productions.remote';
 	import { onMount } from 'svelte';
@@ -29,7 +30,7 @@
 				map.set(bid, {
 					bundleId: bid,
 					bundleName: item.sourceBundle.template.name,
-					orgName: item.asset.organization.name,
+					orgName: orgLabel(item.asset.organization),
 					productCounts: []
 				});
 			}
@@ -120,7 +121,7 @@
 					<td class="py-3 font-medium">{item.asset.product.name}</td>
 					<td class="py-3">{item.asset.product.manufacturer.name}</td>
 					<td class="py-3 font-mono text-sm">{item.asset.serialNumber || 'N/A'}</td>
-					<td class="py-3 text-right">{item.asset.organization.name}</td>
+					<td class="py-3 text-right">{orgLabel(item.asset.organization)}</td>
 				</tr>
 			{/each}
 		</tbody>

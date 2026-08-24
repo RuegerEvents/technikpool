@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getErrorMessage } from '$lib/utils';
+	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -426,7 +426,7 @@
 	<div class="flex flex-wrap items-center justify-between gap-4">
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">{production.name}</h1>
-			<p class="text-muted-foreground">Owned by {production.organization.name}</p>
+			<p class="text-muted-foreground">Owned by {orgLabel(production.organization)}</p>
 		</div>
 		<div class="flex flex-wrap gap-2">
 			<Button variant="outline" href={resolve('/productions')}>Back</Button>
@@ -896,7 +896,7 @@
 													{item.asset.serialNumber ? `S/N: ${item.asset.serialNumber}` : '—'}
 												</span>
 												<span class="text-xs text-muted-foreground"
-													>{item.asset.organization.name}</span
+													>{orgLabel(item.asset.organization)}</span
 												>
 												<span
 													class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {statusClass[

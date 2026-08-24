@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { orgLabel } from '$lib/utils';
 	import { page } from '$app/stores';
 	import { getProduction } from '$lib/remote/productions.remote';
 	import { onMount } from 'svelte';
@@ -89,7 +90,7 @@
 						{/if}
 
 						<div class="flex justify-between border-t pt-2 text-xs text-zinc-500">
-							<span>{production.organization.name}</span>
+							<span>{orgLabel(production.organization)}</span>
 							{#if member.user.email}<span>{member.user.email}</span>{/if}
 						</div>
 					</div>

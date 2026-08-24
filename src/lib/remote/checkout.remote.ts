@@ -32,7 +32,7 @@ export const getAllProductions = query(async () => {
 	const orgIds = memberships.map((m) => m.organizationId);
 	return await prisma.production.findMany({
 		where: { organizationId: { in: orgIds } },
-		include: { organization: { select: { name: true } } },
+		include: { organization: { select: { name: true, shortName: true } } },
 		orderBy: [{ startDate: 'desc' }, { name: 'asc' }]
 	});
 });

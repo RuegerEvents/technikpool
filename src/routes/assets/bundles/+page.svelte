@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
@@ -37,7 +38,9 @@
 						<div class="flex items-start justify-between gap-2">
 							<div class="min-w-0">
 								<Card.Title class="truncate text-base">{template.name}</Card.Title>
-								<p class="mt-0.5 text-xs text-muted-foreground">{template.organization.name}</p>
+								<p class="mt-0.5 text-xs text-muted-foreground">
+									{orgLabel(template.organization)}
+								</p>
 							</div>
 							<Layers class="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
 						</div>

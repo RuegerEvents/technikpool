@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { orgLabel } from '$lib/utils';
 	/* eslint-disable svelte/prefer-svelte-reactivity */
 	import { getCalendarData, getProductionsCalendar } from '$lib/remote/productions.remote';
 	import { resolve } from '$app/paths';
@@ -80,7 +81,7 @@
 			if (!seen.has(a.organization.id)) {
 				seen.set(a.organization.id, {
 					id: a.organization.id,
-					name: a.organization.name,
+					name: orgLabel(a.organization),
 					color: a.organization.color,
 					avatarLabel: a.organization.avatarLabel
 				});
@@ -481,10 +482,10 @@
 							kind: 'asset',
 							id: a.id,
 							label: a.serialNumber ?? a.assetTag ?? `#${a.id.slice(0, 6)}`,
-							org: a.organization.name,
+							org: orgLabel(a.organization),
 							orgInfo: {
 								id: a.organization.id,
-								name: a.organization.name,
+								name: orgLabel(a.organization),
 								color: a.organization.color,
 								avatarLabel: a.organization.avatarLabel
 							},
@@ -966,7 +967,7 @@
 							onchange={() => toggleOrgFilter(org.id)}
 							class="h-4 w-4 rounded border-input"
 						/>
-						<OrgBadge name={org.name} color={org.color} avatarLabel={org.avatarLabel} />
+						<OrgBadge name={orgLabel(org)} color={org.color} avatarLabel={org.avatarLabel} />
 					</label>
 				{/each}
 			</FilterPopover>

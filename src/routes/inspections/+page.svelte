@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getErrorMessage } from '$lib/utils';
+	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import { Dialog } from 'bits-ui';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -157,7 +157,7 @@
 								</td>
 								<td class="px-4 py-3">
 									<OrgBadge
-										name={asset.organization.name}
+										name={orgLabel(asset.organization)}
 										color={asset.organization.color}
 										avatarLabel={asset.organization.avatarLabel}
 									/>
@@ -212,7 +212,7 @@
 								</td>
 								<td class="px-4 py-3">
 									<OrgBadge
-										name={asset.organization.name}
+										name={orgLabel(asset.organization)}
 										color={asset.organization.color}
 										avatarLabel={asset.organization.avatarLabel}
 									/>

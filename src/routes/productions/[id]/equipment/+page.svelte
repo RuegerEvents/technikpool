@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getErrorMessage, plural } from '$lib/utils';
+	import { getErrorMessage, plural, orgLabel } from '$lib/utils';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { Button } from '$lib/components/ui/button';
@@ -483,7 +483,7 @@
 								}}
 								class="h-4 w-4 rounded border-input"
 							/>
-							<OrgBadge name={org.name} color={org.color} avatarLabel={org.avatarLabel} />
+							<OrgBadge name={orgLabel(org)} color={org.color} avatarLabel={org.avatarLabel} />
 						</label>
 					{/each}
 				</FilterPopover>

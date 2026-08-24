@@ -199,6 +199,7 @@ function normalizeColor(raw: string): string {
 
 const createOrgSchema = v.object({
 	name: v.string(),
+	shortName: v.optional(v.string()),
 	assetIdPrefix: v.string(),
 	color: v.string(),
 	avatarLabel: v.string()
@@ -206,7 +207,7 @@ const createOrgSchema = v.object({
 
 export const createOrg = command(
 	createOrgSchema,
-	async ({ name, assetIdPrefix, color, avatarLabel }) => {
+	async ({ name, shortName, assetIdPrefix, color, avatarLabel }) => {
 		const user = await requireAuth();
 		const prefix = normalizePrefix(assetIdPrefix);
 		const normalizedColor = normalizeColor(color);
@@ -216,6 +217,7 @@ export const createOrg = command(
 			return await tx.organization.create({
 				data: {
 					name,
+					shortName: shortName?.trim() || null,
 					assetIdPrefix: prefix,
 					color: normalizedColor,
 					avatarLabel: normalizedLabel,
@@ -243,6 +245,7 @@ const billingAddressSchema = v.object({
 
 const updateOrgSchema = v.object({
 	orgId: v.string(),
+	shortName: v.optional(v.nullable(v.string())),
 	assetIdPrefix: v.string(),
 	color: v.string(),
 	avatarLabel: v.string(),
@@ -260,6 +263,7 @@ export const updateOrg = command(
 	updateOrgSchema,
 	async ({
 		orgId,
+		shortName,
 		assetIdPrefix,
 		color,
 		avatarLabel,
@@ -306,6 +310,7 @@ export const updateOrg = command(
 			return await tx.organization.update({
 				where: { id: orgId },
 				data: {
+					...(shortName !== undefined ? { shortName: shortName?.trim() || null } : {}),
 					assetIdPrefix: prefix,
 					color: normalizedColor,
 					avatarLabel: normalizedLabel,
@@ -364,7 +369,7 @@ export const getAllUsers = query(async () => {
 			isAdmin: true,
 			createdAt: true,
 			memberships: {
-				select: { role: true, organization: { select: { id: true, name: true } } },
+				select: { role: true, organization: { select: { id: true, name: true, shortName: true } } },
 				orderBy: { role: 'asc' }
 			}
 		},

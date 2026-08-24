@@ -5,7 +5,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
-	import { getErrorMessage, dayCountBetween, formatAddress } from '$lib/utils';
+	import { getErrorMessage, dayCountBetween, formatAddress, orgLabel } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
 	import {
 		getInvoice,
@@ -126,7 +126,7 @@
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">Invoice {invoice.number}</h1>
 			<p class="text-muted-foreground">
-				{invoice.customerName} · {invoice.organization.name}
+				{invoice.customerName} · {orgLabel(invoice.organization)}
 				{#if invoice.production}
 					·
 					<a

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getErrorMessage } from '$lib/utils';
+	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -100,7 +100,7 @@
 						required
 					>
 						{#each orgs as org (org.id)}
-							<option value={org.id}>{org.name}</option>
+							<option value={org.id}>{orgLabel(org)}</option>
 						{/each}
 					</select>
 				</div>

@@ -130,7 +130,7 @@ export const getProductions = query(v.optional(v.string()), async (organizationI
 	return await prisma.production.findMany({
 		where: { organizationId: { in: orgIds } },
 		include: {
-			organization: { select: { name: true } },
+			organization: { select: { name: true, shortName: true } },
 			items: {
 				include: {
 					asset: {
@@ -409,7 +409,7 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: data.productionId },
-		include: { organization: { select: { id: true, name: true } } }
+		include: { organization: { select: { id: true, name: true, shortName: true } } }
 	});
 	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: data.assetId } });
 
@@ -960,7 +960,7 @@ export const getProductionsCalendar = query(async () => {
 			startDate: { not: null },
 			endDate: { not: null }
 		},
-		include: { organization: { select: { name: true } } },
+		include: { organization: { select: { name: true, shortName: true } } },
 		orderBy: { startDate: 'asc' }
 	});
 });
@@ -993,7 +993,7 @@ export const getDashboardStats = query(async () => {
 				name: true,
 				startDate: true,
 				endDate: true,
-				organization: { select: { name: true } },
+				organization: { select: { name: true, shortName: true } },
 				_count: { select: { items: true, crew: true } }
 			}
 		}),

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getErrorMessage, dayCountBetween, formatAddress } from '$lib/utils';
+	import { getErrorMessage, dayCountBetween, formatAddress, orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -140,7 +140,7 @@
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">Offer — {offer.customerName}</h1>
 			<p class="text-muted-foreground">
-				{offer.organization.name}
+				{orgLabel(offer.organization)}
 				{#if offer.production}
 					·
 					<a

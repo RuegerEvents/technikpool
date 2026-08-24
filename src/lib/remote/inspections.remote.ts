@@ -40,7 +40,9 @@ export const getOverdueAssets = query(async () => {
 		},
 		include: {
 			product: { include: { manufacturer: true } },
-			organization: { select: { id: true, name: true, color: true, avatarLabel: true } },
+			organization: {
+				select: { id: true, name: true, shortName: true, color: true, avatarLabel: true }
+			},
 			location: { select: { name: true } }
 		},
 		orderBy: { nextInspectionDue: 'asc' }

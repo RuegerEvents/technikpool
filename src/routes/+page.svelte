@@ -11,7 +11,7 @@
 	} from '$lib/remote/productions.remote';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
-	import { plural } from '$lib/utils';
+	import { plural, orgLabel } from '$lib/utils';
 	import {
 		Package,
 		Layers,
@@ -57,7 +57,7 @@
 					acc[item.productionId] = {
 						productionId: item.productionId,
 						productionName: item.production.name,
-						requesterOrg: item.production.organization.name,
+						requesterOrg: orgLabel(item.production.organization),
 						productGroups: [],
 						allItems: []
 					};
@@ -365,7 +365,7 @@
 									>
 										<div class="min-w-0">
 											<p class="truncate font-medium">{prod.name}</p>
-											<p class="text-xs text-muted-foreground">{prod.organization.name}</p>
+											<p class="text-xs text-muted-foreground">{orgLabel(prod.organization)}</p>
 										</div>
 										<div class="ml-4 flex shrink-0 items-center gap-4 text-right">
 											<div class="hidden text-xs text-muted-foreground sm:block">

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getErrorMessage } from '$lib/utils';
+	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -66,6 +66,7 @@
 	}
 
 	let editingSettings = $state(false);
+	let shortNameDraft = $state('');
 	let prefixDraft = $state('');
 	let colorDraft = $state('');
 	let avatarLabelDraft = $state('');
@@ -75,6 +76,7 @@
 
 	$effect(() => {
 		if (!editingSettings) {
+			shortNameDraft = org.shortName ?? '';
 			prefixDraft = org.assetIdPrefix;
 			colorDraft = org.color;
 			avatarLabelDraft = org.avatarLabel;
@@ -89,6 +91,7 @@
 		try {
 			await updateOrg({
 				orgId,
+				shortName: shortNameDraft || null,
 				assetIdPrefix: prefixDraft,
 				color: colorDraft,
 				avatarLabel: avatarLabelDraft,
@@ -230,6 +233,21 @@
 						{#if editingSettings}
 							<form onsubmit={handleSettingsSave} class="space-y-4">
 								<div class="space-y-2">
+									<Label for="shortNameInput"
+										>Short name <span class="text-muted-foreground">(optional)</span></Label
+									>
+									<Input
+										id="shortNameInput"
+										bind:value={shortNameDraft}
+										placeholder={org.name}
+										maxlength={24}
+									/>
+									<p class="text-xs text-muted-foreground">
+										Shown instead of the full name in tables and pickers. Invoices and offers always
+										use the full name.
+									</p>
+								</div>
+								<div class="space-y-2">
 									<Label for="prefixInput">Asset ID prefix</Label>
 									<Input
 										id="prefixInput"
@@ -301,12 +319,16 @@
 						{:else}
 							<div class="space-y-3">
 								<div class="flex items-center justify-between">
+									<span class="text-sm text-muted-foreground">Short name</span>
+									<span>{org.shortName || '—'}</span>
+								</div>
+								<div class="flex items-center justify-between">
 									<span class="text-sm text-muted-foreground">Asset ID prefix</span>
 									<span class="font-mono">{org.assetIdPrefix}</span>
 								</div>
 								<div class="flex items-center justify-between">
 									<span class="text-sm text-muted-foreground">Visual identity</span>
-									<OrgBadge name={org.name} color={org.color} avatarLabel={org.avatarLabel} />
+									<OrgBadge name={orgLabel(org)} color={org.color} avatarLabel={org.avatarLabel} />
 								</div>
 								<div class="flex items-center justify-between">
 									<span class="text-sm text-muted-foreground">DGUV default interval</span>

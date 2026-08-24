@@ -46,7 +46,7 @@ export const getOffers = query(v.optional(v.string()), async (organizationId?: s
 	return prisma.offer.findMany({
 		where: { organizationId: { in: orgIds } },
 		include: {
-			organization: { select: { name: true } },
+			organization: { select: { name: true, shortName: true } },
 			production: { select: { name: true } },
 			items: true,
 			invoices: { select: { id: true, number: true } }
@@ -636,7 +636,7 @@ export const getInvoices = query(v.optional(v.string()), async (organizationId?:
 	return prisma.invoice.findMany({
 		where: { organizationId: { in: orgIds } },
 		include: {
-			organization: { select: { name: true } },
+			organization: { select: { name: true, shortName: true } },
 			production: { select: { name: true } },
 			items: true
 		},

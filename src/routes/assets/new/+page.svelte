@@ -19,7 +19,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
-	import { plural, getErrorMessage } from '$lib/utils';
+	import { plural, getErrorMessage, orgLabel } from '$lib/utils';
 	import { browser } from '$app/environment';
 
 	let saving = $state(false);
@@ -231,7 +231,7 @@
 							required
 							class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
 						>
-							{#each orgs as org (org.id)}<option value={org.id}>{org.name}</option>{/each}
+							{#each orgs as org (org.id)}<option value={org.id}>{orgLabel(org)}</option>{/each}
 						</select>
 					</div>
 
