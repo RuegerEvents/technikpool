@@ -4093,3 +4093,84 @@ msgstr "Kurzname <0>(optional)</0>"
 #: src/routes/orgs/+page.svelte
 msgid "Shown instead of the full name in tables and pickers."
 msgstr "Wird in Tabellen und Auswahllisten anstelle des vollständigen Namens angezeigt."
+
+#: src/routes/devices/+page.svelte
+msgid "Device connected"
+msgstr "Gerät verbunden"
+
+#: src/routes/devices/+page.svelte
+msgid "Request rejected"
+msgstr "Anfrage abgelehnt"
+
+#: src/routes/devices/+page.svelte
+msgid "Connect a handheld scanner to Technikpool. Scans made on a connected device are recorded under your name."
+msgstr "Verbinde einen Handscanner mit Technikpool. Scans eines verbundenen Geräts werden unter deinem Namen erfasst."
+
+#: src/routes/devices/+page.svelte
+msgid "1. Point the scanner at this code"
+msgstr "1. Scanner auf diesen Code richten"
+
+#: src/routes/devices/+page.svelte
+msgid "On the scanner, choose \"Connect\" and pull the trigger while aiming at this code. It tells the device where to find this server."
+msgstr "Wähle am Scanner \"Verbinden\" und drücke den Auslöser, während du auf diesen Code zielst. Er teilt dem Gerät mit, wo dieser Server zu finden ist."
+
+#: src/routes/devices/+page.svelte
+msgid "Server address"
+msgstr "Serveradresse"
+
+#: src/routes/devices/+page.svelte
+msgid "No camera on the device? Type the address above by hand instead."
+msgstr "Keine Kamera am Gerät? Gib die Adresse oben stattdessen von Hand ein."
+
+#: src/routes/devices/+page.svelte
+msgid "2. Enter the code the scanner shows"
+msgstr "2. Den Code eingeben, den der Scanner anzeigt"
+
+#: src/routes/devices/+page.svelte
+msgid "The scanner displays eight characters. Enter them here to connect it. The code expires after 15 minutes."
+msgstr "Der Scanner zeigt acht Zeichen an. Gib sie hier ein, um ihn zu verbinden. Der Code läuft nach 15 Minuten ab."
+
+#: src/routes/devices/+page.svelte
+msgid "Device connected. It can now book equipment in and out as you."
+msgstr "Gerät verbunden. Es kann jetzt in deinem Namen Material ein- und ausbuchen."
+
+#: src/routes/devices/+page.svelte
+msgid "Connect another device"
+msgstr "Weiteres Gerät verbinden"
+
+#: src/routes/devices/+page.svelte
+msgid "Request rejected. The device was not connected."
+msgstr "Anfrage abgelehnt. Das Gerät wurde nicht verbunden."
+
+#: src/routes/devices/+page.svelte
+msgid "Enter another code"
+msgstr "Anderen Code eingeben"
+
+#: src/routes/devices/+page.svelte
+msgid "Code from the device"
+msgstr "Code vom Gerät"
+
+#: src/routes/devices/+page.svelte
+msgid "Only enter a code you are reading off a device in front of you. Anyone who gets a code approved gains access to your equipment."
+msgstr "Gib nur einen Code ein, den du von einem Gerät vor dir abliest. Wer einen Code bestätigt bekommt, erhält Zugriff auf dein Material."
+
+#: src/routes/devices/+page.svelte
+msgid "Connecting…"
+msgstr "Wird verbunden…"
+
+#: src/routes/devices/+page.svelte
+msgid "Connect device"
+msgstr "Gerät verbinden"
+
+#: src/routes/devices/+page.svelte
+msgid "Reject"
+msgstr "Ablehnen"
+
+#: src/routes/devices/+page.svelte
+msgid "Scanners | Technikpool"
+msgstr "Scanner | Technikpool"
+
+#: src/routes/+layout.svelte
+#: src/routes/devices/+page.svelte
+msgid "Scanners"
+msgstr "Scanner"

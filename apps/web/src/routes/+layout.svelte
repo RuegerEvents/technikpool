@@ -97,7 +97,7 @@
 											type="button"
 											class="flex items-center gap-1 text-sm font-medium transition-colors {page.url.pathname.startsWith(
 												'/stickers'
-											)
+											) || page.url.pathname.startsWith('/devices')
 												? 'text-foreground'
 												: 'text-muted-foreground hover:text-foreground'}"
 										>
@@ -147,6 +147,12 @@
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											Invoices
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/devices'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											Scanners
 										</DropdownMenu.Item>
 									</DropdownMenu.Content>
 								</DropdownMenu.Portal>

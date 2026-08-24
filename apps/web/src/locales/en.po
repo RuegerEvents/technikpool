@@ -4093,3 +4093,84 @@ msgstr "Short Name <0>(optional)</0>"
 #: src/routes/orgs/+page.svelte
 msgid "Shown instead of the full name in tables and pickers."
 msgstr "Shown instead of the full name in tables and pickers."
+
+#: src/routes/devices/+page.svelte
+msgid "Device connected"
+msgstr "Device connected"
+
+#: src/routes/devices/+page.svelte
+msgid "Request rejected"
+msgstr "Request rejected"
+
+#: src/routes/devices/+page.svelte
+msgid "Connect a handheld scanner to Technikpool. Scans made on a connected device are recorded under your name."
+msgstr "Connect a handheld scanner to Technikpool. Scans made on a connected device are recorded under your name."
+
+#: src/routes/devices/+page.svelte
+msgid "1. Point the scanner at this code"
+msgstr "1. Point the scanner at this code"
+
+#: src/routes/devices/+page.svelte
+msgid "On the scanner, choose \"Connect\" and pull the trigger while aiming at this code. It tells the device where to find this server."
+msgstr "On the scanner, choose \"Connect\" and pull the trigger while aiming at this code. It tells the device where to find this server."
+
+#: src/routes/devices/+page.svelte
+msgid "Server address"
+msgstr "Server address"
+
+#: src/routes/devices/+page.svelte
+msgid "No camera on the device? Type the address above by hand instead."
+msgstr "No camera on the device? Type the address above by hand instead."
+
+#: src/routes/devices/+page.svelte
+msgid "2. Enter the code the scanner shows"
+msgstr "2. Enter the code the scanner shows"
+
+#: src/routes/devices/+page.svelte
+msgid "The scanner displays eight characters. Enter them here to connect it. The code expires after 15 minutes."
+msgstr "The scanner displays eight characters. Enter them here to connect it. The code expires after 15 minutes."
+
+#: src/routes/devices/+page.svelte
+msgid "Device connected. It can now book equipment in and out as you."
+msgstr "Device connected. It can now book equipment in and out as you."
+
+#: src/routes/devices/+page.svelte
+msgid "Connect another device"
+msgstr "Connect another device"
+
+#: src/routes/devices/+page.svelte
+msgid "Request rejected. The device was not connected."
+msgstr "Request rejected. The device was not connected."
+
+#: src/routes/devices/+page.svelte
+msgid "Enter another code"
+msgstr "Enter another code"
+
+#: src/routes/devices/+page.svelte
+msgid "Code from the device"
+msgstr "Code from the device"
+
+#: src/routes/devices/+page.svelte
+msgid "Only enter a code you are reading off a device in front of you. Anyone who gets a code approved gains access to your equipment."
+msgstr "Only enter a code you are reading off a device in front of you. Anyone who gets a code approved gains access to your equipment."
+
+#: src/routes/devices/+page.svelte
+msgid "Connecting…"
+msgstr "Connecting…"
+
+#: src/routes/devices/+page.svelte
+msgid "Connect device"
+msgstr "Connect device"
+
+#: src/routes/devices/+page.svelte
+msgid "Reject"
+msgstr "Reject"
+
+#: src/routes/devices/+page.svelte
+msgid "Scanners | Technikpool"
+msgstr "Scanners | Technikpool"
+
+#: src/routes/+layout.svelte
+#: src/routes/devices/+page.svelte
+msgid "Scanners"
+msgstr "Scanners"
