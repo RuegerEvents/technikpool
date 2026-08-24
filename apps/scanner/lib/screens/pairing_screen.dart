@@ -259,7 +259,7 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
         Text(
           pending?.verificationUri ?? '',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Theme.of(context).colorScheme.outline),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 24),
         if (_error != null)

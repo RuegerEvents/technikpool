@@ -10,6 +10,7 @@ import '../l10n/labels.dart';
 import '../l10n/strings.dart';
 import '../scan/camera_scan_screen.dart';
 import '../state/providers.dart';
+import '../theme.dart';
 
 class _Entry {
   _Entry({required this.tag, required this.ok, required this.title, required this.detail})
@@ -141,6 +142,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final status = StatusColors.of(context);
     final camera = ref.watch(scanSettingsProvider).cameraEnabled;
 
     return Scaffold(
@@ -176,14 +178,21 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
               ),
             )
           else
+            // Inverts while a scan is in flight. A colour change this large is
+            // the point: it has to be readable at arm's length by someone
+            // looking at the shelf, not at the screen.
             Container(
               width: double.infinity,
-              color: _busy ? scheme.tertiaryContainer : scheme.surfaceContainerHighest,
+              color: _busy ? scheme.inverseSurface : scheme.surfaceContainerHighest,
               padding: const EdgeInsets.symmetric(vertical: 14),
               child: Center(
                 child: Text(
                   _busy ? '…' : S.scanNow,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: _busy ? scheme.onInverseSurface : scheme.onSurface,
+                  ),
                 ),
               ),
             ),
@@ -198,7 +207,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
                       return ListTile(
                         leading: Icon(
                           e.ok ? Icons.check_circle : Icons.error,
-                          color: e.ok ? Colors.green.shade700 : scheme.error,
+                          color: e.ok ? status.success : scheme.error,
                           size: 30,
                         ),
                         title: Text(

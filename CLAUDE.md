@@ -419,6 +419,32 @@ cd apps/scanner
 dart run swagger_parser && dart run build_runner build
 ```
 
+## Theme
+
+`lib/theme.dart` is a port of the web's tokens, not a Flutter theme that happens to look
+similar. `apps/web/src/routes/layout.css` writes them as oklch with **zero chroma**, so they land
+exactly on Tailwind's `neutral` scale and are written here as the hex they resolve to. If a token
+moves there, move it here.
+
+The palette has **no accent hue at all**. That's deliberate on the web and matters more on a
+handheld: the only colour in the UI is status, so a green or red row means something. Status
+lives in a `StatusColors` theme extension — Material's `ColorScheme` carries `error` but has
+nothing meaning "this went through", and a scan session is mostly a list of exactly that.
+
+Two places deliberately do **not** follow the theme, both documented where they're defined:
+
+- `OverlayColors` — the camera screen draws over a live video feed, which is neither surface, so
+  a theme-following banner would be unreadable half the time.
+- The launcher icon, which is dark-tile/light-mark in both themes.
+
+Fonts are **bundled, not fetched** — these devices work in a warehouse and can't rely on a
+network at launch. Static Inter instances, not the variable font: Flutter doesn't map
+`fontWeight` onto a variable axis without explicit `fontVariations`, so a variable Inter would
+silently ignore every `FontWeight` in the codebase.
+
+Theme mode follows the device. The web remembers a per-user choice in `localStorage`; a shared
+handheld has no per-user anything.
+
 ## Scan intake
 
 Two inputs, one path. **`ScanBus` (`lib/scan/scan_bus.dart`) is the only place a decoded barcode

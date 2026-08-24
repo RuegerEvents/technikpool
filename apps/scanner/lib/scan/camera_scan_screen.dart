@@ -6,6 +6,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../l10n/strings.dart';
 import '../state/providers.dart';
+import '../theme.dart';
 import 'scan_bus.dart';
 
 /// What the screen that opened the camera made of one code. Shown over the
@@ -135,6 +136,7 @@ class _CameraScanScreenState extends ConsumerState<CameraScanScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+      // The app bar floats over the preview rather than sitting on a surface.
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
@@ -181,7 +183,10 @@ class _CameraScanScreenState extends ConsumerState<CameraScanScreen> {
                         child: Text(
                           _describe(error),
                           textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.white, fontSize: 16),
+                          style: const TextStyle(
+                            color: OverlayColors.foreground,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     ),
@@ -190,7 +195,7 @@ class _CameraScanScreenState extends ConsumerState<CameraScanScreen> {
                     controller: _controller,
                     scanWindow: window,
                     borderRadius: BorderRadius.circular(16),
-                    borderColor: Colors.white70,
+                    borderColor: OverlayColors.guide,
                   ),
                 ],
               );
@@ -210,9 +215,9 @@ class _CameraScanScreenState extends ConsumerState<CameraScanScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: switch (last) {
-            null => Colors.black.withValues(alpha: 0.6),
-            CameraScanFeedback(ok: true) => Colors.green.shade800,
-            _ => Theme.of(context).colorScheme.error,
+            null => OverlayColors.scrim,
+            CameraScanFeedback(ok: true) => OverlayColors.success,
+            _ => OverlayColors.error,
           },
           borderRadius: BorderRadius.circular(12),
         ),
@@ -224,7 +229,7 @@ class _CameraScanScreenState extends ConsumerState<CameraScanScreen> {
                   : last.ok
                   ? Icons.check_circle
                   : Icons.error,
-              color: Colors.white,
+              color: OverlayColors.foreground,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -235,7 +240,7 @@ class _CameraScanScreenState extends ConsumerState<CameraScanScreen> {
                   Text(
                     last?.title ?? S.cameraHint,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: OverlayColors.foreground,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -243,7 +248,10 @@ class _CameraScanScreenState extends ConsumerState<CameraScanScreen> {
                   if (last != null && last.detail.isNotEmpty)
                     Text(
                       last.detail,
-                      style: const TextStyle(color: Colors.white70, fontSize: 13),
+                      style: const TextStyle(
+                        color: OverlayColors.mutedForeground,
+                        fontSize: 13,
+                      ),
                     ),
                 ],
               ),
@@ -253,9 +261,9 @@ class _CameraScanScreenState extends ConsumerState<CameraScanScreen> {
               Text(
                 '$_count',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: OverlayColors.foreground,
                   fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],

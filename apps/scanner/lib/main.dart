@@ -6,6 +6,7 @@ import 'l10n/strings.dart';
 import 'screens/home_screen.dart';
 import 'screens/pairing_screen.dart';
 import 'state/providers.dart';
+import 'theme.dart';
 
 /// Riverpod 3 retries failed providers automatically. That's genuinely useful
 /// on a warehouse PDA drifting in and out of wifi, but only for failures that
@@ -32,32 +33,15 @@ class ScannerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: const Color(0xFF0069C9),
-      brightness: Brightness.light,
-    );
     return MaterialApp(
       title: S.appTitle,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: scheme,
-        useMaterial3: true,
-        // Warehouse use: gloves, poor light, arm's length. Bigger touch targets
-        // and text than the Material defaults.
-        filledButtonTheme: FilledButtonThemeData(
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(52),
-            textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
-          ),
-        ),
-        outlinedButtonTheme: OutlinedButtonThemeData(
-          style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-        ),
-        inputDecorationTheme: const InputDecorationTheme(
-          border: OutlineInputBorder(),
-          contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 18),
-        ),
-      ),
+      theme: technikpoolTheme(Brightness.light),
+      darkTheme: technikpoolTheme(Brightness.dark),
+      // The web remembers a per-user choice in localStorage. A shared handheld
+      // has no per-user anything, so it follows the device instead — which on a
+      // PDA is usually set once for the building it works in.
+      themeMode: ThemeMode.system,
       home: const _Root(),
     );
   }

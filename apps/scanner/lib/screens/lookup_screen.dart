@@ -164,7 +164,7 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
           width: 150,
           child: Text(
             label,
-            style: TextStyle(color: Theme.of(context).colorScheme.outline),
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
         ),
         Expanded(

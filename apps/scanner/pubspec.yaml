@@ -82,6 +82,23 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # The web app's typeface, bundled rather than fetched: these devices work in
+  # a warehouse and cannot rely on a network at launch. Static instances, not
+  # the variable font — Flutter does not map `fontWeight` onto a variable axis
+  # without explicit `fontVariations`, so a variable Inter would silently
+  # ignore every FontWeight in the codebase. Licence in assets/fonts.
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
