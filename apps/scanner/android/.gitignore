@@ -12,3 +12,10 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Play service account key — grants release access to the listing.
+play-store-key.json
+
+# fastlane working files.
+fastlane/report.xml
+fastlane/Preview.html

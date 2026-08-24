@@ -1,0 +1,73 @@
+# Uploading the scanner to Google Play.
+#
+# Version and build number come from apps/scanner/pubspec.yaml, set by
+# `pnpm release:app` — so these lanes never invent one. The app versions
+# independently of the server: `pnpm release` is a different thing entirely.
+# Cut the app release first, then run a lane.
+#
+# Needs, once:
+#   * android/key.properties — see key.properties.example, this is the upload key
+#   * a Play service account JSON with "Release manager", either at
+#     android/play-store-key.json or pointed at by $GOOGLE_PLAY_JSON_KEY
+#
+# Check both before a first upload:  bundle exec fastlane android validate
+
+default_platform(:android)
+
+# __dir__ is android/fastlane, so this is apps/scanner — the Flutter project
+# root, which is where flutter must run and where it writes build/.
+FLUTTER_PROJECT = File.expand_path('../..', __dir__)
+AAB = File.join(FLUTTER_PROJECT, 'build/app/outputs/bundle/release/app-release.aab')
+
+platform :android do
+  desc 'Build a signed release app bundle'
+  lane :build do
+    Dir.chdir(FLUTTER_PROJECT) do
+      sh('flutter', 'clean')
+      sh('flutter', 'pub', 'get')
+      sh('flutter', 'build', 'appbundle', '--release')
+    end
+    UI.user_error!("No bundle at #{AAB}") unless File.exist?(AAB)
+    UI.success("Built #{AAB}")
+  end
+
+  desc 'Check the credentials without uploading anything'
+  lane :validate do
+    UI.user_error!('android/key.properties is missing — see key.properties.example') unless
+      File.exist?(File.join(FLUTTER_PROJECT, 'android/key.properties'))
+    validate_play_store_json_key
+    UI.success('Signing key and Play credentials look usable.')
+  end
+
+  desc 'Upload to the internal test track'
+  lane :internal do
+    build
+    upload_to_play_store(
+      track: 'internal',
+      aab: AAB,
+      skip_upload_apk: true,
+      # The listing is edited in the Play Console; a lane that also pushed
+      # metadata would quietly revert whatever was changed there.
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      release_status: 'draft'
+    )
+  end
+
+  desc 'Promote whatever is on the internal track to production, without rebuilding'
+  lane :promote do
+    upload_to_play_store(
+      track: 'internal',
+      track_promote_to: 'production',
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      # A staged rollout, because the first thing a broken scanner build costs
+      # is a warehouse's morning.
+      rollout: '0.2'
+    )
+  end
+end

@@ -6,6 +6,14 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<!-- Flutter localises through gen_l10n, which iOS can't see, so the App
+	     Store would list the app as English-only. This is what puts German in
+	     the listing and lets a German device pick it. -->
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>de</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Technikpool</string>
 	<key>CFBundleExecutable</key>

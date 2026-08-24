@@ -12,7 +12,7 @@ pnpm workspace. **All paths below are relative to `apps/web/` unless stated othe
 technikpool/
 ├── package.json            # root: prettier, husky, release script; delegates to workspaces
 ├── pnpm-workspace.yaml     # packages: apps/*
-├── scripts/                # release.mjs, upgrade.sh (repo-level)
+├── scripts/                # release.mjs, brand.sh (repo-level)
 ├── apps/
 │   ├── web/                # the SvelteKit app — src/, prisma/, openapi.yaml, Dockerfile, .env
 │   └── scanner/            # Flutter app for Android PDA barcode scanners
@@ -537,6 +537,114 @@ the receiver — sharing one notifier would tear the receiver down at exactly th
   private address; everything outside private ranges still requires HTTPS.
 - **Both at once** — a `cloudflared`/`ngrok` tunnel. Point `PUBLIC_BETTER_AUTH_BASE_URL` at the
   tunnel URL, since device-code pairing and bearer tokens are issued against that origin.
+
+## Demo mode
+
+App-store reviewers have no Technikpool server to pair with, so `lib/demo/` is a warehouse that
+runs on the device. "Explore the demo" on the pairing screen stores `demo://technikpool` as the
+base URL like any other pairing, so the whole app — home screen, sign-out, `isPaired` — needs no
+knowledge of it; `apiClientProvider` is the single place that branches.
+
+**It intercepts at the Dio layer, not per screen.** `DemoBackend.dio()` resolves every request
+from memory, so the generated clients, the error envelopes and every screen behave exactly as
+they do against a real server, and the demo cannot drift from the app it demonstrates. Two
+consequences worth knowing:
+
+- Responses go through `jsonEncode`/`jsonDecode` rather than `toJson()` alone. A generated
+  `toJson` is **shallow** — nested models come back as model instances — and `fromJson` on the
+  other side casts them to maps.
+- The request body arrives as the model's own `toJson` map, _before_ Dio would have serialised
+  it, so `targetType` is still an enum where a server would only ever see a string. `_scan`
+  reads it either way.
+- `handler.resolve(response, true)` runs the response through `ApiClient`'s own interceptor,
+  which is what turns a 404 envelope into an `ApiException`.
+
+`test/demo_backend_test.dart` covers it, because it is the one path with no server behind it to
+catch a mistake. Tags run 40000001–40000012 and are printed in Inventory and hinted on Lookup —
+a reviewer has no sticker to scan and has to type one.
+
+## Releasing and store uploads
+
+**The server and the app version separately**, because they ship on separate schedules to
+separate places, and a fix to one is no reason to move the other's number.
+
+| Command                                                | Bumps                       | Tag              |
+| ------------------------------------------------------ | --------------------------- | ---------------- |
+| `pnpm release <patch\|minor\|major\|x.y.z>`            | root `package.json`         | `v1.2.3`         |
+| `pnpm release:app <patch\|minor\|major\|build\|x.y.z>` | `apps/scanner/pubspec.yaml` | `scanner-v1.2.3` |
+
+Both refuse to run on a dirty tree, then commit, tag and push.
+
+`pubspec.yaml`'s `version: x.y.z+n` is the only place a store build's version is decided: it
+drives versionName/versionCode on Android and MARKETING_VERSION/CURRENT_PROJECT_VERSION on iOS.
+`release:app` always increments the `+n`, because **the build number only ever goes up** — both
+stores reject one they have already seen, even for a version that was never released. That is
+what `build` is for: it re-cuts the same version with a fresh build number and moves the tag,
+which is what a rejected or replaced binary needs.
+
+Deploying the server is Watchtower's job — it pulls the new image itself. There is no upgrade
+script any more.
+
+### What the tags trigger
+
+| Tag pattern       | Workflow                               | Result                                        |
+| ----------------- | -------------------------------------- | --------------------------------------------- |
+| `v[0-9]*`         | `.github/workflows/docker-publish.yml` | Docker image to Docker Hub                    |
+| `scanner-v[0-9]*` | `.github/workflows/app-release.yml`    | `.aab` to Play internal, `.ipa` to TestFlight |
+
+The globs are mutually exclusive by design — `v*` would have been enough today, but only because
+no other component has a tag yet. Any new component gets its own prefix, and both workflows are
+narrow enough that a new prefix can't land in the wrong one.
+
+`app-release.yml` also takes a `workflow_dispatch` with an optional ref, so a failed upload can
+be retried without inventing a version bump.
+
+**Each store is switched on by a repository variable**, not by whether its secrets happen to be
+set: a release that silently skipped a store would look exactly like one that succeeded. Set
+`RELEASE_ANDROID` / `RELEASE_IOS` to `true` under Settings › Secrets and variables › Actions ›
+Variables once that store's credentials are in.
+
+Repository secrets the workflow needs:
+
+| Android                     | iOS                                 |
+| --------------------------- | ----------------------------------- |
+| `ANDROID_KEYSTORE_BASE64`   | `ASC_KEY_ID`                        |
+| `ANDROID_KEYSTORE_PASSWORD` | `ASC_ISSUER_ID`                     |
+| `ANDROID_KEY_ALIAS`         | `ASC_KEY_P8` (base64)               |
+| `ANDROID_KEY_PASSWORD`      | `IOS_DIST_CERT_P12` (base64)        |
+| `GOOGLE_PLAY_JSON_KEY`      | `IOS_DIST_CERT_PASSWORD`            |
+|                             | `IOS_PROVISIONING_PROFILE` (base64) |
+
+Every one of them is written to disk for the length of a job and shredded in an `if: always()`
+step. `key.properties` is assembled in CI from the four Android secrets rather than being a
+secret of its own, so the same file works locally and on a runner without ever being committed.
+
+fastlane lives next to each platform, not at the repo root, because that is where its tooling
+expects to be:
+
+| Lane                                           | Does                                                                |
+| ---------------------------------------------- | ------------------------------------------------------------------- |
+| `cd apps/scanner/android && fastlane validate` | Checks the upload key and Play credentials, uploads nothing         |
+| `… fastlane internal`                          | Builds a signed `.aab` and puts it on the internal track as a draft |
+| `… fastlane promote`                           | Promotes internal → production at 20%, without rebuilding           |
+| `cd apps/scanner/ios && fastlane validate`     | Checks the App Store Connect key, uploads nothing                   |
+| `… fastlane beta`                              | Builds an `.ipa` and uploads it to TestFlight                       |
+| `… fastlane release`                           | Uploads to App Store Connect, without submitting for review         |
+
+Neither platform's lanes push store metadata: the listings are edited in the consoles, and a lane
+that also wrote them would silently revert whatever was changed there.
+`ios/fastlane/review_information/` is the exception kept in the repo — it tells a reviewer how to
+reach demo mode, and it is pasted in by hand.
+
+**Secrets, none of which are in the repo** (all gitignored):
+
+- `apps/scanner/android/key.properties` — the Play _upload_ key. See `key.properties.example`.
+  Without it a release build silently falls back to debug keys: it runs, it just can't be
+  uploaded.
+- `apps/scanner/android/play-store-key.json` (or `$GOOGLE_PLAY_JSON_KEY`) — a Play service
+  account with "Release manager".
+- `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_PATH` — an App Store Connect API key (`.p8`). A key
+  rather than an Apple ID because it needs no 2FA prompt, so the same command works in CI.
 
 ## Gotchas
 

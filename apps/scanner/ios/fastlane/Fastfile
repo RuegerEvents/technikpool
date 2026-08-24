@@ -1,0 +1,87 @@
+# Uploading the scanner to TestFlight and the App Store.
+#
+# Version and build number come from apps/scanner/pubspec.yaml, set by
+# `pnpm release:app` — so these lanes never invent one. The app versions
+# independently of the server: `pnpm release` is a different thing entirely.
+# Cut the app release first, then run a lane.
+#
+# Authentication is an App Store Connect API key, not an Apple ID: it needs no
+# 2FA prompt, so the same command works on a laptop and in CI. Set
+#   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_PATH   (path to the .p8)
+# Create one under App Store Connect › Users and Access › Integrations.
+#
+# Check it before a first upload:  bundle exec fastlane ios validate
+
+default_platform(:ios)
+
+# __dir__ is ios/fastlane, so this is apps/scanner — where flutter must run.
+FLUTTER_PROJECT = File.expand_path('../..', __dir__)
+IPA = File.join(FLUTTER_PROJECT, 'build/ios/ipa/technikpool_scanner.ipa')
+
+def asc_key
+  %w[ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_PATH].each do |name|
+    UI.user_error!("#{name} is not set — see the comment at the top of this Fastfile") if
+      ENV[name].to_s.empty?
+  end
+  app_store_connect_api_key(
+    key_id: ENV.fetch('ASC_KEY_ID'),
+    issuer_id: ENV.fetch('ASC_ISSUER_ID'),
+    key_filepath: ENV.fetch('ASC_KEY_PATH'),
+    in_house: false
+  )
+end
+
+platform :ios do
+  desc 'Build a signed App Store ipa'
+  lane :build do
+    Dir.chdir(FLUTTER_PROJECT) do
+      sh('flutter', 'clean')
+      sh('flutter', 'pub', 'get')
+      # Flutter drives the whole build, including signing, from the same
+      # pubspec version the Android lane uses. Going through gym instead would
+      # mean a second place that decides how the app is built.
+      sh('flutter', 'build', 'ipa', '--release', '--export-method', 'app-store')
+    end
+    UI.user_error!("No ipa at #{IPA}") unless File.exist?(IPA)
+    UI.success("Built #{IPA}")
+  end
+
+  desc 'Check the API key without uploading anything'
+  lane :validate do
+    api_key = asc_key
+    # Cheapest call that proves the key can see the app record.
+    latest_testflight_build_number(api_key: api_key)
+    UI.success('App Store Connect key works and the app record is visible.')
+  end
+
+  desc 'Upload to TestFlight'
+  lane :beta do
+    api_key = asc_key
+    build
+    upload_to_testflight(
+      api_key: api_key,
+      ipa: IPA,
+      # Nothing here is for external testers yet, so skip the review submission
+      # that would otherwise queue on every upload.
+      distribute_external: false,
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc 'Upload to App Store Connect for review'
+  lane :release do
+    api_key = asc_key
+    build
+    upload_to_app_store(
+      api_key: api_key,
+      ipa: IPA,
+      # The listing is edited in App Store Connect; pushing metadata from here
+      # would revert whatever was changed there. review_information/ below is
+      # the exception worth keeping in the repo, and it is applied by hand.
+      skip_metadata: true,
+      skip_screenshots: true,
+      precheck_include_in_app_purchases: false,
+      submit_for_review: false
+    )
+  end
+end

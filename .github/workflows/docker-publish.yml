@@ -1,9 +1,13 @@
 name: Publish Docker image
 
+# Server releases only. Tags in this monorepo are namespaced by component, and
+# `v[0-9]*` is deliberately narrower than `v*` so that no future `v…`-prefixed
+# component tag can land here by accident. The app is scanner-v… — see
+# .github/workflows/app-release.yml.
 on:
   push:
     tags:
-      - 'v*'
+      - 'v[0-9]*'
 
 permissions:
   contents: read

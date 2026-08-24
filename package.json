@@ -11,7 +11,8 @@
 		"lint": "prettier --check . && pnpm -r lint",
 		"format": "prettier --write .",
 		"prepare": "husky",
-		"release": "node scripts/release.mjs"
+		"release": "node scripts/release.mjs",
+		"release:app": "node scripts/release-app.mjs"
 	},
 	"devDependencies": {
 		"husky": "^9.1.7",

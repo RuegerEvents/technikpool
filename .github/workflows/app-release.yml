@@ -1,0 +1,159 @@
+name: Release scanner app
+
+# Tags in this monorepo are namespaced by what they release:
+#   v1.2.3          → the server, built and pushed by docker-publish.yml
+#   scanner-v1.2.3  → the Flutter app, built and uploaded here
+# The two globs are mutually exclusive, so a server release never builds an app
+# and vice versa. `pnpm release` and `pnpm release:app` are what create them.
+on:
+  push:
+    tags:
+      - 'scanner-v[0-9]*'
+  # Re-running an upload without re-tagging — a store rejected the binary, a
+  # credential was wrong — shouldn't need a fake version bump.
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Tag to build (defaults to the current branch)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: '3.47.1'
+
+jobs:
+  # Each store is enabled by a repository *variable*, not by whether its secrets
+  # happen to be set: a release that silently skipped a store would look exactly
+  # like one that succeeded. Set RELEASE_ANDROID / RELEASE_IOS to 'true' under
+  # Settings › Secrets and variables › Actions › Variables once that store's
+  # credentials are in place.
+  android:
+    if: vars.RELEASE_ANDROID == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: apps/scanner/android
+
+      # The upload key and the Play credentials only exist for the length of
+      # this job, and both are cleaned up below even if the upload fails.
+      - name: Write signing credentials
+        working-directory: apps/scanner/android
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
+        run: |
+          set -euo pipefail
+          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD PLAY_JSON_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Secret ANDROID_$name (or GOOGLE_PLAY_JSON_KEY) is not set" >&2
+              exit 1
+            fi
+          done
+          echo "$KEYSTORE_BASE64" | base64 --decode > upload.jks
+          printf '%s\n' "$PLAY_JSON_KEY" > play-store-key.json
+          cat > key.properties <<EOF
+          storeFile=$PWD/upload.jks
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+
+      - name: Upload to the internal track
+        working-directory: apps/scanner/android
+        run: bundle exec fastlane internal
+
+      - name: Shred credentials
+        if: always()
+        working-directory: apps/scanner/android
+        run: rm -f upload.jks play-store-key.json key.properties
+
+  ios:
+    if: vars.RELEASE_IOS == 'true'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: apps/scanner/ios
+
+      # A distribution certificate and an App Store profile, exported from the
+      # Mac that already has them. They go into a throwaway keychain that dies
+      # with the runner.
+      - name: Import signing certificate
+        uses: apple-actions/import-codesign-certs@v5
+        with:
+          p12-file-base64: ${{ secrets.IOS_DIST_CERT_P12 }}
+          p12-password: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+
+      - name: Install provisioning profile
+        env:
+          PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE }}
+        run: |
+          set -euo pipefail
+          if [ -z "$PROFILE_BASE64" ]; then
+            echo "::error::Secret IOS_PROVISIONING_PROFILE is not set" >&2
+            exit 1
+          fi
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$PROFILE_BASE64" | base64 --decode \
+            > ~/Library/MobileDevice/Provisioning\ Profiles/technikpool.mobileprovision
+
+      - name: Write the App Store Connect key
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          set -euo pipefail
+          if [ -z "$ASC_KEY_P8" ]; then
+            echo "::error::Secret ASC_KEY_P8 is not set" >&2
+            exit 1
+          fi
+          echo "$ASC_KEY_P8" | base64 --decode > "$RUNNER_TEMP/asc_key.p8"
+
+      - name: Upload to TestFlight
+        working-directory: apps/scanner/ios
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_PATH: ${{ runner.temp }}/asc_key.p8
+        run: bundle exec fastlane beta
+
+      - name: Shred credentials
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/asc_key.p8"
+          rm -f ~/Library/MobileDevice/Provisioning\ Profiles/technikpool.mobileprovision

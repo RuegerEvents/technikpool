@@ -38,6 +38,9 @@ function bump(current, kind) {
 	fail(`Unknown bump type: ${kind}`);
 }
 
+// Releases the *server*. The scanner app has its own version and its own
+// script — see scripts/release-app.mjs. They ship on separate schedules to
+// separate places, and a fix to one must not drag the other's version along.
 const arg = process.argv[2];
 if (!arg) {
 	fail('Usage: pnpm release <patch|minor|major|x.y.z|vx.y.z>');

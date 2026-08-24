@@ -1,0 +1,20 @@
+Technikpool Scanner is the handheld companion to Technikpool, a rental-inventory
+system for event-production companies. In normal use it pairs with a customer's
+own server, so there is no shared account to sign in with.
+
+To review it without a server, tap "Explore the demo" at the bottom of the first
+screen. That runs a small sample warehouse entirely on the device — no network
+request is made, and nothing is stored beyond the app.
+
+In the demo:
+  * Scans — pick a location or production, then type an asset tag where it says
+    "Manual entry". Tags run 40000001 to 40000012. On a device with a camera the
+    camera button works too, but there is nothing to point it at.
+  * Lookup — type the same tags to see an asset, where it is and its history.
+  * Inventory — lists every asset with its tag, so nothing has to be guessed.
+
+Leave the demo under Settings › Leave demo.
+
+Camera access is requested only for reading barcodes, and only when the scan
+button is used. The app runs on phones and on rugged warehouse handhelds that
+have a physical barcode trigger instead of a camera.

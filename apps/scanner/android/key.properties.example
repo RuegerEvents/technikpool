@@ -1,0 +1,13 @@
+# Copy to android/key.properties and fill in. Never commit the real thing —
+# the .gitignore next to this file already covers key.properties and *.jks.
+#
+# Create the upload key once:
+#   keytool -genkey -v -keystore ~/technikpool-upload.jks \
+#     -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+#
+# Google Play signs the app itself; this is the *upload* key. If it is lost,
+# Play support can reset it — the app signing key is the one that can't be.
+storeFile=/absolute/path/to/technikpool-upload.jks
+storePassword=
+keyAlias=upload
+keyPassword=
