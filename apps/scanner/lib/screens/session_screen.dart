@@ -8,6 +8,7 @@ import '../api/client.dart';
 import '../api/generated/export.dart';
 import '../l10n/labels.dart';
 import '../l10n/strings.dart';
+import '../scan/camera_scan_screen.dart';
 import '../state/providers.dart';
 
 class _Entry {
@@ -19,6 +20,9 @@ class _Entry {
   final String title;
   final String detail;
   final DateTime at;
+
+  CameraScanFeedback get feedback =>
+      CameraScanFeedback(ok: ok, title: title, detail: '$tag · $detail');
 }
 
 /// The working screen: everything the trigger produces is booked against the
@@ -42,10 +46,15 @@ class SessionScreen extends ConsumerStatefulWidget {
 class _SessionScreenState extends ConsumerState<SessionScreen> {
   final _entries = <_Entry>[];
   final _manualController = TextEditingController();
+  final _feedback = StreamController<CameraScanFeedback>.broadcast();
   StreamSubscription<String>? _sub;
+
+  /// Scans arrive faster than the round trip they cause, so they are booked one
+  /// after another rather than dropped while one is in flight. Losing a scan
+  /// silently is the worst thing this screen could do — the operator has
+  /// already moved the box.
+  Future<void> _queue = Future<void>.value();
   bool _busy = false;
-  String? _lastTag;
-  DateTime _lastAt = DateTime.fromMillisecondsSinceEpoch(0);
 
   int get _okCount => _entries.where((e) => e.ok).length;
   int get _errorCount => _entries.length - _okCount;
@@ -53,33 +62,27 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
   @override
   void initState() {
     super.initState();
-    _sub = ref.read(scanChannelProvider).scans.listen(_onScan);
+    _sub = ref.read(scanBusProvider).codes.listen(_enqueue);
   }
 
   @override
   void dispose() {
     _sub?.cancel();
     _manualController.dispose();
+    _feedback.close();
     super.dispose();
   }
 
-  void _onScan(String raw) {
-    final tag = raw.trim();
-    if (tag.isEmpty) return;
-    // Scanners often fire twice on one trigger pull; ignore the echo.
-    final now = DateTime.now();
-    if (tag == _lastTag && now.difference(_lastAt) < const Duration(seconds: 2)) return;
-    _lastTag = tag;
-    _lastAt = now;
-    unawaited(_submit(tag));
+  void _enqueue(String tag) {
+    if (tag.trim().isEmpty) return;
+    _queue = _queue.then((_) => _submit(tag.trim()));
   }
 
   Future<void> _submit(String tag) async {
-    if (_busy) return;
     final api = ref.read(apiClientProvider);
     if (api == null) return;
 
-    setState(() => _busy = true);
+    if (mounted) setState(() => _busy = true);
     try {
       final result = await api.scanning.createScan(
         body: ScanRequest(
@@ -112,16 +115,45 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
   }
 
   void _push(_Entry entry) {
+    if (!_feedback.isClosed) _feedback.add(entry.feedback);
     if (!mounted) return;
     setState(() => _entries.insert(0, entry));
   }
 
+  void _submitManual() {
+    // Deliberately not routed through the scan bus: retyping the same tag is
+    // something the operator meant to do, and the bus would eat it as an echo.
+    final tag = _manualController.text.trim();
+    if (tag.isNotEmpty) _queue = _queue.then((_) => _submit(tag));
+    _manualController.clear();
+  }
+
+  Future<void> _openCamera() => Navigator.of(context).push<void>(
+    MaterialPageRoute(
+      builder: (_) => CameraScanScreen(
+        title: widget.targetName,
+        continuous: true,
+        feedback: _feedback.stream,
+      ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final camera = ref.watch(scanSettingsProvider).cameraEnabled;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.targetName, overflow: TextOverflow.ellipsis),
+        actions: [
+          if (camera)
+            IconButton(
+              tooltip: S.scanWithCamera,
+              onPressed: _openCamera,
+              icon: const Icon(Icons.photo_camera_outlined),
+            ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(30),
           child: Padding(
@@ -134,17 +166,27 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
       ),
       body: Column(
         children: [
-          Container(
-            width: double.infinity,
-            color: _busy ? scheme.tertiaryContainer : scheme.surfaceContainerHighest,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Center(
-              child: Text(
-                _busy ? '…' : S.scanNow,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          if (camera)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+              child: FilledButton.icon(
+                onPressed: _openCamera,
+                icon: const Icon(Icons.photo_camera_outlined),
+                label: const Text(S.scanWithCamera),
+              ),
+            )
+          else
+            Container(
+              width: double.infinity,
+              color: _busy ? scheme.tertiaryContainer : scheme.surfaceContainerHighest,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Center(
+                child: Text(
+                  _busy ? '…' : S.scanNow,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
               ),
             ),
-          ),
           Expanded(
             child: _entries.isEmpty
                 ? const Center(child: Text(S.sessionEmpty))
@@ -169,7 +211,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
                   ),
           ),
           // Fallback for a device whose broadcast settings aren't right yet, or
-          // a sticker too damaged to read.
+          // a sticker too damaged for either the trigger or the camera to read.
           Padding(
             padding: EdgeInsets.fromLTRB(
               12,
@@ -187,22 +229,11 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
                       labelText: S.manualEntry,
                       isDense: true,
                     ),
-                    onSubmitted: (v) {
-                      final tag = v.trim();
-                      if (tag.isNotEmpty) unawaited(_submit(tag));
-                      _manualController.clear();
-                    },
+                    onSubmitted: (_) => _submitManual(),
                   ),
                 ),
                 const SizedBox(width: 8),
-                IconButton.filled(
-                  onPressed: () {
-                    final tag = _manualController.text.trim();
-                    if (tag.isNotEmpty) unawaited(_submit(tag));
-                    _manualController.clear();
-                  },
-                  icon: const Icon(Icons.send),
-                ),
+                IconButton.filled(onPressed: _submitManual, icon: const Icon(Icons.send)),
               ],
             ),
           ),

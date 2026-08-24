@@ -1,5 +1,6 @@
 package events.rueger.technikpool.technikpool_scanner
 
+import android.os.Build
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
@@ -30,6 +31,17 @@ class MainActivity : FlutterActivity() {
                     call.argument<List<String>>("actions").orEmpty(),
                     call.argument<List<String>>("extraKeys").orEmpty(),
                     result
+                )
+
+                // Who this device says it is. The only use is recognising the
+                // PDA models we know ship a scan engine, so the app can lead
+                // with the trigger before the first scan has proved anything.
+                "deviceInfo" -> result.success(
+                    mapOf(
+                        "manufacturer" to Build.MANUFACTURER,
+                        "brand" to Build.BRAND,
+                        "model" to Build.MODEL,
+                    )
                 )
 
                 "stop" -> {

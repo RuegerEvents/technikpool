@@ -382,9 +382,10 @@ class="px-3 py-1.5 {tab === 'assets'
 
 # Flutter Scanner App (`apps/scanner`)
 
-Android app for warehouse PDAs (tested against a Chainway C90; Munbyn resells the same class of
-hardware). German-only UI — strings in `lib/l10n/strings.dart`, server enum labels in
-`lib/l10n/labels.dart`.
+Android + iOS app. It is built for warehouse PDAs (tested against a Chainway C90; Munbyn resells
+the same class of hardware) and falls back to the camera on ordinary phones, so the same build
+runs on a rugged handheld, an Android phone and an iPhone. German-only UI — strings in
+`lib/l10n/strings.dart`, server enum labels in `lib/l10n/labels.dart`.
 
 **The API client is generated** into `lib/api/generated/` from `apps/web/openapi.yaml`. Don't
 hand-edit it; regenerate after any spec change:
@@ -396,8 +397,19 @@ dart run swagger_parser && dart run build_runner build
 
 ## Scan intake
 
-The PDA's barcode engine emits scans as Android broadcast Intents. `ScanReceiver.kt` registers a
-BroadcastReceiver and forwards decoded text over an EventChannel.
+Two inputs, one path. **`ScanBus` (`lib/scan/scan_bus.dart`) is the only place a decoded barcode
+enters the app**, and every screen listens to it — never to `ScanChannel.scans` directly. That is
+what keeps one screen working on all three device classes without knowing which it is on, and it
+is where the echo suppression lives (a trigger fires twice per pull; the camera re-reads a label
+every frame).
+
+- **Hardware** — the PDA's engine emits scans as Android broadcast Intents. `ScanReceiver.kt`
+  registers a BroadcastReceiver and forwards decoded text over an EventChannel. Android only:
+  `ScanChannel.isSupported` is false everywhere else and every entry point degrades to nothing
+  rather than throwing MissingPluginException.
+- **Camera** — `CameraScanScreen` (mobile_scanner) reads codes _into the bus_ rather than
+  returning them, so a camera scan reaches the screen behind it through exactly the same path as
+  a trigger pull. One-shot for pairing and lookup, continuous for a session.
 
 **The action string and extra key are not knowable in advance** — they differ between PDA vendors
 and between firmware revisions of one model. So they are configurable (Settings › Scanner-
@@ -410,12 +422,58 @@ Simulate a scan without hardware (works on an emulator too):
 adb shell am broadcast -a com.scanner.broadcast --es data "40000001"
 ```
 
+## Which input a device uses
+
+`ScanSettings` (`lib/scan/scan_settings.dart`) resolves `ScanMode.auto` into an `effectiveMode`,
+and `cameraEnabled` follows from that: a handheld with a real trigger shows **no camera UI at
+all**, because a camera button there is only ever a mis-tap.
+
+Android has **no API that answers "does this device have a barcode engine"** — the engine is a
+vendor service, invisible until it broadcasts. Two signals stand in, in order of trust:
+
+1. `hardwareSeen` — this device has actually delivered a scan (`hardwareSeenProvider`, persisted).
+   Proof, and it outlives any list we maintain.
+2. `DeviceIdentity.isKnownPda` — the model is one we know ships an engine: manufacturer/brand
+   `sunmi` or `chainway`, or a model containing `c90`. Read over the method channel from Android's
+   `Build` (no extra dependency). The C90 is matched by model as well as maker because resellers
+   rebrand it — Munbyn sell the same hardware under their own name.
+
+**The list only moves the starting answer; it is not the mechanism.** A PDA missing from it still
+switches to trigger-first the moment it delivers its first scan, so a new model costs one tap,
+never the feature. Anything unrecognised gets the camera. Settings › Scan-Eingabe overrides the
+whole thing (Automatisch / Hardware-Auslöser / Kamera) and shows what the device reported.
+
+`hardwareSeenProvider` is deliberately **separate from `scanModeProvider`**: it flips while a scan
+is being delivered, and `scannerConfigProvider` watches the raw mode to decide whether to register
+the receiver — sharing one notifier would tear the receiver down at exactly the wrong moment.
+
+## Running against a dev server on a real device
+
+- **Android** — `adb reverse tcp:5179 tcp:5179`, then the device reaches `http://localhost:5179`.
+- **iOS** — no `adb reverse` equivalent. Use the Mac's LAN address (`pnpm --filter web dev --host`).
+  `NSAllowsLocalNetworking` in `ios/Runner/Info.plist` is what lets ATS allow plain HTTP to a
+  private address; everything outside private ranges still requires HTTPS.
+- **Both at once** — a `cloudflared`/`ngrok` tunnel. Point `PUBLIC_BETTER_AUTH_BASE_URL` at the
+  tunnel URL, since device-code pairing and bearer tokens are issued against that origin.
+
 ## Gotchas
 
 - **One platform subscription, fanned out.** `ScanChannel.scans` subscribes to the EventChannel
   once and never cancels it. `EventChannel.receiveBroadcastStream()` builds a new controller per
   call and re-fires the platform's onListen/onCancel, so subscribing per screen means the newest
   listener replaces the Kotlin sink and the first disposal clears it for everyone.
+- **The home tabs live in an IndexedStack, so they all stay mounted and all hear every scan.**
+  `activeTabProvider` is how a screen knows it is the one in front; without that check, scanning
+  during a session also fires a lookup.
+- **Typed entry does not go through `ScanBus`.** Retyping a tag by hand is deliberate, and the
+  bus would swallow it as an echo.
+- **iOS has no `Podfile`** — Flutter resolves the plugins through Swift Package Manager. Don't
+  add one back; `flutter build ios` wires it up.
+- **iOS signs with `DEVELOPMENT_TEAM = M273PG74WU`** (Hannes Rueger). `flutter create` stamps in
+  whichever team Xcode used last, which is not this one — check `ios/Runner.xcodeproj` after any
+  regeneration of the iOS target.
+- **Never run `dart format` over `lib/` wholesale.** It rewrites `lib/api/generated/`, which is
+  generated from `openapi.yaml` and deliberately left unformatted. Format the files you touched.
 - **`build.yaml` sets `include_if_null: false`.** Optional request fields must be _absent_ when
   unset; better-auth rejects an explicit null where it expects a string or nothing.
 - **`compileSdk = 37` must be paired with `compileSdkMinor = 0`.** API 37 ships under Android's

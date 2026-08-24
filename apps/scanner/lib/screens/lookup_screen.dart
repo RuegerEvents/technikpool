@@ -7,6 +7,7 @@ import '../api/client.dart';
 import '../api/generated/export.dart';
 import '../l10n/labels.dart';
 import '../l10n/strings.dart';
+import '../scan/camera_scan_screen.dart';
 import '../state/providers.dart';
 
 /// Scan a tag outside a session to see what the thing is and where it's been —
@@ -28,8 +29,11 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
   @override
   void initState() {
     super.initState();
-    _sub = ref.read(scanChannelProvider).scans.listen((tag) {
-      if (mounted) unawaited(_lookup(tag.trim()));
+    _sub = ref.read(scanBusProvider).codes.listen((tag) {
+      // Every tab stays mounted inside the IndexedStack, so this hears scans
+      // meant for a session too. Only react when it is the tab in front.
+      if (!mounted || ref.read(activeTabProvider) != HomeTab.lookup) return;
+      unawaited(_lookup(tag.trim()));
     });
   }
 
@@ -67,7 +71,17 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(S.lookup)),
+      appBar: AppBar(
+        title: const Text(S.lookup),
+        actions: [
+          if (ref.watch(scanSettingsProvider).cameraEnabled)
+            IconButton(
+              tooltip: S.scanWithCamera,
+              onPressed: () => CameraScanScreen.once(context, title: S.lookup),
+              icon: const Icon(Icons.photo_camera_outlined),
+            ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
@@ -122,10 +136,7 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
         if (asset.currentProduction != null)
           _row(S.checkedOutTo, asset.currentProduction!.name),
         const SizedBox(height: 24),
-        const Text(
-          S.history,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+        const Text(S.history, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         for (final tx in asset.history)
           ListTile(

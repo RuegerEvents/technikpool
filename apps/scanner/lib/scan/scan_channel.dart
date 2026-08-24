@@ -1,6 +1,10 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+
+import 'scan_settings.dart';
 
 /// A broadcast configuration: which Intent actions to listen for and which
 /// extras carry the decoded text.
@@ -24,11 +28,10 @@ class ScannerConfig {
     extraKeys: ['data', 'barcode_string', 'barcode', 'SCAN_BARCODE1', 'value'],
   );
 
-  ScannerConfig copyWith({List<String>? actions, List<String>? extraKeys}) =>
-      ScannerConfig(
-        actions: actions ?? this.actions,
-        extraKeys: extraKeys ?? this.extraKeys,
-      );
+  ScannerConfig copyWith({List<String>? actions, List<String>? extraKeys}) => ScannerConfig(
+    actions: actions ?? this.actions,
+    extraKeys: extraKeys ?? this.extraKeys,
+  );
 
   Map<String, dynamic> toJson() => {'actions': actions, 'extraKeys': extraKeys};
 
@@ -48,10 +51,22 @@ class DiagnosticEvent {
 
 /// Talks to the Kotlin BroadcastReceiver. Everything the hardware trigger
 /// produces arrives on [scans].
+///
+/// Android only. A scan engine that announces itself over broadcast Intents is
+/// an Android-PDA idea; nothing answers these channel names on iOS, where every
+/// call would throw MissingPluginException. So each entry point checks
+/// [isSupported] and degrades to nothing rather than to a crash, and the camera
+/// carries the scanning wherever this is false.
 class ScanChannel {
   static const _method = MethodChannel('technikpool/scanner');
   static const _scans = EventChannel('technikpool/scanner/scans');
   static const _diagnostics = EventChannel('technikpool/scanner/diagnostics');
+
+  /// Whether this device could have a hardware scan engine behind these
+  /// channels at all. Not whether it actually has one — no Android API
+  /// reports that, so see [ScanSettings.hardwareSeen] for the answer that
+  /// only the device itself can give.
+  static bool get isSupported => !kIsWeb && Platform.isAndroid;
 
   StreamController<String>? _scanController;
   StreamSubscription<dynamic>? _platformSubscription;
@@ -65,6 +80,7 @@ class ScanChannel {
   /// screen disposed cleared it for everyone — scanning silently died as soon
   /// as the pairing screen went away.
   Stream<String> get scans {
+    if (!isSupported) return const Stream<String>.empty();
     final controller = _scanController ??= StreamController<String>.broadcast();
     _platformSubscription ??= _scans.receiveBroadcastStream().listen(
       (event) => controller.add(event as String),
@@ -73,18 +89,36 @@ class ScanChannel {
     return controller.stream;
   }
 
-  Stream<DiagnosticEvent> get diagnostics => _diagnostics.receiveBroadcastStream().map((
-    event,
-  ) {
-    final map = (event as Map).cast<Object?, Object?>();
-    return DiagnosticEvent(
-      action: map['action'] as String? ?? '',
-      extras: (map['extras'] as Map?)?.map((k, v) => MapEntry('$k', '$v')) ?? const {},
+  Stream<DiagnosticEvent> get diagnostics {
+    if (!isSupported) return const Stream<DiagnosticEvent>.empty();
+    return _diagnostics.receiveBroadcastStream().map((event) {
+      final map = (event as Map).cast<Object?, Object?>();
+      return DiagnosticEvent(
+        action: map['action'] as String? ?? '',
+        extras: (map['extras'] as Map?)?.map((k, v) => MapEntry('$k', '$v')) ?? const {},
+      );
+    });
+  }
+
+  Future<void> configure(ScannerConfig config) async {
+    if (!isSupported) return;
+    await _method.invokeMethod<void>('configure', config.toJson());
+  }
+
+  Future<void> stop() async {
+    if (!isSupported) return;
+    await _method.invokeMethod<void>('stop');
+  }
+
+  /// What this device calls itself. Null wherever there is no bridge to ask.
+  Future<DeviceIdentity?> deviceInfo() async {
+    if (!isSupported) return null;
+    final map = await _method.invokeMapMethod<String, String>('deviceInfo');
+    if (map == null) return null;
+    return DeviceIdentity(
+      manufacturer: map['manufacturer'] ?? '',
+      brand: map['brand'] ?? '',
+      model: map['model'] ?? '',
     );
-  });
-
-  Future<void> configure(ScannerConfig config) =>
-      _method.invokeMethod<void>('configure', config.toJson());
-
-  Future<void> stop() => _method.invokeMethod<void>('stop');
+  }
 }

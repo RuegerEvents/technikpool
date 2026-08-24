@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../l10n/strings.dart';
 import '../scan/scan_channel.dart';
+import '../scan/scan_settings.dart';
 import '../state/providers.dart';
 import 'diagnostics_screen.dart';
 
@@ -14,6 +15,7 @@ class SettingsScreen extends ConsumerWidget {
     final creds = ref.watch(credentialsProvider).value;
     final user = ref.watch(currentUserProvider);
     final config = ref.watch(scannerConfigProvider).value;
+    final settings = ref.watch(scanSettingsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text(S.settings)),
@@ -33,25 +35,79 @@ class SettingsScreen extends ConsumerWidget {
           ),
           ListTile(title: const Text(S.server), subtitle: Text(creds?.baseUrl ?? '—')),
           const Divider(),
-          ListTile(
-            title: const Text(S.scannerConfig),
-            subtitle: Text(
-              config == null
-                  ? '…'
-                  : '${config.actions.length} Actions · ${config.extraKeys.length} Keys',
+          const _SectionHeader(S.scanInput),
+          RadioGroup<ScanMode>(
+            groupValue: settings.mode,
+            onChanged: (picked) {
+              if (picked != null) ref.read(scanModeProvider.notifier).save(picked);
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final mode in ScanMode.values)
+                  RadioListTile<ScanMode>(
+                    value: mode,
+                    title: Text(switch (mode) {
+                      ScanMode.auto => S.scanModeAuto,
+                      ScanMode.hardware => S.scanModeHardware,
+                      ScanMode.camera => S.scanModeCamera,
+                    }),
+                    subtitle: Text(switch (mode) {
+                      ScanMode.auto => S.scanModeAutoHint,
+                      ScanMode.hardware => S.scanModeHardwareHint,
+                      ScanMode.camera => S.scanModeCameraHint,
+                    }),
+                    // A device with no broadcast bridge cannot honour either of
+                    // the hardware answers, so it is not offered them.
+                    enabled: ScanChannel.isSupported || mode == ScanMode.camera,
+                  ),
+              ],
             ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute<void>(builder: (_) => const _ScannerConfigScreen())),
           ),
-          ListTile(
-            title: const Text(S.diagnostics),
-            subtitle: const Text(S.diagnosticsHint),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context)
-                .push(MaterialPageRoute<void>(builder: (_) => const DiagnosticsScreen())),
-          ),
+          if (ScanChannel.isSupported)
+            ListTile(
+              leading: Icon(
+                settings.hardwareSeen || settings.isKnownPda
+                    ? Icons.check_circle_outline
+                    : Icons.help_outline,
+              ),
+              title: Text(switch (settings) {
+                ScanSettings(hardwareSeen: true) => S.hardwareDetected,
+                ScanSettings(isKnownPda: true) => S.knownPdaModel,
+                _ => S.hardwareNotDetected,
+              }),
+              subtitle: Text(settings.device?.toString() ?? '…'),
+              trailing: settings.hardwareSeen
+                  ? TextButton(
+                      onPressed: () => ref.read(hardwareSeenProvider.notifier).forget(),
+                      child: const Text(S.reset),
+                    )
+                  : null,
+            ),
+          // Both of these configure the Android broadcast bridge, which does
+          // not exist on a device that scans with its camera.
+          if (ScanChannel.isSupported) ...[
+            const Divider(),
+            ListTile(
+              title: const Text(S.scannerConfig),
+              subtitle: Text(
+                config == null
+                    ? '…'
+                    : '${config.actions.length} Actions · ${config.extraKeys.length} Keys',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(
+                context,
+              ).push(MaterialPageRoute<void>(builder: (_) => const _ScannerConfigScreen())),
+            ),
+            ListTile(
+              title: const Text(S.diagnostics),
+              subtitle: const Text(S.diagnosticsHint),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context)
+                  .push(MaterialPageRoute<void>(builder: (_) => const DiagnosticsScreen())),
+            ),
+          ],
           const Divider(),
           Padding(
             padding: const EdgeInsets.all(16),
@@ -65,6 +121,24 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+    child: Text(
+      label,
+      style: TextStyle(
+        fontWeight: FontWeight.w600,
+        color: Theme.of(context).colorScheme.primary,
+      ),
+    ),
+  );
 }
 
 class _ScannerConfigScreen extends ConsumerStatefulWidget {
@@ -99,9 +173,7 @@ class _ScannerConfigScreenState extends ConsumerState<_ScannerConfigScreen> {
   Future<void> _save() async {
     await ref
         .read(scannerConfigProvider.notifier)
-        .save(
-          ScannerConfig(actions: _split(_actions.text), extraKeys: _split(_keys.text)),
-        );
+        .save(ScannerConfig(actions: _split(_actions.text), extraKeys: _split(_keys.text)));
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(S.saved)));
     }

@@ -69,8 +69,11 @@ class _Root extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final creds = ref.watch(credentialsProvider);
-    // Registers the broadcast receiver as soon as the app starts.
+    // Registers the broadcast receiver as soon as the app starts (a no-op on
+    // platforms with no such thing), and opens the scan bus so a trigger pull
+    // is noticed even before a screen has asked to listen.
     ref.watch(scannerConfigProvider);
+    ref.watch(scanBusProvider);
 
     return creds.when(
       loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),

@@ -2,18 +2,21 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../api/auth_service.dart';
 import '../api/client.dart';
 import '../l10n/strings.dart';
+import '../scan/camera_scan_screen.dart';
 import '../state/providers.dart';
 
 enum _Step { server, deviceCode, password }
 
-/// First-run pairing. The server address is read with the hardware scanner off
-/// the QR on the web app's Scanners page — no URL typing on a rugged keypad —
-/// and then the operator either approves a short code in a browser (default) or
-/// signs in with a password.
+/// First-run pairing. The server address is read off the QR on the web app's
+/// Scanners page — with the hardware trigger on a PDA, with the camera on a
+/// phone, either way no URL typing on a rugged keypad — and then the operator
+/// either approves a short code in a browser (default) or signs in with a
+/// password.
 class PairingScreen extends ConsumerStatefulWidget {
   const PairingScreen({super.key});
 
@@ -37,9 +40,8 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
   @override
   void initState() {
     super.initState();
-    // The same hardware trigger that reads asset tags reads the setup QR, so
-    // no camera plugin is needed anywhere in this app.
-    _scanSub = ref.read(scanChannelProvider).scans.listen((code) {
+    // Whatever reads asset tags on this device reads the setup QR too.
+    _scanSub = ref.read(scanBusProvider).codes.listen((code) {
       if (!mounted || _step != _Step.server) return;
       final trimmed = code.trim();
       if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
@@ -179,6 +181,20 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       const Text(S.scanServerQr, style: TextStyle(fontSize: 16)),
+      if (ref.watch(scanSettingsProvider).cameraEnabled) ...[
+        const SizedBox(height: 16),
+        OutlinedButton.icon(
+          onPressed: _busy
+              ? null
+              : () => CameraScanScreen.once(
+                  context,
+                  title: S.scanQrWithCamera,
+                  formats: const [BarcodeFormat.qrCode],
+                ),
+          icon: const Icon(Icons.photo_camera_outlined),
+          label: const Text(S.scanQrWithCamera),
+        ),
+      ],
       const SizedBox(height: 20),
       TextField(
         controller: _urlController,

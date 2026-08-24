@@ -74,10 +74,35 @@ class S {
   static const diagnosticsEmpty = 'Noch nichts empfangen.';
   static const useThisPair = 'Diese Werte übernehmen';
 
+  // Scan input
+  static const scanInput = 'Scan-Eingabe';
+  static const scanWithCamera = 'Mit Kamera scannen';
+  static const cameraScanner = 'Kamera-Scanner';
+  static const cameraHint = 'Etikett in den Rahmen halten.';
+  static const cameraDenied =
+      'Kein Kamerazugriff. Erlaube ihn in den Systemeinstellungen und versuche es erneut.';
+  static const cameraUnsupported = 'Dieses Gerät hat keine nutzbare Kamera.';
+  static const cameraFailed = 'Die Kamera konnte nicht gestartet werden.';
+  static const torch = 'Licht';
+  static const scanModeAuto = 'Automatisch';
+  static const scanModeAutoHint =
+      'Hardware-Auslöser bei bekannten Scanner-Modellen und sobald ein Gerät '
+      'einen Scan liefert — sonst Kamera.';
+  static const scanModeHardware = 'Hardware-Auslöser';
+  static const scanModeHardwareHint = 'Nur die eingebaute Scan-Engine des Geräts.';
+  static const scanModeCamera = 'Kamera';
+  static const scanModeCameraHint = 'Nur die Kamera. Für Telefone ohne Scan-Engine.';
+  static const hardwareDetected = 'Hardware-Scanner erkannt';
+  static const hardwareNotDetected = 'Noch kein Hardware-Scan empfangen';
+  static const knownPdaModel = 'Bekanntes Scanner-Modell';
+  static const scanQrWithCamera = 'QR-Code mit Kamera scannen';
+
   // Generic
   static const retry = 'Erneut versuchen';
   static const cancel = 'Abbrechen';
   static const manualEntry = 'Etikett manuell eingeben';
   static const submit = 'Übernehmen';
+  static const close = 'Schließen';
+  static const reset = 'Zurücksetzen';
   static const sessionExpired = 'Die Sitzung ist abgelaufen. Bitte erneut verbinden.';
 }
