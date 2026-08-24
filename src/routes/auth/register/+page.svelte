@@ -6,6 +6,19 @@
 	import * as Card from '$lib/components/ui/card';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
+
+	// Same contract as the login page — see the auth guard in hooks.server.ts.
+	let redirectTo = $derived.by(() => {
+		const raw = page.url.searchParams.get('redirectTo');
+		return raw && raw.startsWith('/') && !raw.startsWith('//') ? raw : null;
+	});
+
+	let loginHref = $derived(
+		redirectTo
+			? `${resolve('/auth/login')}?redirectTo=${encodeURIComponent(redirectTo)}`
+			: resolve('/auth/login')
+	);
 
 	let name = $state('');
 	let email = $state('');
@@ -30,7 +43,9 @@
 					success = true;
 					loading = false;
 					await invalidateAll();
-					goto(resolve('/'));
+					// eslint-disable-next-line svelte/no-navigation-without-resolve
+					if (redirectTo) goto(redirectTo);
+					else goto(resolve('/'));
 				},
 				onError: (ctx) => {
 					error = ctx.error.message;
@@ -75,7 +90,7 @@
 			</form>
 			<div class="mt-4 text-center text-sm">
 				Already have an account?
-				<a href={resolve('/auth/login')} class="underline"> Login </a>
+				<a href={loginHref} class="underline"> Login </a>
 			</div>
 		</Card.Content>
 	</Card.Root>

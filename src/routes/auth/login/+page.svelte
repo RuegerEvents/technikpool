@@ -6,11 +6,25 @@
 	import * as Card from '$lib/components/ui/card';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 
 	let email = $state('');
 	let password = $state('');
 	let loading = $state(false);
 	let error = $state('');
+
+	// Set by the server-side auth guard. Only same-origin paths are honoured, so
+	// a crafted ?redirectTo=//evil.com can't bounce the user off-site.
+	let redirectTo = $derived.by(() => {
+		const raw = page.url.searchParams.get('redirectTo');
+		return raw && raw.startsWith('/') && !raw.startsWith('//') ? raw : null;
+	});
+
+	let registerHref = $derived(
+		redirectTo
+			? `${resolve('/auth/register')}?redirectTo=${encodeURIComponent(redirectTo)}`
+			: resolve('/auth/register')
+	);
 
 	async function handleLogin(e: Event) {
 		e.preventDefault();
@@ -25,7 +39,9 @@
 			{
 				onSuccess: async () => {
 					await invalidateAll();
-					goto(resolve('/'));
+					// eslint-disable-next-line svelte/no-navigation-without-resolve
+					if (redirectTo) goto(redirectTo);
+					else goto(resolve('/'));
 				},
 				onError: (ctx) => {
 					error = ctx.error.message;
@@ -68,7 +84,7 @@
 			</form>
 			<div class="mt-4 text-center text-sm">
 				Don't have an account?
-				<a href={resolve('/auth/register')} class="underline"> Sign up </a>
+				<a href={registerHref} class="underline"> Sign up </a>
 			</div>
 		</Card.Content>
 	</Card.Root>
