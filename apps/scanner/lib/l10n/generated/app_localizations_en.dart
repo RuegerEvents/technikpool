@@ -242,6 +242,25 @@ class SEn extends S {
   String get statusSold => 'Sold';
 
   @override
+  String get demoStart => 'Explore the demo';
+
+  @override
+  String get demoExplainer =>
+      'No server to hand? The demo runs a small warehouse on this device — nothing is sent anywhere.';
+
+  @override
+  String get demoBannerText =>
+      'Demo mode — sample data, stored on this device only.';
+
+  @override
+  String get demoLeave => 'Leave demo';
+
+  @override
+  String demoTagHint(String tag) {
+    return 'Try tag $tag — Inventory lists them all';
+  }
+
+  @override
   String get statusDecommissioned => 'Decommissioned';
 
   @override

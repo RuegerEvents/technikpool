@@ -270,6 +270,20 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
                 }),
           child: Text(l10n.signInWithPassword),
         ),
+        const Divider(height: 32),
+        // App-store reviewers have no Technikpool server to pair with, so the
+        // way in has to be on the screen that would otherwise stop them.
+        Text(
+          l10n.demoExplainer,
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: _busy ? null : () => ref.read(credentialsProvider.notifier).startDemo(),
+          icon: const Icon(Icons.science_outlined),
+          label: Text(l10n.demoStart),
+        ),
       ],
     );
   }

@@ -137,7 +137,9 @@ class SettingsScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: OutlinedButton.icon(
               icon: const Icon(Icons.logout),
-              label: Text(l10n.disconnect),
+              // Same action either way, but "Disconnect" reads as if there were
+              // a server on the other end of the demo.
+              label: Text(ref.watch(isDemoProvider) ? l10n.demoLeave : l10n.disconnect),
               onPressed: () => ref.read(credentialsProvider.notifier).signOut(),
             ),
           ),

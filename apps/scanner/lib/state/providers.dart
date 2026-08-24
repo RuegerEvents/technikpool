@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../api/auth_service.dart';
 import '../api/client.dart';
 import '../api/generated/export.dart';
+import '../demo/demo_api.dart';
 import '../scan/scan_bus.dart';
 import '../scan/scan_channel.dart';
 import '../scan/scan_settings.dart';
@@ -79,14 +80,28 @@ class CredentialsNotifier extends AsyncNotifier<Credentials> {
     state = AsyncData(Credentials(baseUrl: baseUrl, token: token));
   }
 
+  /// Enter demo mode: stored like any other pairing, so everything downstream
+  /// — the home screen, sign-out, the API client — treats it as one.
+  Future<void> startDemo() => save(baseUrl: demoBaseUrl, token: _demoToken);
+
   /// Drop the token but keep the server address — re-pairing the same device
-  /// shouldn't mean reading the QR again.
+  /// shouldn't mean reading the QR again. Leaving the demo drops the address
+  /// too: `demo://` is no use in the server field.
   Future<void> signOut() async {
     final baseUrl = state.value?.baseUrl;
     await _storage.delete(key: _kToken);
+    if (isDemo(baseUrl)) {
+      await _storage.delete(key: _kBaseUrl);
+      state = const AsyncData(Credentials());
+      return;
+    }
     state = AsyncData(Credentials(baseUrl: baseUrl));
   }
 }
+
+/// Stands in for a session token so [Credentials.isPaired] holds. Nothing ever
+/// sends it: in demo mode no request leaves the device.
+const _demoToken = 'demo';
 
 final credentialsProvider = AsyncNotifierProvider<CredentialsNotifier, Credentials>(
   CredentialsNotifier.new,
@@ -215,13 +230,25 @@ final scanSettingsProvider = Provider<ScanSettings>((ref) {
   );
 });
 
+/// Whether this install is running the store-review demo rather than talking to
+/// a server. Screens use it to say so on screen — a demo that doesn't announce
+/// itself is just a confusing app.
+final isDemoProvider = Provider<bool>(
+  (ref) => isDemo(ref.watch(credentialsProvider).value?.baseUrl),
+);
+
+/// The demo warehouse, kept for as long as the app runs, so a scan the reviewer
+/// makes is still there on the next screen.
+final demoBackendProvider = Provider<DemoBackend>((ref) => DemoBackend());
+
 /// An API client for whatever we're currently paired with. Rebuilt whenever the
 /// credentials change, so signing out invalidates every dependent request.
 final apiClientProvider = Provider<ApiClient?>((ref) {
   final creds = ref.watch(credentialsProvider).value;
   if (creds?.baseUrl == null) return null;
+  if (isDemo(creds!.baseUrl)) return demoApiClient(ref.watch(demoBackendProvider));
   return ApiClient(
-    baseUrl: creds!.baseUrl!,
+    baseUrl: creds.baseUrl!,
     token: creds.token,
     userAgent: ref.watch(_userAgentProvider),
   );

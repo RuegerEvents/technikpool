@@ -547,6 +547,36 @@ abstract class S {
   /// **'Sold'**
   String get statusSold;
 
+  /// No description provided for @demoStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore the demo'**
+  String get demoStart;
+
+  /// No description provided for @demoExplainer.
+  ///
+  /// In en, this message translates to:
+  /// **'No server to hand? The demo runs a small warehouse on this device — nothing is sent anywhere.'**
+  String get demoExplainer;
+
+  /// No description provided for @demoBannerText.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo mode — sample data, stored on this device only.'**
+  String get demoBannerText;
+
+  /// No description provided for @demoLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave demo'**
+  String get demoLeave;
+
+  /// No description provided for @demoTagHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try tag {tag} — Inventory lists them all'**
+  String demoTagHint(String tag);
+
   /// No description provided for @statusDecommissioned.
   ///
   /// In en, this message translates to:

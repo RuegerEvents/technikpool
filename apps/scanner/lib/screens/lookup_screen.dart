@@ -8,6 +8,7 @@ import '../api/generated/export.dart';
 import '../l10n/labels.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../scan/camera_scan_screen.dart';
+import '../demo/demo_data.dart';
 import '../state/providers.dart';
 import '../widgets/category_pill.dart';
 
@@ -96,6 +97,11 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
               decoration: InputDecoration(
                 labelText: l10n.manualEntry,
                 prefixIcon: Icon(Icons.qr_code_scanner),
+                // In the demo there is no sticker to point at, so the tag to
+                // type has to be on screen. Inventory lists the rest.
+                helperText: ref.watch(isDemoProvider)
+                    ? l10n.demoTagHint(DemoData.assets().first.assetTag!)
+                    : null,
               ),
               onSubmitted: (v) => _lookup(v.trim()),
             ),

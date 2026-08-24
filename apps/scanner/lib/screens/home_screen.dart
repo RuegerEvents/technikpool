@@ -39,7 +39,15 @@ class HomeScreen extends ConsumerWidget {
     final tab = ref.watch(activeTabProvider);
 
     return Scaffold(
-      body: IndexedStack(index: tab.index, children: _tabs),
+      body: Column(
+        children: [
+          // A demo that doesn't say so is just an app full of made-up stock.
+          // Above the tabs rather than inside one, because every tab is demo
+          // data and the reviewer may start on any of them.
+          if (ref.watch(isDemoProvider)) _DemoBanner(),
+          Expanded(child: IndexedStack(index: tab.index, children: _tabs)),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: tab.index,
         onDestinationSelected: (i) =>
@@ -53,6 +61,36 @@ class HomeScreen extends ConsumerWidget {
           ),
           NavigationDestination(icon: Icon(Icons.settings_outlined), label: l10n.settings),
         ],
+      ),
+    );
+  }
+}
+
+/// Says, on every screen, that none of this is real.
+class _DemoBanner extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      color: scheme.surfaceContainerHighest,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Icon(Icons.science_outlined, size: 18, color: scheme.onSurfaceVariant),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.demoBannerText,
+                  style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

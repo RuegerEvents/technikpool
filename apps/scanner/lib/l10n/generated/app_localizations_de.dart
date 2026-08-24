@@ -243,6 +243,25 @@ class SDe extends S {
   String get statusSold => 'Verkauft';
 
   @override
+  String get demoStart => 'Demo ausprobieren';
+
+  @override
+  String get demoExplainer =>
+      'Kein Server zur Hand? Die Demo betreibt ein kleines Lager auf diesem Gerät — es wird nichts übertragen.';
+
+  @override
+  String get demoBannerText =>
+      'Demo-Modus — Beispieldaten, nur auf diesem Gerät.';
+
+  @override
+  String get demoLeave => 'Demo verlassen';
+
+  @override
+  String demoTagHint(String tag) {
+    return 'Etikett $tag probieren — im Inventar stehen alle';
+  }
+
+  @override
   String get statusDecommissioned => 'Ausgemustert';
 
   @override
