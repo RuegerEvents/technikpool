@@ -2,7 +2,7 @@ import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import type { FieldChange } from '$lib/types/asset-transaction';
-import { isSystemAdmin, requireAuth, userOrgIds } from '$lib/server/services/access';
+import { isSystemAdmin, requireAuth, scopedOrgIds, userOrgIds } from '$lib/server/services/access';
 import {
 	ACTIVE_ASSET_WHERE,
 	ASSET_STATUSES,
@@ -12,8 +12,7 @@ import {
 
 export const getAssets = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
-	const orgIds = await userOrgIds(user.id);
-	const queryOrgIds = organizationId ? [organizationId] : orgIds;
+	const queryOrgIds = await scopedOrgIds(user.id, organizationId);
 
 	return await prisma.asset.findMany({
 		where: { organizationId: { in: queryOrgIds }, ...ACTIVE_ASSET_WHERE },
@@ -34,8 +33,7 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
  */
 export const getRetiredAssets = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
-	const orgIds = await userOrgIds(user.id);
-	const queryOrgIds = organizationId ? [organizationId] : orgIds;
+	const queryOrgIds = await scopedOrgIds(user.id, organizationId);
 
 	return await prisma.asset.findMany({
 		where: { organizationId: { in: queryOrgIds }, ...RETIRED_ASSET_WHERE },
@@ -75,8 +73,7 @@ export const getInventorySummary = query(
 	v.optional(v.string()),
 	async (organizationId?: string) => {
 		const user = await requireAuth();
-		const orgIds = await userOrgIds(user.id);
-		const queryOrgIds = organizationId ? [organizationId] : orgIds;
+		const queryOrgIds = await scopedOrgIds(user.id, organizationId);
 
 		const products = await prisma.product.findMany({
 			include: {
@@ -115,13 +112,7 @@ export const getCategories = query(async () => {
 
 export const getLocations = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
-	const orgIds = await userOrgIds(user.id);
-	const queryOrgIds = organizationId ? [organizationId] : orgIds;
-	const systemAdmin = await isSystemAdmin(user.id);
-
-	if (!systemAdmin && organizationId && !orgIds.includes(organizationId)) {
-		throw new Error('Unauthorized');
-	}
+	const queryOrgIds = await scopedOrgIds(user.id, organizationId);
 
 	return await prisma.location.findMany({
 		where: { organizationId: { in: queryOrgIds } },
@@ -618,8 +609,7 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 
 export const getBundleTemplates = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
-	const orgIds = await userOrgIds(user.id);
-	const queryOrgIds = organizationId ? [organizationId] : orgIds;
+	const queryOrgIds = await scopedOrgIds(user.id, organizationId);
 
 	return await prisma.bundleTemplate.findMany({
 		where: { organizationId: { in: queryOrgIds } },
@@ -646,8 +636,7 @@ export const getBundleTemplates = query(v.optional(v.string()), async (organizat
 
 export const getBundles = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
-	const orgIds = await userOrgIds(user.id);
-	const queryOrgIds = organizationId ? [organizationId] : orgIds;
+	const queryOrgIds = await scopedOrgIds(user.id, organizationId);
 
 	return await prisma.assetBundle.findMany({
 		where: { template: { organizationId: { in: queryOrgIds } } },
@@ -663,8 +652,8 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 });
 
 export const getBundle = query(v.string(), async (id: string) => {
-	await requireAuth();
-	return await prisma.assetBundle.findUniqueOrThrow({
+	const user = await requireAuth();
+	const bundle = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id },
 		include: {
 			template: { include: { organization: true, category: true } },
@@ -678,6 +667,13 @@ export const getBundle = query(v.string(), async (id: string) => {
 			}
 		}
 	});
+
+	const orgIds = await userOrgIds(user.id);
+	if (!orgIds.includes(bundle.template.organizationId) && !(await isSystemAdmin(user.id))) {
+		throw new Error('Unauthorized');
+	}
+
+	return bundle;
 });
 
 // AssetBundle.tag is globally unique like Asset.assetTag — check up front so the
