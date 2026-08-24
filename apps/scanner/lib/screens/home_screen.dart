@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../api/client.dart';
 import '../l10n/strings.dart';
 import '../state/providers.dart';
 import 'inventory_screen.dart';
@@ -27,13 +28,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // A 401 anywhere means the token was revoked or expired; drop it and the
-    // root widget swaps back to pairing.
+    // A 401 means the token was revoked or expired; drop it and the root widget
+    // swaps back to pairing. Checked against the typed status rather than the
+    // message, which is localised and would never have matched.
     ref.listen(currentUserProvider, (_, next) {
       next.whenOrNull(
         error: (error, _) {
-          if (error.toString().contains('401') ||
-              '$error'.contains('Nicht autorisiert')) {
+          final err = unwrapError(error);
+          if (err is ApiException && err.isUnauthorized) {
             ref.read(credentialsProvider.notifier).signOut();
           }
         },
