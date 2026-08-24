@@ -75,6 +75,9 @@
 	let filteredAvailable = $derived(
 		availableAssets.filter((a) => {
 			if (selectedIds.has(a.id)) return false;
+			// A unit belongs to one kit at a time, so one already in a bundle isn't
+			// on offer here — same rule the bundle detail page's picker applies.
+			if (a.bundleId) return false;
 			if (!assetSearch.trim()) return true;
 			const q = assetSearch.toLowerCase();
 			return (

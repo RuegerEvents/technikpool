@@ -859,10 +859,18 @@ export const addAssetToBundle = command(bundleAssetSchema, async ({ bundleId, as
 	});
 	const asset = await prisma.asset.findUniqueOrThrow({
 		where: { id: assetId },
-		select: { status: true }
+		select: { status: true, bundleId: true, bundle: { select: { template: true } } }
 	});
 	if (isRetiredStatus(asset.status)) {
 		throw new Error('This asset is sold or decommissioned and cannot be added to a bundle');
+	}
+	// A unit belongs to one kit at a time. Both pickers already leave bundled
+	// assets out, so reaching here means a stale page — moving it silently would
+	// take it out of the other bundle without anyone seeing.
+	if (asset.bundleId && asset.bundleId !== bundleId) {
+		throw new Error(
+			`This asset is already in the bundle "${asset.bundle?.template.name}" — remove it there first`
+		);
 	}
 	const updateData: { bundleId: string; locationId?: string } = { bundleId };
 	if (bundle.locationId) updateData.locationId = bundle.locationId;
