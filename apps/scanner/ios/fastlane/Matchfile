@@ -1,0 +1,22 @@
+# Where the signing identity lives.
+#
+# match keeps the distribution certificate and the App Store provisioning
+# profile in a private git repo, encrypted with a passphrase. That repo is the
+# only copy anyone needs: a new Mac or a CI runner clones it, decrypts, and is
+# signing within seconds — no exporting .p12 files by hand and no second person
+# generating a rival certificate that silently invalidates the first.
+#
+# Set MATCH_GIT_URL to a *private* repo that exists only for this (conventional
+# name: technikpool-certificates). It is not this monorepo — the whole point is
+# that read access to it is a different grant from read access to the code.
+git_url(ENV.fetch('MATCH_GIT_URL', ''))
+storage_mode('git')
+
+type('appstore')
+app_identifier(['events.rueger.technikpool.technikpoolScanner'])
+
+# Never on CI. Creating or revoking a certificate is a decision with blast
+# radius — Apple allows very few distribution certs, and revoking one breaks
+# every build signed with it. The `certificates` lane below is where a human
+# does it deliberately.
+readonly(true)

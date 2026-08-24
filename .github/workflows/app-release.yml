@@ -111,28 +111,10 @@ jobs:
           bundler-cache: true
           working-directory: apps/scanner/ios
 
-      # A distribution certificate and an App Store profile, exported from the
-      # Mac that already has them. They go into a throwaway keychain that dies
-      # with the runner.
-      - name: Import signing certificate
-        uses: apple-actions/import-codesign-certs@v5
-        with:
-          p12-file-base64: ${{ secrets.IOS_DIST_CERT_P12 }}
-          p12-password: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
-
-      - name: Install provisioning profile
-        env:
-          PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE }}
-        run: |
-          set -euo pipefail
-          if [ -z "$PROFILE_BASE64" ]; then
-            echo "::error::Secret IOS_PROVISIONING_PROFILE is not set" >&2
-            exit 1
-          fi
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "$PROFILE_BASE64" | base64 --decode \
-            > ~/Library/MobileDevice/Provisioning\ Profiles/technikpool.mobileprovision
-
+      # The signing identity is not a secret here — it is cloned from the match
+      # repo and decrypted at build time, so there is no .p12 to export, rotate
+      # by hand, or keep in step across machines. The lane runs `setup_ci`,
+      # which puts it in a throwaway keychain that dies with the runner.
       - name: Write the App Store Connect key
         env:
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
@@ -150,10 +132,14 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_PATH: ${{ runner.temp }}/asc_key.p8
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          # Read access to the certificates repo. base64 of "user:token" with a
+          # PAT scoped to that one private repo — the runner never gets a
+          # credential that reaches this monorepo.
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
         run: bundle exec fastlane beta
 
       - name: Shred credentials
         if: always()
-        run: |
-          rm -f "$RUNNER_TEMP/asc_key.p8"
-          rm -f ~/Library/MobileDevice/Provisioning\ Profiles/technikpool.mobileprovision
+        run: rm -f "$RUNNER_TEMP/asc_key.p8"

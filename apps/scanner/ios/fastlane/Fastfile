@@ -5,18 +5,26 @@
 # independently of the server: `pnpm release` is a different thing entirely.
 # Cut the app release first, then run a lane.
 #
-# Authentication is an App Store Connect API key, not an Apple ID: it needs no
-# 2FA prompt, so the same command works on a laptop and in CI. Set
-#   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_PATH   (path to the .p8)
-# Create one under App Store Connect › Users and Access › Integrations.
+# Two credentials, and neither is an Apple ID password:
 #
-# Check it before a first upload:  bundle exec fastlane ios validate
+#   * An App Store Connect API key — ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_PATH
+#     (path to the .p8). A key rather than an Apple ID because it needs no 2FA
+#     prompt, so the same command works on a laptop and on a runner. Create one
+#     under App Store Connect › Users and Access › Integrations.
+#   * match — MATCH_GIT_URL and MATCH_PASSWORD. See Matchfile.
+#
+# First time on a new machine, or first time ever:
+#   bundle exec fastlane ios certificates   # creates/fetches the identity
+#   bundle exec fastlane ios validate       # proves both credentials work
 
 default_platform(:ios)
 
 # __dir__ is ios/fastlane, so this is apps/scanner — where flutter must run.
 FLUTTER_PROJECT = File.expand_path('../..', __dir__)
-IPA = File.join(FLUTTER_PROJECT, 'build/ios/ipa/technikpool_scanner.ipa')
+IOS_DIR = File.expand_path('..', __dir__)
+OUTPUT_DIR = File.join(FLUTTER_PROJECT, 'build/ios/ipa')
+IPA = File.join(OUTPUT_DIR, 'Runner.ipa')
+APP_IDENTIFIER = 'events.rueger.technikpool.technikpoolScanner'
 
 def asc_key
   %w[ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_PATH].each do |name|
@@ -31,27 +39,80 @@ def asc_key
   )
 end
 
+def require_match_env
+  UI.user_error!('MATCH_GIT_URL is not set — see ios/fastlane/Matchfile') if
+    ENV['MATCH_GIT_URL'].to_s.empty?
+  UI.user_error!('MATCH_PASSWORD is not set — it decrypts the certificates repo') if
+    ENV['MATCH_PASSWORD'].to_s.empty?
+end
+
 platform :ios do
+  desc 'Create or renew the signing identity, and push it to the match repo'
+  desc 'Run this by hand on a Mac — never in CI'
+  lane :certificates do
+    require_match_env
+    match(type: 'appstore', readonly: false, api_key: asc_key)
+  end
+
   desc 'Build a signed App Store ipa'
   lane :build do
+    require_match_env
+    # Creates a throwaway keychain when running on a runner, and does nothing
+    # otherwise. Without it match has nowhere to put the certificate on CI.
+    setup_ci
+    match(type: 'appstore', readonly: true, api_key: asc_key)
+
     Dir.chdir(FLUTTER_PROJECT) do
       sh('flutter', 'clean')
       sh('flutter', 'pub', 'get')
-      # Flutter drives the whole build, including signing, from the same
-      # pubspec version the Android lane uses. Going through gym instead would
-      # mean a second place that decides how the app is built.
-      sh('flutter', 'build', 'ipa', '--release', '--export-method', 'app-store')
+      # Flutter builds the app but signs nothing; gym archives and signs it.
+      # `flutter build ipa` would sign it too, with Xcode's *automatic* signing,
+      # which picks its own profile and ignores the one match just installed.
+      sh('flutter', 'build', 'ios', '--release', '--no-codesign')
     end
+
+    # match exports the profile it installed under this key. Reading it back
+    # beats hardcoding "match AppStore <bundle id>", which is a convention that
+    # match owns and could change.
+    profile = ENV.fetch("sigh_#{APP_IDENTIFIER}_appstore_profile-name")
+
+    build_app(
+      workspace: File.join(IOS_DIR, 'Runner.xcworkspace'),
+      scheme: 'Runner',
+      configuration: 'Release',
+      export_method: 'app-store',
+      output_directory: OUTPUT_DIR,
+      output_name: 'Runner.ipa',
+      export_options: {
+        signingStyle: 'manual',
+        provisioningProfiles: { APP_IDENTIFIER => profile }
+      },
+      # Override signing as build settings rather than editing project.pbxproj.
+      # The project is on automatic signing and stays that way: a second writer
+      # to that file is how it ends up corrupted (see CLAUDE.md), and a lane
+      # that mutates it leaves the repo dirty on a developer's machine.
+      xcargs: [
+        'CODE_SIGN_STYLE=Manual',
+        "PROVISIONING_PROFILE_SPECIFIER=\"#{profile}\"",
+        "DEVELOPMENT_TEAM=#{CredentialsManager::AppfileConfig.try_fetch_value(:team_id)}",
+        'CODE_SIGN_IDENTITY="Apple Distribution"'
+      ].join(' ')
+    )
+
     UI.user_error!("No ipa at #{IPA}") unless File.exist?(IPA)
     UI.success("Built #{IPA}")
   end
 
-  desc 'Check the API key without uploading anything'
+  desc 'Check both credentials without uploading or building anything'
   lane :validate do
+    require_match_env
     api_key = asc_key
     # Cheapest call that proves the key can see the app record.
     latest_testflight_build_number(api_key: api_key)
-    UI.success('App Store Connect key works and the app record is visible.')
+    # Proves the repo can be cloned and the passphrase decrypts it. readonly, so
+    # a missing certificate fails here rather than quietly minting a new one.
+    match(type: 'appstore', readonly: true, api_key: api_key)
+    UI.success('App Store Connect key works, and the signing identity decrypts.')
   end
 
   desc 'Upload to TestFlight'

@@ -606,18 +606,61 @@ Variables once that store's credentials are in.
 
 Repository secrets the workflow needs:
 
-| Android                     | iOS                                 |
-| --------------------------- | ----------------------------------- |
-| `ANDROID_KEYSTORE_BASE64`   | `ASC_KEY_ID`                        |
-| `ANDROID_KEYSTORE_PASSWORD` | `ASC_ISSUER_ID`                     |
-| `ANDROID_KEY_ALIAS`         | `ASC_KEY_P8` (base64)               |
-| `ANDROID_KEY_PASSWORD`      | `IOS_DIST_CERT_P12` (base64)        |
-| `GOOGLE_PLAY_JSON_KEY`      | `IOS_DIST_CERT_PASSWORD`            |
-|                             | `IOS_PROVISIONING_PROFILE` (base64) |
+| Android                     | iOS                              |
+| --------------------------- | -------------------------------- |
+| `ANDROID_KEYSTORE_BASE64`   | `ASC_KEY_ID`                     |
+| `ANDROID_KEYSTORE_PASSWORD` | `ASC_ISSUER_ID`                  |
+| `ANDROID_KEY_ALIAS`         | `ASC_KEY_P8` (base64 of the .p8) |
+| `ANDROID_KEY_PASSWORD`      | `MATCH_GIT_URL`                  |
+| `GOOGLE_PLAY_JSON_KEY`      | `MATCH_PASSWORD`                 |
+|                             | `MATCH_GIT_BASIC_AUTHORIZATION`  |
 
-Every one of them is written to disk for the length of a job and shredded in an `if: always()`
-step. `key.properties` is assembled in CI from the four Android secrets rather than being a
-secret of its own, so the same file works locally and on a runner without ever being committed.
+`key.properties` is assembled in CI from the four Android secrets rather than being a secret of
+its own, so the same file works locally and on a runner without ever being committed. The App
+Store Connect key is written to disk for the length of a job and shredded in an `if: always()`
+step.
+
+### iOS signing: match
+
+The distribution certificate and App Store profile live in a **separate private git repo**,
+encrypted by `match`. Nothing signing-related is a GitHub secret except the passphrase and read
+access to that repo, and no `.p12` is ever exported by hand.
+
+Why a second repo rather than base64 secrets: a certificate has to be identical on every machine
+that signs. Apple allows very few distribution certificates, and generating a second one to put
+on a runner silently invalidates builds signed with the first. match makes one identity and
+hands it out; `readonly: true` everywhere except the `certificates` lane means CI can never
+create or revoke one.
+
+One-time setup, on a Mac:
+
+```sh
+# 1. Create an empty *private* repo, e.g. RuegerEvents/technikpool-certificates.
+#    Not this monorepo — read access to signing must be a separate grant.
+export MATCH_GIT_URL=git@github.com:RuegerEvents/technikpool-certificates.git
+export MATCH_PASSWORD=…            # invent it here; this is what decrypts the repo
+export ASC_KEY_ID=… ASC_ISSUER_ID=… ASC_KEY_PATH=/path/to/AuthKey_XXXX.p8
+
+cd apps/scanner/ios
+bundle exec fastlane certificates   # creates the identity and pushes it, encrypted
+bundle exec fastlane validate       # proves both credentials work, uploads nothing
+```
+
+Then set the three iOS secrets above. `MATCH_GIT_BASIC_AUTHORIZATION` is
+`base64 <<< "user:TOKEN"` with a PAT scoped to the certificates repo alone, so a runner never
+holds a credential that reaches the code.
+
+`build` deliberately does **not** use `flutter build ipa`: that signs with Xcode's _automatic_
+signing, which picks its own profile and ignores the one match installed. Instead Flutter builds
+unsigned (`--no-codesign`) and gym archives and signs it, with the profile passed as `xcargs`
+build settings. The Xcode project stays on automatic signing and is never rewritten — a second
+writer to `project.pbxproj` is how that file ends up corrupted, and a lane that edited it would
+leave a developer's tree dirty after every build.
+
+Android has no equivalent: there is no `match` for Play, and the upload keystore is a base64
+secret. That is less alarming than it sounds — Play signs the app itself, so this is only the
+_upload_ key, and Play support can reset it if it is lost. The app signing key is the one that
+can't be.
 
 fastlane lives next to each platform, not at the repo root, because that is where its tooling
 expects to be:
