@@ -5,37 +5,29 @@ import { wuchale } from 'wuchale/vite';
 
 // wuchale compiles a *numeric catalog slot* into every translated string
 // (`$.get(_w_runtime_)(499)`), so a component only renders correctly against the
-// catalog it was transformed for. Running the `wuchale` CLI rewrites the
-// catalogs from scratch and renumbers them; any component Vite has already
-// transformed keeps indexing the old slots, and the page renders every string
-// one or more positions off. wuchale's own HMR reloads the catalogs but not the
-// modules that index into them, which is the gap this closes — the alternative
-// was restarting the dev server after every extraction.
+// catalog it was transformed for. Anything that renumbers the catalogs leaves
+// already-transformed modules pointing at the wrong slots, and the page renders
+// every string one or more positions off — wuchale's own HMR reloads the
+// catalogs but not the modules that index into them. Re-transforming is the
+// only fix, and until this existed that meant restarting the dev server.
 //
-// Only *external* catalog writes need this. The dev server extracts on save and
-// rewrites the .po files itself, and those are already consistent — reloading
-// there would throw away HMR on every save. So a catalog write counts as
-// external only when no source file changed just before it, which is the same
-// signal wuchale uses internally to tell its own writes apart.
+// It fires on *every* .po write rather than trying to tell the dev server's own
+// extraction apart from an external one. That distinction turned out to be
+// unreliable — formatting a source file and then filling in a translation puts
+// the two milliseconds apart — and it buys nothing:
+//
+//   - An edit that adds or changes no string writes no .po at all, so ordinary
+//     HMR never reaches this and keeps its page state.
+//   - An edit that does change a string already triggers a full reload from
+//     wuchale itself, so the re-transform here is the missing half rather than
+//     an extra cost.
 function wuchaleCatalogReload(): Plugin {
-	const sourceSettleMs = 1500;
-	let lastSourceChange = 0;
-
-	const isSource = (file: string) =>
-		/\.(svelte|ts|js)$/.test(file) && !file.includes('/src/locales/');
-
 	return {
 		name: 'wuchale-catalog-reload',
 		apply: 'serve',
 		configureServer(server) {
 			const onChange = (path: string) => {
-				const file = path.split('\\').join('/');
-				if (isSource(file)) {
-					lastSourceChange = Date.now();
-					return;
-				}
-				if (!file.endsWith('.po')) return;
-				if (Date.now() - lastSourceChange < sourceSettleMs) return;
+				if (!path.endsWith('.po')) return;
 				server.moduleGraph.invalidateAll();
 				server.ws.send({ type: 'full-reload' });
 			};
