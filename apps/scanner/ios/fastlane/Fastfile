@@ -65,9 +65,9 @@ platform :ios do
     Dir.chdir(FLUTTER_PROJECT) do
       sh('flutter', 'clean')
       sh('flutter', 'pub', 'get')
-      # Flutter builds the app but signs nothing; gym archives and signs it.
-      # `flutter build ipa` would sign it too, with Xcode's *automatic* signing,
-      # which picks its own profile and ignores the one match just installed.
+      # Flutter builds the app but signs nothing; gym archives it and signs on
+      # export. `flutter build ipa` would sign it too, with Xcode's *automatic*
+      # signing, which picks its own profile and ignores the one match installed.
       sh('flutter', 'build', 'ios', '--release', '--no-codesign')
     end
 
@@ -83,20 +83,21 @@ platform :ios do
       export_method: 'app-store',
       output_directory: OUTPUT_DIR,
       output_name: 'Runner.ipa',
+      # Archive unsigned, sign on export. Signing settings passed to xcodebuild
+      # apply to *every* target in the workspace, and since the iOS plugins are
+      # resolved through Swift Package Manager, that includes package targets
+      # like mobile_scanner — which have no profile to apply and fail the
+      # archive outright ("does not support provisioning profiles"). The export
+      # below only ever signs the app, so it is the one place the profile
+      # belongs. This also keeps project.pbxproj untouched: the project stays on
+      # automatic signing, and a second writer to that file is how it ends up
+      # corrupted (see CLAUDE.md).
+      skip_codesigning: true,
+      export_team_id: CredentialsManager::AppfileConfig.try_fetch_value(:team_id),
       export_options: {
         signingStyle: 'manual',
         provisioningProfiles: { APP_IDENTIFIER => profile }
-      },
-      # Override signing as build settings rather than editing project.pbxproj.
-      # The project is on automatic signing and stays that way: a second writer
-      # to that file is how it ends up corrupted (see CLAUDE.md), and a lane
-      # that mutates it leaves the repo dirty on a developer's machine.
-      xcargs: [
-        'CODE_SIGN_STYLE=Manual',
-        "PROVISIONING_PROFILE_SPECIFIER=\"#{profile}\"",
-        "DEVELOPMENT_TEAM=#{CredentialsManager::AppfileConfig.try_fetch_value(:team_id)}",
-        'CODE_SIGN_IDENTITY="Apple Distribution"'
-      ].join(' ')
+      }
     )
 
     UI.user_error!("No ipa at #{IPA}") unless File.exist?(IPA)
