@@ -4193,10 +4193,8 @@ msgstr "Verkauft / Ausgemustert"
 msgid "Last known location"
 msgstr "Zuletzt bekannter Standort"
 
-#. 0: label.toLowerCase()
-#: src/lib/components/ui/image-upload/image-upload.svelte
-msgid "Drop {0} here, paste it, or click to choose"
-msgstr "{0} hier ablegen, einfügen oder klicken zum Auswählen"
+#~ msgid "Drop {0} here, paste it, or click to choose"
+#~ msgstr "{0} hier ablegen, einfügen oder klicken zum Auswählen"
 
 #: src/routes/devices/+page.svelte
 msgid "Device disconnected"
@@ -4517,3 +4515,7 @@ msgstr "Kachelansicht"
 #: src/routes/assets/+page.svelte
 msgid "Select all units"
 msgstr "Alle Einheiten auswählen"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Drop an image here, paste it, or click to choose"
+msgstr "Bild hier ablegen, einfügen oder klicken zum Auswählen"

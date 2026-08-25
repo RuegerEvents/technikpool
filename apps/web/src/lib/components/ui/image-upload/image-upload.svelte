@@ -501,8 +501,14 @@
 	/>
 
 	{#if step === 'idle'}
+		<!-- Every call site labels the field above the zone, so the visible copy
+		     stays generic: interpolating the label forced it to lowercase for
+		     English grammar, which in German lowercases a noun at the start of a
+		     sentence. The label lives on as the accessible name, where two
+		     uploaders on one page still need telling apart. -->
 		<button
 			type="button"
+			aria-label={label}
 			onclick={() => fileInput?.click()}
 			ondragover={(e) => {
 				e.preventDefault();
@@ -516,7 +522,7 @@
 				? 'border-primary bg-primary/5'
 				: 'border-input hover:bg-muted/40'}"
 		>
-			Drop {label.toLowerCase()} here, paste it, or click to choose
+			Drop an image here, paste it, or click to choose
 		</button>
 	{:else if step === 'crop'}
 		<div class="space-y-2 rounded-lg border p-3">

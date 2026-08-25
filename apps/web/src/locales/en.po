@@ -4193,10 +4193,8 @@ msgstr "Sold / Decommissioned"
 msgid "Last known location"
 msgstr "Last known location"
 
-#. 0: label.toLowerCase()
-#: src/lib/components/ui/image-upload/image-upload.svelte
-msgid "Drop {0} here, paste it, or click to choose"
-msgstr "Drop {0} here, paste it, or click to choose"
+#~ msgid "Drop {0} here, paste it, or click to choose"
+#~ msgstr "Drop {0} here, paste it, or click to choose"
 
 #: src/routes/devices/+page.svelte
 msgid "Device disconnected"
@@ -4517,3 +4515,7 @@ msgstr "Grid view"
 #: src/routes/assets/+page.svelte
 msgid "Select all units"
 msgstr "Select all units"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Drop an image here, paste it, or click to choose"
+msgstr "Drop an image here, paste it, or click to choose"
