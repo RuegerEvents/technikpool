@@ -6,10 +6,15 @@
 		alt?: string;
 		/** Edge length in px. 28 is the table default — dense enough to leave row height alone. */
 		size?: number;
+		/** Fill the parent instead of a fixed square — for the grid view's card image. */
+		fill?: boolean;
 		class?: string;
 	};
 
-	let { src, alt = '', size = 28, class: className }: Props = $props();
+	let { src, alt = '', size = 28, fill = false, class: className }: Props = $props();
+
+	let box = $derived(fill ? undefined : `width: ${size}px; height: ${size}px;`);
+	let boxClass = $derived(fill ? 'h-full w-full' : '');
 </script>
 
 <!--
@@ -23,22 +28,23 @@
 		{src}
 		{alt}
 		loading="lazy"
-		class={cn('shrink-0 rounded border bg-background object-contain p-px', className)}
-		style="width: {size}px; height: {size}px;"
+		class={cn('shrink-0 rounded border bg-background object-contain p-px', boxClass, className)}
+		style={box}
 	/>
 {:else}
 	<div
 		class={cn(
 			'flex shrink-0 items-center justify-center rounded border bg-muted/40 text-muted-foreground',
+			boxClass,
 			className
 		)}
-		style="width: {size}px; height: {size}px;"
+		style={box}
 		aria-hidden="true"
 	>
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
-			width={Math.round(size * 0.5)}
-			height={Math.round(size * 0.5)}
+			width={fill ? 40 : Math.round(size * 0.5)}
+			height={fill ? 40 : Math.round(size * 0.5)}
 			viewBox="0 0 24 24"
 			fill="none"
 			stroke="currentColor"

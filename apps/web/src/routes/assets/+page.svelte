@@ -46,6 +46,8 @@
 	);
 	let categoryFilter = $state(initial.get('category') ?? '');
 	let showBundleView = $state(initial.get('bundles') !== '0');
+	// A photo wall for browsing the catalogue; the table stays the working view.
+	let layout = $state<'list' | 'grid'>(initial.get('view') === 'grid' ? 'grid' : 'list');
 	let expanded = new SvelteMap<string, boolean>();
 	let selectedAssetIds = new SvelteSet<string>();
 
@@ -60,7 +62,8 @@
 			q: searchQuery,
 			status: statusFilter,
 			category: categoryFilter,
-			bundles: showBundleView ? '' : '0'
+			bundles: showBundleView ? '' : '0',
+			view: layout === 'grid' ? 'grid' : ''
 		};
 		for (const [key, value] of Object.entries(params)) {
 			if (value) url.searchParams.set(key, value);
@@ -84,10 +87,12 @@
 	type BundleInstance = TemplateData['instances'][number];
 	type BundleAsset = BundleInstance['assets'][number];
 
+	// Bundles are a table-only grouping: a kit has no photo of its own, so the
+	// grid shows the products its contents belong to instead.
+	let bundleGrouping = $derived(showBundleView && !showingRetired && layout === 'list');
+
 	let templates = $derived(
-		showBundleView && !showingRetired
-			? await getBundleTemplates(filterOrgId || undefined)
-			: ([] as TemplateData[])
+		bundleGrouping ? await getBundleTemplates(filterOrgId || undefined) : ([] as TemplateData[])
 	);
 
 	type Group = {
@@ -123,7 +128,7 @@
 	};
 
 	// In bundle view, exclude bundled assets from product groups
-	let baseAssets = $derived(showBundleView ? assets.filter((a) => !a.bundleId) : assets);
+	let baseAssets = $derived(bundleGrouping ? assets.filter((a) => !a.bundleId) : assets);
 
 	let visibleAssets = $derived(
 		baseAssets
@@ -181,7 +186,7 @@
 	);
 
 	let filteredBundles = $derived(
-		!showBundleView || showingRetired
+		!bundleGrouping
 			? ([] as TemplateGroup[])
 			: templates
 					.map((t) => {
@@ -267,11 +272,17 @@
 		statusFilter = value;
 	}
 
-	let hasResults = $derived(
-		showBundleView
-			? filteredBundles.length > 0 || filteredGroups.length > 0
-			: filteredGroups.length > 0
-	);
+	let hasResults = $derived(filteredBundles.length > 0 || filteredGroups.length > 0);
+
+	function toggleGroupSelection(assetIds: string[], allSelected: boolean) {
+		if (allSelected) assetIds.forEach((id) => selectedAssetIds.delete(id));
+		else assetIds.forEach((id) => selectedAssetIds.add(id));
+	}
+
+	function toggleAssetSelection(assetId: string) {
+		if (selectedAssetIds.has(assetId)) selectedAssetIds.delete(assetId);
+		else selectedAssetIds.add(assetId);
+	}
 </script>
 
 <svelte:head><title>Devices | Technikpool</title></svelte:head>
@@ -321,21 +332,72 @@
 				>
 			{/each}
 		</div>
-		<div class="ml-auto flex items-center gap-1">
-			<button
-				type="button"
-				onclick={() => (showBundleView = true)}
-				class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {showBundleView
-					? 'bg-primary text-primary-foreground'
-					: 'bg-muted text-muted-foreground hover:bg-muted/70'}">Bundle View</button
-			>
-			<button
-				type="button"
-				onclick={() => (showBundleView = false)}
-				class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {!showBundleView
-					? 'bg-primary text-primary-foreground'
-					: 'bg-muted text-muted-foreground hover:bg-muted/70'}">All Products</button
-			>
+		<div class="ml-auto flex items-center gap-3">
+			{#if layout === 'list'}
+				<div class="flex items-center gap-1">
+					<button
+						type="button"
+						onclick={() => (showBundleView = true)}
+						class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {showBundleView
+							? 'bg-primary text-primary-foreground'
+							: 'bg-muted text-muted-foreground hover:bg-muted/70'}">Bundle View</button
+					>
+					<button
+						type="button"
+						onclick={() => (showBundleView = false)}
+						class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {!showBundleView
+							? 'bg-primary text-primary-foreground'
+							: 'bg-muted text-muted-foreground hover:bg-muted/70'}">All Products</button
+					>
+				</div>
+			{/if}
+			<div class="flex overflow-hidden rounded-md border border-input">
+				<button
+					type="button"
+					onclick={() => (layout = 'list')}
+					title="List view"
+					class="flex h-8 w-8 items-center justify-center transition-colors {layout === 'list'
+						? 'bg-primary text-primary-foreground'
+						: 'bg-background text-muted-foreground hover:bg-muted'}"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="15"
+						height="15"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					>
+						<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+					</svg>
+				</button>
+				<button
+					type="button"
+					onclick={() => (layout = 'grid')}
+					title="Grid view"
+					class="flex h-8 w-8 items-center justify-center transition-colors {layout === 'grid'
+						? 'bg-primary text-primary-foreground'
+						: 'bg-background text-muted-foreground hover:bg-muted'}"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="15"
+						height="15"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					>
+						<rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
+						<rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+					</svg>
+				</button>
+			</div>
 		</div>
 	</div>
 
@@ -356,6 +418,91 @@
 					>
 				{/if}
 			</div>
+		</div>
+	{:else if layout === 'grid'}
+		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+			{#each filteredGroups as group (group.productId)}
+				{@const groupAssetIds = group.assets.map((a) => a.id)}
+				{@const allInGroupSelected =
+					groupAssetIds.length > 0 && groupAssetIds.every((id) => selectedAssetIds.has(id))}
+				<div
+					class="group relative flex flex-col overflow-hidden rounded-lg border transition-colors hover:border-foreground/25"
+				>
+					<!-- The checkbox only appears on hover unless it is ticked: a photo
+					     wall is for looking at, and a control on every tile competes
+					     with the thing it sits on top of. -->
+					<input
+						type="checkbox"
+						checked={allInGroupSelected}
+						onchange={() => toggleGroupSelection(groupAssetIds, allInGroupSelected)}
+						title="Select all units"
+						class="absolute top-2 left-2 z-10 h-4 w-4 cursor-pointer rounded border-input bg-background transition-opacity group-hover:opacity-100 focus:opacity-100 {allInGroupSelected
+							? ''
+							: 'opacity-0'}"
+					/>
+					<button
+						type="button"
+						onclick={() => toggle(group.productId)}
+						class="flex flex-1 flex-col text-left"
+					>
+						<div class="flex aspect-[4/3] items-center justify-center bg-muted/30 p-4">
+							<ProductThumb
+								src={group.imageUrl}
+								alt={group.name}
+								fill
+								class="border-0 bg-transparent p-0"
+							/>
+						</div>
+						<div class="flex flex-1 flex-col gap-1 border-t p-3">
+							<span class="text-sm leading-snug font-medium">{group.name}</span>
+							<span class="text-xs text-muted-foreground">{group.manufacturerName}</span>
+							<div class="mt-auto flex flex-wrap items-center gap-2 pt-2">
+								<CategoryPill name={group.categoryName} color={group.categoryColor} />
+								<span class="ml-auto flex items-center gap-1.5 font-mono text-xs tabular-nums">
+									<span class="text-green-700 dark:text-green-400" title="Available"
+										>{group.available}</span
+									>
+									{#if group.maintenance > 0}
+										<span class="text-yellow-600 dark:text-yellow-400" title="Maintenance"
+											>{group.maintenance}</span
+										>
+									{/if}
+									{#if group.broken > 0}
+										<span class="text-red-600 dark:text-red-400" title="Broken">{group.broken}</span
+										>
+									{/if}
+									<span class="text-muted-foreground" title="Total">/ {group.assets.length}</span>
+								</span>
+							</div>
+						</div>
+					</button>
+					{#if expanded.get(group.productId)}
+						<div class="max-h-56 overflow-y-auto border-t">
+							{#each group.assets as asset (asset.id)}
+								<div
+									class="flex items-center gap-2 border-b px-3 py-1.5 text-xs last:border-0 hover:bg-muted/30"
+								>
+									<input
+										type="checkbox"
+										checked={selectedAssetIds.has(asset.id)}
+										onchange={() => toggleAssetSelection(asset.id)}
+										class="h-4 w-4 shrink-0 cursor-pointer rounded border-input"
+									/>
+									<a
+										href={resolve(`/assets/${asset.id}`)}
+										class="flex min-w-0 flex-1 items-center gap-2"
+									>
+										<span class="truncate font-mono text-muted-foreground">
+											{asset.assetTag ?? asset.serialNumber ?? '—'}
+										</span>
+										<AssetStatusBadge status={asset.status} class="ml-auto shrink-0" />
+									</a>
+								</div>
+							{/each}
+						</div>
+					{/if}
+				</div>
+			{/each}
 		</div>
 	{:else}
 		<div class="rounded-md border">

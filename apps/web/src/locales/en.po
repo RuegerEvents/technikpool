@@ -447,6 +447,7 @@ msgstr "Tag"
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/routes/assets/+page.svelte
+#: src/routes/assets/+page.svelte
 #: src/routes/invoices/+page.svelte
 #: src/routes/invoices/[id]/print/+page.svelte
 #: src/routes/invoices/[id]/print/+page.svelte
@@ -460,15 +461,18 @@ msgstr "Total"
 #: src/lib/components/ui/asset-status/asset-status.svelte.ts
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
+#: src/routes/assets/+page.svelte
 msgid "Available"
 msgstr "Available"
 
 #: src/lib/components/ui/asset-status/asset-status.svelte.ts
 #: src/routes/assets/+page.svelte
+#: src/routes/assets/+page.svelte
 msgid "Maintenance"
 msgstr "Maintenance"
 
 #: src/lib/components/ui/asset-status/asset-status.svelte.ts
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 msgid "Broken"
@@ -1520,7 +1524,7 @@ msgid "Calendar | Technikpool"
 msgstr "Calendar | Technikpool"
 
 #. 0: group.productCounts.map((p) => `${p.count}× ${p.name}`).join(', ')
-#. 
+#. 0: group.productCounts.map((p) => `${p.count}× ${p.name}`).join(', ')
 #: src/routes/productions/[id]/delivery-note/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Contains: {0}"
@@ -2928,7 +2932,7 @@ msgid "Invoice {0} | Technikpool"
 msgstr "Invoice {0} | Technikpool"
 
 #. 0: invoice.number
-#. 
+#. 0: invoice.number
 #: src/routes/invoices/[id]/+page.svelte
 #: src/routes/invoices/[id]/print/+page.svelte
 msgid "Invoice {0}"
@@ -3850,8 +3854,8 @@ msgid "Uncategorized"
 msgstr "Uncategorized"
 
 #. 0: group.name
-#. 
-#. 
+#. 0: group.name
+#. 0: group.name
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/routes/invoices/[id]/print/+page.svelte
 #: src/routes/offers/[id]/print/+page.svelte
@@ -4000,7 +4004,7 @@ msgid "Bundle · {0}{1}"
 msgstr "Bundle · {0}{1}"
 
 #. 0: i + 1
-#. 
+#. 0: i + 1
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/bundles/+page.svelte
 msgid "Instance {0}"
@@ -4501,3 +4505,15 @@ msgstr "Ctrl"
 #: src/routes/products/+page.svelte
 msgid "{0}S"
 msgstr "{0}S"
+
+#: src/routes/assets/+page.svelte
+msgid "List view"
+msgstr "List view"
+
+#: src/routes/assets/+page.svelte
+msgid "Grid view"
+msgstr "Grid view"
+
+#: src/routes/assets/+page.svelte
+msgid "Select all units"
+msgstr "Select all units"
