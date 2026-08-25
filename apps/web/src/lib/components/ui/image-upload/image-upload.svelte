@@ -70,6 +70,7 @@
 	// would be no mounted canvas to read it back from. The previews are <img>.
 	let sourceImg: HTMLImageElement | null = null;
 	let sourceHasAlpha = $state(false);
+	let cropBackground = '#ffffff';
 	let croppedCanvas: HTMLCanvasElement | null = null;
 	let croppedUrl = $state('');
 	let removedUrl = $state('');
@@ -129,6 +130,41 @@
 		return clear / (side * side) >= 0.1;
 	}
 
+	// The colour the photo's own background is, read from its corners. A crop of
+	// a photo that doesn't fill the square leaves empty bands above and below,
+	// and those bands are what breaks background removal: the model works on RGB
+	// and sees transparent as black, so it gets a subject framed by two black
+	// bars instead of one even background, and starts cutting into the subject.
+	// Painting the bands in the photo's own background instead gives it one
+	// coherent background to remove — and the whole lot goes in one pass.
+	function backgroundColor(img: HTMLImageElement): string {
+		const side = 32;
+		const probe = document.createElement('canvas');
+		probe.width = side;
+		probe.height = side;
+		const ctx = probe.getContext('2d', { willReadFrequently: true });
+		if (!ctx) return '#ffffff';
+		ctx.drawImage(img, 0, 0, side, side);
+		const { data } = ctx.getImageData(0, 0, side, side);
+		const corners = [
+			[0, 0],
+			[side - 1, 0],
+			[0, side - 1],
+			[side - 1, side - 1]
+		];
+		let r = 0;
+		let g = 0;
+		let b = 0;
+		for (const [x, y] of corners) {
+			const at = (y * side + x) * 4;
+			r += data[at];
+			g += data[at + 1];
+			b += data[at + 2];
+		}
+		const n = corners.length;
+		return `rgb(${Math.round(r / n)}, ${Math.round(g / n)}, ${Math.round(b / n)})`;
+	}
+
 	function canvasBlob(canvas: HTMLCanvasElement | null): Promise<Blob | null> {
 		if (!canvas) return Promise.resolve(null);
 		return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
@@ -153,6 +189,7 @@
 				naturalW = img.naturalWidth;
 				naturalH = img.naturalHeight;
 				sourceHasAlpha = hasTransparency(img);
+				cropBackground = backgroundColor(img);
 
 				// The stage is sized from the column the uploader actually sits in —
 				// a modal is much narrower than the page. Everything inside is placed
@@ -241,19 +278,25 @@
 		const canvas = document.createElement('canvas');
 		canvas.width = outSize;
 		canvas.height = outSize;
-		canvas
-			.getContext('2d')!
-			.drawImage(
-				sourceImg,
-				0,
-				0,
-				naturalW,
-				naturalH,
-				(imgOffsetX - box.x) * outScale,
-				(imgOffsetY - box.y) * outScale,
-				displayImgW * outScale,
-				displayImgH * outScale
-			);
+		const ctx = canvas.getContext('2d')!;
+		// See backgroundColor(). A source that already has a cut-out background
+		// skips this step entirely, so filling here can only ever cover ground the
+		// photo itself doesn't reach.
+		if (!sourceHasAlpha) {
+			ctx.fillStyle = cropBackground;
+			ctx.fillRect(0, 0, outSize, outSize);
+		}
+		ctx.drawImage(
+			sourceImg,
+			0,
+			0,
+			naturalW,
+			naturalH,
+			(imgOffsetX - box.x) * outScale,
+			(imgOffsetY - box.y) * outScale,
+			displayImgW * outScale,
+			displayImgH * outScale
+		);
 
 		croppedCanvas = canvas;
 		croppedUrl = canvas.toDataURL('image/png');
