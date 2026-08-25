@@ -138,13 +138,32 @@ The app supports **German** (default) and **English** via [wuchale](https://wuch
 
 **Workflow — after adding new user-facing strings:**
 
+**While `pnpm dev` is running, extraction is automatic.** The `wuchale()` Vite plugin extracts
+on save and writes the new `msgid`s into `en.po`/`de.po` within a fraction of a second. Do not
+run the CLI as well: two extractors writing the same catalogs is the only way they can disagree,
+and the disagreement is invisible until a string renders in the wrong place.
+
+Only when no dev server is running:
+
 ```sh
 npx wuchale   # extracts new strings into en.po and de.po
 ```
 
-Then fill in the empty `msgstr ""` entries in `de.po`.
+Never `npx wuchale --clean` casually — it deletes every obsolete entry, and this project keeps
+~140 of them with their German translations so a re-added string recovers its wording.
 
-**MANDATORY: Never leave translations empty.** Every task that adds or changes user-facing strings MUST run `npx wuchale` and fill in all new `msgstr ""` entries in `de.po` before the task is complete.
+Either way, fill in the empty `msgstr ""` entries in `de.po`.
+
+**MANDATORY: Never leave translations empty.** Every task that adds or changes user-facing strings
+MUST end with every new `msgstr ""` in `de.po` filled in.
+
+**Why the dev server used to need restarting.** wuchale compiles a _numeric catalog slot_ into
+every translated string (`$.get(_w_runtime_)(499)`), so a component only renders correctly against
+the catalog it was transformed for. An external rewrite of the catalogs can renumber them, and
+wuchale's HMR reloads the catalogs but not the modules that index into them — so every string on
+an already-transformed page renders one or more positions off. `wuchaleCatalogReload()` in
+`vite.config.ts` closes that: a `.po` write that no source change preceded forces a full
+re-transform. Source-triggered writes are left alone, so ordinary HMR is untouched.
 
 **Extraction rules (what gets extracted):**
 
