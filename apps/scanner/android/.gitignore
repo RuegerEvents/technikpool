@@ -19,3 +19,8 @@ play-store-key.json
 # fastlane working files.
 fastlane/report.xml
 fastlane/Preview.html
+
+# Bundled fastlane gems. Installed per-project because the Homebrew Ruby's gem
+# dir isn't writable — `bundle config set --local path vendor/bundle`.
+vendor/bundle/
+.bundle/

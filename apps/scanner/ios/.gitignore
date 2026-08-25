@@ -41,3 +41,8 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots
 fastlane/test_output
+
+# Bundled fastlane gems. Installed per-project because the Homebrew Ruby's gem
+# dir isn't writable — `bundle config set --local path vendor/bundle`.
+vendor/bundle/
+.bundle/
