@@ -146,6 +146,12 @@ platform :ios do
       # tag rather than generated.
       skip_metadata: false,
       skip_screenshots: true,
+      # deliver renders the metadata to fastlane/Preview.html and then blocks on
+      # a confirmation prompt, which on a runner is not a question but a crash.
+      # There is nothing to confirm: the only metadata on disk is
+      # release_notes.txt per locale, so the preview is the two changelogs and
+      # a "screenshots skipped" notice.
+      force: true,
       precheck_include_in_app_purchases: false,
       submit_for_review: true,
       # Nothing to hold back for: no marketing date, no coordinated launch.
