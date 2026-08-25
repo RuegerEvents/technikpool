@@ -94,6 +94,16 @@
 	const checker =
 		'background: repeating-conic-gradient(var(--muted) 0% 25%, var(--background) 0% 50%) 50% / 16px 16px;';
 
+	// The crop is worked at the resolution the segmentation model runs at, and
+	// only shrunk to the stored size on the way out. isnet resizes whatever it is
+	// given to 1024² before inference, so a 480px crop reached it as a 2.1×
+	// upscale — every thin thing in the picture (a handle, the gap under it, the
+	// edge of a connector) was already gone before the model saw it, and no
+	// amount of configuring it can bring those back.
+	const WORK_SIZE = 1024;
+	/** What actually gets stored. Product shots are shown at 28–160px. */
+	const UPLOAD_SIZE = 480;
+
 	const me: Claimant = {
 		hovered: () => hovered,
 		focused: () => !!container && container.contains(document.activeElement),
@@ -260,8 +270,15 @@
 		if (drag.mode === 'move') {
 			box = { ...box, x: drag.ox + dx, y: drag.oy + dy };
 		} else {
+			// Resize about the centre: what someone is framing is in the middle of
+			// the box, and anchoring the far corner instead slides it out from under
+			// them on every adjustment. The handle sits on the corner, so the side
+			// grows by twice what the pointer moved.
 			const delta = Math.max(dx, dy);
-			box = { ...box, s: Math.max(30, Math.min(stageSize, drag.os + delta)) };
+			const size = Math.max(30, Math.min(stageSize, drag.os + delta * 2));
+			const cx = drag.ox + drag.os / 2;
+			const cy = drag.oy + drag.os / 2;
+			box = { x: cx - size / 2, y: cy - size / 2, s: size };
 		}
 		clampBox();
 	}
@@ -273,7 +290,7 @@
 	function continueToBg() {
 		if (!sourceImg) return;
 
-		const outSize = Math.round(Math.min(480, box.s * (naturalW / displayImgW)));
+		const outSize = Math.round(Math.min(WORK_SIZE, box.s * (naturalW / displayImgW)));
 		const outScale = outSize / box.s;
 		const canvas = document.createElement('canvas');
 		canvas.width = outSize;
@@ -380,9 +397,35 @@
 		worker.postMessage({ source } satisfies BackgroundRemovalRequest);
 	}
 
+	/**
+	 * Down to the stored size. Both variants come through here, so the cut-out and
+	 * the untouched crop are always the same size — and the shrink is what turns
+	 * the model's 1024px matte into a clean anti-aliased edge at 480.
+	 */
+	async function toStoredSize(blob: Blob): Promise<Blob | null> {
+		const bitmap = await createImageBitmap(blob);
+		if (bitmap.width <= UPLOAD_SIZE) {
+			bitmap.close();
+			return blob;
+		}
+		const canvas = document.createElement('canvas');
+		canvas.width = UPLOAD_SIZE;
+		canvas.height = UPLOAD_SIZE;
+		const ctx = canvas.getContext('2d');
+		if (!ctx) {
+			bitmap.close();
+			return blob;
+		}
+		ctx.imageSmoothingQuality = 'high';
+		ctx.drawImage(bitmap, 0, 0, UPLOAD_SIZE, UPLOAD_SIZE);
+		bitmap.close();
+		return canvasBlob(canvas);
+	}
+
 	async function finish(useRemoved: boolean) {
 		if (uploading) return;
-		const blob = useRemoved ? removedBlob : await canvasBlob(croppedCanvas);
+		const source = useRemoved ? removedBlob : await canvasBlob(croppedCanvas);
+		const blob = source && (await toStoredSize(source));
 		if (!blob) return;
 		uploading = true;
 		try {
@@ -395,6 +438,7 @@
 			}
 			const { url } = await response.json();
 			value = url;
+			shownValue = url;
 			step = 'done';
 		} catch (err) {
 			toast.error(getErrorMessage(err));
@@ -406,7 +450,8 @@
 		}
 	}
 
-	function reset() {
+	/** Throw away anything half-finished, without touching what is stored. */
+	function discardWork() {
 		worker?.terminate();
 		worker = null;
 		bgRemoving = false;
@@ -416,9 +461,29 @@
 		croppedUrl = '';
 		removedBlob = null;
 		setRemovedUrl('');
+	}
+
+	function reset() {
+		discardWork();
 		value = '';
+		shownValue = '';
 		step = 'idle';
 	}
+
+	// The uploader can outlive the thing it is editing: the product wizard keeps
+	// one mounted and swaps the product underneath it. `step` is seeded from
+	// `value` at mount, so without this the previous product's photo stays on
+	// screen — under a Replace button, on a product that has no image at all.
+	// A plain variable rather than $state: it records which value this component
+	// has already reacted to, and re-running the effect on it would be circular.
+	let shownValue = value;
+
+	$effect(() => {
+		if (value === shownValue) return;
+		shownValue = value;
+		discardWork();
+		step = value ? 'done' : 'idle';
+	});
 </script>
 
 <svelte:window onpointermove={onPointerMove} onpointerup={onPointerUp} onpaste={handlePaste} />
@@ -503,7 +568,9 @@
 				Pick one — it is uploaded straight away. The background is removed in your browser, so the
 				image never leaves your device until you pick.
 			</p>
-			<div class="grid grid-cols-2 gap-3">
+			<!-- Capped at the crop stage's own maximum: in a page-wide column an
+			     uncapped pair of square previews is taller than the viewport. -->
+			<div class="grid max-w-80 grid-cols-2 gap-3">
 				<button
 					type="button"
 					disabled={uploading}
@@ -547,7 +614,7 @@
 			</div>
 
 			{#if bgRemoving}
-				<div class="h-1 w-full overflow-hidden rounded-full bg-muted">
+				<div class="h-1 w-full max-w-80 overflow-hidden rounded-full bg-muted">
 					<div
 						class="h-full bg-primary transition-[width]"
 						style="width: {Math.round(bgProgress * 100)}%"
