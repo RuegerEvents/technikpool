@@ -5,6 +5,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { OrgBadge } from '$lib/components/ui/org-badge';
 	import { FilterPopover } from '$lib/components/ui/filter-popover';
+	import { ProductThumb } from '$lib/components/ui/product-thumb';
 	import { getEquipmentEditorData, setProductionQuantity } from '$lib/remote/equipment.remote';
 	import {
 		addBundleToProduction,
@@ -566,6 +567,8 @@
 								: 'cursor-pointer hover:bg-muted/40'}"
 							onclick={() => !bundleAddDisabled && handleAddBundle(row.addable[0])}
 						>
+							<!-- Holds the product rows' thumbnail slot so both start on the same edge. -->
+							<span class="h-7 w-7 shrink-0"></span>
 							<div class="min-w-0 flex-1">
 								<p class="truncate text-sm font-medium">
 									<span
@@ -592,6 +595,7 @@
 								: 'cursor-pointer hover:bg-muted/40'}"
 							onclick={() => !groupAddDisabled && setQty(g, g.bookedHere + 1)}
 						>
+							<ProductThumb src={g.imageUrl} alt={g.productName} />
 							<div class="min-w-0 flex-1">
 								<p class="truncate text-sm font-medium">
 									<span
@@ -657,6 +661,7 @@
 								{@const tags = bookedTags(row)}
 								{@const locationName = sharedLocationName(row)}
 								<div class="flex items-center gap-2 border-b bg-muted/20 px-3 py-2 last:border-0">
+									<span class="h-7 w-7 shrink-0"></span>
 									<div class="min-w-0 flex-1">
 										<p class="truncate text-sm font-medium">
 											Bundle · {row.name}{tags ? ` (${tags})` : ''}
@@ -673,6 +678,7 @@
 							{/each}
 							{#each rows as g (g.key)}
 								<div class="flex items-center gap-2 border-b px-3 py-2 last:border-0">
+									<ProductThumb src={g.imageUrl} alt={g.productName} />
 									<div class="min-w-0 flex-1">
 										<p class="truncate text-sm font-medium">{g.productName}</p>
 										<p class="truncate text-xs text-muted-foreground">

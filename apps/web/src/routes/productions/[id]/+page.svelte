@@ -26,6 +26,7 @@
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { resolve } from '$app/paths';
 	import CheckoutBar from '$lib/components/ui/checkout-bar.svelte';
+	import { ProductThumb } from '$lib/components/ui/product-thumb';
 
 	const productionId = $derived(page.params.id as string);
 	let production = $derived(await getProduction(productionId));
@@ -124,6 +125,7 @@
 		kind: 'product';
 		productId: string;
 		productName: string;
+		imageUrl: string | null;
 		manufacturerName: string;
 		total: number;
 		pending: number;
@@ -168,6 +170,7 @@
 						kind: 'product',
 						productId: pid,
 						productName: item.asset.product.name,
+						imageUrl: item.asset.product.imageUrl,
 						manufacturerName: item.asset.product.manufacturer.name,
 						total: 0,
 						pending: 0,
@@ -842,6 +845,7 @@
 												Remove
 											</button>
 										{:else}
+											<ProductThumb src={section.imageUrl} alt={section.productName} />
 											<span class="font-medium">{section.productName}</span>
 										{/if}
 									</div>
@@ -890,6 +894,11 @@
 										<td colspan="7" class="px-4 py-2">
 											<div class="flex items-center gap-4 text-sm">
 												{#if section.kind === 'bundle'}
+													<ProductThumb
+														src={item.asset.product.imageUrl}
+														alt={item.asset.product.name}
+														size={22}
+													/>
 													<span class="font-medium">{item.asset.product.name}</span>
 												{/if}
 												<span class="w-36 font-mono text-xs text-muted-foreground">

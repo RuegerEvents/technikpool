@@ -6,6 +6,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { CategorySelect } from '$lib/components/ui/category-select';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
+	import { ProductThumb } from '$lib/components/ui/product-thumb';
 	import {
 		getBundle,
 		getCategories,
@@ -315,6 +316,7 @@
 									<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
 										<td class="px-4 py-3">
 											<div class="flex items-center gap-2">
+												<ProductThumb src={asset.product.imageUrl} alt={asset.product.name} />
 												<CategoryPill
 													name={asset.product.category.name}
 													color={asset.product.category.color}
@@ -392,10 +394,15 @@
 							{#each availableToAdd as asset (asset.id)}
 								<tr class="border-b bg-background last:border-0 hover:bg-muted/30">
 									<td class="px-3 py-2">
-										<p class="font-medium">{asset.product.name}</p>
-										<p class="text-xs text-muted-foreground">
-											{asset.product.manufacturer.name}
-										</p>
+										<div class="flex items-center gap-2">
+											<ProductThumb src={asset.product.imageUrl} alt={asset.product.name} />
+											<div>
+												<p class="font-medium">{asset.product.name}</p>
+												<p class="text-xs text-muted-foreground">
+													{asset.product.manufacturer.name}
+												</p>
+											</div>
+										</div>
 									</td>
 									<td class="px-3 py-2 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
 									<td class="px-3 py-2 text-xs text-muted-foreground"

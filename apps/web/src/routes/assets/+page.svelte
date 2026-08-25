@@ -10,6 +10,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { CategorySelect } from '$lib/components/ui/category-select';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
+	import { ProductThumb } from '$lib/components/ui/product-thumb';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
@@ -92,6 +93,7 @@
 	type Group = {
 		productId: string;
 		name: string;
+		imageUrl: string | null;
 		manufacturerName: string;
 		categoryId: string;
 		categoryName: string;
@@ -137,6 +139,7 @@
 					acc[pid] = {
 						productId: pid,
 						name: asset.product.name,
+						imageUrl: asset.product.imageUrl,
 						manufacturerName: asset.product.manufacturer.name,
 						categoryId: asset.product.categoryId,
 						categoryName: asset.product.category.name,
@@ -426,6 +429,10 @@
 										>
 											<path d="m9 18 6-6-6-6" />
 										</svg>
+										<!-- Holds the product rows' thumbnail slot, so both kinds of row
+										     start their name on the same edge. A bundle has no photo of
+										     its own — its contents do. -->
+										<span class="h-7 w-7 shrink-0"></span>
 										<span class="font-medium">{template.name}</span>
 										<span
 											class="rounded-full border border-border px-1.5 py-0.5 text-xs text-muted-foreground"
@@ -546,12 +553,16 @@
 									</tr>
 									{#if expanded.get(instance.id)}
 										{#each instance.filteredAssets as asset (asset.id)}
-											<tr class="border-b bg-muted/20 last:border-0">
+											<tr
+												class="cursor-pointer border-b bg-muted/20 transition-colors last:border-0 hover:bg-muted/40"
+												onclick={() => goto(resolve(`/assets/${asset.id}`))}
+											>
 												<td class="px-4 py-2 pl-8">
 													<input
 														type="checkbox"
 														checked={selectedAssetIds.has(asset.id)}
-														onclick={() => {
+														onclick={(e) => {
+															e.stopPropagation();
 															if (selectedAssetIds.has(asset.id)) {
 																selectedAssetIds.delete(asset.id);
 															} else {
@@ -563,8 +574,15 @@
 												</td>
 												<td colspan="7" class="px-4 py-2">
 													<div class="flex items-center gap-6 text-sm">
-														<span class="w-40 truncate text-xs font-medium">
-															{asset.product.name}
+														<span class="flex w-44 items-center gap-2">
+															<ProductThumb
+																src={asset.product.imageUrl}
+																alt={asset.product.name}
+																size={22}
+															/>
+															<span class="truncate text-xs font-medium">
+																{asset.product.name}
+															</span>
 														</span>
 														<span class="w-36 font-mono text-xs text-muted-foreground">
 															{asset.serialNumber ? `S/N: ${asset.serialNumber}` : '—'}
@@ -640,6 +658,7 @@
 									>
 										<path d="m9 18 6-6-6-6" />
 									</svg>
+									<ProductThumb src={group.imageUrl} alt={group.name} />
 									<span class="font-medium">{group.name}</span>
 								</div>
 							</td>
@@ -673,12 +692,16 @@
 						</tr>
 						{#if expanded.get(group.productId)}
 							{#each group.assets as asset (asset.id)}
-								<tr class="border-b bg-muted/10 last:border-0">
+								<tr
+									class="cursor-pointer border-b bg-muted/10 transition-colors last:border-0 hover:bg-muted/30"
+									onclick={() => goto(resolve(`/assets/${asset.id}`))}
+								>
 									<td class="px-4 py-2">
 										<input
 											type="checkbox"
 											checked={selectedAssetIds.has(asset.id)}
-											onclick={() => {
+											onclick={(e) => {
+												e.stopPropagation();
 												if (selectedAssetIds.has(asset.id)) {
 													selectedAssetIds.delete(asset.id);
 												} else {

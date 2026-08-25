@@ -6,6 +6,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import { CategorySelect } from '$lib/components/ui/category-select';
+	import { ImageUpload } from '$lib/components/ui/image-upload';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
@@ -375,21 +376,22 @@
 							/>
 						</div>
 					</div>
-					{#if asset.product.imageUrl}
-						<div class="space-y-2">
-							<Label>Product Image</Label>
+					<div class="space-y-2">
+						<Label>Product Image</Label>
+						{#if asset.product.imageUrl}
 							<img
 								src={asset.product.imageUrl}
 								alt={asset.product.name}
 								class="h-40 w-full rounded-md border bg-muted/30 object-contain p-2"
 							/>
-						</div>
-					{:else}
-						<div class="space-y-2">
-							<Label>Product Image URL</Label>
-							<Input value="—" disabled />
-						</div>
-					{/if}
+						{:else}
+							<div
+								class="flex h-40 w-full items-center justify-center rounded-md border border-dashed text-sm text-muted-foreground"
+							>
+								No image yet — add one with Edit.
+							</div>
+						{/if}
+					</div>
 				</Card.Content>
 			</Card.Root>
 
@@ -532,13 +534,8 @@
 				</div>
 
 				<div class="space-y-2">
-					<Label for="modal-image">Product Image URL</Label>
-					<Input
-						id="modal-image"
-						type="url"
-						placeholder="https://…"
-						bind:value={productModal.imageUrl}
-					/>
+					<Label>Product Image</Label>
+					<ImageUpload bind:value={productModal.imageUrl} label="Product photo" />
 				</div>
 			</div>
 

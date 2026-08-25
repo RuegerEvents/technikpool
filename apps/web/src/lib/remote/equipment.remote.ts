@@ -53,6 +53,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 		key: GroupKey;
 		productId: string;
 		productName: string;
+		imageUrl: string | null;
 		manufacturerName: string;
 		categoryId: string;
 		categoryName: string;
@@ -85,6 +86,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 				key,
 				productId: a.productId,
 				productName: a.product.name,
+				imageUrl: a.product.imageUrl,
 				manufacturerName: a.product.manufacturer.name,
 				categoryId: a.product.categoryId,
 				categoryName: a.product.category.name,

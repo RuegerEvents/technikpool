@@ -1917,13 +1917,12 @@ msgid "Product Name"
 msgstr "Product Name"
 
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/[id]/+page.svelte
 msgid "Product Image"
 msgstr "Product Image"
 
-#: src/routes/assets/[id]/+page.svelte
-#: src/routes/assets/[id]/+page.svelte
-msgid "Product Image URL"
-msgstr "Product Image URL"
+#~ msgid "Product Image URL"
+#~ msgstr "Product Image URL"
 
 #: src/routes/assets/[id]/+page.svelte
 msgid "Edit Product"
@@ -2878,6 +2877,7 @@ msgstr "Color and a 2-letter label identify this org at a glance in the calendar
 msgid "Manufacturer logo"
 msgstr "Manufacturer logo"
 
+#: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Product photo"
@@ -3179,10 +3179,8 @@ msgstr "Image"
 msgid "Please choose an image file"
 msgstr "Please choose an image file"
 
-#. 0: getErrorMessage(err)
-#: src/lib/components/ui/image-upload/image-upload.svelte
-msgid "Background removal failed: {0}"
-msgstr "Background removal failed: {0}"
+#~ msgid "Background removal failed: {0}"
+#~ msgstr "Background removal failed: {0}"
 
 #: src/lib/components/ui/image-upload/image-upload.svelte
 msgid "Upload failed"
@@ -3199,37 +3197,32 @@ msgstr "Square crop. Drag to reposition, use the handle to resize — pull out t
 msgid "Continue"
 msgstr "Continue"
 
-#: src/lib/components/ui/image-upload/image-upload.svelte
-msgid "Optionally remove the background (runs in your browser — the image never leaves your device until you upload it)."
-msgstr "Optionally remove the background (runs in your browser — the image never leaves your device until you upload it)."
+#~ msgid "Optionally remove the background (runs in your browser — the image never leaves your device until you upload it)."
+#~ msgstr "Optionally remove the background (runs in your browser — the image never leaves your device until you upload it)."
 
-#: src/lib/components/ui/image-upload/image-upload.svelte
-msgid "Cropped"
-msgstr "Cropped"
+#~ msgid "Cropped"
+#~ msgstr "Cropped"
 
-#: src/lib/components/ui/image-upload/image-upload.svelte
-msgid "Background removed"
-msgstr "Background removed"
+#~ msgid "Background removed"
+#~ msgstr "Background removed"
 
 #: src/lib/components/ui/image-upload/image-upload.svelte
 msgid "Removing…"
 msgstr "Removing…"
 
-#: src/lib/components/ui/image-upload/image-upload.svelte
-msgid "Remove background"
-msgstr "Remove background"
+#~ msgid "Remove background"
+#~ msgstr "Remove background"
+
+#~ msgid "Keep background"
+#~ msgstr "Keep background"
 
 #: src/lib/components/ui/image-upload/image-upload.svelte
-msgid "Keep background"
-msgstr "Keep background"
-
 #: src/lib/components/ui/image-upload/image-upload.svelte
 msgid "Uploading…"
 msgstr "Uploading…"
 
-#: src/lib/components/ui/image-upload/image-upload.svelte
-msgid "Use this image"
-msgstr "Use this image"
+#~ msgid "Use this image"
+#~ msgstr "Use this image"
 
 #: src/lib/components/ui/image-upload/image-upload.svelte
 msgid "Replace"
@@ -4232,3 +4225,59 @@ msgstr "Disconnecting…"
 #: src/routes/devices/+page.svelte
 msgid "Disconnect"
 msgstr "Disconnect"
+
+#~ msgid "Preparing the model — {0}%"
+#~ msgstr "Preparing the model — {0}%"
+
+#~ msgid "Working on the image…"
+#~ msgstr "Working on the image…"
+
+#~ msgid "Downloading the model, once per browser — {0}%"
+#~ msgstr "Downloading the model, once per browser — {0}%"
+
+#~ msgid "Removing the background…"
+#~ msgstr "Removing the background…"
+
+#~ msgid "Starting…"
+#~ msgstr "Starting…"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "No image yet — add one with Edit."
+msgstr "No image yet — add one with Edit."
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Use image"
+msgstr "Use image"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "With background"
+msgstr "With background"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Not possible"
+msgstr "Not possible"
+
+#. 0: Math.round(bgProgress * 100)
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Loading the model — {0}%"
+msgstr "Loading the model — {0}%"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Background removal failed"
+msgstr "Background removal failed"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Without background"
+msgstr "Without background"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Try again"
+msgstr "Try again"
+
+#: src/lib/components/ui/image-upload/image-upload.svelte
+msgid "Pick one — it is uploaded straight away. The background is removed in your browser, so the image never leaves your device until you pick."
+msgstr "Pick one — it is uploaded straight away. The background is removed in your browser, so the image never leaves your device until you pick."
+
+#: src/routes/inspections/+page.svelte
+msgid "Wuchale probe string"
+msgstr "Wuchale probe string"

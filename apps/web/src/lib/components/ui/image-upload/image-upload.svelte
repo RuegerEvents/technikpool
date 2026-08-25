@@ -1,7 +1,38 @@
+<script lang="ts" module>
+	// Paste is listened for on the window, because the drop zone is a button and
+	// nothing here is a text field the caret could sit in. A page can hold more
+	// than one uploader (the new-product modal opens over the manufacturer-logo
+	// one), so exactly one of them has to claim a given paste. Ranked: the one
+	// under the pointer, then the one holding focus, then the one mounted last —
+	// which is the modal's, because a modal mounts over the page behind it.
+	type Claimant = { hovered: () => boolean; focused: () => boolean; idle: () => boolean };
+
+	const mounted: Claimant[] = [];
+
+	function lastWhere(match: (c: Claimant) => boolean): Claimant | null {
+		for (let i = mounted.length - 1; i >= 0; i--) if (match(mounted[i])) return mounted[i];
+		return null;
+	}
+
+	function pasteClaimant(): Claimant | null {
+		const idle = mounted.filter((c) => c.idle());
+		if (idle.length === 0) return null;
+		return (
+			lastWhere((c) => c.idle() && c.hovered()) ??
+			lastWhere((c) => c.idle() && c.focused()) ??
+			idle[idle.length - 1]
+		);
+	}
+</script>
+
 <script lang="ts">
 	import { getErrorMessage } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
 	import { toast } from 'svelte-sonner';
+	import type {
+		BackgroundRemovalMessage,
+		BackgroundRemovalRequest
+	} from './background-removal.worker';
 
 	let { value = $bindable(''), label = 'Image' }: { value?: string; label?: string } = $props();
 
@@ -32,21 +63,81 @@
 		os: number;
 	} | null = null;
 
-	let croppedCanvas = $state<HTMLCanvasElement | null>(null);
-	let removedCanvas = $state<HTMLCanvasElement | null>(null);
-	let cropParams = $state<{
-		size: number;
-		drawX: number;
-		drawY: number;
-		drawW: number;
-		drawH: number;
-	} | null>(null);
+	let containerWidth = $state(0);
+
+	// The crop result lives on a canvas that is never in the DOM: an image that
+	// already has a cut-out background skips the choice step entirely, so there
+	// would be no mounted canvas to read it back from. The previews are <img>.
+	let sourceImg: HTMLImageElement | null = null;
+	let sourceHasAlpha = $state(false);
+	let croppedCanvas: HTMLCanvasElement | null = null;
+	let croppedUrl = $state('');
+	let removedUrl = $state('');
+	let removedBlob: Blob | null = null;
+
 	let bgRemoving = $state(false);
 	let bgRemoved = $state(false);
+	let bgError = $state('');
+	// imgly reports two phases: `fetch:<asset>` in bytes while the model is
+	// downloaded (first use only — it is cached afterwards), then `compute:<step>`
+	// counting 1..4 through the inference. They need different wording, so the
+	// phase is tracked alongside the fraction. Fetch progress arrives per asset,
+	// hence the record: summing them keeps the bar monotonic instead of
+	// restarting at zero for each file.
+	let bgPhase = $state<'' | 'fetch' | 'compute'>('');
+	let bgProgress = $state(0);
+	let fetchProgress: Record<string, { current: number; total: number }> = {};
+	let worker: Worker | null = null;
 	let uploading = $state(false);
 
 	const checker =
 		'background: repeating-conic-gradient(var(--muted) 0% 25%, var(--background) 0% 50%) 50% / 16px 16px;';
+
+	const me: Claimant = {
+		hovered: () => hovered,
+		focused: () => !!container && container.contains(document.activeElement),
+		idle: () => step === 'idle'
+	};
+
+	$effect(() => {
+		mounted.push(me);
+		return () => {
+			const at = mounted.indexOf(me);
+			if (at >= 0) mounted.splice(at, 1);
+			worker?.terminate();
+			worker = null;
+			if (removedUrl) URL.revokeObjectURL(removedUrl);
+		};
+	});
+
+	// A picture that already has a cut-out background has nothing to gain from
+	// the removal step, so it skips straight to the upload. Sampled small,
+	// because this is a yes/no about large transparent regions rather than a
+	// measurement — and thresholded, so the thin band of partial alpha along an
+	// anti-aliased edge doesn't read as a cut-out.
+	function hasTransparency(img: HTMLImageElement): boolean {
+		const side = 100;
+		const probe = document.createElement('canvas');
+		probe.width = side;
+		probe.height = side;
+		const ctx = probe.getContext('2d', { willReadFrequently: true });
+		if (!ctx) return false;
+		ctx.drawImage(img, 0, 0, side, side);
+		let clear = 0;
+		const { data } = ctx.getImageData(0, 0, side, side);
+		for (let i = 3; i < data.length; i += 4) if (data[i] < 16) clear++;
+		return clear / (side * side) >= 0.1;
+	}
+
+	function canvasBlob(canvas: HTMLCanvasElement | null): Promise<Blob | null> {
+		if (!canvas) return Promise.resolve(null);
+		return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+	}
+
+	function setRemovedUrl(url: string) {
+		if (removedUrl) URL.revokeObjectURL(removedUrl);
+		removedUrl = url;
+	}
 
 	function onFileChosen(file: File) {
 		if (!file.type.startsWith('image/')) {
@@ -58,11 +149,22 @@
 			cropSrc = reader.result as string;
 			const img = new Image();
 			img.onload = () => {
+				sourceImg = img;
 				naturalW = img.naturalWidth;
 				naturalH = img.naturalHeight;
-				displayImgW = Math.min(280, naturalW);
-				displayImgH = displayImgW * (naturalH / naturalW);
-				stageSize = Math.round(Math.max(displayImgW, displayImgH) * 1.5);
+				sourceHasAlpha = hasTransparency(img);
+
+				// The stage is sized from the column the uploader actually sits in —
+				// a modal is much narrower than the page. Everything inside is placed
+				// in absolute pixels, so a stage wider than its container overflows
+				// rather than scaling down. Minus the crop card's border and padding.
+				stageSize = Math.round(Math.max(160, Math.min((containerWidth || 280) - 26, 320)));
+
+				// The photo takes two thirds of the stage, leaving room to pull the
+				// crop box out past its edges and letterbox it.
+				const scale = stageSize / 1.5 / Math.max(naturalW, naturalH);
+				displayImgW = naturalW * scale;
+				displayImgH = naturalH * scale;
 				imgOffsetX = (stageSize - displayImgW) / 2;
 				imgOffsetY = (stageSize - displayImgH) / 2;
 
@@ -93,14 +195,8 @@
 		return null;
 	}
 
-	// Paste is listened for on the window, because the drop zone is a button and
-	// nothing here is a text field the caret could sit in. A page can hold more
-	// than one uploader (the new-product modal opens over the manufacturer logo
-	// one), so a paste only belongs to this instance while the user is pointing
-	// at this drop zone — hovering it, or having tabbed to it.
 	function handlePaste(e: ClipboardEvent) {
-		if (step !== 'idle') return;
-		if (!hovered && !container?.contains(document.activeElement)) return;
+		if (pasteClaimant() !== me) return;
 		const file = imageFromClipboard(e.clipboardData);
 		if (!file) return;
 		e.preventDefault();
@@ -136,70 +232,117 @@
 		drag = null;
 	}
 
+	// Crops off-DOM, then decides whether there is a question worth asking.
 	function continueToBg() {
-		const outSize = Math.min(480, box.s * (naturalW / displayImgW));
+		if (!sourceImg) return;
+
+		const outSize = Math.round(Math.min(480, box.s * (naturalW / displayImgW)));
 		const outScale = outSize / box.s;
-		cropParams = {
-			size: Math.round(outSize),
-			drawX: (imgOffsetX - box.x) * outScale,
-			drawY: (imgOffsetY - box.y) * outScale,
-			drawW: displayImgW * outScale,
-			drawH: displayImgH * outScale
-		};
+		const canvas = document.createElement('canvas');
+		canvas.width = outSize;
+		canvas.height = outSize;
+		canvas
+			.getContext('2d')!
+			.drawImage(
+				sourceImg,
+				0,
+				0,
+				naturalW,
+				naturalH,
+				(imgOffsetX - box.x) * outScale,
+				(imgOffsetY - box.y) * outScale,
+				displayImgW * outScale,
+				displayImgH * outScale
+			);
+
+		croppedCanvas = canvas;
+		croppedUrl = canvas.toDataURL('image/png');
+		setRemovedUrl('');
+		removedBlob = null;
 		bgRemoved = false;
+		bgError = '';
+
+		// Already a cut-out — there is nothing to choose between.
+		if (sourceHasAlpha) {
+			finish(false);
+			return;
+		}
+
 		step = 'bg';
+		// Started without being asked: by the time someone is on this step they
+		// have already decided they want the comparison, and making them request
+		// it first costs a click and a wait they could have spent watching.
+		runBackgroundRemoval();
 	}
 
-	// Runs once the 'bg' step's canvases exist in the DOM, drawing the crop
-	// result into them (a fresh canvas element each time the step is entered).
-	$effect(() => {
-		if (step !== 'bg' || !cropParams || !croppedCanvas) return;
-		const { size, drawX, drawY, drawW, drawH } = cropParams;
-		const img = new Image();
-		img.onload = () => {
-			if (!croppedCanvas) return;
-			croppedCanvas.width = size;
-			croppedCanvas.height = size;
-			croppedCanvas
-				.getContext('2d')!
-				.drawImage(img, 0, 0, naturalW, naturalH, drawX, drawY, drawW, drawH);
-		};
-		img.src = cropSrc;
-		if (removedCanvas) {
-			removedCanvas.width = size;
-			removedCanvas.height = size;
-		}
-	});
-
+	// The model is ~40 MB and is fetched from img.ly's CDN the first time anyone
+	// on this browser removes a background, which is most of the wait — hence a
+	// progress bar rather than a spinner. The inference runs in a worker (see
+	// background-removal.worker.ts) so the page stays usable throughout.
 	async function runBackgroundRemoval() {
-		if (!croppedCanvas || !removedCanvas) return;
+		const source = await canvasBlob(croppedCanvas);
+		if (!source) return;
+
 		bgRemoving = true;
-		try {
-			const { removeBackground } = await import('@imgly/background-removal');
-			const sourceBlob: Blob = await new Promise((resolve) =>
-				croppedCanvas!.toBlob((b) => resolve(b!), 'image/png')
-			);
-			const resultBlob = await removeBackground(sourceBlob);
-			const bmp = await createImageBitmap(resultBlob);
-			const ctx = removedCanvas.getContext('2d')!;
-			ctx.clearRect(0, 0, removedCanvas.width, removedCanvas.height);
-			ctx.drawImage(bmp, 0, 0, removedCanvas.width, removedCanvas.height);
-			bgRemoved = true;
-		} catch (err) {
-			toast.error(`Background removal failed: ${getErrorMessage(err)}`);
-		} finally {
+		bgRemoved = false;
+		bgError = '';
+		bgPhase = '';
+		bgProgress = 0;
+		fetchProgress = {};
+
+		worker?.terminate();
+		worker = new Worker(new URL('./background-removal.worker.ts', import.meta.url), {
+			type: 'module'
+		});
+
+		worker.onmessage = ({ data }: MessageEvent<BackgroundRemovalMessage>) => {
+			if (data.kind === 'progress') {
+				if (data.stage.startsWith('compute:')) {
+					bgPhase = 'compute';
+					bgProgress = data.total > 0 ? Math.min(1, data.current / data.total) : 0;
+				} else {
+					bgPhase = 'fetch';
+					fetchProgress[data.stage] = { current: data.current, total: data.total };
+					let current = 0;
+					let total = 0;
+					for (const entry of Object.values(fetchProgress)) {
+						current += entry.current;
+						total += entry.total;
+					}
+					bgProgress = total > 0 ? Math.min(1, current / total) : 0;
+				}
+				return;
+			}
+
 			bgRemoving = false;
-		}
+			worker?.terminate();
+			worker = null;
+
+			if (data.kind === 'error') {
+				bgError = data.message;
+				return;
+			}
+			removedBlob = data.result;
+			setRemovedUrl(URL.createObjectURL(data.result));
+			bgRemoved = true;
+		};
+
+		worker.onerror = (event) => {
+			bgRemoving = false;
+			worker?.terminate();
+			worker = null;
+			bgError = event.message || 'worker error';
+		};
+
+		worker.postMessage({ source } satisfies BackgroundRemovalRequest);
 	}
 
 	async function finish(useRemoved: boolean) {
-		const source = useRemoved && bgRemoved ? removedCanvas : croppedCanvas;
-		if (!source) return;
+		if (uploading) return;
+		const blob = useRemoved ? removedBlob : await canvasBlob(croppedCanvas);
+		if (!blob) return;
 		uploading = true;
 		try {
-			const blob: Blob = await new Promise((resolve) =>
-				source.toBlob((b) => resolve(b!), 'image/png')
-			);
 			const form = new FormData();
 			form.append('file', blob, 'image.png');
 			const response = await fetch('/api/uploads', { method: 'POST', body: form });
@@ -212,22 +355,32 @@
 			step = 'done';
 		} catch (err) {
 			toast.error(getErrorMessage(err));
+			// Stay where the user was, so a failed upload can be retried without
+			// re-cropping. Skipping the choice step leaves nowhere to go back to.
+			if (step !== 'bg') step = 'crop';
 		} finally {
 			uploading = false;
 		}
 	}
 
 	function reset() {
+		worker?.terminate();
+		worker = null;
+		bgRemoving = false;
+		bgRemoved = false;
+		bgError = '';
+		croppedCanvas = null;
+		croppedUrl = '';
+		removedBlob = null;
+		setRemovedUrl('');
 		value = '';
 		step = 'idle';
-		bgRemoved = false;
-		cropParams = null;
 	}
 </script>
 
 <svelte:window onpointermove={onPointerMove} onpointerup={onPointerUp} onpaste={handlePaste} />
 
-<div bind:this={container} class="space-y-2">
+<div bind:this={container} bind:clientWidth={containerWidth} class="space-y-2">
 	<input
 		bind:this={fileInput}
 		type="file"
@@ -290,55 +443,90 @@
 			</div>
 			<div class="flex justify-end gap-2">
 				<Button type="button" variant="outline" size="sm" onclick={reset}>Cancel</Button>
-				<Button type="button" size="sm" onclick={continueToBg}>Continue</Button>
+				<Button type="button" size="sm" disabled={uploading} onclick={continueToBg}>
+					{#if uploading}
+						Uploading…
+					{:else if sourceHasAlpha}
+						Use image
+					{:else}
+						Continue
+					{/if}
+				</Button>
 			</div>
 		</div>
 	{:else if step === 'bg'}
-		<div class="space-y-2 rounded-lg border p-3">
+		<div class="space-y-3 rounded-lg border p-3">
 			<p class="text-xs text-muted-foreground">
-				Optionally remove the background (runs in your browser — the image never leaves your device
-				until you upload it).
+				Pick one — it is uploaded straight away. The background is removed in your browser, so the
+				image never leaves your device until you pick.
 			</p>
-			<div class="flex gap-3">
-				<div class="flex-1 space-y-1">
-					<p class="text-[11px] text-muted-foreground">Cropped</p>
-					<canvas bind:this={croppedCanvas} class="w-full rounded-md" style={checker}></canvas>
-				</div>
-				<div class="flex-1 space-y-1">
-					<p class="text-[11px] text-muted-foreground">Background removed</p>
-					<canvas bind:this={removedCanvas} class="w-full rounded-md" style={checker}></canvas>
-				</div>
-			</div>
-			<div class="flex flex-wrap justify-end gap-2">
-				<Button type="button" variant="outline" size="sm" onclick={() => (step = 'crop')}
-					>Back</Button
-				>
-				<Button
+			<div class="grid grid-cols-2 gap-3">
+				<button
 					type="button"
-					variant="outline"
-					size="sm"
-					disabled={bgRemoving}
-					onclick={runBackgroundRemoval}
+					disabled={uploading}
+					onclick={() => finish(false)}
+					class="space-y-1 rounded-md border-2 border-transparent p-1 transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none disabled:opacity-50"
 				>
-					{bgRemoving ? 'Removing…' : 'Remove background'}
-				</Button>
+					<img src={croppedUrl} alt="" class="aspect-square w-full rounded" style={checker} />
+					<span class="block text-[11px] text-muted-foreground">With background</span>
+				</button>
+
+				<button
+					type="button"
+					disabled={uploading || !bgRemoved}
+					onclick={() => finish(true)}
+					class="space-y-1 rounded-md border-2 border-transparent p-1 transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none disabled:opacity-50"
+				>
+					<span
+						class="flex aspect-square w-full items-center justify-center overflow-hidden rounded"
+						style={checker}
+					>
+						{#if removedUrl}
+							<img src={removedUrl} alt="" class="h-full w-full object-contain" />
+						{:else if bgError}
+							<span class="px-2 text-center text-[11px] text-muted-foreground">Not possible</span>
+						{/if}
+					</span>
+					<span class="block text-[11px] text-muted-foreground">
+						{#if bgRemoving}
+							{#if bgPhase === 'fetch'}
+								Loading the model — {Math.round(bgProgress * 100)}%
+							{:else}
+								Removing…
+							{/if}
+						{:else if bgError}
+							Background removal failed
+						{:else}
+							Without background
+						{/if}
+					</span>
+				</button>
+			</div>
+
+			{#if bgRemoving}
+				<div class="h-1 w-full overflow-hidden rounded-full bg-muted">
+					<div
+						class="h-full bg-primary transition-[width]"
+						style="width: {Math.round(bgProgress * 100)}%"
+					></div>
+				</div>
+			{/if}
+
+			<div class="flex justify-between gap-2">
 				<Button
 					type="button"
 					variant="outline"
 					size="sm"
 					disabled={uploading}
-					onclick={() => finish(false)}
+					onclick={() => (step = 'crop')}>Back</Button
 				>
-					Keep background
-				</Button>
-				<Button
-					type="button"
-					size="sm"
-					disabled={uploading || !bgRemoved}
-					onclick={() => finish(true)}
-				>
-					{uploading ? 'Uploading…' : 'Use this image'}
-				</Button>
+				{#if bgError}
+					<Button type="button" variant="outline" size="sm" onclick={runBackgroundRemoval}
+						>Try again</Button
+					>
+				{:else if uploading}
+					<span class="self-center text-xs text-muted-foreground">Uploading…</span>
+				{/if}
 			</div>
 		</div>
 	{:else if step === 'done'}

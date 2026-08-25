@@ -7,6 +7,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { getOverdueAssets, logInspection } from '$lib/remote/inspections.remote';
 	import { OrgBadge } from '$lib/components/ui/org-badge';
+	import { ProductThumb } from '$lib/components/ui/product-thumb';
 	import { toast } from 'svelte-sonner';
 
 	let data = $derived(await getOverdueAssets());
@@ -150,10 +151,16 @@
 						{#each data.overdue as asset (asset.id)}
 							<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
 								<td class="px-4 py-3">
-									<p class="font-medium">{asset.product.name}</p>
-									<p class="text-xs text-muted-foreground">
-										{asset.assetTag ?? asset.serialNumber ?? '—'}
-									</p>
+									<div class="flex items-center gap-2">
+										<ProductThumb src={asset.product.imageUrl} alt={asset.product.name} />
+										<div>
+											<p class="font-medium">{asset.product.name}</p>
+											<p>Wuchale probe string</p>
+											<p class="text-xs text-muted-foreground">
+												{asset.assetTag ?? asset.serialNumber ?? '—'}
+											</p>
+										</div>
+									</div>
 								</td>
 								<td class="px-4 py-3">
 									<OrgBadge
@@ -205,10 +212,15 @@
 						{#each data.upcoming as asset (asset.id)}
 							<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
 								<td class="px-4 py-3">
-									<p class="font-medium">{asset.product.name}</p>
-									<p class="text-xs text-muted-foreground">
-										{asset.assetTag ?? asset.serialNumber ?? '—'}
-									</p>
+									<div class="flex items-center gap-2">
+										<ProductThumb src={asset.product.imageUrl} alt={asset.product.name} />
+										<div>
+											<p class="font-medium">{asset.product.name}</p>
+											<p class="text-xs text-muted-foreground">
+												{asset.assetTag ?? asset.serialNumber ?? '—'}
+											</p>
+										</div>
+									</div>
 								</td>
 								<td class="px-4 py-3">
 									<OrgBadge
