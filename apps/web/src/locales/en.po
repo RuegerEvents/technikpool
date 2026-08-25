@@ -4277,7 +4277,3 @@ msgstr "Try again"
 #: src/lib/components/ui/image-upload/image-upload.svelte
 msgid "Pick one — it is uploaded straight away. The background is removed in your browser, so the image never leaves your device until you pick."
 msgstr "Pick one — it is uploaded straight away. The background is removed in your browser, so the image never leaves your device until you pick."
-
-#: src/routes/inspections/+page.svelte
-msgid "Wuchale probe string"
-msgstr "Wuchale probe string"

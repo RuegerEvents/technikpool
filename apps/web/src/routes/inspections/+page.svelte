@@ -155,7 +155,6 @@
 										<ProductThumb src={asset.product.imageUrl} alt={asset.product.name} />
 										<div>
 											<p class="font-medium">{asset.product.name}</p>
-											<p>Wuchale probe string</p>
 											<p class="text-xs text-muted-foreground">
 												{asset.assetTag ?? asset.serialNumber ?? '—'}
 											</p>
