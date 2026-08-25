@@ -180,6 +180,7 @@ msgstr "Crew"
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
@@ -864,6 +865,7 @@ msgstr "ArrowUp"
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 #: src/lib/components/ui/org-multi-select/org-multi-select.svelte
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+#: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/new/+page.svelte
@@ -4277,3 +4279,56 @@ msgstr "Erneut versuchen"
 #: src/lib/components/ui/image-upload/image-upload.svelte
 msgid "Pick one — it is uploaded straight away. The background is removed in your browser, so the image never leaves your device until you pick."
 msgstr "Wähle eines aus — es wird sofort hochgeladen. Der Hintergrund wird in deinem Browser entfernt, das Bild verlässt dein Gerät also erst mit deiner Auswahl."
+
+#~ msgid "Wuchale probe string"
+#~ msgstr ""
+
+#~ msgid "Catalog index probe"
+#~ msgstr ""
+
+#~ msgid "Catalog index probe two"
+#~ msgstr ""
+
+#~ msgid "Catalog index probe 3"
+#~ msgstr ""
+
+#~ msgid "Catalog index probe 4"
+#~ msgstr ""
+
+#~ msgid "Catalog index probe 5"
+#~ msgstr ""
+
+#~ msgid "Catalog index probe SIX"
+#~ msgstr ""
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Asset deleted"
+msgstr "Gerät gelöscht"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Delete this asset"
+msgstr "Dieses Gerät löschen"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Only possible while it has never been booked, scanned, inspected or billed. A unit that has been in use is decommissioned instead, so its history survives."
+msgstr "Nur möglich, solange es nie gebucht, gescannt, geprüft oder abgerechnet wurde. Ein Gerät, das im Einsatz war, wird stattdessen ausgemustert, damit seine Historie erhalten bleibt."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Delete"
+msgstr "Löschen"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Deleting…"
+msgstr "Wird gelöscht…"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Delete asset"
+msgstr "Gerät löschen"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Delete this asset?"
+msgstr "Dieses Gerät löschen?"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "This cannot be undone. Only the unit is removed — the product it belongs to stays."
+msgstr "Das lässt sich nicht rückgängig machen. Nur das Gerät wird entfernt — das Produkt dazu bleibt bestehen."

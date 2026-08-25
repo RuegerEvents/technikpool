@@ -180,6 +180,7 @@ msgstr "Crew"
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
@@ -864,6 +865,7 @@ msgstr "ArrowUp"
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 #: src/lib/components/ui/org-multi-select/org-multi-select.svelte
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+#: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/new/+page.svelte
@@ -4277,3 +4279,56 @@ msgstr "Try again"
 #: src/lib/components/ui/image-upload/image-upload.svelte
 msgid "Pick one — it is uploaded straight away. The background is removed in your browser, so the image never leaves your device until you pick."
 msgstr "Pick one — it is uploaded straight away. The background is removed in your browser, so the image never leaves your device until you pick."
+
+#~ msgid "Wuchale probe string"
+#~ msgstr "Wuchale probe string"
+
+#~ msgid "Catalog index probe"
+#~ msgstr "Catalog index probe"
+
+#~ msgid "Catalog index probe two"
+#~ msgstr "Catalog index probe two"
+
+#~ msgid "Catalog index probe 3"
+#~ msgstr "Catalog index probe 3"
+
+#~ msgid "Catalog index probe 4"
+#~ msgstr "Catalog index probe 4"
+
+#~ msgid "Catalog index probe 5"
+#~ msgstr "Catalog index probe 5"
+
+#~ msgid "Catalog index probe SIX"
+#~ msgstr "Catalog index probe SIX"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Asset deleted"
+msgstr "Asset deleted"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Delete this asset"
+msgstr "Delete this asset"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Only possible while it has never been booked, scanned, inspected or billed. A unit that has been in use is decommissioned instead, so its history survives."
+msgstr "Only possible while it has never been booked, scanned, inspected or billed. A unit that has been in use is decommissioned instead, so its history survives."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Delete"
+msgstr "Delete"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Deleting…"
+msgstr "Deleting…"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Delete asset"
+msgstr "Delete asset"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Delete this asset?"
+msgstr "Delete this asset?"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "This cannot be undone. Only the unit is removed — the product it belongs to stays."
+msgstr "This cannot be undone. Only the unit is removed — the product it belongs to stays."

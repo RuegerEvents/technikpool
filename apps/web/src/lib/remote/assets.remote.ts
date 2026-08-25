@@ -1,4 +1,5 @@
 import { query, command } from '$app/server';
+import { error } from '@sveltejs/kit';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import type { FieldChange } from '$lib/types/asset-transaction';
@@ -564,6 +565,93 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 	}
 
 	return updated;
+});
+
+// Deleting an asset is only ever right for one that was never actually used: a
+// mis-scan, or a row created to try something out. Anything that moved has an
+// audit trail, a place in a production's history, or a billing line pointing at
+// it, and those records exist precisely so they can't be quietly rewritten. The
+// honest way out of a real unit is retiring it — see RETIRED_ASSET_STATUSES.
+//
+// Every check below is the reason this isn't left to the database. Prisma
+// cascades ProductionItem, AssetTransaction and Inspection, so the delete would
+// succeed and take the history with it. OfferItem and InvoiceItem are worse:
+// they reference an asset by id with no foreign key at all, so nothing but this
+// would stop a delete from orphaning a line on an issued invoice.
+
+// The guards below use SvelteKit's `error()` rather than `throw new Error()`
+// like the rest of this file. A plain Error from a remote function never
+// reaches the browser — SvelteKit replaces it with "Internal Error" — and here
+// the message *is* the feature: it names which kind of history is in the way
+// and points at decommissioning instead.
+
+/** Actions an asset accumulates without ever leaving the shelf. */
+const UNUSED_ASSET_ACTIONS = ['CREATED', 'UPDATED'];
+
+export const deleteAsset = command(v.string(), async (assetId: string) => {
+	const user = await requireAuth();
+	const systemAdmin = await isSystemAdmin(user.id);
+
+	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: assetId } });
+
+	if (!systemAdmin) {
+		const membership = await prisma.orgMembership.findUnique({
+			where: {
+				userId_organizationId: { userId: user.id, organizationId: asset.organizationId }
+			}
+		});
+		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
+			error(403, 'Unauthorized');
+		}
+	}
+
+	const booked = await prisma.productionItem.findFirst({
+		where: { assetId },
+		include: { production: { select: { name: true } } }
+	});
+	if (booked) {
+		error(
+			409,
+			`Asset has been booked for "${booked.production.name}" — decommission it instead of deleting it`
+		);
+	}
+
+	const moved = await prisma.assetTransaction.findFirst({
+		where: { assetId, action: { notIn: UNUSED_ASSET_ACTIONS } }
+	});
+	if (moved) {
+		error(409, 'Asset has been scanned or checked out — decommission it instead of deleting it');
+	}
+
+	const inspected = await prisma.inspection.findFirst({ where: { assetId } });
+	if (inspected) {
+		error(409, 'Asset has an inspection on record — decommission it instead of deleting it');
+	}
+
+	const [offerLine, invoiceLine] = await Promise.all([
+		prisma.offerItem.findFirst({ where: { assetId } }),
+		prisma.invoiceItem.findFirst({ where: { assetId } })
+	]);
+	if (offerLine || invoiceLine) {
+		error(409, 'Asset appears on an offer or invoice — decommission it instead of deleting it');
+	}
+
+	const { organizationId, bundleId } = asset;
+	await prisma.asset.delete({ where: { id: assetId } });
+
+	await getAssets(organizationId).refresh();
+	await getAssets().refresh();
+	await getRetiredAssets(organizationId).refresh();
+	await getRetiredAssets().refresh();
+	await getInventorySummary(organizationId).refresh();
+	await getInventorySummary().refresh();
+	await getLocations(organizationId).refresh();
+	if (bundleId) {
+		await getBundle(bundleId).refresh();
+		await getBundles(organizationId).refresh();
+		await getBundleTemplates(organizationId).refresh();
+		await getBundleTemplates().refresh();
+	}
 });
 
 const updateProductSchema = v.object({

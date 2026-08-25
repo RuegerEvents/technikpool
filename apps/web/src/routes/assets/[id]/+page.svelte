@@ -9,6 +9,7 @@
 	import { ImageUpload } from '$lib/components/ui/image-upload';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
+	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import {
 		getAsset,
@@ -16,7 +17,8 @@
 		getLocations,
 		getCategories,
 		updateAsset,
-		updateProduct
+		updateProduct,
+		deleteAsset
 	} from '$lib/remote/assets.remote';
 	import type { TransactionData } from '$lib/types/asset-transaction';
 	import { ASSET_STATUSES, isRetiredStatus, type AssetStatus } from '$lib/asset-status';
@@ -35,6 +37,26 @@
 	// ── Asset editing ─────────────────────────────────────────────────────────
 	let editingAsset = $state(false);
 	let savingAsset = $state(false);
+
+	let confirmingDelete = $state(false);
+	let deleting = $state(false);
+
+	async function handleDelete() {
+		deleting = true;
+		try {
+			await deleteAsset(assetId);
+			confirmingDelete = false;
+			toast.success('Asset deleted');
+			await goto(resolve('/assets'));
+		} catch (err) {
+			// The command refuses anything with history, and says which kind — that
+			// reason is the useful part, so it goes in front of the user verbatim.
+			toast.error(getErrorMessage(err));
+			confirmingDelete = false;
+		} finally {
+			deleting = false;
+		}
+	}
 
 	let assetDraft = $state({
 		serialNumber: '',
@@ -497,9 +519,72 @@
 					{/if}
 				</Card.Content>
 			</Card.Root>
+
+			<div
+				class="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-destructive/30 p-4"
+			>
+				<div>
+					<p class="text-sm font-medium">Delete this asset</p>
+					<p class="text-xs text-muted-foreground">
+						Only possible while it has never been booked, scanned, inspected or billed. A unit that
+						has been in use is decommissioned instead, so its history survives.
+					</p>
+				</div>
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					class="border-destructive/40 text-destructive hover:bg-destructive/10"
+					onclick={() => (confirmingDelete = true)}>Delete</Button
+				>
+			</div>
 		</div>
 	</div>
 </div>
+
+<!-- Delete Asset Modal -->
+{#if confirmingDelete}
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+		onkeydown={(e) => e.key === 'Escape' && (confirmingDelete = false)}
+	>
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div
+			class="mx-4 w-full max-w-md rounded-lg border bg-background p-6 shadow-lg"
+			onkeydown={(e) => e.stopPropagation()}
+		>
+			<h2 class="mb-1 text-lg font-semibold">Delete this asset?</h2>
+			<p class="mb-5 text-sm text-muted-foreground">
+				{asset.product.manufacturer.name}
+				{asset.product.name}{asset.assetTag ? ` · ${asset.assetTag}` : ''}{asset.serialNumber
+					? ` · ${asset.serialNumber}`
+					: ''}
+			</p>
+			<p class="mb-5 text-sm text-muted-foreground">
+				This cannot be undone. Only the unit is removed — the product it belongs to stays.
+			</p>
+			<div class="flex justify-end gap-3">
+				<Button
+					type="button"
+					variant="outline"
+					onclick={() => (confirmingDelete = false)}
+					disabled={deleting}
+				>
+					Cancel
+				</Button>
+				<Button
+					type="button"
+					class="bg-destructive text-white hover:bg-destructive/90"
+					onclick={handleDelete}
+					disabled={deleting}
+				>
+					{deleting ? 'Deleting…' : 'Delete asset'}
+				</Button>
+			</div>
+		</div>
+	</div>
+{/if}
 
 <!-- Edit Product Modal -->
 {#if productModal.open}
