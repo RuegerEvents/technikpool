@@ -97,7 +97,9 @@
 											type="button"
 											class="flex items-center gap-1 text-sm font-medium transition-colors {page.url.pathname.startsWith(
 												'/stickers'
-											) || page.url.pathname.startsWith('/devices')
+											) ||
+											page.url.pathname.startsWith('/products') ||
+											page.url.pathname.startsWith('/devices')
 												? 'text-foreground'
 												: 'text-muted-foreground hover:text-foreground'}"
 										>
@@ -124,6 +126,12 @@
 										sideOffset={6}
 										class="z-50 min-w-[180px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
 									>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/products'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											Products
+										</DropdownMenu.Item>
 										<DropdownMenu.Item
 											onSelect={() => goto(resolve('/stickers'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"

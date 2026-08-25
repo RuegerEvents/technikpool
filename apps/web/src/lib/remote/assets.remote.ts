@@ -235,6 +235,34 @@ export const getProducts = query(v.optional(v.string()), async (manufacturerId?:
 	});
 });
 
+/**
+ * The product catalogue behind the user's own assets — what the product wizard
+ * walks through.
+ *
+ * `getProducts` deliberately returns every product in the system, because the
+ * new-asset form has to be able to pick one that nobody owns yet. This one is
+ * scoped the same way the Devices list is, so a walk through the catalogue is a
+ * walk through your own inventory and not somebody else's.
+ */
+export const getProductCatalog = query(v.optional(v.string()), async (organizationId?: string) => {
+	const user = await requireAuth();
+	const queryOrgIds = await scopedOrgIds(user.id, organizationId);
+
+	const assetScope = { organizationId: { in: queryOrgIds }, ...ACTIVE_ASSET_WHERE };
+
+	const products = await prisma.product.findMany({
+		where: { assets: { some: assetScope } },
+		include: {
+			manufacturer: true,
+			category: true,
+			_count: { select: { assets: { where: assetScope } } }
+		},
+		orderBy: [{ manufacturer: { name: 'asc' } }, { name: 'asc' }]
+	});
+
+	return products.map(({ _count, ...product }) => ({ ...product, assetCount: _count.assets }));
+});
+
 const createAssetsSchema = v.object({
 	organizationId: v.string(),
 	locationId: v.string(),
@@ -816,7 +844,12 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		const memberships = await prisma.orgMembership.findMany({
 			where: { userId: user.id, role: { in: ['ADMIN', 'OWNER'] } }
 		});
-		if (memberships.length === 0) throw new Error('Unauthorized');
+		// The message matters here: the product wizard is reachable by any member,
+		// and "Internal Error" would look like a broken save rather than a missing
+		// right.
+		if (memberships.length === 0) {
+			error(403, 'You need admin rights in one of your organisations to edit products');
+		}
 	}
 
 	const product = await prisma.product.update({
@@ -834,9 +867,20 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 
 	const affectedAssets = await prisma.asset.findMany({
 		where: { productId: product.id },
-		select: { id: true }
+		select: { id: true, organizationId: true }
 	});
-	await Promise.all(affectedAssets.map((a) => getAsset(a.id).refresh()));
+	const affectedOrgIds = [...new Set(affectedAssets.map((a) => a.organizationId))];
+	await Promise.all([
+		...affectedAssets.map((a) => getAsset(a.id).refresh()),
+		// The catalogue is cached per org filter, and the unfiltered entry is the
+		// one the wizard opens on.
+		getProductCatalog().refresh(),
+		...affectedOrgIds.map((id) => getProductCatalog(id).refresh()),
+		...affectedOrgIds.map((id) => getAssets(id).refresh()),
+		getAssets().refresh(),
+		...affectedOrgIds.map((id) => getInventorySummary(id).refresh()),
+		getInventorySummary().refresh()
+	]);
 
 	return product;
 });

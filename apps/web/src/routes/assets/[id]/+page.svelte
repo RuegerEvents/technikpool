@@ -5,8 +5,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
-	import { CategorySelect } from '$lib/components/ui/category-select';
-	import { ImageUpload } from '$lib/components/ui/image-upload';
+	import { ProductFields, type ProductDraft } from '$lib/components/ui/product-fields';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
@@ -143,21 +142,18 @@
 	}
 
 	// ── Product editing ───────────────────────────────────────────────────────
-	let productModal = $state({
-		open: false,
-		name: '',
-		categoryId: '',
-		imageUrl: ''
-	});
+	// The same three fields the product wizard walks through — see ProductFields.
+	let productModalOpen = $state(false);
+	let productDraft = $state<ProductDraft>({ name: '', categoryId: '', imageUrl: '' });
 	let savingProduct = $state(false);
 
 	function openProductModal() {
-		productModal = {
-			open: true,
+		productDraft = {
 			name: asset.product.name,
 			categoryId: asset.product.categoryId,
 			imageUrl: asset.product.imageUrl ?? ''
 		};
+		productModalOpen = true;
 	}
 
 	async function handleProductSave() {
@@ -165,12 +161,12 @@
 		try {
 			await updateProduct({
 				productId: asset.product.id,
-				name: productModal.name,
-				categoryId: productModal.categoryId,
-				imageUrl: productModal.imageUrl
+				name: productDraft.name,
+				categoryId: productDraft.categoryId,
+				imageUrl: productDraft.imageUrl
 			});
 			toast.success('Product updated');
-			productModal.open = false;
+			productModalOpen = false;
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {
@@ -587,11 +583,11 @@
 {/if}
 
 <!-- Edit Product Modal -->
-{#if productModal.open}
+{#if productModalOpen}
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-		onkeydown={(e) => e.key === 'Escape' && (productModal.open = false)}
+		onkeydown={(e) => e.key === 'Escape' && (productModalOpen = false)}
 	>
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
@@ -603,32 +599,13 @@
 				Changes apply to all assets of this product type.
 			</p>
 
-			<div class="space-y-4">
-				<div class="space-y-2">
-					<Label for="modal-name">Product Name</Label>
-					<Input id="modal-name" bind:value={productModal.name} required />
-				</div>
-
-				<div class="space-y-2">
-					<Label>Category</Label>
-					<CategorySelect
-						{categories}
-						bind:value={productModal.categoryId}
-						placeholder="Select a category"
-					/>
-				</div>
-
-				<div class="space-y-2">
-					<Label>Product Image</Label>
-					<ImageUpload bind:value={productModal.imageUrl} label="Product photo" />
-				</div>
-			</div>
+			<ProductFields {categories} bind:value={productDraft} idPrefix="modal" />
 
 			<div class="mt-6 flex justify-end gap-3">
 				<Button
 					type="button"
 					variant="outline"
-					onclick={() => (productModal.open = false)}
+					onclick={() => (productModalOpen = false)}
 					disabled={savingProduct}
 				>
 					Cancel
