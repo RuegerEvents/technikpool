@@ -138,15 +138,18 @@ platform :ios do
     upload_to_app_store(
       api_key: api_key,
       ipa: IPA,
-      # The listing is edited in App Store Connect; pushing metadata from here
-      # would revert whatever was changed there. review_information/ is the
-      # exception kept in the repo, and it is pasted in by hand.
-      skip_metadata: true,
+      # The listing (title, description, keywords, ...) is edited in App Store
+      # Connect; deliver only ever touches a field it finds a file for, so
+      # leaving skip_metadata false is safe as long as metadata/ holds nothing
+      # but release_notes.txt per locale. review_information/ is the other
+      # exception kept in the repo, and both are pasted in by hand before a
+      # tag rather than generated.
+      skip_metadata: false,
       skip_screenshots: true,
       precheck_include_in_app_purchases: false,
       submit_for_review: true,
       # Nothing to hold back for: no marketing date, no coordinated launch.
-      automatic_release_after_approval: true,
+      automatic_release: true,
       # Answered here rather than in the console, because an unanswered
       # question doesn't fail the submission — it just parks it, which looks
       # exactly like a slow review queue.

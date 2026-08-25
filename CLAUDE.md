@@ -702,10 +702,14 @@ no console click between a green build and every device. Both stores still revie
 
 Two consequences worth keeping in mind:
 
-- **The App Store version has to be ready before the tag.** `skip_metadata` means CI never
-  writes the listing, so a new version needs its "What's New" filled in in App Store Connect
-  first, or the submission is rejected for incomplete metadata. The workflow log is where that
-  shows up.
+- **The App Store version has to be ready before the tag, except What's New.**
+  `ios/fastlane/metadata/<locale>/release_notes.txt` is the only metadata file that exists on
+  disk, so deliver uploads just that field per locale and leaves title, description, keywords
+  and screenshots alone — update those two files before tagging. Everything else in the listing
+  still has to already exist in App Store Connect (screenshots, description, ...), or the
+  submission is rejected for incomplete metadata; the workflow log is where that shows up. On
+  the very first App Store Connect version for the app there's nothing yet to attach release
+  notes to, so deliver logs a warning and skips them rather than failing.
 - **`submission_information` is answered in the Fastfile**, not the console. An unanswered
   export-compliance or IDFA question doesn't fail a submission — it silently parks it, which
   looks exactly like a slow review queue. The answers there match
