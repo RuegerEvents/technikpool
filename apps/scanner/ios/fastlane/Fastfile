@@ -115,7 +115,7 @@ platform :ios do
     UI.success('App Store Connect key works, and the signing identity decrypts.')
   end
 
-  desc 'Upload to TestFlight'
+  desc 'Upload to TestFlight only, without submitting anything for review'
   lane :beta do
     api_key = asc_key
     build
@@ -129,7 +129,8 @@ platform :ios do
     )
   end
 
-  desc 'Upload to App Store Connect for review'
+  desc 'Upload, submit for review, and release on approval'
+  desc 'What CI runs on a scanner-v* tag'
   lane :release do
     api_key = asc_key
     build
@@ -137,12 +138,24 @@ platform :ios do
       api_key: api_key,
       ipa: IPA,
       # The listing is edited in App Store Connect; pushing metadata from here
-      # would revert whatever was changed there. review_information/ below is
-      # the exception worth keeping in the repo, and it is applied by hand.
+      # would revert whatever was changed there. review_information/ is the
+      # exception kept in the repo, and it is pasted in by hand.
       skip_metadata: true,
       skip_screenshots: true,
       precheck_include_in_app_purchases: false,
-      submit_for_review: false
+      submit_for_review: true,
+      # Nothing to hold back for: no marketing date, no coordinated launch.
+      automatic_release_after_approval: true,
+      # Answered here rather than in the console, because an unanswered
+      # question doesn't fail the submission — it just parks it, which looks
+      # exactly like a slow review queue.
+      submission_information: {
+        # Matches ITSAppUsesNonExemptEncryption in Info.plist: HTTPS and the
+        # platform keychain are exempt, and the app encrypts nothing itself.
+        export_compliance_uses_encryption: false,
+        # No ad network, no analytics SDK, nothing that reads the ad id.
+        add_id_info_uses_idfa: false
+      }
     )
   end
 end

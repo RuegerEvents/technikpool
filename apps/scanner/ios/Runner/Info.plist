@@ -43,6 +43,12 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<!-- The app encrypts nothing itself: HTTPS and the platform keychain are
+	     both exempt categories. Declaring it here is what stops every TestFlight
+	     build from parking in "Missing Compliance" until someone answers the
+	     same question by hand in App Store Connect. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>Zum Scannen von Etiketten und QR-Codes mit der Kamera.</string>
 	<key>NSLocalNetworkUsageDescription</key>

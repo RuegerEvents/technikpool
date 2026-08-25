@@ -669,11 +669,32 @@ expects to be:
 | Lane                                           | Does                                                                |
 | ---------------------------------------------- | ------------------------------------------------------------------- |
 | `cd apps/scanner/android && fastlane validate` | Checks the upload key and Play credentials, uploads nothing         |
+| `… fastlane production`                        | **What CI runs.** Builds and publishes to production, full rollout  |
 | `… fastlane internal`                          | Builds a signed `.aab` and puts it on the internal track as a draft |
 | `… fastlane promote`                           | Promotes internal → production at 20%, without rebuilding           |
-| `cd apps/scanner/ios && fastlane validate`     | Checks the App Store Connect key, uploads nothing                   |
-| `… fastlane beta`                              | Builds an `.ipa` and uploads it to TestFlight                       |
-| `… fastlane release`                           | Uploads to App Store Connect, without submitting for review         |
+| `cd apps/scanner/ios && fastlane validate`     | Checks the App Store Connect key and the signing identity           |
+| `… fastlane release`                           | **What CI runs.** Uploads, submits for review, releases on approval |
+| `… fastlane beta`                              | Uploads to TestFlight only, submitting nothing                      |
+
+**A tagged release goes all the way.** `scanner-v*` publishes to Play production at 100% and
+submits to App Store review with automatic release on approval — there is no staging step and
+no console click between a green build and every device. Both stores still review, so
+"published" means queued, not live; and neither review is something CI can shorten.
+
+Two consequences worth keeping in mind:
+
+- **The App Store version has to be ready before the tag.** `skip_metadata` means CI never
+  writes the listing, so a new version needs its "What's New" filled in in App Store Connect
+  first, or the submission is rejected for incomplete metadata. The workflow log is where that
+  shows up.
+- **`submission_information` is answered in the Fastfile**, not the console. An unanswered
+  export-compliance or IDFA question doesn't fail a submission — it silently parks it, which
+  looks exactly like a slow review queue. The answers there match
+  `ITSAppUsesNonExemptEncryption` in `Info.plist`: the app encrypts nothing itself, and reads
+  no advertising id.
+
+For a build that should _not_ go straight out, use `fastlane internal` / `fastlane beta` by
+hand instead of tagging.
 
 Neither platform's lanes push store metadata: the listings are edited in the consoles, and a lane
 that also wrote them would silently revert whatever was changed there.

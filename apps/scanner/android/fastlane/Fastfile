@@ -39,7 +39,8 @@ platform :android do
     UI.success('Signing key and Play credentials look usable.')
   end
 
-  desc 'Upload to the internal test track'
+  desc 'Upload to the internal test track as a draft'
+  desc 'For staging a build by hand — CI goes straight to production'
   lane :internal do
     build
     upload_to_play_store(
@@ -55,6 +56,23 @@ platform :android do
     )
   end
 
+  desc 'Build and publish straight to production, full rollout'
+  desc 'What CI runs on a scanner-v* tag'
+  lane :production do
+    build
+    upload_to_play_store(
+      track: 'production',
+      aab: AAB,
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      # 'completed' with no rollout fraction is a 100% release. Google still
+      # reviews it, so "published" means queued for review, not live yet.
+      release_status: 'completed'
+    )
+  end
+
   desc 'Promote whatever is on the internal track to production, without rebuilding'
   lane :promote do
     upload_to_play_store(
@@ -65,8 +83,9 @@ platform :android do
       skip_upload_metadata: true,
       skip_upload_images: true,
       skip_upload_screenshots: true,
-      # A staged rollout, because the first thing a broken scanner build costs
-      # is a warehouse's morning.
+      # This lane exists for the staged case: promoting something already on
+      # internal, to a fraction of devices. The production lane above is the
+      # unstaged path CI takes.
       rollout: '0.2'
     )
   end

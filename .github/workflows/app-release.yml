@@ -82,9 +82,9 @@ jobs:
           keyPassword=$KEY_PASSWORD
           EOF
 
-      - name: Upload to the internal track
+      - name: Publish to production
         working-directory: apps/scanner/android
-        run: bundle exec fastlane internal
+        run: bundle exec fastlane production
 
       - name: Shred credentials
         if: always()
@@ -134,7 +134,7 @@ jobs:
           fi
           echo "$ASC_KEY_P8" | base64 --decode > "$RUNNER_TEMP/asc_key.p8"
 
-      - name: Upload to TestFlight
+      - name: Upload and submit for review
         working-directory: apps/scanner/ios
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
@@ -146,7 +146,7 @@ jobs:
           # would carry whatever else the issuing account can reach. match takes
           # the key's contents directly and loads it into an ssh-agent itself.
           MATCH_GIT_PRIVATE_KEY: ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
-        run: bundle exec fastlane beta
+        run: bundle exec fastlane release
 
       - name: Shred credentials
         if: always()
