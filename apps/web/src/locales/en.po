@@ -174,6 +174,7 @@ msgid "Crew"
 msgstr "Crew"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 #: src/routes/+page.svelte
@@ -419,6 +420,7 @@ msgstr "Organization"
 #~ msgstr "All individual equipment units across your organizations."
 
 #: src/routes/assets/+page.svelte
+#: src/routes/products/+page.svelte
 msgid "All Organizations"
 msgstr "All Organizations"
 
@@ -682,6 +684,7 @@ msgstr "<0/> Create another after saving"
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
+#: src/routes/products/+page.svelte
 msgid "Saving…"
 msgstr "Saving…"
 
@@ -861,6 +864,7 @@ msgstr "Enter"
 msgid "ArrowUp"
 msgstr "ArrowUp"
 
+#: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/category-select/category-select.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 #: src/lib/components/ui/org-multi-select/org-multi-select.svelte
@@ -1276,7 +1280,7 @@ msgid "Edit"
 msgstr "Edit"
 
 #: src/lib/components/CsvImportModal.svelte
-#: src/lib/components/ui/checkout-bar.svelte
+#: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
@@ -1309,6 +1313,7 @@ msgstr "Location"
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
+#: src/routes/products/+page.svelte
 msgid "Save"
 msgstr "Save"
 
@@ -1515,7 +1520,7 @@ msgid "Calendar | Technikpool"
 msgstr "Calendar | Technikpool"
 
 #. 0: group.productCounts.map((p) => `${p.count}× ${p.name}`).join(', ')
-#. 0: group.productCounts.map((p) => `${p.count}× ${p.name}`).join(', ')
+#. 
 #: src/routes/productions/[id]/delivery-note/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Contains: {0}"
@@ -1589,7 +1594,7 @@ msgstr "Expand all"
 msgid "Collapse all"
 msgstr "Collapse all"
 
-#: src/lib/components/ui/checkout-bar.svelte
+#: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/routes/calendar/+page.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/checkout/+page.svelte
@@ -1602,8 +1607,9 @@ msgstr "Production"
 msgid "No assets with scheduled productions found."
 msgstr "No assets with scheduled productions found."
 
-#~ msgid "Previous"
-#~ msgstr "Previous"
+#: src/routes/products/+page.svelte
+msgid "Previous"
+msgstr "Previous"
 
 #~ msgid "Next"
 #~ msgstr "Next"
@@ -1620,7 +1626,7 @@ msgstr "Register | Technikpool"
 msgid "Joined"
 msgstr "Joined"
 
-#: src/lib/components/ui/checkout-bar.svelte
+#: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/routes/+layout.svelte
 msgid "Checkout"
 msgstr "Checkout"
@@ -1791,19 +1797,19 @@ msgid "Try a different search term or filter."
 msgstr "Try a different search term or filter."
 
 #. 0: selectedIds.size; 1: selectedIds.size !== 1 ? 's' \\: ''
-#: src/lib/components/ui/checkout-bar.svelte
+#: src/lib/components/ui/bulk-actions-bar.svelte
 msgid "{0} asset{1} selected"
 msgstr "{0} asset{1} selected"
 
-#: src/lib/components/ui/checkout-bar.svelte
+#: src/lib/components/ui/bulk-actions-bar.svelte
 msgid "Clear"
 msgstr "Clear"
 
-#: src/lib/components/ui/checkout-bar.svelte
+#: src/lib/components/ui/bulk-actions-bar.svelte
 msgid "Select target…"
 msgstr "Select target…"
 
-#: src/lib/components/ui/checkout-bar.svelte
+#: src/lib/components/ui/bulk-actions-bar.svelte
 msgid "Checking out…"
 msgstr "Checking out…"
 
@@ -1823,8 +1829,8 @@ msgid "All Categories"
 msgstr "All Categories"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/+page.svelte
-#: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
@@ -1846,7 +1852,7 @@ msgid "Please select a category"
 msgstr "Please select a category"
 
 #: src/lib/components/ui/category-select/category-select.svelte
-#: src/routes/assets/[id]/+page.svelte
+#: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
@@ -1898,6 +1904,7 @@ msgstr "Declined for <0/>"
 #~ msgstr "Tab"
 
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/products/+page.svelte
 msgid "Product updated"
 msgstr "Product updated"
 
@@ -1912,13 +1919,13 @@ msgstr "Serial number, tag, status, and location."
 msgid "Shared product details for this asset type."
 msgstr "Shared product details for this asset type."
 
-#: src/routes/assets/[id]/+page.svelte
+#: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Product Name"
 msgstr "Product Name"
 
-#: src/routes/assets/[id]/+page.svelte
+#: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/[id]/+page.svelte
 msgid "Product Image"
 msgstr "Product Image"
@@ -2879,7 +2886,7 @@ msgstr "Color and a 2-letter label identify this org at a glance in the calendar
 msgid "Manufacturer logo"
 msgstr "Manufacturer logo"
 
-#: src/routes/assets/[id]/+page.svelte
+#: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Product photo"
@@ -2921,7 +2928,7 @@ msgid "Invoice {0} | Technikpool"
 msgstr "Invoice {0} | Technikpool"
 
 #. 0: invoice.number
-#. 0: invoice.number
+#. 
 #: src/routes/invoices/[id]/+page.svelte
 #: src/routes/invoices/[id]/print/+page.svelte
 msgid "Invoice {0}"
@@ -3843,8 +3850,8 @@ msgid "Uncategorized"
 msgstr "Uncategorized"
 
 #. 0: group.name
-#. 0: group.name
-#. 0: group.name
+#. 
+#. 
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/routes/invoices/[id]/print/+page.svelte
 #: src/routes/offers/[id]/print/+page.svelte
@@ -3923,7 +3930,7 @@ msgid "{0}00001 (leave blank to auto-generate)"
 msgstr "{0}00001 (leave blank to auto-generate)"
 
 #. 0: result.count; 1: result.count !== 1 ? 's' \\: ''; 2: result.targetName
-#: src/lib/components/ui/checkout-bar.svelte
+#: src/lib/components/ui/bulk-actions-bar.svelte
 msgid "{0} asset{1} checked out to {2}"
 msgstr "{0} asset{1} checked out to {2}"
 
@@ -3993,7 +4000,7 @@ msgid "Bundle · {0}{1}"
 msgstr "Bundle · {0}{1}"
 
 #. 0: i + 1
-#. 0: i + 1
+#. 
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/bundles/+page.svelte
 msgid "Instance {0}"
@@ -4332,3 +4339,165 @@ msgstr "Delete this asset?"
 #: src/routes/assets/[id]/+page.svelte
 msgid "This cannot be undone. Only the unit is removed — the product it belongs to stays."
 msgstr "This cannot be undone. Only the unit is removed — the product it belongs to stays."
+
+#~ msgid "Shift canary string"
+#~ msgstr "Shift canary string"
+
+#. 0: label
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "Already set to {0} — nothing changed"
+msgstr "Already set to {0} — nothing changed"
+
+#. 0: result.updated; 1: result.updated !== 1 ? 's' \\: ''; 2: label; 3: result.unchanged
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "{0} asset{1} set to {2} · {3} already were"
+msgstr "{0} asset{1} set to {2} · {3} already were"
+
+#. 0: result.updated; 1: result.updated !== 1 ? 's' \\: ''; 2: label
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "{0} asset{1} set to {2}"
+msgstr "{0} asset{1} set to {2}"
+
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "Set status…"
+msgstr "Set status…"
+
+#: src/lib/components/ui/bulk-actions-bar.svelte
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "Applying…"
+msgstr "Applying…"
+
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "Apply"
+msgstr "Apply"
+
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "Confirm"
+msgstr "Confirm"
+
+#. 0: selectedIds.size; 1: selectedIds.size !== 1 ? 's' \\: ''; 2: assetStatusLabel( newStatus )
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "Mark {0} asset{1} as {2}?"
+msgstr "Mark {0} asset{1} as {2}?"
+
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "They leave the pool: no longer bookable, scannable or listed, and removed from any bundle they are in. The status can be set back, but the bundle membership can't — that has to be rebuilt."
+msgstr "They leave the pool: no longer bookable, scannable or listed, and removed from any bundle they are in. The status can be set back, but the bundle membership can't — that has to be rebuilt."
+
+#: src/routes/+layout.svelte
+#: src/routes/products/+page.svelte
+msgid "Products"
+msgstr "Products"
+
+#: src/routes/products/+page.svelte
+msgid "Product name is required"
+msgstr "Product name is required"
+
+#: src/routes/products/+page.svelte
+msgid "That was the last product"
+msgstr "That was the last product"
+
+#~ msgid "ArrowRight"
+#~ msgstr "ArrowRight"
+
+#~ msgid "ArrowLeft"
+#~ msgstr "ArrowLeft"
+
+#: src/routes/products/+page.svelte
+msgid "Products | Technikpool"
+msgstr "Products | Technikpool"
+
+#: src/routes/products/+page.svelte
+msgid "Step through the catalog and fill in what's missing — one product at a time."
+msgstr "Step through the catalog and fill in what's missing — one product at a time."
+
+#: src/routes/products/+page.svelte
+msgid "Search by product, manufacturer, category…"
+msgstr "Search by product, manufacturer, category…"
+
+#: src/routes/products/+page.svelte
+msgid "All products"
+msgstr "All products"
+
+#. 0: missingImageCount
+#: src/routes/products/+page.svelte
+msgid "Missing image ({0})"
+msgstr "Missing image ({0})"
+
+#: src/routes/products/+page.svelte
+msgid "You can look through the catalog, but editing a product needs admin or owner rights in one of your organizations."
+msgstr "You can look through the catalog, but editing a product needs admin or owner rights in one of your organizations."
+
+#: src/routes/products/+page.svelte
+msgid "No products yet"
+msgstr "No products yet"
+
+#: src/routes/products/+page.svelte
+msgid "Nothing left to edit"
+msgstr "Nothing left to edit"
+
+#: src/routes/products/+page.svelte
+msgid "Products appear here once your organizations own assets."
+msgstr "Products appear here once your organizations own assets."
+
+#: src/routes/products/+page.svelte
+msgid "Every product in this filter is done."
+msgstr "Every product in this filter is done."
+
+#: src/routes/products/+page.svelte
+msgid "Catalog"
+msgstr "Catalog"
+
+#. 0: index + 1; 1: visible.length
+#: src/routes/products/+page.svelte
+msgid "{0} of {1}"
+msgstr "{0} of {1}"
+
+#: src/routes/products/+page.svelte
+msgid "No image"
+msgstr "No image"
+
+#: src/routes/products/+page.svelte
+msgid "Unsaved changes"
+msgstr "Unsaved changes"
+
+#. 0: current.assetCount
+#: src/routes/products/+page.svelte
+msgid "{0} units"
+msgstr "{0} units"
+
+#: src/routes/products/+page.svelte
+msgid "View in Devices →"
+msgstr "View in Devices →"
+
+#: src/routes/products/+page.svelte
+msgid "step"
+msgstr "step"
+
+#: src/routes/products/+page.svelte
+msgid "save & next"
+msgstr "save & next"
+
+#~ msgid "⌘S"
+#~ msgstr "⌘S"
+
+#: src/routes/products/+page.svelte
+msgid "save"
+msgstr "save"
+
+#: src/routes/products/+page.svelte
+msgid "Save & finish"
+msgstr "Save & finish"
+
+#: src/routes/products/+page.svelte
+msgid "Save & next"
+msgstr "Save & next"
+
+#: src/routes/products/+page.svelte
+msgid "Ctrl"
+msgstr "Ctrl"
+
+#. 0: modLabel
+#: src/routes/products/+page.svelte
+msgid "{0}S"
+msgstr "{0}S"

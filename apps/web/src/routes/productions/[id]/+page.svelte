@@ -25,7 +25,7 @@
 	import type { Prisma } from '$lib/prisma/client';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { resolve } from '$app/paths';
-	import CheckoutBar from '$lib/components/ui/checkout-bar.svelte';
+	import BulkActionsBar from '$lib/components/ui/bulk-actions-bar.svelte';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
 
 	const productionId = $derived(page.params.id as string);
@@ -1019,4 +1019,4 @@
 	</div>
 </div>
 
-<CheckoutBar selectedIds={selectedItemAssetIds} onClear={() => selectedItemAssetIds.clear()} />
+<BulkActionsBar selectedIds={selectedItemAssetIds} onClear={() => selectedItemAssetIds.clear()} />

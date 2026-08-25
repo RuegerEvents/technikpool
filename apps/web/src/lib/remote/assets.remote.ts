@@ -567,6 +567,154 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 	return updated;
 });
 
+const bulkUpdateAssetStatusSchema = v.object({
+	assetIds: v.array(v.string()),
+	status: v.picklist(ASSET_STATUSES)
+});
+
+/**
+ * Set one status across a hand-picked selection — the Devices list's bulk
+ * action, and the only way to un-retire a batch.
+ *
+ * It applies the same guards `updateAsset` applies to a single unit, but as an
+ * all-or-nothing batch: a booked asset aborts the whole call rather than
+ * leaving half a selection retired, because the fix (unbook it, try again) is
+ * easier to act on than working out which rows went through. Assets already at
+ * the target status are simply not written, so a selection that spans statuses
+ * doesn't fill the history with no-op entries.
+ */
+export const bulkUpdateAssetStatus = command(bulkUpdateAssetStatusSchema, async (input) => {
+	const user = await requireAuth();
+	const systemAdmin = await isSystemAdmin(user.id);
+
+	const assets = await prisma.asset.findMany({
+		where: { id: { in: input.assetIds } },
+		select: {
+			id: true,
+			status: true,
+			organizationId: true,
+			bundleId: true,
+			bundle: { select: { template: { select: { name: true } } } }
+		}
+	});
+	if (assets.length === 0) error(404, 'No assets found');
+
+	const organizationIds = [...new Set(assets.map((a) => a.organizationId))];
+
+	if (!systemAdmin) {
+		const memberships = await prisma.orgMembership.findMany({
+			where: {
+				userId: user.id,
+				organizationId: { in: organizationIds },
+				role: { in: ['ADMIN', 'OWNER'] }
+			},
+			select: { organizationId: true }
+		});
+		const allowed = new Set(memberships.map((m) => m.organizationId));
+		if (organizationIds.some((id) => !allowed.has(id))) error(403, 'Unauthorized');
+	}
+
+	const changing = assets.filter((a) => a.status !== input.status);
+	const retiring = isRetiredStatus(input.status)
+		? changing.filter((a) => !isRetiredStatus(a.status))
+		: [];
+
+	if (retiring.length > 0) {
+		const openItems = await prisma.productionItem.findMany({
+			where: {
+				assetId: { in: retiring.map((a) => a.id) },
+				status: { in: ['PENDING', 'APPROVED', 'CHECKED_OUT'] }
+			},
+			include: { production: { select: { name: true } } }
+		});
+		if (openItems.length > 0) {
+			const blocked = new Set(openItems.map((i) => i.assetId)).size;
+			const names = [...new Set(openItems.map((i) => i.production.name))];
+			const shown = names
+				.slice(0, 3)
+				.map((n) => `"${n}"`)
+				.join(', ');
+			const list = names.length > 3 ? `${shown}, …` : shown;
+			error(
+				409,
+				blocked === 1
+					? `One asset is still booked for ${list} — remove it there first`
+					: `${blocked} assets are still booked (${list}) — remove them there first`
+			);
+		}
+	}
+
+	// A unit that has left the pool has left its kit with it. Un-retiring won't
+	// put it back — it has to be added to a bundle again like any other asset.
+	const unbundling = retiring.filter((a) => a.bundleId);
+
+	if (changing.length > 0) {
+		await prisma.$transaction(async (tx) => {
+			await tx.asset.updateMany({
+				where: { id: { in: changing.map((a) => a.id) } },
+				data: { status: input.status }
+			});
+			if (unbundling.length > 0) {
+				await tx.asset.updateMany({
+					where: { id: { in: unbundling.map((a) => a.id) } },
+					data: { bundleId: null }
+				});
+			}
+			const unbundledIds = new Set(unbundling.map((a) => a.id));
+			await tx.assetTransaction.createMany({
+				data: changing.map((asset) => {
+					const changes: FieldChange[] = [
+						{ field: 'status', from: asset.status, to: input.status }
+					];
+					if (unbundledIds.has(asset.id)) {
+						changes.push({
+							field: 'bundle',
+							from: asset.bundle?.template.name ?? null,
+							to: null
+						});
+					}
+					return {
+						assetId: asset.id,
+						userId: user.id,
+						action: 'UPDATED',
+						data: { type: 'UPDATED', changes }
+					};
+				})
+			});
+		});
+	}
+
+	const bundleIds = [...new Set(unbundling.map((a) => a.bundleId as string))];
+
+	await Promise.all([
+		...changing.flatMap((a) => [getAsset(a.id).refresh(), getAssetHistory(a.id).refresh()]),
+		...organizationIds.flatMap((id) => [
+			getAssets(id).refresh(),
+			getRetiredAssets(id).refresh(),
+			getInventorySummary(id).refresh()
+		]),
+		getAssets().refresh(),
+		getRetiredAssets().refresh(),
+		getInventorySummary().refresh(),
+		...bundleIds.flatMap((id) => [getBundle(id).refresh()]),
+		...(bundleIds.length > 0
+			? [
+					...organizationIds.flatMap((id) => [
+						getBundles(id).refresh(),
+						getBundleTemplates(id).refresh()
+					]),
+					getBundleTemplates().refresh()
+				]
+			: [])
+	]);
+
+	return {
+		updated: changing.length,
+		unchanged: assets.length - changing.length,
+		status: input.status
+	};
+});
+
 // Deleting an asset is only ever right for one that was never actually used: a
 // mis-scan, or a row created to try something out. Anything that moved has an
 // audit trail, a place in a production's history, or a billing line pointing at

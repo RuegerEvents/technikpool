@@ -15,7 +15,7 @@
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
-	import CheckoutBar from '$lib/components/ui/checkout-bar.svelte';
+	import BulkActionsBar from '$lib/components/ui/bulk-actions-bar.svelte';
 	import CsvImportModal from '$lib/components/CsvImportModal.svelte';
 	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
 
@@ -754,9 +754,15 @@
 	{/if}
 </div>
 
-{#if !showingRetired}
-	<CheckoutBar selectedIds={selectedAssetIds} onClear={() => selectedAssetIds.clear()} />
-{/if}
+<!-- The retired list keeps the bar for its status half: setting a unit back to
+     AVAILABLE is the only way out of sold/decommissioned, and doing it one row
+     at a time is the wrong tool for a shelf that was written off in a batch. -->
+<BulkActionsBar
+	selectedIds={selectedAssetIds}
+	onClear={() => selectedAssetIds.clear()}
+	canCheckout={!showingRetired}
+	canSetStatus
+/>
 
 {#if showImportModal}
 	<CsvImportModal onClose={() => (showImportModal = false)} />
