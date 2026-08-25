@@ -1,0 +1,45 @@
+App-Name (max. 30 Zeichen)
+==========================
+Technikpool Scanner
+
+
+Kurzbeschreibung (max. 80 Zeichen)
+==================================
+Equipment per Barcode ein- und ausbuchen, Bestand direkt nachschlagen
+
+
+Vollständige Beschreibung (max. 4000 Zeichen)
+=============================================
+Technikpool Scanner ist die Handscanner-App zu Technikpool, der Lagerverwaltung für Veranstaltungstechnik. Die App verbindet sich mit dem Technikpool-Server deines Betriebs. Ohne diesen Server hat sie keine Daten.
+
+Wofür sie gedacht ist
+
+Equipment bewegt sich ständig: aus dem Lager auf den LKW, auf die Produktion und wieder zurück. Wer das auf Papier festhält, tippt es später ein zweites Mal ein. Mit der App wird jede Bewegung dort gebucht, wo sie passiert.
+
+Session starten, dann scannen
+
+Du wählst einmal ein Ziel, einen Lagerort oder eine Produktion, und scannst danach nur noch Etiketten. Jeder Scan wird sofort gebucht und in der Liste bestätigt, mit Zähler für erfolgreiche und fehlgeschlagene Scans. Kommt ein Gerät von einer Produktion zurück, steht das in der Zeile.
+
+Nachschlagen
+
+Ein Etikett scannen genügt für Seriennummer, Status, aktuellen Lagerort, offene Ausbuchung und den vollständigen Verlauf des Geräts.
+
+Bestand
+
+Der komplette Bestand mit Suche und Filtern nach Lagerort und Kategorie, auch ohne Etikett in der Hand.
+
+Für Handhelds und für Telefone
+
+Auf einem Lager-PDA mit eingebauter Scan-Engine löst die App über den Hardware-Auslöser aus, auf einem Telefon über die Kamera. Sie erkennt selbst, was das Gerät kann, und lässt sich in den Einstellungen umstellen. Die Broadcast-Konfiguration des Scanners ist frei einstellbar, weil Action und Extra-Key sich je nach Hersteller und Firmware unterscheiden. Eine Diagnose-Ansicht zeigt jeden empfangenen Broadcast mit allen Extras, damit die richtigen Werte am Gerät ablesbar sind.
+
+Koppeln ohne Passwort
+
+Ein QR-Code aus der Weboberfläche oder ein sechsstelliger Code genügt. Auf einem Gerät, das sich mehrere Leute teilen, muss niemand ein Passwort eintippen. Anmeldung per E-Mail und Passwort geht trotzdem.
+
+Ohne Server ausprobieren
+
+"Demo ausprobieren" auf dem ersten Bildschirm startet ein kleines Beispiellager auf dem Gerät. Dabei wird nichts übertragen und nichts auf einem Server gespeichert.
+
+Sonstiges
+
+Deutsch und Englisch, in der App umschaltbar. Helles und dunkles Design nach Systemeinstellung. Die Kamera wird nur zum Lesen von Barcodes verwendet und nur dann, wenn du den Kamera-Scan startest.

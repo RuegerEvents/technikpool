@@ -1,0 +1,45 @@
+App name (max. 30 characters)
+=============================
+Technikpool Scanner
+
+
+Short description (max. 80 characters)
+======================================
+Scan equipment in and out by barcode, and look up your stock on the spot
+
+
+Full description (max. 4000 characters)
+=======================================
+Technikpool Scanner is the handheld companion to Technikpool, a rental inventory system for event production. The app talks to your company's own Technikpool server. Without that server it has no data.
+
+What it is for
+
+Equipment moves constantly: out of the warehouse, onto the truck, onto a production and back again. Written on paper, all of it gets typed in a second time later. The app books each movement where it happens.
+
+Start a session, then scan
+
+Pick a target once, either a location or a production, and after that you only scan labels. Every scan is booked immediately and confirmed in the list, with a counter for successful and failed scans. When an item comes back from a production, the line says so.
+
+Look up
+
+Scanning one label is enough for the serial number, status, current location, any open checkout and the item's full history.
+
+Stock
+
+The whole inventory with search and filters by location and category, for when you don't have the label in your hand.
+
+For handhelds and for phones
+
+On a warehouse PDA with a built-in scan engine the app fires on the hardware trigger, on a phone it uses the camera. It works out what the device can do and can be switched over in the settings. The scanner's broadcast configuration is editable, because the action and the extra key differ between vendors and firmware revisions. A diagnostics view shows every broadcast received with all its extras, so the real values can be read off the device.
+
+Pairing without a password
+
+A QR code from the web interface or a six-digit code is enough. On a device several people share, nobody has to type a password. Signing in with email and password still works.
+
+Try it without a server
+
+"Explore the demo" on the first screen starts a small sample warehouse on the device. Nothing is transmitted and nothing is stored on a server.
+
+Other things
+
+German and English, switchable inside the app. Light and dark theme following the system setting. The camera is used only to read barcodes, and only when you start a camera scan.
