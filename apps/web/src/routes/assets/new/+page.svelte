@@ -70,7 +70,8 @@
 		open: false,
 		name: '',
 		categoryId: '',
-		imageUrl: ''
+		imageUrl: '',
+		netPurchasePrice: ''
 	});
 
 	$effect(() => {
@@ -79,7 +80,12 @@
 		if (misc) newProductModal.categoryId = misc.id;
 	});
 
-	let pendingProduct = $state<{ name: string; categoryId: string; imageUrl: string } | null>(null);
+	let pendingProduct = $state<{
+		name: string;
+		categoryId: string;
+		imageUrl: string;
+		netPurchasePrice: string;
+	} | null>(null);
 
 	let manufacturerKey = $state(0);
 
@@ -104,7 +110,8 @@
 		pendingProduct = {
 			name: newProductModal.name,
 			categoryId: newProductModal.categoryId,
-			imageUrl: newProductModal.imageUrl
+			imageUrl: newProductModal.imageUrl,
+			netPurchasePrice: newProductModal.netPurchasePrice
 		};
 		newProductModal.open = false;
 	}
@@ -174,6 +181,10 @@
 				productId: product.id ?? undefined,
 				newProductName: product.id ? undefined : (pendingProduct?.name ?? product.name),
 				newProductImageUrl: product.id ? undefined : pendingProduct?.imageUrl || undefined,
+				newProductNetPurchasePrice:
+					product.id || !pendingProduct?.netPurchasePrice?.trim()
+						? undefined
+						: Number(pendingProduct.netPurchasePrice),
 				categoryId: product.id ? undefined : pendingProduct?.categoryId,
 				items: items.map((item) => ({
 					serialNumber: item.serialNumber || undefined,
@@ -450,6 +461,21 @@
 						bind:value={newProductModal.categoryId}
 						placeholder="Select a category"
 					/>
+				</div>
+
+				<div class="space-y-2">
+					<Label for="modal-product-price">Net purchase price (€)</Label>
+					<Input
+						id="modal-product-price"
+						type="number"
+						min="0"
+						step="0.01"
+						bind:value={newProductModal.netPurchasePrice}
+						placeholder="Unknown"
+					/>
+					<p class="text-sm text-muted-foreground">
+						What a rental rate is calculated from. An offer can't bill this product without it.
+					</p>
 				</div>
 
 				<div class="space-y-2">

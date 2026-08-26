@@ -71,10 +71,8 @@ msgstr "Registrieren"
 msgid "Crew member added"
 msgstr "Crewmitglied hinzugefügt"
 
-#. 0: orgLabel(production.organization)
-#: src/routes/productions/[id]/+page.svelte
-msgid "Owned by {0}"
-msgstr "Organisation: {0}"
+#~ msgid "Owned by {0}"
+#~ msgstr "Organisation: {0}"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
@@ -1059,6 +1057,9 @@ msgstr "Produktionszeitraum:<0/> <1/> – <2/>"
 msgid "Date"
 msgstr "Datum"
 
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
 #: src/routes/productions/[id]/delivery-note/+page.svelte
 msgid "Qty"
 msgstr "Menge"
@@ -1304,12 +1305,15 @@ msgstr "Standort"
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/admin/categories/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/new/+page.svelte
+#: src/routes/offers/new/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
@@ -2863,7 +2867,6 @@ msgid "Rechnungen — persisted, sequentially numbered documents."
 msgstr "Rechnungen — gespeicherte, fortlaufend nummerierte Dokumente."
 
 #: src/routes/invoices/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
 msgid "No invoices yet."
 msgstr "Noch keine Rechnungen."
 
@@ -2900,16 +2903,16 @@ msgstr "Produktfoto"
 msgid "Pricing & inspection updated"
 msgstr "Preis & Prüfung aktualisiert"
 
-#: src/routes/assets/[id]/+page.svelte
-msgid "Pricing & Inspection"
-msgstr "Preis & Prüfung"
+#~ msgid "Pricing & Inspection"
+#~ msgstr "Preis & Prüfung"
 
-#: src/routes/assets/[id]/+page.svelte
-msgid "Feeds offer/invoice pricing and DGUV due-date tracking."
-msgstr "Fließt in die Angebots-/Rechnungspreisberechnung und die DGUV-Fälligkeitsverfolgung ein."
+#~ msgid "Feeds offer/invoice pricing and DGUV due-date tracking."
+#~ msgstr "Fließt in die Angebots-/Rechnungspreisberechnung und die DGUV-Fälligkeitsverfolgung ein."
 
+#: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/new/+page.svelte
 msgid "Net purchase price (€)"
 msgstr "Netto-Einkaufspreis (€)"
 
@@ -3092,6 +3095,8 @@ msgid "Purchase price"
 msgstr "Einkaufspreis"
 
 #: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
 msgid "Daily rate"
 msgstr "Tagessatz"
 
@@ -3267,6 +3272,8 @@ msgstr "Equipment"
 msgid "{0} device{1} booked"
 msgstr "{0} Geräte gebucht"
 
+#: src/routes/+layout.svelte
+#: src/routes/admin/categories/+page.svelte
 #: src/routes/productions/[id]/equipment/+page.svelte
 msgid "Categories"
 msgstr "Kategorien"
@@ -3326,10 +3333,12 @@ msgstr "Mietpreise | {0} | Technikpool"
 msgid "Default daily rental rate per category, as a percentage of an asset's net purchase price. Feeds offer/invoice pricing."
 msgstr "Standard-Tagesmietsatz pro Kategorie, als Prozentsatz des Netto-Einkaufspreises eines Geräts. Fließt in die Angebots-/Rechnungspreisberechnung ein."
 
+#: src/routes/offers/new/+page.svelte
 #: src/routes/orgs/[id]/rates/+page.svelte
 msgid "% / day"
 msgstr "% / Tag"
 
+#: src/routes/assets/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
@@ -3561,15 +3570,11 @@ msgstr "Gesamtdauer"
 msgid "<0/> Show duration same as total duration"
 msgstr "<0/> Show-Dauer entspricht der Gesamtdauer"
 
-#. 0: result.added; 1: result.added !== 1 ? 's' \\: ''; 2: result.skippedConflicts
-#: src/routes/productions/[id]/equipment/+page.svelte
-msgid "Added {0} asset{1} ({2} skipped — already booked elsewhere)"
-msgstr "{0} Gerät{1} hinzugefügt ({2} übersprungen — bereits anderweitig gebucht)"
+#~ msgid "Added {0} asset{1} ({2} skipped — already booked elsewhere)"
+#~ msgstr "{0} Gerät{1} hinzugefügt ({2} übersprungen — bereits anderweitig gebucht)"
 
-#. 0: result.added; 1: result.added !== 1 ? 's' \\: ''; 2: b.name
-#: src/routes/productions/[id]/equipment/+page.svelte
-msgid "Added {0} asset{1} from \"{2}\""
-msgstr "{0} Gerät{1} aus „{2}“ hinzugefügt"
+#~ msgid "Added {0} asset{1} from \"{2}\""
+#~ msgstr "{0} Gerät{1} aus „{2}“ hinzugefügt"
 
 #: src/routes/productions/[id]/equipment/+page.svelte
 msgid "<0/> Show items in bundles"
@@ -3847,11 +3852,8 @@ msgstr "Kunde bearbeiten"
 msgid "Existing customer"
 msgstr "Bestehender Kunde"
 
-#: src/lib/components/ui/billing-document/billing-document.svelte
-#: src/routes/invoices/[id]/print/+page.svelte
-#: src/routes/offers/[id]/print/+page.svelte
-msgid "Uncategorized"
-msgstr "Ohne Kategorie"
+#~ msgid "Uncategorized"
+#~ msgstr "Ohne Kategorie"
 
 #. 0: group.name
 #. 0: group.name
@@ -4519,3 +4521,235 @@ msgstr "Alle Einheiten auswählen"
 #: src/lib/components/ui/image-upload/image-upload.svelte
 msgid "Drop an image here, paste it, or click to choose"
 msgstr "Bild hier ablegen, einfügen oder klicken zum Auswählen"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Enter a net purchase price first"
+msgstr "Bitte zuerst einen Netto-Einkaufspreis eingeben"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Enter a valid net purchase price"
+msgstr "Bitte einen gültigen Netto-Einkaufspreis eingeben"
+
+#~ msgid "Price set on # unit"
+#~ msgid_plural "Price set on # units"
+#~ msgstr[0] "Preis für # Einheit gesetzt"
+#~ msgstr[1] "Preis für # Einheiten gesetzt"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Enter a rental rate first"
+msgstr "Bitte zuerst einen Mietsatz eingeben"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Enter a valid rental rate"
+msgstr "Bitte einen gültigen Mietsatz eingeben"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Rate saved"
+msgstr "Mietsatz gespeichert"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Set the missing prices and rates before creating the offer"
+msgstr "Fehlende Preise und Mietsätze ergänzen, bevor das Angebot erstellt wird"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Resolve the missing pricing data first — it's listed on the right."
+msgstr "Zuerst die fehlenden Preisdaten ergänzen — sie stehen rechts."
+
+#: src/routes/offers/new/+page.svelte
+msgid "Pick a production to see how its equipment prices out."
+msgstr "Produktion auswählen, um zu sehen, wie ihr Equipment kalkuliert wird."
+
+#: src/routes/offers/new/+page.svelte
+msgid "Ready to bill"
+msgstr "Bereit zur Abrechnung"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Every booked item has a net purchase price and a category rate."
+msgstr "Jede gebuchte Position hat einen Netto-Einkaufspreis und einen Kategorie-Mietsatz."
+
+#: src/routes/offers/new/+page.svelte
+msgid "# line item"
+msgid_plural "# line items"
+msgstr[0] "# Position"
+msgstr[1] "# Positionen"
+
+#. 0: plural(r.pricedLineCount, ['# line item', '# line items']); 1: money( r.pricedDailyTotal )
+#: src/routes/offers/new/+page.svelte
+msgid "{0} · {1} per day before discount and VAT."
+msgstr "{0} · {1} pro Tag vor Rabatt und MwSt."
+
+#: src/routes/offers/new/+page.svelte
+msgid "Missing pricing data"
+msgstr "Fehlende Preisdaten"
+
+#: src/routes/offers/new/+page.svelte
+msgid "An offer bills each item as a percentage of its net purchase price, so these have nothing to bill from. Set them here — the values are stored on the equipment itself, not just on this offer."
+msgstr "Ein Angebot rechnet jede Position als Prozentsatz ihres Netto-Einkaufspreises ab — diesen hier fehlt die Grundlage dafür. Hier ergänzen: Die Werte werden am Equipment selbst gespeichert, nicht nur in diesem Angebot."
+
+#: src/routes/offers/new/+page.svelte
+msgid "# category has no rental rate"
+msgid_plural "# categories have no rental rate"
+msgstr[0] "# Kategorie hat keinen Mietsatz"
+msgstr[1] "# Kategorien haben keinen Mietsatz"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Daily rate, as a percentage of the net purchase price."
+msgstr "Tagessatz, als Prozentsatz des Netto-Einkaufspreises."
+
+#: src/routes/offers/new/+page.svelte
+msgid "Ask an owner of this organization to set it."
+msgstr "Ein Inhaber dieser Organisation muss ihn setzen."
+
+#: src/routes/offers/new/+page.svelte
+msgid "# product has no net purchase price"
+msgid_plural "# products have no net purchase price"
+msgstr[0] "# Produkt hat keinen Netto-Einkaufspreis"
+msgstr[1] "# Produkte haben keinen Netto-Einkaufspreis"
+
+#: src/routes/offers/new/+page.svelte
+msgid "# unit"
+msgid_plural "# units"
+msgstr[0] "# Einheit"
+msgstr[1] "# Einheiten"
+
+#: src/routes/offers/new/+page.svelte
+msgid "€ net"
+msgstr "€ netto"
+
+#~ msgid "Applies to all {0} units listed above."
+#~ msgstr "Gilt für alle {0} oben aufgeführten Einheiten."
+
+#~ msgid "Owned by {0}. Ask them to price it, or set \"Assets to include\" to this organization's own assets only."
+#~ msgstr "Gehört {0}. Der Preis muss dort gesetzt werden — oder \"Einzubeziehende Geräte\" auf \"Nur eigene Geräte dieser Organisation\" stellen."
+
+#: src/routes/offers/new/+page.svelte
+msgid "In bundle <0/>, which has no price of its own. Pricing that bundle bills it as one line instead."
+msgstr "Im Bundle <0/>, das selbst keinen Preis hat. Mit einem Preis am Bundle wird es als eine einzige Position abgerechnet."
+
+#~ msgid "Added {0} asset{1}"
+#~ msgstr "{0} Gerät{1} hinzugefügt"
+
+#~ msgid "{0} already booked individually moved into the bundle"
+#~ msgstr "{0} bereits einzeln gebuchte in das Bundle übernommen"
+
+#~ msgid "{0} skipped — already booked elsewhere"
+#~ msgstr "{0} übersprungen — bereits anderweitig gebucht"
+
+#~ msgid "{0} from \"{1}\""
+#~ msgstr "{0} aus \"{1}\""
+
+#~ msgid "{0} already-booked asset{1} moved into the bundle"
+#~ msgstr "{0} bereits gebuchte{1} Gerät{1} in das Bundle übernommen"
+
+#. 0: formatDateRange( production.showStartDate ?? production.startDate, production.showEndDate ?? production.endDate )
+#: src/routes/productions/[id]/+page.svelte
+msgid "· Show {0}"
+msgstr "· Show {0}"
+
+#. 0: orgLabel(production.organization); 1: formatDateRange( production.startDate, production.endDate )
+#: src/routes/productions/[id]/+page.svelte
+msgid "Owned by {0} · {1} <0/>"
+msgstr "Von {0} · {1} <0/>"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "No invoices yet — an invoice is created from an offer."
+msgstr "Noch keine Rechnungen — eine Rechnung entsteht aus einem Angebot."
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Category saved"
+msgstr "Kategorie gespeichert"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Categories | Technikpool"
+msgstr "Kategorien | Technikpool"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Categories are shared by every organization. The English name is the source — it is what the API returns and what a billing line records; the German name is what the German UI and a German offer or invoice show."
+msgstr "Kategorien gelten für alle Organisationen. Der englische Name ist die Quelle — ihn liefert die API und ihn hält eine Abrechnungsposition fest; der deutsche Name erscheint in der deutschen Oberfläche und auf einem deutschen Angebot oder einer Rechnung."
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Colour"
+msgstr "Farbe"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "English name"
+msgstr "Englischer Name"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "German name"
+msgstr "Deutscher Name"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Order"
+msgstr "Reihenfolge"
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "# asset added"
+msgid_plural "# assets added"
+msgstr[0] "# Gerät hinzugefügt"
+msgstr[1] "# Geräte hinzugefügt"
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "# was already booked individually and moved into the bundle"
+msgid_plural "# were already booked individually and moved into the bundle"
+msgstr[0] "# war bereits einzeln gebucht und wurde ins Bundle übernommen"
+msgstr[1] "# waren bereits einzeln gebucht und wurden ins Bundle übernommen"
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "# skipped, already booked elsewhere"
+msgid_plural "# skipped, already booked elsewhere"
+msgstr[0] "# übersprungen, bereits anderweitig gebucht"
+msgstr[1] "# übersprungen, bereits anderweitig gebucht"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "# already-booked asset moved into the bundle"
+msgid_plural "# already-booked assets moved into the bundle"
+msgstr[0] "# bereits gebuchtes Gerät ins Bundle übernommen"
+msgstr[1] "# bereits gebuchte Geräte ins Bundle übernommen"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+#: src/routes/assets/new/+page.svelte
+msgid "Unknown"
+msgstr "Unbekannt"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "What a rental rate is calculated from. It applies to every unit of this product."
+msgstr "Grundlage für die Mietsatz-Berechnung. Gilt für jede Einheit dieses Produkts."
+
+#~ msgid "Set on the product — it applies to every unit of {0}. Change it under \"Edit product\" above."
+#~ msgstr ""
+
+#~ msgid "Set on the product — it applies to every unit of {0}. Change it Change it in the Product card."
+#~ msgstr ""
+
+#: src/routes/assets/new/+page.svelte
+msgid "What a rental rate is calculated from. An offer can't bill this product without it."
+msgstr "Grundlage für die Mietsatz-Berechnung. Ohne ihn kann ein Angebot dieses Produkt nicht abrechnen."
+
+#. 0: group.label
+#: src/routes/offers/new/+page.svelte
+msgid "Price saved on {0}"
+msgstr "Preis für {0} gespeichert"
+
+#: src/routes/offers/new/+page.svelte
+msgid "The price belongs to the product, so it covers every unit of it — here and in every other offer."
+msgstr "Der Preis gehört zum Produkt und gilt damit für jede Einheit — hier und in jedem anderen Angebot."
+
+#: src/routes/offers/new/+page.svelte
+msgid "You need admin rights in an organization to price a product."
+msgstr "Zum Setzen eines Produktpreises sind Admin-Rechte in einer Organisation nötig."
+
+#~ msgid "Set on the product — it applies to every unit of {0}. Change it in the Product card."
+#~ msgstr "Am Produkt hinterlegt — gilt für jede Einheit von {0}. Änderbar in der Produkt-Karte."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Purchase & Inspection"
+msgstr "Kauf & Prüfung"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Facts about this individual unit. What it bills at is the product's price."
+msgstr "Angaben zu dieser einzelnen Einheit. Abgerechnet wird mit dem Preis des Produkts."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "What a rental rate is calculated from, for every unit of this product."
+msgstr "Grundlage für die Mietsatz-Berechnung, für jede Einheit dieses Produkts."

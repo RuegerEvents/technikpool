@@ -57,6 +57,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 		manufacturerName: string;
 		categoryId: string;
 		categoryName: string;
+		categoryNameDe: string | null;
 		categoryColor: string;
 		categorySortOrder: number;
 		organizationId: string;
@@ -73,11 +74,16 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 		// belong to a bundle — hidden from the individual-add flow by default.
 		bundledAvailable: number;
 		// Of bookedHere, how many were added as part of a bundle — the booked
-		// panel shows those under their bundle instead of the product row.
+		// panel shows those under their bundle instead of the product row, and
+		// the product row's stepper only ever touches the difference. A unit is
+		// booked either individually or through a bundle, never counted as both.
 		bookedFromBundle: number;
 	};
 	const groups = new Map<GroupKey, Group>();
-	const assetStatus = new Map<string, { bookedHere: boolean; unavailableElsewhere: boolean }>();
+	const assetStatus = new Map<
+		string,
+		{ bookedHere: boolean; bookedFromBundleId: string | null; unavailableElsewhere: boolean }
+	>();
 
 	for (const a of assets) {
 		const key = `${a.productId}:${a.organizationId}:${a.locationId}`;
@@ -90,6 +96,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 				manufacturerName: a.product.manufacturer.name,
 				categoryId: a.product.categoryId,
 				categoryName: a.product.category.name,
+				categoryNameDe: a.product.category.nameDe,
 				categoryColor: a.product.category.color,
 				categorySortOrder: a.product.category.sortOrder,
 				organizationId: a.organizationId,
@@ -111,7 +118,11 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 		const bookedItem = a.productionItems.find((pi) => pi.productionId === productionId);
 		const bookedHere = !!bookedItem;
 		const unavailableElsewhere = !bookedHere && a.productionItems.length > 0;
-		assetStatus.set(a.id, { bookedHere, unavailableElsewhere });
+		assetStatus.set(a.id, {
+			bookedHere,
+			bookedFromBundleId: bookedItem?.sourceBundleId ?? null,
+			unavailableElsewhere
+		});
 		if (bookedHere) {
 			g.bookedHere++;
 			if (bookedItem.sourceBundleId) g.bookedFromBundle++;
@@ -124,7 +135,9 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 		include: {
 			template: {
 				include: {
-					category: { select: { id: true, name: true, color: true, sortOrder: true } },
+					category: {
+						select: { id: true, name: true, nameDe: true, color: true, sortOrder: true }
+					},
 					organization: {
 						select: { id: true, name: true, shortName: true, color: true, avatarLabel: true }
 					}
@@ -139,11 +152,15 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 
 	const bundles = assetBundles
 		.map((b) => {
+			// Only units this production booked *through this bundle* count as the
+			// bundle's. One that was added individually stays on its product row
+			// until adding the bundle adopts it — otherwise the same unit would
+			// show up in both panels.
 			let bookedHere = 0;
 			let availableCount = 0;
 			for (const a of b.assets) {
 				const status = assetStatus.get(a.id);
-				if (status?.bookedHere) bookedHere++;
+				if (status?.bookedFromBundleId === b.id) bookedHere++;
 				else if (!status?.unavailableElsewhere) availableCount++;
 			}
 			return {
@@ -153,6 +170,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 				tag: b.tag,
 				categoryId: b.template.categoryId,
 				categoryName: b.template.category.name,
+				categoryNameDe: b.template.category.nameDe,
 				categoryColor: b.template.category.color,
 				categorySortOrder: b.template.category.sortOrder,
 				organizationId: b.template.organizationId,
@@ -196,10 +214,14 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 		where: { id: data.productionId }
 	});
 
+	// A unit booked as part of a bundle belongs to that bundle's row, not to
+	// this product row: the quantity here counts and removes only individually
+	// booked units, so the same unit is never in both places.
 	const currentItems = await prisma.productionItem.findMany({
 		where: {
 			productionId: data.productionId,
 			status: { in: [...ACTIVE_STATUSES] },
+			sourceBundleId: null,
 			asset: {
 				productId: data.productId,
 				organizationId: data.organizationId,
@@ -208,6 +230,15 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 		},
 		select: { id: true, assetId: true }
 	});
+
+	// …but every unit already in the production is off the table as a candidate,
+	// however it got there.
+	const bookedAssetIds = (
+		await prisma.productionItem.findMany({
+			where: { productionId: data.productionId },
+			select: { assetId: true }
+		})
+	).map((i) => i.assetId);
 
 	const currentCount = currentItems.length;
 	const delta = data.quantity - currentCount;
@@ -220,7 +251,7 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 				organizationId: data.organizationId,
 				locationId: data.locationId,
 				...ACTIVE_ASSET_WHERE,
-				id: { notIn: currentItems.map((i) => i.assetId) },
+				id: { notIn: bookedAssetIds },
 				...(data.includeBundled ? {} : { bundleId: null })
 			},
 			orderBy: { createdAt: 'asc' }

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { categoryLabel } from '$lib/category';
 	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -102,7 +103,6 @@
 	let editingPricing = $state(false);
 	let savingPricing = $state(false);
 	let pricingDraft = $state({
-		netPurchasePrice: '',
 		purchaseDate: '',
 		inspectionIntervalMonths: ''
 	});
@@ -110,7 +110,6 @@
 	$effect(() => {
 		if (editingPricing) return;
 		pricingDraft = {
-			netPurchasePrice: asset.netPurchasePrice?.toString() ?? '',
 			purchaseDate: asset.purchaseDate
 				? new Date(asset.purchaseDate).toISOString().slice(0, 10)
 				: '',
@@ -124,9 +123,6 @@
 		try {
 			await updateAsset({
 				assetId,
-				netPurchasePrice: pricingDraft.netPurchasePrice
-					? Number(pricingDraft.netPurchasePrice)
-					: null,
 				purchaseDate: pricingDraft.purchaseDate || null,
 				inspectionIntervalMonths: pricingDraft.inspectionIntervalMonths
 					? Number(pricingDraft.inspectionIntervalMonths)
@@ -144,14 +140,20 @@
 	// ── Product editing ───────────────────────────────────────────────────────
 	// The same three fields the product wizard walks through — see ProductFields.
 	let productModalOpen = $state(false);
-	let productDraft = $state<ProductDraft>({ name: '', categoryId: '', imageUrl: '' });
+	let productDraft = $state<ProductDraft>({
+		name: '',
+		categoryId: '',
+		imageUrl: '',
+		netPurchasePrice: ''
+	});
 	let savingProduct = $state(false);
 
 	function openProductModal() {
 		productDraft = {
 			name: asset.product.name,
 			categoryId: asset.product.categoryId,
-			imageUrl: asset.product.imageUrl ?? ''
+			imageUrl: asset.product.imageUrl ?? '',
+			netPurchasePrice: asset.product.netPurchasePrice?.toString() ?? ''
 		};
 		productModalOpen = true;
 	}
@@ -163,7 +165,10 @@
 				productId: asset.product.id,
 				name: productDraft.name,
 				categoryId: productDraft.categoryId,
-				imageUrl: productDraft.imageUrl
+				imageUrl: productDraft.imageUrl,
+				netPurchasePrice: productDraft.netPurchasePrice.trim()
+					? Number(productDraft.netPurchasePrice)
+					: null
 			});
 			toast.success('Product updated');
 			productModalOpen = false;
@@ -296,10 +301,10 @@
 			<Card.Header>
 				<div class="flex items-start justify-between gap-4">
 					<div>
-						<Card.Title>Pricing & Inspection</Card.Title>
-						<Card.Description
-							>Feeds offer/invoice pricing and DGUV due-date tracking.</Card.Description
-						>
+						<Card.Title>Purchase & Inspection</Card.Title>
+						<Card.Description>
+							Facts about this individual unit. What it bills at is the product's price.
+						</Card.Description>
 					</div>
 					{#if !editingPricing && !retired}
 						<Button variant="outline" onclick={() => (editingPricing = true)}>Edit</Button>
@@ -308,17 +313,6 @@
 			</Card.Header>
 			<Card.Content>
 				<form class="space-y-4" onsubmit={handlePricingSave}>
-					<div class="space-y-2">
-						<Label for="netPurchasePrice">Net purchase price (€)</Label>
-						<Input
-							id="netPurchasePrice"
-							type="number"
-							min="0"
-							step="0.01"
-							bind:value={pricingDraft.netPurchasePrice}
-							disabled={!editingPricing}
-						/>
-					</div>
 					<div class="space-y-2">
 						<Label for="purchaseDate">Purchase date</Label>
 						<Input
@@ -389,11 +383,28 @@
 							class="flex h-10 items-center rounded-md border border-input bg-background px-3 py-2 text-sm"
 						>
 							<CategoryPill
-								name={asset.product.category.name}
+								name={categoryLabel(asset.product.category)}
 								color={asset.product.category.color}
 							/>
 						</div>
 					</div>
+					<div class="space-y-2">
+						<Label>Net purchase price (€)</Label>
+						<div
+							class="flex h-10 items-center rounded-md border border-input bg-background px-3 py-2 text-sm"
+						>
+							{asset.product.netPurchasePrice
+								? Number(asset.product.netPurchasePrice).toLocaleString('de-DE', {
+										style: 'currency',
+										currency: 'EUR'
+									})
+								: 'Not set'}
+						</div>
+						<p class="text-sm text-muted-foreground">
+							What a rental rate is calculated from, for every unit of this product.
+						</p>
+					</div>
+
 					<div class="space-y-2">
 						<Label>Product Image</Label>
 						{#if asset.product.imageUrl}

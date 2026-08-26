@@ -184,8 +184,13 @@ model Manufacturer {
 }
 
 model Category {
-  id        String   @id @default(cuid())
+  id String @id @default(cuid())
+  // English is the source name — it's what `name` has always held, what the
+  // API returns, and what a billing line snapshots. `nameDe` is the German
+  // display name; empty means "no translation yet", and the English name shows
+  // through rather than a blank chip.
   name      String   @unique
+  nameDe    String?
   color     String   @default("#ffffff")
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
@@ -204,9 +209,17 @@ model Product {
   categoryId     String
   category       Category     @relation(fields: [categoryId], references: [id])
   imageUrl       String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  assets         Asset[]
+
+  // Pricing (issue #9): the catalog price a rental rate is calculated from.
+  // It lives on the product, not on each unit — billing asks "what does this
+  // kind of device cost per day", and two identical lamps bought two years
+  // apart still rent for the same money. What an individual unit cost is a
+  // bookkeeping fact, and Asset.purchaseDate is what remains of it.
+  netPurchasePrice Decimal? @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  assets    Asset[]
 }
 
 model Address {
@@ -254,10 +267,9 @@ model Asset {
   bundleId String?
   bundle   AssetBundle? @relation(fields: [bundleId], references: [id])
 
-  // Pricing (issue #9): purchase price feeds offer/invoice rate calculation.
-  // Nullable — historical assets may have no known purchase price/date.
-  netPurchasePrice Decimal?  @db.Decimal(10, 2)
-  purchaseDate     DateTime?
+  // When this individual unit was bought. The price it is billed at lives on
+  // the Product — see Product.netPurchasePrice.
+  purchaseDate DateTime?
 
   // DGUV inspection tracking (issue #7). Snapshotted from the org's default
   // at creation, not a live reference — see Organization.defaultInspectionIntervalMonths.
@@ -504,9 +516,17 @@ model OfferItem {
   // Category snapshot (soft reference, no FK) — grouping/display stays
   // stable even if the category is later renamed or the source asset/bundle
   // is recategorized.
-  categoryId    String?
-  categoryName  String?
-  categoryColor String?
+  categoryId     String?
+  categoryName   String?
+  categoryNameDe String?
+  categoryColor  String?
+
+  // Product snapshot (soft reference, no FK) — what lets units of the same
+  // product collapse into one "3 × …" line on the document while each unit
+  // keeps its own row in the database. productLabel is the description
+  // without the per-unit tag, so the collapsed line needs no string surgery.
+  productId    String?
+  productLabel String?
 
   description      String
   netPurchasePrice Decimal @db.Decimal(10, 2)
@@ -580,9 +600,14 @@ model InvoiceItem {
   bundleId String?
 
   // Soft reference only — see OfferItem.categoryId.
-  categoryId    String?
-  categoryName  String?
-  categoryColor String?
+  categoryId     String?
+  categoryName   String?
+  categoryNameDe String?
+  categoryColor  String?
+
+  // Soft reference only — see OfferItem.productId.
+  productId    String?
+  productLabel String?
 
   description      String
   netPurchasePrice Decimal @db.Decimal(10, 2)

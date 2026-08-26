@@ -167,6 +167,14 @@
 							</DropdownMenu.Root>
 							{#if data.isAdmin}
 								<a
+									href={resolve('/admin/categories')}
+									class="text-sm font-medium transition-colors {page.url.pathname.startsWith(
+										'/admin/categories'
+									)
+										? 'text-foreground'
+										: 'text-muted-foreground hover:text-foreground'}">Categories</a
+								>
+								<a
 									href={resolve('/admin/users')}
 									class="text-sm font-medium transition-colors {page.url.pathname.startsWith(
 										'/admin'

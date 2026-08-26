@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { categoryLabel } from '$lib/category';
 	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import { getCategories, getProductCatalog, updateProduct } from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
@@ -46,7 +47,7 @@
 		return (
 			product.name.toLowerCase().includes(searchTrimmed) ||
 			product.manufacturer.name.toLowerCase().includes(searchTrimmed) ||
-			product.category.name.toLowerCase().includes(searchTrimmed)
+			categoryLabel(product.category).toLowerCase().includes(searchTrimmed)
 		);
 	}
 
@@ -66,7 +67,12 @@
 	);
 	let current = $derived(visible.at(index));
 
-	let draft = $state<ProductDraft>({ name: '', categoryId: '', imageUrl: '' });
+	let draft = $state<ProductDraft>({
+		name: '',
+		categoryId: '',
+		imageUrl: '',
+		netPurchasePrice: ''
+	});
 	let draftFor = $state('');
 	let saving = $state(false);
 
@@ -79,7 +85,8 @@
 		draft = {
 			name: product.name,
 			categoryId: product.categoryId,
-			imageUrl: product.imageUrl ?? ''
+			imageUrl: product.imageUrl ?? '',
+			netPurchasePrice: product.netPurchasePrice?.toString() ?? ''
 		};
 	});
 
@@ -88,7 +95,8 @@
 			draftFor === current.id &&
 			(draft.name.trim() !== current.name ||
 				draft.categoryId !== current.categoryId ||
-				draft.imageUrl.trim() !== (current.imageUrl ?? ''))
+				draft.imageUrl.trim() !== (current.imageUrl ?? '') ||
+				draft.netPurchasePrice.trim() !== (current.netPurchasePrice?.toString() ?? ''))
 	);
 
 	/** Returns whether the save went through, so a caller can hold position on failure. */
@@ -104,7 +112,8 @@
 				productId: current.id,
 				name: draft.name,
 				categoryId: draft.categoryId,
-				imageUrl: draft.imageUrl
+				imageUrl: draft.imageUrl,
+				netPurchasePrice: draft.netPurchasePrice.trim() ? Number(draft.netPurchasePrice) : null
 			});
 			return true;
 		} catch (err) {
@@ -290,7 +299,10 @@
 								{/if}
 							</Card.Title>
 							<Card.Description class="flex flex-wrap items-center gap-2 pt-1">
-								<CategoryPill name={current.category.name} color={current.category.color} />
+								<CategoryPill
+									name={categoryLabel(current.category)}
+									color={current.category.color}
+								/>
 								<span>{current.assetCount} units</span>
 								<a
 									href="{resolve('/assets')}?q={encodeURIComponent(current.name)}"

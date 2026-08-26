@@ -284,8 +284,8 @@
 		onSaveDiscount={async (discountType, discountValue) => {
 			await updateOfferDiscount({ offerId, discountType, discountValue });
 		}}
-		onSaveItemRate={async (offerItemId, ratePercent) => {
-			await updateOfferItemRate({ offerItemId, ratePercent });
+		onSaveItemRate={async (itemIds, ratePercent) => {
+			await updateOfferItemRate({ offerItemIds: itemIds, ratePercent });
 		}}
 	/>
 </div>

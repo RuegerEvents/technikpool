@@ -1,7 +1,8 @@
 import { query, command } from '$app/server';
+import { error } from '@sveltejs/kit';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
-import { dayCountBetween } from '$lib/utils';
+import { dayCountBetween, getErrorMessage } from '$lib/utils';
 import { isSystemAdmin, requireAuth, userOrgIds } from '$lib/server/services/access';
 
 async function requireOrgManageAccess(orgId: string) {
@@ -82,8 +83,14 @@ export const getOffersForProduction = query(v.string(), async (productionId: str
 type BillingLine = {
 	assetId: string | null;
 	bundleId: string | null;
+	// Null for bundle lines, which already collapse to one line by themselves.
+	productId: string | null;
+	// The description without the per-unit tag — the label a collapsed
+	// "3 × …" line carries.
+	productLabel: string;
 	categoryId: string;
 	categoryName: string;
+	categoryNameDe: string | null;
 	categoryColor: string;
 	description: string;
 	netPurchasePrice: number;
@@ -91,15 +98,61 @@ type BillingLine = {
 	dailyRate: number;
 };
 
+// Equipment that is booked but can't be priced yet. One entry per product,
+// because the price is the product's: filling it in covers every unit of it
+// here and everywhere else.
+type MissingPrice = {
+	key: string;
+	productId: string;
+	label: string;
+	categoryName: string;
+	categoryNameDe: string | null;
+	categoryColor: string;
+	// Which orgs the booked units belong to — informational, since a product is
+	// shared catalog data rather than any one org's.
+	organizationNames: string[];
+	assets: {
+		id: string;
+		assetTag: string | null;
+		label: string;
+		// Set when the unit sits in a bundle that has no price of its own —
+		// pricing that bundle is the other way to resolve the same blocker.
+		bundleId: string | null;
+		bundleName: string | null;
+	}[];
+};
+
+type MissingRate = { categoryId: string; categoryName: string; categoryNameDe: string | null };
+
+type ProductionBilling = {
+	lines: BillingLine[];
+	missingPrices: MissingPrice[];
+	missingRates: MissingRate[];
+};
+
+function assetLabel(asset: {
+	assetTag: string | null;
+	serialNumber: string | null;
+	id: string;
+}): string {
+	return asset.assetTag ?? asset.serialNumber ?? asset.id;
+}
+
 // Recomputes what a production's currently-booked equipment would bill as,
 // under a given asset scope. Used both to price a new offer/invoice and to
 // detect + resync when an existing one has drifted from the production's
 // current booking state. Priced per day — callers multiply by their own
 // document's dayCount to get a lineTotal.
-async function computeProductionBillingLines(
+//
+// Everything that *can* be priced is priced; equipment that can't is reported
+// in `missingPrices` / `missingRates` rather than aborting the whole
+// computation, so the offer form can list every blocker at once and offer to
+// fix it. `computeProductionBillingLines` is the wrapper that insists on a
+// complete result.
+async function computeProductionBilling(
 	productionId: string,
 	assetScope: string
-): Promise<BillingLine[]> {
+): Promise<ProductionBilling> {
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: productionId },
 		include: {
@@ -108,8 +161,15 @@ async function computeProductionBillingLines(
 				include: {
 					asset: {
 						include: {
+							organization: { select: { id: true, name: true } },
 							product: { include: { manufacturer: true, category: true } },
-							bundle: { include: { template: { include: { category: true } } } }
+							bundle: {
+								include: {
+									template: {
+										include: { category: true, organization: { select: { id: true, name: true } } }
+									}
+								}
+							}
 						}
 					}
 				}
@@ -127,79 +187,165 @@ async function computeProductionBillingLines(
 	});
 	const rateByCategory = new Map(rates.map((r) => [r.categoryId, Number(r.percentage)]));
 
-	// Assets in a bundle that has its own net purchase price are billed as a
-	// single bundle line — the individual assets don't need their own price.
+	const missingPrices: MissingPrice[] = [];
+	const missingRates = new Map<string, MissingRate>();
+
+	// Assets booked *through* a bundle that has its own net purchase price are
+	// billed as a single bundle line — the individual assets don't need their
+	// own price. Booking source, not bundle membership: a unit picked
+	// individually bills as itself, because a kit price can't be charged for a
+	// kit that didn't ship. A unit that has left its bundle since it was booked
+	// bills individually for the same reason.
+	const billedAsBundle = (item: (typeof scopedItems)[number]) =>
+		item.sourceBundleId !== null &&
+		item.asset.bundleId === item.sourceBundleId &&
+		item.asset.bundle?.netPurchasePrice != null
+			? item.asset.bundle
+			: null;
+
 	const priceByBundleId = new Map(
 		scopedItems
-			.map((item) => item.asset.bundle)
-			.filter((bundle) => bundle != null && bundle.netPurchasePrice != null)
+			.map(billedAsBundle)
+			.filter((bundle) => bundle != null)
 			.map((bundle) => [bundle!.id, bundle!])
 	);
 
-	const bundledItems = scopedItems.filter(
-		(item) => item.asset.bundleId && priceByBundleId.has(item.asset.bundleId)
-	);
-	const individualItems = scopedItems.filter(
-		(item) => !item.asset.bundleId || !priceByBundleId.has(item.asset.bundleId)
-	);
+	const bundledItems = scopedItems.filter((item) => billedAsBundle(item) !== null);
+	const individualItems = scopedItems.filter((item) => billedAsBundle(item) === null);
 
-	const individualLines: BillingLine[] = individualItems.map((item) => {
+	const individualLines: BillingLine[] = [];
+	const unpricedByProduct = new Map<string, MissingPrice>();
+
+	for (const item of individualItems) {
 		const asset = item.asset;
-		if (asset.netPurchasePrice == null) {
-			throw new Error(
-				`${asset.product.name} (${asset.assetTag ?? asset.id}) has no net purchase price set — set it on the asset or its bundle before creating an offer`
-			);
-		}
 		const ratePercent = rateByCategory.get(asset.product.categoryId);
 		if (ratePercent == null) {
-			throw new Error(
-				`No rental rate set for category "${asset.product.category.name}" — set it in org settings first`
-			);
+			missingRates.set(asset.product.categoryId, {
+				categoryId: asset.product.categoryId,
+				categoryName: asset.product.category.name,
+				categoryNameDe: asset.product.category.nameDe
+			});
 		}
-		const netPrice = Number(asset.netPurchasePrice);
-		return {
+		if (asset.product.netPurchasePrice == null) {
+			const key = `product:${asset.productId}`;
+			let group = unpricedByProduct.get(key);
+			if (!group) {
+				group = {
+					key,
+					productId: asset.productId,
+					label: `${asset.product.manufacturer.name} ${asset.product.name}`,
+					categoryName: asset.product.category.name,
+					categoryNameDe: asset.product.category.nameDe,
+					categoryColor: asset.product.category.color,
+					organizationNames: [],
+					assets: []
+				};
+				unpricedByProduct.set(key, group);
+				missingPrices.push(group);
+			}
+			if (!group.organizationNames.includes(asset.organization.name)) {
+				group.organizationNames.push(asset.organization.name);
+			}
+			group.assets.push({
+				id: asset.id,
+				assetTag: asset.assetTag,
+				label: assetLabel(asset),
+				bundleId: asset.bundle?.id ?? null,
+				bundleName: asset.bundle
+					? `${asset.bundle.template.name}${asset.bundle.tag ? ` (${asset.bundle.tag})` : ''}`
+					: null
+			});
+			continue;
+		}
+		if (ratePercent == null) continue;
+
+		const netPrice = Number(asset.product.netPurchasePrice);
+		const productLabel = `${asset.product.manufacturer.name} ${asset.product.name}`;
+		individualLines.push({
 			assetId: asset.id,
 			bundleId: null,
+			productId: asset.productId,
+			productLabel,
 			categoryId: asset.product.categoryId,
 			categoryName: asset.product.category.name,
+			categoryNameDe: asset.product.category.nameDe,
 			categoryColor: asset.product.category.color,
-			description: `${asset.product.manufacturer.name} ${asset.product.name}${asset.assetTag ? ` (${asset.assetTag})` : ''}`,
+			description: `${productLabel}${asset.assetTag ? ` (${asset.assetTag})` : ''}`,
 			netPurchasePrice: netPrice,
 			ratePercent,
 			dailyRate: netPrice * (ratePercent / 100)
-		};
-	});
+		});
+	}
 
 	const itemsByBundleId = new Map<string, typeof bundledItems>();
 	for (const item of bundledItems) {
-		const bundleId = item.asset.bundleId!;
+		const bundleId = item.sourceBundleId!;
 		const list = itemsByBundleId.get(bundleId);
 		if (list) list.push(item);
 		else itemsByBundleId.set(bundleId, [item]);
 	}
-	const bundleLines: BillingLine[] = [...itemsByBundleId.entries()].map(([bundleId, items]) => {
+	const bundleLines: BillingLine[] = [];
+	for (const [bundleId, items] of itemsByBundleId) {
 		const bundle = priceByBundleId.get(bundleId)!;
 		const ratePercent = rateByCategory.get(bundle.template.categoryId);
 		if (ratePercent == null) {
-			throw new Error(
-				`No rental rate set for category "${bundle.template.category.name}" — set it in org settings first`
-			);
+			missingRates.set(bundle.template.categoryId, {
+				categoryId: bundle.template.categoryId,
+				categoryName: bundle.template.category.name,
+				categoryNameDe: bundle.template.category.nameDe
+			});
+			continue;
 		}
 		const netPrice = Number(bundle.netPurchasePrice);
-		return {
+		bundleLines.push({
 			assetId: null,
 			bundleId,
+			productId: null,
+			productLabel: `Bundle: ${bundle.template.name}`,
 			categoryId: bundle.template.categoryId,
 			categoryName: bundle.template.category.name,
+			categoryNameDe: bundle.template.category.nameDe,
 			categoryColor: bundle.template.category.color,
 			description: `Bundle: ${bundle.template.name} (${items.length} item${items.length !== 1 ? 's' : ''})`,
 			netPurchasePrice: netPrice,
 			ratePercent,
 			dailyRate: netPrice * (ratePercent / 100)
-		};
-	});
+		});
+	}
 
-	return [...individualLines, ...bundleLines];
+	return {
+		lines: [...individualLines, ...bundleLines],
+		missingPrices,
+		missingRates: [...missingRates.values()]
+	};
+}
+
+function billingBlockerMessage(missingPrices: MissingPrice[], missingRates: MissingRate[]): string {
+	const parts: string[] = [];
+	if (missingPrices.length > 0) {
+		const named = missingPrices.map((m) => `${m.label} (${m.assets.length}×)`).join(', ');
+		parts.push(`No net purchase price set for: ${named}`);
+	}
+	if (missingRates.length > 0) {
+		parts.push(
+			`No rental rate set for category: ${missingRates.map((r) => r.categoryName).join(', ')}`
+		);
+	}
+	return parts.join('. ');
+}
+
+async function computeProductionBillingLines(
+	productionId: string,
+	assetScope: string
+): Promise<BillingLine[]> {
+	const { lines, missingPrices, missingRates } = await computeProductionBilling(
+		productionId,
+		assetScope
+	);
+	if (missingPrices.length > 0 || missingRates.length > 0) {
+		error(400, billingBlockerMessage(missingPrices, missingRates));
+	}
+	return lines;
 }
 
 function billingLineKey(assetId: string | null, bundleId: string | null, description: string) {
@@ -248,6 +394,61 @@ function diffBillingLines(stored: DiffLine[], current: DiffLine[]) {
 	return { added, removed, changed };
 }
 
+const billingReadinessSchema = v.object({
+	productionId: v.string(),
+	assetScope: v.optional(v.picklist(['ALL', 'OWN_ORG_ONLY']))
+});
+
+// What the offer form asks before it lets anyone press "Create": which booked
+// equipment still can't be priced, and whether this user is the one who can
+// fix it. Without this the first unpriced asset only surfaces as a failed
+// creation, with no way to act on it from where the user is standing.
+export const getProductionBillingReadiness = query(
+	billingReadinessSchema,
+	async ({ productionId, assetScope }) => {
+		const user = await requireAuth();
+		const production = await prisma.production.findUniqueOrThrow({
+			where: { id: productionId },
+			select: { organizationId: true }
+		});
+		const systemAdmin = await isSystemAdmin(user.id);
+		if (!systemAdmin && !(await userOrgIds(user.id)).includes(production.organizationId)) {
+			error(403, 'Unauthorized');
+		}
+
+		const { lines, missingPrices, missingRates } = await computeProductionBilling(
+			productionId,
+			assetScope ?? 'ALL'
+		);
+
+		const manageableOrgIds = new Set(
+			systemAdmin
+				? []
+				: (
+						await prisma.orgMembership.findMany({
+							where: { userId: user.id, role: { in: ['ADMIN', 'OWNER'] } },
+							select: { organizationId: true }
+						})
+					).map((m) => m.organizationId)
+		);
+		const canManage = (orgId: string) => systemAdmin || manageableOrgIds.has(orgId);
+
+		return {
+			organizationId: production.organizationId,
+			pricedLineCount: lines.length,
+			pricedDailyTotal: lines.reduce((sum, line) => sum + line.dailyRate, 0),
+			// A product is shared catalog data, so pricing it takes admin rights in
+			// some org rather than in the one that happens to own these units —
+			// the same rule `updateProduct` applies.
+			canEditPrices: systemAdmin || manageableOrgIds.size > 0,
+			missingPrices,
+			missingRates,
+			// A rental rate, by contrast, belongs to the org doing the billing.
+			canEditRates: canManage(production.organizationId)
+		};
+	}
+);
+
 const createOfferSchema = v.object({
 	productionId: v.string(),
 	customerId: v.optional(v.string()),
@@ -282,8 +483,11 @@ export const createOfferFromProduction = command(createOfferSchema, async (data)
 	const itemsData = lines.map((line) => ({
 		assetId: line.assetId,
 		bundleId: line.bundleId,
+		productId: line.productId,
+		productLabel: line.productLabel,
 		categoryId: line.categoryId,
 		categoryName: line.categoryName,
+		categoryNameDe: line.categoryNameDe,
 		categoryColor: line.categoryColor,
 		description: line.description,
 		netPurchasePrice: line.netPurchasePrice,
@@ -347,7 +551,7 @@ export const getOfferStaleness = query(v.string(), async (offerId: string) => {
 		return {
 			applicable: true,
 			stale: false,
-			error: (err as Error).message,
+			error: getErrorMessage(err),
 			added: [],
 			removed: [],
 			changed: []
@@ -382,8 +586,11 @@ export const updateOfferItemsFromProduction = command(v.string(), async (offerId
 	const itemsData = lines.map((line) => ({
 		assetId: line.assetId,
 		bundleId: line.bundleId,
+		productId: line.productId,
+		productLabel: line.productLabel,
 		categoryId: line.categoryId,
 		categoryName: line.categoryName,
+		categoryNameDe: line.categoryNameDe,
 		categoryColor: line.categoryColor,
 		description: line.description,
 		netPurchasePrice: line.netPurchasePrice,
@@ -427,27 +634,37 @@ export const updateOfferDayCount = command(
 	}
 );
 
+// Takes a list because the document shows units of one product as a single
+// line: editing that line's rate has to move every unit behind it, or the
+// collapsed line would show a rate none of its units actually has.
 const updateOfferItemRateSchema = v.object({
-	offerItemId: v.string(),
+	offerItemIds: v.pipe(v.array(v.string()), v.minLength(1)),
 	ratePercent: v.number()
 });
 
 export const updateOfferItemRate = command(
 	updateOfferItemRateSchema,
-	async ({ offerItemId, ratePercent }) => {
-		const item = await prisma.offerItem.findUniqueOrThrow({
-			where: { id: offerItemId },
+	async ({ offerItemIds, ratePercent }) => {
+		const items = await prisma.offerItem.findMany({
+			where: { id: { in: offerItemIds } },
 			include: { offer: true }
 		});
-		await requireOrgManageAccess(item.offer.organizationId);
+		if (items.length === 0) error(404, 'No offer lines found');
+		const offerIds = [...new Set(items.map((i) => i.offerId))];
+		if (offerIds.length > 1) error(400, 'Lines belong to different offers');
+		await requireOrgManageAccess(items[0].offer.organizationId);
 
-		const dailyRate = Number(item.netPurchasePrice) * (ratePercent / 100);
-		await prisma.offerItem.update({
-			where: { id: offerItemId },
-			data: { ratePercent, dailyRate, lineTotal: dailyRate * item.offer.dayCount }
-		});
+		await prisma.$transaction(
+			items.map((item) => {
+				const dailyRate = Number(item.netPurchasePrice) * (ratePercent / 100);
+				return prisma.offerItem.update({
+					where: { id: item.id },
+					data: { ratePercent, dailyRate, lineTotal: dailyRate * item.offer.dayCount }
+				});
+			})
+		);
 
-		await getOffer(item.offerId).refresh();
+		await getOffer(offerIds[0]).refresh();
 	}
 );
 
@@ -533,8 +750,11 @@ export const copyOfferToNewCustomer = command(
 					create: source.items.map((i) => ({
 						assetId: i.assetId,
 						bundleId: i.bundleId,
+						productId: i.productId,
+						productLabel: i.productLabel,
 						categoryId: i.categoryId,
 						categoryName: i.categoryName,
+						categoryNameDe: i.categoryNameDe,
 						categoryColor: i.categoryColor,
 						description: i.description,
 						netPurchasePrice: i.netPurchasePrice,
@@ -588,8 +808,11 @@ export const convertOfferToInvoice = command(v.string(), async (offerId: string)
 					create: offer.items.map((i) => ({
 						assetId: i.assetId,
 						bundleId: i.bundleId,
+						productId: i.productId,
+						productLabel: i.productLabel,
 						categoryId: i.categoryId,
 						categoryName: i.categoryName,
+						categoryNameDe: i.categoryNameDe,
 						categoryColor: i.categoryColor,
 						description: i.description,
 						netPurchasePrice: i.netPurchasePrice,
@@ -742,8 +965,11 @@ export const updateInvoiceItemsFromProduction = command(v.string(), async (invoi
 	const itemsData = lines.map((line) => ({
 		assetId: line.assetId,
 		bundleId: line.bundleId,
+		productId: line.productId,
+		productLabel: line.productLabel,
 		categoryId: line.categoryId,
 		categoryName: line.categoryName,
+		categoryNameDe: line.categoryNameDe,
 		categoryColor: line.categoryColor,
 		description: line.description,
 		netPurchasePrice: line.netPurchasePrice,
@@ -804,30 +1030,38 @@ export const updateInvoiceDayCount = command(
 	}
 );
 
+// A list, for the same reason as updateOfferItemRate.
 const updateInvoiceItemRateSchema = v.object({
-	invoiceItemId: v.string(),
+	invoiceItemIds: v.pipe(v.array(v.string()), v.minLength(1)),
 	ratePercent: v.number()
 });
 
 export const updateInvoiceItemRate = command(
 	updateInvoiceItemRateSchema,
-	async ({ invoiceItemId, ratePercent }) => {
-		const item = await prisma.invoiceItem.findUniqueOrThrow({
-			where: { id: invoiceItemId },
+	async ({ invoiceItemIds, ratePercent }) => {
+		const items = await prisma.invoiceItem.findMany({
+			where: { id: { in: invoiceItemIds } },
 			include: { invoice: true }
 		});
-		await requireOrgManageAccess(item.invoice.organizationId);
-		if (item.invoice.sentAt) {
+		if (items.length === 0) error(404, 'No invoice lines found');
+		const invoiceIds = [...new Set(items.map((i) => i.invoiceId))];
+		if (invoiceIds.length > 1) error(400, 'Lines belong to different invoices');
+		await requireOrgManageAccess(items[0].invoice.organizationId);
+		if (items[0].invoice.sentAt) {
 			throw new Error('This invoice has been sent and is immutable');
 		}
 
-		const dailyRate = Number(item.netPurchasePrice) * (ratePercent / 100);
-		await prisma.invoiceItem.update({
-			where: { id: invoiceItemId },
-			data: { ratePercent, dailyRate, lineTotal: dailyRate * item.invoice.dayCount }
-		});
+		await prisma.$transaction(
+			items.map((item) => {
+				const dailyRate = Number(item.netPurchasePrice) * (ratePercent / 100);
+				return prisma.invoiceItem.update({
+					where: { id: item.id },
+					data: { ratePercent, dailyRate, lineTotal: dailyRate * item.invoice.dayCount }
+				});
+			})
+		);
 
-		await getInvoice(item.invoiceId).refresh();
+		await getInvoice(invoiceIds[0]).refresh();
 	}
 );
 

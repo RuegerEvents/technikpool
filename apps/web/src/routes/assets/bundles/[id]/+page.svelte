@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { categoryLabel } from '$lib/category';
 	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -318,7 +319,7 @@
 											<div class="flex items-center gap-2">
 												<ProductThumb src={asset.product.imageUrl} alt={asset.product.name} />
 												<CategoryPill
-													name={asset.product.category.name}
+													name={categoryLabel(asset.product.category)}
 													color={asset.product.category.color}
 												/>
 												<span class="font-medium">{asset.product.name}</span>

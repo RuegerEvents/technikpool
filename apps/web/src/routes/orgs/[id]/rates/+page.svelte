@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { categoryLabel } from '$lib/category';
 	import { getErrorMessage } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -89,7 +90,7 @@
 						<div class="flex items-center gap-2">
 							<span class="h-2.5 w-2.5 rounded-full" style="background-color: {row.category.color}"
 							></span>
-							<span class="font-medium">{row.category.name}</span>
+							<span class="font-medium">{categoryLabel(row.category)}</span>
 						</div>
 						{#if canManage}
 							<div class="flex items-center gap-2">

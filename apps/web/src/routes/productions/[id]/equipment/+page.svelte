@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { categoryLabel } from '$lib/category';
 	import { getErrorMessage, plural, orgLabel } from '$lib/utils';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
@@ -51,7 +52,7 @@
 			if (!seen.has(g.categoryId)) {
 				seen.set(g.categoryId, {
 					id: g.categoryId,
-					name: g.categoryName,
+					name: categoryLabel({ name: g.categoryName, nameDe: g.categoryNameDe }),
 					color: g.categoryColor,
 					sortOrder: g.categorySortOrder
 				});
@@ -61,7 +62,7 @@
 			if (!seen.has(b.categoryId)) {
 				seen.set(b.categoryId, {
 					id: b.categoryId,
-					name: b.categoryName,
+					name: categoryLabel({ name: b.categoryName, nameDe: b.categoryNameDe }),
 					color: b.categoryColor,
 					sortOrder: b.categorySortOrder
 				});
@@ -116,6 +117,12 @@
 	});
 
 	let cities = $derived([...new SvelteSet(locations.map((l) => l.city))].sort());
+
+	// What the product row's stepper shows and changes: units booked on their
+	// own. Units booked through a bundle live on the bundle's row.
+	function groupBookedIndividually(g: Group): number {
+		return g.bookedHere - g.bookedFromBundle;
+	}
 
 	function groupAvailable(g: Group): number {
 		const remaining = g.total - g.bookedHere - g.unavailableElsewhere;
@@ -272,11 +279,22 @@
 		try {
 			const result = await addBundleToProduction({ productionId, bundleId: b.id });
 			await getEquipmentEditorData(productionId).refresh();
-			toast.success(
-				result.skippedConflicts > 0
-					? `Added ${result.added} asset${result.added !== 1 ? 's' : ''} (${result.skippedConflicts} skipped — already booked elsewhere)`
-					: `Added ${result.added} asset${result.added !== 1 ? 's' : ''} from "${b.name}"`
-			);
+			const parts: string[] = [plural(result.added, ['# asset added', '# assets added'])];
+			if (result.adopted > 0)
+				parts.push(
+					plural(result.adopted, [
+						'# was already booked individually and moved into the bundle',
+						'# were already booked individually and moved into the bundle'
+					])
+				);
+			if (result.skippedConflicts > 0)
+				parts.push(
+					plural(result.skippedConflicts, [
+						'# skipped, already booked elsewhere',
+						'# skipped, already booked elsewhere'
+					])
+				);
+			toast.success(`${parts.join(' · ')} — "${b.name}"`);
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {
@@ -336,13 +354,14 @@
 
 {#snippet stepper(g: Group)}
 	{@const maxQty = groupMaxQty(g)}
+	{@const booked = groupBookedIndividually(g)}
 	{@render countStepper(
-		g.bookedHere,
+		booked,
 		maxQty,
-		pending.has(g.key) || g.bookedHere <= 0,
+		pending.has(g.key) || booked <= 0,
 		pending.has(g.key) || g.bookedHere >= maxQty,
-		() => setQty(g, g.bookedHere - 1),
-		() => setQty(g, g.bookedHere + 1)
+		() => setQty(g, booked - 1),
+		() => setQty(g, booked + 1)
 	)}
 {/snippet}
 
@@ -589,11 +608,12 @@
 					{/each}
 					{#each availableGroups as g (g.key)}
 						{@const groupAddDisabled = pending.has(g.key) || g.bookedHere >= groupMaxQty(g)}
+						<!-- the centre pane's + always adds one more individually booked unit -->
 						<div
 							class="flex items-center gap-2 border-b px-3 py-2 last:border-0 {groupAddDisabled
 								? 'opacity-50'
 								: 'cursor-pointer hover:bg-muted/40'}"
-							onclick={() => !groupAddDisabled && setQty(g, g.bookedHere + 1)}
+							onclick={() => !groupAddDisabled && setQty(g, groupBookedIndividually(g) + 1)}
 						>
 							<ProductThumb src={g.imageUrl} alt={g.productName} />
 							<div class="min-w-0 flex-1">

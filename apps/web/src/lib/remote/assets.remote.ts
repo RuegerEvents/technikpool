@@ -111,6 +111,44 @@ export const getCategories = query(async () => {
 	return await prisma.category.findMany({ orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }] });
 });
 
+const updateCategorySchema = v.object({
+	categoryId: v.string(),
+	name: v.optional(v.string()),
+	nameDe: v.optional(v.nullable(v.string())),
+	color: v.optional(v.string()),
+	sortOrder: v.optional(v.number())
+});
+
+/**
+ * Categories are global, not per-org — one org renaming "Light" would rename it
+ * on every other org's assets — so editing them is a system-admin action.
+ * `name` stays the English source name; `nameDe` is what the German UI and a
+ * German billing document show.
+ */
+export const updateCategory = command(updateCategorySchema, async (input) => {
+	const user = await requireAuth();
+	if (!(await isSystemAdmin(user.id))) error(403, 'Admin access required');
+
+	const data: { name?: string; nameDe?: string | null; color?: string; sortOrder?: number } = {};
+	if ('name' in input) {
+		const name = input.name?.trim();
+		if (!name) error(400, 'A category needs an English name');
+		const clash = await prisma.category.findFirst({
+			where: { name, id: { not: input.categoryId } },
+			select: { id: true }
+		});
+		if (clash) error(409, `Another category is already called "${name}"`);
+		data.name = name;
+	}
+	if ('nameDe' in input) data.nameDe = input.nameDe?.trim() || null;
+	if ('color' in input) data.color = input.color;
+	if ('sortOrder' in input) data.sortOrder = input.sortOrder;
+
+	const updated = await prisma.category.update({ where: { id: input.categoryId }, data });
+	await getCategories().refresh();
+	return updated;
+});
+
 export const getLocations = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
 	const queryOrgIds = await scopedOrgIds(user.id, organizationId);
@@ -269,6 +307,7 @@ const createAssetsSchema = v.object({
 	productId: v.optional(v.string()),
 	newProductName: v.optional(v.string()),
 	newProductImageUrl: v.optional(v.string()),
+	newProductNetPurchasePrice: v.optional(v.nullable(v.pipe(v.number(), v.minValue(0)))),
 	categoryId: v.optional(v.string()),
 	manufacturerId: v.optional(v.string()),
 	newManufacturerName: v.optional(v.string()),
@@ -314,7 +353,8 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 				name: data.newProductName,
 				manufacturerId,
 				categoryId: data.categoryId,
-				imageUrl: data.newProductImageUrl?.trim() || null
+				imageUrl: data.newProductImageUrl?.trim() || null,
+				netPurchasePrice: data.newProductNetPurchasePrice ?? null
 			}
 		});
 		productId = p.id;
@@ -425,7 +465,6 @@ const updateAssetSchema = v.object({
 	assetTag: v.optional(v.string()),
 	status: v.optional(v.picklist(ASSET_STATUSES)),
 	locationId: v.optional(v.string()),
-	netPurchasePrice: v.optional(v.nullable(v.number())),
 	purchaseDate: v.optional(v.nullable(v.string())),
 	inspectionIntervalMonths: v.optional(v.nullable(v.number()))
 });
@@ -488,16 +527,12 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 		status?: string;
 		locationId?: string;
 		bundleId?: string | null;
-		netPurchasePrice?: number | null;
 		purchaseDate?: Date | null;
 		inspectionIntervalMonths?: number | null;
 		nextInspectionDue?: Date | null;
 	} = {};
 
 	const changes: FieldChange[] = [];
-	if ('netPurchasePrice' in input) {
-		updateData.netPurchasePrice = input.netPurchasePrice ?? null;
-	}
 	if ('purchaseDate' in input) {
 		updateData.purchaseDate = input.purchaseDate ? new Date(input.purchaseDate) : null;
 	}
@@ -834,7 +869,8 @@ const updateProductSchema = v.object({
 	productId: v.string(),
 	name: v.optional(v.string()),
 	categoryId: v.optional(v.string()),
-	imageUrl: v.optional(v.string())
+	imageUrl: v.optional(v.string()),
+	netPurchasePrice: v.optional(v.nullable(v.pipe(v.number(), v.minValue(0))))
 });
 
 export const updateProduct = command(updateProductSchema, async (input) => {
@@ -857,7 +893,10 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		data: {
 			...(input.name ? { name: input.name.trim() } : {}),
 			...(input.categoryId ? { categoryId: input.categoryId } : {}),
-			imageUrl: input.imageUrl !== undefined ? input.imageUrl?.trim() || null : undefined
+			imageUrl: input.imageUrl !== undefined ? input.imageUrl?.trim() || null : undefined,
+			// Explicit null clears it; leaving the field out keeps what's stored,
+			// so a form that doesn't show the price can't wipe it.
+			...('netPurchasePrice' in input ? { netPurchasePrice: input.netPurchasePrice } : {})
 		},
 		include: { manufacturer: true, category: true }
 	});

@@ -47,7 +47,10 @@ export type InvoiceItemMinAggregateOutputType = {
   bundleId: string | null
   categoryId: string | null
   categoryName: string | null
+  categoryNameDe: string | null
   categoryColor: string | null
+  productId: string | null
+  productLabel: string | null
   description: string | null
   netPurchasePrice: runtime.Decimal | null
   ratePercent: runtime.Decimal | null
@@ -63,7 +66,10 @@ export type InvoiceItemMaxAggregateOutputType = {
   bundleId: string | null
   categoryId: string | null
   categoryName: string | null
+  categoryNameDe: string | null
   categoryColor: string | null
+  productId: string | null
+  productLabel: string | null
   description: string | null
   netPurchasePrice: runtime.Decimal | null
   ratePercent: runtime.Decimal | null
@@ -79,7 +85,10 @@ export type InvoiceItemCountAggregateOutputType = {
   bundleId: number
   categoryId: number
   categoryName: number
+  categoryNameDe: number
   categoryColor: number
+  productId: number
+  productLabel: number
   description: number
   netPurchasePrice: number
   ratePercent: number
@@ -111,7 +120,10 @@ export type InvoiceItemMinAggregateInputType = {
   bundleId?: true
   categoryId?: true
   categoryName?: true
+  categoryNameDe?: true
   categoryColor?: true
+  productId?: true
+  productLabel?: true
   description?: true
   netPurchasePrice?: true
   ratePercent?: true
@@ -127,7 +139,10 @@ export type InvoiceItemMaxAggregateInputType = {
   bundleId?: true
   categoryId?: true
   categoryName?: true
+  categoryNameDe?: true
   categoryColor?: true
+  productId?: true
+  productLabel?: true
   description?: true
   netPurchasePrice?: true
   ratePercent?: true
@@ -143,7 +158,10 @@ export type InvoiceItemCountAggregateInputType = {
   bundleId?: true
   categoryId?: true
   categoryName?: true
+  categoryNameDe?: true
   categoryColor?: true
+  productId?: true
+  productLabel?: true
   description?: true
   netPurchasePrice?: true
   ratePercent?: true
@@ -246,7 +264,10 @@ export type InvoiceItemGroupByOutputType = {
   bundleId: string | null
   categoryId: string | null
   categoryName: string | null
+  categoryNameDe: string | null
   categoryColor: string | null
+  productId: string | null
+  productLabel: string | null
   description: string
   netPurchasePrice: runtime.Decimal
   ratePercent: runtime.Decimal
@@ -285,7 +306,10 @@ export type InvoiceItemWhereInput = {
   bundleId?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   categoryId?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   categoryName?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  categoryNameDe?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   categoryColor?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  productId?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  productLabel?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   description?: Prisma.StringFilter<"InvoiceItem"> | string
   netPurchasePrice?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratePercent?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -302,7 +326,10 @@ export type InvoiceItemOrderByWithRelationInput = {
   bundleId?: Prisma.SortOrderInput | Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   categoryName?: Prisma.SortOrderInput | Prisma.SortOrder
+  categoryNameDe?: Prisma.SortOrderInput | Prisma.SortOrder
   categoryColor?: Prisma.SortOrderInput | Prisma.SortOrder
+  productId?: Prisma.SortOrderInput | Prisma.SortOrder
+  productLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrder
   netPurchasePrice?: Prisma.SortOrder
   ratePercent?: Prisma.SortOrder
@@ -322,7 +349,10 @@ export type InvoiceItemWhereUniqueInput = Prisma.AtLeast<{
   bundleId?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   categoryId?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   categoryName?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  categoryNameDe?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   categoryColor?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  productId?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  productLabel?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   description?: Prisma.StringFilter<"InvoiceItem"> | string
   netPurchasePrice?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratePercent?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -339,7 +369,10 @@ export type InvoiceItemOrderByWithAggregationInput = {
   bundleId?: Prisma.SortOrderInput | Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   categoryName?: Prisma.SortOrderInput | Prisma.SortOrder
+  categoryNameDe?: Prisma.SortOrderInput | Prisma.SortOrder
   categoryColor?: Prisma.SortOrderInput | Prisma.SortOrder
+  productId?: Prisma.SortOrderInput | Prisma.SortOrder
+  productLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrder
   netPurchasePrice?: Prisma.SortOrder
   ratePercent?: Prisma.SortOrder
@@ -363,7 +396,10 @@ export type InvoiceItemScalarWhereWithAggregatesInput = {
   bundleId?: Prisma.StringNullableWithAggregatesFilter<"InvoiceItem"> | string | null
   categoryId?: Prisma.StringNullableWithAggregatesFilter<"InvoiceItem"> | string | null
   categoryName?: Prisma.StringNullableWithAggregatesFilter<"InvoiceItem"> | string | null
+  categoryNameDe?: Prisma.StringNullableWithAggregatesFilter<"InvoiceItem"> | string | null
   categoryColor?: Prisma.StringNullableWithAggregatesFilter<"InvoiceItem"> | string | null
+  productId?: Prisma.StringNullableWithAggregatesFilter<"InvoiceItem"> | string | null
+  productLabel?: Prisma.StringNullableWithAggregatesFilter<"InvoiceItem"> | string | null
   description?: Prisma.StringWithAggregatesFilter<"InvoiceItem"> | string
   netPurchasePrice?: Prisma.DecimalWithAggregatesFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratePercent?: Prisma.DecimalWithAggregatesFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -378,7 +414,10 @@ export type InvoiceItemCreateInput = {
   bundleId?: string | null
   categoryId?: string | null
   categoryName?: string | null
+  categoryNameDe?: string | null
   categoryColor?: string | null
+  productId?: string | null
+  productLabel?: string | null
   description: string
   netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -395,7 +434,10 @@ export type InvoiceItemUncheckedCreateInput = {
   bundleId?: string | null
   categoryId?: string | null
   categoryName?: string | null
+  categoryNameDe?: string | null
   categoryColor?: string | null
+  productId?: string | null
+  productLabel?: string | null
   description: string
   netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -410,7 +452,10 @@ export type InvoiceItemUpdateInput = {
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryNameDe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -427,7 +472,10 @@ export type InvoiceItemUncheckedUpdateInput = {
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryNameDe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -443,7 +491,10 @@ export type InvoiceItemCreateManyInput = {
   bundleId?: string | null
   categoryId?: string | null
   categoryName?: string | null
+  categoryNameDe?: string | null
   categoryColor?: string | null
+  productId?: string | null
+  productLabel?: string | null
   description: string
   netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -458,7 +509,10 @@ export type InvoiceItemUpdateManyMutationInput = {
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryNameDe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -474,7 +528,10 @@ export type InvoiceItemUncheckedUpdateManyInput = {
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryNameDe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -500,7 +557,10 @@ export type InvoiceItemCountOrderByAggregateInput = {
   bundleId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   categoryName?: Prisma.SortOrder
+  categoryNameDe?: Prisma.SortOrder
   categoryColor?: Prisma.SortOrder
+  productId?: Prisma.SortOrder
+  productLabel?: Prisma.SortOrder
   description?: Prisma.SortOrder
   netPurchasePrice?: Prisma.SortOrder
   ratePercent?: Prisma.SortOrder
@@ -523,7 +583,10 @@ export type InvoiceItemMaxOrderByAggregateInput = {
   bundleId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   categoryName?: Prisma.SortOrder
+  categoryNameDe?: Prisma.SortOrder
   categoryColor?: Prisma.SortOrder
+  productId?: Prisma.SortOrder
+  productLabel?: Prisma.SortOrder
   description?: Prisma.SortOrder
   netPurchasePrice?: Prisma.SortOrder
   ratePercent?: Prisma.SortOrder
@@ -539,7 +602,10 @@ export type InvoiceItemMinOrderByAggregateInput = {
   bundleId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   categoryName?: Prisma.SortOrder
+  categoryNameDe?: Prisma.SortOrder
   categoryColor?: Prisma.SortOrder
+  productId?: Prisma.SortOrder
+  productLabel?: Prisma.SortOrder
   description?: Prisma.SortOrder
   netPurchasePrice?: Prisma.SortOrder
   ratePercent?: Prisma.SortOrder
@@ -603,7 +669,10 @@ export type InvoiceItemCreateWithoutInvoiceInput = {
   bundleId?: string | null
   categoryId?: string | null
   categoryName?: string | null
+  categoryNameDe?: string | null
   categoryColor?: string | null
+  productId?: string | null
+  productLabel?: string | null
   description: string
   netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -618,7 +687,10 @@ export type InvoiceItemUncheckedCreateWithoutInvoiceInput = {
   bundleId?: string | null
   categoryId?: string | null
   categoryName?: string | null
+  categoryNameDe?: string | null
   categoryColor?: string | null
+  productId?: string | null
+  productLabel?: string | null
   description: string
   netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -663,7 +735,10 @@ export type InvoiceItemScalarWhereInput = {
   bundleId?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   categoryId?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   categoryName?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  categoryNameDe?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   categoryColor?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  productId?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  productLabel?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   description?: Prisma.StringFilter<"InvoiceItem"> | string
   netPurchasePrice?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratePercent?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -678,7 +753,10 @@ export type InvoiceItemCreateManyInvoiceInput = {
   bundleId?: string | null
   categoryId?: string | null
   categoryName?: string | null
+  categoryNameDe?: string | null
   categoryColor?: string | null
+  productId?: string | null
+  productLabel?: string | null
   description: string
   netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -693,7 +771,10 @@ export type InvoiceItemUpdateWithoutInvoiceInput = {
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryNameDe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -708,7 +789,10 @@ export type InvoiceItemUncheckedUpdateWithoutInvoiceInput = {
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryNameDe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -723,7 +807,10 @@ export type InvoiceItemUncheckedUpdateManyWithoutInvoiceInput = {
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryNameDe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -741,7 +828,10 @@ export type InvoiceItemSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   bundleId?: boolean
   categoryId?: boolean
   categoryName?: boolean
+  categoryNameDe?: boolean
   categoryColor?: boolean
+  productId?: boolean
+  productLabel?: boolean
   description?: boolean
   netPurchasePrice?: boolean
   ratePercent?: boolean
@@ -758,7 +848,10 @@ export type InvoiceItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   bundleId?: boolean
   categoryId?: boolean
   categoryName?: boolean
+  categoryNameDe?: boolean
   categoryColor?: boolean
+  productId?: boolean
+  productLabel?: boolean
   description?: boolean
   netPurchasePrice?: boolean
   ratePercent?: boolean
@@ -775,7 +868,10 @@ export type InvoiceItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   bundleId?: boolean
   categoryId?: boolean
   categoryName?: boolean
+  categoryNameDe?: boolean
   categoryColor?: boolean
+  productId?: boolean
+  productLabel?: boolean
   description?: boolean
   netPurchasePrice?: boolean
   ratePercent?: boolean
@@ -792,7 +888,10 @@ export type InvoiceItemSelectScalar = {
   bundleId?: boolean
   categoryId?: boolean
   categoryName?: boolean
+  categoryNameDe?: boolean
   categoryColor?: boolean
+  productId?: boolean
+  productLabel?: boolean
   description?: boolean
   netPurchasePrice?: boolean
   ratePercent?: boolean
@@ -801,7 +900,7 @@ export type InvoiceItemSelectScalar = {
   createdAt?: boolean
 }
 
-export type InvoiceItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "invoiceId" | "assetId" | "bundleId" | "categoryId" | "categoryName" | "categoryColor" | "description" | "netPurchasePrice" | "ratePercent" | "dailyRate" | "lineTotal" | "createdAt", ExtArgs["result"]["invoiceItem"]>
+export type InvoiceItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "invoiceId" | "assetId" | "bundleId" | "categoryId" | "categoryName" | "categoryNameDe" | "categoryColor" | "productId" | "productLabel" | "description" | "netPurchasePrice" | "ratePercent" | "dailyRate" | "lineTotal" | "createdAt", ExtArgs["result"]["invoiceItem"]>
 export type InvoiceItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   invoice?: boolean | Prisma.InvoiceDefaultArgs<ExtArgs>
 }
@@ -824,7 +923,10 @@ export type $InvoiceItemPayload<ExtArgs extends runtime.Types.Extensions.Interna
     bundleId: string | null
     categoryId: string | null
     categoryName: string | null
+    categoryNameDe: string | null
     categoryColor: string | null
+    productId: string | null
+    productLabel: string | null
     description: string
     netPurchasePrice: runtime.Decimal
     ratePercent: runtime.Decimal
@@ -1261,7 +1363,10 @@ export interface InvoiceItemFieldRefs {
   readonly bundleId: Prisma.FieldRef<"InvoiceItem", 'String'>
   readonly categoryId: Prisma.FieldRef<"InvoiceItem", 'String'>
   readonly categoryName: Prisma.FieldRef<"InvoiceItem", 'String'>
+  readonly categoryNameDe: Prisma.FieldRef<"InvoiceItem", 'String'>
   readonly categoryColor: Prisma.FieldRef<"InvoiceItem", 'String'>
+  readonly productId: Prisma.FieldRef<"InvoiceItem", 'String'>
+  readonly productLabel: Prisma.FieldRef<"InvoiceItem", 'String'>
   readonly description: Prisma.FieldRef<"InvoiceItem", 'String'>
   readonly netPurchasePrice: Prisma.FieldRef<"InvoiceItem", 'Decimal'>
   readonly ratePercent: Prisma.FieldRef<"InvoiceItem", 'Decimal'>

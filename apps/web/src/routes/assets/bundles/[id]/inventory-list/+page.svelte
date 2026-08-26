@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { categoryLabel } from '$lib/category';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { getBundle } from '$lib/remote/assets.remote';
@@ -44,7 +45,7 @@
 			</div>
 			<div class="text-right">
 				<p class="font-bold">{bundle.template.organization.name}</p>
-				<p>{bundle.template.category.name}</p>
+				<p>{categoryLabel(bundle.template.category)}</p>
 				<p>Date: {new Date().toLocaleDateString()}</p>
 			</div>
 		</div>

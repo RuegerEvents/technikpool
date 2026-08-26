@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { categoryLabel } from '$lib/category';
 	import { orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -47,7 +48,10 @@
 					</Card.Header>
 					<Card.Content class="pt-0">
 						<div class="flex items-center justify-between">
-							<CategoryPill name={template.category.name} color={template.category.color} />
+							<CategoryPill
+								name={categoryLabel(template.category)}
+								color={template.category.color}
+							/>
 							<span class="text-sm text-muted-foreground">
 								{#if template.instances.length === 1}
 									{template.instances.length} instance

@@ -4,6 +4,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { getErrorMessage } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
+	import { groupBillingItems } from '$lib/billing-lines';
 	import type { BillingItem, DurationInfo } from './types';
 
 	let {
@@ -36,7 +37,7 @@
 			discountType: 'PERCENT' | 'AMOUNT' | undefined,
 			discountValue: number | undefined
 		) => Promise<void>;
-		onSaveItemRate: (itemId: string, ratePercent: number) => Promise<void>;
+		onSaveItemRate: (itemIds: string[], ratePercent: number) => Promise<void>;
 	} = $props();
 
 	function fmtEUR(n: number): string {
@@ -52,35 +53,8 @@
 		return fmt((d.start ?? d.end)!);
 	}
 
-	type CategoryGroup = {
-		key: string;
-		name: string;
-		color: string | null;
-		items: BillingItem[];
-		subtotal: number;
-	};
-
-	let groups = $derived.by((): CategoryGroup[] => {
-		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- local grouping map, discarded after building the array below
-		const map = new Map<string, CategoryGroup>();
-		for (const item of items) {
-			const key = item.categoryId ?? '';
-			let group = map.get(key);
-			if (!group) {
-				group = {
-					key,
-					name: item.categoryName ?? 'Uncategorized',
-					color: item.categoryColor,
-					items: [],
-					subtotal: 0
-				};
-				map.set(key, group);
-			}
-			group.items.push(item);
-			group.subtotal += Number(item.lineTotal);
-		}
-		return [...map.values()];
-	});
+	// Units of one product show as a single quantity line — see $lib/billing-lines.
+	let groups = $derived(groupBillingItems(items));
 
 	let subtotal = $derived(items.reduce((sum, i) => sum + Number(i.lineTotal), 0));
 	let discountAmount = $derived.by(() => {
@@ -154,14 +128,15 @@
 	}
 
 	// ── Per-line rate override ──
+	// Keyed by the collapsed line, and saved onto every unit behind it.
 	let rateEdits = $state<Record<string, string>>({});
-	async function saveRate(itemId: string) {
-		const value = rateEdits[itemId];
+	async function saveRate(lineKey: string, itemIds: string[]) {
+		const value = rateEdits[lineKey];
 		if (value === undefined || value === '') return;
 		try {
-			await onSaveItemRate(itemId, Number(value));
+			await onSaveItemRate(itemIds, Number(value));
 			toast.success('Rate updated');
-			delete rateEdits[itemId];
+			delete rateEdits[lineKey];
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		}
@@ -180,6 +155,7 @@
 					<thead>
 						<tr class="border-b bg-muted/30">
 							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Item</th>
+							<th class="px-4 py-3 text-right font-medium text-muted-foreground">Qty</th>
 							<th class="px-4 py-3 text-right font-medium text-muted-foreground">Purchase price</th>
 							<th class="px-4 py-3 text-right font-medium text-muted-foreground">Rate %/day</th>
 							<th class="px-4 py-3 text-right font-medium text-muted-foreground">Daily rate</th>
@@ -189,7 +165,7 @@
 					<tbody>
 						{#each groups as group (group.key)}
 							<tr class="border-b bg-muted/20">
-								<td colspan="5" class="px-4 py-2 text-xs font-semibold tracking-wide">
+								<td colspan="6" class="px-4 py-2 text-xs font-semibold tracking-wide">
 									<span class="inline-flex items-center gap-1.5">
 										<span
 											class="h-2 w-2 shrink-0 rounded-full"
@@ -199,12 +175,18 @@
 									</span>
 								</td>
 							</tr>
-							{#each group.items as item (item.id)}
+							{#each group.lines as line (line.key)}
 								<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
-									<td class="px-4 py-3">{item.description}</td>
-									<td class="px-4 py-3 text-right tabular-nums"
-										>{fmtEUR(Number(item.netPurchasePrice))}</td
-									>
+									<td class="px-4 py-3">
+										{line.label}
+										{#if line.quantity > 1}
+											<span class="block text-xs text-muted-foreground">
+												{line.items.map((i) => i.description).join(', ')}
+											</span>
+										{/if}
+									</td>
+									<td class="px-4 py-3 text-right tabular-nums">{line.quantity}×</td>
+									<td class="px-4 py-3 text-right tabular-nums">{fmtEUR(line.netPurchasePrice)}</td>
 									<td class="px-4 py-3 text-right">
 										{#if editable}
 											<div class="flex items-center justify-end gap-1">
@@ -212,31 +194,36 @@
 													type="number"
 													min="0"
 													step="0.01"
-													value={rateEdits[item.id] ?? String(item.ratePercent)}
+													value={rateEdits[line.key] ?? String(line.ratePercent)}
 													oninput={(e) => {
-														rateEdits[item.id] = (e.target as HTMLInputElement).value;
+														rateEdits[line.key] = (e.target as HTMLInputElement).value;
 													}}
 													class="w-20 text-right"
 												/>
-												{#if rateEdits[item.id] !== undefined}
-													<Button size="sm" variant="outline" onclick={() => saveRate(item.id)}
-														>Save</Button
+												{#if rateEdits[line.key] !== undefined}
+													<Button
+														size="sm"
+														variant="outline"
+														onclick={() =>
+															saveRate(
+																line.key,
+																line.items.map((i) => i.id)
+															)}>Save</Button
 													>
 												{/if}
 											</div>
 										{:else}
-											{item.ratePercent}%
+											{line.ratePercent}%
 										{/if}
 									</td>
-									<td class="px-4 py-3 text-right tabular-nums">{fmtEUR(Number(item.dailyRate))}</td
-									>
+									<td class="px-4 py-3 text-right tabular-nums">{fmtEUR(line.dailyRate)}</td>
 									<td class="px-4 py-3 text-right font-medium tabular-nums"
-										>{fmtEUR(Number(item.lineTotal))}</td
+										>{fmtEUR(line.lineTotal)}</td
 									>
 								</tr>
 							{/each}
 							<tr class="border-b bg-muted/10 last:border-0">
-								<td colspan="4" class="px-4 py-2 text-right text-xs text-muted-foreground">
+								<td colspan="5" class="px-4 py-2 text-right text-xs text-muted-foreground">
 									Subtotal {group.name}
 								</td>
 								<td class="px-4 py-2 text-right text-xs font-semibold tabular-nums"

@@ -618,15 +618,27 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 
 	const existingItems = await prisma.productionItem.findMany({
 		where: { productionId: data.productionId },
-		select: { assetId: true }
+		select: { id: true, assetId: true, sourceBundleId: true }
 	});
 	const existingAssetIds = new Set(existingItems.map((i) => i.assetId));
 
 	if (bundle.assets.length === 0) throw new Error('Bundle has no assets');
+
+	// Units of this bundle that are already booked here on their own — putting
+	// booked assets into a bundle and then adding that bundle is the ordinary
+	// way to arrive at this. The bundle adopts them instead of leaving the same
+	// unit listed both individually and under the bundle.
+	const bundleAssetIds = new Set(bundle.assets.map((a) => a.id));
+	const adoptable = existingItems.filter(
+		(i) => bundleAssetIds.has(i.assetId) && i.sourceBundleId === null
+	);
+
 	let newAssets = bundle.assets.filter(
 		(a) => !existingAssetIds.has(a.id) && !isRetiredStatus(a.status)
 	);
-	if (newAssets.length === 0) throw new Error('All bundle assets are already in this production');
+	if (newAssets.length === 0 && adoptable.length === 0) {
+		throw new Error('All bundle assets are already in this production');
+	}
 
 	let skippedConflicts = 0;
 	if (production.startDate && production.endDate) {
@@ -653,7 +665,7 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 		newAssets = newAssets.filter((a) => !conflictIds.has(a.id));
 	}
 
-	if (newAssets.length === 0)
+	if (newAssets.length === 0 && adoptable.length === 0)
 		throw new Error('All bundle assets are already booked during this production');
 
 	const crossOrgIds = [
@@ -665,8 +677,8 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	];
 	const orgsToNotify = await getOrgIdsNeedingApprovalNotification(data.productionId, crossOrgIds);
 
-	await prisma.$transaction(
-		newAssets.map((asset) => {
+	await prisma.$transaction([
+		...newAssets.map((asset) => {
 			const isCrossOrg = production.organizationId !== asset.organizationId;
 			return prisma.productionItem.create({
 				data: {
@@ -676,8 +688,18 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 					status: isCrossOrg ? 'PENDING' : 'APPROVED'
 				}
 			});
-		})
-	);
+		}),
+		// Adoption only moves which row a unit is listed under; its approval
+		// status was already settled when it was booked.
+		...(adoptable.length > 0
+			? [
+					prisma.productionItem.updateMany({
+						where: { id: { in: adoptable.map((i) => i.id) } },
+						data: { sourceBundleId: data.bundleId }
+					})
+				]
+			: [])
+	]);
 
 	await prisma.assetTransaction.createMany({
 		data: newAssets.map((asset) => ({
@@ -702,7 +724,7 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	}
 
 	await getProduction(data.productionId).refresh();
-	return { added: newAssets.length, skippedConflicts };
+	return { added: newAssets.length, adopted: adoptable.length, skippedConflicts };
 });
 
 export const removeProductionItem = command(v.string(), async (itemId: string) => {
@@ -756,9 +778,15 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 
 	const allProductionItems = await prisma.productionItem.findMany({
 		where: { productionId: data.productionId },
-		select: { assetId: true }
+		select: { id: true, assetId: true, sourceBundleId: true }
 	});
 	const allProductionAssetIds = new Set(allProductionItems.map((i) => i.assetId));
+
+	// Members that are booked here on their own move under the bundle rather
+	// than staying listed twice — same rule as adding the bundle.
+	const adoptable = allProductionItems.filter(
+		(i) => bundleAssetIds.has(i.assetId) && i.sourceBundleId === null
+	);
 
 	let toAdd = bundle.assets.filter(
 		(a) => !currentItemAssetIds.has(a.id) && !allProductionAssetIds.has(a.id)
@@ -810,7 +838,15 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 					status: isCrossOrg ? 'PENDING' : 'APPROVED'
 				}
 			});
-		})
+		}),
+		...(adoptable.length > 0
+			? [
+					prisma.productionItem.updateMany({
+						where: { id: { in: adoptable.map((i) => i.id) } },
+						data: { sourceBundleId: data.bundleId }
+					})
+				]
+			: [])
 	]);
 
 	if (toAdd.length > 0) {
@@ -835,7 +871,12 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 	}
 
 	await getProduction(data.productionId).refresh();
-	return { removed: toRemove.length, added: toAdd.length, skippedConflicts };
+	return {
+		removed: toRemove.length,
+		added: toAdd.length,
+		adopted: adoptable.length,
+		skippedConflicts
+	};
 });
 
 // ── Crew ─────────────────────────────────────────────────────────────────────

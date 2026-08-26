@@ -3,6 +3,7 @@
 	import { getInvoice } from '$lib/remote/offers.remote';
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
+	import { groupBillingItems } from '$lib/billing-lines';
 
 	const invoiceId = $derived(page.params.id as string);
 	let invoice = $derived(await getInvoice(invoiceId));
@@ -12,27 +13,8 @@
 		return () => window.clearTimeout(timer);
 	});
 
-	type CategoryGroup = {
-		key: string;
-		name: string;
-		items: (typeof invoice.items)[number][];
-		subtotal: number;
-	};
-	let groups = $derived.by((): CategoryGroup[] => {
-		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- local grouping map, discarded after building the array below
-		const map = new Map<string, CategoryGroup>();
-		for (const item of invoice.items) {
-			const key = item.categoryId ?? '';
-			let group = map.get(key);
-			if (!group) {
-				group = { key, name: item.categoryName ?? 'Uncategorized', items: [], subtotal: 0 };
-				map.set(key, group);
-			}
-			group.items.push(item);
-			group.subtotal += Number(item.lineTotal);
-		}
-		return [...map.values()];
-	});
+	// Units of one product print as a single quantity line — see $lib/billing-lines.
+	let groups = $derived(groupBillingItems(invoice.items));
 
 	let subtotal = $derived(invoice.items.reduce((sum, i) => sum + Number(i.lineTotal), 0));
 	let discountAmount = $derived.by(() => {
@@ -97,7 +79,9 @@
 		<thead>
 			<tr class="border-b border-black">
 				<th class="py-2">Item</th>
+				<th class="py-2 text-right">Qty</th>
 				<th class="py-2 text-right">Rate %/day</th>
+				<th class="py-2 text-right">Daily rate</th>
 				<th class="py-2 text-right">Days</th>
 				<th class="py-2 text-right">Total</th>
 			</tr>
@@ -105,18 +89,20 @@
 		<tbody>
 			{#each groups as group (group.key)}
 				<tr class="border-b border-zinc-300">
-					<td colspan="4" class="py-2 text-xs font-bold tracking-wide uppercase">{group.name}</td>
+					<td colspan="6" class="py-2 text-xs font-bold tracking-wide uppercase">{group.name}</td>
 				</tr>
-				{#each group.items as item (item.id)}
+				{#each group.lines as line (line.key)}
 					<tr class="border-b border-zinc-200">
-						<td class="py-3">{item.description}</td>
-						<td class="py-3 text-right">{item.ratePercent}%</td>
+						<td class="py-3">{line.label}</td>
+						<td class="py-3 text-right">{line.quantity}×</td>
+						<td class="py-3 text-right">{line.ratePercent}%</td>
+						<td class="py-3 text-right">{fmtEUR(line.dailyRate)}</td>
 						<td class="py-3 text-right">{invoice.dayCount}</td>
-						<td class="py-3 text-right">{fmtEUR(Number(item.lineTotal))}</td>
+						<td class="py-3 text-right">{fmtEUR(line.lineTotal)}</td>
 					</tr>
 				{/each}
 				<tr class="border-b border-zinc-300">
-					<td colspan="3" class="py-2 text-right text-xs text-zinc-600">Subtotal {group.name}</td>
+					<td colspan="5" class="py-2 text-right text-xs text-zinc-600">Subtotal {group.name}</td>
 					<td class="py-2 text-right text-xs font-semibold">{fmtEUR(group.subtotal)}</td>
 				</tr>
 			{/each}

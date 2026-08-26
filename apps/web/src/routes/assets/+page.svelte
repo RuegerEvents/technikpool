@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { categoryLabel } from '$lib/category';
 	import { orgLabel } from '$lib/utils';
 	import {
 		getAssets,
@@ -147,7 +148,7 @@
 						imageUrl: asset.product.imageUrl,
 						manufacturerName: asset.product.manufacturer.name,
 						categoryId: asset.product.categoryId,
-						categoryName: asset.product.category.name,
+						categoryName: categoryLabel(asset.product.category),
 						categoryColor: asset.product.category.color,
 						available: 0,
 						maintenance: 0,
@@ -591,7 +592,10 @@
 								<td class="px-4 py-3 text-muted-foreground">—</td>
 								<td class="px-4 py-3">
 									{#if template.category}
-										<CategoryPill name={template.category.name} color={template.category.color} />
+										<CategoryPill
+											name={categoryLabel(template.category)}
+											color={template.category.color}
+										/>
 									{/if}
 								</td>
 								<td class="px-4 py-3 text-right font-mono tabular-nums">

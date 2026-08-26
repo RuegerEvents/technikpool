@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getErrorMessage, orgLabel } from '$lib/utils';
+	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -74,6 +74,13 @@
 				parts.push(`${result.added} asset${result.added !== 1 ? 's' : ''} added`);
 			if (result.removed > 0)
 				parts.push(`${result.removed} asset${result.removed !== 1 ? 's' : ''} removed`);
+			if (result.adopted > 0)
+				parts.push(
+					plural(result.adopted, [
+						'# already-booked asset moved into the bundle',
+						'# already-booked assets moved into the bundle'
+					])
+				);
 			if (result.skippedConflicts > 0) parts.push(`${result.skippedConflicts} skipped (conflict)`);
 			toast.success(
 				parts.length ? `Bundle updated: ${parts.join(', ')}` : 'Bundle already in sync'
@@ -429,7 +436,18 @@
 	<div class="flex flex-wrap items-center justify-between gap-4">
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">{production.name}</h1>
-			<p class="text-muted-foreground">Owned by {orgLabel(production.organization)}</p>
+			<p class="text-muted-foreground">
+				Owned by {orgLabel(production.organization)} · {formatDateRange(
+					production.startDate,
+					production.endDate
+				)}
+				{#if production.showStartDate || production.showEndDate}
+					· Show {formatDateRange(
+						production.showStartDate ?? production.startDate,
+						production.showEndDate ?? production.endDate
+					)}
+				{/if}
+			</p>
 		</div>
 		<div class="flex flex-wrap gap-2">
 			<Button variant="outline" href={resolve('/productions')}>Back</Button>
@@ -453,68 +471,68 @@
 	</div>
 
 	<!-- Offers & Invoices -->
-	{#if offers.length > 0 || invoices.length > 0}
-		<div class="grid gap-4 sm:grid-cols-2">
-			<Card.Root>
-				<Card.Header>
-					<Card.Title>Offers</Card.Title>
-				</Card.Header>
-				<Card.Content>
-					{#if offers.length === 0}
-						<p class="text-sm text-muted-foreground">No offers yet.</p>
-					{:else}
-						<div class="space-y-2">
-							{#each offers as offer (offer.id)}
-								<a
-									href={resolve(`/offers/${offer.id}`)}
-									class="flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
-								>
-									<div>
-										<p class="font-medium">{offer.customerName}</p>
-										<p class="text-xs text-muted-foreground">
-											{offer.dayCount} d
-											{#if offer.invoices.length > 0}
-												· Invoiced ({offer.invoices[0].number})
-											{/if}
-										</p>
-									</div>
-									<span class="font-medium tabular-nums">{fmtEUR(offerTotal(offer))}</span>
-								</a>
-							{/each}
-						</div>
-					{/if}
-				</Card.Content>
-			</Card.Root>
+	<div class="grid gap-4 sm:grid-cols-2">
+		<Card.Root>
+			<Card.Header>
+				<Card.Title>Offers</Card.Title>
+			</Card.Header>
+			<Card.Content>
+				{#if offers.length === 0}
+					<p class="text-sm text-muted-foreground">No offers yet.</p>
+				{:else}
+					<div class="space-y-2">
+						{#each offers as offer (offer.id)}
+							<a
+								href={resolve(`/offers/${offer.id}`)}
+								class="flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
+							>
+								<div>
+									<p class="font-medium">{offer.customerName}</p>
+									<p class="text-xs text-muted-foreground">
+										{offer.dayCount} d
+										{#if offer.invoices.length > 0}
+											· Invoiced ({offer.invoices[0].number})
+										{/if}
+									</p>
+								</div>
+								<span class="font-medium tabular-nums">{fmtEUR(offerTotal(offer))}</span>
+							</a>
+						{/each}
+					</div>
+				{/if}
+			</Card.Content>
+		</Card.Root>
 
-			<Card.Root>
-				<Card.Header>
-					<Card.Title>Invoices</Card.Title>
-				</Card.Header>
-				<Card.Content>
-					{#if invoices.length === 0}
-						<p class="text-sm text-muted-foreground">No invoices yet.</p>
-					{:else}
-						<div class="space-y-2">
-							{#each invoices as invoice (invoice.id)}
-								<a
-									href={resolve(`/invoices/${invoice.id}`)}
-									class="flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
-								>
-									<div>
-										<p class="font-medium">{invoice.number}</p>
-										<p class="text-xs text-muted-foreground">
-											{invoice.dayCount} d · {invoice.sentAt ? 'Sent' : 'Draft'}
-										</p>
-									</div>
-									<span class="font-medium tabular-nums">{fmtEUR(invoiceTotal(invoice))}</span>
-								</a>
-							{/each}
-						</div>
-					{/if}
-				</Card.Content>
-			</Card.Root>
-		</div>
-	{/if}
+		<Card.Root>
+			<Card.Header>
+				<Card.Title>Invoices</Card.Title>
+			</Card.Header>
+			<Card.Content>
+				{#if invoices.length === 0}
+					<p class="text-sm text-muted-foreground">
+						No invoices yet — an invoice is created from an offer.
+					</p>
+				{:else}
+					<div class="space-y-2">
+						{#each invoices as invoice (invoice.id)}
+							<a
+								href={resolve(`/invoices/${invoice.id}`)}
+								class="flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
+							>
+								<div>
+									<p class="font-medium">{invoice.number}</p>
+									<p class="text-xs text-muted-foreground">
+										{invoice.dayCount} d · {invoice.sentAt ? 'Sent' : 'Draft'}
+									</p>
+								</div>
+								<span class="font-medium tabular-nums">{fmtEUR(invoiceTotal(invoice))}</span>
+							</a>
+						{/each}
+					</div>
+				{/if}
+			</Card.Content>
+		</Card.Root>
+	</div>
 
 	<!-- Main info -->
 	<Card.Root>

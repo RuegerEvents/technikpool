@@ -71,10 +71,8 @@ msgstr "Sign up"
 msgid "Crew member added"
 msgstr "Crew member added"
 
-#. 0: orgLabel(production.organization)
-#: src/routes/productions/[id]/+page.svelte
-msgid "Owned by {0}"
-msgstr "Owned by {0}"
+#~ msgid "Owned by {0}"
+#~ msgstr "Owned by {0}"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
@@ -1059,6 +1057,9 @@ msgstr "Production Period:<0/> <1/> – <2/>"
 msgid "Date"
 msgstr "Date"
 
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
 #: src/routes/productions/[id]/delivery-note/+page.svelte
 msgid "Qty"
 msgstr "Qty"
@@ -1304,12 +1305,15 @@ msgstr "Location"
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/admin/categories/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/new/+page.svelte
+#: src/routes/offers/new/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
@@ -2863,7 +2867,6 @@ msgid "Rechnungen — persisted, sequentially numbered documents."
 msgstr "Rechnungen — persisted, sequentially numbered documents."
 
 #: src/routes/invoices/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
 msgid "No invoices yet."
 msgstr "No invoices yet."
 
@@ -2900,16 +2903,16 @@ msgstr "Product photo"
 msgid "Pricing & inspection updated"
 msgstr "Pricing & inspection updated"
 
-#: src/routes/assets/[id]/+page.svelte
-msgid "Pricing & Inspection"
-msgstr "Pricing & Inspection"
+#~ msgid "Pricing & Inspection"
+#~ msgstr "Pricing & Inspection"
 
-#: src/routes/assets/[id]/+page.svelte
-msgid "Feeds offer/invoice pricing and DGUV due-date tracking."
-msgstr "Feeds offer/invoice pricing and DGUV due-date tracking."
+#~ msgid "Feeds offer/invoice pricing and DGUV due-date tracking."
+#~ msgstr "Feeds offer/invoice pricing and DGUV due-date tracking."
 
+#: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/new/+page.svelte
 msgid "Net purchase price (€)"
 msgstr "Net purchase price (€)"
 
@@ -3092,6 +3095,8 @@ msgid "Purchase price"
 msgstr "Purchase price"
 
 #: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/invoices/[id]/print/+page.svelte
+#: src/routes/offers/[id]/print/+page.svelte
 msgid "Daily rate"
 msgstr "Daily rate"
 
@@ -3267,6 +3272,8 @@ msgstr "Equipment"
 msgid "{0} device{1} booked"
 msgstr "{0} device{1} booked"
 
+#: src/routes/+layout.svelte
+#: src/routes/admin/categories/+page.svelte
 #: src/routes/productions/[id]/equipment/+page.svelte
 msgid "Categories"
 msgstr "Categories"
@@ -3326,10 +3333,12 @@ msgstr "Rental Rates | {0} | Technikpool"
 msgid "Default daily rental rate per category, as a percentage of an asset's net purchase price. Feeds offer/invoice pricing."
 msgstr "Default daily rental rate per category, as a percentage of an asset's net purchase price. Feeds offer/invoice pricing."
 
+#: src/routes/offers/new/+page.svelte
 #: src/routes/orgs/[id]/rates/+page.svelte
 msgid "% / day"
 msgstr "% / day"
 
+#: src/routes/assets/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
@@ -3561,15 +3570,11 @@ msgstr "Total Duration"
 msgid "<0/> Show duration same as total duration"
 msgstr "<0/> Show duration same as total duration"
 
-#. 0: result.added; 1: result.added !== 1 ? 's' \\: ''; 2: result.skippedConflicts
-#: src/routes/productions/[id]/equipment/+page.svelte
-msgid "Added {0} asset{1} ({2} skipped — already booked elsewhere)"
-msgstr "Added {0} asset{1} ({2} skipped — already booked elsewhere)"
+#~ msgid "Added {0} asset{1} ({2} skipped — already booked elsewhere)"
+#~ msgstr "Added {0} asset{1} ({2} skipped — already booked elsewhere)"
 
-#. 0: result.added; 1: result.added !== 1 ? 's' \\: ''; 2: b.name
-#: src/routes/productions/[id]/equipment/+page.svelte
-msgid "Added {0} asset{1} from \"{2}\""
-msgstr "Added {0} asset{1} from \"{2}\""
+#~ msgid "Added {0} asset{1} from \"{2}\""
+#~ msgstr "Added {0} asset{1} from \"{2}\""
 
 #: src/routes/productions/[id]/equipment/+page.svelte
 msgid "<0/> Show items in bundles"
@@ -3847,11 +3852,8 @@ msgstr "Edit customer"
 msgid "Existing customer"
 msgstr "Existing customer"
 
-#: src/lib/components/ui/billing-document/billing-document.svelte
-#: src/routes/invoices/[id]/print/+page.svelte
-#: src/routes/offers/[id]/print/+page.svelte
-msgid "Uncategorized"
-msgstr "Uncategorized"
+#~ msgid "Uncategorized"
+#~ msgstr "Uncategorized"
 
 #. 0: group.name
 #. 0: group.name
@@ -4519,3 +4521,235 @@ msgstr "Select all units"
 #: src/lib/components/ui/image-upload/image-upload.svelte
 msgid "Drop an image here, paste it, or click to choose"
 msgstr "Drop an image here, paste it, or click to choose"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Enter a net purchase price first"
+msgstr "Enter a net purchase price first"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Enter a valid net purchase price"
+msgstr "Enter a valid net purchase price"
+
+#~ msgid "Price set on # unit"
+#~ msgid_plural "Price set on # units"
+#~ msgstr[0] "Price set on # unit"
+#~ msgstr[1] "Price set on # units"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Enter a rental rate first"
+msgstr "Enter a rental rate first"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Enter a valid rental rate"
+msgstr "Enter a valid rental rate"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Rate saved"
+msgstr "Rate saved"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Set the missing prices and rates before creating the offer"
+msgstr "Set the missing prices and rates before creating the offer"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Resolve the missing pricing data first — it's listed on the right."
+msgstr "Resolve the missing pricing data first — it's listed on the right."
+
+#: src/routes/offers/new/+page.svelte
+msgid "Pick a production to see how its equipment prices out."
+msgstr "Pick a production to see how its equipment prices out."
+
+#: src/routes/offers/new/+page.svelte
+msgid "Ready to bill"
+msgstr "Ready to bill"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Every booked item has a net purchase price and a category rate."
+msgstr "Every booked item has a net purchase price and a category rate."
+
+#: src/routes/offers/new/+page.svelte
+msgid "# line item"
+msgid_plural "# line items"
+msgstr[0] "# line item"
+msgstr[1] "# line items"
+
+#. 0: plural(r.pricedLineCount, ['# line item', '# line items']); 1: money( r.pricedDailyTotal )
+#: src/routes/offers/new/+page.svelte
+msgid "{0} · {1} per day before discount and VAT."
+msgstr "{0} · {1} per day before discount and VAT."
+
+#: src/routes/offers/new/+page.svelte
+msgid "Missing pricing data"
+msgstr "Missing pricing data"
+
+#: src/routes/offers/new/+page.svelte
+msgid "An offer bills each item as a percentage of its net purchase price, so these have nothing to bill from. Set them here — the values are stored on the equipment itself, not just on this offer."
+msgstr "An offer bills each item as a percentage of its net purchase price, so these have nothing to bill from. Set them here — the values are stored on the equipment itself, not just on this offer."
+
+#: src/routes/offers/new/+page.svelte
+msgid "# category has no rental rate"
+msgid_plural "# categories have no rental rate"
+msgstr[0] "# category has no rental rate"
+msgstr[1] "# categories have no rental rate"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Daily rate, as a percentage of the net purchase price."
+msgstr "Daily rate, as a percentage of the net purchase price."
+
+#: src/routes/offers/new/+page.svelte
+msgid "Ask an owner of this organization to set it."
+msgstr "Ask an owner of this organization to set it."
+
+#: src/routes/offers/new/+page.svelte
+msgid "# product has no net purchase price"
+msgid_plural "# products have no net purchase price"
+msgstr[0] "# product has no net purchase price"
+msgstr[1] "# products have no net purchase price"
+
+#: src/routes/offers/new/+page.svelte
+msgid "# unit"
+msgid_plural "# units"
+msgstr[0] "# unit"
+msgstr[1] "# units"
+
+#: src/routes/offers/new/+page.svelte
+msgid "€ net"
+msgstr "€ net"
+
+#~ msgid "Applies to all {0} units listed above."
+#~ msgstr "Applies to all {0} units listed above."
+
+#~ msgid "Owned by {0}. Ask them to price it, or set \"Assets to include\" to this organization's own assets only."
+#~ msgstr "Owned by {0}. Ask them to price it, or set \"Assets to include\" to this organization's own assets only."
+
+#: src/routes/offers/new/+page.svelte
+msgid "In bundle <0/>, which has no price of its own. Pricing that bundle bills it as one line instead."
+msgstr "In bundle <0/>, which has no price of its own. Pricing that bundle bills it as one line instead."
+
+#~ msgid "Added {0} asset{1}"
+#~ msgstr "Added {0} asset{1}"
+
+#~ msgid "{0} already booked individually moved into the bundle"
+#~ msgstr "{0} already booked individually moved into the bundle"
+
+#~ msgid "{0} skipped — already booked elsewhere"
+#~ msgstr "{0} skipped — already booked elsewhere"
+
+#~ msgid "{0} from \"{1}\""
+#~ msgstr "{0} from \"{1}\""
+
+#~ msgid "{0} already-booked asset{1} moved into the bundle"
+#~ msgstr "{0} already-booked asset{1} moved into the bundle"
+
+#. 0: formatDateRange( production.showStartDate ?? production.startDate, production.showEndDate ?? production.endDate )
+#: src/routes/productions/[id]/+page.svelte
+msgid "· Show {0}"
+msgstr "· Show {0}"
+
+#. 0: orgLabel(production.organization); 1: formatDateRange( production.startDate, production.endDate )
+#: src/routes/productions/[id]/+page.svelte
+msgid "Owned by {0} · {1} <0/>"
+msgstr "Owned by {0} · {1} <0/>"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "No invoices yet — an invoice is created from an offer."
+msgstr "No invoices yet — an invoice is created from an offer."
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Category saved"
+msgstr "Category saved"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Categories | Technikpool"
+msgstr "Categories | Technikpool"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Categories are shared by every organization. The English name is the source — it is what the API returns and what a billing line records; the German name is what the German UI and a German offer or invoice show."
+msgstr "Categories are shared by every organization. The English name is the source — it is what the API returns and what a billing line records; the German name is what the German UI and a German offer or invoice show."
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Colour"
+msgstr "Colour"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "English name"
+msgstr "English name"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "German name"
+msgstr "German name"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Order"
+msgstr "Order"
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "# asset added"
+msgid_plural "# assets added"
+msgstr[0] "# asset added"
+msgstr[1] "# assets added"
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "# was already booked individually and moved into the bundle"
+msgid_plural "# were already booked individually and moved into the bundle"
+msgstr[0] "# was already booked individually and moved into the bundle"
+msgstr[1] "# were already booked individually and moved into the bundle"
+
+#: src/routes/productions/[id]/equipment/+page.svelte
+msgid "# skipped, already booked elsewhere"
+msgid_plural "# skipped, already booked elsewhere"
+msgstr[0] "# skipped, already booked elsewhere"
+msgstr[1] "# skipped, already booked elsewhere"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "# already-booked asset moved into the bundle"
+msgid_plural "# already-booked assets moved into the bundle"
+msgstr[0] "# already-booked asset moved into the bundle"
+msgstr[1] "# already-booked assets moved into the bundle"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+#: src/routes/assets/new/+page.svelte
+msgid "Unknown"
+msgstr "Unknown"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "What a rental rate is calculated from. It applies to every unit of this product."
+msgstr "What a rental rate is calculated from. It applies to every unit of this product."
+
+#~ msgid "Set on the product — it applies to every unit of {0}. Change it under \"Edit product\" above."
+#~ msgstr "Set on the product — it applies to every unit of {0}. Change it under \"Edit product\" above."
+
+#~ msgid "Set on the product — it applies to every unit of {0}. Change it Change it in the Product card."
+#~ msgstr "Set on the product — it applies to every unit of {0}. Change it Change it in the Product card."
+
+#: src/routes/assets/new/+page.svelte
+msgid "What a rental rate is calculated from. An offer can't bill this product without it."
+msgstr "What a rental rate is calculated from. An offer can't bill this product without it."
+
+#. 0: group.label
+#: src/routes/offers/new/+page.svelte
+msgid "Price saved on {0}"
+msgstr "Price saved on {0}"
+
+#: src/routes/offers/new/+page.svelte
+msgid "The price belongs to the product, so it covers every unit of it — here and in every other offer."
+msgstr "The price belongs to the product, so it covers every unit of it — here and in every other offer."
+
+#: src/routes/offers/new/+page.svelte
+msgid "You need admin rights in an organization to price a product."
+msgstr "You need admin rights in an organization to price a product."
+
+#~ msgid "Set on the product — it applies to every unit of {0}. Change it in the Product card."
+#~ msgstr "Set on the product — it applies to every unit of {0}. Change it in the Product card."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Purchase & Inspection"
+msgstr "Purchase & Inspection"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Facts about this individual unit. What it bills at is the product's price."
+msgstr "Facts about this individual unit. What it bills at is the product's price."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "What a rental rate is calculated from, for every unit of this product."
+msgstr "What a rental rate is calculated from, for every unit of this product."

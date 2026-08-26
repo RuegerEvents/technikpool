@@ -8,6 +8,8 @@
 		name: string;
 		categoryId: string;
 		imageUrl: string;
+		/** Kept as a string so an empty field means "unknown", not 0. */
+		netPurchasePrice: string;
 	};
 
 	type Props = {
@@ -18,7 +20,7 @@
 	};
 
 	let {
-		value = $bindable({ name: '', categoryId: '', imageUrl: '' }),
+		value = $bindable({ name: '', categoryId: '', imageUrl: '', netPurchasePrice: '' }),
 		categories,
 		idPrefix = 'product'
 	}: Props = $props();
@@ -38,6 +40,21 @@
 			bind:value={value.categoryId}
 			placeholder="Select a category"
 		/>
+	</div>
+
+	<div class="space-y-2">
+		<Label for="{idPrefix}-price">Net purchase price (€)</Label>
+		<Input
+			id="{idPrefix}-price"
+			type="number"
+			min="0"
+			step="0.01"
+			placeholder="Unknown"
+			bind:value={value.netPurchasePrice}
+		/>
+		<p class="text-sm text-muted-foreground">
+			What a rental rate is calculated from. It applies to every unit of this product.
+		</p>
 	</div>
 
 	<div class="space-y-2">
