@@ -76,3 +76,7 @@ Bumps the root `package.json`, commits, tags, and pushes. Pushing a `v1.2.3` tag
 GitHub Action that publishes `docker.io/hrueger/technikpool`, tagged `dev` and the version.
 
 Repository secrets required: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
