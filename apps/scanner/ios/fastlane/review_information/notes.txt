@@ -1,20 +1,81 @@
+WHAT THE APP IS
+
 Technikpool Scanner is the handheld companion to Technikpool, a rental-inventory
-system for event-production companies. In normal use it pairs with a customer's
-own server, so there is no shared account to sign in with.
+system for event-production companies (lighting, audio, staging). When a crew
+loads a truck for an event, someone has to record which cases went out and which
+came back; on paper it is not done at all, and equipment goes missing. This app
+lets a crew member scan the label on each case as it is handled, and the
+inventory updates on the spot.
 
-To review it without a server, tap "Explore the demo" at the bottom of the first
-screen. That runs a small sample warehouse entirely on the device — no network
-request is made, and nothing is stored beyond the app.
+Technikpool is an open-source project:
+https://github.com/RuegerEvents/technikpool — anyone can host their own server
+from it for free, and this app is the handheld client for it. There is nothing
+to buy, from us or in the app.
 
-In the demo:
+It is for staff of the company running that server — a warehouse manager, a
+driver, a stagehand. Not a consumer app, and there is no public sign-up.
+
+Features: Scans (check equipment out to a production or back in), Lookup (one
+tag, showing the asset, where it is and its history), Inventory (the full asset
+list), Settings.
+
+It runs on ordinary phones, scanning with the camera, and on rugged warehouse
+handhelds that have a physical barcode trigger and no usable camera. On those,
+no camera UI is shown at all.
+
+SETUP AND ACCESS TO THE MAIN FEATURES
+
+In normal use the app pairs with a customer's own server, so there is no shared
+account we can hand out. To review it without one, tap "Explore the demo" at the
+bottom of the first screen. That runs a sample warehouse entirely on the device:
+no network request is made, nothing leaves the phone, no credentials needed.
+
   * Scans — pick a location or production, then type an asset tag where it says
-    "Manual entry". Tags run 40000001 to 40000012. On a device with a camera the
-    camera button works too, but there is nothing to point it at.
-  * Lookup — type the same tags to see an asset, where it is and its history.
+    "Manual entry". Tags run 40000001 to 40000012. The camera button works too,
+    though there is nothing to point it at.
+  * Lookup — type the same tags to see an asset, where it is, and its history.
   * Inventory — lists every asset with its tag, so nothing has to be guessed.
-
-Leave the demo under Settings › Leave demo.
+  * Settings › Leave demo returns to the first screen.
 
 Camera access is requested only for reading barcodes, and only when the scan
-button is used. The app runs on phones and on rugged warehouse handhelds that
-have a physical barcode trigger instead of a camera.
+button is used. Local-network access only when pairing with a server on the same
+network.
+
+ACCOUNTS
+
+There is no registration in the app, and no in-app purchase, subscription or
+paid content. Pairing to a real server is either scanning the QR code on that
+server's Scanners page and approving a short code in a browser (RFC 8628 device
+authorization), or signing in with an email and password issued by that
+customer's administrator. Settings › Disconnect erases the stored token.
+Accounts are created and deleted by that administrator in the web app — the app
+cannot create one, so it has none to delete.
+
+There is no user-generated content. The only thing a user contributes is a scan
+of a barcode on their own employer's equipment, visible to that employer alone.
+
+EXTERNAL SERVICES
+
+None. The app talks to exactly one host: the Technikpool server belonging to the
+company using it, self-hosted from the repository above, which also handles
+authentication. No analytics SDK, no crash reporter, no advertising network, no
+payment processor, no AI service, no third-party data provider. The app does not
+use the advertising identifier and does not track. Demo mode makes no network
+request at all.
+
+REGIONAL DIFFERENCES
+
+None. Same features and content in every region. The interface is German and
+English, following the device language with an override in Settings and on the
+pairing screen; that is the only variation.
+
+REGULATED INDUSTRY / THIRD-PARTY MATERIAL
+
+Neither applies. Equipment rental is not a regulated industry, and the app ships
+no third-party material — the inventory data belongs to whichever company runs
+the server.
+
+TESTED ON
+
+iPhone 16 running iOS 26 (physical device), and a Chainway C90 rugged handheld
+running Android for the hardware-trigger path.
