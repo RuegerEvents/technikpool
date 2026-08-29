@@ -49,10 +49,15 @@
 	     same question by hand in App Store Connect. -->
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<!-- These two strings are the *fallback* only. The text a user actually
+	     sees comes from Runner/<lang>.lproj/InfoPlist.strings, which is what
+	     makes the permission prompt follow the same language as the rest of
+	     the UI. A hardcoded string here is shown in every locale regardless
+	     of the device language, which is a guideline 4 rejection. -->
 	<key>NSCameraUsageDescription</key>
-	<string>Zum Scannen von Etiketten und QR-Codes mit der Kamera.</string>
+	<string>Used to scan equipment labels and barcodes with the camera.</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Um einen Technikpool-Server im selben Netzwerk zu erreichen.</string>
+	<string>Used to reach a Technikpool server on the same network.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

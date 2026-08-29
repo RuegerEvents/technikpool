@@ -1,0 +1,6 @@
+/* English is the source catalogue, as in lib/l10n/app_en.arb — the German
+   below is the translation. Info.plist carries the same English text as the
+   fallback for a locale we do not ship. */
+
+"NSCameraUsageDescription" = "Used to scan equipment labels and barcodes with the camera.";
+"NSLocalNetworkUsageDescription" = "Used to reach a Technikpool server on the same network.";
