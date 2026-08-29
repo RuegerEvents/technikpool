@@ -19,6 +19,8 @@ class SettingsScreen extends ConsumerWidget {
     final settings = ref.watch(scanSettingsProvider);
 
     return Scaffold(
+      // HomeScreen's Scaffold owns the keyboard inset for every tab.
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(title: Text(l10n.settings)),
       body: ListView(
         children: [

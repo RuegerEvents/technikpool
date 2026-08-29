@@ -37,6 +37,8 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
         : ref.watch(productionsProvider);
 
     return Scaffold(
+      // HomeScreen's Scaffold owns the keyboard inset for every tab.
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(title: Text(l10n.startSession)),
       body: Column(
         children: [

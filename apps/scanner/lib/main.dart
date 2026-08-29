@@ -41,13 +41,22 @@ class ScannerApp extends ConsumerWidget {
       locale: ref.watch(localeProvider).value,
       localizationsDelegates: S.localizationsDelegates,
       supportedLocales: S.supportedLocales,
-      debugShowCheckedModeBanner: true,
+      debugShowCheckedModeBanner: false,
       theme: technikpoolTheme(Brightness.light),
       darkTheme: technikpoolTheme(Brightness.dark),
       // The web remembers a per-user choice in localStorage. A shared handheld
       // has no per-user anything, so it follows the device instead — which on a
       // PDA is usually set once for the building it works in.
       themeMode: ThemeMode.system,
+      // Flutter's own onTapOutside does nothing on a touch platform, so once a
+      // field has focus on iOS there is no way back out of the keyboard: it
+      // covers the tab bar, and iOS — unlike Android — has no system Back to
+      // dismiss it. Tapping anywhere that isn't itself tappable drops focus.
+      builder: (context, child) => GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: child,
+      ),
       home: const _Root(),
     );
   }

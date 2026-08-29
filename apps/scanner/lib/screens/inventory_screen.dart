@@ -76,6 +76,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     final categories = ref.watch(categoriesProvider).value ?? const <Category>[];
 
     return Scaffold(
+      // HomeScreen's Scaffold owns the keyboard inset for every tab.
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(title: Text(l10n.inventory)),
       body: Column(
         children: [
@@ -160,6 +162,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             child: RefreshIndicator(
               onRefresh: () => _load(reset: true),
               child: ListView.separated(
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                 itemCount: _assets.length + 1,
                 separatorBuilder: (_, _) => const Divider(height: 1),
                 itemBuilder: (_, i) {

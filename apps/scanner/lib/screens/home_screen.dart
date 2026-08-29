@@ -37,15 +37,29 @@ class HomeScreen extends ConsumerWidget {
     });
 
     final tab = ref.watch(activeTabProvider);
+    final demo = ref.watch(isDemoProvider);
 
+    Widget tabs = IndexedStack(index: tab.index, children: _tabs);
+    // The banner has already spent the status-bar inset getting out from under
+    // it. Without this the tab's own AppBar spends it a second time and opens a
+    // status bar's worth of blank space between the two.
+    if (demo) {
+      tabs = MediaQuery.removePadding(context: context, removeTop: true, child: tabs);
+    }
+
+    // Each tab has a Scaffold of its own, and every one of them sets
+    // resizeToAvoidBottomInset: false, because this one already lifts its body
+    // clear of the keyboard. Letting both resize subtracts the keyboard twice —
+    // on Android the window itself shrinks, so the second subtraction finds
+    // nothing left to take, but on iOS it squeezes a tab into a sliver.
     return Scaffold(
       body: Column(
         children: [
           // A demo that doesn't say so is just an app full of made-up stock.
           // Above the tabs rather than inside one, because every tab is demo
           // data and the reviewer may start on any of them.
-          if (ref.watch(isDemoProvider)) _DemoBanner(),
-          Expanded(child: IndexedStack(index: tab.index, children: _tabs)),
+          if (demo) _DemoBanner(),
+          Expanded(child: tabs),
         ],
       ),
       bottomNavigationBar: NavigationBar(

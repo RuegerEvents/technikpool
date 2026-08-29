@@ -76,6 +76,8 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     return Scaffold(
+      // HomeScreen's Scaffold owns the keyboard inset for every tab.
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(l10n.lookup),
         actions: [
@@ -129,6 +131,9 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
     }
 
     return ListView(
+      // The other half of dismissing the keyboard: on iOS a list under a
+      // search field is expected to push it away as soon as you drag.
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.all(16),
       children: [
         Text(
