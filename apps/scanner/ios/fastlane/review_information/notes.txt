@@ -1,34 +1,33 @@
 WHAT THE APP IS
 
-Technikpool Scanner is the handheld companion to Technikpool, a rental-inventory
-system for event-production companies (lighting, audio, staging). When a crew
-loads a truck for an event, someone has to record which cases went out and which
-came back; on paper it is not done at all, and equipment goes missing. This app
-lets a crew member scan the label on each case as it is handled, and the
-inventory updates on the spot.
+Technikpool Scanner is a barcode inventory scanner for event equipment
+(lighting, audio, staging). When a crew loads a truck for an event, someone has
+to record which cases went out and which came back; on paper it is not done at
+all, and equipment goes missing. This app lets anyone scan the label on a case
+as it is handled, and the inventory updates on the spot.
 
-Technikpool is an open-source project:
-https://github.com/RuegerEvents/technikpool — anyone can host their own server
-from it for free, and this app is the handheld client for it. There is nothing
-to buy, from us or in the app.
+WHO CAN USE IT
 
-It is for staff of the company running that server — a warehouse manager, a
-driver, a stagehand. Not a consumer app, and there is no public sign-up.
+Anyone. Technikpool is free and open-source software, published under the MIT
+licence at https://github.com/RuegerEvents/technikpool. Any person, band,
+theatre group, school, church, camera club or company can download the server,
+run it themselves, and use this app with it. There is no invitation, no
+approval step, no waiting list, and no affiliation with us or with anyone else
+required. We do not operate a service that anyone has to be a customer of, we
+do not gate access to the software, and we cannot see or restrict who runs it.
 
-Features: Scans (check equipment out to a production or back in), Lookup (one
-tag, showing the asset, where it is and its history), Inventory (the full asset
-list), Settings.
+The app also works with no server at all: "Explore the demo" on the first screen
+runs a complete sample warehouse on the device. Scanning, lookup and inventory
+all work there, with no account, no sign-up and no network request. That is a
+real feature of the shipped app, available to every person who downloads it.
 
-It runs on ordinary phones, scanning with the camera, and on rugged warehouse
-handhelds that have a physical barcode trigger and no usable camera. On those,
-no camera UI is shown at all.
+Nothing in the app is paid. There is no purchase, subscription, in-app purchase
+or paid tier, from us or from anyone else. The server software is free as well.
 
 SETUP AND ACCESS TO THE MAIN FEATURES
 
-In normal use the app pairs with a customer's own server, so there is no shared
-account we can hand out. To review it without one, tap "Explore the demo" at the
-bottom of the first screen. That runs a sample warehouse entirely on the device:
-no network request is made, nothing leaves the phone, no credentials needed.
+Tap "Explore the demo" at the bottom of the first screen. No credentials are
+needed and nothing leaves the device.
 
   * Scans — pick a location or production, then type an asset tag where it says
     "Manual entry". Tags run 40000001 to 40000012. The camera button works too,
@@ -37,31 +36,36 @@ no network request is made, nothing leaves the phone, no credentials needed.
   * Inventory — lists every asset with its tag, so nothing has to be guessed.
   * Settings › Leave demo returns to the first screen.
 
+To use the app for real, a person installs the open-source server (Docker image,
+one command) and either scans the QR code on its Scanners page or signs in with
+an email and password on that server. Both are shown on the first screen.
+
 Camera access is requested only for reading barcodes, and only when the scan
 button is used. Local-network access only when pairing with a server on the same
-network.
+network. Both prompts are localised and follow the language of the interface.
 
 ACCOUNTS
 
-There is no registration in the app, and no in-app purchase, subscription or
-paid content. Pairing to a real server is either scanning the QR code on that
-server's Scanners page and approving a short code in a browser (RFC 8628 device
-authorization), or signing in with an email and password issued by that
-customer's administrator. Settings › Disconnect erases the stored token.
-Accounts are created and deleted by that administrator in the web app — the app
-cannot create one, so it has none to delete.
+Accounts live on whichever server the user runs, not with us — there is no
+Technikpool account, no central sign-up and no central directory. Somebody
+running their own server creates the first account on it themselves during
+setup, and can create as many more as they like. Pairing is either the QR code
+plus a short confirmation code in a browser (RFC 8628 device authorization) or
+an email and password. Settings › Disconnect erases the stored token. Deleting
+an account is done in the web app on that server; the app cannot create one, so
+it has none to delete.
 
-There is no user-generated content. The only thing a user contributes is a scan
-of a barcode on their own employer's equipment, visible to that employer alone.
+There is no user-generated content and nothing is shared between users. The only
+thing a user contributes is a scan of a barcode on their own equipment, stored
+on their own server.
 
 EXTERNAL SERVICES
 
-None. The app talks to exactly one host: the Technikpool server belonging to the
-company using it, self-hosted from the repository above, which also handles
-authentication. No analytics SDK, no crash reporter, no advertising network, no
-payment processor, no AI service, no third-party data provider. The app does not
-use the advertising identifier and does not track. Demo mode makes no network
-request at all.
+None. The app talks to exactly one host: whichever Technikpool server its user
+chose, which also handles authentication. No analytics SDK, no crash reporter,
+no advertising network, no payment processor, no AI service, no third-party data
+provider. The app does not use the advertising identifier and does not track.
+Demo mode makes no network request at all.
 
 REGIONAL DIFFERENCES
 
@@ -72,10 +76,10 @@ pairing screen; that is the only variation.
 REGULATED INDUSTRY / THIRD-PARTY MATERIAL
 
 Neither applies. Equipment rental is not a regulated industry, and the app ships
-no third-party material — the inventory data belongs to whichever company runs
-the server.
+no third-party material — the inventory data belongs to whoever runs the server.
 
 TESTED ON
 
-iPhone 16 running iOS 26 (physical device), and a Chainway C90 rugged handheld
-running Android for the hardware-trigger path.
+iPhone 16 running iOS 26 (physical device), iPad Air 11-inch (simulator, both
+languages), and a Chainway C90 rugged handheld running Android for the
+hardware-trigger path.
