@@ -317,7 +317,7 @@
 									<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
 										<td class="px-4 py-3">
 											<div class="flex items-center gap-2">
-												<ProductThumb src={asset.product.imageUrl} alt={asset.product.name} />
+												<ProductThumb path={asset.product.imagePath} alt={asset.product.name} />
 												<CategoryPill
 													name={categoryLabel(asset.product.category)}
 													color={asset.product.category.color}
@@ -396,7 +396,7 @@
 								<tr class="border-b bg-background last:border-0 hover:bg-muted/30">
 									<td class="px-3 py-2">
 										<div class="flex items-center gap-2">
-											<ProductThumb src={asset.product.imageUrl} alt={asset.product.name} />
+											<ProductThumb path={asset.product.imagePath} alt={asset.product.name} />
 											<div>
 												<p class="font-medium">{asset.product.name}</p>
 												<p class="text-xs text-muted-foreground">

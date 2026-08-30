@@ -23,8 +23,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const bytes = new Uint8Array(await file.arrayBuffer());
 
 	try {
-		const url = await putObject(key, bytes, file.type);
-		return json({ url });
+		// The stored key, not an address. What renders it is `imageSrc()`; see
+		// $lib/images for why the host is resolved at display time.
+		const path = await putObject(key, bytes, file.type);
+		return json({ path });
 	} catch (error) {
 		return json(
 			{ message: `Could not upload image: ${(error as Error).message}` },

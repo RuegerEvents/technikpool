@@ -25,13 +25,6 @@ export const BUCKET = process.env.S3_BUCKET ?? 'technikpool';
 // Manufacturer are a global catalogue, not org-scoped.
 export const PUBLIC_PREFIX = 'product-images';
 
-// Base URL the stored object is reachable at (e.g. a reverse-proxied path to
-// the S3-compatible server, or a CDN in front of it). It ends up baked into
-// every stored imageUrl, so it has to be an address a *browser* can reach —
-// not the container name the app itself talks to.
-export const PUBLIC_URL_BASE =
-	process.env.S3_PUBLIC_URL_BASE ?? `${process.env.S3_ENDPOINT}/${BUCKET}`;
-
 // Grants anonymous s3:GetObject on the public prefix and nothing else: other
 // keys in the bucket stay 403, and the bucket itself cannot be listed, so the
 // object names are not enumerable.
@@ -74,9 +67,14 @@ export async function ensureBucket() {
 	}
 }
 
+// Returns the key it wrote, which is also what gets stored: the address a
+// browser loads it from is `imageSrc()`'s job (see $lib/images), resolved
+// against PUBLIC_S3_URL_BASE at render time. Storing the full URL instead would
+// pin every existing row to whatever host the store happened to be on the day
+// it was uploaded.
 export async function putObject(key: string, body: Uint8Array, contentType: string) {
 	await s3.send(
 		new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: body, ContentType: contentType })
 	);
-	return `${PUBLIC_URL_BASE}/${key}`;
+	return key;
 }

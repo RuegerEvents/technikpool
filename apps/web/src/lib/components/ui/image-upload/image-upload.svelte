@@ -27,6 +27,7 @@
 
 <script lang="ts">
 	import { getErrorMessage } from '$lib/utils';
+	import { imageSrc } from '$lib/images';
 	import { Button } from '$lib/components/ui/button';
 	import { toast } from 'svelte-sonner';
 	import type {
@@ -34,6 +35,8 @@
 		BackgroundRemovalRequest
 	} from './background-removal.worker';
 
+	// `value` is the stored object key, not an address — what the form saves and
+	// what the database holds. Only the preview below resolves it. See $lib/images.
 	let { value = $bindable(''), label = 'Image' }: { value?: string; label?: string } = $props();
 
 	type Step = 'idle' | 'crop' | 'bg' | 'done';
@@ -436,9 +439,9 @@
 				const error = await response.json().catch(() => ({ message: 'Upload failed' }));
 				throw new Error(error.message);
 			}
-			const { url } = await response.json();
-			value = url;
-			shownValue = url;
+			const { path } = await response.json();
+			value = path;
+			shownValue = path;
 			step = 'done';
 		} catch (err) {
 			toast.error(getErrorMessage(err));
@@ -647,7 +650,7 @@
 		</div>
 	{:else if step === 'done'}
 		<div class="flex items-center gap-3 rounded-lg border p-2">
-			<img src={value} alt="" class="h-14 w-14 rounded-md border object-cover" />
+			<img src={imageSrc(value)} alt="" class="h-14 w-14 rounded-md border object-cover" />
 			<Button type="button" variant="outline" size="sm" onclick={reset}>Replace</Button>
 		</div>
 	{/if}

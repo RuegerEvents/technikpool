@@ -132,7 +132,7 @@
 		kind: 'product';
 		productId: string;
 		productName: string;
-		imageUrl: string | null;
+		imagePath: string | null;
 		manufacturerName: string;
 		total: number;
 		pending: number;
@@ -177,7 +177,7 @@
 						kind: 'product',
 						productId: pid,
 						productName: item.asset.product.name,
-						imageUrl: item.asset.product.imageUrl,
+						imagePath: item.asset.product.imagePath,
 						manufacturerName: item.asset.product.manufacturer.name,
 						total: 0,
 						pending: 0,
@@ -863,7 +863,7 @@
 												Remove
 											</button>
 										{:else}
-											<ProductThumb src={section.imageUrl} alt={section.productName} />
+											<ProductThumb path={section.imagePath} alt={section.productName} />
 											<span class="font-medium">{section.productName}</span>
 										{/if}
 									</div>
@@ -913,7 +913,7 @@
 											<div class="flex items-center gap-4 text-sm">
 												{#if section.kind === 'bundle'}
 													<ProductThumb
-														src={item.asset.product.imageUrl}
+														path={item.asset.product.imagePath}
 														alt={item.asset.product.name}
 														size={22}
 													/>

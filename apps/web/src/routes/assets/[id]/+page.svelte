@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { categoryLabel } from '$lib/category';
 	import { getErrorMessage, orgLabel } from '$lib/utils';
+	import { imageSrc } from '$lib/images';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -143,7 +144,7 @@
 	let productDraft = $state<ProductDraft>({
 		name: '',
 		categoryId: '',
-		imageUrl: '',
+		imagePath: '',
 		netPurchasePrice: ''
 	});
 	let savingProduct = $state(false);
@@ -152,7 +153,7 @@
 		productDraft = {
 			name: asset.product.name,
 			categoryId: asset.product.categoryId,
-			imageUrl: asset.product.imageUrl ?? '',
+			imagePath: asset.product.imagePath ?? '',
 			netPurchasePrice: asset.product.netPurchasePrice?.toString() ?? ''
 		};
 		productModalOpen = true;
@@ -165,7 +166,7 @@
 				productId: asset.product.id,
 				name: productDraft.name,
 				categoryId: productDraft.categoryId,
-				imageUrl: productDraft.imageUrl,
+				imagePath: productDraft.imagePath,
 				netPurchasePrice: productDraft.netPurchasePrice.trim()
 					? Number(productDraft.netPurchasePrice)
 					: null
@@ -407,9 +408,9 @@
 
 					<div class="space-y-2">
 						<Label>Product Image</Label>
-						{#if asset.product.imageUrl}
+						{#if asset.product.imagePath}
 							<img
-								src={asset.product.imageUrl}
+								src={imageSrc(asset.product.imagePath)}
 								alt={asset.product.name}
 								class="h-40 w-full rounded-md border bg-muted/30 object-contain p-2"
 							/>

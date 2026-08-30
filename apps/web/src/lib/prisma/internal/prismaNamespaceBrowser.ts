@@ -211,7 +211,7 @@ export type OrgMembershipScalarFieldEnum = (typeof OrgMembershipScalarFieldEnum)
 export const ManufacturerScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  logoUrl: 'logoUrl',
+  logoPath: 'logoPath',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -237,7 +237,7 @@ export const ProductScalarFieldEnum = {
   name: 'name',
   manufacturerId: 'manufacturerId',
   categoryId: 'categoryId',
-  imageUrl: 'imageUrl',
+  imagePath: 'imagePath',
   netPurchasePrice: 'netPurchasePrice',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

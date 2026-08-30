@@ -7,7 +7,7 @@
 	export type ProductDraft = {
 		name: string;
 		categoryId: string;
-		imageUrl: string;
+		imagePath: string;
 		/** Kept as a string so an empty field means "unknown", not 0. */
 		netPurchasePrice: string;
 	};
@@ -20,7 +20,7 @@
 	};
 
 	let {
-		value = $bindable({ name: '', categoryId: '', imageUrl: '', netPurchasePrice: '' }),
+		value = $bindable({ name: '', categoryId: '', imagePath: '', netPurchasePrice: '' }),
 		categories,
 		idPrefix = 'product'
 	}: Props = $props();
@@ -59,6 +59,6 @@
 
 	<div class="space-y-2">
 		<Label>Product Image</Label>
-		<ImageUpload bind:value={value.imageUrl} label="Product photo" />
+		<ImageUpload bind:value={value.imagePath} label="Product photo" />
 	</div>
 </div>

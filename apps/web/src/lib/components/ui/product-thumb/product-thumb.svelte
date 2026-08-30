@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { cn } from '$lib/utils';
+	import { imageSrc } from '$lib/images';
 
 	type Props = {
-		src?: string | null;
+		/** The stored object key, not an address — resolved here. See $lib/images. */
+		path?: string | null;
 		alt?: string;
 		/** Edge length in px. 28 is the table default — dense enough to leave row height alone. */
 		size?: number;
@@ -11,8 +13,9 @@
 		class?: string;
 	};
 
-	let { src, alt = '', size = 28, fill = false, class: className }: Props = $props();
+	let { path, alt = '', size = 28, fill = false, class: className }: Props = $props();
 
+	let src = $derived(imageSrc(path));
 	let box = $derived(fill ? undefined : `width: ${size}px; height: ${size}px;`);
 	let boxClass = $derived(fill ? 'h-full w-full' : '');
 </script>

@@ -42,7 +42,7 @@
 	let searchTrimmed = $derived(searchQuery.toLowerCase().trim());
 
 	function matches(product: CatalogProduct) {
-		if (onlyMissingImage && product.imageUrl) return false;
+		if (onlyMissingImage && product.imagePath) return false;
 		if (!searchTrimmed) return true;
 		return (
 			product.name.toLowerCase().includes(searchTrimmed) ||
@@ -57,7 +57,7 @@
 	// person who just did that. It leaves as soon as they move on.
 	let visible = $derived(products.filter((p) => p.id === currentId || matches(p)));
 
-	let missingImageCount = $derived(products.filter((p) => !p.imageUrl).length);
+	let missingImageCount = $derived(products.filter((p) => !p.imagePath).length);
 
 	let index = $derived(
 		Math.max(
@@ -70,7 +70,7 @@
 	let draft = $state<ProductDraft>({
 		name: '',
 		categoryId: '',
-		imageUrl: '',
+		imagePath: '',
 		netPurchasePrice: ''
 	});
 	let draftFor = $state('');
@@ -85,7 +85,7 @@
 		draft = {
 			name: product.name,
 			categoryId: product.categoryId,
-			imageUrl: product.imageUrl ?? '',
+			imagePath: product.imagePath ?? '',
 			netPurchasePrice: product.netPurchasePrice?.toString() ?? ''
 		};
 	});
@@ -95,7 +95,7 @@
 			draftFor === current.id &&
 			(draft.name.trim() !== current.name ||
 				draft.categoryId !== current.categoryId ||
-				draft.imageUrl.trim() !== (current.imageUrl ?? '') ||
+				draft.imagePath.trim() !== (current.imagePath ?? '') ||
 				draft.netPurchasePrice.trim() !== (current.netPurchasePrice?.toString() ?? ''))
 	);
 
@@ -112,7 +112,7 @@
 				productId: current.id,
 				name: draft.name,
 				categoryId: draft.categoryId,
-				imageUrl: draft.imageUrl,
+				imagePath: draft.imagePath,
 				netPurchasePrice: draft.netPurchasePrice.trim() ? Number(draft.netPurchasePrice) : null
 			});
 			return true;
@@ -268,14 +268,14 @@
 								? 'bg-muted'
 								: 'hover:bg-muted/40'}"
 						>
-							<ProductThumb src={product.imageUrl} alt={product.name} size={32} />
+							<ProductThumb path={product.imagePath} alt={product.name} size={32} />
 							<span class="min-w-0 flex-1">
 								<span class="block truncate text-sm font-medium">{product.name}</span>
 								<span class="block truncate text-xs text-muted-foreground"
 									>{product.manufacturer.name}</span
 								>
 							</span>
-							{#if !product.imageUrl}
+							{#if !product.imagePath}
 								<span
 									class="shrink-0 rounded-full bg-yellow-100 px-1.5 py-0.5 text-[10px] font-semibold text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
 									>No image</span

@@ -49,7 +49,7 @@
 	type SelectionOrNew = { id: string; name: string } | { id: null; name: string } | null;
 
 	let manufacturer = $state<SelectionOrNew>(null);
-	let newManufacturerLogoUrl = $state('');
+	let newManufacturerLogoPath = $state('');
 	let product = $state<SelectionOrNew>(null);
 	let categories = $derived(await getCategories());
 
@@ -70,7 +70,7 @@
 		open: false,
 		name: '',
 		categoryId: '',
-		imageUrl: '',
+		imagePath: '',
 		netPurchasePrice: ''
 	});
 
@@ -83,7 +83,7 @@
 	let pendingProduct = $state<{
 		name: string;
 		categoryId: string;
-		imageUrl: string;
+		imagePath: string;
 		netPurchasePrice: string;
 	} | null>(null);
 
@@ -110,7 +110,7 @@
 		pendingProduct = {
 			name: newProductModal.name,
 			categoryId: newProductModal.categoryId,
-			imageUrl: newProductModal.imageUrl,
+			imagePath: newProductModal.imagePath,
 			netPurchasePrice: newProductModal.netPurchasePrice
 		};
 		newProductModal.open = false;
@@ -144,7 +144,7 @@
 
 	function resetForm() {
 		manufacturer = null;
-		newManufacturerLogoUrl = '';
+		newManufacturerLogoPath = '';
 		product = null;
 		pendingProduct = null;
 		manufacturerKey++;
@@ -177,10 +177,10 @@
 				locationId,
 				manufacturerId: manufacturer.id ?? undefined,
 				newManufacturerName: manufacturer.id ? undefined : manufacturer.name,
-				newManufacturerLogoUrl: manufacturer.id ? undefined : newManufacturerLogoUrl || undefined,
+				newManufacturerLogoPath: manufacturer.id ? undefined : newManufacturerLogoPath || undefined,
 				productId: product.id ?? undefined,
 				newProductName: product.id ? undefined : (pendingProduct?.name ?? product.name),
-				newProductImageUrl: product.id ? undefined : pendingProduct?.imageUrl || undefined,
+				newProductImagePath: product.id ? undefined : pendingProduct?.imagePath || undefined,
 				newProductNetPurchasePrice:
 					product.id || !pendingProduct?.netPurchasePrice?.trim()
 						? undefined
@@ -295,7 +295,7 @@
 					{#if manufacturer && manufacturer.id === null}
 						<div class="space-y-2">
 							<Label>Manufacturer logo</Label>
-							<ImageUpload bind:value={newManufacturerLogoUrl} label="Manufacturer logo" />
+							<ImageUpload bind:value={newManufacturerLogoPath} label="Manufacturer logo" />
 						</div>
 					{/if}
 
@@ -318,7 +318,7 @@
 									<p class="text-xs text-muted-foreground">
 										New product · {categories.find((c) => c.id === pendingProduct?.categoryId)
 											?.name ?? ''}
-										{#if pendingProduct.imageUrl}· has image{/if}
+										{#if pendingProduct.imagePath}· has image{/if}
 									</p>
 								{/if}
 							</div>
@@ -480,7 +480,7 @@
 
 				<div class="space-y-2">
 					<Label>Product photo</Label>
-					<ImageUpload bind:value={newProductModal.imageUrl} label="Product photo" />
+					<ImageUpload bind:value={newProductModal.imagePath} label="Product photo" />
 				</div>
 			</div>
 

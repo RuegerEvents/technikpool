@@ -306,12 +306,12 @@ const createAssetsSchema = v.object({
 	locationId: v.string(),
 	productId: v.optional(v.string()),
 	newProductName: v.optional(v.string()),
-	newProductImageUrl: v.optional(v.string()),
+	newProductImagePath: v.optional(v.string()),
 	newProductNetPurchasePrice: v.optional(v.nullable(v.pipe(v.number(), v.minValue(0)))),
 	categoryId: v.optional(v.string()),
 	manufacturerId: v.optional(v.string()),
 	newManufacturerName: v.optional(v.string()),
-	newManufacturerLogoUrl: v.optional(v.string()),
+	newManufacturerLogoPath: v.optional(v.string()),
 	items: v.array(
 		v.object({
 			serialNumber: v.optional(v.string()),
@@ -336,7 +336,7 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 		const m = await prisma.manufacturer.create({
 			data: {
 				name: data.newManufacturerName,
-				logoUrl: data.newManufacturerLogoUrl?.trim() || null
+				logoPath: data.newManufacturerLogoPath?.trim() || null
 			}
 		});
 		manufacturerId = m.id;
@@ -353,7 +353,7 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 				name: data.newProductName,
 				manufacturerId,
 				categoryId: data.categoryId,
-				imageUrl: data.newProductImageUrl?.trim() || null,
+				imagePath: data.newProductImagePath?.trim() || null,
 				netPurchasePrice: data.newProductNetPurchasePrice ?? null
 			}
 		});
@@ -869,7 +869,7 @@ const updateProductSchema = v.object({
 	productId: v.string(),
 	name: v.optional(v.string()),
 	categoryId: v.optional(v.string()),
-	imageUrl: v.optional(v.string()),
+	imagePath: v.optional(v.string()),
 	netPurchasePrice: v.optional(v.nullable(v.pipe(v.number(), v.minValue(0))))
 });
 
@@ -893,7 +893,7 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		data: {
 			...(input.name ? { name: input.name.trim() } : {}),
 			...(input.categoryId ? { categoryId: input.categoryId } : {}),
-			imageUrl: input.imageUrl !== undefined ? input.imageUrl?.trim() || null : undefined,
+			imagePath: input.imagePath !== undefined ? input.imagePath?.trim() || null : undefined,
 			// Explicit null clears it; leaving the field out keeps what's stored,
 			// so a form that doesn't show the price can't wipe it.
 			...('netPurchasePrice' in input ? { netPurchasePrice: input.netPurchasePrice } : {})

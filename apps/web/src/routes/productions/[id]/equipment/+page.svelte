@@ -615,7 +615,7 @@
 								: 'cursor-pointer hover:bg-muted/40'}"
 							onclick={() => !groupAddDisabled && setQty(g, groupBookedIndividually(g) + 1)}
 						>
-							<ProductThumb src={g.imageUrl} alt={g.productName} />
+							<ProductThumb path={g.imagePath} alt={g.productName} />
 							<div class="min-w-0 flex-1">
 								<p class="truncate text-sm font-medium">
 									<span
@@ -698,7 +698,7 @@
 							{/each}
 							{#each rows as g (g.key)}
 								<div class="flex items-center gap-2 border-b px-3 py-2 last:border-0">
-									<ProductThumb src={g.imageUrl} alt={g.productName} />
+									<ProductThumb path={g.imagePath} alt={g.productName} />
 									<div class="min-w-0 flex-1">
 										<p class="truncate text-sm font-medium">{g.productName}</p>
 										<p class="truncate text-xs text-muted-foreground">

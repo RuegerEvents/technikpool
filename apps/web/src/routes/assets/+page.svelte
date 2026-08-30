@@ -99,7 +99,7 @@
 	type Group = {
 		productId: string;
 		name: string;
-		imageUrl: string | null;
+		imagePath: string | null;
 		manufacturerName: string;
 		categoryId: string;
 		categoryName: string;
@@ -145,7 +145,7 @@
 					acc[pid] = {
 						productId: pid,
 						name: asset.product.name,
-						imageUrl: asset.product.imageUrl,
+						imagePath: asset.product.imagePath,
 						manufacturerName: asset.product.manufacturer.name,
 						categoryId: asset.product.categoryId,
 						categoryName: categoryLabel(asset.product.category),
@@ -448,7 +448,7 @@
 					>
 						<div class="flex aspect-[4/3] items-center justify-center bg-muted/30 p-4">
 							<ProductThumb
-								src={group.imageUrl}
+								path={group.imagePath}
 								alt={group.name}
 								fill
 								class="border-0 bg-transparent p-0"
@@ -727,7 +727,7 @@
 													<div class="flex items-center gap-6 text-sm">
 														<span class="flex w-44 items-center gap-2">
 															<ProductThumb
-																src={asset.product.imageUrl}
+																path={asset.product.imagePath}
 																alt={asset.product.name}
 																size={22}
 															/>
@@ -809,7 +809,7 @@
 									>
 										<path d="m9 18 6-6-6-6" />
 									</svg>
-									<ProductThumb src={group.imageUrl} alt={group.name} />
+									<ProductThumb path={group.imagePath} alt={group.name} />
 									<span class="font-medium">{group.name}</span>
 								</div>
 							</td>

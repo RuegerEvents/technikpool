@@ -1,4 +1,5 @@
 import type { Schemas } from '$lib/server/api';
+import { imageSrc } from '$lib/images';
 
 // Prisma payloads are deliberately not returned straight to clients: they carry
 // fields the API doesn't promise, and adding a column to the schema would
@@ -94,7 +95,7 @@ export function toCategory(category: CategoryRow): Schemas['Category'] {
 type ProductRow = {
 	id: string;
 	name: string;
-	imageUrl: string | null;
+	imagePath: string | null;
 	manufacturer: { name: string };
 	category: CategoryRow;
 };
@@ -105,7 +106,11 @@ export function toProduct(product: ProductRow): Schemas['Product'] {
 		name: product.name,
 		manufacturerName: product.manufacturer.name,
 		category: toCategory(product.category),
-		imageUrl: product.imageUrl
+		// The API keeps promising an address, because the scanner has nowhere to
+		// resolve a key against. What changed is where it comes from: it is built
+		// per response now, so a moved object store is picked up on the next
+		// request rather than needing every row rewritten.
+		imageUrl: imageSrc(product.imagePath)
 	};
 }
 

@@ -175,9 +175,12 @@ model OrgMembership {
 }
 
 model Manufacturer {
-  id        String    @id @default(cuid())
-  name      String
-  logoUrl   String?
+  id   String @id @default(cuid())
+  name String
+  // The object key in the S3-compatible store, not an address: see
+  // src/lib/images.ts. A stored URL would pin the row to whichever host the
+  // store was on when it was uploaded.
+  logoPath String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   products  Product[]
@@ -208,7 +211,8 @@ model Product {
   manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
   categoryId     String
   category       Category     @relation(fields: [categoryId], references: [id])
-  imageUrl       String?
+  /// Object key, like Manufacturer.logoPath.
+  imagePath      String?
 
   // Pricing (issue #9): the catalog price a rental rate is calculated from.
   // It lives on the product, not on each unit — billing asks "what does this

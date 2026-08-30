@@ -30,6 +30,17 @@ Database config lives in `apps/web/.env`. Migrations:
 pnpm --filter web exec prisma migrate dev
 ```
 
+### Object storage
+
+Product photos and manufacturer logos go to an S3-compatible store. `S3_ENDPOINT` and the
+credentials beside it are how the _server_ reaches it; `PUBLIC_S3_URL_BASE` is how a _browser_
+does, and the two differ whenever the app talks to a container name or a private address.
+
+Only the object key (`product-images/<uuid>.png`) is stored in the database — never a full URL.
+The address is built per render from `PUBLIC_S3_URL_BASE`, so moving the store is an env change
+and a restart rather than a rewrite of every row. Because it is read through
+`$env/dynamic/public`, that change needs no rebuild.
+
 ## API
 
 `/api/v1` serves clients that can't use SvelteKit remote functions — chiefly the scanner app.
