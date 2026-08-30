@@ -12,6 +12,20 @@ import {
 	isRetiredStatus
 } from '$lib/asset-status';
 import { syncAccessories } from '$lib/server/services/accessories';
+import { ensureBundleImage } from '$lib/server/services/bundle-image';
+
+async function ensureBundleImageWithoutBreakingRead(
+	bundle: Parameters<typeof ensureBundleImage>[0]
+) {
+	try {
+		return await ensureBundleImage(bundle);
+	} catch (cause) {
+		// Inventory must remain usable during an object-store outage. A later read
+		// retries because the fingerprint was not persisted.
+		console.error(`Could not refresh generated image for bundle "${bundle.id}":`, cause);
+		return bundle.imagePath;
+	}
+}
 
 // What a listing or a detail page needs to know about an asset's place in the
 // accessory tree: who it hangs off, and what hangs off it. The parent is a thin
@@ -1213,7 +1227,7 @@ export const getBundleTemplates = query(v.optional(v.string()), async (organizat
 	const user = await requireAuth();
 	const queryOrgIds = await scopedOrgIds(user.id, organizationId);
 
-	return await prisma.bundleTemplate.findMany({
+	const templates = await prisma.bundleTemplate.findMany({
 		where: { organizationId: { in: queryOrgIds } },
 		include: {
 			organization: true,
@@ -1236,6 +1250,14 @@ export const getBundleTemplates = query(v.optional(v.string()), async (organizat
 		},
 		orderBy: { name: 'asc' }
 	});
+	await Promise.all(
+		templates.flatMap((template) =>
+			template.instances.map(async (bundle) => {
+				bundle.imagePath = await ensureBundleImageWithoutBreakingRead(bundle);
+			})
+		)
+	);
+	return templates;
 });
 
 // ── Bundles (instances) ──────────────────────────────────────────────────────
@@ -1244,7 +1266,7 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 	const user = await requireAuth();
 	const queryOrgIds = await scopedOrgIds(user.id, organizationId);
 
-	return await prisma.assetBundle.findMany({
+	const bundles = await prisma.assetBundle.findMany({
 		where: { template: { organizationId: { in: queryOrgIds } } },
 		include: {
 			template: { include: { organization: true, category: true } },
@@ -1256,6 +1278,8 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 		},
 		orderBy: [{ template: { name: 'asc' } }, { tag: { sort: 'asc', nulls: 'last' } }]
 	});
+	await Promise.all(bundles.map((bundle) => ensureBundleImageWithoutBreakingRead(bundle)));
+	return bundles;
 });
 
 export const getBundle = query(v.string(), async (id: string) => {
@@ -1281,7 +1305,37 @@ export const getBundle = query(v.string(), async (id: string) => {
 		throw new Error('Unauthorized');
 	}
 
+	await ensureBundleImageWithoutBreakingRead(bundle);
 	return bundle;
+});
+
+export const regenerateBundleImage = command(v.string(), async (bundleId) => {
+	const user = await requireAuth();
+	const bundle = await prisma.assetBundle.findUniqueOrThrow({
+		where: { id: bundleId },
+		include: {
+			template: { include: { category: true } },
+			assets: { include: { product: true } }
+		}
+	});
+	const membership = await prisma.orgMembership.findUnique({
+		where: {
+			userId_organizationId: {
+				userId: user.id,
+				organizationId: bundle.template.organizationId
+			}
+		}
+	});
+	if (!(await isSystemAdmin(user.id)) && !membership) error(403, 'Unauthorized');
+
+	const imagePath = await ensureBundleImage(bundle, true);
+	await Promise.all([
+		getBundle(bundleId).refresh(),
+		getBundles(bundle.template.organizationId).refresh(),
+		getBundleTemplates(bundle.template.organizationId).refresh(),
+		getBundleTemplates().refresh()
+	]);
+	return { imagePath };
 });
 
 // AssetBundle.tag is globally unique like Asset.assetTag — check up front so the

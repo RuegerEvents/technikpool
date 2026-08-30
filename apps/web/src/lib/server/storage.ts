@@ -1,6 +1,7 @@
 import {
 	S3Client,
 	PutObjectCommand,
+	GetObjectCommand,
 	CreateBucketCommand,
 	PutBucketPolicyCommand
 } from '@aws-sdk/client-s3';
@@ -77,4 +78,14 @@ export async function putObject(key: string, body: Uint8Array, contentType: stri
 		new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: body, ContentType: contentType })
 	);
 	return key;
+}
+
+/** Reads an object for server-side composition without exposing the S3 origin. */
+export async function getObject(key: string) {
+	const result = await s3.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }));
+	if (!result.Body) throw new Error(`S3 object "${key}" has no body`);
+	return {
+		bytes: await result.Body.transformToByteArray(),
+		contentType: result.ContentType ?? 'application/octet-stream'
+	};
 }

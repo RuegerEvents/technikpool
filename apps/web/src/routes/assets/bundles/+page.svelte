@@ -7,6 +7,7 @@
 	import { getBundleTemplates } from '$lib/remote/assets.remote';
 	import { resolve } from '$app/paths';
 	import { Layers } from '@lucide/svelte';
+	import { imageSrc } from '$lib/images';
 
 	let templates = $derived(await getBundleTemplates());
 </script>
@@ -35,6 +36,13 @@
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each templates as template (template.id)}
 				<Card.Root class="h-full">
+					{#if template.instances[0]?.imagePath}
+						<img
+							src={imageSrc(template.instances[0].imagePath)}
+							alt={`Generated preview of ${template.name}`}
+							class="aspect-[4/3] w-full rounded-t-xl border-b bg-muted/30 object-contain"
+						/>
+					{/if}
 					<Card.Header class="pb-3">
 						<div class="flex items-start justify-between gap-2">
 							<div class="min-w-0">

@@ -40,6 +40,8 @@ export type AssetBundleMinAggregateOutputType = {
   tag: string | null
   locationId: string | null
   netPurchasePrice: runtime.Decimal | null
+  imagePath: string | null
+  imageFingerprint: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -50,6 +52,8 @@ export type AssetBundleMaxAggregateOutputType = {
   tag: string | null
   locationId: string | null
   netPurchasePrice: runtime.Decimal | null
+  imagePath: string | null
+  imageFingerprint: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -60,6 +64,8 @@ export type AssetBundleCountAggregateOutputType = {
   tag: number
   locationId: number
   netPurchasePrice: number
+  imagePath: number
+  imageFingerprint: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -80,6 +86,8 @@ export type AssetBundleMinAggregateInputType = {
   tag?: true
   locationId?: true
   netPurchasePrice?: true
+  imagePath?: true
+  imageFingerprint?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -90,6 +98,8 @@ export type AssetBundleMaxAggregateInputType = {
   tag?: true
   locationId?: true
   netPurchasePrice?: true
+  imagePath?: true
+  imageFingerprint?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -100,6 +110,8 @@ export type AssetBundleCountAggregateInputType = {
   tag?: true
   locationId?: true
   netPurchasePrice?: true
+  imagePath?: true
+  imageFingerprint?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -197,6 +209,8 @@ export type AssetBundleGroupByOutputType = {
   tag: string | null
   locationId: string | null
   netPurchasePrice: runtime.Decimal | null
+  imagePath: string | null
+  imageFingerprint: string | null
   createdAt: Date
   updatedAt: Date
   _count: AssetBundleCountAggregateOutputType | null
@@ -230,6 +244,8 @@ export type AssetBundleWhereInput = {
   tag?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
   locationId?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
   netPurchasePrice?: Prisma.DecimalNullableFilter<"AssetBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
+  imageFingerprint?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
   template?: Prisma.XOR<Prisma.BundleTemplateScalarRelationFilter, Prisma.BundleTemplateWhereInput>
@@ -244,6 +260,8 @@ export type AssetBundleOrderByWithRelationInput = {
   tag?: Prisma.SortOrderInput | Prisma.SortOrder
   locationId?: Prisma.SortOrderInput | Prisma.SortOrder
   netPurchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  imagePath?: Prisma.SortOrderInput | Prisma.SortOrder
+  imageFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   template?: Prisma.BundleTemplateOrderByWithRelationInput
@@ -261,6 +279,8 @@ export type AssetBundleWhereUniqueInput = Prisma.AtLeast<{
   templateId?: Prisma.StringFilter<"AssetBundle"> | string
   locationId?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
   netPurchasePrice?: Prisma.DecimalNullableFilter<"AssetBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
+  imageFingerprint?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
   template?: Prisma.XOR<Prisma.BundleTemplateScalarRelationFilter, Prisma.BundleTemplateWhereInput>
@@ -275,6 +295,8 @@ export type AssetBundleOrderByWithAggregationInput = {
   tag?: Prisma.SortOrderInput | Prisma.SortOrder
   locationId?: Prisma.SortOrderInput | Prisma.SortOrder
   netPurchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  imagePath?: Prisma.SortOrderInput | Prisma.SortOrder
+  imageFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AssetBundleCountOrderByAggregateInput
@@ -293,6 +315,8 @@ export type AssetBundleScalarWhereWithAggregatesInput = {
   tag?: Prisma.StringNullableWithAggregatesFilter<"AssetBundle"> | string | null
   locationId?: Prisma.StringNullableWithAggregatesFilter<"AssetBundle"> | string | null
   netPurchasePrice?: Prisma.DecimalNullableWithAggregatesFilter<"AssetBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.StringNullableWithAggregatesFilter<"AssetBundle"> | string | null
+  imageFingerprint?: Prisma.StringNullableWithAggregatesFilter<"AssetBundle"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AssetBundle"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AssetBundle"> | Date | string
 }
@@ -301,6 +325,8 @@ export type AssetBundleCreateInput = {
   id?: string
   tag?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: string | null
+  imageFingerprint?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   template: Prisma.BundleTemplateCreateNestedOneWithoutInstancesInput
@@ -315,6 +341,8 @@ export type AssetBundleUncheckedCreateInput = {
   tag?: string | null
   locationId?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: string | null
+  imageFingerprint?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput
@@ -325,6 +353,8 @@ export type AssetBundleUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   template?: Prisma.BundleTemplateUpdateOneRequiredWithoutInstancesNestedInput
@@ -339,6 +369,8 @@ export type AssetBundleUncheckedUpdateInput = {
   tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput
@@ -351,6 +383,8 @@ export type AssetBundleCreateManyInput = {
   tag?: string | null
   locationId?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: string | null
+  imageFingerprint?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -359,6 +393,8 @@ export type AssetBundleUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -369,6 +405,8 @@ export type AssetBundleUncheckedUpdateManyInput = {
   tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -394,6 +432,8 @@ export type AssetBundleCountOrderByAggregateInput = {
   tag?: Prisma.SortOrder
   locationId?: Prisma.SortOrder
   netPurchasePrice?: Prisma.SortOrder
+  imagePath?: Prisma.SortOrder
+  imageFingerprint?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -408,6 +448,8 @@ export type AssetBundleMaxOrderByAggregateInput = {
   tag?: Prisma.SortOrder
   locationId?: Prisma.SortOrder
   netPurchasePrice?: Prisma.SortOrder
+  imagePath?: Prisma.SortOrder
+  imageFingerprint?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -418,6 +460,8 @@ export type AssetBundleMinOrderByAggregateInput = {
   tag?: Prisma.SortOrder
   locationId?: Prisma.SortOrder
   netPurchasePrice?: Prisma.SortOrder
+  imagePath?: Prisma.SortOrder
+  imageFingerprint?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -546,6 +590,8 @@ export type AssetBundleCreateWithoutLocationInput = {
   id?: string
   tag?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: string | null
+  imageFingerprint?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   template: Prisma.BundleTemplateCreateNestedOneWithoutInstancesInput
@@ -558,6 +604,8 @@ export type AssetBundleUncheckedCreateWithoutLocationInput = {
   templateId: string
   tag?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: string | null
+  imageFingerprint?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput
@@ -599,6 +647,8 @@ export type AssetBundleScalarWhereInput = {
   tag?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
   locationId?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
   netPurchasePrice?: Prisma.DecimalNullableFilter<"AssetBundle"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
+  imageFingerprint?: Prisma.StringNullableFilter<"AssetBundle"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AssetBundle"> | Date | string
 }
@@ -607,6 +657,8 @@ export type AssetBundleCreateWithoutAssetsInput = {
   id?: string
   tag?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: string | null
+  imageFingerprint?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   template: Prisma.BundleTemplateCreateNestedOneWithoutInstancesInput
@@ -620,6 +672,8 @@ export type AssetBundleUncheckedCreateWithoutAssetsInput = {
   tag?: string | null
   locationId?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: string | null
+  imageFingerprint?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutSourceBundleInput
@@ -645,6 +699,8 @@ export type AssetBundleUpdateWithoutAssetsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   template?: Prisma.BundleTemplateUpdateOneRequiredWithoutInstancesNestedInput
@@ -658,6 +714,8 @@ export type AssetBundleUncheckedUpdateWithoutAssetsInput = {
   tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutSourceBundleNestedInput
@@ -667,6 +725,8 @@ export type AssetBundleCreateWithoutTemplateInput = {
   id?: string
   tag?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: string | null
+  imageFingerprint?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   location?: Prisma.LocationCreateNestedOneWithoutAssetBundlesInput
@@ -679,6 +739,8 @@ export type AssetBundleUncheckedCreateWithoutTemplateInput = {
   tag?: string | null
   locationId?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: string | null
+  imageFingerprint?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput
@@ -715,6 +777,8 @@ export type AssetBundleCreateWithoutProductionItemsInput = {
   id?: string
   tag?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: string | null
+  imageFingerprint?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   template: Prisma.BundleTemplateCreateNestedOneWithoutInstancesInput
@@ -728,6 +792,8 @@ export type AssetBundleUncheckedCreateWithoutProductionItemsInput = {
   tag?: string | null
   locationId?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: string | null
+  imageFingerprint?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput
@@ -753,6 +819,8 @@ export type AssetBundleUpdateWithoutProductionItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   template?: Prisma.BundleTemplateUpdateOneRequiredWithoutInstancesNestedInput
@@ -766,6 +834,8 @@ export type AssetBundleUncheckedUpdateWithoutProductionItemsInput = {
   tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput
@@ -776,6 +846,8 @@ export type AssetBundleCreateManyLocationInput = {
   templateId: string
   tag?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: string | null
+  imageFingerprint?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -784,6 +856,8 @@ export type AssetBundleUpdateWithoutLocationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   template?: Prisma.BundleTemplateUpdateOneRequiredWithoutInstancesNestedInput
@@ -796,6 +870,8 @@ export type AssetBundleUncheckedUpdateWithoutLocationInput = {
   templateId?: Prisma.StringFieldUpdateOperationsInput | string
   tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput
@@ -807,6 +883,8 @@ export type AssetBundleUncheckedUpdateManyWithoutLocationInput = {
   templateId?: Prisma.StringFieldUpdateOperationsInput | string
   tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -816,6 +894,8 @@ export type AssetBundleCreateManyTemplateInput = {
   tag?: string | null
   locationId?: string | null
   netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: string | null
+  imageFingerprint?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -824,6 +904,8 @@ export type AssetBundleUpdateWithoutTemplateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   location?: Prisma.LocationUpdateOneWithoutAssetBundlesNestedInput
@@ -836,6 +918,8 @@ export type AssetBundleUncheckedUpdateWithoutTemplateInput = {
   tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput
@@ -847,6 +931,8 @@ export type AssetBundleUncheckedUpdateManyWithoutTemplateInput = {
   tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -897,6 +983,8 @@ export type AssetBundleSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   tag?: boolean
   locationId?: boolean
   netPurchasePrice?: boolean
+  imagePath?: boolean
+  imageFingerprint?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   template?: boolean | Prisma.BundleTemplateDefaultArgs<ExtArgs>
@@ -912,6 +1000,8 @@ export type AssetBundleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   tag?: boolean
   locationId?: boolean
   netPurchasePrice?: boolean
+  imagePath?: boolean
+  imageFingerprint?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   template?: boolean | Prisma.BundleTemplateDefaultArgs<ExtArgs>
@@ -924,6 +1014,8 @@ export type AssetBundleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   tag?: boolean
   locationId?: boolean
   netPurchasePrice?: boolean
+  imagePath?: boolean
+  imageFingerprint?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   template?: boolean | Prisma.BundleTemplateDefaultArgs<ExtArgs>
@@ -936,11 +1028,13 @@ export type AssetBundleSelectScalar = {
   tag?: boolean
   locationId?: boolean
   netPurchasePrice?: boolean
+  imagePath?: boolean
+  imageFingerprint?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AssetBundleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "templateId" | "tag" | "locationId" | "netPurchasePrice" | "createdAt" | "updatedAt", ExtArgs["result"]["assetBundle"]>
+export type AssetBundleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "templateId" | "tag" | "locationId" | "netPurchasePrice" | "imagePath" | "imageFingerprint" | "createdAt" | "updatedAt", ExtArgs["result"]["assetBundle"]>
 export type AssetBundleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   template?: boolean | Prisma.BundleTemplateDefaultArgs<ExtArgs>
   location?: boolean | Prisma.AssetBundle$locationArgs<ExtArgs>
@@ -971,6 +1065,8 @@ export type $AssetBundlePayload<ExtArgs extends runtime.Types.Extensions.Interna
     tag: string | null
     locationId: string | null
     netPurchasePrice: runtime.Decimal | null
+    imagePath: string | null
+    imageFingerprint: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["assetBundle"]>
@@ -1405,6 +1501,8 @@ export interface AssetBundleFieldRefs {
   readonly tag: Prisma.FieldRef<"AssetBundle", 'String'>
   readonly locationId: Prisma.FieldRef<"AssetBundle", 'String'>
   readonly netPurchasePrice: Prisma.FieldRef<"AssetBundle", 'Decimal'>
+  readonly imagePath: Prisma.FieldRef<"AssetBundle", 'String'>
+  readonly imageFingerprint: Prisma.FieldRef<"AssetBundle", 'String'>
   readonly createdAt: Prisma.FieldRef<"AssetBundle", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AssetBundle", 'DateTime'>
 }

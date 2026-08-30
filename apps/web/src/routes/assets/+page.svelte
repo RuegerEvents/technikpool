@@ -656,10 +656,11 @@
 										>
 											<path d="m9 18 6-6-6-6" />
 										</svg>
-										<!-- Holds the product rows' thumbnail slot, so both kinds of row
-										     start their name on the same edge. A bundle has no photo of
-										     its own — its contents do. -->
-										<span class="h-7 w-7 shrink-0"></span>
+										<ProductThumb
+											path={template.instanceGroups[0]?.imagePath}
+											alt={template.name}
+											class="border-0 bg-transparent p-0"
+										/>
 										<span class="font-medium">{template.name}</span>
 										<span
 											class="rounded-full border border-border px-1.5 py-0.5 text-xs text-muted-foreground"
@@ -747,6 +748,12 @@
 													>
 														<path d="m9 18 6-6-6-6" />
 													</svg>
+													<ProductThumb
+														path={instance.imagePath}
+														alt={instance.tag ?? template.name}
+														size={24}
+														class="border-0 bg-transparent p-0"
+													/>
 													<span class="truncate text-xs font-medium">
 														{instance.tag ?? `Instance ${i + 1}`}
 													</span>

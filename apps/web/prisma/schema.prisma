@@ -336,6 +336,11 @@ model AssetBundle {
   // the individual assets in the bundle don't each need their own price.
   netPurchasePrice Decimal? @db.Decimal(10, 2)
 
+  // Generated preview of this instance's current contents. The fingerprint
+  // makes reads cheap while still letting them repair a stale preview.
+  imagePath        String?
+  imageFingerprint String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

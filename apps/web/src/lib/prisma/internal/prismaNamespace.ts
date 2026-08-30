@@ -2694,6 +2694,8 @@ export const AssetBundleScalarFieldEnum = {
   tag: 'tag',
   locationId: 'locationId',
   netPurchasePrice: 'netPurchasePrice',
+  imagePath: 'imagePath',
+  imageFingerprint: 'imageFingerprint',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

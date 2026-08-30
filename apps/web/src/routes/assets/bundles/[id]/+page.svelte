@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { categoryLabel } from '$lib/category';
+	import { imageSrc } from '$lib/images';
 	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -18,7 +19,8 @@
 		addAssetToBundle,
 		removeAssetFromBundle,
 		updateBundleTemplate,
-		updateBundle
+		updateBundle,
+		regenerateBundleImage
 	} from '$lib/remote/assets.remote';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
@@ -103,6 +105,19 @@
 	let searchQuery = $state('');
 	let categoryFilter = $state('');
 	let working = $state(false);
+	let regeneratingImage = $state(false);
+
+	async function handleRegenerateImage() {
+		regeneratingImage = true;
+		try {
+			await regenerateBundleImage(bundleId);
+			toast.success('Bundle image regenerated');
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			regeneratingImage = false;
+		}
+	}
 
 	// Accessories mirror their parent's bundleId, so they are members of this kit
 	// — but they are shown under the unit they are attached to, not as peers, and
@@ -235,6 +250,18 @@
 			</Card.Header>
 			<Card.Content>
 				<div class="space-y-4">
+					<div class="space-y-2">
+						{#if bundle.imagePath}
+							<img
+								src={imageSrc(bundle.imagePath)}
+								alt={`Generated preview of ${bundle.template.name}`}
+								class="aspect-[4/3] w-full rounded-md border bg-muted/30 object-contain"
+							/>
+						{/if}
+						<Button variant="outline" disabled={regeneratingImage} onclick={handleRegenerateImage}>
+							{regeneratingImage ? 'Regenerating…' : 'Regenerate image'}
+						</Button>
+					</div>
 					<div class="space-y-2">
 						<Label>Organization</Label>
 						<Input value={orgLabel(bundle.template.organization)} disabled />
