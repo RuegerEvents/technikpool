@@ -4,8 +4,8 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
-	import { CategorySelect } from '$lib/components/ui/category-select';
 	import { ImageUpload } from '$lib/components/ui/image-upload';
+	import { ProductFields, type ProductDraft } from '$lib/components/ui/product-fields';
 	import {
 		getManufacturers,
 		getCategories,
@@ -65,9 +65,11 @@
 		duplicatePrefilled = true;
 	});
 
-	// New product modal state
-	let newProductModal = $state({
-		open: false,
+	// New product modal state. The draft is a bare ProductDraft so ProductFields
+	// can bind to it — whether the modal is open is this page's business, not
+	// the product's.
+	let newProductOpen = $state(false);
+	let newProductDraft = $state<ProductDraft>({
 		name: '',
 		categoryId: '',
 		imagePath: '',
@@ -75,17 +77,12 @@
 	});
 
 	$effect(() => {
-		if (newProductModal.categoryId) return;
+		if (newProductDraft.categoryId) return;
 		const misc = categories.find((c) => c.name.toLowerCase() === 'miscellaneous');
-		if (misc) newProductModal.categoryId = misc.id;
+		if (misc) newProductDraft.categoryId = misc.id;
 	});
 
-	let pendingProduct = $state<{
-		name: string;
-		categoryId: string;
-		imagePath: string;
-		netPurchasePrice: string;
-	} | null>(null);
+	let pendingProduct = $state<ProductDraft | null>(null);
 
 	let manufacturerKey = $state(0);
 
@@ -97,27 +94,22 @@
 	}
 
 	function handleProductCreate(name: string) {
-		newProductModal.name = name;
-		newProductModal.open = true;
+		newProductDraft.name = name;
+		newProductOpen = true;
 	}
 
 	function confirmNewProduct() {
-		if (!newProductModal.categoryId) {
+		if (!newProductDraft.categoryId) {
 			toast.error('Please select a category');
 			return;
 		}
-		product = { id: null, name: newProductModal.name };
-		pendingProduct = {
-			name: newProductModal.name,
-			categoryId: newProductModal.categoryId,
-			imagePath: newProductModal.imagePath,
-			netPurchasePrice: newProductModal.netPurchasePrice
-		};
-		newProductModal.open = false;
+		product = { id: null, name: newProductDraft.name };
+		pendingProduct = { ...newProductDraft };
+		newProductOpen = false;
 	}
 
 	function cancelNewProduct() {
-		newProductModal.open = false;
+		newProductOpen = false;
 	}
 
 	let quantity = $state(1);
@@ -427,7 +419,7 @@
 </div>
 
 <!-- New Product Modal -->
-{#if newProductModal.open}
+{#if newProductOpen}
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
@@ -443,46 +435,9 @@
 				Fill in the details for the new product model.
 			</p>
 
-			<div class="space-y-4">
-				<div class="space-y-2">
-					<Label for="modal-product-name">Product Name</Label>
-					<Input
-						id="modal-product-name"
-						bind:value={newProductModal.name}
-						placeholder="e.g. SM58"
-						required
-					/>
-				</div>
-
-				<div class="space-y-2">
-					<Label>Category</Label>
-					<CategorySelect
-						{categories}
-						bind:value={newProductModal.categoryId}
-						placeholder="Select a category"
-					/>
-				</div>
-
-				<div class="space-y-2">
-					<Label for="modal-product-price">Net purchase price (€)</Label>
-					<Input
-						id="modal-product-price"
-						type="number"
-						min="0"
-						step="0.01"
-						bind:value={newProductModal.netPurchasePrice}
-						placeholder="Unknown"
-					/>
-					<p class="text-sm text-muted-foreground">
-						What a rental rate is calculated from. An offer can't bill this product without it.
-					</p>
-				</div>
-
-				<div class="space-y-2">
-					<Label>Product photo</Label>
-					<ImageUpload bind:value={newProductModal.imagePath} label="Product photo" />
-				</div>
-			</div>
+			<!-- The same four fields the product page and the asset detail page edit.
+			     One component, so a field added there shows up here too. -->
+			<ProductFields {categories} bind:value={newProductDraft} idPrefix="modal-product" />
 
 			<div class="mt-6 flex justify-end gap-3">
 				<Button type="button" variant="outline" onclick={cancelNewProduct}>Cancel</Button>

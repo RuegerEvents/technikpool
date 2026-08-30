@@ -45,7 +45,8 @@
 		/** Accessories are labelled far less often than they aren't. */
 		defaultNoTag?: boolean;
 		description?: Snippet;
-		onCreated?: (count: number) => void;
+		/** The created units, so a caller collecting them can take them straight. */
+		onCreated?: (assets: Awaited<ReturnType<typeof createAssets>>) => void;
 	};
 
 	let {
@@ -161,7 +162,7 @@
 				}))
 			});
 			open = false;
-			onCreated?.(created.length);
+			onCreated?.(created);
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {

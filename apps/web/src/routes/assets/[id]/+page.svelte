@@ -792,10 +792,12 @@
 	parentAssetId={assetId}
 	heading="New accessory"
 	defaultNoTag
-	onCreated={(count) => {
+	onCreated={(created) => {
 		attachSelection = null;
 		toast.success(
-			count === 1 ? 'Accessory created and attached' : `${count} accessories created and attached`
+			created.length === 1
+				? 'Accessory created and attached'
+				: `${created.length} accessories created and attached`
 		);
 	}}
 >

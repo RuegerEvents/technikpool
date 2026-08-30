@@ -184,7 +184,6 @@ msgstr "Crew"
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/inspections/+page.svelte
@@ -278,7 +277,6 @@ msgstr "Entfernen"
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
@@ -383,7 +381,6 @@ msgstr "Einige ablehnen…"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/routes/assets/[id]/+page.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/productions/[id]/delivery-note/+page.svelte
@@ -392,7 +389,6 @@ msgstr "Seriennummer"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/routes/assets/[id]/+page.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Asset Tag"
@@ -429,7 +425,6 @@ msgstr "Alle Organisationen"
 #~ msgstr "Nach Produkt, S/N, Bundle suchen…"
 
 #: src/routes/assets/+page.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Add Asset"
 msgstr "Gerät hinzufügen"
@@ -652,17 +647,14 @@ msgstr "Neues Gerät hinzufügen"
 msgid "Register new equipment into your organization's inventory."
 msgstr "Neues Equipment in das Inventar Ihrer Organisation aufnehmen."
 
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Search or create manufacturer…"
 msgstr "Hersteller suchen oder erstellen…"
 
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Product Model"
 msgstr "Produktmodell"
 
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Search or create product…"
 msgstr "Produkt suchen oder erstellen…"
@@ -726,7 +718,6 @@ msgid "What's in this bundle?"
 msgstr "Was ist in diesem Bundle?"
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/offers/new/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
@@ -1178,13 +1169,11 @@ msgstr "Tag: {0}"
 msgid "View →"
 msgstr "Ansehen →"
 
-#: src/routes/assets/bundles/new/+page.svelte
-msgid "Please select a manufacturer and product"
-msgstr "Bitte Hersteller und Produkt auswählen"
+#~ msgid "Please select a manufacturer and product"
+#~ msgstr "Bitte Hersteller und Produkt auswählen"
 
-#: src/routes/assets/bundles/new/+page.svelte
-msgid "Asset created and added to bundle"
-msgstr "Gerät erstellt und zum Bundle hinzugefügt"
+#~ msgid "Asset created and added to bundle"
+#~ msgstr "Gerät erstellt und zum Bundle hinzugefügt"
 
 #~ msgid "← Back to Bundles"
 #~ msgstr "← Zurück zu Bundles"
@@ -1222,13 +1211,11 @@ msgstr "Keine Geräte entsprechen der Suche."
 msgid "No assets in this organization yet. Use \"+ New Asset\" to create one."
 msgstr "Noch keine Geräte in dieser Organisation. Nutze \"+ Neues Gerät\" zum Erstellen."
 
-#: src/routes/assets/bundles/new/+page.svelte
-msgid "New Asset"
-msgstr "Neues Gerät"
+#~ msgid "New Asset"
+#~ msgstr "Neues Gerät"
 
-#: src/routes/assets/bundles/new/+page.svelte
-msgid "Create a new asset and add it to this bundle."
-msgstr "Neues Gerät erstellen und zum Bundle hinzufügen."
+#~ msgid "Create a new asset and add it to this bundle."
+#~ msgstr "Neues Gerät erstellen und zum Bundle hinzufügen."
 
 #~ msgid "Search assets and bundles…"
 #~ msgstr "Geräte und Bundles suchen…"
@@ -1297,7 +1284,6 @@ msgstr "Bearbeiten"
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/checkout/+page.svelte
@@ -1333,12 +1319,10 @@ msgid "Save"
 msgstr "Speichern"
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Please select a location"
 msgstr "Bitte einen Standort auswählen"
 
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "No locations yet. Create one in <0>Locations</0>."
 msgstr "Noch keine Standorte. Erstelle einen unter <0>Standorte</0>."
@@ -1851,8 +1835,6 @@ msgstr "Alle Kategorien"
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
-#: src/routes/assets/bundles/new/+page.svelte
-#: src/routes/assets/new/+page.svelte
 msgid "Category"
 msgstr "Kategorie"
 
@@ -1863,7 +1845,6 @@ msgstr "Kategorie"
 #~ msgstr ""
 
 #: src/routes/assets/bundles/new/+page.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Please select a category"
 msgstr "Bitte eine Kategorie auswählen"
@@ -1871,8 +1852,6 @@ msgstr "Bitte eine Kategorie auswählen"
 #: src/lib/components/ui/category-select/category-select.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/bundles/new/+page.svelte
-#: src/routes/assets/bundles/new/+page.svelte
-#: src/routes/assets/new/+page.svelte
 msgid "Select a category"
 msgstr "Kategorie auswählen"
 
@@ -1938,7 +1917,6 @@ msgstr "Gemeinsame Produktdetails für diesen Asset-Typ."
 
 #: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/[id]/+page.svelte
-#: src/routes/assets/new/+page.svelte
 msgid "Product Name"
 msgstr "Produktname"
 
@@ -2905,8 +2883,6 @@ msgstr "Herstellerlogo"
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
-#: src/routes/assets/new/+page.svelte
-#: src/routes/assets/new/+page.svelte
 msgid "Product photo"
 msgstr "Produktfoto"
 
@@ -2923,7 +2899,6 @@ msgstr "Preis & Prüfung aktualisiert"
 #: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
-#: src/routes/assets/new/+page.svelte
 msgid "Net purchase price (€)"
 msgstr "Netto-Einkaufspreis (€)"
 
@@ -4719,7 +4694,6 @@ msgstr[0] "# bereits gebuchtes Gerät ins Bundle übernommen"
 msgstr[1] "# bereits gebuchte Geräte ins Bundle übernommen"
 
 #: src/lib/components/ui/product-fields/product-fields.svelte
-#: src/routes/assets/new/+page.svelte
 msgid "Unknown"
 msgstr "Unbekannt"
 
@@ -4733,9 +4707,8 @@ msgstr "Grundlage für die Mietsatz-Berechnung. Gilt für jede Einheit dieses Pr
 #~ msgid "Set on the product — it applies to every unit of {0}. Change it Change it in the Product card."
 #~ msgstr ""
 
-#: src/routes/assets/new/+page.svelte
-msgid "What a rental rate is calculated from. An offer can't bill this product without it."
-msgstr "Grundlage für die Mietsatz-Berechnung. Ohne ihn kann ein Angebot dieses Produkt nicht abrechnen."
+#~ msgid "What a rental rate is calculated from. An offer can't bill this product without it."
+#~ msgstr "Grundlage für die Mietsatz-Berechnung. Ohne ihn kann ein Angebot dieses Produkt nicht abrechnen."
 
 #. 0: group.label
 #: src/routes/offers/new/+page.svelte
@@ -4847,7 +4820,7 @@ msgstr "Ein neues Produkt braucht eine Kategorie"
 msgid "Accessory created and attached"
 msgstr "Zubehör angelegt und angehängt"
 
-#. 0: count
+#. 0: created.length
 #: src/routes/assets/[id]/+page.svelte
 msgid "{0} accessories created and attached"
 msgstr "{0} Zubehörteile angelegt und angehängt"
@@ -4918,6 +4891,7 @@ msgstr "Ohne Inventarnummer kann die Einheit nicht gescannt werden, und der Prü
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/new/+page.svelte
 msgid "New device"
 msgstr "Neues Gerät"
 
@@ -4932,11 +4906,14 @@ msgid "Register \"{0}\" as a new device"
 msgstr "\"{0}\" als neues Gerät anlegen"
 
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/new/+page.svelte
 msgid "Device created and added"
 msgstr "Gerät angelegt und hinzugefügt"
 
-#. 0: count
+#. 0: created.length
+#. 0: created.length
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/new/+page.svelte
 msgid "{0} devices created and added"
 msgstr "{0} Geräte angelegt und hinzugefügt"
 
@@ -4944,3 +4921,7 @@ msgstr "{0} Geräte angelegt und hinzugefügt"
 #: src/routes/assets/bundles/[id]/+page.svelte
 msgid "Registered and put into {0}{1} in one step."
 msgstr "Wird in einem Schritt angelegt und in {0}{1} eingefügt."
+
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "Registered and added to this bundle. It joins the bundle when you create it."
+msgstr "Wird angelegt und diesem Bundle hinzugefügt. Es kommt ins Bundle, sobald du es anlegst."

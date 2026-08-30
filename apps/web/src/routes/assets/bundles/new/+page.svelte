@@ -6,15 +6,12 @@
 	import { Label } from '$lib/components/ui/label';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { CategorySelect } from '$lib/components/ui/category-select';
-	import { Dialog } from 'bits-ui';
+	import { NewAssetModal } from '$lib/components/ui/new-asset-modal';
 	import {
 		getAssets,
 		getCategories,
-		getManufacturers,
 		getLocations,
-		getProducts,
 		getBundleTemplates,
-		createAssets,
 		createBundleInstance,
 		addAssetToBundle
 	} from '$lib/remote/assets.remote';
@@ -50,7 +47,6 @@
 
 	// Remote data
 	let orgs = $derived(await getMyOrgs());
-	let manufacturers = $derived(await getManufacturers());
 	let categories = $derived(await getCategories());
 	let bundleTypes = $derived(selectedOrgId ? await getBundleTemplates(selectedOrgId) : []);
 
@@ -109,102 +105,16 @@
 		selectedAssets = selectedAssets.filter((a) => a.id !== id);
 	}
 
-	// New asset modal
+	// Registering a unit that isn't in the pool yet. The bundle doesn't exist
+	// until this page is submitted, so unlike the other two callers this one
+	// can't hand the modal a bundleId — the asset is created loose and collected
+	// into `selectedAssets`, and joins the bundle when it is created.
 	let showModal = $state(false);
-	let modalLocationId = $state('');
-	let modalManufacturer = $state<SelectionOrNew>(null);
-	let modalProduct = $state<SelectionOrNew>(null);
-	let modalCategoryId = $state('');
-	let modalManufacturerKey = $state(0);
-	let modalSerial = $state('');
-	let modalTag = $state('');
-	let modalSaving = $state(false);
+	let newAssetModal = $state<{ reset: (name?: string) => void } | null>(null);
 
-	let modalProducts = $derived(
-		modalManufacturer?.id ? await getProducts(modalManufacturer.id) : []
-	);
-
-	$effect(() => {
-		if (!selectedOrgId) {
-			modalLocationId = '';
-			return;
-		}
-		if (orgLocations.length === 0) {
-			modalLocationId = '';
-			return;
-		}
-		if (!modalLocationId || !orgLocations.some((l) => l.id === modalLocationId)) {
-			modalLocationId = orgLocations[0].id;
-		}
-	});
-
-	function handleModalManufacturerChange(sel: SelectionOrNew) {
-		modalManufacturer = sel;
-		modalProduct = null;
-		modalManufacturerKey++;
-	}
-
-	function resetModal() {
-		modalManufacturer = null;
-		modalProduct = null;
-		modalCategoryId = '';
-		modalManufacturerKey++;
-		modalSerial = '';
-		modalTag = '';
-	}
-
-	$effect(() => {
-		if (modalCategoryId) return;
-		const misc = categories.find((c) => c.name.toLowerCase() === 'miscellaneous');
-		if (misc) modalCategoryId = misc.id;
-	});
-
-	async function handleNewAsset(e: Event) {
-		e.preventDefault();
-		if (!modalLocationId) {
-			toast.error('Please select a location');
-			return;
-		}
-		if (!modalManufacturer || !modalProduct) {
-			toast.error('Please select a manufacturer and product');
-			return;
-		}
-		if (modalProduct.id === null && !modalCategoryId) {
-			toast.error('Please select a category');
-			return;
-		}
-		modalSaving = true;
-		try {
-			const created = await createAssets({
-				organizationId: selectedOrgId,
-				locationId: modalLocationId,
-				manufacturerId: modalManufacturer.id ?? undefined,
-				newManufacturerName: modalManufacturer.id ? undefined : modalManufacturer.name,
-				productId: modalProduct.id ?? undefined,
-				newProductName: modalProduct.id ? undefined : modalProduct.name,
-				categoryId: modalProduct.id ? undefined : modalCategoryId,
-				items: [{ serialNumber: modalSerial || undefined, assetTag: modalTag || undefined }]
-			});
-			const asset = created[0];
-			selectedAssets = [
-				...selectedAssets,
-				{
-					id: asset.id,
-					productName: asset.product.name,
-					manufacturerName: asset.product.manufacturer.name,
-					serialNumber: asset.serialNumber,
-					assetTag: asset.assetTag,
-					status: asset.status
-				}
-			];
-			resetModal();
-			showModal = false;
-			toast.success('Asset created and added to bundle');
-		} catch (err) {
-			toast.error(getErrorMessage(err));
-		} finally {
-			modalSaving = false;
-		}
+	function openNewAsset() {
+		newAssetModal?.reset(assetSearch);
+		showModal = true;
 	}
 
 	async function handleSubmit(e: Event) {
@@ -316,12 +226,7 @@
 						<Card.Title>Assets</Card.Title>
 						<Card.Description>Add existing assets or create new ones.</Card.Description>
 					</div>
-					<Button
-						type="button"
-						variant="outline"
-						disabled={!selectedOrgId}
-						onclick={() => (showModal = true)}
-					>
+					<Button type="button" variant="outline" disabled={!selectedOrgId} onclick={openNewAsset}>
 						+ New Asset
 					</Button>
 				</div>
@@ -430,109 +335,34 @@
 </div>
 
 <!-- New asset modal -->
-<Dialog.Root
-	open={showModal}
-	onOpenChange={(open) => {
-		if (!open) {
-			resetModal();
-			showModal = false;
-		}
+
+<NewAssetModal
+	bind:this={newAssetModal}
+	bind:open={showModal}
+	organizationId={selectedOrgId}
+	heading="New device"
+	locations={orgLocations}
+	onCreated={(created) => {
+		selectedAssets = [
+			...selectedAssets,
+			...created.map((a) => ({
+				id: a.id,
+				productName: a.product.name,
+				manufacturerName: a.product.manufacturer.name,
+				serialNumber: a.serialNumber,
+				assetTag: a.assetTag,
+				status: a.status
+			}))
+		];
+		assetSearch = '';
+		toast.success(
+			created.length === 1
+				? 'Device created and added'
+				: `${created.length} devices created and added`
+		);
 	}}
 >
-	<Dialog.Portal>
-		<Dialog.Overlay class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
-		<Dialog.Content
-			class="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-background p-6 shadow-lg"
-		>
-			<Dialog.Title class="text-base font-semibold">New Asset</Dialog.Title>
-			<Dialog.Description class="mt-1 mb-4 text-sm text-muted-foreground">
-				Create a new asset and add it to this bundle.
-			</Dialog.Description>
-
-			<form onsubmit={handleNewAsset} class="space-y-4">
-				<div class="space-y-2">
-					<Label for="modal-location">Location</Label>
-					<select
-						id="modal-location"
-						bind:value={modalLocationId}
-						required
-						class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-					>
-						{#if orgLocations.length === 0}
-							<option value="" disabled>—</option>
-						{:else}
-							{#each orgLocations as loc (loc.id)}
-								<option value={loc.id}>{loc.name}</option>
-							{/each}
-						{/if}
-					</select>
-					{#if orgLocations.length === 0}
-						<p class="text-sm text-muted-foreground">
-							No locations yet. Create one in
-							<a class="underline" href={resolve(`/orgs/${selectedOrgId}/locations`)}>Locations</a>.
-						</p>
-					{/if}
-				</div>
-
-				<div class="space-y-2">
-					<Label>Manufacturer</Label>
-					<CreatableSelect
-						items={manufacturers}
-						value={modalManufacturer}
-						onchange={handleModalManufacturerChange}
-						placeholder="Search or create manufacturer…"
-					/>
-				</div>
-
-				{#if modalManufacturer}
-					{#key modalManufacturerKey}
-						<div class="space-y-2">
-							<Label>Product Model</Label>
-							<CreatableSelect
-								items={modalProducts}
-								value={modalProduct}
-								onchange={(sel) => (modalProduct = sel)}
-								placeholder="Search or create product…"
-							/>
-						</div>
-					{/key}
-				{/if}
-
-				{#if modalProduct && modalProduct.id === null}
-					<div class="space-y-2">
-						<Label for="modal-category">Category</Label>
-						<CategorySelect
-							id="modal-category"
-							{categories}
-							bind:value={modalCategoryId}
-							placeholder="Select a category"
-						/>
-					</div>
-				{/if}
-
-				<div class="grid grid-cols-2 gap-3">
-					<div class="space-y-2">
-						<Label for="modal-serial">Serial Number</Label>
-						<Input id="modal-serial" bind:value={modalSerial} placeholder="S/N 123456" />
-					</div>
-					<div class="space-y-2">
-						<Label for="modal-tag">Asset Tag</Label>
-						<Input id="modal-tag" bind:value={modalTag} placeholder="TAG-001" />
-					</div>
-				</div>
-
-				<div class="flex justify-end gap-2 pt-2">
-					<Dialog.Close>
-						<Button type="button" variant="outline">Cancel</Button>
-					</Dialog.Close>
-					<Button
-						type="submit"
-						disabled={modalSaving || !modalLocationId || !modalManufacturer || !modalProduct}
-					>
-						{modalSaving ? 'Creating…' : 'Add Asset'}
-					</Button>
-				</div>
-			</form>
-		</Dialog.Content>
-	</Dialog.Portal>
-</Dialog.Root>
+	{#snippet description()}
+		Registered and added to this bundle. It joins the bundle when you create it.
+	{/snippet}
+</NewAssetModal>

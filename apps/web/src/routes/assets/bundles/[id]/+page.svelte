@@ -491,9 +491,13 @@
 	heading="New device"
 	{locations}
 	locationId={bundle.locationId ?? undefined}
-	onCreated={(count) => {
+	onCreated={(created) => {
 		searchQuery = '';
-		toast.success(count === 1 ? 'Device created and added' : `${count} devices created and added`);
+		toast.success(
+			created.length === 1
+				? 'Device created and added'
+				: `${created.length} devices created and added`
+		);
 	}}
 >
 	{#snippet description()}
