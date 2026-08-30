@@ -3033,6 +3033,7 @@ msgstr "View invoice {0}"
 msgid "Duplicates all line items into a new offer."
 msgstr "Duplicates all line items into a new offer."
 
+#: src/routes/assets/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
 msgid "Copying…"
 msgstr "Copying…"
@@ -4714,9 +4715,8 @@ msgstr "Accessory detached"
 msgid "What this unit is attached to. It is booked, moved and returned with it."
 msgstr "What this unit is attached to. It is booked, moved and returned with it."
 
-#: src/routes/assets/[id]/+page.svelte
-msgid "Cases, power supplies and brackets that belong to this unit. They follow it into bundles, onto productions and through every scan."
-msgstr "Cases, power supplies and brackets that belong to this unit. They follow it into bundles, onto productions and through every scan."
+#~ msgid "Cases, power supplies and brackets that belong to this unit. They follow it into bundles, onto productions and through every scan."
+#~ msgstr "Cases, power supplies and brackets that belong to this unit. They follow it into bundles, onto productions and through every scan."
 
 #: src/routes/assets/[id]/+page.svelte
 msgid "Accessories"
@@ -4789,6 +4789,7 @@ msgid "Search this organisation's devices, or type a new one…"
 msgstr "Search this organisation's devices, or type a new one…"
 
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 msgid "New"
 msgstr "New"
 
@@ -4912,3 +4913,102 @@ msgstr "Edit Location"
 #: src/routes/orgs/[id]/locations/+page.svelte
 msgid "Rename it or correct its address."
 msgstr "Rename it or correct its address."
+
+#. 0.0: copyableSummary
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Also create what the other units carry <0>{0} — each new unit gets its own, attached.</0>"
+msgstr "Also create what the other units carry <0>{0} — each new unit gets its own, attached.</0>"
+
+#~ msgid "How many per unit"
+#~ msgstr "How many per unit"
+
+#~ msgid "The number each unit ends up with. A unit that already has that many is left alone; one that has fewer gets the difference — so running this twice changes nothing."
+#~ msgstr "The number each unit ends up with. A unit that already has that many is left alone; one that has fewer gets the difference — so running this twice changes nothing."
+
+#~ msgid "Add to every unit"
+#~ msgstr "Add to every unit"
+
+#~ msgid "{0} units of this product are registered here. What you attach below belongs to this one alone — every unit needs its own cable, and its own record of it."
+#~ msgstr "{0} units of this product are registered here. What you attach below belongs to this one alone — every unit needs its own cable, and its own record of it."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Every unit already has that — nothing to do"
+msgstr "Every unit already has that — nothing to do"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "1 accessory"
+msgid_plural "# accessories"
+msgstr[0] "1 accessory"
+msgstr[1] "# accessories"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "1 unit"
+msgid_plural "# units"
+msgstr[0] "1 unit"
+msgstr[1] "# units"
+
+#~ msgid "{0} created across {1}"
+#~ msgstr "{0} created across {1}"
+
+#~ msgid "Every unit of {0} {1} in this organisation gets its own copy, attached, at that unit's location."
+#~ msgstr "Every unit of {0} {1} in this organisation gets its own copy, attached, at that unit's location."
+
+#. 0: made; 1: onUnits; 2: unitsSkipped
+#: src/routes/assets/[id]/+page.svelte
+msgid "{0} created on {1} · {2} already had one"
+msgstr "{0} created on {1} · {2} already had one"
+
+#. 0: made; 1: onUnits
+#: src/routes/assets/[id]/+page.svelte
+msgid "{0} created on {1}"
+msgstr "{0} created on {1}"
+
+#~ msgid "the one unit already registered has"
+#~ msgid_plural "# units already registered have"
+#~ msgstr[0] "the one unit already registered has"
+#~ msgstr[1] "# units already registered have"
+
+#~ msgid "this. The new unit gets"
+#~ msgid_plural "this. Each new unit gets"
+#~ msgstr[0] "this. The new unit gets"
+#~ msgstr[1] "this. Each new unit gets"
+
+#~ msgid "Also create the accessories the other units carry <0>{0} — {1} {2} its own, attached.</0>"
+#~ msgstr "Also create the accessories the other units carry <0>{0} — {1} {2} its own, attached.</0>"
+
+#. 0.0: accessorySummary
+#: src/routes/assets/new/+page.svelte
+msgid "Also create the accessories the other units carry <0>{0} — each new unit gets its own, attached.</0>"
+msgstr "Also create the accessories the other units carry <0>{0} — each new unit gets its own, attached.</0>"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Register a new unit of…"
+msgstr "Register a new unit of…"
+
+#. 0: searchQuery.trim()
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "No product matches \"{0}\" either."
+msgstr "No product matches \"{0}\" either."
+
+#. 0: siblingProfile.unitCount
+#: src/routes/assets/[id]/+page.svelte
+msgid "This is one of {0} units of this product — what you attach is its own, and each one can be copied to the rest."
+msgstr "This is one of {0} units of this product — what you attach is its own, and each one can be copied to the rest."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Cases, power supplies and brackets that belong to this unit. They follow it into bundles, onto productions and through every scan. <0/>"
+msgstr "Cases, power supplies and brackets that belong to this unit. They follow it into bundles, onto productions and through every scan. <0/>"
+
+#. 0: siblingProfile.unitCount
+#: src/routes/assets/[id]/+page.svelte
+msgid "All {0} units of this product have this."
+msgstr "All {0} units of this product have this."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Copy to the others"
+msgstr "Copy to the others"
+
+#. 0: standing.matching; 1: siblingProfile.unitCount
+#: src/routes/assets/[id]/+page.svelte
+msgid "{0} of {1} units of this product have this."
+msgstr "{0} of {1} units of this product have this."

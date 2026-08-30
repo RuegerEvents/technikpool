@@ -13,6 +13,7 @@
 		getProducts,
 		getLocations,
 		getAsset,
+		getProductAccessoryProfile,
 		createAssets
 	} from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
@@ -113,6 +114,23 @@
 		newProductOpen = false;
 	}
 
+	// What the org's existing units of the chosen product carry. A fixture is
+	// registered without its brackets far more often than someone means to leave
+	// them off — nothing about the unit looks wrong afterwards — so this is asked
+	// here, at the one moment anyone knows the answer.
+	let accessoryProfile = $derived(
+		selectedOrgId && product?.id
+			? await getProductAccessoryProfile({
+					productId: product.id,
+					organizationId: selectedOrgId
+				})
+			: null
+	);
+	let accessorySummary = $derived(
+		accessoryProfile?.accessories.map((a) => `${a.perUnit}× ${a.name}`).join(' · ') ?? ''
+	);
+	let copyAccessories = $state(true);
+
 	let quantity = $state(1);
 	let noAssetTag = $state(false);
 	let items = $state<{ serialNumber: string; assetTag: string }[]>([
@@ -138,6 +156,7 @@
 	function resetForm() {
 		manufacturer = null;
 		newManufacturerLogoPath = '';
+		copyAccessories = true;
 		product = null;
 		pendingProduct = null;
 		manufacturerKey++;
@@ -179,6 +198,8 @@
 						? undefined
 						: Number(pendingProduct.netPurchasePrice),
 				categoryId: product.id ? undefined : pendingProduct?.categoryId,
+				copyProductAccessories:
+					copyAccessories && (accessoryProfile?.accessories.length ?? 0) > 0 ? true : undefined,
 				items: items.map((item) => ({
 					serialNumber: item.serialNumber || undefined,
 					assetTag: noAssetTag ? undefined : item.assetTag || undefined,
@@ -316,6 +337,24 @@
 								{/if}
 							</div>
 						{/key}
+					{/if}
+
+					{#if accessoryProfile && accessoryProfile.accessories.length > 0}
+						<label
+							class="flex cursor-pointer items-start gap-2 rounded-md border border-dashed p-3 text-sm select-none"
+						>
+							<input
+								type="checkbox"
+								bind:checked={copyAccessories}
+								class="mt-0.5 h-4 w-4 rounded border-input"
+							/>
+							<span>
+								Also create the accessories the other units carry
+								<span class="block text-xs text-muted-foreground">
+									{accessorySummary} — each new unit gets its own, attached.
+								</span>
+							</span>
+						</label>
 					{/if}
 
 					<div class="space-y-2">

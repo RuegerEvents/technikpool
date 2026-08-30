@@ -1,3 +1,18 @@
+<script lang="ts" module>
+	/**
+	 * A product already in the catalogue, picked instead of typed. `reset` takes
+	 * this where it would otherwise take a name, so a picker that lists products
+	 * under its units can hand one straight over with nothing left to fill in.
+	 */
+	export type NewAssetSeed = {
+		manufacturer: { id: string; name: string };
+		product: { id: string; name: string };
+	};
+
+	/** What `bind:this` gives a caller. */
+	export type NewAssetModalHandle = { reset: (seed?: string | NewAssetSeed) => void };
+</script>
+
 <script lang="ts">
 	// Registering a unit at the moment you need it, rather than being sent to
 	// /assets/new and back to put it where it belongs. Two places need exactly
@@ -23,6 +38,7 @@
 		createAssets,
 		getCategories,
 		getManufacturers,
+		getProductAccessoryProfile,
 		getProducts
 	} from '$lib/remote/assets.remote';
 
@@ -93,6 +109,19 @@
 	// its own (edited from the asset detail page, where it applies to every unit).
 	let isNewProduct = $derived(product !== null && product.id === null);
 
+	// What the org's other units of the chosen product already carry. Only asked
+	// once an existing product is picked, and never for an accessory: that is
+	// already one level deep, and an accessory has no accessories of its own.
+	let copyable = $derived(
+		open && product?.id && !parentAssetId
+			? await getProductAccessoryProfile({ productId: product.id, organizationId })
+			: null
+	);
+	let copyableSummary = $derived(
+		copyable?.accessories.map((a) => `${a.perUnit}× ${a.name}`).join(' · ') ?? ''
+	);
+	let copyAccessories = $state(true);
+
 	// Same defaulting the product wizard uses: an unclassified thing is
 	// Miscellaneous until someone says otherwise. Refills after every reset.
 	$effect(() => {
@@ -101,21 +130,26 @@
 		if (misc) categoryId = misc.id;
 	});
 
-	/** Call before setting `open` — resets the form and seeds the product name. */
-	export function reset(productName = '') {
-		manufacturer = null;
-		product = null;
+	/**
+	 * Call before setting `open` — resets the form and seeds the product. A
+	 * string is whatever was typed into the picker that sent us here, which is
+	 * almost always the name of a product nobody has registered yet; a
+	 * `NewAssetSeed` is one that already exists, and fills both pickers in.
+	 */
+	export function reset(seedValue: string | NewAssetSeed = '') {
+		const preselected = typeof seedValue === 'string' ? null : seedValue;
+		manufacturer = preselected?.manufacturer ?? null;
+		product = preselected?.product ?? null;
 		categoryId = '';
 		quantity = 1;
 		tag = '';
 		serial = '';
 		noTag = defaultNoTag;
 		imagePath = '';
+		copyAccessories = true;
 		chosenLocationId = locationId ?? locations?.[0]?.id ?? '';
 		manufacturerKey++;
-		// Whatever was typed into the picker that sent us here is almost always
-		// the product name — carry it over so it isn't typed twice.
-		seed = productName.trim();
+		seed = typeof seedValue === 'string' ? seedValue.trim() : '';
 	}
 
 	function handleManufacturer(sel: Selection) {
@@ -157,6 +191,8 @@
 				newProductName: product.id ? undefined : product.name.trim(),
 				newProductImagePath: product.id ? undefined : imagePath || undefined,
 				categoryId: product.id ? undefined : categoryId,
+				copyProductAccessories:
+					copyAccessories && (copyable?.accessories.length ?? 0) > 0 ? true : undefined,
 				items: Array.from({ length: quantity }, () => ({
 					// A serial number and a typed tag identify one physical unit, so
 					// they are only offered when exactly one is being created.
@@ -216,6 +252,23 @@
 				<Label>Product photo</Label>
 				<ImageUpload bind:value={imagePath} label="Product photo" />
 			</div>
+		{/if}
+
+		{#if copyable && copyable.accessories.length > 0}
+			<label class="flex items-start gap-2 text-sm">
+				<input
+					type="checkbox"
+					bind:checked={copyAccessories}
+					disabled={saving}
+					class="mt-0.5 h-4 w-4 rounded border-input"
+				/>
+				<span>
+					Also create what the other units carry
+					<span class="block text-xs text-muted-foreground">
+						{copyableSummary} — each new unit gets its own, attached.
+					</span>
+				</span>
+			</label>
 		{/if}
 
 		{#if locations}

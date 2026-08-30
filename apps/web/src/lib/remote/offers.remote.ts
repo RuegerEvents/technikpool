@@ -786,7 +786,13 @@ export const copyOfferToNewCustomer = command(
 export const convertOfferToInvoice = command(v.string(), async (offerId: string) => {
 	const offer = await prisma.offer.findUniqueOrThrow({
 		where: { id: offerId },
-		include: { items: true, organization: { include: { address: true } } }
+		// The invoice's lines are created in the order they are read here, and an
+		// invoice whose lines are shuffled against the offer it was converted from
+		// is the one document where that is not a cosmetic difference.
+		include: {
+			items: { orderBy: { createdAt: 'asc' } },
+			organization: { include: { address: true } }
+		}
 	});
 	await requireOrgManageAccess(offer.organizationId);
 

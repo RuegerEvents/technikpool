@@ -1,6 +1,7 @@
 import { query, command } from '$app/server';
 import { error } from '@sveltejs/kit';
 import { prisma } from '$lib/server/auth';
+import type { Prisma } from '$lib/prisma/client';
 import * as v from 'valibot';
 import type { FieldChange } from '$lib/types/asset-transaction';
 import { isSystemAdmin, requireAuth, scopedOrgIds, userOrgIds } from '$lib/server/services/access';
@@ -24,10 +25,23 @@ const PARENT_SELECT = {
 	}
 } as const;
 
+// Every list of units, everywhere, comes out in this order. Product name alone
+// is not an order: a rack of twelve identical units ties on it, and Postgres
+// breaks a tie in whatever order it happened to read the rows — which changes
+// as soon as one of them is updated. The tag and then the id settle it, so a
+// list looks the same on the second visit as on the first.
+const ASSET_ORDER_BY: Prisma.AssetOrderByWithRelationInput[] = [
+	{ product: { name: 'asc' } },
+	// Untagged units sort after tagged ones rather than being scattered through
+	// them; Postgres would put NULLs last here anyway, but only by default.
+	{ assetTag: { sort: 'asc', nulls: 'last' } },
+	{ id: 'asc' }
+];
+
 const ACCESSORIES_INCLUDE = {
 	where: ACTIVE_ASSET_WHERE,
 	include: { product: { include: { manufacturer: true, category: true } } },
-	orderBy: { product: { name: 'asc' } }
+	orderBy: ASSET_ORDER_BY
 } as const;
 
 export const getAssets = query(v.optional(v.string()), async (organizationId?: string) => {
@@ -44,7 +58,7 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 			parent: PARENT_SELECT,
 			accessories: ACCESSORIES_INCLUDE
 		},
-		orderBy: [{ product: { name: 'asc' } }]
+		orderBy: ASSET_ORDER_BY
 	});
 });
 
@@ -70,7 +84,7 @@ export const getRetiredAssets = query(v.optional(v.string()), async (organizatio
 			parent: PARENT_SELECT,
 			accessories: ACCESSORIES_INCLUDE
 		},
-		orderBy: [{ product: { name: 'asc' } }]
+		orderBy: ASSET_ORDER_BY
 	});
 });
 
@@ -329,16 +343,8 @@ export const getProductCatalog = query(v.optional(v.string()), async (organizati
 	return products.map(({ _count, ...product }) => ({ ...product, assetCount: _count.assets }));
 });
 
-const createAssetsSchema = v.object({
-	organizationId: v.string(),
-	locationId: v.string(),
-	// Set when the units being created land somewhere immediately — attached to
-	// a parent ("New accessory" on the asset detail page) or inside a kit ("New
-	// device" on the bundle page). They are created already there rather than
-	// created and then moved, so a failure can't leave a loose unit behind that
-	// nobody asked for. Mutually exclusive: an accessory's kit is its parent's.
-	parentAssetId: v.optional(v.string()),
-	bundleId: v.optional(v.string()),
+/** The manufacturer/product half of a create form, which two commands now ask for. */
+const productRefSchema = {
 	productId: v.optional(v.string()),
 	newProductName: v.optional(v.string()),
 	newProductImagePath: v.optional(v.string()),
@@ -346,26 +352,21 @@ const createAssetsSchema = v.object({
 	categoryId: v.optional(v.string()),
 	manufacturerId: v.optional(v.string()),
 	newManufacturerName: v.optional(v.string()),
-	newManufacturerLogoPath: v.optional(v.string()),
-	items: v.array(
-		v.object({
-			serialNumber: v.optional(v.string()),
-			assetTag: v.optional(v.string()),
-			noAssetTag: v.optional(v.boolean())
-		})
-	)
-});
+	newManufacturerLogoPath: v.optional(v.string())
+};
 
-export const createAssets = command(createAssetsSchema, async (data) => {
-	const user = await requireAuth();
+type ProductRef = {
+	[K in keyof typeof productRefSchema]?: v.InferOutput<(typeof productRefSchema)[K]>;
+};
 
-	const membership = await prisma.orgMembership.findUnique({
-		where: { userId_organizationId: { userId: user.id, organizationId: data.organizationId } }
-	});
-	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		throw new Error('Unauthorized to create assets in this org');
-	}
-
+/**
+ * Turns "this product" or "a product nobody has named yet" into a product id,
+ * creating the manufacturer and the product on the way if that is what was
+ * asked for. Both create-shaped commands take the same eight fields, and the
+ * order they are resolved in matters — a new product needs its manufacturer to
+ * exist first.
+ */
+async function resolveProductRef(data: ProductRef): Promise<string> {
 	let manufacturerId = data.manufacturerId;
 	if (data.newManufacturerName && !manufacturerId) {
 		const m = await prisma.manufacturer.create({
@@ -397,6 +398,70 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 	}
 
 	if (!productId) throw new Error('Product is required');
+	return productId;
+}
+
+/** The subset of a Prisma client these helpers need — the real one or a `$transaction` handle. */
+type AssetTx = Pick<typeof prisma, 'asset' | 'organization'>;
+
+/**
+ * Hands out an org's next free asset tags, in order, for the length of one
+ * transaction. Everything created in a batch draws from the same counter — the
+ * units that were asked for and the accessories copied onto them alike — so a
+ * batch can't hand the same number to two of them.
+ */
+async function tagAllocator(tx: AssetTx, prefix: string): Promise<() => string> {
+	const last = await tx.asset.findFirst({
+		where: { assetTag: { startsWith: prefix } },
+		orderBy: { assetTag: 'desc' },
+		select: { assetTag: true }
+	});
+	let next = 1;
+	if (last?.assetTag) {
+		const parsed = parseInt(last.assetTag.slice(prefix.length), 10);
+		if (!isNaN(parsed)) next = parsed + 1;
+	}
+	return () => `${prefix}${String(next++).padStart(5, '0')}`;
+}
+
+const createAssetsSchema = v.object({
+	organizationId: v.string(),
+	locationId: v.string(),
+	// Set when the units being created land somewhere immediately — attached to
+	// a parent ("New accessory" on the asset detail page) or inside a kit ("New
+	// device" on the bundle page). They are created already there rather than
+	// created and then moved, so a failure can't leave a loose unit behind that
+	// nobody asked for. Mutually exclusive: an accessory's kit is its parent's.
+	parentAssetId: v.optional(v.string()),
+	bundleId: v.optional(v.string()),
+	...productRefSchema,
+	/**
+	 * Give each new unit the accessories the org's other units of this product
+	 * already carry — see `productAccessoryProfile`. Asked for at the point of
+	 * creation because that is the only moment anyone knows the answer: a
+	 * fixture registered without its brackets is not obviously missing them.
+	 */
+	copyProductAccessories: v.optional(v.boolean()),
+	items: v.array(
+		v.object({
+			serialNumber: v.optional(v.string()),
+			assetTag: v.optional(v.string()),
+			noAssetTag: v.optional(v.boolean())
+		})
+	)
+});
+
+export const createAssets = command(createAssetsSchema, async (data) => {
+	const user = await requireAuth();
+
+	const membership = await prisma.orgMembership.findUnique({
+		where: { userId_organizationId: { userId: user.id, organizationId: data.organizationId } }
+	});
+	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
+		throw new Error('Unauthorized to create assets in this org');
+	}
+
+	const productId = await resolveProductRef(data);
 
 	// An accessory is wherever its parent is and in whatever kit its parent is
 	// in, so the parent decides both — the caller's locationId is ignored. The
@@ -417,6 +482,7 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 					bundleId: true,
 					parentAssetId: true,
 					assetTag: true,
+					productId: true,
 					product: { select: { name: true, manufacturer: { select: { name: true } } } }
 				}
 			})
@@ -450,6 +516,15 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 	const location = await prisma.location.findUniqueOrThrow({ where: { id: locationId } });
 	if (location.organizationId !== data.organizationId) throw new Error('Invalid location');
 
+	// What the org's other units of this product already carry. Read before the
+	// transaction opens, so it describes the fleet as it was — the units being
+	// created here are not in it. An accessory gets none of its own: one level
+	// deep, and a power cable has no brackets.
+	const accessoryProfile =
+		data.copyProductAccessories && !data.parentAssetId
+			? await productAccessoryProfile(productId, data.organizationId)
+			: null;
+
 	const assets = await prisma.$transaction(async (tx) => {
 		const { assetIdPrefix: prefix, defaultInspectionIntervalMonths } =
 			await tx.organization.findUniqueOrThrow({
@@ -466,19 +541,9 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 				)
 			: null;
 
-		const last = await tx.asset.findFirst({
-			where: { assetTag: { startsWith: prefix } },
-			orderBy: { assetTag: 'desc' },
-			select: { assetTag: true }
-		});
-		let nextNum = 1;
-		if (last?.assetTag) {
-			const parsed = parseInt(last.assetTag.slice(prefix.length), 10);
-			if (!isNaN(parsed)) nextNum = parsed + 1;
-		}
+		const nextTag = await tagAllocator(tx, prefix);
 
-		let autoTagIdx = 0;
-		return Promise.all(
+		const created = await Promise.all(
 			data.items.map((item) => {
 				let resolvedTag: string | null;
 				if (item.noAssetTag) {
@@ -489,7 +554,7 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 						throw new Error(`Asset tag "${tag}" must start with org prefix "${prefix}"`);
 					resolvedTag = tag;
 				} else {
-					resolvedTag = `${prefix}${String(nextNum + autoTagIdx++).padStart(5, '0')}`;
+					resolvedTag = nextTag();
 				}
 
 				return tx.asset.create({
@@ -530,15 +595,57 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 				});
 			})
 		);
+
+		// In the same transaction as the units themselves: a fixture that reaches
+		// the pool without the brackets every other one of its kind has is worse
+		// than one that was never created — nothing about it looks wrong later.
+		if (accessoryProfile) {
+			for (const unit of created) {
+				for (const acc of accessoryProfile.accessories) {
+					for (let n = 0; n < acc.perUnit; n++) {
+						await createAccessoryRecord(tx, {
+							userId: user.id,
+							organizationId: data.organizationId,
+							productId: acc.productId,
+							assetTag: acc.tagged ? nextTag() : null,
+							inspectionIntervalMonths: defaultInspectionIntervalMonths,
+							nextInspectionDue,
+							parent: {
+								id: unit.id,
+								locationId: unit.locationId,
+								bundleId: unit.bundleId,
+								assetTag: unit.assetTag,
+								product: unit.product
+							}
+						});
+					}
+				}
+			}
+		}
+
+		return created;
 	});
 
 	await getAssets(data.organizationId).refresh();
 	await getAssets().refresh();
 	await getInventorySummary(data.organizationId).refresh();
 	await getInventorySummary().refresh();
+	if (accessoryProfile) {
+		await Promise.all(assets.map((a) => getAsset(a.id).refresh()));
+	}
+	// Both ends move: the product just gained a unit, and if these were
+	// accessories the parent's product now carries one more of them.
+	await getProductAccessoryProfile({
+		productId,
+		organizationId: data.organizationId
+	}).refresh();
 	if (parent) {
 		await getAsset(parent.id).refresh();
 		await getAssetHistory(parent.id).refresh();
+		await getProductAccessoryProfile({
+			productId: parent.productId,
+			organizationId: data.organizationId
+		}).refresh();
 	}
 	const touchedBundleId = parent?.bundleId ?? bundle?.id ?? null;
 	if (touchedBundleId) {
@@ -1118,9 +1225,13 @@ export const getBundleTemplates = query(v.optional(v.string()), async (organizat
 						include: {
 							product: { include: { manufacturer: true, category: true } },
 							location: true
-						}
+						},
+						orderBy: ASSET_ORDER_BY
 					}
-				}
+				},
+				// Two instances of one bundle type are told apart by their tag and
+				// nothing else, so that is the order they are listed in.
+				orderBy: [{ tag: { sort: 'asc', nulls: 'last' } }, { id: 'asc' }]
 			}
 		},
 		orderBy: { name: 'asc' }
@@ -1139,10 +1250,11 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 			template: { include: { organization: true, category: true } },
 			location: true,
 			assets: {
-				include: { product: { include: { manufacturer: true, category: true } }, location: true }
+				include: { product: { include: { manufacturer: true, category: true } }, location: true },
+				orderBy: ASSET_ORDER_BY
 			}
 		},
-		orderBy: { template: { name: 'asc' } }
+		orderBy: [{ template: { name: 'asc' } }, { tag: { sort: 'asc', nulls: 'last' } }]
 	});
 });
 
@@ -1158,7 +1270,8 @@ export const getBundle = query(v.string(), async (id: string) => {
 					product: { include: { manufacturer: true, category: true } },
 					organization: true,
 					location: true
-				}
+				},
+				orderBy: ASSET_ORDER_BY
 			}
 		}
 	});
@@ -1420,6 +1533,7 @@ async function refreshAccessoryPair(
 	organizationId: string,
 	childId: string,
 	parentId: string,
+	parentProductId: string,
 	bundleIds: (string | null)[]
 ) {
 	await Promise.all([
@@ -1429,6 +1543,9 @@ async function refreshAccessoryPair(
 		getAssetHistory(parentId).refresh(),
 		getAssets(organizationId).refresh(),
 		getAssets().refresh(),
+		// What the parent's product carries changed for the whole fleet's worth of
+		// it, which is what the "add to every unit" offer is computed from.
+		getProductAccessoryProfile({ productId: parentProductId, organizationId }).refresh(),
 		...[...new Set(bundleIds.filter((id) => id !== null))].flatMap((id) => [
 			getBundle(id as string).refresh(),
 			getBundles(organizationId).refresh()
@@ -1444,6 +1561,302 @@ function assetLabel(asset: {
 	return asset.assetTag ? `${name} (${asset.assetTag})` : name;
 }
 
+/**
+ * What the org's units of one product carry, as a single answer for the product
+ * rather than for any one unit. There is no table for this: an accessory hangs
+ * off an individual asset, so a product-level profile can only be derived from
+ * what the fleet actually looks like right now.
+ *
+ * Two surfaces need it. The asset detail page uses it to say that a unit's
+ * siblings exist and can be given the same thing in one go; `createAssets` uses
+ * it to give a newly registered unit what the others already have.
+ */
+async function productAccessoryProfile(productId: string, organizationId: string) {
+	const units = await prisma.asset.findMany({
+		where: { productId, organizationId, parentAssetId: null, ...ACTIVE_ASSET_WHERE },
+		select: {
+			id: true,
+			accessories: {
+				where: ACTIVE_ASSET_WHERE,
+				select: {
+					productId: true,
+					assetTag: true,
+					product: { select: { name: true, manufacturer: { select: { name: true } } } }
+				}
+			}
+		}
+	});
+
+	type Tally = {
+		productId: string;
+		name: string;
+		manufacturerName: string;
+		unitsWith: number;
+		tagged: number;
+		total: number;
+		/** How many units carry exactly N of this accessory. */
+		countsPerUnit: Map<number, number>;
+	};
+	const byProduct = new Map<string, Tally>();
+
+	for (const unit of units) {
+		const here = new Map<string, number>();
+		for (const acc of unit.accessories) {
+			here.set(acc.productId, (here.get(acc.productId) ?? 0) + 1);
+			let tally = byProduct.get(acc.productId);
+			if (!tally) {
+				tally = {
+					productId: acc.productId,
+					name: acc.product.name,
+					manufacturerName: acc.product.manufacturer.name,
+					unitsWith: 0,
+					tagged: 0,
+					total: 0,
+					countsPerUnit: new Map()
+				};
+				byProduct.set(acc.productId, tally);
+			}
+			tally.total++;
+			if (acc.assetTag) tally.tagged++;
+		}
+		for (const [accProductId, n] of here) {
+			const tally = byProduct.get(accProductId)!;
+			tally.unitsWith++;
+			tally.countsPerUnit.set(n, (tally.countsPerUnit.get(n) ?? 0) + 1);
+		}
+	}
+
+	return {
+		unitCount: units.length,
+		accessories: [...byProduct.values()]
+			.map((tally) => ({
+				productId: tally.productId,
+				name: tally.name,
+				manufacturerName: tally.manufacturerName,
+				unitsWith: tally.unitsWith,
+				// The mode, not the mean. "Every unit has two power cables" is a fact
+				// about a kit; an average of 1.6 of them is a fact about nothing, and
+				// it is the number a copy has to be made from.
+				perUnit: [...tally.countsPerUnit.entries()].sort(
+					(a, b) => b[1] - a[1] || b[0] - a[0]
+				)[0][0],
+				// The whole spread, because `unitsWith` only answers "has one at
+				// all". A unit carrying two brackets where the rest carry one is not
+				// a fleet that already agrees, and saying it is would be a lie the
+				// user can see out of the corner of their eye.
+				distribution: [...tally.countsPerUnit.entries()]
+					.map(([perUnit, units]) => ({ perUnit, units }))
+					.sort((a, b) => a.perUnit - b.perUnit),
+				// A copy is tagged if the ones already out there are. A fleet whose
+				// cables carry tags is one where somebody decided they should.
+				tagged: tally.tagged * 2 >= tally.total
+			}))
+			.sort((a, b) => b.unitsWith - a.unitsWith || a.name.localeCompare(b.name))
+	};
+}
+
+export type ProductAccessoryProfile = Awaited<ReturnType<typeof productAccessoryProfile>>;
+
+export const getProductAccessoryProfile = query(
+	v.object({ productId: v.string(), organizationId: v.string() }),
+	async ({ productId, organizationId }) => {
+		const user = await requireAuth();
+		const orgIds = await userOrgIds(user.id);
+		if (!orgIds.includes(organizationId) && !(await isSystemAdmin(user.id))) {
+			throw new Error('Unauthorized');
+		}
+		return await productAccessoryProfile(productId, organizationId);
+	}
+);
+
+/** What `createAccessoryRecord` needs to know about the unit it is attaching to. */
+type AccessoryParent = {
+	id: string;
+	locationId: string;
+	bundleId: string | null;
+	assetTag: string | null;
+	product: { name: string; manufacturer: { name: string } };
+};
+
+/**
+ * One accessory, created already attached — the shape both fan-out paths need.
+ * It inherits its parent's location and kit for the same reason `attachAccessory`
+ * writes them: those two columns are the parent's to decide.
+ */
+function createAccessoryRecord(
+	tx: AssetTx,
+	args: {
+		userId: string;
+		organizationId: string;
+		productId: string;
+		assetTag: string | null;
+		inspectionIntervalMonths: number | null;
+		nextInspectionDue: Date | null;
+		parent: AccessoryParent;
+	}
+) {
+	return tx.asset.create({
+		data: {
+			organizationId: args.organizationId,
+			productId: args.productId,
+			locationId: args.parent.locationId,
+			assetTag: args.assetTag,
+			status: 'AVAILABLE',
+			parentAssetId: args.parent.id,
+			bundleId: args.parent.bundleId,
+			inspectionIntervalMonths: args.inspectionIntervalMonths,
+			nextInspectionDue: args.nextInspectionDue,
+			transactions: {
+				create: [
+					{ userId: args.userId, action: 'CREATED', data: { type: 'CREATED' } },
+					{
+						userId: args.userId,
+						action: 'ACCESSORY_ATTACHED',
+						data: {
+							type: 'ACCESSORY_ATTACHED',
+							parentAssetId: args.parent.id,
+							parentLabel: assetLabel(args.parent)
+						}
+					}
+				]
+			}
+		},
+		select: { id: true }
+	});
+}
+
+const addProductAccessoriesSchema = v.object({
+	organizationId: v.string(),
+	/** The product whose every unit is getting one — not the accessory's own. */
+	parentProductId: v.string(),
+	...productRefSchema,
+	perUnit: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(20)),
+	noAssetTag: v.optional(v.boolean())
+});
+
+/**
+ * Give every unit of a product its own copy of the same accessory. Adding a
+ * power cable to each of twenty fixtures one unit at a time is forty clicks and
+ * a list to keep in your head of which ones you have done.
+ *
+ * Each unit gets its *own* accessory assets rather than a shared one — that is
+ * what an accessory is here, a full asset with its own tag and its own DGUV
+ * record, and a cable in the case of fixture 12 is not the cable in the case of
+ * fixture 13.
+ *
+ * It tops up rather than adding blindly: `perUnit` is the number each unit
+ * should end with, so running it twice does nothing the second time and a unit
+ * that already has one of two gets the one it is missing.
+ */
+export const addProductAccessories = command(addProductAccessoriesSchema, async (data) => {
+	const user = await requireAuth();
+	const systemAdmin = await isSystemAdmin(user.id);
+	if (!systemAdmin) {
+		const membership = await prisma.orgMembership.findUnique({
+			where: {
+				userId_organizationId: { userId: user.id, organizationId: data.organizationId }
+			}
+		});
+		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
+			error(403, 'Unauthorized');
+		}
+	}
+
+	const accessoryProductId = await resolveProductRef(data);
+	if (accessoryProductId === data.parentProductId) {
+		error(409, 'A product cannot be an accessory of itself');
+	}
+
+	// Only units that can hold an accessory: active, and not accessories
+	// themselves. `accessories` is narrowed to the one product so its length is
+	// the count this run is topping up.
+	const units = await prisma.asset.findMany({
+		where: {
+			productId: data.parentProductId,
+			organizationId: data.organizationId,
+			parentAssetId: null,
+			...ACTIVE_ASSET_WHERE
+		},
+		select: {
+			id: true,
+			locationId: true,
+			bundleId: true,
+			assetTag: true,
+			product: { select: { name: true, manufacturer: { select: { name: true } } } },
+			accessories: {
+				where: { productId: accessoryProductId, ...ACTIVE_ASSET_WHERE },
+				select: { id: true }
+			}
+		},
+		orderBy: ASSET_ORDER_BY
+	});
+	if (units.length === 0) error(409, 'This organisation has no units of that product');
+
+	const todo = units
+		.map((unit) => ({ unit, missing: data.perUnit - unit.accessories.length }))
+		.filter(({ missing }) => missing > 0);
+
+	const createdIds = await prisma.$transaction(async (tx) => {
+		const { assetIdPrefix: prefix, defaultInspectionIntervalMonths } =
+			await tx.organization.findUniqueOrThrow({
+				where: { id: data.organizationId },
+				select: { assetIdPrefix: true, defaultInspectionIntervalMonths: true }
+			});
+
+		const now = new Date();
+		const nextInspectionDue = defaultInspectionIntervalMonths
+			? new Date(now.getFullYear(), now.getMonth() + defaultInspectionIntervalMonths, now.getDate())
+			: null;
+		const nextTag = await tagAllocator(tx, prefix);
+
+		const ids: string[] = [];
+		for (const { unit, missing } of todo) {
+			for (let n = 0; n < missing; n++) {
+				const created = await createAccessoryRecord(tx, {
+					userId: user.id,
+					organizationId: data.organizationId,
+					productId: accessoryProductId,
+					assetTag: data.noAssetTag ? null : nextTag(),
+					inspectionIntervalMonths: defaultInspectionIntervalMonths,
+					nextInspectionDue,
+					parent: unit
+				});
+				ids.push(created.id);
+			}
+		}
+		return ids;
+	});
+
+	await Promise.all([
+		getAssets(data.organizationId).refresh(),
+		getAssets().refresh(),
+		getInventorySummary(data.organizationId).refresh(),
+		getInventorySummary().refresh(),
+		getProductAccessoryProfile({
+			productId: data.parentProductId,
+			organizationId: data.organizationId
+		}).refresh(),
+		...todo.flatMap(({ unit }) => [
+			getAsset(unit.id).refresh(),
+			getAssetHistory(unit.id).refresh()
+		]),
+		...[...new Set(todo.map(({ unit }) => unit.bundleId).filter((id) => id !== null))].map((id) =>
+			getBundle(id as string).refresh()
+		)
+	]);
+	if (todo.some(({ unit }) => unit.bundleId)) {
+		await getBundles(data.organizationId).refresh();
+		await getBundleTemplates(data.organizationId).refresh();
+		await getBundleTemplates().refresh();
+	}
+
+	return {
+		created: createdIds.length,
+		unitsTouched: todo.length,
+		unitsSkipped: units.length - todo.length
+	};
+});
+
 const accessoryLinkSchema = v.object({ parentId: v.string(), assetId: v.string() });
 
 export const attachAccessory = command(accessoryLinkSchema, async ({ parentId, assetId }) => {
@@ -1454,6 +1867,7 @@ export const attachAccessory = command(accessoryLinkSchema, async ({ parentId, a
 
 	const labelInclude = {
 		assetTag: true,
+		productId: true,
 		product: { select: { name: true, manufacturer: { select: { name: true } } } }
 	};
 
@@ -1543,7 +1957,7 @@ export const attachAccessory = command(accessoryLinkSchema, async ({ parentId, a
 		}
 	});
 
-	await refreshAccessoryPair(parent.organizationId, assetId, parentId, [
+	await refreshAccessoryPair(parent.organizationId, assetId, parentId, parent.productId, [
 		parent.bundleId,
 		asset.bundleId
 	]);
@@ -1564,6 +1978,7 @@ export const detachAccessory = command(v.string(), async (assetId: string) => {
 			parent: {
 				select: {
 					assetTag: true,
+					productId: true,
 					product: { select: { name: true, manufacturer: { select: { name: true } } } }
 				}
 			}
@@ -1602,7 +2017,13 @@ export const detachAccessory = command(v.string(), async (assetId: string) => {
 		}
 	});
 
-	await refreshAccessoryPair(asset.organizationId, assetId, asset.parentAssetId, [asset.bundleId]);
+	await refreshAccessoryPair(
+		asset.organizationId,
+		assetId,
+		asset.parentAssetId,
+		asset.parent.productId,
+		[asset.bundleId]
+	);
 	return { assetId };
 });
 

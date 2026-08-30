@@ -9,6 +9,17 @@
 		value?: Selection | null;
 		onchange?: (item: Selection | null) => void;
 		oncreate?: (name: string) => void;
+		/**
+		 * A second, labelled list under the real options — entries that are not a
+		 * selection but a shortcut somewhere else. Picking one calls `onselect`
+		 * and leaves `value` untouched.
+		 *
+		 * The accessory picker uses it for the product catalogue: what you want to
+		 * attach is very often a thing the pool has none of yet, and the honest
+		 * answer to "not in the list" is not always "type its name in" — usually
+		 * the product is already known and only the unit is missing.
+		 */
+		suggestions?: { label: string; items: Item[]; onselect: (item: Item) => void };
 		placeholder?: string;
 		required?: boolean;
 		disabled?: boolean;
@@ -21,6 +32,7 @@
 		value = $bindable(null),
 		onchange,
 		oncreate,
+		suggestions,
 		placeholder = 'Search…',
 		required = false,
 		disabled = false,
@@ -34,25 +46,47 @@
 	let containerEl: HTMLDivElement;
 	let inputEl: HTMLInputElement;
 
-	let filtered = $derived(
-		inputValue.trim()
-			? items.filter((i) => i.name.toLowerCase().includes(inputValue.toLowerCase().trim()))
-			: items
-	);
+	let query = $derived(inputValue.toLowerCase().trim());
+	const matching = (list: Item[]) =>
+		query ? list.filter((i) => i.name.toLowerCase().includes(query)) : list;
 
+	let filtered = $derived(matching(items));
+	let filteredSuggestions = $derived(suggestions ? matching(suggestions.items) : []);
+
+	// A suggestion counts: if the catalogue already has that exact name, offering
+	// to create a second product called the same thing is how duplicates happen.
 	let exactMatch = $derived(
-		items.some((i) => i.name.toLowerCase() === inputValue.toLowerCase().trim())
+		[...items, ...(suggestions?.items ?? [])].some((i) => i.name.toLowerCase() === query)
 	);
 
 	let showCreate = $derived(allowCreate && inputValue.trim().length > 0 && !exactMatch);
 
-	let options = $derived<Array<{ type: 'item'; item: Item } | { type: 'create'; name: string }>>([
+	type Option =
+		| { type: 'item'; item: Item }
+		| { type: 'suggestion'; item: Item }
+		| { type: 'create'; name: string };
+
+	// Suggestions sit between the real options and "create a new one": a product
+	// that already exists is a better answer than naming a second one like it,
+	// and naming one from scratch is the last resort it looks like.
+	let options = $derived<Option[]>([
 		...filtered.map((item) => ({ type: 'item' as const, item })),
+		...filteredSuggestions.map((item) => ({ type: 'suggestion' as const, item })),
 		...(showCreate ? [{ type: 'create' as const, name: inputValue.trim() }] : [])
 	]);
 
-	function selectOption(opt: (typeof options)[number]) {
-		if (opt.type === 'item') {
+	/** Where the suggestion heading goes — the divider is drawn before this row. */
+	let firstSuggestionIndex = $derived(options.findIndex((o) => o.type === 'suggestion'));
+
+	function selectOption(opt: Option) {
+		if (opt.type === 'suggestion') {
+			open = false;
+			highlightedIndex = -1;
+			// Deliberately not written into `value`: this is a shortcut out of the
+			// picker, and the caller decides what the form becomes next.
+			inputValue = value?.name ?? '';
+			suggestions?.onselect(opt.item);
+		} else if (opt.type === 'item') {
 			value = opt.item;
 			inputValue = opt.item.name;
 			onchange?.(opt.item);
@@ -147,7 +181,15 @@
 			class="absolute z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md"
 		>
 			<ul class="max-h-60 overflow-y-auto py-1">
-				{#each options as opt, i (opt.type === 'item' ? opt.item.id : `create-${opt.name}`)}
+				{#each options as opt, i (opt.type === 'create' ? `create-${opt.name}` : `${opt.type}-${opt.item.id}`)}
+					{#if i === firstSuggestionIndex && suggestions}
+						<li
+							class="mt-1 border-t px-3 pt-2 pb-1 text-xs font-medium text-muted-foreground"
+							aria-hidden="true"
+						>
+							{suggestions.label}
+						</li>
+					{/if}
 					<li>
 						<!-- svelte-ignore a11y_interactive_supports_focus -->
 						<div
@@ -163,6 +205,8 @@
 								: ''}"
 						>
 							{#if opt.type === 'item'}
+								{opt.item.name}
+							{:else if opt.type === 'suggestion'}
 								{opt.item.name}
 							{:else}
 								<span class="flex items-center gap-1.5">

@@ -152,7 +152,16 @@ export const getProduction = query(v.string(), async (id: string) => {
 						}
 					},
 					sourceBundle: { select: { id: true, template: { select: { name: true } } } }
-				}
+				},
+				// The page groups these into sections in the order it meets them, and
+				// the print routes walk them as they come — so an unordered list is a
+				// packing list whose sections move between two prints of it. Same
+				// order as every other list of units: product, then tag.
+				orderBy: [
+					{ asset: { product: { name: 'asc' } } },
+					{ asset: { assetTag: { sort: 'asc', nulls: 'last' } } },
+					{ assetId: 'asc' }
+				]
 			},
 			address: true,
 			customer: { include: { address: true } },

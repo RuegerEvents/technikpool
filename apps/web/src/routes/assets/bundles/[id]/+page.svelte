@@ -14,6 +14,7 @@
 		getCategories,
 		getAssets,
 		getLocations,
+		getProducts,
 		addAssetToBundle,
 		removeAssetFromBundle,
 		updateBundleTemplate,
@@ -24,7 +25,7 @@
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
-	import { NewAssetModal } from '$lib/components/ui/new-asset-modal';
+	import { NewAssetModal, type NewAssetModalHandle } from '$lib/components/ui/new-asset-modal';
 
 	const bundleId = $derived(page.params.id as string);
 
@@ -144,12 +145,32 @@
 	// /assets/new and back to add it is the long way round. Created straight
 	// into this bundle, so it can't be left loose if something fails.
 	let newOpen = $state(false);
-	let newAssetModal = $state<{ reset: (name?: string) => void } | null>(null);
+	let newAssetModal = $state<NewAssetModalHandle | null>(null);
 
 	function openNewAsset() {
 		// The search box is where someone has just failed to find it, so whatever
 		// they typed is the best guess at the product name.
 		newAssetModal?.reset(searchQuery);
+		newOpen = true;
+	}
+
+	// Under the loose units, the catalogue. A kit is usually short of a product
+	// the pool knows perfectly well and has no spare unit of — every one of them
+	// is already in another case — so the list that ends in "nothing matches"
+	// carries on into "register one of these instead".
+	let catalogue = $derived(await getProducts());
+	let productMatches = $derived.by(() => {
+		const q = searchQuery.toLowerCase().trim();
+		return catalogue
+			.map((p) => ({ ...p, label: `${p.manufacturer.name} ${p.name}` }))
+			.filter((p) => !q || p.label.toLowerCase().includes(q));
+	});
+
+	function openNewAssetOfProduct(p: (typeof productMatches)[number]) {
+		newAssetModal?.reset({
+			manufacturer: { id: p.manufacturerId, name: p.manufacturer.name },
+			product: { id: p.id, name: p.name }
+		});
 		newOpen = true;
 	}
 
@@ -377,9 +398,6 @@
 				? `Nothing here matches "${searchQuery.trim()}".`
 				: 'No assets available to add.'}
 		</p>
-		<Button size="sm" class="mt-3" disabled={working} onclick={openNewAsset}>
-			{searchQuery.trim() ? `Register "${searchQuery.trim()}" as a new device` : 'New device'}
-		</Button>
 	{:else}
 		<div class="max-h-80 overflow-y-auto rounded-md border">
 			<table class="w-full text-sm">
@@ -417,6 +435,40 @@
 				</tbody>
 			</table>
 		</div>
+	{/if}
+
+	<!-- The catalogue, under the units. Everything above is a unit standing
+	     loose in the warehouse; below is every product the system knows, so a
+	     kit short of a thing the pool has no spare of is one click from having
+	     one registered straight into it. -->
+	<p class="mt-4 mb-2 text-xs font-medium text-muted-foreground">Register a new unit of…</p>
+	{#if productMatches.length === 0}
+		{#if searchQuery.trim()}
+			<p class="text-sm text-muted-foreground">
+				No product matches "{searchQuery.trim()}" either.
+			</p>
+		{/if}
+		<Button size="sm" class="mt-3" disabled={working} onclick={openNewAsset}>
+			{searchQuery.trim() ? `Register "${searchQuery.trim()}" as a new device` : 'New device'}
+		</Button>
+	{:else}
+		<ul class="max-h-56 divide-y overflow-y-auto rounded-md border">
+			{#each productMatches as p (p.id)}
+				<li class="flex items-center gap-2 bg-background px-3 py-2">
+					<ProductThumb path={p.imagePath} alt={p.name} />
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-sm font-medium">{p.name}</p>
+						<p class="text-xs text-muted-foreground">{p.manufacturer.name}</p>
+					</div>
+					<Button
+						size="sm"
+						variant="outline"
+						disabled={working}
+						onclick={() => openNewAssetOfProduct(p)}>New</Button
+					>
+				</li>
+			{/each}
+		</ul>
 	{/if}
 </Modal>
 
