@@ -25,6 +25,7 @@
 		detachAccessory
 	} from '$lib/remote/assets.remote';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
+	import { NewAssetModal } from '$lib/components/ui/new-asset-modal';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
 	import { AssetStatusBadge, assetStatusLabel } from '$lib/components/ui/asset-status';
 	import type { TransactionData } from '$lib/types/asset-transaction';
@@ -88,6 +89,22 @@
 		} finally {
 			attaching = false;
 		}
+	}
+
+	// ── New accessory ─────────────────────────────────────────────────────────
+	// A cable or bracket that isn't in the pool yet is the ordinary case, not the
+	// exception: nobody registers an accessory before they need it. So typing a
+	// name the picker doesn't know offers to create it here, already attached,
+	// rather than sending someone to /assets/new and back to attach it by hand.
+	//
+	// No location is offered — an accessory is wherever its parent is, and the
+	// command overrides it anyway.
+	let newOpen = $state(false);
+	let newAssetModal = $state<{ reset: (name?: string) => void } | null>(null);
+
+	function openNewAccessory(name: string) {
+		newAssetModal?.reset(name);
+		newOpen = true;
 	}
 
 	// ── Asset editing ─────────────────────────────────────────────────────────
@@ -499,14 +516,20 @@
 								<CreatableSelect
 									items={attachCandidates}
 									bind:value={attachSelection}
-									allowCreate={false}
-									placeholder="Search this organisation's devices…"
+									oncreate={openNewAccessory}
+									placeholder="Search this organisation's devices, or type a new one…"
 									disabled={attaching}
 								/>
 							</div>
 							<Button disabled={attaching || !attachSelection?.id} onclick={handleAttach}>
 								{attaching ? 'Attaching…' : 'Attach'}
 							</Button>
+							<Button
+								type="button"
+								variant="outline"
+								disabled={attaching}
+								onclick={() => openNewAccessory('')}>New</Button
+							>
 						</div>
 					{/if}
 				{/if}
@@ -761,6 +784,27 @@
 		</div>
 	</div>
 {/if}
+
+<NewAssetModal
+	bind:this={newAssetModal}
+	bind:open={newOpen}
+	organizationId={asset.organizationId}
+	parentAssetId={assetId}
+	heading="New accessory"
+	defaultNoTag
+	onCreated={(count) => {
+		attachSelection = null;
+		toast.success(
+			count === 1 ? 'Accessory created and attached' : `${count} accessories created and attached`
+		);
+	}}
+>
+	{#snippet description()}
+		Registered and attached to {asset.product.manufacturer.name}
+		{asset.product.name}{asset.assetTag ? ` (${asset.assetTag})` : ''} in one step. It inherits that unit's
+		location{asset.bundle ? ' and bundle' : ''}.
+	{/snippet}
+</NewAssetModal>
 
 <!-- Edit Product Modal -->
 {#if productModalOpen}

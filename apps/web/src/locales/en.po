@@ -120,6 +120,7 @@ msgstr "Booked Equipment"
 #~ msgid "No assets found."
 #~ msgstr "No assets found."
 
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
@@ -174,6 +175,7 @@ msgstr "Crew"
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 #: src/routes/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
@@ -272,6 +274,7 @@ msgid "Remove"
 msgstr "Remove"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
@@ -722,6 +725,7 @@ msgstr "New Bundle"
 msgid "What's in this bundle?"
 msgstr "What's in this bundle?"
 
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/offers/new/+page.svelte
@@ -869,6 +873,7 @@ msgstr "ArrowUp"
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/category-select/category-select.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/org-multi-select/org-multi-select.svelte
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 #: src/routes/assets/[id]/+page.svelte
@@ -879,6 +884,7 @@ msgid "Escape"
 msgstr "Escape"
 
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 msgid "Create"
 msgstr "Create"
 
@@ -1286,6 +1292,7 @@ msgstr "Edit"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
@@ -1325,6 +1332,7 @@ msgstr "Location"
 msgid "Save"
 msgstr "Save"
 
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Please select a location"
@@ -1837,6 +1845,7 @@ msgid "All Categories"
 msgstr "All Categories"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
@@ -2893,6 +2902,8 @@ msgstr "Color and a 2-letter label identify this org at a glance in the calendar
 msgid "Manufacturer logo"
 msgstr "Manufacturer logo"
 
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
@@ -4792,14 +4803,8 @@ msgstr "Detach"
 msgid "Nothing is attached to this unit yet."
 msgstr "Nothing is attached to this unit yet."
 
-#. 0: new Date(accessory.nextInspectionDue).toLocaleDateString( 'de-DE' )
-#: src/routes/assets/[id]/+page.svelte
-msgid "· Next due: {0}"
-msgstr "· Next due: {0}"
-
-#: src/routes/assets/[id]/+page.svelte
-msgid "Search this organisation's devices…"
-msgstr "Search this organisation's devices…"
+#~ msgid "Search this organisation's devices…"
+#~ msgstr "Search this organisation's devices…"
 
 #: src/routes/assets/[id]/+page.svelte
 msgid "Add an accessory"
@@ -4820,3 +4825,122 @@ msgstr "Attached as an accessory of <0/>"
 #: src/routes/assets/[id]/+page.svelte
 msgid "Detached from <0/>"
 msgstr "Detached from <0/>"
+
+#. 0: new Date(accessory.nextInspectionDue).toLocaleDateString( 'de-DE' )
+#: src/routes/assets/[id]/+page.svelte
+msgid "· Next due: {0}"
+msgstr "· Next due: {0}"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Please choose or name a manufacturer"
+msgstr "Please choose or name a manufacturer"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Please choose or name a product"
+msgstr "Please choose or name a product"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "A new product needs a category"
+msgstr "A new product needs a category"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Accessory created and attached"
+msgstr "Accessory created and attached"
+
+#. 0: count
+#: src/routes/assets/[id]/+page.svelte
+msgid "{0} accessories created and attached"
+msgstr "{0} accessories created and attached"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Search this organisation's devices, or type a new one…"
+msgstr "Search this organisation's devices, or type a new one…"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "New"
+msgstr "New"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Search or type a new one…"
+msgstr "Search or type a new one…"
+
+#. 0: product?.name
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "\"{0}\" is new, so it needs a category. It becomes a product like any other — the next unit of it is picked from the list."
+msgstr "\"{0}\" is new, so it needs a category. It becomes a product like any other — the next unit of it is picked from the list."
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "How many"
+msgstr "How many"
+
+#~ msgid "Two omega brackets on one fixture is one entry here, not two."
+#~ msgstr "Two omega brackets on one fixture is one entry here, not two."
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Serial number"
+msgstr "Serial number"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Leave blank for the next free number"
+msgstr "Leave blank for the next free number"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Asset tag"
+msgstr "Asset tag"
+
+#~ msgid "Create & attach"
+#~ msgstr "Create & attach"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "<0/> No asset tag"
+msgstr "<0/> No asset tag"
+
+#~ msgid "Only for something too small to label. A tag is what an inspection record hangs off, so anything DGUV-relevant wants one."
+#~ msgstr "Only for something too small to label. A tag is what an inspection record hangs off, so anything DGUV-relevant wants one."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "New accessory"
+msgstr "New accessory"
+
+#. 0: asset.product.manufacturer.name; 1: asset.product.name; 2: asset.assetTag ? ` (${asset.assetTag})` \\: ''; 3: asset.bundle ? ' and bundle' \\: ''
+#: src/routes/assets/[id]/+page.svelte
+msgid "Registered and attached to {0} {1}{2} in one step. It inherits that unit's location{3}."
+msgstr "Registered and attached to {0} {1}{2} in one step. It inherits that unit's location{3}."
+
+#~ msgid "Most accessories carry no sticker, so this starts ticked. Untick it to give this one a number — that is what an inspection record hangs off, so anything DGUV-relevant wants one."
+#~ msgstr "Most accessories carry no sticker, so this starts ticked. Untick it to give this one a number — that is what an inspection record hangs off, so anything DGUV-relevant wants one."
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Without a tag the unit can't be scanned, and an inspection record has nothing to hang off — so anything DGUV-relevant wants one."
+msgstr "Without a tag the unit can't be scanned, and an inspection record has nothing to hang off — so anything DGUV-relevant wants one."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "New device"
+msgstr "New device"
+
+#. 0: searchQuery.trim()
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Nothing here matches \"{0}\"."
+msgstr "Nothing here matches \"{0}\"."
+
+#. 0: searchQuery.trim()
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Register \"{0}\" as a new device"
+msgstr "Register \"{0}\" as a new device"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Device created and added"
+msgstr "Device created and added"
+
+#. 0: count
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "{0} devices created and added"
+msgstr "{0} devices created and added"
+
+#. 0: bundle.template.name; 1: bundle.tag ? ` (${bundle.tag})` \\: ''
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Registered and put into {0}{1} in one step."
+msgstr "Registered and put into {0}{1} in one step."

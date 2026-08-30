@@ -20,8 +20,10 @@
 	} from '$lib/remote/assets.remote';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
+	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
+	import { NewAssetModal } from '$lib/components/ui/new-asset-modal';
 
 	const bundleId = $derived(page.params.id as string);
 
@@ -135,6 +137,20 @@
 			);
 		});
 	});
+
+	// Same idea as the accessory picker on the asset detail page: the unit you
+	// want in a kit is often one nobody has registered yet, and being sent to
+	// /assets/new and back to add it is the long way round. Created straight
+	// into this bundle, so it can't be left loose if something fails.
+	let newOpen = $state(false);
+	let newAssetModal = $state<{ reset: (name?: string) => void } | null>(null);
+
+	function openNewAsset() {
+		// The search box is where someone has just failed to find it, so whatever
+		// they typed is the best guess at the product name.
+		newAssetModal?.reset(searchQuery);
+		newOpen = true;
+	}
 
 	async function handleAdd(assetId: string) {
 		working = true;
@@ -329,7 +345,13 @@
 							</thead>
 							<tbody>
 								{#each visibleBundleAssets as { asset, nested } (asset.id)}
-									<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
+									<!-- The whole row navigates, as it does on the Devices list, but the
+									     product name is a real anchor so the unit can be opened in a new
+									     tab and reached by keyboard. -->
+									<tr
+										class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
+										onclick={() => goto(resolve(`/assets/${asset.id}`))}
+									>
 										<td class="px-4 py-3 {nested ? 'pl-10' : ''}">
 											<div class="flex items-center gap-2">
 												{#if nested}
@@ -340,7 +362,11 @@
 													name={categoryLabel(asset.product.category)}
 													color={asset.product.category.color}
 												/>
-												<span class="font-medium">{asset.product.name}</span>
+												<a
+													href={resolve(`/assets/${asset.id}`)}
+													class="font-medium hover:underline"
+													onclick={(e) => e.stopPropagation()}>{asset.product.name}</a
+												>
 											</div>
 										</td>
 										<td class="px-4 py-3 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
@@ -356,7 +382,10 @@
 													size="sm"
 													variant="outline"
 													disabled={working}
-													onclick={() => handleRemove(asset.id)}>Remove</Button
+													onclick={(e) => {
+														e.stopPropagation();
+														handleRemove(asset.id);
+													}}>Remove</Button
 												>
 											{/if}
 										</td>
@@ -388,7 +417,10 @@
 					<h2 class="text-lg font-semibold">Add Assets to Bundle</h2>
 					<p class="text-sm text-muted-foreground">Only devices without a bundle can be added.</p>
 				</div>
-				<Button variant="outline" size="sm" onclick={() => (showAddModal = false)}>Close</Button>
+				<div class="flex items-center gap-2">
+					<Button size="sm" disabled={working} onclick={openNewAsset}>New device</Button>
+					<Button variant="outline" size="sm" onclick={() => (showAddModal = false)}>Close</Button>
+				</div>
 			</div>
 
 			<input
@@ -399,7 +431,14 @@
 			/>
 
 			{#if availableToAdd.length === 0}
-				<p class="text-sm text-muted-foreground">No assets available to add.</p>
+				<p class="text-sm text-muted-foreground">
+					{searchQuery.trim()
+						? `Nothing here matches "${searchQuery.trim()}".`
+						: 'No assets available to add.'}
+				</p>
+				<Button size="sm" class="mt-3" disabled={working} onclick={openNewAsset}>
+					{searchQuery.trim() ? `Register "${searchQuery.trim()}" as a new device` : 'New device'}
+				</Button>
 			{:else}
 				<div class="max-h-80 overflow-y-auto rounded-md border">
 					<table class="w-full text-sm">
@@ -443,3 +482,21 @@
 		</div>
 	</div>
 {/if}
+
+<NewAssetModal
+	bind:this={newAssetModal}
+	bind:open={newOpen}
+	organizationId={bundle.template.organizationId}
+	bundleId={bundle.id}
+	heading="New device"
+	{locations}
+	locationId={bundle.locationId ?? undefined}
+	onCreated={(count) => {
+		searchQuery = '';
+		toast.success(count === 1 ? 'Device created and added' : `${count} devices created and added`);
+	}}
+>
+	{#snippet description()}
+		Registered and put into {bundle.template.name}{bundle.tag ? ` (${bundle.tag})` : ''} in one step.
+	{/snippet}
+</NewAssetModal>

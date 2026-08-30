@@ -120,6 +120,7 @@ msgstr "Gebuchte Geräte"
 #~ msgid "No assets found."
 #~ msgstr "Keine Geräte gefunden."
 
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
@@ -174,6 +175,7 @@ msgstr "Crew"
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 #: src/routes/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
@@ -272,6 +274,7 @@ msgid "Remove"
 msgstr "Entfernen"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
@@ -722,6 +725,7 @@ msgstr "Neues Bundle"
 msgid "What's in this bundle?"
 msgstr "Was ist in diesem Bundle?"
 
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/offers/new/+page.svelte
@@ -869,6 +873,7 @@ msgstr "ArrowUp"
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/category-select/category-select.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/org-multi-select/org-multi-select.svelte
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 #: src/routes/assets/[id]/+page.svelte
@@ -879,6 +884,7 @@ msgid "Escape"
 msgstr "Escape"
 
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 msgid "Create"
 msgstr "Erstellen"
 
@@ -1286,6 +1292,7 @@ msgstr "Bearbeiten"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
@@ -1325,6 +1332,7 @@ msgstr "Standort"
 msgid "Save"
 msgstr "Speichern"
 
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Please select a location"
@@ -1837,6 +1845,7 @@ msgid "All Categories"
 msgstr "Alle Kategorien"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
@@ -2893,6 +2902,8 @@ msgstr "Farbe und ein 2-Buchstaben-Kürzel identifizieren diese Organisation auf
 msgid "Manufacturer logo"
 msgstr "Herstellerlogo"
 
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
@@ -4792,14 +4803,8 @@ msgstr "Abhängen"
 msgid "Nothing is attached to this unit yet."
 msgstr "An dieser Einheit hängt noch nichts."
 
-#. 0: new Date(accessory.nextInspectionDue).toLocaleDateString( 'de-DE' )
-#: src/routes/assets/[id]/+page.svelte
-msgid "· Next due: {0}"
-msgstr "· Nächste Fälligkeit: {0}"
-
-#: src/routes/assets/[id]/+page.svelte
-msgid "Search this organisation's devices…"
-msgstr "Geräte dieser Organisation durchsuchen…"
+#~ msgid "Search this organisation's devices…"
+#~ msgstr "Geräte dieser Organisation durchsuchen…"
 
 #: src/routes/assets/[id]/+page.svelte
 msgid "Add an accessory"
@@ -4820,3 +4825,122 @@ msgstr "Als Zubehör angehängt an <0/>"
 #: src/routes/assets/[id]/+page.svelte
 msgid "Detached from <0/>"
 msgstr "Abgehängt von <0/>"
+
+#. 0: new Date(accessory.nextInspectionDue).toLocaleDateString( 'de-DE' )
+#: src/routes/assets/[id]/+page.svelte
+msgid "· Next due: {0}"
+msgstr "· Nächste Fälligkeit: {0}"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Please choose or name a manufacturer"
+msgstr "Bitte einen Hersteller wählen oder eingeben"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Please choose or name a product"
+msgstr "Bitte ein Produkt wählen oder eingeben"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "A new product needs a category"
+msgstr "Ein neues Produkt braucht eine Kategorie"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Accessory created and attached"
+msgstr "Zubehör angelegt und angehängt"
+
+#. 0: count
+#: src/routes/assets/[id]/+page.svelte
+msgid "{0} accessories created and attached"
+msgstr "{0} Zubehörteile angelegt und angehängt"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Search this organisation's devices, or type a new one…"
+msgstr "Geräte dieser Organisation durchsuchen oder neues eingeben…"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "New"
+msgstr "Neu"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Search or type a new one…"
+msgstr "Suchen oder neu eingeben…"
+
+#. 0: product?.name
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "\"{0}\" is new, so it needs a category. It becomes a product like any other — the next unit of it is picked from the list."
+msgstr "\"{0}\" ist neu und braucht deshalb eine Kategorie. Es wird ein Produkt wie jedes andere — die nächste Einheit davon wird aus der Liste gewählt."
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "How many"
+msgstr "Anzahl"
+
+#~ msgid "Two omega brackets on one fixture is one entry here, not two."
+#~ msgstr "Zwei Omega-Bügel an einem Scheinwerfer sind hier ein Eintrag, nicht zwei."
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Serial number"
+msgstr "Seriennummer"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Leave blank for the next free number"
+msgstr "Leer lassen für die nächste freie Nummer"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Asset tag"
+msgstr "Inventarnummer"
+
+#~ msgid "Create & attach"
+#~ msgstr "Anlegen & anhängen"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "<0/> No asset tag"
+msgstr "<0/> Keine Inventarnummer"
+
+#~ msgid "Only for something too small to label. A tag is what an inspection record hangs off, so anything DGUV-relevant wants one."
+#~ msgstr "Nur für Teile, die zu klein zum Beschriften sind. An der Inventarnummer hängt der Prüfnachweis — alles DGUV-Relevante braucht eine."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "New accessory"
+msgstr "Neues Zubehör"
+
+#. 0: asset.product.manufacturer.name; 1: asset.product.name; 2: asset.assetTag ? ` (${asset.assetTag})` \\: ''; 3: asset.bundle ? ' and bundle' \\: ''
+#: src/routes/assets/[id]/+page.svelte
+msgid "Registered and attached to {0} {1}{2} in one step. It inherits that unit's location{3}."
+msgstr "Wird in einem Schritt angelegt und an {0} {1}{2} angehängt. Es übernimmt den Standort{3} dieser Einheit."
+
+#~ msgid "Most accessories carry no sticker, so this starts ticked. Untick it to give this one a number — that is what an inspection record hangs off, so anything DGUV-relevant wants one."
+#~ msgstr "Die meisten Zubehörteile tragen keinen Aufkleber, deshalb ist das hier vorausgewählt. Abwählen, um diesem Teil eine Nummer zu geben — daran hängt der Prüfnachweis, alles DGUV-Relevante braucht also eine."
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Without a tag the unit can't be scanned, and an inspection record has nothing to hang off — so anything DGUV-relevant wants one."
+msgstr "Ohne Inventarnummer kann die Einheit nicht gescannt werden, und der Prüfnachweis hat nichts, woran er hängen könnte — alles DGUV-Relevante braucht also eine."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "New device"
+msgstr "Neues Gerät"
+
+#. 0: searchQuery.trim()
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Nothing here matches \"{0}\"."
+msgstr "Hier passt nichts zu \"{0}\"."
+
+#. 0: searchQuery.trim()
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Register \"{0}\" as a new device"
+msgstr "\"{0}\" als neues Gerät anlegen"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Device created and added"
+msgstr "Gerät angelegt und hinzugefügt"
+
+#. 0: count
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "{0} devices created and added"
+msgstr "{0} Geräte angelegt und hinzugefügt"
+
+#. 0: bundle.template.name; 1: bundle.tag ? ` (${bundle.tag})` \\: ''
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Registered and put into {0}{1} in one step."
+msgstr "Wird in einem Schritt angelegt und in {0}{1} eingefügt."

@@ -332,6 +332,13 @@ export const getProductCatalog = query(v.optional(v.string()), async (organizati
 const createAssetsSchema = v.object({
 	organizationId: v.string(),
 	locationId: v.string(),
+	// Set when the units being created land somewhere immediately — attached to
+	// a parent ("New accessory" on the asset detail page) or inside a kit ("New
+	// device" on the bundle page). They are created already there rather than
+	// created and then moved, so a failure can't leave a loose unit behind that
+	// nobody asked for. Mutually exclusive: an accessory's kit is its parent's.
+	parentAssetId: v.optional(v.string()),
+	bundleId: v.optional(v.string()),
 	productId: v.optional(v.string()),
 	newProductName: v.optional(v.string()),
 	newProductImagePath: v.optional(v.string()),
@@ -391,7 +398,56 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 
 	if (!productId) throw new Error('Product is required');
 
-	const location = await prisma.location.findUniqueOrThrow({ where: { id: data.locationId } });
+	// An accessory is wherever its parent is and in whatever kit its parent is
+	// in, so the parent decides both — the caller's locationId is ignored. The
+	// parent-side guards are the ones from `attachAccessory`; the child-side ones
+	// can't fail for a unit that is being created here and now.
+	if (data.parentAssetId && data.bundleId) {
+		error(400, 'An accessory is in whatever kit its parent is in — pass one or the other');
+	}
+
+	const parent = data.parentAssetId
+		? await prisma.asset.findUniqueOrThrow({
+				where: { id: data.parentAssetId },
+				select: {
+					id: true,
+					status: true,
+					organizationId: true,
+					locationId: true,
+					bundleId: true,
+					parentAssetId: true,
+					assetTag: true,
+					product: { select: { name: true, manufacturer: { select: { name: true } } } }
+				}
+			})
+		: null;
+	if (parent) {
+		if (parent.organizationId !== data.organizationId) {
+			error(409, 'An accessory has to belong to the same organisation as what it is attached to');
+		}
+		if (isRetiredStatus(parent.status)) {
+			error(409, 'A sold or decommissioned unit cannot have accessories attached to it');
+		}
+		if (parent.parentAssetId) {
+			error(409, 'That unit is itself an accessory — accessories are one level deep');
+		}
+	}
+
+	// A kit's own location wins over the caller's for the same reason a parent's
+	// does — `addAssetToBundle` applies it to anything joining an existing
+	// bundle. A bundle with no location of its own leaves the choice open.
+	const bundle = data.bundleId
+		? await prisma.assetBundle.findUniqueOrThrow({
+				where: { id: data.bundleId },
+				select: { id: true, locationId: true, template: { select: { organizationId: true } } }
+			})
+		: null;
+	if (bundle && bundle.template.organizationId !== data.organizationId) {
+		error(409, 'That bundle belongs to a different organisation');
+	}
+
+	const locationId = parent?.locationId ?? bundle?.locationId ?? data.locationId;
+	const location = await prisma.location.findUniqueOrThrow({ where: { id: locationId } });
 	if (location.organizationId !== data.organizationId) throw new Error('Invalid location');
 
 	const assets = await prisma.$transaction(async (tx) => {
@@ -444,11 +500,30 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 						serialNumber: item.serialNumber || null,
 						assetTag: resolvedTag,
 						status: 'AVAILABLE',
+						parentAssetId: parent?.id ?? null,
+						bundleId: parent?.bundleId ?? bundle?.id ?? null,
 						// Snapshot, not a live reference — see Organization.defaultInspectionIntervalMonths.
 						inspectionIntervalMonths: defaultInspectionIntervalMonths,
 						nextInspectionDue,
 						transactions: {
-							create: { userId: user.id, action: 'CREATED', data: { type: 'CREATED' } }
+							create: [
+								{ userId: user.id, action: 'CREATED', data: { type: 'CREATED' } },
+								// Two entries rather than one: the unit was created, and it was
+								// attached. Detaching it later leaves the first one true.
+								...(parent
+									? [
+											{
+												userId: user.id,
+												action: 'ACCESSORY_ATTACHED',
+												data: {
+													type: 'ACCESSORY_ATTACHED',
+													parentAssetId: parent.id,
+													parentLabel: assetLabel(parent)
+												}
+											}
+										]
+									: [])
+							]
 						}
 					},
 					include: { product: { include: { manufacturer: true, category: true } }, location: true }
@@ -458,8 +533,20 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 	});
 
 	await getAssets(data.organizationId).refresh();
+	await getAssets().refresh();
 	await getInventorySummary(data.organizationId).refresh();
 	await getInventorySummary().refresh();
+	if (parent) {
+		await getAsset(parent.id).refresh();
+		await getAssetHistory(parent.id).refresh();
+	}
+	const touchedBundleId = parent?.bundleId ?? bundle?.id ?? null;
+	if (touchedBundleId) {
+		await getBundle(touchedBundleId).refresh();
+		await getBundles(data.organizationId).refresh();
+		await getBundleTemplates(data.organizationId).refresh();
+		await getBundleTemplates().refresh();
+	}
 
 	return assets;
 });
