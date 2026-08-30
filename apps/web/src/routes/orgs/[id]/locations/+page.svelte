@@ -5,6 +5,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { AddressInput } from '$lib/components/ui/address-input';
+	import { Modal } from '$lib/components/ui/modal';
 	import { getOrgWithMembers } from '$lib/remote/orgs.remote';
 	import { createLocation, getLocations, updateLocation } from '$lib/remote/assets.remote';
 	import { page } from '$app/state';
@@ -33,77 +34,48 @@
 		return { line1: '', line2: '', postalCode: '', city: '' };
 	}
 
-	let creating = $state(false);
-	let newName = $state('');
-	let newAddress = $state<AddressDraft>(emptyAddress());
-
-	async function handleCreate(e: Event) {
-		e.preventDefault();
-		if (!newName.trim()) return;
-		creating = true;
-		try {
-			await createLocation({
-				organizationId: orgId,
-				name: newName,
-				address: {
-					line1: newAddress.line1,
-					line2: newAddress.line2,
-					postalCode: newAddress.postalCode,
-					city: newAddress.city
-				}
-			});
-			toast.success('Location created');
-			newName = '';
-			newAddress = emptyAddress();
-		} catch (err) {
-			toast.error(getErrorMessage(err));
-		} finally {
-			creating = false;
-		}
-	}
-
+	// One dialog for both jobs: creating is editing a location that doesn't
+	// exist yet, and the fields are the same either way. `editingId` is what
+	// tells them apart.
+	let formOpen = $state(false);
 	let editingId = $state<string | null>(null);
 	let saving = $state(false);
-	let editName = $state('');
-	let editAddress = $state<AddressDraft>(emptyAddress());
+	let formName = $state('');
+	let formAddress = $state<AddressDraft>(emptyAddress());
+
+	function startCreate() {
+		editingId = null;
+		formName = '';
+		formAddress = emptyAddress();
+		formOpen = true;
+	}
 
 	function startEdit(loc: (typeof locations)[number]) {
 		editingId = loc.id;
-		saving = false;
-		editName = loc.name;
-		editAddress = {
+		formName = loc.name;
+		formAddress = {
 			line1: loc.address?.line1 ?? '',
 			line2: loc.address?.line2 ?? '',
 			postalCode: loc.address?.postalCode ?? '',
 			city: loc.address?.city ?? ''
 		};
+		formOpen = true;
 	}
 
-	function cancelEdit() {
-		editingId = null;
-		saving = false;
-		editName = '';
-		editAddress = emptyAddress();
-	}
-
-	async function handleSave(e: Event) {
+	async function handleSubmit(e: Event) {
 		e.preventDefault();
-		if (!editingId) return;
-		if (!editName.trim()) return;
+		if (!formName.trim()) return;
 		saving = true;
 		try {
-			await updateLocation({
-				locationId: editingId,
-				name: editName,
-				address: {
-					line1: editAddress.line1,
-					line2: editAddress.line2,
-					postalCode: editAddress.postalCode,
-					city: editAddress.city
-				}
-			});
-			toast.success('Location updated');
-			editingId = null;
+			const address = { ...formAddress };
+			if (editingId) {
+				await updateLocation({ locationId: editingId, name: formName, address });
+				toast.success('Location updated');
+			} else {
+				await createLocation({ organizationId: orgId, name: formName, address });
+				toast.success('Location created');
+			}
+			formOpen = false;
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {
@@ -130,38 +102,20 @@
 		</Button>
 	</div>
 
-	<div>
-		<h1 class="text-3xl font-bold tracking-tight">Locations</h1>
-		<p class="text-muted-foreground">Manage locations for {org.name}.</p>
+	<div class="flex items-start justify-between gap-4">
+		<div>
+			<h1 class="text-3xl font-bold tracking-tight">Locations</h1>
+			<p class="text-muted-foreground">Manage locations for {org.name}.</p>
+		</div>
+		{#if canManage}
+			<Button onclick={startCreate}>New Location</Button>
+		{/if}
 	</div>
 
 	{#if !canManage}
 		<Card.Root>
 			<Card.Content class="pt-6">
 				<p class="text-muted-foreground">You don’t have permission to manage locations.</p>
-			</Card.Content>
-		</Card.Root>
-	{:else}
-		<Card.Root>
-			<Card.Header>
-				<Card.Title>Create Location</Card.Title>
-				<Card.Description>Add a new storage or pickup location.</Card.Description>
-			</Card.Header>
-			<Card.Content>
-				<form class="space-y-4" onsubmit={handleCreate}>
-					<div class="space-y-2">
-						<Label for="name">Name</Label>
-						<Input id="name" bind:value={newName} placeholder="e.g. Warehouse" required />
-					</div>
-
-					<AddressInput bind:value={newAddress} idPrefix="new-loc" />
-
-					<div class="flex justify-end">
-						<Button type="submit" disabled={creating}>
-							{creating ? 'Creating…' : 'Create Location'}
-						</Button>
-					</div>
-				</form>
 			</Card.Content>
 		</Card.Root>
 	{/if}
@@ -181,38 +135,40 @@
 									<Card.Description>{formatAddress(loc.address)}</Card.Description>
 								</div>
 								{#if canManage}
-									{#if editingId === loc.id}
-										<Button type="button" variant="outline" onclick={cancelEdit}>Cancel</Button>
-									{:else}
-										<Button type="button" variant="outline" onclick={() => startEdit(loc)}>
-											Edit
-										</Button>
-									{/if}
+									<Button type="button" variant="outline" onclick={() => startEdit(loc)}>
+										Edit
+									</Button>
 								{/if}
 							</div>
 						</Card.Header>
-
-						{#if editingId === loc.id}
-							<Card.Content>
-								<form class="space-y-4" onsubmit={handleSave}>
-									<div class="space-y-2">
-										<Label for={`edit-name-${loc.id}`}>Name</Label>
-										<Input id={`edit-name-${loc.id}`} bind:value={editName} required />
-									</div>
-
-									<AddressInput bind:value={editAddress} idPrefix={`edit-${loc.id}`} />
-
-									<div class="flex justify-end">
-										<Button type="submit" disabled={saving}>
-											{saving ? 'Saving…' : 'Save'}
-										</Button>
-									</div>
-								</form>
-							</Card.Content>
-						{/if}
 					</Card.Root>
 				{/each}
 			</div>
 		{/if}
 	</div>
 </div>
+
+<Modal
+	bind:open={formOpen}
+	title={editingId ? 'Edit Location' : 'Create Location'}
+	dismissible={!saving}
+>
+	{#snippet description()}
+		{editingId ? 'Rename it or correct its address.' : 'Add a new storage or pickup location.'}
+	{/snippet}
+	<form id="location-form" class="space-y-4" onsubmit={handleSubmit}>
+		<div class="space-y-2">
+			<Label for="loc-name">Name</Label>
+			<Input id="loc-name" bind:value={formName} placeholder="e.g. Warehouse" required />
+		</div>
+		<AddressInput bind:value={formAddress} idPrefix="loc" />
+	</form>
+	{#snippet footer()}
+		<Button type="button" variant="outline" onclick={() => (formOpen = false)} disabled={saving}>
+			Cancel
+		</Button>
+		<Button type="submit" form="location-form" disabled={saving}>
+			{saving ? 'Saving…' : editingId ? 'Save' : 'Create Location'}
+		</Button>
+	{/snippet}
+</Modal>

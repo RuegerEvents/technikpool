@@ -209,101 +209,56 @@
 						<Card.Title>Bundle</Card.Title>
 						<Card.Description>Name, category, pricing, and location.</Card.Description>
 					</div>
-					{#if !editingBundle}
-						<Button variant="outline" onclick={() => (editingBundle = true)}>Edit</Button>
-					{/if}
+					<Button variant="outline" onclick={() => (editingBundle = true)}>Edit</Button>
 				</div>
 			</Card.Header>
 			<Card.Content>
-				<form class="space-y-4" onsubmit={handleBundleSave}>
+				<div class="space-y-4">
 					<div class="space-y-2">
 						<Label>Organization</Label>
 						<Input value={orgLabel(bundle.template.organization)} disabled />
 					</div>
 					<div class="space-y-2">
-						<Label for="name">Name</Label>
-						<Input id="name" bind:value={bundleDraft.name} disabled={!editingBundle} />
-						<p class="text-xs text-muted-foreground">
-							Shared with every instance of this bundle type.
-						</p>
+						<Label>Name</Label>
+						<Input value={bundle.template.name} disabled />
 					</div>
 					<div class="space-y-2">
 						<Label>Category</Label>
-						<CategorySelect
-							{categories}
-							bind:value={bundleDraft.categoryId}
-							disabled={!editingBundle}
-						/>
-					</div>
-					<div class="space-y-2">
-						<Label for="description"
-							>Description <span class="text-muted-foreground">(optional)</span></Label
+						<div
+							class="flex h-10 items-center rounded-md border border-input bg-background px-3 py-2 text-sm"
 						>
-						<Input
-							id="description"
-							bind:value={bundleDraft.description}
-							disabled={!editingBundle}
-							placeholder="What's in this bundle?"
-						/>
+							<CategoryPill
+								name={categoryLabel(bundle.template.category)}
+								color={bundle.template.category.color}
+							/>
+						</div>
 					</div>
 					<div class="space-y-2">
-						<Label for="tag">Tag <span class="text-muted-foreground">(optional)</span></Label>
-						<Input
-							id="tag"
-							bind:value={bundleDraft.tag}
-							disabled={!editingBundle}
-							placeholder="e.g. Kit A"
-						/>
-						<p class="text-xs text-muted-foreground">
-							Distinguishes this physical instance from others of the same type.
-						</p>
+						<Label>Description</Label>
+						<Input value={bundle.template.description ?? '—'} disabled />
 					</div>
 					<div class="space-y-2">
-						<Label for="netPurchasePrice">Net purchase price (€)</Label>
+						<Label>Tag</Label>
+						<Input value={bundle.tag ?? '—'} disabled />
+					</div>
+					<div class="space-y-2">
+						<Label>Net purchase price (€)</Label>
 						<Input
-							id="netPurchasePrice"
-							type="number"
-							min="0"
-							step="0.01"
-							bind:value={bundleDraft.netPurchasePrice}
-							disabled={!editingBundle}
+							value={bundle.netPurchasePrice
+								? Number(bundle.netPurchasePrice).toLocaleString('de-DE', {
+										style: 'currency',
+										currency: 'EUR'
+									})
+								: 'Not set'}
+							disabled
 						/>
 						<p class="text-xs text-muted-foreground">Billed as one line on offers.</p>
 					</div>
 					<div class="space-y-2">
-						<Label for="location">Location</Label>
-						<select
-							id="location"
-							bind:value={bundleDraft.locationId}
-							disabled={!editingBundle}
-							class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-						>
-							<option value="">No location</option>
-							{#each locations as loc (loc.id)}
-								{@const city = loc.address?.city?.trim()}
-								{@const line1 = loc.address?.line1?.trim()}
-								{@const addrParts = [line1, city].filter(Boolean).join(', ')}
-								<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option
-								>
-							{/each}
-						</select>
+						<Label>Location</Label>
+						<Input value={bundle.location?.name ?? 'No location'} disabled />
 					</div>
-					{#if editingBundle}
-						<div class="flex justify-end gap-4 pt-2">
-							<Button
-								type="button"
-								variant="outline"
-								onclick={() => (editingBundle = false)}
-								disabled={savingBundle}
-							>
-								Cancel
-							</Button>
-							<Button type="submit" disabled={savingBundle || !bundleDraft.name.trim()}>
-								{savingBundle ? 'Saving…' : 'Save'}
-							</Button>
-						</div>
-					{/if}
-				</form>
+				</div>
 			</Card.Content>
 		</Card.Root>
 
@@ -486,3 +441,81 @@
 		Registered and put into {bundle.template.name}{bundle.tag ? ` (${bundle.tag})` : ''} in one step.
 	{/snippet}
 </NewAssetModal>
+
+<Modal bind:open={editingBundle} title="Edit Bundle" dismissible={!savingBundle}>
+	{#snippet description()}
+		Name, category, pricing, and location.
+	{/snippet}
+	<form id="edit-bundle-form" class="space-y-4" onsubmit={handleBundleSave}>
+		<div class="space-y-2">
+			<Label for="name">Name</Label>
+			<Input id="name" bind:value={bundleDraft.name} />
+			<p class="text-xs text-muted-foreground">Shared with every instance of this bundle type.</p>
+		</div>
+		<div class="space-y-2">
+			<Label>Category</Label>
+			<CategorySelect {categories} bind:value={bundleDraft.categoryId} />
+		</div>
+		<div class="space-y-2">
+			<Label for="description"
+				>Description <span class="text-muted-foreground">(optional)</span></Label
+			>
+			<Input
+				id="description"
+				bind:value={bundleDraft.description}
+				placeholder="What's in this bundle?"
+			/>
+		</div>
+		<div class="space-y-2">
+			<Label for="tag">Tag <span class="text-muted-foreground">(optional)</span></Label>
+			<Input id="tag" bind:value={bundleDraft.tag} placeholder="e.g. Kit A" />
+			<p class="text-xs text-muted-foreground">
+				Distinguishes this physical instance from others of the same type.
+			</p>
+		</div>
+		<div class="space-y-2">
+			<Label for="netPurchasePrice">Net purchase price (€)</Label>
+			<Input
+				id="netPurchasePrice"
+				type="number"
+				min="0"
+				step="0.01"
+				bind:value={bundleDraft.netPurchasePrice}
+			/>
+			<p class="text-xs text-muted-foreground">Billed as one line on offers.</p>
+		</div>
+		<div class="space-y-2">
+			<Label for="location">Location</Label>
+			<select
+				id="location"
+				bind:value={bundleDraft.locationId}
+				class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+			>
+				<option value="">No location</option>
+				{#each locations as loc (loc.id)}
+					{@const city = loc.address?.city?.trim()}
+					{@const line1 = loc.address?.line1?.trim()}
+					{@const addrParts = [line1, city].filter(Boolean).join(', ')}
+					<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option>
+				{/each}
+			</select>
+		</div>
+	</form>
+	{#snippet footer()}
+		<Button
+			type="button"
+			variant="outline"
+			onclick={() => (editingBundle = false)}
+			disabled={savingBundle}
+		>
+			Cancel
+		</Button>
+		<Button
+			type="submit"
+			form="edit-bundle-form"
+			disabled={savingBundle || !bundleDraft.name.trim()}
+		>
+			{savingBundle ? 'Saving…' : 'Save'}
+		</Button>
+	{/snippet}
+</Modal>

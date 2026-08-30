@@ -286,13 +286,11 @@
 							{/if}
 						</Card.Description>
 					</div>
-					{#if !editingAsset}
-						<Button variant="outline" onclick={() => (editingAsset = true)}>Edit</Button>
-					{/if}
+					<Button variant="outline" onclick={() => (editingAsset = true)}>Edit</Button>
 				</div>
 			</Card.Header>
 			<Card.Content>
-				<form class="space-y-4" onsubmit={handleAssetSave}>
+				<div class="space-y-4">
 					<div class="space-y-2">
 						<Label>Organization</Label>
 						<Input value={orgLabel(asset.organization)} disabled />
@@ -302,71 +300,24 @@
 						<Input value={asset.bundle?.template.name ?? '—'} disabled />
 					</div>
 					<div class="space-y-2">
-						<Label for="serial">Serial Number</Label>
-						<Input
-							id="serial"
-							bind:value={assetDraft.serialNumber}
-							disabled={!editingAsset || retired}
-						/>
+						<Label>Serial Number</Label>
+						<Input value={asset.serialNumber ?? '—'} disabled />
 					</div>
 					<div class="space-y-2">
-						<Label for="tag">Asset Tag</Label>
-						<Input id="tag" bind:value={assetDraft.assetTag} disabled={!editingAsset || retired} />
+						<Label>Asset Tag</Label>
+						<Input value={asset.assetTag ?? '—'} disabled />
 					</div>
 					<div class="space-y-2">
-						<Label for="status">Status</Label>
-						<select
-							id="status"
-							bind:value={assetDraft.status}
-							disabled={!editingAsset}
-							class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-						>
-							{#each ASSET_STATUSES as s (s)}
-								<option value={s}>{assetStatusLabel(s)}</option>
-							{/each}
-						</select>
+						<Label>Status</Label>
+						<Input value={assetStatusLabel(asset.status as AssetStatus)} disabled />
 					</div>
 					<div class="space-y-2">
-						{#if retired}
-							<!-- A unit that has left the pool isn't anywhere any more; the stored
-							     location is only where it stood when it went. -->
-							<Label for="location">Last known location</Label>
-							<Input id="location" value={asset.location?.name ?? '—'} disabled />
-						{:else}
-							<Label for="location">Location</Label>
-							<select
-								id="location"
-								bind:value={assetDraft.locationId}
-								disabled={!editingAsset}
-								class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-							>
-								{#each locations as loc (loc.id)}
-									{@const city = loc.address?.city?.trim()}
-									{@const line1 = loc.address?.line1?.trim()}
-									{@const addrParts = [line1, city].filter(Boolean).join(', ')}
-									<option value={loc.id}
-										>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option
-									>
-								{/each}
-							</select>
-						{/if}
+						<!-- A unit that has left the pool isn't anywhere any more; the stored
+						     location is only where it stood when it went. -->
+						<Label>{retired ? 'Last known location' : 'Location'}</Label>
+						<Input value={asset.location?.name ?? '—'} disabled />
 					</div>
-					{#if editingAsset}
-						<div class="flex justify-end gap-4 pt-2">
-							<Button
-								type="button"
-								variant="outline"
-								onclick={() => (editingAsset = false)}
-								disabled={savingAsset}
-							>
-								Cancel
-							</Button>
-							<Button type="submit" disabled={savingAsset}>
-								{savingAsset ? 'Saving…' : 'Save'}
-							</Button>
-						</div>
-					{/if}
-				</form>
+				</div>
 			</Card.Content>
 		</Card.Root>
 
@@ -380,53 +331,32 @@
 							Facts about this individual unit. What it bills at is the product's price.
 						</Card.Description>
 					</div>
-					{#if !editingPricing && !retired}
+					{#if !retired}
 						<Button variant="outline" onclick={() => (editingPricing = true)}>Edit</Button>
 					{/if}
 				</div>
 			</Card.Header>
 			<Card.Content>
-				<form class="space-y-4" onsubmit={handlePricingSave}>
+				<div class="space-y-4">
 					<div class="space-y-2">
-						<Label for="purchaseDate">Purchase date</Label>
+						<Label>Purchase date</Label>
 						<Input
-							id="purchaseDate"
-							type="date"
-							bind:value={pricingDraft.purchaseDate}
-							disabled={!editingPricing}
+							value={asset.purchaseDate
+								? new Date(asset.purchaseDate).toLocaleDateString('de-DE')
+								: '—'}
+							disabled
 						/>
 					</div>
 					<div class="space-y-2">
-						<Label for="inspectionInterval">DGUV inspection interval (months)</Label>
-						<Input
-							id="inspectionInterval"
-							type="number"
-							min="1"
-							bind:value={pricingDraft.inspectionIntervalMonths}
-							disabled={!editingPricing}
-						/>
+						<Label>DGUV inspection interval (months)</Label>
+						<Input value={asset.inspectionIntervalMonths?.toString() ?? '—'} disabled />
 						{#if asset.nextInspectionDue}
 							<p class="text-xs text-muted-foreground">
 								Next due: {new Date(asset.nextInspectionDue).toLocaleDateString('de-DE')}
 							</p>
 						{/if}
 					</div>
-					{#if editingPricing}
-						<div class="flex justify-end gap-4 pt-2">
-							<Button
-								type="button"
-								variant="outline"
-								onclick={() => (editingPricing = false)}
-								disabled={savingPricing}
-							>
-								Cancel
-							</Button>
-							<Button type="submit" disabled={savingPricing}>
-								{savingPricing ? 'Saving…' : 'Save'}
-							</Button>
-						</div>
-					{/if}
-				</form>
+				</div>
 			</Card.Content>
 		</Card.Root>
 
@@ -741,6 +671,102 @@
 		</div>
 	</div>
 </div>
+
+<Modal bind:open={editingAsset} title="Edit Asset" dismissible={!savingAsset}>
+	{#snippet description()}
+		{#if retired}
+			This unit is sold or decommissioned — only its status can be changed.
+		{:else}
+			Serial number, tag, status, and location.
+		{/if}
+	{/snippet}
+	<form id="edit-asset-form" class="space-y-4" onsubmit={handleAssetSave}>
+		<div class="space-y-2">
+			<Label for="serial">Serial Number</Label>
+			<Input id="serial" bind:value={assetDraft.serialNumber} disabled={retired} />
+		</div>
+		<div class="space-y-2">
+			<Label for="tag">Asset Tag</Label>
+			<Input id="tag" bind:value={assetDraft.assetTag} disabled={retired} />
+		</div>
+		<div class="space-y-2">
+			<Label for="status">Status</Label>
+			<select
+				id="status"
+				bind:value={assetDraft.status}
+				class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+			>
+				{#each ASSET_STATUSES as s (s)}
+					<option value={s}>{assetStatusLabel(s)}</option>
+				{/each}
+			</select>
+		</div>
+		{#if !retired}
+			<div class="space-y-2">
+				<Label for="location">Location</Label>
+				<select
+					id="location"
+					bind:value={assetDraft.locationId}
+					class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+				>
+					{#each locations as loc (loc.id)}
+						{@const city = loc.address?.city?.trim()}
+						{@const line1 = loc.address?.line1?.trim()}
+						{@const addrParts = [line1, city].filter(Boolean).join(', ')}
+						<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option>
+					{/each}
+				</select>
+			</div>
+		{/if}
+	</form>
+	{#snippet footer()}
+		<Button
+			type="button"
+			variant="outline"
+			onclick={() => (editingAsset = false)}
+			disabled={savingAsset}
+		>
+			Cancel
+		</Button>
+		<Button type="submit" form="edit-asset-form" disabled={savingAsset}>
+			{savingAsset ? 'Saving…' : 'Save'}
+		</Button>
+	{/snippet}
+</Modal>
+
+<Modal bind:open={editingPricing} title="Purchase & Inspection" dismissible={!savingPricing}>
+	{#snippet description()}
+		Facts about this individual unit. What it bills at is the product's price.
+	{/snippet}
+	<form id="edit-pricing-form" class="space-y-4" onsubmit={handlePricingSave}>
+		<div class="space-y-2">
+			<Label for="purchaseDate">Purchase date</Label>
+			<Input id="purchaseDate" type="date" bind:value={pricingDraft.purchaseDate} />
+		</div>
+		<div class="space-y-2">
+			<Label for="inspectionInterval">DGUV inspection interval (months)</Label>
+			<Input
+				id="inspectionInterval"
+				type="number"
+				min="1"
+				bind:value={pricingDraft.inspectionIntervalMonths}
+			/>
+		</div>
+	</form>
+	{#snippet footer()}
+		<Button
+			type="button"
+			variant="outline"
+			onclick={() => (editingPricing = false)}
+			disabled={savingPricing}
+		>
+			Cancel
+		</Button>
+		<Button type="submit" form="edit-pricing-form" disabled={savingPricing}>
+			{savingPricing ? 'Saving…' : 'Save'}
+		</Button>
+	{/snippet}
+</Modal>
 
 <Modal bind:open={confirmingDelete} title="Delete this asset?" dismissible={!deleting}>
 	{#snippet description()}
