@@ -1231,6 +1231,183 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 	return product;
 });
 
+// ── Merging duplicate products ───────────────────────────────────────────────
+// Nothing stops two rows describing the same device: there is no unique
+// constraint on (manufacturer, name), and the create-a-product path is a free
+// text field by design, because the pool has to be able to register a thing
+// nobody has catalogued yet. So "Robin 600" and "Robe Robin 600" both exist,
+// each holding half the units, and every count, every catalogue page and every
+// offer line built from them is wrong in a way that adds up.
+//
+// A merge is unusually cheap here because `Asset.productId` is the only foreign
+// key pointing at a product. OfferItem and InvoiceItem carry a productId too,
+// but as a *snapshot* with no relation (see the schema): an issued document
+// says what it said, and the id there is only ever used to collapse identical
+// lines on that one document. They are deliberately left alone — rewriting them
+// would be editing a sent invoice to make a catalogue tidier.
+
+const mergeProductsSchema = v.object({
+	/** Survives. Its name, manufacturer and category are the ones that remain. */
+	targetProductId: v.string(),
+	/** The duplicate: its units move to the target, then the row is deleted. */
+	sourceProductId: v.string()
+});
+
+export const mergeProducts = command(
+	mergeProductsSchema,
+	async ({ targetProductId, sourceProductId }) => {
+		const user = await requireAuth();
+		if (targetProductId === sourceProductId) error(409, 'A product cannot be merged into itself');
+
+		const [target, source] = await Promise.all([
+			prisma.product.findUniqueOrThrow({
+				where: { id: targetProductId },
+				include: { manufacturer: true }
+			}),
+			prisma.product.findUniqueOrThrow({
+				where: { id: sourceProductId },
+				include: { manufacturer: true }
+			})
+		]);
+
+		// Retired and decommissioned units come too. They are not in
+		// ACTIVE_ASSET_WHERE and no page lists them next to the rest, but they are
+		// rows with a foreign key: leaving them behind would make the delete fail
+		// on exactly the old, half-abandoned product a merge is aimed at.
+		const moving = await prisma.asset.findMany({
+			where: { productId: sourceProductId },
+			select: {
+				id: true,
+				organizationId: true,
+				bundleId: true,
+				parent: { select: { productId: true } }
+			}
+		});
+
+		const systemAdmin = await isSystemAdmin(user.id);
+		if (!systemAdmin) {
+			const managed = await prisma.orgMembership.findMany({
+				where: { userId: user.id, role: { in: ['ADMIN', 'OWNER'] } },
+				select: { organizationId: true }
+			});
+			if (managed.length === 0) {
+				error(403, 'You need admin rights in one of your organisations to merge products');
+			}
+			// The catalogue is global — any org admin can already rename any product
+			// — but a merge moves *units*, and those belong to someone. The check is
+			// on the source alone because it is the only side that loses records:
+			// the target's units are not touched. A duplicate nobody owns has no
+			// owning orgs and passes freely, which is the common cleanup case.
+			const managedIds = managed.map((m) => m.organizationId);
+			const foreign = [...new Set(moving.map((a) => a.organizationId))].filter(
+				(id) => !managedIds.includes(id)
+			);
+			if (foreign.length > 0) {
+				const orgs = await prisma.organization.findMany({
+					where: { id: { in: foreign } },
+					select: { name: true }
+				});
+				error(
+					403,
+					`Units of "${source.name}" belong to ${orgs.map((o) => o.name).join(', ')}. Only a system admin can move another organisation's inventory.`
+				);
+			}
+		}
+
+		// The two identities the merge picks between. Name, manufacturer and
+		// category are the target's, always — that is what choosing a target
+		// means. An image and a price are not identity, they are work someone did,
+		// so an empty one on the target takes the source's rather than throwing it
+		// away over which card the merge happened to be started from.
+		const inherited = {
+			...(!target.imagePath && source.imagePath ? { imagePath: source.imagePath } : {}),
+			...(target.netPurchasePrice === null && source.netPurchasePrice !== null
+				? { netPurchasePrice: source.netPurchasePrice }
+				: {})
+		};
+
+		const label = (p: { name: string; manufacturer: { name: string } }) =>
+			`${p.manufacturer.name} ${p.name}`;
+
+		await prisma.$transaction(async (tx) => {
+			await tx.asset.updateMany({
+				where: { productId: sourceProductId },
+				data: { productId: targetProductId }
+			});
+			// What a unit *is* changed, which is the kind of thing the history exists
+			// to explain: a tag that has sat on a shelf for two years now reporting a
+			// different product is otherwise indistinguishable from someone having
+			// mislabelled it.
+			await tx.assetTransaction.createMany({
+				data: moving.map((asset) => ({
+					assetId: asset.id,
+					userId: user.id,
+					action: 'UPDATED',
+					data: {
+						type: 'UPDATED',
+						changes: [{ field: 'product', from: label(source), to: label(target) }]
+					}
+				}))
+			});
+			if (Object.keys(inherited).length > 0) {
+				await tx.product.update({ where: { id: targetProductId }, data: inherited });
+			}
+			await tx.product.delete({ where: { id: sourceProductId } });
+		});
+
+		const orgIds = [...new Set(moving.map((a) => a.organizationId))];
+		// Both products' accessory profiles are derived from what units carry, so
+		// they move whichever side the units were on. The parents' too: a unit
+		// whose accessory just became a different product is a unit whose fleet no
+		// longer carries what it carried.
+		const profiles = new Map<string, { productId: string; organizationId: string }>();
+		for (const organizationId of orgIds) {
+			for (const productId of [targetProductId, sourceProductId]) {
+				profiles.set(`${productId}:${organizationId}`, { productId, organizationId });
+			}
+		}
+		for (const asset of moving) {
+			if (!asset.parent) continue;
+			const key = `${asset.parent.productId}:${asset.organizationId}`;
+			profiles.set(key, {
+				productId: asset.parent.productId,
+				organizationId: asset.organizationId
+			});
+		}
+
+		await Promise.all([
+			getProducts().refresh(),
+			getProducts(target.manufacturerId).refresh(),
+			getProducts(source.manufacturerId).refresh(),
+			getProductCatalog().refresh(),
+			getAssets().refresh(),
+			getRetiredAssets().refresh(),
+			getInventorySummary().refresh(),
+			...orgIds.flatMap((id) => [
+				getProductCatalog(id).refresh(),
+				getAssets(id).refresh(),
+				getRetiredAssets(id).refresh(),
+				getInventorySummary(id).refresh()
+			]),
+			...moving.flatMap((a) => [getAsset(a.id).refresh(), getAssetHistory(a.id).refresh()]),
+			...[...profiles.values()].map((key) => getProductAccessoryProfile(key).refresh()),
+			...[...new Set(moving.map((a) => a.bundleId).filter((id) => id !== null))].map((id) =>
+				getBundle(id as string).refresh()
+			)
+		]);
+		if (moving.some((a) => a.bundleId)) {
+			await getBundleTemplates().refresh();
+			await Promise.all(orgIds.map((id) => getBundleTemplates(id).refresh()));
+		}
+
+		return {
+			movedAssets: moving.length,
+			inheritedImage: 'imagePath' in inherited,
+			inheritedPrice: 'netPurchasePrice' in inherited
+		};
+	}
+);
+
 // ── Bundle templates ─────────────────────────────────────────────────────────
 
 export const getBundleTemplates = query(v.optional(v.string()), async (organizationId?: string) => {
