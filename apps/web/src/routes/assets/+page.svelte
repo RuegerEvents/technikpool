@@ -88,9 +88,9 @@
 	type BundleInstance = TemplateData['instances'][number];
 	type BundleAsset = BundleInstance['assets'][number];
 
-	// Bundles are a table-only grouping: a kit has no photo of its own, so the
-	// grid shows the products its contents belong to instead.
-	let bundleGrouping = $derived(showBundleView && !showingRetired && layout === 'list');
+	// Grouping is independent of presentation: switching between list and grid
+	// must not make kits disappear into their component product groups.
+	let bundleGrouping = $derived(showBundleView && !showingRetired);
 
 	let templates = $derived(
 		bundleGrouping ? await getBundleTemplates(filterOrgId || undefined) : ([] as TemplateData[])
@@ -334,7 +334,7 @@
 			{/each}
 		</div>
 		<div class="ml-auto flex items-center gap-3">
-			{#if layout === 'list'}
+			{#if !showingRetired}
 				<div class="flex items-center gap-1">
 					<button
 						type="button"
@@ -422,6 +422,85 @@
 		</div>
 	{:else if layout === 'grid'}
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+			{#each filteredBundles as template (template.id)}
+				{@const templateAssetIds = template.instanceGroups.flatMap((instance) =>
+					instance.filteredAssets.map((asset) => asset.id)
+				)}
+				{@const allInTemplateSelected =
+					templateAssetIds.length > 0 && templateAssetIds.every((id) => selectedAssetIds.has(id))}
+				<div
+					class="group relative flex flex-col overflow-hidden rounded-lg border transition-colors hover:border-foreground/25"
+				>
+					<input
+						type="checkbox"
+						checked={allInTemplateSelected}
+						onchange={() => toggleGroupSelection(templateAssetIds, allInTemplateSelected)}
+						title="Select all units in bundle"
+						class="absolute top-2 left-2 z-10 h-4 w-4 cursor-pointer rounded border-input bg-background transition-opacity group-hover:opacity-100 focus:opacity-100 {allInTemplateSelected
+							? ''
+							: 'opacity-0'}"
+					/>
+					<button
+						type="button"
+						onclick={() => toggle(template.id)}
+						class="flex flex-1 flex-col text-left"
+					>
+						<div class="flex aspect-[4/3] items-center justify-center bg-muted/30 p-4">
+							<ProductThumb
+								path={template.instanceGroups[0]?.imagePath}
+								alt={template.name}
+								fill
+								class="border-0 bg-transparent p-0"
+							/>
+						</div>
+						<div class="flex flex-1 flex-col gap-1 border-t p-3">
+							<span class="text-sm leading-snug font-medium">{template.name}</span>
+							<span class="text-xs text-muted-foreground">Bundle</span>
+							<div class="mt-auto flex flex-wrap items-center gap-2 pt-2">
+								{#if template.category}
+									<CategoryPill
+										name={categoryLabel(template.category)}
+										color={template.category.color}
+									/>
+								{/if}
+								<span class="ml-auto flex items-center gap-1.5 font-mono text-xs tabular-nums">
+									<span class="text-green-700 dark:text-green-400" title="Available"
+										>{template.availableInstances}</span
+									>
+									{#if template.maintenanceInstances > 0}
+										<span class="text-yellow-600 dark:text-yellow-400" title="Maintenance"
+											>{template.maintenanceInstances}</span
+										>
+									{/if}
+									{#if template.brokenInstances > 0}
+										<span class="text-red-600 dark:text-red-400" title="Broken"
+											>{template.brokenInstances}</span
+										>
+									{/if}
+									<span class="text-muted-foreground" title="Total"
+										>/ {template.totalInstances}</span
+									>
+								</span>
+							</div>
+						</div>
+					</button>
+					{#if expanded.get(template.id)}
+						<div class="max-h-56 overflow-y-auto border-t">
+							{#each template.instanceGroups as instance, i (instance.id)}
+								<a
+									href={resolve(`/assets/bundles/${instance.id}`)}
+									class="flex items-center gap-2 border-b px-3 py-2 text-xs last:border-0 hover:bg-muted/30"
+								>
+									<span class="min-w-0 flex-1 truncate font-medium">
+										{instance.tag ?? `Instance ${i + 1}`}
+									</span>
+									<span class="text-muted-foreground">{instance.filteredAssets.length} items</span>
+								</a>
+							{/each}
+						</div>
+					{/if}
+				</div>
+			{/each}
 			{#each filteredGroups as group (group.productId)}
 				{@const groupAssetIds = group.assets.map((a) => a.id)}
 				{@const allInGroupSelected =
