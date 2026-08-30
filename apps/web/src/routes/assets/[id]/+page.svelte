@@ -26,7 +26,8 @@
 		detachAccessory,
 		addProductAccessories,
 		getProductAccessoryProfile,
-		getProducts
+		getProducts,
+		getManufacturers
 	} from '$lib/remote/assets.remote';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { NewAssetModal, type NewAssetModalHandle } from '$lib/components/ui/new-asset-modal';
@@ -325,9 +326,15 @@
 		imagePath: '',
 		netPurchasePrice: ''
 	});
+	let productManufacturer = $state<{ id: string | null; name: string } | null>(null);
+	let manufacturers = $derived(await getManufacturers());
 	let savingProduct = $state(false);
 
 	function openProductModal() {
+		productManufacturer = {
+			id: asset.product.manufacturerId,
+			name: asset.product.manufacturer.name
+		};
 		productDraft = {
 			name: asset.product.name,
 			categoryId: asset.product.categoryId,
@@ -338,10 +345,15 @@
 	}
 
 	async function handleProductSave() {
+		if (!productManufacturer?.id) {
+			toast.error('Manufacturer is required');
+			return;
+		}
 		savingProduct = true;
 		try {
 			await updateProduct({
 				productId: asset.product.id,
+				manufacturerId: productManufacturer.id,
 				name: productDraft.name,
 				categoryId: productDraft.categoryId,
 				imagePath: productDraft.imagePath,
@@ -968,6 +980,16 @@
 	{#snippet description()}
 		Changes apply to all assets of this product type.
 	{/snippet}
+	<div class="space-y-2">
+		<p class="text-sm font-medium">Manufacturer</p>
+		<CreatableSelect
+			items={manufacturers}
+			bind:value={productManufacturer}
+			allowCreate={false}
+			disabled={savingProduct}
+			placeholder="Search manufacturers…"
+		/>
+	</div>
 	<ProductFields {categories} bind:value={productDraft} idPrefix="modal" />
 
 	{#snippet footer()}

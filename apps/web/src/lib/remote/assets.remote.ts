@@ -1165,6 +1165,7 @@ export const deleteAsset = command(v.string(), async (assetId: string) => {
 const updateProductSchema = v.object({
 	productId: v.string(),
 	name: v.optional(v.string()),
+	manufacturerId: v.optional(v.string()),
 	categoryId: v.optional(v.string()),
 	imagePath: v.optional(v.string()),
 	netPurchasePrice: v.optional(v.nullable(v.pipe(v.number(), v.minValue(0))))
@@ -1185,10 +1186,16 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		}
 	}
 
+	const previousProduct = await prisma.product.findUniqueOrThrow({
+		where: { id: input.productId },
+		select: { manufacturerId: true }
+	});
+
 	const product = await prisma.product.update({
 		where: { id: input.productId },
 		data: {
 			...(input.name ? { name: input.name.trim() } : {}),
+			...(input.manufacturerId ? { manufacturerId: input.manufacturerId } : {}),
 			...(input.categoryId ? { categoryId: input.categoryId } : {}),
 			imagePath: input.imagePath !== undefined ? input.imagePath?.trim() || null : undefined,
 			// Explicit null clears it; leaving the field out keeps what's stored,
@@ -1199,6 +1206,9 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 	});
 
 	await getProducts(product.manufacturerId).refresh();
+	if (previousProduct.manufacturerId !== product.manufacturerId) {
+		await getProducts(previousProduct.manufacturerId).refresh();
+	}
 	await getProducts().refresh();
 
 	const affectedAssets = await prisma.asset.findMany({

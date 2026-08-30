@@ -1,11 +1,17 @@
 <script lang="ts">
 	import { categoryLabel } from '$lib/category';
 	import { getErrorMessage, orgLabel } from '$lib/utils';
-	import { getCategories, getProductCatalog, updateProduct } from '$lib/remote/assets.remote';
+	import {
+		getCategories,
+		getManufacturers,
+		getProductCatalog,
+		updateProduct
+	} from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
+	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
 	import { ProductFields, type ProductDraft } from '$lib/components/ui/product-fields';
 	import { resolve } from '$app/paths';
@@ -24,6 +30,7 @@
 
 	let orgs = $derived(await getMyOrgs());
 	let categories = $derived(await getCategories());
+	let manufacturers = $derived(await getManufacturers());
 	let products = $derived(await getProductCatalog(filterOrgId || undefined));
 
 	type CatalogProduct = Awaited<ReturnType<typeof getProductCatalog>>[number];
@@ -73,6 +80,7 @@
 		imagePath: '',
 		netPurchasePrice: ''
 	});
+	let manufacturer = $state<{ id: string | null; name: string } | null>(null);
 	let draftFor = $state('');
 	let saving = $state(false);
 
@@ -82,6 +90,7 @@
 		const product = current;
 		if (!product || product.id === draftFor) return;
 		draftFor = product.id;
+		manufacturer = { id: product.manufacturerId, name: product.manufacturer.name };
 		draft = {
 			name: product.name,
 			categoryId: product.categoryId,
@@ -94,6 +103,7 @@
 		!!current &&
 			draftFor === current.id &&
 			(draft.name.trim() !== current.name ||
+				manufacturer?.id !== current.manufacturerId ||
 				draft.categoryId !== current.categoryId ||
 				draft.imagePath.trim() !== (current.imagePath ?? '') ||
 				draft.netPurchasePrice.trim() !== (current.netPurchasePrice?.toString() ?? ''))
@@ -106,11 +116,16 @@
 			toast.error('Product name is required');
 			return false;
 		}
+		if (!manufacturer?.id) {
+			toast.error('Manufacturer is required');
+			return false;
+		}
 		saving = true;
 		try {
 			await updateProduct({
 				productId: current.id,
 				name: draft.name,
+				manufacturerId: manufacturer.id,
 				categoryId: draft.categoryId,
 				imagePath: draft.imagePath,
 				netPurchasePrice: draft.netPurchasePrice.trim() ? Number(draft.netPurchasePrice) : null
@@ -317,6 +332,16 @@
 					</div>
 				</Card.Header>
 				<Card.Content>
+					<div class="mb-4 space-y-2">
+						<p class="text-sm font-medium">Manufacturer</p>
+						<CreatableSelect
+							items={manufacturers}
+							bind:value={manufacturer}
+							allowCreate={false}
+							disabled={!canEdit}
+							placeholder="Search manufacturers…"
+						/>
+					</div>
 					<ProductFields {categories} bind:value={draft} idPrefix="wizard" />
 				</Card.Content>
 				<Card.Footer class="flex flex-wrap items-center justify-between gap-3">
