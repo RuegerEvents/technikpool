@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { Dialog, DropdownMenu } from 'bits-ui';
+	import { DropdownMenu } from 'bits-ui';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
+	import { Modal } from '$lib/components/ui/modal';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import {
 		getPendingApprovals,
@@ -124,54 +125,40 @@
 <svelte:head><title>Technikpool</title></svelte:head>
 
 <!-- Count picker modal -->
-<Dialog.Root
-	open={modal !== null}
-	onOpenChange={(open) => {
-		if (!open) modal = null;
-	}}
->
-	<Dialog.Portal>
-		<Dialog.Overlay class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
-		<Dialog.Content
-			class="fixed top-1/2 left-1/2 z-50 w-full max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-background p-6 shadow-lg"
-		>
-			{#if modal}
-				<Dialog.Title class="text-base font-semibold">
-					{modal.action === 'approve' ? 'Approve' : 'Decline'} some {modal.pg.productName}
-				</Dialog.Title>
-				<Dialog.Description class="mt-1 text-sm text-muted-foreground">
-					How many of the {modal.pg.items.length} units do you want to {modal.action}?
-				</Dialog.Description>
-				<div class="mt-4 flex items-center gap-3">
-					<input
-						type="number"
-						min="1"
-						max={modal.pg.items.length}
-						bind:value={modal.count}
-						oninput={(e) => {
-							if (modal)
-								modal.count = Math.min(Math.max(1, +e.currentTarget.value), modal.pg.items.length);
-						}}
-						class="w-24 rounded-md border border-input bg-background px-3 py-2 text-center text-sm focus:ring-1 focus:ring-ring focus:outline-none"
-					/>
-					<span class="text-sm text-muted-foreground">of {modal.pg.items.length}</span>
-				</div>
-				<div class="mt-6 flex justify-end gap-2">
-					<Dialog.Close>
-						<Button variant="outline">Cancel</Button>
-					</Dialog.Close>
-					<Button
-						variant={modal.action === 'approve' ? 'default' : 'destructive'}
-						onclick={confirmModal}
-					>
-						{modal.action === 'approve' ? 'Approve' : 'Decline'}
-						{modal.count}
-					</Button>
-				</div>
-			{/if}
-		</Dialog.Content>
-	</Dialog.Portal>
-</Dialog.Root>
+{#if modal}
+	<!-- Bound here because a snippet is its own closure: the narrowing the {#if}
+	     gives us doesn't reach inside one. -->
+	{@const m = modal}
+	<Modal
+		open={true}
+		onclose={() => (modal = null)}
+		title="{m.action === 'approve' ? 'Approve' : 'Decline'} some {m.pg.productName}"
+	>
+		{#snippet description()}
+			How many of the {m.pg.items.length} units do you want to {m.action}?
+		{/snippet}
+		<div class="flex items-center gap-3">
+			<input
+				type="number"
+				min="1"
+				max={m.pg.items.length}
+				bind:value={m.count}
+				oninput={(e) => {
+					m.count = Math.min(Math.max(1, +e.currentTarget.value), m.pg.items.length);
+				}}
+				class="w-24 rounded-md border border-input bg-background px-3 py-2 text-center text-sm focus:ring-1 focus:ring-ring focus:outline-none"
+			/>
+			<span class="text-sm text-muted-foreground">of {m.pg.items.length}</span>
+		</div>
+		{#snippet footer()}
+			<Button variant="outline" onclick={() => (modal = null)}>Cancel</Button>
+			<Button variant={m.action === 'approve' ? 'default' : 'destructive'} onclick={confirmModal}>
+				{m.action === 'approve' ? 'Approve' : 'Decline'}
+				{m.count}
+			</Button>
+		{/snippet}
+	</Modal>
+{/if}
 
 {#if !data.user}
 	<div class="flex flex-col items-center justify-center py-24 text-center">

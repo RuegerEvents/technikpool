@@ -176,17 +176,11 @@ msgstr "Crew"
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
-#: src/routes/+page.svelte
-#: src/routes/assets/[id]/+page.svelte
-#: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
-#: src/routes/assets/new/+page.svelte
-#: src/routes/inspections/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
@@ -293,19 +287,15 @@ msgstr "Approve"
 msgid "Decline"
 msgstr "Decline"
 
-#. 0: modal.action === 'approve' ? 'Approve' \\: 'Decline'; 1: modal.pg.productName
-#: src/routes/+page.svelte
-msgid "{0} some {1}"
-msgstr "{0} some {1}"
+#~ msgid "{0} some {1}"
+#~ msgstr "{0} some {1}"
 
-#. 0: modal.pg.items.length; 1: modal.action
+#. 0: m.pg.items.length; 1: m.action
 #: src/routes/+page.svelte
 msgid "How many of the {0} units do you want to {1}?"
 msgstr "How many of the {0} units do you want to {1}?"
 
-#. 0: modal.pg.items.length
 #. 0: max
-#: src/routes/+page.svelte
 #: src/routes/productions/[id]/equipment/+page.svelte
 msgid "of {0}"
 msgstr "of {0}"
@@ -861,16 +851,10 @@ msgstr "Enter"
 msgid "ArrowUp"
 msgstr "ArrowUp"
 
-#: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/category-select/category-select.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/ui/modal/modal.svelte
 #: src/lib/components/ui/org-multi-select/org-multi-select.svelte
-#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
-#: src/routes/assets/[id]/+page.svelte
-#: src/routes/assets/[id]/+page.svelte
-#: src/routes/assets/bundles/[id]/+page.svelte
-#: src/routes/assets/new/+page.svelte
 msgid "Escape"
 msgstr "Escape"
 
@@ -1946,9 +1930,8 @@ msgstr "Create New Product"
 msgid "Fill in the details for the new product model."
 msgstr "Fill in the details for the new product model."
 
-#: src/routes/assets/new/+page.svelte
-msgid "Add Product"
-msgstr "Add Product"
+#~ msgid "Add Product"
+#~ msgstr "Add Product"
 
 #: src/routes/assets/+page.svelte
 msgid "Bundle View"
@@ -2719,7 +2702,7 @@ msgstr "Inspection logged"
 msgid "Inspections | Technikpool"
 msgstr "Inspections | Technikpool"
 
-#. 0: modalAsset.product.name
+#. 0: target.product.name
 #: src/routes/inspections/+page.svelte
 msgid "Log inspection — {0}"
 msgstr "Log inspection — {0}"
@@ -4315,9 +4298,8 @@ msgstr "Delete asset"
 msgid "Delete this asset?"
 msgstr "Delete this asset?"
 
-#: src/routes/assets/[id]/+page.svelte
-msgid "This cannot be undone. Only the unit is removed — the product it belongs to stays."
-msgstr "This cannot be undone. Only the unit is removed — the product it belongs to stays."
+#~ msgid "This cannot be undone. Only the unit is removed — the product it belongs to stays."
+#~ msgstr "This cannot be undone. Only the unit is removed — the product it belongs to stays."
 
 #~ msgid "Shift canary string"
 #~ msgstr "Shift canary string"

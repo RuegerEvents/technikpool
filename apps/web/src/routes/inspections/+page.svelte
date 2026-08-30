@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { getErrorMessage, orgLabel } from '$lib/utils';
-	import { Dialog } from 'bits-ui';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
+	import { Modal } from '$lib/components/ui/modal';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { getOverdueAssets, logInspection } from '$lib/remote/inspections.remote';
@@ -60,65 +60,62 @@
 
 <svelte:head><title>Inspections | Technikpool</title></svelte:head>
 
-<Dialog.Root
-	open={modalAsset !== null}
-	onOpenChange={(open) => {
-		if (!open) modalAsset = null;
-	}}
->
-	<Dialog.Portal>
-		<Dialog.Overlay class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
-		<Dialog.Content
-			class="fixed top-1/2 left-1/2 z-50 w-full max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-background p-6 shadow-lg"
+{#if modalAsset}
+	<!-- Bound here because a snippet is its own closure: the narrowing the {#if}
+	     gives us doesn't reach inside one. -->
+	{@const target = modalAsset}
+	<Modal
+		open={true}
+		onclose={() => (modalAsset = null)}
+		title="Log inspection — {target.product.name}"
+		dismissible={!saving}
+	>
+		{#snippet description()}
+			{target.assetTag ?? target.serialNumber ?? target.id}
+		{/snippet}
+		<form
+			id="log-inspection-form"
+			class="space-y-4"
+			onsubmit={(e) => {
+				e.preventDefault();
+				handleLog();
+			}}
 		>
-			{#if modalAsset}
-				<Dialog.Title class="text-base font-semibold">
-					Log inspection — {modalAsset.product.name}
-				</Dialog.Title>
-				<Dialog.Description class="mt-1 text-sm text-muted-foreground">
-					{modalAsset.assetTag ?? modalAsset.serialNumber ?? modalAsset.id}
-				</Dialog.Description>
-				<form
-					class="mt-4 space-y-4"
-					onsubmit={(e) => {
-						e.preventDefault();
-						handleLog();
-					}}
+			<div class="space-y-2">
+				<Label for="performedAt">Date</Label>
+				<Input id="performedAt" type="date" bind:value={performedAt} required />
+			</div>
+			<div class="space-y-2">
+				<Label for="result">Result</Label>
+				<select
+					id="result"
+					bind:value={result}
+					class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
 				>
-					<div class="space-y-2">
-						<Label for="performedAt">Date</Label>
-						<Input id="performedAt" type="date" bind:value={performedAt} required />
-					</div>
-					<div class="space-y-2">
-						<Label for="result">Result</Label>
-						<select
-							id="result"
-							bind:value={result}
-							class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
-						>
-							<option value="PASSED">Passed</option>
-							<option value="FAILED">Failed</option>
-						</select>
-					</div>
-					<div class="space-y-2">
-						<Label for="inspectorName">Inspector</Label>
-						<Input id="inspectorName" bind:value={inspectorName} placeholder="e.g. TÜV Nord" />
-					</div>
-					<div class="space-y-2">
-						<Label for="notes">Notes</Label>
-						<Input id="notes" bind:value={notes} placeholder="Optional" />
-					</div>
-					<div class="flex justify-end gap-2 pt-2">
-						<Dialog.Close>
-							<Button type="button" variant="outline">Cancel</Button>
-						</Dialog.Close>
-						<Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Log inspection'}</Button>
-					</div>
-				</form>
-			{/if}
-		</Dialog.Content>
-	</Dialog.Portal>
-</Dialog.Root>
+					<option value="PASSED">Passed</option>
+					<option value="FAILED">Failed</option>
+				</select>
+			</div>
+			<div class="space-y-2">
+				<Label for="inspectorName">Inspector</Label>
+				<Input id="inspectorName" bind:value={inspectorName} placeholder="e.g. TÜV Nord" />
+			</div>
+			<div class="space-y-2">
+				<Label for="notes">Notes</Label>
+				<Input id="notes" bind:value={notes} placeholder="Optional" />
+			</div>
+		</form>
+
+		{#snippet footer()}
+			<Button type="button" variant="outline" onclick={() => (modalAsset = null)} disabled={saving}>
+				Cancel
+			</Button>
+			<Button type="submit" form="log-inspection-form" disabled={saving}>
+				{saving ? 'Saving…' : 'Log inspection'}
+			</Button>
+		{/snippet}
+	</Modal>
+{/if}
 
 <div class="space-y-8">
 	<div>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
+	import { Modal } from '$lib/components/ui/modal';
 	import { bulkUpdateAssetStatus, getLocations } from '$lib/remote/assets.remote';
 	import { getAllProductions, checkoutAssets } from '$lib/remote/checkout.remote';
 	import { ASSET_STATUSES, isRetiredStatus, type AssetStatus } from '$lib/asset-status';
@@ -167,45 +168,36 @@
 	</div>
 {/if}
 
-{#if confirmingRetire && newStatus}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-		onkeydown={(e) => e.key === 'Escape' && (confirmingRetire = false)}
+{#if newStatus}
+	<Modal
+		bind:open={confirmingRetire}
+		title="Mark {selectedIds.size} asset{selectedIds.size !== 1 ? 's' : ''} as {assetStatusLabel(
+			newStatus
+		)}?"
+		dismissible={!settingStatus}
 	>
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div
-			class="mx-4 w-full max-w-md rounded-lg border bg-background p-6 shadow-lg"
-			onkeydown={(e) => e.stopPropagation()}
-		>
-			<h2 class="mb-1 text-lg font-semibold">
-				Mark {selectedIds.size} asset{selectedIds.size !== 1 ? 's' : ''} as {assetStatusLabel(
-					newStatus
-				)}?
-			</h2>
-			<p class="mb-5 text-sm text-muted-foreground">
-				They leave the pool: no longer bookable, scannable or listed, and removed from any bundle
-				they are in. The status can be set back, but the bundle membership can't — that has to be
-				rebuilt.
-			</p>
-			<div class="flex justify-end gap-3">
-				<Button
-					type="button"
-					variant="outline"
-					onclick={() => (confirmingRetire = false)}
-					disabled={settingStatus}
-				>
-					Cancel
-				</Button>
-				<Button
-					type="button"
-					class="bg-destructive text-white hover:bg-destructive/90"
-					onclick={applyStatus}
-					disabled={settingStatus}
-				>
-					{settingStatus ? 'Applying…' : 'Confirm'}
-				</Button>
-			</div>
-		</div>
-	</div>
+		{#snippet description()}
+			They leave the pool: no longer bookable, scannable or listed, and removed from any bundle they
+			are in. The status can be set back, but the bundle membership can't — that has to be rebuilt.
+		{/snippet}
+
+		{#snippet footer()}
+			<Button
+				type="button"
+				variant="outline"
+				onclick={() => (confirmingRetire = false)}
+				disabled={settingStatus}
+			>
+				Cancel
+			</Button>
+			<Button
+				type="button"
+				class="bg-destructive text-white hover:bg-destructive/90"
+				onclick={applyStatus}
+				disabled={settingStatus}
+			>
+				{settingStatus ? 'Applying…' : 'Confirm'}
+			</Button>
+		{/snippet}
+	</Modal>
 {/if}

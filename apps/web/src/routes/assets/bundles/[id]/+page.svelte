@@ -3,6 +3,7 @@
 	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
+	import { Modal } from '$lib/components/ui/modal';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { CategorySelect } from '$lib/components/ui/category-select';
@@ -400,88 +401,69 @@
 	</div>
 </div>
 
-<!-- Add Assets Modal -->
-{#if showAddModal}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-		onkeydown={(e) => e.key === 'Escape' && (showAddModal = false)}
-	>
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div
-			class="mx-4 w-full max-w-2xl rounded-lg border bg-background p-6 shadow-lg"
-			onkeydown={(e) => e.stopPropagation()}
-		>
-			<div class="mb-4 flex items-start justify-between gap-4">
-				<div>
-					<h2 class="text-lg font-semibold">Add Assets to Bundle</h2>
-					<p class="text-sm text-muted-foreground">Only devices without a bundle can be added.</p>
-				</div>
-				<div class="flex items-center gap-2">
-					<Button size="sm" disabled={working} onclick={openNewAsset}>New device</Button>
-					<Button variant="outline" size="sm" onclick={() => (showAddModal = false)}>Close</Button>
-				</div>
-			</div>
+<Modal bind:open={showAddModal} title="Add Assets to Bundle" size="xl">
+	{#snippet description()}
+		Only devices without a bundle can be added.
+	{/snippet}
+	{#snippet headerActions()}
+		<Button size="sm" disabled={working} onclick={openNewAsset}>New device</Button>
+		<Button variant="outline" size="sm" onclick={() => (showAddModal = false)}>Close</Button>
+	{/snippet}
+	<input
+		type="search"
+		bind:value={searchQuery}
+		placeholder="Search assets…"
+		class="mb-3 h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+	/>
 
-			<input
-				type="search"
-				bind:value={searchQuery}
-				placeholder="Search assets…"
-				class="mb-3 h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-			/>
-
-			{#if availableToAdd.length === 0}
-				<p class="text-sm text-muted-foreground">
-					{searchQuery.trim()
-						? `Nothing here matches "${searchQuery.trim()}".`
-						: 'No assets available to add.'}
-				</p>
-				<Button size="sm" class="mt-3" disabled={working} onclick={openNewAsset}>
-					{searchQuery.trim() ? `Register "${searchQuery.trim()}" as a new device` : 'New device'}
-				</Button>
-			{:else}
-				<div class="max-h-80 overflow-y-auto rounded-md border">
-					<table class="w-full text-sm">
-						<thead class="sticky top-0 bg-muted/80 backdrop-blur-sm">
-							<tr class="border-b">
-								<th class="px-3 py-2 text-left font-medium text-muted-foreground">Product</th>
-								<th class="px-3 py-2 text-left font-medium text-muted-foreground">S/N</th>
-								<th class="px-3 py-2 text-left font-medium text-muted-foreground">Org</th>
-								<th class="px-3 py-2"></th>
-							</tr>
-						</thead>
-						<tbody>
-							{#each availableToAdd as asset (asset.id)}
-								<tr class="border-b bg-background last:border-0 hover:bg-muted/30">
-									<td class="px-3 py-2">
-										<div class="flex items-center gap-2">
-											<ProductThumb path={asset.product.imagePath} alt={asset.product.name} />
-											<div>
-												<p class="font-medium">{asset.product.name}</p>
-												<p class="text-xs text-muted-foreground">
-													{asset.product.manufacturer.name}
-												</p>
-											</div>
-										</div>
-									</td>
-									<td class="px-3 py-2 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
-									<td class="px-3 py-2 text-xs text-muted-foreground"
-										>{orgLabel(asset.organization)}</td
-									>
-									<td class="px-3 py-2 text-right">
-										<Button size="sm" disabled={working} onclick={() => handleAdd(asset.id)}
-											>Add</Button
-										>
-									</td>
-								</tr>
-							{/each}
-						</tbody>
-					</table>
-				</div>
-			{/if}
+	{#if availableToAdd.length === 0}
+		<p class="text-sm text-muted-foreground">
+			{searchQuery.trim()
+				? `Nothing here matches "${searchQuery.trim()}".`
+				: 'No assets available to add.'}
+		</p>
+		<Button size="sm" class="mt-3" disabled={working} onclick={openNewAsset}>
+			{searchQuery.trim() ? `Register "${searchQuery.trim()}" as a new device` : 'New device'}
+		</Button>
+	{:else}
+		<div class="max-h-80 overflow-y-auto rounded-md border">
+			<table class="w-full text-sm">
+				<thead class="sticky top-0 bg-muted/80 backdrop-blur-sm">
+					<tr class="border-b">
+						<th class="px-3 py-2 text-left font-medium text-muted-foreground">Product</th>
+						<th class="px-3 py-2 text-left font-medium text-muted-foreground">S/N</th>
+						<th class="px-3 py-2 text-left font-medium text-muted-foreground">Org</th>
+						<th class="px-3 py-2"></th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each availableToAdd as asset (asset.id)}
+						<tr class="border-b bg-background last:border-0 hover:bg-muted/30">
+							<td class="px-3 py-2">
+								<div class="flex items-center gap-2">
+									<ProductThumb path={asset.product.imagePath} alt={asset.product.name} />
+									<div>
+										<p class="font-medium">{asset.product.name}</p>
+										<p class="text-xs text-muted-foreground">
+											{asset.product.manufacturer.name}
+										</p>
+									</div>
+								</div>
+							</td>
+							<td class="px-3 py-2 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
+							<td class="px-3 py-2 text-xs text-muted-foreground">{orgLabel(asset.organization)}</td
+							>
+							<td class="px-3 py-2 text-right">
+								<Button size="sm" disabled={working} onclick={() => handleAdd(asset.id)}>Add</Button
+								>
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
 		</div>
-	</div>
-{/if}
+	{/if}
+</Modal>
 
 <NewAssetModal
 	bind:this={newAssetModal}

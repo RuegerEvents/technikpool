@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
+	import { Modal } from '$lib/components/ui/modal';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { getLocations, getCategories, importAssets } from '$lib/remote/assets.remote';
 	import type { ImportResult } from '$lib/remote/assets.remote';
@@ -305,332 +306,315 @@
 		results: 'Import Complete'
 	};
 
+	// The parent mounts and unmounts this, so `open` only has to survive long
+	// enough for Escape or a backdrop click to reach `onClose`.
+	let open = $state(true);
+
 	const selectClass =
 		'flex h-9 w-full items-center rounded-md border border-input bg-background px-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none';
 </script>
 
-<!-- Backdrop -->
-<div
-	class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-	role="presentation"
-	onclick={(e) => {
-		if (e.target === e.currentTarget) onClose();
-	}}
->
-	<!-- Modal card -->
-	<div
-		class="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-lg border bg-background shadow-xl"
-		role="dialog"
-		aria-modal="true"
-	>
-		<!-- Header -->
-		<div class="flex items-center justify-between border-b px-6 py-4">
-			<h2 class="text-lg font-semibold">{stepTitles[step]}</h2>
-			<button
-				type="button"
-				onclick={onClose}
-				class="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none"
-				aria-label="Close"
+<Modal bind:open title={stepTitles[step]} size="full" onclose={onClose}>
+	{#snippet headerActions()}
+		<button
+			type="button"
+			onclick={onClose}
+			class="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none"
+			aria-label="Close"
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="18"
+				height="18"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
 			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="18"
-					height="18"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-				>
-					<path d="M18 6 6 18" /><path d="m6 6 12 12" />
-				</svg>
-			</button>
+				<path d="M18 6 6 18" /><path d="m6 6 12 12" />
+			</svg>
+		</button>
+	{/snippet}
+	<!-- Step 1: Upload -->
+	{#if step === 'upload'}
+		<div
+			ondrop={handleDrop}
+			ondragover={(e) => {
+				e.preventDefault();
+				dragOver = true;
+			}}
+			ondragleave={() => (dragOver = false)}
+			onclick={() => fileInput?.click()}
+			role="button"
+			tabindex="0"
+			onkeydown={(e) => e.key === 'Enter' && fileInput?.click()}
+			class="flex cursor-pointer flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed px-8 py-16 transition-colors {dragOver
+				? 'border-primary bg-primary/5'
+				: 'border-border hover:border-primary/50 hover:bg-muted/30'}"
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="40"
+				height="40"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				class="text-muted-foreground"
+			>
+				<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+				<polyline points="17 8 12 3 7 8" />
+				<line x1="12" x2="12" y1="3" y2="15" />
+			</svg>
+			<div class="text-center">
+				<p class="text-sm font-medium">
+					Drag and drop a CSV file here, or <span class="text-primary">click to browse</span>
+				</p>
+				<p class="mt-1 text-xs text-muted-foreground">Supported: .csv files with column headers</p>
+			</div>
 		</div>
+		<input
+			type="file"
+			accept=".csv,text/csv"
+			class="hidden"
+			bind:this={fileInput}
+			onchange={handleFileInput}
+		/>
+	{/if}
 
-		<!-- Content -->
-		<div class="flex-1 overflow-y-auto px-6 py-5">
-			<!-- Step 1: Upload -->
-			{#if step === 'upload'}
-				<div
-					ondrop={handleDrop}
-					ondragover={(e) => {
-						e.preventDefault();
-						dragOver = true;
-					}}
-					ondragleave={() => (dragOver = false)}
-					onclick={() => fileInput?.click()}
-					role="button"
-					tabindex="0"
-					onkeydown={(e) => e.key === 'Enter' && fileInput?.click()}
-					class="flex cursor-pointer flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed px-8 py-16 transition-colors {dragOver
-						? 'border-primary bg-primary/5'
-						: 'border-border hover:border-primary/50 hover:bg-muted/30'}"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="40"
-						height="40"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="1.5"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						class="text-muted-foreground"
-					>
-						<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-						<polyline points="17 8 12 3 7 8" />
-						<line x1="12" x2="12" y1="3" y2="15" />
-					</svg>
-					<div class="text-center">
-						<p class="text-sm font-medium">
-							Drag and drop a CSV file here, or <span class="text-primary">click to browse</span>
-						</p>
-						<p class="mt-1 text-xs text-muted-foreground">
-							Supported: .csv files with column headers
-						</p>
+	<!-- Step 2: Mapping -->
+	{#if step === 'mapping'}
+		{#if true}
+			{@const orgs = await getMyOrgs()}
+			{#if !selectedOrgId && orgs[0]}{((selectedOrgId = orgs[0].id), '')}{/if}
+
+			<div class="space-y-6">
+				<!-- Org + Location -->
+				<div class="grid grid-cols-2 gap-4">
+					<div class="space-y-1.5">
+						<label class="text-sm font-medium" for="import-org">Organization</label>
+						<select id="import-org" bind:value={selectedOrgId} class={selectClass}>
+							{#each orgs as org (org.id)}
+								<option value={org.id}>{orgLabel(org)}</option>
+							{/each}
+						</select>
+					</div>
+					<div class="space-y-1.5">
+						<label class="text-sm font-medium" for="import-loc">Location</label>
+						<select
+							id="import-loc"
+							bind:value={selectedLocationId}
+							disabled={locations.length === 0}
+							class={selectClass}
+						>
+							{#if locations.length === 0}
+								<option value="">No locations</option>
+							{:else}
+								{#each locations as loc (loc.id)}
+									<option value={loc.id}>{loc.name}</option>
+								{/each}
+							{/if}
+						</select>
 					</div>
 				</div>
-				<input
-					type="file"
-					accept=".csv,text/csv"
-					class="hidden"
-					bind:this={fileInput}
-					onchange={handleFileInput}
-				/>
-			{/if}
 
-			<!-- Step 2: Mapping -->
-			{#if step === 'mapping'}
-				{#if true}
-					{@const orgs = await getMyOrgs()}
-					{#if !selectedOrgId && orgs[0]}{((selectedOrgId = orgs[0].id), '')}{/if}
-
-					<div class="space-y-6">
-						<!-- Org + Location -->
-						<div class="grid grid-cols-2 gap-4">
-							<div class="space-y-1.5">
-								<label class="text-sm font-medium" for="import-org">Organization</label>
-								<select id="import-org" bind:value={selectedOrgId} class={selectClass}>
-									{#each orgs as org (org.id)}
-										<option value={org.id}>{orgLabel(org)}</option>
-									{/each}
-								</select>
-							</div>
-							<div class="space-y-1.5">
-								<label class="text-sm font-medium" for="import-loc">Location</label>
-								<select
-									id="import-loc"
-									bind:value={selectedLocationId}
-									disabled={locations.length === 0}
-									class={selectClass}
-								>
-									{#if locations.length === 0}
-										<option value="">No locations</option>
-									{:else}
-										{#each locations as loc (loc.id)}
-											<option value={loc.id}>{loc.name}</option>
-										{/each}
-									{/if}
-								</select>
-							</div>
-						</div>
-
-						<!-- Column mapping -->
-						<div class="space-y-2">
-							<h3 class="text-sm font-medium">Column Mapping</h3>
-							<div class="overflow-hidden rounded-lg border">
-								<table class="w-full text-sm">
-									<thead>
-										<tr class="border-b bg-muted/30">
-											<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground"
-												>CSV Column</th
-											>
-											<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground"
-												>Maps To</th
-											>
-											<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground"
-												>Sample</th
-											>
-										</tr>
-									</thead>
-									<tbody>
-										{#each csvHeaders as header, i (i)}
-											<tr class="border-b last:border-0">
-												<td class="px-4 py-2 font-mono text-xs">{header}</td>
-												<td class="px-4 py-2">
-													<select
-														bind:value={columnMapping[i]}
-														class="h-8 rounded border border-input bg-background px-2 text-xs focus:ring-1 focus:ring-ring focus:outline-none"
-													>
-														{#each fieldOptions as opt (opt.value)}
-															<option value={opt.value}>{opt.label}</option>
-														{/each}
-													</select>
-												</td>
-												<td
-													class="max-w-[180px] truncate px-4 py-2 font-mono text-xs text-muted-foreground"
-												>
-													{csvRows[0]?.[i] ?? ''}
-												</td>
-											</tr>
-										{/each}
-									</tbody>
-								</table>
-							</div>
-						</div>
-
-						<!-- Category value mapping -->
-						{#if categoryColIdx >= 0 && uniqueCategoryValues.length > 0}
-							<div class="space-y-2">
-								<h3 class="text-sm font-medium">Category Values</h3>
-								<div class="overflow-hidden rounded-lg border">
-									<table class="w-full text-sm">
-										<thead>
-											<tr class="border-b bg-muted/30">
-												<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground"
-													>Value in CSV</th
-												>
-												<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground"
-													>Maps To Category</th
-												>
-											</tr>
-										</thead>
-										<tbody>
-											{#each uniqueCategoryValues as val (val)}
-												<tr class="border-b last:border-0">
-													<td class="px-4 py-2 font-mono text-xs">{val}</td>
-													<td class="px-4 py-2">
-														<select
-															bind:value={categoryValueMap[val]}
-															class="h-8 w-full rounded border border-input bg-background px-2 text-xs focus:ring-1 focus:ring-ring focus:outline-none"
-														>
-															<option value="">— Unassigned —</option>
-															{#each categories as cat (cat.id)}
-																<option value={cat.id}>{cat.name}</option>
-															{/each}
-														</select>
-													</td>
-												</tr>
-											{/each}
-										</tbody>
-									</table>
-								</div>
-							</div>
-						{/if}
-
-						<!-- Preview -->
-						{#if previewRows.length > 0}
-							<div class="space-y-2">
-								<h3 class="text-sm font-medium">
-									Preview <span class="font-normal text-muted-foreground"
-										>(first {previewRows.length} of {csvRows.length} rows)</span
+				<!-- Column mapping -->
+				<div class="space-y-2">
+					<h3 class="text-sm font-medium">Column Mapping</h3>
+					<div class="overflow-hidden rounded-lg border">
+						<table class="w-full text-sm">
+							<thead>
+								<tr class="border-b bg-muted/30">
+									<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground"
+										>CSV Column</th
 									>
-								</h3>
-								<div class="overflow-x-auto rounded-lg border">
-									<table class="w-full text-xs">
-										<thead>
-											<tr class="border-b bg-muted/30">
-												{#each csvHeaders as h, i (i)}
-													{#if columnMapping[i] !== 'skip'}
-														<th class="px-3 py-2 text-left font-medium text-muted-foreground"
-															>{h}</th
-														>
-													{/if}
+									<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground"
+										>Maps To</th
+									>
+									<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground"
+										>Sample</th
+									>
+								</tr>
+							</thead>
+							<tbody>
+								{#each csvHeaders as header, i (i)}
+									<tr class="border-b last:border-0">
+										<td class="px-4 py-2 font-mono text-xs">{header}</td>
+										<td class="px-4 py-2">
+											<select
+												bind:value={columnMapping[i]}
+												class="h-8 rounded border border-input bg-background px-2 text-xs focus:ring-1 focus:ring-ring focus:outline-none"
+											>
+												{#each fieldOptions as opt (opt.value)}
+													<option value={opt.value}>{opt.label}</option>
 												{/each}
-											</tr>
-										</thead>
-										<tbody>
-											{#each previewRows as row, ri (ri)}
-												<tr class="border-b last:border-0">
-													{#each row as cell, ci (ci)}
-														{#if columnMapping[ci] !== 'skip'}
-															<td class="max-w-[160px] truncate px-3 py-2">{cell ?? ''}</td>
-														{/if}
+											</select>
+										</td>
+										<td
+											class="max-w-[180px] truncate px-4 py-2 font-mono text-xs text-muted-foreground"
+										>
+											{csvRows[0]?.[i] ?? ''}
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<!-- Category value mapping -->
+				{#if categoryColIdx >= 0 && uniqueCategoryValues.length > 0}
+					<div class="space-y-2">
+						<h3 class="text-sm font-medium">Category Values</h3>
+						<div class="overflow-hidden rounded-lg border">
+							<table class="w-full text-sm">
+								<thead>
+									<tr class="border-b bg-muted/30">
+										<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground"
+											>Value in CSV</th
+										>
+										<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground"
+											>Maps To Category</th
+										>
+									</tr>
+								</thead>
+								<tbody>
+									{#each uniqueCategoryValues as val (val)}
+										<tr class="border-b last:border-0">
+											<td class="px-4 py-2 font-mono text-xs">{val}</td>
+											<td class="px-4 py-2">
+												<select
+													bind:value={categoryValueMap[val]}
+													class="h-8 w-full rounded border border-input bg-background px-2 text-xs focus:ring-1 focus:ring-ring focus:outline-none"
+												>
+													<option value="">— Unassigned —</option>
+													{#each categories as cat (cat.id)}
+														<option value={cat.id}>{cat.name}</option>
 													{/each}
-												</tr>
-											{/each}
-										</tbody>
-									</table>
-								</div>
-							</div>
-						{/if}
+												</select>
+											</td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
 					</div>
 				{/if}
-			{/if}
 
-			<!-- Step 3: Importing -->
-			{#if step === 'importing'}
-				<div class="flex flex-col items-center justify-center gap-4 py-16">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="32"
-						height="32"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						class="animate-spin text-muted-foreground"
-					>
-						<path d="M21 12a9 9 0 1 1-6.219-8.56" />
-					</svg>
-					<p class="text-sm text-muted-foreground">Processing {csvRows.length} rows…</p>
-				</div>
-			{/if}
-
-			<!-- Step 4: Results -->
-			{#if step === 'results' && importResult}
-				<div class="space-y-5">
-					<div class="grid grid-cols-3 gap-4">
-						<div class="rounded-lg border p-4 text-center">
-							<div class="text-2xl font-bold text-green-600 dark:text-green-400">
-								{importResult.created}
-							</div>
-							<div class="mt-1 text-xs text-muted-foreground">Assets created</div>
-						</div>
-						<div class="rounded-lg border p-4 text-center">
-							<div
-								class="text-2xl font-bold {importResult.skipped > 0
-									? 'text-yellow-600 dark:text-yellow-400'
-									: 'text-muted-foreground'}"
+				<!-- Preview -->
+				{#if previewRows.length > 0}
+					<div class="space-y-2">
+						<h3 class="text-sm font-medium">
+							Preview <span class="font-normal text-muted-foreground"
+								>(first {previewRows.length} of {csvRows.length} rows)</span
 							>
-								{importResult.skipped}
-							</div>
-							<div class="mt-1 text-xs text-muted-foreground">Assets skipped (existing tag)</div>
-						</div>
-						<div class="rounded-lg border p-4 text-center">
-							<div
-								class="text-2xl font-bold {importResult.errors.length > 0
-									? 'text-red-600 dark:text-red-400'
-									: 'text-muted-foreground'}"
-							>
-								{importResult.errors.length}
-							</div>
-							<div class="mt-1 text-xs text-muted-foreground">Errors</div>
+						</h3>
+						<div class="overflow-x-auto rounded-lg border">
+							<table class="w-full text-xs">
+								<thead>
+									<tr class="border-b bg-muted/30">
+										{#each csvHeaders as h, i (i)}
+											{#if columnMapping[i] !== 'skip'}
+												<th class="px-3 py-2 text-left font-medium text-muted-foreground">{h}</th>
+											{/if}
+										{/each}
+									</tr>
+								</thead>
+								<tbody>
+									{#each previewRows as row, ri (ri)}
+										<tr class="border-b last:border-0">
+											{#each row as cell, ci (ci)}
+												{#if columnMapping[ci] !== 'skip'}
+													<td class="max-w-[160px] truncate px-3 py-2">{cell ?? ''}</td>
+												{/if}
+											{/each}
+										</tr>
+									{/each}
+								</tbody>
+							</table>
 						</div>
 					</div>
-					{#if importResult.errors.length > 0}
-						<div class="space-y-1.5">
-							<h3 class="text-sm font-medium">Error details</h3>
-							<div class="max-h-48 overflow-y-auto rounded-lg border text-xs">
-								{#each importResult.errors as err (err.rowIndex)}
-									<div class="border-b px-4 py-2 last:border-0">
-										<span class="text-muted-foreground">Row {err.rowIndex + 2}:</span>
-										{err.message}
-									</div>
-								{/each}
+				{/if}
+			</div>
+		{/if}
+	{/if}
+
+	<!-- Step 3: Importing -->
+	{#if step === 'importing'}
+		<div class="flex flex-col items-center justify-center gap-4 py-16">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="32"
+				height="32"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				class="animate-spin text-muted-foreground"
+			>
+				<path d="M21 12a9 9 0 1 1-6.219-8.56" />
+			</svg>
+			<p class="text-sm text-muted-foreground">Processing {csvRows.length} rows…</p>
+		</div>
+	{/if}
+
+	<!-- Step 4: Results -->
+	{#if step === 'results' && importResult}
+		<div class="space-y-5">
+			<div class="grid grid-cols-3 gap-4">
+				<div class="rounded-lg border p-4 text-center">
+					<div class="text-2xl font-bold text-green-600 dark:text-green-400">
+						{importResult.created}
+					</div>
+					<div class="mt-1 text-xs text-muted-foreground">Assets created</div>
+				</div>
+				<div class="rounded-lg border p-4 text-center">
+					<div
+						class="text-2xl font-bold {importResult.skipped > 0
+							? 'text-yellow-600 dark:text-yellow-400'
+							: 'text-muted-foreground'}"
+					>
+						{importResult.skipped}
+					</div>
+					<div class="mt-1 text-xs text-muted-foreground">Assets skipped (existing tag)</div>
+				</div>
+				<div class="rounded-lg border p-4 text-center">
+					<div
+						class="text-2xl font-bold {importResult.errors.length > 0
+							? 'text-red-600 dark:text-red-400'
+							: 'text-muted-foreground'}"
+					>
+						{importResult.errors.length}
+					</div>
+					<div class="mt-1 text-xs text-muted-foreground">Errors</div>
+				</div>
+			</div>
+			{#if importResult.errors.length > 0}
+				<div class="space-y-1.5">
+					<h3 class="text-sm font-medium">Error details</h3>
+					<div class="max-h-48 overflow-y-auto rounded-lg border text-xs">
+						{#each importResult.errors as err (err.rowIndex)}
+							<div class="border-b px-4 py-2 last:border-0">
+								<span class="text-muted-foreground">Row {err.rowIndex + 2}:</span>
+								{err.message}
 							</div>
-						</div>
-					{/if}
+						{/each}
+					</div>
 				</div>
 			{/if}
 		</div>
+	{/if}
 
-		<!-- Footer -->
-		<div class="flex items-center justify-between border-t px-6 py-4">
+	{#snippet footer()}
+		<!-- The only footer in the app that isn't just right-aligned buttons: the
+		     wizard's Back belongs on the other side of the row from its Import. -->
+		<div class="flex w-full items-center justify-between">
 			{#if step === 'upload'}
 				<div></div>
 				<Button variant="outline" onclick={onClose}>Cancel</Button>
@@ -648,5 +632,5 @@
 				<Button onclick={onClose}>Close</Button>
 			{/if}
 		</div>
-	</div>
-</div>
+	{/snippet}
+</Modal>

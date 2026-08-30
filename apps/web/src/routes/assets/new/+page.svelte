@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
+	import { Modal } from '$lib/components/ui/modal';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
@@ -418,31 +419,16 @@
 	</Card.Root>
 </div>
 
-<!-- New Product Modal -->
-{#if newProductOpen}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-		onkeydown={(e) => e.key === 'Escape' && cancelNewProduct()}
-	>
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div
-			class="mx-4 w-full max-w-md rounded-lg border bg-background p-6 shadow-lg"
-			onkeydown={(e) => e.stopPropagation()}
-		>
-			<h2 class="mb-1 text-lg font-semibold">Create New Product</h2>
-			<p class="mb-5 text-sm text-muted-foreground">
-				Fill in the details for the new product model.
-			</p>
+<Modal bind:open={newProductOpen} title="Create New Product" onclose={cancelNewProduct}>
+	{#snippet description()}
+		Fill in the details for the new product model.
+	{/snippet}
+	<!-- The same four fields the product page and the asset detail page edit.
+		     One component, so a field added there shows up here too. -->
+	<ProductFields {categories} bind:value={newProductDraft} idPrefix="modal-product" />
 
-			<!-- The same four fields the product page and the asset detail page edit.
-			     One component, so a field added there shows up here too. -->
-			<ProductFields {categories} bind:value={newProductDraft} idPrefix="modal-product" />
-
-			<div class="mt-6 flex justify-end gap-3">
-				<Button type="button" variant="outline" onclick={cancelNewProduct}>Cancel</Button>
-				<Button type="button" onclick={confirmNewProduct}>Add Product</Button>
-			</div>
-		</div>
-	</div>
-{/if}
+	{#snippet footer()}
+		<Button type="button" variant="outline" onclick={cancelNewProduct}>Cancel</Button>
+		<Button type="button" onclick={confirmNewProduct}>Add Product</Button>
+	{/snippet}
+</Modal>

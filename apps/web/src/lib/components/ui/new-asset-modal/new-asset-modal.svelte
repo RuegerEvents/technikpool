@@ -11,6 +11,7 @@
 	// cable that turned out not to be in the system.
 	import type { Snippet } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
+	import { Modal } from '$lib/components/ui/modal';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
@@ -171,136 +172,121 @@
 	}
 </script>
 
-{#if open}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-		onkeydown={(e) => e.key === 'Escape' && !saving && (open = false)}
-	>
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div
-			class="mx-4 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg border bg-background p-6 shadow-lg"
-			onkeydown={(e) => e.stopPropagation()}
-		>
-			<h2 class="mb-1 text-lg font-semibold">{heading}</h2>
-			{#if description}
-				<p class="mb-5 text-sm text-muted-foreground">{@render description()}</p>
-			{/if}
+<Modal bind:open title={heading} dismissible={!saving} {description}>
+	<form id="new-asset-form" class="space-y-4" onsubmit={handleSubmit}>
+		<div class="space-y-2">
+			<Label>Manufacturer</Label>
+			<CreatableSelect
+				items={manufacturers}
+				value={manufacturer}
+				onchange={handleManufacturer}
+				oncreate={(name) => handleManufacturer({ id: null, name })}
+				placeholder="Search or type a new one…"
+				disabled={saving}
+			/>
+		</div>
 
-			<form class="space-y-4" onsubmit={handleSubmit}>
+		{#if manufacturer}
+			{#key manufacturerKey}
 				<div class="space-y-2">
-					<Label>Manufacturer</Label>
+					<Label>Product</Label>
 					<CreatableSelect
-						items={manufacturers}
-						value={manufacturer}
-						onchange={handleManufacturer}
-						oncreate={(name) => handleManufacturer({ id: null, name })}
+						items={manufacturer.id ? productsForManufacturer : []}
+						bind:value={product}
 						placeholder="Search or type a new one…"
 						disabled={saving}
 					/>
 				</div>
+			{/key}
+		{/if}
 
-				{#if manufacturer}
-					{#key manufacturerKey}
-						<div class="space-y-2">
-							<Label>Product</Label>
-							<CreatableSelect
-								items={manufacturer.id ? productsForManufacturer : []}
-								bind:value={product}
-								placeholder="Search or type a new one…"
-								disabled={saving}
-							/>
-						</div>
-					{/key}
-				{/if}
-
-				{#if isNewProduct}
-					<div class="space-y-2">
-						<Label>Category</Label>
-						<CategorySelect {categories} bind:value={categoryId} disabled={saving} />
-						<p class="text-xs text-muted-foreground">
-							"{product?.name}" is new, so it needs a category. It becomes a product like any other
-							— the next unit of it is picked from the list.
-						</p>
-					</div>
-					<div class="space-y-2">
-						<Label>Product photo</Label>
-						<ImageUpload bind:value={imagePath} label="Product photo" />
-					</div>
-				{/if}
-
-				{#if locations}
-					<div class="space-y-2">
-						<Label for="newAssetLocation">Location</Label>
-						<select
-							id="newAssetLocation"
-							bind:value={chosenLocationId}
-							disabled={saving}
-							class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-						>
-							{#each locations as loc (loc.id)}
-								{@const city = loc.address?.city?.trim()}
-								<option value={loc.id}>{city ? `${loc.name} (${city})` : loc.name}</option>
-							{/each}
-						</select>
-					</div>
-				{/if}
-
-				<div class="space-y-2">
-					<Label for="newAssetQty">How many</Label>
-					<Input
-						id="newAssetQty"
-						type="number"
-						min="1"
-						max="20"
-						value={quantity}
-						oninput={(e) =>
-							(quantity = Math.max(1, Math.min(20, Number(e.currentTarget.value) || 1)))}
-						disabled={saving}
-					/>
-				</div>
-
-				<label class="flex items-center gap-2 text-sm">
-					<input
-						type="checkbox"
-						bind:checked={noTag}
-						disabled={saving}
-						class="h-4 w-4 rounded border-input"
-					/>
-					No asset tag
-				</label>
+		{#if isNewProduct}
+			<div class="space-y-2">
+				<Label>Category</Label>
+				<CategorySelect {categories} bind:value={categoryId} disabled={saving} />
 				<p class="text-xs text-muted-foreground">
-					Without a tag the unit can't be scanned, and an inspection record has nothing to hang off
-					— so anything DGUV-relevant wants one.
+					"{product?.name}" is new, so it needs a category. It becomes a product like any other —
+					the next unit of it is picked from the list.
 				</p>
+			</div>
+			<div class="space-y-2">
+				<Label>Product photo</Label>
+				<ImageUpload bind:value={imagePath} label="Product photo" />
+			</div>
+		{/if}
 
-				{#if quantity === 1}
-					<div class="space-y-2">
-						<Label for="newAssetSerial">Serial number</Label>
-						<Input id="newAssetSerial" bind:value={serial} disabled={saving} />
-					</div>
-					{#if !noTag}
-						<div class="space-y-2">
-							<Label for="newAssetTag">Asset tag</Label>
-							<Input
-								id="newAssetTag"
-								bind:value={tag}
-								disabled={saving}
-								placeholder="Leave blank for the next free number"
-							/>
-						</div>
-					{/if}
-				{/if}
+		{#if locations}
+			<div class="space-y-2">
+				<Label for="newAssetLocation">Location</Label>
+				<select
+					id="newAssetLocation"
+					bind:value={chosenLocationId}
+					disabled={saving}
+					class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+				>
+					{#each locations as loc (loc.id)}
+						{@const city = loc.address?.city?.trim()}
+						<option value={loc.id}>{city ? `${loc.name} (${city})` : loc.name}</option>
+					{/each}
+				</select>
+			</div>
+		{/if}
 
-				<div class="flex justify-end gap-3 pt-2">
-					<Button type="button" variant="outline" onclick={() => (open = false)} disabled={saving}>
-						Cancel
-					</Button>
-					<Button type="submit" disabled={saving}>
-						{saving ? 'Creating…' : 'Create'}
-					</Button>
-				</div>
-			</form>
+		<div class="space-y-2">
+			<Label for="newAssetQty">How many</Label>
+			<Input
+				id="newAssetQty"
+				type="number"
+				min="1"
+				max="20"
+				value={quantity}
+				oninput={(e) => (quantity = Math.max(1, Math.min(20, Number(e.currentTarget.value) || 1)))}
+				disabled={saving}
+			/>
 		</div>
-	</div>
-{/if}
+
+		<label class="flex items-center gap-2 text-sm">
+			<input
+				type="checkbox"
+				bind:checked={noTag}
+				disabled={saving}
+				class="h-4 w-4 rounded border-input"
+			/>
+			No asset tag
+		</label>
+		<p class="text-xs text-muted-foreground">
+			Without a tag the unit can't be scanned, and an inspection record has nothing to hang off — so
+			anything DGUV-relevant wants one.
+		</p>
+
+		{#if quantity === 1}
+			<div class="space-y-2">
+				<Label for="newAssetSerial">Serial number</Label>
+				<Input id="newAssetSerial" bind:value={serial} disabled={saving} />
+			</div>
+			{#if !noTag}
+				<div class="space-y-2">
+					<Label for="newAssetTag">Asset tag</Label>
+					<Input
+						id="newAssetTag"
+						bind:value={tag}
+						disabled={saving}
+						placeholder="Leave blank for the next free number"
+					/>
+				</div>
+			{/if}
+		{/if}
+	</form>
+
+	{#snippet footer()}
+		<Button type="button" variant="outline" onclick={() => (open = false)} disabled={saving}>
+			Cancel
+		</Button>
+		<!-- The submit lives in the footer, outside the <form> it submits — that is
+		     what `form=` is for, and it keeps the buttons pinned while the fields
+		     scroll. -->
+		<Button type="submit" form="new-asset-form" disabled={saving}>
+			{saving ? 'Creating…' : 'Create'}
+		</Button>
+	{/snippet}
+</Modal>

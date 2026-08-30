@@ -4,6 +4,7 @@
 	import { imageSrc } from '$lib/images';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
+	import { Modal } from '$lib/components/ui/modal';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
@@ -741,49 +742,36 @@
 	</div>
 </div>
 
-<!-- Delete Asset Modal -->
-{#if confirmingDelete}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-		onkeydown={(e) => e.key === 'Escape' && (confirmingDelete = false)}
-	>
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div
-			class="mx-4 w-full max-w-md rounded-lg border bg-background p-6 shadow-lg"
-			onkeydown={(e) => e.stopPropagation()}
+<Modal bind:open={confirmingDelete} title="Delete this asset?" dismissible={!deleting}>
+	{#snippet description()}
+		{asset.product.manufacturer.name}
+		{asset.product.name}{asset.assetTag ? ` · ${asset.assetTag}` : ''}{asset.serialNumber
+			? ` · ${asset.serialNumber}`
+			: ''}
+	{/snippet}
+	<p class="text-sm text-muted-foreground">
+		This cannot be undone. Only the unit is removed — the product it belongs to stays.
+	</p>
+
+	{#snippet footer()}
+		<Button
+			type="button"
+			variant="outline"
+			onclick={() => (confirmingDelete = false)}
+			disabled={deleting}
 		>
-			<h2 class="mb-1 text-lg font-semibold">Delete this asset?</h2>
-			<p class="mb-5 text-sm text-muted-foreground">
-				{asset.product.manufacturer.name}
-				{asset.product.name}{asset.assetTag ? ` · ${asset.assetTag}` : ''}{asset.serialNumber
-					? ` · ${asset.serialNumber}`
-					: ''}
-			</p>
-			<p class="mb-5 text-sm text-muted-foreground">
-				This cannot be undone. Only the unit is removed — the product it belongs to stays.
-			</p>
-			<div class="flex justify-end gap-3">
-				<Button
-					type="button"
-					variant="outline"
-					onclick={() => (confirmingDelete = false)}
-					disabled={deleting}
-				>
-					Cancel
-				</Button>
-				<Button
-					type="button"
-					class="bg-destructive text-white hover:bg-destructive/90"
-					onclick={handleDelete}
-					disabled={deleting}
-				>
-					{deleting ? 'Deleting…' : 'Delete asset'}
-				</Button>
-			</div>
-		</div>
-	</div>
-{/if}
+			Cancel
+		</Button>
+		<Button
+			type="button"
+			class="bg-destructive text-white hover:bg-destructive/90"
+			onclick={handleDelete}
+			disabled={deleting}
+		>
+			{deleting ? 'Deleting…' : 'Delete asset'}
+		</Button>
+	{/snippet}
+</Modal>
 
 <NewAssetModal
 	bind:this={newAssetModal}
@@ -808,38 +796,23 @@
 	{/snippet}
 </NewAssetModal>
 
-<!-- Edit Product Modal -->
-{#if productModalOpen}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-		onkeydown={(e) => e.key === 'Escape' && (productModalOpen = false)}
-	>
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div
-			class="mx-4 w-full max-w-md rounded-lg border bg-background p-6 shadow-lg"
-			onkeydown={(e) => e.stopPropagation()}
+<Modal bind:open={productModalOpen} title="Edit Product" dismissible={!savingProduct}>
+	{#snippet description()}
+		Changes apply to all assets of this product type.
+	{/snippet}
+	<ProductFields {categories} bind:value={productDraft} idPrefix="modal" />
+
+	{#snippet footer()}
+		<Button
+			type="button"
+			variant="outline"
+			onclick={() => (productModalOpen = false)}
+			disabled={savingProduct}
 		>
-			<h2 class="mb-1 text-lg font-semibold">Edit Product</h2>
-			<p class="mb-5 text-sm text-muted-foreground">
-				Changes apply to all assets of this product type.
-			</p>
-
-			<ProductFields {categories} bind:value={productDraft} idPrefix="modal" />
-
-			<div class="mt-6 flex justify-end gap-3">
-				<Button
-					type="button"
-					variant="outline"
-					onclick={() => (productModalOpen = false)}
-					disabled={savingProduct}
-				>
-					Cancel
-				</Button>
-				<Button type="button" onclick={handleProductSave} disabled={savingProduct}>
-					{savingProduct ? 'Saving…' : 'Save'}
-				</Button>
-			</div>
-		</div>
-	</div>
-{/if}
+			Cancel
+		</Button>
+		<Button type="button" onclick={handleProductSave} disabled={savingProduct}>
+			{savingProduct ? 'Saving…' : 'Save'}
+		</Button>
+	{/snippet}
+</Modal>

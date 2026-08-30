@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
+	import { Modal } from '$lib/components/ui/modal';
 	import { getErrorMessage } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
 	import type { Staleness } from './types';
@@ -55,84 +56,68 @@
 	</Card.Root>
 {/if}
 
-{#if open}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-		onkeydown={(e) => e.key === 'Escape' && (open = false)}
-	>
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div
-			class="mx-4 w-full max-w-xl rounded-lg border bg-background p-6 shadow-lg"
-			onkeydown={(e) => e.stopPropagation()}
-		>
-			<h2 class="mb-1 text-lg font-semibold">Update items</h2>
-			<p class="mb-4 text-sm text-muted-foreground">
-				This replaces the current line items with what's booked on the production now.
-			</p>
-
-			<div class="max-h-80 space-y-3 overflow-y-auto text-sm">
-				{#if staleness.added.length > 0}
-					<div>
-						<p class="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-							Added
-						</p>
-						<div class="space-y-1">
-							{#each staleness.added as line (line.key)}
-								<div
-									class="flex justify-between rounded-md bg-green-50 px-2 py-1 dark:bg-green-950/40"
-								>
-									<span>{line.description}</span>
-									<span class="text-green-700 tabular-nums dark:text-green-400"
-										>+{fmtEUR(line.lineTotal)}</span
-									>
-								</div>
-							{/each}
+<Modal bind:open title="Update items" size="lg">
+	{#snippet description()}
+		This replaces the current line items with what's booked on the production now.
+	{/snippet}
+	<div class="space-y-3 text-sm">
+		{#if staleness.added.length > 0}
+			<div>
+				<p class="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+					Added
+				</p>
+				<div class="space-y-1">
+					{#each staleness.added as line (line.key)}
+						<div class="flex justify-between rounded-md bg-green-50 px-2 py-1 dark:bg-green-950/40">
+							<span>{line.description}</span>
+							<span class="text-green-700 tabular-nums dark:text-green-400"
+								>+{fmtEUR(line.lineTotal)}</span
+							>
 						</div>
-					</div>
-				{/if}
-				{#if staleness.removed.length > 0}
-					<div>
-						<p class="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-							Removed
-						</p>
-						<div class="space-y-1">
-							{#each staleness.removed as line (line.key)}
-								<div class="flex justify-between rounded-md bg-red-50 px-2 py-1 dark:bg-red-950/40">
-									<span class="line-through">{line.description}</span>
-									<span class="text-red-700 tabular-nums dark:text-red-400"
-										>−{fmtEUR(line.lineTotal)}</span
-									>
-								</div>
-							{/each}
-						</div>
-					</div>
-				{/if}
-				{#if staleness.changed.length > 0}
-					<div>
-						<p class="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-							Changed
-						</p>
-						<div class="space-y-1">
-							{#each staleness.changed as line (line.key)}
-								<div class="flex justify-between rounded-md bg-muted/50 px-2 py-1">
-									<span>{line.description}</span>
-									<span class="tabular-nums">{fmtEUR(line.before)} → {fmtEUR(line.after)}</span>
-								</div>
-							{/each}
-						</div>
-					</div>
-				{/if}
+					{/each}
+				</div>
 			</div>
-
-			<div class="mt-6 flex justify-end gap-3">
-				<Button type="button" variant="outline" onclick={() => (open = false)} disabled={working}>
-					Cancel
-				</Button>
-				<Button type="button" onclick={handleUpdate} disabled={working}>
-					{working ? 'Updating…' : 'Update Items'}
-				</Button>
+		{/if}
+		{#if staleness.removed.length > 0}
+			<div>
+				<p class="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+					Removed
+				</p>
+				<div class="space-y-1">
+					{#each staleness.removed as line (line.key)}
+						<div class="flex justify-between rounded-md bg-red-50 px-2 py-1 dark:bg-red-950/40">
+							<span class="line-through">{line.description}</span>
+							<span class="text-red-700 tabular-nums dark:text-red-400"
+								>−{fmtEUR(line.lineTotal)}</span
+							>
+						</div>
+					{/each}
+				</div>
 			</div>
-		</div>
+		{/if}
+		{#if staleness.changed.length > 0}
+			<div>
+				<p class="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+					Changed
+				</p>
+				<div class="space-y-1">
+					{#each staleness.changed as line (line.key)}
+						<div class="flex justify-between rounded-md bg-muted/50 px-2 py-1">
+							<span>{line.description}</span>
+							<span class="tabular-nums">{fmtEUR(line.before)} → {fmtEUR(line.after)}</span>
+						</div>
+					{/each}
+				</div>
+			</div>
+		{/if}
 	</div>
-{/if}
+
+	{#snippet footer()}
+		<Button type="button" variant="outline" onclick={() => (open = false)} disabled={working}>
+			Cancel
+		</Button>
+		<Button type="button" onclick={handleUpdate} disabled={working}>
+			{working ? 'Updating…' : 'Update Items'}
+		</Button>
+	{/snippet}
+</Modal>
