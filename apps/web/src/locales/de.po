@@ -1339,44 +1339,33 @@ msgstr "Optionale Liefer- / Veranstaltungsadresse."
 
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
 msgid "Address line 1"
 msgstr "Adresszeile 1"
 
 #: src/lib/components/ui/address-input/address-input.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
 msgid "Street and number"
 msgstr "Straße und Hausnummer"
 
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
 msgid "Address line 2"
 msgstr "Adresszeile 2"
 
 #: src/lib/components/ui/address-input/address-input.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
 msgid "Building, floor, c/o"
 msgstr "Gebäude, Etage, c/o"
 
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
 msgid "Postal code"
 msgstr "Postleitzahl"
 
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
 msgid "City"
 msgstr "Stadt"
 
 #: src/lib/components/ui/address-input/address-input.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
 msgid "Berlin"
 msgstr "Berlin"
 

@@ -4,6 +4,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { AddressInput } from '$lib/components/ui/address-input';
 	import { getOrgWithMembers } from '$lib/remote/orgs.remote';
 	import { createLocation, getLocations, updateLocation } from '$lib/remote/assets.remote';
 	import { page } from '$app/state';
@@ -153,24 +154,7 @@
 						<Input id="name" bind:value={newName} placeholder="e.g. Warehouse" required />
 					</div>
 
-					<div class="grid gap-4 sm:grid-cols-2">
-						<div class="space-y-2 sm:col-span-2">
-							<Label for="line1">Address line 1</Label>
-							<Input id="line1" bind:value={newAddress.line1} placeholder="Street and number" />
-						</div>
-						<div class="space-y-2 sm:col-span-2">
-							<Label for="line2">Address line 2</Label>
-							<Input id="line2" bind:value={newAddress.line2} placeholder="Building, floor, c/o" />
-						</div>
-						<div class="space-y-2">
-							<Label for="postal">Postal code</Label>
-							<Input id="postal" bind:value={newAddress.postalCode} placeholder="12345" />
-						</div>
-						<div class="space-y-2">
-							<Label for="city">City</Label>
-							<Input id="city" bind:value={newAddress.city} placeholder="Berlin" />
-						</div>
-					</div>
+					<AddressInput bind:value={newAddress} idPrefix="new-loc" />
 
 					<div class="flex justify-end">
 						<Button type="submit" disabled={creating}>
@@ -216,24 +200,7 @@
 										<Input id={`edit-name-${loc.id}`} bind:value={editName} required />
 									</div>
 
-									<div class="grid gap-4 sm:grid-cols-2">
-										<div class="space-y-2 sm:col-span-2">
-											<Label for={`edit-line1-${loc.id}`}>Address line 1</Label>
-											<Input id={`edit-line1-${loc.id}`} bind:value={editAddress.line1} />
-										</div>
-										<div class="space-y-2 sm:col-span-2">
-											<Label for={`edit-line2-${loc.id}`}>Address line 2</Label>
-											<Input id={`edit-line2-${loc.id}`} bind:value={editAddress.line2} />
-										</div>
-										<div class="space-y-2">
-											<Label for={`edit-postal-${loc.id}`}>Postal code</Label>
-											<Input id={`edit-postal-${loc.id}`} bind:value={editAddress.postalCode} />
-										</div>
-										<div class="space-y-2">
-											<Label for={`edit-city-${loc.id}`}>City</Label>
-											<Input id={`edit-city-${loc.id}`} bind:value={editAddress.city} />
-										</div>
-									</div>
+									<AddressInput bind:value={editAddress} idPrefix={`edit-${loc.id}`} />
 
 									<div class="flex justify-end">
 										<Button type="submit" disabled={saving}>
