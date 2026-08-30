@@ -4,6 +4,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { AddressInput } from '$lib/components/ui/address-input';
+	import { CustomerFields, emptyCustomerDraft } from '$lib/components/ui/customer-fields';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { setOrgCategoryRate } from '$lib/remote/orgs.remote';
 	import { getProduction, getProductions } from '$lib/remote/productions.remote';
@@ -18,7 +19,7 @@
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
-	import { formatAddress, getErrorMessage, orgLabel, plural } from '$lib/utils';
+	import { customerLabel, formatAddress, getErrorMessage, orgLabel, plural } from '$lib/utils';
 	import { localizedName } from '$lib/category';
 
 	const preselectedProductionId = page.url.searchParams.get('productionId');
@@ -38,12 +39,7 @@
 
 	let customers = $derived(selectedOrgId ? await getCustomers(selectedOrgId) : []);
 	let creatingCustomer = $state(false);
-	let newCustomer = $state({ companyName: '', contactPerson: '', email: '' });
-	let newCustomerAddress = $state({ line1: '', line2: '', postalCode: '', city: '' });
-
-	function customerLabel(c: { companyName: string | null; contactPerson: string | null }) {
-		return c.companyName || c.contactPerson || 'Unnamed customer';
-	}
+	let newCustomer = $state(emptyCustomerDraft());
 
 	// One line per bundle among a group's units, so a kit that could be priced
 	// as a whole says so once rather than under every unit in it.
@@ -205,13 +201,13 @@
 					companyName: newCustomer.companyName || undefined,
 					contactPerson: newCustomer.contactPerson || undefined,
 					email: newCustomer.email || undefined,
-					address: newCustomerAddress
+					address: newCustomer.address
 				});
 				finalCustomerId = created.id;
 				finalCustomerName = customerLabel(created);
 				finalCustomerContactPerson = newCustomer.contactPerson;
 				finalCustomerEmail = newCustomer.email;
-				finalCustomerAddress = newCustomerAddress;
+				finalCustomerAddress = newCustomer.address;
 			}
 			const offer = await createOfferFromProduction({
 				productionId,
@@ -346,22 +342,8 @@
 								<AddressInput bind:value={customerAddress} idPrefix="customerAddress" />
 							</div>
 						{:else}
-							<div class="space-y-4 rounded-md border p-4">
-								<div class="grid gap-4 sm:grid-cols-2">
-									<div class="space-y-2">
-										<Label for="cust-company">Company name</Label>
-										<Input id="cust-company" bind:value={newCustomer.companyName} />
-									</div>
-									<div class="space-y-2">
-										<Label for="cust-contact">Contact person</Label>
-										<Input id="cust-contact" bind:value={newCustomer.contactPerson} />
-									</div>
-									<div class="space-y-2 sm:col-span-2">
-										<Label for="cust-email">Email</Label>
-										<Input id="cust-email" type="email" bind:value={newCustomer.email} />
-									</div>
-								</div>
-								<AddressInput bind:value={newCustomerAddress} idPrefix="cust-addr" />
+							<div class="space-y-4">
+								<CustomerFields bind:value={newCustomer} idPrefix="offer-cust" />
 								<Button type="button" variant="outline" onclick={() => (creatingCustomer = false)}>
 									Cancel new customer
 								</Button>

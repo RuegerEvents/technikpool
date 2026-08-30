@@ -243,6 +243,7 @@ msgstr "Noch keine Crewmitglieder hinzugefügt."
 msgid "Name"
 msgstr "Name"
 
+#: src/lib/components/ui/customer-fields/customer-fields.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/auth/forgot-password/+page.svelte
 #: src/routes/auth/login/+page.svelte
@@ -250,10 +251,8 @@ msgstr "Name"
 #: src/routes/invoices/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
 #: src/routes/offers/new/+page.svelte
-#: src/routes/offers/new/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/new/+page.svelte
 msgid "Email"
 msgstr "E-Mail"
 
@@ -3551,9 +3550,7 @@ msgstr "<0/> Bundle · {0}"
 
 #: src/routes/invoices/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
-#: src/routes/offers/new/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/new/+page.svelte
 msgid "Unnamed customer"
 msgstr "Unbenannter Kunde"
 
@@ -3575,18 +3572,16 @@ msgstr "— Keine —"
 msgid "+ New customer"
 msgstr "+ Neuer Kunde"
 
-#: src/routes/offers/new/+page.svelte
+#: src/lib/components/ui/customer-fields/customer-fields.svelte
 #: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/new/+page.svelte
 msgid "Company name"
 msgstr "Firmenname"
 
+#: src/lib/components/ui/customer-fields/customer-fields.svelte
 #: src/routes/invoices/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
 #: src/routes/offers/new/+page.svelte
-#: src/routes/offers/new/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/new/+page.svelte
 msgid "Contact person"
 msgstr "Ansprechpartner"
 

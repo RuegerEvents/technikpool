@@ -11,6 +11,14 @@ export function orgLabel(org: { name: string; shortName?: string | null }): stri
 	return org.shortName?.trim() || org.name;
 }
 
+/** A customer may have a company, a person, or neither — never assume one. */
+export function customerLabel(c: {
+	companyName: string | null;
+	contactPerson: string | null;
+}): string {
+	return c.companyName || c.contactPerson || 'Unnamed customer';
+}
+
 // Inclusive day count between two dates (a single day counts as 1, not 0).
 export function dayCountBetween(
 	start: Date | string | null | undefined,

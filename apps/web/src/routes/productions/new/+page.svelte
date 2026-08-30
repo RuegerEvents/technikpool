@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { getErrorMessage, orgLabel } from '$lib/utils';
+	import { customerLabel, getErrorMessage, orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { AddressInput } from '$lib/components/ui/address-input';
+	import { CustomerFields, emptyCustomerDraft } from '$lib/components/ui/customer-fields';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { createProduction } from '$lib/remote/productions.remote';
 	import { getCustomers, createCustomer } from '$lib/remote/customers.remote';
@@ -30,12 +31,7 @@
 	let customers = $derived(organizationId ? await getCustomers(organizationId) : []);
 	let customerId = $state('');
 	let creatingCustomer = $state(false);
-	let newCustomer = $state({ companyName: '', contactPerson: '', email: '' });
-	let newCustomerAddress = $state({ line1: '', line2: '', postalCode: '', city: '' });
-
-	function customerLabel(c: { companyName: string | null; contactPerson: string | null }) {
-		return c.companyName || c.contactPerson || 'Unnamed customer';
-	}
+	let newCustomer = $state(emptyCustomerDraft());
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -48,7 +44,7 @@
 					companyName: newCustomer.companyName || undefined,
 					contactPerson: newCustomer.contactPerson || undefined,
 					email: newCustomer.email || undefined,
-					address: newCustomerAddress
+					address: newCustomer.address
 				});
 				finalCustomerId = created.id;
 			}
@@ -197,22 +193,8 @@
 							</Button>
 						</div>
 					{:else}
-						<div class="space-y-4 rounded-md border p-4">
-							<div class="grid gap-4 sm:grid-cols-2">
-								<div class="space-y-2">
-									<Label for="cust-company">Company name</Label>
-									<Input id="cust-company" bind:value={newCustomer.companyName} />
-								</div>
-								<div class="space-y-2">
-									<Label for="cust-contact">Contact person</Label>
-									<Input id="cust-contact" bind:value={newCustomer.contactPerson} />
-								</div>
-								<div class="space-y-2 sm:col-span-2">
-									<Label for="cust-email">Email</Label>
-									<Input id="cust-email" type="email" bind:value={newCustomer.email} />
-								</div>
-							</div>
-							<AddressInput bind:value={newCustomerAddress} idPrefix="cust-addr" />
+						<div class="space-y-4">
+							<CustomerFields bind:value={newCustomer} idPrefix="prod-cust" />
 							<Button type="button" variant="outline" onclick={() => (creatingCustomer = false)}>
 								Cancel new customer
 							</Button>
