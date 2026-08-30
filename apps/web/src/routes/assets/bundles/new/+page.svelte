@@ -78,6 +78,8 @@
 			// A unit belongs to one kit at a time, so one already in a bundle isn't
 			// on offer here — same rule the bundle detail page's picker applies.
 			if (a.bundleId) return false;
+			// An accessory follows its parent into the kit; it is never picked.
+			if (a.parentAssetId) return false;
 			if (!assetSearch.trim()) return true;
 			const q = assetSearch.toLowerCase();
 			return (

@@ -22,6 +22,7 @@ class Asset {
     this.assetTag,
     this.serialNumber,
     this.bundleId,
+    this.parentAssetId,
   });
   
   factory Asset.fromJson(Map<String, Object?> json) => _$AssetFromJson(json);
@@ -44,6 +45,13 @@ class Asset {
   final Location location;
   final Organization organization;
   final String? bundleId;
+
+  /// Set when this unit is an accessory of another — its case, its power.
+  /// supply, its brackets. An accessory travels with its parent: it is.
+  /// booked, moved and returned whenever the parent is, and is never.
+  /// picked on its own. Scanning it alone still moves only itself.
+  ///
+  final String? parentAssetId;
 
   Map<String, Object?> toJson() => _$AssetToJson(this);
 }

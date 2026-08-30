@@ -8,6 +8,7 @@ import { addedAsCrewEmail } from '$lib/server/emails/added-as-crew';
 import * as v from 'valibot';
 import { requireAuth } from '$lib/server/services/access';
 import { ACTIVE_ASSET_WHERE, isRetiredStatus } from '$lib/asset-status';
+import { accessoryIdsOf } from '$lib/server/services/accessories';
 
 // Returns which of `ownerOrgIds` do NOT currently have any PENDING item in
 // this production — i.e. the orgs for which a new PENDING item would be the
@@ -439,6 +440,11 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 		? await getOrgIdsNeedingApprovalNotification(data.productionId, [asset.organizationId])
 		: [];
 
+	// Whatever is attached to it is booked with it — see
+	// src/lib/server/services/accessories.ts. No conflict check of its own: an
+	// accessory is never booked independently, so the check above covers it.
+	const accessoryIds = (await accessoryIdsOf([data.assetId])).get(data.assetId) ?? [];
+
 	const item = await prisma.productionItem.create({
 		data: {
 			productionId: data.productionId,
@@ -446,6 +452,16 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 			status: initialStatus
 		}
 	});
+	if (accessoryIds.length > 0) {
+		await prisma.productionItem.createMany({
+			data: accessoryIds.map((assetId) => ({
+				productionId: data.productionId,
+				assetId,
+				status: initialStatus
+			})),
+			skipDuplicates: true
+		});
+	}
 
 	await prisma.assetTransaction.create({
 		data: {
@@ -730,6 +746,10 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 export const removeProductionItem = command(v.string(), async (itemId: string) => {
 	await requireAuth();
 	const item = await prisma.productionItem.delete({ where: { id: itemId } });
+	// The accessories were booked because the parent was; they go with it.
+	await prisma.productionItem.deleteMany({
+		where: { productionId: item.productionId, asset: { parentAssetId: item.assetId } }
+	});
 	await getProduction(item.productionId).refresh();
 	return item;
 });
@@ -966,8 +986,10 @@ export const getCalendarData = query(async () => {
 	});
 	const orgIds = memberships.map((m) => m.organizationId);
 
+	// An accessory's availability is its parent's — it is booked and returned
+	// with it, so a row per power cable is noise on a calendar.
 	const assets = await prisma.asset.findMany({
-		where: { organizationId: { in: orgIds }, ...ACTIVE_ASSET_WHERE },
+		where: { organizationId: { in: orgIds }, parentAssetId: null, ...ACTIVE_ASSET_WHERE },
 		include: {
 			product: { include: { manufacturer: true } },
 			organization: true,

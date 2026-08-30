@@ -4753,3 +4753,70 @@ msgstr "Angaben zu dieser einzelnen Einheit. Abgerechnet wird mit dem Preis des 
 #: src/routes/assets/[id]/+page.svelte
 msgid "What a rental rate is calculated from, for every unit of this product."
 msgstr "Grundlage für die Mietsatz-Berechnung, für jede Einheit dieses Produkts."
+
+#. 0: asset.parent.product.name
+#: src/routes/assets/+page.svelte
+msgid "↳ Accessory of {0}"
+msgstr "↳ Zubehör von {0}"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Accessory attached"
+msgstr "Zubehör angehängt"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Accessory detached"
+msgstr "Zubehör abgehängt"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "What this unit is attached to. It is booked, moved and returned with it."
+msgstr "Woran diese Einheit hängt. Sie wird mit ihr gebucht, bewegt und zurückgegeben."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Cases, power supplies and brackets that belong to this unit. They follow it into bundles, onto productions and through every scan."
+msgstr "Cases, Netzteile und Halterungen, die zu dieser Einheit gehören. Sie folgen ihr in Bundles, auf Produktionen und durch jeden Scan."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Accessories"
+msgstr "Zubehör"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Accessory of"
+msgstr "Zubehör von"
+
+#: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/[id]/+page.svelte
+msgid "Detach"
+msgstr "Abhängen"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Nothing is attached to this unit yet."
+msgstr "An dieser Einheit hängt noch nichts."
+
+#. 0: new Date(accessory.nextInspectionDue).toLocaleDateString( 'de-DE' )
+#: src/routes/assets/[id]/+page.svelte
+msgid "· Next due: {0}"
+msgstr "· Nächste Fälligkeit: {0}"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Search this organisation's devices…"
+msgstr "Geräte dieser Organisation durchsuchen…"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Add an accessory"
+msgstr "Zubehör hinzufügen"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Attaching…"
+msgstr "Wird angehängt…"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Attach"
+msgstr "Anhängen"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Attached as an accessory of <0/>"
+msgstr "Als Zubehör angehängt an <0/>"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Detached from <0/>"
+msgstr "Abgehängt von <0/>"

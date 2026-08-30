@@ -351,6 +351,13 @@ export interface components {
             location: components["schemas"]["Location"];
             organization: components["schemas"]["Organization"];
             bundleId?: string | null;
+            /**
+             * @description Set when this unit is an accessory of another — its case, its power
+             *     supply, its brackets. An accessory travels with its parent: it is
+             *     booked, moved and returned whenever the parent is, and is never
+             *     picked on its own. Scanning it alone still moves only itself.
+             */
+            parentAssetId?: string | null;
         };
         Product: {
             id: string;

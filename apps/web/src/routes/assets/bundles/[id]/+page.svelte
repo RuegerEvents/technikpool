@@ -100,11 +100,23 @@
 	let categoryFilter = $state('');
 	let working = $state(false);
 
-	let visibleBundleAssets = $derived(
-		!categoryFilter
+	// Accessories mirror their parent's bundleId, so they are members of this kit
+	// — but they are shown under the unit they are attached to, not as peers, and
+	// they can't be removed from here: they leave when the parent does.
+	let visibleBundleAssets = $derived.by(() => {
+		const filtered = !categoryFilter
 			? bundle.assets
-			: bundle.assets.filter((a) => a.product.categoryId === categoryFilter)
-	);
+			: bundle.assets.filter((a) => a.product.categoryId === categoryFilter);
+		const memberIds = new Set(filtered.map((a) => a.id));
+		const isNested = (a: (typeof filtered)[number]) =>
+			a.parentAssetId !== null && memberIds.has(a.parentAssetId);
+		return filtered
+			.filter((a) => !isNested(a))
+			.flatMap((a) => [
+				{ asset: a, nested: false },
+				...filtered.filter((c) => c.parentAssetId === a.id).map((c) => ({ asset: c, nested: true }))
+			]);
+	});
 
 	let availableToAdd = $derived.by(() => {
 		const bundleAssetIds = new Set(bundle.assets.map((a) => a.id));
@@ -112,6 +124,9 @@
 		return allAssets.filter((a) => {
 			if (bundleAssetIds.has(a.id)) return false;
 			if (a.bundle) return false;
+			// An accessory is in whatever kit its parent is in — adding the parent
+			// brings it along, and there is no way to add it on its own.
+			if (a.parentAssetId) return false;
 			if (!q) return true;
 			return (
 				a.product.name.toLowerCase().includes(q) ||
@@ -313,10 +328,13 @@
 								</tr>
 							</thead>
 							<tbody>
-								{#each visibleBundleAssets as asset (asset.id)}
+								{#each visibleBundleAssets as { asset, nested } (asset.id)}
 									<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
-										<td class="px-4 py-3">
+										<td class="px-4 py-3 {nested ? 'pl-10' : ''}">
 											<div class="flex items-center gap-2">
+												{#if nested}
+													<span class="text-muted-foreground">↳</span>
+												{/if}
 												<ProductThumb path={asset.product.imagePath} alt={asset.product.name} />
 												<CategoryPill
 													name={categoryLabel(asset.product.category)}
@@ -333,12 +351,14 @@
 											{asset.location?.name ?? '—'}
 										</td>
 										<td class="px-4 py-3 text-right">
-											<Button
-												size="sm"
-												variant="outline"
-												disabled={working}
-												onclick={() => handleRemove(asset.id)}>Remove</Button
-											>
+											{#if !nested}
+												<Button
+													size="sm"
+													variant="outline"
+													disabled={working}
+													onclick={() => handleRemove(asset.id)}>Remove</Button
+												>
+											{/if}
 										</td>
 									</tr>
 								{/each}

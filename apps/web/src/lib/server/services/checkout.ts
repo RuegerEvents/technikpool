@@ -1,6 +1,7 @@
 import { prisma } from '$lib/server/auth';
 import { isSystemAdmin, userOrgIds } from './access';
-import { isRetiredStatus } from '$lib/asset-status';
+import { ACTIVE_ASSET_WHERE, isRetiredStatus } from '$lib/asset-status';
+import { withAccessories } from './accessories';
 
 // Scan/checkout behaviour lives here rather than in checkout.remote.ts so the
 // /api/v1 endpoints and the web UI share one implementation. These functions
@@ -116,8 +117,19 @@ export async function performScan(
 		manufacturerName: asset.product.manufacturer.name
 	};
 
+	// Scanning a unit does the same thing to whatever is attached to it: the
+	// case, the power supply, the brackets moved because it moved. Each gets its
+	// own AssetTransaction, so the audit trail per cable survives. Scanning an
+	// accessory on its own moves only itself — a cable found loose on a shelf is
+	// a real situation, and it says so by not carrying the parent along.
+	const accessories = await prisma.asset.findMany({
+		where: { parentAssetId: asset.id, ...ACTIVE_ASSET_WHERE },
+		select: { id: true }
+	});
+	const touchedIds = [asset.id, ...accessories.map((a) => a.id)];
+
 	const affected = emptyAffected();
-	mergeAffected(affected, { assetIds: [asset.id], organizationIds: [asset.organizationId] });
+	mergeAffected(affected, { assetIds: touchedIds, organizationIds: [asset.organizationId] });
 
 	if (input.targetType === 'location') {
 		const location = await prisma.location.findUniqueOrThrow({ where: { id: input.targetId } });
@@ -126,23 +138,23 @@ export async function performScan(
 		}
 
 		const checkedOutItems = await prisma.productionItem.findMany({
-			where: { assetId: asset.id, status: 'CHECKED_OUT' },
+			where: { assetId: { in: touchedIds }, status: 'CHECKED_OUT' },
 			include: { production: { select: { id: true, name: true } } }
 		});
 
 		await prisma.$transaction(async (tx) => {
-			await tx.asset.update({
-				where: { id: asset.id },
+			await tx.asset.updateMany({
+				where: { id: { in: touchedIds } },
 				data: { locationId: input.targetId }
 			});
 
-			await tx.assetTransaction.create({
-				data: {
-					assetId: asset.id,
+			await tx.assetTransaction.createMany({
+				data: touchedIds.map((assetId) => ({
+					assetId,
 					userId,
 					action: 'LOCATION_ASSIGNED',
 					data: { type: 'LOCATION_ASSIGNED', locationId: location.id, locationName: location.name }
-				}
+				}))
 			});
 
 			for (const item of checkedOutItems) {
@@ -152,7 +164,7 @@ export async function performScan(
 				});
 				await tx.assetTransaction.create({
 					data: {
-						assetId: asset.id,
+						assetId: item.assetId,
 						userId,
 						productionId: item.production.id,
 						action: 'RETURNED',
@@ -186,7 +198,9 @@ export async function performScan(
 				asset: scannedAsset,
 				action: 'LOCATION_ASSIGNED',
 				targetName: location.name,
-				returnedFrom: checkedOutItems.map((i) => i.production.name)
+				// Deduped: the parent and each of its accessories were on the same
+				// production, and the scanner reports one return, not five.
+				returnedFrom: [...new Set(checkedOutItems.map((i) => i.production.name))]
 			},
 			affected
 		};
@@ -194,29 +208,38 @@ export async function performScan(
 
 	const production = await prisma.production.findUniqueOrThrow({ where: { id: input.targetId } });
 
-	const existingItem = await prisma.productionItem.findFirst({
-		where: { productionId: input.targetId, assetId: asset.id }
+	const existingItems = await prisma.productionItem.findMany({
+		where: { productionId: input.targetId, assetId: { in: touchedIds } },
+		select: { id: true, assetId: true }
 	});
+	const alreadyBooked = new Set(existingItems.map((i) => i.assetId));
 
-	if (existingItem) {
-		await prisma.productionItem.update({
-			where: { id: existingItem.id },
-			data: { status: 'CHECKED_OUT' }
-		});
-	} else {
-		await prisma.productionItem.create({
-			data: { productionId: input.targetId, assetId: asset.id, status: 'CHECKED_OUT' }
-		});
-	}
-
-	await prisma.assetTransaction.create({
-		data: {
-			assetId: asset.id,
-			userId,
-			productionId: input.targetId,
-			action: 'CHECKED_OUT',
-			data: { type: 'CHECKED_OUT', productionId: production.id, productionName: production.name }
+	await prisma.$transaction(async (tx) => {
+		if (existingItems.length > 0) {
+			await tx.productionItem.updateMany({
+				where: { id: { in: existingItems.map((i) => i.id) } },
+				data: { status: 'CHECKED_OUT' }
+			});
 		}
+		const newIds = touchedIds.filter((id) => !alreadyBooked.has(id));
+		if (newIds.length > 0) {
+			await tx.productionItem.createMany({
+				data: newIds.map((assetId) => ({
+					productionId: input.targetId,
+					assetId,
+					status: 'CHECKED_OUT'
+				}))
+			});
+		}
+		await tx.assetTransaction.createMany({
+			data: touchedIds.map((assetId) => ({
+				assetId,
+				userId,
+				productionId: input.targetId,
+				action: 'CHECKED_OUT',
+				data: { type: 'CHECKED_OUT', productionId: production.id, productionName: production.name }
+			}))
+		});
 	});
 
 	mergeAffected(affected, { productionIds: [production.id] });
@@ -245,8 +268,13 @@ export async function performBulkCheckout(
 ): Promise<{ result: { count: number; targetName: string }; affected: AffectedRecords }> {
 	const [orgIds, systemAdmin] = await Promise.all([userOrgIds(userId), isSystemAdmin(userId)]);
 
+	// Everything attached to a picked unit is picked with it, before anything
+	// else looks at the list — so the access and retirement checks, the
+	// per-asset writes and `movedBundleIds` below all see one flat set.
+	const assetIds = await withAccessories(input.assetIds);
+
 	const assets = await prisma.asset.findMany({
-		where: { id: { in: input.assetIds } },
+		where: { id: { in: assetIds } },
 		select: { id: true, organizationId: true, bundleId: true, status: true }
 	});
 
@@ -280,7 +308,7 @@ export async function performBulkCheckout(
 				where: { bundleId },
 				select: { id: true }
 			});
-			if (bundleAssets.every((ba) => input.assetIds.includes(ba.id))) movedBundleIds.push(bundleId);
+			if (bundleAssets.every((ba) => assetIds.includes(ba.id))) movedBundleIds.push(bundleId);
 		}
 
 		for (const asset of assets) {

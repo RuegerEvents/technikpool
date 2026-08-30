@@ -2664,6 +2664,7 @@ export const AssetScalarFieldEnum = {
   assetTag: 'assetTag',
   status: 'status',
   bundleId: 'bundleId',
+  parentAssetId: 'parentAssetId',
   purchaseDate: 'purchaseDate',
   inspectionIntervalMonths: 'inspectionIntervalMonths',
   nextInspectionDue: 'nextInspectionDue',

@@ -10,6 +10,25 @@ import {
 	RETIRED_ASSET_WHERE,
 	isRetiredStatus
 } from '$lib/asset-status';
+import { syncAccessories } from '$lib/server/services/accessories';
+
+// What a listing or a detail page needs to know about an asset's place in the
+// accessory tree: who it hangs off, and what hangs off it. The parent is a thin
+// label (the row links to it); the accessories are full rows, because they are
+// rendered as sub-lines wherever their parent appears.
+const PARENT_SELECT = {
+	select: {
+		id: true,
+		assetTag: true,
+		product: { select: { name: true, manufacturer: { select: { name: true } } } }
+	}
+} as const;
+
+const ACCESSORIES_INCLUDE = {
+	where: ACTIVE_ASSET_WHERE,
+	include: { product: { include: { manufacturer: true, category: true } } },
+	orderBy: { product: { name: 'asc' } }
+} as const;
 
 export const getAssets = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
@@ -21,7 +40,9 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 			product: { include: { manufacturer: true, category: true } },
 			location: true,
 			organization: true,
-			bundle: { select: { id: true, template: { select: { name: true } } } }
+			bundle: { select: { id: true, template: { select: { name: true } } } },
+			parent: PARENT_SELECT,
+			accessories: ACCESSORIES_INCLUDE
 		},
 		orderBy: [{ product: { name: 'asc' } }]
 	});
@@ -42,7 +63,12 @@ export const getRetiredAssets = query(v.optional(v.string()), async (organizatio
 			product: { include: { manufacturer: true, category: true } },
 			location: true,
 			organization: true,
-			bundle: { select: { id: true, template: { select: { name: true } } } }
+			bundle: { select: { id: true, template: { select: { name: true } } } },
+			// Retiring detaches in both directions, so these are always empty here —
+			// they are included so the two listings stay one shape for the page that
+			// renders both.
+			parent: PARENT_SELECT,
+			accessories: ACCESSORIES_INCLUDE
 		},
 		orderBy: [{ product: { name: 'asc' } }]
 	});
@@ -59,7 +85,9 @@ export const getAsset = query(v.string(), async (assetId: string) => {
 			product: { include: { manufacturer: true, category: true } },
 			location: true,
 			organization: true,
-			bundle: { select: { id: true, template: { select: { name: true } } } }
+			bundle: { select: { id: true, template: { select: { name: true } } } },
+			parent: PARENT_SELECT,
+			accessories: ACCESSORIES_INCLUDE
 		}
 	});
 
@@ -475,7 +503,12 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 
 	const asset = await prisma.asset.findUniqueOrThrow({
 		where: { id: input.assetId },
-		include: { location: true, product: true, bundle: { include: { template: true } } }
+		include: {
+			location: true,
+			product: true,
+			bundle: { include: { template: true } },
+			accessories: { select: { id: true } }
+		}
 	});
 
 	if (!systemAdmin) {
@@ -527,6 +560,7 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 		status?: string;
 		locationId?: string;
 		bundleId?: string | null;
+		parentAssetId?: string | null;
 		purchaseDate?: Date | null;
 		inspectionIntervalMonths?: number | null;
 		nextInspectionDue?: Date | null;
@@ -577,6 +611,14 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 		updateData.bundleId = null;
 		changes.push({ field: 'bundle', from: asset.bundle?.template.name ?? null, to: null });
 	}
+	// The same for what it was attached to, in both directions: a retired cable
+	// stops being this converter's cable, and a retired converter stops holding
+	// live cables that are still in service.
+	const detachingAccessories = retiring ? asset.accessories.map((a) => a.id) : [];
+	if (retiring && asset.parentAssetId) {
+		updateData.parentAssetId = null;
+		changes.push({ field: 'accessoryOf', from: asset.parentAssetId, to: null });
+	}
 	if (nextLocation !== undefined) {
 		updateData.locationId = nextLocation.id;
 		if (nextLocation.id !== asset.locationId)
@@ -589,15 +631,27 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 			});
 	}
 
-	const updated = await prisma.asset.update({
-		where: { id: input.assetId },
-		data: updateData,
-		include: {
-			product: { include: { manufacturer: true } },
-			location: true,
-			organization: true,
-			bundle: { select: { id: true, template: { select: { name: true } } } }
+	const updated = await prisma.$transaction(async (tx) => {
+		const result = await tx.asset.update({
+			where: { id: input.assetId },
+			data: updateData,
+			include: {
+				product: { include: { manufacturer: true } },
+				location: true,
+				organization: true,
+				bundle: { select: { id: true, template: { select: { name: true } } } }
+			}
+		});
+		if (detachingAccessories.length > 0) {
+			await tx.asset.updateMany({
+				where: { id: { in: detachingAccessories } },
+				data: { parentAssetId: null }
+			});
+		} else if (updateData.locationId) {
+			// Whatever is attached to this unit is physically wherever it is.
+			await syncAccessories(tx, asset.id, { locationId: updateData.locationId });
 		}
+		return result;
 	});
 
 	if (changes.length > 0) {
@@ -613,6 +667,8 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 
 	await getAsset(input.assetId).refresh();
 	await getAssetHistory(input.assetId).refresh();
+	if (asset.parentAssetId) await getAsset(asset.parentAssetId).refresh();
+	for (const id of asset.accessories.map((a) => a.id)) await getAsset(id).refresh();
 	await getAssets(asset.organizationId).refresh();
 	await getAssets().refresh();
 	await getRetiredAssets(asset.organizationId).refresh();
@@ -657,6 +713,7 @@ export const bulkUpdateAssetStatus = command(bulkUpdateAssetStatusSchema, async 
 			status: true,
 			organizationId: true,
 			bundleId: true,
+			parentAssetId: true,
 			bundle: { select: { template: { select: { name: true } } } }
 		}
 	});
@@ -710,6 +767,9 @@ export const bulkUpdateAssetStatus = command(bulkUpdateAssetStatusSchema, async 
 	// A unit that has left the pool has left its kit with it. Un-retiring won't
 	// put it back — it has to be added to a bundle again like any other asset.
 	const unbundling = retiring.filter((a) => a.bundleId);
+	// The same for accessories, in both directions — see `updateAsset`.
+	const detaching = retiring.filter((a) => a.parentAssetId);
+	const orphaning = retiring.map((a) => a.id);
 
 	if (changing.length > 0) {
 		await prisma.$transaction(async (tx) => {
@@ -723,7 +783,20 @@ export const bulkUpdateAssetStatus = command(bulkUpdateAssetStatusSchema, async 
 					data: { bundleId: null }
 				});
 			}
+			if (detaching.length > 0) {
+				await tx.asset.updateMany({
+					where: { id: { in: detaching.map((a) => a.id) } },
+					data: { parentAssetId: null }
+				});
+			}
+			if (orphaning.length > 0) {
+				await tx.asset.updateMany({
+					where: { parentAssetId: { in: orphaning } },
+					data: { parentAssetId: null }
+				});
+			}
 			const unbundledIds = new Set(unbundling.map((a) => a.id));
+			const detachedIds = new Set(detaching.map((a) => a.id));
 			await tx.assetTransaction.createMany({
 				data: changing.map((asset) => {
 					const changes: FieldChange[] = [
@@ -733,6 +806,13 @@ export const bulkUpdateAssetStatus = command(bulkUpdateAssetStatusSchema, async 
 						changes.push({
 							field: 'bundle',
 							from: asset.bundle?.template.name ?? null,
+							to: null
+						});
+					}
+					if (detachedIds.has(asset.id)) {
+						changes.push({
+							field: 'accessoryOf',
+							from: asset.parentAssetId,
 							to: null
 						});
 					}
@@ -839,6 +919,14 @@ export const deleteAsset = command(v.string(), async (assetId: string) => {
 		error(409, 'Asset has an inspection on record — decommission it instead of deleting it');
 	}
 
+	// The FK is ON DELETE SET NULL, so this would succeed and quietly leave the
+	// cables loose. Detaching is a deliberate act, and the person deleting a
+	// parent should be the one to decide where its accessories go.
+	const attached = await prisma.asset.findFirst({ where: { parentAssetId: assetId } });
+	if (attached) {
+		error(409, 'Other assets are attached to this one as accessories — detach them first');
+	}
+
 	const [offerLine, invoiceLine] = await Promise.all([
 		prisma.offerItem.findFirst({ where: { assetId } }),
 		prisma.invoiceItem.findFirst({ where: { assetId } })
@@ -847,9 +935,10 @@ export const deleteAsset = command(v.string(), async (assetId: string) => {
 		error(409, 'Asset appears on an offer or invoice — decommission it instead of deleting it');
 	}
 
-	const { organizationId, bundleId } = asset;
+	const { organizationId, bundleId, parentAssetId } = asset;
 	await prisma.asset.delete({ where: { id: assetId } });
 
+	if (parentAssetId) await getAsset(parentAssetId).refresh();
 	await getAssets(organizationId).refresh();
 	await getAssets().refresh();
 	await getRetiredAssets(organizationId).refresh();
@@ -1150,8 +1239,10 @@ export const updateBundle = command(updateBundleSchema, async (input) => {
 			include: { template: { include: { organization: true, category: true } }, location: true }
 		});
 		if (input.locationId) {
+			// `parent.bundleId` catches accessories whose own bundleId hasn't been
+			// mirrored yet — an accessory is wherever its parent is either way.
 			await tx.asset.updateMany({
-				where: { bundleId: input.bundleId },
+				where: { OR: [{ bundleId: input.bundleId }, { parent: { bundleId: input.bundleId } }] },
 				data: { locationId: input.locationId }
 			});
 		}
@@ -1174,10 +1265,22 @@ export const addAssetToBundle = command(bundleAssetSchema, async ({ bundleId, as
 	});
 	const asset = await prisma.asset.findUniqueOrThrow({
 		where: { id: assetId },
-		select: { status: true, bundleId: true, bundle: { select: { template: true } } }
+		select: {
+			status: true,
+			bundleId: true,
+			parentAssetId: true,
+			bundle: { select: { template: true } }
+		}
 	});
 	if (isRetiredStatus(asset.status)) {
 		throw new Error('This asset is sold or decommissioned and cannot be added to a bundle');
+	}
+	// An accessory is in whatever kit its parent is in and no other. Both
+	// pickers leave accessories out, so this is a stale page.
+	if (asset.parentAssetId) {
+		throw new Error(
+			'This asset is an accessory — put the unit it is attached to in the bundle instead'
+		);
 	}
 	// A unit belongs to one kit at a time. Both pickers already leave bundled
 	// assets out, so reaching here means a stale page — moving it silently would
@@ -1189,7 +1292,11 @@ export const addAssetToBundle = command(bundleAssetSchema, async ({ bundleId, as
 	}
 	const updateData: { bundleId: string; locationId?: string } = { bundleId };
 	if (bundle.locationId) updateData.locationId = bundle.locationId;
-	await prisma.asset.update({ where: { id: assetId }, data: updateData });
+	await prisma.$transaction(async (tx) => {
+		await tx.asset.update({ where: { id: assetId }, data: updateData });
+		// Whatever is attached to it comes along — the kit ships as one thing.
+		await syncAccessories(tx, assetId, updateData);
+	});
 	await getBundleTemplates(bundle.template.organizationId).refresh();
 	await getBundles(bundle.template.organizationId).refresh();
 	await getBundle(bundleId).refresh();
@@ -1203,12 +1310,213 @@ export const removeAssetFromBundle = command(bundleAssetSchema, async ({ bundleI
 		where: { id: bundleId },
 		include: { template: true }
 	});
-	await prisma.asset.update({ where: { id: assetId }, data: { bundleId: null } });
+	await prisma.$transaction(async (tx) => {
+		await tx.asset.update({ where: { id: assetId }, data: { bundleId: null } });
+		await syncAccessories(tx, assetId, { bundleId: null });
+	});
 	await getBundleTemplates(bundle.template.organizationId).refresh();
 	await getBundles(bundle.template.organizationId).refresh();
 	await getBundle(bundleId).refresh();
 	await getAssets(bundle.template.organizationId).refresh();
 	return { bundleId, assetId };
+});
+
+// ── Accessories ───────────────────────────────────────────────────────────────
+
+// An accessory is an Asset attached to one parent Asset — see
+// src/lib/server/services/accessories.ts. It stays a full asset because a power
+// cable is DGUV equipment with its own inspection record; what follows the
+// parent is where it lives, what kit it is in, and what it is booked onto.
+
+/** Everything an attach or detach invalidates, on both ends of the relation. */
+async function refreshAccessoryPair(
+	organizationId: string,
+	childId: string,
+	parentId: string,
+	bundleIds: (string | null)[]
+) {
+	await Promise.all([
+		getAsset(childId).refresh(),
+		getAsset(parentId).refresh(),
+		getAssetHistory(childId).refresh(),
+		getAssetHistory(parentId).refresh(),
+		getAssets(organizationId).refresh(),
+		getAssets().refresh(),
+		...[...new Set(bundleIds.filter((id) => id !== null))].flatMap((id) => [
+			getBundle(id as string).refresh(),
+			getBundles(organizationId).refresh()
+		])
+	]);
+}
+
+function assetLabel(asset: {
+	assetTag: string | null;
+	product: { name: string; manufacturer: { name: string } };
+}) {
+	const name = `${asset.product.manufacturer.name} ${asset.product.name}`;
+	return asset.assetTag ? `${name} (${asset.assetTag})` : name;
+}
+
+const accessoryLinkSchema = v.object({ parentId: v.string(), assetId: v.string() });
+
+export const attachAccessory = command(accessoryLinkSchema, async ({ parentId, assetId }) => {
+	const user = await requireAuth();
+	const systemAdmin = await isSystemAdmin(user.id);
+
+	if (parentId === assetId) error(400, 'An asset cannot be its own accessory');
+
+	const labelInclude = {
+		assetTag: true,
+		product: { select: { name: true, manufacturer: { select: { name: true } } } }
+	};
+
+	const [parent, asset] = await Promise.all([
+		prisma.asset.findUniqueOrThrow({
+			where: { id: parentId },
+			select: {
+				id: true,
+				status: true,
+				organizationId: true,
+				locationId: true,
+				bundleId: true,
+				parentAssetId: true,
+				...labelInclude
+			}
+		}),
+		prisma.asset.findUniqueOrThrow({
+			where: { id: assetId },
+			select: {
+				id: true,
+				status: true,
+				organizationId: true,
+				bundleId: true,
+				parentAssetId: true,
+				accessories: { select: { id: true }, take: 1 },
+				bundle: { select: { template: { select: { name: true } } } },
+				...labelInclude
+			}
+		})
+	]);
+
+	if (!systemAdmin) {
+		const membership = await prisma.orgMembership.findUnique({
+			where: {
+				userId_organizationId: { userId: user.id, organizationId: parent.organizationId }
+			}
+		});
+		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
+			error(403, 'Unauthorized');
+		}
+	}
+
+	// Rule 1 of the feature, guard by guard. Every one of these is reachable
+	// from a stale page, so each says what to do rather than just refusing.
+	if (isRetiredStatus(parent.status) || isRetiredStatus(asset.status)) {
+		error(409, 'A sold or decommissioned unit cannot be attached to anything');
+	}
+	if (parent.organizationId !== asset.organizationId) {
+		error(409, 'An accessory has to belong to the same organisation as what it is attached to');
+	}
+	if (parent.parentAssetId) {
+		error(409, 'That unit is itself an accessory — accessories are one level deep');
+	}
+	if (asset.accessories.length > 0) {
+		error(409, 'That unit has accessories of its own — detach those first');
+	}
+	if (asset.parentAssetId && asset.parentAssetId !== parentId) {
+		error(409, 'That unit is already attached to another asset — detach it there first');
+	}
+	// It follows the parent into a kit; it can't arrive carrying a different one.
+	if (asset.bundleId && asset.bundleId !== parent.bundleId) {
+		error(
+			409,
+			`That unit is in the bundle "${asset.bundle?.template.name}" — remove it there first`
+		);
+	}
+
+	await prisma.asset.update({
+		where: { id: assetId },
+		data: {
+			parentAssetId: parentId,
+			locationId: parent.locationId,
+			bundleId: parent.bundleId
+		}
+	});
+
+	await prisma.assetTransaction.create({
+		data: {
+			assetId,
+			userId: user.id,
+			action: 'ACCESSORY_ATTACHED',
+			data: {
+				type: 'ACCESSORY_ATTACHED',
+				parentAssetId: parentId,
+				parentLabel: assetLabel(parent)
+			}
+		}
+	});
+
+	await refreshAccessoryPair(parent.organizationId, assetId, parentId, [
+		parent.bundleId,
+		asset.bundleId
+	]);
+	return { parentId, assetId };
+});
+
+export const detachAccessory = command(v.string(), async (assetId: string) => {
+	const user = await requireAuth();
+	const systemAdmin = await isSystemAdmin(user.id);
+
+	const asset = await prisma.asset.findUniqueOrThrow({
+		where: { id: assetId },
+		select: {
+			id: true,
+			organizationId: true,
+			bundleId: true,
+			parentAssetId: true,
+			parent: {
+				select: {
+					assetTag: true,
+					product: { select: { name: true, manufacturer: { select: { name: true } } } }
+				}
+			}
+		}
+	});
+	if (!asset.parentAssetId || !asset.parent) error(409, 'That asset is not an accessory');
+
+	if (!systemAdmin) {
+		const membership = await prisma.orgMembership.findUnique({
+			where: {
+				userId_organizationId: { userId: user.id, organizationId: asset.organizationId }
+			}
+		});
+		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
+			error(403, 'Unauthorized');
+		}
+	}
+
+	// It was only ever in that kit through the parent, so it leaves with the
+	// relation. Its location stays: detaching a cable doesn't move it.
+	await prisma.asset.update({
+		where: { id: assetId },
+		data: { parentAssetId: null, bundleId: null }
+	});
+
+	await prisma.assetTransaction.create({
+		data: {
+			assetId,
+			userId: user.id,
+			action: 'ACCESSORY_DETACHED',
+			data: {
+				type: 'ACCESSORY_DETACHED',
+				parentAssetId: asset.parentAssetId,
+				parentLabel: assetLabel(asset.parent)
+			}
+		}
+	});
+
+	await refreshAccessoryPair(asset.organizationId, assetId, asset.parentAssetId, [asset.bundleId]);
+	return { assetId };
 });
 
 // ── CSV Import ────────────────────────────────────────────────────────────────

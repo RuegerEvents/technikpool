@@ -120,6 +120,7 @@ type AssetRow = {
 	serialNumber: string | null;
 	status: string;
 	bundleId: string | null;
+	parentAssetId: string | null;
 	product: ProductRow;
 	location: LocationRow;
 	organization: OrgRow;
@@ -136,7 +137,8 @@ export function toAsset(asset: AssetRow): Schemas['Asset'] {
 		product: toProduct(asset.product),
 		location: toLocation(asset.location),
 		organization: toOrganization(asset.organization),
-		bundleId: asset.bundleId
+		bundleId: asset.bundleId,
+		parentAssetId: asset.parentAssetId
 	};
 }
 

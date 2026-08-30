@@ -867,6 +867,18 @@
 											<span class="w-36 font-mono text-xs text-muted-foreground">
 												{asset.serialNumber ? `S/N: ${asset.serialNumber}` : '—'}
 											</span>
+											<!-- An accessory still belongs in this listing — it gets
+											     inspected like anything else — but what it hangs off is
+											     the first thing you need to know about it. -->
+											{#if asset.parent}
+												<a
+													href={resolve(`/assets/${asset.parent.id}`)}
+													class="text-xs text-muted-foreground hover:underline"
+													onclick={(e) => e.stopPropagation()}
+												>
+													↳ Accessory of {asset.parent.product.name}
+												</a>
+											{/if}
 											{#if asset.assetTag}
 												<span class="text-xs text-muted-foreground">Tag: {asset.assetTag}</span>
 											{/if}

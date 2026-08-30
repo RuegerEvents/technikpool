@@ -13,9 +13,9 @@ export type AssetStatus = (typeof ASSET_STATUSES)[number];
 
 /**
  * End of life: the unit has physically left the pool. A retired asset can't be
- * booked, scanned onto a production, put in a bundle or otherwise edited, and
- * it drops out of every listing — the only change still allowed is its status,
- * so a mis-click can be undone.
+ * booked, scanned onto a production, put in a bundle, attached as an accessory
+ * or otherwise edited, and it drops out of every listing — the only change
+ * still allowed is its status, so a mis-click can be undone.
  */
 export const RETIRED_ASSET_STATUSES = [
 	'SOLD',

@@ -26,6 +26,7 @@ class AssetDetail {
     this.assetTag,
     this.serialNumber,
     this.bundleId,
+    this.parentAssetId,
   });
   
   factory AssetDetail.fromJson(Map<String, Object?> json) => _$AssetDetailFromJson(json);
@@ -48,6 +49,13 @@ class AssetDetail {
   final Location location;
   final Organization organization;
   final String? bundleId;
+
+  /// Set when this unit is an accessory of another — its case, its power.
+  /// supply, its brackets. An accessory travels with its parent: it is.
+  /// booked, moved and returned whenever the parent is, and is never.
+  /// picked on its own. Scanning it alone still moves only itself.
+  ///
+  final String? parentAssetId;
 
   /// The production this asset is currently checked out to, if any.
   final Production? currentProduction;

@@ -27,6 +27,7 @@
 	import { resolve } from '$app/paths';
 	import BulkActionsBar from '$lib/components/ui/bulk-actions-bar.svelte';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
+	import { accessorySummary, nestAccessories, type Nested } from '$lib/production-items';
 
 	const productionId = $derived(page.params.id as string);
 	let production = $derived(await getProduction(productionId));
@@ -98,10 +99,15 @@
 			if (section.kind !== 'bundle') continue;
 			const currentBundle = allBundles.find((b) => b.id === section.bundleId);
 			if (!currentBundle) continue;
+			// Flattened: an accessory is a member of the bundle like any other unit
+			// and has an item of its own — it is only *displayed* under its parent,
+			// and comparing the nested view against the flat one would report every
+			// kit that contains an accessory as diverged.
+			const sectionItems = section.items.flatMap((i) => [i, ...i.accessories]);
 			const bundleAssetIds = new Set(currentBundle.assets.map((a) => a.id));
-			const productionAssetIds = new Set(section.items.map((i) => i.assetId));
+			const productionAssetIds = new Set(sectionItems.map((i) => i.assetId));
 			const addedCount = currentBundle.assets.filter((a) => !productionAssetIds.has(a.id)).length;
-			const removedCount = section.items.filter((i) => !bundleAssetIds.has(i.assetId)).length;
+			const removedCount = sectionItems.filter((i) => !bundleAssetIds.has(i.assetId)).length;
 			if (addedCount > 0 || removedCount > 0) {
 				map.set(section.bundleId, { addedCount, removedCount });
 			}
@@ -125,7 +131,7 @@
 		approved: number;
 		checkedOut: number;
 		returned: number;
-		items: ItemPayload[];
+		items: Nested<ItemPayload>[];
 	};
 
 	type ProductSection = {
@@ -139,7 +145,7 @@
 		approved: number;
 		checkedOut: number;
 		returned: number;
-		items: ItemPayload[];
+		items: Nested<ItemPayload>[];
 	};
 
 	type DisplaySection = BundleSection | ProductSection;
@@ -147,7 +153,9 @@
 	let displaySections = $derived.by((): DisplaySection[] => {
 		const bundleMap = new SvelteMap<string, BundleSection>();
 		const productMap = new SvelteMap<string, ProductSection>();
-		for (const item of production.items) {
+		// Accessories are rolled into the item they travel with, so the counts
+		// below say how many *units* are booked rather than how many rows exist.
+		for (const item of nestAccessories(production.items)) {
 			if (item.sourceBundle) {
 				const bid = item.sourceBundle.id;
 				if (!bundleMap.has(bid)) {
@@ -202,7 +210,9 @@
 	let expanded = new SvelteMap<string, boolean>();
 	let selectedItemAssetIds = new SvelteSet<string>();
 
-	let allItemAssetIds = $derived(production.items.map((i) => i.asset.id));
+	// Only the units that have a row of their own: an accessory is selected by
+	// selecting its parent, and the bulk action expands the set server-side.
+	let allItemAssetIds = $derived(displaySections.flatMap((s) => s.items.map((i) => i.asset.id)));
 	let allItemsSelected = $derived(
 		allItemAssetIds.length > 0 && allItemAssetIds.every((id) => selectedItemAssetIds.has(id))
 	);
@@ -938,6 +948,13 @@
 													Remove
 												</button>
 											</div>
+											{#if item.accessories.length > 0}
+												<!-- Attached to this unit, so booked and removed with it —
+												     never a line of its own. -->
+												<p class="mt-1 pl-6 text-xs text-muted-foreground">
+													↳ {accessorySummary(item.accessories)}
+												</p>
+											{/if}
 										</td>
 									</tr>
 								{/each}

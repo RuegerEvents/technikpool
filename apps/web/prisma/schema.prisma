@@ -271,6 +271,13 @@ model Asset {
   bundleId String?
   bundle   AssetBundle? @relation(fields: [bundleId], references: [id])
 
+  // An accessory that travels with one specific unit — its case, its power cable, its
+  // omega brackets. Still a full asset (DGUV inspection, image, history); only its
+  // booking, location and bundle membership follow the parent. One level deep.
+  parentAssetId String?
+  parent        Asset?  @relation("AssetAccessories", fields: [parentAssetId], references: [id], onDelete: SetNull)
+  accessories   Asset[] @relation("AssetAccessories")
+
   // When this individual unit was bought. The price it is billed at lives on
   // the Product — see Product.netPurchasePrice.
   purchaseDate DateTime?
@@ -286,6 +293,10 @@ model Asset {
   productionItems ProductionItem[]
   transactions    AssetTransaction[]
   inspections     Inspection[]
+
+  // The one index this schema declares: every booking, scan and print walks
+  // parent → accessories, and Prisma indexes no relation scalar on its own.
+  @@index([parentAssetId])
 }
 
 // The catalog entry for a kind of bundle (e.g. "Standard Lighting Kit") — like

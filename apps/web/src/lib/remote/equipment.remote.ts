@@ -5,6 +5,7 @@ import { orgLabel } from '$lib/utils';
 import { getProduction } from './productions.remote';
 import { requireAuth, userOrgIds } from '$lib/server/services/access';
 import { ACTIVE_ASSET_WHERE } from '$lib/asset-status';
+import { accessoryIdsOf } from '$lib/server/services/accessories';
 
 const ACTIVE_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT', 'RETURNED'] as const;
 const CONFLICT_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT'] as const;
@@ -20,8 +21,13 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 		select: { id: true, name: true, startDate: true, endDate: true, organizationId: true }
 	});
 
+	// Accessories are not bookable on their own: they follow whatever they are
+	// attached to, and a row for "8× Omega Bracket" next to the fixtures they
+	// are bolted to is a way to book the same thing twice. They are left out of
+	// the counts as well as the picker, so `total` still means "units you can
+	// ask for".
 	const assets = await prisma.asset.findMany({
-		where: { organizationId: { in: orgIds }, ...ACTIVE_ASSET_WHERE },
+		where: { organizationId: { in: orgIds }, parentAssetId: null, ...ACTIVE_ASSET_WHERE },
 		include: {
 			product: { include: { manufacturer: true, category: true } },
 			organization: {
@@ -144,7 +150,11 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 				}
 			},
 			location: { select: { id: true, name: true, address: { select: { city: true } } } },
+			// Same exclusion as above: an accessory mirrors its parent's bundleId,
+			// so it is in this kit — but it is not a unit anyone books, and
+			// counting it would make the kit look bigger than it is orderable.
 			assets: {
+				where: { parentAssetId: null },
 				include: { product: { include: { manufacturer: true } } }
 			}
 		}
@@ -225,7 +235,11 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 			asset: {
 				productId: data.productId,
 				organizationId: data.organizationId,
-				locationId: data.locationId
+				locationId: data.locationId,
+				// An accessory of the same product as a loose unit (a spare power
+				// cable next to the attached ones) is booked through its parent, not
+				// through this row's count.
+				parentAssetId: null
 			}
 		},
 		select: { id: true, assetId: true }
@@ -251,6 +265,7 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 				organizationId: data.organizationId,
 				locationId: data.locationId,
 				...ACTIVE_ASSET_WHERE,
+				parentAssetId: null,
 				id: { notIn: bookedAssetIds },
 				...(data.includeBundled ? {} : { bundleId: null })
 			},
@@ -282,15 +297,36 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 		const isCrossOrg = production.organizationId !== data.organizationId;
 		const status = isCrossOrg ? 'PENDING' : 'APPROVED';
 
+		// What is bolted to a unit ships with it. These get real ProductionItem
+		// rows — `@@unique([productionId, assetId])` is what makes a scan of the
+		// cable find something to check out — but no conflict check of their own:
+		// an accessory can't be booked independently, so the parent's check above
+		// already covers it. `skipDuplicates` adopts one that was booked on its
+		// own before it was attached, rather than failing the whole batch.
+		const accessoriesByParent = await accessoryIdsOf(toAdd.map((a) => a.id));
+		const accessoryIds = [...accessoriesByParent.values()].flat();
+
 		await prisma.$transaction([
 			...toAdd.map((asset) =>
 				prisma.productionItem.create({
 					data: { productionId: data.productionId, assetId: asset.id, status }
 				})
 			),
+			...(accessoryIds.length > 0
+				? [
+						prisma.productionItem.createMany({
+							data: accessoryIds.map((assetId) => ({
+								productionId: data.productionId,
+								assetId,
+								status
+							})),
+							skipDuplicates: true
+						})
+					]
+				: []),
 			prisma.assetTransaction.createMany({
-				data: toAdd.map((asset) => ({
-					assetId: asset.id,
+				data: [...toAdd.map((a) => a.id), ...accessoryIds].map((assetId) => ({
+					assetId,
 					userId: user.id,
 					productionId: data.productionId,
 					action: isCrossOrg ? 'REQUESTED' : 'ADDED_TO_PRODUCTION',
@@ -304,7 +340,17 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 		]);
 	} else {
 		const toRemove = currentItems.slice(0, -delta);
-		await prisma.productionItem.deleteMany({ where: { id: { in: toRemove.map((i) => i.id) } } });
+		const removedAssetIds = toRemove.map((i) => i.assetId);
+		await prisma.productionItem.deleteMany({
+			where: {
+				productionId: data.productionId,
+				OR: [
+					{ id: { in: toRemove.map((i) => i.id) } },
+					// The accessories came in with the parent; they leave with it.
+					{ asset: { parentAssetId: { in: removedAssetIds } } }
+				]
+			}
+		});
 	}
 
 	await getEquipmentEditorData(data.productionId).refresh();

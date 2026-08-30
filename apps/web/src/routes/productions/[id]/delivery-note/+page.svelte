@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
 	import { SvelteMap } from 'svelte/reactivity';
+	import { accessorySummary, nestAccessories } from '$lib/production-items';
 
 	const productionId = $derived(page.params.id as string);
 	let production = $derived(await getProduction(productionId));
@@ -46,7 +47,10 @@
 		return [...map.values()];
 	});
 
-	let individualItems = $derived(production.items.filter((i) => !i.sourceBundle));
+	// Accessories nest under the unit they travel with. Inside a bundle group the
+	// "Contains:" counts already include them — they mirror the parent's
+	// bundleId — so only the individual lines need the treatment.
+	let individualItems = $derived(nestAccessories(production.items.filter((i) => !i.sourceBundle)));
 </script>
 
 <svelte:head>
@@ -131,6 +135,9 @@
 					<td class="py-4">
 						<p class="font-medium">{item.asset.product.name}</p>
 						<p class="text-sm text-zinc-600">{item.asset.product.manufacturer.name}</p>
+						{#if item.accessories.length > 0}
+							<p class="pl-4 text-sm text-zinc-600">↳ {accessorySummary(item.accessories)}</p>
+						{/if}
 					</td>
 					<td class="py-4 font-mono text-sm">{item.asset.serialNumber || 'N/A'}</td>
 					<td class="py-4 text-right"></td>

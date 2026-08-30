@@ -59,6 +59,18 @@ export type DeclinedData = {
 	productionName: string;
 };
 
+export type AccessoryAttachedData = {
+	type: 'ACCESSORY_ATTACHED';
+	parentAssetId: string;
+	parentLabel: string;
+};
+
+export type AccessoryDetachedData = {
+	type: 'ACCESSORY_DETACHED';
+	parentAssetId: string;
+	parentLabel: string;
+};
+
 export type TransactionData =
 	| CreatedData
 	| UpdatedData
@@ -68,4 +80,6 @@ export type TransactionData =
 	| RequestedData
 	| AddedToProductionData
 	| ApprovedData
-	| DeclinedData;
+	| DeclinedData
+	| AccessoryAttachedData
+	| AccessoryDetachedData;

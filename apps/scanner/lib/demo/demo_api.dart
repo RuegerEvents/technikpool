@@ -128,6 +128,7 @@ class DemoBackend {
       location: asset.location,
       organization: asset.organization,
       bundleId: asset.bundleId,
+      parentAssetId: asset.parentAssetId,
       currentProduction: _checkedOutTo[asset.id],
       history: _history[asset.id] ?? const [],
     );
@@ -225,6 +226,7 @@ class DemoBackend {
       location: location,
       organization: asset.organization,
       bundleId: asset.bundleId,
+      parentAssetId: asset.parentAssetId,
     );
   }
 

@@ -4753,3 +4753,70 @@ msgstr "Facts about this individual unit. What it bills at is the product's pric
 #: src/routes/assets/[id]/+page.svelte
 msgid "What a rental rate is calculated from, for every unit of this product."
 msgstr "What a rental rate is calculated from, for every unit of this product."
+
+#. 0: asset.parent.product.name
+#: src/routes/assets/+page.svelte
+msgid "↳ Accessory of {0}"
+msgstr "↳ Accessory of {0}"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Accessory attached"
+msgstr "Accessory attached"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Accessory detached"
+msgstr "Accessory detached"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "What this unit is attached to. It is booked, moved and returned with it."
+msgstr "What this unit is attached to. It is booked, moved and returned with it."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Cases, power supplies and brackets that belong to this unit. They follow it into bundles, onto productions and through every scan."
+msgstr "Cases, power supplies and brackets that belong to this unit. They follow it into bundles, onto productions and through every scan."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Accessories"
+msgstr "Accessories"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Accessory of"
+msgstr "Accessory of"
+
+#: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/[id]/+page.svelte
+msgid "Detach"
+msgstr "Detach"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Nothing is attached to this unit yet."
+msgstr "Nothing is attached to this unit yet."
+
+#. 0: new Date(accessory.nextInspectionDue).toLocaleDateString( 'de-DE' )
+#: src/routes/assets/[id]/+page.svelte
+msgid "· Next due: {0}"
+msgstr "· Next due: {0}"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Search this organisation's devices…"
+msgstr "Search this organisation's devices…"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Add an accessory"
+msgstr "Add an accessory"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Attaching…"
+msgstr "Attaching…"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Attach"
+msgstr "Attach"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Attached as an accessory of <0/>"
+msgstr "Attached as an accessory of <0/>"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Detached from <0/>"
+msgstr "Detached from <0/>"

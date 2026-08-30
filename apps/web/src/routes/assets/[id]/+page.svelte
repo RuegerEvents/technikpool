@@ -14,16 +14,21 @@
 	import { toast } from 'svelte-sonner';
 	import {
 		getAsset,
+		getAssets,
 		getAssetHistory,
 		getLocations,
 		getCategories,
 		updateAsset,
 		updateProduct,
-		deleteAsset
+		deleteAsset,
+		attachAccessory,
+		detachAccessory
 	} from '$lib/remote/assets.remote';
+	import { CreatableSelect } from '$lib/components/ui/creatable-select';
+	import { ProductThumb } from '$lib/components/ui/product-thumb';
+	import { AssetStatusBadge, assetStatusLabel } from '$lib/components/ui/asset-status';
 	import type { TransactionData } from '$lib/types/asset-transaction';
 	import { ASSET_STATUSES, isRetiredStatus, type AssetStatus } from '$lib/asset-status';
-	import { assetStatusLabel } from '$lib/components/ui/asset-status';
 
 	let assetId = $derived(page.params.id as string);
 	let asset = $derived(await getAsset(assetId));
@@ -34,6 +39,56 @@
 	// Sold and decommissioned freeze everything but the status itself, so the
 	// unit can be brought back if it was retired by mistake.
 	let retired = $derived(isRetiredStatus(asset.status));
+
+	// ── Accessories ───────────────────────────────────────────────────────────
+	// What can be attached here: an active unit of this org that is not already
+	// somebody's accessory, has none of its own, and isn't in another kit. The
+	// same guards `attachAccessory` enforces — this list only saves the round
+	// trip that would end in the error message.
+	let orgAssets = $derived(await getAssets(asset.organizationId));
+	let attachCandidates = $derived(
+		orgAssets
+			.filter(
+				(a) =>
+					a.id !== asset.id &&
+					a.parent === null &&
+					a.accessories.length === 0 &&
+					(a.bundleId === null || a.bundleId === asset.bundleId)
+			)
+			.map((a) => ({
+				id: a.id,
+				name: `${a.product.manufacturer.name} ${a.product.name}${a.assetTag ? ` (${a.assetTag})` : ''}`
+			}))
+	);
+
+	let attachSelection = $state<{ id: string | null; name: string } | null>(null);
+	let attaching = $state(false);
+
+	async function handleAttach() {
+		if (!attachSelection?.id) return;
+		attaching = true;
+		try {
+			await attachAccessory({ parentId: assetId, assetId: attachSelection.id });
+			attachSelection = null;
+			toast.success('Accessory attached');
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			attaching = false;
+		}
+	}
+
+	async function handleDetach(id: string) {
+		attaching = true;
+		try {
+			await detachAccessory(id);
+			toast.success('Accessory detached');
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			attaching = false;
+		}
+	}
 
 	// ── Asset editing ─────────────────────────────────────────────────────────
 	let editingAsset = $state(false);
@@ -357,6 +412,107 @@
 			</Card.Content>
 		</Card.Root>
 
+		<!-- Accessories: what travels with this unit, or what it travels with -->
+		<Card.Root>
+			<Card.Header>
+				<Card.Title>Accessories</Card.Title>
+				<Card.Description>
+					{#if asset.parent}
+						What this unit is attached to. It is booked, moved and returned with it.
+					{:else}
+						Cases, power supplies and brackets that belong to this unit. They follow it into
+						bundles, onto productions and through every scan.
+					{/if}
+				</Card.Description>
+			</Card.Header>
+			<Card.Content class="space-y-4">
+				{#if asset.parent}
+					<div class="flex items-center justify-between gap-4 rounded-md border p-3">
+						<div class="text-sm">
+							<p class="text-xs text-muted-foreground">Accessory of</p>
+							<a
+								href={resolve(`/assets/${asset.parent.id}`)}
+								class="font-medium underline underline-offset-2"
+							>
+								{asset.parent.product.manufacturer.name}
+								{asset.parent.product.name}{asset.parent.assetTag
+									? ` (${asset.parent.assetTag})`
+									: ''}
+							</a>
+						</div>
+						{#if !retired}
+							<Button
+								variant="outline"
+								size="sm"
+								disabled={attaching}
+								onclick={() => handleDetach(asset.id)}>Detach</Button
+							>
+						{/if}
+					</div>
+				{:else}
+					{#if asset.accessories.length === 0}
+						<p class="text-sm text-muted-foreground">Nothing is attached to this unit yet.</p>
+					{:else}
+						<ul class="divide-y rounded-md border">
+							{#each asset.accessories as accessory (accessory.id)}
+								<li class="flex items-center gap-3 p-3">
+									<ProductThumb
+										path={accessory.product.imagePath}
+										alt={accessory.product.name}
+										size={28}
+									/>
+									<div class="min-w-0 flex-1">
+										<a
+											href={resolve(`/assets/${accessory.id}`)}
+											class="text-sm font-medium underline underline-offset-2"
+										>
+											{accessory.product.name}
+										</a>
+										<p class="text-xs text-muted-foreground">
+											{accessory.product.manufacturer.name}{accessory.assetTag
+												? ` · ${accessory.assetTag}`
+												: ''}
+											{#if accessory.nextInspectionDue}
+												· Next due: {new Date(accessory.nextInspectionDue).toLocaleDateString(
+													'de-DE'
+												)}
+											{/if}
+										</p>
+									</div>
+									<AssetStatusBadge status={accessory.status} />
+									{#if !retired}
+										<Button
+											variant="outline"
+											size="sm"
+											disabled={attaching}
+											onclick={() => handleDetach(accessory.id)}>Detach</Button
+										>
+									{/if}
+								</li>
+							{/each}
+						</ul>
+					{/if}
+					{#if !retired}
+						<div class="flex items-end gap-2">
+							<div class="flex-1 space-y-2">
+								<Label>Add an accessory</Label>
+								<CreatableSelect
+									items={attachCandidates}
+									bind:value={attachSelection}
+									allowCreate={false}
+									placeholder="Search this organisation's devices…"
+									disabled={attaching}
+								/>
+							</div>
+							<Button disabled={attaching || !attachSelection?.id} onclick={handleAttach}>
+								{attaching ? 'Attaching…' : 'Attach'}
+							</Button>
+						</div>
+					{/if}
+				{/if}
+			</Card.Content>
+		</Card.Root>
+
 		<!-- Product details (right) -->
 		<div class="space-y-6">
 			<Card.Root>
@@ -499,6 +655,18 @@
 													href={resolve(`/productions/${tx.productionId}`)}
 													class="text-foreground underline underline-offset-2"
 													>{tx.productionName}</a
+												>
+											{:else if tx?.type === 'ACCESSORY_ATTACHED'}
+												Attached as an accessory of
+												<a
+													href={resolve(`/assets/${tx.parentAssetId}`)}
+													class="text-foreground underline underline-offset-2">{tx.parentLabel}</a
+												>
+											{:else if tx?.type === 'ACCESSORY_DETACHED'}
+												Detached from
+												<a
+													href={resolve(`/assets/${tx.parentAssetId}`)}
+													class="text-foreground underline underline-offset-2">{tx.parentLabel}</a
 												>
 											{:else}
 												{item.action}

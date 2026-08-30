@@ -177,10 +177,22 @@ async function computeProductionBilling(
 		}
 	});
 
-	const scopedItems =
+	const inScopeItems =
 		assetScope === 'OWN_ORG_ONLY'
 			? production.items.filter((item) => item.asset.organizationId === production.organizationId)
 			: production.items;
+
+	// An accessory is booked because its parent was, and the parent's price is
+	// the price of what ships attached to it — a converter's PSU is not a second
+	// line, and its missing product price is not a blocker. Derived from live
+	// state, not a stored flag, for the same reason `billedAsBundle` below is:
+	// detaching it makes it bill as itself again from that moment on. An
+	// accessory whose parent is *not* in this billing scope (a cross-org parent
+	// under OWN_ORG_ONLY) does bill as itself — nothing else covers it.
+	const parentIdsInScope = new Set(inScopeItems.map((item) => item.assetId));
+	const scopedItems = inScopeItems.filter(
+		(item) => item.asset.parentAssetId === null || !parentIdsInScope.has(item.asset.parentAssetId)
+	);
 
 	const rates = await prisma.orgCategoryRate.findMany({
 		where: { organizationId: production.organizationId }

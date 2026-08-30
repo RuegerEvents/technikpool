@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
 	import { SvelteMap } from 'svelte/reactivity';
+	import { accessorySummary, nestAccessories } from '$lib/production-items';
 
 	const productionId = $derived(page.params.id as string);
 	let production = $derived(await getProduction(productionId));
@@ -49,7 +50,10 @@
 		return [...map.values()];
 	});
 
-	let individualItems = $derived(production.items.filter((i) => !i.sourceBundle));
+	// Accessories nest under the unit they travel with. Inside a bundle group the
+	// "Contains:" counts already include them — they mirror the parent's
+	// bundleId — so only the individual lines need the treatment.
+	let individualItems = $derived(nestAccessories(production.items.filter((i) => !i.sourceBundle)));
 </script>
 
 <svelte:head>
@@ -118,7 +122,16 @@
 					<td class="py-3 text-center">
 						<div class="inline-block h-5 w-5 border-2 border-black"></div>
 					</td>
-					<td class="py-3 font-medium">{item.asset.product.name}</td>
+					<td class="py-3 font-medium">
+						{item.asset.product.name}
+						{#if item.accessories.length > 0}
+							<!-- Tags rather than counts: someone is ticking physical
+							     objects off against this sheet. -->
+							<p class="pl-4 text-sm font-normal text-zinc-600">
+								↳ {accessorySummary(item.accessories, { tags: true })}
+							</p>
+						{/if}
+					</td>
 					<td class="py-3">{item.asset.product.manufacturer.name}</td>
 					<td class="py-3 font-mono text-sm">{item.asset.serialNumber || 'N/A'}</td>
 					<td class="py-3 text-right">{orgLabel(item.asset.organization)}</td>

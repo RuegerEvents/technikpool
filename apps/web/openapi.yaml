@@ -622,6 +622,13 @@ components:
           $ref: '#/components/schemas/Organization'
         bundleId:
           type: [string, 'null']
+        parentAssetId:
+          type: [string, 'null']
+          description: |
+            Set when this unit is an accessory of another — its case, its power
+            supply, its brackets. An accessory travels with its parent: it is
+            booked, moved and returned whenever the parent is, and is never
+            picked on its own. Scanning it alone still moves only itself.
 
     Product:
       type: object
