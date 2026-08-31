@@ -3,6 +3,7 @@
 	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
 	import {
 		getCategories,
+		deleteProduct,
 		getManufacturers,
 		getProductCatalog,
 		getProducts,
@@ -247,6 +248,27 @@
 		}
 	}
 
+	let deleteOpen = $state(false);
+	let deleting = $state(false);
+
+	async function doDelete() {
+		if (!current || current.hasAssets || deleting) return;
+		const deletedId = current.id;
+		const nextId = visible[index + 1]?.id ?? visible[index - 1]?.id ?? '';
+		deleting = true;
+		try {
+			await deleteProduct(deletedId);
+			currentId = nextId;
+			draftFor = '';
+			deleteOpen = false;
+			toast.success('Product deleted');
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			deleting = false;
+		}
+	}
+
 	function scrollIntoViewWhenActive(node: HTMLElement, active: boolean) {
 		if (active) node.scrollIntoView({ block: 'nearest' });
 		return {
@@ -419,6 +441,11 @@
 						</div>
 						<div class="flex shrink-0 items-center gap-3">
 							{#if canEdit}
+								{#if !current.hasAssets}
+									<Button variant="destructive" size="sm" onclick={() => (deleteOpen = true)}
+										>Delete unused</Button
+									>
+								{/if}
 								<Button variant="outline" size="sm" onclick={openMerge}>Merge duplicate…</Button>
 							{/if}
 							<span class="font-mono text-sm text-muted-foreground tabular-nums"
@@ -548,6 +575,32 @@
 		<Button variant="outline" onclick={() => (mergeOpen = false)} disabled={merging}>Cancel</Button>
 		<Button onclick={doMerge} disabled={!picked || merging}>
 			{merging ? 'Merging…' : 'Merge'}
+		</Button>
+	{/snippet}
+</Modal>
+
+<Modal bind:open={deleteOpen} title="Delete unused product" dismissible={!deleting}>
+	{#snippet description()}
+		This permanently removes the catalogue entry. Products with any units, including retired units,
+		cannot be deleted.
+	{/snippet}
+
+	{#if current}
+		<p class="text-sm">
+			Delete <span class="font-medium">{current.manufacturer.name} {current.name}</span>?
+		</p>
+	{/if}
+
+	{#snippet footer()}
+		<Button variant="outline" onclick={() => (deleteOpen = false)} disabled={deleting}
+			>Cancel</Button
+		>
+		<Button
+			variant="destructive"
+			onclick={doDelete}
+			disabled={!current || current.hasAssets || deleting}
+		>
+			{deleting ? 'Deleting…' : 'Delete product'}
 		</Button>
 	{/snippet}
 </Modal>

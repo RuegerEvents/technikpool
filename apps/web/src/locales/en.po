@@ -4285,6 +4285,7 @@ msgid "Delete"
 msgstr "Delete"
 
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/products/+page.svelte
 msgid "Deleting…"
 msgstr "Deleting…"
 
@@ -5187,3 +5188,27 @@ msgstr "Choose the main device. Every other device in this bundle will become it
 #: src/routes/assets/bundles/[id]/+page.svelte
 msgid "Choose main device"
 msgstr "Choose main device"
+
+#: src/routes/products/+page.svelte
+msgid "Product deleted"
+msgstr "Product deleted"
+
+#: src/routes/products/+page.svelte
+msgid "Delete unused"
+msgstr "Delete unused"
+
+#: src/routes/products/+page.svelte
+msgid "Delete unused product"
+msgstr "Delete unused product"
+
+#: src/routes/products/+page.svelte
+msgid "This permanently removes the catalogue entry. Products with any units, including retired units, cannot be deleted."
+msgstr "This permanently removes the catalogue entry. Products with any units, including retired units, cannot be deleted."
+
+#: src/routes/products/+page.svelte
+msgid "Delete <0/>?"
+msgstr "Delete <0/>?"
+
+#: src/routes/products/+page.svelte
+msgid "Delete product"
+msgstr "Delete product"

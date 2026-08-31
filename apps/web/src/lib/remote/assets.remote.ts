@@ -345,13 +345,9 @@ export const getProducts = query(v.optional(v.string()), async (manufacturerId?:
 });
 
 /**
- * The product catalogue behind the user's own assets — what the product wizard
- * walks through.
- *
- * `getProducts` deliberately returns every product in the system, because the
- * new-asset form has to be able to pick one that nobody owns yet. This one is
- * scoped the same way the Devices list is, so a walk through the catalogue is a
- * walk through your own inventory and not somebody else's.
+ * The complete product catalogue. Counts remain scoped to the selected
+ * organization(s), but products with no matching units must stay visible: this
+ * is also the place where abandoned catalogue rows are cleaned up.
  */
 export const getProductCatalog = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
@@ -360,16 +356,20 @@ export const getProductCatalog = query(v.optional(v.string()), async (organizati
 	const assetScope = { organizationId: { in: queryOrgIds }, ...ACTIVE_ASSET_WHERE };
 
 	const products = await prisma.product.findMany({
-		where: { assets: { some: assetScope } },
 		include: {
 			manufacturer: true,
 			category: true,
+			assets: { select: { id: true }, take: 1 },
 			_count: { select: { assets: { where: assetScope } } }
 		},
 		orderBy: [{ manufacturer: { name: 'asc' } }, { name: 'asc' }]
 	});
 
-	return products.map(({ _count, ...product }) => ({ ...product, assetCount: _count.assets }));
+	return products.map(({ _count, assets, ...product }) => ({
+		...product,
+		assetCount: _count.assets,
+		hasAssets: assets.length > 0
+	}));
 });
 
 /** The manufacturer/product half of a create form, which two commands now ask for. */
@@ -1244,6 +1244,40 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 	]);
 
 	return product;
+});
+
+/** Delete a catalogue row only when no unit, including a retired one, refers to it. */
+export const deleteProduct = command(v.string(), async (productId: string) => {
+	const user = await requireAuth();
+	const systemAdmin = await isSystemAdmin(user.id);
+	if (!systemAdmin) {
+		const membership = await prisma.orgMembership.findFirst({
+			where: { userId: user.id, role: { in: ['ADMIN', 'OWNER'] } },
+			select: { id: true }
+		});
+		if (!membership) {
+			error(403, 'You need admin rights in one of your organisations to delete products');
+		}
+	}
+
+	const product = await prisma.product.findUniqueOrThrow({
+		where: { id: productId },
+		include: { manufacturer: true, _count: { select: { assets: true } } }
+	});
+	if (product._count.assets > 0) {
+		error(409, 'This product still has units. Merge it into the correct product instead.');
+	}
+
+	await prisma.product.delete({ where: { id: productId } });
+	const orgIds = await userOrgIds(user.id);
+	await Promise.all([
+		getProducts().refresh(),
+		getProducts(product.manufacturerId).refresh(),
+		getProductCatalog().refresh(),
+		...orgIds.map((id) => getProductCatalog(id).refresh())
+	]);
+
+	return { id: product.id };
 });
 
 // ── Merging duplicate products ───────────────────────────────────────────────
