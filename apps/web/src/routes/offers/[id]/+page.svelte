@@ -297,6 +297,7 @@
 		discountValue={offer.discountValue != null ? Number(offer.discountValue) : null}
 		vatRatePercent={Number(offer.vatRatePercent)}
 		noVat={offer.organization.isKleinunternehmer}
+		categoryRates={offer.organization.categoryRates}
 		onSaveDayCount={async (dayCount) => {
 			await updateOfferDayCount({ offerId, dayCount });
 		}}
@@ -304,7 +305,8 @@
 			await updateOfferDiscount({ offerId, discountType, discountValue });
 		}}
 		onSaveItemRate={async (itemIds, ratePercent) => {
-			await updateOfferItemRate({ offerItemIds: itemIds, ratePercent });
+			const updatedOffer = await updateOfferItemRate({ offerItemIds: itemIds, ratePercent });
+			getOffer(offerId).set(updatedOffer);
 		}}
 	/>
 </div>

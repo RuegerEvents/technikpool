@@ -91,10 +91,33 @@ export function groupBillingItems<T extends GroupableItem>(items: T[]): Category
 		line.lineTotal += Number(item.lineTotal);
 	}
 
-	return [...categories.values()];
+	const collator = new Intl.Collator('de', { numeric: true, sensitivity: 'base' });
+	return [...categories.values()]
+		.map((category) => ({
+			...category,
+			lines: category.lines.sort(
+				(a, b) =>
+					collator.compare(a.label, b.label) ||
+					a.netPurchasePrice - b.netPurchasePrice ||
+					a.ratePercent - b.ratePercent ||
+					collator.compare(a.key, b.key)
+			)
+		}))
+		.sort((a, b) => collator.compare(a.name, b.name) || collator.compare(a.key, b.key));
 }
 
 /** The tags behind a collapsed line, for the views that show what's in it. */
 export function lineUnitLabels<T extends GroupableItem>(line: LineGroup<T>): string[] {
 	return line.items.map((i) => i.description);
+}
+
+/** Composition/accessory text stored after the first line of a description. */
+export function lineSubtitle<T extends GroupableItem>(line: LineGroup<T>): string {
+	return [
+		...new Set(
+			line.items
+				.map((item) => item.description.split('\n').slice(1).join('\n').trim())
+				.filter(Boolean)
+		)
+	].join('\n');
 }

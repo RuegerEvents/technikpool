@@ -3,7 +3,7 @@
 	import { getOffer } from '$lib/remote/offers.remote';
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
-	import { groupBillingItems } from '$lib/billing-lines';
+	import { groupBillingItems, lineSubtitle } from '$lib/billing-lines';
 
 	const offerId = $derived(page.params.id as string);
 	let offer = $derived(await getOffer(offerId));
@@ -91,8 +91,16 @@
 					<td colspan="6" class="py-2 text-xs font-bold tracking-wide uppercase">{group.name}</td>
 				</tr>
 				{#each group.lines as line (line.key)}
+					{@const subtitle = lineSubtitle(line)}
 					<tr class="border-b border-zinc-200">
-						<td class="py-3">{line.label}</td>
+						<td class="py-3">
+							{line.label}
+							{#if subtitle}
+								<span class="mt-0.5 block text-xs whitespace-pre-line text-zinc-600"
+									>{subtitle}</span
+								>
+							{/if}
+						</td>
 						<td class="py-3 text-right">{line.quantity}×</td>
 						<td class="py-3 text-right">{line.ratePercent}%</td>
 						<td class="py-3 text-right">{fmtEUR(line.dailyRate)}</td>

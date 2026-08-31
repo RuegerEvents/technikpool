@@ -135,6 +135,7 @@
 												'/stickers'
 											) ||
 											page.url.pathname.startsWith('/products') ||
+											page.url.pathname.startsWith('/manufacturers') ||
 											page.url.pathname.startsWith('/devices') ||
 											page.url.pathname.startsWith('/inspections') ||
 											page.url.pathname.startsWith('/admin/categories')
@@ -171,6 +172,13 @@
 										>
 											<Boxes aria-hidden="true" />
 											Products
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/manufacturers'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<Boxes aria-hidden="true" />
+											Manufacturers
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
 											onSelect={() => goto(resolve('/stickers'))}

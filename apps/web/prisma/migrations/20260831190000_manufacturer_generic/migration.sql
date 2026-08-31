@@ -1,0 +1,1 @@
+ALTER TABLE "Manufacturer" ADD COLUMN "generic" BOOLEAN NOT NULL DEFAULT false;

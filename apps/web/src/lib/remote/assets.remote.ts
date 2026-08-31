@@ -174,8 +174,93 @@ export const getInventorySummary = query(
 
 export const getManufacturers = query(async () => {
 	await requireAuth();
-	return await prisma.manufacturer.findMany({ orderBy: { name: 'asc' } });
+	return await prisma.manufacturer.findMany({
+		include: { _count: { select: { products: true } } },
+		orderBy: { name: 'asc' }
+	});
 });
+
+async function requireCatalogAdmin() {
+	const user = await requireAuth();
+	if (await isSystemAdmin(user.id)) return user;
+	const membership = await prisma.orgMembership.findFirst({
+		where: { userId: user.id, role: { in: ['ADMIN', 'OWNER'] } },
+		select: { id: true }
+	});
+	if (!membership)
+		error(403, 'You need admin rights in one of your organisations to edit the catalog');
+	return user;
+}
+
+const updateManufacturerSchema = v.object({
+	manufacturerId: v.string(),
+	name: v.string(),
+	generic: v.boolean()
+});
+
+export const updateManufacturer = command(updateManufacturerSchema, async (input) => {
+	await requireCatalogAdmin();
+	const name = input.name.trim();
+	if (!name) error(400, 'A manufacturer needs a name');
+	const clash = await prisma.manufacturer.findFirst({
+		where: { name: { equals: name, mode: 'insensitive' }, id: { not: input.manufacturerId } },
+		select: { id: true }
+	});
+	if (clash) error(409, 'A manufacturer with this name already exists. Merge them instead.');
+	const manufacturer = await prisma.manufacturer.update({
+		where: { id: input.manufacturerId },
+		data: { name, generic: input.generic }
+	});
+	await Promise.all([
+		getManufacturers().refresh(),
+		getProducts().refresh(),
+		getProductCatalog().refresh()
+	]);
+	return manufacturer;
+});
+
+const mergeManufacturersSchema = v.object({
+	targetManufacturerId: v.string(),
+	sourceManufacturerId: v.string()
+});
+
+export const mergeManufacturers = command(
+	mergeManufacturersSchema,
+	async ({ targetManufacturerId, sourceManufacturerId }) => {
+		await requireCatalogAdmin();
+		if (targetManufacturerId === sourceManufacturerId) {
+			error(409, 'A manufacturer cannot be merged into itself');
+		}
+		const [target, source] = await Promise.all([
+			prisma.manufacturer.findUniqueOrThrow({ where: { id: targetManufacturerId } }),
+			prisma.manufacturer.findUniqueOrThrow({ where: { id: sourceManufacturerId } })
+		]);
+		const movedProducts = await prisma.product.count({ where: { manufacturerId: source.id } });
+		await prisma.$transaction(async (tx) => {
+			await tx.product.updateMany({
+				where: { manufacturerId: source.id },
+				data: { manufacturerId: target.id }
+			});
+			if (!target.logoPath && source.logoPath) {
+				await tx.manufacturer.update({
+					where: { id: target.id },
+					data: { logoPath: source.logoPath }
+				});
+			}
+			await tx.manufacturer.delete({ where: { id: source.id } });
+		});
+		await Promise.all([
+			getManufacturers().refresh(),
+			getProducts().refresh(),
+			getProducts(target.id).refresh(),
+			getProducts(source.id).refresh(),
+			getProductCatalog().refresh(),
+			getAssets().refresh(),
+			getInventorySummary().refresh()
+		]);
+		return { movedProducts };
+	}
+);
 
 export const getCategories = query(async () => {
 	await requireAuth();

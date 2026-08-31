@@ -27,6 +27,7 @@ export type AggregateManufacturer = {
 export type ManufacturerMinAggregateOutputType = {
   id: string | null
   name: string | null
+  generic: boolean | null
   logoPath: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -35,6 +36,7 @@ export type ManufacturerMinAggregateOutputType = {
 export type ManufacturerMaxAggregateOutputType = {
   id: string | null
   name: string | null
+  generic: boolean | null
   logoPath: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -43,6 +45,7 @@ export type ManufacturerMaxAggregateOutputType = {
 export type ManufacturerCountAggregateOutputType = {
   id: number
   name: number
+  generic: number
   logoPath: number
   createdAt: number
   updatedAt: number
@@ -53,6 +56,7 @@ export type ManufacturerCountAggregateOutputType = {
 export type ManufacturerMinAggregateInputType = {
   id?: true
   name?: true
+  generic?: true
   logoPath?: true
   createdAt?: true
   updatedAt?: true
@@ -61,6 +65,7 @@ export type ManufacturerMinAggregateInputType = {
 export type ManufacturerMaxAggregateInputType = {
   id?: true
   name?: true
+  generic?: true
   logoPath?: true
   createdAt?: true
   updatedAt?: true
@@ -69,6 +74,7 @@ export type ManufacturerMaxAggregateInputType = {
 export type ManufacturerCountAggregateInputType = {
   id?: true
   name?: true
+  generic?: true
   logoPath?: true
   createdAt?: true
   updatedAt?: true
@@ -150,6 +156,7 @@ export type ManufacturerGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 export type ManufacturerGroupByOutputType = {
   id: string
   name: string
+  generic: boolean
   logoPath: string | null
   createdAt: Date
   updatedAt: Date
@@ -179,6 +186,7 @@ export type ManufacturerWhereInput = {
   NOT?: Prisma.ManufacturerWhereInput | Prisma.ManufacturerWhereInput[]
   id?: Prisma.StringFilter<"Manufacturer"> | string
   name?: Prisma.StringFilter<"Manufacturer"> | string
+  generic?: Prisma.BoolFilter<"Manufacturer"> | boolean
   logoPath?: Prisma.StringNullableFilter<"Manufacturer"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Manufacturer"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Manufacturer"> | Date | string
@@ -188,6 +196,7 @@ export type ManufacturerWhereInput = {
 export type ManufacturerOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  generic?: Prisma.SortOrder
   logoPath?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -200,6 +209,7 @@ export type ManufacturerWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.ManufacturerWhereInput[]
   NOT?: Prisma.ManufacturerWhereInput | Prisma.ManufacturerWhereInput[]
   name?: Prisma.StringFilter<"Manufacturer"> | string
+  generic?: Prisma.BoolFilter<"Manufacturer"> | boolean
   logoPath?: Prisma.StringNullableFilter<"Manufacturer"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Manufacturer"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Manufacturer"> | Date | string
@@ -209,6 +219,7 @@ export type ManufacturerWhereUniqueInput = Prisma.AtLeast<{
 export type ManufacturerOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  generic?: Prisma.SortOrder
   logoPath?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -223,6 +234,7 @@ export type ManufacturerScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ManufacturerScalarWhereWithAggregatesInput | Prisma.ManufacturerScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Manufacturer"> | string
   name?: Prisma.StringWithAggregatesFilter<"Manufacturer"> | string
+  generic?: Prisma.BoolWithAggregatesFilter<"Manufacturer"> | boolean
   logoPath?: Prisma.StringNullableWithAggregatesFilter<"Manufacturer"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Manufacturer"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Manufacturer"> | Date | string
@@ -231,6 +243,7 @@ export type ManufacturerScalarWhereWithAggregatesInput = {
 export type ManufacturerCreateInput = {
   id?: string
   name: string
+  generic?: boolean
   logoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -240,6 +253,7 @@ export type ManufacturerCreateInput = {
 export type ManufacturerUncheckedCreateInput = {
   id?: string
   name: string
+  generic?: boolean
   logoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -249,6 +263,7 @@ export type ManufacturerUncheckedCreateInput = {
 export type ManufacturerUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  generic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -258,6 +273,7 @@ export type ManufacturerUpdateInput = {
 export type ManufacturerUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  generic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -267,6 +283,7 @@ export type ManufacturerUncheckedUpdateInput = {
 export type ManufacturerCreateManyInput = {
   id?: string
   name: string
+  generic?: boolean
   logoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -275,6 +292,7 @@ export type ManufacturerCreateManyInput = {
 export type ManufacturerUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  generic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -283,6 +301,7 @@ export type ManufacturerUpdateManyMutationInput = {
 export type ManufacturerUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  generic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -291,6 +310,7 @@ export type ManufacturerUncheckedUpdateManyInput = {
 export type ManufacturerCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  generic?: Prisma.SortOrder
   logoPath?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -299,6 +319,7 @@ export type ManufacturerCountOrderByAggregateInput = {
 export type ManufacturerMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  generic?: Prisma.SortOrder
   logoPath?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -307,6 +328,7 @@ export type ManufacturerMaxOrderByAggregateInput = {
 export type ManufacturerMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  generic?: Prisma.SortOrder
   logoPath?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -334,6 +356,7 @@ export type ManufacturerUpdateOneRequiredWithoutProductsNestedInput = {
 export type ManufacturerCreateWithoutProductsInput = {
   id?: string
   name: string
+  generic?: boolean
   logoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -342,6 +365,7 @@ export type ManufacturerCreateWithoutProductsInput = {
 export type ManufacturerUncheckedCreateWithoutProductsInput = {
   id?: string
   name: string
+  generic?: boolean
   logoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -366,6 +390,7 @@ export type ManufacturerUpdateToOneWithWhereWithoutProductsInput = {
 export type ManufacturerUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  generic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -374,6 +399,7 @@ export type ManufacturerUpdateWithoutProductsInput = {
 export type ManufacturerUncheckedUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  generic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -413,6 +439,7 @@ export type ManufacturerCountOutputTypeCountProductsArgs<ExtArgs extends runtime
 export type ManufacturerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  generic?: boolean
   logoPath?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -423,6 +450,7 @@ export type ManufacturerSelect<ExtArgs extends runtime.Types.Extensions.Internal
 export type ManufacturerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  generic?: boolean
   logoPath?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -431,6 +459,7 @@ export type ManufacturerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
 export type ManufacturerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  generic?: boolean
   logoPath?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -439,12 +468,13 @@ export type ManufacturerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
 export type ManufacturerSelectScalar = {
   id?: boolean
   name?: boolean
+  generic?: boolean
   logoPath?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ManufacturerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "logoPath" | "createdAt" | "updatedAt", ExtArgs["result"]["manufacturer"]>
+export type ManufacturerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "generic" | "logoPath" | "createdAt" | "updatedAt", ExtArgs["result"]["manufacturer"]>
 export type ManufacturerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   products?: boolean | Prisma.Manufacturer$productsArgs<ExtArgs>
   _count?: boolean | Prisma.ManufacturerCountOutputTypeDefaultArgs<ExtArgs>
@@ -460,6 +490,7 @@ export type $ManufacturerPayload<ExtArgs extends runtime.Types.Extensions.Intern
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
+    generic: boolean
     logoPath: string | null
     createdAt: Date
     updatedAt: Date
@@ -889,6 +920,7 @@ export interface Prisma__ManufacturerClient<T, Null = never, ExtArgs extends run
 export interface ManufacturerFieldRefs {
   readonly id: Prisma.FieldRef<"Manufacturer", 'String'>
   readonly name: Prisma.FieldRef<"Manufacturer", 'String'>
+  readonly generic: Prisma.FieldRef<"Manufacturer", 'Boolean'>
   readonly logoPath: Prisma.FieldRef<"Manufacturer", 'String'>
   readonly createdAt: Prisma.FieldRef<"Manufacturer", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Manufacturer", 'DateTime'>

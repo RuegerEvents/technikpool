@@ -20,7 +20,8 @@
 		noVat,
 		onSaveDayCount,
 		onSaveDiscount,
-		onSaveItemRate
+		onSaveItemRate,
+		categoryRates = []
 	}: {
 		items: BillingItem[];
 		emptyMessage: string;
@@ -38,6 +39,7 @@
 			discountValue: number | undefined
 		) => Promise<void>;
 		onSaveItemRate: (itemIds: string[], ratePercent: number) => Promise<void>;
+		categoryRates?: { categoryId: string; percentage: unknown }[];
 	} = $props();
 
 	function fmtEUR(n: number): string {
@@ -130,6 +132,10 @@
 	// ── Per-line rate override ──
 	// Keyed by the collapsed line, and saved onto every unit behind it.
 	let rateEdits = $state<Record<string, string>>({});
+	let savingCategory = $state<string | null>(null);
+	let categoryRateById = $derived(
+		new Map(categoryRates.map((rate) => [rate.categoryId, Number(rate.percentage)]))
+	);
 	async function saveRate(lineKey: string, itemIds: string[]) {
 		const value = rateEdits[lineKey];
 		if (value === undefined || value === '') return;
@@ -139,6 +145,18 @@
 			delete rateEdits[lineKey];
 		} catch (err) {
 			toast.error(getErrorMessage(err));
+		}
+	}
+
+	async function applyCategoryRate(categoryId: string, itemIds: string[], ratePercent: number) {
+		savingCategory = categoryId;
+		try {
+			await onSaveItemRate(itemIds, ratePercent);
+			toast.success('Category rate applied');
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			savingCategory = null;
 		}
 	}
 </script>
@@ -164,26 +182,46 @@
 					</thead>
 					<tbody>
 						{#each groups as group (group.key)}
+							{@const categoryRate = categoryRateById.get(group.key)}
 							<tr class="border-b bg-muted/20">
 								<td colspan="6" class="px-4 py-2 text-xs font-semibold tracking-wide">
-									<span class="inline-flex items-center gap-1.5">
-										<span
-											class="h-2 w-2 shrink-0 rounded-full"
-											style="background-color: {group.color ?? '#a1a1aa'}"
-										></span>
-										{group.name}
-									</span>
+									<div class="flex flex-wrap items-center justify-between gap-2">
+										<span class="inline-flex items-center gap-1.5">
+											<span
+												class="h-2 w-2 shrink-0 rounded-full"
+												style="background-color: {group.color ?? '#a1a1aa'}"
+											></span>
+											{group.name}
+										</span>
+										{#if categoryRate !== undefined}
+											<div class="flex items-center gap-2 font-normal tracking-normal normal-case">
+												<span class="text-muted-foreground"
+													>Category rate: {categoryRate}% / day</span
+												>
+												{#if editable && group.lines.some((line) => Math.abs(line.ratePercent - categoryRate) > 0.000001)}
+													<Button
+														size="sm"
+														variant="outline"
+														disabled={savingCategory === group.key}
+														onclick={() =>
+															applyCategoryRate(
+																group.key,
+																group.lines.flatMap((line) => line.items.map((item) => item.id)),
+																categoryRate
+															)}
+													>
+														{savingCategory === group.key ? 'Applying…' : 'Apply to all'}
+													</Button>
+												{/if}
+											</div>
+										{/if}
+									</div>
 								</td>
 							</tr>
 							{#each group.lines as line (line.key)}
 								<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
 									<td class="px-4 py-3">
 										{line.label}
-										{#if line.quantity > 1}
-											<span class="block text-xs text-muted-foreground">
-												{line.items.map((i) => i.description).join(', ')}
-											</span>
-										{/if}
 									</td>
 									<td class="px-4 py-3 text-right tabular-nums">{line.quantity}×</td>
 									<td class="px-4 py-3 text-right tabular-nums">{fmtEUR(line.netPurchasePrice)}</td>

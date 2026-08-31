@@ -175,8 +175,9 @@ model OrgMembership {
 }
 
 model Manufacturer {
-  id   String @id @default(cuid())
-  name String
+  id      String  @id @default(cuid())
+  name    String
+  generic Boolean @default(false)
   // The object key in the S3-compatible store, not an address: see
   // src/lib/images.ts. A stored URL would pin the row to whichever host the
   // store was on when it was uploaded.

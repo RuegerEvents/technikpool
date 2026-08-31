@@ -41,7 +41,7 @@ export const getOffer = query(v.string(), async (id: string) => {
 	const offer = await prisma.offer.findUniqueOrThrow({
 		where: { id },
 		include: {
-			organization: { include: { address: true } },
+			organization: { include: { address: true, categoryRates: true } },
 			production: {
 				select: {
 					id: true,
@@ -138,6 +138,25 @@ function assetLabel(asset: {
 	return asset.assetTag ?? asset.serialNumber ?? asset.id;
 }
 
+function summarizeContents(labels: string[]): string {
+	const counts = new Map<string, number>();
+	for (const label of labels) counts.set(label, (counts.get(label) ?? 0) + 1);
+	const collator = new Intl.Collator('de', { numeric: true, sensitivity: 'base' });
+	return [...counts]
+		.sort(([a], [b]) => collator.compare(a, b))
+		.map(([label, count]) => (count > 1 ? `${count}× ${label}` : label))
+		.join(', ');
+}
+
+function productBillingLabel(product: {
+	name: string;
+	manufacturer: { name: string; generic: boolean };
+}): string {
+	return product.manufacturer.generic
+		? product.name
+		: `${product.manufacturer.name} ${product.name}`;
+}
+
 // Recomputes what a production's currently-booked equipment would bill as,
 // under a given asset scope. Used both to price a new offer/invoice and to
 // detect + resync when an existing one has drifted from the production's
@@ -163,6 +182,10 @@ async function computeProductionBilling(
 						include: {
 							organization: { select: { id: true, name: true } },
 							product: { include: { manufacturer: true, category: true } },
+							accessories: {
+								include: { product: { include: { manufacturer: true } } },
+								orderBy: { id: 'asc' }
+							},
 							bundle: {
 								include: {
 									template: {
@@ -272,7 +295,11 @@ async function computeProductionBilling(
 		if (ratePercent == null) continue;
 
 		const netPrice = Number(asset.product.netPurchasePrice);
-		const productLabel = `${asset.product.manufacturer.name} ${asset.product.name}`;
+		const productLabel = productBillingLabel(asset.product);
+		const accessoryLabels = asset.accessories.map((accessory) =>
+			productBillingLabel(accessory.product)
+		);
+		const baseDescription = `${productLabel}${asset.assetTag ? ` (${asset.assetTag})` : ''}`;
 		individualLines.push({
 			assetId: asset.id,
 			bundleId: null,
@@ -282,7 +309,10 @@ async function computeProductionBilling(
 			categoryName: asset.product.category.name,
 			categoryNameDe: asset.product.category.nameDe,
 			categoryColor: asset.product.category.color,
-			description: `${productLabel}${asset.assetTag ? ` (${asset.assetTag})` : ''}`,
+			description:
+				accessoryLabels.length > 0
+					? `${baseDescription}\ninkl. ${summarizeContents(accessoryLabels)}`
+					: baseDescription,
 			netPurchasePrice: netPrice,
 			ratePercent,
 			dailyRate: netPrice * (ratePercent / 100)
@@ -309,16 +339,20 @@ async function computeProductionBilling(
 			continue;
 		}
 		const netPrice = Number(bundle.netPurchasePrice);
+		const contentLabels = items.flatMap((item) => [
+			productBillingLabel(item.asset.product),
+			...item.asset.accessories.map((accessory) => productBillingLabel(accessory.product))
+		]);
 		bundleLines.push({
 			assetId: null,
 			bundleId,
 			productId: null,
-			productLabel: `Bundle: ${bundle.template.name}`,
+			productLabel: bundle.template.name,
 			categoryId: bundle.template.categoryId,
 			categoryName: bundle.template.category.name,
 			categoryNameDe: bundle.template.category.nameDe,
 			categoryColor: bundle.template.category.color,
-			description: `Bundle: ${bundle.template.name} (${items.length} item${items.length !== 1 ? 's' : ''})`,
+			description: `${bundle.template.name}\nbestehend aus: ${summarizeContents(contentLabels)}`,
 			netPurchasePrice: netPrice,
 			ratePercent,
 			dailyRate: netPrice * (ratePercent / 100)
@@ -387,10 +421,7 @@ function diffBillingLines(stored: DiffLine[], current: DiffLine[]) {
 		const prev = storedByKey.get(line.key);
 		if (!prev) {
 			added.push(line);
-		} else if (
-			prev.description !== line.description ||
-			Math.abs(prev.lineTotal - line.lineTotal) > 0.005
-		) {
+		} else if (Math.abs(prev.lineTotal - line.lineTotal) > 0.005) {
 			changed.push({
 				key: line.key,
 				description: line.description,
@@ -550,9 +581,12 @@ export const getOfferStaleness = query(v.string(), async (offerId: string) => {
 		} satisfies Staleness;
 	}
 
+	const storedByKey = new Map(
+		offer.items.map((item) => [billingLineKey(item.assetId, item.bundleId, item.description), item])
+	);
 	const stored: DiffLine[] = offer.items.map((item) => ({
 		key: billingLineKey(item.assetId, item.bundleId, item.description),
-		description: item.description,
+		description: item.productLabel ?? item.description.split('\n', 1)[0],
 		lineTotal: Number(item.lineTotal)
 	}));
 
@@ -570,11 +604,20 @@ export const getOfferStaleness = query(v.string(), async (offerId: string) => {
 		} satisfies Staleness;
 	}
 
-	const current: DiffLine[] = lines.map((line) => ({
-		key: billingLineKey(line.assetId, line.bundleId, line.description),
-		description: line.description,
-		lineTotal: line.dailyRate * offer.dayCount
-	}));
+	const current: DiffLine[] = lines.map((line) => {
+		const key = billingLineKey(line.assetId, line.bundleId, line.description);
+		const storedItem = storedByKey.get(key);
+		// A line-level rate is an intentional document override, not a change to
+		// the production. Reprice the live catalog value with that stored rate so
+		// catalog price changes still surface without category defaults making a
+		// manually edited offer appear stale.
+		const ratePercent = storedItem ? Number(storedItem.ratePercent) : line.ratePercent;
+		return {
+			key,
+			description: line.productLabel,
+			lineTotal: line.netPurchasePrice * (ratePercent / 100) * offer.dayCount
+		};
+	});
 
 	const { added, removed, changed } = diffBillingLines(stored, current);
 	return {
@@ -676,7 +719,10 @@ export const updateOfferItemRate = command(
 			})
 		);
 
-		await getOffer(offerIds[0]).refresh();
+		// Return the committed document so the caller can replace its active
+		// query value directly. A refresh alone can update only the cache while an
+		// already-rendered remote-query value remains one edit behind.
+		return await getOffer(offerIds[0]);
 	}
 );
 

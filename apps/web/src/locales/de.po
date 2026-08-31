@@ -664,6 +664,7 @@ msgstr "<0/> Nach dem Speichern weiteres erstellen"
 #: src/routes/assets/new/+page.svelte
 #: src/routes/inspections/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
+#: src/routes/manufacturers/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
@@ -1288,6 +1289,7 @@ msgstr "Standort"
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
+#: src/routes/manufacturers/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
 #: src/routes/offers/new/+page.svelte
 #: src/routes/offers/new/+page.svelte
@@ -4314,6 +4316,7 @@ msgstr "{0} Gerät{1} auf {2} gesetzt"
 msgid "Set status…"
 msgstr "Status setzen…"
 
+#: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
 msgid "Applying…"
@@ -5077,10 +5080,12 @@ msgstr "<0/> wird gelöscht. {0} <1/> — gleiche Tags, gleiche Historie, gleich
 msgid "Offers and invoices already written are not touched — they say what they said."
 msgstr "Bereits geschriebene Angebote und Rechnungen bleiben unberührt — sie sagen, was sie gesagt haben."
 
+#: src/routes/manufacturers/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Merging…"
 msgstr "Wird zusammengeführt…"
 
+#: src/routes/manufacturers/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Merge"
 msgstr "Zusammenführen"
@@ -5128,6 +5133,7 @@ msgid "Manufacturer is required"
 msgstr "Hersteller ist erforderlich"
 
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/manufacturers/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Search manufacturers…"
 msgstr "Hersteller suchen…"
@@ -5287,3 +5293,68 @@ msgstr "Das Konto, die Sitzungen und die Organisationsmitgliedschaften werden da
 #: src/routes/offers/[id]/+page.svelte
 msgid "Back to equipment"
 msgstr "Zurück zum Equipment"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Category rate applied"
+msgstr "Kategoriesatz angewendet"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Apply to all"
+msgstr "Auf alle anwenden"
+
+#. 0: categoryRate
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Category rate: {0}% / day"
+msgstr "Kategoriesatz: {0} %/Tag"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Manufacturers"
+msgstr ""
+
+#: src/routes/manufacturers/+page.svelte
+msgid "Manufacturer updated"
+msgstr ""
+
+#: src/routes/manufacturers/+page.svelte
+msgid "# product moved"
+msgid_plural "# products moved"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/routes/manufacturers/+page.svelte
+msgid "Manufacturers | Technikpool"
+msgstr ""
+
+#: src/routes/manufacturers/+page.svelte
+msgid "Manufacturers"
+msgstr ""
+
+#: src/routes/manufacturers/+page.svelte
+msgid "Manage catalog names, mark generic placeholders, and merge duplicate manufacturers."
+msgstr ""
+
+#: src/routes/manufacturers/+page.svelte
+msgid "Editing manufacturers requires admin or owner rights in one of your organizations."
+msgstr ""
+
+#: src/routes/manufacturers/+page.svelte
+msgid "# product"
+msgid_plural "# products"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/routes/manufacturers/+page.svelte
+msgid "Merge…"
+msgstr ""
+
+#: src/routes/manufacturers/+page.svelte
+msgid "<0/> Generic"
+msgstr ""
+
+#: src/routes/manufacturers/+page.svelte
+msgid "Merge manufacturer"
+msgstr ""
+
+#: src/routes/manufacturers/+page.svelte
+msgid "All products move to the selected manufacturer. Existing offers and invoices are not changed."
+msgstr ""
