@@ -2,6 +2,47 @@
 	import { cn, type WithElementRef } from '$lib/utils.js';
 	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements';
 	import { type VariantProps, tv } from 'tailwind-variants';
+	import {
+		ArrowLeft,
+		ArrowRight,
+		Check,
+		Download,
+		LogIn,
+		Merge,
+		Pencil,
+		Plus,
+		Printer,
+		RefreshCw,
+		Save,
+		Send,
+		Trash2,
+		Copy,
+		Upload,
+		UserPlus,
+		X
+	} from '@lucide/svelte';
+
+	export const buttonIcons = {
+		add: Plus,
+		back: ArrowLeft,
+		close: X,
+		copy: Copy,
+		confirm: Check,
+		delete: Trash2,
+		download: Download,
+		edit: Pencil,
+		forward: ArrowRight,
+		login: LogIn,
+		merge: Merge,
+		print: Printer,
+		refresh: RefreshCw,
+		save: Save,
+		send: Send,
+		signup: UserPlus,
+		upload: Upload
+	} as const;
+
+	export type ButtonIcon = keyof typeof buttonIcons;
 
 	export const buttonVariants = tv({
 		base: "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-3 active:not-aria-[haspopup]:translate-y-px aria-invalid:ring-3 [&_svg:not([class*='size-'])]:size-4 group/button inline-flex shrink-0 items-center justify-center whitespace-nowrap transition-all outline-none select-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
@@ -45,6 +86,7 @@
 		WithElementRef<HTMLAnchorAttributes> & {
 			variant?: ButtonVariant;
 			size?: ButtonSize;
+			icon?: ButtonIcon;
 		};
 </script>
 
@@ -55,11 +97,14 @@
 		size = 'default',
 		ref = $bindable(null),
 		href = undefined,
+		icon = undefined,
 		type = 'button',
 		disabled,
 		children,
 		...restProps
 	}: ButtonProps = $props();
+
+	let Icon = $derived(icon ? buttonIcons[icon] : null);
 </script>
 
 {#if href}
@@ -74,6 +119,7 @@
 		tabindex={disabled ? -1 : undefined}
 		{...restProps}
 	>
+		{#if Icon}<Icon aria-hidden="true" />{/if}
 		{@render children?.()}
 	</a>
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
@@ -86,6 +132,7 @@
 		{disabled}
 		{...restProps}
 	>
+		{#if Icon}<Icon aria-hidden="true" />{/if}
 		{@render children?.()}
 	</button>
 {/if}

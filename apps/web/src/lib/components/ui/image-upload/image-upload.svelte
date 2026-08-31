@@ -559,7 +559,9 @@
 				</div>
 			</div>
 			<div class="flex justify-end gap-2">
-				<Button type="button" variant="outline" size="sm" onclick={reset}>Cancel</Button>
+				<Button icon="close" type="button" variant="outline" size="sm" onclick={reset}
+					>Cancel</Button
+				>
 				<Button type="button" size="sm" disabled={uploading} onclick={continueToBg}>
 					{#if uploading}
 						Uploading…

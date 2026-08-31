@@ -386,7 +386,7 @@
 			<Button variant="outline" href={resolve(`/assets/new?duplicateFrom=${asset.id}`)}
 				>Duplicate</Button
 			>
-			<Button variant="outline" href={resolve('/assets')}>Back to Devices</Button>
+			<Button icon="back" variant="outline" href={resolve('/assets')}>Back to Devices</Button>
 		</div>
 	</div>
 
@@ -406,7 +406,7 @@
 							{/if}
 						</Card.Description>
 					</div>
-					<Button variant="outline" onclick={() => (editingAsset = true)}>Edit</Button>
+					<Button icon="edit" variant="outline" onclick={() => (editingAsset = true)}>Edit</Button>
 				</div>
 			</Card.Header>
 			<Card.Content>
@@ -452,7 +452,9 @@
 						</Card.Description>
 					</div>
 					{#if !retired}
-						<Button variant="outline" onclick={() => (editingPricing = true)}>Edit</Button>
+						<Button icon="edit" variant="outline" onclick={() => (editingPricing = true)}>
+							Edit
+						</Button>
 					{/if}
 				</div>
 			</Card.Header>
@@ -633,7 +635,7 @@
 							<Card.Title>Product</Card.Title>
 							<Card.Description>Shared product details for this asset type.</Card.Description>
 						</div>
-						<Button variant="outline" onclick={openProductModal}>Edit</Button>
+						<Button icon="edit" variant="outline" onclick={openProductModal}>Edit</Button>
 					</div>
 				</Card.Header>
 				<Card.Content class="space-y-4">
@@ -880,6 +882,7 @@
 	</form>
 	{#snippet footer()}
 		<Button
+			icon="close"
 			type="button"
 			variant="outline"
 			onclick={() => (editingAsset = false)}
@@ -887,7 +890,7 @@
 		>
 			Cancel
 		</Button>
-		<Button type="submit" form="edit-asset-form" disabled={savingAsset}>
+		<Button icon="save" type="submit" form="edit-asset-form" disabled={savingAsset}>
 			{savingAsset ? 'Saving…' : 'Save'}
 		</Button>
 	{/snippet}
@@ -914,6 +917,7 @@
 	</form>
 	{#snippet footer()}
 		<Button
+			icon="close"
 			type="button"
 			variant="outline"
 			onclick={() => (editingPricing = false)}
@@ -921,7 +925,7 @@
 		>
 			Cancel
 		</Button>
-		<Button type="submit" form="edit-pricing-form" disabled={savingPricing}>
+		<Button icon="save" type="submit" form="edit-pricing-form" disabled={savingPricing}>
 			{savingPricing ? 'Saving…' : 'Save'}
 		</Button>
 	{/snippet}
@@ -940,6 +944,7 @@
 
 	{#snippet footer()}
 		<Button
+			icon="close"
 			type="button"
 			variant="outline"
 			onclick={() => (confirmingDelete = false)}
@@ -999,6 +1004,7 @@
 
 	{#snippet footer()}
 		<Button
+			icon="close"
 			type="button"
 			variant="outline"
 			onclick={() => (productModalOpen = false)}
@@ -1006,7 +1012,7 @@
 		>
 			Cancel
 		</Button>
-		<Button type="button" onclick={handleProductSave} disabled={savingProduct}>
+		<Button icon="save" type="button" onclick={handleProductSave} disabled={savingProduct}>
 			{savingProduct ? 'Saving…' : 'Save'}
 		</Button>
 	{/snippet}

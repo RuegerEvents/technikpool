@@ -617,19 +617,19 @@
 		<div class="flex w-full items-center justify-between">
 			{#if step === 'upload'}
 				<div></div>
-				<Button variant="outline" onclick={onClose}>Cancel</Button>
+				<Button icon="close" variant="outline" onclick={onClose}>Cancel</Button>
 			{:else if step === 'mapping'}
 				<Button variant="outline" onclick={() => (step = 'upload')}>Back</Button>
 				<div class="flex items-center gap-3">
 					<span class="text-sm text-muted-foreground">{csvRows.length} rows</span>
-					<Button onclick={runImport} disabled={!canImport}>Import</Button>
+					<Button icon="upload" onclick={runImport} disabled={!canImport}>Import</Button>
 				</div>
 			{:else if step === 'importing'}
 				<div></div>
 				<div></div>
 			{:else if step === 'results'}
 				<div></div>
-				<Button onclick={onClose}>Close</Button>
+				<Button icon="close" onclick={onClose}>Close</Button>
 			{/if}
 		</div>
 	{/snippet}

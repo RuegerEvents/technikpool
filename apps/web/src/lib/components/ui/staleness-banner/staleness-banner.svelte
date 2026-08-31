@@ -113,7 +113,13 @@
 	</div>
 
 	{#snippet footer()}
-		<Button type="button" variant="outline" onclick={() => (open = false)} disabled={working}>
+		<Button
+			icon="close"
+			type="button"
+			variant="outline"
+			onclick={() => (open = false)}
+			disabled={working}
+		>
 			Cancel
 		</Button>
 		<Button type="button" onclick={handleUpdate} disabled={working}>

@@ -2,13 +2,17 @@
 	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
-	import { getAllUsers, setUserAdmin } from '$lib/remote/orgs.remote';
+	import { Modal } from '$lib/components/ui/modal';
+	import { deleteUser, getAllUsers, setUserAdmin } from '$lib/remote/orgs.remote';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 
 	let { data } = $props();
 
 	let users = $derived(await getAllUsers());
+	let deleteTarget = $state<(typeof users)[number] | null>(null);
+	let deleteOpen = $state(false);
+	let deleting = $state(false);
 
 	const roleLabels: Record<string, string> = {
 		OWNER: 'Owner',
@@ -23,6 +27,21 @@
 			toast.success(`${name} ${!currentIsAdmin ? 'granted' : 'revoked'} admin access`);
 		} catch (err) {
 			toast.error(getErrorMessage(err));
+		}
+	}
+
+	async function handleDeleteUser() {
+		if (!deleteTarget || deleting) return;
+		deleting = true;
+		try {
+			await deleteUser(deleteTarget.id);
+			toast.success(`${deleteTarget.name || deleteTarget.email} deleted`);
+			deleteOpen = false;
+			deleteTarget = null;
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			deleting = false;
 		}
 	}
 </script>
@@ -96,14 +115,26 @@
 							</td>
 							<td class="px-6 py-3 text-right">
 								{#if user.id !== data.user?.id}
-									<Button
-										variant={user.isAdmin ? 'destructive' : 'outline'}
-										size="sm"
-										onclick={() =>
-											handleToggleAdmin(user.id, user.isAdmin, user.name || user.email)}
-									>
-										{user.isAdmin ? 'Revoke Admin' : 'Make Admin'}
-									</Button>
+									<div class="flex justify-end gap-2">
+										<Button
+											variant={user.isAdmin ? 'destructive' : 'outline'}
+											size="sm"
+											onclick={() =>
+												handleToggleAdmin(user.id, user.isAdmin, user.name || user.email)}
+										>
+											{user.isAdmin ? 'Revoke Admin' : 'Make Admin'}
+										</Button>
+										<Button
+											variant="destructive"
+											size="sm"
+											onclick={() => {
+												deleteTarget = user;
+												deleteOpen = true;
+											}}
+										>
+											Delete
+										</Button>
+									</div>
 								{/if}
 							</td>
 						</tr>
@@ -113,3 +144,23 @@
 		</Card.Content>
 	</Card.Root>
 </div>
+
+<Modal bind:open={deleteOpen} title="Delete user" dismissible={!deleting}>
+	{#snippet description()}
+		The account, sessions, and organization memberships are permanently removed. Users recorded in
+		asset history cannot be deleted.
+	{/snippet}
+	{#if deleteTarget}
+		<p class="text-sm">
+			Delete <span class="font-medium">{deleteTarget.name || deleteTarget.email}</span>?
+		</p>
+	{/if}
+	{#snippet footer()}
+		<Button icon="close" variant="outline" onclick={() => (deleteTarget = null)} disabled={deleting}
+			>Cancel</Button
+		>
+		<Button icon="delete" variant="destructive" onclick={handleDeleteUser} disabled={deleting}>
+			{deleting ? 'Deleting…' : 'Delete user'}
+		</Button>
+	{/snippet}
+</Modal>

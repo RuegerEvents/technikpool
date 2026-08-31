@@ -344,7 +344,12 @@
 						{:else}
 							<div class="space-y-4">
 								<CustomerFields bind:value={newCustomer} idPrefix="offer-cust" />
-								<Button type="button" variant="outline" onclick={() => (creatingCustomer = false)}>
+								<Button
+									icon="close"
+									type="button"
+									variant="outline"
+									onclick={() => (creatingCustomer = false)}
+								>
 									Cancel new customer
 								</Button>
 							</div>
@@ -435,6 +440,7 @@
 													/>
 													<span class="text-sm text-muted-foreground">% / day</span>
 													<Button
+														icon="save"
 														size="sm"
 														variant="outline"
 														disabled={pending.has(rate.categoryId) ||
@@ -492,6 +498,7 @@
 														/>
 														<span class="text-sm text-muted-foreground">€ net</span>
 														<Button
+															icon="save"
 															size="sm"
 															variant="outline"
 															disabled={pending.has(group.key) || !priceDrafts.get(group.key)}

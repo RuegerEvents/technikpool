@@ -257,7 +257,7 @@
 			>
 				Print Inventory List
 			</Button>
-			<Button variant="outline" href={resolve('/assets')}>Back to Devices</Button>
+			<Button icon="back" variant="outline" href={resolve('/assets')}>Back to Devices</Button>
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					{#snippet child({ props })}
@@ -309,7 +309,7 @@
 						<Card.Title>Bundle</Card.Title>
 						<Card.Description>Name, category, pricing, and location.</Card.Description>
 					</div>
-					<Button variant="outline" onclick={() => (editingBundle = true)}>Edit</Button>
+					<Button icon="edit" variant="outline" onclick={() => (editingBundle = true)}>Edit</Button>
 				</div>
 			</Card.Header>
 			<Card.Content>
@@ -505,7 +505,12 @@
 		</fieldset>
 	</div>
 	{#snippet footer()}
-		<Button variant="outline" disabled={converting} onclick={() => (convertOpen = false)}>
+		<Button
+			icon="close"
+			variant="outline"
+			disabled={converting}
+			onclick={() => (convertOpen = false)}
+		>
 			Cancel
 		</Button>
 		<Button disabled={converting || !mainAssetId} onclick={handleConvert}>
@@ -519,8 +524,10 @@
 		Only devices without a bundle can be added.
 	{/snippet}
 	{#snippet headerActions()}
-		<Button size="sm" disabled={working} onclick={openNewAsset}>New device</Button>
-		<Button variant="outline" size="sm" onclick={() => (showAddModal = false)}>Close</Button>
+		<Button icon="add" size="sm" disabled={working} onclick={openNewAsset}>New device</Button>
+		<Button icon="close" variant="outline" size="sm" onclick={() => (showAddModal = false)}>
+			Close
+		</Button>
 	{/snippet}
 	<input
 		type="search"
@@ -692,6 +699,7 @@
 	</form>
 	{#snippet footer()}
 		<Button
+			icon="close"
 			type="button"
 			variant="outline"
 			onclick={() => (editingBundle = false)}

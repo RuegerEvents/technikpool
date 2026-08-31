@@ -62,7 +62,7 @@
 					{#if error}
 						<p class="text-sm font-medium text-destructive">{error}</p>
 					{/if}
-					<Button type="submit" class="w-full" disabled={loading}>
+					<Button icon="send" type="submit" class="w-full" disabled={loading}>
 						{loading ? 'Sending...' : 'Send reset link'}
 					</Button>
 				</form>

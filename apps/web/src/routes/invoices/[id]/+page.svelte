@@ -139,11 +139,16 @@
 			</p>
 		</div>
 		<div class="flex flex-wrap gap-2">
-			<Button variant="outline" href={resolve(`/invoices/${invoiceId}/print`)} target="_blank">
+			<Button
+				icon="print"
+				variant="outline"
+				href={resolve(`/invoices/${invoiceId}/print`)}
+				target="_blank"
+			>
 				Print
 			</Button>
 			{#if !invoice.sentAt}
-				<Button variant="outline" onclick={openEditCustomer}>Edit customer</Button>
+				<Button icon="edit" variant="outline" onclick={openEditCustomer}>Edit customer</Button>
 				<Button disabled={sending} onclick={handleMarkAsSent}>
 					{sending ? 'Marking…' : 'Mark as Sent'}
 				</Button>
@@ -218,10 +223,15 @@
 						/>
 					</div>
 					<div class="flex gap-2">
-						<Button type="submit" disabled={savingCustomer}>
+						<Button icon="save" type="submit" disabled={savingCustomer}>
 							{savingCustomer ? 'Saving…' : 'Save'}
 						</Button>
-						<Button type="button" variant="outline" onclick={() => (editCustomerOpen = false)}>
+						<Button
+							icon="close"
+							type="button"
+							variant="outline"
+							onclick={() => (editCustomerOpen = false)}
+						>
 							Cancel
 						</Button>
 					</div>

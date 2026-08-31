@@ -20,17 +20,14 @@ msgstr "Technikpool"
 msgid "Assets"
 msgstr "Geräte"
 
-#: src/routes/+layout.svelte
 #: src/routes/calendar/+page.svelte
 #: src/routes/productions/+page.svelte
 msgid "Productions"
 msgstr "Produktionen"
 
-#: src/routes/+layout.svelte
-msgid "Calendar"
-msgstr "Kalender"
+#~ msgid "Calendar"
+#~ msgstr "Kalender"
 
-#: src/routes/+layout.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/orgs/+page.svelte
@@ -1603,7 +1600,6 @@ msgid "Joined"
 msgstr "Beigetreten"
 
 #: src/lib/components/ui/bulk-actions-bar.svelte
-#: src/routes/+layout.svelte
 msgid "Checkout"
 msgstr "Checkout"
 
@@ -2350,7 +2346,6 @@ msgstr "Noch keine Bundles. <0>Erstes Bundle erstellen →</0>"
 msgid "Devices | Technikpool"
 msgstr "Geräte | Technikpool"
 
-#: src/routes/+layout.svelte
 #: src/routes/assets/+page.svelte
 msgid "Devices"
 msgstr "Geräte"
@@ -2364,9 +2359,8 @@ msgstr "<0/> Geräte"
 msgid "Back to Devices"
 msgstr "Zurück zu Geräte"
 
-#: src/routes/+layout.svelte
-msgid "Stickers"
-msgstr "Sticker"
+#~ msgid "Stickers"
+#~ msgstr "Sticker"
 
 #: src/routes/stickers/+page.svelte
 msgid "Rüger Events"
@@ -2612,9 +2606,8 @@ msgstr "{0} mm"
 msgid "Sticker width mm{0}"
 msgstr "Stickerbreite mm{0}"
 
-#: src/routes/+layout.svelte
-msgid "Tools <0/>"
-msgstr "Werkzeuge <0/>"
+#~ msgid "Tools <0/>"
+#~ msgstr "Werkzeuge <0/>"
 
 #: src/routes/stickers/+page.svelte
 msgid "Total labels"
@@ -2664,17 +2657,14 @@ msgstr "<0/> Jede zweite Lasche verschachteln, um Platz zu sparen"
 msgid "Rotates every second sticker 180° so its tail nests against its neighbor's, instead of each sticker needing its own full tail length of sheet width. Needs enough sticker height that the two tails' bleeds don't touch."
 msgstr "Dreht jeden zweiten Sticker um 180°, sodass sich seine Lasche mit der des Nachbarn verschachtelt, statt dass jeder Sticker seine eigene volle Laschenlänge an Bogenbreite braucht. Erfordert genug Stickerhöhe, damit sich die Beschnitte der beiden Laschen nicht berühren."
 
-#: src/routes/+layout.svelte
-msgid "Inspections"
-msgstr "Inspektionen"
+#~ msgid "Inspections"
+#~ msgstr "Inspektionen"
 
-#: src/routes/+layout.svelte
 #: src/routes/offers/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Offers"
 msgstr "Angebote"
 
-#: src/routes/+layout.svelte
 #: src/routes/invoices/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Invoices"
@@ -3231,7 +3221,6 @@ msgstr "Equipment"
 msgid "{0} device{1} booked"
 msgstr "{0} Geräte gebucht"
 
-#: src/routes/+layout.svelte
 #: src/routes/admin/categories/+page.svelte
 #: src/routes/productions/[id]/equipment/+page.svelte
 msgid "Categories"
@@ -4126,7 +4115,6 @@ msgstr "Ablehnen"
 msgid "Scanners | Technikpool"
 msgstr "Scanner | Technikpool"
 
-#: src/routes/+layout.svelte
 #: src/routes/devices/+page.svelte
 msgid "Scanners"
 msgstr "Scanner"
@@ -4280,11 +4268,15 @@ msgstr "Dieses Gerät löschen"
 msgid "Only possible while it has never been booked, scanned, inspected or billed. A unit that has been in use is decommissioned instead, so its history survives."
 msgstr "Nur möglich, solange es nie gebucht, gescannt, geprüft oder abgerechnet wurde. Ein Gerät, das im Einsatz war, wird stattdessen ausgemustert, damit seine Historie erhalten bleibt."
 
+#: src/routes/admin/users/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
 msgid "Delete"
 msgstr "Löschen"
 
+#: src/routes/admin/users/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Deleting…"
 msgstr "Wird gelöscht…"
@@ -4344,7 +4336,6 @@ msgstr "{0} Gerät{1} als {2} markieren?"
 msgid "They leave the pool: no longer bookable, scannable or listed, and removed from any bundle they are in. The status can be set back, but the bundle membership can't — that has to be rebuilt."
 msgstr "Sie verlassen den Pool: nicht mehr buchbar, scanbar oder gelistet und aus jedem Bundle entfernt, in dem sie stecken. Der Status lässt sich zurücksetzen, die Bundle-Zugehörigkeit nicht — die muss neu aufgebaut werden."
 
-#: src/routes/+layout.svelte
 #: src/routes/products/+page.svelte
 msgid "Products"
 msgstr "Produkte"
@@ -5129,17 +5120,17 @@ msgstr "Bild neu erstellen"
 
 #: src/routes/assets/+page.svelte
 msgid "Select all units in bundle"
-msgstr ""
+msgstr "Alle Einheiten im Bundle auswählen"
 
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Manufacturer is required"
-msgstr ""
+msgstr "Hersteller ist erforderlich"
 
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Search manufacturers…"
-msgstr ""
+msgstr "Hersteller suchen…"
 
 #: src/routes/assets/[id]/+page.svelte
 msgid "Device Image"
@@ -5191,24 +5182,104 @@ msgstr "Hauptgerät auswählen"
 
 #: src/routes/products/+page.svelte
 msgid "Product deleted"
-msgstr ""
+msgstr "Produkt gelöscht"
 
 #: src/routes/products/+page.svelte
 msgid "Delete unused"
-msgstr ""
+msgstr "Ungenutztes löschen"
 
 #: src/routes/products/+page.svelte
 msgid "Delete unused product"
-msgstr ""
+msgstr "Ungenutztes Produkt löschen"
 
 #: src/routes/products/+page.svelte
 msgid "This permanently removes the catalogue entry. Products with any units, including retired units, cannot be deleted."
-msgstr ""
+msgstr "Dadurch wird der Katalogeintrag dauerhaft gelöscht. Produkte mit Einheiten – einschließlich ausgemusterter Einheiten – können nicht gelöscht werden."
 
+#: src/routes/admin/users/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Delete <0/>?"
-msgstr ""
+msgstr "<0/> löschen?"
 
 #: src/routes/products/+page.svelte
 msgid "Delete product"
-msgstr ""
+msgstr "Produkt löschen"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Organization deleted"
+msgstr "Organisation gelöscht"
+
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Delete organization"
+msgstr "Organisation löschen"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "This permanently deletes the organization and all of its locations, assets, productions, offers, and invoices."
+msgstr "Dadurch werden die Organisation und alle zugehörigen Standorte, Geräte, Produktionen, Angebote und Rechnungen dauerhaft gelöscht."
+
+#: src/routes/+layout.svelte
+msgid "<0/> Tools <1/>"
+msgstr "<0/> Werkzeuge <1/>"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Categories"
+msgstr "<0/> Kategorien"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Products"
+msgstr "<0/> Produkte"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Stickers"
+msgstr "<0/> Sticker"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Inspections"
+msgstr "<0/> Prüfungen"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Scanners"
+msgstr "<0/> Scanner"
+
+#: src/routes/+layout.svelte
+msgid "<0/>Admin"
+msgstr "<0/>Admin"
+
+#: src/routes/+layout.svelte
+msgid "<0/>Devices"
+msgstr "<0/>Geräte"
+
+#: src/routes/+layout.svelte
+msgid "<0/>Productions"
+msgstr "<0/>Produktionen"
+
+#: src/routes/+layout.svelte
+msgid "<0/>Calendar"
+msgstr "<0/>Kalender"
+
+#: src/routes/+layout.svelte
+msgid "<0/>Checkout"
+msgstr "<0/>Ausgabe"
+
+#: src/routes/+layout.svelte
+msgid "<0/>Offers"
+msgstr "<0/>Angebote"
+
+#: src/routes/+layout.svelte
+msgid "<0/>Invoices"
+msgstr "<0/>Rechnungen"
+
+#. 0: deleteTarget.name || deleteTarget.email
+#: src/routes/admin/users/+page.svelte
+msgid "{0} deleted"
+msgstr "{0} gelöscht"
+
+#: src/routes/admin/users/+page.svelte
+#: src/routes/admin/users/+page.svelte
+msgid "Delete user"
+msgstr "Benutzer löschen"
+
+#: src/routes/admin/users/+page.svelte
+msgid "The account, sessions, and organization memberships are permanently removed. Users recorded in asset history cannot be deleted."
+msgstr "Das Konto, die Sitzungen und die Organisationsmitgliedschaften werden dauerhaft entfernt. Benutzer, die im Geräteverlauf erfasst sind, können nicht gelöscht werden."

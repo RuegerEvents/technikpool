@@ -525,7 +525,9 @@
 					</div>
 
 					<div class="flex justify-end gap-3 border-t pt-6">
-						<Button type="button" variant="outline" href="/assets">Back to devices</Button>
+						<Button icon="back" type="button" variant="outline" href="/assets"
+							>Back to devices</Button
+						>
 						<Button type="submit" disabled={generating}
 							>{generating ? 'Generating…' : 'Generate PDF'}</Button
 						>

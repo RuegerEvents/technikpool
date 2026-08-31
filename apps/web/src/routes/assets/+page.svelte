@@ -323,8 +323,8 @@
 				{#each orgs as org (org.id)}<option value={org.id}>{orgLabel(org)}</option>{/each}
 			</select>
 			<Button variant="outline" onclick={() => (showImportModal = true)}>Import CSV</Button>
-			<Button variant="outline" href={resolve('/assets/bundles/new')}>Add Bundle</Button>
-			<Button href={resolve('/assets/new')}>Add Asset</Button>
+			<Button icon="add" variant="outline" href={resolve('/assets/bundles/new')}>Add Bundle</Button>
+			<Button icon="add" href={resolve('/assets/new')}>Add Asset</Button>
 		</div>
 	</div>
 

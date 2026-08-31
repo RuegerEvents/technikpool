@@ -31,7 +31,7 @@
 			<h1 class="text-3xl font-bold tracking-tight">Offers</h1>
 			<p class="text-muted-foreground">Angebote generated from production equipment bookings.</p>
 		</div>
-		<Button href={resolve('/offers/new')}>New Offer</Button>
+		<Button icon="add" href={resolve('/offers/new')}>New Offer</Button>
 	</div>
 
 	{#if offers.length === 0}

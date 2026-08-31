@@ -84,7 +84,7 @@
 				{#if success}
 					<p class="text-sm font-medium text-emerald-600">Account created! Redirecting…</p>
 				{/if}
-				<Button type="submit" class="w-full" disabled={loading || success}>
+				<Button icon="signup" type="submit" class="w-full" disabled={loading || success}>
 					{loading ? 'Creating account...' : 'Create an account'}
 				</Button>
 			</form>

@@ -151,7 +151,7 @@
 			<span class="text-sm text-muted-foreground">of {m.pg.items.length}</span>
 		</div>
 		{#snippet footer()}
-			<Button variant="outline" onclick={() => (modal = null)}>Cancel</Button>
+			<Button icon="close" variant="outline" onclick={() => (modal = null)}>Cancel</Button>
 			<Button variant={m.action === 'approve' ? 'default' : 'destructive'} onclick={confirmModal}>
 				{m.action === 'approve' ? 'Approve' : 'Decline'}
 				{m.count}

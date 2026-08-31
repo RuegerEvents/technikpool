@@ -335,13 +335,19 @@
 	</form>
 
 	{#snippet footer()}
-		<Button type="button" variant="outline" onclick={() => (open = false)} disabled={saving}>
+		<Button
+			icon="close"
+			type="button"
+			variant="outline"
+			onclick={() => (open = false)}
+			disabled={saving}
+		>
 			Cancel
 		</Button>
 		<!-- The submit lives in the footer, outside the <form> it submits — that is
 		     what `form=` is for, and it keeps the buttons pinned while the fields
 		     scroll. -->
-		<Button type="submit" form="new-asset-form" disabled={saving}>
+		<Button icon="add" type="submit" form="new-asset-form" disabled={saving}>
 			{saving ? 'Creating…' : 'Create'}
 		</Button>
 	{/snippet}

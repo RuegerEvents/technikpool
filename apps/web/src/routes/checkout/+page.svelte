@@ -408,8 +408,10 @@
 				</div>
 				{#if sessionEnded}
 					<div class="flex gap-2">
-						<Button variant="outline" onclick={() => window.print()}>Print Report</Button>
-						<Button onclick={newSession}>New Session</Button>
+						<Button icon="print" variant="outline" onclick={() => window.print()}
+							>Print Report</Button
+						>
+						<Button icon="add" onclick={newSession}>New Session</Button>
 					</div>
 				{/if}
 			</div>

@@ -109,6 +109,7 @@
 						/>
 					</div>
 					<Button
+						icon="save"
 						variant="outline"
 						disabled={!dirty || saving.has(category.id)}
 						onclick={() => handleSave(category)}

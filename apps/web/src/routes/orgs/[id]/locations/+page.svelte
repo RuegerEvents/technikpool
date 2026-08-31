@@ -108,7 +108,7 @@
 			<p class="text-muted-foreground">Manage locations for {org.name}.</p>
 		</div>
 		{#if canManage}
-			<Button onclick={startCreate}>New Location</Button>
+			<Button icon="add" onclick={startCreate}>New Location</Button>
 		{/if}
 	</div>
 
@@ -135,7 +135,12 @@
 									<Card.Description>{formatAddress(loc.address)}</Card.Description>
 								</div>
 								{#if canManage}
-									<Button type="button" variant="outline" onclick={() => startEdit(loc)}>
+									<Button
+										icon="edit"
+										type="button"
+										variant="outline"
+										onclick={() => startEdit(loc)}
+									>
 										Edit
 									</Button>
 								{/if}
@@ -164,10 +169,16 @@
 		<AddressInput bind:value={formAddress} idPrefix="loc" />
 	</form>
 	{#snippet footer()}
-		<Button type="button" variant="outline" onclick={() => (formOpen = false)} disabled={saving}>
+		<Button
+			icon="close"
+			type="button"
+			variant="outline"
+			onclick={() => (formOpen = false)}
+			disabled={saving}
+		>
 			Cancel
 		</Button>
-		<Button type="submit" form="location-form" disabled={saving}>
+		<Button icon="save" type="submit" form="location-form" disabled={saving}>
 			{saving ? 'Saving…' : editingId ? 'Save' : 'Create Location'}
 		</Button>
 	{/snippet}

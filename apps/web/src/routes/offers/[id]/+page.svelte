@@ -153,10 +153,15 @@
 			</p>
 		</div>
 		<div class="flex flex-wrap gap-2">
-			<Button variant="outline" href={resolve(`/offers/${offerId}/print`)} target="_blank">
+			<Button
+				icon="print"
+				variant="outline"
+				href={resolve(`/offers/${offerId}/print`)}
+				target="_blank"
+			>
 				Print
 			</Button>
-			<Button variant="outline" onclick={openEditCustomer}>Edit customer</Button>
+			<Button icon="edit" variant="outline" onclick={openEditCustomer}>Edit customer</Button>
 			<Button variant="outline" onclick={() => (copyOpen = !copyOpen)}>Copy to new customer</Button>
 			{#if offer.invoices.length === 0}
 				<Button disabled={converting} onclick={handleConvert}>
@@ -228,10 +233,15 @@
 						/>
 					</div>
 					<div class="flex gap-2">
-						<Button type="submit" disabled={savingCustomer}>
+						<Button icon="save" type="submit" disabled={savingCustomer}>
 							{savingCustomer ? 'Saving…' : 'Save'}
 						</Button>
-						<Button type="button" variant="outline" onclick={() => (editCustomerOpen = false)}>
+						<Button
+							icon="close"
+							type="button"
+							variant="outline"
+							onclick={() => (editCustomerOpen = false)}
+						>
 							Cancel
 						</Button>
 					</div>

@@ -20,17 +20,14 @@ msgstr "Technikpool"
 msgid "Assets"
 msgstr "Assets"
 
-#: src/routes/+layout.svelte
 #: src/routes/calendar/+page.svelte
 #: src/routes/productions/+page.svelte
 msgid "Productions"
 msgstr "Productions"
 
-#: src/routes/+layout.svelte
-msgid "Calendar"
-msgstr "Calendar"
+#~ msgid "Calendar"
+#~ msgstr "Calendar"
 
-#: src/routes/+layout.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/orgs/+page.svelte
@@ -1603,7 +1600,6 @@ msgid "Joined"
 msgstr "Joined"
 
 #: src/lib/components/ui/bulk-actions-bar.svelte
-#: src/routes/+layout.svelte
 msgid "Checkout"
 msgstr "Checkout"
 
@@ -2350,7 +2346,6 @@ msgstr "No bundles yet. <0>Create your first bundle →</0>"
 msgid "Devices | Technikpool"
 msgstr "Devices | Technikpool"
 
-#: src/routes/+layout.svelte
 #: src/routes/assets/+page.svelte
 msgid "Devices"
 msgstr "Devices"
@@ -2364,9 +2359,8 @@ msgstr "<0/> Devices"
 msgid "Back to Devices"
 msgstr "Back to Devices"
 
-#: src/routes/+layout.svelte
-msgid "Stickers"
-msgstr "Stickers"
+#~ msgid "Stickers"
+#~ msgstr "Stickers"
 
 #: src/routes/stickers/+page.svelte
 msgid "Rüger Events"
@@ -2612,9 +2606,8 @@ msgstr "{0} mm"
 msgid "Sticker width mm{0}"
 msgstr "Sticker width mm{0}"
 
-#: src/routes/+layout.svelte
-msgid "Tools <0/>"
-msgstr "Tools <0/>"
+#~ msgid "Tools <0/>"
+#~ msgstr "Tools <0/>"
 
 #: src/routes/stickers/+page.svelte
 msgid "Total labels"
@@ -2664,17 +2657,14 @@ msgstr "<0/> Nest every second tail to save space"
 msgid "Rotates every second sticker 180° so its tail nests against its neighbor's, instead of each sticker needing its own full tail length of sheet width. Needs enough sticker height that the two tails' bleeds don't touch."
 msgstr "Rotates every second sticker 180° so its tail nests against its neighbor's, instead of each sticker needing its own full tail length of sheet width. Needs enough sticker height that the two tails' bleeds don't touch."
 
-#: src/routes/+layout.svelte
-msgid "Inspections"
-msgstr "Inspections"
+#~ msgid "Inspections"
+#~ msgstr "Inspections"
 
-#: src/routes/+layout.svelte
 #: src/routes/offers/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Offers"
 msgstr "Offers"
 
-#: src/routes/+layout.svelte
 #: src/routes/invoices/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Invoices"
@@ -3231,7 +3221,6 @@ msgstr "Equipment"
 msgid "{0} device{1} booked"
 msgstr "{0} device{1} booked"
 
-#: src/routes/+layout.svelte
 #: src/routes/admin/categories/+page.svelte
 #: src/routes/productions/[id]/equipment/+page.svelte
 msgid "Categories"
@@ -4126,7 +4115,6 @@ msgstr "Reject"
 msgid "Scanners | Technikpool"
 msgstr "Scanners | Technikpool"
 
-#: src/routes/+layout.svelte
 #: src/routes/devices/+page.svelte
 msgid "Scanners"
 msgstr "Scanners"
@@ -4280,11 +4268,15 @@ msgstr "Delete this asset"
 msgid "Only possible while it has never been booked, scanned, inspected or billed. A unit that has been in use is decommissioned instead, so its history survives."
 msgstr "Only possible while it has never been booked, scanned, inspected or billed. A unit that has been in use is decommissioned instead, so its history survives."
 
+#: src/routes/admin/users/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
 msgid "Delete"
 msgstr "Delete"
 
+#: src/routes/admin/users/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Deleting…"
 msgstr "Deleting…"
@@ -4344,7 +4336,6 @@ msgstr "Mark {0} asset{1} as {2}?"
 msgid "They leave the pool: no longer bookable, scannable or listed, and removed from any bundle they are in. The status can be set back, but the bundle membership can't — that has to be rebuilt."
 msgstr "They leave the pool: no longer bookable, scannable or listed, and removed from any bundle they are in. The status can be set back, but the bundle membership can't — that has to be rebuilt."
 
-#: src/routes/+layout.svelte
 #: src/routes/products/+page.svelte
 msgid "Products"
 msgstr "Products"
@@ -5205,6 +5196,7 @@ msgstr "Delete unused product"
 msgid "This permanently removes the catalogue entry. Products with any units, including retired units, cannot be deleted."
 msgstr "This permanently removes the catalogue entry. Products with any units, including retired units, cannot be deleted."
 
+#: src/routes/admin/users/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Delete <0/>?"
 msgstr "Delete <0/>?"
@@ -5212,3 +5204,82 @@ msgstr "Delete <0/>?"
 #: src/routes/products/+page.svelte
 msgid "Delete product"
 msgstr "Delete product"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Organization deleted"
+msgstr "Organization deleted"
+
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Delete organization"
+msgstr "Delete organization"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "This permanently deletes the organization and all of its locations, assets, productions, offers, and invoices."
+msgstr "This permanently deletes the organization and all of its locations, assets, productions, offers, and invoices."
+
+#: src/routes/+layout.svelte
+msgid "<0/> Tools <1/>"
+msgstr "<0/> Tools <1/>"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Categories"
+msgstr "<0/> Categories"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Products"
+msgstr "<0/> Products"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Stickers"
+msgstr "<0/> Stickers"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Inspections"
+msgstr "<0/> Inspections"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Scanners"
+msgstr "<0/> Scanners"
+
+#: src/routes/+layout.svelte
+msgid "<0/>Admin"
+msgstr "<0/>Admin"
+
+#: src/routes/+layout.svelte
+msgid "<0/>Devices"
+msgstr "<0/>Devices"
+
+#: src/routes/+layout.svelte
+msgid "<0/>Productions"
+msgstr "<0/>Productions"
+
+#: src/routes/+layout.svelte
+msgid "<0/>Calendar"
+msgstr "<0/>Calendar"
+
+#: src/routes/+layout.svelte
+msgid "<0/>Checkout"
+msgstr "<0/>Checkout"
+
+#: src/routes/+layout.svelte
+msgid "<0/>Offers"
+msgstr "<0/>Offers"
+
+#: src/routes/+layout.svelte
+msgid "<0/>Invoices"
+msgstr "<0/>Invoices"
+
+#. 0: deleteTarget.name || deleteTarget.email
+#: src/routes/admin/users/+page.svelte
+msgid "{0} deleted"
+msgstr "{0} deleted"
+
+#: src/routes/admin/users/+page.svelte
+#: src/routes/admin/users/+page.svelte
+msgid "Delete user"
+msgstr "Delete user"
+
+#: src/routes/admin/users/+page.svelte
+msgid "The account, sessions, and organization memberships are permanently removed. Users recorded in asset history cannot be deleted."
+msgstr "The account, sessions, and organization memberships are permanently removed. Users recorded in asset history cannot be deleted."

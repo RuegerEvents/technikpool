@@ -329,10 +329,15 @@
 									Kleinunternehmer (§19 UStG) — no VAT charged
 								</label>
 								<div class="flex gap-2">
-									<Button type="submit" disabled={savingSettings}>
+									<Button icon="save" type="submit" disabled={savingSettings}>
 										{savingSettings ? 'Saving…' : 'Save'}
 									</Button>
-									<Button type="button" variant="outline" onclick={() => (editingSettings = false)}>
+									<Button
+										icon="close"
+										type="button"
+										variant="outline"
+										onclick={() => (editingSettings = false)}
+									>
 										Cancel
 									</Button>
 								</div>
@@ -364,6 +369,7 @@
 									<span>{org.isKleinunternehmer ? 'Yes' : 'No'}</span>
 								</div>
 								<Button
+									icon="edit"
 									variant="outline"
 									size="sm"
 									class="w-full"
@@ -427,10 +433,15 @@
 									<Input id="billingBankName" bind:value={billingDraft.bankName} />
 								</div>
 								<div class="flex gap-2">
-									<Button type="submit" disabled={savingBilling}>
+									<Button icon="save" type="submit" disabled={savingBilling}>
 										{savingBilling ? 'Saving…' : 'Save'}
 									</Button>
-									<Button type="button" variant="outline" onclick={() => (editingBilling = false)}>
+									<Button
+										icon="close"
+										type="button"
+										variant="outline"
+										onclick={() => (editingBilling = false)}
+									>
 										Cancel
 									</Button>
 								</div>
@@ -464,6 +475,7 @@
 									</p>
 								</div>
 								<Button
+									icon="edit"
 									variant="outline"
 									size="sm"
 									class="w-full"
@@ -587,10 +599,10 @@
 		Delete <span class="font-medium">{org.name}</span> and all of its data?
 	</p>
 	{#snippet footer()}
-		<Button variant="outline" onclick={() => (deleteOpen = false)} disabled={deleting}
+		<Button icon="close" variant="outline" onclick={() => (deleteOpen = false)} disabled={deleting}
 			>Cancel</Button
 		>
-		<Button variant="destructive" onclick={handleDeleteOrg} disabled={deleting}>
+		<Button icon="delete" variant="destructive" onclick={handleDeleteOrg} disabled={deleting}>
 			{deleting ? 'Deleting…' : 'Delete organization'}
 		</Button>
 	{/snippet}

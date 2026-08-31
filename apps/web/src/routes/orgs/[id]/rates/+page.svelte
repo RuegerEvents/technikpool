@@ -106,6 +106,7 @@
 								/>
 								<span class="text-sm text-muted-foreground">% / day</span>
 								<Button
+									icon="save"
 									size="sm"
 									variant="outline"
 									disabled={saving.has(row.category.id) || !drafts.has(row.category.id)}

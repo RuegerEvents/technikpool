@@ -460,7 +460,7 @@
 			</p>
 		</div>
 		<div class="flex flex-wrap gap-2">
-			<Button variant="outline" href={resolve('/productions')}>Back</Button>
+			<Button icon="back" variant="outline" href={resolve('/productions')}>Back</Button>
 			<Button
 				variant="secondary"
 				href={resolve(`/productions/${production.id}/packing-list`)}
@@ -476,7 +476,9 @@
 				href={resolve(`/productions/${production.id}/crew-passes`)}
 				target="_blank">Crew Passes</Button
 			>
-			<Button href={resolve(`/offers/new?productionId=${production.id}`)}>Create Offer</Button>
+			<Button icon="add" href={resolve(`/offers/new?productionId=${production.id}`)}
+				>Create Offer</Button
+			>
 		</div>
 	</div>
 
@@ -574,7 +576,9 @@
 						</div>
 					</div>
 					{#if !editingDuration}
-						<Button variant="outline" onclick={() => (editingDuration = true)}>Edit</Button>
+						<Button icon="edit" variant="outline" onclick={() => (editingDuration = true)}>
+							Edit
+						</Button>
 					{/if}
 				</div>
 
@@ -631,10 +635,15 @@
 						{/if}
 
 						<div class="flex justify-end gap-2">
-							<Button type="button" variant="outline" onclick={() => (editingDuration = false)}>
+							<Button
+								icon="close"
+								type="button"
+								variant="outline"
+								onclick={() => (editingDuration = false)}
+							>
 								Cancel
 							</Button>
-							<Button type="submit" disabled={savingDuration}>
+							<Button icon="save" type="submit" disabled={savingDuration}>
 								{savingDuration ? 'Saving…' : 'Save'}
 							</Button>
 						</div>
@@ -652,7 +661,9 @@
 						<p class="text-sm">{formatAddress(production.address)}</p>
 					</div>
 					{#if !editingAddress}
-						<Button variant="outline" onclick={() => (editingAddress = true)}>Edit</Button>
+						<Button icon="edit" variant="outline" onclick={() => (editingAddress = true)}>
+							Edit
+						</Button>
 					{/if}
 				</div>
 
@@ -661,10 +672,15 @@
 						<AddressInput bind:value={addressDraft} idPrefix="addr" />
 
 						<div class="flex justify-end gap-2">
-							<Button type="button" variant="outline" onclick={() => (editingAddress = false)}>
+							<Button
+								icon="close"
+								type="button"
+								variant="outline"
+								onclick={() => (editingAddress = false)}
+							>
 								Cancel
 							</Button>
-							<Button type="submit" disabled={savingAddress}>
+							<Button icon="save" type="submit" disabled={savingAddress}>
 								{savingAddress ? 'Saving…' : 'Save'}
 							</Button>
 						</div>
@@ -684,7 +700,9 @@
 						</p>
 					</div>
 					{#if !editingCustomer}
-						<Button variant="outline" onclick={() => (editingCustomer = true)}>Edit</Button>
+						<Button icon="edit" variant="outline" onclick={() => (editingCustomer = true)}>
+							Edit
+						</Button>
 					{/if}
 				</div>
 
@@ -722,7 +740,12 @@
 									</div>
 								</div>
 								<AddressInput bind:value={newCustomerAddress} idPrefix="cust-addr" />
-								<Button type="button" variant="outline" onclick={() => (creatingCustomer = false)}>
+								<Button
+									icon="close"
+									type="button"
+									variant="outline"
+									onclick={() => (creatingCustomer = false)}
+								>
 									Cancel new customer
 								</Button>
 							</div>
@@ -730,6 +753,7 @@
 
 						<div class="flex justify-end gap-2">
 							<Button
+								icon="close"
 								type="button"
 								variant="outline"
 								onclick={() => {
@@ -739,7 +763,7 @@
 							>
 								Cancel
 							</Button>
-							<Button type="submit" disabled={savingCustomer}>
+							<Button icon="save" type="submit" disabled={savingCustomer}>
 								{savingCustomer ? 'Saving…' : 'Save'}
 							</Button>
 						</div>
@@ -1006,7 +1030,9 @@
 							<Button type="button" variant="outline" onclick={() => (showCrewForm = false)}
 								>Cancel</Button
 							>
-							<Button type="submit" disabled={savingCrew}>{savingCrew ? 'Adding…' : 'Add'}</Button>
+							<Button icon="add" type="submit" disabled={savingCrew}
+								>{savingCrew ? 'Adding…' : 'Add'}</Button
+							>
 						</div>
 					</form>
 				</Card.Content>

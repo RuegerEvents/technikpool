@@ -107,10 +107,16 @@
 		</form>
 
 		{#snippet footer()}
-			<Button type="button" variant="outline" onclick={() => (modalAsset = null)} disabled={saving}>
+			<Button
+				icon="close"
+				type="button"
+				variant="outline"
+				onclick={() => (modalAsset = null)}
+				disabled={saving}
+			>
 				Cancel
 			</Button>
-			<Button type="submit" form="log-inspection-form" disabled={saving}>
+			<Button icon="save" type="submit" form="log-inspection-form" disabled={saving}>
 				{saving ? 'Saving…' : 'Log inspection'}
 			</Button>
 		{/snippet}

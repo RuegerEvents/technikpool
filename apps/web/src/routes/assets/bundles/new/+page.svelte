@@ -326,8 +326,12 @@
 		</Card.Root>
 
 		<div class="flex justify-end gap-3">
-			<Button type="button" variant="outline" href={resolve('/assets')}>Cancel</Button>
-			<Button type="submit" disabled={saving || !bundleType?.name.trim() || !selectedOrgId}>
+			<Button icon="close" type="button" variant="outline" href={resolve('/assets')}>Cancel</Button>
+			<Button
+				icon="add"
+				type="submit"
+				disabled={saving || !bundleType?.name.trim() || !selectedOrgId}
+			>
 				{saving ? 'Creating…' : 'Create Bundle'}
 			</Button>
 		</div>

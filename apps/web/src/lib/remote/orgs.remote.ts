@@ -407,6 +407,24 @@ export const setUserAdmin = command(
 	}
 );
 
+export const deleteUser = command(v.string(), async (userId: string) => {
+	const current = await requireAuth();
+	if (!(await isUserAdmin(current.id))) error(403, 'Admin access required');
+	if (userId === current.id) error(409, 'You cannot delete your own account');
+
+	const user = await prisma.user.findUniqueOrThrow({
+		where: { id: userId },
+		select: { id: true, _count: { select: { transactions: true } } }
+	});
+	if (user._count.transactions > 0) {
+		error(409, 'This user appears in asset history and cannot be deleted');
+	}
+
+	await prisma.user.delete({ where: { id: userId } });
+	await getAllUsers().refresh();
+	return { id: userId };
+});
+
 // ── Category rental rates (offers/invoices pricing, issue #9) ─────────────────
 
 export const getOrgCategoryRates = query(v.string(), async (orgId: string) => {

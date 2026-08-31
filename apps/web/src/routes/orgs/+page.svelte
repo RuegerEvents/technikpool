@@ -175,6 +175,7 @@
 	</form>
 	{#snippet footer()}
 		<Button
+			icon="close"
 			type="button"
 			variant="outline"
 			onclick={() => (createOpen = false)}
@@ -182,7 +183,7 @@
 		>
 			Cancel
 		</Button>
-		<Button type="submit" form="create-org-form" disabled={creating}>
+		<Button icon="add" type="submit" form="create-org-form" disabled={creating}>
 			{creating ? 'Creating...' : 'Create Organization'}
 		</Button>
 	{/snippet}

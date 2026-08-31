@@ -73,7 +73,7 @@
 					{#if error}
 						<p class="text-sm font-medium text-destructive">{error}</p>
 					{/if}
-					<Button type="submit" class="w-full" disabled={loading || success}>
+					<Button icon="save" type="submit" class="w-full" disabled={loading || success}>
 						{loading ? 'Saving...' : 'Save new password'}
 					</Button>
 				</form>

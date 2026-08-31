@@ -195,7 +195,12 @@
 					{:else}
 						<div class="space-y-4">
 							<CustomerFields bind:value={newCustomer} idPrefix="prod-cust" />
-							<Button type="button" variant="outline" onclick={() => (creatingCustomer = false)}>
+							<Button
+								icon="close"
+								type="button"
+								variant="outline"
+								onclick={() => (creatingCustomer = false)}
+							>
 								Cancel new customer
 							</Button>
 						</div>
@@ -203,8 +208,10 @@
 				</div>
 
 				<div class="flex justify-end gap-4 pt-4">
-					<Button type="button" variant="outline" href={resolve('/productions')}>Cancel</Button>
-					<Button type="submit" disabled={saving}>
+					<Button icon="close" type="button" variant="outline" href={resolve('/productions')}
+						>Cancel</Button
+					>
+					<Button icon="add" type="submit" disabled={saving}>
 						{saving ? 'Creating...' : 'Create Production'}
 					</Button>
 				</div>

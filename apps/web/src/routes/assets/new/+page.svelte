@@ -446,8 +446,10 @@
 							Create another after saving
 						</label>
 						<div class="flex justify-end gap-4">
-							<Button type="button" variant="outline" href={resolve('/assets')}>Cancel</Button>
-							<Button type="submit" disabled={saving}>
+							<Button icon="close" type="button" variant="outline" href={resolve('/assets')}
+								>Cancel</Button
+							>
+							<Button icon="add" type="submit" disabled={saving}>
 								{saving ? 'Saving…' : quantity > 1 ? `Add ${quantity} Assets` : 'Add Asset'}
 							</Button>
 						</div>
@@ -467,7 +469,7 @@
 	<ProductFields {categories} bind:value={newProductDraft} idPrefix="modal-product" />
 
 	{#snippet footer()}
-		<Button type="button" variant="outline" onclick={cancelNewProduct}>Cancel</Button>
-		<Button type="button" onclick={confirmNewProduct}>Add Product</Button>
+		<Button icon="close" type="button" variant="outline" onclick={cancelNewProduct}>Cancel</Button>
+		<Button icon="add" type="button" onclick={confirmNewProduct}>Add Product</Button>
 	{/snippet}
 </Modal>

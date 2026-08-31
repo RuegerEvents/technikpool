@@ -446,7 +446,9 @@
 										>Delete unused</Button
 									>
 								{/if}
-								<Button variant="outline" size="sm" onclick={openMerge}>Merge duplicate…</Button>
+								<Button icon="merge" variant="outline" size="sm" onclick={openMerge}
+									>Merge duplicate…</Button
+								>
 							{/if}
 							<span class="font-mono text-sm text-muted-foreground tabular-nums"
 								>{index + 1} / {visible.length}</span
@@ -478,13 +480,18 @@
 						<span>save</span>
 					</div>
 					<div class="flex items-center gap-2">
-						<Button variant="outline" onclick={() => go(-1)} disabled={index === 0 || saving}>
+						<Button
+							icon="back"
+							variant="outline"
+							onclick={() => go(-1)}
+							disabled={index === 0 || saving}
+						>
 							Previous
 						</Button>
-						<Button variant="outline" onclick={saveAndStay} disabled={!dirty || saving}>
+						<Button icon="save" variant="outline" onclick={saveAndStay} disabled={!dirty || saving}>
 							{saving ? 'Saving…' : 'Save'}
 						</Button>
-						<Button onclick={() => go(1)} disabled={saving}>
+						<Button icon="forward" onclick={() => go(1)} disabled={saving}>
 							{index + 1 === visible.length ? 'Save & finish' : 'Save & next'}
 						</Button>
 					</div>
@@ -572,8 +579,10 @@
 	</div>
 
 	{#snippet footer()}
-		<Button variant="outline" onclick={() => (mergeOpen = false)} disabled={merging}>Cancel</Button>
-		<Button onclick={doMerge} disabled={!picked || merging}>
+		<Button icon="close" variant="outline" onclick={() => (mergeOpen = false)} disabled={merging}>
+			Cancel
+		</Button>
+		<Button icon="merge" onclick={doMerge} disabled={!picked || merging}>
 			{merging ? 'Merging…' : 'Merge'}
 		</Button>
 	{/snippet}
@@ -592,10 +601,11 @@
 	{/if}
 
 	{#snippet footer()}
-		<Button variant="outline" onclick={() => (deleteOpen = false)} disabled={deleting}
+		<Button icon="close" variant="outline" onclick={() => (deleteOpen = false)} disabled={deleting}
 			>Cancel</Button
 		>
 		<Button
+			icon="delete"
 			variant="destructive"
 			onclick={doDelete}
 			disabled={!current || current.hasAssets || deleting}

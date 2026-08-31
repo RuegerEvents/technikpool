@@ -8,6 +8,20 @@
 	import { Toaster } from 'svelte-sonner';
 	import { browser } from '$app/environment';
 	import { DropdownMenu } from 'bits-ui';
+	import {
+		Boxes,
+		CalendarDays,
+		ClipboardCheck,
+		Clapperboard,
+		FileText,
+		FolderKanban,
+		Package,
+		ReceiptText,
+		ScanBarcode,
+		Shapes,
+		Tags,
+		Wrench
+	} from '@lucide/svelte';
 
 	let { data, children } = $props();
 
@@ -56,38 +70,60 @@
 						<span class="inline-block text-xl font-bold tracking-tight">Technikpool</span>
 					</a>
 					{#if data.user}
-						<nav class="hidden gap-6 md:flex">
+						<nav class="hidden gap-3 md:flex lg:gap-5">
 							<a
 								href={resolve('/assets')}
-								class="text-sm font-medium transition-colors {page.url.pathname.startsWith(
+								class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
 									'/assets'
 								)
 									? 'text-foreground'
-									: 'text-muted-foreground hover:text-foreground'}">Devices</a
+									: 'text-muted-foreground hover:text-foreground'}"
+								><Package aria-hidden="true" class="size-4" />Devices</a
 							>
 							<a
 								href={resolve('/productions')}
-								class="text-sm font-medium transition-colors {page.url.pathname.startsWith(
+								class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
 									'/productions'
 								)
 									? 'text-foreground'
-									: 'text-muted-foreground hover:text-foreground'}">Productions</a
+									: 'text-muted-foreground hover:text-foreground'}"
+								><Clapperboard aria-hidden="true" class="size-4" />Productions</a
 							>
 							<a
 								href={resolve('/calendar')}
-								class="text-sm font-medium transition-colors {page.url.pathname.startsWith(
+								class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
 									'/calendar'
 								)
 									? 'text-foreground'
-									: 'text-muted-foreground hover:text-foreground'}">Calendar</a
+									: 'text-muted-foreground hover:text-foreground'}"
+								><CalendarDays aria-hidden="true" class="size-4" />Calendar</a
 							>
 							<a
 								href={resolve('/checkout')}
-								class="text-sm font-medium transition-colors {page.url.pathname.startsWith(
+								class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
 									'/checkout'
 								)
 									? 'text-foreground'
-									: 'text-muted-foreground hover:text-foreground'}">Checkout</a
+									: 'text-muted-foreground hover:text-foreground'}"
+								><ScanBarcode aria-hidden="true" class="size-4" />Checkout</a
+							>
+							<a
+								href={resolve('/offers')}
+								class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
+									'/offers'
+								)
+									? 'text-foreground'
+									: 'text-muted-foreground hover:text-foreground'}"
+								><FileText aria-hidden="true" class="size-4" />Offers</a
+							>
+							<a
+								href={resolve('/invoices')}
+								class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
+									'/invoices'
+								)
+									? 'text-foreground'
+									: 'text-muted-foreground hover:text-foreground'}"
+								><ReceiptText aria-hidden="true" class="size-4" />Invoices</a
 							>
 							<DropdownMenu.Root>
 								<DropdownMenu.Trigger>
@@ -99,10 +135,13 @@
 												'/stickers'
 											) ||
 											page.url.pathname.startsWith('/products') ||
-											page.url.pathname.startsWith('/devices')
+											page.url.pathname.startsWith('/devices') ||
+											page.url.pathname.startsWith('/inspections') ||
+											page.url.pathname.startsWith('/admin/categories')
 												? 'text-foreground'
 												: 'text-muted-foreground hover:text-foreground'}"
 										>
+											<Wrench aria-hidden="true" class="size-4" />
 											Tools
 											<svg
 												xmlns="http://www.w3.org/2000/svg"
@@ -124,42 +163,43 @@
 									<DropdownMenu.Content
 										align="start"
 										sideOffset={6}
-										class="z-50 min-w-[180px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+										class="z-50 min-w-[180px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md [&_svg]:size-4"
 									>
 										<DropdownMenu.Item
 											onSelect={() => goto(resolve('/products'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
+											<Boxes aria-hidden="true" />
 											Products
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
 											onSelect={() => goto(resolve('/stickers'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
+											<Tags aria-hidden="true" />
 											Stickers
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
 											onSelect={() => goto(resolve('/inspections'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
+											<ClipboardCheck aria-hidden="true" />
 											Inspections
 										</DropdownMenu.Item>
-										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/offers'))}
-											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-										>
-											Offers
-										</DropdownMenu.Item>
-										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/invoices'))}
-											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-										>
-											Invoices
-										</DropdownMenu.Item>
+										{#if data.isAdmin}
+											<DropdownMenu.Item
+												onSelect={() => goto(resolve('/admin/categories'))}
+												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+											>
+												<Shapes aria-hidden="true" />
+												Categories
+											</DropdownMenu.Item>
+										{/if}
 										<DropdownMenu.Item
 											onSelect={() => goto(resolve('/devices'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
+											<ScanBarcode aria-hidden="true" />
 											Scanners
 										</DropdownMenu.Item>
 									</DropdownMenu.Content>
@@ -167,20 +207,13 @@
 							</DropdownMenu.Root>
 							{#if data.isAdmin}
 								<a
-									href={resolve('/admin/categories')}
-									class="text-sm font-medium transition-colors {page.url.pathname.startsWith(
-										'/admin/categories'
-									)
-										? 'text-foreground'
-										: 'text-muted-foreground hover:text-foreground'}">Categories</a
-								>
-								<a
 									href={resolve('/admin/users')}
-									class="text-sm font-medium transition-colors {page.url.pathname.startsWith(
+									class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
 										'/admin'
 									)
 										? 'text-foreground'
-										: 'text-muted-foreground hover:text-foreground'}">Admin</a
+										: 'text-muted-foreground hover:text-foreground'}"
+									><FolderKanban aria-hidden="true" class="size-4" />Admin</a
 								>
 							{/if}
 						</nav>

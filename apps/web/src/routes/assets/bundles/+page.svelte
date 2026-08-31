@@ -20,7 +20,7 @@
 			<h1 class="text-3xl font-bold tracking-tight">Asset Bundles</h1>
 			<p class="text-muted-foreground">Groups of assets that travel together.</p>
 		</div>
-		<Button href={resolve('/assets/bundles/new')}>New Bundle</Button>
+		<Button icon="add" href={resolve('/assets/bundles/new')}>New Bundle</Button>
 	</div>
 
 	{#if templates.length === 0}

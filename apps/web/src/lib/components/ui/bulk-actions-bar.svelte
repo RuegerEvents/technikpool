@@ -183,6 +183,7 @@
 
 		{#snippet footer()}
 			<Button
+				icon="close"
 				type="button"
 				variant="outline"
 				onclick={() => (confirmingRetire = false)}
