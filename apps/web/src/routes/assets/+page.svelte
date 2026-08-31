@@ -128,8 +128,12 @@
 		brokenInstances: number;
 	};
 
-	// In bundle view, exclude bundled assets from product groups
-	let baseAssets = $derived(bundleGrouping ? assets.filter((a) => !a.bundleId) : assets);
+	// Bundle view is about top-level inventory structure. Components belonging to
+	// a bundle appear under that bundle; attached accessories stay exclusive to
+	// All Products, where they can be found and managed as individual units.
+	let baseAssets = $derived(
+		bundleGrouping ? assets.filter((a) => !a.bundleId && !a.parentAssetId) : assets
+	);
 
 	let visibleAssets = $derived(
 		baseAssets
@@ -193,6 +197,7 @@
 					.map((t) => {
 						const instanceGroups: InstanceGroup[] = t.instances.map((inst) => {
 							const filteredAssets = inst.assets
+								.filter((a) => !a.parentAssetId)
 								.filter((a) => !statusFilter || a.status === statusFilter)
 								.filter((a) => !categoryFilter || a.product.categoryId === categoryFilter);
 							return {
@@ -223,13 +228,15 @@
 						if (t.instances.some((i) => i.tag?.toLowerCase().includes(searchTrimmed))) return true;
 						// Search full asset list so bundles surface even when status/category filter hides the match
 						return t.instances.some((inst) =>
-							inst.assets.some(
-								(a) =>
-									a.product.name.toLowerCase().includes(searchTrimmed) ||
-									a.product.manufacturer.name.toLowerCase().includes(searchTrimmed) ||
-									(a.serialNumber?.toLowerCase().includes(searchTrimmed) ?? false) ||
-									(a.assetTag?.toLowerCase().includes(searchTrimmed) ?? false)
-							)
+							inst.assets
+								.filter((a) => !a.parentAssetId)
+								.some(
+									(a) =>
+										a.product.name.toLowerCase().includes(searchTrimmed) ||
+										a.product.manufacturer.name.toLowerCase().includes(searchTrimmed) ||
+										(a.serialNumber?.toLowerCase().includes(searchTrimmed) ?? false) ||
+										(a.assetTag?.toLowerCase().includes(searchTrimmed) ?? false)
+								)
 						);
 					})
 	);
