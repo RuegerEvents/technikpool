@@ -158,7 +158,7 @@
 
 	<form onsubmit={handleSubmit} class="space-y-6">
 		<!-- Bundle details -->
-		<Card.Root>
+		<Card.Root class="overflow-visible">
 			<Card.Header>
 				<Card.Title>Bundle Details</Card.Title>
 			</Card.Header>
