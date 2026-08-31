@@ -269,6 +269,7 @@ msgstr "Entfernen"
 #: src/routes/assets/new/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
+#: src/routes/products/+page.svelte
 msgid "Manufacturer"
 msgstr "Hersteller"
 
@@ -382,6 +383,7 @@ msgid "Asset Tag"
 msgstr "Asset-Tag"
 
 #: src/routes/assets/+page.svelte
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
@@ -432,6 +434,7 @@ msgstr "Tag"
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
+#: src/routes/assets/+page.svelte
 #: src/routes/invoices/+page.svelte
 #: src/routes/invoices/[id]/print/+page.svelte
 #: src/routes/invoices/[id]/print/+page.svelte
@@ -446,16 +449,19 @@ msgstr "Gesamt"
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
+#: src/routes/assets/+page.svelte
 msgid "Available"
 msgstr "Verfügbar"
 
 #: src/lib/components/ui/asset-status/asset-status.svelte.ts
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
+#: src/routes/assets/+page.svelte
 msgid "Maintenance"
 msgstr "Wartung"
 
 #: src/lib/components/ui/asset-status/asset-status.svelte.ts
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
@@ -3016,6 +3022,7 @@ msgstr "Angebot — {0}"
 msgid "Copy to new customer"
 msgstr "Für neuen Kunden kopieren"
 
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
 msgid "Converting…"
 msgstr "Wird umgewandelt…"
@@ -3957,12 +3964,16 @@ msgstr "Bundle · {0}{1}"
 
 #. 0: i + 1
 #. 0: i + 1
+#. 0: i + 1
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/bundles/+page.svelte
 msgid "Instance {0}"
 msgstr "Instanz {0}"
 
 #. 0: instance.filteredAssets.length
+#. 0: instance.filteredAssets.length
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 msgid "{0} items"
 msgstr "{0} Geräte"
@@ -4936,6 +4947,7 @@ msgid "Every unit already has that — nothing to do"
 msgstr "Jede Einheit hat das bereits — nichts zu tun"
 
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 msgid "1 accessory"
 msgid_plural "# accessories"
 msgstr[0] "1 Zubehörteil"
@@ -5012,3 +5024,166 @@ msgstr "Auf die übrigen übertragen"
 #: src/routes/assets/[id]/+page.svelte
 msgid "{0} of {1} units of this product have this."
 msgstr "{0} von {1} Einheiten dieses Produkts haben das."
+
+#: src/routes/products/+page.svelte
+msgid "Merged — # unit moved"
+msgid_plural "Merged — # units moved"
+msgstr[0] "Zusammengeführt — # Einheit verschoben"
+msgstr[1] "Zusammengeführt — # Einheiten verschoben"
+
+#: src/routes/products/+page.svelte
+msgid "Merge duplicate…"
+msgstr "Duplikat zusammenführen…"
+
+#: src/routes/products/+page.svelte
+msgid "Merge duplicate product"
+msgstr "Doppeltes Produkt zusammenführen"
+
+#~ msgid "Two entries for one device split its units in half, and every count built on them is half right. Pick the other entry — its units move here and it disappears."
+#~ msgstr "Zwei Einträge für dasselbe Gerät teilen seine Einheiten auf, und jede Zahl, die darauf aufbaut, stimmt nur zur Hälfte. Wählen Sie den anderen Eintrag — seine Einheiten wandern hierher und er verschwindet."
+
+#~ msgid "Search the whole catalog…"
+#~ msgstr ""
+
+#: src/routes/products/+page.svelte
+msgid "# unit here"
+msgid_plural "# units here"
+msgstr[0] "# Einheit hier"
+msgstr[1] "# Einheiten hier"
+
+#: src/routes/products/+page.svelte
+msgid "Which name is right?"
+msgstr "Welcher Name ist der richtige?"
+
+#~ msgid "Its # unit becomes a"
+#~ msgid_plural "Its # units become"
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#: src/routes/products/+page.svelte
+msgid "The image and the purchase price come along — this entry has neither."
+msgstr "Bild und Einkaufspreis kommen mit — dieser Eintrag hat beides nicht."
+
+#: src/routes/products/+page.svelte
+msgid "The image comes along — this entry has none."
+msgstr "Das Bild kommt mit — dieser Eintrag hat keins."
+
+#: src/routes/products/+page.svelte
+msgid "The purchase price comes along — this entry has none."
+msgstr "Der Einkaufspreis kommt mit — dieser Eintrag hat keinen."
+
+#: src/routes/products/+page.svelte
+msgid "Different manufacturers: the units end up under <0/>."
+msgstr "Unterschiedliche Hersteller: Die Einheiten landen unter <0/>."
+
+#. 0: plural(movingCount, ['Its # unit becomes', 'Its # units become'])
+#: src/routes/products/+page.svelte
+msgid "<0/> is deleted. {0} <1/> — same tags, same history, same accessories."
+msgstr "<0/> wird gelöscht. {0} <1/> — gleiche Tags, gleiche Historie, gleiches Zubehör."
+
+#: src/routes/products/+page.svelte
+msgid "Offers and invoices already written are not touched — they say what they said."
+msgstr "Bereits geschriebene Angebote und Rechnungen bleiben unberührt — sie sagen, was sie gesagt haben."
+
+#: src/routes/products/+page.svelte
+msgid "Merging…"
+msgstr "Wird zusammengeführt…"
+
+#: src/routes/products/+page.svelte
+msgid "Merge"
+msgstr "Zusammenführen"
+
+#: src/routes/products/+page.svelte
+msgid "Its # unit becomes"
+msgid_plural "Its # units become"
+msgstr[0] "Seine # Einheit wird zu"
+msgstr[1] "Seine # Einheiten werden zu"
+
+#: src/routes/products/+page.svelte
+msgid "Search the whole catalog for the duplicate…"
+msgstr "Im gesamten Katalog nach dem Duplikat suchen…"
+
+#: src/routes/products/+page.svelte
+msgid "Two entries for one device split its units in half, and every count built on them is half right. Pick the other entry, then say which of the two names is the one to keep."
+msgstr "Zwei Einträge für dasselbe Gerät teilen seine Einheiten auf, und jede Zahl, die darauf aufbaut, stimmt nur zur Hälfte. Wählen Sie den anderen Eintrag und sagen Sie dann, welcher der beiden Namen bleiben soll."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Bundle image regenerated"
+msgstr "Bundle-Bild neu erstellt"
+
+#. 0: template.name
+#. 0: bundle.template.name
+#: src/routes/assets/bundles/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Generated preview of {0}"
+msgstr "Erzeugte Vorschau von {0}"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Regenerating…"
+msgstr "Wird neu erstellt…"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Regenerate image"
+msgstr "Bild neu erstellen"
+
+#: src/routes/assets/+page.svelte
+msgid "Select all units in bundle"
+msgstr ""
+
+#: src/routes/assets/[id]/+page.svelte
+#: src/routes/products/+page.svelte
+msgid "Manufacturer is required"
+msgstr ""
+
+#: src/routes/assets/[id]/+page.svelte
+#: src/routes/products/+page.svelte
+msgid "Search manufacturers…"
+msgstr ""
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Device Image"
+msgstr "Gerätebild"
+
+#. 0: asset.product.name
+#: src/routes/assets/[id]/+page.svelte
+msgid "{0} with accessories"
+msgstr "{0} mit Zubehör"
+
+#~ msgid "Bundle converted — {0} {1} attached"
+#~ msgstr ""
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Convert to device"
+msgstr "In Gerät mit Zubehör umwandeln"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Convert Bundle to Device"
+msgstr "Bundle in Gerät mit Zubehör umwandeln"
+
+#~ msgid "Choose the main device. Every other device in this bundle will become its accessory."
+#~ msgstr ""
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Convert bundle"
+msgstr "Bundle umwandeln"
+
+#. 0: plural(result.accessories, ['1 accessory', '# accessories'])
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Bundle converted — {0} attached"
+msgstr "Bundle umgewandelt — {0} angehängt"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "More actions"
+msgstr "Weitere Aktionen"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "· already an accessory"
+msgstr "· bereits Zubehör"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Choose the main device. Every other device in this bundle will become its accessory. The bundle instance will be removed; its bundle price and tag will no longer apply. Existing bookings stay intact as individual device bookings."
+msgstr "Wähle das Hauptgerät aus. Alle anderen Geräte in diesem Bundle werden zu seinem Zubehör. Das Bundle wird entfernt; sein Bundle-Preis und Tag entfallen. Bestehende Buchungen bleiben als einzelne Gerätebuchungen erhalten."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Choose main device"
+msgstr "Hauptgerät auswählen"

@@ -12,7 +12,8 @@ import {
 	isRetiredStatus
 } from '$lib/asset-status';
 import { syncAccessories } from '$lib/server/services/accessories';
-import { ensureBundleImage } from '$lib/server/services/bundle-image';
+import { ensureAssetImage, ensureBundleImage } from '$lib/server/services/bundle-image';
+import { getProduction } from '$lib/remote/productions.remote';
 
 async function ensureBundleImageWithoutBreakingRead(
 	bundle: Parameters<typeof ensureBundleImage>[0]
@@ -24,6 +25,17 @@ async function ensureBundleImageWithoutBreakingRead(
 		// retries because the fingerprint was not persisted.
 		console.error(`Could not refresh generated image for bundle "${bundle.id}":`, cause);
 		return bundle.imagePath;
+	}
+}
+
+async function ensureAssetImageWithoutBreakingRead(asset: Parameters<typeof ensureAssetImage>[0]) {
+	try {
+		return await ensureAssetImage(asset);
+	} catch (cause) {
+		// A generated preview is an enhancement; storage trouble must not make
+		// inventory pages unavailable.
+		console.error(`Could not refresh generated image for asset "${asset.id}":`, cause);
+		return asset.generatedImagePath;
 	}
 }
 
@@ -62,7 +74,7 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 	const user = await requireAuth();
 	const queryOrgIds = await scopedOrgIds(user.id, organizationId);
 
-	return await prisma.asset.findMany({
+	const assets = await prisma.asset.findMany({
 		where: { organizationId: { in: queryOrgIds }, ...ACTIVE_ASSET_WHERE },
 		include: {
 			product: { include: { manufacturer: true, category: true } },
@@ -74,6 +86,8 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 		},
 		orderBy: ASSET_ORDER_BY
 	});
+	await Promise.all(assets.map((asset) => ensureAssetImageWithoutBreakingRead(asset)));
+	return assets;
 });
 
 /**
@@ -123,6 +137,7 @@ export const getAsset = query(v.string(), async (assetId: string) => {
 		throw new Error('Unauthorized');
 	}
 
+	await ensureAssetImageWithoutBreakingRead(asset);
 	return asset;
 });
 
@@ -1761,6 +1776,122 @@ export const removeAssetFromBundle = command(bundleAssetSchema, async ({ bundleI
 	await getAssets(bundle.template.organizationId).refresh();
 	return { bundleId, assetId };
 });
+
+const convertBundleToAccessoriesSchema = v.object({
+	bundleId: v.string(),
+	mainAssetId: v.string()
+});
+
+/** Replace one physical bundle with a main device and its attached accessories. */
+export const convertBundleToAccessories = command(
+	convertBundleToAccessoriesSchema,
+	async ({ bundleId, mainAssetId }) => {
+		const user = await requireAuth();
+		const systemAdmin = await isSystemAdmin(user.id);
+		const bundle = await prisma.assetBundle.findUniqueOrThrow({
+			where: { id: bundleId },
+			include: {
+				template: true,
+				productionItems: { select: { productionId: true } },
+				assets: {
+					include: {
+						product: { select: { name: true, manufacturer: { select: { name: true } } } }
+					}
+				}
+			}
+		});
+
+		if (!systemAdmin) {
+			const membership = await prisma.orgMembership.findUnique({
+				where: {
+					userId_organizationId: {
+						userId: user.id,
+						organizationId: bundle.template.organizationId
+					}
+				}
+			});
+			if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
+				error(403, 'Unauthorized');
+			}
+		}
+
+		if (bundle.assets.length < 2) {
+			error(409, 'A bundle needs at least two devices to be converted');
+		}
+		const main = bundle.assets.find((asset) => asset.id === mainAssetId);
+		if (!main) error(409, 'The selected main device is not in this bundle');
+		if (main.parentAssetId) {
+			error(409, 'The main device cannot itself be an accessory');
+		}
+		if (bundle.assets.some((asset) => asset.organizationId !== main.organizationId)) {
+			error(409, 'All bundle members must belong to the same organisation');
+		}
+
+		const newlyAttached = bundle.assets.filter(
+			(asset) => asset.id !== main.id && asset.parentAssetId !== main.id
+		);
+		const productionIds = [...new Set(bundle.productionItems.map((item) => item.productionId))];
+		await prisma.$transaction(async (tx) => {
+			// Existing nested groups are deliberately flattened: after conversion the
+			// selected device is the only parent and every other member follows it.
+			await tx.asset.updateMany({
+				where: { bundleId, id: { not: main.id } },
+				data: { parentAssetId: main.id, bundleId: null, locationId: main.locationId }
+			});
+			await tx.asset.update({ where: { id: main.id }, data: { bundleId: null } });
+			// A production booking remains intact, but it no longer points at a bundle
+			// that will cease to exist.
+			await tx.productionItem.updateMany({
+				where: { sourceBundleId: bundleId },
+				data: { sourceBundleId: null }
+			});
+			for (const accessory of newlyAttached) {
+				await tx.assetTransaction.create({
+					data: {
+						assetId: accessory.id,
+						userId: user.id,
+						action: 'ACCESSORY_ATTACHED',
+						data: {
+							type: 'ACCESSORY_ATTACHED',
+							parentAssetId: main.id,
+							parentLabel: assetLabel(main),
+							convertedFromBundleId: bundleId
+						}
+					}
+				});
+			}
+			await tx.assetBundle.delete({ where: { id: bundleId } });
+			const remainingInstances = await tx.assetBundle.count({
+				where: { templateId: bundle.templateId }
+			});
+			if (remainingInstances === 0) {
+				await tx.bundleTemplate.delete({ where: { id: bundle.templateId } });
+			}
+		});
+
+		await Promise.all([
+			getAsset(main.id).refresh(),
+			getAssetHistory(main.id).refresh(),
+			getAssets(main.organizationId).refresh(),
+			getAssets().refresh(),
+			getBundles(main.organizationId).refresh(),
+			getBundles().refresh(),
+			getBundleTemplates(main.organizationId).refresh(),
+			getBundleTemplates().refresh(),
+			getProductAccessoryProfile({
+				productId: main.productId,
+				organizationId: main.organizationId
+			}).refresh(),
+			...newlyAttached.flatMap((asset) => [
+				getAsset(asset.id).refresh(),
+				getAssetHistory(asset.id).refresh()
+			]),
+			...productionIds.map((productionId) => getProduction(productionId).refresh())
+		]);
+
+		return { assetId: main.id, accessories: bundle.assets.length - 1 };
+	}
+);
 
 // ── Accessories ───────────────────────────────────────────────────────────────
 

@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { categoryLabel } from '$lib/category';
 	import { imageSrc } from '$lib/images';
-	import { getErrorMessage, orgLabel } from '$lib/utils';
+	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
+	import { DropdownMenu } from 'bits-ui';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Modal } from '$lib/components/ui/modal';
@@ -20,7 +21,8 @@
 		removeAssetFromBundle,
 		updateBundleTemplate,
 		updateBundle,
-		regenerateBundleImage
+		regenerateBundleImage,
+		convertBundleToAccessories
 	} from '$lib/remote/assets.remote';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
@@ -106,6 +108,29 @@
 	let categoryFilter = $state('');
 	let working = $state(false);
 	let regeneratingImage = $state(false);
+	let converting = $state(false);
+	let convertOpen = $state(false);
+	let mainAssetId = $state('');
+
+	function openConvert() {
+		mainAssetId = bundle.assets.find((asset) => !asset.parentAssetId)?.id ?? '';
+		convertOpen = true;
+	}
+
+	async function handleConvert() {
+		if (!mainAssetId) return;
+		converting = true;
+		try {
+			const result = await convertBundleToAccessories({ bundleId, mainAssetId });
+			toast.success(
+				`Bundle converted — ${plural(result.accessories, ['1 accessory', '# accessories'])} attached`
+			);
+			await goto(resolve(`/assets/${result.assetId}`));
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+			converting = false;
+		}
+	}
 
 	async function handleRegenerateImage() {
 		regeneratingImage = true;
@@ -233,6 +258,45 @@
 				Print Inventory List
 			</Button>
 			<Button variant="outline" href={resolve('/assets')}>Back to Devices</Button>
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger>
+					{#snippet child({ props })}
+						<button
+							{...props}
+							type="button"
+							class="flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+							aria-label="More actions"
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="18"
+								height="18"
+								viewBox="0 0 24 24"
+								fill="currentColor"
+							>
+								<circle cx="5" cy="12" r="1.75" />
+								<circle cx="12" cy="12" r="1.75" />
+								<circle cx="19" cy="12" r="1.75" />
+							</svg>
+						</button>
+					{/snippet}
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Portal>
+					<DropdownMenu.Content
+						align="end"
+						sideOffset={4}
+						class="z-50 min-w-[190px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+					>
+						<DropdownMenu.Item
+							disabled={bundle.assets.length < 2}
+							onSelect={openConvert}
+							class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-accent"
+						>
+							Convert to device
+						</DropdownMenu.Item>
+					</DropdownMenu.Content>
+				</DropdownMenu.Portal>
+			</DropdownMenu.Root>
 		</div>
 	</div>
 
@@ -403,6 +467,52 @@
 		</Card.Root>
 	</div>
 </div>
+
+<Modal bind:open={convertOpen} title="Convert Bundle to Device" dismissible={!converting}>
+	{#snippet description()}
+		Choose the main device. Every other device in this bundle will become its accessory. The bundle
+		instance will be removed; its bundle price and tag will no longer apply. Existing bookings stay
+		intact as individual device bookings.
+	{/snippet}
+	<div class="space-y-4">
+		<fieldset class="space-y-2" aria-label="Choose main device">
+			{#each bundle.assets as asset (asset.id)}
+				<label
+					class="flex items-center gap-3 rounded-md border p-3 {asset.parentAssetId
+						? 'cursor-not-allowed opacity-50'
+						: 'cursor-pointer hover:bg-muted/40'}"
+				>
+					<input
+						type="radio"
+						name="main-device"
+						value={asset.id}
+						bind:group={mainAssetId}
+						disabled={asset.parentAssetId !== null || converting}
+					/>
+					<ProductThumb path={asset.product.imagePath} alt={asset.product.name} />
+					<span class="min-w-0">
+						<span class="block truncate font-medium">{asset.product.name}</span>
+						<span class="block text-xs text-muted-foreground">
+							{asset.product.manufacturer.name}{asset.assetTag
+								? ` · ${asset.assetTag}`
+								: ''}{#if asset.parentAssetId}
+								· already an accessory
+							{/if}
+						</span>
+					</span>
+				</label>
+			{/each}
+		</fieldset>
+	</div>
+	{#snippet footer()}
+		<Button variant="outline" disabled={converting} onclick={() => (convertOpen = false)}>
+			Cancel
+		</Button>
+		<Button disabled={converting || !mainAssetId} onclick={handleConvert}>
+			{converting ? 'Converting…' : 'Convert bundle'}
+		</Button>
+	{/snippet}
+</Modal>
 
 <Modal bind:open={showAddModal} title="Add Assets to Bundle" size="xl">
 	{#snippet description()}

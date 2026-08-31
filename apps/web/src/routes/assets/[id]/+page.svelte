@@ -45,6 +45,9 @@
 	// Sold and decommissioned freeze everything but the status itself, so the
 	// unit can be brought back if it was retired by mistake.
 	let retired = $derived(isRetiredStatus(asset.status));
+	let displayImagePath = $derived(
+		asset.accessories.length > 0 ? asset.generatedImagePath : asset.product.imagePath
+	);
 
 	// ── Accessories ───────────────────────────────────────────────────────────
 	// What can be attached here: an active unit of this org that is not already
@@ -671,11 +674,13 @@
 					</div>
 
 					<div class="space-y-2">
-						<Label>Product Image</Label>
-						{#if asset.product.imagePath}
+						<Label>{asset.accessories.length > 0 ? 'Device Image' : 'Product Image'}</Label>
+						{#if displayImagePath}
 							<img
-								src={imageSrc(asset.product.imagePath)}
-								alt={asset.product.name}
+								src={imageSrc(displayImagePath)}
+								alt={asset.accessories.length > 0
+									? `${asset.product.name} with accessories`
+									: asset.product.name}
 								class="h-40 w-full rounded-md border bg-muted/30 object-contain p-2"
 							/>
 						{:else}

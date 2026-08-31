@@ -2665,6 +2665,8 @@ export const AssetScalarFieldEnum = {
   status: 'status',
   bundleId: 'bundleId',
   parentAssetId: 'parentAssetId',
+  generatedImagePath: 'generatedImagePath',
+  generatedImageFingerprint: 'generatedImageFingerprint',
   purchaseDate: 'purchaseDate',
   inspectionIntervalMonths: 'inspectionIntervalMonths',
   nextInspectionDue: 'nextInspectionDue',

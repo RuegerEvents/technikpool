@@ -44,6 +44,8 @@ export type AssetMinAggregateOutputType = {
   status: string | null
   bundleId: string | null
   parentAssetId: string | null
+  generatedImagePath: string | null
+  generatedImageFingerprint: string | null
   purchaseDate: Date | null
   inspectionIntervalMonths: number | null
   nextInspectionDue: Date | null
@@ -61,6 +63,8 @@ export type AssetMaxAggregateOutputType = {
   status: string | null
   bundleId: string | null
   parentAssetId: string | null
+  generatedImagePath: string | null
+  generatedImageFingerprint: string | null
   purchaseDate: Date | null
   inspectionIntervalMonths: number | null
   nextInspectionDue: Date | null
@@ -78,6 +82,8 @@ export type AssetCountAggregateOutputType = {
   status: number
   bundleId: number
   parentAssetId: number
+  generatedImagePath: number
+  generatedImageFingerprint: number
   purchaseDate: number
   inspectionIntervalMonths: number
   nextInspectionDue: number
@@ -105,6 +111,8 @@ export type AssetMinAggregateInputType = {
   status?: true
   bundleId?: true
   parentAssetId?: true
+  generatedImagePath?: true
+  generatedImageFingerprint?: true
   purchaseDate?: true
   inspectionIntervalMonths?: true
   nextInspectionDue?: true
@@ -122,6 +130,8 @@ export type AssetMaxAggregateInputType = {
   status?: true
   bundleId?: true
   parentAssetId?: true
+  generatedImagePath?: true
+  generatedImageFingerprint?: true
   purchaseDate?: true
   inspectionIntervalMonths?: true
   nextInspectionDue?: true
@@ -139,6 +149,8 @@ export type AssetCountAggregateInputType = {
   status?: true
   bundleId?: true
   parentAssetId?: true
+  generatedImagePath?: true
+  generatedImageFingerprint?: true
   purchaseDate?: true
   inspectionIntervalMonths?: true
   nextInspectionDue?: true
@@ -243,6 +255,8 @@ export type AssetGroupByOutputType = {
   status: string
   bundleId: string | null
   parentAssetId: string | null
+  generatedImagePath: string | null
+  generatedImageFingerprint: string | null
   purchaseDate: Date | null
   inspectionIntervalMonths: number | null
   nextInspectionDue: Date | null
@@ -283,6 +297,8 @@ export type AssetWhereInput = {
   status?: Prisma.StringFilter<"Asset"> | string
   bundleId?: Prisma.StringNullableFilter<"Asset"> | string | null
   parentAssetId?: Prisma.StringNullableFilter<"Asset"> | string | null
+  generatedImagePath?: Prisma.StringNullableFilter<"Asset"> | string | null
+  generatedImageFingerprint?: Prisma.StringNullableFilter<"Asset"> | string | null
   purchaseDate?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
   inspectionIntervalMonths?: Prisma.IntNullableFilter<"Asset"> | number | null
   nextInspectionDue?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
@@ -309,6 +325,8 @@ export type AssetOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   bundleId?: Prisma.SortOrderInput | Prisma.SortOrder
   parentAssetId?: Prisma.SortOrderInput | Prisma.SortOrder
+  generatedImagePath?: Prisma.SortOrderInput | Prisma.SortOrder
+  generatedImageFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
   purchaseDate?: Prisma.SortOrderInput | Prisma.SortOrder
   inspectionIntervalMonths?: Prisma.SortOrderInput | Prisma.SortOrder
   nextInspectionDue?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -338,6 +356,8 @@ export type AssetWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.StringFilter<"Asset"> | string
   bundleId?: Prisma.StringNullableFilter<"Asset"> | string | null
   parentAssetId?: Prisma.StringNullableFilter<"Asset"> | string | null
+  generatedImagePath?: Prisma.StringNullableFilter<"Asset"> | string | null
+  generatedImageFingerprint?: Prisma.StringNullableFilter<"Asset"> | string | null
   purchaseDate?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
   inspectionIntervalMonths?: Prisma.IntNullableFilter<"Asset"> | number | null
   nextInspectionDue?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
@@ -364,6 +384,8 @@ export type AssetOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   bundleId?: Prisma.SortOrderInput | Prisma.SortOrder
   parentAssetId?: Prisma.SortOrderInput | Prisma.SortOrder
+  generatedImagePath?: Prisma.SortOrderInput | Prisma.SortOrder
+  generatedImageFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
   purchaseDate?: Prisma.SortOrderInput | Prisma.SortOrder
   inspectionIntervalMonths?: Prisma.SortOrderInput | Prisma.SortOrder
   nextInspectionDue?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -389,6 +411,8 @@ export type AssetScalarWhereWithAggregatesInput = {
   status?: Prisma.StringWithAggregatesFilter<"Asset"> | string
   bundleId?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
   parentAssetId?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
+  generatedImagePath?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
+  generatedImageFingerprint?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
   purchaseDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Asset"> | Date | string | null
   inspectionIntervalMonths?: Prisma.IntNullableWithAggregatesFilter<"Asset"> | number | null
   nextInspectionDue?: Prisma.DateTimeNullableWithAggregatesFilter<"Asset"> | Date | string | null
@@ -401,6 +425,8 @@ export type AssetCreateInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -427,6 +453,8 @@ export type AssetUncheckedCreateInput = {
   status?: string
   bundleId?: string | null
   parentAssetId?: string | null
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -443,6 +471,8 @@ export type AssetUpdateInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -469,6 +499,8 @@ export type AssetUncheckedUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -490,6 +522,8 @@ export type AssetCreateManyInput = {
   status?: string
   bundleId?: string | null
   parentAssetId?: string | null
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -502,6 +536,8 @@ export type AssetUpdateManyMutationInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -519,6 +555,8 @@ export type AssetUncheckedUpdateManyInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -551,6 +589,8 @@ export type AssetCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   bundleId?: Prisma.SortOrder
   parentAssetId?: Prisma.SortOrder
+  generatedImagePath?: Prisma.SortOrder
+  generatedImageFingerprint?: Prisma.SortOrder
   purchaseDate?: Prisma.SortOrder
   inspectionIntervalMonths?: Prisma.SortOrder
   nextInspectionDue?: Prisma.SortOrder
@@ -572,6 +612,8 @@ export type AssetMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   bundleId?: Prisma.SortOrder
   parentAssetId?: Prisma.SortOrder
+  generatedImagePath?: Prisma.SortOrder
+  generatedImageFingerprint?: Prisma.SortOrder
   purchaseDate?: Prisma.SortOrder
   inspectionIntervalMonths?: Prisma.SortOrder
   nextInspectionDue?: Prisma.SortOrder
@@ -589,6 +631,8 @@ export type AssetMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   bundleId?: Prisma.SortOrder
   parentAssetId?: Prisma.SortOrder
+  generatedImagePath?: Prisma.SortOrder
+  generatedImageFingerprint?: Prisma.SortOrder
   purchaseDate?: Prisma.SortOrder
   inspectionIntervalMonths?: Prisma.SortOrder
   nextInspectionDue?: Prisma.SortOrder
@@ -878,6 +922,8 @@ export type AssetCreateWithoutOrganizationInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -902,6 +948,8 @@ export type AssetUncheckedCreateWithoutOrganizationInput = {
   status?: string
   bundleId?: string | null
   parentAssetId?: string | null
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -952,6 +1000,8 @@ export type AssetScalarWhereInput = {
   status?: Prisma.StringFilter<"Asset"> | string
   bundleId?: Prisma.StringNullableFilter<"Asset"> | string | null
   parentAssetId?: Prisma.StringNullableFilter<"Asset"> | string | null
+  generatedImagePath?: Prisma.StringNullableFilter<"Asset"> | string | null
+  generatedImageFingerprint?: Prisma.StringNullableFilter<"Asset"> | string | null
   purchaseDate?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
   inspectionIntervalMonths?: Prisma.IntNullableFilter<"Asset"> | number | null
   nextInspectionDue?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
@@ -964,6 +1014,8 @@ export type AssetCreateWithoutProductInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -988,6 +1040,8 @@ export type AssetUncheckedCreateWithoutProductInput = {
   status?: string
   bundleId?: string | null
   parentAssetId?: string | null
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1030,6 +1084,8 @@ export type AssetCreateWithoutLocationInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1054,6 +1110,8 @@ export type AssetUncheckedCreateWithoutLocationInput = {
   status?: string
   bundleId?: string | null
   parentAssetId?: string | null
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1096,6 +1154,8 @@ export type AssetCreateWithoutAccessoriesInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1121,6 +1181,8 @@ export type AssetUncheckedCreateWithoutAccessoriesInput = {
   status?: string
   bundleId?: string | null
   parentAssetId?: string | null
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1141,6 +1203,8 @@ export type AssetCreateWithoutParentInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1165,6 +1229,8 @@ export type AssetUncheckedCreateWithoutParentInput = {
   assetTag?: string | null
   status?: string
   bundleId?: string | null
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1202,6 +1268,8 @@ export type AssetUpdateWithoutAccessoriesInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1227,6 +1295,8 @@ export type AssetUncheckedUpdateWithoutAccessoriesInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1258,6 +1328,8 @@ export type AssetCreateWithoutBundleInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1282,6 +1354,8 @@ export type AssetUncheckedCreateWithoutBundleInput = {
   assetTag?: string | null
   status?: string
   parentAssetId?: string | null
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1324,6 +1398,8 @@ export type AssetCreateWithoutProductionItemsInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1349,6 +1425,8 @@ export type AssetUncheckedCreateWithoutProductionItemsInput = {
   status?: string
   bundleId?: string | null
   parentAssetId?: string | null
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1380,6 +1458,8 @@ export type AssetUpdateWithoutProductionItemsInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1405,6 +1485,8 @@ export type AssetUncheckedUpdateWithoutProductionItemsInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1420,6 +1502,8 @@ export type AssetCreateWithoutTransactionsInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1445,6 +1529,8 @@ export type AssetUncheckedCreateWithoutTransactionsInput = {
   status?: string
   bundleId?: string | null
   parentAssetId?: string | null
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1476,6 +1562,8 @@ export type AssetUpdateWithoutTransactionsInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1501,6 +1589,8 @@ export type AssetUncheckedUpdateWithoutTransactionsInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1516,6 +1606,8 @@ export type AssetCreateWithoutInspectionsInput = {
   serialNumber?: string | null
   assetTag?: string | null
   status?: string
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1541,6 +1633,8 @@ export type AssetUncheckedCreateWithoutInspectionsInput = {
   status?: string
   bundleId?: string | null
   parentAssetId?: string | null
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1572,6 +1666,8 @@ export type AssetUpdateWithoutInspectionsInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1597,6 +1693,8 @@ export type AssetUncheckedUpdateWithoutInspectionsInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1616,6 +1714,8 @@ export type AssetCreateManyOrganizationInput = {
   status?: string
   bundleId?: string | null
   parentAssetId?: string | null
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1628,6 +1728,8 @@ export type AssetUpdateWithoutOrganizationInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1652,6 +1754,8 @@ export type AssetUncheckedUpdateWithoutOrganizationInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1672,6 +1776,8 @@ export type AssetUncheckedUpdateManyWithoutOrganizationInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1688,6 +1794,8 @@ export type AssetCreateManyProductInput = {
   status?: string
   bundleId?: string | null
   parentAssetId?: string | null
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1700,6 +1808,8 @@ export type AssetUpdateWithoutProductInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1724,6 +1834,8 @@ export type AssetUncheckedUpdateWithoutProductInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1744,6 +1856,8 @@ export type AssetUncheckedUpdateManyWithoutProductInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1760,6 +1874,8 @@ export type AssetCreateManyLocationInput = {
   status?: string
   bundleId?: string | null
   parentAssetId?: string | null
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1772,6 +1888,8 @@ export type AssetUpdateWithoutLocationInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1796,6 +1914,8 @@ export type AssetUncheckedUpdateWithoutLocationInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1816,6 +1936,8 @@ export type AssetUncheckedUpdateManyWithoutLocationInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1832,6 +1954,8 @@ export type AssetCreateManyParentInput = {
   assetTag?: string | null
   status?: string
   bundleId?: string | null
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1844,6 +1968,8 @@ export type AssetUpdateWithoutParentInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1868,6 +1994,8 @@ export type AssetUncheckedUpdateWithoutParentInput = {
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1888,6 +2016,8 @@ export type AssetUncheckedUpdateManyWithoutParentInput = {
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1904,6 +2034,8 @@ export type AssetCreateManyBundleInput = {
   assetTag?: string | null
   status?: string
   parentAssetId?: string | null
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
   purchaseDate?: Date | string | null
   inspectionIntervalMonths?: number | null
   nextInspectionDue?: Date | string | null
@@ -1916,6 +2048,8 @@ export type AssetUpdateWithoutBundleInput = {
   serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1940,6 +2074,8 @@ export type AssetUncheckedUpdateWithoutBundleInput = {
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   parentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1960,6 +2096,8 @@ export type AssetUncheckedUpdateManyWithoutBundleInput = {
   assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   parentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2035,6 +2173,8 @@ export type AssetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   status?: boolean
   bundleId?: boolean
   parentAssetId?: boolean
+  generatedImagePath?: boolean
+  generatedImageFingerprint?: boolean
   purchaseDate?: boolean
   inspectionIntervalMonths?: boolean
   nextInspectionDue?: boolean
@@ -2062,6 +2202,8 @@ export type AssetSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   status?: boolean
   bundleId?: boolean
   parentAssetId?: boolean
+  generatedImagePath?: boolean
+  generatedImageFingerprint?: boolean
   purchaseDate?: boolean
   inspectionIntervalMonths?: boolean
   nextInspectionDue?: boolean
@@ -2084,6 +2226,8 @@ export type AssetSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   status?: boolean
   bundleId?: boolean
   parentAssetId?: boolean
+  generatedImagePath?: boolean
+  generatedImageFingerprint?: boolean
   purchaseDate?: boolean
   inspectionIntervalMonths?: boolean
   nextInspectionDue?: boolean
@@ -2106,6 +2250,8 @@ export type AssetSelectScalar = {
   status?: boolean
   bundleId?: boolean
   parentAssetId?: boolean
+  generatedImagePath?: boolean
+  generatedImageFingerprint?: boolean
   purchaseDate?: boolean
   inspectionIntervalMonths?: boolean
   nextInspectionDue?: boolean
@@ -2113,7 +2259,7 @@ export type AssetSelectScalar = {
   updatedAt?: boolean
 }
 
-export type AssetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "productId" | "locationId" | "serialNumber" | "assetTag" | "status" | "bundleId" | "parentAssetId" | "purchaseDate" | "inspectionIntervalMonths" | "nextInspectionDue" | "createdAt" | "updatedAt", ExtArgs["result"]["asset"]>
+export type AssetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "productId" | "locationId" | "serialNumber" | "assetTag" | "status" | "bundleId" | "parentAssetId" | "generatedImagePath" | "generatedImageFingerprint" | "purchaseDate" | "inspectionIntervalMonths" | "nextInspectionDue" | "createdAt" | "updatedAt", ExtArgs["result"]["asset"]>
 export type AssetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
@@ -2164,6 +2310,8 @@ export type $AssetPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     status: string
     bundleId: string | null
     parentAssetId: string | null
+    generatedImagePath: string | null
+    generatedImageFingerprint: string | null
     purchaseDate: Date | null
     inspectionIntervalMonths: number | null
     nextInspectionDue: Date | null
@@ -2610,6 +2758,8 @@ export interface AssetFieldRefs {
   readonly status: Prisma.FieldRef<"Asset", 'String'>
   readonly bundleId: Prisma.FieldRef<"Asset", 'String'>
   readonly parentAssetId: Prisma.FieldRef<"Asset", 'String'>
+  readonly generatedImagePath: Prisma.FieldRef<"Asset", 'String'>
+  readonly generatedImageFingerprint: Prisma.FieldRef<"Asset", 'String'>
   readonly purchaseDate: Prisma.FieldRef<"Asset", 'DateTime'>
   readonly inspectionIntervalMonths: Prisma.FieldRef<"Asset", 'Int'>
   readonly nextInspectionDue: Prisma.FieldRef<"Asset", 'DateTime'>

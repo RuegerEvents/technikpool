@@ -278,6 +278,11 @@ model Asset {
   parent        Asset?  @relation("AssetAccessories", fields: [parentAssetId], references: [id], onDelete: SetNull)
   accessories   Asset[] @relation("AssetAccessories")
 
+  // A generated preview of this unit together with its attached accessories.
+  // Product.imagePath remains the shared catalogue photo for the bare product.
+  generatedImagePath        String?
+  generatedImageFingerprint String?
+
   // When this individual unit was bought. The price it is billed at lives on
   // the Product — see Product.netPurchasePrice.
   purchaseDate DateTime?

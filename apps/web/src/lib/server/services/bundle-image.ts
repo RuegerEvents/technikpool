@@ -12,8 +12,18 @@ type BundleForImage = {
 	}>;
 };
 
-function fingerprint(bundle: BundleForImage) {
-	const contents = bundle.assets
+type AssetForImage = {
+	id: string;
+	generatedImagePath: string | null;
+	generatedImageFingerprint: string | null;
+	product: { id: string; imagePath: string | null };
+	accessories: Array<{ product: { id: string; imagePath: string | null } }>;
+};
+
+type ImageContents = BundleForImage['assets'];
+
+function fingerprint(assets: ImageContents) {
+	const contents = assets
 		.map((asset) => [asset.product.id, asset.product.imagePath, Boolean(asset.parentAssetId)])
 		.sort((a, b) => String(a).localeCompare(String(b)));
 	return createHash('sha256')
@@ -35,12 +45,12 @@ async function embeddedImage(path: string | null) {
 	}
 }
 
-async function render(bundle: BundleForImage) {
+async function render(assets: ImageContents) {
 	const uniqueProducts = new Map<
 		string,
 		{ imagePath: string | null; count: number; accessory: boolean }
 	>();
-	for (const { product, parentAssetId } of bundle.assets) {
+	for (const { product, parentAssetId } of assets) {
 		const accessory = parentAssetId !== null;
 		const key = `${accessory ? 'accessory' : 'primary'}:${product.id}`;
 		const existing = uniqueProducts.get(key);
@@ -142,10 +152,10 @@ async function render(bundle: BundleForImage) {
 
 /** Generate only when contents changed; force creates a fresh URL to bust browser caches. */
 export async function ensureBundleImage(bundle: BundleForImage, force = false) {
-	const currentFingerprint = fingerprint(bundle);
+	const currentFingerprint = fingerprint(bundle.assets);
 	if (!force && bundle.imagePath && bundle.imageFingerprint === currentFingerprint)
 		return bundle.imagePath;
-	const svg = await render(bundle);
+	const svg = await render(bundle.assets);
 	const suffix = force ? `${currentFingerprint}-${randomUUID()}` : currentFingerprint;
 	const path = `${PUBLIC_PREFIX}/bundles/${bundle.id}-${suffix}.svg`;
 	await putObject(path, new TextEncoder().encode(svg), 'image/svg+xml');
@@ -155,5 +165,39 @@ export async function ensureBundleImage(bundle: BundleForImage, force = false) {
 	});
 	bundle.imagePath = path;
 	bundle.imageFingerprint = currentFingerprint;
+	return path;
+}
+
+/** Generate a bundle-style preview for a unit that has attached accessories. */
+export async function ensureAssetImage(asset: AssetForImage, force = false) {
+	if (asset.accessories.length === 0) return null;
+	const contents: ImageContents = [
+		{ parentAssetId: null, product: asset.product },
+		...asset.accessories.map((accessory) => ({
+			parentAssetId: asset.id,
+			product: accessory.product
+		}))
+	];
+	const currentFingerprint = fingerprint(contents);
+	if (
+		!force &&
+		asset.generatedImagePath &&
+		asset.generatedImageFingerprint === currentFingerprint
+	) {
+		return asset.generatedImagePath;
+	}
+	const svg = await render(contents);
+	const suffix = force ? `${currentFingerprint}-${randomUUID()}` : currentFingerprint;
+	const path = `${PUBLIC_PREFIX}/assets/${asset.id}-${suffix}.svg`;
+	await putObject(path, new TextEncoder().encode(svg), 'image/svg+xml');
+	await prisma.asset.update({
+		where: { id: asset.id },
+		data: {
+			generatedImagePath: path,
+			generatedImageFingerprint: currentFingerprint
+		}
+	});
+	asset.generatedImagePath = path;
+	asset.generatedImageFingerprint = currentFingerprint;
 	return path;
 }

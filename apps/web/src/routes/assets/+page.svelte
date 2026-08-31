@@ -149,7 +149,10 @@
 					acc[pid] = {
 						productId: pid,
 						name: asset.product.name,
-						imagePath: asset.product.imagePath,
+						imagePath:
+							bundleGrouping && asset.accessories.length > 0
+								? (asset.generatedImagePath ?? asset.product.imagePath)
+								: asset.product.imagePath,
 						manufacturerName: asset.product.manufacturer.name,
 						categoryId: asset.product.categoryId,
 						categoryName: categoryLabel(asset.product.category),
@@ -161,6 +164,16 @@
 					};
 				}
 				const g = acc[pid];
+				// Bundle View presents what travels as one unit. If another unit in
+				// this product group is the first one with attached accessories, use
+				// its generated composite as the representative group image.
+				if (
+					bundleGrouping &&
+					asset.accessories.length > 0 &&
+					!g.assets.some((member) => member.accessories.length > 0)
+				) {
+					g.imagePath = asset.generatedImagePath ?? asset.product.imagePath;
+				}
 				g.assets.push(asset);
 				if (asset.status === 'AVAILABLE') g.available++;
 				else if (asset.status === 'MAINTENANCE') g.maintenance++;
