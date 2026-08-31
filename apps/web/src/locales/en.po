@@ -5283,3 +5283,7 @@ msgstr "Delete user"
 #: src/routes/admin/users/+page.svelte
 msgid "The account, sessions, and organization memberships are permanently removed. Users recorded in asset history cannot be deleted."
 msgstr "The account, sessions, and organization memberships are permanently removed. Users recorded in asset history cannot be deleted."
+
+#: src/routes/offers/[id]/+page.svelte
+msgid "Back to equipment"
+msgstr "Back to equipment"

@@ -5283,3 +5283,7 @@ msgstr "Benutzer löschen"
 #: src/routes/admin/users/+page.svelte
 msgid "The account, sessions, and organization memberships are permanently removed. Users recorded in asset history cannot be deleted."
 msgstr "Das Konto, die Sitzungen und die Organisationsmitgliedschaften werden dauerhaft entfernt. Benutzer, die im Geräteverlauf erfasst sind, können nicht gelöscht werden."
+
+#: src/routes/offers/[id]/+page.svelte
+msgid "Back to equipment"
+msgstr "Zurück zum Equipment"

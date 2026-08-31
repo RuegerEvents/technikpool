@@ -28,6 +28,7 @@
 		categoryId: string;
 		categoryColor: string;
 		organizationName: string;
+		imagePath: string | null;
 		instances: Bundle[];
 		/** Instances with assets booked into this production */
 		booked: Bundle[];
@@ -206,12 +207,14 @@
 					categoryId: b.categoryId,
 					categoryColor: b.categoryColor,
 					organizationName: b.organizationName,
+					imagePath: b.imagePath,
 					instances: [],
 					booked: [],
 					addable: []
 				};
 				rows.set(b.templateId, row);
 			}
+			if (!row.imagePath && b.imagePath) row.imagePath = b.imagePath;
 			row.instances.push(b);
 			if (b.bookedHere > 0) row.booked.push(b);
 			else if (b.availableCount > 0) row.addable.push(b);
@@ -586,8 +589,7 @@
 								: 'cursor-pointer hover:bg-muted/40'}"
 							onclick={() => !bundleAddDisabled && handleAddBundle(row.addable[0])}
 						>
-							<!-- Holds the product rows' thumbnail slot so both start on the same edge. -->
-							<span class="h-7 w-7 shrink-0"></span>
+							<ProductThumb path={row.imagePath} alt={row.name} />
 							<div class="min-w-0 flex-1">
 								<p class="truncate text-sm font-medium">
 									<span
@@ -681,7 +683,7 @@
 								{@const tags = bookedTags(row)}
 								{@const locationName = sharedLocationName(row)}
 								<div class="flex items-center gap-2 border-b bg-muted/20 px-3 py-2 last:border-0">
-									<span class="h-7 w-7 shrink-0"></span>
+									<ProductThumb path={row.imagePath} alt={row.name} />
 									<div class="min-w-0 flex-1">
 										<p class="truncate text-sm font-medium">
 											Bundle · {row.name}{tags ? ` (${tags})` : ''}

@@ -153,6 +153,15 @@
 			</p>
 		</div>
 		<div class="flex flex-wrap gap-2">
+			{#if offer.production}
+				<Button
+					icon="back"
+					variant="outline"
+					href={resolve(`/productions/${offer.production.id}/equipment`)}
+				>
+					Back to equipment
+				</Button>
+			{/if}
 			<Button
 				icon="print"
 				variant="outline"

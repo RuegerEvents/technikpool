@@ -98,7 +98,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 				key,
 				productId: a.productId,
 				productName: a.product.name,
-				imagePath: a.product.imagePath,
+				imagePath: a.generatedImagePath ?? a.product.imagePath,
 				manufacturerName: a.product.manufacturer.name,
 				categoryId: a.product.categoryId,
 				categoryName: a.product.category.name,
@@ -120,6 +120,9 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 			});
 		}
 		const g = groups.get(key)!;
+		// Prefer a unit preview with its attached accessories over the bare
+		// catalogue image when any asset in this grouped row has one.
+		if (a.generatedImagePath) g.imagePath = a.generatedImagePath;
 		g.total++;
 		const bookedItem = a.productionItems.find((pi) => pi.productionId === productionId);
 		const bookedHere = !!bookedItem;
@@ -177,6 +180,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 				id: b.id,
 				templateId: b.templateId,
 				name: b.template.name,
+				imagePath: b.imagePath,
 				tag: b.tag,
 				categoryId: b.template.categoryId,
 				categoryName: b.template.category.name,
