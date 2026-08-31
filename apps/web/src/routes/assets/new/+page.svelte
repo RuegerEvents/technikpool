@@ -75,7 +75,7 @@
 		name: '',
 		categoryId: '',
 		imagePath: '',
-		netPurchasePrice: ''
+		netPurchasePrice: undefined
 	});
 
 	$effect(() => {
@@ -193,10 +193,7 @@
 				productId: product.id ?? undefined,
 				newProductName: product.id ? undefined : (pendingProduct?.name ?? product.name),
 				newProductImagePath: product.id ? undefined : pendingProduct?.imagePath || undefined,
-				newProductNetPurchasePrice:
-					product.id || !pendingProduct?.netPurchasePrice?.trim()
-						? undefined
-						: Number(pendingProduct.netPurchasePrice),
+				newProductNetPurchasePrice: product.id ? undefined : pendingProduct?.netPurchasePrice,
 				categoryId: product.id ? undefined : pendingProduct?.categoryId,
 				copyProductAccessories:
 					copyAccessories && (accessoryProfile?.accessories.length ?? 0) > 0 ? true : undefined,

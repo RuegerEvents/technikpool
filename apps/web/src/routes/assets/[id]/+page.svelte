@@ -327,7 +327,7 @@
 		name: '',
 		categoryId: '',
 		imagePath: '',
-		netPurchasePrice: ''
+		netPurchasePrice: undefined
 	});
 	let productManufacturer = $state<{ id: string | null; name: string } | null>(null);
 	let manufacturers = $derived(await getManufacturers());
@@ -342,7 +342,8 @@
 			name: asset.product.name,
 			categoryId: asset.product.categoryId,
 			imagePath: asset.product.imagePath ?? '',
-			netPurchasePrice: asset.product.netPurchasePrice?.toString() ?? ''
+			netPurchasePrice:
+				asset.product.netPurchasePrice == null ? undefined : Number(asset.product.netPurchasePrice)
 		};
 		productModalOpen = true;
 	}
@@ -360,9 +361,7 @@
 				name: productDraft.name,
 				categoryId: productDraft.categoryId,
 				imagePath: productDraft.imagePath,
-				netPurchasePrice: productDraft.netPurchasePrice.trim()
-					? Number(productDraft.netPurchasePrice)
-					: null
+				netPurchasePrice: productDraft.netPurchasePrice ?? null
 			});
 			toast.success('Product updated');
 			productModalOpen = false;

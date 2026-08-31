@@ -8,8 +8,8 @@
 		name: string;
 		categoryId: string;
 		imagePath: string;
-		/** Kept as a string so an empty field means "unknown", not 0. */
-		netPurchasePrice: string;
+		/** Number inputs bind as numbers and use undefined for an empty field. */
+		netPurchasePrice: number | undefined;
 	};
 
 	type Props = {
@@ -20,7 +20,7 @@
 	};
 
 	let {
-		value = $bindable({ name: '', categoryId: '', imagePath: '', netPurchasePrice: '' }),
+		value = $bindable({ name: '', categoryId: '', imagePath: '', netPurchasePrice: undefined }),
 		categories,
 		idPrefix = 'product'
 	}: Props = $props();

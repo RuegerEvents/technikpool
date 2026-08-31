@@ -82,7 +82,7 @@
 		name: '',
 		categoryId: '',
 		imagePath: '',
-		netPurchasePrice: ''
+		netPurchasePrice: undefined
 	});
 	let manufacturer = $state<{ id: string | null; name: string } | null>(null);
 	let draftFor = $state('');
@@ -99,7 +99,8 @@
 			name: product.name,
 			categoryId: product.categoryId,
 			imagePath: product.imagePath ?? '',
-			netPurchasePrice: product.netPurchasePrice?.toString() ?? ''
+			netPurchasePrice:
+				product.netPurchasePrice == null ? undefined : Number(product.netPurchasePrice)
 		};
 	});
 
@@ -110,7 +111,8 @@
 				manufacturer?.id !== current.manufacturerId ||
 				draft.categoryId !== current.categoryId ||
 				draft.imagePath.trim() !== (current.imagePath ?? '') ||
-				draft.netPurchasePrice.trim() !== (current.netPurchasePrice?.toString() ?? ''))
+				draft.netPurchasePrice !==
+					(current.netPurchasePrice == null ? undefined : Number(current.netPurchasePrice)))
 	);
 
 	/** Returns whether the save went through, so a caller can hold position on failure. */
@@ -132,7 +134,7 @@
 				manufacturerId: manufacturer.id,
 				categoryId: draft.categoryId,
 				imagePath: draft.imagePath,
-				netPurchasePrice: draft.netPurchasePrice.trim() ? Number(draft.netPurchasePrice) : null
+				netPurchasePrice: draft.netPurchasePrice ?? null
 			});
 			return true;
 		} catch (err) {
