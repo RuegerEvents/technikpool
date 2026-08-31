@@ -266,6 +266,46 @@ export const createProduction = command(createProductionSchema, async (data) => 
 	return production;
 });
 
+export const deleteProduction = command(v.string(), async (productionId: string) => {
+	const user = await requireAuth();
+	const production = await prisma.production.findUniqueOrThrow({
+		where: { id: productionId },
+		select: { id: true, name: true, organizationId: true, addressId: true }
+	});
+	const membership = await prisma.orgMembership.findUnique({
+		where: {
+			userId_organizationId: { userId: user.id, organizationId: production.organizationId }
+		},
+		select: { role: true }
+	});
+	if (!membership || (membership.role !== 'OWNER' && membership.role !== 'ADMIN')) {
+		throw new Error('Only organization admins and owners can delete productions');
+	}
+
+	await prisma.$transaction(async (tx) => {
+		await tx.production.delete({ where: { id: productionId } });
+		// Production addresses are created as private records. Remove the orphan
+		// only when nothing else has since been linked to it.
+		if (production.addressId) {
+			const references = await Promise.all([
+				tx.organization.count({ where: { addressId: production.addressId } }),
+				tx.location.count({ where: { addressId: production.addressId } }),
+				tx.customer.count({ where: { addressId: production.addressId } }),
+				tx.production.count({ where: { addressId: production.addressId } })
+			]);
+			if (references.every((count) => count === 0)) {
+				await tx.address.delete({ where: { id: production.addressId } });
+			}
+		}
+	});
+
+	await Promise.all([
+		getProductions(production.organizationId).refresh(),
+		getProductions().refresh()
+	]);
+	return { id: production.id, name: production.name };
+});
+
 const updateProductionAddressSchema = v.object({
 	productionId: v.string(),
 	address: addressInputSchema

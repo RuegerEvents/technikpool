@@ -12,6 +12,7 @@
 		addCrewMember,
 		removeCrewMember,
 		removeProductionItem,
+		deleteProduction,
 		updateProductionAddress,
 		updateProductionDuration,
 		updateProductionCustomer
@@ -22,17 +23,32 @@
 	import { getOffersForProduction, getInvoicesForProduction } from '$lib/remote/offers.remote';
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
+	import { goto } from '$app/navigation';
 	import type { Prisma } from '$lib/prisma/client';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { resolve } from '$app/paths';
 	import BulkActionsBar from '$lib/components/ui/bulk-actions-bar.svelte';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
+	import { Modal } from '$lib/components/ui/modal';
 	import { accessorySummary, nestAccessories, type Nested } from '$lib/production-items';
 
 	const productionId = $derived(page.params.id as string);
 	let production = $derived(await getProduction(productionId));
 
 	let working = $state(false);
+	let deleteOpen = $state(false);
+	let deleting = $state(false);
+	async function handleDeleteProduction() {
+		deleting = true;
+		try {
+			await deleteProduction(productionId);
+			toast.success('Production deleted');
+			goto(resolve('/productions'));
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+			deleting = false;
+		}
+	}
 
 	let allBundles = $derived(await getBundles());
 	let offers = $derived(await getOffersForProduction(productionId));
@@ -461,6 +477,7 @@
 		</div>
 		<div class="flex flex-wrap gap-2">
 			<Button icon="back" variant="outline" href={resolve('/productions')}>Back</Button>
+			<Button variant="destructive" onclick={() => (deleteOpen = true)}>Delete</Button>
 			<Button
 				variant="secondary"
 				href={resolve(`/productions/${production.id}/packing-list`)}
@@ -1081,3 +1098,21 @@
 </div>
 
 <BulkActionsBar selectedIds={selectedItemAssetIds} onClear={() => selectedItemAssetIds.clear()} />
+
+<Modal bind:open={deleteOpen} title="Delete production" dismissible={!deleting}>
+	{#snippet description()}
+		This permanently deletes the production, its equipment bookings, and its crew assignments.
+		Existing offers and invoices are preserved but will no longer be linked to this production.
+	{/snippet}
+	<p class="text-sm">
+		Delete <span class="font-medium">{production.name}</span>?
+	</p>
+	{#snippet footer()}
+		<Button variant="outline" disabled={deleting} onclick={() => (deleteOpen = false)}
+			>Cancel</Button
+		>
+		<Button variant="destructive" disabled={deleting} onclick={handleDeleteProduction}>
+			{deleting ? 'Deleting…' : 'Delete production'}
+		</Button>
+	{/snippet}
+</Modal>

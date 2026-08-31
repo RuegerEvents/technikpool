@@ -4273,12 +4273,14 @@ msgstr "Nur möglich, solange es nie gebucht, gescannt, geprüft oder abgerechne
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 msgid "Delete"
 msgstr "Löschen"
 
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Deleting…"
 msgstr "Wird gelöscht…"
@@ -5358,3 +5360,16 @@ msgstr ""
 #: src/routes/manufacturers/+page.svelte
 msgid "All products move to the selected manufacturer. Existing offers and invoices are not changed."
 msgstr ""
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Production deleted"
+msgstr "Produktion gelöscht"
+
+#: src/routes/productions/[id]/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
+msgid "Delete production"
+msgstr "Produktion löschen"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "This permanently deletes the production, its equipment bookings, and its crew assignments. Existing offers and invoices are preserved but will no longer be linked to this production."
+msgstr "Dies löscht die Produktion, ihre Equipment-Buchungen und Crew-Zuweisungen dauerhaft. Bestehende Angebote und Rechnungen bleiben erhalten, sind aber nicht mehr mit dieser Produktion verknüpft."
