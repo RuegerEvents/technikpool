@@ -1040,7 +1040,6 @@ msgstr "Date"
 
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/routes/invoices/[id]/print/+page.svelte
-#: src/routes/offers/[id]/print/+page.svelte
 #: src/routes/productions/[id]/delivery-note/+page.svelte
 msgid "Qty"
 msgstr "Qty"
@@ -2895,13 +2894,11 @@ msgstr "Invoice {0}"
 
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/routes/invoices/[id]/print/+page.svelte
-#: src/routes/offers/[id]/print/+page.svelte
 msgid "Item"
 msgstr "Item"
 
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/routes/invoices/[id]/print/+page.svelte
-#: src/routes/offers/[id]/print/+page.svelte
 msgid "Rate %/day"
 msgstr "Rate %/day"
 
@@ -5373,3 +5370,11 @@ msgstr "Delete production"
 #: src/routes/productions/[id]/+page.svelte
 msgid "This permanently deletes the production, its equipment bookings, and its crew assignments. Existing offers and invoices are preserved but will no longer be linked to this production."
 msgstr "This permanently deletes the production, its equipment bookings, and its crew assignments. Existing offers and invoices are preserved but will no longer be linked to this production."
+
+#: src/routes/offers/[id]/print/+page.svelte
+msgid "Pos."
+msgstr "Pos."
+
+#: src/routes/offers/[id]/print/+page.svelte
+msgid "Bezeichnung"
+msgstr "Bezeichnung"

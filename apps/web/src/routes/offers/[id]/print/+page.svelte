@@ -15,6 +15,9 @@
 
 	// Units of one product print as a single quantity line — see $lib/billing-lines.
 	let groups = $derived(groupBillingItems(offer.items));
+	let positionByKey = $derived(
+		new Map(groups.flatMap((group) => group.lines).map((line, index) => [line.key, index + 1]))
+	);
 
 	let subtotal = $derived(offer.items.reduce((sum, i) => sum + Number(i.lineTotal), 0));
 	let discountAmount = $derived.by(() => {
@@ -77,23 +80,25 @@
 	<table class="w-full border-collapse text-left">
 		<thead>
 			<tr class="border-b border-black">
-				<th class="py-2">Item</th>
-				<th class="py-2 text-right">Qty</th>
-				<th class="py-2 text-right">Rate %/day</th>
-				<th class="py-2 text-right">Daily rate</th>
-				<th class="py-2 text-right">Days</th>
-				<th class="py-2 text-right">Total</th>
+				<th class="py-2 pr-2 text-left">Pos.</th>
+				<th colspan="2" class="px-2 py-2 text-left">Bezeichnung</th>
+				<th class="px-2 py-2 text-right">Daily rate</th>
+				<th class="px-2 py-2 text-right">Days</th>
+				<th class="py-2 pl-2 text-right">Total</th>
 			</tr>
 		</thead>
 		<tbody>
 			{#each groups as group (group.key)}
 				<tr class="border-b border-zinc-300">
-					<td colspan="6" class="py-2 text-xs font-bold tracking-wide uppercase">{group.name}</td>
+					<td></td>
+					<td colspan="5" class="py-2 text-xs font-bold tracking-wide uppercase">{group.name}</td>
 				</tr>
 				{#each group.lines as line (line.key)}
 					{@const subtitle = lineSubtitle(line)}
-					<tr class="border-b border-zinc-200">
-						<td class="py-3">
+					<tr class="border-b border-zinc-200 [&>td]:align-top">
+						<td class="py-3 pr-2 text-right tabular-nums">{positionByKey.get(line.key)}</td>
+						<td class="px-2 py-3 text-right">{line.quantity}×</td>
+						<td class="px-2 py-3">
 							{line.label}
 							{#if subtitle}
 								<span class="mt-0.5 block text-xs whitespace-pre-line text-zinc-600"
@@ -101,11 +106,9 @@
 								>
 							{/if}
 						</td>
-						<td class="py-3 text-right">{line.quantity}×</td>
-						<td class="py-3 text-right">{line.ratePercent}%</td>
-						<td class="py-3 text-right">{fmtEUR(line.dailyRate)}</td>
-						<td class="py-3 text-right">{offer.dayCount}</td>
-						<td class="py-3 text-right">{fmtEUR(line.lineTotal)}</td>
+						<td class="px-2 py-3 text-right">{fmtEUR(line.dailyRate)}</td>
+						<td class="px-2 py-3 text-right">{offer.dayCount}</td>
+						<td class="py-3 pl-2 text-right">{fmtEUR(line.lineTotal)}</td>
 					</tr>
 				{/each}
 				<tr class="border-b border-zinc-300">
