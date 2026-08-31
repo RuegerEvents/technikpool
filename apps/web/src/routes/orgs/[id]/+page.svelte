@@ -7,14 +7,17 @@
 	import {
 		getOrgWithMembers,
 		addUserToOrg,
+		deleteOrg,
 		removeUserFromOrg,
 		updateMemberRole,
 		updateOrg
 	} from '$lib/remote/orgs.remote';
 	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
 	import { OrgBadge } from '$lib/components/ui/org-badge';
+	import { Modal } from '$lib/components/ui/modal';
 
 	let { data } = $props();
 
@@ -23,6 +26,21 @@
 
 	let myMembership = $derived(org.members.find((m) => m.userId === data.user?.id));
 	let canManage = $derived(myMembership?.role === 'OWNER' || data.isAdmin);
+	let deleteOpen = $state(false);
+	let deleting = $state(false);
+
+	async function handleDeleteOrg() {
+		if (deleting) return;
+		deleting = true;
+		try {
+			await deleteOrg(orgId);
+			toast.success('Organization deleted');
+			await goto(resolve('/orgs'));
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+			deleting = false;
+		}
+	}
 
 	let addEmail = $state('');
 	let addRole = $state<'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER'>('MEMBER');
@@ -213,8 +231,11 @@
 				<p class="text-muted-foreground">Manage members and roles.</p>
 			</div>
 			{#if canManage}
-				<Button variant="outline" href={resolve(`/orgs/${orgId}/locations`)}>Locations</Button>
-				<Button variant="outline" href={resolve(`/orgs/${orgId}/rates`)}>Rental Rates</Button>
+				<div class="flex flex-wrap items-center gap-2">
+					<Button variant="outline" href={resolve(`/orgs/${orgId}/locations`)}>Locations</Button>
+					<Button variant="outline" href={resolve(`/orgs/${orgId}/rates`)}>Rental Rates</Button>
+					<Button variant="destructive" onclick={() => (deleteOpen = true)}>Delete</Button>
+				</div>
 			{/if}
 		</div>
 	</div>
@@ -556,3 +577,21 @@
 		</div>
 	</div>
 </div>
+
+<Modal bind:open={deleteOpen} title="Delete organization" dismissible={!deleting}>
+	{#snippet description()}
+		This permanently deletes the organization and all of its locations, assets, productions, offers,
+		and invoices.
+	{/snippet}
+	<p class="text-sm">
+		Delete <span class="font-medium">{org.name}</span> and all of its data?
+	</p>
+	{#snippet footer()}
+		<Button variant="outline" onclick={() => (deleteOpen = false)} disabled={deleting}
+			>Cancel</Button
+		>
+		<Button variant="destructive" onclick={handleDeleteOrg} disabled={deleting}>
+			{deleting ? 'Deleting…' : 'Delete organization'}
+		</Button>
+	{/snippet}
+</Modal>

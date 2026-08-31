@@ -1,4 +1,5 @@
 import { query, command } from '$app/server';
+import { error } from '@sveltejs/kit';
 import { prisma } from '$lib/server/auth';
 import { sendMail } from '$lib/server/mail';
 import { appBaseUrl } from '$lib/server/app-url';
@@ -326,6 +327,31 @@ export const updateOrg = command(
 		return org;
 	}
 );
+
+export const deleteOrg = command(v.string(), async (orgId: string) => {
+	await requireOrgManageAccess(orgId);
+	await prisma.organization.findUniqueOrThrow({ where: { id: orgId }, select: { id: true } });
+	const foreignAssetAtLocation = await prisma.asset.findFirst({
+		where: { organizationId: { not: orgId }, location: { organizationId: orgId } },
+		select: { id: true }
+	});
+	if (foreignAssetAtLocation) {
+		error(409, 'Another organization has an asset at one of these locations; move it first');
+	}
+
+	await prisma.$transaction(async (tx) => {
+		// Production has a restrictive organization FK; its children cascade or
+		// detach. Assets must go before their locations and bundles, whose FKs are
+		// deliberately restrictive during ordinary inventory operations.
+		await tx.production.deleteMany({ where: { organizationId: orgId } });
+		await tx.asset.deleteMany({ where: { organizationId: orgId } });
+		await tx.user.updateMany({ where: { homeOrgId: orgId }, data: { homeOrgId: null } });
+		await tx.organization.delete({ where: { id: orgId } });
+	});
+
+	await Promise.all([getMyOrgs().refresh(), getAllOrgs().refresh(), getAllUsers().refresh()]);
+	return { id: orgId };
+});
 
 // ── Admin-only ────────────────────────────────────────────────────────────────
 
