@@ -14,9 +14,11 @@
 		ClipboardCheck,
 		Clapperboard,
 		FileText,
+		Factory,
 		FolderKanban,
 		Package,
 		ReceiptText,
+		Users,
 		ScanBarcode,
 		Shapes,
 		Tags,
@@ -138,6 +140,7 @@
 											page.url.pathname.startsWith('/manufacturers') ||
 											page.url.pathname.startsWith('/devices') ||
 											page.url.pathname.startsWith('/inspections') ||
+											page.url.pathname.startsWith('/customers') ||
 											page.url.pathname.startsWith('/admin/categories')
 												? 'text-foreground'
 												: 'text-muted-foreground hover:text-foreground'}"
@@ -167,6 +170,13 @@
 										class="z-50 min-w-[180px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md [&_svg]:size-4"
 									>
 										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/customers'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<Users aria-hidden="true" />
+											Customers
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
 											onSelect={() => goto(resolve('/products'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
@@ -177,7 +187,7 @@
 											onSelect={() => goto(resolve('/manufacturers'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
-											<Boxes aria-hidden="true" />
+											<Factory aria-hidden="true" />
 											Manufacturers
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
