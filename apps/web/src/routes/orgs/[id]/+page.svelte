@@ -577,6 +577,21 @@
 
 				<Card.Root>
 					<Card.Header>
+						<Card.Title>Data Export</Card.Title>
+						<Card.Description>
+							Download everything this organization owns — members, inventory, productions, offers
+							and invoices including the archived PDFs — as one JSON file.
+						</Card.Description>
+					</Card.Header>
+					<Card.Content>
+						<Button icon="download" variant="outline" href={`/api/orgs/${orgId}/export`}>
+							Export all data (JSON)
+						</Button>
+					</Card.Content>
+				</Card.Root>
+
+				<Card.Root>
+					<Card.Header>
 						<Card.Title>Add Member</Card.Title>
 						<Card.Description>
 							Add a registered user to this organization by email.
