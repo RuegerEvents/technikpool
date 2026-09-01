@@ -2,7 +2,7 @@ import { query, command } from '$app/server';
 import { error } from '@sveltejs/kit';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
-import { dayCountBetween, getErrorMessage } from '$lib/utils';
+import { customerLabel, dayCountBetween, formatAddress, getErrorMessage } from '$lib/utils';
 import { isSystemAdmin, requireAuth, userOrgIds } from '$lib/server/services/access';
 import {
 	DEFAULT_INVOICE_CLOSING,
@@ -878,66 +878,76 @@ export const updateOfferCustomer = command(updateOfferCustomerSchema, async (dat
 
 const copyOfferSchema = v.object({
 	offerId: v.string(),
-	customerName: v.string(),
-	customerAddress: v.optional(v.string())
+	customerId: v.string()
 });
 
-export const copyOfferToNewCustomer = command(
-	copyOfferSchema,
-	async ({ offerId, customerName, customerAddress }) => {
-		const source = await prisma.offer.findUniqueOrThrow({
-			where: { id: offerId },
-			include: { items: true, organization: { include: { address: true } } }
-		});
-		await requireOrgManageAccess(source.organizationId);
+export const copyOfferToNewCustomer = command(copyOfferSchema, async ({ offerId, customerId }) => {
+	const source = await prisma.offer.findUniqueOrThrow({
+		where: { id: offerId },
+		include: { items: true, organization: { include: { address: true } } }
+	});
+	await requireOrgManageAccess(source.organizationId);
 
-		const newOffer = await prisma.$transaction(async (tx) => {
-			return tx.offer.create({
-				data: {
-					// A copy is a new document issued now: it gets its own number and a
-					// fresh snapshot of the org's current letterhead, not the source's.
-					number: await nextOfferNumber(tx, source.organizationId),
-					...orgSnapshotColumns(source.organization),
-					isKleinunternehmerSnapshot: source.isKleinunternehmerSnapshot,
-					organizationId: source.organizationId,
-					productionId: source.productionId,
-					customerName,
-					customerAddress: customerAddress?.trim() || null,
-					serviceStartDate: source.serviceStartDate,
-					serviceEndDate: source.serviceEndDate,
-					introText: source.introText,
-					closingText: source.closingText,
-					paymentTermsDays: source.paymentTermsDays,
-					dayCount: source.dayCount,
-					discountType: source.discountType,
-					discountValue: source.discountValue,
-					assetScope: source.assetScope,
-					vatRatePercent: source.vatRatePercent,
-					items: {
-						create: source.items.map((i) => ({
-							assetId: i.assetId,
-							bundleId: i.bundleId,
-							productId: i.productId,
-							productLabel: i.productLabel,
-							categoryId: i.categoryId,
-							categoryName: i.categoryName,
-							categoryNameDe: i.categoryNameDe,
-							categoryColor: i.categoryColor,
-							description: i.description,
-							netPurchasePrice: i.netPurchasePrice,
-							ratePercent: i.ratePercent,
-							dailyRate: i.dailyRate,
-							lineTotal: i.lineTotal
-						}))
-					}
+	// The copy goes to a real customer record, scoped to the same org —
+	// its details become the new document's snapshot.
+	const customer = await prisma.customer.findFirst({
+		where: { id: customerId, organizationId: source.organizationId },
+		include: { address: true }
+	});
+	if (!customer) throw new Error('Customer not found');
+
+	const newOffer = await prisma.$transaction(async (tx) => {
+		return tx.offer.create({
+			data: {
+				// A copy is a new document issued now: it gets its own number and a
+				// fresh snapshot of the org's current letterhead, not the source's.
+				number: await nextOfferNumber(tx, source.organizationId),
+				...orgSnapshotColumns(source.organization),
+				isKleinunternehmerSnapshot: source.isKleinunternehmerSnapshot,
+				organizationId: source.organizationId,
+				productionId: source.productionId,
+				customerId: customer.id,
+				customerName: customerLabel(customer),
+				customerAddress: formatAddress(customer.address) || null,
+				customerContactPerson: customer.contactPerson,
+				customerEmail: customer.email,
+				customerNumber: customer.customerNumber,
+				customerPhone: customer.phone,
+				customerVatId: customer.vatId,
+				serviceStartDate: source.serviceStartDate,
+				serviceEndDate: source.serviceEndDate,
+				introText: source.introText,
+				closingText: source.closingText,
+				paymentTermsDays: source.paymentTermsDays,
+				dayCount: source.dayCount,
+				discountType: source.discountType,
+				discountValue: source.discountValue,
+				assetScope: source.assetScope,
+				vatRatePercent: source.vatRatePercent,
+				items: {
+					create: source.items.map((i) => ({
+						assetId: i.assetId,
+						bundleId: i.bundleId,
+						productId: i.productId,
+						productLabel: i.productLabel,
+						categoryId: i.categoryId,
+						categoryName: i.categoryName,
+						categoryNameDe: i.categoryNameDe,
+						categoryColor: i.categoryColor,
+						description: i.description,
+						netPurchasePrice: i.netPurchasePrice,
+						ratePercent: i.ratePercent,
+						dailyRate: i.dailyRate,
+						lineTotal: i.lineTotal
+					}))
 				}
-			});
+			}
 		});
+	});
 
-		await getOffers().refresh();
-		return newOffer;
-	}
-);
+	await getOffers().refresh();
+	return newOffer;
+});
 
 export const deleteOffer = command(v.string(), async (offerId: string) => {
 	const offer = await prisma.offer.findUniqueOrThrow({

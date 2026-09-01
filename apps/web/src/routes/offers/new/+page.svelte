@@ -3,12 +3,10 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import { AddressInput } from '$lib/components/ui/address-input';
-	import { CustomerFields, emptyCustomerDraft } from '$lib/components/ui/customer-fields';
+	import { CustomerSelect } from '$lib/components/ui/customer-select';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { setOrgCategoryRate } from '$lib/remote/orgs.remote';
 	import { getProduction, getProductions } from '$lib/remote/productions.remote';
-	import { getCustomers, createCustomer } from '$lib/remote/customers.remote';
 	import { setOrgProductPrice } from '$lib/remote/assets.remote';
 	import {
 		createOfferFromProduction,
@@ -44,10 +42,6 @@
 	let saving = $state(false);
 	let introText = $state('');
 	let closingText = $state('');
-
-	let customers = $derived(selectedOrgId ? await getCustomers(selectedOrgId) : []);
-	let creatingCustomer = $state(false);
-	let newCustomer = $state(emptyCustomerDraft());
 
 	// One line per bundle among a group's units, so a kit that could be priced
 	// as a whole says so once rather than under every unit in it.
@@ -147,11 +141,6 @@
 		});
 	});
 
-	function handleSelectCustomer(e: Event) {
-		customerId = (e.currentTarget as HTMLSelectElement).value;
-		applyCustomerSnapshot(customers.find((c) => c.id === customerId) ?? null);
-	}
-
 	async function handleSavePrice(group: { key: string; productId: string; label: string }) {
 		const raw = priceDrafts.get(group.key)?.trim();
 		if (!raw) {
@@ -217,37 +206,19 @@
 			toast.error('Set the missing prices and rates before creating the offer');
 			return;
 		}
+		if (!customerId || !customerName) {
+			toast.error('Please select or create a customer');
+			return;
+		}
 		saving = true;
 		try {
-			let finalCustomerId = customerId || undefined;
-			let finalCustomerName = customerName;
-			let finalCustomerContactPerson = customerContactPerson;
-			let finalCustomerEmail = customerEmail;
-			let finalCustomerAddress = customerAddress;
-			if (creatingCustomer) {
-				const created = await createCustomer({
-					organizationId: selectedOrgId,
-					companyName: newCustomer.companyName || undefined,
-					contactPerson: newCustomer.contactPerson || undefined,
-					email: newCustomer.email || undefined,
-					customerNumber: newCustomer.customerNumber || undefined,
-					phone: newCustomer.phone || undefined,
-					vatId: newCustomer.vatId || undefined,
-					address: newCustomer.address
-				});
-				finalCustomerId = created.id;
-				finalCustomerName = customerLabel(created);
-				finalCustomerContactPerson = newCustomer.contactPerson;
-				finalCustomerEmail = newCustomer.email;
-				finalCustomerAddress = newCustomer.address;
-			}
 			const offer = await createOfferFromProduction({
 				productionId,
-				customerId: finalCustomerId,
-				customerName: finalCustomerName,
-				customerAddress: formatAddress(finalCustomerAddress) || undefined,
-				customerContactPerson: finalCustomerContactPerson || undefined,
-				customerEmail: finalCustomerEmail || undefined,
+				customerId,
+				customerName,
+				customerAddress: formatAddress(customerAddress) || undefined,
+				customerContactPerson: customerContactPerson || undefined,
+				customerEmail: customerEmail || undefined,
 				introText: introText || undefined,
 				closingText: closingText || undefined,
 				assetScope: hasCrossOrgItems ? assetScope : undefined
@@ -323,70 +294,21 @@
 						</div>
 					{/if}
 
-					<div class="space-y-3">
-						<Label>Customer</Label>
-						{#if !creatingCustomer}
-							<div class="space-y-2">
-								<select
-									id="customer"
-									value={customerId}
-									onchange={handleSelectCustomer}
-									class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-								>
-									<option value="">— None —</option>
-									{#each customers as c (c.id)}
-										<option value={c.id}>{customerLabel(c)}</option>
-									{/each}
-								</select>
-								<Button
-									type="button"
-									variant="outline"
-									onclick={() => {
-										creatingCustomer = true;
-										customerId = '';
-									}}
-								>
-									+ New customer
-								</Button>
-							</div>
-
-							<div class="space-y-2">
-								<Label for="customerName">Customer name</Label>
-								<Input id="customerName" bind:value={customerName} required />
-							</div>
-							<div class="space-y-2">
-								<Label for="customerContactPerson">Contact person</Label>
-								<Input
-									id="customerContactPerson"
-									bind:value={customerContactPerson}
-									placeholder="Optional"
-								/>
-							</div>
-							<div class="space-y-2">
-								<Label for="customerEmail">Email</Label>
-								<Input
-									id="customerEmail"
-									type="email"
-									bind:value={customerEmail}
-									placeholder="Optional"
-								/>
-							</div>
-							<div class="space-y-2">
-								<Label>Customer address</Label>
-								<AddressInput bind:value={customerAddress} idPrefix="customerAddress" />
-							</div>
-						{:else}
-							<div class="space-y-4">
-								<CustomerFields bind:value={newCustomer} idPrefix="offer-cust" />
-								<Button
-									icon="close"
-									type="button"
-									variant="outline"
-									onclick={() => (creatingCustomer = false)}
-								>
-									Cancel new customer
-								</Button>
-							</div>
+					<div class="space-y-2">
+						<Label for="customer">Customer</Label>
+						<CustomerSelect
+							id="customer"
+							organizationId={selectedOrgId}
+							bind:value={customerId}
+							idPrefix="offer-cust"
+							onChange={applyCustomerSnapshot}
+						/>
+						{#if customerContactPerson || customerEmail || formatAddress(customerAddress)}
+							<p class="text-sm text-muted-foreground">
+								{[customerContactPerson, customerEmail, formatAddress(customerAddress)]
+									.filter(Boolean)
+									.join(' · ')}
+							</p>
 						{/if}
 					</div>
 

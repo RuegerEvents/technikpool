@@ -1,14 +1,13 @@
 <script lang="ts">
-	import { customerLabel, getErrorMessage, orgLabel } from '$lib/utils';
+	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { AddressInput } from '$lib/components/ui/address-input';
-	import { CustomerFields, emptyCustomerDraft } from '$lib/components/ui/customer-fields';
+	import { CustomerSelect } from '$lib/components/ui/customer-select';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { createProduction } from '$lib/remote/productions.remote';
-	import { getCustomers, createCustomer } from '$lib/remote/customers.remote';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
@@ -28,29 +27,12 @@
 		city: ''
 	});
 
-	let customers = $derived(organizationId ? await getCustomers(organizationId) : []);
 	let customerId = $state('');
-	let creatingCustomer = $state(false);
-	let newCustomer = $state(emptyCustomerDraft());
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
 		saving = true;
 		try {
-			let finalCustomerId = customerId || undefined;
-			if (creatingCustomer) {
-				const created = await createCustomer({
-					organizationId,
-					companyName: newCustomer.companyName || undefined,
-					contactPerson: newCustomer.contactPerson || undefined,
-					email: newCustomer.email || undefined,
-					customerNumber: newCustomer.customerNumber || undefined,
-					phone: newCustomer.phone || undefined,
-					vatId: newCustomer.vatId || undefined,
-					address: newCustomer.address
-				});
-				finalCustomerId = created.id;
-			}
 			const production = await createProduction({
 				name,
 				organizationId,
@@ -59,7 +41,7 @@
 				showStartDate: !sameAsTotalDuration && showStartDate ? new Date(showStartDate) : undefined,
 				showEndDate: !sameAsTotalDuration && showEndDate ? new Date(showEndDate) : undefined,
 				address,
-				customerId: finalCustomerId
+				customerId: customerId || undefined
 			});
 			toast.success('Production created!');
 			goto(resolve(`/productions/${production.id}`));
@@ -172,42 +154,13 @@
 						</p>
 					</div>
 
-					{#if !creatingCustomer}
-						<div class="space-y-2">
-							<select
-								id="customer"
-								bind:value={customerId}
-								class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-							>
-								<option value="">— None —</option>
-								{#each customers as c (c.id)}
-									<option value={c.id}>{customerLabel(c)}</option>
-								{/each}
-							</select>
-							<Button
-								type="button"
-								variant="outline"
-								onclick={() => {
-									creatingCustomer = true;
-									customerId = '';
-								}}
-							>
-								+ New customer
-							</Button>
-						</div>
-					{:else}
-						<div class="space-y-4">
-							<CustomerFields bind:value={newCustomer} idPrefix="prod-cust" />
-							<Button
-								icon="close"
-								type="button"
-								variant="outline"
-								onclick={() => (creatingCustomer = false)}
-							>
-								Cancel new customer
-							</Button>
-						</div>
-					{/if}
+					<CustomerSelect
+						id="customer"
+						{organizationId}
+						bind:value={customerId}
+						allowNone
+						idPrefix="prod-cust"
+					/>
 				</div>
 
 				<div class="flex justify-end gap-4 pt-4">

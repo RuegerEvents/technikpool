@@ -8,6 +8,11 @@
 		xl: 'max-w-2xl',
 		full: 'max-w-4xl'
 	};
+
+	// Modals can stack (a form dialog opened from inside another dialog), and
+	// every open instance hears the same window keydown — without this, one
+	// Escape would close all of them at once. Only the top of the stack reacts.
+	const openStack: symbol[] = [];
 </script>
 
 <script lang="ts">
@@ -54,6 +59,7 @@
 	}: Props = $props();
 
 	const titleId = `modal-title-${Math.random().toString(36).slice(2, 9)}`;
+	const stackKey = Symbol();
 
 	let panel = $state<HTMLDivElement | null>(null);
 
@@ -69,11 +75,14 @@
 	// the reader's place.
 	$effect(() => {
 		if (!open) return;
+		openStack.push(stackKey);
 		const previous = document.activeElement as HTMLElement | null;
 		const { overflow } = document.body.style;
 		document.body.style.overflow = 'hidden';
 		tick().then(() => panel?.focus());
 		return () => {
+			const at = openStack.indexOf(stackKey);
+			if (at >= 0) openStack.splice(at, 1);
 			document.body.style.overflow = overflow;
 			previous?.focus?.();
 		};
@@ -82,7 +91,7 @@
 
 <svelte:window
 	onkeydown={(e) => {
-		if (open && e.key === 'Escape') close();
+		if (open && e.key === 'Escape' && openStack[openStack.length - 1] === stackKey) close();
 	}}
 />
 

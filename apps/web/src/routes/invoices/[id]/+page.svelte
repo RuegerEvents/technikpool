@@ -6,7 +6,13 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
-	import { getErrorMessage, dayCountBetween, formatAddress, orgLabel } from '$lib/utils';
+	import {
+		customerLabel,
+		getErrorMessage,
+		dayCountBetween,
+		formatAddress,
+		orgLabel
+	} from '$lib/utils';
 	import { toast } from 'svelte-sonner';
 	import {
 		getInvoice,
@@ -27,6 +33,9 @@
 	import type { Staleness } from '$lib/components/ui/staleness-banner';
 	import { OrgSnapshotBanner } from '$lib/components/ui/org-snapshot-banner';
 	import { BillingDocument } from '$lib/components/ui/billing-document';
+	import { Modal } from '$lib/components/ui/modal';
+	import { CustomerSelect } from '$lib/components/ui/customer-select';
+	import type { CustomerWithAddress } from '$lib/components/ui/customer-form-modal';
 
 	const invoiceId = $derived(page.params.id as string);
 	let invoice = $derived(await getInvoice(invoiceId));
@@ -85,49 +94,34 @@
 
 	let customers = $derived(await getCustomers(invoice.organizationId));
 
-	function customerLabel(c: { companyName: string | null; contactPerson: string | null }) {
-		return c.companyName || c.contactPerson || 'Unnamed customer';
-	}
-
 	// ── Edit customer ──
 	let editCustomerOpen = $state(false);
 	let editCustomerId = $state('');
-	let editCustomerName = $state('');
-	let editCustomerContactPerson = $state('');
-	let editCustomerEmail = $state('');
-	let editCustomerAddress = $state('');
+	let editCustomerSelected = $state<CustomerWithAddress | null>(null);
 	let savingCustomer = $state(false);
 
 	function openEditCustomer() {
 		editCustomerId = invoice.customerId ?? '';
-		editCustomerName = invoice.customerName;
-		editCustomerContactPerson = invoice.customerContactPerson ?? '';
-		editCustomerEmail = invoice.customerEmail ?? '';
-		editCustomerAddress = invoice.customerAddress ?? '';
+		editCustomerSelected = null;
 		editCustomerOpen = true;
-	}
-
-	function handleSelectEditCustomer(e: Event) {
-		editCustomerId = (e.currentTarget as HTMLSelectElement).value;
-		const c = customers.find((c) => c.id === editCustomerId);
-		if (!c) return;
-		editCustomerName = customerLabel(c);
-		editCustomerContactPerson = c.contactPerson ?? '';
-		editCustomerEmail = c.email ?? '';
-		editCustomerAddress = formatAddress(c.address);
 	}
 
 	async function handleSaveCustomer(e: Event) {
 		e.preventDefault();
+		const c = editCustomerSelected ?? customers.find((cu) => cu.id === editCustomerId) ?? null;
+		if (!c) {
+			toast.error('Please select or create a customer');
+			return;
+		}
 		savingCustomer = true;
 		try {
 			await updateInvoiceCustomer({
 				invoiceId,
-				customerId: editCustomerId || undefined,
-				customerName: editCustomerName,
-				customerContactPerson: editCustomerContactPerson || undefined,
-				customerEmail: editCustomerEmail || undefined,
-				customerAddress: editCustomerAddress || undefined
+				customerId: c.id,
+				customerName: customerLabel(c),
+				customerContactPerson: c.contactPerson || undefined,
+				customerEmail: c.email || undefined,
+				customerAddress: formatAddress(c.address) || undefined
 			});
 			toast.success('Customer updated');
 			editCustomerOpen = false;
@@ -284,73 +278,35 @@
 		</Card.Root>
 	{/if}
 
-	{#if editCustomerOpen}
-		<Card.Root class="max-w-lg bg-muted/30">
-			<Card.Header>
-				<Card.Title>Edit customer</Card.Title>
-			</Card.Header>
-			<Card.Content>
-				<form class="space-y-4" onsubmit={handleSaveCustomer}>
-					<div class="space-y-2">
-						<Label for="editCustomerSelect">Existing customer</Label>
-						<select
-							id="editCustomerSelect"
-							value={editCustomerId}
-							onchange={handleSelectEditCustomer}
-							class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-						>
-							<option value="">— None —</option>
-							{#each customers as c (c.id)}
-								<option value={c.id}>{customerLabel(c)}</option>
-							{/each}
-						</select>
-					</div>
-					<div class="space-y-2">
-						<Label for="editCustomerName">Customer name</Label>
-						<Input id="editCustomerName" bind:value={editCustomerName} required />
-					</div>
-					<div class="space-y-2">
-						<Label for="editCustomerContactPerson">Contact person</Label>
-						<Input
-							id="editCustomerContactPerson"
-							bind:value={editCustomerContactPerson}
-							placeholder="Optional"
-						/>
-					</div>
-					<div class="space-y-2">
-						<Label for="editCustomerEmail">Email</Label>
-						<Input
-							id="editCustomerEmail"
-							type="email"
-							bind:value={editCustomerEmail}
-							placeholder="Optional"
-						/>
-					</div>
-					<div class="space-y-2">
-						<Label for="editCustomerAddress">Customer address</Label>
-						<Input
-							id="editCustomerAddress"
-							bind:value={editCustomerAddress}
-							placeholder="Optional"
-						/>
-					</div>
-					<div class="flex gap-2">
-						<Button icon="save" type="submit" disabled={savingCustomer}>
-							{savingCustomer ? 'Saving…' : 'Save'}
-						</Button>
-						<Button
-							icon="close"
-							type="button"
-							variant="outline"
-							onclick={() => (editCustomerOpen = false)}
-						>
-							Cancel
-						</Button>
-					</div>
-				</form>
-			</Card.Content>
-		</Card.Root>
-	{/if}
+	<Modal bind:open={editCustomerOpen} title="Edit customer" size="lg" dismissible={!savingCustomer}>
+		{#snippet description()}
+			The selected customer's details are copied onto this invoice.
+		{/snippet}
+
+		<form class="space-y-4" onsubmit={handleSaveCustomer}>
+			<CustomerSelect
+				organizationId={invoice.organizationId}
+				bind:value={editCustomerId}
+				id="invoice-edit-customer"
+				idPrefix="invoice-edit-cust"
+				onChange={(c) => (editCustomerSelected = c)}
+			/>
+		</form>
+
+		{#snippet footer()}
+			<Button
+				icon="close"
+				variant="outline"
+				disabled={savingCustomer}
+				onclick={() => (editCustomerOpen = false)}
+			>
+				Cancel
+			</Button>
+			<Button icon="save" disabled={savingCustomer || !editCustomerId} onclick={handleSaveCustomer}>
+				{savingCustomer ? 'Saving…' : 'Save'}
+			</Button>
+		{/snippet}
+	</Modal>
 
 	<StalenessBanner
 		{staleness}

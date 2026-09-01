@@ -177,9 +177,6 @@ msgstr "Crew"
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
-#: src/routes/invoices/[id]/+page.svelte
-#: src/routes/offers/[id]/+page.svelte
-#: src/routes/offers/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
@@ -243,10 +240,6 @@ msgstr "Name"
 #: src/routes/auth/forgot-password/+page.svelte
 #: src/routes/auth/login/+page.svelte
 #: src/routes/auth/register/+page.svelte
-#: src/routes/invoices/[id]/+page.svelte
-#: src/routes/offers/[id]/+page.svelte
-#: src/routes/offers/new/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Email"
 msgstr "Email"
@@ -656,12 +649,12 @@ msgstr "Quantity"
 msgid "<0/> Create another after saving"
 msgstr "<0/> Create another after saving"
 
+#: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/new/+page.svelte
-#: src/routes/customers/+page.svelte
 #: src/routes/inspections/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
@@ -1241,6 +1234,7 @@ msgstr "Asset"
 #~ msgid "Update serial, tag, status, and location."
 #~ msgstr "Update serial, tag, status, and location."
 
+#: src/lib/components/ui/customer-select/customer-select.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
@@ -2719,15 +2713,6 @@ msgid "Notes"
 msgstr "Notes"
 
 #: src/routes/inspections/+page.svelte
-#: src/routes/invoices/[id]/+page.svelte
-#: src/routes/invoices/[id]/+page.svelte
-#: src/routes/invoices/[id]/+page.svelte
-#: src/routes/offers/[id]/+page.svelte
-#: src/routes/offers/[id]/+page.svelte
-#: src/routes/offers/[id]/+page.svelte
-#: src/routes/offers/[id]/+page.svelte
-#: src/routes/offers/new/+page.svelte
-#: src/routes/offers/new/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Optional"
 msgstr "Optional"
@@ -2941,19 +2926,11 @@ msgstr "Select a production"
 msgid "{0} ({1} items)"
 msgstr "{0} ({1} items)"
 
-#: src/routes/invoices/[id]/+page.svelte
-#: src/routes/offers/[id]/+page.svelte
-#: src/routes/offers/[id]/+page.svelte
-#: src/routes/offers/new/+page.svelte
-msgid "Customer name"
-msgstr "Customer name"
+#~ msgid "Customer name"
+#~ msgstr "Customer name"
 
-#: src/routes/invoices/[id]/+page.svelte
-#: src/routes/offers/[id]/+page.svelte
-#: src/routes/offers/[id]/+page.svelte
-#: src/routes/offers/new/+page.svelte
-msgid "Customer address"
-msgstr "Customer address"
+#~ msgid "Customer address"
+#~ msgstr "Customer address"
 
 #: src/routes/offers/new/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
@@ -3008,9 +2985,8 @@ msgstr "Convert to invoice"
 msgid "View invoice {0}"
 msgstr "View invoice {0}"
 
-#: src/routes/offers/[id]/+page.svelte
-msgid "Duplicates all line items into a new offer."
-msgstr "Duplicates all line items into a new offer."
+#~ msgid "Duplicates all line items into a new offer."
+#~ msgstr "Duplicates all line items into a new offer."
 
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
@@ -3493,48 +3469,30 @@ msgstr "<0/> Bundle · {0}"
 #~ msgid "Add bundle"
 #~ msgstr "Add bundle"
 
-#: src/routes/invoices/[id]/+page.svelte
-#: src/routes/offers/[id]/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
-msgid "Unnamed customer"
-msgstr "Unnamed customer"
+#~ msgid "Unnamed customer"
+#~ msgstr "Unnamed customer"
 
 #: src/routes/productions/new/+page.svelte
 msgid "Optional — reused to auto-populate offers/invoices for this production."
 msgstr "Optional — reused to auto-populate offers/invoices for this production."
 
-#: src/routes/invoices/[id]/+page.svelte
-#: src/routes/offers/[id]/+page.svelte
-#: src/routes/offers/new/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/new/+page.svelte
+#: src/lib/components/ui/customer-select/customer-select.svelte
 msgid "— None —"
 msgstr "— None —"
 
-#: src/routes/offers/new/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/new/+page.svelte
-msgid "+ New customer"
-msgstr "+ New customer"
+#~ msgid "+ New customer"
+#~ msgstr "+ New customer"
 
 #: src/lib/components/ui/customer-fields/customer-fields.svelte
-#: src/routes/productions/[id]/+page.svelte
 msgid "Company name"
 msgstr "Company name"
 
 #: src/lib/components/ui/customer-fields/customer-fields.svelte
-#: src/routes/invoices/[id]/+page.svelte
-#: src/routes/offers/[id]/+page.svelte
-#: src/routes/offers/new/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
 msgid "Contact person"
 msgstr "Contact person"
 
-#: src/routes/offers/new/+page.svelte
-#: src/routes/productions/[id]/+page.svelte
-#: src/routes/productions/new/+page.svelte
-msgid "Cancel new customer"
-msgstr "Cancel new customer"
+#~ msgid "Cancel new customer"
+#~ msgstr "Cancel new customer"
 
 #: src/routes/invoices/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
@@ -3736,7 +3694,8 @@ msgstr "{0} d · {1}"
 #~ msgid "Back to production"
 #~ msgstr "Back to production"
 
-#: src/routes/customers/+page.svelte
+#: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
+#: src/lib/components/ui/customer-select/customer-select.svelte
 #: src/routes/invoices/[id]/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
@@ -3744,10 +3703,8 @@ msgstr "{0} d · {1}"
 msgid "Edit customer"
 msgstr "Edit customer"
 
-#: src/routes/invoices/[id]/+page.svelte
-#: src/routes/offers/[id]/+page.svelte
-msgid "Existing customer"
-msgstr "Existing customer"
+#~ msgid "Existing customer"
+#~ msgstr "Existing customer"
 
 #~ msgid "Uncategorized"
 #~ msgstr "Uncategorized"
@@ -4215,14 +4172,15 @@ msgstr "Delete this asset"
 msgid "Only possible while it has never been booked, scanned, inspected or billed. A unit that has been in use is decommissioned instead, so its history survives."
 msgstr "Only possible while it has never been booked, scanned, inspected or billed. A unit that has been in use is decommissioned instead, so its history survives."
 
+#: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
-#: src/routes/customers/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Delete"
 msgstr "Delete"
 
+#: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
@@ -4741,6 +4699,7 @@ msgstr "{0} accessories created and attached"
 msgid "Search this organisation's devices, or type a new one…"
 msgstr "Search this organisation's devices, or type a new one…"
 
+#: src/lib/components/ui/customer-select/customer-select.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 msgid "New"
@@ -5393,23 +5352,23 @@ msgstr "Save text"
 #~ msgid "BIC: {0}"
 #~ msgstr "BIC: {0}"
 
-#: src/routes/customers/+page.svelte
+#: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 msgid "Enter a company or contact person"
 msgstr "Enter a company or contact person"
 
-#: src/routes/customers/+page.svelte
+#: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 msgid "Customer saved"
 msgstr "Customer saved"
 
-#: src/routes/customers/+page.svelte
+#: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 msgid "Customer created"
 msgstr "Customer created"
 
-#: src/routes/customers/+page.svelte
+#: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 msgid "Delete this customer? Existing documents keep their snapshot."
 msgstr "Delete this customer? Existing documents keep their snapshot."
 
-#: src/routes/customers/+page.svelte
+#: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 msgid "Customer deleted"
 msgstr "Customer deleted"
 
@@ -5425,7 +5384,8 @@ msgstr "Customers"
 msgid "Manage billing recipients and their document details."
 msgstr "Manage billing recipients and their document details."
 
-#: src/routes/customers/+page.svelte
+#: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
+#: src/lib/components/ui/customer-select/customer-select.svelte
 #: src/routes/customers/+page.svelte
 msgid "New customer"
 msgstr "New customer"
@@ -5442,11 +5402,11 @@ msgstr "No address"
 msgid "No customers yet."
 msgstr "No customers yet."
 
-#: src/routes/customers/+page.svelte
+#: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 msgid "These values are copied into new offers and invoices."
 msgstr "These values are copied into new offers and invoices."
 
-#: src/routes/customers/+page.svelte
+#: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 msgid "Save customer"
 msgstr "Save customer"
 
@@ -5777,3 +5737,42 @@ msgstr "Subject"
 #: src/routes/admin/catalog-log/+page.svelte
 msgid "Details"
 msgstr "Details"
+
+#: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
+msgid "Create customer"
+msgstr "Create customer"
+
+#: src/lib/components/ui/customer-select/customer-select.svelte
+msgid "Select a customer"
+msgstr "Select a customer"
+
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/new/+page.svelte
+msgid "Please select or create a customer"
+msgstr "Please select or create a customer"
+
+#: src/routes/offers/[id]/+page.svelte
+msgid "The selected customer's details are copied onto this offer."
+msgstr "The selected customer's details are copied onto this offer."
+
+#: src/routes/offers/[id]/+page.svelte
+msgid "Duplicates all line items into a new offer for the selected customer."
+msgstr "Duplicates all line items into a new offer for the selected customer."
+
+#: src/routes/invoices/[id]/+page.svelte
+msgid "The selected customer's details are copied onto this invoice."
+msgstr "The selected customer's details are copied onto this invoice."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Data Export"
+msgstr "Data Export"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Download everything this organization owns — members, inventory, productions, offers and invoices including the archived PDFs — as one JSON file."
+msgstr "Download everything this organization owns — members, inventory, productions, offers and invoices including the archived PDFs — as one JSON file."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Export all data (JSON)"
+msgstr "Export all data (JSON)"

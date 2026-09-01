@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { getErrorMessage, dayCountBetween, formatAddress, orgLabel } from '$lib/utils';
+	import {
+		customerLabel,
+		getErrorMessage,
+		dayCountBetween,
+		formatAddress,
+		orgLabel
+	} from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -28,6 +34,8 @@
 	import { OrgSnapshotBanner } from '$lib/components/ui/org-snapshot-banner';
 	import { BillingDocument } from '$lib/components/ui/billing-document';
 	import { Modal } from '$lib/components/ui/modal';
+	import { CustomerSelect } from '$lib/components/ui/customer-select';
+	import type { CustomerWithAddress } from '$lib/components/ui/customer-form-modal';
 
 	const offerId = $derived(page.params.id as string);
 	let offer = $derived(await getOffer(offerId));
@@ -76,49 +84,34 @@
 
 	let customers = $derived(await getCustomers(offer.organizationId));
 
-	function customerLabel(c: { companyName: string | null; contactPerson: string | null }) {
-		return c.companyName || c.contactPerson || 'Unnamed customer';
-	}
-
 	// ── Edit customer ──
 	let editCustomerOpen = $state(false);
 	let editCustomerId = $state('');
-	let editCustomerName = $state('');
-	let editCustomerContactPerson = $state('');
-	let editCustomerEmail = $state('');
-	let editCustomerAddress = $state('');
+	let editCustomerSelected = $state<CustomerWithAddress | null>(null);
 	let savingCustomer = $state(false);
 
 	function openEditCustomer() {
 		editCustomerId = offer.customerId ?? '';
-		editCustomerName = offer.customerName;
-		editCustomerContactPerson = offer.customerContactPerson ?? '';
-		editCustomerEmail = offer.customerEmail ?? '';
-		editCustomerAddress = offer.customerAddress ?? '';
+		editCustomerSelected = null;
 		editCustomerOpen = true;
-	}
-
-	function handleSelectEditCustomer(e: Event) {
-		editCustomerId = (e.currentTarget as HTMLSelectElement).value;
-		const c = customers.find((c) => c.id === editCustomerId);
-		if (!c) return;
-		editCustomerName = customerLabel(c);
-		editCustomerContactPerson = c.contactPerson ?? '';
-		editCustomerEmail = c.email ?? '';
-		editCustomerAddress = formatAddress(c.address);
 	}
 
 	async function handleSaveCustomer(e: Event) {
 		e.preventDefault();
+		const c = editCustomerSelected ?? customers.find((cu) => cu.id === editCustomerId) ?? null;
+		if (!c) {
+			toast.error('Please select or create a customer');
+			return;
+		}
 		savingCustomer = true;
 		try {
 			await updateOfferCustomer({
 				offerId,
-				customerId: editCustomerId || undefined,
-				customerName: editCustomerName,
-				customerContactPerson: editCustomerContactPerson || undefined,
-				customerEmail: editCustomerEmail || undefined,
-				customerAddress: editCustomerAddress || undefined
+				customerId: c.id,
+				customerName: customerLabel(c),
+				customerContactPerson: c.contactPerson || undefined,
+				customerEmail: c.email || undefined,
+				customerAddress: formatAddress(c.address) || undefined
 			});
 			toast.success('Customer updated');
 			editCustomerOpen = false;
@@ -131,17 +124,19 @@
 
 	// ── Copy to new customer ──
 	let copyOpen = $state(false);
-	let copyName = $state('');
-	let copyAddress = $state('');
+	let copyCustomerId = $state('');
 	let copying = $state(false);
 	async function handleCopy(e: Event) {
 		e.preventDefault();
+		if (!copyCustomerId) {
+			toast.error('Please select or create a customer');
+			return;
+		}
 		copying = true;
 		try {
 			const newOffer = await copyOfferToNewCustomer({
 				offerId,
-				customerName: copyName,
-				customerAddress: copyAddress || undefined
+				customerId: copyCustomerId
 			});
 			toast.success('Offer copied');
 			goto(resolve(`/offers/${newOffer.id}`));
@@ -248,7 +243,7 @@
 				><Button disabled={finalizing} onclick={handleFinalize}
 					>{finalizing ? 'Finalizing…' : 'Finalize offer'}</Button
 				>{/if}
-			<Button variant="outline" onclick={() => (copyOpen = !copyOpen)}>Copy to new customer</Button>
+			<Button variant="outline" onclick={() => (copyOpen = true)}>Copy to new customer</Button>
 			{#if offer.invoices.length === 0}<Button
 					variant="destructive"
 					disabled={deleting}
@@ -325,100 +320,59 @@
 		></Card.Root
 	>
 
-	{#if editCustomerOpen}
-		<Card.Root class="max-w-lg bg-muted/30">
-			<Card.Header>
-				<Card.Title>Edit customer</Card.Title>
-			</Card.Header>
-			<Card.Content>
-				<form class="space-y-4" onsubmit={handleSaveCustomer}>
-					<div class="space-y-2">
-						<Label for="editCustomerSelect">Existing customer</Label>
-						<select
-							id="editCustomerSelect"
-							value={editCustomerId}
-							onchange={handleSelectEditCustomer}
-							class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-						>
-							<option value="">— None —</option>
-							{#each customers as c (c.id)}
-								<option value={c.id}>{customerLabel(c)}</option>
-							{/each}
-						</select>
-					</div>
-					<div class="space-y-2">
-						<Label for="editCustomerName">Customer name</Label>
-						<Input id="editCustomerName" bind:value={editCustomerName} required />
-					</div>
-					<div class="space-y-2">
-						<Label for="editCustomerContactPerson">Contact person</Label>
-						<Input
-							id="editCustomerContactPerson"
-							bind:value={editCustomerContactPerson}
-							placeholder="Optional"
-						/>
-					</div>
-					<div class="space-y-2">
-						<Label for="editCustomerEmail">Email</Label>
-						<Input
-							id="editCustomerEmail"
-							type="email"
-							bind:value={editCustomerEmail}
-							placeholder="Optional"
-						/>
-					</div>
-					<div class="space-y-2">
-						<Label for="editCustomerAddress">Customer address</Label>
-						<Input
-							id="editCustomerAddress"
-							bind:value={editCustomerAddress}
-							placeholder="Optional"
-						/>
-					</div>
-					<div class="flex gap-2">
-						<Button icon="save" type="submit" disabled={savingCustomer}>
-							{savingCustomer ? 'Saving…' : 'Save'}
-						</Button>
-						<Button
-							icon="close"
-							type="button"
-							variant="outline"
-							onclick={() => (editCustomerOpen = false)}
-						>
-							Cancel
-						</Button>
-					</div>
-				</form>
-			</Card.Content>
-		</Card.Root>
-	{/if}
+	<Modal bind:open={editCustomerOpen} title="Edit customer" size="lg" dismissible={!savingCustomer}>
+		{#snippet description()}
+			The selected customer's details are copied onto this offer.
+		{/snippet}
 
-	{#if copyOpen}
-		<Card.Root class="max-w-lg bg-muted/30">
-			<Card.Header>
-				<Card.Title>Copy to new customer</Card.Title>
-				<Card.Description>Duplicates all line items into a new offer.</Card.Description>
-			</Card.Header>
-			<Card.Content>
-				<form class="space-y-4" onsubmit={handleCopy}>
-					<div class="space-y-2">
-						<Label for="copyName">Customer name</Label>
-						<Input id="copyName" bind:value={copyName} required />
-					</div>
-					<div class="space-y-2">
-						<Label for="copyAddress">Customer address</Label>
-						<Input id="copyAddress" bind:value={copyAddress} placeholder="Optional" />
-					</div>
-					<div class="flex gap-2">
-						<Button type="submit" disabled={copying}>{copying ? 'Copying…' : 'Copy'}</Button>
-						<Button type="button" variant="outline" onclick={() => (copyOpen = false)}
-							>Cancel</Button
-						>
-					</div>
-				</form>
-			</Card.Content>
-		</Card.Root>
-	{/if}
+		<form class="space-y-4" onsubmit={handleSaveCustomer}>
+			<CustomerSelect
+				organizationId={offer.organizationId}
+				bind:value={editCustomerId}
+				id="offer-edit-customer"
+				idPrefix="offer-edit-cust"
+				onChange={(c) => (editCustomerSelected = c)}
+			/>
+		</form>
+
+		{#snippet footer()}
+			<Button
+				icon="close"
+				variant="outline"
+				disabled={savingCustomer}
+				onclick={() => (editCustomerOpen = false)}
+			>
+				Cancel
+			</Button>
+			<Button icon="save" disabled={savingCustomer || !editCustomerId} onclick={handleSaveCustomer}>
+				{savingCustomer ? 'Saving…' : 'Save'}
+			</Button>
+		{/snippet}
+	</Modal>
+
+	<Modal bind:open={copyOpen} title="Copy to new customer" size="lg" dismissible={!copying}>
+		{#snippet description()}
+			Duplicates all line items into a new offer for the selected customer.
+		{/snippet}
+
+		<form class="space-y-4" onsubmit={handleCopy}>
+			<CustomerSelect
+				organizationId={offer.organizationId}
+				bind:value={copyCustomerId}
+				id="offer-copy-customer"
+				idPrefix="offer-copy-cust"
+			/>
+		</form>
+
+		{#snippet footer()}
+			<Button icon="close" variant="outline" disabled={copying} onclick={() => (copyOpen = false)}>
+				Cancel
+			</Button>
+			<Button icon="copy" disabled={copying || !copyCustomerId} onclick={handleCopy}>
+				{copying ? 'Copying…' : 'Copy'}
+			</Button>
+		{/snippet}
+	</Modal>
 
 	<BillingDocument
 		items={offer.items}

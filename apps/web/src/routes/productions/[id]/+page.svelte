@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
+	import { customerLabel, getErrorMessage, orgLabel, plural } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { AddressInput } from '$lib/components/ui/address-input';
+	import { CustomerSelect } from '$lib/components/ui/customer-select';
 	import {
 		getProduction,
 		removeBundleFromProduction,
@@ -20,7 +21,6 @@
 	} from '$lib/remote/productions.remote';
 	import { getBundles } from '$lib/remote/assets.remote';
 	import { getOrgUsers } from '$lib/remote/orgs.remote';
-	import { getCustomers, createCustomer } from '$lib/remote/customers.remote';
 	import { getOffersForProduction, getInvoicesForProduction } from '$lib/remote/offers.remote';
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
@@ -378,40 +378,20 @@
 
 	let editingCustomer = $state(false);
 	let savingCustomer = $state(false);
-	let creatingCustomer = $state(false);
 	let customerDraftId = $state('');
-	let newCustomer = $state({ companyName: '', contactPerson: '', email: '' });
-	let newCustomerAddress = $state({ line1: '', line2: '', postalCode: '', city: '' });
-	let orgCustomers = $derived(await getCustomers(production.organizationId));
 
 	$effect(() => {
 		if (editingCustomer) return;
 		customerDraftId = production.customerId ?? '';
 	});
 
-	function customerLabel(c: { companyName: string | null; contactPerson: string | null }) {
-		return c.companyName || c.contactPerson || 'Unnamed customer';
-	}
-
 	async function handleSaveCustomer(e: Event) {
 		e.preventDefault();
 		savingCustomer = true;
 		try {
-			let finalCustomerId = customerDraftId || undefined;
-			if (creatingCustomer) {
-				const created = await createCustomer({
-					organizationId: production.organizationId,
-					companyName: newCustomer.companyName || undefined,
-					contactPerson: newCustomer.contactPerson || undefined,
-					email: newCustomer.email || undefined,
-					address: newCustomerAddress
-				});
-				finalCustomerId = created.id;
-			}
-			await updateProductionCustomer({ productionId, customerId: finalCustomerId });
+			await updateProductionCustomer({ productionId, customerId: customerDraftId || undefined });
 			toast.success('Customer updated');
 			editingCustomer = false;
-			creatingCustomer = false;
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {
@@ -754,58 +734,20 @@
 
 				{#if editingCustomer}
 					<form class="space-y-4" onsubmit={handleSaveCustomer}>
-						{#if !creatingCustomer}
-							<div class="space-y-2">
-								<select
-									bind:value={customerDraftId}
-									class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-								>
-									<option value="">— None —</option>
-									{#each orgCustomers as c (c.id)}
-										<option value={c.id}>{customerLabel(c)}</option>
-									{/each}
-								</select>
-								<Button type="button" variant="outline" onclick={() => (creatingCustomer = true)}>
-									+ New customer
-								</Button>
-							</div>
-						{:else}
-							<div class="space-y-4 rounded-md border p-4">
-								<div class="grid gap-4 sm:grid-cols-2">
-									<div class="space-y-2">
-										<Label for="cust-company">Company name</Label>
-										<Input id="cust-company" bind:value={newCustomer.companyName} />
-									</div>
-									<div class="space-y-2">
-										<Label for="cust-contact">Contact person</Label>
-										<Input id="cust-contact" bind:value={newCustomer.contactPerson} />
-									</div>
-									<div class="space-y-2 sm:col-span-2">
-										<Label for="cust-email">Email</Label>
-										<Input id="cust-email" type="email" bind:value={newCustomer.email} />
-									</div>
-								</div>
-								<AddressInput bind:value={newCustomerAddress} idPrefix="cust-addr" />
-								<Button
-									icon="close"
-									type="button"
-									variant="outline"
-									onclick={() => (creatingCustomer = false)}
-								>
-									Cancel new customer
-								</Button>
-							</div>
-						{/if}
+						<CustomerSelect
+							organizationId={production.organizationId}
+							bind:value={customerDraftId}
+							allowNone
+							id="production-customer"
+							idPrefix="prod-cust"
+						/>
 
 						<div class="flex justify-end gap-2">
 							<Button
 								icon="close"
 								type="button"
 								variant="outline"
-								onclick={() => {
-									editingCustomer = false;
-									creatingCustomer = false;
-								}}
+								onclick={() => (editingCustomer = false)}
 							>
 								Cancel
 							</Button>
