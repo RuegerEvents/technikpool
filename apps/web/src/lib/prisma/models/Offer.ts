@@ -27,12 +27,14 @@ export type AggregateOffer = {
 }
 
 export type OfferAvgAggregateOutputType = {
+  paymentTermsDays: number | null
   dayCount: number | null
   discountValue: runtime.Decimal | null
   vatRatePercent: runtime.Decimal | null
 }
 
 export type OfferSumAggregateOutputType = {
+  paymentTermsDays: number | null
   dayCount: number | null
   discountValue: runtime.Decimal | null
   vatRatePercent: runtime.Decimal | null
@@ -47,6 +49,16 @@ export type OfferMinAggregateOutputType = {
   customerAddress: string | null
   customerContactPerson: string | null
   customerEmail: string | null
+  customerNumber: string | null
+  customerPhone: string | null
+  customerVatId: string | null
+  serviceStartDate: Date | null
+  serviceEndDate: Date | null
+  introText: string | null
+  closingText: string | null
+  paymentTermsDays: number | null
+  finalizedAt: Date | null
+  pdfPath: string | null
   dayCount: number | null
   discountType: string | null
   discountValue: runtime.Decimal | null
@@ -65,6 +77,16 @@ export type OfferMaxAggregateOutputType = {
   customerAddress: string | null
   customerContactPerson: string | null
   customerEmail: string | null
+  customerNumber: string | null
+  customerPhone: string | null
+  customerVatId: string | null
+  serviceStartDate: Date | null
+  serviceEndDate: Date | null
+  introText: string | null
+  closingText: string | null
+  paymentTermsDays: number | null
+  finalizedAt: Date | null
+  pdfPath: string | null
   dayCount: number | null
   discountType: string | null
   discountValue: runtime.Decimal | null
@@ -83,6 +105,16 @@ export type OfferCountAggregateOutputType = {
   customerAddress: number
   customerContactPerson: number
   customerEmail: number
+  customerNumber: number
+  customerPhone: number
+  customerVatId: number
+  serviceStartDate: number
+  serviceEndDate: number
+  introText: number
+  closingText: number
+  paymentTermsDays: number
+  finalizedAt: number
+  pdfPath: number
   dayCount: number
   discountType: number
   discountValue: number
@@ -95,12 +127,14 @@ export type OfferCountAggregateOutputType = {
 
 
 export type OfferAvgAggregateInputType = {
+  paymentTermsDays?: true
   dayCount?: true
   discountValue?: true
   vatRatePercent?: true
 }
 
 export type OfferSumAggregateInputType = {
+  paymentTermsDays?: true
   dayCount?: true
   discountValue?: true
   vatRatePercent?: true
@@ -115,6 +149,16 @@ export type OfferMinAggregateInputType = {
   customerAddress?: true
   customerContactPerson?: true
   customerEmail?: true
+  customerNumber?: true
+  customerPhone?: true
+  customerVatId?: true
+  serviceStartDate?: true
+  serviceEndDate?: true
+  introText?: true
+  closingText?: true
+  paymentTermsDays?: true
+  finalizedAt?: true
+  pdfPath?: true
   dayCount?: true
   discountType?: true
   discountValue?: true
@@ -133,6 +177,16 @@ export type OfferMaxAggregateInputType = {
   customerAddress?: true
   customerContactPerson?: true
   customerEmail?: true
+  customerNumber?: true
+  customerPhone?: true
+  customerVatId?: true
+  serviceStartDate?: true
+  serviceEndDate?: true
+  introText?: true
+  closingText?: true
+  paymentTermsDays?: true
+  finalizedAt?: true
+  pdfPath?: true
   dayCount?: true
   discountType?: true
   discountValue?: true
@@ -151,6 +205,16 @@ export type OfferCountAggregateInputType = {
   customerAddress?: true
   customerContactPerson?: true
   customerEmail?: true
+  customerNumber?: true
+  customerPhone?: true
+  customerVatId?: true
+  serviceStartDate?: true
+  serviceEndDate?: true
+  introText?: true
+  closingText?: true
+  paymentTermsDays?: true
+  finalizedAt?: true
+  pdfPath?: true
   dayCount?: true
   discountType?: true
   discountValue?: true
@@ -256,6 +320,16 @@ export type OfferGroupByOutputType = {
   customerAddress: string | null
   customerContactPerson: string | null
   customerEmail: string | null
+  customerNumber: string | null
+  customerPhone: string | null
+  customerVatId: string | null
+  serviceStartDate: Date | null
+  serviceEndDate: Date | null
+  introText: string | null
+  closingText: string | null
+  paymentTermsDays: number
+  finalizedAt: Date | null
+  pdfPath: string | null
   dayCount: number
   discountType: string | null
   discountValue: runtime.Decimal | null
@@ -297,6 +371,16 @@ export type OfferWhereInput = {
   customerAddress?: Prisma.StringNullableFilter<"Offer"> | string | null
   customerContactPerson?: Prisma.StringNullableFilter<"Offer"> | string | null
   customerEmail?: Prisma.StringNullableFilter<"Offer"> | string | null
+  customerNumber?: Prisma.StringNullableFilter<"Offer"> | string | null
+  customerPhone?: Prisma.StringNullableFilter<"Offer"> | string | null
+  customerVatId?: Prisma.StringNullableFilter<"Offer"> | string | null
+  serviceStartDate?: Prisma.DateTimeNullableFilter<"Offer"> | Date | string | null
+  serviceEndDate?: Prisma.DateTimeNullableFilter<"Offer"> | Date | string | null
+  introText?: Prisma.StringNullableFilter<"Offer"> | string | null
+  closingText?: Prisma.StringNullableFilter<"Offer"> | string | null
+  paymentTermsDays?: Prisma.IntFilter<"Offer"> | number
+  finalizedAt?: Prisma.DateTimeNullableFilter<"Offer"> | Date | string | null
+  pdfPath?: Prisma.StringNullableFilter<"Offer"> | string | null
   dayCount?: Prisma.IntFilter<"Offer"> | number
   discountType?: Prisma.StringNullableFilter<"Offer"> | string | null
   discountValue?: Prisma.DecimalNullableFilter<"Offer"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -319,6 +403,16 @@ export type OfferOrderByWithRelationInput = {
   customerAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   customerContactPerson?: Prisma.SortOrderInput | Prisma.SortOrder
   customerEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerVatId?: Prisma.SortOrderInput | Prisma.SortOrder
+  serviceStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  serviceEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  introText?: Prisma.SortOrderInput | Prisma.SortOrder
+  closingText?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentTermsDays?: Prisma.SortOrder
+  finalizedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  pdfPath?: Prisma.SortOrderInput | Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountType?: Prisma.SortOrderInput | Prisma.SortOrder
   discountValue?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -344,6 +438,16 @@ export type OfferWhereUniqueInput = Prisma.AtLeast<{
   customerAddress?: Prisma.StringNullableFilter<"Offer"> | string | null
   customerContactPerson?: Prisma.StringNullableFilter<"Offer"> | string | null
   customerEmail?: Prisma.StringNullableFilter<"Offer"> | string | null
+  customerNumber?: Prisma.StringNullableFilter<"Offer"> | string | null
+  customerPhone?: Prisma.StringNullableFilter<"Offer"> | string | null
+  customerVatId?: Prisma.StringNullableFilter<"Offer"> | string | null
+  serviceStartDate?: Prisma.DateTimeNullableFilter<"Offer"> | Date | string | null
+  serviceEndDate?: Prisma.DateTimeNullableFilter<"Offer"> | Date | string | null
+  introText?: Prisma.StringNullableFilter<"Offer"> | string | null
+  closingText?: Prisma.StringNullableFilter<"Offer"> | string | null
+  paymentTermsDays?: Prisma.IntFilter<"Offer"> | number
+  finalizedAt?: Prisma.DateTimeNullableFilter<"Offer"> | Date | string | null
+  pdfPath?: Prisma.StringNullableFilter<"Offer"> | string | null
   dayCount?: Prisma.IntFilter<"Offer"> | number
   discountType?: Prisma.StringNullableFilter<"Offer"> | string | null
   discountValue?: Prisma.DecimalNullableFilter<"Offer"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -366,6 +470,16 @@ export type OfferOrderByWithAggregationInput = {
   customerAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   customerContactPerson?: Prisma.SortOrderInput | Prisma.SortOrder
   customerEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerVatId?: Prisma.SortOrderInput | Prisma.SortOrder
+  serviceStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  serviceEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  introText?: Prisma.SortOrderInput | Prisma.SortOrder
+  closingText?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentTermsDays?: Prisma.SortOrder
+  finalizedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  pdfPath?: Prisma.SortOrderInput | Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountType?: Prisma.SortOrderInput | Prisma.SortOrder
   discountValue?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -392,6 +506,16 @@ export type OfferScalarWhereWithAggregatesInput = {
   customerAddress?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
   customerContactPerson?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
   customerEmail?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
+  customerNumber?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
+  customerPhone?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
+  customerVatId?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
+  serviceStartDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Offer"> | Date | string | null
+  serviceEndDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Offer"> | Date | string | null
+  introText?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
+  closingText?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
+  paymentTermsDays?: Prisma.IntWithAggregatesFilter<"Offer"> | number
+  finalizedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Offer"> | Date | string | null
+  pdfPath?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
   dayCount?: Prisma.IntWithAggregatesFilter<"Offer"> | number
   discountType?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
   discountValue?: Prisma.DecimalNullableWithAggregatesFilter<"Offer"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -408,6 +532,16 @@ export type OfferCreateInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
+  finalizedAt?: Date | string | null
+  pdfPath?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -430,6 +564,16 @@ export type OfferUncheckedCreateInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
+  finalizedAt?: Date | string | null
+  pdfPath?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -448,6 +592,16 @@ export type OfferUpdateInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -470,6 +624,16 @@ export type OfferUncheckedUpdateInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -490,6 +654,16 @@ export type OfferCreateManyInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
+  finalizedAt?: Date | string | null
+  pdfPath?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -506,6 +680,16 @@ export type OfferUpdateManyMutationInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -524,6 +708,16 @@ export type OfferUncheckedUpdateManyInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -552,6 +746,16 @@ export type OfferCountOrderByAggregateInput = {
   customerAddress?: Prisma.SortOrder
   customerContactPerson?: Prisma.SortOrder
   customerEmail?: Prisma.SortOrder
+  customerNumber?: Prisma.SortOrder
+  customerPhone?: Prisma.SortOrder
+  customerVatId?: Prisma.SortOrder
+  serviceStartDate?: Prisma.SortOrder
+  serviceEndDate?: Prisma.SortOrder
+  introText?: Prisma.SortOrder
+  closingText?: Prisma.SortOrder
+  paymentTermsDays?: Prisma.SortOrder
+  finalizedAt?: Prisma.SortOrder
+  pdfPath?: Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountType?: Prisma.SortOrder
   discountValue?: Prisma.SortOrder
@@ -562,6 +766,7 @@ export type OfferCountOrderByAggregateInput = {
 }
 
 export type OfferAvgOrderByAggregateInput = {
+  paymentTermsDays?: Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountValue?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
@@ -576,6 +781,16 @@ export type OfferMaxOrderByAggregateInput = {
   customerAddress?: Prisma.SortOrder
   customerContactPerson?: Prisma.SortOrder
   customerEmail?: Prisma.SortOrder
+  customerNumber?: Prisma.SortOrder
+  customerPhone?: Prisma.SortOrder
+  customerVatId?: Prisma.SortOrder
+  serviceStartDate?: Prisma.SortOrder
+  serviceEndDate?: Prisma.SortOrder
+  introText?: Prisma.SortOrder
+  closingText?: Prisma.SortOrder
+  paymentTermsDays?: Prisma.SortOrder
+  finalizedAt?: Prisma.SortOrder
+  pdfPath?: Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountType?: Prisma.SortOrder
   discountValue?: Prisma.SortOrder
@@ -594,6 +809,16 @@ export type OfferMinOrderByAggregateInput = {
   customerAddress?: Prisma.SortOrder
   customerContactPerson?: Prisma.SortOrder
   customerEmail?: Prisma.SortOrder
+  customerNumber?: Prisma.SortOrder
+  customerPhone?: Prisma.SortOrder
+  customerVatId?: Prisma.SortOrder
+  serviceStartDate?: Prisma.SortOrder
+  serviceEndDate?: Prisma.SortOrder
+  introText?: Prisma.SortOrder
+  closingText?: Prisma.SortOrder
+  paymentTermsDays?: Prisma.SortOrder
+  finalizedAt?: Prisma.SortOrder
+  pdfPath?: Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountType?: Prisma.SortOrder
   discountValue?: Prisma.SortOrder
@@ -604,6 +829,7 @@ export type OfferMinOrderByAggregateInput = {
 }
 
 export type OfferSumOrderByAggregateInput = {
+  paymentTermsDays?: Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountValue?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
@@ -740,6 +966,16 @@ export type OfferCreateWithoutOrganizationInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
+  finalizedAt?: Date | string | null
+  pdfPath?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -760,6 +996,16 @@ export type OfferUncheckedCreateWithoutOrganizationInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
+  finalizedAt?: Date | string | null
+  pdfPath?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -809,6 +1055,16 @@ export type OfferScalarWhereInput = {
   customerAddress?: Prisma.StringNullableFilter<"Offer"> | string | null
   customerContactPerson?: Prisma.StringNullableFilter<"Offer"> | string | null
   customerEmail?: Prisma.StringNullableFilter<"Offer"> | string | null
+  customerNumber?: Prisma.StringNullableFilter<"Offer"> | string | null
+  customerPhone?: Prisma.StringNullableFilter<"Offer"> | string | null
+  customerVatId?: Prisma.StringNullableFilter<"Offer"> | string | null
+  serviceStartDate?: Prisma.DateTimeNullableFilter<"Offer"> | Date | string | null
+  serviceEndDate?: Prisma.DateTimeNullableFilter<"Offer"> | Date | string | null
+  introText?: Prisma.StringNullableFilter<"Offer"> | string | null
+  closingText?: Prisma.StringNullableFilter<"Offer"> | string | null
+  paymentTermsDays?: Prisma.IntFilter<"Offer"> | number
+  finalizedAt?: Prisma.DateTimeNullableFilter<"Offer"> | Date | string | null
+  pdfPath?: Prisma.StringNullableFilter<"Offer"> | string | null
   dayCount?: Prisma.IntFilter<"Offer"> | number
   discountType?: Prisma.StringNullableFilter<"Offer"> | string | null
   discountValue?: Prisma.DecimalNullableFilter<"Offer"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -825,6 +1081,16 @@ export type OfferCreateWithoutProductionInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
+  finalizedAt?: Date | string | null
+  pdfPath?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -845,6 +1111,16 @@ export type OfferUncheckedCreateWithoutProductionInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
+  finalizedAt?: Date | string | null
+  pdfPath?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -889,6 +1165,16 @@ export type OfferCreateWithoutItemsInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
+  finalizedAt?: Date | string | null
+  pdfPath?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -910,6 +1196,16 @@ export type OfferUncheckedCreateWithoutItemsInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
+  finalizedAt?: Date | string | null
+  pdfPath?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -943,6 +1239,16 @@ export type OfferUpdateWithoutItemsInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -964,6 +1270,16 @@ export type OfferUncheckedUpdateWithoutItemsInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -981,6 +1297,16 @@ export type OfferCreateWithoutInvoicesInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
+  finalizedAt?: Date | string | null
+  pdfPath?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1002,6 +1328,16 @@ export type OfferUncheckedCreateWithoutInvoicesInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
+  finalizedAt?: Date | string | null
+  pdfPath?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1035,6 +1371,16 @@ export type OfferUpdateWithoutInvoicesInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1056,6 +1402,16 @@ export type OfferUncheckedUpdateWithoutInvoicesInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1074,6 +1430,16 @@ export type OfferCreateManyOrganizationInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
+  finalizedAt?: Date | string | null
+  pdfPath?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1090,6 +1456,16 @@ export type OfferUpdateWithoutOrganizationInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1110,6 +1486,16 @@ export type OfferUncheckedUpdateWithoutOrganizationInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1129,6 +1515,16 @@ export type OfferUncheckedUpdateManyWithoutOrganizationInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1146,6 +1542,16 @@ export type OfferCreateManyProductionInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
+  finalizedAt?: Date | string | null
+  pdfPath?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1162,6 +1568,16 @@ export type OfferUpdateWithoutProductionInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1182,6 +1598,16 @@ export type OfferUncheckedUpdateWithoutProductionInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1201,6 +1627,16 @@ export type OfferUncheckedUpdateManyWithoutProductionInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1259,6 +1695,16 @@ export type OfferSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   customerAddress?: boolean
   customerContactPerson?: boolean
   customerEmail?: boolean
+  customerNumber?: boolean
+  customerPhone?: boolean
+  customerVatId?: boolean
+  serviceStartDate?: boolean
+  serviceEndDate?: boolean
+  introText?: boolean
+  closingText?: boolean
+  paymentTermsDays?: boolean
+  finalizedAt?: boolean
+  pdfPath?: boolean
   dayCount?: boolean
   discountType?: boolean
   discountValue?: boolean
@@ -1282,6 +1728,16 @@ export type OfferSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   customerAddress?: boolean
   customerContactPerson?: boolean
   customerEmail?: boolean
+  customerNumber?: boolean
+  customerPhone?: boolean
+  customerVatId?: boolean
+  serviceStartDate?: boolean
+  serviceEndDate?: boolean
+  introText?: boolean
+  closingText?: boolean
+  paymentTermsDays?: boolean
+  finalizedAt?: boolean
+  pdfPath?: boolean
   dayCount?: boolean
   discountType?: boolean
   discountValue?: boolean
@@ -1302,6 +1758,16 @@ export type OfferSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   customerAddress?: boolean
   customerContactPerson?: boolean
   customerEmail?: boolean
+  customerNumber?: boolean
+  customerPhone?: boolean
+  customerVatId?: boolean
+  serviceStartDate?: boolean
+  serviceEndDate?: boolean
+  introText?: boolean
+  closingText?: boolean
+  paymentTermsDays?: boolean
+  finalizedAt?: boolean
+  pdfPath?: boolean
   dayCount?: boolean
   discountType?: boolean
   discountValue?: boolean
@@ -1322,6 +1788,16 @@ export type OfferSelectScalar = {
   customerAddress?: boolean
   customerContactPerson?: boolean
   customerEmail?: boolean
+  customerNumber?: boolean
+  customerPhone?: boolean
+  customerVatId?: boolean
+  serviceStartDate?: boolean
+  serviceEndDate?: boolean
+  introText?: boolean
+  closingText?: boolean
+  paymentTermsDays?: boolean
+  finalizedAt?: boolean
+  pdfPath?: boolean
   dayCount?: boolean
   discountType?: boolean
   discountValue?: boolean
@@ -1331,7 +1807,7 @@ export type OfferSelectScalar = {
   updatedAt?: boolean
 }
 
-export type OfferOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "productionId" | "customerId" | "customerName" | "customerAddress" | "customerContactPerson" | "customerEmail" | "dayCount" | "discountType" | "discountValue" | "assetScope" | "vatRatePercent" | "createdAt" | "updatedAt", ExtArgs["result"]["offer"]>
+export type OfferOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "productionId" | "customerId" | "customerName" | "customerAddress" | "customerContactPerson" | "customerEmail" | "customerNumber" | "customerPhone" | "customerVatId" | "serviceStartDate" | "serviceEndDate" | "introText" | "closingText" | "paymentTermsDays" | "finalizedAt" | "pdfPath" | "dayCount" | "discountType" | "discountValue" | "assetScope" | "vatRatePercent" | "createdAt" | "updatedAt", ExtArgs["result"]["offer"]>
 export type OfferInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   production?: boolean | Prisma.Offer$productionArgs<ExtArgs>
@@ -1365,6 +1841,16 @@ export type $OfferPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     customerAddress: string | null
     customerContactPerson: string | null
     customerEmail: string | null
+    customerNumber: string | null
+    customerPhone: string | null
+    customerVatId: string | null
+    serviceStartDate: Date | null
+    serviceEndDate: Date | null
+    introText: string | null
+    closingText: string | null
+    paymentTermsDays: number
+    finalizedAt: Date | null
+    pdfPath: string | null
     dayCount: number
     discountType: string | null
     discountValue: runtime.Decimal | null
@@ -1807,6 +2293,16 @@ export interface OfferFieldRefs {
   readonly customerAddress: Prisma.FieldRef<"Offer", 'String'>
   readonly customerContactPerson: Prisma.FieldRef<"Offer", 'String'>
   readonly customerEmail: Prisma.FieldRef<"Offer", 'String'>
+  readonly customerNumber: Prisma.FieldRef<"Offer", 'String'>
+  readonly customerPhone: Prisma.FieldRef<"Offer", 'String'>
+  readonly customerVatId: Prisma.FieldRef<"Offer", 'String'>
+  readonly serviceStartDate: Prisma.FieldRef<"Offer", 'DateTime'>
+  readonly serviceEndDate: Prisma.FieldRef<"Offer", 'DateTime'>
+  readonly introText: Prisma.FieldRef<"Offer", 'String'>
+  readonly closingText: Prisma.FieldRef<"Offer", 'String'>
+  readonly paymentTermsDays: Prisma.FieldRef<"Offer", 'Int'>
+  readonly finalizedAt: Prisma.FieldRef<"Offer", 'DateTime'>
+  readonly pdfPath: Prisma.FieldRef<"Offer", 'String'>
   readonly dayCount: Prisma.FieldRef<"Offer", 'Int'>
   readonly discountType: Prisma.FieldRef<"Offer", 'String'>
   readonly discountValue: Prisma.FieldRef<"Offer", 'Decimal'>

@@ -18,6 +18,12 @@
 	import { resolve } from '$app/paths';
 	import { OrgBadge } from '$lib/components/ui/org-badge';
 	import { Modal } from '$lib/components/ui/modal';
+	import {
+		DEFAULT_INVOICE_CLOSING,
+		DEFAULT_INVOICE_INTRO,
+		DEFAULT_OFFER_CLOSING,
+		DEFAULT_OFFER_INTRO
+	} from '$lib/billing-text';
 
 	let { data } = $props();
 
@@ -138,7 +144,14 @@
 		bankAccountHolder: '',
 		iban: '',
 		bic: '',
-		bankName: ''
+		bankName: '',
+		billingEmail: '',
+		billingWebsite: '',
+		paymentTermsDays: '14',
+		offerIntroTemplate: '',
+		offerClosingTemplate: '',
+		invoiceIntroTemplate: '',
+		invoiceClosingTemplate: ''
 	});
 
 	$effect(() => {
@@ -152,7 +165,14 @@
 				bankAccountHolder: org.bankAccountHolder ?? '',
 				iban: org.iban ?? '',
 				bic: org.bic ?? '',
-				bankName: org.bankName ?? ''
+				bankName: org.bankName ?? '',
+				billingEmail: org.billingEmail ?? '',
+				billingWebsite: org.billingWebsite ?? '',
+				paymentTermsDays: String(org.paymentTermsDays),
+				offerIntroTemplate: org.offerIntroTemplate ?? DEFAULT_OFFER_INTRO,
+				offerClosingTemplate: org.offerClosingTemplate ?? DEFAULT_OFFER_CLOSING,
+				invoiceIntroTemplate: org.invoiceIntroTemplate ?? DEFAULT_INVOICE_INTRO,
+				invoiceClosingTemplate: org.invoiceClosingTemplate ?? DEFAULT_INVOICE_CLOSING
 			};
 		}
 	});
@@ -179,7 +199,14 @@
 				bankAccountHolder: billingDraft.bankAccountHolder || null,
 				iban: billingDraft.iban || null,
 				bic: billingDraft.bic || null,
-				bankName: billingDraft.bankName || null
+				bankName: billingDraft.bankName || null,
+				billingEmail: billingDraft.billingEmail || null,
+				billingWebsite: billingDraft.billingWebsite || null,
+				paymentTermsDays: Number(billingDraft.paymentTermsDays) || 14,
+				offerIntroTemplate: billingDraft.offerIntroTemplate || null,
+				offerClosingTemplate: billingDraft.offerClosingTemplate || null,
+				invoiceIntroTemplate: billingDraft.invoiceIntroTemplate || null,
+				invoiceClosingTemplate: billingDraft.invoiceClosingTemplate || null
 			});
 			toast.success('Billing details updated');
 			editingBilling = false;
@@ -431,6 +458,66 @@
 								<div class="space-y-2">
 									<Label for="billingBankName">Bank name</Label>
 									<Input id="billingBankName" bind:value={billingDraft.bankName} />
+								</div>
+								<div class="grid gap-4 sm:grid-cols-2">
+									<div class="space-y-2">
+										<Label for="billingEmail">Billing email</Label><Input
+											id="billingEmail"
+											type="email"
+											bind:value={billingDraft.billingEmail}
+										/>
+									</div>
+									<div class="space-y-2">
+										<Label for="billingWebsite">Website</Label><Input
+											id="billingWebsite"
+											bind:value={billingDraft.billingWebsite}
+										/>
+									</div>
+									<div class="space-y-2">
+										<Label for="paymentTerms">Payment term (days)</Label><Input
+											id="paymentTerms"
+											type="number"
+											min="0"
+											bind:value={billingDraft.paymentTermsDays}
+										/>
+									</div>
+								</div>
+								<div class="space-y-4 rounded-md border p-4">
+									<div>
+										<p class="font-medium">Document text presets</p>
+										<p class="text-sm text-muted-foreground">
+											Placeholders: {'{production}'}, {'{startDate}'}, {'{endDate}'}, {'{servicePeriod}'},
+											{'{customer}'}, {'{documentNumber}'}, {'{paymentTermsDays}'}
+										</p>
+									</div>
+									<div class="space-y-2">
+										<Label for="offerIntro">Offer introduction</Label><textarea
+											id="offerIntro"
+											bind:value={billingDraft.offerIntroTemplate}
+											rows="3"
+											class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+									</div>
+									<div class="space-y-2">
+										<Label for="offerClosing">Offer closing</Label><textarea
+											id="offerClosing"
+											bind:value={billingDraft.offerClosingTemplate}
+											rows="3"
+											class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+									</div>
+									<div class="space-y-2">
+										<Label for="invoiceIntro">Invoice introduction</Label><textarea
+											id="invoiceIntro"
+											bind:value={billingDraft.invoiceIntroTemplate}
+											rows="3"
+											class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+									</div>
+									<div class="space-y-2">
+										<Label for="invoiceClosing">Invoice closing</Label><textarea
+											id="invoiceClosing"
+											bind:value={billingDraft.invoiceClosingTemplate}
+											rows="3"
+											class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+									</div>
 								</div>
 								<div class="flex gap-2">
 									<Button icon="save" type="submit" disabled={savingBilling}>

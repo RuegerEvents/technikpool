@@ -5,6 +5,9 @@
 		companyName: string;
 		contactPerson: string;
 		email: string;
+		customerNumber: string;
+		phone: string;
+		vatId: string;
 		address: AddressValue;
 	};
 
@@ -13,6 +16,9 @@
 			companyName: '',
 			contactPerson: '',
 			email: '',
+			customerNumber: '',
+			phone: '',
+			vatId: '',
 			address: { line1: '', line2: '', postalCode: '', city: '' }
 		};
 	}
@@ -53,6 +59,18 @@
 		<div class="space-y-2 sm:col-span-2">
 			<Label for="{idPrefix}-email">Email</Label>
 			<Input id="{idPrefix}-email" type="email" bind:value={value.email} />
+		</div>
+		<div class="space-y-2">
+			<Label for="{idPrefix}-number">Customer number</Label>
+			<Input id="{idPrefix}-number" bind:value={value.customerNumber} />
+		</div>
+		<div class="space-y-2">
+			<Label for="{idPrefix}-phone">Phone</Label>
+			<Input id="{idPrefix}-phone" type="tel" bind:value={value.phone} />
+		</div>
+		<div class="space-y-2 sm:col-span-2">
+			<Label for="{idPrefix}-vat">VAT ID</Label>
+			<Input id="{idPrefix}-vat" bind:value={value.vatId} />
 		</div>
 	</div>
 	<AddressInput bind:value={value.address} idPrefix="{idPrefix}-addr" />

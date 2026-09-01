@@ -250,7 +250,14 @@ const updateOrgSchema = v.object({
 	bankAccountHolder: v.optional(v.nullable(v.string())),
 	iban: v.optional(v.nullable(v.string())),
 	bic: v.optional(v.nullable(v.string())),
-	bankName: v.optional(v.nullable(v.string()))
+	bankName: v.optional(v.nullable(v.string())),
+	billingEmail: v.optional(v.nullable(v.string())),
+	billingWebsite: v.optional(v.nullable(v.string())),
+	paymentTermsDays: v.optional(v.number()),
+	offerIntroTemplate: v.optional(v.nullable(v.string())),
+	offerClosingTemplate: v.optional(v.nullable(v.string())),
+	invoiceIntroTemplate: v.optional(v.nullable(v.string())),
+	invoiceClosingTemplate: v.optional(v.nullable(v.string()))
 });
 
 export const updateOrg = command(
@@ -268,7 +275,14 @@ export const updateOrg = command(
 		bankAccountHolder,
 		iban,
 		bic,
-		bankName
+		bankName,
+		billingEmail,
+		billingWebsite,
+		paymentTermsDays,
+		offerIntroTemplate,
+		offerClosingTemplate,
+		invoiceIntroTemplate,
+		invoiceClosingTemplate
 	}) => {
 		await requireOrgManageAccess(orgId);
 		const prefix = normalizePrefix(assetIdPrefix);
@@ -317,7 +331,24 @@ export const updateOrg = command(
 					...(bankAccountHolder !== undefined ? { bankAccountHolder } : {}),
 					...(iban !== undefined ? { iban } : {}),
 					...(bic !== undefined ? { bic } : {}),
-					...(bankName !== undefined ? { bankName } : {})
+					...(bankName !== undefined ? { bankName } : {}),
+					...(billingEmail !== undefined ? { billingEmail: billingEmail?.trim() || null } : {}),
+					...(billingWebsite !== undefined
+						? { billingWebsite: billingWebsite?.trim() || null }
+						: {}),
+					...(paymentTermsDays !== undefined ? { paymentTermsDays } : {}),
+					...(offerIntroTemplate !== undefined
+						? { offerIntroTemplate: offerIntroTemplate?.trim() || null }
+						: {}),
+					...(offerClosingTemplate !== undefined
+						? { offerClosingTemplate: offerClosingTemplate?.trim() || null }
+						: {}),
+					...(invoiceIntroTemplate !== undefined
+						? { invoiceIntroTemplate: invoiceIntroTemplate?.trim() || null }
+						: {}),
+					...(invoiceClosingTemplate !== undefined
+						? { invoiceClosingTemplate: invoiceClosingTemplate?.trim() || null }
+						: {})
 				}
 			});
 		});

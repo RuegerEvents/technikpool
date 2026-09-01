@@ -27,12 +27,14 @@ export type AggregateInvoice = {
 }
 
 export type InvoiceAvgAggregateOutputType = {
+  paymentTermsDays: number | null
   dayCount: number | null
   discountValue: runtime.Decimal | null
   vatRatePercent: runtime.Decimal | null
 }
 
 export type InvoiceSumAggregateOutputType = {
+  paymentTermsDays: number | null
   dayCount: number | null
   discountValue: runtime.Decimal | null
   vatRatePercent: runtime.Decimal | null
@@ -49,12 +51,21 @@ export type InvoiceMinAggregateOutputType = {
   customerAddress: string | null
   customerContactPerson: string | null
   customerEmail: string | null
+  customerNumber: string | null
+  customerPhone: string | null
+  customerVatId: string | null
+  serviceStartDate: Date | null
+  serviceEndDate: Date | null
+  introText: string | null
+  closingText: string | null
+  paymentTermsDays: number | null
   issueDate: Date | null
   dayCount: number | null
   discountType: string | null
   discountValue: runtime.Decimal | null
   assetScope: string | null
   sentAt: Date | null
+  pdfPath: string | null
   isKleinunternehmerSnapshot: boolean | null
   vatRatePercent: runtime.Decimal | null
   createdAt: Date | null
@@ -72,12 +83,21 @@ export type InvoiceMaxAggregateOutputType = {
   customerAddress: string | null
   customerContactPerson: string | null
   customerEmail: string | null
+  customerNumber: string | null
+  customerPhone: string | null
+  customerVatId: string | null
+  serviceStartDate: Date | null
+  serviceEndDate: Date | null
+  introText: string | null
+  closingText: string | null
+  paymentTermsDays: number | null
   issueDate: Date | null
   dayCount: number | null
   discountType: string | null
   discountValue: runtime.Decimal | null
   assetScope: string | null
   sentAt: Date | null
+  pdfPath: string | null
   isKleinunternehmerSnapshot: boolean | null
   vatRatePercent: runtime.Decimal | null
   createdAt: Date | null
@@ -95,12 +115,21 @@ export type InvoiceCountAggregateOutputType = {
   customerAddress: number
   customerContactPerson: number
   customerEmail: number
+  customerNumber: number
+  customerPhone: number
+  customerVatId: number
+  serviceStartDate: number
+  serviceEndDate: number
+  introText: number
+  closingText: number
+  paymentTermsDays: number
   issueDate: number
   dayCount: number
   discountType: number
   discountValue: number
   assetScope: number
   sentAt: number
+  pdfPath: number
   isKleinunternehmerSnapshot: number
   vatRatePercent: number
   createdAt: number
@@ -110,12 +139,14 @@ export type InvoiceCountAggregateOutputType = {
 
 
 export type InvoiceAvgAggregateInputType = {
+  paymentTermsDays?: true
   dayCount?: true
   discountValue?: true
   vatRatePercent?: true
 }
 
 export type InvoiceSumAggregateInputType = {
+  paymentTermsDays?: true
   dayCount?: true
   discountValue?: true
   vatRatePercent?: true
@@ -132,12 +163,21 @@ export type InvoiceMinAggregateInputType = {
   customerAddress?: true
   customerContactPerson?: true
   customerEmail?: true
+  customerNumber?: true
+  customerPhone?: true
+  customerVatId?: true
+  serviceStartDate?: true
+  serviceEndDate?: true
+  introText?: true
+  closingText?: true
+  paymentTermsDays?: true
   issueDate?: true
   dayCount?: true
   discountType?: true
   discountValue?: true
   assetScope?: true
   sentAt?: true
+  pdfPath?: true
   isKleinunternehmerSnapshot?: true
   vatRatePercent?: true
   createdAt?: true
@@ -155,12 +195,21 @@ export type InvoiceMaxAggregateInputType = {
   customerAddress?: true
   customerContactPerson?: true
   customerEmail?: true
+  customerNumber?: true
+  customerPhone?: true
+  customerVatId?: true
+  serviceStartDate?: true
+  serviceEndDate?: true
+  introText?: true
+  closingText?: true
+  paymentTermsDays?: true
   issueDate?: true
   dayCount?: true
   discountType?: true
   discountValue?: true
   assetScope?: true
   sentAt?: true
+  pdfPath?: true
   isKleinunternehmerSnapshot?: true
   vatRatePercent?: true
   createdAt?: true
@@ -178,12 +227,21 @@ export type InvoiceCountAggregateInputType = {
   customerAddress?: true
   customerContactPerson?: true
   customerEmail?: true
+  customerNumber?: true
+  customerPhone?: true
+  customerVatId?: true
+  serviceStartDate?: true
+  serviceEndDate?: true
+  introText?: true
+  closingText?: true
+  paymentTermsDays?: true
   issueDate?: true
   dayCount?: true
   discountType?: true
   discountValue?: true
   assetScope?: true
   sentAt?: true
+  pdfPath?: true
   isKleinunternehmerSnapshot?: true
   vatRatePercent?: true
   createdAt?: true
@@ -288,12 +346,21 @@ export type InvoiceGroupByOutputType = {
   customerAddress: string | null
   customerContactPerson: string | null
   customerEmail: string | null
+  customerNumber: string | null
+  customerPhone: string | null
+  customerVatId: string | null
+  serviceStartDate: Date | null
+  serviceEndDate: Date | null
+  introText: string | null
+  closingText: string | null
+  paymentTermsDays: number
   issueDate: Date
   dayCount: number
   discountType: string | null
   discountValue: runtime.Decimal | null
   assetScope: string
   sentAt: Date | null
+  pdfPath: string | null
   isKleinunternehmerSnapshot: boolean
   vatRatePercent: runtime.Decimal
   createdAt: Date
@@ -334,12 +401,21 @@ export type InvoiceWhereInput = {
   customerAddress?: Prisma.StringNullableFilter<"Invoice"> | string | null
   customerContactPerson?: Prisma.StringNullableFilter<"Invoice"> | string | null
   customerEmail?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerNumber?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerPhone?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerVatId?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  serviceStartDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
+  serviceEndDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
+  introText?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  closingText?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  paymentTermsDays?: Prisma.IntFilter<"Invoice"> | number
   issueDate?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   dayCount?: Prisma.IntFilter<"Invoice"> | number
   discountType?: Prisma.StringNullableFilter<"Invoice"> | string | null
   discountValue?: Prisma.DecimalNullableFilter<"Invoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFilter<"Invoice"> | string
   sentAt?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
+  pdfPath?: Prisma.StringNullableFilter<"Invoice"> | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFilter<"Invoice"> | boolean
   vatRatePercent?: Prisma.DecimalFilter<"Invoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
@@ -361,12 +437,21 @@ export type InvoiceOrderByWithRelationInput = {
   customerAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   customerContactPerson?: Prisma.SortOrderInput | Prisma.SortOrder
   customerEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerVatId?: Prisma.SortOrderInput | Prisma.SortOrder
+  serviceStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  serviceEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  introText?: Prisma.SortOrderInput | Prisma.SortOrder
+  closingText?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentTermsDays?: Prisma.SortOrder
   issueDate?: Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountType?: Prisma.SortOrderInput | Prisma.SortOrder
   discountValue?: Prisma.SortOrderInput | Prisma.SortOrder
   assetScope?: Prisma.SortOrder
   sentAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  pdfPath?: Prisma.SortOrderInput | Prisma.SortOrder
   isKleinunternehmerSnapshot?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -391,12 +476,21 @@ export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
   customerAddress?: Prisma.StringNullableFilter<"Invoice"> | string | null
   customerContactPerson?: Prisma.StringNullableFilter<"Invoice"> | string | null
   customerEmail?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerNumber?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerPhone?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerVatId?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  serviceStartDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
+  serviceEndDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
+  introText?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  closingText?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  paymentTermsDays?: Prisma.IntFilter<"Invoice"> | number
   issueDate?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   dayCount?: Prisma.IntFilter<"Invoice"> | number
   discountType?: Prisma.StringNullableFilter<"Invoice"> | string | null
   discountValue?: Prisma.DecimalNullableFilter<"Invoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFilter<"Invoice"> | string
   sentAt?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
+  pdfPath?: Prisma.StringNullableFilter<"Invoice"> | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFilter<"Invoice"> | boolean
   vatRatePercent?: Prisma.DecimalFilter<"Invoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
@@ -418,12 +512,21 @@ export type InvoiceOrderByWithAggregationInput = {
   customerAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   customerContactPerson?: Prisma.SortOrderInput | Prisma.SortOrder
   customerEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerVatId?: Prisma.SortOrderInput | Prisma.SortOrder
+  serviceStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  serviceEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  introText?: Prisma.SortOrderInput | Prisma.SortOrder
+  closingText?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentTermsDays?: Prisma.SortOrder
   issueDate?: Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountType?: Prisma.SortOrderInput | Prisma.SortOrder
   discountValue?: Prisma.SortOrderInput | Prisma.SortOrder
   assetScope?: Prisma.SortOrder
   sentAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  pdfPath?: Prisma.SortOrderInput | Prisma.SortOrder
   isKleinunternehmerSnapshot?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -449,12 +552,21 @@ export type InvoiceScalarWhereWithAggregatesInput = {
   customerAddress?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
   customerContactPerson?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
   customerEmail?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  customerNumber?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  customerPhone?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  customerVatId?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  serviceStartDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Invoice"> | Date | string | null
+  serviceEndDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Invoice"> | Date | string | null
+  introText?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  closingText?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  paymentTermsDays?: Prisma.IntWithAggregatesFilter<"Invoice"> | number
   issueDate?: Prisma.DateTimeWithAggregatesFilter<"Invoice"> | Date | string
   dayCount?: Prisma.IntWithAggregatesFilter<"Invoice"> | number
   discountType?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
   discountValue?: Prisma.DecimalNullableWithAggregatesFilter<"Invoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringWithAggregatesFilter<"Invoice"> | string
   sentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Invoice"> | Date | string | null
+  pdfPath?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolWithAggregatesFilter<"Invoice"> | boolean
   vatRatePercent?: Prisma.DecimalWithAggregatesFilter<"Invoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Invoice"> | Date | string
@@ -469,12 +581,21 @@ export type InvoiceCreateInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
   issueDate?: Date | string
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: string
   sentAt?: Date | string | null
+  pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
@@ -496,12 +617,21 @@ export type InvoiceUncheckedCreateInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
   issueDate?: Date | string
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: string
   sentAt?: Date | string | null
+  pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
@@ -517,12 +647,21 @@ export type InvoiceUpdateInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -544,12 +683,21 @@ export type InvoiceUncheckedUpdateInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -568,12 +716,21 @@ export type InvoiceCreateManyInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
   issueDate?: Date | string
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: string
   sentAt?: Date | string | null
+  pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
@@ -588,12 +745,21 @@ export type InvoiceUpdateManyMutationInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -611,12 +777,21 @@ export type InvoiceUncheckedUpdateManyInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -644,12 +819,21 @@ export type InvoiceCountOrderByAggregateInput = {
   customerAddress?: Prisma.SortOrder
   customerContactPerson?: Prisma.SortOrder
   customerEmail?: Prisma.SortOrder
+  customerNumber?: Prisma.SortOrder
+  customerPhone?: Prisma.SortOrder
+  customerVatId?: Prisma.SortOrder
+  serviceStartDate?: Prisma.SortOrder
+  serviceEndDate?: Prisma.SortOrder
+  introText?: Prisma.SortOrder
+  closingText?: Prisma.SortOrder
+  paymentTermsDays?: Prisma.SortOrder
   issueDate?: Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountType?: Prisma.SortOrder
   discountValue?: Prisma.SortOrder
   assetScope?: Prisma.SortOrder
   sentAt?: Prisma.SortOrder
+  pdfPath?: Prisma.SortOrder
   isKleinunternehmerSnapshot?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -657,6 +841,7 @@ export type InvoiceCountOrderByAggregateInput = {
 }
 
 export type InvoiceAvgOrderByAggregateInput = {
+  paymentTermsDays?: Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountValue?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
@@ -673,12 +858,21 @@ export type InvoiceMaxOrderByAggregateInput = {
   customerAddress?: Prisma.SortOrder
   customerContactPerson?: Prisma.SortOrder
   customerEmail?: Prisma.SortOrder
+  customerNumber?: Prisma.SortOrder
+  customerPhone?: Prisma.SortOrder
+  customerVatId?: Prisma.SortOrder
+  serviceStartDate?: Prisma.SortOrder
+  serviceEndDate?: Prisma.SortOrder
+  introText?: Prisma.SortOrder
+  closingText?: Prisma.SortOrder
+  paymentTermsDays?: Prisma.SortOrder
   issueDate?: Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountType?: Prisma.SortOrder
   discountValue?: Prisma.SortOrder
   assetScope?: Prisma.SortOrder
   sentAt?: Prisma.SortOrder
+  pdfPath?: Prisma.SortOrder
   isKleinunternehmerSnapshot?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -696,12 +890,21 @@ export type InvoiceMinOrderByAggregateInput = {
   customerAddress?: Prisma.SortOrder
   customerContactPerson?: Prisma.SortOrder
   customerEmail?: Prisma.SortOrder
+  customerNumber?: Prisma.SortOrder
+  customerPhone?: Prisma.SortOrder
+  customerVatId?: Prisma.SortOrder
+  serviceStartDate?: Prisma.SortOrder
+  serviceEndDate?: Prisma.SortOrder
+  introText?: Prisma.SortOrder
+  closingText?: Prisma.SortOrder
+  paymentTermsDays?: Prisma.SortOrder
   issueDate?: Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountType?: Prisma.SortOrder
   discountValue?: Prisma.SortOrder
   assetScope?: Prisma.SortOrder
   sentAt?: Prisma.SortOrder
+  pdfPath?: Prisma.SortOrder
   isKleinunternehmerSnapshot?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -709,6 +912,7 @@ export type InvoiceMinOrderByAggregateInput = {
 }
 
 export type InvoiceSumOrderByAggregateInput = {
+  paymentTermsDays?: Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountValue?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
@@ -867,12 +1071,21 @@ export type InvoiceCreateWithoutOrganizationInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
   issueDate?: Date | string
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: string
   sentAt?: Date | string | null
+  pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
@@ -892,12 +1105,21 @@ export type InvoiceUncheckedCreateWithoutOrganizationInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
   issueDate?: Date | string
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: string
   sentAt?: Date | string | null
+  pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
@@ -945,12 +1167,21 @@ export type InvoiceScalarWhereInput = {
   customerAddress?: Prisma.StringNullableFilter<"Invoice"> | string | null
   customerContactPerson?: Prisma.StringNullableFilter<"Invoice"> | string | null
   customerEmail?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerNumber?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerPhone?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerVatId?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  serviceStartDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
+  serviceEndDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
+  introText?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  closingText?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  paymentTermsDays?: Prisma.IntFilter<"Invoice"> | number
   issueDate?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   dayCount?: Prisma.IntFilter<"Invoice"> | number
   discountType?: Prisma.StringNullableFilter<"Invoice"> | string | null
   discountValue?: Prisma.DecimalNullableFilter<"Invoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFilter<"Invoice"> | string
   sentAt?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
+  pdfPath?: Prisma.StringNullableFilter<"Invoice"> | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFilter<"Invoice"> | boolean
   vatRatePercent?: Prisma.DecimalFilter<"Invoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
@@ -965,12 +1196,21 @@ export type InvoiceCreateWithoutProductionInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
   issueDate?: Date | string
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: string
   sentAt?: Date | string | null
+  pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
@@ -990,12 +1230,21 @@ export type InvoiceUncheckedCreateWithoutProductionInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
   issueDate?: Date | string
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: string
   sentAt?: Date | string | null
+  pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
@@ -1037,12 +1286,21 @@ export type InvoiceCreateWithoutOfferInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
   issueDate?: Date | string
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: string
   sentAt?: Date | string | null
+  pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
@@ -1062,12 +1320,21 @@ export type InvoiceUncheckedCreateWithoutOfferInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
   issueDate?: Date | string
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: string
   sentAt?: Date | string | null
+  pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
@@ -1109,12 +1376,21 @@ export type InvoiceCreateWithoutItemsInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
   issueDate?: Date | string
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: string
   sentAt?: Date | string | null
+  pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
@@ -1135,12 +1411,21 @@ export type InvoiceUncheckedCreateWithoutItemsInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
   issueDate?: Date | string
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: string
   sentAt?: Date | string | null
+  pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
@@ -1171,12 +1456,21 @@ export type InvoiceUpdateWithoutItemsInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1197,12 +1491,21 @@ export type InvoiceUncheckedUpdateWithoutItemsInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1219,12 +1522,21 @@ export type InvoiceCreateManyOrganizationInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
   issueDate?: Date | string
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: string
   sentAt?: Date | string | null
+  pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
@@ -1239,12 +1551,21 @@ export type InvoiceUpdateWithoutOrganizationInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1264,12 +1585,21 @@ export type InvoiceUncheckedUpdateWithoutOrganizationInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1287,12 +1617,21 @@ export type InvoiceUncheckedUpdateManyWithoutOrganizationInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1309,12 +1648,21 @@ export type InvoiceCreateManyProductionInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
   issueDate?: Date | string
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: string
   sentAt?: Date | string | null
+  pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
@@ -1329,12 +1677,21 @@ export type InvoiceUpdateWithoutProductionInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1354,12 +1711,21 @@ export type InvoiceUncheckedUpdateWithoutProductionInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1377,12 +1743,21 @@ export type InvoiceUncheckedUpdateManyWithoutProductionInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1399,12 +1774,21 @@ export type InvoiceCreateManyOfferInput = {
   customerAddress?: string | null
   customerContactPerson?: string | null
   customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
   issueDate?: Date | string
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: string
   sentAt?: Date | string | null
+  pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
@@ -1419,12 +1803,21 @@ export type InvoiceUpdateWithoutOfferInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1444,12 +1837,21 @@ export type InvoiceUncheckedUpdateWithoutOfferInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1467,12 +1869,21 @@ export type InvoiceUncheckedUpdateManyWithoutOfferInput = {
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   issueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1521,12 +1932,21 @@ export type InvoiceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   customerAddress?: boolean
   customerContactPerson?: boolean
   customerEmail?: boolean
+  customerNumber?: boolean
+  customerPhone?: boolean
+  customerVatId?: boolean
+  serviceStartDate?: boolean
+  serviceEndDate?: boolean
+  introText?: boolean
+  closingText?: boolean
+  paymentTermsDays?: boolean
   issueDate?: boolean
   dayCount?: boolean
   discountType?: boolean
   discountValue?: boolean
   assetScope?: boolean
   sentAt?: boolean
+  pdfPath?: boolean
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: boolean
   createdAt?: boolean
@@ -1549,12 +1969,21 @@ export type InvoiceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   customerAddress?: boolean
   customerContactPerson?: boolean
   customerEmail?: boolean
+  customerNumber?: boolean
+  customerPhone?: boolean
+  customerVatId?: boolean
+  serviceStartDate?: boolean
+  serviceEndDate?: boolean
+  introText?: boolean
+  closingText?: boolean
+  paymentTermsDays?: boolean
   issueDate?: boolean
   dayCount?: boolean
   discountType?: boolean
   discountValue?: boolean
   assetScope?: boolean
   sentAt?: boolean
+  pdfPath?: boolean
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: boolean
   createdAt?: boolean
@@ -1575,12 +2004,21 @@ export type InvoiceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   customerAddress?: boolean
   customerContactPerson?: boolean
   customerEmail?: boolean
+  customerNumber?: boolean
+  customerPhone?: boolean
+  customerVatId?: boolean
+  serviceStartDate?: boolean
+  serviceEndDate?: boolean
+  introText?: boolean
+  closingText?: boolean
+  paymentTermsDays?: boolean
   issueDate?: boolean
   dayCount?: boolean
   discountType?: boolean
   discountValue?: boolean
   assetScope?: boolean
   sentAt?: boolean
+  pdfPath?: boolean
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: boolean
   createdAt?: boolean
@@ -1601,19 +2039,28 @@ export type InvoiceSelectScalar = {
   customerAddress?: boolean
   customerContactPerson?: boolean
   customerEmail?: boolean
+  customerNumber?: boolean
+  customerPhone?: boolean
+  customerVatId?: boolean
+  serviceStartDate?: boolean
+  serviceEndDate?: boolean
+  introText?: boolean
+  closingText?: boolean
+  paymentTermsDays?: boolean
   issueDate?: boolean
   dayCount?: boolean
   discountType?: boolean
   discountValue?: boolean
   assetScope?: boolean
   sentAt?: boolean
+  pdfPath?: boolean
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type InvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "organizationId" | "productionId" | "offerId" | "customerId" | "customerName" | "customerAddress" | "customerContactPerson" | "customerEmail" | "issueDate" | "dayCount" | "discountType" | "discountValue" | "assetScope" | "sentAt" | "isKleinunternehmerSnapshot" | "vatRatePercent" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
+export type InvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "organizationId" | "productionId" | "offerId" | "customerId" | "customerName" | "customerAddress" | "customerContactPerson" | "customerEmail" | "customerNumber" | "customerPhone" | "customerVatId" | "serviceStartDate" | "serviceEndDate" | "introText" | "closingText" | "paymentTermsDays" | "issueDate" | "dayCount" | "discountType" | "discountValue" | "assetScope" | "sentAt" | "pdfPath" | "isKleinunternehmerSnapshot" | "vatRatePercent" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
 export type InvoiceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   production?: boolean | Prisma.Invoice$productionArgs<ExtArgs>
@@ -1651,12 +2098,21 @@ export type $InvoicePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     customerAddress: string | null
     customerContactPerson: string | null
     customerEmail: string | null
+    customerNumber: string | null
+    customerPhone: string | null
+    customerVatId: string | null
+    serviceStartDate: Date | null
+    serviceEndDate: Date | null
+    introText: string | null
+    closingText: string | null
+    paymentTermsDays: number
     issueDate: Date
     dayCount: number
     discountType: string | null
     discountValue: runtime.Decimal | null
     assetScope: string
     sentAt: Date | null
+    pdfPath: string | null
     isKleinunternehmerSnapshot: boolean
     vatRatePercent: runtime.Decimal
     createdAt: Date
@@ -2098,12 +2554,21 @@ export interface InvoiceFieldRefs {
   readonly customerAddress: Prisma.FieldRef<"Invoice", 'String'>
   readonly customerContactPerson: Prisma.FieldRef<"Invoice", 'String'>
   readonly customerEmail: Prisma.FieldRef<"Invoice", 'String'>
+  readonly customerNumber: Prisma.FieldRef<"Invoice", 'String'>
+  readonly customerPhone: Prisma.FieldRef<"Invoice", 'String'>
+  readonly customerVatId: Prisma.FieldRef<"Invoice", 'String'>
+  readonly serviceStartDate: Prisma.FieldRef<"Invoice", 'DateTime'>
+  readonly serviceEndDate: Prisma.FieldRef<"Invoice", 'DateTime'>
+  readonly introText: Prisma.FieldRef<"Invoice", 'String'>
+  readonly closingText: Prisma.FieldRef<"Invoice", 'String'>
+  readonly paymentTermsDays: Prisma.FieldRef<"Invoice", 'Int'>
   readonly issueDate: Prisma.FieldRef<"Invoice", 'DateTime'>
   readonly dayCount: Prisma.FieldRef<"Invoice", 'Int'>
   readonly discountType: Prisma.FieldRef<"Invoice", 'String'>
   readonly discountValue: Prisma.FieldRef<"Invoice", 'Decimal'>
   readonly assetScope: Prisma.FieldRef<"Invoice", 'String'>
   readonly sentAt: Prisma.FieldRef<"Invoice", 'DateTime'>
+  readonly pdfPath: Prisma.FieldRef<"Invoice", 'String'>
   readonly isKleinunternehmerSnapshot: Prisma.FieldRef<"Invoice", 'Boolean'>
   readonly vatRatePercent: Prisma.FieldRef<"Invoice", 'Decimal'>
   readonly createdAt: Prisma.FieldRef<"Invoice", 'DateTime'>

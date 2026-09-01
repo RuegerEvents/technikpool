@@ -140,6 +140,14 @@ model Organization {
   bic               String?
   bankName          String?
 
+  billingEmail      String?
+  billingWebsite    String?
+  paymentTermsDays  Int     @default(14)
+  offerIntroTemplate    String? @db.Text
+  offerClosingTemplate  String? @db.Text
+  invoiceIntroTemplate  String? @db.Text
+  invoiceClosingTemplate String? @db.Text
+
   homeUsers User[]          @relation("HomeOrg")
   members   OrgMembership[]
 
@@ -395,6 +403,9 @@ model Customer {
   companyName   String?
   contactPerson String?
   email         String?
+  customerNumber String?
+  phone          String?
+  vatId          String?
 
   addressId String?
   address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
@@ -503,6 +514,17 @@ model Offer {
   customerAddress       String?
   customerContactPerson String?
   customerEmail         String?
+  customerNumber        String?
+  customerPhone         String?
+  customerVatId         String?
+
+  serviceStartDate DateTime?
+  serviceEndDate   DateTime?
+  introText        String? @db.Text
+  closingText      String? @db.Text
+  paymentTermsDays Int    @default(14)
+  finalizedAt      DateTime?
+  pdfPath          String?
 
   dayCount      Int
   discountType  String? // "PERCENT" | "AMOUNT"
@@ -588,6 +610,15 @@ model Invoice {
   customerAddress       String?
   customerContactPerson String?
   customerEmail         String?
+  customerNumber        String?
+  customerPhone         String?
+  customerVatId         String?
+
+  serviceStartDate DateTime?
+  serviceEndDate   DateTime?
+  introText        String? @db.Text
+  closingText      String? @db.Text
+  paymentTermsDays Int    @default(14)
 
   issueDate DateTime @default(now())
   dayCount  Int
@@ -603,6 +634,7 @@ model Invoice {
   // re-synced from the production. Once set, the invoice is immutable
   // (GoBD/§14 UStG): no more item updates, no more field edits.
   sentAt DateTime?
+  pdfPath String?
 
   // Snapshot of the org's Kleinunternehmer status at issuance — GoBD requires
   // the issued document's content to stay fixed even if the org flag changes later.

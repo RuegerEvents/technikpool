@@ -55,6 +55,9 @@ const createCustomerSchema = v.object({
 	companyName: v.optional(v.string()),
 	contactPerson: v.optional(v.string()),
 	email: v.optional(v.string()),
+	customerNumber: v.optional(v.string()),
+	phone: v.optional(v.string()),
+	vatId: v.optional(v.string()),
 	address: v.optional(addressInputSchema)
 });
 
@@ -80,6 +83,9 @@ export const createCustomer = command(createCustomerSchema, async (data) => {
 				companyName: data.companyName?.trim() || null,
 				contactPerson: data.contactPerson?.trim() || null,
 				email: data.email?.trim() || null,
+				customerNumber: data.customerNumber?.trim() || null,
+				phone: data.phone?.trim() || null,
+				vatId: data.vatId?.trim() || null,
 				addressId: address?.id
 			},
 			include: { address: true }
@@ -95,6 +101,9 @@ const updateCustomerSchema = v.object({
 	companyName: v.optional(v.string()),
 	contactPerson: v.optional(v.string()),
 	email: v.optional(v.string()),
+	customerNumber: v.optional(v.string()),
+	phone: v.optional(v.string()),
+	vatId: v.optional(v.string()),
 	address: v.optional(addressInputSchema)
 });
 
@@ -137,6 +146,9 @@ export const updateCustomer = command(updateCustomerSchema, async (input) => {
 				companyName: input.companyName?.trim() || null,
 				contactPerson: input.contactPerson?.trim() || null,
 				email: input.email?.trim() || null,
+				customerNumber: input.customerNumber?.trim() || null,
+				phone: input.phone?.trim() || null,
+				vatId: input.vatId?.trim() || null,
 				addressId
 			},
 			include: { address: true }
@@ -146,4 +158,16 @@ export const updateCustomer = command(updateCustomerSchema, async (input) => {
 	await getCustomers(customer.organizationId).refresh();
 	await getCustomer(input.customerId).refresh();
 	return updated;
+});
+
+export const deleteCustomer = command(v.string(), async (customerId) => {
+	const user = await requireAuth();
+	const customer = await prisma.customer.findUniqueOrThrow({ where: { id: customerId } });
+	await requireOrgMembership(user.id, customer.organizationId);
+	await prisma.$transaction(async (tx) => {
+		await tx.production.updateMany({ where: { customerId }, data: { customerId: null } });
+		await tx.customer.delete({ where: { id: customerId } });
+		if (customer.addressId) await tx.address.deleteMany({ where: { id: customer.addressId } });
+	});
+	await getCustomers(customer.organizationId).refresh();
 });

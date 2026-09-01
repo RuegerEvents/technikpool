@@ -28,10 +28,12 @@ export type AggregateOrganization = {
 
 export type OrganizationAvgAggregateOutputType = {
   defaultInspectionIntervalMonths: number | null
+  paymentTermsDays: number | null
 }
 
 export type OrganizationSumAggregateOutputType = {
   defaultInspectionIntervalMonths: number | null
+  paymentTermsDays: number | null
 }
 
 export type OrganizationMinAggregateOutputType = {
@@ -52,6 +54,13 @@ export type OrganizationMinAggregateOutputType = {
   iban: string | null
   bic: string | null
   bankName: string | null
+  billingEmail: string | null
+  billingWebsite: string | null
+  paymentTermsDays: number | null
+  offerIntroTemplate: string | null
+  offerClosingTemplate: string | null
+  invoiceIntroTemplate: string | null
+  invoiceClosingTemplate: string | null
 }
 
 export type OrganizationMaxAggregateOutputType = {
@@ -72,6 +81,13 @@ export type OrganizationMaxAggregateOutputType = {
   iban: string | null
   bic: string | null
   bankName: string | null
+  billingEmail: string | null
+  billingWebsite: string | null
+  paymentTermsDays: number | null
+  offerIntroTemplate: string | null
+  offerClosingTemplate: string | null
+  invoiceIntroTemplate: string | null
+  invoiceClosingTemplate: string | null
 }
 
 export type OrganizationCountAggregateOutputType = {
@@ -92,16 +108,25 @@ export type OrganizationCountAggregateOutputType = {
   iban: number
   bic: number
   bankName: number
+  billingEmail: number
+  billingWebsite: number
+  paymentTermsDays: number
+  offerIntroTemplate: number
+  offerClosingTemplate: number
+  invoiceIntroTemplate: number
+  invoiceClosingTemplate: number
   _all: number
 }
 
 
 export type OrganizationAvgAggregateInputType = {
   defaultInspectionIntervalMonths?: true
+  paymentTermsDays?: true
 }
 
 export type OrganizationSumAggregateInputType = {
   defaultInspectionIntervalMonths?: true
+  paymentTermsDays?: true
 }
 
 export type OrganizationMinAggregateInputType = {
@@ -122,6 +147,13 @@ export type OrganizationMinAggregateInputType = {
   iban?: true
   bic?: true
   bankName?: true
+  billingEmail?: true
+  billingWebsite?: true
+  paymentTermsDays?: true
+  offerIntroTemplate?: true
+  offerClosingTemplate?: true
+  invoiceIntroTemplate?: true
+  invoiceClosingTemplate?: true
 }
 
 export type OrganizationMaxAggregateInputType = {
@@ -142,6 +174,13 @@ export type OrganizationMaxAggregateInputType = {
   iban?: true
   bic?: true
   bankName?: true
+  billingEmail?: true
+  billingWebsite?: true
+  paymentTermsDays?: true
+  offerIntroTemplate?: true
+  offerClosingTemplate?: true
+  invoiceIntroTemplate?: true
+  invoiceClosingTemplate?: true
 }
 
 export type OrganizationCountAggregateInputType = {
@@ -162,6 +201,13 @@ export type OrganizationCountAggregateInputType = {
   iban?: true
   bic?: true
   bankName?: true
+  billingEmail?: true
+  billingWebsite?: true
+  paymentTermsDays?: true
+  offerIntroTemplate?: true
+  offerClosingTemplate?: true
+  invoiceIntroTemplate?: true
+  invoiceClosingTemplate?: true
   _all?: true
 }
 
@@ -269,6 +315,13 @@ export type OrganizationGroupByOutputType = {
   iban: string | null
   bic: string | null
   bankName: string | null
+  billingEmail: string | null
+  billingWebsite: string | null
+  paymentTermsDays: number
+  offerIntroTemplate: string | null
+  offerClosingTemplate: string | null
+  invoiceIntroTemplate: string | null
+  invoiceClosingTemplate: string | null
   _count: OrganizationCountAggregateOutputType | null
   _avg: OrganizationAvgAggregateOutputType | null
   _sum: OrganizationSumAggregateOutputType | null
@@ -312,6 +365,13 @@ export type OrganizationWhereInput = {
   iban?: Prisma.StringNullableFilter<"Organization"> | string | null
   bic?: Prisma.StringNullableFilter<"Organization"> | string | null
   bankName?: Prisma.StringNullableFilter<"Organization"> | string | null
+  billingEmail?: Prisma.StringNullableFilter<"Organization"> | string | null
+  billingWebsite?: Prisma.StringNullableFilter<"Organization"> | string | null
+  paymentTermsDays?: Prisma.IntFilter<"Organization"> | number
+  offerIntroTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
+  offerClosingTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
+  invoiceIntroTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
+  invoiceClosingTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
   address?: Prisma.XOR<Prisma.AddressNullableScalarRelationFilter, Prisma.AddressWhereInput> | null
   homeUsers?: Prisma.UserListRelationFilter
   members?: Prisma.OrgMembershipListRelationFilter
@@ -343,6 +403,13 @@ export type OrganizationOrderByWithRelationInput = {
   iban?: Prisma.SortOrderInput | Prisma.SortOrder
   bic?: Prisma.SortOrderInput | Prisma.SortOrder
   bankName?: Prisma.SortOrderInput | Prisma.SortOrder
+  billingEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  billingWebsite?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentTermsDays?: Prisma.SortOrder
+  offerIntroTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
+  offerClosingTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
+  invoiceIntroTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
+  invoiceClosingTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.AddressOrderByWithRelationInput
   homeUsers?: Prisma.UserOrderByRelationAggregateInput
   members?: Prisma.OrgMembershipOrderByRelationAggregateInput
@@ -377,6 +444,13 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   iban?: Prisma.StringNullableFilter<"Organization"> | string | null
   bic?: Prisma.StringNullableFilter<"Organization"> | string | null
   bankName?: Prisma.StringNullableFilter<"Organization"> | string | null
+  billingEmail?: Prisma.StringNullableFilter<"Organization"> | string | null
+  billingWebsite?: Prisma.StringNullableFilter<"Organization"> | string | null
+  paymentTermsDays?: Prisma.IntFilter<"Organization"> | number
+  offerIntroTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
+  offerClosingTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
+  invoiceIntroTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
+  invoiceClosingTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
   address?: Prisma.XOR<Prisma.AddressNullableScalarRelationFilter, Prisma.AddressWhereInput> | null
   homeUsers?: Prisma.UserListRelationFilter
   members?: Prisma.OrgMembershipListRelationFilter
@@ -408,6 +482,13 @@ export type OrganizationOrderByWithAggregationInput = {
   iban?: Prisma.SortOrderInput | Prisma.SortOrder
   bic?: Prisma.SortOrderInput | Prisma.SortOrder
   bankName?: Prisma.SortOrderInput | Prisma.SortOrder
+  billingEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  billingWebsite?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentTermsDays?: Prisma.SortOrder
+  offerIntroTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
+  offerClosingTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
+  invoiceIntroTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
+  invoiceClosingTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.OrganizationCountOrderByAggregateInput
   _avg?: Prisma.OrganizationAvgOrderByAggregateInput
   _max?: Prisma.OrganizationMaxOrderByAggregateInput
@@ -436,6 +517,13 @@ export type OrganizationScalarWhereWithAggregatesInput = {
   iban?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
   bic?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
   bankName?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  billingEmail?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  billingWebsite?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  paymentTermsDays?: Prisma.IntWithAggregatesFilter<"Organization"> | number
+  offerIntroTemplate?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  offerClosingTemplate?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  invoiceIntroTemplate?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  invoiceClosingTemplate?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
 }
 
 export type OrganizationCreateInput = {
@@ -455,6 +543,13 @@ export type OrganizationCreateInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   address?: Prisma.AddressCreateNestedOneWithoutOrganizationsInput
   homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
@@ -486,6 +581,13 @@ export type OrganizationUncheckedCreateInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -515,6 +617,13 @@ export type OrganizationUpdateInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.AddressUpdateOneWithoutOrganizationsNestedInput
   homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
@@ -546,6 +655,13 @@ export type OrganizationUncheckedUpdateInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -576,6 +692,13 @@ export type OrganizationCreateManyInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
 }
 
 export type OrganizationUpdateManyMutationInput = {
@@ -595,6 +718,13 @@ export type OrganizationUpdateManyMutationInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type OrganizationUncheckedUpdateManyInput = {
@@ -615,6 +745,13 @@ export type OrganizationUncheckedUpdateManyInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type OrganizationNullableScalarRelationFilter = {
@@ -640,10 +777,18 @@ export type OrganizationCountOrderByAggregateInput = {
   iban?: Prisma.SortOrder
   bic?: Prisma.SortOrder
   bankName?: Prisma.SortOrder
+  billingEmail?: Prisma.SortOrder
+  billingWebsite?: Prisma.SortOrder
+  paymentTermsDays?: Prisma.SortOrder
+  offerIntroTemplate?: Prisma.SortOrder
+  offerClosingTemplate?: Prisma.SortOrder
+  invoiceIntroTemplate?: Prisma.SortOrder
+  invoiceClosingTemplate?: Prisma.SortOrder
 }
 
 export type OrganizationAvgOrderByAggregateInput = {
   defaultInspectionIntervalMonths?: Prisma.SortOrder
+  paymentTermsDays?: Prisma.SortOrder
 }
 
 export type OrganizationMaxOrderByAggregateInput = {
@@ -664,6 +809,13 @@ export type OrganizationMaxOrderByAggregateInput = {
   iban?: Prisma.SortOrder
   bic?: Prisma.SortOrder
   bankName?: Prisma.SortOrder
+  billingEmail?: Prisma.SortOrder
+  billingWebsite?: Prisma.SortOrder
+  paymentTermsDays?: Prisma.SortOrder
+  offerIntroTemplate?: Prisma.SortOrder
+  offerClosingTemplate?: Prisma.SortOrder
+  invoiceIntroTemplate?: Prisma.SortOrder
+  invoiceClosingTemplate?: Prisma.SortOrder
 }
 
 export type OrganizationMinOrderByAggregateInput = {
@@ -684,10 +836,18 @@ export type OrganizationMinOrderByAggregateInput = {
   iban?: Prisma.SortOrder
   bic?: Prisma.SortOrder
   bankName?: Prisma.SortOrder
+  billingEmail?: Prisma.SortOrder
+  billingWebsite?: Prisma.SortOrder
+  paymentTermsDays?: Prisma.SortOrder
+  offerIntroTemplate?: Prisma.SortOrder
+  offerClosingTemplate?: Prisma.SortOrder
+  invoiceIntroTemplate?: Prisma.SortOrder
+  invoiceClosingTemplate?: Prisma.SortOrder
 }
 
 export type OrganizationSumOrderByAggregateInput = {
   defaultInspectionIntervalMonths?: Prisma.SortOrder
+  paymentTermsDays?: Prisma.SortOrder
 }
 
 export type OrganizationScalarRelationFilter = {
@@ -719,6 +879,14 @@ export type OrganizationUpdateOneWithoutHomeUsersNestedInput = {
   delete?: Prisma.OrganizationWhereInput | boolean
   connect?: Prisma.OrganizationWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutHomeUsersInput, Prisma.OrganizationUpdateWithoutHomeUsersInput>, Prisma.OrganizationUncheckedUpdateWithoutHomeUsersInput>
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type OrganizationCreateNestedOneWithoutMembersInput = {
@@ -906,6 +1074,13 @@ export type OrganizationCreateWithoutHomeUsersInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   address?: Prisma.AddressCreateNestedOneWithoutOrganizationsInput
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -936,6 +1111,13 @@ export type OrganizationUncheckedCreateWithoutHomeUsersInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
@@ -980,6 +1162,13 @@ export type OrganizationUpdateWithoutHomeUsersInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.AddressUpdateOneWithoutOrganizationsNestedInput
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -1010,6 +1199,13 @@ export type OrganizationUncheckedUpdateWithoutHomeUsersInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1038,6 +1234,13 @@ export type OrganizationCreateWithoutMembersInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   address?: Prisma.AddressCreateNestedOneWithoutOrganizationsInput
   homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -1068,6 +1271,13 @@ export type OrganizationUncheckedCreateWithoutMembersInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1112,6 +1322,13 @@ export type OrganizationUpdateWithoutMembersInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.AddressUpdateOneWithoutOrganizationsNestedInput
   homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -1142,6 +1359,13 @@ export type OrganizationUncheckedUpdateWithoutMembersInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1170,6 +1394,13 @@ export type OrganizationCreateWithoutAddressInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -1199,6 +1430,13 @@ export type OrganizationUncheckedCreateWithoutAddressInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1258,6 +1496,13 @@ export type OrganizationScalarWhereInput = {
   iban?: Prisma.StringNullableFilter<"Organization"> | string | null
   bic?: Prisma.StringNullableFilter<"Organization"> | string | null
   bankName?: Prisma.StringNullableFilter<"Organization"> | string | null
+  billingEmail?: Prisma.StringNullableFilter<"Organization"> | string | null
+  billingWebsite?: Prisma.StringNullableFilter<"Organization"> | string | null
+  paymentTermsDays?: Prisma.IntFilter<"Organization"> | number
+  offerIntroTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
+  offerClosingTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
+  invoiceIntroTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
+  invoiceClosingTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
 }
 
 export type OrganizationCreateWithoutLocationsInput = {
@@ -1277,6 +1522,13 @@ export type OrganizationCreateWithoutLocationsInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   address?: Prisma.AddressCreateNestedOneWithoutOrganizationsInput
   homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
@@ -1307,6 +1559,13 @@ export type OrganizationUncheckedCreateWithoutLocationsInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1351,6 +1610,13 @@ export type OrganizationUpdateWithoutLocationsInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.AddressUpdateOneWithoutOrganizationsNestedInput
   homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
@@ -1381,6 +1647,13 @@ export type OrganizationUncheckedUpdateWithoutLocationsInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1409,6 +1682,13 @@ export type OrganizationCreateWithoutAssetsInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   address?: Prisma.AddressCreateNestedOneWithoutOrganizationsInput
   homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
@@ -1439,6 +1719,13 @@ export type OrganizationUncheckedCreateWithoutAssetsInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1483,6 +1770,13 @@ export type OrganizationUpdateWithoutAssetsInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.AddressUpdateOneWithoutOrganizationsNestedInput
   homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
@@ -1513,6 +1807,13 @@ export type OrganizationUncheckedUpdateWithoutAssetsInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1541,6 +1842,13 @@ export type OrganizationCreateWithoutBundleTemplatesInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   address?: Prisma.AddressCreateNestedOneWithoutOrganizationsInput
   homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
@@ -1571,6 +1879,13 @@ export type OrganizationUncheckedCreateWithoutBundleTemplatesInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1615,6 +1930,13 @@ export type OrganizationUpdateWithoutBundleTemplatesInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.AddressUpdateOneWithoutOrganizationsNestedInput
   homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
@@ -1645,6 +1967,13 @@ export type OrganizationUncheckedUpdateWithoutBundleTemplatesInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1673,6 +2002,13 @@ export type OrganizationCreateWithoutProductionsInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   address?: Prisma.AddressCreateNestedOneWithoutOrganizationsInput
   homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
@@ -1703,6 +2039,13 @@ export type OrganizationUncheckedCreateWithoutProductionsInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1747,6 +2090,13 @@ export type OrganizationUpdateWithoutProductionsInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.AddressUpdateOneWithoutOrganizationsNestedInput
   homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
@@ -1777,6 +2127,13 @@ export type OrganizationUncheckedUpdateWithoutProductionsInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1805,6 +2162,13 @@ export type OrganizationCreateWithoutCustomersInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   address?: Prisma.AddressCreateNestedOneWithoutOrganizationsInput
   homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
@@ -1835,6 +2199,13 @@ export type OrganizationUncheckedCreateWithoutCustomersInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1879,6 +2250,13 @@ export type OrganizationUpdateWithoutCustomersInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.AddressUpdateOneWithoutOrganizationsNestedInput
   homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
@@ -1909,6 +2287,13 @@ export type OrganizationUncheckedUpdateWithoutCustomersInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1937,6 +2322,13 @@ export type OrganizationCreateWithoutCategoryRatesInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   address?: Prisma.AddressCreateNestedOneWithoutOrganizationsInput
   homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
@@ -1967,6 +2359,13 @@ export type OrganizationUncheckedCreateWithoutCategoryRatesInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2011,6 +2410,13 @@ export type OrganizationUpdateWithoutCategoryRatesInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.AddressUpdateOneWithoutOrganizationsNestedInput
   homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
@@ -2041,6 +2447,13 @@ export type OrganizationUncheckedUpdateWithoutCategoryRatesInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2069,6 +2482,13 @@ export type OrganizationCreateWithoutOffersInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   address?: Prisma.AddressCreateNestedOneWithoutOrganizationsInput
   homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
@@ -2099,6 +2519,13 @@ export type OrganizationUncheckedCreateWithoutOffersInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2143,6 +2570,13 @@ export type OrganizationUpdateWithoutOffersInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.AddressUpdateOneWithoutOrganizationsNestedInput
   homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
@@ -2173,6 +2607,13 @@ export type OrganizationUncheckedUpdateWithoutOffersInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2201,6 +2642,13 @@ export type OrganizationCreateWithoutInvoicesInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   address?: Prisma.AddressCreateNestedOneWithoutOrganizationsInput
   homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
@@ -2231,6 +2679,13 @@ export type OrganizationUncheckedCreateWithoutInvoicesInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
   homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2275,6 +2730,13 @@ export type OrganizationUpdateWithoutInvoicesInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.AddressUpdateOneWithoutOrganizationsNestedInput
   homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
@@ -2305,6 +2767,13 @@ export type OrganizationUncheckedUpdateWithoutInvoicesInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2333,6 +2802,13 @@ export type OrganizationCreateManyAddressInput = {
   iban?: string | null
   bic?: string | null
   bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
 }
 
 export type OrganizationUpdateWithoutAddressInput = {
@@ -2352,6 +2828,13 @@ export type OrganizationUpdateWithoutAddressInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -2381,6 +2864,13 @@ export type OrganizationUncheckedUpdateWithoutAddressInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2410,6 +2900,13 @@ export type OrganizationUncheckedUpdateManyWithoutAddressInput = {
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -2542,6 +3039,13 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   iban?: boolean
   bic?: boolean
   bankName?: boolean
+  billingEmail?: boolean
+  billingWebsite?: boolean
+  paymentTermsDays?: boolean
+  offerIntroTemplate?: boolean
+  offerClosingTemplate?: boolean
+  invoiceIntroTemplate?: boolean
+  invoiceClosingTemplate?: boolean
   address?: boolean | Prisma.Organization$addressArgs<ExtArgs>
   homeUsers?: boolean | Prisma.Organization$homeUsersArgs<ExtArgs>
   members?: boolean | Prisma.Organization$membersArgs<ExtArgs>
@@ -2574,6 +3078,13 @@ export type OrganizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   iban?: boolean
   bic?: boolean
   bankName?: boolean
+  billingEmail?: boolean
+  billingWebsite?: boolean
+  paymentTermsDays?: boolean
+  offerIntroTemplate?: boolean
+  offerClosingTemplate?: boolean
+  invoiceIntroTemplate?: boolean
+  invoiceClosingTemplate?: boolean
   address?: boolean | Prisma.Organization$addressArgs<ExtArgs>
 }, ExtArgs["result"]["organization"]>
 
@@ -2595,6 +3106,13 @@ export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   iban?: boolean
   bic?: boolean
   bankName?: boolean
+  billingEmail?: boolean
+  billingWebsite?: boolean
+  paymentTermsDays?: boolean
+  offerIntroTemplate?: boolean
+  offerClosingTemplate?: boolean
+  invoiceIntroTemplate?: boolean
+  invoiceClosingTemplate?: boolean
   address?: boolean | Prisma.Organization$addressArgs<ExtArgs>
 }, ExtArgs["result"]["organization"]>
 
@@ -2616,9 +3134,16 @@ export type OrganizationSelectScalar = {
   iban?: boolean
   bic?: boolean
   bankName?: boolean
+  billingEmail?: boolean
+  billingWebsite?: boolean
+  paymentTermsDays?: boolean
+  offerIntroTemplate?: boolean
+  offerClosingTemplate?: boolean
+  invoiceIntroTemplate?: boolean
+  invoiceClosingTemplate?: boolean
 }
 
-export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "shortName" | "assetIdPrefix" | "createdAt" | "updatedAt" | "defaultAssetVisibility" | "color" | "avatarLabel" | "defaultInspectionIntervalMonths" | "isKleinunternehmer" | "addressId" | "taxId" | "bankAccountHolder" | "iban" | "bic" | "bankName", ExtArgs["result"]["organization"]>
+export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "shortName" | "assetIdPrefix" | "createdAt" | "updatedAt" | "defaultAssetVisibility" | "color" | "avatarLabel" | "defaultInspectionIntervalMonths" | "isKleinunternehmer" | "addressId" | "taxId" | "bankAccountHolder" | "iban" | "bic" | "bankName" | "billingEmail" | "billingWebsite" | "paymentTermsDays" | "offerIntroTemplate" | "offerClosingTemplate" | "invoiceIntroTemplate" | "invoiceClosingTemplate", ExtArgs["result"]["organization"]>
 export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   address?: boolean | Prisma.Organization$addressArgs<ExtArgs>
   homeUsers?: boolean | Prisma.Organization$homeUsersArgs<ExtArgs>
@@ -2673,6 +3198,13 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     iban: string | null
     bic: string | null
     bankName: string | null
+    billingEmail: string | null
+    billingWebsite: string | null
+    paymentTermsDays: number
+    offerIntroTemplate: string | null
+    offerClosingTemplate: string | null
+    invoiceIntroTemplate: string | null
+    invoiceClosingTemplate: string | null
   }, ExtArgs["result"]["organization"]>
   composites: {}
 }
@@ -3124,6 +3656,13 @@ export interface OrganizationFieldRefs {
   readonly iban: Prisma.FieldRef<"Organization", 'String'>
   readonly bic: Prisma.FieldRef<"Organization", 'String'>
   readonly bankName: Prisma.FieldRef<"Organization", 'String'>
+  readonly billingEmail: Prisma.FieldRef<"Organization", 'String'>
+  readonly billingWebsite: Prisma.FieldRef<"Organization", 'String'>
+  readonly paymentTermsDays: Prisma.FieldRef<"Organization", 'Int'>
+  readonly offerIntroTemplate: Prisma.FieldRef<"Organization", 'String'>
+  readonly offerClosingTemplate: Prisma.FieldRef<"Organization", 'String'>
+  readonly invoiceIntroTemplate: Prisma.FieldRef<"Organization", 'String'>
+  readonly invoiceClosingTemplate: Prisma.FieldRef<"Organization", 'String'>
 }
     
 

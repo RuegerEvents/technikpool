@@ -44,6 +44,9 @@
 					companyName: newCustomer.companyName || undefined,
 					contactPerson: newCustomer.contactPerson || undefined,
 					email: newCustomer.email || undefined,
+					customerNumber: newCustomer.customerNumber || undefined,
+					phone: newCustomer.phone || undefined,
+					vatId: newCustomer.vatId || undefined,
 					address: newCustomer.address
 				});
 				finalCustomerId = created.id;
