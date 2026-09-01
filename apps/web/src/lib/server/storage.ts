@@ -3,7 +3,8 @@ import {
 	PutObjectCommand,
 	GetObjectCommand,
 	CreateBucketCommand,
-	PutBucketPolicyCommand
+	PutBucketPolicyCommand,
+	DeleteObjectCommand
 } from '@aws-sdk/client-s3';
 
 // Self-hosted, S3-compatible object storage (RustFS recommended — see wayfinder
@@ -88,4 +89,8 @@ export async function getObject(key: string) {
 		bytes: await result.Body.transformToByteArray(),
 		contentType: result.ContentType ?? 'application/octet-stream'
 	};
+}
+
+export async function deleteObject(key: string) {
+	await s3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
 }

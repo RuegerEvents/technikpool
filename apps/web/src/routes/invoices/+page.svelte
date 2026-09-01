@@ -46,6 +46,7 @@
 						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Org</th>
 						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
 						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Total</th>
+						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
 						<th class="w-16 px-4 py-3"></th>
 					</tr>
 				</thead>
@@ -60,6 +61,15 @@
 							>
 							<td class="px-4 py-3 text-right font-medium tabular-nums"
 								>{fmtEUR(invoiceTotal(invoice))}</td
+							>
+							<td class="px-4 py-3"
+								>{#if invoice.sentAt}<span
+										class="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+										>Finalized</span
+									>{:else}<span
+										class="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground"
+										>Draft</span
+									>{/if}</td
 							>
 							<td class="px-4 py-3 text-right">
 								<Button variant="outline" size="sm" href={resolve(`/invoices/${invoice.id}`)}

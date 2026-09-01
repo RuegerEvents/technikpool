@@ -68,11 +68,16 @@
 									>
 										Invoiced
 									</span>
+								{:else if offer.finalizedAt}
+									<span
+										class="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+										>Finalized</span
+									>
 								{:else}
 									<span
 										class="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground"
 									>
-										Offer
+										Draft
 									</span>
 								{/if}
 							</td>

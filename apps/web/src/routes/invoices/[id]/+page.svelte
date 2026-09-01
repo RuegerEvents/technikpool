@@ -5,6 +5,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
+	import { goto } from '$app/navigation';
 	import { getErrorMessage, dayCountBetween, formatAddress, orgLabel } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
 	import {
@@ -15,7 +16,9 @@
 		updateInvoiceItemRate,
 		updateInvoiceDiscount,
 		updateInvoiceCustomer,
-		markInvoiceAsSent
+		finalizeInvoice,
+		deleteInvoice,
+		updateDocumentText
 	} from '$lib/remote/offers.remote';
 	import { getCustomers } from '$lib/remote/customers.remote';
 	import { StalenessBanner } from '$lib/components/ui/staleness-banner';
@@ -24,6 +27,33 @@
 
 	const invoiceId = $derived(page.params.id as string);
 	let invoice = $derived(await getInvoice(invoiceId));
+	let introTextDraft = $state('');
+	let closingTextDraft = $state('');
+	let paymentTermsDraft = $state('14');
+	let savingText = $state(false);
+	$effect(() => {
+		introTextDraft = invoice.introText ?? '';
+		closingTextDraft = invoice.closingText ?? '';
+		paymentTermsDraft = String(invoice.paymentTermsDays);
+	});
+	async function saveText(e: Event) {
+		e.preventDefault();
+		savingText = true;
+		try {
+			await updateDocumentText({
+				id: invoiceId,
+				kind: 'invoice',
+				introText: introTextDraft || undefined,
+				closingText: closingTextDraft || undefined,
+				paymentTermsDays: Number(paymentTermsDraft) || 14
+			});
+			toast.success('Document text updated');
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			savingText = false;
+		}
+	}
 	let staleness = $derived(
 		await (invoice.sentAt
 			? Promise.resolve({
@@ -105,16 +135,31 @@
 		}
 	}
 
-	let sending = $state(false);
-	async function handleMarkAsSent() {
-		sending = true;
+	let finalizing = $state(false);
+	let deleting = $state(false);
+	async function handleFinalize() {
+		if (!confirm('Finalize this invoice? It can no longer be edited or deleted afterwards.'))
+			return;
+		finalizing = true;
 		try {
-			await markInvoiceAsSent(invoiceId);
-			toast.success('Invoice marked as sent');
+			await finalizeInvoice(invoiceId);
+			toast.success('Invoice finalized and PDF archived');
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {
-			sending = false;
+			finalizing = false;
+		}
+	}
+	async function handleDelete() {
+		if (!confirm('Delete this draft invoice permanently?')) return;
+		deleting = true;
+		try {
+			await deleteInvoice(invoiceId);
+			toast.success('Invoice deleted');
+			await goto(resolve('/invoices'));
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+			deleting = false;
 		}
 	}
 </script>
@@ -139,19 +184,29 @@
 			</p>
 		</div>
 		<div class="flex flex-wrap gap-2">
-			<Button
-				icon="print"
-				variant="outline"
-				href={resolve(`/invoices/${invoiceId}/print`)}
-				target="_blank"
-			>
-				Print
-			</Button>
+			{#if invoice.pdfPath}<Button
+					icon="download"
+					variant="outline"
+					href={`/api/billing-documents/invoices/${invoiceId}`}
+					target="_blank">Open archived PDF</Button
+				>{:else}<Button
+					icon="print"
+					variant="outline"
+					href={`/api/billing-documents/invoices/${invoiceId}`}
+					target="_blank">Preview PDF</Button
+				>{/if}
 			{#if !invoice.sentAt}
 				<Button icon="edit" variant="outline" onclick={openEditCustomer}>Edit customer</Button>
-				<Button disabled={sending} onclick={handleMarkAsSent}>
-					{sending ? 'Marking…' : 'Mark as Sent'}
-				</Button>
+				<Button variant="destructive" disabled={deleting} onclick={handleDelete}
+					>{deleting ? 'Deleting…' : 'Delete invoice'}</Button
+				>
+				<Button disabled={finalizing} onclick={handleFinalize}
+					>{finalizing ? 'Finalizing…' : 'Finalize invoice'}</Button
+				>
+			{:else if !invoice.pdfPath}
+				<Button disabled={finalizing} onclick={handleFinalize}
+					>{finalizing ? 'Archiving…' : 'Archive PDF'}</Button
+				>
 			{/if}
 		</div>
 	</div>
@@ -159,15 +214,16 @@
 	{#if invoice.sentAt}
 		<Card.Root class="bg-muted/30">
 			<Card.Content class="py-4 text-sm text-muted-foreground">
-				Sent on {new Date(invoice.sentAt).toLocaleDateString('de-DE')} — invoices are immutable once sent
-				(GoBD/§14 UStG). Corrections require a new document.
+				Finalized on {new Date(invoice.sentAt).toLocaleDateString('de-DE')} — this invoice is immutable.{#if invoice.pdfPath}
+					Its archived PDF is authoritative.{:else}
+					Its PDF has not been archived yet.{/if} Corrections require a new document.
 			</Card.Content>
 		</Card.Root>
 	{:else}
 		<Card.Root class="bg-muted/30">
 			<Card.Content class="py-4 text-sm text-muted-foreground">
-				This invoice hasn't been sent yet — items can still be corrected or resynced from the
-				production. Once marked as sent, it becomes immutable (GoBD/§14 UStG).
+				This invoice is a draft — items can still be corrected or resynced from the production.
+				Finalizing archives its PDF and makes it immutable.
 			</Card.Content>
 		</Card.Root>
 	{/if}
@@ -246,6 +302,44 @@
 			await updateInvoiceItemsFromProduction(invoiceId);
 		}}
 	/>
+	<Card.Root
+		><Card.Header
+			><Card.Title>Document text</Card.Title><Card.Description
+				>Copied from the organization preset and frozen when the invoice is marked as sent.</Card.Description
+			></Card.Header
+		><Card.Content
+			>{#if invoice.sentAt}<div class="space-y-4 text-sm">
+					<p class="whitespace-pre-line">{invoice.introText}</p>
+					<p class="whitespace-pre-line">{invoice.closingText}</p>
+				</div>{:else}<form class="space-y-4" onsubmit={saveText}>
+					<div class="space-y-2">
+						<Label for="invoiceIntroText">Introduction</Label><textarea
+							id="invoiceIntroText"
+							bind:value={introTextDraft}
+							rows="3"
+							class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+					</div>
+					<div class="space-y-2">
+						<Label for="invoiceClosingText">Closing text</Label><textarea
+							id="invoiceClosingText"
+							bind:value={closingTextDraft}
+							rows="3"
+							class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+					</div>
+					<div class="max-w-48 space-y-2">
+						<Label for="invoiceTerms">Payment term (days)</Label><Input
+							id="invoiceTerms"
+							type="number"
+							min="0"
+							bind:value={paymentTermsDraft}
+						/>
+					</div>
+					<Button icon="save" type="submit" disabled={savingText}
+						>{savingText ? 'Saving…' : 'Save text'}</Button
+					>
+				</form>{/if}</Card.Content
+		></Card.Root
+	>
 
 	<BillingDocument
 		items={invoice.items}

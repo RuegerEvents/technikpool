@@ -17,7 +17,10 @@
 		updateOfferDiscount,
 		updateOfferCustomer,
 		copyOfferToNewCustomer,
-		convertOfferToInvoice
+		convertOfferToInvoice,
+		updateDocumentText,
+		finalizeOffer,
+		deleteOffer
 	} from '$lib/remote/offers.remote';
 	import { getCustomers } from '$lib/remote/customers.remote';
 	import { StalenessBanner } from '$lib/components/ui/staleness-banner';
@@ -26,6 +29,33 @@
 	const offerId = $derived(page.params.id as string);
 	let offer = $derived(await getOffer(offerId));
 	let staleness = $derived(await getOfferStaleness(offerId));
+	let introTextDraft = $state('');
+	let closingTextDraft = $state('');
+	let paymentTermsDraft = $state('14');
+	let savingText = $state(false);
+	$effect(() => {
+		introTextDraft = offer.introText ?? '';
+		closingTextDraft = offer.closingText ?? '';
+		paymentTermsDraft = String(offer.paymentTermsDays);
+	});
+	async function saveText(e: Event) {
+		e.preventDefault();
+		savingText = true;
+		try {
+			await updateDocumentText({
+				id: offerId,
+				kind: 'offer',
+				introText: introTextDraft || undefined,
+				closingText: closingTextDraft || undefined,
+				paymentTermsDays: Number(paymentTermsDraft) || 14
+			});
+			toast.success('Document text updated');
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			savingText = false;
+		}
+	}
 
 	let fullDuration = $derived({
 		days: dayCountBetween(offer.production?.startDate, offer.production?.endDate),
@@ -120,6 +150,32 @@
 
 	// ── Convert to invoice ──
 	let converting = $state(false);
+	let finalizing = $state(false);
+	let deleting = $state(false);
+	async function handleFinalize() {
+		if (!confirm('Finalize this offer? It can no longer be edited afterwards.')) return;
+		finalizing = true;
+		try {
+			await finalizeOffer(offerId);
+			toast.success('Offer finalized and PDF archived');
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			finalizing = false;
+		}
+	}
+	async function handleDelete() {
+		if (!confirm('Delete this offer permanently?')) return;
+		deleting = true;
+		try {
+			await deleteOffer(offerId);
+			toast.success('Offer deleted');
+			await goto(resolve('/offers'));
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+			deleting = false;
+		}
+	}
 	async function handleConvert() {
 		converting = true;
 		try {
@@ -162,18 +218,30 @@
 					Back to equipment
 				</Button>
 			{/if}
-			<Button
-				icon="print"
-				variant="outline"
-				href={resolve(`/offers/${offerId}/print`)}
-				target="_blank"
-			>
-				Print
-			</Button>
-			<Button icon="edit" variant="outline" onclick={openEditCustomer}>Edit customer</Button>
+			{#if offer.pdfPath}<Button
+					icon="download"
+					variant="outline"
+					href={`/api/billing-documents/offers/${offerId}`}
+					target="_blank">Open archived PDF</Button
+				>{:else}<Button
+					icon="print"
+					variant="outline"
+					href={`/api/billing-documents/offers/${offerId}`}
+					target="_blank">Preview PDF</Button
+				>{/if}
+			{#if !offer.finalizedAt}<Button icon="edit" variant="outline" onclick={openEditCustomer}
+					>Edit customer</Button
+				><Button disabled={finalizing} onclick={handleFinalize}
+					>{finalizing ? 'Finalizing…' : 'Finalize offer'}</Button
+				>{/if}
 			<Button variant="outline" onclick={() => (copyOpen = !copyOpen)}>Copy to new customer</Button>
+			{#if offer.invoices.length === 0}<Button
+					variant="destructive"
+					disabled={deleting}
+					onclick={handleDelete}>{deleting ? 'Deleting…' : 'Delete offer'}</Button
+				>{/if}
 			{#if offer.invoices.length === 0}
-				<Button disabled={converting} onclick={handleConvert}>
+				<Button disabled={converting || !offer.finalizedAt} onclick={handleConvert}>
 					{converting ? 'Converting…' : 'Convert to invoice'}
 				</Button>
 			{:else}
@@ -183,6 +251,12 @@
 			{/if}
 		</div>
 	</div>
+	{#if offer.finalizedAt}<Card.Root class="bg-muted/30"
+			><Card.Content class="py-4 text-sm text-muted-foreground"
+				>Finalized on {new Date(offer.finalizedAt).toLocaleDateString('de-DE')} — this offer is immutable.
+				The archived PDF is the authoritative document.</Card.Content
+			></Card.Root
+		>{/if}
 
 	<StalenessBanner
 		{staleness}
@@ -190,6 +264,44 @@
 			await updateOfferItemsFromProduction(offerId);
 		}}
 	/>
+	<Card.Root
+		><Card.Header
+			><Card.Title>Document text</Card.Title><Card.Description
+				>Copied from the organization preset and editable for this offer.</Card.Description
+			></Card.Header
+		><Card.Content
+			>{#if offer.finalizedAt}<div class="space-y-4 text-sm">
+					<p class="whitespace-pre-line">{offer.introText}</p>
+					<p class="whitespace-pre-line">{offer.closingText}</p>
+				</div>{:else}<form class="space-y-4" onsubmit={saveText}>
+					<div class="space-y-2">
+						<Label for="offerIntroText">Introduction</Label><textarea
+							id="offerIntroText"
+							bind:value={introTextDraft}
+							rows="3"
+							class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+					</div>
+					<div class="space-y-2">
+						<Label for="offerClosingText">Closing text</Label><textarea
+							id="offerClosingText"
+							bind:value={closingTextDraft}
+							rows="3"
+							class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+					</div>
+					<div class="max-w-48 space-y-2">
+						<Label for="offerTerms">Payment term (days)</Label><Input
+							id="offerTerms"
+							type="number"
+							min="0"
+							bind:value={paymentTermsDraft}
+						/>
+					</div>
+					<Button icon="save" type="submit" disabled={savingText}
+						>{savingText ? 'Saving…' : 'Save text'}</Button
+					>
+				</form>{/if}</Card.Content
+		></Card.Root
+	>
 
 	{#if editCustomerOpen}
 		<Card.Root class="max-w-lg bg-muted/30">
@@ -289,7 +401,7 @@
 	<BillingDocument
 		items={offer.items}
 		emptyMessage="No items on this offer yet."
-		editable={true}
+		editable={!offer.finalizedAt}
 		dayCount={offer.dayCount}
 		{fullDuration}
 		{showDuration}

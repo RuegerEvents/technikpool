@@ -21,6 +21,12 @@
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { customerLabel, formatAddress, getErrorMessage, orgLabel, plural } from '$lib/utils';
 	import { localizedName } from '$lib/category';
+	import {
+		DEFAULT_OFFER_CLOSING,
+		DEFAULT_OFFER_INTRO,
+		formatBillingDate,
+		renderBillingText
+	} from '$lib/billing-text';
 
 	const preselectedProductionId = page.url.searchParams.get('productionId');
 
@@ -36,6 +42,8 @@
 	let customerAddress = $state({ line1: '', line2: '', postalCode: '', city: '' });
 	let assetScope = $state<'ALL' | 'OWN_ORG_ONLY'>('ALL');
 	let saving = $state(false);
+	let introText = $state('');
+	let closingText = $state('');
 
 	let customers = $derived(selectedOrgId ? await getCustomers(selectedOrgId) : []);
 	let creatingCustomer = $state(false);
@@ -82,6 +90,7 @@
 	}
 
 	let selectedProduction = $derived(productions.find((p) => p.id === productionId));
+	let selectedOrg = $derived(orgs.find((org) => org.id === selectedOrgId));
 	let hasCrossOrgItems = $derived(
 		!!selectedProduction &&
 			selectedProduction.items.some(
@@ -120,6 +129,21 @@
 			const c = p.customer;
 			customerId = c?.id ?? '';
 			applyCustomerSnapshot(c);
+			const start = new Date(p.showStartDate ?? p.startDate ?? Date.now());
+			const end = new Date(p.showEndDate ?? p.endDate ?? start);
+			const values = {
+				production: p.name,
+				startDate: formatBillingDate(start),
+				endDate: formatBillingDate(end),
+				servicePeriod: `${formatBillingDate(start)} bis ${formatBillingDate(end)}`,
+				customer: c ? customerLabel(c) : '',
+				paymentTermsDays: selectedOrg?.paymentTermsDays ?? 14
+			};
+			introText = renderBillingText(selectedOrg?.offerIntroTemplate || DEFAULT_OFFER_INTRO, values);
+			closingText = renderBillingText(
+				selectedOrg?.offerClosingTemplate || DEFAULT_OFFER_CLOSING,
+				values
+			);
 		});
 	});
 
@@ -201,6 +225,9 @@
 					companyName: newCustomer.companyName || undefined,
 					contactPerson: newCustomer.contactPerson || undefined,
 					email: newCustomer.email || undefined,
+					customerNumber: newCustomer.customerNumber || undefined,
+					phone: newCustomer.phone || undefined,
+					vatId: newCustomer.vatId || undefined,
 					address: newCustomer.address
 				});
 				finalCustomerId = created.id;
@@ -216,6 +243,8 @@
 				customerAddress: formatAddress(finalCustomerAddress) || undefined,
 				customerContactPerson: finalCustomerContactPerson || undefined,
 				customerEmail: finalCustomerEmail || undefined,
+				introText: introText || undefined,
+				closingText: closingText || undefined,
 				assetScope: hasCrossOrgItems ? assetScope : undefined
 			});
 			toast.success('Offer created');
@@ -354,6 +383,23 @@
 								</Button>
 							</div>
 						{/if}
+					</div>
+
+					<div class="space-y-2">
+						<Label for="introText">Introduction</Label>
+						<textarea
+							id="introText"
+							bind:value={introText}
+							rows="4"
+							class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+					</div>
+					<div class="space-y-2">
+						<Label for="closingText">Closing text</Label>
+						<textarea
+							id="closingText"
+							bind:value={closingText}
+							rows="4"
+							class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
 					</div>
 
 					<div class="space-y-2">

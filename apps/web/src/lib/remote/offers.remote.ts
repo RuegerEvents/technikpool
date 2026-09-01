@@ -4,6 +4,16 @@ import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import { dayCountBetween, getErrorMessage } from '$lib/utils';
 import { isSystemAdmin, requireAuth, userOrgIds } from '$lib/server/services/access';
+import {
+	DEFAULT_INVOICE_CLOSING,
+	DEFAULT_INVOICE_INTRO,
+	DEFAULT_OFFER_CLOSING,
+	DEFAULT_OFFER_INTRO,
+	formatBillingDate,
+	renderBillingText
+} from '$lib/billing-text';
+import { generateBillingPdf } from '$lib/server/billing-pdf';
+import { deleteObject, putObject } from '$lib/server/storage';
 
 async function requireOrgManageAccess(orgId: string) {
 	const user = await requireAuth();
@@ -499,6 +509,8 @@ const createOfferSchema = v.object({
 	customerAddress: v.optional(v.string()),
 	customerContactPerson: v.optional(v.string()),
 	customerEmail: v.optional(v.string()),
+	introText: v.optional(v.string()),
+	closingText: v.optional(v.string()),
 	// 'OWN_ORG_ONLY' excludes assets loaned in from partner orgs — lets the
 	// production owner bill their own equipment separately from partner-owned
 	// equipment contributed to the same production.
@@ -508,7 +520,7 @@ const createOfferSchema = v.object({
 export const createOfferFromProduction = command(createOfferSchema, async (data) => {
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: data.productionId },
-		include: { organization: { select: { isKleinunternehmer: true } } }
+		include: { organization: true }
 	});
 	await requireOrgManageAccess(production.organizationId);
 
@@ -523,6 +535,21 @@ export const createOfferFromProduction = command(createOfferSchema, async (data)
 		) ?? 1;
 
 	const lines = await computeProductionBillingLines(data.productionId, assetScope);
+	const serviceStartDate = production.showStartDate ?? production.startDate ?? new Date();
+	const serviceEndDate = production.showEndDate ?? production.endDate ?? serviceStartDate;
+	const customer = data.customerId
+		? await prisma.customer.findFirst({
+				where: { id: data.customerId, organizationId: production.organizationId }
+			})
+		: null;
+	const variables = {
+		production: production.name,
+		startDate: formatBillingDate(serviceStartDate),
+		endDate: formatBillingDate(serviceEndDate),
+		servicePeriod: `${formatBillingDate(serviceStartDate)} bis ${formatBillingDate(serviceEndDate)}`,
+		customer: data.customerName,
+		paymentTermsDays: production.organization.paymentTermsDays
+	};
 	const itemsData = lines.map((line) => ({
 		assetId: line.assetId,
 		bundleId: line.bundleId,
@@ -548,6 +575,24 @@ export const createOfferFromProduction = command(createOfferSchema, async (data)
 			customerAddress: data.customerAddress?.trim() || null,
 			customerContactPerson: data.customerContactPerson?.trim() || null,
 			customerEmail: data.customerEmail?.trim() || null,
+			customerNumber: customer?.customerNumber ?? null,
+			customerPhone: customer?.phone ?? null,
+			customerVatId: customer?.vatId ?? null,
+			serviceStartDate,
+			serviceEndDate,
+			introText:
+				data.introText?.trim() ||
+				renderBillingText(
+					production.organization.offerIntroTemplate || DEFAULT_OFFER_INTRO,
+					variables
+				),
+			closingText:
+				data.closingText?.trim() ||
+				renderBillingText(
+					production.organization.offerClosingTemplate || DEFAULT_OFFER_CLOSING,
+					variables
+				),
+			paymentTermsDays: production.organization.paymentTermsDays,
 			dayCount,
 			assetScope,
 			vatRatePercent: production.organization.isKleinunternehmer ? 0 : 19,
@@ -572,6 +617,15 @@ export const getOfferStaleness = query(v.string(), async (offerId: string) => {
 	}
 
 	if (!offer.productionId) {
+		return {
+			applicable: false,
+			stale: false,
+			added: [],
+			removed: [],
+			changed: []
+		} satisfies Staleness;
+	}
+	if (offer.finalizedAt) {
 		return {
 			applicable: false,
 			stale: false,
@@ -632,6 +686,7 @@ export const getOfferStaleness = query(v.string(), async (offerId: string) => {
 export const updateOfferItemsFromProduction = command(v.string(), async (offerId: string) => {
 	const offer = await prisma.offer.findUniqueOrThrow({ where: { id: offerId } });
 	await requireOrgManageAccess(offer.organizationId);
+	if (offer.finalizedAt) throw new Error('This offer is finalized and immutable');
 
 	if (!offer.productionId) {
 		throw new Error('This offer is not linked to a production');
@@ -673,6 +728,7 @@ export const updateOfferDayCount = command(
 			include: { items: true }
 		});
 		await requireOrgManageAccess(offer.organizationId);
+		if (offer.finalizedAt) throw new Error('This offer is finalized and immutable');
 
 		await prisma.$transaction([
 			prisma.offer.update({ where: { id: offerId }, data: { dayCount } }),
@@ -708,6 +764,7 @@ export const updateOfferItemRate = command(
 		const offerIds = [...new Set(items.map((i) => i.offerId))];
 		if (offerIds.length > 1) error(400, 'Lines belong to different offers');
 		await requireOrgManageAccess(items[0].offer.organizationId);
+		if (items[0].offer.finalizedAt) throw new Error('This offer is finalized and immutable');
 
 		await prisma.$transaction(
 			items.map((item) => {
@@ -737,6 +794,7 @@ export const updateOfferDiscount = command(
 	async ({ offerId, discountType, discountValue }) => {
 		const offer = await prisma.offer.findUniqueOrThrow({ where: { id: offerId } });
 		await requireOrgManageAccess(offer.organizationId);
+		if (offer.finalizedAt) throw new Error('This offer is finalized and immutable');
 
 		await prisma.offer.update({
 			where: { id: offerId },
@@ -762,6 +820,12 @@ const updateOfferCustomerSchema = v.object({
 export const updateOfferCustomer = command(updateOfferCustomerSchema, async (data) => {
 	const offer = await prisma.offer.findUniqueOrThrow({ where: { id: data.offerId } });
 	await requireOrgManageAccess(offer.organizationId);
+	if (offer.finalizedAt) throw new Error('This offer is finalized and immutable');
+	const customer = data.customerId
+		? await prisma.customer.findFirst({
+				where: { id: data.customerId, organizationId: offer.organizationId }
+			})
+		: null;
 
 	await prisma.offer.update({
 		where: { id: data.offerId },
@@ -770,7 +834,10 @@ export const updateOfferCustomer = command(updateOfferCustomerSchema, async (dat
 			customerName: data.customerName,
 			customerAddress: data.customerAddress?.trim() || null,
 			customerContactPerson: data.customerContactPerson?.trim() || null,
-			customerEmail: data.customerEmail?.trim() || null
+			customerEmail: data.customerEmail?.trim() || null,
+			customerNumber: customer?.customerNumber ?? null,
+			customerPhone: customer?.phone ?? null,
+			customerVatId: customer?.vatId ?? null
 		}
 	});
 
@@ -799,6 +866,11 @@ export const copyOfferToNewCustomer = command(
 				productionId: source.productionId,
 				customerName,
 				customerAddress: customerAddress?.trim() || null,
+				serviceStartDate: source.serviceStartDate,
+				serviceEndDate: source.serviceEndDate,
+				introText: source.introText,
+				closingText: source.closingText,
+				paymentTermsDays: source.paymentTermsDays,
 				dayCount: source.dayCount,
 				discountType: source.discountType,
 				discountValue: source.discountValue,
@@ -829,6 +901,42 @@ export const copyOfferToNewCustomer = command(
 	}
 );
 
+export const deleteOffer = command(v.string(), async (offerId: string) => {
+	const offer = await prisma.offer.findUniqueOrThrow({
+		where: { id: offerId },
+		include: { _count: { select: { invoices: true } } }
+	});
+	await requireOrgManageAccess(offer.organizationId);
+	if (offer._count.invoices > 0) throw new Error('An invoice was created from this offer');
+	await prisma.offer.delete({ where: { id: offerId } });
+	if (offer.pdfPath)
+		deleteObject(offer.pdfPath).catch((error) =>
+			console.error(`Could not delete archived offer PDF ${offer.pdfPath}:`, error)
+		);
+	await getOffers().refresh();
+});
+
+export const finalizeOffer = command(v.string(), async (offerId: string) => {
+	const offer = await prisma.offer.findUniqueOrThrow({
+		where: { id: offerId },
+		include: {
+			organization: { include: { address: true } },
+			items: { orderBy: { createdAt: 'asc' } }
+		}
+	});
+	await requireOrgManageAccess(offer.organizationId);
+	if (offer.finalizedAt) throw new Error('This offer has already been finalized');
+	const pdfPath = `billing-documents/${offer.organizationId}/offers/${offer.id}.pdf`;
+	const pdf = await generateBillingPdf('offer', offer);
+	await putObject(pdfPath, pdf, 'application/pdf');
+	await prisma.offer.update({
+		where: { id: offerId },
+		data: { finalizedAt: new Date(), pdfPath }
+	});
+	await getOffer(offerId).refresh();
+	await getOffers().refresh();
+});
+
 export const convertOfferToInvoice = command(v.string(), async (offerId: string) => {
 	const offer = await prisma.offer.findUniqueOrThrow({
 		where: { id: offerId },
@@ -841,6 +949,8 @@ export const convertOfferToInvoice = command(v.string(), async (offerId: string)
 		}
 	});
 	await requireOrgManageAccess(offer.organizationId);
+	if (!offer.finalizedAt || !offer.pdfPath)
+		throw new Error('Finalize the offer before creating an invoice');
 
 	const year = new Date().getFullYear();
 	const invoice = await prisma.$transaction(async (tx) => {
@@ -862,6 +972,46 @@ export const convertOfferToInvoice = command(v.string(), async (offerId: string)
 				customerAddress: offer.customerAddress,
 				customerContactPerson: offer.customerContactPerson,
 				customerEmail: offer.customerEmail,
+				customerNumber: offer.customerNumber,
+				customerPhone: offer.customerPhone,
+				customerVatId: offer.customerVatId,
+				serviceStartDate: offer.serviceStartDate,
+				serviceEndDate: offer.serviceEndDate,
+				introText: renderBillingText(
+					offer.organization.invoiceIntroTemplate || DEFAULT_INVOICE_INTRO,
+					{
+						production: offer.productionId
+							? ((
+									await tx.production.findUnique({
+										where: { id: offer.productionId },
+										select: { name: true }
+									})
+								)?.name ?? '')
+							: '',
+						startDate: offer.serviceStartDate ? formatBillingDate(offer.serviceStartDate) : '',
+						endDate: offer.serviceEndDate ? formatBillingDate(offer.serviceEndDate) : '',
+						servicePeriod:
+							offer.serviceStartDate && offer.serviceEndDate
+								? `${formatBillingDate(offer.serviceStartDate)} bis ${formatBillingDate(offer.serviceEndDate)}`
+								: '',
+						customer: offer.customerName,
+						documentNumber: number,
+						paymentTermsDays: offer.organization.paymentTermsDays
+					}
+				),
+				closingText: renderBillingText(
+					offer.organization.invoiceClosingTemplate || DEFAULT_INVOICE_CLOSING,
+					{
+						production: '',
+						startDate: '',
+						endDate: '',
+						servicePeriod: '',
+						customer: offer.customerName,
+						documentNumber: number,
+						paymentTermsDays: offer.organization.paymentTermsDays
+					}
+				),
+				paymentTermsDays: offer.organization.paymentTermsDays,
 				dayCount: offer.dayCount,
 				discountType: offer.discountType,
 				discountValue: offer.discountValue,
@@ -1051,18 +1201,38 @@ export const updateInvoiceItemsFromProduction = command(v.string(), async (invoi
 	await getInvoices().refresh();
 });
 
-export const markInvoiceAsSent = command(v.string(), async (invoiceId: string) => {
-	const invoice = await prisma.invoice.findUniqueOrThrow({ where: { id: invoiceId } });
+export const finalizeInvoice = command(v.string(), async (invoiceId: string) => {
+	const invoice = await prisma.invoice.findUniqueOrThrow({
+		where: { id: invoiceId },
+		include: {
+			organization: { include: { address: true } },
+			items: { orderBy: { createdAt: 'asc' } }
+		}
+	});
 	await requireOrgManageAccess(invoice.organizationId);
 
-	if (invoice.sentAt) {
-		throw new Error('This invoice has already been marked as sent');
+	if (invoice.pdfPath) {
+		throw new Error('This invoice has already been finalized');
 	}
-
-	await prisma.invoice.update({ where: { id: invoiceId }, data: { sentAt: new Date() } });
+	const pdfPath = `billing-documents/${invoice.organizationId}/invoices/${invoice.id}.pdf`;
+	const pdf = await generateBillingPdf('invoice', invoice);
+	await putObject(pdfPath, pdf, 'application/pdf');
+	await prisma.invoice.update({
+		where: { id: invoiceId },
+		data: { sentAt: invoice.sentAt ?? new Date(), pdfPath }
+	});
 
 	await getInvoice(invoiceId).refresh();
 	await getInvoices().refresh();
+});
+
+export const deleteInvoice = command(v.string(), async (invoiceId: string) => {
+	const invoice = await prisma.invoice.findUniqueOrThrow({ where: { id: invoiceId } });
+	await requireOrgManageAccess(invoice.organizationId);
+	if (invoice.sentAt) throw new Error('A finalized invoice cannot be deleted');
+	await prisma.invoice.delete({ where: { id: invoiceId } });
+	await getInvoices().refresh();
+	if (invoice.offerId) await getOffer(invoice.offerId).refresh();
 });
 
 const updateInvoiceDayCountSchema = v.object({ invoiceId: v.string(), dayCount: v.number() });
@@ -1171,6 +1341,11 @@ export const updateInvoiceCustomer = command(updateInvoiceCustomerSchema, async 
 	if (invoice.sentAt) {
 		throw new Error('This invoice has been sent and is immutable');
 	}
+	const customer = data.customerId
+		? await prisma.customer.findFirst({
+				where: { id: data.customerId, organizationId: invoice.organizationId }
+			})
+		: null;
 
 	await prisma.invoice.update({
 		where: { id: data.invoiceId },
@@ -1179,10 +1354,51 @@ export const updateInvoiceCustomer = command(updateInvoiceCustomerSchema, async 
 			customerName: data.customerName,
 			customerAddress: data.customerAddress?.trim() || null,
 			customerContactPerson: data.customerContactPerson?.trim() || null,
-			customerEmail: data.customerEmail?.trim() || null
+			customerEmail: data.customerEmail?.trim() || null,
+			customerNumber: customer?.customerNumber ?? null,
+			customerPhone: customer?.phone ?? null,
+			customerVatId: customer?.vatId ?? null
 		}
 	});
 
 	await getInvoice(data.invoiceId).refresh();
 	await getInvoices().refresh();
+});
+
+const updateDocumentTextSchema = v.object({
+	id: v.string(),
+	kind: v.picklist(['offer', 'invoice']),
+	introText: v.optional(v.string()),
+	closingText: v.optional(v.string()),
+	paymentTermsDays: v.number()
+});
+
+export const updateDocumentText = command(updateDocumentTextSchema, async (data) => {
+	if (data.kind === 'offer') {
+		const offer = await prisma.offer.findUniqueOrThrow({ where: { id: data.id } });
+		await requireOrgManageAccess(offer.organizationId);
+		if (offer.finalizedAt) throw new Error('This offer is finalized and immutable');
+		await prisma.offer.update({
+			where: { id: data.id },
+			data: {
+				introText: data.introText?.trim() || null,
+				closingText: data.closingText?.trim() || null,
+				paymentTermsDays: data.paymentTermsDays
+			}
+		});
+		await getOffer(data.id).refresh();
+	} else {
+		const invoice = await prisma.invoice.findUniqueOrThrow({ where: { id: data.id } });
+		await requireOrgManageAccess(invoice.organizationId);
+		if (invoice.sentAt) throw new Error('This invoice has been sent and is immutable');
+		await prisma.invoice.update({
+			where: { id: data.id },
+			data: {
+				introText: data.introText?.trim() || null,
+				closingText: data.closingText?.trim() || null,
+				paymentTermsDays: data.paymentTermsDays
+			}
+		});
+		await getInvoice(data.id).refresh();
+	}
 });

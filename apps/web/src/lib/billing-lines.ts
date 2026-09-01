@@ -48,7 +48,11 @@ function lineKey(item: GroupableItem): string {
 	return `${identity}|${Number(item.netPurchasePrice)}|${Number(item.ratePercent)}`;
 }
 
-export function groupBillingItems<T extends GroupableItem>(items: T[]): CategoryGroup<T>[] {
+export function groupBillingItems<T extends GroupableItem>(
+	items: T[],
+	categoryLabel: (item: T) => string = (item) =>
+		localizedName(item.categoryName, item.categoryNameDe) || 'Uncategorized'
+): CategoryGroup<T>[] {
 	const categories = new Map<string, CategoryGroup<T>>();
 	const lines = new Map<string, LineGroup<T>>();
 
@@ -58,7 +62,7 @@ export function groupBillingItems<T extends GroupableItem>(items: T[]): Category
 		if (!category) {
 			category = {
 				key: catKey,
-				name: localizedName(item.categoryName, item.categoryNameDe) || 'Uncategorized',
+				name: categoryLabel(item),
 				color: item.categoryColor ?? null,
 				lines: [],
 				subtotal: 0
