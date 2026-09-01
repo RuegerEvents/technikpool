@@ -8,6 +8,7 @@
 		getProductCatalog,
 		getProducts,
 		mergeProducts,
+		setOrgProductPrice,
 		updateProduct
 	} from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
@@ -44,6 +45,28 @@
 	let canEdit = $derived(
 		data.isAdmin || orgs.some((o) => o.role === 'ADMIN' || o.role === 'OWNER')
 	);
+
+	// The orgs whose prices this user may set — prices are per-org, so the
+	// wizard shows one price field per org here rather than one global one.
+	let managedOrgs = $derived(
+		orgs.filter((o) => data.isAdmin || o.role === 'ADMIN' || o.role === 'OWNER')
+	);
+	let managedOrgIdSet = $derived(new Set(managedOrgs.map((o) => o.id)));
+
+	// With an org filter active the catalog only carries that org's price rows,
+	// so only that org's field can be shown — a field initialised from the rows
+	// that aren't there would read as "no price" and delete a stored one on save.
+	let priceOrgs = $derived(
+		filterOrgId ? managedOrgs.filter((o) => o.id === filterOrgId) : managedOrgs
+	);
+
+	// Renaming or recategorizing follows the ownership rule the server
+	// enforces: every org holding units must be one this user admins. Locked
+	// fields are greyed out rather than failing on save.
+	function isIdentityLocked(product: CatalogProduct) {
+		if (data.isAdmin) return false;
+		return product.owningOrgIds.some((id) => !managedOrgIdSet.has(id));
+	}
 
 	// The position is held as an id, not an index: a product that stops matching
 	// the filter changes every index after it, and an index would then point at
@@ -85,8 +108,16 @@
 		netPurchasePrice: undefined
 	});
 	let manufacturer = $state<{ id: string | null; name: string } | null>(null);
+	// One price per org the user manages — prices are per-org, and undefined
+	// means "no price set for this org".
+	let priceDrafts = $state<Record<string, number | undefined>>({});
 	let draftFor = $state('');
 	let saving = $state(false);
+
+	function storedPrice(product: CatalogProduct, orgId: string): number | undefined {
+		const row = product.prices.find((p) => p.organizationId === orgId);
+		return row == null ? undefined : Number(row.netPurchasePrice);
+	}
 
 	// The draft follows whatever product is in front — an effect rather than a
 	// derived, because from there on it is the user's own state to edit.
@@ -99,21 +130,46 @@
 			name: product.name,
 			categoryId: product.categoryId,
 			imagePath: product.imagePath ?? '',
-			netPurchasePrice:
-				product.netPurchasePrice == null ? undefined : Number(product.netPurchasePrice)
+			netPurchasePrice: undefined
 		};
 	});
 
-	let dirty = $derived(
+	// Price drafts additionally follow the org filter: switching it swaps which
+	// price rows the catalog even carries, so stale drafts for the previous
+	// selection must not survive into a save.
+	let pricesFor = $state('');
+	$effect(() => {
+		const product = current;
+		const key = `${product?.id ?? ''}:${filterOrgId}`;
+		if (!product || key === pricesFor) return;
+		pricesFor = key;
+		priceDrafts = Object.fromEntries(
+			priceOrgs.map((org) => [org.id, storedPrice(product, org.id)])
+		);
+	});
+
+	let identityLocked = $derived(!!current && isIdentityLocked(current));
+
+	let identityDirty = $derived(
 		!!current &&
 			draftFor === current.id &&
 			(draft.name.trim() !== current.name ||
 				manufacturer?.id !== current.manufacturerId ||
-				draft.categoryId !== current.categoryId ||
-				draft.imagePath.trim() !== (current.imagePath ?? '') ||
-				draft.netPurchasePrice !==
-					(current.netPurchasePrice == null ? undefined : Number(current.netPurchasePrice)))
+				draft.categoryId !== current.categoryId)
 	);
+	let imageDirty = $derived(
+		!!current && draftFor === current.id && draft.imagePath.trim() !== (current.imagePath ?? '')
+	);
+	let dirtyPriceOrgIds = $derived(
+		current && draftFor === current.id
+			? priceOrgs
+					.map((org) => org.id)
+					.filter(
+						(orgId) => (priceDrafts[orgId] ?? null) !== (storedPrice(current!, orgId) ?? null)
+					)
+			: []
+	);
+	let dirty = $derived(identityDirty || imageDirty || dirtyPriceOrgIds.length > 0);
 
 	/** Returns whether the save went through, so a caller can hold position on failure. */
 	async function save(): Promise<boolean> {
@@ -128,14 +184,30 @@
 		}
 		saving = true;
 		try {
-			await updateProduct({
-				productId: current.id,
-				name: draft.name,
-				manufacturerId: manufacturer.id,
-				categoryId: draft.categoryId,
-				imagePath: draft.imagePath,
-				netPurchasePrice: draft.netPurchasePrice ?? null
-			});
+			if (identityDirty || imageDirty) {
+				await updateProduct({
+					productId: current.id,
+					// Locked identity fields are greyed out in the form; not sending
+					// them keeps an image-only save from tripping the server's
+					// ownership check on an unchanged name.
+					...(identityLocked
+						? {}
+						: {
+								name: draft.name,
+								manufacturerId: manufacturer.id,
+								categoryId: draft.categoryId
+							}),
+					imagePath: draft.imagePath
+				});
+			}
+			for (const orgId of dirtyPriceOrgIds) {
+				await setOrgProductPrice({
+					organizationId: orgId,
+					productId: current.id,
+					netPurchasePrice: priceDrafts[orgId] ?? null
+				});
+			}
+			await getProductCatalog(filterOrgId || undefined).refresh();
 			return true;
 		} catch (err) {
 			toast.error(getErrorMessage(err));
@@ -207,18 +279,13 @@
 	let unitCount = $derived(new Map(products.map((p) => [p.id, p.assetCount])));
 	let movingCount = $derived(absorbed ? (unitCount.get(absorbed.id) ?? 0) : 0);
 
-	// Name, manufacturer and category are the survivor's; an image and a price
-	// are not identity but work someone did, so the merge keeps them when the
-	// survivor has none. Said out loud here because it is the one part of the
-	// operation that isn't obvious from picking a side.
+	// Name, manufacturer and category are the survivor's; an image is not
+	// identity but work someone did, so the merge keeps it when the survivor
+	// has none. Said out loud here because it is the one part of the operation
+	// that isn't obvious from picking a side. (Per-org prices move over the
+	// same way — each org keeps its own — noted statically below.)
 	let inheritsImage = $derived(
 		!!survivor && !!absorbed && !survivor.imagePath && !!absorbed.imagePath
-	);
-	let inheritsPrice = $derived(
-		!!survivor &&
-			!!absorbed &&
-			(survivor.netPurchasePrice ?? null) === null &&
-			(absorbed.netPurchasePrice ?? null) !== null
 	);
 
 	function openMerge() {
@@ -241,6 +308,7 @@
 			// the draft have to be pointed at what actually exists now.
 			currentId = survivor.id;
 			draftFor = '';
+			pricesFor = '';
 			mergeOpen = false;
 			toast.success(plural(movedAssets, ['Merged — # unit moved', 'Merged — # units moved']));
 		} catch (err) {
@@ -262,6 +330,7 @@
 			await deleteProduct(deletedId);
 			currentId = nextId;
 			draftFor = '';
+			pricesFor = '';
 			deleteOpen = false;
 			toast.success('Product deleted');
 		} catch (err) {
@@ -459,17 +528,52 @@
 					</div>
 				</Card.Header>
 				<Card.Content>
+					{#if identityLocked}
+						<div class="mb-4 rounded-md border border-dashed p-3 text-sm text-muted-foreground">
+							Units of this product belong to organizations you don't administer, so its name,
+							manufacturer and category are locked here. Your image contribution and your own
+							organization's price still save.
+						</div>
+					{/if}
 					<div class="mb-4 space-y-2">
 						<p class="text-sm font-medium">Manufacturer</p>
 						<CreatableSelect
 							items={manufacturers}
 							bind:value={manufacturer}
 							allowCreate={false}
-							disabled={!canEdit}
+							disabled={!canEdit || identityLocked}
 							placeholder="Search manufacturers…"
 						/>
 					</div>
-					<ProductFields {categories} bind:value={draft} idPrefix="wizard" />
+					<ProductFields
+						{categories}
+						bind:value={draft}
+						idPrefix="wizard"
+						showPrice={false}
+						identityDisabled={!canEdit || identityLocked}
+					/>
+					{#if priceOrgs.length > 0}
+						<div class="mt-4 space-y-2">
+							<p class="text-sm font-medium">Net purchase price (€)</p>
+							<p class="text-sm text-muted-foreground">
+								Per organization — what that organization's rental rate is calculated from. Other
+								organizations set their own price.
+							</p>
+							{#each priceOrgs as org (org.id)}
+								<div class="flex items-center gap-3">
+									<span class="w-40 truncate text-sm">{orgLabel(org)}</span>
+									<input
+										type="number"
+										min="0"
+										step="0.01"
+										placeholder="Unknown"
+										bind:value={priceDrafts[org.id]}
+										class="h-10 w-40 rounded-md border border-input bg-background px-3 py-2 text-right text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+									/>
+								</div>
+							{/each}
+						</div>
+					{/if}
 				</Card.Content>
 				<Card.Footer class="flex flex-wrap items-center justify-between gap-3">
 					<div class="flex items-center gap-2 text-xs text-muted-foreground">
@@ -556,17 +660,13 @@
 					<span class="font-medium">{survivor.manufacturer.name} {survivor.name}</span> — same tags, same
 					history, same accessories.
 				</p>
-				{#if inheritsImage || inheritsPrice}
-					<p class="text-muted-foreground">
-						{#if inheritsImage && inheritsPrice}
-							The image and the purchase price come along — this entry has neither.
-						{:else if inheritsImage}
-							The image comes along — this entry has none.
-						{:else}
-							The purchase price comes along — this entry has none.
-						{/if}
-					</p>
+				{#if inheritsImage}
+					<p class="text-muted-foreground">The image comes along — this entry has none.</p>
 				{/if}
+				<p class="text-muted-foreground">
+					Purchase prices are each organization's own and move over with the merge — an organization
+					that priced both entries keeps the surviving entry's price.
+				</p>
 				{#if survivor.manufacturerId !== absorbed.manufacturerId}
 					<p class="text-muted-foreground">
 						Different manufacturers: the units end up under

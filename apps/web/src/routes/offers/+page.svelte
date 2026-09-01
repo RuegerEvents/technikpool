@@ -44,6 +44,7 @@
 			<table class="w-full text-sm">
 				<thead>
 					<tr class="border-b bg-muted/30">
+						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Number</th>
 						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Customer</th>
 						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Production</th>
 						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Org</th>
@@ -55,6 +56,7 @@
 				<tbody>
 					{#each offers as offer (offer.id)}
 						<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
+							<td class="px-4 py-3 font-mono text-sm tabular-nums">{offer.number}</td>
 							<td class="px-4 py-3 font-medium">{offer.customerName}</td>
 							<td class="px-4 py-3 text-muted-foreground">{offer.production?.name ?? '—'}</td>
 							<td class="px-4 py-3 text-muted-foreground">{orgLabel(offer.organization)}</td>

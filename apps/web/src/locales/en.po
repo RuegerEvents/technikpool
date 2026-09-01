@@ -133,6 +133,7 @@ msgstr "Product"
 msgid "S/N"
 msgstr "S/N"
 
+#: src/routes/admin/catalog-log/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/inspections/+page.svelte
 #: src/routes/inspections/+page.svelte
@@ -175,6 +176,7 @@ msgstr "Crew"
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
+#: src/routes/invoices/[id]/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
@@ -226,6 +228,7 @@ msgstr "Add"
 msgid "No crew members added yet."
 msgstr "No crew members added yet."
 
+#: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/auth/register/+page.svelte
@@ -581,6 +584,7 @@ msgstr "Manage"
 msgid "View Assets"
 msgstr "View Assets"
 
+#: src/routes/admin/catalog-log/+page.svelte
 #: src/routes/admin/users/+page.svelte
 msgid "User Management"
 msgstr "User Management"
@@ -659,6 +663,7 @@ msgstr "<0/> Create another after saving"
 #: src/routes/assets/new/+page.svelte
 #: src/routes/customers/+page.svelte
 #: src/routes/inspections/+page.svelte
+#: src/routes/invoices/[id]/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
 #: src/routes/manufacturers/+page.svelte
@@ -1277,6 +1282,7 @@ msgstr "Location"
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/+page.svelte
 #: src/routes/manufacturers/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
 #: src/routes/offers/new/+page.svelte
@@ -1301,6 +1307,7 @@ msgstr "Please select a location"
 msgid "No locations yet. Create one in <0>Locations</0>."
 msgstr "No locations yet. Create one in <0>Locations</0>."
 
+#: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/new/+page.svelte
@@ -1643,6 +1650,7 @@ msgstr "Target"
 msgid "Select a production…"
 msgstr "Select a production…"
 
+#: src/routes/admin/catalog-log/+page.svelte
 #: src/routes/checkout/+page.svelte
 msgid "Action"
 msgstr "Action"
@@ -1861,6 +1869,7 @@ msgstr "Declined for <0/>"
 #~ msgid "Tab"
 #~ msgstr "Tab"
 
+#: src/routes/admin/catalog-log/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Product updated"
@@ -2802,15 +2811,15 @@ msgstr "View"
 msgid "Invoices | Technikpool"
 msgstr "Invoices | Technikpool"
 
-#: src/routes/invoices/+page.svelte
-msgid "Rechnungen — persisted, sequentially numbered documents."
-msgstr "Rechnungen — persisted, sequentially numbered documents."
+#~ msgid "Rechnungen — persisted, sequentially numbered documents."
+#~ msgstr "Rechnungen — persisted, sequentially numbered documents."
 
 #: src/routes/invoices/+page.svelte
 msgid "No invoices yet."
 msgstr "No invoices yet."
 
 #: src/routes/invoices/+page.svelte
+#: src/routes/offers/+page.svelte
 msgid "Number"
 msgstr "Number"
 
@@ -2849,6 +2858,7 @@ msgstr "Pricing & inspection updated"
 #: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/products/+page.svelte
 msgid "Net purchase price (€)"
 msgstr "Net purchase price (€)"
 
@@ -2870,10 +2880,8 @@ msgstr "Next due: {0}"
 msgid "Invoice {0} | Technikpool"
 msgstr "Invoice {0} | Technikpool"
 
-#. 0: invoice.number
-#: src/routes/invoices/[id]/+page.svelte
-msgid "Invoice {0}"
-msgstr "Invoice {0}"
+#~ msgid "Invoice {0}"
+#~ msgstr "Invoice {0}"
 
 #~ msgid "Invoices are immutable once issued (GoBD/§14 UStG) — this record can't be edited. Corrections require a new document."
 #~ msgstr "Invoices are immutable once issued (GoBD/§14 UStG) — this record can't be edited. Corrections require a new document."
@@ -2974,15 +2982,11 @@ msgstr "Offer copied"
 msgid "Invoice {0} created"
 msgstr "Invoice {0} created"
 
-#. 0: offer.customerName
-#: src/routes/offers/[id]/+page.svelte
-msgid "Offer — {0} | Technikpool"
-msgstr "Offer — {0} | Technikpool"
+#~ msgid "Offer — {0} | Technikpool"
+#~ msgstr "Offer — {0} | Technikpool"
 
-#. 0: offer.customerName
-#: src/routes/offers/[id]/+page.svelte
-msgid "Offer — {0}"
-msgstr "Offer — {0}"
+#~ msgid "Offer — {0}"
+#~ msgstr "Offer — {0}"
 
 #: src/routes/offers/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
@@ -2994,6 +2998,7 @@ msgstr "Copy to new customer"
 msgid "Converting…"
 msgstr "Converting…"
 
+#: src/routes/offers/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
 msgid "Convert to invoice"
 msgstr "Convert to invoice"
@@ -3314,6 +3319,7 @@ msgstr "BIC"
 msgid "Bank name"
 msgstr "Bank name"
 
+#: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Tax ID"
 msgstr "Tax ID"
@@ -3657,6 +3663,7 @@ msgstr "Removed"
 msgid "Changed"
 msgstr "Changed"
 
+#: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 msgid "Updating…"
 msgstr "Updating…"
@@ -4601,12 +4608,12 @@ msgstr[0] "# already-booked asset moved into the bundle"
 msgstr[1] "# already-booked assets moved into the bundle"
 
 #: src/lib/components/ui/product-fields/product-fields.svelte
+#: src/routes/products/+page.svelte
 msgid "Unknown"
 msgstr "Unknown"
 
-#: src/lib/components/ui/product-fields/product-fields.svelte
-msgid "What a rental rate is calculated from. It applies to every unit of this product."
-msgstr "What a rental rate is calculated from. It applies to every unit of this product."
+#~ msgid "What a rental rate is calculated from. It applies to every unit of this product."
+#~ msgstr "What a rental rate is calculated from. It applies to every unit of this product."
 
 #~ msgid "Set on the product — it applies to every unit of {0}. Change it under \"Edit product\" above."
 #~ msgstr "Set on the product — it applies to every unit of {0}. Change it under \"Edit product\" above."
@@ -4622,13 +4629,11 @@ msgstr "What a rental rate is calculated from. It applies to every unit of this 
 msgid "Price saved on {0}"
 msgstr "Price saved on {0}"
 
-#: src/routes/offers/new/+page.svelte
-msgid "The price belongs to the product, so it covers every unit of it — here and in every other offer."
-msgstr "The price belongs to the product, so it covers every unit of it — here and in every other offer."
+#~ msgid "The price belongs to the product, so it covers every unit of it — here and in every other offer."
+#~ msgstr "The price belongs to the product, so it covers every unit of it — here and in every other offer."
 
-#: src/routes/offers/new/+page.svelte
-msgid "You need admin rights in an organization to price a product."
-msgstr "You need admin rights in an organization to price a product."
+#~ msgid "You need admin rights in an organization to price a product."
+#~ msgstr "You need admin rights in an organization to price a product."
 
 #~ msgid "Set on the product — it applies to every unit of {0}. Change it in the Product card."
 #~ msgstr "Set on the product — it applies to every unit of {0}. Change it in the Product card."
@@ -4643,9 +4648,8 @@ msgstr "Purchase & Inspection"
 msgid "Facts about this individual unit. What it bills at is the product's price."
 msgstr "Facts about this individual unit. What it bills at is the product's price."
 
-#: src/routes/assets/[id]/+page.svelte
-msgid "What a rental rate is calculated from, for every unit of this product."
-msgstr "What a rental rate is calculated from, for every unit of this product."
+#~ msgid "What a rental rate is calculated from, for every unit of this product."
+#~ msgstr "What a rental rate is calculated from, for every unit of this product."
 
 #. 0: asset.parent.product.name
 #: src/routes/assets/+page.svelte
@@ -4998,17 +5002,15 @@ msgstr "Which name is right?"
 #~ msgstr[0] "Its # unit becomes a"
 #~ msgstr[1] "Its # units become"
 
-#: src/routes/products/+page.svelte
-msgid "The image and the purchase price come along — this entry has neither."
-msgstr "The image and the purchase price come along — this entry has neither."
+#~ msgid "The image and the purchase price come along — this entry has neither."
+#~ msgstr "The image and the purchase price come along — this entry has neither."
 
 #: src/routes/products/+page.svelte
 msgid "The image comes along — this entry has none."
 msgstr "The image comes along — this entry has none."
 
-#: src/routes/products/+page.svelte
-msgid "The purchase price comes along — this entry has none."
-msgstr "The purchase price comes along — this entry has none."
+#~ msgid "The purchase price comes along — this entry has none."
+#~ msgstr "The purchase price comes along — this entry has none."
 
 #: src/routes/products/+page.svelte
 msgid "Different manufacturers: the units end up under <0/>."
@@ -5129,6 +5131,7 @@ msgstr "Choose the main device. Every other device in this bundle will become it
 msgid "Choose main device"
 msgstr "Choose main device"
 
+#: src/routes/admin/catalog-log/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Product deleted"
 msgstr "Product deleted"
@@ -5254,6 +5257,7 @@ msgstr "Category rate: {0}% / day"
 msgid "<0/> Manufacturers"
 msgstr "<0/> Manufacturers"
 
+#: src/routes/admin/catalog-log/+page.svelte
 #: src/routes/manufacturers/+page.svelte
 msgid "Manufacturer updated"
 msgstr "Manufacturer updated"
@@ -5276,9 +5280,8 @@ msgstr "Manufacturers"
 msgid "Manage catalog names, mark generic placeholders, and merge duplicate manufacturers."
 msgstr "Manage catalog names, mark generic placeholders, and merge duplicate manufacturers."
 
-#: src/routes/manufacturers/+page.svelte
-msgid "Editing manufacturers requires admin or owner rights in one of your organizations."
-msgstr "Editing manufacturers requires admin or owner rights in one of your organizations."
+#~ msgid "Editing manufacturers requires admin or owner rights in one of your organizations."
+#~ msgstr "Editing manufacturers requires admin or owner rights in one of your organizations."
 
 #: src/routes/manufacturers/+page.svelte
 msgid "# product"
@@ -5594,3 +5597,183 @@ msgstr "This invoice is a draft — items can still be corrected or resynced fro
 
 #~ msgid "Select manufacturer…"
 #~ msgstr "Select manufacturer…"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "# accessory added"
+msgid_plural "# accessories added"
+msgstr[0] "# accessory added"
+msgstr[1] "# accessories added"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "# accessory removed"
+msgid_plural "# accessories removed"
+msgstr[0] "# accessory removed"
+msgstr[1] "# accessories removed"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Accessories changed"
+msgstr "Accessories changed"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "Update accessories"
+msgstr "Update accessories"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "What your organization's rental rate is calculated from. It applies to every unit of this product your organization bills — other organizations set their own price."
+msgstr "What your organization's rental rate is calculated from. It applies to every unit of this product your organization bills — other organizations set their own price."
+
+#. 0: orgLabel(asset.organization)
+#: src/routes/assets/[id]/+page.svelte
+msgid "{0}'s price for this product — what its rental rate is calculated from. Other organizations price it themselves."
+msgstr "{0}'s price for this product — what its rental rate is calculated from. Other organizations price it themselves."
+
+#: src/routes/offers/new/+page.svelte
+msgid "The price is your organization's own for this product — it covers every unit of it in your billing, here and in every later offer."
+msgstr "The price is your organization's own for this product — it covers every unit of it in your billing, here and in every later offer."
+
+#: src/routes/offers/new/+page.svelte
+msgid "Ask an admin of this organization to price the product."
+msgstr "Ask an admin of this organization to price the product."
+
+#: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
+msgid "Contact details"
+msgstr "Contact details"
+
+#: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
+msgid "Bank details"
+msgstr "Bank details"
+
+#: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
+msgid "VAT status"
+msgstr "VAT status"
+
+#: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
+msgid "Organization details updated on this document"
+msgstr "Organization details updated on this document"
+
+#. 0: diff .map((key) => labels[key]) .join(', ')
+#: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
+msgid "This document still shows the organization's details as they were when it was created ({0}). Update it to use the current details."
+msgstr "This document still shows the organization's details as they were when it was created ({0}). Update it to use the current details."
+
+#. 0: diff .map((key) => labels[key]) .join(', ')
+#: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
+msgid "This document was issued with the organization's details of its time ({0} changed since). Issued documents keep what they said."
+msgstr "This document was issued with the organization's details of its time ({0} changed since). Issued documents keep what they said."
+
+#: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
+msgid "Organization details have changed"
+msgstr "Organization details have changed"
+
+#: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
+msgid "Use current details"
+msgstr "Use current details"
+
+#: src/routes/offers/[id]/+page.svelte
+msgid "Enter an invoice number first"
+msgstr "Enter an invoice number first"
+
+#. 0: offer.number; 1: offer.customerName
+#: src/routes/offers/[id]/+page.svelte
+msgid "Offer {0} — {1} | Technikpool"
+msgstr "Offer {0} — {1} | Technikpool"
+
+#. 0: offer.number; 1: offer.customerName
+#: src/routes/offers/[id]/+page.svelte
+msgid "Offer {0} — {1}"
+msgstr "Offer {0} — {1}"
+
+#: src/routes/offers/[id]/+page.svelte
+msgid "The invoice number is assigned by you — your organization's own numbering scheme applies. It has to be unique within the organization and can still be corrected while the invoice is a draft."
+msgstr "The invoice number is assigned by you — your organization's own numbering scheme applies. It has to be unique within the organization and can still be corrected while the invoice is a draft."
+
+#: src/routes/offers/[id]/+page.svelte
+msgid "Create invoice"
+msgstr "Create invoice"
+
+#: src/routes/invoices/[id]/+page.svelte
+msgid "Invoice number updated"
+msgstr "Invoice number updated"
+
+#: src/routes/invoices/[id]/+page.svelte
+msgid "Edit invoice number"
+msgstr "Edit invoice number"
+
+#. 0: invoice.number
+#: src/routes/invoices/[id]/+page.svelte
+msgid "Invoice {0} <0/>"
+msgstr "Invoice {0} <0/>"
+
+#: src/routes/invoices/+page.svelte
+msgid "Rechnungen — numbered by hand, following your organization's own scheme."
+msgstr "Rechnungen — numbered by hand, following your organization's own scheme."
+
+#: src/routes/manufacturers/+page.svelte
+msgid "Manufacturers are shared across all organizations, so renaming or merging them is reserved for system administrators."
+msgstr "Manufacturers are shared across all organizations, so renaming or merging them is reserved for system administrators."
+
+#: src/routes/admin/catalog-log/+page.svelte
+#: src/routes/admin/users/+page.svelte
+msgid "Catalog Log"
+msgstr "Catalog Log"
+
+#: src/routes/products/+page.svelte
+msgid "Units of this product belong to organizations you don't administer, so its name, manufacturer and category are locked here. Your image contribution and your own organization's price still save."
+msgstr "Units of this product belong to organizations you don't administer, so its name, manufacturer and category are locked here. Your image contribution and your own organization's price still save."
+
+#: src/routes/products/+page.svelte
+msgid "Per organization — what that organization's rental rate is calculated from. Other organizations set their own price."
+msgstr "Per organization — what that organization's rental rate is calculated from. Other organizations set their own price."
+
+#: src/routes/products/+page.svelte
+msgid "Purchase prices are each organization's own and move over with the merge — an organization that priced both entries keeps the surviving entry's price."
+msgstr "Purchase prices are each organization's own and move over with the merge — an organization that priced both entries keeps the surviving entry's price."
+
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "Products merged"
+msgstr "Products merged"
+
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "Price set"
+msgstr "Price set"
+
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "Manufacturers merged"
+msgstr "Manufacturers merged"
+
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "Category updated"
+msgstr "Category updated"
+
+#. 0: payload.source.name ?? '?'; 1: payload.target.name ?? '?'; 2: moved
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "{0} → {1} ({2} moved)"
+msgstr "{0} → {1} ({2} moved)"
+
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "Catalog Log | Technikpool"
+msgstr "Catalog Log | Technikpool"
+
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "Every change to the shared catalog — products, manufacturers, categories and per-org prices — with who made it."
+msgstr "Every change to the shared catalog — products, manufacturers, categories and per-org prices — with who made it."
+
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "No catalog changes recorded yet."
+msgstr "No catalog changes recorded yet."
+
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "When"
+msgstr "When"
+
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "Who"
+msgstr "Who"
+
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "Subject"
+msgstr "Subject"
+
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "Details"
+msgstr "Details"

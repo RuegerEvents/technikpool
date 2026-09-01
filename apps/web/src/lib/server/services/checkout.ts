@@ -227,6 +227,9 @@ export async function performScan(
 				data: newIds.map((assetId) => ({
 					productionId: input.targetId,
 					assetId,
+					sourceParentAssetId: accessories.some((accessory) => accessory.id === assetId)
+						? asset.id
+						: null,
 					status: 'CHECKED_OUT'
 				}))
 			});
@@ -275,7 +278,7 @@ export async function performBulkCheckout(
 
 	const assets = await prisma.asset.findMany({
 		where: { id: { in: assetIds } },
-		select: { id: true, organizationId: true, bundleId: true, status: true }
+		select: { id: true, organizationId: true, bundleId: true, parentAssetId: true, status: true }
 	});
 
 	for (const asset of assets) {
@@ -386,7 +389,12 @@ export async function performBulkCheckout(
 			});
 		} else {
 			await prisma.productionItem.create({
-				data: { productionId: input.targetId, assetId: asset.id, status: 'CHECKED_OUT' }
+				data: {
+					productionId: input.targetId,
+					assetId: asset.id,
+					sourceParentAssetId: asset.parentAssetId,
+					status: 'CHECKED_OUT'
+				}
 			});
 		}
 

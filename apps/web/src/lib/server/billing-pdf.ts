@@ -13,6 +13,50 @@ type PdfOrganization = {
 	bankName: string | null;
 	isKleinunternehmer?: boolean;
 };
+/**
+ * The issuing-org columns snapshotted onto Offer and Invoice rows. Documents
+ * render from these, never from the live Organization — an org moving offices
+ * must not rewrite an already-issued document.
+ */
+export type OrgSnapshot = {
+	orgName: string;
+	orgAddressLine1: string | null;
+	orgAddressLine2: string | null;
+	orgPostalCode: string | null;
+	orgCity: string | null;
+	orgTaxId: string | null;
+	orgBillingEmail: string | null;
+	orgBillingWebsite: string | null;
+	orgBankAccountHolder: string | null;
+	orgBankName: string | null;
+	orgIban: string | null;
+	orgBic: string | null;
+	isKleinunternehmerSnapshot: boolean;
+};
+
+export function organizationFromSnapshot(doc: OrgSnapshot): PdfOrganization {
+	return {
+		name: doc.orgName,
+		address:
+			doc.orgAddressLine1 && doc.orgPostalCode && doc.orgCity
+				? {
+						line1: doc.orgAddressLine1,
+						line2: doc.orgAddressLine2,
+						postalCode: doc.orgPostalCode,
+						city: doc.orgCity
+					}
+				: null,
+		taxId: doc.orgTaxId,
+		billingEmail: doc.orgBillingEmail,
+		billingWebsite: doc.orgBillingWebsite,
+		bankAccountHolder: doc.orgBankAccountHolder,
+		iban: doc.orgIban,
+		bic: doc.orgBic,
+		bankName: doc.orgBankName,
+		isKleinunternehmer: doc.isKleinunternehmerSnapshot
+	};
+}
+
 type PdfDocumentData = {
 	number?: string;
 	createdAt?: Date;
@@ -76,7 +120,7 @@ function validateDocument(kind: 'offer' | 'invoice', data: PdfDocumentData) {
 	required(data.introText, 'introduction text');
 	required(data.closingText, 'closing text');
 	required(data.issueDate ?? data.createdAt, 'document date');
-	if (kind === 'invoice') required(data.number, 'invoice number');
+	required(data.number, kind === 'invoice' ? 'invoice number' : 'offer number');
 	if (!Number.isInteger(data.paymentTermsDays) || data.paymentTermsDays < 0)
 		missing.push('valid payment terms');
 	if (data.items.length === 0) missing.push('at least one line item');
@@ -126,7 +170,10 @@ export async function generateBillingPdf(
 		data.items,
 		(item) => item.categoryNameDe || item.categoryName || 'Ohne Kategorie'
 	);
-	const title = kind === 'invoice' ? `Rechnung${data.number ? ` ${data.number}` : ''}` : 'Angebot';
+	const title =
+		kind === 'invoice'
+			? `Rechnung${data.number ? ` ${data.number}` : ''}`
+			: `Angebot${data.number ? ` ${data.number}` : ''}`;
 	let page!: PDFPage;
 	let y = 0;
 	let pageNumber = 0;

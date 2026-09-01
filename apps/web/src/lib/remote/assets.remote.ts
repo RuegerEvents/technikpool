@@ -4,7 +4,15 @@ import { prisma } from '$lib/server/auth';
 import type { Prisma } from '$lib/prisma/client';
 import * as v from 'valibot';
 import type { FieldChange } from '$lib/types/asset-transaction';
-import { isSystemAdmin, requireAuth, scopedOrgIds, userOrgIds } from '$lib/server/services/access';
+import {
+	isSystemAdmin,
+	managedOrgIds,
+	requireAuth,
+	requireSystemAdmin,
+	scopedOrgIds,
+	userOrgIds
+} from '$lib/server/services/access';
+import { fieldChanges, logCatalogChange } from '$lib/server/services/catalog-log';
 import {
 	ACTIVE_ASSET_WHERE,
 	ASSET_STATUSES,
@@ -180,26 +188,18 @@ export const getManufacturers = query(async () => {
 	});
 });
 
-async function requireCatalogAdmin() {
-	const user = await requireAuth();
-	if (await isSystemAdmin(user.id)) return user;
-	const membership = await prisma.orgMembership.findFirst({
-		where: { userId: user.id, role: { in: ['ADMIN', 'OWNER'] } },
-		select: { id: true }
-	});
-	if (!membership)
-		error(403, 'You need admin rights in one of your organisations to edit the catalog');
-	return user;
-}
-
 const updateManufacturerSchema = v.object({
 	manufacturerId: v.string(),
 	name: v.string(),
 	generic: v.boolean()
 });
 
+// Manufacturers are global rows shared by every org, and editing or merging
+// one rewrites labels on other orgs' inventory and future documents — so,
+// like categories, they are system-admin territory. Creating one stays open
+// (the asset wizard has to register gear nobody has catalogued yet).
 export const updateManufacturer = command(updateManufacturerSchema, async (input) => {
-	await requireCatalogAdmin();
+	const user = await requireSystemAdmin();
 	const name = input.name.trim();
 	if (!name) error(400, 'A manufacturer needs a name');
 	const clash = await prisma.manufacturer.findFirst({
@@ -207,10 +207,23 @@ export const updateManufacturer = command(updateManufacturerSchema, async (input
 		select: { id: true }
 	});
 	if (clash) error(409, 'A manufacturer with this name already exists. Merge them instead.');
+	const previous = await prisma.manufacturer.findUniqueOrThrow({
+		where: { id: input.manufacturerId },
+		select: { name: true, generic: true }
+	});
 	const manufacturer = await prisma.manufacturer.update({
 		where: { id: input.manufacturerId },
 		data: { name, generic: input.generic }
 	});
+	const changes = fieldChanges(previous, { name, generic: input.generic });
+	if (changes.length > 0) {
+		await logCatalogChange({
+			userId: user.id,
+			action: 'MANUFACTURER_UPDATED',
+			manufacturerId: manufacturer.id,
+			data: { changes }
+		});
+	}
 	await Promise.all([
 		getManufacturers().refresh(),
 		getProducts().refresh(),
@@ -227,7 +240,7 @@ const mergeManufacturersSchema = v.object({
 export const mergeManufacturers = command(
 	mergeManufacturersSchema,
 	async ({ targetManufacturerId, sourceManufacturerId }) => {
-		await requireCatalogAdmin();
+		const user = await requireSystemAdmin();
 		if (targetManufacturerId === sourceManufacturerId) {
 			error(409, 'A manufacturer cannot be merged into itself');
 		}
@@ -248,6 +261,16 @@ export const mergeManufacturers = command(
 				});
 			}
 			await tx.manufacturer.delete({ where: { id: source.id } });
+		});
+		await logCatalogChange({
+			userId: user.id,
+			action: 'MANUFACTURER_MERGED',
+			manufacturerId: target.id,
+			data: {
+				source: { id: source.id, name: source.name },
+				target: { id: target.id, name: target.name },
+				movedProducts
+			}
 		});
 		await Promise.all([
 			getManufacturers().refresh(),
@@ -300,7 +323,20 @@ export const updateCategory = command(updateCategorySchema, async (input) => {
 	if ('color' in input) data.color = input.color;
 	if ('sortOrder' in input) data.sortOrder = input.sortOrder;
 
+	const previous = await prisma.category.findUniqueOrThrow({
+		where: { id: input.categoryId },
+		select: { name: true, nameDe: true, color: true, sortOrder: true }
+	});
 	const updated = await prisma.category.update({ where: { id: input.categoryId }, data });
+	const changes = fieldChanges(previous, data);
+	if (changes.length > 0) {
+		await logCatalogChange({
+			userId: user.id,
+			action: 'CATEGORY_UPDATED',
+			categoryId: updated.id,
+			data: { changes }
+		});
+	}
 	await getCategories().refresh();
 	return updated;
 });
@@ -444,16 +480,25 @@ export const getProductCatalog = query(v.optional(v.string()), async (organizati
 		include: {
 			manufacturer: true,
 			category: true,
-			assets: { select: { id: true }, take: 1 },
+			// One row per org that owns units — `owningOrgIds` is what lets the
+			// wizard grey out identity fields the server would refuse to change.
+			assets: { select: { organizationId: true }, distinct: ['organizationId'] },
+			// Prices are per-org and only the user's own orgs' are anyone's business.
+			orgPrices: {
+				where: { organizationId: { in: queryOrgIds } },
+				select: { organizationId: true, netPurchasePrice: true }
+			},
 			_count: { select: { assets: { where: assetScope } } }
 		},
 		orderBy: [{ manufacturer: { name: 'asc' } }, { name: 'asc' }]
 	});
 
-	return products.map(({ _count, assets, ...product }) => ({
+	return products.map(({ _count, assets, orgPrices, ...product }) => ({
 		...product,
 		assetCount: _count.assets,
-		hasAssets: assets.length > 0
+		hasAssets: assets.length > 0,
+		owningOrgIds: assets.map((a) => a.organizationId),
+		prices: orgPrices
 	}));
 });
 
@@ -480,7 +525,7 @@ type ProductRef = {
  * order they are resolved in matters — a new product needs its manufacturer to
  * exist first.
  */
-async function resolveProductRef(data: ProductRef): Promise<string> {
+async function resolveProductRef(data: ProductRef, organizationId: string): Promise<string> {
 	let manufacturerId = data.manufacturerId;
 	if (data.newManufacturerName && !manufacturerId) {
 		const m = await prisma.manufacturer.create({
@@ -503,10 +548,20 @@ async function resolveProductRef(data: ProductRef): Promise<string> {
 				name: data.newProductName,
 				manufacturerId,
 				categoryId: data.categoryId,
-				imagePath: data.newProductImagePath?.trim() || null,
-				netPurchasePrice: data.newProductNetPurchasePrice ?? null
+				imagePath: data.newProductImagePath?.trim() || null
 			}
 		});
+		// The price given alongside a brand-new product is the creating org's own
+		// — prices are per-org, so it binds nobody else.
+		if (data.newProductNetPurchasePrice != null) {
+			await prisma.orgProductPrice.create({
+				data: {
+					organizationId,
+					productId: p.id,
+					netPurchasePrice: data.newProductNetPurchasePrice
+				}
+			});
+		}
 		productId = p.id;
 		await getProducts(manufacturerId).refresh();
 	}
@@ -575,7 +630,7 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 		throw new Error('Unauthorized to create assets in this org');
 	}
 
-	const productId = await resolveProductRef(data);
+	const productId = await resolveProductRef(data, data.organizationId);
 
 	// An accessory is wherever its parent is and in whatever kit its parent is
 	// in, so the parent decides both — the caller's locationId is ignored. The
@@ -1267,29 +1322,54 @@ const updateProductSchema = v.object({
 	name: v.optional(v.string()),
 	manufacturerId: v.optional(v.string()),
 	categoryId: v.optional(v.string()),
-	imagePath: v.optional(v.string()),
-	netPurchasePrice: v.optional(v.nullable(v.pipe(v.number(), v.minValue(0))))
+	imagePath: v.optional(v.string())
 });
 
 export const updateProduct = command(updateProductSchema, async (input) => {
 	const user = await requireAuth();
 	const systemAdmin = await isSystemAdmin(user.id);
-	if (!systemAdmin) {
-		const memberships = await prisma.orgMembership.findMany({
-			where: { userId: user.id, role: { in: ['ADMIN', 'OWNER'] } }
-		});
+	const managed = systemAdmin ? [] : await managedOrgIds(user.id);
+	if (!systemAdmin && managed.length === 0) {
 		// The message matters here: the product wizard is reachable by any member,
 		// and "Internal Error" would look like a broken save rather than a missing
 		// right.
-		if (memberships.length === 0) {
-			error(403, 'You need admin rights in one of your organisations to edit products');
-		}
+		error(403, 'You need admin rights in one of your organisations to edit products');
 	}
 
 	const previousProduct = await prisma.product.findUniqueOrThrow({
 		where: { id: input.productId },
-		select: { manufacturerId: true }
+		select: { name: true, manufacturerId: true, categoryId: true, imagePath: true }
 	});
+
+	// Identity (name, manufacturer, category) follows the same rule as
+	// `mergeProducts`: whoever's gear it is controls what it is called. Every
+	// org holding units must be one this user admins — a product nobody owns
+	// units of is free to fix up, and an image is work rather than identity, so
+	// any org admin may contribute one. Recategorizing is identity *and* money:
+	// the category decides which rental rate other orgs' offers apply.
+	const changesIdentity =
+		(input.name !== undefined && input.name.trim() !== previousProduct.name) ||
+		(input.manufacturerId !== undefined &&
+			input.manufacturerId !== previousProduct.manufacturerId) ||
+		(input.categoryId !== undefined && input.categoryId !== previousProduct.categoryId);
+	if (changesIdentity && !systemAdmin) {
+		const owners = await prisma.asset.findMany({
+			where: { productId: input.productId },
+			select: { organizationId: true },
+			distinct: ['organizationId']
+		});
+		const foreign = owners.map((o) => o.organizationId).filter((id) => !managed.includes(id));
+		if (foreign.length > 0) {
+			const orgs = await prisma.organization.findMany({
+				where: { id: { in: foreign } },
+				select: { name: true }
+			});
+			error(
+				403,
+				`Units of this product belong to ${orgs.map((o) => o.name).join(', ')}. Renaming or recategorizing it needs admin rights there, or a system admin.`
+			);
+		}
+	}
 
 	const product = await prisma.product.update({
 		where: { id: input.productId },
@@ -1297,13 +1377,26 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 			...(input.name ? { name: input.name.trim() } : {}),
 			...(input.manufacturerId ? { manufacturerId: input.manufacturerId } : {}),
 			...(input.categoryId ? { categoryId: input.categoryId } : {}),
-			imagePath: input.imagePath !== undefined ? input.imagePath?.trim() || null : undefined,
-			// Explicit null clears it; leaving the field out keeps what's stored,
-			// so a form that doesn't show the price can't wipe it.
-			...('netPurchasePrice' in input ? { netPurchasePrice: input.netPurchasePrice } : {})
+			imagePath: input.imagePath !== undefined ? input.imagePath?.trim() || null : undefined
 		},
 		include: { manufacturer: true, category: true }
 	});
+
+	const changes = fieldChanges(previousProduct, {
+		...(input.name ? { name: input.name.trim() } : {}),
+		...(input.manufacturerId ? { manufacturerId: input.manufacturerId } : {}),
+		...(input.categoryId ? { categoryId: input.categoryId } : {}),
+		...(input.imagePath !== undefined ? { imagePath: input.imagePath.trim() || null } : {})
+	});
+	if (changes.length > 0) {
+		await logCatalogChange({
+			userId: user.id,
+			action: 'PRODUCT_UPDATED',
+			productId: product.id,
+			manufacturerId: product.manufacturerId,
+			data: { changes }
+		});
+	}
 
 	await getProducts(product.manufacturerId).refresh();
 	if (previousProduct.manufacturerId !== product.manufacturerId) {
@@ -1354,6 +1447,13 @@ export const deleteProduct = command(v.string(), async (productId: string) => {
 	}
 
 	await prisma.product.delete({ where: { id: productId } });
+	await logCatalogChange({
+		userId: user.id,
+		action: 'PRODUCT_DELETED',
+		productId: product.id,
+		manufacturerId: product.manufacturerId,
+		data: { name: product.name, manufacturerName: product.manufacturer.name }
+	});
 	const orgIds = await userOrgIds(user.id);
 	await Promise.all([
 		getProducts().refresh(),
@@ -1450,14 +1550,13 @@ export const mergeProducts = command(
 
 		// The two identities the merge picks between. Name, manufacturer and
 		// category are the target's, always — that is what choosing a target
-		// means. An image and a price are not identity, they are work someone did,
-		// so an empty one on the target takes the source's rather than throwing it
-		// away over which card the merge happened to be started from.
+		// means. An image is not identity, it is work someone did, so an empty
+		// one on the target takes the source's rather than throwing it away over
+		// which card the merge happened to be started from. Per-org prices are
+		// each org's own work for the same reason: a source row moves to the
+		// target unless that org already priced the target itself.
 		const inherited = {
-			...(!target.imagePath && source.imagePath ? { imagePath: source.imagePath } : {}),
-			...(target.netPurchasePrice === null && source.netPurchasePrice !== null
-				? { netPurchasePrice: source.netPurchasePrice }
-				: {})
+			...(!target.imagePath && source.imagePath ? { imagePath: source.imagePath } : {})
 		};
 
 		const label = (p: { name: string; manufacturer: { name: string } }) =>
@@ -1486,7 +1585,31 @@ export const mergeProducts = command(
 			if (Object.keys(inherited).length > 0) {
 				await tx.product.update({ where: { id: targetProductId }, data: inherited });
 			}
+			const pricedOrgs = await tx.orgProductPrice.findMany({
+				where: { productId: targetProductId },
+				select: { organizationId: true }
+			});
+			await tx.orgProductPrice.updateMany({
+				where: {
+					productId: sourceProductId,
+					organizationId: { notIn: pricedOrgs.map((p) => p.organizationId) }
+				},
+				data: { productId: targetProductId }
+			});
+			await tx.orgProductPrice.deleteMany({ where: { productId: sourceProductId } });
 			await tx.product.delete({ where: { id: sourceProductId } });
+		});
+
+		await logCatalogChange({
+			userId: user.id,
+			action: 'PRODUCT_MERGED',
+			productId: targetProductId,
+			manufacturerId: target.manufacturerId,
+			data: {
+				source: { id: source.id, name: label(source) },
+				target: { id: target.id, name: label(target) },
+				movedAssets: moving.length
+			}
 		});
 
 		const orgIds = [...new Set(moving.map((a) => a.organizationId))];
@@ -1536,11 +1659,132 @@ export const mergeProducts = command(
 
 		return {
 			movedAssets: moving.length,
-			inheritedImage: 'imagePath' in inherited,
-			inheritedPrice: 'netPurchasePrice' in inherited
+			inheritedImage: 'imagePath' in inherited
 		};
 	}
 );
+
+// ── Per-org product pricing ──────────────────────────────────────────────────
+// See OrgProductPrice in the schema: the catalog is shared, the price is not.
+
+export const getOrgProductPrices = query(v.string(), async (organizationId: string) => {
+	const user = await requireAuth();
+	await scopedOrgIds(user.id, organizationId);
+	return prisma.orgProductPrice.findMany({
+		where: { organizationId },
+		select: { productId: true, netPurchasePrice: true }
+	});
+});
+
+const setOrgProductPriceSchema = v.object({
+	organizationId: v.string(),
+	productId: v.string(),
+	/** Null clears the org's price for this product. */
+	netPurchasePrice: v.nullable(v.pipe(v.number(), v.minValue(0)))
+});
+
+export const setOrgProductPrice = command(
+	setOrgProductPriceSchema,
+	async ({ organizationId, productId, netPurchasePrice }) => {
+		const user = await requireAuth();
+		if (!(await isSystemAdmin(user.id))) {
+			const membership = await prisma.orgMembership.findUnique({
+				where: { userId_organizationId: { userId: user.id, organizationId } }
+			});
+			if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
+				error(403, 'Only admins of this organisation can set its prices');
+			}
+		}
+		await prisma.product.findUniqueOrThrow({ where: { id: productId }, select: { id: true } });
+
+		const previous = await prisma.orgProductPrice.findUnique({
+			where: { organizationId_productId: { organizationId, productId } },
+			select: { netPurchasePrice: true }
+		});
+		if (netPurchasePrice === null) {
+			await prisma.orgProductPrice.deleteMany({ where: { organizationId, productId } });
+		} else {
+			await prisma.orgProductPrice.upsert({
+				where: { organizationId_productId: { organizationId, productId } },
+				create: { organizationId, productId, netPurchasePrice },
+				update: { netPurchasePrice }
+			});
+		}
+
+		const from = previous ? Number(previous.netPurchasePrice) : null;
+		if (from !== netPurchasePrice) {
+			await logCatalogChange({
+				userId: user.id,
+				action: 'PRODUCT_PRICE_SET',
+				productId,
+				organizationId,
+				data: { changes: [{ field: 'netPurchasePrice', from, to: netPurchasePrice }] }
+			});
+		}
+
+		await Promise.all([
+			getOrgProductPrices(organizationId).refresh(),
+			getProductCatalog().refresh(),
+			getProductCatalog(organizationId).refresh()
+		]);
+	}
+);
+
+// The catalog audit trail, newest first — system-admin only, because it spans
+// every org's activity.
+export const getCatalogTransactions = query(async () => {
+	await requireSystemAdmin();
+	const entries = await prisma.catalogTransaction.findMany({
+		orderBy: { createdAt: 'desc' },
+		take: 200,
+		include: { user: { select: { name: true, email: true } } }
+	});
+	// The log's references are soft — resolve what still exists so the page can
+	// show names instead of ids, and fall back to the id for merged-away rows.
+	const [products, manufacturers, categories, organizations] = await Promise.all([
+		prisma.product.findMany({
+			where: {
+				id: { in: [...new Set(entries.map((e) => e.productId).filter((id): id is string => !!id))] }
+			},
+			select: { id: true, name: true, manufacturer: { select: { name: true } } }
+		}),
+		prisma.manufacturer.findMany({
+			where: {
+				id: {
+					in: [...new Set(entries.map((e) => e.manufacturerId).filter((id): id is string => !!id))]
+				}
+			},
+			select: { id: true, name: true }
+		}),
+		prisma.category.findMany({
+			where: {
+				id: {
+					in: [...new Set(entries.map((e) => e.categoryId).filter((id): id is string => !!id))]
+				}
+			},
+			select: { id: true, name: true, nameDe: true }
+		}),
+		prisma.organization.findMany({
+			where: {
+				id: {
+					in: [...new Set(entries.map((e) => e.organizationId).filter((id): id is string => !!id))]
+				}
+			},
+			select: { id: true, name: true, shortName: true }
+		})
+	]);
+	return {
+		entries,
+		products: Object.fromEntries(
+			products.map((p) => [p.id, `${p.manufacturer.name} ${p.name}`] as const)
+		),
+		manufacturers: Object.fromEntries(manufacturers.map((m) => [m.id, m.name] as const)),
+		categories: Object.fromEntries(categories.map((c) => [c.id, c.nameDe || c.name] as const)),
+		organizations: Object.fromEntries(
+			organizations.map((o) => [o.id, o.shortName || o.name] as const)
+		)
+	};
+});
 
 // ── Bundle templates ─────────────────────────────────────────────────────────
 
@@ -2253,7 +2497,7 @@ export const addProductAccessories = command(addProductAccessoriesSchema, async 
 		}
 	}
 
-	const accessoryProductId = await resolveProductRef(data);
+	const accessoryProductId = await resolveProductRef(data, data.organizationId);
 	if (accessoryProductId === data.parentProductId) {
 		error(409, 'A product cannot be an accessory of itself');
 	}

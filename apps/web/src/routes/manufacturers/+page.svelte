@@ -5,7 +5,6 @@
 		mergeManufacturers,
 		updateManufacturer
 	} from '$lib/remote/assets.remote';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import * as Card from '$lib/components/ui/card';
@@ -14,10 +13,10 @@
 
 	let { data } = $props();
 	let manufacturers = $derived(await getManufacturers());
-	let orgs = $derived(await getMyOrgs());
-	let canEdit = $derived(
-		data.isAdmin || orgs.some((o) => o.role === 'ADMIN' || o.role === 'OWNER')
-	);
+	// Manufacturers are global rows shared by every org — renaming or merging
+	// one rewrites labels on other orgs' inventory, so it's system-admin
+	// territory (creating one from the asset wizard stays open to everyone).
+	let canEdit = $derived(data.isAdmin);
 	let search = $state('');
 	let visible = $derived(
 		manufacturers.filter((manufacturer) =>
@@ -99,7 +98,8 @@
 
 	{#if !canEdit}
 		<div class="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
-			Editing manufacturers requires admin or owner rights in one of your organizations.
+			Manufacturers are shared across all organizations, so renaming or merging them is reserved for
+			system administrators.
 		</div>
 	{/if}
 

@@ -28,7 +28,9 @@
 <div class="space-y-6">
 	<div>
 		<h1 class="text-3xl font-bold tracking-tight">Invoices</h1>
-		<p class="text-muted-foreground">Rechnungen — persisted, sequentially numbered documents.</p>
+		<p class="text-muted-foreground">
+			Rechnungen — numbered by hand, following your organization's own scheme.
+		</p>
 	</div>
 
 	{#if invoices.length === 0}

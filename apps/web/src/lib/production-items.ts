@@ -10,19 +10,23 @@
 // because nothing else is representing it.
 
 /** The shape both the production detail page and the print routes have on hand. */
-type NestableItem = { assetId: string; asset: { parentAssetId: string | null } };
+type NestableItem = {
+	assetId: string;
+	sourceParentAssetId?: string | null;
+	asset: { parentAssetId: string | null };
+};
 
 export type Nested<T> = T & { accessories: T[] };
 
 export function nestAccessories<T extends NestableItem>(items: T[]): Nested<T>[] {
 	const parentIds = new Set(items.map((item) => item.assetId));
-	const isNested = (item: T) =>
-		item.asset.parentAssetId !== null && parentIds.has(item.asset.parentAssetId);
+	const parentOf = (item: T) => item.sourceParentAssetId ?? item.asset.parentAssetId;
+	const isNested = (item: T) => parentOf(item) !== null && parentIds.has(parentOf(item)!);
 
 	const byParent = new Map<string, T[]>();
 	for (const item of items) {
 		if (!isNested(item)) continue;
-		const parentId = item.asset.parentAssetId!;
+		const parentId = parentOf(item)!;
 		const list = byParent.get(parentId);
 		if (list) list.push(item);
 		else byParent.set(parentId, [item]);

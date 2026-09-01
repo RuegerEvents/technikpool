@@ -322,6 +322,9 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 							data: accessoryIds.map((assetId) => ({
 								productionId: data.productionId,
 								assetId,
+								sourceParentAssetId: [...accessoriesByParent.entries()].find(([, ids]) =>
+									ids.includes(assetId)
+								)?.[0],
 								status
 							})),
 							skipDuplicates: true
@@ -351,7 +354,7 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 				OR: [
 					{ id: { in: toRemove.map((i) => i.id) } },
 					// The accessories came in with the parent; they leave with it.
-					{ asset: { parentAssetId: { in: removedAssetIds } } }
+					{ sourceParentAssetId: { in: removedAssetIds } }
 				]
 			}
 		});

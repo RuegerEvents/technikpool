@@ -49,9 +49,12 @@
 <svelte:head><title>User Management | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
-	<div>
-		<h1 class="text-3xl font-bold tracking-tight">User Management</h1>
-		<p class="text-muted-foreground">Manage system admin privileges for all users.</p>
+	<div class="flex flex-wrap items-start justify-between gap-3">
+		<div>
+			<h1 class="text-3xl font-bold tracking-tight">User Management</h1>
+			<p class="text-muted-foreground">Manage system admin privileges for all users.</p>
+		</div>
+		<Button variant="outline" href={resolve('/admin/catalog-log')}>Catalog Log</Button>
 	</div>
 
 	<Card.Root>

@@ -24,6 +24,8 @@ model User {
   sessions Session[]
   accounts Account[]
 
+  catalogTransactions CatalogTransaction[]
+
   // App-specific relations
   homeOrgId       String?
   homeOrg         Organization?      @relation("HomeOrg", fields: [homeOrgId], references: [id])
@@ -156,6 +158,8 @@ model Organization {
   bundleTemplates BundleTemplate[]
   productions     Production[]
   categoryRates   OrgCategoryRate[]
+  productPrices   OrgProductPrice[]
+  offerSequences  OfferSequence[]
   offers          Offer[]
   invoices        Invoice[]
   customers       Customer[]
@@ -223,16 +227,35 @@ model Product {
   /// Object key, like Manufacturer.logoPath.
   imagePath      String?
 
-  // Pricing (issue #9): the catalog price a rental rate is calculated from.
-  // It lives on the product, not on each unit — billing asks "what does this
-  // kind of device cost per day", and two identical lamps bought two years
-  // apart still rent for the same money. What an individual unit cost is a
-  // bookkeeping fact, and Asset.purchaseDate is what remains of it.
-  netPurchasePrice Decimal? @db.Decimal(10, 2)
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   assets    Asset[]
+  orgPrices OrgProductPrice[]
+}
+
+// The catalog price a rental rate is calculated from — per organization, not
+// per product. The catalog (Product) is shared between orgs, but what a device
+// cost is each org's own fact: two orgs bought the same lamp in different
+// years for different money, and — more importantly — a global price would let
+// any org admin silently reprice every other org's future offers. Billing
+// always reads the *billing* org's price, including for equipment loaned in
+// from a partner org. It still lives per product rather than per unit: two
+// identical lamps bought two years apart rent for the same money, and what an
+// individual unit cost is a bookkeeping fact (Asset.purchaseDate is what
+// remains of it).
+model OrgProductPrice {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  netPurchasePrice Decimal @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, productId])
 }
 
 model Address {
@@ -427,6 +450,11 @@ model ProductionItem {
   sourceBundleId String?
   sourceBundle   AssetBundle? @relation(fields: [sourceBundleId], references: [id])
 
+  // Snapshot of the parent this accessory belonged to when it was booked.
+  // Unlike Asset.parentAssetId this deliberately does not change until the
+  // production is synchronized.
+  sourceParentAssetId String?
+
   status String @default("PENDING") // PENDING, APPROVED, CHECKED_OUT, RETURNED
 
   @@unique([productionId, assetId])
@@ -499,8 +527,25 @@ model OrgCategoryRate {
   @@unique([organizationId, categoryId])
 }
 
-model Offer {
+// One counter row per org and year — offers are numbered automatically
+// (unlike invoices, whose numbers are assigned by hand), and per org so one
+// tenant's activity never shows up as gaps in another's sequence.
+model OfferSequence {
   id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  year           Int
+  lastNumber     Int          @default(0)
+
+  @@unique([organizationId, year])
+}
+
+model Offer {
+  id     String @id @default(cuid())
+  // e.g. "A-2026-0007", drawn from OfferSequence. Unique per org, not
+  // globally — each org runs its own sequence.
+  number String
+
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   productionId   String?
@@ -539,13 +584,34 @@ model Offer {
   // Snapshot at creation — 19% German VAT, 0% for Kleinunternehmer orgs
   // (§19 UStG). Kept as its own field rather than derived, so a future VAT
   // rate change in the app doesn't retroactively alter existing documents.
-  vatRatePercent Decimal @default(19) @db.Decimal(4, 2)
+  vatRatePercent             Decimal @default(19) @db.Decimal(4, 2)
+  isKleinunternehmerSnapshot Boolean @default(false)
+
+  // Snapshot of the issuing org's letterhead and bank details at creation.
+  // The organizationId relation stays live for access control, but the
+  // document renders from these fields — an org moving offices must not
+  // silently rewrite an already-sent document (the UI shows a hint and offers
+  // an explicit update while the document is still a draft).
+  orgName              String
+  orgAddressLine1      String?
+  orgAddressLine2      String?
+  orgPostalCode        String?
+  orgCity              String?
+  orgTaxId             String?
+  orgBillingEmail      String?
+  orgBillingWebsite    String?
+  orgBankAccountHolder String?
+  orgBankName          String?
+  orgIban              String?
+  orgBic               String?
 
   items    OfferItem[]
   invoices Invoice[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, number])
 }
 
 model OfferItem {
@@ -585,17 +651,14 @@ model OfferItem {
   createdAt DateTime @default(now())
 }
 
-// Gapless-not-required-but-never-duplicated sequential invoice numbering
-// (§14(4) Nr. 4 UStG) — one counter row per year, incremented in a transaction.
-model InvoiceSequence {
-  id         String @id @default(cuid())
-  year       Int    @unique
-  lastNumber Int    @default(0)
-}
-
 model Invoice {
   id     String @id @default(cuid())
-  number String @unique // e.g. "2026-0007"
+  // Assigned by hand when the invoice is created — each org runs its own
+  // numbering scheme outside the app too, so the app doesn't invent one
+  // (§14(4) Nr. 4 UStG only asks for uniqueness per issuer). Unique per org,
+  // not globally: a shared counter would leak one tenant's invoice volume
+  // into every other tenant's number gaps.
+  number String
 
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -641,10 +704,48 @@ model Invoice {
   isKleinunternehmerSnapshot Boolean @default(false)
   vatRatePercent             Decimal @default(19) @db.Decimal(4, 2)
 
+  // Issuing-org snapshot — see the same block on Offer.
+  orgName              String
+  orgAddressLine1      String?
+  orgAddressLine2      String?
+  orgPostalCode        String?
+  orgCity              String?
+  orgTaxId             String?
+  orgBillingEmail      String?
+  orgBillingWebsite    String?
+  orgBankAccountHolder String?
+  orgBankName          String?
+  orgIban              String?
+  orgBic               String?
+
   items InvoiceItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, number])
+}
+
+// Audit log for the shared catalog (products, manufacturers, categories,
+// per-org prices) — the AssetTransaction idea applied to catalog rows. The
+// catalog is writable across org boundaries, so every mutation records who
+// did what; merges delete their source rows, which is why the references
+// here are soft strings rather than relations.
+model CatalogTransaction {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  action String // e.g. PRODUCT_UPDATED, PRODUCT_MERGED, MANUFACTURER_MERGED, PRICE_SET
+
+  productId      String?
+  manufacturerId String?
+  categoryId     String?
+  organizationId String?
+
+  data Json?
+
+  createdAt DateTime @default(now())
 }
 
 model InvoiceItem {

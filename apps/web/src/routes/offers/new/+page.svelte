@@ -9,7 +9,7 @@
 	import { setOrgCategoryRate } from '$lib/remote/orgs.remote';
 	import { getProduction, getProductions } from '$lib/remote/productions.remote';
 	import { getCustomers, createCustomer } from '$lib/remote/customers.remote';
-	import { updateProduct } from '$lib/remote/assets.remote';
+	import { setOrgProductPrice } from '$lib/remote/assets.remote';
 	import {
 		createOfferFromProduction,
 		getProductionBillingReadiness
@@ -166,7 +166,12 @@
 		pending.add(group.key);
 		try {
 			const args = readinessArgs;
-			await updateProduct({ productId: group.productId, netPurchasePrice });
+			// The billing org's own price — pricing here binds no other org.
+			await setOrgProductPrice({
+				organizationId: readiness?.organizationId ?? selectedOrgId,
+				productId: group.productId,
+				netPurchasePrice
+			});
 			priceDrafts.delete(group.key);
 			await getProductionBillingReadiness(args).refresh();
 			toast.success(`Price saved on ${group.label}`);
@@ -570,12 +575,12 @@
 
 											{#if r.canEditPrices}
 												<p class="text-sm text-muted-foreground">
-													The price belongs to the product, so it covers every unit of it — here and
-													in every other offer.
+													The price is your organization's own for this product — it covers every
+													unit of it in your billing, here and in every later offer.
 												</p>
 											{:else}
 												<p class="text-sm text-muted-foreground">
-													You need admin rights in an organization to price a product.
+													Ask an admin of this organization to price the product.
 												</p>
 											{/if}
 

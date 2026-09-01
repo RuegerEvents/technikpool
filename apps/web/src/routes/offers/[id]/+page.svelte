@@ -19,12 +19,15 @@
 		copyOfferToNewCustomer,
 		convertOfferToInvoice,
 		updateDocumentText,
+		updateDocumentOrgSnapshot,
 		finalizeOffer,
 		deleteOffer
 	} from '$lib/remote/offers.remote';
 	import { getCustomers } from '$lib/remote/customers.remote';
 	import { StalenessBanner } from '$lib/components/ui/staleness-banner';
+	import { OrgSnapshotBanner } from '$lib/components/ui/org-snapshot-banner';
 	import { BillingDocument } from '$lib/components/ui/billing-document';
+	import { Modal } from '$lib/components/ui/modal';
 
 	const offerId = $derived(page.params.id as string);
 	let offer = $derived(await getOffer(offerId));
@@ -149,6 +152,10 @@
 	}
 
 	// ── Convert to invoice ──
+	// The invoice number is typed in by hand: every org runs its own external
+	// numbering scheme, so the app checks uniqueness instead of inventing one.
+	let convertOpen = $state(false);
+	let invoiceNumber = $state('');
 	let converting = $state(false);
 	let finalizing = $state(false);
 	let deleting = $state(false);
@@ -176,10 +183,15 @@
 			deleting = false;
 		}
 	}
-	async function handleConvert() {
+	async function handleConvert(e: Event) {
+		e.preventDefault();
+		if (!invoiceNumber.trim()) {
+			toast.error('Enter an invoice number first');
+			return;
+		}
 		converting = true;
 		try {
-			const invoice = await convertOfferToInvoice(offerId);
+			const invoice = await convertOfferToInvoice({ offerId, number: invoiceNumber.trim() });
 			toast.success(`Invoice ${invoice.number} created`);
 			goto(resolve(`/invoices/${invoice.id}`));
 		} catch (err) {
@@ -189,12 +201,14 @@
 	}
 </script>
 
-<svelte:head><title>Offer — {offer.customerName} | Technikpool</title></svelte:head>
+<svelte:head><title>Offer {offer.number} — {offer.customerName} | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
 	<div class="flex flex-wrap items-start justify-between gap-3">
 		<div>
-			<h1 class="text-3xl font-bold tracking-tight">Offer — {offer.customerName}</h1>
+			<h1 class="text-3xl font-bold tracking-tight">
+				Offer {offer.number} — {offer.customerName}
+			</h1>
 			<p class="text-muted-foreground">
 				{orgLabel(offer.organization)}
 				{#if offer.production}
@@ -241,8 +255,8 @@
 					onclick={handleDelete}>{deleting ? 'Deleting…' : 'Delete offer'}</Button
 				>{/if}
 			{#if offer.invoices.length === 0}
-				<Button disabled={converting || !offer.finalizedAt} onclick={handleConvert}>
-					{converting ? 'Converting…' : 'Convert to invoice'}
+				<Button disabled={converting || !offer.finalizedAt} onclick={() => (convertOpen = true)}>
+					Convert to invoice
 				</Button>
 			{:else}
 				<Button variant="outline" href={resolve(`/invoices/${offer.invoices[0].id}`)}>
@@ -262,6 +276,14 @@
 		{staleness}
 		onUpdate={async () => {
 			await updateOfferItemsFromProduction(offerId);
+		}}
+	/>
+	<OrgSnapshotBanner
+		document={offer}
+		organization={offer.organization}
+		editable={!offer.finalizedAt}
+		onUpdate={async () => {
+			await updateDocumentOrgSnapshot({ id: offerId, kind: 'offer' });
 		}}
 	/>
 	<Card.Root
@@ -408,7 +430,7 @@
 		discountType={offer.discountType as 'PERCENT' | 'AMOUNT' | null}
 		discountValue={offer.discountValue != null ? Number(offer.discountValue) : null}
 		vatRatePercent={Number(offer.vatRatePercent)}
-		noVat={offer.organization.isKleinunternehmer}
+		noVat={offer.isKleinunternehmerSnapshot}
 		categoryRates={offer.organization.categoryRates}
 		onSaveDayCount={async (dayCount) => {
 			await updateOfferDayCount({ offerId, dayCount });
@@ -422,3 +444,31 @@
 		}}
 	/>
 </div>
+
+<Modal bind:open={convertOpen} title="Convert to invoice" dismissible={!converting}>
+	{#snippet description()}
+		The invoice number is assigned by you — your organization's own numbering scheme applies. It has
+		to be unique within the organization and can still be corrected while the invoice is a draft.
+	{/snippet}
+
+	<form class="space-y-4" onsubmit={handleConvert}>
+		<div class="space-y-2">
+			<Label for="invoiceNumber">Invoice number</Label>
+			<Input id="invoiceNumber" bind:value={invoiceNumber} placeholder="2026-0042" required />
+		</div>
+	</form>
+
+	{#snippet footer()}
+		<Button
+			icon="close"
+			variant="outline"
+			onclick={() => (convertOpen = false)}
+			disabled={converting}
+		>
+			Cancel
+		</Button>
+		<Button onclick={handleConvert} disabled={converting || !invoiceNumber.trim()}>
+			{converting ? 'Converting…' : 'Create invoice'}
+		</Button>
+	{/snippet}
+</Modal>

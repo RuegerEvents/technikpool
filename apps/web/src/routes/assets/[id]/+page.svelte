@@ -27,7 +27,9 @@
 		addProductAccessories,
 		getProductAccessoryProfile,
 		getProducts,
-		getManufacturers
+		getManufacturers,
+		getOrgProductPrices,
+		setOrgProductPrice
 	} from '$lib/remote/assets.remote';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { NewAssetModal, type NewAssetModalHandle } from '$lib/components/ui/new-asset-modal';
@@ -41,6 +43,14 @@
 	let history = $derived(await getAssetHistory(assetId));
 	let locations = $derived(await getLocations(asset.organizationId));
 	let categories = $derived(await getCategories());
+
+	// Prices are per-org — this page shows and edits the owning org's price
+	// for the unit's product.
+	let orgPrices = $derived(await getOrgProductPrices(asset.organizationId));
+	let orgNetPurchasePrice = $derived.by(() => {
+		const row = orgPrices.find((p) => p.productId === asset.productId);
+		return row == null ? undefined : Number(row.netPurchasePrice);
+	});
 
 	// Sold and decommissioned freeze everything but the status itself, so the
 	// unit can be brought back if it was retired by mistake.
@@ -342,8 +352,8 @@
 			name: asset.product.name,
 			categoryId: asset.product.categoryId,
 			imagePath: asset.product.imagePath ?? '',
-			netPurchasePrice:
-				asset.product.netPurchasePrice == null ? undefined : Number(asset.product.netPurchasePrice)
+			// The owning org's price — prices are per-org now.
+			netPurchasePrice: orgNetPurchasePrice
 		};
 		productModalOpen = true;
 	}
@@ -360,9 +370,15 @@
 				manufacturerId: productManufacturer.id,
 				name: productDraft.name,
 				categoryId: productDraft.categoryId,
-				imagePath: productDraft.imagePath,
-				netPurchasePrice: productDraft.netPurchasePrice ?? null
+				imagePath: productDraft.imagePath
 			});
+			if ((productDraft.netPurchasePrice ?? null) !== (orgNetPurchasePrice ?? null)) {
+				await setOrgProductPrice({
+					organizationId: asset.organizationId,
+					productId: asset.product.id,
+					netPurchasePrice: productDraft.netPurchasePrice ?? null
+				});
+			}
 			toast.success('Product updated');
 			productModalOpen = false;
 		} catch (err) {
@@ -662,15 +678,16 @@
 						<div
 							class="flex h-10 items-center rounded-md border border-input bg-background px-3 py-2 text-sm"
 						>
-							{asset.product.netPurchasePrice
-								? Number(asset.product.netPurchasePrice).toLocaleString('de-DE', {
+							{orgNetPurchasePrice != null
+								? orgNetPurchasePrice.toLocaleString('de-DE', {
 										style: 'currency',
 										currency: 'EUR'
 									})
 								: 'Not set'}
 						</div>
 						<p class="text-sm text-muted-foreground">
-							What a rental rate is calculated from, for every unit of this product.
+							{orgLabel(asset.organization)}'s price for this product — what its rental rate is
+							calculated from. Other organizations price it themselves.
 						</p>
 					</div>
 

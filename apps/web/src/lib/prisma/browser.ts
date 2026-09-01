@@ -68,6 +68,11 @@ export type Category = Prisma.CategoryModel
  */
 export type Product = Prisma.ProductModel
 /**
+ * Model OrgProductPrice
+ * 
+ */
+export type OrgProductPrice = Prisma.OrgProductPriceModel
+/**
  * Model Address
  * 
  */
@@ -128,6 +133,11 @@ export type Inspection = Prisma.InspectionModel
  */
 export type OrgCategoryRate = Prisma.OrgCategoryRateModel
 /**
+ * Model OfferSequence
+ * 
+ */
+export type OfferSequence = Prisma.OfferSequenceModel
+/**
  * Model Offer
  * 
  */
@@ -138,15 +148,15 @@ export type Offer = Prisma.OfferModel
  */
 export type OfferItem = Prisma.OfferItemModel
 /**
- * Model InvoiceSequence
- * 
- */
-export type InvoiceSequence = Prisma.InvoiceSequenceModel
-/**
  * Model Invoice
  * 
  */
 export type Invoice = Prisma.InvoiceModel
+/**
+ * Model CatalogTransaction
+ * 
+ */
+export type CatalogTransaction = Prisma.CatalogTransactionModel
 /**
  * Model InvoiceItem
  * 

@@ -68,6 +68,18 @@ export type InvoiceMinAggregateOutputType = {
   pdfPath: string | null
   isKleinunternehmerSnapshot: boolean | null
   vatRatePercent: runtime.Decimal | null
+  orgName: string | null
+  orgAddressLine1: string | null
+  orgAddressLine2: string | null
+  orgPostalCode: string | null
+  orgCity: string | null
+  orgTaxId: string | null
+  orgBillingEmail: string | null
+  orgBillingWebsite: string | null
+  orgBankAccountHolder: string | null
+  orgBankName: string | null
+  orgIban: string | null
+  orgBic: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -100,6 +112,18 @@ export type InvoiceMaxAggregateOutputType = {
   pdfPath: string | null
   isKleinunternehmerSnapshot: boolean | null
   vatRatePercent: runtime.Decimal | null
+  orgName: string | null
+  orgAddressLine1: string | null
+  orgAddressLine2: string | null
+  orgPostalCode: string | null
+  orgCity: string | null
+  orgTaxId: string | null
+  orgBillingEmail: string | null
+  orgBillingWebsite: string | null
+  orgBankAccountHolder: string | null
+  orgBankName: string | null
+  orgIban: string | null
+  orgBic: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -132,6 +156,18 @@ export type InvoiceCountAggregateOutputType = {
   pdfPath: number
   isKleinunternehmerSnapshot: number
   vatRatePercent: number
+  orgName: number
+  orgAddressLine1: number
+  orgAddressLine2: number
+  orgPostalCode: number
+  orgCity: number
+  orgTaxId: number
+  orgBillingEmail: number
+  orgBillingWebsite: number
+  orgBankAccountHolder: number
+  orgBankName: number
+  orgIban: number
+  orgBic: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -180,6 +216,18 @@ export type InvoiceMinAggregateInputType = {
   pdfPath?: true
   isKleinunternehmerSnapshot?: true
   vatRatePercent?: true
+  orgName?: true
+  orgAddressLine1?: true
+  orgAddressLine2?: true
+  orgPostalCode?: true
+  orgCity?: true
+  orgTaxId?: true
+  orgBillingEmail?: true
+  orgBillingWebsite?: true
+  orgBankAccountHolder?: true
+  orgBankName?: true
+  orgIban?: true
+  orgBic?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -212,6 +260,18 @@ export type InvoiceMaxAggregateInputType = {
   pdfPath?: true
   isKleinunternehmerSnapshot?: true
   vatRatePercent?: true
+  orgName?: true
+  orgAddressLine1?: true
+  orgAddressLine2?: true
+  orgPostalCode?: true
+  orgCity?: true
+  orgTaxId?: true
+  orgBillingEmail?: true
+  orgBillingWebsite?: true
+  orgBankAccountHolder?: true
+  orgBankName?: true
+  orgIban?: true
+  orgBic?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -244,6 +304,18 @@ export type InvoiceCountAggregateInputType = {
   pdfPath?: true
   isKleinunternehmerSnapshot?: true
   vatRatePercent?: true
+  orgName?: true
+  orgAddressLine1?: true
+  orgAddressLine2?: true
+  orgPostalCode?: true
+  orgCity?: true
+  orgTaxId?: true
+  orgBillingEmail?: true
+  orgBillingWebsite?: true
+  orgBankAccountHolder?: true
+  orgBankName?: true
+  orgIban?: true
+  orgBic?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -363,6 +435,18 @@ export type InvoiceGroupByOutputType = {
   pdfPath: string | null
   isKleinunternehmerSnapshot: boolean
   vatRatePercent: runtime.Decimal
+  orgName: string
+  orgAddressLine1: string | null
+  orgAddressLine2: string | null
+  orgPostalCode: string | null
+  orgCity: string | null
+  orgTaxId: string | null
+  orgBillingEmail: string | null
+  orgBillingWebsite: string | null
+  orgBankAccountHolder: string | null
+  orgBankName: string | null
+  orgIban: string | null
+  orgBic: string | null
   createdAt: Date
   updatedAt: Date
   _count: InvoiceCountAggregateOutputType | null
@@ -418,6 +502,18 @@ export type InvoiceWhereInput = {
   pdfPath?: Prisma.StringNullableFilter<"Invoice"> | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFilter<"Invoice"> | boolean
   vatRatePercent?: Prisma.DecimalFilter<"Invoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFilter<"Invoice"> | string
+  orgAddressLine1?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgAddressLine2?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgPostalCode?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgCity?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgTaxId?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgBillingEmail?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgBillingWebsite?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgBankAccountHolder?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgBankName?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgIban?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgBic?: Prisma.StringNullableFilter<"Invoice"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -454,6 +550,18 @@ export type InvoiceOrderByWithRelationInput = {
   pdfPath?: Prisma.SortOrderInput | Prisma.SortOrder
   isKleinunternehmerSnapshot?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
+  orgName?: Prisma.SortOrder
+  orgAddressLine1?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgAddressLine2?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgPostalCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgCity?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgTaxId?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgBillingEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgBillingWebsite?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgBankAccountHolder?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgBankName?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgIban?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgBic?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
@@ -464,10 +572,11 @@ export type InvoiceOrderByWithRelationInput = {
 
 export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  number?: string
+  organizationId_number?: Prisma.InvoiceOrganizationIdNumberCompoundUniqueInput
   AND?: Prisma.InvoiceWhereInput | Prisma.InvoiceWhereInput[]
   OR?: Prisma.InvoiceWhereInput[]
   NOT?: Prisma.InvoiceWhereInput | Prisma.InvoiceWhereInput[]
+  number?: Prisma.StringFilter<"Invoice"> | string
   organizationId?: Prisma.StringFilter<"Invoice"> | string
   productionId?: Prisma.StringNullableFilter<"Invoice"> | string | null
   offerId?: Prisma.StringNullableFilter<"Invoice"> | string | null
@@ -493,13 +602,25 @@ export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
   pdfPath?: Prisma.StringNullableFilter<"Invoice"> | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFilter<"Invoice"> | boolean
   vatRatePercent?: Prisma.DecimalFilter<"Invoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFilter<"Invoice"> | string
+  orgAddressLine1?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgAddressLine2?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgPostalCode?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgCity?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgTaxId?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgBillingEmail?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgBillingWebsite?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgBankAccountHolder?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgBankName?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgIban?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgBic?: Prisma.StringNullableFilter<"Invoice"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   production?: Prisma.XOR<Prisma.ProductionNullableScalarRelationFilter, Prisma.ProductionWhereInput> | null
   offer?: Prisma.XOR<Prisma.OfferNullableScalarRelationFilter, Prisma.OfferWhereInput> | null
   items?: Prisma.InvoiceItemListRelationFilter
-}, "id" | "number">
+}, "id" | "organizationId_number">
 
 export type InvoiceOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -529,6 +650,18 @@ export type InvoiceOrderByWithAggregationInput = {
   pdfPath?: Prisma.SortOrderInput | Prisma.SortOrder
   isKleinunternehmerSnapshot?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
+  orgName?: Prisma.SortOrder
+  orgAddressLine1?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgAddressLine2?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgPostalCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgCity?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgTaxId?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgBillingEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgBillingWebsite?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgBankAccountHolder?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgBankName?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgIban?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgBic?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.InvoiceCountOrderByAggregateInput
@@ -569,6 +702,18 @@ export type InvoiceScalarWhereWithAggregatesInput = {
   pdfPath?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolWithAggregatesFilter<"Invoice"> | boolean
   vatRatePercent?: Prisma.DecimalWithAggregatesFilter<"Invoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringWithAggregatesFilter<"Invoice"> | string
+  orgAddressLine1?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  orgAddressLine2?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  orgPostalCode?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  orgCity?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  orgTaxId?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  orgBillingEmail?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  orgBillingWebsite?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  orgBankAccountHolder?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  orgBankName?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  orgIban?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  orgBic?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Invoice"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Invoice"> | Date | string
 }
@@ -598,6 +743,18 @@ export type InvoiceCreateInput = {
   pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName: string
+  orgAddressLine1?: string | null
+  orgAddressLine2?: string | null
+  orgPostalCode?: string | null
+  orgCity?: string | null
+  orgTaxId?: string | null
+  orgBillingEmail?: string | null
+  orgBillingWebsite?: string | null
+  orgBankAccountHolder?: string | null
+  orgBankName?: string | null
+  orgIban?: string | null
+  orgBic?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutInvoicesInput
@@ -634,6 +791,18 @@ export type InvoiceUncheckedCreateInput = {
   pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName: string
+  orgAddressLine1?: string | null
+  orgAddressLine2?: string | null
+  orgPostalCode?: string | null
+  orgCity?: string | null
+  orgTaxId?: string | null
+  orgBillingEmail?: string | null
+  orgBillingWebsite?: string | null
+  orgBankAccountHolder?: string | null
+  orgBankName?: string | null
+  orgIban?: string | null
+  orgBic?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.InvoiceItemUncheckedCreateNestedManyWithoutInvoiceInput
@@ -664,6 +833,18 @@ export type InvoiceUpdateInput = {
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutInvoicesNestedInput
@@ -700,6 +881,18 @@ export type InvoiceUncheckedUpdateInput = {
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.InvoiceItemUncheckedUpdateManyWithoutInvoiceNestedInput
@@ -733,6 +926,18 @@ export type InvoiceCreateManyInput = {
   pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName: string
+  orgAddressLine1?: string | null
+  orgAddressLine2?: string | null
+  orgPostalCode?: string | null
+  orgCity?: string | null
+  orgTaxId?: string | null
+  orgBillingEmail?: string | null
+  orgBillingWebsite?: string | null
+  orgBankAccountHolder?: string | null
+  orgBankName?: string | null
+  orgIban?: string | null
+  orgBic?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -762,6 +967,18 @@ export type InvoiceUpdateManyMutationInput = {
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -794,6 +1011,18 @@ export type InvoiceUncheckedUpdateManyInput = {
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -806,6 +1035,11 @@ export type InvoiceListRelationFilter = {
 
 export type InvoiceOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type InvoiceOrganizationIdNumberCompoundUniqueInput = {
+  organizationId: string
+  number: string
 }
 
 export type InvoiceCountOrderByAggregateInput = {
@@ -836,6 +1070,18 @@ export type InvoiceCountOrderByAggregateInput = {
   pdfPath?: Prisma.SortOrder
   isKleinunternehmerSnapshot?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
+  orgName?: Prisma.SortOrder
+  orgAddressLine1?: Prisma.SortOrder
+  orgAddressLine2?: Prisma.SortOrder
+  orgPostalCode?: Prisma.SortOrder
+  orgCity?: Prisma.SortOrder
+  orgTaxId?: Prisma.SortOrder
+  orgBillingEmail?: Prisma.SortOrder
+  orgBillingWebsite?: Prisma.SortOrder
+  orgBankAccountHolder?: Prisma.SortOrder
+  orgBankName?: Prisma.SortOrder
+  orgIban?: Prisma.SortOrder
+  orgBic?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -875,6 +1121,18 @@ export type InvoiceMaxOrderByAggregateInput = {
   pdfPath?: Prisma.SortOrder
   isKleinunternehmerSnapshot?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
+  orgName?: Prisma.SortOrder
+  orgAddressLine1?: Prisma.SortOrder
+  orgAddressLine2?: Prisma.SortOrder
+  orgPostalCode?: Prisma.SortOrder
+  orgCity?: Prisma.SortOrder
+  orgTaxId?: Prisma.SortOrder
+  orgBillingEmail?: Prisma.SortOrder
+  orgBillingWebsite?: Prisma.SortOrder
+  orgBankAccountHolder?: Prisma.SortOrder
+  orgBankName?: Prisma.SortOrder
+  orgIban?: Prisma.SortOrder
+  orgBic?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -907,6 +1165,18 @@ export type InvoiceMinOrderByAggregateInput = {
   pdfPath?: Prisma.SortOrder
   isKleinunternehmerSnapshot?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
+  orgName?: Prisma.SortOrder
+  orgAddressLine1?: Prisma.SortOrder
+  orgAddressLine2?: Prisma.SortOrder
+  orgPostalCode?: Prisma.SortOrder
+  orgCity?: Prisma.SortOrder
+  orgTaxId?: Prisma.SortOrder
+  orgBillingEmail?: Prisma.SortOrder
+  orgBillingWebsite?: Prisma.SortOrder
+  orgBankAccountHolder?: Prisma.SortOrder
+  orgBankName?: Prisma.SortOrder
+  orgIban?: Prisma.SortOrder
+  orgBic?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1088,6 +1358,18 @@ export type InvoiceCreateWithoutOrganizationInput = {
   pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName: string
+  orgAddressLine1?: string | null
+  orgAddressLine2?: string | null
+  orgPostalCode?: string | null
+  orgCity?: string | null
+  orgTaxId?: string | null
+  orgBillingEmail?: string | null
+  orgBillingWebsite?: string | null
+  orgBankAccountHolder?: string | null
+  orgBankName?: string | null
+  orgIban?: string | null
+  orgBic?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   production?: Prisma.ProductionCreateNestedOneWithoutInvoicesInput
@@ -1122,6 +1404,18 @@ export type InvoiceUncheckedCreateWithoutOrganizationInput = {
   pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName: string
+  orgAddressLine1?: string | null
+  orgAddressLine2?: string | null
+  orgPostalCode?: string | null
+  orgCity?: string | null
+  orgTaxId?: string | null
+  orgBillingEmail?: string | null
+  orgBillingWebsite?: string | null
+  orgBankAccountHolder?: string | null
+  orgBankName?: string | null
+  orgIban?: string | null
+  orgBic?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.InvoiceItemUncheckedCreateNestedManyWithoutInvoiceInput
@@ -1184,6 +1478,18 @@ export type InvoiceScalarWhereInput = {
   pdfPath?: Prisma.StringNullableFilter<"Invoice"> | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFilter<"Invoice"> | boolean
   vatRatePercent?: Prisma.DecimalFilter<"Invoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFilter<"Invoice"> | string
+  orgAddressLine1?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgAddressLine2?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgPostalCode?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgCity?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgTaxId?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgBillingEmail?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgBillingWebsite?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgBankAccountHolder?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgBankName?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgIban?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgBic?: Prisma.StringNullableFilter<"Invoice"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
 }
@@ -1213,6 +1519,18 @@ export type InvoiceCreateWithoutProductionInput = {
   pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName: string
+  orgAddressLine1?: string | null
+  orgAddressLine2?: string | null
+  orgPostalCode?: string | null
+  orgCity?: string | null
+  orgTaxId?: string | null
+  orgBillingEmail?: string | null
+  orgBillingWebsite?: string | null
+  orgBankAccountHolder?: string | null
+  orgBankName?: string | null
+  orgIban?: string | null
+  orgBic?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutInvoicesInput
@@ -1247,6 +1565,18 @@ export type InvoiceUncheckedCreateWithoutProductionInput = {
   pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName: string
+  orgAddressLine1?: string | null
+  orgAddressLine2?: string | null
+  orgPostalCode?: string | null
+  orgCity?: string | null
+  orgTaxId?: string | null
+  orgBillingEmail?: string | null
+  orgBillingWebsite?: string | null
+  orgBankAccountHolder?: string | null
+  orgBankName?: string | null
+  orgIban?: string | null
+  orgBic?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.InvoiceItemUncheckedCreateNestedManyWithoutInvoiceInput
@@ -1303,6 +1633,18 @@ export type InvoiceCreateWithoutOfferInput = {
   pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName: string
+  orgAddressLine1?: string | null
+  orgAddressLine2?: string | null
+  orgPostalCode?: string | null
+  orgCity?: string | null
+  orgTaxId?: string | null
+  orgBillingEmail?: string | null
+  orgBillingWebsite?: string | null
+  orgBankAccountHolder?: string | null
+  orgBankName?: string | null
+  orgIban?: string | null
+  orgBic?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutInvoicesInput
@@ -1337,6 +1679,18 @@ export type InvoiceUncheckedCreateWithoutOfferInput = {
   pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName: string
+  orgAddressLine1?: string | null
+  orgAddressLine2?: string | null
+  orgPostalCode?: string | null
+  orgCity?: string | null
+  orgTaxId?: string | null
+  orgBillingEmail?: string | null
+  orgBillingWebsite?: string | null
+  orgBankAccountHolder?: string | null
+  orgBankName?: string | null
+  orgIban?: string | null
+  orgBic?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.InvoiceItemUncheckedCreateNestedManyWithoutInvoiceInput
@@ -1393,6 +1747,18 @@ export type InvoiceCreateWithoutItemsInput = {
   pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName: string
+  orgAddressLine1?: string | null
+  orgAddressLine2?: string | null
+  orgPostalCode?: string | null
+  orgCity?: string | null
+  orgTaxId?: string | null
+  orgBillingEmail?: string | null
+  orgBillingWebsite?: string | null
+  orgBankAccountHolder?: string | null
+  orgBankName?: string | null
+  orgIban?: string | null
+  orgBic?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutInvoicesInput
@@ -1428,6 +1794,18 @@ export type InvoiceUncheckedCreateWithoutItemsInput = {
   pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName: string
+  orgAddressLine1?: string | null
+  orgAddressLine2?: string | null
+  orgPostalCode?: string | null
+  orgCity?: string | null
+  orgTaxId?: string | null
+  orgBillingEmail?: string | null
+  orgBillingWebsite?: string | null
+  orgBankAccountHolder?: string | null
+  orgBankName?: string | null
+  orgIban?: string | null
+  orgBic?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1473,6 +1851,18 @@ export type InvoiceUpdateWithoutItemsInput = {
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutInvoicesNestedInput
@@ -1508,6 +1898,18 @@ export type InvoiceUncheckedUpdateWithoutItemsInput = {
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1539,6 +1941,18 @@ export type InvoiceCreateManyOrganizationInput = {
   pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName: string
+  orgAddressLine1?: string | null
+  orgAddressLine2?: string | null
+  orgPostalCode?: string | null
+  orgCity?: string | null
+  orgTaxId?: string | null
+  orgBillingEmail?: string | null
+  orgBillingWebsite?: string | null
+  orgBankAccountHolder?: string | null
+  orgBankName?: string | null
+  orgIban?: string | null
+  orgBic?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1568,6 +1982,18 @@ export type InvoiceUpdateWithoutOrganizationInput = {
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   production?: Prisma.ProductionUpdateOneWithoutInvoicesNestedInput
@@ -1602,6 +2028,18 @@ export type InvoiceUncheckedUpdateWithoutOrganizationInput = {
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.InvoiceItemUncheckedUpdateManyWithoutInvoiceNestedInput
@@ -1634,6 +2072,18 @@ export type InvoiceUncheckedUpdateManyWithoutOrganizationInput = {
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1665,6 +2115,18 @@ export type InvoiceCreateManyProductionInput = {
   pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName: string
+  orgAddressLine1?: string | null
+  orgAddressLine2?: string | null
+  orgPostalCode?: string | null
+  orgCity?: string | null
+  orgTaxId?: string | null
+  orgBillingEmail?: string | null
+  orgBillingWebsite?: string | null
+  orgBankAccountHolder?: string | null
+  orgBankName?: string | null
+  orgIban?: string | null
+  orgBic?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1694,6 +2156,18 @@ export type InvoiceUpdateWithoutProductionInput = {
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutInvoicesNestedInput
@@ -1728,6 +2202,18 @@ export type InvoiceUncheckedUpdateWithoutProductionInput = {
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.InvoiceItemUncheckedUpdateManyWithoutInvoiceNestedInput
@@ -1760,6 +2246,18 @@ export type InvoiceUncheckedUpdateManyWithoutProductionInput = {
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1791,6 +2289,18 @@ export type InvoiceCreateManyOfferInput = {
   pdfPath?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName: string
+  orgAddressLine1?: string | null
+  orgAddressLine2?: string | null
+  orgPostalCode?: string | null
+  orgCity?: string | null
+  orgTaxId?: string | null
+  orgBillingEmail?: string | null
+  orgBillingWebsite?: string | null
+  orgBankAccountHolder?: string | null
+  orgBankName?: string | null
+  orgIban?: string | null
+  orgBic?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1820,6 +2330,18 @@ export type InvoiceUpdateWithoutOfferInput = {
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutInvoicesNestedInput
@@ -1854,6 +2376,18 @@ export type InvoiceUncheckedUpdateWithoutOfferInput = {
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.InvoiceItemUncheckedUpdateManyWithoutInvoiceNestedInput
@@ -1886,6 +2420,18 @@ export type InvoiceUncheckedUpdateManyWithoutOfferInput = {
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1949,6 +2495,18 @@ export type InvoiceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   pdfPath?: boolean
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: boolean
+  orgName?: boolean
+  orgAddressLine1?: boolean
+  orgAddressLine2?: boolean
+  orgPostalCode?: boolean
+  orgCity?: boolean
+  orgTaxId?: boolean
+  orgBillingEmail?: boolean
+  orgBillingWebsite?: boolean
+  orgBankAccountHolder?: boolean
+  orgBankName?: boolean
+  orgIban?: boolean
+  orgBic?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1986,6 +2544,18 @@ export type InvoiceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   pdfPath?: boolean
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: boolean
+  orgName?: boolean
+  orgAddressLine1?: boolean
+  orgAddressLine2?: boolean
+  orgPostalCode?: boolean
+  orgCity?: boolean
+  orgTaxId?: boolean
+  orgBillingEmail?: boolean
+  orgBillingWebsite?: boolean
+  orgBankAccountHolder?: boolean
+  orgBankName?: boolean
+  orgIban?: boolean
+  orgBic?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -2021,6 +2591,18 @@ export type InvoiceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   pdfPath?: boolean
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: boolean
+  orgName?: boolean
+  orgAddressLine1?: boolean
+  orgAddressLine2?: boolean
+  orgPostalCode?: boolean
+  orgCity?: boolean
+  orgTaxId?: boolean
+  orgBillingEmail?: boolean
+  orgBillingWebsite?: boolean
+  orgBankAccountHolder?: boolean
+  orgBankName?: boolean
+  orgIban?: boolean
+  orgBic?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -2056,11 +2638,23 @@ export type InvoiceSelectScalar = {
   pdfPath?: boolean
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: boolean
+  orgName?: boolean
+  orgAddressLine1?: boolean
+  orgAddressLine2?: boolean
+  orgPostalCode?: boolean
+  orgCity?: boolean
+  orgTaxId?: boolean
+  orgBillingEmail?: boolean
+  orgBillingWebsite?: boolean
+  orgBankAccountHolder?: boolean
+  orgBankName?: boolean
+  orgIban?: boolean
+  orgBic?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type InvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "organizationId" | "productionId" | "offerId" | "customerId" | "customerName" | "customerAddress" | "customerContactPerson" | "customerEmail" | "customerNumber" | "customerPhone" | "customerVatId" | "serviceStartDate" | "serviceEndDate" | "introText" | "closingText" | "paymentTermsDays" | "issueDate" | "dayCount" | "discountType" | "discountValue" | "assetScope" | "sentAt" | "pdfPath" | "isKleinunternehmerSnapshot" | "vatRatePercent" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
+export type InvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "organizationId" | "productionId" | "offerId" | "customerId" | "customerName" | "customerAddress" | "customerContactPerson" | "customerEmail" | "customerNumber" | "customerPhone" | "customerVatId" | "serviceStartDate" | "serviceEndDate" | "introText" | "closingText" | "paymentTermsDays" | "issueDate" | "dayCount" | "discountType" | "discountValue" | "assetScope" | "sentAt" | "pdfPath" | "isKleinunternehmerSnapshot" | "vatRatePercent" | "orgName" | "orgAddressLine1" | "orgAddressLine2" | "orgPostalCode" | "orgCity" | "orgTaxId" | "orgBillingEmail" | "orgBillingWebsite" | "orgBankAccountHolder" | "orgBankName" | "orgIban" | "orgBic" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
 export type InvoiceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   production?: boolean | Prisma.Invoice$productionArgs<ExtArgs>
@@ -2115,6 +2709,18 @@ export type $InvoicePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     pdfPath: string | null
     isKleinunternehmerSnapshot: boolean
     vatRatePercent: runtime.Decimal
+    orgName: string
+    orgAddressLine1: string | null
+    orgAddressLine2: string | null
+    orgPostalCode: string | null
+    orgCity: string | null
+    orgTaxId: string | null
+    orgBillingEmail: string | null
+    orgBillingWebsite: string | null
+    orgBankAccountHolder: string | null
+    orgBankName: string | null
+    orgIban: string | null
+    orgBic: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["invoice"]>
@@ -2571,6 +3177,18 @@ export interface InvoiceFieldRefs {
   readonly pdfPath: Prisma.FieldRef<"Invoice", 'String'>
   readonly isKleinunternehmerSnapshot: Prisma.FieldRef<"Invoice", 'Boolean'>
   readonly vatRatePercent: Prisma.FieldRef<"Invoice", 'Decimal'>
+  readonly orgName: Prisma.FieldRef<"Invoice", 'String'>
+  readonly orgAddressLine1: Prisma.FieldRef<"Invoice", 'String'>
+  readonly orgAddressLine2: Prisma.FieldRef<"Invoice", 'String'>
+  readonly orgPostalCode: Prisma.FieldRef<"Invoice", 'String'>
+  readonly orgCity: Prisma.FieldRef<"Invoice", 'String'>
+  readonly orgTaxId: Prisma.FieldRef<"Invoice", 'String'>
+  readonly orgBillingEmail: Prisma.FieldRef<"Invoice", 'String'>
+  readonly orgBillingWebsite: Prisma.FieldRef<"Invoice", 'String'>
+  readonly orgBankAccountHolder: Prisma.FieldRef<"Invoice", 'String'>
+  readonly orgBankName: Prisma.FieldRef<"Invoice", 'String'>
+  readonly orgIban: Prisma.FieldRef<"Invoice", 'String'>
+  readonly orgBic: Prisma.FieldRef<"Invoice", 'String'>
   readonly createdAt: Prisma.FieldRef<"Invoice", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Invoice", 'DateTime'>
 }

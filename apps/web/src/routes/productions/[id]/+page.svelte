@@ -9,6 +9,7 @@
 		getProduction,
 		removeBundleFromProduction,
 		syncBundleInProduction,
+		syncAssetAccessoriesInProduction,
 		addCrewMember,
 		removeCrewMember,
 		removeProductionItem,
@@ -109,6 +110,28 @@
 		}
 	}
 
+	async function handleSyncAccessories(assetId: string) {
+		working = true;
+		try {
+			const result = await syncAssetAccessoriesInProduction({ productionId, assetId });
+			toast.success(
+				plural(result.added, ['# accessory added', '# accessories added']) +
+					' · ' +
+					plural(result.removed, ['# accessory removed', '# accessories removed'])
+			);
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			working = false;
+		}
+	}
+
+	function accessoriesChanged(item: Nested<ItemPayload>) {
+		const current = new Set(item.asset.accessories.map((accessory) => accessory.id));
+		const booked = new Set(item.accessories.map((accessory) => accessory.assetId));
+		return current.size !== booked.size || [...current].some((assetId) => !booked.has(assetId));
+	}
+
 	let bundleDivergence = $derived.by(() => {
 		const map = new SvelteMap<string, { addedCount: number; removedCount: number }>();
 		for (const section of displaySections) {
@@ -133,7 +156,13 @@
 
 	type ItemPayload = Prisma.ProductionItemGetPayload<{
 		include: {
-			asset: { include: { product: { include: { manufacturer: true } }; organization: true } };
+			asset: {
+				include: {
+					product: { include: { manufacturer: true } };
+					organization: true;
+					accessories: { select: { id: true } };
+				};
+			};
 			sourceBundle: { select: { id: true; template: { select: { name: true } } } };
 		};
 	}>;
@@ -516,7 +545,7 @@
 								class="flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
 							>
 								<div>
-									<p class="font-medium">{offer.customerName}</p>
+									<p class="font-medium">{offer.number} — {offer.customerName}</p>
 									<p class="text-xs text-muted-foreground">
 										{offer.dayCount} d
 										{#if offer.invoices.length > 0}
@@ -981,6 +1010,20 @@
 														item.status
 													] ?? ''}">{statusLabels[item.status] ?? item.status}</span
 												>
+												{#if accessoriesChanged(item)}
+													<span
+														class="rounded bg-yellow-100 px-1.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+														>Accessories changed</span
+													>
+													<button
+														type="button"
+														disabled={working}
+														onclick={() => handleSyncAccessories(item.assetId)}
+														class="rounded border border-yellow-400 px-2 py-0.5 text-xs text-yellow-800 transition-colors hover:bg-yellow-100 dark:border-yellow-600 dark:text-yellow-300 dark:hover:bg-yellow-900/40"
+													>
+														Update accessories
+													</button>
+												{/if}
 												<button
 													type="button"
 													onclick={() => handleRemoveItem(item.id)}

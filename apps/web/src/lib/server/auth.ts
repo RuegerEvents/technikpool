@@ -44,9 +44,11 @@ const prefixes: Partial<Record<ModelName, string>> = {
 	OrgCategoryRate: 'ocr',
 	Offer: 'ofr',
 	OfferItem: 'ofi',
+	OfferSequence: 'ofsq',
 	Invoice: 'inv',
 	InvoiceItem: 'ivi',
-	InvoiceSequence: 'invs'
+	OrgProductPrice: 'opp',
+	CatalogTransaction: 'cltx'
 };
 
 // Extend the client with prefixed IDs

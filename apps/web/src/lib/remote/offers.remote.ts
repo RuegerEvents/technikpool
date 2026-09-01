@@ -12,8 +12,9 @@ import {
 	formatBillingDate,
 	renderBillingText
 } from '$lib/billing-text';
-import { generateBillingPdf } from '$lib/server/billing-pdf';
-import { deleteObject, putObject } from '$lib/server/storage';
+import { generateBillingPdf, organizationFromSnapshot } from '$lib/server/billing-pdf';
+import { putObject } from '$lib/server/storage';
+import { orgSnapshotColumns } from '$lib/org-snapshot';
 
 async function requireOrgManageAccess(orgId: string) {
 	const user = await requireAuth();
@@ -28,6 +29,26 @@ async function requireOrgManageAccess(orgId: string) {
 }
 
 const ACTIVE_ITEM_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT', 'RETURNED'] as const;
+
+/**
+ * Offers are numbered automatically, per org and year ("A-2026-0007") —
+ * unlike invoices, whose numbers are typed in by hand because orgs follow
+ * their own external schemes there. Must run inside the transaction that
+ * creates the offer, so a failed create doesn't burn a number… which would be
+ * harmless, but confusing.
+ */
+async function nextOfferNumber(
+	tx: Pick<typeof prisma, 'offerSequence'>,
+	organizationId: string
+): Promise<string> {
+	const year = new Date().getFullYear();
+	const seq = await tx.offerSequence.upsert({
+		where: { organizationId_year: { organizationId, year } },
+		create: { organizationId, year, lastNumber: 1 },
+		update: { lastNumber: { increment: 1 } }
+	});
+	return `A-${year}-${String(seq.lastNumber).padStart(4, '0')}`;
+}
 
 // ── Offers ─────────────────────────────────────────────────────────────────
 
@@ -109,8 +130,8 @@ type BillingLine = {
 };
 
 // Equipment that is booked but can't be priced yet. One entry per product,
-// because the price is the product's: filling it in covers every unit of it
-// here and everywhere else.
+// because the price is per (billing org, product): filling it in covers every
+// unit of that product in this org's billing, here and in every later offer.
 type MissingPrice = {
 	key: string;
 	productId: string;
@@ -232,6 +253,14 @@ async function computeProductionBilling(
 	});
 	const rateByCategory = new Map(rates.map((r) => [r.categoryId, Number(r.percentage)]));
 
+	// Prices are per-org, and it is always the *billing* org's price that
+	// counts — including for equipment loaned in from a partner org: what the
+	// partner paid for the device is their bookkeeping, not this org's tariff.
+	const orgPrices = await prisma.orgProductPrice.findMany({
+		where: { organizationId: production.organizationId }
+	});
+	const priceByProduct = new Map(orgPrices.map((p) => [p.productId, Number(p.netPurchasePrice)]));
+
 	const missingPrices: MissingPrice[] = [];
 	const missingRates = new Map<string, MissingRate>();
 
@@ -271,7 +300,7 @@ async function computeProductionBilling(
 				categoryNameDe: asset.product.category.nameDe
 			});
 		}
-		if (asset.product.netPurchasePrice == null) {
+		if (priceByProduct.get(asset.productId) == null) {
 			const key = `product:${asset.productId}`;
 			let group = unpricedByProduct.get(key);
 			if (!group) {
@@ -304,7 +333,7 @@ async function computeProductionBilling(
 		}
 		if (ratePercent == null) continue;
 
-		const netPrice = Number(asset.product.netPurchasePrice);
+		const netPrice = priceByProduct.get(asset.productId)!;
 		const productLabel = productBillingLabel(asset.product);
 		const accessoryLabels = asset.accessories.map((accessory) =>
 			productBillingLabel(accessory.product)
@@ -490,13 +519,11 @@ export const getProductionBillingReadiness = query(
 			organizationId: production.organizationId,
 			pricedLineCount: lines.length,
 			pricedDailyTotal: lines.reduce((sum, line) => sum + line.dailyRate, 0),
-			// A product is shared catalog data, so pricing it takes admin rights in
-			// some org rather than in the one that happens to own these units —
-			// the same rule `updateProduct` applies.
-			canEditPrices: systemAdmin || manageableOrgIds.size > 0,
+			// Both the price and the rate belong to the org doing the billing —
+			// prices are per (org, product), so only this org's admins set them.
+			canEditPrices: canManage(production.organizationId),
 			missingPrices,
 			missingRates,
-			// A rental rate, by contrast, belongs to the org doing the billing.
 			canEditRates: canManage(production.organizationId)
 		};
 	}
@@ -520,7 +547,7 @@ const createOfferSchema = v.object({
 export const createOfferFromProduction = command(createOfferSchema, async (data) => {
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: data.productionId },
-		include: { organization: true }
+		include: { organization: { include: { address: true } } }
 	});
 	await requireOrgManageAccess(production.organizationId);
 
@@ -566,39 +593,43 @@ export const createOfferFromProduction = command(createOfferSchema, async (data)
 		lineTotal: line.dailyRate * dayCount
 	}));
 
-	const offer = await prisma.offer.create({
-		data: {
-			organizationId: production.organizationId,
-			productionId: production.id,
-			customerId: data.customerId || null,
-			customerName: data.customerName,
-			customerAddress: data.customerAddress?.trim() || null,
-			customerContactPerson: data.customerContactPerson?.trim() || null,
-			customerEmail: data.customerEmail?.trim() || null,
-			customerNumber: customer?.customerNumber ?? null,
-			customerPhone: customer?.phone ?? null,
-			customerVatId: customer?.vatId ?? null,
-			serviceStartDate,
-			serviceEndDate,
-			introText:
-				data.introText?.trim() ||
-				renderBillingText(
-					production.organization.offerIntroTemplate || DEFAULT_OFFER_INTRO,
-					variables
-				),
-			closingText:
-				data.closingText?.trim() ||
-				renderBillingText(
-					production.organization.offerClosingTemplate || DEFAULT_OFFER_CLOSING,
-					variables
-				),
-			paymentTermsDays: production.organization.paymentTermsDays,
-			dayCount,
-			assetScope,
-			vatRatePercent: production.organization.isKleinunternehmer ? 0 : 19,
-			items: { create: itemsData }
-		},
-		include: { items: true }
+	const offer = await prisma.$transaction(async (tx) => {
+		return tx.offer.create({
+			data: {
+				number: await nextOfferNumber(tx, production.organizationId),
+				...orgSnapshotColumns(production.organization),
+				organizationId: production.organizationId,
+				productionId: production.id,
+				customerId: data.customerId || null,
+				customerName: data.customerName,
+				customerAddress: data.customerAddress?.trim() || null,
+				customerContactPerson: data.customerContactPerson?.trim() || null,
+				customerEmail: data.customerEmail?.trim() || null,
+				customerNumber: customer?.customerNumber ?? null,
+				customerPhone: customer?.phone ?? null,
+				customerVatId: customer?.vatId ?? null,
+				serviceStartDate,
+				serviceEndDate,
+				introText:
+					data.introText?.trim() ||
+					renderBillingText(
+						production.organization.offerIntroTemplate || DEFAULT_OFFER_INTRO,
+						variables
+					),
+				closingText:
+					data.closingText?.trim() ||
+					renderBillingText(
+						production.organization.offerClosingTemplate || DEFAULT_OFFER_CLOSING,
+						variables
+					),
+				paymentTermsDays: production.organization.paymentTermsDays,
+				dayCount,
+				assetScope,
+				vatRatePercent: production.organization.isKleinunternehmer ? 0 : 19,
+				items: { create: itemsData }
+			},
+			include: { items: true }
+		});
 	});
 
 	await getOffers().refresh();
@@ -856,44 +887,51 @@ export const copyOfferToNewCustomer = command(
 	async ({ offerId, customerName, customerAddress }) => {
 		const source = await prisma.offer.findUniqueOrThrow({
 			where: { id: offerId },
-			include: { items: true }
+			include: { items: true, organization: { include: { address: true } } }
 		});
 		await requireOrgManageAccess(source.organizationId);
 
-		const newOffer = await prisma.offer.create({
-			data: {
-				organizationId: source.organizationId,
-				productionId: source.productionId,
-				customerName,
-				customerAddress: customerAddress?.trim() || null,
-				serviceStartDate: source.serviceStartDate,
-				serviceEndDate: source.serviceEndDate,
-				introText: source.introText,
-				closingText: source.closingText,
-				paymentTermsDays: source.paymentTermsDays,
-				dayCount: source.dayCount,
-				discountType: source.discountType,
-				discountValue: source.discountValue,
-				assetScope: source.assetScope,
-				vatRatePercent: source.vatRatePercent,
-				items: {
-					create: source.items.map((i) => ({
-						assetId: i.assetId,
-						bundleId: i.bundleId,
-						productId: i.productId,
-						productLabel: i.productLabel,
-						categoryId: i.categoryId,
-						categoryName: i.categoryName,
-						categoryNameDe: i.categoryNameDe,
-						categoryColor: i.categoryColor,
-						description: i.description,
-						netPurchasePrice: i.netPurchasePrice,
-						ratePercent: i.ratePercent,
-						dailyRate: i.dailyRate,
-						lineTotal: i.lineTotal
-					}))
+		const newOffer = await prisma.$transaction(async (tx) => {
+			return tx.offer.create({
+				data: {
+					// A copy is a new document issued now: it gets its own number and a
+					// fresh snapshot of the org's current letterhead, not the source's.
+					number: await nextOfferNumber(tx, source.organizationId),
+					...orgSnapshotColumns(source.organization),
+					isKleinunternehmerSnapshot: source.isKleinunternehmerSnapshot,
+					organizationId: source.organizationId,
+					productionId: source.productionId,
+					customerName,
+					customerAddress: customerAddress?.trim() || null,
+					serviceStartDate: source.serviceStartDate,
+					serviceEndDate: source.serviceEndDate,
+					introText: source.introText,
+					closingText: source.closingText,
+					paymentTermsDays: source.paymentTermsDays,
+					dayCount: source.dayCount,
+					discountType: source.discountType,
+					discountValue: source.discountValue,
+					assetScope: source.assetScope,
+					vatRatePercent: source.vatRatePercent,
+					items: {
+						create: source.items.map((i) => ({
+							assetId: i.assetId,
+							bundleId: i.bundleId,
+							productId: i.productId,
+							productLabel: i.productLabel,
+							categoryId: i.categoryId,
+							categoryName: i.categoryName,
+							categoryNameDe: i.categoryNameDe,
+							categoryColor: i.categoryColor,
+							description: i.description,
+							netPurchasePrice: i.netPurchasePrice,
+							ratePercent: i.ratePercent,
+							dailyRate: i.dailyRate,
+							lineTotal: i.lineTotal
+						}))
+					}
 				}
-			}
+			});
 		});
 
 		await getOffers().refresh();
@@ -908,36 +946,49 @@ export const deleteOffer = command(v.string(), async (offerId: string) => {
 	});
 	await requireOrgManageAccess(offer.organizationId);
 	if (offer._count.invoices > 0) throw new Error('An invoice was created from this offer');
+	// A finalized offer is an issued commercial letter with an archived PDF —
+	// GoBD retention applies to it just as to an invoice, so it cannot be
+	// deleted (deleting a finalized offer would also shred that archive).
+	if (offer.finalizedAt) throw new Error('A finalized offer cannot be deleted');
 	await prisma.offer.delete({ where: { id: offerId } });
-	if (offer.pdfPath)
-		deleteObject(offer.pdfPath).catch((error) =>
-			console.error(`Could not delete archived offer PDF ${offer.pdfPath}:`, error)
-		);
 	await getOffers().refresh();
 });
 
 export const finalizeOffer = command(v.string(), async (offerId: string) => {
 	const offer = await prisma.offer.findUniqueOrThrow({
 		where: { id: offerId },
-		include: {
-			organization: { include: { address: true } },
-			items: { orderBy: { createdAt: 'asc' } }
-		}
+		include: { items: { orderBy: { createdAt: 'asc' } } }
 	});
 	await requireOrgManageAccess(offer.organizationId);
 	if (offer.finalizedAt) throw new Error('This offer has already been finalized');
 	const pdfPath = `billing-documents/${offer.organizationId}/offers/${offer.id}.pdf`;
-	const pdf = await generateBillingPdf('offer', offer);
+	// The PDF renders from the offer's own org snapshot, never the live org —
+	// what is archived is what the document said, not what the org looks like
+	// on the day someone pressed the button.
+	const pdf = await generateBillingPdf('offer', {
+		...offer,
+		organization: organizationFromSnapshot(offer)
+	});
 	await putObject(pdfPath, pdf, 'application/pdf');
-	await prisma.offer.update({
-		where: { id: offerId },
+	// Conditional on still being a draft, so two concurrent finalizes can't
+	// both pass the check above and each archive their own PDF.
+	const { count } = await prisma.offer.updateMany({
+		where: { id: offerId, finalizedAt: null },
 		data: { finalizedAt: new Date(), pdfPath }
 	});
+	if (count === 0) throw new Error('This offer has already been finalized');
 	await getOffer(offerId).refresh();
 	await getOffers().refresh();
 });
 
-export const convertOfferToInvoice = command(v.string(), async (offerId: string) => {
+const convertOfferSchema = v.object({
+	offerId: v.string(),
+	// Assigned by hand — each org runs its own external numbering scheme, so
+	// the app checks uniqueness within the org rather than inventing numbers.
+	number: v.pipe(v.string(), v.trim(), v.minLength(1))
+});
+
+export const convertOfferToInvoice = command(convertOfferSchema, async ({ offerId, number }) => {
 	const offer = await prisma.offer.findUniqueOrThrow({
 		where: { id: offerId },
 		// The invoice's lines are created in the order they are read here, and an
@@ -952,18 +1003,19 @@ export const convertOfferToInvoice = command(v.string(), async (offerId: string)
 	if (!offer.finalizedAt || !offer.pdfPath)
 		throw new Error('Finalize the offer before creating an invoice');
 
-	const year = new Date().getFullYear();
-	const invoice = await prisma.$transaction(async (tx) => {
-		const seq = await tx.invoiceSequence.upsert({
-			where: { year },
-			create: { year, lastNumber: 1 },
-			update: { lastNumber: { increment: 1 } }
-		});
-		const number = `${year}-${String(seq.lastNumber).padStart(4, '0')}`;
+	const clash = await prisma.invoice.findUnique({
+		where: { organizationId_number: { organizationId: offer.organizationId, number } },
+		select: { id: true }
+	});
+	if (clash) error(409, `Invoice number "${number}" is already taken in this organisation`);
 
+	const invoice = await prisma.$transaction(async (tx) => {
 		return tx.invoice.create({
 			data: {
 				number,
+				// The invoice is a new document issued now, so it snapshots the
+				// org's *current* letterhead — the offer may be weeks old.
+				...orgSnapshotColumns(offer.organization),
 				organizationId: offer.organizationId,
 				productionId: offer.productionId,
 				offerId: offer.id,
@@ -996,7 +1048,7 @@ export const convertOfferToInvoice = command(v.string(), async (offerId: string)
 								: '',
 						customer: offer.customerName,
 						documentNumber: number,
-						paymentTermsDays: offer.organization.paymentTermsDays
+						paymentTermsDays: offer.paymentTermsDays
 					}
 				),
 				closingText: renderBillingText(
@@ -1008,10 +1060,10 @@ export const convertOfferToInvoice = command(v.string(), async (offerId: string)
 						servicePeriod: '',
 						customer: offer.customerName,
 						documentNumber: number,
-						paymentTermsDays: offer.organization.paymentTermsDays
+						paymentTermsDays: offer.paymentTermsDays
 					}
 				),
-				paymentTermsDays: offer.organization.paymentTermsDays,
+				paymentTermsDays: offer.paymentTermsDays,
 				dayCount: offer.dayCount,
 				discountType: offer.discountType,
 				discountValue: offer.discountValue,
@@ -1204,10 +1256,7 @@ export const updateInvoiceItemsFromProduction = command(v.string(), async (invoi
 export const finalizeInvoice = command(v.string(), async (invoiceId: string) => {
 	const invoice = await prisma.invoice.findUniqueOrThrow({
 		where: { id: invoiceId },
-		include: {
-			organization: { include: { address: true } },
-			items: { orderBy: { createdAt: 'asc' } }
-		}
+		include: { items: { orderBy: { createdAt: 'asc' } } }
 	});
 	await requireOrgManageAccess(invoice.organizationId);
 
@@ -1215,15 +1264,94 @@ export const finalizeInvoice = command(v.string(), async (invoiceId: string) => 
 		throw new Error('This invoice has already been finalized');
 	}
 	const pdfPath = `billing-documents/${invoice.organizationId}/invoices/${invoice.id}.pdf`;
-	const pdf = await generateBillingPdf('invoice', invoice);
+	// Renders from the invoice's own org snapshot — see finalizeOffer.
+	const pdf = await generateBillingPdf('invoice', {
+		...invoice,
+		organization: organizationFromSnapshot(invoice)
+	});
 	await putObject(pdfPath, pdf, 'application/pdf');
-	await prisma.invoice.update({
-		where: { id: invoiceId },
+	// Conditional on not being archived yet, so two concurrent finalizes can't
+	// both slip past the check above.
+	const { count } = await prisma.invoice.updateMany({
+		where: { id: invoiceId, pdfPath: null },
 		data: { sentAt: invoice.sentAt ?? new Date(), pdfPath }
 	});
+	if (count === 0) throw new Error('This invoice has already been finalized');
 
 	await getInvoice(invoiceId).refresh();
 	await getInvoices().refresh();
+});
+
+const updateInvoiceNumberSchema = v.object({
+	invoiceId: v.string(),
+	number: v.pipe(v.string(), v.trim(), v.minLength(1))
+});
+
+// The number is entered by hand at creation, so a typo needs a way out — but
+// only while the invoice is still a draft.
+export const updateInvoiceNumber = command(
+	updateInvoiceNumberSchema,
+	async ({ invoiceId, number }) => {
+		const invoice = await prisma.invoice.findUniqueOrThrow({ where: { id: invoiceId } });
+		await requireOrgManageAccess(invoice.organizationId);
+		if (invoice.sentAt) throw new Error('This invoice has been sent and is immutable');
+		const clash = await prisma.invoice.findUnique({
+			where: { organizationId_number: { organizationId: invoice.organizationId, number } },
+			select: { id: true }
+		});
+		if (clash && clash.id !== invoiceId)
+			error(409, `Invoice number "${number}" is already taken in this organisation`);
+
+		await prisma.invoice.update({ where: { id: invoiceId }, data: { number } });
+		await getInvoice(invoiceId).refresh();
+		await getInvoices().refresh();
+	}
+);
+
+const updateDocumentOrgSnapshotSchema = v.object({
+	id: v.string(),
+	kind: v.picklist(['offer', 'invoice'])
+});
+
+// Pull the org's *current* letterhead into a draft document. The snapshot
+// never follows the org on its own — this is the explicit flow behind the
+// "org details have changed" hint, and it stops working the moment the
+// document is finalized.
+export const updateDocumentOrgSnapshot = command(updateDocumentOrgSnapshotSchema, async (data) => {
+	if (data.kind === 'offer') {
+		const offer = await prisma.offer.findUniqueOrThrow({
+			where: { id: data.id },
+			include: { organization: { include: { address: true } } }
+		});
+		await requireOrgManageAccess(offer.organizationId);
+		if (offer.finalizedAt) throw new Error('This offer is finalized and immutable');
+		const snapshot = orgSnapshotColumns(offer.organization);
+		await prisma.offer.update({
+			where: { id: data.id },
+			data: {
+				...snapshot,
+				// The VAT rate follows the Kleinunternehmer status it snapshots.
+				vatRatePercent: snapshot.isKleinunternehmerSnapshot ? 0 : 19
+			}
+		});
+		await getOffer(data.id).refresh();
+	} else {
+		const invoice = await prisma.invoice.findUniqueOrThrow({
+			where: { id: data.id },
+			include: { organization: { include: { address: true } } }
+		});
+		await requireOrgManageAccess(invoice.organizationId);
+		if (invoice.sentAt) throw new Error('This invoice has been sent and is immutable');
+		const snapshot = orgSnapshotColumns(invoice.organization);
+		await prisma.invoice.update({
+			where: { id: data.id },
+			data: {
+				...snapshot,
+				vatRatePercent: snapshot.isKleinunternehmerSnapshot ? 0 : 19
+			}
+		});
+		await getInvoice(data.id).refresh();
+	}
 });
 
 export const deleteInvoice = command(v.string(), async (invoiceId: string) => {

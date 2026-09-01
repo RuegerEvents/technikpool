@@ -570,6 +570,14 @@ export type AssetBundleUncheckedUpdateManyWithoutTemplateNestedInput = {
   deleteMany?: Prisma.AssetBundleScalarWhereInput | Prisma.AssetBundleScalarWhereInput[]
 }
 
+export type NullableDecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
 export type AssetBundleCreateNestedOneWithoutProductionItemsInput = {
   create?: Prisma.XOR<Prisma.AssetBundleCreateWithoutProductionItemsInput, Prisma.AssetBundleUncheckedCreateWithoutProductionItemsInput>
   connectOrCreate?: Prisma.AssetBundleCreateOrConnectWithoutProductionItemsInput

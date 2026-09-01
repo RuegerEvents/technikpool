@@ -16,13 +16,16 @@
 		updateInvoiceItemRate,
 		updateInvoiceDiscount,
 		updateInvoiceCustomer,
+		updateInvoiceNumber,
 		finalizeInvoice,
 		deleteInvoice,
-		updateDocumentText
+		updateDocumentText,
+		updateDocumentOrgSnapshot
 	} from '$lib/remote/offers.remote';
 	import { getCustomers } from '$lib/remote/customers.remote';
 	import { StalenessBanner } from '$lib/components/ui/staleness-banner';
 	import type { Staleness } from '$lib/components/ui/staleness-banner';
+	import { OrgSnapshotBanner } from '$lib/components/ui/org-snapshot-banner';
 	import { BillingDocument } from '$lib/components/ui/billing-document';
 
 	const invoiceId = $derived(page.params.id as string);
@@ -135,6 +138,27 @@
 		}
 	}
 
+	// ── Invoice number ──
+	// Typed in by hand at creation, so a typo needs a way out while the
+	// invoice is still a draft.
+	let editingNumber = $state(false);
+	let numberDraft = $state('');
+	let savingNumber = $state(false);
+	async function handleSaveNumber(e: Event) {
+		e.preventDefault();
+		if (!numberDraft.trim()) return;
+		savingNumber = true;
+		try {
+			await updateInvoiceNumber({ invoiceId, number: numberDraft.trim() });
+			toast.success('Invoice number updated');
+			editingNumber = false;
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			savingNumber = false;
+		}
+	}
+
 	let finalizing = $state(false);
 	let deleting = $state(false);
 	async function handleFinalize() {
@@ -169,7 +193,39 @@
 <div class="space-y-6">
 	<div class="flex flex-wrap items-start justify-between gap-3">
 		<div>
-			<h1 class="text-3xl font-bold tracking-tight">Invoice {invoice.number}</h1>
+			{#if editingNumber}
+				<form class="flex items-center gap-2" onsubmit={handleSaveNumber}>
+					<Input class="w-48 text-2xl font-bold" bind:value={numberDraft} required />
+					<Button icon="save" size="sm" type="submit" disabled={savingNumber}>
+						{savingNumber ? 'Saving…' : 'Save'}
+					</Button>
+					<Button
+						icon="close"
+						size="sm"
+						type="button"
+						variant="outline"
+						onclick={() => (editingNumber = false)}
+					>
+						Cancel
+					</Button>
+				</form>
+			{:else}
+				<h1 class="flex items-center gap-2 text-3xl font-bold tracking-tight">
+					Invoice {invoice.number}
+					{#if !invoice.sentAt}
+						<Button
+							icon="edit"
+							size="sm"
+							variant="ghost"
+							title="Edit invoice number"
+							onclick={() => {
+								numberDraft = invoice.number;
+								editingNumber = true;
+							}}
+						/>
+					{/if}
+				</h1>
+			{/if}
 			<p class="text-muted-foreground">
 				{invoice.customerName} · {orgLabel(invoice.organization)}
 				{#if invoice.production}
@@ -300,6 +356,14 @@
 		{staleness}
 		onUpdate={async () => {
 			await updateInvoiceItemsFromProduction(invoiceId);
+		}}
+	/>
+	<OrgSnapshotBanner
+		document={invoice}
+		organization={invoice.organization}
+		editable={!invoice.sentAt}
+		onUpdate={async () => {
+			await updateDocumentOrgSnapshot({ id: invoiceId, kind: 'invoice' });
 		}}
 	/>
 	<Card.Root

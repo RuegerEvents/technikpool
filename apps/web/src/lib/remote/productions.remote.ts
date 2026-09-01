@@ -148,7 +148,8 @@ export const getProduction = query(v.string(), async (id: string) => {
 					asset: {
 						include: {
 							product: { include: { manufacturer: true } },
-							organization: true
+							organization: true,
+							accessories: { select: { id: true } }
 						}
 					},
 					sourceBundle: { select: { id: true, template: { select: { name: true } } } }
@@ -506,6 +507,7 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 			data: accessoryIds.map((assetId) => ({
 				productionId: data.productionId,
 				assetId,
+				sourceParentAssetId: data.assetId,
 				status: initialStatus
 			})),
 			skipDuplicates: true
@@ -750,6 +752,7 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 					productionId: data.productionId,
 					assetId: asset.id,
 					sourceBundleId: data.bundleId,
+					sourceParentAssetId: asset.parentAssetId,
 					status: isCrossOrg ? 'PENDING' : 'APPROVED'
 				}
 			});
@@ -797,11 +800,57 @@ export const removeProductionItem = command(v.string(), async (itemId: string) =
 	const item = await prisma.productionItem.delete({ where: { id: itemId } });
 	// The accessories were booked because the parent was; they go with it.
 	await prisma.productionItem.deleteMany({
-		where: { productionId: item.productionId, asset: { parentAssetId: item.assetId } }
+		where: { productionId: item.productionId, sourceParentAssetId: item.assetId }
 	});
 	await getProduction(item.productionId).refresh();
 	return item;
 });
+
+const syncAssetAccessoriesSchema = v.object({
+	productionId: v.string(),
+	assetId: v.string()
+});
+
+export const syncAssetAccessoriesInProduction = command(
+	syncAssetAccessoriesSchema,
+	async ({ productionId, assetId }) => {
+		await requireAuth();
+		const parentItem = await prisma.productionItem.findUniqueOrThrow({
+			where: { productionId_assetId: { productionId, assetId } }
+		});
+		const currentAccessories = await prisma.asset.findMany({
+			where: { parentAssetId: assetId },
+			select: { id: true }
+		});
+		const bookedAccessories = await prisma.productionItem.findMany({
+			where: { productionId, sourceParentAssetId: assetId }
+		});
+		const currentIds = new Set(currentAccessories.map((asset) => asset.id));
+		const bookedIds = new Set(bookedAccessories.map((item) => item.assetId));
+		const toRemove = bookedAccessories.filter((item) => !currentIds.has(item.assetId));
+		const toAdd = currentAccessories.filter((asset) => !bookedIds.has(asset.id));
+
+		await prisma.$transaction([
+			prisma.productionItem.deleteMany({ where: { id: { in: toRemove.map((item) => item.id) } } }),
+			...(toAdd.length > 0
+				? [
+						prisma.productionItem.createMany({
+							data: toAdd.map((asset) => ({
+								productionId,
+								assetId: asset.id,
+								sourceBundleId: parentItem.sourceBundleId,
+								sourceParentAssetId: assetId,
+								status: parentItem.status
+							})),
+							skipDuplicates: true
+						})
+					]
+				: [])
+		]);
+		await getProduction(productionId).refresh();
+		return { added: toAdd.length, removed: toRemove.length };
+	}
+);
 
 const removeBundleFromProductionSchema = v.object({
 	productionId: v.string(),
@@ -904,6 +953,7 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 					productionId: data.productionId,
 					assetId: asset.id,
 					sourceBundleId: data.bundleId,
+					sourceParentAssetId: asset.parentAssetId,
 					status: isCrossOrg ? 'PENDING' : 'APPROVED'
 				}
 			});

@@ -28,6 +28,29 @@ export async function isSystemAdmin(userId: string) {
 }
 
 /**
+ * System admin (User.isAdmin) is a deliberately separate permission from being
+ * ADMIN/OWNER of an org — anyone can create an org and own it, so "admin of
+ * some org" grants nothing beyond that org's own data. Global, shared state
+ * (manufacturers, categories) gates on this instead.
+ */
+export async function requireSystemAdmin() {
+	const user = await requireAuth();
+	if (!(await isSystemAdmin(user.id))) {
+		throw new Error('System admin access required');
+	}
+	return user;
+}
+
+/** The ids of orgs the user can manage (ADMIN or OWNER role). */
+export async function managedOrgIds(userId: string) {
+	const memberships = await prisma.orgMembership.findMany({
+		where: { userId, role: { in: ['ADMIN', 'OWNER'] } },
+		select: { organizationId: true }
+	});
+	return memberships.map((m) => m.organizationId);
+}
+
+/**
  * The organization ids a read should be scoped to, given an optional filter.
  *
  * Without a filter that is everything the user belongs to. With one, the user

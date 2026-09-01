@@ -29,6 +29,7 @@ export type ProductionItemMinAggregateOutputType = {
   productionId: string | null
   assetId: string | null
   sourceBundleId: string | null
+  sourceParentAssetId: string | null
   status: string | null
 }
 
@@ -37,6 +38,7 @@ export type ProductionItemMaxAggregateOutputType = {
   productionId: string | null
   assetId: string | null
   sourceBundleId: string | null
+  sourceParentAssetId: string | null
   status: string | null
 }
 
@@ -45,6 +47,7 @@ export type ProductionItemCountAggregateOutputType = {
   productionId: number
   assetId: number
   sourceBundleId: number
+  sourceParentAssetId: number
   status: number
   _all: number
 }
@@ -55,6 +58,7 @@ export type ProductionItemMinAggregateInputType = {
   productionId?: true
   assetId?: true
   sourceBundleId?: true
+  sourceParentAssetId?: true
   status?: true
 }
 
@@ -63,6 +67,7 @@ export type ProductionItemMaxAggregateInputType = {
   productionId?: true
   assetId?: true
   sourceBundleId?: true
+  sourceParentAssetId?: true
   status?: true
 }
 
@@ -71,6 +76,7 @@ export type ProductionItemCountAggregateInputType = {
   productionId?: true
   assetId?: true
   sourceBundleId?: true
+  sourceParentAssetId?: true
   status?: true
   _all?: true
 }
@@ -152,6 +158,7 @@ export type ProductionItemGroupByOutputType = {
   productionId: string
   assetId: string
   sourceBundleId: string | null
+  sourceParentAssetId: string | null
   status: string
   _count: ProductionItemCountAggregateOutputType | null
   _min: ProductionItemMinAggregateOutputType | null
@@ -181,6 +188,7 @@ export type ProductionItemWhereInput = {
   productionId?: Prisma.StringFilter<"ProductionItem"> | string
   assetId?: Prisma.StringFilter<"ProductionItem"> | string
   sourceBundleId?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
+  sourceParentAssetId?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
   status?: Prisma.StringFilter<"ProductionItem"> | string
   production?: Prisma.XOR<Prisma.ProductionScalarRelationFilter, Prisma.ProductionWhereInput>
   asset?: Prisma.XOR<Prisma.AssetScalarRelationFilter, Prisma.AssetWhereInput>
@@ -192,6 +200,7 @@ export type ProductionItemOrderByWithRelationInput = {
   productionId?: Prisma.SortOrder
   assetId?: Prisma.SortOrder
   sourceBundleId?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceParentAssetId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   production?: Prisma.ProductionOrderByWithRelationInput
   asset?: Prisma.AssetOrderByWithRelationInput
@@ -207,6 +216,7 @@ export type ProductionItemWhereUniqueInput = Prisma.AtLeast<{
   productionId?: Prisma.StringFilter<"ProductionItem"> | string
   assetId?: Prisma.StringFilter<"ProductionItem"> | string
   sourceBundleId?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
+  sourceParentAssetId?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
   status?: Prisma.StringFilter<"ProductionItem"> | string
   production?: Prisma.XOR<Prisma.ProductionScalarRelationFilter, Prisma.ProductionWhereInput>
   asset?: Prisma.XOR<Prisma.AssetScalarRelationFilter, Prisma.AssetWhereInput>
@@ -218,6 +228,7 @@ export type ProductionItemOrderByWithAggregationInput = {
   productionId?: Prisma.SortOrder
   assetId?: Prisma.SortOrder
   sourceBundleId?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceParentAssetId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   _count?: Prisma.ProductionItemCountOrderByAggregateInput
   _max?: Prisma.ProductionItemMaxOrderByAggregateInput
@@ -232,11 +243,13 @@ export type ProductionItemScalarWhereWithAggregatesInput = {
   productionId?: Prisma.StringWithAggregatesFilter<"ProductionItem"> | string
   assetId?: Prisma.StringWithAggregatesFilter<"ProductionItem"> | string
   sourceBundleId?: Prisma.StringNullableWithAggregatesFilter<"ProductionItem"> | string | null
+  sourceParentAssetId?: Prisma.StringNullableWithAggregatesFilter<"ProductionItem"> | string | null
   status?: Prisma.StringWithAggregatesFilter<"ProductionItem"> | string
 }
 
 export type ProductionItemCreateInput = {
   id?: string
+  sourceParentAssetId?: string | null
   status?: string
   production: Prisma.ProductionCreateNestedOneWithoutItemsInput
   asset: Prisma.AssetCreateNestedOneWithoutProductionItemsInput
@@ -248,11 +261,13 @@ export type ProductionItemUncheckedCreateInput = {
   productionId: string
   assetId: string
   sourceBundleId?: string | null
+  sourceParentAssetId?: string | null
   status?: string
 }
 
 export type ProductionItemUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   production?: Prisma.ProductionUpdateOneRequiredWithoutItemsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutProductionItemsNestedInput
@@ -264,6 +279,7 @@ export type ProductionItemUncheckedUpdateInput = {
   productionId?: Prisma.StringFieldUpdateOperationsInput | string
   assetId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -272,11 +288,13 @@ export type ProductionItemCreateManyInput = {
   productionId: string
   assetId: string
   sourceBundleId?: string | null
+  sourceParentAssetId?: string | null
   status?: string
 }
 
 export type ProductionItemUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -285,6 +303,7 @@ export type ProductionItemUncheckedUpdateManyInput = {
   productionId?: Prisma.StringFieldUpdateOperationsInput | string
   assetId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -308,6 +327,7 @@ export type ProductionItemCountOrderByAggregateInput = {
   productionId?: Prisma.SortOrder
   assetId?: Prisma.SortOrder
   sourceBundleId?: Prisma.SortOrder
+  sourceParentAssetId?: Prisma.SortOrder
   status?: Prisma.SortOrder
 }
 
@@ -316,6 +336,7 @@ export type ProductionItemMaxOrderByAggregateInput = {
   productionId?: Prisma.SortOrder
   assetId?: Prisma.SortOrder
   sourceBundleId?: Prisma.SortOrder
+  sourceParentAssetId?: Prisma.SortOrder
   status?: Prisma.SortOrder
 }
 
@@ -324,6 +345,7 @@ export type ProductionItemMinOrderByAggregateInput = {
   productionId?: Prisma.SortOrder
   assetId?: Prisma.SortOrder
   sourceBundleId?: Prisma.SortOrder
+  sourceParentAssetId?: Prisma.SortOrder
   status?: Prisma.SortOrder
 }
 
@@ -455,6 +477,7 @@ export type ProductionItemUncheckedUpdateManyWithoutProductionNestedInput = {
 
 export type ProductionItemCreateWithoutAssetInput = {
   id?: string
+  sourceParentAssetId?: string | null
   status?: string
   production: Prisma.ProductionCreateNestedOneWithoutItemsInput
   sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput
@@ -464,6 +487,7 @@ export type ProductionItemUncheckedCreateWithoutAssetInput = {
   id?: string
   productionId: string
   sourceBundleId?: string | null
+  sourceParentAssetId?: string | null
   status?: string
 }
 
@@ -501,11 +525,13 @@ export type ProductionItemScalarWhereInput = {
   productionId?: Prisma.StringFilter<"ProductionItem"> | string
   assetId?: Prisma.StringFilter<"ProductionItem"> | string
   sourceBundleId?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
+  sourceParentAssetId?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
   status?: Prisma.StringFilter<"ProductionItem"> | string
 }
 
 export type ProductionItemCreateWithoutSourceBundleInput = {
   id?: string
+  sourceParentAssetId?: string | null
   status?: string
   production: Prisma.ProductionCreateNestedOneWithoutItemsInput
   asset: Prisma.AssetCreateNestedOneWithoutProductionItemsInput
@@ -515,6 +541,7 @@ export type ProductionItemUncheckedCreateWithoutSourceBundleInput = {
   id?: string
   productionId: string
   assetId: string
+  sourceParentAssetId?: string | null
   status?: string
 }
 
@@ -546,6 +573,7 @@ export type ProductionItemUpdateManyWithWhereWithoutSourceBundleInput = {
 
 export type ProductionItemCreateWithoutProductionInput = {
   id?: string
+  sourceParentAssetId?: string | null
   status?: string
   asset: Prisma.AssetCreateNestedOneWithoutProductionItemsInput
   sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput
@@ -555,6 +583,7 @@ export type ProductionItemUncheckedCreateWithoutProductionInput = {
   id?: string
   assetId: string
   sourceBundleId?: string | null
+  sourceParentAssetId?: string | null
   status?: string
 }
 
@@ -588,11 +617,13 @@ export type ProductionItemCreateManyAssetInput = {
   id?: string
   productionId: string
   sourceBundleId?: string | null
+  sourceParentAssetId?: string | null
   status?: string
 }
 
 export type ProductionItemUpdateWithoutAssetInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   production?: Prisma.ProductionUpdateOneRequiredWithoutItemsNestedInput
   sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput
@@ -602,6 +633,7 @@ export type ProductionItemUncheckedUpdateWithoutAssetInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   productionId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -609,6 +641,7 @@ export type ProductionItemUncheckedUpdateManyWithoutAssetInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   productionId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -616,11 +649,13 @@ export type ProductionItemCreateManySourceBundleInput = {
   id?: string
   productionId: string
   assetId: string
+  sourceParentAssetId?: string | null
   status?: string
 }
 
 export type ProductionItemUpdateWithoutSourceBundleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   production?: Prisma.ProductionUpdateOneRequiredWithoutItemsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutProductionItemsNestedInput
@@ -630,6 +665,7 @@ export type ProductionItemUncheckedUpdateWithoutSourceBundleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   productionId?: Prisma.StringFieldUpdateOperationsInput | string
   assetId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -637,6 +673,7 @@ export type ProductionItemUncheckedUpdateManyWithoutSourceBundleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   productionId?: Prisma.StringFieldUpdateOperationsInput | string
   assetId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -644,11 +681,13 @@ export type ProductionItemCreateManyProductionInput = {
   id?: string
   assetId: string
   sourceBundleId?: string | null
+  sourceParentAssetId?: string | null
   status?: string
 }
 
 export type ProductionItemUpdateWithoutProductionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   asset?: Prisma.AssetUpdateOneRequiredWithoutProductionItemsNestedInput
   sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput
@@ -658,6 +697,7 @@ export type ProductionItemUncheckedUpdateWithoutProductionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   assetId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -665,6 +705,7 @@ export type ProductionItemUncheckedUpdateManyWithoutProductionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   assetId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -675,6 +716,7 @@ export type ProductionItemSelect<ExtArgs extends runtime.Types.Extensions.Intern
   productionId?: boolean
   assetId?: boolean
   sourceBundleId?: boolean
+  sourceParentAssetId?: boolean
   status?: boolean
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
@@ -686,6 +728,7 @@ export type ProductionItemSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   productionId?: boolean
   assetId?: boolean
   sourceBundleId?: boolean
+  sourceParentAssetId?: boolean
   status?: boolean
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
@@ -697,6 +740,7 @@ export type ProductionItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   productionId?: boolean
   assetId?: boolean
   sourceBundleId?: boolean
+  sourceParentAssetId?: boolean
   status?: boolean
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
@@ -708,10 +752,11 @@ export type ProductionItemSelectScalar = {
   productionId?: boolean
   assetId?: boolean
   sourceBundleId?: boolean
+  sourceParentAssetId?: boolean
   status?: boolean
 }
 
-export type ProductionItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productionId" | "assetId" | "sourceBundleId" | "status", ExtArgs["result"]["productionItem"]>
+export type ProductionItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productionId" | "assetId" | "sourceBundleId" | "sourceParentAssetId" | "status", ExtArgs["result"]["productionItem"]>
 export type ProductionItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
@@ -740,6 +785,7 @@ export type $ProductionItemPayload<ExtArgs extends runtime.Types.Extensions.Inte
     productionId: string
     assetId: string
     sourceBundleId: string | null
+    sourceParentAssetId: string | null
     status: string
   }, ExtArgs["result"]["productionItem"]>
   composites: {}
@@ -1171,6 +1217,7 @@ export interface ProductionItemFieldRefs {
   readonly productionId: Prisma.FieldRef<"ProductionItem", 'String'>
   readonly assetId: Prisma.FieldRef<"ProductionItem", 'String'>
   readonly sourceBundleId: Prisma.FieldRef<"ProductionItem", 'String'>
+  readonly sourceParentAssetId: Prisma.FieldRef<"ProductionItem", 'String'>
   readonly status: Prisma.FieldRef<"ProductionItem", 'String'>
 }
     

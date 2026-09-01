@@ -61,6 +61,7 @@ export const ModelName = {
   Manufacturer: 'Manufacturer',
   Category: 'Category',
   Product: 'Product',
+  OrgProductPrice: 'OrgProductPrice',
   Address: 'Address',
   Location: 'Location',
   Asset: 'Asset',
@@ -73,10 +74,11 @@ export const ModelName = {
   AssetTransaction: 'AssetTransaction',
   Inspection: 'Inspection',
   OrgCategoryRate: 'OrgCategoryRate',
+  OfferSequence: 'OfferSequence',
   Offer: 'Offer',
   OfferItem: 'OfferItem',
-  InvoiceSequence: 'InvoiceSequence',
   Invoice: 'Invoice',
+  CatalogTransaction: 'CatalogTransaction',
   InvoiceItem: 'InvoiceItem'
 } as const
 
@@ -246,12 +248,23 @@ export const ProductScalarFieldEnum = {
   manufacturerId: 'manufacturerId',
   categoryId: 'categoryId',
   imagePath: 'imagePath',
-  netPurchasePrice: 'netPurchasePrice',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const OrgProductPriceScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  productId: 'productId',
+  netPurchasePrice: 'netPurchasePrice',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrgProductPriceScalarFieldEnum = (typeof OrgProductPriceScalarFieldEnum)[keyof typeof OrgProductPriceScalarFieldEnum]
 
 
 export const AddressScalarFieldEnum = {
@@ -368,6 +381,7 @@ export const ProductionItemScalarFieldEnum = {
   productionId: 'productionId',
   assetId: 'assetId',
   sourceBundleId: 'sourceBundleId',
+  sourceParentAssetId: 'sourceParentAssetId',
   status: 'status'
 } as const
 
@@ -424,8 +438,19 @@ export const OrgCategoryRateScalarFieldEnum = {
 export type OrgCategoryRateScalarFieldEnum = (typeof OrgCategoryRateScalarFieldEnum)[keyof typeof OrgCategoryRateScalarFieldEnum]
 
 
+export const OfferSequenceScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  year: 'year',
+  lastNumber: 'lastNumber'
+} as const
+
+export type OfferSequenceScalarFieldEnum = (typeof OfferSequenceScalarFieldEnum)[keyof typeof OfferSequenceScalarFieldEnum]
+
+
 export const OfferScalarFieldEnum = {
   id: 'id',
+  number: 'number',
   organizationId: 'organizationId',
   productionId: 'productionId',
   customerId: 'customerId',
@@ -448,6 +473,19 @@ export const OfferScalarFieldEnum = {
   discountValue: 'discountValue',
   assetScope: 'assetScope',
   vatRatePercent: 'vatRatePercent',
+  isKleinunternehmerSnapshot: 'isKleinunternehmerSnapshot',
+  orgName: 'orgName',
+  orgAddressLine1: 'orgAddressLine1',
+  orgAddressLine2: 'orgAddressLine2',
+  orgPostalCode: 'orgPostalCode',
+  orgCity: 'orgCity',
+  orgTaxId: 'orgTaxId',
+  orgBillingEmail: 'orgBillingEmail',
+  orgBillingWebsite: 'orgBillingWebsite',
+  orgBankAccountHolder: 'orgBankAccountHolder',
+  orgBankName: 'orgBankName',
+  orgIban: 'orgIban',
+  orgBic: 'orgBic',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -475,15 +513,6 @@ export const OfferItemScalarFieldEnum = {
 } as const
 
 export type OfferItemScalarFieldEnum = (typeof OfferItemScalarFieldEnum)[keyof typeof OfferItemScalarFieldEnum]
-
-
-export const InvoiceSequenceScalarFieldEnum = {
-  id: 'id',
-  year: 'year',
-  lastNumber: 'lastNumber'
-} as const
-
-export type InvoiceSequenceScalarFieldEnum = (typeof InvoiceSequenceScalarFieldEnum)[keyof typeof InvoiceSequenceScalarFieldEnum]
 
 
 export const InvoiceScalarFieldEnum = {
@@ -514,11 +543,38 @@ export const InvoiceScalarFieldEnum = {
   pdfPath: 'pdfPath',
   isKleinunternehmerSnapshot: 'isKleinunternehmerSnapshot',
   vatRatePercent: 'vatRatePercent',
+  orgName: 'orgName',
+  orgAddressLine1: 'orgAddressLine1',
+  orgAddressLine2: 'orgAddressLine2',
+  orgPostalCode: 'orgPostalCode',
+  orgCity: 'orgCity',
+  orgTaxId: 'orgTaxId',
+  orgBillingEmail: 'orgBillingEmail',
+  orgBillingWebsite: 'orgBillingWebsite',
+  orgBankAccountHolder: 'orgBankAccountHolder',
+  orgBankName: 'orgBankName',
+  orgIban: 'orgIban',
+  orgBic: 'orgBic',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type InvoiceScalarFieldEnum = (typeof InvoiceScalarFieldEnum)[keyof typeof InvoiceScalarFieldEnum]
+
+
+export const CatalogTransactionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  action: 'action',
+  productId: 'productId',
+  manufacturerId: 'manufacturerId',
+  categoryId: 'categoryId',
+  organizationId: 'organizationId',
+  data: 'data',
+  createdAt: 'createdAt'
+} as const
+
+export type CatalogTransactionScalarFieldEnum = (typeof CatalogTransactionScalarFieldEnum)[keyof typeof CatalogTransactionScalarFieldEnum]
 
 
 export const InvoiceItemScalarFieldEnum = {
