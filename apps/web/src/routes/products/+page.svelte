@@ -485,7 +485,9 @@
 				</Card.Content>
 			</Card.Root>
 
-			<Card.Root>
+			<!-- The card clips to its rounded corners, cutting off any picker that
+			     opens past its edge. Nothing in this one is full-bleed. -->
+			<Card.Root class="overflow-visible">
 				<Card.Header>
 					<div class="flex flex-wrap items-start justify-between gap-3">
 						<div class="min-w-0">

@@ -247,7 +247,9 @@
 
 	<!-- Setup card — hidden when session active or ended -->
 	{#if !sessionActive && !sessionEnded}
-		<Card.Root class="no-print">
+		<!-- The card clips to its rounded corners, cutting off any picker that
+		     opens past its edge. Nothing in this one is full-bleed. -->
+		<Card.Root class="no-print overflow-visible">
 			<Card.Header>
 				<Card.Title>Session Setup</Card.Title>
 			</Card.Header>

@@ -238,7 +238,9 @@
 		</div>
 	{/if}
 
-	<Card.Root class="max-w-3xl">
+	<!-- The card clips to its rounded corners, cutting off any picker that
+	     opens past its edge. Nothing in this one is full-bleed. -->
+	<Card.Root class="max-w-3xl overflow-visible">
 		<Card.Content class="pt-6">
 			{#if true}
 				{@const orgs = await getMyOrgs()}
