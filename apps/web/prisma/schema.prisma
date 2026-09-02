@@ -437,6 +437,12 @@ model Customer {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Created by the billing-documents migration but never declared here, so
+  // every later migration wanted to drop it again. A customer number is the
+  // handle an org's own bookkeeping uses; two customers sharing one inside a
+  // single org is a data entry mistake, not a state to support.
+  @@unique([organizationId, customerNumber])
 }
 
 model ProductionItem {
