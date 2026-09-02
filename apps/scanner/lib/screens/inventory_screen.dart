@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/client.dart';
 import '../api/generated/export.dart';
+import '../cable_format.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../state/providers.dart';
 import '../widgets/category_pill.dart';
@@ -73,7 +74,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final locations = ref.watch(locationsProvider).value ?? const <Location>[];
-    final categories = ref.watch(categoriesProvider).value ?? const <Category>[];
+    final categories =
+        ref.watch(categoriesProvider).value ?? const <Category>[];
 
     return Scaffold(
       // HomeScreen's Scaffold owns the keyboard inset for every tab.
@@ -116,7 +118,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       for (final loc in locations)
                         DropdownMenuItem(
                           value: loc.id,
-                          child: Text(loc.name, overflow: TextOverflow.ellipsis),
+                          child: Text(
+                            loc.name,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                     ],
                     onChanged: (v) {
@@ -138,7 +143,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       for (final category in categories)
                         DropdownMenuItem(
                           value: category.id,
-                          child: Text(category.name, overflow: TextOverflow.ellipsis),
+                          child: Text(
+                            category.name,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                     ],
                     onChanged: (v) {
@@ -162,7 +170,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             child: RefreshIndicator(
               onRefresh: () => _load(reset: true),
               child: ListView.separated(
-                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 itemCount: _assets.length + 1,
                 separatorBuilder: (_, _) => const Divider(height: 1),
                 itemBuilder: (_, i) {
@@ -176,7 +185,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                     if (_exhausted) return const SizedBox(height: 24);
                     return Padding(
                       padding: const EdgeInsets.all(16),
-                      child: OutlinedButton(onPressed: _load, child: Text(l10n.loadMore)),
+                      child: OutlinedButton(
+                        onPressed: _load,
+                        child: Text(l10n.loadMore),
+                      ),
                     );
                   }
                   final asset = _assets[i];
@@ -193,7 +205,17 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                           CategoryPill(asset.product.category, dense: true),
                           Expanded(
                             child: Text(
-                              [asset.assetTag ?? '—', asset.location.name].join(' · '),
+                              [
+                                asset.assetTag ?? '—',
+                                asset.location.name,
+                                // Two cables of one type differ only by length
+                                // and ends, so a tile without them is unusable
+                                // for telling them apart.
+                                if (asset.product.cable case final cable?) ...[
+                                  cableConnectors(cable),
+                                  ?cableLength(cable, l10n.localeName),
+                                ],
+                              ].join(' · '),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),

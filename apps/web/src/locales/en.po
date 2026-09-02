@@ -100,8 +100,9 @@ msgstr "Crew Passes"
 msgid "Booked Equipment"
 msgstr "Booked Equipment"
 
-#~ msgid "Done"
-#~ msgstr "Done"
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Done"
+msgstr "Done"
 
 #~ msgid "Add Equipment"
 #~ msgstr "Add Equipment"
@@ -174,6 +175,7 @@ msgstr "Crew"
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/routes/admin/connectors/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
@@ -226,8 +228,11 @@ msgid "No crew members added yet."
 msgstr "No crew members added yet."
 
 #: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
+#: src/routes/admin/connectors/+page.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
 #: src/routes/auth/register/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/productions/+page.svelte
@@ -259,6 +264,8 @@ msgstr "Remove"
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/assets/new/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
 #: src/routes/products/+page.svelte
@@ -387,6 +394,7 @@ msgstr "Bundle"
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
 #: src/routes/offers/new/+page.svelte
 #: src/routes/productions/+page.svelte
 #: src/routes/stickers/+page.svelte
@@ -649,12 +657,14 @@ msgstr "Quantity"
 msgid "<0/> Create another after saving"
 msgstr "<0/> Create another after saving"
 
+#: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/new/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
 #: src/routes/inspections/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
@@ -840,6 +850,9 @@ msgstr "ArrowDown"
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
+#: src/routes/assets/new/cables/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
 msgid "Enter"
 msgstr "Enter"
 
@@ -1031,6 +1044,8 @@ msgid "Date"
 msgstr "Date"
 
 #: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/assets/new/cables/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
 #: src/routes/productions/[id]/delivery-note/+page.svelte
 msgid "Qty"
 msgstr "Qty"
@@ -1235,6 +1250,7 @@ msgstr "Asset"
 #~ msgstr "Update serial, tag, status, and location."
 
 #: src/lib/components/ui/customer-select/customer-select.svelte
+#: src/routes/admin/connectors/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
@@ -1257,6 +1273,7 @@ msgstr "Edit"
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/new/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/inspections/+page.svelte
@@ -1270,6 +1287,7 @@ msgstr "Location"
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/routes/admin/categories/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
@@ -1294,10 +1312,12 @@ msgstr "Save"
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/new/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
 msgid "Please select a location"
 msgstr "Please select a location"
 
 #: src/routes/assets/new/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
 msgid "No locations yet. Create one in <0>Locations</0>."
 msgstr "No locations yet. Create one in <0>Locations</0>."
 
@@ -1799,6 +1819,8 @@ msgstr "All Categories"
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
 msgid "Category"
 msgstr "Category"
 
@@ -4173,6 +4195,8 @@ msgid "Only possible while it has never been booked, scanned, inspected or bille
 msgstr "Only possible while it has never been booked, scanned, inspected or billed. A unit that has been in use is decommissioned instead, so its history survives."
 
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
+#: src/routes/admin/connectors/+page.svelte
+#: src/routes/admin/connectors/+page.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
@@ -4181,6 +4205,7 @@ msgid "Delete"
 msgstr "Delete"
 
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
+#: src/routes/admin/connectors/+page.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
@@ -4247,6 +4272,7 @@ msgstr "Mark {0} asset{1} as {2}?"
 msgid "They leave the pool: no longer bookable, scannable or listed, and removed from any bundle they are in. The status can be set back, but the bundle membership can't — that has to be rebuilt."
 msgstr "They leave the pool: no longer bookable, scannable or listed, and removed from any bundle they are in. The status can be set back, but the bundle membership can't — that has to be rebuilt."
 
+#: src/routes/admin/connectors/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Products"
 msgstr "Products"
@@ -4355,6 +4381,7 @@ msgstr "Save & finish"
 msgid "Save & next"
 msgstr "Save & next"
 
+#: src/routes/assets/new/cables/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Ctrl"
 msgstr "Ctrl"
@@ -5242,6 +5269,7 @@ msgstr "Manage catalog names, mark generic placeholders, and merge duplicate man
 #~ msgid "Editing manufacturers requires admin or owner rights in one of your organizations."
 #~ msgstr "Editing manufacturers requires admin or owner rights in one of your organizations."
 
+#: src/routes/assets/new/cables/+page.svelte
 #: src/routes/manufacturers/+page.svelte
 msgid "# product"
 msgid_plural "# products"
@@ -5776,3 +5804,366 @@ msgstr "Download everything this organization owns — members, inventory, produ
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Export all data (JSON)"
 msgstr "Export all data (JSON)"
+
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Add Cables"
+msgstr "Add Cables"
+
+#: src/routes/assets/+page.svelte
+msgid "All types"
+msgstr "All types"
+
+#: src/routes/assets/+page.svelte
+msgid "Any connector"
+msgstr "Any connector"
+
+#: src/routes/assets/new/+page.svelte
+msgid "Registering cables? <0>Add them by the drawer</0> instead — one row per kind, quantities rather than units."
+msgstr "Registering cables? <0>Add them by the drawer</0> instead — one row per kind, quantities rather than units."
+
+#~ msgid "XLR, Schuko, DMX…"
+#~ msgstr "XLR, Schuko, DMX…"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Cable type"
+msgstr "Cable type"
+
+#~ msgid "Connector A"
+#~ msgstr "Connector A"
+
+#~ msgid "Connector B"
+#~ msgstr "Connector B"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+#: src/routes/assets/new/cables/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Length (m)"
+msgstr "Length (m)"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "<0/> This is a cable"
+msgstr "<0/> This is a cable"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Could not read that. Try \"10x 10m Schuko\"."
+msgstr "Could not read that. Try \"10x 10m Schuko\"."
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Add at least one cable"
+msgstr "Add at least one cable"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Every row needs a category"
+msgstr "Every row needs a category"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "# cable created"
+msgid_plural "# cables created"
+msgstr[0] "# cable created"
+msgstr[1] "# cables created"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "# new catalog entry"
+msgid_plural "# new catalog entries"
+msgstr[0] "# new catalog entry"
+msgstr[1] "# new catalog entries"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Add Cables | Technikpool"
+msgstr "Add Cables | Technikpool"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "A drawer at a time. Identical cables share one catalog entry, so the list stays \"10 × Schuko 10 m\" rather than ten rows."
+msgstr "A drawer at a time. Identical cables share one catalog entry, so the list stays \"10 × Schuko 10 m\" rather than ten rows."
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Quick entry"
+msgstr "Quick entry"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Type it the way you'd say it and press Enter. Everything it fills in is still editable below."
+msgstr "Type it the way you'd say it and press Enter. Everything it fills in is still editable below."
+
+#~ msgid "Type…"
+#~ msgstr "Type…"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Generic (created on save)"
+msgstr "Generic (created on save)"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Schuko 10 m"
+msgstr "Schuko 10 m"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Remove row"
+msgstr "Remove row"
+
+#. 0: modLabel
+#: src/routes/assets/new/cables/+page.svelte
+msgid "{0} + Enter saves"
+msgstr "{0} + Enter saves"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "<0/> Assign asset tags"
+msgstr "<0/> Assign asset tags"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Add row"
+msgstr "Add row"
+
+#: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
+msgid "A connector needs a name"
+msgstr "A connector needs a name"
+
+#: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
+msgid "Connector updated"
+msgstr "Connector updated"
+
+#: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
+msgid "Connector added"
+msgstr "Connector added"
+
+#: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
+msgid "Edit connector"
+msgstr "Edit connector"
+
+#: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
+#: src/routes/admin/connectors/+page.svelte
+msgid "New connector"
+msgstr "New connector"
+
+#: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
+msgid "A picture is worth more than the name here — a connector is quicker to recognise than to read."
+msgstr "A picture is worth more than the name here — a connector is quicker to recognise than to read."
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+msgid "Schuko M"
+msgstr "Schuko M"
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+msgid "Connector photo"
+msgstr "Connector photo"
+
+#: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
+msgid "Add connector"
+msgstr "Add connector"
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+msgid "Schuko"
+msgstr "Schuko"
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+msgid "Connector name"
+msgstr "Connector name"
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+msgid "Mates with"
+msgstr "Mates with"
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+msgid "The other half of the pair, named as a group: Schuko M and Schuko F are both <0>Schuko</0>. Leave it blank for a connector that only ever meets its own kind."
+msgstr "The other half of the pair, named as a group: Schuko M and Schuko F are both <0>Schuko</0>. Leave it blank for a connector that only ever meets its own kind."
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+msgid "Not stated"
+msgstr "Not stated"
+
+#~ msgid "Plug (male)"
+#~ msgstr "Plug (male)"
+
+#~ msgid "Socket (female)"
+#~ msgstr "Socket (female)"
+
+#~ msgid "Type"
+#~ msgstr "Type"
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+msgid "Connector image"
+msgstr "Connector image"
+
+#~ msgid "Plug or socket"
+#~ msgstr "Plug or socket"
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+#: src/routes/admin/connectors/+page.svelte
+msgid "Department"
+msgstr "Department"
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+msgid "Prefills the category on a new cable that ends in this connector — a Schuko plug is Power wherever it turns up. Only a starting point; the cable's own category still decides what it bills as."
+msgstr "Prefills the category on a new cable that ends in this connector — a Schuko plug is Power wherever it turns up. Only a starting point; the cable's own category still decides what it bills as."
+
+#: src/routes/+layout.svelte
+msgid "<0/> Connectors"
+msgstr "<0/> Connectors"
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "Connector deleted"
+msgstr "Connector deleted"
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "Connectors | Technikpool"
+msgstr "Connectors | Technikpool"
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "Connectors"
+msgstr "Connectors"
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "What a cable's ends are called, shared by every organization. A connector nobody has catalogued is still accepted when equipment is registered — it turns up here afterwards, with its family guessed and no picture yet."
+msgstr "What a cable's ends are called, shared by every organization. A connector nobody has catalogued is still accepted when equipment is registered — it turns up here afterwards, with its family guessed and no picture yet."
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "Search by name or family…"
+msgstr "Search by name or family…"
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "Nothing matches that."
+msgstr "Nothing matches that."
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "# connector"
+msgid_plural "# connectors"
+msgstr[0] "# connector"
+msgstr[1] "# connectors"
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "Delete connector"
+msgstr "Delete connector"
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "No product names this connector, so nothing loses its ends — but the picture and the family go with it."
+msgstr "No product names this connector, so nothing loses its ends — but the picture and the family go with it."
+
+#~ msgid "Plug — goes in"
+#~ msgstr "Plug — goes in"
+
+#~ msgid "Socket — receives"
+#~ msgstr "Socket — receives"
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+#: src/routes/admin/connectors/+page.svelte
+msgid "Pins (male)"
+msgstr "Pins (male)"
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+#: src/routes/admin/connectors/+page.svelte
+msgid "Sockets (female)"
+msgstr "Sockets (female)"
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+#: src/routes/admin/connectors/+page.svelte
+msgid "Contacts"
+msgstr "Contacts"
+
+#~ msgid "Not the same question as the one beside it, and on a locking connector the answers differ: a speakON cable end has sockets inside and is still the plug you push in."
+#~ msgstr "Not the same question as the one beside it, and on a locking connector the answers differ: a speakON cable end has sockets inside and is still the plug you push in."
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "Plug"
+msgstr "Plug"
+
+#~ msgid "Socket"
+#~ msgstr "Socket"
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+#: src/routes/admin/connectors/+page.svelte
+msgid "Body style"
+msgstr "Body style"
+
+#~ msgid "What the part looks like, nothing more. What it can be joined to is decided by the contacts beside it — a speakON is built like a plug and has sockets inside."
+#~ msgstr "What the part looks like, nothing more. What it can be joined to is decided by the contacts beside it — a speakON is built like a plug and has sockets inside."
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+msgid "This is the one that decides what mates with what: male meets female, inside the same family."
+msgstr "This is the one that decides what mates with what: male meets female, inside the same family."
+
+#: src/routes/admin/categories/+page.svelte
+msgid "No direction"
+msgstr "No direction"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Male end feeds"
+msgstr "Male end feeds"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Female end feeds"
+msgstr "Female end feeds"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Cable input end"
+msgstr "Cable input end"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "These look the wrong way round. Connector A should be the end power or signal comes in on — the end that goes into the supply."
+msgstr "These look the wrong way round. Connector A should be the end power or signal comes in on — the end that goes into the supply."
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Swap the ends"
+msgstr "Swap the ends"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Ends look reversed — A should be the end that goes into the supply."
+msgstr "Ends look reversed — A should be the end that goes into the supply."
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+msgid "Plug — on a cable"
+msgstr "Plug — on a cable"
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+msgid "Built-in socket — in a device"
+msgstr "Built-in socket — in a device"
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+msgid "Where it sits, not what it mates with. Nearly every connector here is a plug, because nearly every one is a cable end — what it can be joined to is decided by the contacts beside it."
+msgstr "Where it sits, not what it mates with. Nearly every connector here is a plug, because nearly every one is a cable end — what it can be joined to is decided by the contacts beside it."
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "Built-in socket"
+msgstr "Built-in socket"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+#: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Connector A <0/>"
+msgstr "Connector A <0/>"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+#: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Connector B <0/>"
+msgstr "Connector B <0/>"
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "Direction"
+msgstr "Direction"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Length"
+msgstr "Length"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "Additional info, e.g. CAT7 or 2.5mm²"
+msgstr "Additional info, e.g. CAT7 or 2.5mm²"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "Optional, and only for what the connectors cannot say — the wire itself. Two RJ45 ends are a patch lead whether they are CAT6A or CAT7."
+msgstr "Optional, and only for what the connectors cannot say — the wire itself. Two RJ45 ends are a patch lead whether they are CAT6A or CAT7."
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "CAT7, 2.5mm²…"
+msgstr "CAT7, 2.5mm²…"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+#: src/routes/assets/new/cables/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Additional info"
+msgstr "Additional info"

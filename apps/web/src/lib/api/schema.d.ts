@@ -365,6 +365,25 @@ export interface components {
             manufacturerName: string;
             category: components["schemas"]["Category"];
             imageUrl?: string | null;
+            /**
+             * @description Present only for cables. The name already carries type and length;
+             *     this is the structured form, for filtering and for showing the ends
+             *     without parsing a label. Deliberately not required, like
+             *     Location.address: a client that predates it keeps compiling.
+             */
+            cable?: components["schemas"]["CableSpec"] | null;
+        };
+        CableSpec: {
+            /**
+             * @description The wire rather than the ends — `CAT7`, `2,5 mm²`, `DMX`. Free text,
+             *     not an enum, and null on most cables: what a lead is, is usually said
+             *     completely by its connectors and its length.
+             */
+            type: string | null;
+            connectorA: string | null;
+            connectorB: string | null;
+            /** @description Whole centimetres. */
+            lengthCm: number | null;
         };
         Category: {
             id: string;

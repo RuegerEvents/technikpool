@@ -2,6 +2,13 @@
 	import { categoryLabel } from '$lib/category';
 	import { orgLabel } from '$lib/utils';
 	import {
+		connectorLabel,
+		formatLength,
+		isCable,
+		parseLengthMeters,
+		type CableAttrs
+	} from '$lib/cable';
+	import {
 		getAssets,
 		getCategories,
 		getBundleTemplates,
@@ -46,6 +53,12 @@
 		statusFilterOptions.some(([value]) => value === initialStatus) ? initialStatus : ''
 	);
 	let categoryFilter = $state(initial.get('category') ?? '');
+	// Cable filters. Length is held as the metres someone typed, not centimetres:
+	// it round-trips through the URL as what is in the box.
+	let cableTypeFilter = $state(initial.get('ctype') ?? '');
+	let connectorFilter = $state(initial.get('conn') ?? '');
+	let lengthMin = $state(initial.get('lmin') ?? '');
+	let lengthMax = $state(initial.get('lmax') ?? '');
 	let showBundleView = $state(initial.get('bundles') !== '0');
 	// A photo wall for browsing the catalogue; the table stays the working view.
 	let layout = $state<'list' | 'grid'>(initial.get('view') === 'grid' ? 'grid' : 'list');
@@ -64,7 +77,11 @@
 			status: statusFilter,
 			category: categoryFilter,
 			bundles: showBundleView ? '' : '0',
-			view: layout === 'grid' ? 'grid' : ''
+			view: layout === 'grid' ? 'grid' : '',
+			ctype: cableTypeFilter,
+			conn: connectorFilter,
+			lmin: lengthMin,
+			lmax: lengthMax
 		};
 		for (const [key, value] of Object.entries(params)) {
 			if (value) url.searchParams.set(key, value);
@@ -104,6 +121,7 @@
 		categoryId: string;
 		categoryName: string;
 		categoryColor: string;
+		cable: CableAttrs | null;
 		available: number;
 		maintenance: number;
 		broken: number;
@@ -135,10 +153,54 @@
 		bundleGrouping ? assets.filter((a) => !a.bundleId && !a.parentAssetId) : assets
 	);
 
+	// A pool of lamps shouldn't grow a row of controls that can only ever match
+	// nothing, so the cable filters appear once the pool holds a cable.
+	let hasCables = $derived(assets.some((a) => isCable(a.product)));
+	const collator = new Intl.Collator('de', { numeric: true });
+	let cableTypes = $derived(
+		[...new Set(assets.map((a) => a.product.cableType).filter((t): t is string => !!t))].sort(
+			collator.compare
+		)
+	);
+	let connectors = $derived(
+		[
+			...new Set(
+				assets
+					.flatMap((a) => [a.product.connectorA, a.product.connectorB])
+					.filter((c): c is string => !!c)
+			)
+		].sort(collator.compare)
+	);
+
+	let lengthMinCm = $derived(parseLengthMeters(lengthMin));
+	let lengthMaxCm = $derived(parseLengthMeters(lengthMax));
+
+	// A connector matches on either end: "everything with a TRUE1 on it" is the
+	// question, and which end it is on is not something anyone knows in advance.
+	function matchesCable(product: {
+		cableType: string | null;
+		connectorA: string | null;
+		connectorB: string | null;
+		lengthCm: number | null;
+	}) {
+		if (cableTypeFilter && product.cableType !== cableTypeFilter) return false;
+		if (
+			connectorFilter &&
+			product.connectorA !== connectorFilter &&
+			product.connectorB !== connectorFilter
+		) {
+			return false;
+		}
+		if (lengthMinCm !== null && (product.lengthCm ?? -1) < lengthMinCm) return false;
+		if (lengthMaxCm !== null && (product.lengthCm ?? Infinity) > lengthMaxCm) return false;
+		return true;
+	}
+
 	let visibleAssets = $derived(
 		baseAssets
 			.filter((a) => (!statusFilter || showingRetired ? true : a.status === statusFilter))
 			.filter((a) => (!categoryFilter ? true : a.product.categoryId === categoryFilter))
+			.filter((a) => matchesCable(a.product))
 	);
 
 	let groups = $derived(
@@ -157,6 +219,14 @@
 						categoryId: asset.product.categoryId,
 						categoryName: categoryLabel(asset.product.category),
 						categoryColor: asset.product.category.color,
+						cable: isCable(asset.product)
+							? {
+									cableType: asset.product.cableType,
+									connectorA: asset.product.connectorA,
+									connectorB: asset.product.connectorB,
+									lengthCm: asset.product.lengthCm
+								}
+							: null,
 						available: 0,
 						maintenance: 0,
 						broken: 0,
@@ -192,6 +262,9 @@
 						g.name.toLowerCase().includes(searchTrimmed) ||
 						g.manufacturerName.toLowerCase().includes(searchTrimmed) ||
 						g.categoryName.toLowerCase().includes(searchTrimmed) ||
+						[g.cable?.cableType, g.cable?.connectorA, g.cable?.connectorB].some((v) =>
+							v?.toLowerCase().includes(searchTrimmed)
+						) ||
 						g.assets.some(
 							(a) =>
 								(a.serialNumber?.toLowerCase().includes(searchTrimmed) ?? false) ||
@@ -212,7 +285,8 @@
 							const filteredAssets = inst.assets
 								.filter((a) => !a.parentAssetId)
 								.filter((a) => !statusFilter || a.status === statusFilter)
-								.filter((a) => !categoryFilter || a.product.categoryId === categoryFilter);
+								.filter((a) => !categoryFilter || a.product.categoryId === categoryFilter)
+								.filter((a) => matchesCable(a.product));
 							return {
 								...inst,
 								filteredAssets,
@@ -324,6 +398,7 @@
 			</select>
 			<Button variant="outline" onclick={() => (showImportModal = true)}>Import CSV</Button>
 			<Button icon="add" variant="outline" href={resolve('/assets/bundles/new')}>Add Bundle</Button>
+			<Button icon="add" variant="outline" href={resolve('/assets/new/cables')}>Add Cables</Button>
 			<Button icon="add" href={resolve('/assets/new')}>Add Asset</Button>
 		</div>
 	</div>
@@ -342,6 +417,34 @@
 			allowEmpty
 			allLabel="All Categories"
 		/>
+		{#if hasCables}
+			<select
+				bind:value={cableTypeFilter}
+				class="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+			>
+				<option value="">All types</option>
+				{#each cableTypes as type (type)}<option value={type}>{type}</option>{/each}
+			</select>
+			<select
+				bind:value={connectorFilter}
+				class="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+			>
+				<option value="">Any connector</option>
+				{#each connectors as conn (conn)}<option value={conn}>{conn}</option>{/each}
+			</select>
+			<input
+				bind:value={lengthMin}
+				inputmode="decimal"
+				placeholder="min m"
+				class="h-10 w-20 rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+			/>
+			<input
+				bind:value={lengthMax}
+				inputmode="decimal"
+				placeholder="max m"
+				class="h-10 w-20 rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+			/>
+		{/if}
 		<div class="flex items-center gap-1">
 			{#each statusFilterOptions as [val, label] (val)}
 				<button
@@ -421,6 +524,18 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- What the name can't be trusted to say: the ends and the length, spelled
+	     the same way on every row. -->
+	{#snippet cableChips(cable: CableAttrs | null)}
+		{#if cable}
+			{@const ends = connectorLabel(cable)}
+			{#if ends}<span class="rounded bg-muted px-1.5 py-0.5 text-xs">{ends}</span>{/if}
+			{#if cable.lengthCm}
+				<span class="rounded bg-muted px-1.5 py-0.5 text-xs">{formatLength(cable.lengthCm)}</span>
+			{/if}
+		{/if}
+	{/snippet}
 
 	{#if !hasResults}
 		<div class="rounded-md border">
@@ -556,6 +671,11 @@
 						<div class="flex flex-1 flex-col gap-1 border-t p-3">
 							<span class="text-sm leading-snug font-medium">{group.name}</span>
 							<span class="text-xs text-muted-foreground">{group.manufacturerName}</span>
+							{#if group.cable}
+								<div class="flex flex-wrap items-center gap-1">
+									{@render cableChips(group.cable)}
+								</div>
+							{/if}
 							<div class="mt-auto flex flex-wrap items-center gap-2 pt-2">
 								<CategoryPill name={group.categoryName} color={group.categoryColor} />
 								<span class="ml-auto flex items-center gap-1.5 font-mono text-xs tabular-nums">
@@ -917,6 +1037,7 @@
 									</svg>
 									<ProductThumb path={group.imagePath} alt={group.name} />
 									<span class="font-medium">{group.name}</span>
+									{@render cableChips(group.cable)}
 								</div>
 							</td>
 							<td class="px-4 py-3 text-muted-foreground">{group.manufacturerName}</td>

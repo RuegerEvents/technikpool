@@ -23,6 +23,7 @@ export 'models/location.dart';
 export 'models/production.dart';
 export 'models/asset.dart';
 export 'models/product.dart';
+export 'models/cable_spec.dart';
 export 'models/category.dart';
 export 'models/asset_detail.dart';
 export 'models/asset_transaction.dart';

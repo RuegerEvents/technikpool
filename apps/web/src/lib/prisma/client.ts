@@ -82,6 +82,16 @@ export type OrgMembership = Prisma.OrgMembershipModel
  */
 export type Manufacturer = Prisma.ManufacturerModel
 /**
+ * Model Connector
+ * A cable end as a row of its own, so it can carry a picture and so the pool
+ * spells it one way. The product fields stay free text — `Product.connectorA`
+ * is still a string, and a name nobody has used before is accepted and gets a
+ * row on save. This table is what that name accumulates against, not a gate in
+ * front of it: a warehouse at 22:00 with an unlisted connector must never be
+ * stuck.
+ */
+export type Connector = Prisma.ConnectorModel
+/**
  * Model Category
  * 
  */

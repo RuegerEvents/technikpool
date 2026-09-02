@@ -10,7 +10,13 @@
 
 	let categories = $derived(await getCategories());
 
-	type Draft = { name: string; nameDe: string; color: string; sortOrder: string };
+	type Draft = {
+		name: string;
+		nameDe: string;
+		color: string;
+		sortOrder: string;
+		cableInputGender: '' | 'male' | 'female';
+	};
 	let drafts = new SvelteMap<string, Draft>();
 	let saving = new SvelteSet<string>();
 
@@ -20,7 +26,8 @@
 				name: c.name,
 				nameDe: c.nameDe ?? '',
 				color: c.color,
-				sortOrder: String(c.sortOrder)
+				sortOrder: String(c.sortOrder),
+				cableInputGender: (c.cableInputGender as 'male' | 'female' | null) ?? ''
 			}
 		);
 	}
@@ -39,7 +46,8 @@
 				name: draft.name,
 				nameDe: draft.nameDe || null,
 				color: draft.color,
-				sortOrder: Number(draft.sortOrder)
+				sortOrder: Number(draft.sortOrder),
+				cableInputGender: draft.cableInputGender || null
 			});
 			drafts.delete(c.id);
 			toast.success('Category saved');
@@ -97,6 +105,28 @@
 							placeholder={category.name}
 							oninput={(e) => edit(category, { nameDe: (e.target as HTMLInputElement).value })}
 						/>
+					</div>
+					<div class="space-y-1">
+						<!-- Which end of a cable in this department feeds. It is a
+						     power-versus-signal fact, not a per-connector one: a cable's male
+						     end takes power in, while an XLR's female end is the receiving
+						     one. Recording it here is what lets the cable forms say when the
+						     two ends have been entered the wrong way round. -->
+						<Label for="dir-{category.id}" class="text-xs">Cable input end</Label>
+						<select
+							id="dir-{category.id}"
+							value={draft.cableInputGender}
+							onchange={(e) =>
+								edit(category, {
+									cableInputGender: (e.currentTarget as HTMLSelectElement).value as
+										'' | 'male' | 'female'
+								})}
+							class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+						>
+							<option value="">No direction</option>
+							<option value="male">Male end feeds</option>
+							<option value="female">Female end feeds</option>
+						</select>
 					</div>
 					<div class="space-y-1">
 						<Label for="sort-{category.id}" class="text-xs">Order</Label>

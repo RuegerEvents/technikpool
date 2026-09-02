@@ -31,6 +31,8 @@
   "serialNumber": "Seriennummer",
   "status": "Status",
   "currentLocation": "Aktueller Lagerort",
+  "connectors": "Stecker",
+  "cableLength": "Länge",
   "checkedOutTo": "Ausgebucht an",
   "history": "Verlauf",
   "inventory": "Bestand",

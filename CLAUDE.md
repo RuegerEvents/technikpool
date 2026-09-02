@@ -579,7 +579,7 @@ consequences worth knowing:
   which is what turns a 404 envelope into an `ApiException`.
 
 `test/demo_backend_test.dart` covers it, because it is the one path with no server behind it to
-catch a mistake. Tags run 40000001–40000012 and are printed in Inventory and hinted on Lookup —
+catch a mistake. Tags run 40000001–40000014 and are printed in Inventory and hinted on Lookup —
 a reviewer has no sticker to scan and has to type one.
 
 ## Releasing and store uploads

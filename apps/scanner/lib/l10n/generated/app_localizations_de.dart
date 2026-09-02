@@ -105,6 +105,12 @@ class SDe extends S {
   String get currentLocation => 'Aktueller Lagerort';
 
   @override
+  String get connectors => 'Stecker';
+
+  @override
+  String get cableLength => 'Länge';
+
+  @override
   String get checkedOutTo => 'Ausgebucht an';
 
   @override

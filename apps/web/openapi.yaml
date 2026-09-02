@@ -644,6 +644,33 @@ components:
           $ref: '#/components/schemas/Category'
         imageUrl:
           type: [string, 'null']
+        cable:
+          description: |
+            Present only for cables. The name already carries type and length;
+            this is the structured form, for filtering and for showing the ends
+            without parsing a label. Deliberately not required, like
+            Location.address: a client that predates it keeps compiling.
+          oneOf:
+            - $ref: '#/components/schemas/CableSpec'
+            - type: 'null'
+
+    CableSpec:
+      type: object
+      required: [type, connectorA, connectorB, lengthCm]
+      properties:
+        type:
+          type: [string, 'null']
+          description: |
+            The wire rather than the ends — `CAT7`, `2,5 mm²`, `DMX`. Free text,
+            not an enum, and null on most cables: what a lead is, is usually said
+            completely by its connectors and its length.
+        connectorA:
+          type: [string, 'null']
+        connectorB:
+          type: [string, 'null']
+        lengthCm:
+          type: [integer, 'null']
+          description: Whole centimetres.
 
     Category:
       type: object

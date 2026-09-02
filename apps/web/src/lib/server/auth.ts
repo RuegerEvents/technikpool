@@ -27,6 +27,7 @@ const prefixes: Partial<Record<ModelName, string>> = {
 	AssetTransaction: 'astx',
 	BundleTemplate: 'bndt',
 	Category: 'catg',
+	Connector: 'conn',
 	Customer: 'cust',
 	DeviceCode: 'dvc',
 	Manufacturer: 'mfr',

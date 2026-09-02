@@ -16,7 +16,10 @@ void main() {
     expect(await api.inventory.listLocations(), hasLength(3));
     expect(await api.inventory.listProductions(), hasLength(2));
     expect(await api.inventory.listCategories(), hasLength(3));
-    expect((await api.inventory.listAssets()).items, hasLength(DemoData.assets().length));
+    expect(
+      (await api.inventory.listAssets()).items,
+      hasLength(DemoData.assets().length),
+    );
   });
 
   test('filters assets by search and category', () async {
@@ -24,22 +27,41 @@ void main() {
     expect(search.items, isNotEmpty);
     expect(search.items.every((a) => a.product.name.contains('K2')), isTrue);
 
-    final lights = await api.inventory.listAssets(categoryId: 'catg_demo_light');
-    expect(lights.items.every((a) => a.product.category.id == 'catg_demo_light'), isTrue);
-  });
-
-  test('an unknown tag comes back as an ApiException, not a parse failure', () async {
-    await expectLater(
-      api.inventory.getAssetByTag(tag: '99999999'),
-      throwsA(
-        isA<Object>().having(
-          (e) => (unwrapError(e) as ApiException).code,
-          'code',
-          'asset_not_found',
-        ),
-      ),
+    final lights = await api.inventory.listAssets(
+      categoryId: 'catg_demo_light',
+    );
+    expect(
+      lights.items.every((a) => a.product.category.id == 'catg_demo_light'),
+      isTrue,
     );
   });
+
+  test('a cable carries its structured half', () async {
+    final detail = await api.inventory.getAssetByTag(tag: '40000013');
+    expect(detail.product.cable, isNotNull);
+    expect(detail.product.cable!.type, 'XLR');
+    expect(detail.product.cable!.lengthCm, 1000);
+    // Nothing else in the fixture is a cable, so a `cable` on a lamp would mean
+    // the mapper is inventing one.
+    final lamp = await api.inventory.getAssetByTag(tag: '40000001');
+    expect(lamp.product.cable, isNull);
+  });
+
+  test(
+    'an unknown tag comes back as an ApiException, not a parse failure',
+    () async {
+      await expectLater(
+        api.inventory.getAssetByTag(tag: '99999999'),
+        throwsA(
+          isA<Object>().having(
+            (e) => (unwrapError(e) as ApiException).code,
+            'code',
+            'asset_not_found',
+          ),
+        ),
+      );
+    },
+  );
 
   test('a scan onto a production is still there on the next lookup', () async {
     final production = (await api.inventory.listProductions()).first;

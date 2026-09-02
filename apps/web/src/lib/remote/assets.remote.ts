@@ -22,6 +22,9 @@ import {
 import { syncAccessories } from '$lib/server/services/accessories';
 import { ensureAssetImage, ensureBundleImage } from '$lib/server/services/bundle-image';
 import { getProduction } from '$lib/remote/productions.remote';
+import { CABLE_TYPE_DEFAULTS, CABLE_TYPE_SUGGESTIONS, isCable, normalizeCable } from '$lib/cable';
+import { ensureConnectors } from '$lib/server/services/connectors';
+import { getConnectors } from '$lib/remote/connectors.remote';
 
 async function ensureBundleImageWithoutBreakingRead(
 	bundle: Parameters<typeof ensureBundleImage>[0]
@@ -295,7 +298,9 @@ const updateCategorySchema = v.object({
 	name: v.optional(v.string()),
 	nameDe: v.optional(v.nullable(v.string())),
 	color: v.optional(v.string()),
-	sortOrder: v.optional(v.number())
+	sortOrder: v.optional(v.number()),
+	/** Which contacts feed, on a cable in this department. See $lib/cable. */
+	cableInputGender: v.optional(v.nullable(v.picklist(['male', 'female'])))
 });
 
 /**
@@ -308,7 +313,13 @@ export const updateCategory = command(updateCategorySchema, async (input) => {
 	const user = await requireAuth();
 	if (!(await isSystemAdmin(user.id))) error(403, 'Admin access required');
 
-	const data: { name?: string; nameDe?: string | null; color?: string; sortOrder?: number } = {};
+	const data: {
+		name?: string;
+		nameDe?: string | null;
+		color?: string;
+		sortOrder?: number;
+		cableInputGender?: string | null;
+	} = {};
 	if ('name' in input) {
 		const name = input.name?.trim();
 		if (!name) error(400, 'A category needs an English name');
@@ -322,10 +333,17 @@ export const updateCategory = command(updateCategorySchema, async (input) => {
 	if ('nameDe' in input) data.nameDe = input.nameDe?.trim() || null;
 	if ('color' in input) data.color = input.color;
 	if ('sortOrder' in input) data.sortOrder = input.sortOrder;
+	if ('cableInputGender' in input) data.cableInputGender = input.cableInputGender ?? null;
 
 	const previous = await prisma.category.findUniqueOrThrow({
 		where: { id: input.categoryId },
-		select: { name: true, nameDe: true, color: true, sortOrder: true }
+		select: {
+			name: true,
+			nameDe: true,
+			color: true,
+			sortOrder: true,
+			cableInputGender: true
+		}
 	});
 	const updated = await prisma.category.update({ where: { id: input.categoryId }, data });
 	const changes = fieldChanges(previous, data);
@@ -466,6 +484,80 @@ export const getProducts = query(v.optional(v.string()), async (manufacturerId?:
 });
 
 /**
+ * The vocabulary the cable forms offer: what this pool already calls its
+ * cables, merged with a starter list so day one isn't a blank field.
+ * Deliberately not a lookup table — `Product.cableType` is free text, and the
+ * next cable is always one nobody anticipated. What the catalogue holds wins on
+ * spelling, because that is the spelling the rest of the inventory is filed
+ * under.
+ *
+ * `byType` is the prefill: picking "Schuko" fills the connectors and the
+ * category from the newest Schuko product, which is a better guess than any
+ * list we could maintain — it is what this pool actually owns.
+ */
+export const getCableVocabulary = query(async () => {
+	await requireAuth();
+	const rows = await prisma.product.findMany({
+		where: {
+			OR: [
+				{ cableType: { not: null } },
+				{ connectorA: { not: null } },
+				{ connectorB: { not: null } },
+				{ lengthCm: { not: null } }
+			]
+		},
+		select: { cableType: true, connectorA: true, connectorB: true, categoryId: true },
+		orderBy: { createdAt: 'desc' }
+	});
+
+	// Case-insensitive dedup, first spelling seen wins. Catalogue values go in
+	// first, so a pool that writes "schuko" keeps writing it.
+	const merge = (fromCatalog: string[], starters: readonly string[]) => {
+		const seen = new Map<string, string>();
+		for (const value of [...fromCatalog, ...starters]) {
+			const name = value.trim();
+			if (!name) continue;
+			const key = name.toLowerCase();
+			if (!seen.has(key)) seen.set(key, name);
+		}
+		return [...seen.values()];
+	};
+
+	const byType: Record<
+		string,
+		{ connectorA: string | null; connectorB: string | null; categoryId: string | null }
+	> = {};
+	for (const row of rows) {
+		const type = row.cableType?.trim();
+		// Newest first, so the first row of a type is the precedent.
+		if (!type || byType[type]) continue;
+		byType[type] = {
+			connectorA: row.connectorA,
+			connectorB: row.connectorB,
+			categoryId: row.categoryId
+		};
+	}
+	for (const [type, ends] of Object.entries(CABLE_TYPE_DEFAULTS)) {
+		if (!byType[type]) byType[type] = { ...ends, categoryId: null };
+	}
+
+	return {
+		// Whether the pool holds any cables decides whether the device list shows
+		// cable filters — a pool of lamps shouldn't grow a row of controls that
+		// can only ever match nothing.
+		hasCables: rows.length > 0,
+		types: merge(
+			rows.flatMap((r) => (r.cableType ? [r.cableType] : [])),
+			CABLE_TYPE_SUGGESTIONS
+		),
+		// Connectors are not here: they are rows of their own now, with pictures,
+		// and `getConnectors` serves them. Types have no such table — there is
+		// nothing to hang on a cable type but its name.
+		byType
+	};
+});
+
+/**
  * The complete product catalogue. Counts remain scoped to the selected
  * organization(s), but products with no matching units must stay visible: this
  * is also the place where abandoned catalogue rows are cleaned up.
@@ -502,12 +594,27 @@ export const getProductCatalog = query(v.optional(v.string()), async (organizati
 	}));
 });
 
+/**
+ * The four cable columns as a form sends them. `cableType` is what makes a
+ * product a cable, so it is the one that has to be there; the ends and the
+ * length are each unknown often enough to be optional.
+ */
+const cableAttrsSchema = v.object({
+	/** The wire, not the ends: CAT7, 2,5 mm². Optional — most cables have nothing
+	 * to say here that the connectors do not already say. */
+	cableType: v.optional(v.nullable(v.string())),
+	connectorA: v.optional(v.nullable(v.string())),
+	connectorB: v.optional(v.nullable(v.string())),
+	lengthCm: v.optional(v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1))))
+});
+
 /** The manufacturer/product half of a create form, which two commands now ask for. */
 const productRefSchema = {
 	productId: v.optional(v.string()),
 	newProductName: v.optional(v.string()),
 	newProductImagePath: v.optional(v.string()),
 	newProductNetPurchasePrice: v.optional(v.nullable(v.pipe(v.number(), v.minValue(0)))),
+	newProductCable: v.optional(v.nullable(cableAttrsSchema)),
 	categoryId: v.optional(v.string()),
 	manufacturerId: v.optional(v.string()),
 	newManufacturerName: v.optional(v.string()),
@@ -548,7 +655,8 @@ async function resolveProductRef(data: ProductRef, organizationId: string): Prom
 				name: data.newProductName,
 				manufacturerId,
 				categoryId: data.categoryId,
-				imagePath: data.newProductImagePath?.trim() || null
+				imagePath: data.newProductImagePath?.trim() || null,
+				...(data.newProductCable ? normalizeCable(data.newProductCable) : {})
 			}
 		});
 		// The price given alongside a brand-new product is the creating org's own
@@ -564,6 +672,14 @@ async function resolveProductRef(data: ProductRef, organizationId: string): Prom
 		}
 		productId = p.id;
 		await getProducts(manufacturerId).refresh();
+		if (data.newProductCable) {
+			const added = await ensureConnectors([
+				data.newProductCable.connectorA,
+				data.newProductCable.connectorB
+			]);
+			if (added.length > 0) await getConnectors().refresh();
+			await getCableVocabulary().refresh();
+		}
 	}
 
 	if (!productId) throw new Error('Product is required');
@@ -591,6 +707,162 @@ async function tagAllocator(tx: AssetTx, prefix: string): Promise<() => string> 
 		if (!isNaN(parsed)) next = parsed + 1;
 	}
 	return () => `${prefix}${String(next++).padStart(5, '0')}`;
+}
+
+/** Registering equipment is an org-admin right; three commands ask the same question. */
+async function assertOrgAssetAdmin(userId: string, organizationId: string) {
+	const membership = await prisma.orgMembership.findUnique({
+		where: { userId_organizationId: { userId, organizationId } }
+	});
+	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
+		throw new Error('Unauthorized to create assets in this org');
+	}
+}
+
+/** One unit as a caller asks for it — a tag it brought, one to allocate, or none. */
+type UnitSpec = {
+	productId: string;
+	serialNumber?: string | null;
+	assetTag?: string | null;
+	noAssetTag?: boolean;
+};
+
+type CreateUnitsArgs = {
+	userId: string;
+	organizationId: string;
+	/** Already resolved and checked against the org by the caller. */
+	locationId: string;
+	units: UnitSpec[];
+	parent?: (AccessoryParent & { productId: string }) | null;
+	bundleId?: string | null;
+	accessoryProfile?: ProductAccessoryProfile | null;
+};
+
+/**
+ * Creates units, in one transaction, with everything that has to happen at the
+ * same moment: the org's inspection interval snapshotted onto each one, tags
+ * drawn in row order from a single allocator, the CREATED (and, for an
+ * accessory, ACCESSORY_ATTACHED) transactions, and the accessory fan-out.
+ *
+ * Extracted because the cable batch is the third caller. Two copies of tag
+ * allocation is how one batch hands the same number to two units.
+ */
+async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
+	const { assetIdPrefix: prefix, defaultInspectionIntervalMonths } =
+		await tx.organization.findUniqueOrThrow({
+			where: { id: args.organizationId },
+			select: { assetIdPrefix: true, defaultInspectionIntervalMonths: true }
+		});
+
+	const createdAt = new Date();
+	const nextInspectionDue = defaultInspectionIntervalMonths
+		? new Date(
+				createdAt.getFullYear(),
+				createdAt.getMonth() + defaultInspectionIntervalMonths,
+				createdAt.getDate()
+			)
+		: null;
+
+	const nextTag = await tagAllocator(tx, prefix);
+	const parent = args.parent ?? null;
+
+	const created = await Promise.all(
+		// `nextTag()` is called synchronously inside the map, before anything is
+		// awaited, so the tags land in row order rather than completion order.
+		args.units.map((unit) => {
+			let resolvedTag: string | null;
+			if (unit.noAssetTag) {
+				resolvedTag = null;
+			} else if (unit.assetTag?.trim()) {
+				const tag = unit.assetTag.trim();
+				if (!tag.startsWith(prefix))
+					throw new Error(`Asset tag "${tag}" must start with org prefix "${prefix}"`);
+				resolvedTag = tag;
+			} else {
+				resolvedTag = nextTag();
+			}
+
+			return tx.asset.create({
+				data: {
+					organizationId: args.organizationId,
+					productId: unit.productId,
+					locationId: args.locationId,
+					serialNumber: unit.serialNumber || null,
+					assetTag: resolvedTag,
+					status: 'AVAILABLE',
+					parentAssetId: parent?.id ?? null,
+					bundleId: parent?.bundleId ?? args.bundleId ?? null,
+					// Snapshot, not a live reference — see Organization.defaultInspectionIntervalMonths.
+					inspectionIntervalMonths: defaultInspectionIntervalMonths,
+					nextInspectionDue,
+					transactions: {
+						create: [
+							{ userId: args.userId, action: 'CREATED', data: { type: 'CREATED' } },
+							// Two entries rather than one: the unit was created, and it was
+							// attached. Detaching it later leaves the first one true.
+							...(parent
+								? [
+										{
+											userId: args.userId,
+											action: 'ACCESSORY_ATTACHED',
+											data: {
+												type: 'ACCESSORY_ATTACHED',
+												parentAssetId: parent.id,
+												parentLabel: assetLabel(parent)
+											}
+										}
+									]
+								: [])
+						]
+					}
+				},
+				include: { product: { include: { manufacturer: true, category: true } }, location: true }
+			});
+		})
+	);
+
+	// In the same transaction as the units themselves: a fixture that reaches
+	// the pool without the brackets every other one of its kind has is worse
+	// than one that was never created — nothing about it looks wrong later.
+	if (args.accessoryProfile) {
+		for (const unit of created) {
+			for (const acc of args.accessoryProfile.accessories) {
+				for (let n = 0; n < acc.perUnit; n++) {
+					await createAccessoryRecord(tx, {
+						userId: args.userId,
+						organizationId: args.organizationId,
+						productId: acc.productId,
+						assetTag: acc.tagged ? nextTag() : null,
+						inspectionIntervalMonths: defaultInspectionIntervalMonths,
+						nextInspectionDue,
+						parent: {
+							id: unit.id,
+							locationId: unit.locationId,
+							bundleId: unit.bundleId,
+							assetTag: unit.assetTag,
+							product: unit.product
+						}
+					});
+				}
+			}
+		}
+	}
+
+	return created;
+}
+
+/** What a listing shows once an org has gained units of some products. */
+async function refreshAfterUnitsCreated(organizationId: string, productIds: string[]) {
+	await getAssets(organizationId).refresh();
+	await getAssets().refresh();
+	await getInventorySummary(organizationId).refresh();
+	await getInventorySummary().refresh();
+	// The product just gained a unit, so what its fleet carries may have moved.
+	await Promise.all(
+		[...new Set(productIds)].map((productId) =>
+			getProductAccessoryProfile({ productId, organizationId }).refresh()
+		)
+	);
 }
 
 const createAssetsSchema = v.object({
@@ -622,13 +894,7 @@ const createAssetsSchema = v.object({
 
 export const createAssets = command(createAssetsSchema, async (data) => {
 	const user = await requireAuth();
-
-	const membership = await prisma.orgMembership.findUnique({
-		where: { userId_organizationId: { userId: user.id, organizationId: data.organizationId } }
-	});
-	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		throw new Error('Unauthorized to create assets in this org');
-	}
+	await assertOrgAssetAdmin(user.id, data.organizationId);
 
 	const productId = await resolveProductRef(data, data.organizationId);
 
@@ -694,120 +960,23 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 			? await productAccessoryProfile(productId, data.organizationId)
 			: null;
 
-	const assets = await prisma.$transaction(async (tx) => {
-		const { assetIdPrefix: prefix, defaultInspectionIntervalMonths } =
-			await tx.organization.findUniqueOrThrow({
-				where: { id: data.organizationId },
-				select: { assetIdPrefix: true, defaultInspectionIntervalMonths: true }
-			});
+	const assets = await prisma.$transaction((tx) =>
+		createUnitsInTx(tx, {
+			userId: user.id,
+			organizationId: data.organizationId,
+			locationId: location.id,
+			units: data.items.map((item) => ({ ...item, productId })),
+			parent,
+			bundleId: bundle?.id ?? null,
+			accessoryProfile
+		})
+	);
 
-		const createdAt = new Date();
-		const nextInspectionDue = defaultInspectionIntervalMonths
-			? new Date(
-					createdAt.getFullYear(),
-					createdAt.getMonth() + defaultInspectionIntervalMonths,
-					createdAt.getDate()
-				)
-			: null;
-
-		const nextTag = await tagAllocator(tx, prefix);
-
-		const created = await Promise.all(
-			data.items.map((item) => {
-				let resolvedTag: string | null;
-				if (item.noAssetTag) {
-					resolvedTag = null;
-				} else if (item.assetTag?.trim()) {
-					const tag = item.assetTag.trim();
-					if (!tag.startsWith(prefix))
-						throw new Error(`Asset tag "${tag}" must start with org prefix "${prefix}"`);
-					resolvedTag = tag;
-				} else {
-					resolvedTag = nextTag();
-				}
-
-				return tx.asset.create({
-					data: {
-						organizationId: data.organizationId,
-						productId: productId!,
-						locationId: location.id,
-						serialNumber: item.serialNumber || null,
-						assetTag: resolvedTag,
-						status: 'AVAILABLE',
-						parentAssetId: parent?.id ?? null,
-						bundleId: parent?.bundleId ?? bundle?.id ?? null,
-						// Snapshot, not a live reference — see Organization.defaultInspectionIntervalMonths.
-						inspectionIntervalMonths: defaultInspectionIntervalMonths,
-						nextInspectionDue,
-						transactions: {
-							create: [
-								{ userId: user.id, action: 'CREATED', data: { type: 'CREATED' } },
-								// Two entries rather than one: the unit was created, and it was
-								// attached. Detaching it later leaves the first one true.
-								...(parent
-									? [
-											{
-												userId: user.id,
-												action: 'ACCESSORY_ATTACHED',
-												data: {
-													type: 'ACCESSORY_ATTACHED',
-													parentAssetId: parent.id,
-													parentLabel: assetLabel(parent)
-												}
-											}
-										]
-									: [])
-							]
-						}
-					},
-					include: { product: { include: { manufacturer: true, category: true } }, location: true }
-				});
-			})
-		);
-
-		// In the same transaction as the units themselves: a fixture that reaches
-		// the pool without the brackets every other one of its kind has is worse
-		// than one that was never created — nothing about it looks wrong later.
-		if (accessoryProfile) {
-			for (const unit of created) {
-				for (const acc of accessoryProfile.accessories) {
-					for (let n = 0; n < acc.perUnit; n++) {
-						await createAccessoryRecord(tx, {
-							userId: user.id,
-							organizationId: data.organizationId,
-							productId: acc.productId,
-							assetTag: acc.tagged ? nextTag() : null,
-							inspectionIntervalMonths: defaultInspectionIntervalMonths,
-							nextInspectionDue,
-							parent: {
-								id: unit.id,
-								locationId: unit.locationId,
-								bundleId: unit.bundleId,
-								assetTag: unit.assetTag,
-								product: unit.product
-							}
-						});
-					}
-				}
-			}
-		}
-
-		return created;
-	});
-
-	await getAssets(data.organizationId).refresh();
-	await getAssets().refresh();
-	await getInventorySummary(data.organizationId).refresh();
-	await getInventorySummary().refresh();
+	await refreshAfterUnitsCreated(data.organizationId, [productId]);
 	if (accessoryProfile) {
 		await Promise.all(assets.map((a) => getAsset(a.id).refresh()));
 	}
-	// Both ends move: the product just gained a unit, and if these were
-	// accessories the parent's product now carries one more of them.
-	await getProductAccessoryProfile({
-		productId,
-		organizationId: data.organizationId
-	}).refresh();
+	// If these were accessories, the parent's product now carries one more of them.
 	if (parent) {
 		await getAsset(parent.id).refresh();
 		await getAssetHistory(parent.id).refresh();
@@ -825,6 +994,171 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 	}
 
 	return assets;
+});
+
+// ── Cables, by the box ───────────────────────────────────────────────────────
+// Cables are the most numerous and least individual thing in the pool: nobody
+// registers one, they register ten. `createAssets` asks for a manufacturer, a
+// product, a serial number and a tag per unit, which is four questions too many
+// for "10× Schuko 10 m" — so this command takes rows of
+// (type, ends, length, quantity) and does the product lookup itself.
+
+const cableBatchRowSchema = v.object({
+	...cableAttrsSchema.entries,
+	/** null means the generic manufacturer — a Schuko lead has no brand worth filing. */
+	manufacturerId: v.nullable(v.string()),
+	categoryId: v.string(),
+	name: v.pipe(v.string(), v.trim(), v.minLength(1)),
+	quantity: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(200))
+});
+
+const createCableBatchSchema = v.object({
+	organizationId: v.string(),
+	locationId: v.string(),
+	assignAssetTags: v.boolean(),
+	rows: v.pipe(v.array(cableBatchRowSchema), v.minLength(1))
+});
+
+/**
+ * The org's stand-in manufacturer, created on demand. Cables are filed under it
+ * because "Generisch" is the honest answer for a Schuko lead, and because
+ * `productBillingLabel` prints the product name alone for a generic maker.
+ */
+async function resolveGenericManufacturer(): Promise<string> {
+	const existing = await prisma.manufacturer.findFirst({
+		where: { generic: true },
+		orderBy: { name: 'asc' }
+	});
+	if (existing) return existing.id;
+	const created = await prisma.manufacturer.create({ data: { name: 'Generisch', generic: true } });
+	await getManufacturers().refresh();
+	await getProducts().refresh();
+	return created.id;
+}
+
+export const createCableBatch = command(createCableBatchSchema, async (data) => {
+	const user = await requireAuth();
+	await assertOrgAssetAdmin(user.id, data.organizationId);
+
+	const location = await prisma.location.findUniqueOrThrow({ where: { id: data.locationId } });
+	if (location.organizationId !== data.organizationId) throw new Error('Invalid location');
+
+	let genericManufacturerId: string | null = null;
+	if (data.rows.some((row) => row.manufacturerId === null)) {
+		genericManufacturerId = await resolveGenericManufacturer();
+	}
+
+	const seenCategories = new Set<string>();
+	for (const row of data.rows) {
+		if (seenCategories.has(row.categoryId)) continue;
+		await prisma.category.findUniqueOrThrow({ where: { id: row.categoryId } });
+		seenCategories.add(row.categoryId);
+	}
+
+	// Products are resolved before the transaction opens, the way
+	// `resolveProductRef` does it — a catalogue row is not this org's to roll
+	// back, and two rows describing the same cable have to end up sharing one.
+	const productByKey = new Map<string, { productId: string; created: boolean }>();
+	const resolved: { productId: string; name: string; productCreated: boolean; quantity: number }[] =
+		[];
+
+	for (const row of data.rows) {
+		const cable = normalizeCable(row);
+		const manufacturerId = row.manufacturerId ?? genericManufacturerId;
+		if (!manufacturerId) throw new Error('Manufacturer is required');
+
+		if (!isCable(cable)) {
+			error(400, `"${row.name}" says nothing about the cable — add ends, a length or a type.`);
+		}
+
+		const key = [
+			manufacturerId,
+			cable.cableType?.toLowerCase() ?? '',
+			cable.connectorA?.toLowerCase() ?? '',
+			cable.connectorB?.toLowerCase() ?? '',
+			cable.lengthCm ?? ''
+		].join('|');
+
+		let entry = productByKey.get(key);
+		if (!entry) {
+			// Nulls are passed as `null`, never left undefined: to Prisma
+			// `undefined` means "don't filter on this", so a blank connector would
+			// match any cable and a second product would be created every time.
+			const existing = await prisma.product.findFirst({
+				where: {
+					manufacturerId,
+					cableType: cable.cableType,
+					connectorA: cable.connectorA,
+					connectorB: cable.connectorB,
+					lengthCm: cable.lengthCm
+				},
+				select: { id: true }
+			});
+			if (existing) {
+				entry = { productId: existing.id, created: false };
+			} else {
+				const product = await prisma.product.create({
+					data: {
+						name: row.name.trim(),
+						manufacturerId,
+						categoryId: row.categoryId,
+						...cable
+					},
+					select: { id: true }
+				});
+				entry = { productId: product.id, created: true };
+			}
+			productByKey.set(key, entry);
+		}
+
+		resolved.push({
+			productId: entry.productId,
+			name: row.name.trim(),
+			productCreated: entry.created,
+			quantity: row.quantity
+		});
+	}
+
+	const units = resolved.flatMap((row) =>
+		Array.from({ length: row.quantity }, () => ({
+			productId: row.productId,
+			// Cables are untagged by default: a sticker on a 1.5 m Schuko lead
+			// costs more to maintain than the unit is worth. The form remembers
+			// the choice for pools that do tag them.
+			noAssetTag: !data.assignAssetTags
+		}))
+	);
+
+	const created = await prisma.$transaction((tx) =>
+		createUnitsInTx(tx, {
+			userId: user.id,
+			organizationId: data.organizationId,
+			locationId: location.id,
+			units
+		})
+	);
+
+	const addedConnectors = await ensureConnectors(
+		data.rows.flatMap((row) => [row.connectorA, row.connectorB])
+	);
+
+	const manufacturerIds = new Set(
+		data.rows.map((row) => row.manufacturerId ?? genericManufacturerId!)
+	);
+	await refreshAfterUnitsCreated(
+		data.organizationId,
+		resolved.map((r) => r.productId)
+	);
+	await Promise.all([
+		getProducts().refresh(),
+		...[...manufacturerIds].map((id) => getProducts(id).refresh()),
+		getProductCatalog().refresh(),
+		getProductCatalog(data.organizationId).refresh(),
+		getCableVocabulary().refresh(),
+		...(addedConnectors.length > 0 ? [getConnectors().refresh()] : [])
+	]);
+
+	return { created: created.length, rows: resolved };
 });
 
 export const getAssetHistory = query(v.string(), async (assetId: string) => {
@@ -1322,7 +1656,13 @@ const updateProductSchema = v.object({
 	name: v.optional(v.string()),
 	manufacturerId: v.optional(v.string()),
 	categoryId: v.optional(v.string()),
-	imagePath: v.optional(v.string())
+	imagePath: v.optional(v.string()),
+	/**
+	 * `undefined` leaves the cable columns alone; `null` says this is not a cable
+	 * any more and clears all four. Anything else replaces them wholesale — a
+	 * cable's four attributes describe one physical thing and are edited together.
+	 */
+	cable: v.optional(v.nullable(cableAttrsSchema))
 });
 
 export const updateProduct = command(updateProductSchema, async (input) => {
@@ -1338,8 +1678,34 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 
 	const previousProduct = await prisma.product.findUniqueOrThrow({
 		where: { id: input.productId },
-		select: { name: true, manufacturerId: true, categoryId: true, imagePath: true }
+		select: {
+			name: true,
+			manufacturerId: true,
+			categoryId: true,
+			imagePath: true,
+			cableType: true,
+			connectorA: true,
+			connectorB: true,
+			lengthCm: true
+		}
 	});
+
+	// What a cable *is* — its type, its ends, its length — is identity in exactly
+	// the way a name is: it decides which product a unit belongs to, and every
+	// packing list groups by it. Normalised on both sides so a blank field
+	// arriving as '' doesn't read as a change from null.
+	const nextCable =
+		input.cable === undefined
+			? undefined
+			: input.cable === null
+				? { cableType: null, connectorA: null, connectorB: null, lengthCm: null }
+				: normalizeCable(input.cable);
+	const cableChanged =
+		nextCable !== undefined &&
+		(nextCable.cableType !== previousProduct.cableType ||
+			nextCable.connectorA !== previousProduct.connectorA ||
+			nextCable.connectorB !== previousProduct.connectorB ||
+			nextCable.lengthCm !== previousProduct.lengthCm);
 
 	// Identity (name, manufacturer, category) follows the same rule as
 	// `mergeProducts`: whoever's gear it is controls what it is called. Every
@@ -1351,7 +1717,8 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		(input.name !== undefined && input.name.trim() !== previousProduct.name) ||
 		(input.manufacturerId !== undefined &&
 			input.manufacturerId !== previousProduct.manufacturerId) ||
-		(input.categoryId !== undefined && input.categoryId !== previousProduct.categoryId);
+		(input.categoryId !== undefined && input.categoryId !== previousProduct.categoryId) ||
+		cableChanged;
 	if (changesIdentity && !systemAdmin) {
 		const owners = await prisma.asset.findMany({
 			where: { productId: input.productId },
@@ -1377,7 +1744,8 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 			...(input.name ? { name: input.name.trim() } : {}),
 			...(input.manufacturerId ? { manufacturerId: input.manufacturerId } : {}),
 			...(input.categoryId ? { categoryId: input.categoryId } : {}),
-			imagePath: input.imagePath !== undefined ? input.imagePath?.trim() || null : undefined
+			imagePath: input.imagePath !== undefined ? input.imagePath?.trim() || null : undefined,
+			...(nextCable ?? {})
 		},
 		include: { manufacturer: true, category: true }
 	});
@@ -1386,7 +1754,8 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		...(input.name ? { name: input.name.trim() } : {}),
 		...(input.manufacturerId ? { manufacturerId: input.manufacturerId } : {}),
 		...(input.categoryId ? { categoryId: input.categoryId } : {}),
-		...(input.imagePath !== undefined ? { imagePath: input.imagePath.trim() || null } : {})
+		...(input.imagePath !== undefined ? { imagePath: input.imagePath.trim() || null } : {}),
+		...(nextCable ?? {})
 	});
 	if (changes.length > 0) {
 		await logCatalogChange({
@@ -1403,6 +1772,11 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		await getProducts(previousProduct.manufacturerId).refresh();
 	}
 	await getProducts().refresh();
+	if (cableChanged) {
+		const added = await ensureConnectors([nextCable?.connectorA, nextCable?.connectorB]);
+		if (added.length > 0) await getConnectors().refresh();
+		await getCableVocabulary().refresh();
+	}
 
 	const affectedAssets = await prisma.asset.findMany({
 		where: { productId: product.id },
@@ -1459,6 +1833,7 @@ export const deleteProduct = command(v.string(), async (productId: string) => {
 		getProducts().refresh(),
 		getProducts(product.manufacturerId).refresh(),
 		getProductCatalog().refresh(),
+		getCableVocabulary().refresh(),
 		...orgIds.map((id) => getProductCatalog(id).refresh())
 	]);
 
@@ -1637,6 +2012,7 @@ export const mergeProducts = command(
 			getProducts(target.manufacturerId).refresh(),
 			getProducts(source.manufacturerId).refresh(),
 			getProductCatalog().refresh(),
+			getCableVocabulary().refresh(),
 			getAssets().refresh(),
 			getRetiredAssets().refresh(),
 			getInventorySummary().refresh(),
@@ -2786,13 +3162,7 @@ export type ImportResult = {
 
 export const importAssets = command(importAssetsSchema, async (data): Promise<ImportResult> => {
 	const user = await requireAuth();
-
-	const membership = await prisma.orgMembership.findUnique({
-		where: { userId_organizationId: { userId: user.id, organizationId: data.organizationId } }
-	});
-	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		throw new Error('Unauthorized to create assets in this organization');
-	}
+	await assertOrgAssetAdmin(user.id, data.organizationId);
 
 	const location = await prisma.location.findUniqueOrThrow({ where: { id: data.locationId } });
 	if (location.organizationId !== data.organizationId) throw new Error('Invalid location');
@@ -2914,9 +3284,7 @@ export const importAssets = command(importAssetsSchema, async (data): Promise<Im
 	}
 
 	if (created > 0) {
-		await getAssets(data.organizationId).refresh();
-		await getInventorySummary(data.organizationId).refresh();
-		await getInventorySummary().refresh();
+		await refreshAfterUnitsCreated(data.organizationId, [...productCache.values()]);
 		await getManufacturers().refresh();
 		await getProducts().refresh();
 	}

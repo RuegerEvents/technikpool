@@ -31,7 +31,7 @@ Tap "Explore the demo" at the bottom of the first screen. No credentials are
 needed and nothing leaves the device.
 
   * Scans — pick a location or production, then type an asset tag where it says
-    "Manual entry". Tags run 40000001 to 40000012. The camera button works too:
+    "Manual entry". Tags run 40000001 to 40000014. The camera button works too:
     demo-tags.png next to this file (also attached to our reply of 1 Sep 2026)
     has QR codes for tags 40000001-40000004 to point it at.
   * Lookup — type the same tags to see an asset, where it is, and its history.

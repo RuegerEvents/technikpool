@@ -283,6 +283,18 @@ abstract class S {
   /// **'Current location'**
   String get currentLocation;
 
+  /// A cable's two ends, shown as "XLR3 M → XLR3 F" on the lookup screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Connectors'**
+  String get connectors;
+
+  /// No description provided for @cableLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Length'**
+  String get cableLength;
+
   /// No description provided for @checkedOutTo.
   ///
   /// In en, this message translates to:

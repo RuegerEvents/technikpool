@@ -1,7 +1,17 @@
 <script lang="ts">
 	import { cn } from '$lib/utils';
+	import { ProductThumb } from '$lib/components/ui/product-thumb';
 
-	type Item = { id: string; name: string };
+	type Item = {
+		id: string;
+		name: string;
+		/** Stored object key. Only rendered when `showImages` is on. */
+		imagePath?: string | null;
+		/** A short tag shown after the name — IN/OUT on a connector, say. */
+		hint?: string | null;
+		/** Listed but not choosable: the wrong end of a cable, say. */
+		disabled?: boolean;
+	};
 	type Selection = { id: string | null; name: string };
 
 	type Props = {
@@ -24,6 +34,12 @@
 		required?: boolean;
 		disabled?: boolean;
 		allowCreate?: boolean;
+		/**
+		 * Show each option's picture beside its name, and the chosen one's inside
+		 * the field. For a list where the name is a part number — a connector is
+		 * far quicker to recognise than to read.
+		 */
+		showImages?: boolean;
 		class?: string;
 	};
 
@@ -37,10 +53,19 @@
 		required = false,
 		disabled = false,
 		allowCreate = true,
+		showImages = false,
 		class: className
 	}: Props = $props();
 
 	let inputValue = $derived(value?.name ?? '');
+	// Matched by name, not id: a caller may hold a selection it typed rather than
+	// picked, and that still names a real option most of the time.
+	let selectedImage = $derived(
+		showImages
+			? (items.find((i) => i.name.toLowerCase() === (value?.name ?? '').toLowerCase())?.imagePath ??
+					null)
+			: null
+	);
 	let open = $state(false);
 	let highlightedIndex = $state(-1);
 	let containerEl: HTMLDivElement;
@@ -51,6 +76,7 @@
 		query ? list.filter((i) => i.name.toLowerCase().includes(query)) : list;
 
 	let filtered = $derived(matching(items));
+	let selectableFiltered = $derived(filtered.filter((i) => !i.disabled));
 	let filteredSuggestions = $derived(suggestions ? matching(suggestions.items) : []);
 
 	// A suggestion counts: if the catalogue already has that exact name, offering
@@ -79,6 +105,9 @@
 	let firstSuggestionIndex = $derived(options.findIndex((o) => o.type === 'suggestion'));
 
 	function selectOption(opt: Option) {
+		// A disabled option is shown for context, not offered — clicking it does
+		// nothing rather than silently picking the wrong end.
+		if (opt.type !== 'create' && opt.item.disabled) return;
 		if (opt.type === 'suggestion') {
 			open = false;
 			highlightedIndex = -1;
@@ -127,22 +156,34 @@
 		}
 		if (e.key === 'ArrowDown') {
 			e.preventDefault();
-			highlightedIndex = Math.min(highlightedIndex + 1, options.length - 1);
+			highlightedIndex = nextEnabled(highlightedIndex, 1);
 		} else if (e.key === 'ArrowUp') {
 			e.preventDefault();
-			highlightedIndex = Math.max(highlightedIndex - 1, -1);
+			highlightedIndex = nextEnabled(highlightedIndex, -1);
 		} else if (e.key === 'Enter' || (e.key.toLowerCase() === 'tab' && showCreate && oncreate)) {
 			e.preventDefault();
 			if (highlightedIndex >= 0 && options[highlightedIndex]) {
 				selectOption(options[highlightedIndex]);
 			} else if (showCreate) {
 				selectOption({ type: 'create', name: inputValue.trim() });
-			} else if (filtered.length === 1) {
-				selectOption({ type: 'item', item: filtered[0] });
+			} else if (selectableFiltered.length === 1) {
+				selectOption({ type: 'item', item: selectableFiltered[0] });
 			}
 		} else if (e.key === 'Escape') {
 			open = false;
 			inputEl?.blur();
+		}
+	}
+
+	/** The next option arrow keys should land on, stepping over disabled rows. */
+	function nextEnabled(from: number, direction: 1 | -1): number {
+		let at = from;
+		for (;;) {
+			at += direction;
+			if (at < 0) return -1;
+			if (at > options.length - 1) return from;
+			const opt = options[at];
+			if (opt.type === 'create' || !opt.item.disabled) return at;
 		}
 	}
 
@@ -162,6 +203,14 @@
 </script>
 
 <div bind:this={containerEl} class={cn('relative', className)}>
+	{#if showImages && selectedImage}
+		<!-- Sits on top of the field's own left padding rather than in the flow:
+		     the input has to stay a plain input for the caret and the keyboard
+		     handling to behave. -->
+		<span class="pointer-events-none absolute top-1/2 left-2 z-10 -translate-y-1/2">
+			<ProductThumb path={selectedImage} size={22} />
+		</span>
+	{/if}
 	<input
 		bind:this={inputEl}
 		bind:value={inputValue}
@@ -173,7 +222,10 @@
 		{required}
 		{disabled}
 		autocomplete="off"
-		class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+		class="flex h-10 w-full rounded-md border border-input bg-background py-2 pr-3 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 {showImages &&
+		selectedImage
+			? 'pl-9'
+			: 'pl-3'}"
 	/>
 
 	{#if open && options.length > 0}
@@ -182,6 +234,7 @@
 		>
 			<ul class="max-h-60 overflow-y-auto py-1">
 				{#each options as opt, i (opt.type === 'create' ? `create-${opt.name}` : `${opt.type}-${opt.item.id}`)}
+					{@const disabled = opt.type !== 'create' && !!opt.item.disabled}
 					{#if i === firstSuggestionIndex && suggestions}
 						<li
 							class="mt-1 border-t px-3 pt-2 pb-1 text-xs font-medium text-muted-foreground"
@@ -195,19 +248,32 @@
 						<div
 							role="option"
 							aria-selected={highlightedIndex === i}
+							aria-disabled={disabled}
 							onmousedown={(e) => {
 								e.preventDefault();
 								selectOption(opt);
 							}}
-							onmouseenter={() => (highlightedIndex = i)}
-							class="cursor-pointer px-3 py-2 text-sm {highlightedIndex === i
+							onmouseenter={() => {
+								if (!disabled) highlightedIndex = i;
+							}}
+							class="px-3 py-2 text-sm {disabled
+								? 'cursor-not-allowed opacity-45'
+								: 'cursor-pointer'} {highlightedIndex === i && !disabled
 								? 'bg-accent text-accent-foreground'
 								: ''}"
 						>
-							{#if opt.type === 'item'}
-								{opt.item.name}
-							{:else if opt.type === 'suggestion'}
-								{opt.item.name}
+							{#if opt.type === 'item' || opt.type === 'suggestion'}
+								<span class="flex items-center gap-2">
+									{#if showImages}
+										<ProductThumb path={opt.item.imagePath} alt="" size={22} />
+									{/if}
+									<span class="min-w-0 truncate">{opt.item.name}</span>
+									{#if opt.item.hint}
+										<span class="ml-auto shrink-0 font-mono text-xs text-muted-foreground"
+											>{opt.item.hint}</span
+										>
+									{/if}
+								</span>
 							{:else}
 								<span class="flex items-center gap-1.5">
 									<span class="text-muted-foreground">Create</span>

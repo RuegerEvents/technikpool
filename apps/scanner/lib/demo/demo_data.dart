@@ -3,7 +3,8 @@ import '../api/generated/export.dart';
 /// The warehouse the store reviewers see.
 ///
 /// Real enough to exercise every screen — two organizations so a cross-org
-/// loan is visible, assets in three states, a production to book against — and
+/// loan is visible, assets in three states, a cable with its ends and length,
+/// a production to book against — and
 /// small enough that someone with no context can find their way around it in a
 /// minute. Tags are sequential and printed all over the UI, because a reviewer
 /// has no sticker to scan and has to type one.
@@ -43,9 +44,24 @@ class DemoData {
   );
 
   static const categories = <Category>[
-    Category(id: 'catg_demo_light', name: 'Licht', color: '#facc15', sortOrder: 1),
-    Category(id: 'catg_demo_sound', name: 'Ton', color: '#38bdf8', sortOrder: 2),
-    Category(id: 'catg_demo_rigging', name: 'Rigging', color: '#a3a3a3', sortOrder: 3),
+    Category(
+      id: 'catg_demo_light',
+      name: 'Licht',
+      color: '#facc15',
+      sortOrder: 1,
+    ),
+    Category(
+      id: 'catg_demo_sound',
+      name: 'Ton',
+      color: '#38bdf8',
+      sortOrder: 2,
+    ),
+    Category(
+      id: 'catg_demo_rigging',
+      name: 'Rigging',
+      color: '#a3a3a3',
+      sortOrder: 3,
+    ),
   ];
 
   static const _warehouse = Address(
@@ -69,7 +85,12 @@ class DemoData {
       organization: nordlicht,
       address: _warehouse,
     ),
-    Location(id: 'loc_demo_truck', name: 'LKW 1', organization: nordlicht, address: _warehouse),
+    Location(
+      id: 'loc_demo_truck',
+      name: 'LKW 1',
+      organization: nordlicht,
+      address: _warehouse,
+    ),
     Location(
       id: 'loc_demo_venue',
       name: 'Halle Süd',
@@ -99,35 +120,81 @@ class DemoData {
     id: 'prd_demo_mh',
     name: 'MAC Aura XB',
     manufacturerName: 'Martin',
-    category: Category(id: 'catg_demo_light', name: 'Licht', color: '#facc15', sortOrder: 1),
+    category: Category(
+      id: 'catg_demo_light',
+      name: 'Licht',
+      color: '#facc15',
+      sortOrder: 1,
+    ),
   );
 
   static const _par = Product(
     id: 'prd_demo_par',
     name: 'ColorSource PAR',
     manufacturerName: 'ETC',
-    category: Category(id: 'catg_demo_light', name: 'Licht', color: '#facc15', sortOrder: 1),
+    category: Category(
+      id: 'catg_demo_light',
+      name: 'Licht',
+      color: '#facc15',
+      sortOrder: 1,
+    ),
   );
 
   static const _speaker = Product(
     id: 'prd_demo_speaker',
     name: 'K2',
     manufacturerName: 'L-Acoustics',
-    category: Category(id: 'catg_demo_sound', name: 'Ton', color: '#38bdf8', sortOrder: 2),
+    category: Category(
+      id: 'catg_demo_sound',
+      name: 'Ton',
+      color: '#38bdf8',
+      sortOrder: 2,
+    ),
   );
 
   static const _mixer = Product(
     id: 'prd_demo_mixer',
     name: 'CL5',
     manufacturerName: 'Yamaha',
-    category: Category(id: 'catg_demo_sound', name: 'Ton', color: '#38bdf8', sortOrder: 2),
+    category: Category(
+      id: 'catg_demo_sound',
+      name: 'Ton',
+      color: '#38bdf8',
+      sortOrder: 2,
+    ),
   );
 
   static const _hoist = Product(
     id: 'prd_demo_hoist',
     name: 'BGV-D8 1t',
     manufacturerName: 'Chainmaster',
-    category: Category(id: 'catg_demo_rigging', name: 'Rigging', color: '#a3a3a3', sortOrder: 3),
+    category: Category(
+      id: 'catg_demo_rigging',
+      name: 'Rigging',
+      color: '#a3a3a3',
+      sortOrder: 3,
+    ),
+  );
+
+  /// A cable, so the structured half of a product is visible somewhere: the
+  /// name says "XLR 10 m" and `cable` says the same thing in a form a filter
+  /// can read. Filed under the generic manufacturer, like every cable is.
+  static const _xlrCable = Product(
+    id: 'prd_demo_xlr',
+    name: 'XLR 10 m',
+    manufacturerName: 'Generisch',
+    category: Category(
+      id: 'catg_demo_sound',
+      name: 'Ton',
+      color: '#38bdf8',
+      sortOrder: 2,
+    ),
+    cable: CableSpec(
+      type: 'XLR',
+      connectorA: 'XLR3 M',
+      connectorB: 'XLR3 F',
+      lengthCm: 1000,
+    ),
   );
 
   /// Tags run 40000001 upwards — the same shape the sticker printer produces,
@@ -145,8 +212,25 @@ class DemoData {
     _asset('40000010', _hoist, 0, AssetStatus.available, 'CM-3302'),
     // Loaned in from the other organization, so the reviewer sees that assets
     // carry an owner and that it isn't always the one they are working for.
-    _asset('40000011', _speaker, 2, AssetStatus.available, 'K2-9001', buehnenwerk),
-    _asset('40000012', _mixer, 2, AssetStatus.available, 'CL5-9002', buehnenwerk),
+    _asset(
+      '40000011',
+      _speaker,
+      2,
+      AssetStatus.available,
+      'K2-9001',
+      buehnenwerk,
+    ),
+    _asset(
+      '40000012',
+      _mixer,
+      2,
+      AssetStatus.available,
+      'CL5-9002',
+      buehnenwerk,
+    ),
+    // Cables carry no serial number — nobody stamps one on a 10 m XLR.
+    _asset('40000013', _xlrCable, 0, AssetStatus.available, null),
+    _asset('40000014', _xlrCable, 0, AssetStatus.available, null),
   ];
 
   static Asset _asset(
@@ -154,7 +238,7 @@ class DemoData {
     Product product,
     int locationIndex,
     AssetStatus status,
-    String serial, [
+    String? serial, [
     Organization owner = nordlicht,
   ]) => Asset(
     id: 'asset_demo_$tag',

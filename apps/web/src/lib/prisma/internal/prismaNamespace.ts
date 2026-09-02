@@ -405,6 +405,7 @@ export const ModelName = {
   Organization: 'Organization',
   OrgMembership: 'OrgMembership',
   Manufacturer: 'Manufacturer',
+  Connector: 'Connector',
   Category: 'Category',
   Product: 'Product',
   OrgProductPrice: 'OrgProductPrice',
@@ -441,7 +442,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "manufacturer" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem"
+    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "manufacturer" | "connector" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1034,6 +1035,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ManufacturerCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ManufacturerCountAggregateOutputType> | number
+        }
+      }
+    }
+    Connector: {
+      payload: Prisma.$ConnectorPayload<ExtArgs>
+      fields: Prisma.ConnectorFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConnectorFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectorPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConnectorFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectorPayload>
+        }
+        findFirst: {
+          args: Prisma.ConnectorFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectorPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConnectorFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectorPayload>
+        }
+        findMany: {
+          args: Prisma.ConnectorFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectorPayload>[]
+        }
+        create: {
+          args: Prisma.ConnectorCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectorPayload>
+        }
+        createMany: {
+          args: Prisma.ConnectorCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConnectorCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectorPayload>[]
+        }
+        delete: {
+          args: Prisma.ConnectorDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectorPayload>
+        }
+        update: {
+          args: Prisma.ConnectorUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectorPayload>
+        }
+        deleteMany: {
+          args: Prisma.ConnectorDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConnectorUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConnectorUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectorPayload>[]
+        }
+        upsert: {
+          args: Prisma.ConnectorUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConnectorPayload>
+        }
+        aggregate: {
+          args: Prisma.ConnectorAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConnector>
+        }
+        groupBy: {
+          args: Prisma.ConnectorGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectorGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConnectorCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConnectorCountAggregateOutputType> | number
         }
       }
     }
@@ -2761,6 +2836,22 @@ export const ManufacturerScalarFieldEnum = {
 export type ManufacturerScalarFieldEnum = (typeof ManufacturerScalarFieldEnum)[keyof typeof ManufacturerScalarFieldEnum]
 
 
+export const ConnectorScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  family: 'family',
+  form: 'form',
+  gender: 'gender',
+  categoryId: 'categoryId',
+  imagePath: 'imagePath',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConnectorScalarFieldEnum = (typeof ConnectorScalarFieldEnum)[keyof typeof ConnectorScalarFieldEnum]
+
+
 export const CategoryScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -2768,7 +2859,8 @@ export const CategoryScalarFieldEnum = {
   color: 'color',
   sortOrder: 'sortOrder',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  cableInputGender: 'cableInputGender'
 } as const
 
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
@@ -2780,6 +2872,10 @@ export const ProductScalarFieldEnum = {
   manufacturerId: 'manufacturerId',
   categoryId: 'categoryId',
   imagePath: 'imagePath',
+  cableType: 'cableType',
+  connectorA: 'connectorA',
+  connectorB: 'connectorB',
+  lengthCm: 'lengthCm',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -3441,6 +3537,7 @@ export type GlobalOmitConfig = {
   organization?: Prisma.OrganizationOmit
   orgMembership?: Prisma.OrgMembershipOmit
   manufacturer?: Prisma.ManufacturerOmit
+  connector?: Prisma.ConnectorOmit
   category?: Prisma.CategoryOmit
   product?: Prisma.ProductOmit
   orgProductPrice?: Prisma.OrgProductPriceOmit

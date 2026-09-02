@@ -6,7 +6,11 @@
 	import { Label } from '$lib/components/ui/label';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { ImageUpload } from '$lib/components/ui/image-upload';
-	import { ProductFields, type ProductDraft } from '$lib/components/ui/product-fields';
+	import {
+		ProductFields,
+		cableInputFrom,
+		type ProductDraft
+	} from '$lib/components/ui/product-fields';
 	import {
 		getManufacturers,
 		getCategories,
@@ -75,7 +79,8 @@
 		name: '',
 		categoryId: '',
 		imagePath: '',
-		netPurchasePrice: undefined
+		netPurchasePrice: undefined,
+		cable: null
 	});
 
 	$effect(() => {
@@ -96,7 +101,9 @@
 	}
 
 	function handleProductCreate(name: string) {
-		newProductDraft.name = name;
+		// A fresh object, not a mutation: ProductFields keys its "is the name still
+		// the derived one?" bookkeeping to the draft it was handed.
+		newProductDraft = { ...newProductDraft, name, cable: null };
 		newProductOpen = true;
 	}
 
@@ -194,6 +201,7 @@
 				newProductName: product.id ? undefined : (pendingProduct?.name ?? product.name),
 				newProductImagePath: product.id ? undefined : pendingProduct?.imagePath || undefined,
 				newProductNetPurchasePrice: product.id ? undefined : pendingProduct?.netPurchasePrice,
+				newProductCable: product.id ? undefined : cableInputFrom(pendingProduct?.cable ?? null),
 				categoryId: product.id ? undefined : pendingProduct?.categoryId,
 				copyProductAccessories:
 					copyAccessories && (accessoryProfile?.accessories.length ?? 0) > 0 ? true : undefined,
@@ -226,6 +234,11 @@
 	<div>
 		<h1 class="text-3xl font-bold tracking-tight">Add New Asset</h1>
 		<p class="text-muted-foreground">Register new equipment into your organization's inventory.</p>
+		<p class="mt-1 text-sm text-muted-foreground">
+			Registering cables? <a class="underline" href={resolve('/assets/new/cables')}
+				>Add them by the drawer</a
+			> instead — one row per kind, quantities rather than units.
+		</p>
 	</div>
 
 	{#if duplicateSource}

@@ -42,6 +42,7 @@ export type CategoryMinAggregateOutputType = {
   sortOrder: number | null
   createdAt: Date | null
   updatedAt: Date | null
+  cableInputGender: string | null
 }
 
 export type CategoryMaxAggregateOutputType = {
@@ -52,6 +53,7 @@ export type CategoryMaxAggregateOutputType = {
   sortOrder: number | null
   createdAt: Date | null
   updatedAt: Date | null
+  cableInputGender: string | null
 }
 
 export type CategoryCountAggregateOutputType = {
@@ -62,6 +64,7 @@ export type CategoryCountAggregateOutputType = {
   sortOrder: number
   createdAt: number
   updatedAt: number
+  cableInputGender: number
   _all: number
 }
 
@@ -82,6 +85,7 @@ export type CategoryMinAggregateInputType = {
   sortOrder?: true
   createdAt?: true
   updatedAt?: true
+  cableInputGender?: true
 }
 
 export type CategoryMaxAggregateInputType = {
@@ -92,6 +96,7 @@ export type CategoryMaxAggregateInputType = {
   sortOrder?: true
   createdAt?: true
   updatedAt?: true
+  cableInputGender?: true
 }
 
 export type CategoryCountAggregateInputType = {
@@ -102,6 +107,7 @@ export type CategoryCountAggregateInputType = {
   sortOrder?: true
   createdAt?: true
   updatedAt?: true
+  cableInputGender?: true
   _all?: true
 }
 
@@ -199,6 +205,7 @@ export type CategoryGroupByOutputType = {
   sortOrder: number
   createdAt: Date
   updatedAt: Date
+  cableInputGender: string | null
   _count: CategoryCountAggregateOutputType | null
   _avg: CategoryAvgAggregateOutputType | null
   _sum: CategorySumAggregateOutputType | null
@@ -232,9 +239,11 @@ export type CategoryWhereInput = {
   sortOrder?: Prisma.IntFilter<"Category"> | number
   createdAt?: Prisma.DateTimeFilter<"Category"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Category"> | Date | string
+  cableInputGender?: Prisma.StringNullableFilter<"Category"> | string | null
   products?: Prisma.ProductListRelationFilter
   bundleTemplates?: Prisma.BundleTemplateListRelationFilter
   orgRates?: Prisma.OrgCategoryRateListRelationFilter
+  connectors?: Prisma.ConnectorListRelationFilter
 }
 
 export type CategoryOrderByWithRelationInput = {
@@ -245,9 +254,11 @@ export type CategoryOrderByWithRelationInput = {
   sortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  cableInputGender?: Prisma.SortOrderInput | Prisma.SortOrder
   products?: Prisma.ProductOrderByRelationAggregateInput
   bundleTemplates?: Prisma.BundleTemplateOrderByRelationAggregateInput
   orgRates?: Prisma.OrgCategoryRateOrderByRelationAggregateInput
+  connectors?: Prisma.ConnectorOrderByRelationAggregateInput
 }
 
 export type CategoryWhereUniqueInput = Prisma.AtLeast<{
@@ -261,9 +272,11 @@ export type CategoryWhereUniqueInput = Prisma.AtLeast<{
   sortOrder?: Prisma.IntFilter<"Category"> | number
   createdAt?: Prisma.DateTimeFilter<"Category"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Category"> | Date | string
+  cableInputGender?: Prisma.StringNullableFilter<"Category"> | string | null
   products?: Prisma.ProductListRelationFilter
   bundleTemplates?: Prisma.BundleTemplateListRelationFilter
   orgRates?: Prisma.OrgCategoryRateListRelationFilter
+  connectors?: Prisma.ConnectorListRelationFilter
 }, "id" | "name">
 
 export type CategoryOrderByWithAggregationInput = {
@@ -274,6 +287,7 @@ export type CategoryOrderByWithAggregationInput = {
   sortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  cableInputGender?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.CategoryCountOrderByAggregateInput
   _avg?: Prisma.CategoryAvgOrderByAggregateInput
   _max?: Prisma.CategoryMaxOrderByAggregateInput
@@ -292,6 +306,7 @@ export type CategoryScalarWhereWithAggregatesInput = {
   sortOrder?: Prisma.IntWithAggregatesFilter<"Category"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Category"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Category"> | Date | string
+  cableInputGender?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
 }
 
 export type CategoryCreateInput = {
@@ -302,9 +317,11 @@ export type CategoryCreateInput = {
   sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  cableInputGender?: string | null
   products?: Prisma.ProductCreateNestedManyWithoutCategoryInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutCategoryInput
   orgRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutCategoryInput
+  connectors?: Prisma.ConnectorCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUncheckedCreateInput = {
@@ -315,9 +332,11 @@ export type CategoryUncheckedCreateInput = {
   sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  cableInputGender?: string | null
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutCategoryInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutCategoryInput
   orgRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutCategoryInput
+  connectors?: Prisma.ConnectorUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUpdateInput = {
@@ -328,9 +347,11 @@ export type CategoryUpdateInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cableInputGender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   products?: Prisma.ProductUpdateManyWithoutCategoryNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutCategoryNestedInput
   orgRates?: Prisma.OrgCategoryRateUpdateManyWithoutCategoryNestedInput
+  connectors?: Prisma.ConnectorUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryUncheckedUpdateInput = {
@@ -341,9 +362,11 @@ export type CategoryUncheckedUpdateInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cableInputGender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   products?: Prisma.ProductUncheckedUpdateManyWithoutCategoryNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutCategoryNestedInput
   orgRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutCategoryNestedInput
+  connectors?: Prisma.ConnectorUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryCreateManyInput = {
@@ -354,6 +377,7 @@ export type CategoryCreateManyInput = {
   sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  cableInputGender?: string | null
 }
 
 export type CategoryUpdateManyMutationInput = {
@@ -364,6 +388,7 @@ export type CategoryUpdateManyMutationInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cableInputGender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type CategoryUncheckedUpdateManyInput = {
@@ -374,6 +399,12 @@ export type CategoryUncheckedUpdateManyInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cableInputGender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type CategoryNullableScalarRelationFilter = {
+  is?: Prisma.CategoryWhereInput | null
+  isNot?: Prisma.CategoryWhereInput | null
 }
 
 export type CategoryCountOrderByAggregateInput = {
@@ -384,6 +415,7 @@ export type CategoryCountOrderByAggregateInput = {
   sortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  cableInputGender?: Prisma.SortOrder
 }
 
 export type CategoryAvgOrderByAggregateInput = {
@@ -398,6 +430,7 @@ export type CategoryMaxOrderByAggregateInput = {
   sortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  cableInputGender?: Prisma.SortOrder
 }
 
 export type CategoryMinOrderByAggregateInput = {
@@ -408,6 +441,7 @@ export type CategoryMinOrderByAggregateInput = {
   sortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  cableInputGender?: Prisma.SortOrder
 }
 
 export type CategorySumOrderByAggregateInput = {
@@ -417,6 +451,22 @@ export type CategorySumOrderByAggregateInput = {
 export type CategoryScalarRelationFilter = {
   is?: Prisma.CategoryWhereInput
   isNot?: Prisma.CategoryWhereInput
+}
+
+export type CategoryCreateNestedOneWithoutConnectorsInput = {
+  create?: Prisma.XOR<Prisma.CategoryCreateWithoutConnectorsInput, Prisma.CategoryUncheckedCreateWithoutConnectorsInput>
+  connectOrCreate?: Prisma.CategoryCreateOrConnectWithoutConnectorsInput
+  connect?: Prisma.CategoryWhereUniqueInput
+}
+
+export type CategoryUpdateOneWithoutConnectorsNestedInput = {
+  create?: Prisma.XOR<Prisma.CategoryCreateWithoutConnectorsInput, Prisma.CategoryUncheckedCreateWithoutConnectorsInput>
+  connectOrCreate?: Prisma.CategoryCreateOrConnectWithoutConnectorsInput
+  upsert?: Prisma.CategoryUpsertWithoutConnectorsInput
+  disconnect?: Prisma.CategoryWhereInput | boolean
+  delete?: Prisma.CategoryWhereInput | boolean
+  connect?: Prisma.CategoryWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CategoryUpdateToOneWithWhereWithoutConnectorsInput, Prisma.CategoryUpdateWithoutConnectorsInput>, Prisma.CategoryUncheckedUpdateWithoutConnectorsInput>
 }
 
 export type CategoryCreateNestedOneWithoutProductsInput = {
@@ -461,6 +511,78 @@ export type CategoryUpdateOneRequiredWithoutOrgRatesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CategoryUpdateToOneWithWhereWithoutOrgRatesInput, Prisma.CategoryUpdateWithoutOrgRatesInput>, Prisma.CategoryUncheckedUpdateWithoutOrgRatesInput>
 }
 
+export type CategoryCreateWithoutConnectorsInput = {
+  id?: string
+  name: string
+  nameDe?: string | null
+  color?: string
+  sortOrder?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  cableInputGender?: string | null
+  products?: Prisma.ProductCreateNestedManyWithoutCategoryInput
+  bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutCategoryInput
+  orgRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutCategoryInput
+}
+
+export type CategoryUncheckedCreateWithoutConnectorsInput = {
+  id?: string
+  name: string
+  nameDe?: string | null
+  color?: string
+  sortOrder?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  cableInputGender?: string | null
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutCategoryInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutCategoryInput
+  orgRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutCategoryInput
+}
+
+export type CategoryCreateOrConnectWithoutConnectorsInput = {
+  where: Prisma.CategoryWhereUniqueInput
+  create: Prisma.XOR<Prisma.CategoryCreateWithoutConnectorsInput, Prisma.CategoryUncheckedCreateWithoutConnectorsInput>
+}
+
+export type CategoryUpsertWithoutConnectorsInput = {
+  update: Prisma.XOR<Prisma.CategoryUpdateWithoutConnectorsInput, Prisma.CategoryUncheckedUpdateWithoutConnectorsInput>
+  create: Prisma.XOR<Prisma.CategoryCreateWithoutConnectorsInput, Prisma.CategoryUncheckedCreateWithoutConnectorsInput>
+  where?: Prisma.CategoryWhereInput
+}
+
+export type CategoryUpdateToOneWithWhereWithoutConnectorsInput = {
+  where?: Prisma.CategoryWhereInput
+  data: Prisma.XOR<Prisma.CategoryUpdateWithoutConnectorsInput, Prisma.CategoryUncheckedUpdateWithoutConnectorsInput>
+}
+
+export type CategoryUpdateWithoutConnectorsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameDe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cableInputGender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  products?: Prisma.ProductUpdateManyWithoutCategoryNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutCategoryNestedInput
+  orgRates?: Prisma.OrgCategoryRateUpdateManyWithoutCategoryNestedInput
+}
+
+export type CategoryUncheckedUpdateWithoutConnectorsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameDe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cableInputGender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  products?: Prisma.ProductUncheckedUpdateManyWithoutCategoryNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutCategoryNestedInput
+  orgRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutCategoryNestedInput
+}
+
 export type CategoryCreateWithoutProductsInput = {
   id?: string
   name: string
@@ -469,8 +591,10 @@ export type CategoryCreateWithoutProductsInput = {
   sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  cableInputGender?: string | null
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutCategoryInput
   orgRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutCategoryInput
+  connectors?: Prisma.ConnectorCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUncheckedCreateWithoutProductsInput = {
@@ -481,8 +605,10 @@ export type CategoryUncheckedCreateWithoutProductsInput = {
   sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  cableInputGender?: string | null
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutCategoryInput
   orgRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutCategoryInput
+  connectors?: Prisma.ConnectorUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryCreateOrConnectWithoutProductsInput = {
@@ -509,8 +635,10 @@ export type CategoryUpdateWithoutProductsInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cableInputGender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutCategoryNestedInput
   orgRates?: Prisma.OrgCategoryRateUpdateManyWithoutCategoryNestedInput
+  connectors?: Prisma.ConnectorUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryUncheckedUpdateWithoutProductsInput = {
@@ -521,8 +649,10 @@ export type CategoryUncheckedUpdateWithoutProductsInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cableInputGender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutCategoryNestedInput
   orgRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutCategoryNestedInput
+  connectors?: Prisma.ConnectorUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryCreateWithoutBundleTemplatesInput = {
@@ -533,8 +663,10 @@ export type CategoryCreateWithoutBundleTemplatesInput = {
   sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  cableInputGender?: string | null
   products?: Prisma.ProductCreateNestedManyWithoutCategoryInput
   orgRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutCategoryInput
+  connectors?: Prisma.ConnectorCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUncheckedCreateWithoutBundleTemplatesInput = {
@@ -545,8 +677,10 @@ export type CategoryUncheckedCreateWithoutBundleTemplatesInput = {
   sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  cableInputGender?: string | null
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutCategoryInput
   orgRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutCategoryInput
+  connectors?: Prisma.ConnectorUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryCreateOrConnectWithoutBundleTemplatesInput = {
@@ -573,8 +707,10 @@ export type CategoryUpdateWithoutBundleTemplatesInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cableInputGender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   products?: Prisma.ProductUpdateManyWithoutCategoryNestedInput
   orgRates?: Prisma.OrgCategoryRateUpdateManyWithoutCategoryNestedInput
+  connectors?: Prisma.ConnectorUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryUncheckedUpdateWithoutBundleTemplatesInput = {
@@ -585,8 +721,10 @@ export type CategoryUncheckedUpdateWithoutBundleTemplatesInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cableInputGender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   products?: Prisma.ProductUncheckedUpdateManyWithoutCategoryNestedInput
   orgRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutCategoryNestedInput
+  connectors?: Prisma.ConnectorUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryCreateWithoutOrgRatesInput = {
@@ -597,8 +735,10 @@ export type CategoryCreateWithoutOrgRatesInput = {
   sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  cableInputGender?: string | null
   products?: Prisma.ProductCreateNestedManyWithoutCategoryInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutCategoryInput
+  connectors?: Prisma.ConnectorCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUncheckedCreateWithoutOrgRatesInput = {
@@ -609,8 +749,10 @@ export type CategoryUncheckedCreateWithoutOrgRatesInput = {
   sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  cableInputGender?: string | null
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutCategoryInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutCategoryInput
+  connectors?: Prisma.ConnectorUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryCreateOrConnectWithoutOrgRatesInput = {
@@ -637,8 +779,10 @@ export type CategoryUpdateWithoutOrgRatesInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cableInputGender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   products?: Prisma.ProductUpdateManyWithoutCategoryNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutCategoryNestedInput
+  connectors?: Prisma.ConnectorUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryUncheckedUpdateWithoutOrgRatesInput = {
@@ -649,8 +793,10 @@ export type CategoryUncheckedUpdateWithoutOrgRatesInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cableInputGender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   products?: Prisma.ProductUncheckedUpdateManyWithoutCategoryNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutCategoryNestedInput
+  connectors?: Prisma.ConnectorUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 
@@ -662,12 +808,14 @@ export type CategoryCountOutputType = {
   products: number
   bundleTemplates: number
   orgRates: number
+  connectors: number
 }
 
 export type CategoryCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   products?: boolean | CategoryCountOutputTypeCountProductsArgs
   bundleTemplates?: boolean | CategoryCountOutputTypeCountBundleTemplatesArgs
   orgRates?: boolean | CategoryCountOutputTypeCountOrgRatesArgs
+  connectors?: boolean | CategoryCountOutputTypeCountConnectorsArgs
 }
 
 /**
@@ -701,6 +849,13 @@ export type CategoryCountOutputTypeCountOrgRatesArgs<ExtArgs extends runtime.Typ
   where?: Prisma.OrgCategoryRateWhereInput
 }
 
+/**
+ * CategoryCountOutputType without action
+ */
+export type CategoryCountOutputTypeCountConnectorsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ConnectorWhereInput
+}
+
 
 export type CategorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -710,9 +865,11 @@ export type CategorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   sortOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  cableInputGender?: boolean
   products?: boolean | Prisma.Category$productsArgs<ExtArgs>
   bundleTemplates?: boolean | Prisma.Category$bundleTemplatesArgs<ExtArgs>
   orgRates?: boolean | Prisma.Category$orgRatesArgs<ExtArgs>
+  connectors?: boolean | Prisma.Category$connectorsArgs<ExtArgs>
   _count?: boolean | Prisma.CategoryCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["category"]>
 
@@ -724,6 +881,7 @@ export type CategorySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   sortOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  cableInputGender?: boolean
 }, ExtArgs["result"]["category"]>
 
 export type CategorySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -734,6 +892,7 @@ export type CategorySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   sortOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  cableInputGender?: boolean
 }, ExtArgs["result"]["category"]>
 
 export type CategorySelectScalar = {
@@ -744,13 +903,15 @@ export type CategorySelectScalar = {
   sortOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  cableInputGender?: boolean
 }
 
-export type CategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "nameDe" | "color" | "sortOrder" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
+export type CategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "nameDe" | "color" | "sortOrder" | "createdAt" | "updatedAt" | "cableInputGender", ExtArgs["result"]["category"]>
 export type CategoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   products?: boolean | Prisma.Category$productsArgs<ExtArgs>
   bundleTemplates?: boolean | Prisma.Category$bundleTemplatesArgs<ExtArgs>
   orgRates?: boolean | Prisma.Category$orgRatesArgs<ExtArgs>
+  connectors?: boolean | Prisma.Category$connectorsArgs<ExtArgs>
   _count?: boolean | Prisma.CategoryCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CategoryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -762,6 +923,7 @@ export type $CategoryPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     products: Prisma.$ProductPayload<ExtArgs>[]
     bundleTemplates: Prisma.$BundleTemplatePayload<ExtArgs>[]
     orgRates: Prisma.$OrgCategoryRatePayload<ExtArgs>[]
+    connectors: Prisma.$ConnectorPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -771,6 +933,19 @@ export type $CategoryPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     sortOrder: number
     createdAt: Date
     updatedAt: Date
+    /**
+     * On a cable in this department, which contacts are the end power or signal
+     * comes *in* on. `male` for Strom — a cable's male end goes into the supply
+     * and its female end feeds the load. `female` for Audio and Licht, where it
+     * is the other way round: an XLR's female end sits on the source's male
+     * output. Null where a cable has no direction worth stating (Netzwerk, USB).
+     * 
+     * It lives here rather than on Connector or on a family because it is not a
+     * fact about CEE32 or about XLR — it is a fact about power versus signal,
+     * and writing it onto every family is how one of them ends up contradicting
+     * the rest.
+     */
+    cableInputGender: string | null
   }, ExtArgs["result"]["category"]>
   composites: {}
 }
@@ -1168,6 +1343,7 @@ export interface Prisma__CategoryClient<T, Null = never, ExtArgs extends runtime
   products<T extends Prisma.Category$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Category$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   bundleTemplates<T extends Prisma.Category$bundleTemplatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Category$bundleTemplatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BundleTemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orgRates<T extends Prisma.Category$orgRatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Category$orgRatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrgCategoryRatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  connectors<T extends Prisma.Category$connectorsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Category$connectorsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConnectorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1204,6 +1380,7 @@ export interface CategoryFieldRefs {
   readonly sortOrder: Prisma.FieldRef<"Category", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Category", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Category", 'DateTime'>
+  readonly cableInputGender: Prisma.FieldRef<"Category", 'String'>
 }
     
 
@@ -1666,6 +1843,30 @@ export type Category$orgRatesArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.OrgCategoryRateScalarFieldEnum | Prisma.OrgCategoryRateScalarFieldEnum[]
+}
+
+/**
+ * Category.connectors
+ */
+export type Category$connectorsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Connector
+   */
+  select?: Prisma.ConnectorSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Connector
+   */
+  omit?: Prisma.ConnectorOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConnectorInclude<ExtArgs> | null
+  where?: Prisma.ConnectorWhereInput
+  orderBy?: Prisma.ConnectorOrderByWithRelationInput | Prisma.ConnectorOrderByWithRelationInput[]
+  cursor?: Prisma.ConnectorWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ConnectorScalarFieldEnum | Prisma.ConnectorScalarFieldEnum[]
 }
 
 /**

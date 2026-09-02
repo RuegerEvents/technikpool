@@ -59,6 +59,7 @@ export const ModelName = {
   Organization: 'Organization',
   OrgMembership: 'OrgMembership',
   Manufacturer: 'Manufacturer',
+  Connector: 'Connector',
   Category: 'Category',
   Product: 'Product',
   OrgProductPrice: 'OrgProductPrice',
@@ -229,6 +230,22 @@ export const ManufacturerScalarFieldEnum = {
 export type ManufacturerScalarFieldEnum = (typeof ManufacturerScalarFieldEnum)[keyof typeof ManufacturerScalarFieldEnum]
 
 
+export const ConnectorScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  family: 'family',
+  form: 'form',
+  gender: 'gender',
+  categoryId: 'categoryId',
+  imagePath: 'imagePath',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConnectorScalarFieldEnum = (typeof ConnectorScalarFieldEnum)[keyof typeof ConnectorScalarFieldEnum]
+
+
 export const CategoryScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -236,7 +253,8 @@ export const CategoryScalarFieldEnum = {
   color: 'color',
   sortOrder: 'sortOrder',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  cableInputGender: 'cableInputGender'
 } as const
 
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
@@ -248,6 +266,10 @@ export const ProductScalarFieldEnum = {
   manufacturerId: 'manufacturerId',
   categoryId: 'categoryId',
   imagePath: 'imagePath',
+  cableType: 'cableType',
+  connectorA: 'connectorA',
+  connectorB: 'connectorB',
+  lengthCm: 'lengthCm',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

@@ -105,6 +105,12 @@ class SEn extends S {
   String get currentLocation => 'Current location';
 
   @override
+  String get connectors => 'Connectors';
+
+  @override
+  String get cableLength => 'Length';
+
+  @override
   String get checkedOutTo => 'Checked out to';
 
   @override

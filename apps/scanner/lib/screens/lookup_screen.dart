@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/client.dart';
 import '../api/generated/export.dart';
+import '../cable_format.dart';
 import '../l10n/labels.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../scan/camera_scan_screen.dart';
@@ -84,7 +85,8 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
           if (ref.watch(scanSettingsProvider).cameraEnabled)
             IconButton(
               tooltip: l10n.scanWithCamera,
-              onPressed: () => CameraScanScreen.once(context, title: l10n.lookup),
+              onPressed: () =>
+                  CameraScanScreen.once(context, title: l10n.lookup),
               icon: const Icon(Icons.photo_camera_outlined),
             ),
         ],
@@ -157,10 +159,21 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
         _row(l10n.status, Labels.assetStatus(l10n, asset.status)),
         _row(l10n.serialNumber, asset.serialNumber ?? '—'),
         _row(l10n.currentLocation, asset.location.name),
+        // A cable's ends and length are the two things you actually want off a
+        // label, and the product name can't be trusted to carry both.
+        if (asset.product.cable != null) ...[
+          _row(l10n.connectors, cableConnectors(asset.product.cable!)),
+          if (cableLength(asset.product.cable!, l10n.localeName)
+              case final length?)
+            _row(l10n.cableLength, length),
+        ],
         if (asset.currentProduction != null)
           _row(l10n.checkedOutTo, asset.currentProduction!.name),
         const SizedBox(height: 24),
-        Text(l10n.history, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(
+          l10n.history,
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
         for (final tx in asset.history)
           ListTile(
@@ -188,11 +201,16 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
           width: 150,
           child: Text(
             label,
-            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
         Expanded(
-          child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+          child: Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.w500),
+          ),
         ),
       ],
     ),

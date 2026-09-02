@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { categoryLabel } from '$lib/category';
 	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
+	import { CABLE_END_LABEL, connectorRole, formatLength, connectorLabel } from '$lib/cable';
+	import { getConnectors } from '$lib/remote/connectors.remote';
 	import { imageSrc } from '$lib/images';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -8,7 +10,12 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
-	import { ProductFields, type ProductDraft } from '$lib/components/ui/product-fields';
+	import {
+		ProductFields,
+		cableDraftFrom,
+		cableInputFrom,
+		type ProductDraft
+	} from '$lib/components/ui/product-fields';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
@@ -337,10 +344,23 @@
 		name: '',
 		categoryId: '',
 		imagePath: '',
-		netPurchasePrice: undefined
+		netPurchasePrice: undefined,
+		cable: null
 	});
 	let productManufacturer = $state<{ id: string | null; name: string } | null>(null);
 	let manufacturers = $derived(await getManufacturers());
+
+	// Only fetched for a cable: an asset page for a moving head has no use for
+	// the connector catalogue, and every asset page would otherwise pay for it.
+	let connectors = $derived(asset.product.cableType ? await getConnectors() : []);
+	let cableInputGender = $derived(asset.product.category.cableInputGender ?? null);
+
+	/** The catalogue row behind a name on this product, for its picture and end. */
+	function connectorInfo(name: string | null) {
+		const row = connectors.find((c) => c.name.toLowerCase() === (name ?? '').trim().toLowerCase());
+		const role = row ? connectorRole(row, connectors, cableInputGender) : null;
+		return { imagePath: row?.imagePath ?? null, end: role ? CABLE_END_LABEL[role] : null };
+	}
 	let savingProduct = $state(false);
 
 	function openProductModal() {
@@ -353,7 +373,8 @@
 			categoryId: asset.product.categoryId,
 			imagePath: asset.product.imagePath ?? '',
 			// The owning org's price — prices are per-org now.
-			netPurchasePrice: orgNetPurchasePrice
+			netPurchasePrice: orgNetPurchasePrice,
+			cable: cableDraftFrom(asset.product)
 		};
 		productModalOpen = true;
 	}
@@ -370,7 +391,8 @@
 				manufacturerId: productManufacturer.id,
 				name: productDraft.name,
 				categoryId: productDraft.categoryId,
-				imagePath: productDraft.imagePath
+				imagePath: productDraft.imagePath,
+				cable: cableInputFrom(productDraft.cable)
 			});
 			if ((productDraft.netPurchasePrice ?? null) !== (orgNetPurchasePrice ?? null)) {
 				await setOrgProductPrice({
@@ -395,7 +417,15 @@
 	<div class="flex items-center justify-between">
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">{asset.product.name}</h1>
-			<p class="text-muted-foreground">{asset.product.manufacturer.name}</p>
+			<p class="text-muted-foreground">
+				{[
+					asset.product.manufacturer.name,
+					connectorLabel(asset.product),
+					asset.product.lengthCm ? formatLength(asset.product.lengthCm) : ''
+				]
+					.filter(Boolean)
+					.join(' · ')}
+			</p>
 		</div>
 		<div class="flex gap-2">
 			<Button variant="outline" href={resolve(`/assets/new?duplicateFrom=${asset.id}`)}
@@ -675,6 +705,55 @@
 							/>
 						</div>
 					</div>
+					{#if asset.product.cableType}
+						{@const endA = connectorInfo(asset.product.connectorA)}
+						{@const endB = connectorInfo(asset.product.connectorB)}
+						<div class="space-y-2">
+							<Label>Cable type</Label>
+							<Input value={asset.product.cableType} disabled />
+						</div>
+						<div class="grid gap-4 sm:grid-cols-2">
+							<div class="space-y-2">
+								<Label>
+									Connector A
+									{#if endA.end}
+										<span class="ml-1 font-mono text-xs font-normal text-muted-foreground"
+											>{endA.end}</span
+										>
+									{/if}
+								</Label>
+								<div
+									class="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm"
+								>
+									<ProductThumb path={endA.imagePath} alt="" size={22} />
+									<span>{asset.product.connectorA ?? '—'}</span>
+								</div>
+							</div>
+							<div class="space-y-2">
+								<Label>
+									Connector B
+									{#if endB.end}
+										<span class="ml-1 font-mono text-xs font-normal text-muted-foreground"
+											>{endB.end}</span
+										>
+									{/if}
+								</Label>
+								<div
+									class="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm"
+								>
+									<ProductThumb path={endB.imagePath} alt="" size={22} />
+									<span>{asset.product.connectorB ?? '—'}</span>
+								</div>
+							</div>
+						</div>
+						{#if asset.product.lengthCm}
+							<div class="space-y-2">
+								<Label>Length</Label>
+								<Input value={formatLength(asset.product.lengthCm)} disabled />
+							</div>
+						{/if}
+					{/if}
+
 					<div class="space-y-2">
 						<Label>Net purchase price (€)</Label>
 						<div

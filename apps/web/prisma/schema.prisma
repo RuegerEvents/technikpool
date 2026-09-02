@@ -199,6 +199,53 @@ model Manufacturer {
   products  Product[]
 }
 
+/// A cable end as a row of its own, so it can carry a picture and so the pool
+/// spells it one way. The product fields stay free text — `Product.connectorA`
+/// is still a string, and a name nobody has used before is accepted and gets a
+/// row on save. This table is what that name accumulates against, not a gate in
+/// front of it: a warehouse at 22:00 with an unlisted connector must never be
+/// stuck.
+model Connector {
+  id   String @id @default(cuid())
+  name String
+  /// Lowercased `name`. The unique key, so "Schuko M", "schuko m" and
+  /// "SCHUKO M" cannot become three rows of the same thing.
+  slug String @unique
+  /// What this connector mates with — "Schuko M" and "Schuko F" are both
+  /// `Schuko`, "C13" and "C14" are both `C13/C14`. Not derivable from the name:
+  /// "USB-A" and "USB-C" share a prefix and mate with nothing of each other's,
+  /// while "powerCON blau" and "powerCON grau" share a family and look no more
+  /// alike. It is what tells an ordinary extension lead from a converter.
+  family String?
+  /// `plug` (Stecker) or `socket` (Einbaubuchse) — where this connector sits.
+  /// A Stecker hangs off the end of a cable; an Einbaubuchse is mounted into a
+  /// device or a panel. Almost everything in the catalogue is a Stecker,
+  /// because almost everything in it is a cable end: a Schuko Kupplung and an
+  /// XLR3 F are as much cable ends as their male counterparts.
+  ///
+  /// Descriptive only. What a connector can be joined to is `gender`.
+  form String?
+  /// `male` (Stifte) or `female` (Buchsen) — what the contacts are.
+  ///
+  /// Separate from `form`, because the two come apart on exactly the
+  /// connectors that lock: a speakON NL4FC has female contacts and is still
+  /// the Stecker you push into the chassis, and every powerCON cable end is
+  /// the same way round. They agree on Schuko, XLR, CEE and C13/C14, which is
+  /// what makes one column look sufficient until it isn't.
+  gender String?
+  /// Which department a cable ending in this connector belongs to. A Schuko
+  /// plug is Power wherever it turns up, so this prefills the category on a new
+  /// cable — a better guess than the cable type, which is free text. Only a
+  /// prefill: `Product.categoryId` is what bills, and it stays editable.
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  /// Object key, like Manufacturer.logoPath.
+  imagePath String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Category {
   id String @id @default(cuid())
   // English is the source name — it's what `name` has always held, what the
@@ -212,9 +259,24 @@ model Category {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  /// On a cable in this department, which contacts are the end power or signal
+  /// comes *in* on.
+  ///
+  /// `male` for Strom: a cable's male end goes into the supply. `female` for
+  /// Audio, where a mic input carries 48 V phantom and so is the female side —
+  /// an XLR cable's female end sits on the source. `male` again for Licht,
+  /// because DMX reverses audio: a console's output is female, a fixture's
+  /// input is male. Null where a cable has no direction worth stating.
+  ///
+  /// It lives here rather than on Connector or on a family precisely because of
+  /// that XLR3-versus-XLR5 split: the same shell means opposite things in audio
+  /// and in light, so the answer belongs to the department, not the connector.
+  cableInputGender String?
+
   products        Product[]
   bundleTemplates BundleTemplate[]
   orgRates        OrgCategoryRate[]
+  connectors      Connector[]
 }
 
 model Product {
@@ -226,6 +288,16 @@ model Product {
   category       Category     @relation(fields: [categoryId], references: [id])
   /// Object key, like Manufacturer.logoPath.
   imagePath      String?
+
+  /// Cable attributes — null on anything that is not a cable. `cableType` set is
+  /// what makes a product a cable; the name is still the label everywhere, these
+  /// drive filters, prefills and the API's `cable` object. Category stays the
+  /// department (DMX → Light, XLR → Audio): OrgCategoryRate bills per category.
+  cableType  String?
+  connectorA String?
+  connectorB String?
+  /// Whole centimetres; the UI reads and writes metres.
+  lengthCm   Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

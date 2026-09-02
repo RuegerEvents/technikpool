@@ -1,5 +1,6 @@
 import type { Schemas } from '$lib/server/api';
 import { imageSrc } from '$lib/images';
+import { isCable } from '$lib/cable';
 
 // Prisma payloads are deliberately not returned straight to clients: they carry
 // fields the API doesn't promise, and adding a column to the schema would
@@ -96,6 +97,10 @@ type ProductRow = {
 	id: string;
 	name: string;
 	imagePath: string | null;
+	cableType: string | null;
+	connectorA: string | null;
+	connectorB: string | null;
+	lengthCm: number | null;
 	manufacturer: { name: string };
 	category: CategoryRow;
 };
@@ -110,7 +115,17 @@ export function toProduct(product: ProductRow): Schemas['Product'] {
 		// resolve a key against. What changed is where it comes from: it is built
 		// per response now, so a moved object store is picked up on the next
 		// request rather than needing every row rewritten.
-		imageUrl: imageSrc(product.imagePath)
+		imageUrl: imageSrc(product.imagePath),
+		// Any of the four columns makes it a cable — see isCable. `type` is the
+		// wire (CAT7, 2,5 mm²) and is null on most of them.
+		cable: isCable(product)
+			? {
+					type: product.cableType,
+					connectorA: product.connectorA,
+					connectorB: product.connectorB,
+					lengthCm: product.lengthCm
+				}
+			: null
 	};
 }
 

@@ -37,6 +37,11 @@
   "serialNumber": "Serial number",
   "status": "Status",
   "currentLocation": "Current location",
+  "connectors": "Connectors",
+  "@connectors": {
+    "description": "A cable's two ends, shown as \"XLR3 M \u2192 XLR3 F\" on the lookup screen."
+  },
+  "cableLength": "Length",
   "checkedOutTo": "Checked out to",
   "history": "History",
   "inventory": "Inventory",

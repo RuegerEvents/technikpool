@@ -18,7 +18,12 @@
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { Modal } from '$lib/components/ui/modal';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { ProductFields, type ProductDraft } from '$lib/components/ui/product-fields';
+	import {
+		ProductFields,
+		cableDraftFrom,
+		cableInputFrom,
+		type ProductDraft
+	} from '$lib/components/ui/product-fields';
 	import { resolve } from '$app/paths';
 	import { browser } from '$app/environment';
 	import { toast } from 'svelte-sonner';
@@ -81,7 +86,11 @@
 		return (
 			product.name.toLowerCase().includes(searchTrimmed) ||
 			product.manufacturer.name.toLowerCase().includes(searchTrimmed) ||
-			categoryLabel(product.category).toLowerCase().includes(searchTrimmed)
+			categoryLabel(product.category).toLowerCase().includes(searchTrimmed) ||
+			// "everything with a TRUE1 end" is a question the name can't answer.
+			[product.cableType, product.connectorA, product.connectorB].some((v) =>
+				v?.toLowerCase().includes(searchTrimmed)
+			)
 		);
 	}
 
@@ -105,7 +114,8 @@
 		name: '',
 		categoryId: '',
 		imagePath: '',
-		netPurchasePrice: undefined
+		netPurchasePrice: undefined,
+		cable: null
 	});
 	let manufacturer = $state<{ id: string | null; name: string } | null>(null);
 	// One price per org the user manages — prices are per-org, and undefined
@@ -130,7 +140,8 @@
 			name: product.name,
 			categoryId: product.categoryId,
 			imagePath: product.imagePath ?? '',
-			netPurchasePrice: undefined
+			netPurchasePrice: undefined,
+			cable: cableDraftFrom(product)
 		};
 	});
 
@@ -150,12 +161,25 @@
 
 	let identityLocked = $derived(!!current && isIdentityLocked(current));
 
+	// What a cable is counts as identity here for the same reason the server
+	// treats it as such: it decides which product a unit belongs to.
+	let cableDraftInput = $derived(cableInputFrom(draft.cable));
+	let cableDirty = $derived(
+		!!current &&
+			draftFor === current.id &&
+			((cableDraftInput?.cableType ?? null) !== current.cableType ||
+				(cableDraftInput?.connectorA ?? null) !== current.connectorA ||
+				(cableDraftInput?.connectorB ?? null) !== current.connectorB ||
+				(cableDraftInput?.lengthCm ?? null) !== current.lengthCm)
+	);
+
 	let identityDirty = $derived(
 		!!current &&
 			draftFor === current.id &&
 			(draft.name.trim() !== current.name ||
 				manufacturer?.id !== current.manufacturerId ||
-				draft.categoryId !== current.categoryId)
+				draft.categoryId !== current.categoryId ||
+				cableDirty)
 	);
 	let imageDirty = $derived(
 		!!current && draftFor === current.id && draft.imagePath.trim() !== (current.imagePath ?? '')
@@ -195,7 +219,8 @@
 						: {
 								name: draft.name,
 								manufacturerId: manufacturer.id,
-								categoryId: draft.categoryId
+								categoryId: draft.categoryId,
+								cable: cableDraftInput
 							}),
 					imagePath: draft.imagePath
 				});
