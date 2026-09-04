@@ -1,1 +1,1 @@
-Erstveröffentlichung von Technikpool Scanner.
+Nachschlagen und Bestand zeigen jetzt Stecker und Länge eines Kabels, sodass sich zwei Kabel desselben Typs unterscheiden lassen, ohne das Etikett zu lesen.

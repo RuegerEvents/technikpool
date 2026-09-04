@@ -1,1 +1,1 @@
-Initial release of Technikpool Scanner.
+Look up and Inventory now show a cable's connectors and length, so two cables of the same type can be told apart without reading the label.
