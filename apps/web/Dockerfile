@@ -4,7 +4,7 @@
 # workspace manifest and lockfile. Build with:
 #   docker build -f apps/web/Dockerfile .
 
-FROM node:24-alpine AS base
+FROM node:26-alpine AS base
 WORKDIR /app
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -24,7 +24,7 @@ COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 COPY . .
 RUN pnpm --filter web build
 
-FROM node:24-alpine AS runner
+FROM node:26-alpine AS runner
 ENV NODE_ENV=production
 ENV HUSKY=0
 

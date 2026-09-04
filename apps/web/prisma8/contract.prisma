@@ -1,0 +1,618 @@
+// use prisma-next
+// Contract inferred from the live database schema. Edit as needed, then run `prisma contract emit`.
+namespace public {
+  model Address {
+    id            String         @id(map: "Address_pkey")
+    line1         String
+    line2         String?
+    postalCode    String
+    city          String
+    createdAt     Timestamp(3)   @default(now())
+    updatedAt     Timestamp(3)
+    customers     Customer[]
+    locations     Location[]
+    organizations Organization[]
+    productions   Production[]
+
+    @@map("Address")
+  }
+
+  model Organization {
+    id                              String            @id(map: "Organization_pkey")
+    name                            String
+    createdAt                       Timestamp(3)      @default(now())
+    updatedAt                       Timestamp(3)
+    defaultAssetVisibility          String            @default("PUBLIC")
+    assetIdPrefix                   String
+    avatarLabel                     String
+    color                           String
+    defaultInspectionIntervalMonths Int?
+    isKleinunternehmer              Boolean           @default(false)
+    addressId                       String?
+    bankAccountHolder               String?
+    bankName                        String?
+    bic                             String?
+    iban                            String?
+    taxId                           String?
+    shortName                       String?
+    billingEmail                    String?
+    billingWebsite                  String?
+    paymentTermsDays                Int               @default(14)
+    offerIntroTemplate              String?
+    offerClosingTemplate            String?
+    invoiceIntroTemplate            String?
+    invoiceClosingTemplate          String?
+    assets                          Asset[]
+    bundleTemplates                 BundleTemplate[]
+    customers                       Customer[]
+    invoices                        Invoice[]
+    locations                       Location[]
+    offers                          Offer[]
+    offerSequences                  OfferSequence[]
+    orgCategoryRates                OrgCategoryRate[]
+    orgMemberships                  OrgMembership[]
+    orgProductPrices                OrgProductPrice[]
+    productions                     Production[]
+    users                           User[]
+    address                         Address?          @relation(fields:[addressId], references:[id], onDelete: SetNull, onUpdate: Cascade, map: "Organization_addressId_fkey", index: false)
+
+    @@index([assetIdPrefix], map: "Organization_assetIdPrefix_key", unique: true)
+    @@index([avatarLabel], map: "Organization_avatarLabel_key", unique: true)
+    @@index([color], map: "Organization_color_key", unique: true)
+    @@map("Organization")
+  }
+
+  model User {
+    id                  String               @id(map: "user_pkey")
+    email               String
+    name                String?
+    emailVerified       Boolean              @default(false)
+    image               String?
+    createdAt           Timestamp(3)         @default(now())
+    updatedAt           Timestamp(3)
+    homeOrgId           String?
+    isAdmin             Boolean              @default(false)
+    assetTransactions   AssetTransaction[]
+    catalogTransactions CatalogTransaction[]
+    orgMemberships      OrgMembership[]
+    productionCrews     ProductionCrew[]
+    accounts            Account[]
+    sessions            Session[]
+    homeOrg             Organization?        @relation(fields:[homeOrgId], references:[id], onDelete: SetNull, onUpdate: Cascade, map: "user_homeOrgId_fkey", index: false)
+
+    @@index([email], map: "user_email_key", unique: true)
+    @@map("user")
+  }
+
+  model Account {
+    id                    String        @id(map: "account_pkey")
+    accountId             String
+    providerId            String
+    userId                String
+    accessToken           String?
+    refreshToken          String?
+    idToken               String?
+    accessTokenExpiresAt  Timestamp(3)?
+    refreshTokenExpiresAt Timestamp(3)?
+    scope                 String?
+    password              String?
+    createdAt             Timestamp(3)  @default(now())
+    updatedAt             Timestamp(3)
+    issuer                String
+    user                  User          @relation(fields:[userId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "account_userId_fkey", index: false)
+
+    @@index([issuer, accountId], map: "account_issuer_accountId_key", unique: true)
+    @@map("account")
+  }
+
+  model Category {
+    id               String            @id(map: "Category_pkey")
+    name             String
+    sortOrder        Int               @default(0)
+    createdAt        Timestamp(3)      @default(now())
+    updatedAt        Timestamp(3)
+    color            String            @default("#ffffff")
+    nameDe           String?
+    cableInputGender String?
+    bundleTemplates  BundleTemplate[]
+    connectors       Connector[]
+    orgCategoryRates OrgCategoryRate[]
+    products         Product[]
+
+    @@index([name], map: "Category_name_key", unique: true)
+    @@map("Category")
+  }
+
+  model BundleTemplate {
+    id             String        @id(map: "BundleTemplate_pkey")
+    name           String
+    description    String?
+    organizationId String
+    categoryId     String
+    createdAt      Timestamp(3)  @default(now())
+    updatedAt      Timestamp(3)
+    assetBundles   AssetBundle[]
+    category       Category      @relation(fields:[categoryId], references:[id], onDelete: Restrict, onUpdate: Cascade, map: "BundleTemplate_categoryId_fkey", index: false)
+    organization   Organization  @relation(fields:[organizationId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "BundleTemplate_organizationId_fkey", index: false)
+
+    @@map("BundleTemplate")
+  }
+
+  model Location {
+    id             String        @id(map: "Location_pkey")
+    name           String
+    organizationId String
+    createdAt      Timestamp(3)  @default(now())
+    updatedAt      Timestamp(3)
+    addressId      String
+    assets         Asset[]
+    assetBundles   AssetBundle[]
+    address        Address       @relation(fields:[addressId], references:[id], onDelete: Restrict, onUpdate: Cascade, map: "Location_addressId_fkey", index: false)
+    organization   Organization  @relation(fields:[organizationId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "Location_organizationId_fkey", index: false)
+
+    @@map("Location")
+  }
+
+  model AssetBundle {
+    id               String           @id(map: "AssetBundle_pkey")
+    createdAt        Timestamp(3)     @default(now())
+    updatedAt        Timestamp(3)
+    locationId       String?
+    netPurchasePrice Numeric(10, 2)?
+    templateId       String
+    tag              String?
+    imagePath        String?
+    imageFingerprint String?
+    assets           Asset[]
+    productionItems  ProductionItem[]
+    location         Location?        @relation(fields:[locationId], references:[id], onDelete: SetNull, onUpdate: Cascade, map: "AssetBundle_locationId_fkey", index: false)
+    template         BundleTemplate   @relation(fields:[templateId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "AssetBundle_templateId_fkey", index: false)
+
+    @@index([tag], map: "AssetBundle_tag_key", unique: true)
+    @@map("AssetBundle")
+  }
+
+  model Manufacturer {
+    id        String       @id(map: "Manufacturer_pkey")
+    name      String
+    createdAt Timestamp(3) @default(now())
+    updatedAt Timestamp(3)
+    logoPath  String?
+    generic   Boolean      @default(false)
+    products  Product[]
+
+    @@map("Manufacturer")
+  }
+
+  model Product {
+    id               String            @id(map: "Product_pkey")
+    name             String
+    manufacturerId   String
+    createdAt        Timestamp(3)      @default(now())
+    updatedAt        Timestamp(3)
+    categoryId       String
+    imagePath        String?
+    cableType        String?
+    connectorA       String?
+    connectorB       String?
+    lengthCm         Int?
+    assets           Asset[]
+    orgProductPrices OrgProductPrice[]
+    category         Category          @relation(fields:[categoryId], references:[id], onDelete: Restrict, onUpdate: Cascade, map: "Product_categoryId_fkey", index: false)
+    manufacturer     Manufacturer      @relation(fields:[manufacturerId], references:[id], onDelete: Restrict, onUpdate: Cascade, map: "Product_manufacturerId_fkey", index: false)
+
+    @@map("Product")
+  }
+
+  model Asset {
+    id                        String             @id(map: "Asset_pkey")
+    organizationId            String
+    productId                 String
+    locationId                String
+    serialNumber              String?
+    status                    String             @default("AVAILABLE")
+    createdAt                 Timestamp(3)       @default(now())
+    updatedAt                 Timestamp(3)
+    assetTag                  String?
+    bundleId                  String?
+    inspectionIntervalMonths  Int?
+    nextInspectionDue         Timestamp(3)?
+    purchaseDate              Timestamp(3)?
+    parentAssetId             String?
+    generatedImagePath        String?
+    generatedImageFingerprint String?
+    assetTransactions         AssetTransaction[]
+    inspections               Inspection[]
+    productionItems           ProductionItem[]
+    bundle                    AssetBundle?       @relation(fields:[bundleId], references:[id], onDelete: SetNull, onUpdate: Cascade, map: "Asset_bundleId_fkey", index: false)
+    location                  Location           @relation(fields:[locationId], references:[id], onDelete: Restrict, onUpdate: Cascade, map: "Asset_locationId_fkey", index: false)
+    organization              Organization       @relation(fields:[organizationId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "Asset_organizationId_fkey", index: false)
+    parent                    Asset?             @relation(name: "Asset_parentAssetId_fkey", fields:[parentAssetId], references:[id], onDelete: SetNull, onUpdate: Cascade, map: "Asset_parentAssetId_fkey")
+    accessories               Asset[]            @relation(name: "Asset_parentAssetId_fkey")
+    product                   Product            @relation(fields:[productId], references:[id], onDelete: Restrict, onUpdate: Cascade, map: "Asset_productId_fkey", index: false)
+
+    @@index([assetTag], map: "Asset_assetTag_key", unique: true)
+    @@index([parentAssetId], map: "Asset_parentAssetId_idx")
+    @@map("Asset")
+  }
+
+  model Customer {
+    id             String       @id(map: "Customer_pkey")
+    organizationId String
+    companyName    String?
+    contactPerson  String?
+    email          String?
+    addressId      String?
+    createdAt      Timestamp(3) @default(now())
+    updatedAt      Timestamp(3)
+    customerNumber String?
+    phone          String?
+    vatId          String?
+    productions    Production[]
+    address        Address?     @relation(fields:[addressId], references:[id], onDelete: SetNull, onUpdate: Cascade, map: "Customer_addressId_fkey", index: false)
+    organization   Organization @relation(fields:[organizationId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "Customer_organizationId_fkey", index: false)
+
+    @@index([organizationId, customerNumber], map: "Customer_organizationId_customerNumber_key", unique: true)
+    @@map("Customer")
+  }
+
+  model Production {
+    id                String             @id(map: "Production_pkey")
+    name              String
+    startDate         Timestamp(3)?
+    endDate           Timestamp(3)?
+    organizationId    String
+    createdAt         Timestamp(3)       @default(now())
+    updatedAt         Timestamp(3)
+    addressId         String?
+    showEndDate       Timestamp(3)?
+    showStartDate     Timestamp(3)?
+    customerId        String?
+    assetTransactions AssetTransaction[]
+    invoices          Invoice[]
+    offers            Offer[]
+    crew              ProductionCrew[]
+    items             ProductionItem[]
+    address           Address?           @relation(fields:[addressId], references:[id], onDelete: SetNull, onUpdate: Cascade, map: "Production_addressId_fkey", index: false)
+    customer          Customer?          @relation(fields:[customerId], references:[id], onDelete: SetNull, onUpdate: Cascade, map: "Production_customerId_fkey", index: false)
+    organization      Organization       @relation(fields:[organizationId], references:[id], onDelete: Restrict, onUpdate: Cascade, map: "Production_organizationId_fkey", index: false)
+
+    @@map("Production")
+  }
+
+  model AssetTransaction {
+    id           String       @id(map: "AssetTransaction_pkey")
+    assetId      String
+    userId       String
+    productionId String?
+    action       String
+    createdAt    Timestamp(3) @default(now())
+    data         Jsonb?
+    asset        Asset        @relation(fields:[assetId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "AssetTransaction_assetId_fkey", index: false)
+    production   Production?  @relation(fields:[productionId], references:[id], onDelete: SetNull, onUpdate: Cascade, map: "AssetTransaction_productionId_fkey", index: false)
+    user         User         @relation(fields:[userId], references:[id], onDelete: Restrict, onUpdate: Cascade, map: "AssetTransaction_userId_fkey", index: false)
+
+    @@map("AssetTransaction")
+  }
+
+  model CatalogTransaction {
+    id             String       @id(map: "CatalogTransaction_pkey")
+    userId         String
+    action         String
+    productId      String?
+    manufacturerId String?
+    categoryId     String?
+    organizationId String?
+    data           Jsonb?
+    createdAt      Timestamp(3) @default(now())
+    user           User         @relation(fields:[userId], references:[id], onDelete: Restrict, onUpdate: Cascade, map: "CatalogTransaction_userId_fkey", index: false)
+
+    @@map("CatalogTransaction")
+  }
+
+  model Connector {
+    id         String       @id(map: "Connector_pkey")
+    name       String
+    slug       String
+    imagePath  String?
+    createdAt  Timestamp(3) @default(now())
+    updatedAt  Timestamp(3)
+    family     String?
+    gender     String?
+    categoryId String?
+    form       String?
+    category   Category?    @relation(fields:[categoryId], references:[id], onDelete: SetNull, onUpdate: Cascade, map: "Connector_categoryId_fkey", index: false)
+
+    @@index([slug], map: "Connector_slug_key", unique: true)
+    @@map("Connector")
+  }
+
+  model DeviceCode {
+    id              String        @id(map: "device_code_pkey")
+    deviceCode      String
+    userCode        String
+    userId          String?
+    expiresAt       Timestamp(3)
+    status          String
+    lastPolledAt    Timestamp(3)?
+    pollingInterval Int?
+    clientId        String?
+    scope           String?
+
+    @@index([deviceCode], map: "device_code_deviceCode_key", unique: true)
+    @@index([userCode], map: "device_code_userCode_key", unique: true)
+    @@map("device_code")
+  }
+
+  model Inspection {
+    id            String        @id(map: "Inspection_pkey")
+    assetId       String
+    performedAt   Timestamp(3)
+    result        String
+    notes         String?
+    inspectorName String?
+    nextDueDate   Timestamp(3)?
+    createdAt     Timestamp(3)  @default(now())
+    asset         Asset         @relation(fields:[assetId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "Inspection_assetId_fkey", index: false)
+
+    @@map("Inspection")
+  }
+
+  model Offer {
+    id                         String          @id(map: "Offer_pkey")
+    organizationId             String
+    productionId               String?
+    customerName               String
+    customerAddress            String?
+    dayCount                   Int
+    discountType               String?
+    discountValue              Numeric(10, 2)?
+    createdAt                  Timestamp(3)    @default(now())
+    updatedAt                  Timestamp(3)
+    vatRatePercent             Numeric(4, 2)   @default(19)
+    customerContactPerson      String?
+    customerEmail              String?
+    customerId                 String?
+    assetScope                 String          @default("ALL")
+    customerNumber             String?
+    customerPhone              String?
+    customerVatId              String?
+    serviceStartDate           Timestamp(3)?
+    serviceEndDate             Timestamp(3)?
+    introText                  String?
+    closingText                String?
+    paymentTermsDays           Int             @default(14)
+    finalizedAt                Timestamp(3)?
+    pdfPath                    String?
+    number                     String
+    isKleinunternehmerSnapshot Boolean         @default(false)
+    orgName                    String
+    orgAddressLine1            String?
+    orgAddressLine2            String?
+    orgPostalCode              String?
+    orgCity                    String?
+    orgTaxId                   String?
+    orgBillingEmail            String?
+    orgBillingWebsite          String?
+    orgBankAccountHolder       String?
+    orgBankName                String?
+    orgIban                    String?
+    orgBic                     String?
+    invoices                   Invoice[]
+    offerItems                 OfferItem[]
+    organization               Organization    @relation(fields:[organizationId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "Offer_organizationId_fkey", index: false)
+    production                 Production?     @relation(fields:[productionId], references:[id], onDelete: SetNull, onUpdate: Cascade, map: "Offer_productionId_fkey", index: false)
+
+    @@index([organizationId, number], map: "Offer_organizationId_number_key", unique: true)
+    @@map("Offer")
+  }
+
+  model Invoice {
+    id                         String          @id(map: "Invoice_pkey")
+    number                     String
+    organizationId             String
+    productionId               String?
+    offerId                    String?
+    customerName               String
+    customerAddress            String?
+    issueDate                  Timestamp(3)    @default(now())
+    dayCount                   Int
+    discountType               String?
+    discountValue              Numeric(10, 2)?
+    isKleinunternehmerSnapshot Boolean         @default(false)
+    createdAt                  Timestamp(3)    @default(now())
+    updatedAt                  Timestamp(3)
+    vatRatePercent             Numeric(4, 2)   @default(19)
+    customerContactPerson      String?
+    customerEmail              String?
+    customerId                 String?
+    assetScope                 String          @default("ALL")
+    sentAt                     Timestamp(3)?
+    customerNumber             String?
+    customerPhone              String?
+    customerVatId              String?
+    serviceStartDate           Timestamp(3)?
+    serviceEndDate             Timestamp(3)?
+    introText                  String?
+    closingText                String?
+    paymentTermsDays           Int             @default(14)
+    pdfPath                    String?
+    orgName                    String
+    orgAddressLine1            String?
+    orgAddressLine2            String?
+    orgPostalCode              String?
+    orgCity                    String?
+    orgTaxId                   String?
+    orgBillingEmail            String?
+    orgBillingWebsite          String?
+    orgBankAccountHolder       String?
+    orgBankName                String?
+    orgIban                    String?
+    orgBic                     String?
+    invoiceItems               InvoiceItem[]
+    offer                      Offer?          @relation(fields:[offerId], references:[id], onDelete: SetNull, onUpdate: Cascade, map: "Invoice_offerId_fkey", index: false)
+    organization               Organization    @relation(fields:[organizationId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "Invoice_organizationId_fkey", index: false)
+    production                 Production?     @relation(fields:[productionId], references:[id], onDelete: SetNull, onUpdate: Cascade, map: "Invoice_productionId_fkey", index: false)
+
+    @@index([organizationId, number], map: "Invoice_organizationId_number_key", unique: true)
+    @@map("Invoice")
+  }
+
+  model InvoiceItem {
+    id               String         @id(map: "InvoiceItem_pkey")
+    invoiceId        String
+    assetId          String?
+    description      String
+    netPurchasePrice Numeric(10, 2)
+    ratePercent      Numeric(5, 2)
+    dailyRate        Numeric(10, 2)
+    lineTotal        Numeric(10, 2)
+    createdAt        Timestamp(3)   @default(now())
+    bundleId         String?
+    categoryColor    String?
+    categoryId       String?
+    categoryName     String?
+    productId        String?
+    productLabel     String?
+    categoryNameDe   String?
+    invoice          Invoice        @relation(fields:[invoiceId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "InvoiceItem_invoiceId_fkey", index: false)
+
+    @@map("InvoiceItem")
+  }
+
+  model OfferItem {
+    id               String         @id(map: "OfferItem_pkey")
+    offerId          String
+    assetId          String?
+    description      String
+    netPurchasePrice Numeric(10, 2)
+    ratePercent      Numeric(5, 2)
+    dailyRate        Numeric(10, 2)
+    lineTotal        Numeric(10, 2)
+    createdAt        Timestamp(3)   @default(now())
+    bundleId         String?
+    categoryColor    String?
+    categoryId       String?
+    categoryName     String?
+    productId        String?
+    productLabel     String?
+    categoryNameDe   String?
+    offer            Offer          @relation(fields:[offerId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "OfferItem_offerId_fkey", index: false)
+
+    @@map("OfferItem")
+  }
+
+  model OfferSequence {
+    id             String       @id(map: "OfferSequence_pkey")
+    organizationId String
+    year           Int
+    lastNumber     Int          @default(0)
+    organization   Organization @relation(fields:[organizationId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "OfferSequence_organizationId_fkey", index: false)
+
+    @@index([organizationId, year], map: "OfferSequence_organizationId_year_key", unique: true)
+    @@map("OfferSequence")
+  }
+
+  model OrgCategoryRate {
+    id             String        @id(map: "OrgCategoryRate_pkey")
+    organizationId String
+    categoryId     String
+    percentage     Numeric(5, 2)
+    createdAt      Timestamp(3)  @default(now())
+    updatedAt      Timestamp(3)
+    category       Category      @relation(fields:[categoryId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "OrgCategoryRate_categoryId_fkey", index: false)
+    organization   Organization  @relation(fields:[organizationId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "OrgCategoryRate_organizationId_fkey", index: false)
+
+    @@index([organizationId, categoryId], map: "OrgCategoryRate_organizationId_categoryId_key", unique: true)
+    @@map("OrgCategoryRate")
+  }
+
+  model OrgMembership {
+    id             String        @id(map: "OrgMembership_pkey")
+    userId         String
+    organizationId String
+    role           pg.enum(Role) @default("MEMBER")
+    createdAt      Timestamp(3)  @default(now())
+    updatedAt      Timestamp(3)
+    organization   Organization  @relation(fields:[organizationId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "OrgMembership_organizationId_fkey", index: false)
+    user           User          @relation(fields:[userId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "OrgMembership_userId_fkey", index: false)
+
+    @@index([userId, organizationId], map: "OrgMembership_userId_organizationId_key", unique: true)
+    @@map("OrgMembership")
+  }
+
+  model OrgProductPrice {
+    id               String         @id(map: "OrgProductPrice_pkey")
+    organizationId   String
+    productId        String
+    netPurchasePrice Numeric(10, 2)
+    createdAt        Timestamp(3)   @default(now())
+    updatedAt        Timestamp(3)
+    organization     Organization   @relation(fields:[organizationId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "OrgProductPrice_organizationId_fkey", index: false)
+    product          Product        @relation(fields:[productId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "OrgProductPrice_productId_fkey", index: false)
+
+    @@index([organizationId, productId], map: "OrgProductPrice_organizationId_productId_key", unique: true)
+    @@map("OrgProductPrice")
+  }
+
+  model ProductionCrew {
+    id           String       @id(map: "ProductionCrew_pkey")
+    productionId String
+    role         String?
+    createdAt    Timestamp(3) @default(now())
+    userId       String
+    production   Production   @relation(fields:[productionId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "ProductionCrew_productionId_fkey", index: false)
+    user         User         @relation(fields:[userId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "ProductionCrew_userId_fkey", index: false)
+
+    @@index([productionId, userId], map: "ProductionCrew_productionId_userId_key", unique: true)
+    @@map("ProductionCrew")
+  }
+
+  model ProductionItem {
+    id                  String       @id(map: "ProductionItem_pkey")
+    productionId        String
+    assetId             String
+    status              String       @default("PENDING")
+    sourceBundleId      String?
+    sourceParentAssetId String?
+    asset               Asset        @relation(fields:[assetId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "ProductionItem_assetId_fkey", index: false)
+    production          Production   @relation(fields:[productionId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "ProductionItem_productionId_fkey", index: false)
+    sourceBundle        AssetBundle? @relation(fields:[sourceBundleId], references:[id], onDelete: SetNull, onUpdate: Cascade, map: "ProductionItem_sourceBundleId_fkey", index: false)
+
+    @@index([productionId, assetId], map: "ProductionItem_productionId_assetId_key", unique: true)
+    @@map("ProductionItem")
+  }
+
+  model Session {
+    id        String       @id(map: "session_pkey")
+    expiresAt Timestamp(3)
+    token     String
+    createdAt Timestamp(3) @default(now())
+    updatedAt Timestamp(3)
+    ipAddress String?
+    userAgent String?
+    userId    String
+    user      User         @relation(fields:[userId], references:[id], onDelete: Cascade, onUpdate: Cascade, map: "session_userId_fkey", index: false)
+
+    @@index([token], map: "session_token_key", unique: true)
+    @@map("session")
+  }
+
+  model Verification {
+    id         String        @id(map: "verification_pkey")
+    identifier String
+    value      String
+    expiresAt  Timestamp(3)
+    createdAt  Timestamp(3)? @default(now())
+    updatedAt  Timestamp(3)?
+
+    @@map("verification")
+  }
+
+  native_enum Role {
+    OWNER = "OWNER"
+    ADMIN = "ADMIN"
+    MEMBER = "MEMBER"
+    VIEWER = "VIEWER"
+  }
+}

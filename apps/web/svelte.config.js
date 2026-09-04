@@ -17,6 +17,14 @@ const config = {
 		adapter: adapter(),
 		experimental: {
 			remoteFunctions: true
+		},
+		typescript: {
+			config(config) {
+				// Paths are relative to .svelte-kit/, where the generated tsconfig lives.
+				// Without this the Prisma configs sit outside the project and TypeScript 7
+				// checks them with no `types: ["node"]`, so `process` is unknown there.
+				config.include.push('../prisma.config.ts', '../prisma7.config.ts');
+			}
 		}
 	}
 };

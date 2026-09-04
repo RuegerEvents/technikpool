@@ -1,5 +1,7 @@
 import { query, command } from '$app/server';
-import { prisma } from '$lib/server/auth';
+import { prisma8, newId } from '$lib/server/auth';
+import { and } from '@prisma/orm-postgres/orm-client';
+import { dated, must, toTimestamp, now } from '$lib/server/prisma8';
 import { sendMail } from '$lib/server/mail';
 import { appBaseUrl } from '$lib/server/app-url';
 import { pendingApprovalEmail } from '$lib/server/emails/pending-approval';
@@ -7,8 +9,32 @@ import { bookingReviewedEmail } from '$lib/server/emails/booking-reviewed';
 import { addedAsCrewEmail } from '$lib/server/emails/added-as-crew';
 import * as v from 'valibot';
 import { requireAuth } from '$lib/server/services/access';
-import { ACTIVE_ASSET_WHERE, isRetiredStatus } from '$lib/asset-status';
+import { RETIRED_ASSET_STATUSES, isRetiredStatus } from '$lib/asset-status';
 import { accessoryIdsOf } from '$lib/server/services/accessories';
+
+// Statuses that still hold a booking. Anything else has left the production.
+const BLOCKING_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT'];
+const RETIRED = [...RETIRED_ASSET_STATUSES] as string[];
+
+// Prisma 8's `orderBy` takes fields of the model being queried, so it cannot
+// sort by a joined column the way `{ asset: { product: { name: 'asc' } } }`
+// did. The item lists this file returns are one production's worth, so the
+// ordering happens here instead.
+//
+// This database sorts text in C collation — code-point order, so "CAT6A"
+// comes before "Cable" — even though it reports en_US.utf8. `Intl.Collator`
+// would order it linguistically and put those two the other way round, which
+// is a packing list that reshuffles between two prints of it. Comparing with
+// `<` reproduces what Postgres was doing.
+const compareText = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+
+/** Ascending, with nulls last — what `{ sort: 'asc', nulls: 'last' }` meant. */
+function compareNullsLast(a: string | null, b: string | null) {
+	if (a === b) return 0;
+	if (a === null) return 1;
+	if (b === null) return -1;
+	return compareText(a, b);
+}
 
 // Returns which of `ownerOrgIds` do NOT currently have any PENDING item in
 // this production — i.e. the orgs for which a new PENDING item would be the
@@ -16,16 +42,38 @@ import { accessoryIdsOf } from '$lib/server/services/accessories';
 // creating the new items.
 async function getOrgIdsNeedingApprovalNotification(productionId: string, ownerOrgIds: string[]) {
 	if (ownerOrgIds.length === 0) return [];
-	const alreadyPending = await prisma.productionItem.findMany({
-		where: {
-			productionId,
-			status: 'PENDING',
-			asset: { organizationId: { in: ownerOrgIds } }
-		},
-		select: { asset: { select: { organizationId: true } } }
-	});
-	const alreadyPendingOrgIds = new Set(alreadyPending.map((i) => i.asset.organizationId));
+	// Asked of Asset rather than ProductionItem because the org id lives on the
+	// asset: the ORM exposes a relation as a filter, not as a column to select
+	// through, so starting here keeps `organizationId` a plain projection.
+	const alreadyPending = await prisma8.orm.public.Asset.where((a) =>
+		a.organizationId.in(ownerOrgIds)
+	)
+		.where((a) =>
+			a.productionItems.some((i) => and(i.productionId.eq(productionId), i.status.eq('PENDING')))
+		)
+		.select('organizationId')
+		.all();
+	const alreadyPendingOrgIds = new Set(alreadyPending.map((a) => a.organizationId));
 	return ownerOrgIds.filter((id) => !alreadyPendingOrgIds.has(id));
+}
+
+/** How many items in this production are still awaiting this org's approval. */
+async function countPendingForOwner(productionId: string, ownerOrgId: string) {
+	const { pending } = await prisma8.orm.public.ProductionItem.where({
+		productionId,
+		status: 'PENDING'
+	})
+		.where((i) => i.asset.some((a) => a.organizationId.eq(ownerOrgId)))
+		.aggregate((a) => ({ pending: a.count() }));
+	return pending;
+}
+
+/** The OWNER/ADMIN members of an org, with the addresses to write to. */
+async function orgApprovers(organizationId: string) {
+	return await prisma8.orm.public.OrgMembership.where({ organizationId })
+		.where((m) => m.role.in(['OWNER', 'ADMIN']))
+		.include('user', (u) => u.select('email', 'name'))
+		.all();
 }
 
 // Emails the OWNER/ADMIN members of each owning org once per "batch" of
@@ -42,24 +90,16 @@ async function notifyPendingApproval(
 		ownerOrgIds.map(async (ownerOrgId) => {
 			try {
 				const [pendingCount, org, recipients] = await Promise.all([
-					prisma.productionItem.count({
-						where: { productionId, status: 'PENDING', asset: { organizationId: ownerOrgId } }
-					}),
-					prisma.organization.findUniqueOrThrow({
-						where: { id: ownerOrgId },
-						select: { name: true }
-					}),
-					prisma.orgMembership.findMany({
-						where: { organizationId: ownerOrgId, role: { in: ['OWNER', 'ADMIN'] } },
-						include: { user: { select: { email: true, name: true } } }
-					})
+					countPendingForOwner(productionId, ownerOrgId),
+					prisma8.orm.public.Organization.select('name').first({ id: ownerOrgId }),
+					orgApprovers(ownerOrgId)
 				]);
 
 				await Promise.all(
 					recipients.map((membership) => {
 						const { subject, html, text } = pendingApprovalEmail({
 							name: membership.user.name,
-							ownerOrgName: org.name,
+							ownerOrgName: must(org, 'Organization').name,
 							requestingOrgName,
 							productionName,
 							pendingCount,
@@ -85,26 +125,21 @@ async function notifyRequesterIfQueueCleared(
 	ownerOrgId: string
 ) {
 	try {
-		const remainingPending = await prisma.productionItem.count({
-			where: { productionId, status: 'PENDING', asset: { organizationId: ownerOrgId } }
-		});
+		const remainingPending = await countPendingForOwner(productionId, ownerOrgId);
 		if (remainingPending > 0) return;
 
 		const [production, ownerOrg, recipients] = await Promise.all([
-			prisma.production.findUniqueOrThrow({ where: { id: productionId }, select: { name: true } }),
-			prisma.organization.findUniqueOrThrow({ where: { id: ownerOrgId }, select: { name: true } }),
-			prisma.orgMembership.findMany({
-				where: { organizationId: requestingOrgId, role: { in: ['OWNER', 'ADMIN'] } },
-				include: { user: { select: { email: true, name: true } } }
-			})
+			prisma8.orm.public.Production.select('name').first({ id: productionId }),
+			prisma8.orm.public.Organization.select('name').first({ id: ownerOrgId }),
+			orgApprovers(requestingOrgId)
 		]);
 
 		await Promise.all(
 			recipients.map((membership) => {
 				const { subject, html, text } = bookingReviewedEmail({
 					name: membership.user.name,
-					ownerOrgName: ownerOrg.name,
-					productionName: production.name,
+					ownerOrgName: must(ownerOrg, 'Organization').name,
+					productionName: must(production, 'Production').name,
 					url: `${appBaseUrl}/productions/${productionId}`
 				});
 				return sendMail({ to: membership.user.email, subject, html, text });
@@ -115,64 +150,72 @@ async function notifyRequesterIfQueueCleared(
 	}
 }
 
+/** The org ids the signed-in user belongs to. */
+async function myOrgIds(userId: string) {
+	const memberships = await prisma8.orm.public.OrgMembership.where({ userId })
+		.select('organizationId')
+		.all();
+	return memberships.map((m) => m.organizationId);
+}
+
+/** One membership row, or null when the user does not belong to the org. */
+async function membershipOf(userId: string, organizationId: string) {
+	return await prisma8.orm.public.OrgMembership.where({ userId, organizationId }).first();
+}
+
 export const getProductions = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
-	const memberships = await prisma.orgMembership.findMany({
-		where: { userId: user.id },
-		select: { organizationId: true }
-	});
-	const orgIds = organizationId ? [organizationId] : memberships.map((m) => m.organizationId);
-	return await prisma.production.findMany({
-		where: { organizationId: { in: orgIds } },
-		include: {
-			organization: { select: { name: true, shortName: true } },
-			items: {
-				include: {
-					asset: {
-						include: { product: true }
-					}
-				}
-			}
-		},
-		orderBy: { startDate: 'asc' }
-	});
+	const orgIds = organizationId ? [organizationId] : await myOrgIds(user.id);
+	return dated(
+		await prisma8.orm.public.Production.where((p) => p.organizationId.in(orgIds))
+			.include('organization', (o) => o.select('name', 'shortName'))
+			.include('items', (i) => i.include('asset', (a) => a.include('product')))
+			.orderBy((p) => p.startDate.asc())
+			.all()
+	);
 });
 
 export const getProduction = query(v.string(), async (id: string) => {
 	await requireAuth();
-	return await prisma.production.findUniqueOrThrow({
-		where: { id },
-		include: {
-			items: {
-				include: {
-					asset: {
-						include: {
-							product: { include: { manufacturer: true } },
-							organization: true,
-							accessories: { select: { id: true } }
-						}
-					},
-					sourceBundle: { select: { id: true, template: { select: { name: true } } } }
-				},
-				// The page groups these into sections in the order it meets them, and
-				// the print routes walk them as they come — so an unordered list is a
-				// packing list whose sections move between two prints of it. Same
-				// order as every other list of units: product, then tag.
-				orderBy: [
-					{ asset: { product: { name: 'asc' } } },
-					{ asset: { assetTag: { sort: 'asc', nulls: 'last' } } },
-					{ assetId: 'asc' }
-				]
-			},
-			address: true,
-			customer: { include: { address: true } },
-			crew: {
-				orderBy: { createdAt: 'asc' },
-				include: { user: { select: { id: true, name: true, email: true } } }
-			},
-			organization: true
-		}
-	});
+	const production = dated(
+		must(
+			await prisma8.orm.public.Production.include('items', (i) =>
+				i
+					.include('asset', (a) =>
+						a
+							.include('product', (p) => p.include('manufacturer'))
+							.include('organization')
+							.include('accessories', (acc) => acc.select('id'))
+					)
+					.include('sourceBundle', (b) =>
+						b.select('id').include('template', (t) => t.select('name'))
+					)
+			)
+				.include('address')
+				.include('customer', (c) => c.include('address'))
+				.include('crew', (c) =>
+					c
+						.include('user', (u) => u.select('id', 'name', 'email'))
+						.orderBy((m) => m.createdAt.asc())
+				)
+				.include('organization')
+				.first({ id }),
+			'Production'
+		)
+	);
+
+	// The page groups these into sections in the order it meets them, and the
+	// print routes walk them as they come — so an unordered list is a packing
+	// list whose sections move between two prints of it. Same order as every
+	// other list of units: product, then tag.
+	production.items.sort(
+		(a, b) =>
+			compareText(a.asset.product.name, b.asset.product.name) ||
+			compareNullsLast(a.asset.assetTag, b.asset.assetTag) ||
+			compareText(a.assetId, b.assetId)
+	);
+
+	return production;
 });
 
 const addressInputSchema = v.object({
@@ -216,13 +259,23 @@ function validateDuration(input: {
 	}
 }
 
+/** The production with the relations the address/customer editors render. */
+async function productionWithAddress(id: string) {
+	return dated(
+		must(
+			await prisma8.orm.public.Production.include('address')
+				.include('customer', (c) => c.include('address'))
+				.include('organization')
+				.first({ id }),
+			'Production'
+		)
+	);
+}
+
 export const createProduction = command(createProductionSchema, async (data) => {
 	const user = await requireAuth();
 
-	const membership = await prisma.orgMembership.findUnique({
-		where: { userId_organizationId: { userId: user.id, organizationId: data.organizationId } }
-	});
-
+	const membership = await membershipOf(user.id, data.organizationId);
 	if (!membership) throw new Error('Not a member');
 
 	const startDate = data.startDate ? new Date(data.startDate) : null;
@@ -235,32 +288,34 @@ export const createProduction = command(createProductionSchema, async (data) => 
 		!!data.address &&
 		Object.values(data.address).some((v) => (typeof v === 'string' ? v.trim().length > 0 : false));
 
-	const production = await prisma.$transaction(async (tx) => {
+	const productionId = await prisma8.transaction(async (tx) => {
 		const address = hasAnyAddress
-			? await tx.address.create({
-					data: {
-						line1: data.address!.line1.trim(),
-						line2: data.address?.line2?.trim() || null,
-						postalCode: data.address!.postalCode.trim(),
-						city: data.address!.city.trim()
-					}
+			? await tx.orm.public.Address.create({
+					id: newId('Address'),
+					line1: data.address!.line1.trim(),
+					line2: data.address?.line2?.trim() || null,
+					postalCode: data.address!.postalCode.trim(),
+					city: data.address!.city.trim(),
+					updatedAt: now()
 				})
 			: null;
 
-		return await tx.production.create({
-			data: {
-				name: data.name,
-				organizationId: data.organizationId,
-				startDate,
-				endDate,
-				showStartDate,
-				showEndDate,
-				addressId: address?.id,
-				customerId: data.customerId || null
-			},
-			include: { address: true, customer: { include: { address: true } } }
+		const created = await tx.orm.public.Production.create({
+			id: newId('Production'),
+			name: data.name,
+			organizationId: data.organizationId,
+			startDate: toTimestamp(startDate),
+			endDate: toTimestamp(endDate),
+			showStartDate: toTimestamp(showStartDate),
+			showEndDate: toTimestamp(showEndDate),
+			addressId: address?.id ?? null,
+			customerId: data.customerId || null,
+			updatedAt: now()
 		});
+		return created.id;
 	});
+
+	const production = await productionWithAddress(productionId);
 
 	await getProductions(data.organizationId).refresh();
 	await getProductions().refresh();
@@ -269,33 +324,31 @@ export const createProduction = command(createProductionSchema, async (data) => 
 
 export const deleteProduction = command(v.string(), async (productionId: string) => {
 	const user = await requireAuth();
-	const production = await prisma.production.findUniqueOrThrow({
-		where: { id: productionId },
-		select: { id: true, name: true, organizationId: true, addressId: true }
-	});
-	const membership = await prisma.orgMembership.findUnique({
-		where: {
-			userId_organizationId: { userId: user.id, organizationId: production.organizationId }
-		},
-		select: { role: true }
-	});
+	const production = must(
+		await prisma8.orm.public.Production.select('id', 'name', 'organizationId', 'addressId').first({
+			id: productionId
+		}),
+		'Production'
+	);
+	const membership = await membershipOf(user.id, production.organizationId);
 	if (!membership || (membership.role !== 'OWNER' && membership.role !== 'ADMIN')) {
 		throw new Error('Only organization admins and owners can delete productions');
 	}
 
-	await prisma.$transaction(async (tx) => {
-		await tx.production.delete({ where: { id: productionId } });
+	await prisma8.transaction(async (tx) => {
+		await tx.orm.public.Production.where({ id: productionId }).delete();
 		// Production addresses are created as private records. Remove the orphan
 		// only when nothing else has since been linked to it.
-		if (production.addressId) {
+		const addressId = production.addressId;
+		if (addressId) {
 			const references = await Promise.all([
-				tx.organization.count({ where: { addressId: production.addressId } }),
-				tx.location.count({ where: { addressId: production.addressId } }),
-				tx.customer.count({ where: { addressId: production.addressId } }),
-				tx.production.count({ where: { addressId: production.addressId } })
+				tx.orm.public.Organization.where({ addressId }).aggregate((a) => ({ n: a.count() })),
+				tx.orm.public.Location.where({ addressId }).aggregate((a) => ({ n: a.count() })),
+				tx.orm.public.Customer.where({ addressId }).aggregate((a) => ({ n: a.count() })),
+				tx.orm.public.Production.where({ addressId }).aggregate((a) => ({ n: a.count() }))
 			]);
-			if (references.every((count) => count === 0)) {
-				await tx.address.delete({ where: { id: production.addressId } });
+			if (references.every(({ n }) => n === 0)) {
+				await tx.orm.public.Address.where({ id: addressId }).delete();
 			}
 		}
 	});
@@ -315,58 +368,46 @@ const updateProductionAddressSchema = v.object({
 export const updateProductionAddress = command(updateProductionAddressSchema, async (input) => {
 	const user = await requireAuth();
 
-	const production = await prisma.production.findUniqueOrThrow({
-		where: { id: input.productionId },
-		select: { id: true, organizationId: true, addressId: true }
-	});
+	const production = must(
+		await prisma8.orm.public.Production.select('id', 'organizationId', 'addressId').first({
+			id: input.productionId
+		}),
+		'Production'
+	);
 
-	const membership = await prisma.orgMembership.findUnique({
-		where: {
-			userId_organizationId: { userId: user.id, organizationId: production.organizationId }
-		}
-	});
+	const membership = await membershipOf(user.id, production.organizationId);
 	if (!membership) throw new Error('Not a member');
 
 	const hasAny = Object.values(input.address).some((v) => (v?.trim()?.length ?? 0) > 0);
 
-	const updated = await prisma.$transaction(async (tx) => {
+	await prisma8.transaction(async (tx) => {
 		if (!hasAny) {
-			return await tx.production.update({
-				where: { id: input.productionId },
-				data: { addressId: null },
-				include: { address: true, organization: true }
-			});
+			await tx.orm.public.Production.where({ id: input.productionId }).update({ addressId: null });
+			return;
 		}
 
-		const addressId = production.addressId
-			? (
-					await tx.address.update({
-						where: { id: production.addressId },
-						data: {
-							line1: input.address.line1.trim(),
-							line2: input.address.line2?.trim() || null,
-							postalCode: input.address.postalCode.trim(),
-							city: input.address.city.trim()
-						}
-					})
-				).id
-			: (
-					await tx.address.create({
-						data: {
-							line1: input.address.line1.trim(),
-							line2: input.address.line2?.trim() || null,
-							postalCode: input.address.postalCode.trim(),
-							city: input.address.city.trim()
-						}
-					})
-				).id;
+		const fields = {
+			line1: input.address.line1.trim(),
+			line2: input.address.line2?.trim() || null,
+			postalCode: input.address.postalCode.trim(),
+			city: input.address.city.trim()
+		};
 
-		return await tx.production.update({
-			where: { id: input.productionId },
-			data: { addressId },
-			include: { address: true, organization: true }
-		});
+		const addressId = production.addressId
+			? must(
+					await tx.orm.public.Address.where({ id: production.addressId }).update({
+						...fields,
+						updatedAt: now()
+					}),
+					'Address'
+				).id
+			: (await tx.orm.public.Address.create({ id: newId('Address'), ...fields, updatedAt: now() }))
+					.id;
+
+		await tx.orm.public.Production.where({ id: input.productionId }).update({ addressId });
 	});
+
+	const updated = await productionWithAddress(input.productionId);
 
 	await getProduction(input.productionId).refresh();
 	await getProductions(production.organizationId).refresh();
@@ -385,16 +426,14 @@ const updateProductionDurationSchema = v.object({
 export const updateProductionDuration = command(updateProductionDurationSchema, async (input) => {
 	const user = await requireAuth();
 
-	const production = await prisma.production.findUniqueOrThrow({
-		where: { id: input.productionId },
-		select: { id: true, organizationId: true }
-	});
+	const production = must(
+		await prisma8.orm.public.Production.select('id', 'organizationId').first({
+			id: input.productionId
+		}),
+		'Production'
+	);
 
-	const membership = await prisma.orgMembership.findUnique({
-		where: {
-			userId_organizationId: { userId: user.id, organizationId: production.organizationId }
-		}
-	});
+	const membership = await membershipOf(user.id, production.organizationId);
 	if (!membership) throw new Error('Not a member');
 
 	const startDate = input.startDate ? new Date(input.startDate) : null;
@@ -403,10 +442,17 @@ export const updateProductionDuration = command(updateProductionDurationSchema, 
 	const showEndDate = input.showEndDate ? new Date(input.showEndDate) : null;
 	validateDuration({ startDate, endDate, showStartDate, showEndDate });
 
-	const updated = await prisma.production.update({
-		where: { id: input.productionId },
-		data: { startDate, endDate, showStartDate, showEndDate }
-	});
+	const updated = dated(
+		must(
+			await prisma8.orm.public.Production.where({ id: input.productionId }).update({
+				startDate: toTimestamp(startDate),
+				endDate: toTimestamp(endDate),
+				showStartDate: toTimestamp(showStartDate),
+				showEndDate: toTimestamp(showEndDate)
+			}),
+			'Production'
+		)
+	);
 
 	await getProduction(input.productionId).refresh();
 	await getProductions(production.organizationId).refresh();
@@ -422,23 +468,20 @@ const updateProductionCustomerSchema = v.object({
 export const updateProductionCustomer = command(updateProductionCustomerSchema, async (input) => {
 	const user = await requireAuth();
 
-	const production = await prisma.production.findUniqueOrThrow({
-		where: { id: input.productionId },
-		select: { id: true, organizationId: true }
-	});
+	const production = must(
+		await prisma8.orm.public.Production.select('id', 'organizationId').first({
+			id: input.productionId
+		}),
+		'Production'
+	);
 
-	const membership = await prisma.orgMembership.findUnique({
-		where: {
-			userId_organizationId: { userId: user.id, organizationId: production.organizationId }
-		}
-	});
+	const membership = await membershipOf(user.id, production.organizationId);
 	if (!membership) throw new Error('Not a member');
 
-	const updated = await prisma.production.update({
-		where: { id: input.productionId },
-		data: { customerId: input.customerId || null },
-		include: { customer: { include: { address: true } } }
+	await prisma8.orm.public.Production.where({ id: input.productionId }).update({
+		customerId: input.customerId || null
 	});
+	const updated = await productionWithAddress(input.productionId);
 
 	await getProduction(input.productionId).refresh();
 	return updated;
@@ -449,35 +492,58 @@ const addAssetSchema = v.object({
 	assetId: v.string()
 });
 
+/**
+ * Items of other productions that overlap this one and still hold their asset.
+ * `assetIds` empty means "any asset".
+ */
+async function findOverlappingBookings(
+	productionId: string,
+	start: Date,
+	end: Date,
+	assetIds?: string[]
+) {
+	let items = prisma8.orm.public.ProductionItem.where((i) => i.productionId.neq(productionId))
+		.where((i) => i.status.in(BLOCKING_STATUSES))
+		.where((i) =>
+			i.production.some((p) =>
+				and(
+					p.startDate.isNotNull(),
+					p.endDate.isNotNull(),
+					p.startDate.lte(toTimestamp(end)),
+					p.endDate.gte(toTimestamp(start))
+				)
+			)
+		);
+	if (assetIds) items = items.where((i) => i.assetId.in(assetIds));
+	return await items
+		.select('assetId')
+		.include('production', (p) => p.select('name'))
+		.all();
+}
+
 export const addAssetToProduction = command(addAssetSchema, async (data) => {
 	const user = await requireAuth();
 
-	const production = await prisma.production.findUniqueOrThrow({
-		where: { id: data.productionId },
-		include: { organization: { select: { id: true, name: true, shortName: true } } }
-	});
-	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: data.assetId } });
+	const production = dated(
+		must(
+			await prisma8.orm.public.Production.include('organization', (o) =>
+				o.select('id', 'name', 'shortName')
+			).first({ id: data.productionId }),
+			'Production'
+		)
+	);
+	const asset = must(await prisma8.orm.public.Asset.first({ id: data.assetId }), 'Asset');
 	if (isRetiredStatus(asset.status)) {
 		throw new Error('This asset is sold or decommissioned and can no longer be booked');
 	}
 
 	if (production.startDate && production.endDate) {
-		const conflict = await prisma.productionItem.findFirst({
-			where: {
-				assetId: data.assetId,
-				productionId: { not: data.productionId },
-				status: { in: ['PENDING', 'APPROVED', 'CHECKED_OUT'] },
-				production: {
-					AND: [
-						{ startDate: { not: null } },
-						{ endDate: { not: null } },
-						{ startDate: { lte: production.endDate } },
-						{ endDate: { gte: production.startDate } }
-					]
-				}
-			},
-			include: { production: { select: { name: true } } }
-		});
+		const [conflict] = await findOverlappingBookings(
+			data.productionId,
+			production.startDate,
+			production.endDate,
+			[data.assetId]
+		);
 		if (conflict) {
 			throw new Error(`Asset is already booked for "${conflict.production.name}" during this time`);
 		}
@@ -495,45 +561,59 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 	// accessory is never booked independently, so the check above covers it.
 	const accessoryIds = (await accessoryIdsOf([data.assetId])).get(data.assetId) ?? [];
 
-	const item = await prisma.productionItem.create({
-		data: {
-			productionId: data.productionId,
-			assetId: data.assetId,
-			status: initialStatus
-		}
+	const item = await prisma8.orm.public.ProductionItem.create({
+		id: newId('ProductionItem'),
+		productionId: data.productionId,
+		assetId: data.assetId,
+		status: initialStatus,
+		sourceBundleId: null,
+		sourceParentAssetId: null
 	});
 	if (accessoryIds.length > 0) {
-		await prisma.productionItem.createMany({
-			data: accessoryIds.map((assetId) => ({
-				productionId: data.productionId,
-				assetId,
-				sourceParentAssetId: data.assetId,
-				status: initialStatus
-			})),
-			skipDuplicates: true
-		});
+		// `createAll` has no skipDuplicates, so the already-booked ones are
+		// filtered out here rather than swallowed by the insert.
+		const alreadyBooked = new Set(
+			(
+				await prisma8.orm.public.ProductionItem.where({ productionId: data.productionId })
+					.where((i) => i.assetId.in(accessoryIds))
+					.select('assetId')
+					.all()
+			).map((i) => i.assetId)
+		);
+		const toBook = accessoryIds.filter((id) => !alreadyBooked.has(id));
+		if (toBook.length > 0) {
+			await prisma8.orm.public.ProductionItem.createAll(
+				toBook.map((assetId) => ({
+					id: newId('ProductionItem'),
+					productionId: data.productionId,
+					assetId,
+					sourceBundleId: null,
+					sourceParentAssetId: data.assetId,
+					status: initialStatus
+				}))
+			);
+		}
 	}
 
-	await prisma.assetTransaction.create({
-		data: {
-			assetId: data.assetId,
-			userId: user.id,
-			productionId: data.productionId,
-			action: isCrossOrg ? 'REQUESTED' : 'ADDED_TO_PRODUCTION',
-			data: isCrossOrg
-				? {
-						type: 'REQUESTED',
-						productionId: data.productionId,
-						productionName: production.name,
-						requestingOrgId: production.organization.id,
-						requestingOrgName: production.organization.name
-					}
-				: {
-						type: 'ADDED_TO_PRODUCTION',
-						productionId: data.productionId,
-						productionName: production.name
-					}
-		}
+	await prisma8.orm.public.AssetTransaction.create({
+		id: newId('AssetTransaction'),
+		assetId: data.assetId,
+		userId: user.id,
+		productionId: data.productionId,
+		action: isCrossOrg ? 'REQUESTED' : 'ADDED_TO_PRODUCTION',
+		data: isCrossOrg
+			? {
+					type: 'REQUESTED',
+					productionId: data.productionId,
+					productionName: production.name,
+					requestingOrgId: production.organization.id,
+					requestingOrgName: production.organization.name
+				}
+			: {
+					type: 'ADDED_TO_PRODUCTION',
+					productionId: data.productionId,
+					productionName: production.name
+				}
 	});
 
 	if (orgsToNotify.length > 0) {
@@ -549,38 +629,41 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 	return item;
 });
 
-export const approveProductionItem = command(v.string(), async (itemId: string) => {
+/** Approve or decline one cross-org request, and tell the requester when the queue empties. */
+async function reviewProductionItem(itemId: string, decision: 'APPROVED' | 'DECLINED') {
 	const user = await requireAuth();
 
-	const item = await prisma.productionItem.findUniqueOrThrow({
-		where: { id: itemId },
-		include: { asset: true, production: true }
-	});
+	const item = must(
+		await prisma8.orm.public.ProductionItem.include('asset')
+			.include('production')
+			.first({ id: itemId }),
+		'ProductionItem'
+	);
 
-	const membership = await prisma.orgMembership.findUnique({
-		where: { userId_organizationId: { userId: user.id, organizationId: item.asset.organizationId } }
-	});
-
+	const membership = await membershipOf(user.id, item.asset.organizationId);
 	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		throw new Error('Unauthorized to approve assets from this org');
+		throw new Error(
+			decision === 'APPROVED'
+				? 'Unauthorized to approve assets from this org'
+				: 'Unauthorized to decline assets from this org'
+		);
 	}
 
-	const updated = await prisma.productionItem.update({
-		where: { id: itemId },
-		data: { status: 'APPROVED' }
-	});
+	const updated = must(
+		await prisma8.orm.public.ProductionItem.where({ id: itemId }).update({ status: decision }),
+		'ProductionItem'
+	);
 
-	await prisma.assetTransaction.create({
+	await prisma8.orm.public.AssetTransaction.create({
+		id: newId('AssetTransaction'),
+		assetId: item.assetId,
+		userId: user.id,
+		productionId: item.productionId,
+		action: decision,
 		data: {
-			assetId: item.assetId,
-			userId: user.id,
+			type: decision,
 			productionId: item.productionId,
-			action: 'APPROVED',
-			data: {
-				type: 'APPROVED',
-				productionId: item.productionId,
-				productionName: item.production.name
-			}
+			productionName: item.production.name
 		}
 	});
 
@@ -593,75 +676,31 @@ export const approveProductionItem = command(v.string(), async (itemId: string) 
 	await getProduction(item.productionId).refresh();
 	await getPendingApprovals(item.asset.organizationId).refresh();
 	return updated;
-});
+}
 
-export const declineProductionItem = command(v.string(), async (itemId: string) => {
-	const user = await requireAuth();
+export const approveProductionItem = command(v.string(), (itemId: string) =>
+	reviewProductionItem(itemId, 'APPROVED')
+);
 
-	const item = await prisma.productionItem.findUniqueOrThrow({
-		where: { id: itemId },
-		include: { asset: true, production: true }
-	});
-
-	const membership = await prisma.orgMembership.findUnique({
-		where: { userId_organizationId: { userId: user.id, organizationId: item.asset.organizationId } }
-	});
-
-	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		throw new Error('Unauthorized to decline assets from this org');
-	}
-
-	const updated = await prisma.productionItem.update({
-		where: { id: itemId },
-		data: { status: 'DECLINED' }
-	});
-
-	await prisma.assetTransaction.create({
-		data: {
-			assetId: item.assetId,
-			userId: user.id,
-			productionId: item.productionId,
-			action: 'DECLINED',
-			data: {
-				type: 'DECLINED',
-				productionId: item.productionId,
-				productionName: item.production.name
-			}
-		}
-	});
-
-	await notifyRequesterIfQueueCleared(
-		item.productionId,
-		item.production.organizationId,
-		item.asset.organizationId
-	);
-
-	await getProduction(item.productionId).refresh();
-	await getPendingApprovals(item.asset.organizationId).refresh();
-	return updated;
-});
+export const declineProductionItem = command(v.string(), (itemId: string) =>
+	reviewProductionItem(itemId, 'DECLINED')
+);
 
 export const getPendingApprovals = query(v.string(), async (organizationId: string) => {
 	const user = await requireAuth();
 
-	const membership = await prisma.orgMembership.findUnique({
-		where: { userId_organizationId: { userId: user.id, organizationId } }
-	});
-
+	const membership = await membershipOf(user.id, organizationId);
 	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
 		throw new Error('Unauthorized');
 	}
 
-	return await prisma.productionItem.findMany({
-		where: {
-			asset: { organizationId },
-			status: 'PENDING'
-		},
-		include: {
-			asset: { include: { product: true } },
-			production: { include: { organization: true } }
-		}
-	});
+	return dated(
+		await prisma8.orm.public.ProductionItem.where({ status: 'PENDING' })
+			.where((i) => i.asset.some((a) => a.organizationId.eq(organizationId)))
+			.include('asset', (a) => a.include('product'))
+			.include('production', (p) => p.include('organization'))
+			.all()
+	);
 });
 
 // ── Bundles in productions ────────────────────────────────────────────────────
@@ -674,19 +713,24 @@ const addBundleSchema = v.object({
 export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	const user = await requireAuth();
 
-	const production = await prisma.production.findUniqueOrThrow({
-		where: { id: data.productionId },
-		include: { organization: { select: { name: true } } }
-	});
-	const bundle = await prisma.assetBundle.findUniqueOrThrow({
-		where: { id: data.bundleId },
-		include: { assets: true }
-	});
+	const production = dated(
+		must(
+			await prisma8.orm.public.Production.include('organization', (o) => o.select('name')).first({
+				id: data.productionId
+			}),
+			'Production'
+		)
+	);
+	const bundle = must(
+		await prisma8.orm.public.AssetBundle.include('assets').first({ id: data.bundleId }),
+		'AssetBundle'
+	);
 
-	const existingItems = await prisma.productionItem.findMany({
-		where: { productionId: data.productionId },
-		select: { id: true, assetId: true, sourceBundleId: true }
-	});
+	const existingItems = await prisma8.orm.public.ProductionItem.where({
+		productionId: data.productionId
+	})
+		.select('id', 'assetId', 'sourceBundleId')
+		.all();
 	const existingAssetIds = new Set(existingItems.map((i) => i.assetId));
 
 	if (bundle.assets.length === 0) throw new Error('Bundle has no assets');
@@ -708,25 +752,13 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	}
 
 	let skippedConflicts = 0;
-	if (production.startDate && production.endDate) {
-		const start = production.startDate;
-		const end = production.endDate;
-		const conflictingItems = await prisma.productionItem.findMany({
-			where: {
-				assetId: { in: newAssets.map((a) => a.id) },
-				productionId: { not: data.productionId },
-				status: { in: ['PENDING', 'APPROVED', 'CHECKED_OUT'] },
-				production: {
-					AND: [
-						{ startDate: { not: null } },
-						{ endDate: { not: null } },
-						{ startDate: { lte: end } },
-						{ endDate: { gte: start } }
-					]
-				}
-			},
-			select: { assetId: true }
-		});
+	if (production.startDate && production.endDate && newAssets.length > 0) {
+		const conflictingItems = await findOverlappingBookings(
+			data.productionId,
+			production.startDate,
+			production.endDate,
+			newAssets.map((a) => a.id)
+		);
 		const conflictIds = new Set(conflictingItems.map((i) => i.assetId));
 		skippedConflicts = conflictIds.size;
 		newAssets = newAssets.filter((a) => !conflictIds.has(a.id));
@@ -744,43 +776,43 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	];
 	const orgsToNotify = await getOrgIdsNeedingApprovalNotification(data.productionId, crossOrgIds);
 
-	await prisma.$transaction([
-		...newAssets.map((asset) => {
-			const isCrossOrg = production.organizationId !== asset.organizationId;
-			return prisma.productionItem.create({
-				data: {
+	await prisma8.transaction(async (tx) => {
+		if (newAssets.length > 0) {
+			await tx.orm.public.ProductionItem.createAll(
+				newAssets.map((asset) => ({
+					id: newId('ProductionItem'),
 					productionId: data.productionId,
 					assetId: asset.id,
 					sourceBundleId: data.bundleId,
 					sourceParentAssetId: asset.parentAssetId,
-					status: isCrossOrg ? 'PENDING' : 'APPROVED'
-				}
-			});
-		}),
+					status: production.organizationId !== asset.organizationId ? 'PENDING' : 'APPROVED'
+				}))
+			);
+		}
 		// Adoption only moves which row a unit is listed under; its approval
 		// status was already settled when it was booked.
-		...(adoptable.length > 0
-			? [
-					prisma.productionItem.updateMany({
-						where: { id: { in: adoptable.map((i) => i.id) } },
-						data: { sourceBundleId: data.bundleId }
-					})
-				]
-			: [])
-	]);
-
-	await prisma.assetTransaction.createMany({
-		data: newAssets.map((asset) => ({
-			assetId: asset.id,
-			userId: user.id,
-			productionId: data.productionId,
-			action: 'ADDED_TO_PRODUCTION',
-			data: {
-				productionId: data.productionId,
-				productionName: production.name
-			}
-		}))
+		if (adoptable.length > 0) {
+			await tx.orm.public.ProductionItem.where((i) =>
+				i.id.in(adoptable.map((a) => a.id))
+			).updateAndCount({ sourceBundleId: data.bundleId });
+		}
 	});
+
+	if (newAssets.length > 0) {
+		await prisma8.orm.public.AssetTransaction.createAll(
+			newAssets.map((asset) => ({
+				id: newId('AssetTransaction'),
+				assetId: asset.id,
+				userId: user.id,
+				productionId: data.productionId,
+				action: 'ADDED_TO_PRODUCTION',
+				data: {
+					productionId: data.productionId,
+					productionName: production.name
+				}
+			}))
+		);
+	}
 
 	if (orgsToNotify.length > 0) {
 		await notifyPendingApproval(
@@ -797,11 +829,15 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 
 export const removeProductionItem = command(v.string(), async (itemId: string) => {
 	await requireAuth();
-	const item = await prisma.productionItem.delete({ where: { id: itemId } });
+	const item = must(
+		await prisma8.orm.public.ProductionItem.where({ id: itemId }).delete(),
+		'ProductionItem'
+	);
 	// The accessories were booked because the parent was; they go with it.
-	await prisma.productionItem.deleteMany({
-		where: { productionId: item.productionId, sourceParentAssetId: item.assetId }
-	});
+	await prisma8.orm.public.ProductionItem.where({
+		productionId: item.productionId,
+		sourceParentAssetId: item.assetId
+	}).deleteAndCount();
 	await getProduction(item.productionId).refresh();
 	return item;
 });
@@ -815,38 +851,53 @@ export const syncAssetAccessoriesInProduction = command(
 	syncAssetAccessoriesSchema,
 	async ({ productionId, assetId }) => {
 		await requireAuth();
-		const parentItem = await prisma.productionItem.findUniqueOrThrow({
-			where: { productionId_assetId: { productionId, assetId } }
-		});
-		const currentAccessories = await prisma.asset.findMany({
-			where: { parentAssetId: assetId },
-			select: { id: true }
-		});
-		const bookedAccessories = await prisma.productionItem.findMany({
-			where: { productionId, sourceParentAssetId: assetId }
-		});
+		const parentItem = must(
+			await prisma8.orm.public.ProductionItem.where({ productionId, assetId }).first(),
+			'ProductionItem'
+		);
+		const currentAccessories = await prisma8.orm.public.Asset.where({ parentAssetId: assetId })
+			.select('id')
+			.all();
+		const bookedAccessories = await prisma8.orm.public.ProductionItem.where({
+			productionId,
+			sourceParentAssetId: assetId
+		}).all();
 		const currentIds = new Set(currentAccessories.map((asset) => asset.id));
 		const bookedIds = new Set(bookedAccessories.map((item) => item.assetId));
 		const toRemove = bookedAccessories.filter((item) => !currentIds.has(item.assetId));
 		const toAdd = currentAccessories.filter((asset) => !bookedIds.has(asset.id));
 
-		await prisma.$transaction([
-			prisma.productionItem.deleteMany({ where: { id: { in: toRemove.map((item) => item.id) } } }),
-			...(toAdd.length > 0
-				? [
-						prisma.productionItem.createMany({
-							data: toAdd.map((asset) => ({
-								productionId,
-								assetId: asset.id,
-								sourceBundleId: parentItem.sourceBundleId,
-								sourceParentAssetId: assetId,
-								status: parentItem.status
-							})),
-							skipDuplicates: true
-						})
-					]
-				: [])
-		]);
+		// Anything already in this production under a different parent would have
+		// been a skipDuplicates no-op before; `createAll` has no such option.
+		const alreadyInProduction = new Set(
+			(
+				await prisma8.orm.public.ProductionItem.where({ productionId })
+					.where((i) => i.assetId.in(toAdd.map((a) => a.id)))
+					.select('assetId')
+					.all()
+			).map((i) => i.assetId)
+		);
+		const insertable = toAdd.filter((asset) => !alreadyInProduction.has(asset.id));
+
+		await prisma8.transaction(async (tx) => {
+			if (toRemove.length > 0) {
+				await tx.orm.public.ProductionItem.where((i) =>
+					i.id.in(toRemove.map((item) => item.id))
+				).deleteAndCount();
+			}
+			if (insertable.length > 0) {
+				await tx.orm.public.ProductionItem.createAll(
+					insertable.map((asset) => ({
+						id: newId('ProductionItem'),
+						productionId,
+						assetId: asset.id,
+						sourceBundleId: parentItem.sourceBundleId,
+						sourceParentAssetId: assetId,
+						status: parentItem.status
+					}))
+				);
+			}
+		});
 		await getProduction(productionId).refresh();
 		return { added: toAdd.length, removed: toRemove.length };
 	}
@@ -861,9 +912,10 @@ export const removeBundleFromProduction = command(
 	removeBundleFromProductionSchema,
 	async (data) => {
 		await requireAuth();
-		await prisma.productionItem.deleteMany({
-			where: { productionId: data.productionId, sourceBundleId: data.bundleId }
-		});
+		await prisma8.orm.public.ProductionItem.where({
+			productionId: data.productionId,
+			sourceBundleId: data.bundleId
+		}).deleteAndCount();
 		await getProduction(data.productionId).refresh();
 	}
 );
@@ -876,28 +928,34 @@ const syncBundleSchema = v.object({
 export const syncBundleInProduction = command(syncBundleSchema, async (data) => {
 	const user = await requireAuth();
 
-	const production = await prisma.production.findUniqueOrThrow({
-		where: { id: data.productionId },
-		include: { organization: { select: { id: true, name: true } } }
-	});
-	const bundle = await prisma.assetBundle.findUniqueOrThrow({
-		where: { id: data.bundleId },
-		include: { assets: true }
-	});
+	const production = dated(
+		must(
+			await prisma8.orm.public.Production.include('organization', (o) =>
+				o.select('id', 'name')
+			).first({ id: data.productionId }),
+			'Production'
+		)
+	);
+	const bundle = must(
+		await prisma8.orm.public.AssetBundle.include('assets').first({ id: data.bundleId }),
+		'AssetBundle'
+	);
 
-	const currentItems = await prisma.productionItem.findMany({
-		where: { productionId: data.productionId, sourceBundleId: data.bundleId }
-	});
+	const currentItems = await prisma8.orm.public.ProductionItem.where({
+		productionId: data.productionId,
+		sourceBundleId: data.bundleId
+	}).all();
 
 	const currentItemAssetIds = new Set(currentItems.map((i) => i.assetId));
 	const bundleAssetIds = new Set(bundle.assets.map((a) => a.id));
 
 	const toRemove = currentItems.filter((i) => !bundleAssetIds.has(i.assetId));
 
-	const allProductionItems = await prisma.productionItem.findMany({
-		where: { productionId: data.productionId },
-		select: { id: true, assetId: true, sourceBundleId: true }
-	});
+	const allProductionItems = await prisma8.orm.public.ProductionItem.where({
+		productionId: data.productionId
+	})
+		.select('id', 'assetId', 'sourceBundleId')
+		.all();
 	const allProductionAssetIds = new Set(allProductionItems.map((i) => i.assetId));
 
 	// Members that are booked here on their own move under the bundle rather
@@ -911,25 +969,13 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 	);
 
 	let skippedConflicts = 0;
-	if (production.startDate && production.endDate) {
-		const start = production.startDate;
-		const end = production.endDate;
-		const conflictingItems = await prisma.productionItem.findMany({
-			where: {
-				assetId: { in: toAdd.map((a) => a.id) },
-				productionId: { not: data.productionId },
-				status: { in: ['PENDING', 'APPROVED', 'CHECKED_OUT'] },
-				production: {
-					AND: [
-						{ startDate: { not: null } },
-						{ endDate: { not: null } },
-						{ startDate: { lte: end } },
-						{ endDate: { gte: start } }
-					]
-				}
-			},
-			select: { assetId: true }
-		});
+	if (production.startDate && production.endDate && toAdd.length > 0) {
+		const conflictingItems = await findOverlappingBookings(
+			data.productionId,
+			production.startDate,
+			production.endDate,
+			toAdd.map((a) => a.id)
+		);
 		const conflictIds = new Set(conflictingItems.map((i) => i.assetId));
 		skippedConflicts = conflictIds.size;
 		toAdd = toAdd.filter((a) => !conflictIds.has(a.id));
@@ -944,40 +990,42 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 	];
 	const orgsToNotify = await getOrgIdsNeedingApprovalNotification(data.productionId, crossOrgIds);
 
-	await prisma.$transaction([
-		...toRemove.map((item) => prisma.productionItem.delete({ where: { id: item.id } })),
-		...toAdd.map((asset) => {
-			const isCrossOrg = production.organizationId !== asset.organizationId;
-			return prisma.productionItem.create({
-				data: {
+	await prisma8.transaction(async (tx) => {
+		if (toRemove.length > 0) {
+			await tx.orm.public.ProductionItem.where((i) =>
+				i.id.in(toRemove.map((item) => item.id))
+			).deleteAndCount();
+		}
+		if (toAdd.length > 0) {
+			await tx.orm.public.ProductionItem.createAll(
+				toAdd.map((asset) => ({
+					id: newId('ProductionItem'),
 					productionId: data.productionId,
 					assetId: asset.id,
 					sourceBundleId: data.bundleId,
 					sourceParentAssetId: asset.parentAssetId,
-					status: isCrossOrg ? 'PENDING' : 'APPROVED'
-				}
-			});
-		}),
-		...(adoptable.length > 0
-			? [
-					prisma.productionItem.updateMany({
-						where: { id: { in: adoptable.map((i) => i.id) } },
-						data: { sourceBundleId: data.bundleId }
-					})
-				]
-			: [])
-	]);
+					status: production.organizationId !== asset.organizationId ? 'PENDING' : 'APPROVED'
+				}))
+			);
+		}
+		if (adoptable.length > 0) {
+			await tx.orm.public.ProductionItem.where((i) =>
+				i.id.in(adoptable.map((a) => a.id))
+			).updateAndCount({ sourceBundleId: data.bundleId });
+		}
+	});
 
 	if (toAdd.length > 0) {
-		await prisma.assetTransaction.createMany({
-			data: toAdd.map((asset) => ({
+		await prisma8.orm.public.AssetTransaction.createAll(
+			toAdd.map((asset) => ({
+				id: newId('AssetTransaction'),
 				assetId: asset.id,
 				userId: user.id,
 				productionId: data.productionId,
 				action: 'ADDED_TO_PRODUCTION',
 				data: { productionId: data.productionId, productionName: production.name }
 			}))
-		});
+		);
 	}
 
 	if (orgsToNotify.length > 0) {
@@ -1008,15 +1056,29 @@ const addCrewSchema = v.object({
 
 export const addCrewMember = command(addCrewSchema, async (data) => {
 	await requireAuth();
-	const member = await prisma.productionCrew.create({
-		data,
-		include: { user: { select: { id: true, name: true, email: true } } }
+	const created = await prisma8.orm.public.ProductionCrew.create({
+		id: newId('ProductionCrew'),
+		productionId: data.productionId,
+		userId: data.userId,
+		role: data.role ?? null
 	});
+	const member = dated(
+		must(
+			await prisma8.orm.public.ProductionCrew.include('user', (u) =>
+				u.select('id', 'name', 'email')
+			).first({ id: created.id }),
+			'ProductionCrew'
+		)
+	);
 
-	const production = await prisma.production.findUniqueOrThrow({
-		where: { id: data.productionId },
-		select: { name: true, startDate: true, endDate: true }
-	});
+	const production = dated(
+		must(
+			await prisma8.orm.public.Production.select('name', 'startDate', 'endDate').first({
+				id: data.productionId
+			}),
+			'Production'
+		)
+	);
 
 	try {
 		const { subject, html, text } = addedAsCrewEmail({
@@ -1038,7 +1100,9 @@ export const addCrewMember = command(addCrewSchema, async (data) => {
 
 export const removeCrewMember = command(v.string(), async (id: string) => {
 	await requireAuth();
-	const member = await prisma.productionCrew.delete({ where: { id } });
+	const member = dated(
+		must(await prisma8.orm.public.ProductionCrew.where({ id }).delete(), 'ProductionCrew')
+	);
 	await getProduction(member.productionId).refresh();
 	return member;
 });
@@ -1047,26 +1111,20 @@ export const getBookedAssets = query(
 	v.string(),
 	async (productionId: string): Promise<{ assetId: string; productionName: string }[]> => {
 		await requireAuth();
-		const production = await prisma.production.findUniqueOrThrow({
-			where: { id: productionId },
-			select: { startDate: true, endDate: true }
-		});
+		const production = dated(
+			must(
+				await prisma8.orm.public.Production.select('startDate', 'endDate').first({
+					id: productionId
+				}),
+				'Production'
+			)
+		);
 		if (!production.startDate || !production.endDate) return [];
-		const items = await prisma.productionItem.findMany({
-			where: {
-				productionId: { not: productionId },
-				status: { in: ['PENDING', 'APPROVED', 'CHECKED_OUT'] },
-				production: {
-					AND: [
-						{ startDate: { not: null } },
-						{ endDate: { not: null } },
-						{ startDate: { lte: production.endDate } },
-						{ endDate: { gte: production.startDate } }
-					]
-				}
-			},
-			select: { assetId: true, production: { select: { name: true } } }
-		});
+		const items = await findOverlappingBookings(
+			productionId,
+			production.startDate,
+			production.endDate
+		);
 		const seen = new Map<string, string>();
 		for (const item of items) {
 			if (!seen.has(item.assetId)) seen.set(item.assetId, item.production.name);
@@ -1080,103 +1138,105 @@ export const getCalendarData = query(async () => {
 
 	// Fetch all assets the user has access to, along with their production items
 	// that have a start and end date
-	const memberships = await prisma.orgMembership.findMany({
-		where: { userId: user.id }
-	});
-	const orgIds = memberships.map((m) => m.organizationId);
+	const orgIds = await myOrgIds(user.id);
 
 	// An accessory's availability is its parent's — it is booked and returned
 	// with it, so a row per power cable is noise on a calendar.
-	const assets = await prisma.asset.findMany({
-		where: { organizationId: { in: orgIds }, parentAssetId: null, ...ACTIVE_ASSET_WHERE },
-		include: {
-			product: { include: { manufacturer: true } },
-			organization: true,
-			bundle: { select: { id: true, template: { select: { name: true } } } },
-			productionItems: {
-				where: {
-					status: { in: ['APPROVED', 'CHECKED_OUT', 'PENDING'] },
-					production: {
-						startDate: { not: null },
-						endDate: { not: null }
-					}
-				},
-				include: { production: true }
-			}
-		}
-	});
-
-	return assets;
+	return dated(
+		await prisma8.orm.public.Asset.where((a) => a.organizationId.in(orgIds))
+			.where((a) => a.parentAssetId.isNull())
+			.where((a) => a.status.notIn(RETIRED))
+			.include('product', (p) => p.include('manufacturer'))
+			.include('organization')
+			.include('bundle', (b) => b.select('id').include('template', (t) => t.select('name')))
+			.include('productionItems', (pi) =>
+				pi
+					.where((i) => i.status.in(['APPROVED', 'CHECKED_OUT', 'PENDING']))
+					.where((i) =>
+						i.production.some((p) => and(p.startDate.isNotNull(), p.endDate.isNotNull()))
+					)
+					.include('production')
+			)
+			.all()
+	);
 });
 
 export const getProductionsCalendar = query(async () => {
 	const user = await requireAuth();
-	const memberships = await prisma.orgMembership.findMany({
-		where: { userId: user.id }
-	});
-	const orgIds = memberships.map((m) => m.organizationId);
-	return await prisma.production.findMany({
-		where: {
-			organizationId: { in: orgIds },
-			startDate: { not: null },
-			endDate: { not: null }
-		},
-		include: { organization: { select: { name: true, shortName: true } } },
-		orderBy: { startDate: 'asc' }
-	});
+	const orgIds = await myOrgIds(user.id);
+	return dated(
+		await prisma8.orm.public.Production.where((p) => p.organizationId.in(orgIds))
+			.where((p) => p.startDate.isNotNull())
+			.where((p) => p.endDate.isNotNull())
+			.include('organization', (o) => o.select('name', 'shortName'))
+			.orderBy((p) => p.startDate.asc())
+			.all()
+	);
 });
 
 export const getDashboardStats = query(async () => {
 	const user = await requireAuth();
-	const memberships = await prisma.orgMembership.findMany({ where: { userId: user.id } });
-	const orgIds = memberships.map((m) => m.organizationId);
-	const now = new Date();
+	const orgIds = await myOrgIds(user.id);
+	const today = new Date();
+
+	const myAssets = () => prisma8.orm.public.Asset.where((a) => a.organizationId.in(orgIds));
 
 	const [
 		totalAssets,
 		availableAssets,
 		maintenanceAssets,
 		brokenAssets,
-		upcomingProductions,
-		bundleCount,
+		upcoming,
+		bundles,
 		overdueInspections
 	] = await Promise.all([
-		prisma.asset.count({ where: { organizationId: { in: orgIds }, ...ACTIVE_ASSET_WHERE } }),
-		prisma.asset.count({ where: { organizationId: { in: orgIds }, status: 'AVAILABLE' } }),
-		prisma.asset.count({ where: { organizationId: { in: orgIds }, status: 'MAINTENANCE' } }),
-		prisma.asset.count({ where: { organizationId: { in: orgIds }, status: 'BROKEN' } }),
-		prisma.production.findMany({
-			where: { organizationId: { in: orgIds }, startDate: { gte: now } },
-			orderBy: { startDate: 'asc' },
-			take: 5,
-			select: {
-				id: true,
-				name: true,
-				startDate: true,
-				endDate: true,
-				organization: { select: { name: true, shortName: true } },
-				_count: { select: { items: true, crew: true } }
-			}
-		}),
-		prisma.assetBundle.count({ where: { template: { organizationId: { in: orgIds } } } }),
-		prisma.asset.count({
-			where: {
-				organizationId: { in: orgIds },
-				...ACTIVE_ASSET_WHERE,
-				nextInspectionDue: { not: null, lt: now }
-			}
-		})
+		myAssets()
+			.where((a) => a.status.notIn(RETIRED))
+			.aggregate((a) => ({ n: a.count() })),
+		myAssets()
+			.where({ status: 'AVAILABLE' })
+			.aggregate((a) => ({ n: a.count() })),
+		myAssets()
+			.where({ status: 'MAINTENANCE' })
+			.aggregate((a) => ({ n: a.count() })),
+		myAssets()
+			.where({ status: 'BROKEN' })
+			.aggregate((a) => ({ n: a.count() })),
+		prisma8.orm.public.Production.where((p) => p.organizationId.in(orgIds))
+			.where((p) => p.startDate.gte(toTimestamp(today)))
+			.include('organization', (o) => o.select('name', 'shortName'))
+			// `_count` has no Prisma 8 equivalent; a reducer on the relation is the
+			// same query, and the shape is rebuilt below so the dashboard is unchanged.
+			.include('items', (i) => i.count())
+			.include('crew', (c) => c.count())
+			.select('id', 'name', 'startDate', 'endDate')
+			.orderBy((p) => p.startDate.asc())
+			.limit(5)
+			.all(),
+		prisma8.orm.public.AssetBundle.where((b) =>
+			b.template.some((t) => t.organizationId.in(orgIds))
+		).aggregate((a) => ({ n: a.count() })),
+		myAssets()
+			.where((a) => a.status.notIn(RETIRED))
+			.where((a) => a.nextInspectionDue.isNotNull())
+			.where((a) => a.nextInspectionDue.lt(toTimestamp(today)))
+			.aggregate((a) => ({ n: a.count() }))
 	]);
 
+	const upcomingProductions = dated(upcoming).map(({ items, crew, ...production }) => ({
+		...production,
+		_count: { items, crew }
+	}));
+
 	return {
-		totalAssets,
+		totalAssets: totalAssets.n,
 		assetsByStatus: {
-			available: availableAssets,
-			maintenance: maintenanceAssets,
-			broken: brokenAssets
+			available: availableAssets.n,
+			maintenance: maintenanceAssets.n,
+			broken: brokenAssets.n
 		},
 		upcomingProductions,
-		bundleCount,
-		overdueInspections
+		bundleCount: bundles.n,
+		overdueInspections: overdueInspections.n
 	};
 });

@@ -7,10 +7,14 @@ import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { extendPrismaClient } from 'prisma-prefixed-ids';
 import { building } from '$app/environment';
-import { sendMail } from './mail';
+import { sendMail } from './mail.ts';
 import { passwordResetEmail } from './emails/password-reset';
 import { passwordChangedEmail } from './emails/password-changed';
 import { emailVerificationEmail } from './emails/email-verification';
+import postgres from '@prisma/orm-postgres/runtime';
+import { customAlphabet } from 'nanoid';
+import type { Contract } from '../../../generated/prisma8/contract';
+import contractJson from '../../../generated/prisma8/contract.json' with { type: 'json' };
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -51,6 +55,18 @@ const prefixes: Partial<Record<ModelName, string>> = {
 	OrgProductPrice: 'opp',
 	CatalogTransaction: 'cltx'
 };
+
+export const prisma8 = postgres<Contract>({ url: process.env.DATABASE_URL, contractJson });
+
+// The Prisma 8 contract declares no id default, so code on that client mints
+// its own ids. Same alphabet, length and `<prefix>_` shape as prisma-prefixed-ids
+// gives the Prisma 7 client, so rows from both are indistinguishable.
+const idBody = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 24);
+export function newId(model: ModelName): string {
+	const prefix = prefixes[model];
+	if (!prefix) throw new Error(`No id prefix registered for ${model}`);
+	return `${prefix}_${idBody()}`;
+}
 
 // Extend the client with prefixed IDs
 export const prisma = extendPrismaClient(originalPrisma, {

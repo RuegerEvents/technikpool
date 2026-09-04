@@ -1,6 +1,9 @@
 {
 	"name": "technikpool",
 	"private": true,
+	"engines": {
+		"node": ">=26"
+	},
 	"license": "MIT",
 	"version": "0.3.0",
 	"type": "module",

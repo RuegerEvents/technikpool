@@ -935,15 +935,17 @@ export type $CategoryPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     updatedAt: Date
     /**
      * On a cable in this department, which contacts are the end power or signal
-     * comes *in* on. `male` for Strom — a cable's male end goes into the supply
-     * and its female end feeds the load. `female` for Audio and Licht, where it
-     * is the other way round: an XLR's female end sits on the source's male
-     * output. Null where a cable has no direction worth stating (Netzwerk, USB).
+     * comes *in* on.
      * 
-     * It lives here rather than on Connector or on a family because it is not a
-     * fact about CEE32 or about XLR — it is a fact about power versus signal,
-     * and writing it onto every family is how one of them ends up contradicting
-     * the rest.
+     * `male` for Strom: a cable's male end goes into the supply. `female` for
+     * Audio, where a mic input carries 48 V phantom and so is the female side —
+     * an XLR cable's female end sits on the source. `male` again for Licht,
+     * because DMX reverses audio: a console's output is female, a fixture's
+     * input is male. Null where a cable has no direction worth stating.
+     * 
+     * It lives here rather than on Connector or on a family precisely because of
+     * that XLR3-versus-XLR5 split: the same shell means opposite things in audio
+     * and in light, so the answer belongs to the department, not the connector.
      */
     cableInputGender: string | null
   }, ExtArgs["result"]["category"]>
