@@ -4,14 +4,14 @@ import {
 	MIN_STICKER_SIZE_MM,
 	minCutLineGapMm
 } from './geometry';
+import { DEFAULT_ORG_NAME, DEFAULT_STICKER_COLOR } from '$lib/stickers';
 import type { GeneratorOptions, SheetLayout, StickerSize } from './types';
 
 export interface RawGeneratorOptions {
 	type?: 'quadratisch' | 'faehnchen';
 	output?: string;
 	color?: string;
-	logoText?: string;
-	brandText?: string;
+	orgName?: string;
 	items: {
 		from: number;
 		to?: number;
@@ -53,15 +53,17 @@ function flagGridWidthMm(
 const defaultSquareSize: StickerSize = { widthMm: 15, heightMm: 15 };
 const defaultFlagSize: StickerSize = { widthMm: 25, heightMm: 15, flagTailMm: 31 };
 
+// 15 x 10 stickers of 15mm on a 303 x 216mm sheet, with 4.5mm between cut
+// lines — the print shop's own reference sheet, down to the millimetre.
 const defaultSquareLayout: SheetLayout = {
 	pageWidthMm: 303,
 	pageHeightMm: 216,
-	marginLeftMm: 6,
-	marginTopMm: 13,
-	gapXMm: 10,
-	gapYMm: 10,
-	columns: 12,
-	rows: 8,
+	marginLeftMm: 7.5,
+	marginTopMm: 7.5,
+	gapXMm: 4.5,
+	gapYMm: 4.5,
+	columns: 15,
+	rows: 10,
 	headerHeightMm: 10
 };
 
@@ -88,7 +90,7 @@ function assertNonNegative(value: number, name: string) {
 export function normalizeOptions(raw: RawGeneratorOptions): GeneratorOptions {
 	const type = raw.type ?? 'quadratisch';
 	if (type !== 'quadratisch' && type !== 'faehnchen') throw new Error('Invalid sticker type');
-	if (!/^#[0-9a-fA-F]{6}$/.test(raw.color ?? '#0069c9'))
+	if (!/^#[0-9a-fA-F]{6}$/.test(raw.color ?? DEFAULT_STICKER_COLOR))
 		throw new Error('Color must be a #RRGGBB hex value');
 	if (!raw.items?.length) throw new Error('At least one number range is required');
 
@@ -191,21 +193,20 @@ export function normalizeOptions(raw: RawGeneratorOptions): GeneratorOptions {
 	return {
 		type,
 		output: raw.output ?? 'stickerbogen.pdf',
-		color: raw.color ?? '#0069c9',
-		logoText: raw.logoText?.trim() || undefined,
-		brandText: raw.brandText?.trim() || undefined,
+		color: raw.color ?? DEFAULT_STICKER_COLOR,
+		orgName: raw.orgName?.trim() || DEFAULT_ORG_NAME,
 		items,
 		size,
 		layout,
-		matrixScale: raw.matrixScale ?? 0.68,
-		quietZoneMm: raw.quietZoneMm ?? 1.1,
+		matrixScale: raw.matrixScale ?? 1,
+		quietZoneMm: raw.quietZoneMm ?? 0.75,
 		bleedMm,
 		nestFlagTails
 	};
 }
 
 export function parseHexColor(hex: string): { r: number; g: number; b: number } {
-	const normalized = hex.match(/^#[0-9a-fA-F]{6}$/) ? hex : '#0069c9';
+	const normalized = hex.match(/^#[0-9a-fA-F]{6}$/) ? hex : DEFAULT_STICKER_COLOR;
 	return {
 		r: Number.parseInt(normalized.slice(1, 3), 16) / 255,
 		g: Number.parseInt(normalized.slice(3, 5), 16) / 255,

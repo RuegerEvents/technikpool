@@ -4,6 +4,7 @@ import {
 	PDFOperator,
 	PDFOperatorNames,
 	StandardFonts,
+	degrees,
 	rgb,
 	type PDFFont,
 	type PDFImage,
@@ -15,21 +16,39 @@ import { createDataMatrixPng } from './datamatrix';
 import {
 	CORNER_RADIUS_MM,
 	FLAG_TAIL_HALF_HEIGHT_RATIO,
+	HELVETICA_CAP_HEIGHT_RATIO,
+	HELVETICA_DESCENT_RATIO,
+	SQUARE_STICKER,
 	flagCutPath,
 	roundedRectPath
 } from './geometry';
 import { fillPathRgb, registerKissCutColorSpace, strokeKissCutPath } from './kisscut';
 import { paginateStickers } from './items';
-import type { GeneratorOptions, GridPosition, SheetPage } from './types';
-import { mm } from './units';
+import type { GeneratorOptions, GridPosition, SheetPage, StickerItem } from './types';
+import { mm, ptToMm } from './units';
 
 const KISS_CUT_LINE_WIDTH_PT = 0.5;
 /** How far beyond the bleed the group box sits, so it never overlaps the bleed fill. */
 const GROUP_BOX_CLEARANCE_BEYOND_BLEED_MM = 1;
 
-interface LogoAsset {
-	text?: string;
-}
+/** The header strip's own geometry, in mm from the top-left of the page. */
+const HEADER = {
+	boxTopMm: 6,
+	boxHeightMm: 6.5,
+	firstBoxLeftMm: 6,
+	boxGapMm: 5.4,
+	padLeftMm: 1,
+	labelToValueMm: 3.3,
+	padRightMm: 2,
+	labelSizePt: 7.5,
+	valueSizePt: 12,
+	/** Baselines measured up from the box's bottom edge. */
+	labelBaselineMm: 0.8,
+	valueBaselineMm: 1.7,
+	brandRightMm: 6,
+	/** Clearance the brand keeps from the last field box before it is shrunk to fit. */
+	brandClearanceMm: 8
+};
 
 export async function generateStickerSheet(rawOptions: RawGeneratorOptions): Promise<Uint8Array> {
 	const options = normalizeOptions(rawOptions);
@@ -40,15 +59,13 @@ export async function generateStickerSheet(rawOptions: RawGeneratorOptions): Pro
 
 	const kissCutRef = registerKissCutColorSpace(pdfDoc.context);
 	const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-	const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-	const logo = loadLogo(options);
 	const pages = paginateStickers(options);
 
 	for (const sheetPage of pages) {
 		const page = pdfDoc.addPage([mm(options.layout.pageWidthMm), mm(options.layout.pageHeightMm)]);
-		drawHeader(page, sheetPage, options, font, boldFont);
+		drawHeader(page, sheetPage, options, font);
 		for (const position of sheetPage.positions) {
-			await drawGridPosition(pdfDoc, page, position, options, font, logo, kissCutRef);
+			await drawGridPosition(pdfDoc, page, position, options, font, kissCutRef);
 		}
 		drawGroupBoxes(page, sheetPage, options);
 	}
@@ -56,18 +73,12 @@ export async function generateStickerSheet(rawOptions: RawGeneratorOptions): Pro
 	return pdfDoc.save();
 }
 
-function loadLogo(options: GeneratorOptions): LogoAsset {
-	return { text: options.logoText ?? options.brandText };
-}
-
 function drawHeader(
 	page: PDFPage,
 	sheetPage: SheetPage,
 	options: GeneratorOptions,
-	font: PDFFont,
-	boldFont: PDFFont
+	font: PDFFont
 ): void {
-	const pageHeight = page.getHeight();
 	const stickers = sheetPage.positions
 		.map((position) => position.sticker)
 		.filter((s) => s !== null);
@@ -75,65 +86,91 @@ function drawHeader(
 	const maxLabel = stickers.at(-1)?.label ?? '—';
 	const firstRange = options.items[0];
 	const copies = firstRange?.copies ?? stickers.length;
-	const boxY = pageHeight - mm(7.4);
 
-	drawSmallField(page, font, boldFont, 'Nummern', `${minLabel} – ${maxLabel}`, 6, boxY);
-	drawSmallField(page, font, boldFont, 'Anzahl jeweils', `${copies}x`, 72, boxY);
-	drawSmallField(
-		page,
-		font,
-		boldFont,
-		'Seite',
-		`${sheetPage.pageIndex + 1} von ${sheetPage.totalPages}`,
-		112,
-		boxY
-	);
+	const fields: [string, string][] = [
+		['Nummern', `${minLabel} – ${maxLabel}`],
+		['Anzahl jeweils', `${copies}x`],
+		['Seite', `${sheetPage.pageIndex + 1} von ${sheetPage.totalPages}`]
+	];
 
-	const brand = options.brandText ?? options.logoText;
-	if (brand) {
-		const textWidth = boldFont.widthOfTextAtSize(brand, 12);
-		const x = page.getWidth() - mm(12) - textWidth;
-		page.drawText(brand, {
-			x,
-			y: pageHeight - mm(7),
-			size: 12,
-			font: boldFont,
-			color: rgb(0.08, 0.08, 0.08)
-		});
+	// Each box is only as wide as its own contents, so the three sit as a tight
+	// row however long the numbers run.
+	let xMm = HEADER.firstBoxLeftMm;
+	for (const [label, value] of fields) {
+		xMm += drawSmallField(page, font, label, value, xMm) + HEADER.boxGapMm;
 	}
+
+	drawHeaderBrand(page, options, font, xMm - HEADER.boxGapMm);
 }
 
+/** Draws one labelled field box and returns the width it took, in mm. */
 function drawSmallField(
 	page: PDFPage,
 	font: PDFFont,
-	boldFont: PDFFont,
 	label: string,
 	value: string,
-	xMm: number,
-	y: number
-): void {
+	xMm: number
+): number {
+	const labelWidth = font.widthOfTextAtSize(label, HEADER.labelSizePt);
+	const valueWidth = font.widthOfTextAtSize(value, HEADER.valueSizePt);
+	const widthMm =
+		HEADER.padLeftMm +
+		ptToMm(labelWidth) +
+		HEADER.labelToValueMm +
+		ptToMm(valueWidth) +
+		HEADER.padRightMm;
+
 	const x = mm(xMm);
+	const bottom = page.getHeight() - mm(HEADER.boxTopMm + HEADER.boxHeightMm);
+
 	page.drawRectangle({
 		x,
-		y: y - mm(1.1),
-		width: mm(52),
-		height: mm(6),
+		y: bottom,
+		width: mm(widthMm),
+		height: mm(HEADER.boxHeightMm),
 		borderWidth: 0.25,
 		borderColor: rgb(0.65, 0.65, 0.65)
 	});
 	page.drawText(label, {
-		x: x + mm(1),
-		y: y + mm(0.6),
-		size: 4.5,
+		x: x + mm(HEADER.padLeftMm),
+		y: bottom + mm(HEADER.labelBaselineMm),
+		size: HEADER.labelSizePt,
 		font,
 		color: rgb(0.55, 0.55, 0.55)
 	});
 	page.drawText(value, {
-		x: x + mm(18),
-		y: y + mm(0.6),
-		size: 6.5,
-		font: boldFont,
-		color: rgb(0.05, 0.05, 0.05)
+		x: x + mm(HEADER.padLeftMm + HEADER.labelToValueMm) + labelWidth,
+		y: bottom + mm(HEADER.valueBaselineMm),
+		size: HEADER.valueSizePt,
+		font,
+		color: rgb(0.08, 0.08, 0.08)
+	});
+
+	return widthMm;
+}
+
+/** The org name, set large in the top-right corner and shrunk if a long name would reach the field boxes. */
+function drawHeaderBrand(
+	page: PDFPage,
+	options: GeneratorOptions,
+	font: PDFFont,
+	fieldsRightMm: number
+): void {
+	const brand = options.orgName;
+	if (!brand) return;
+
+	const availableMm =
+		options.layout.pageWidthMm - HEADER.brandRightMm - fieldsRightMm - HEADER.brandClearanceMm;
+	const capSize = mm(HEADER.boxHeightMm * 0.9) / HELVETICA_CAP_HEIGHT_RATIO;
+	const size = Math.min(capSize, mm(availableMm) / font.widthOfTextAtSize(brand, 1));
+	const bottom = page.getHeight() - mm(HEADER.boxTopMm + HEADER.boxHeightMm);
+
+	page.drawText(brand, {
+		x: page.getWidth() - mm(HEADER.brandRightMm) - font.widthOfTextAtSize(brand, size),
+		y: bottom + mm(HEADER.valueBaselineMm) - size * 0.1,
+		size,
+		font,
+		color: rgb(0.08, 0.08, 0.08)
 	});
 }
 
@@ -143,7 +180,6 @@ async function drawGridPosition(
 	position: GridPosition,
 	options: GeneratorOptions,
 	font: PDFFont,
-	logo: LogoAsset,
 	kissCutRef: PDFRef
 ): Promise<void> {
 	const sticker = position.sticker;
@@ -161,33 +197,7 @@ async function drawGridPosition(
 	const matrixImage = await pdfDoc.embedPng(await createDataMatrixPng(sticker.payload));
 
 	if (options.type === 'quadratisch') {
-		const bleedPath = roundedRectPath(
-			x - bleed,
-			y - bleed,
-			w + 2 * bleed,
-			h + 2 * bleed,
-			cornerR + bleed
-		);
-		fillPathRgb(page, bleedPath, color.r, color.g, color.b);
-
-		const cutPath = roundedRectPath(x, y, w, h, cornerR);
-		strokeKissCutPath(page, kissCutRef, cutPath, KISS_CUT_LINE_WIDTH_PT);
-
-		let matrixSize = Math.min(w, h) * options.matrixScale;
-		matrixSize = Math.min(matrixSize, w - 2 * quiet, h - 2 * quiet);
-		const matrixX = x + quiet;
-		const matrixY = y + h - quiet - matrixSize;
-		drawMatrixWithBackground(page, matrixImage, matrixX, matrixY, matrixSize);
-
-		page.drawText(sticker.label, {
-			x: matrixX,
-			y: y + mm(0.8),
-			size: Math.min(5.2, h * 0.18),
-			font,
-			color: rgb(1, 1, 1)
-		});
-
-		drawLogoMark(page, x, y, w, h, options, font, logo);
+		drawSquareSticker(page, { x, y, w, h }, sticker, options, font, matrixImage, kissCutRef);
 	} else {
 		const tailLen = mm(options.size.flagTailMm ?? 0);
 		const tailHalfHeight = h * FLAG_TAIL_HALF_HEIGHT_RATIO;
@@ -258,11 +268,11 @@ async function drawGridPosition(
 			color: rgb(1, 1, 1)
 		});
 
-		const logoText = logo.text ?? options.brandText;
-		if (logoText) {
+		const orgName = options.orgName;
+		if (orgName) {
 			const logoSize = Math.min(3.6, halfH * 0.2);
-			page.drawText(logoText, {
-				x: x + w - mm(0.8) - font.widthOfTextAtSize(logoText, logoSize),
+			page.drawText(orgName, {
+				x: x + w - mm(0.8) - font.widthOfTextAtSize(orgName, logoSize),
 				y: y + h - quiet - logoSize,
 				size: logoSize,
 				font,
@@ -293,31 +303,119 @@ function drawMatrixWithBackground(
 	page.drawImage(matrixImage, { x: matrixX, y: matrixY, width: matrixSize, height: matrixSize });
 }
 
-function drawLogoMark(
+interface Rect {
+	x: number;
+	y: number;
+	w: number;
+	h: number;
+}
+
+/**
+ * The square sticker, laid out like the print shop's reference sheet: a
+ * coloured field with a white footer band carrying the org name, and a white
+ * rounded panel holding the Data Matrix with the asset number set vertically
+ * beside it.
+ *
+ * The bleed is a plain rectangle rather than an outset of the cut contour —
+ * it only has to cover the cut on three sides, and its fourth side stops at
+ * the band, which is bare paper and so needs no fill of its own.
+ */
+function drawSquareSticker(
 	page: PDFPage,
-	x: number,
-	y: number,
-	w: number,
-	h: number,
+	{ x, y, w, h }: Rect,
+	sticker: StickerItem,
 	options: GeneratorOptions,
 	font: PDFFont,
-	logo: LogoAsset
+	matrixImage: PDFImage,
+	kissCutRef: PDFRef
 ): void {
-	const text = logo.text ?? options.brandText;
-	const logoMaxW = w * 0.36;
-	const logoMaxH = h * 0.16;
-	const logoX = x + w - logoMaxW - mm(0.8);
-	const logoY = y + mm(0.75);
+	const color = parseHexColor(options.color);
+	const bleed = mm(options.bleedMm);
+	const quiet = mm(options.quietZoneMm);
+	const bandH = h * SQUARE_STICKER.bandHeightRatio;
 
-	if (text) {
-		page.drawText(text, {
-			x: logoX,
-			y: logoY,
-			size: Math.min(3.6, logoMaxH),
+	page.drawRectangle({
+		x: x - bleed,
+		y: y + bandH,
+		width: w + 2 * bleed,
+		height: h - bandH + bleed,
+		color: rgb(color.r, color.g, color.b)
+	});
+
+	const cutPath = roundedRectPath(x, y, w, h, h * SQUARE_STICKER.cornerRadiusRatio);
+	strokeKissCutPath(page, kissCutRef, cutPath, KISS_CUT_LINE_WIDTH_PT);
+
+	const insetX = w * SQUARE_STICKER.panelInsetXRatio;
+	const insetY = h * SQUARE_STICKER.panelInsetYRatio;
+	const panel: Rect = {
+		x: x + insetX,
+		y: y + bandH + insetY,
+		w: w - 2 * insetX,
+		h: h - bandH - 2 * insetY
+	};
+	fillPathRgb(
+		page,
+		roundedRectPath(panel.x, panel.y, panel.w, panel.h, h * SQUARE_STICKER.panelCornerRatio),
+		1,
+		1,
+		1
+	);
+
+	// The panel is wider than it is tall — the matrix squares off against its
+	// height and the leftover column on the right carries the number.
+	const matrixSize = (Math.min(panel.w, panel.h) - 2 * quiet) * options.matrixScale;
+	const matrixX = panel.x + quiet;
+	const matrixY = panel.y + (panel.h - matrixSize) / 2;
+	page.drawImage(matrixImage, { x: matrixX, y: matrixY, width: matrixSize, height: matrixSize });
+
+	drawVerticalLabel(page, sticker.label, font, {
+		x: panel.x + panel.w - quiet,
+		y: matrixY,
+		w: panel.x + panel.w - quiet - (matrixX + matrixSize),
+		h: matrixSize
+	});
+
+	const orgName = options.orgName;
+	if (orgName) {
+		const capSize = (h * SQUARE_STICKER.bandCapHeightRatio) / HELVETICA_CAP_HEIGHT_RATIO;
+		const size = Math.min(capSize, (w - 2 * insetX) / font.widthOfTextAtSize(orgName, 1));
+		// Centred on cap-plus-descender rather than on the baseline, so a name
+		// with a descender in it doesn't hang into the band's bottom margin.
+		const descent = size * HELVETICA_DESCENT_RATIO;
+		page.drawText(orgName, {
+			x: x + (w - font.widthOfTextAtSize(orgName, size)) / 2,
+			y: y + (bandH - size * HELVETICA_CAP_HEIGHT_RATIO - descent) / 2 + descent,
+			size,
 			font,
-			color: rgb(1, 1, 1)
+			color: rgb(0.08, 0.08, 0.08)
 		});
 	}
+}
+
+/**
+ * The asset number, rotated a quarter turn anticlockwise so it reads bottom to
+ * top in the strip beside the Data Matrix. `slot.x` is the baseline — glyphs
+ * ascend towards -x once rotated, so they grow back towards the matrix — and
+ * the type is sized to the shorter of the two constraints: the strip's width
+ * for its cap height, the matrix's height for its length.
+ */
+function drawVerticalLabel(page: PDFPage, label: string, font: PDFFont, slot: Rect): void {
+	if (slot.w <= 0 || slot.h <= 0) return;
+
+	const size = Math.min(
+		slot.w / HELVETICA_CAP_HEIGHT_RATIO,
+		slot.h / font.widthOfTextAtSize(label, 1)
+	);
+	const textWidth = font.widthOfTextAtSize(label, size);
+
+	page.drawText(label, {
+		x: slot.x,
+		y: slot.y + (slot.h - textWidth) / 2,
+		size,
+		font,
+		rotate: degrees(90),
+		color: rgb(0.08, 0.08, 0.08)
+	});
 }
 
 interface GroupBox {
@@ -380,7 +478,13 @@ function drawGroupBoxes(page: PDFPage, sheetPage: SheetPage, options: GeneratorO
 	const { columns } = options.layout;
 	const boxes = findGroupBoxes(sheetPage.positions, columns);
 	const footprintWidthMm = options.size.widthMm + (options.size.flagTailMm ?? 0);
-	const margin = mm(options.bleedMm + GROUP_BOX_CLEARANCE_BEYOND_BLEED_MM);
+	// Clamped to just inside half the gap: at tight sheet spacings the full
+	// clearance would push neighbouring groups' boxes into one another, and two
+	// overlapping boxes read as one box around both groups.
+	const halfGapMm = Math.min(options.layout.gapXMm, options.layout.gapYMm) / 2;
+	const margin = mm(
+		Math.min(options.bleedMm + GROUP_BOX_CLEARANCE_BEYOND_BLEED_MM, halfGapMm - 0.25)
+	);
 	const color = rgb(0.35, 0.35, 0.35);
 	const thickness = 0.75;
 

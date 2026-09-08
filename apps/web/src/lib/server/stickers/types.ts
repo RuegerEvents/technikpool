@@ -32,8 +32,8 @@ export interface GeneratorOptions {
 	type: StickerType;
 	output: string;
 	color: string;
-	logoText?: string;
-	brandText?: string;
+	/** The organisation name printed in the sheet header and in each sticker's footer band. */
+	orgName?: string;
 	items: InventoryRange[];
 	size: StickerSize;
 	layout: SheetLayout;

@@ -5,19 +5,21 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
+	import { DEFAULT_ORG_NAME, DEFAULT_STICKER_COLOR, stickerOrgName } from '$lib/stickers';
 	import { toast } from 'svelte-sonner';
 	import { browser } from '$app/environment';
 
 	const orgs = await getMyOrgs();
 
-	const SETTINGS_KEY = 'stickers.settings.v1';
+	// v2: the square preset moved to the print shop's own 15 x 10 sheet, so any
+	// v1 settings would fight the new defaults rather than refine them.
+	const SETTINGS_KEY = 'stickers.settings.v2';
 
 	interface PersistedSettings {
 		selectedOrgId?: string;
 		type?: 'quadratisch' | 'faehnchen';
 		color?: string;
-		brandText?: string;
-		logoText?: string;
+		orgName?: string;
 		from?: number;
 		to?: number;
 		copies?: number;
@@ -54,16 +56,21 @@
 
 	const saved = loadSavedSettings();
 
-	let selectedOrgId = $state(saved.selectedOrgId ?? orgs[0]?.id ?? '');
+	// A saved org id can outlive membership in it, so fall back rather than
+	// leaving the select on an id that matches no option.
+	const initialOrg = orgs.find((org) => org.id === saved.selectedOrgId) ?? orgs[0];
+
+	let selectedOrgId = $state(initialOrg?.id ?? '');
 	let type = $state<'quadratisch' | 'faehnchen'>(saved.type ?? 'quadratisch');
-	let color = $state(saved.color ?? '#0069c9');
-	let brandText = $state(saved.brandText ?? orgs[0]?.name ?? '');
-	let logoText = $state(saved.logoText ?? 'RE');
+	let color = $state(saved.color ?? initialOrg?.color ?? DEFAULT_STICKER_COLOR);
+	let orgName = $state(
+		saved.orgName ?? (initialOrg ? stickerOrgName(initialOrg.name) : DEFAULT_ORG_NAME)
+	);
 	let from = $state(saved.from ?? 1);
 	let to = $state(saved.to ?? 150);
 	let copies = $state(saved.copies ?? 1);
 	let payloadTemplate = $state(saved.payloadTemplate ?? '{label}');
-	let labelPrefix = $state(saved.labelPrefix ?? orgs[0]?.assetIdPrefix ?? 'RE');
+	let labelPrefix = $state(saved.labelPrefix ?? initialOrg?.assetIdPrefix ?? 'RE');
 	let padLength = $state(saved.padLength ?? 5);
 	let advanced = $state(saved.advanced ?? false);
 	const payloadPlaceholder = 'https://technik.example/assets/{label}';
@@ -76,14 +83,14 @@
 	let heightMm = $state(saved.heightMm ?? 15);
 	let columns = $state(saved.columns ?? 15);
 	let rows = $state(saved.rows ?? 10);
-	let marginLeftMm = $state(saved.marginLeftMm ?? 6);
-	let marginTopMm = $state(saved.marginTopMm ?? 13);
-	let gapXMm = $state(saved.gapXMm ?? 10);
-	let gapYMm = $state(saved.gapYMm ?? 10);
-	let matrixScale = $state(saved.matrixScale ?? 0.68);
-	let quietZoneMm = $state(saved.quietZoneMm ?? 1.1);
+	let marginLeftMm = $state(saved.marginLeftMm ?? 7.5);
+	let marginTopMm = $state(saved.marginTopMm ?? 7.5);
+	let gapXMm = $state(saved.gapXMm ?? 4.5);
+	let gapYMm = $state(saved.gapYMm ?? 4.5);
+	let matrixScale = $state(saved.matrixScale ?? 1);
+	let quietZoneMm = $state(saved.quietZoneMm ?? 0.75);
 	const initialType = saved.type ?? 'quadratisch';
-	let bleedMm = $state(saved.bleedMm ?? (initialType === 'faehnchen' ? 1.3 : 3));
+	let bleedMm = $state(saved.bleedMm ?? (initialType === 'faehnchen' ? 1.3 : 1.5));
 	let tailLenMm = $state(saved.tailLenMm ?? 31);
 	let nestFlagTails = $state(saved.nestFlagTails ?? initialType === 'faehnchen');
 
@@ -109,8 +116,7 @@
 			selectedOrgId,
 			type,
 			color,
-			brandText,
-			logoText,
+			orgName,
 			from,
 			to,
 			copies,
@@ -142,13 +148,15 @@
 		if (nextType === 'quadratisch') {
 			widthMm = 15;
 			heightMm = 15;
-			columns = 12;
-			rows = 8;
-			marginLeftMm = 6;
-			marginTopMm = 13;
-			gapXMm = 10;
-			gapYMm = 10;
-			bleedMm = 3;
+			columns = 15;
+			rows = 10;
+			marginLeftMm = 7.5;
+			marginTopMm = 7.5;
+			gapXMm = 4.5;
+			gapYMm = 4.5;
+			bleedMm = 1.5;
+			quietZoneMm = 0.75;
+			matrixScale = 1;
 		} else {
 			widthMm = 25;
 			heightMm = 15;
@@ -171,6 +179,13 @@
 		labelPrefix = selectedOrg?.assetIdPrefix ?? labelPrefix;
 	}
 
+	function useSelectedOrg() {
+		useOrgPrefix();
+		if (!selectedOrg) return;
+		orgName = stickerOrgName(selectedOrg.name);
+		color = selectedOrg.color;
+	}
+
 	async function generatePdf() {
 		if (to < from) {
 			toast.error('End number must be greater than or equal to start number');
@@ -188,8 +203,7 @@
 				body: JSON.stringify({
 					type,
 					color,
-					brandText,
-					logoText,
+					orgName,
 					items: [{ from, to, copies, payloadTemplate, labelPrefix, padLength }],
 					size: { widthMm, heightMm, flagTailMm: type === 'faehnchen' ? tailLenMm : undefined },
 					layout: {
@@ -301,7 +315,7 @@
 							<select
 								id="org"
 								bind:value={selectedOrgId}
-								onchange={useOrgPrefix}
+								onchange={useSelectedOrg}
 								class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
 							>
 								{#each orgs as org (org.id)}<option value={org.id}>{orgLabel(org)}</option>{/each}
@@ -321,13 +335,12 @@
 								<p class="text-sm text-destructive">Enter a color as #RRGGBB, e.g. #0069c9.</p>
 							{/if}
 						</div>
-						<div class="space-y-2">
-							<Label for="brand">Header brand</Label>
-							<Input id="brand" bind:value={brandText} placeholder="Rüger Events" />
-						</div>
-						<div class="space-y-2">
-							<Label for="logo">Sticker logo text</Label>
-							<Input id="logo" bind:value={logoText} placeholder="RE" maxlength={12} />
+						<div class="space-y-2 md:col-span-2">
+							<Label for="orgName">Organization name</Label>
+							<Input id="orgName" bind:value={orgName} placeholder={DEFAULT_ORG_NAME} />
+							<p class="text-xs text-muted-foreground">
+								Printed in the sheet header and along the bottom of every sticker.
+							</p>
 						</div>
 					</div>
 
@@ -546,31 +559,54 @@
 				</Card.Header>
 				<Card.Content class="space-y-5">
 					<div class="rounded-2xl border bg-muted/20 p-5">
-						<div
-							class="relative mx-auto h-40 max-w-64 rounded-xl shadow-lg"
-							style:background-color={color}
-						>
-							{#if type === 'faehnchen'}<div
+						{#if type === 'quadratisch'}
+							<div class="mx-auto flex h-48 w-48 flex-col overflow-hidden rounded-xl shadow-lg">
+								<div
+									class="flex flex-1 items-center justify-center p-3"
+									style:background-color={color}
+								>
+									<div class="flex h-full w-full items-center gap-1.5 rounded-md bg-white p-1.5">
+										<div class="grid aspect-square h-full grid-cols-5 gap-0.5">
+											{#each matrixPreviewCells as i (i)}<span
+													class="block rounded-[1px] {i % 3 === 0 || i % 7 === 0
+														? 'bg-black'
+														: 'bg-zinc-200'}"
+												></span>{/each}
+										</div>
+										<div class="rotate-180 font-mono text-[11px] [writing-mode:vertical-rl]">
+											{sampleLabel}
+										</div>
+									</div>
+								</div>
+								<div class="flex h-8 items-center justify-center bg-white text-xs">{orgName}</div>
+							</div>
+						{:else}
+							<div
+								class="relative mx-auto h-40 max-w-64 rounded-xl shadow-lg"
+								style:background-color={color}
+							>
+								<div
 									class="absolute top-1/2 right-0 h-8 w-16 translate-x-10 -translate-y-1/2 rounded-r-md"
 									style:background-color={color}
 								></div>
 								<div
 									class="absolute top-1/2 left-0 h-px w-2/3 border-t border-dashed border-white/90"
-								></div>{/if}
-							<div
-								class="absolute top-4 left-4 grid h-24 w-24 grid-cols-5 gap-0.5 rounded-md bg-white p-2"
-							>
-								{#each matrixPreviewCells as i (i)}<span
-										class="block rounded-[1px] {i % 3 === 0 || i % 7 === 0
-											? 'bg-black'
-											: 'bg-zinc-200'}"
-									></span>{/each}
+								></div>
+								<div
+									class="absolute top-4 left-4 grid h-24 w-24 grid-cols-5 gap-0.5 rounded-md bg-white p-2"
+								>
+									{#each matrixPreviewCells as i (i)}<span
+											class="block rounded-[1px] {i % 3 === 0 || i % 7 === 0
+												? 'bg-black'
+												: 'bg-zinc-200'}"
+										></span>{/each}
+								</div>
+								<div class="absolute bottom-4 left-4 font-mono text-sm font-semibold text-white">
+									{sampleLabel}
+								</div>
+								<div class="absolute right-4 bottom-4 text-sm font-bold text-white">{orgName}</div>
 							</div>
-							<div class="absolute bottom-4 left-4 font-mono text-sm font-semibold text-white">
-								{sampleLabel}
-							</div>
-							<div class="absolute right-4 bottom-4 text-sm font-bold text-white">{logoText}</div>
-						</div>
+						{/if}
 					</div>
 					<dl class="space-y-3 text-sm">
 						<div class="flex justify-between gap-4">

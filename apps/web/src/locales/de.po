@@ -2377,9 +2377,8 @@ msgstr "Zurück zu Geräte"
 #~ msgid "Stickers"
 #~ msgstr "Sticker"
 
-#: src/routes/stickers/+page.svelte
-msgid "Rüger Events"
-msgstr "Rüger Events"
+#~ msgid "Rüger Events"
+#~ msgstr "Rüger Events"
 
 #: src/routes/stickers/+page.svelte
 msgid "End number must be greater than or equal to start number"
@@ -2451,13 +2450,11 @@ msgstr "Lange Etiketten mit Falzmarkierung für Kabel und Kleinteile."
 msgid "Sticker color"
 msgstr "Stickerfarbe"
 
-#: src/routes/stickers/+page.svelte
-msgid "Header brand"
-msgstr "Kopfzeilen-Marke"
+#~ msgid "Header brand"
+#~ msgstr "Kopfzeilen-Marke"
 
-#: src/routes/stickers/+page.svelte
-msgid "Sticker logo text"
-msgstr "Logo-Text auf dem Sticker"
+#~ msgid "Sticker logo text"
+#~ msgstr "Logo-Text auf dem Sticker"
 
 #: src/routes/stickers/+page.svelte
 msgid "Number range"
@@ -6167,3 +6164,11 @@ msgstr "CAT7, 2,5mm²…"
 #: src/routes/assets/new/cables/+page.svelte
 msgid "Additional info"
 msgstr "Zusatzinfo"
+
+#: src/routes/stickers/+page.svelte
+msgid "Organization name"
+msgstr "Name der Organisation"
+
+#: src/routes/stickers/+page.svelte
+msgid "Printed in the sheet header and along the bottom of every sticker."
+msgstr "Wird in der Kopfzeile des Bogens und unten auf jedem Aufkleber gedruckt."

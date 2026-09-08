@@ -1,8 +1,8 @@
 /** Default bleed; configurable per generation (see config.ts). */
-export const DEFAULT_BLEED_MM = 3;
+export const DEFAULT_BLEED_MM = 1.5;
 export const CORNER_RADIUS_MM = 3;
 /** Minimum spacing required between adjacent stickers' bleed edges (not their cut lines). */
-export const MIN_BLEED_GAP_MM = 4;
+export const MIN_BLEED_GAP_MM = 1.5;
 export const SAFETY_MARGIN_MM = 3;
 export const MIN_STICKER_SIZE_MM = 10;
 /** Flag tail half-height, as a fraction of the sticker's full height. */
@@ -158,3 +158,30 @@ export function flagCutPath(
 		{ op: 'Z' }
 	];
 }
+
+/** Helvetica's cap height as a fraction of its em, for sizing type to a measured cap height. */
+export const HELVETICA_CAP_HEIGHT_RATIO = 0.717;
+/** Helvetica's descender depth as a fraction of its em, for centring mixed-case type by its ink. */
+export const HELVETICA_DESCENT_RATIO = 0.207;
+
+/**
+ * The square sticker's proportions, measured off the print shop's reference
+ * sheet (15 × 15 mm) and expressed as fractions of the sticker's own width or
+ * height so they hold at any size. The sticker is a coloured field with a
+ * white footer band carrying the org name, and a white rounded panel holding
+ * the Data Matrix with the asset number set vertically beside it.
+ */
+export const SQUARE_STICKER = {
+	/** White footer band, as a fraction of sticker height — 3mm of 15mm. */
+	bandHeightRatio: 0.2,
+	/** Cut-contour corner radius, as a fraction of height — 1.35mm of 15mm. */
+	cornerRadiusRatio: 0.09,
+	/** Panel inset from the left and right cut edges, as a fraction of width — 1.7mm of 15mm. */
+	panelInsetXRatio: 0.113,
+	/** Panel inset from the top cut edge and from the band, as a fraction of height — 1mm of 15mm. */
+	panelInsetYRatio: 0.067,
+	/** The panel's own corner radius, as a fraction of height — 0.7mm of 15mm. */
+	panelCornerRatio: 0.047,
+	/** Cap height of the org name in the band, as a fraction of height — 1.5mm of 15mm. */
+	bandCapHeightRatio: 0.1
+} as const;
