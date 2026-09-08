@@ -26,6 +26,11 @@ class SEn extends S {
       'Scan the QR code on the \"Tools › Scanners\" page, or type the address in by hand.';
 
   @override
+  String notAServerCode(String code) {
+    return '\"$code\" is not a server address. Asset tags are scanned after connecting — or in the demo.';
+  }
+
+  @override
   String get continueLabel => 'Continue';
 
   @override

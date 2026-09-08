@@ -127,6 +127,12 @@ abstract class S {
   /// **'Scan the QR code on the \"Tools › Scanners\" page, or type the address in by hand.'**
   String get scanServerQr;
 
+  /// Shown on the pairing screen when the scanned code is not an http(s) URL, typically an asset tag.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{code}\" is not a server address. Asset tags are scanned after connecting — or in the demo.'**
+  String notAServerCode(String code);
+
   /// No description provided for @continueLabel.
   ///
   /// In en, this message translates to:

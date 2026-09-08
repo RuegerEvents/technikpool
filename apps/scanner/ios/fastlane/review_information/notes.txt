@@ -19,8 +19,7 @@ cannot see or restrict who runs it.
 The app also works with no server at all: "Explore the demo" on the first
 screen runs a complete sample warehouse on the device — scanning, lookup and
 inventory all work there, with no account, no sign-up and no network request.
-That is a real feature of the shipped app, available to everyone who downloads
-it.
+That is a real feature of the shipped app, available to everyone.
 
 Nothing is paid: no purchase, subscription, in-app purchase or paid tier, from
 us or anyone else. The server software is free as well.
@@ -30,10 +29,14 @@ SETUP AND ACCESS TO THE MAIN FEATURES
 Tap "Explore the demo" at the bottom of the first screen. No credentials are
 needed and nothing leaves the device.
 
+The QR button on that first screen reads a server's pairing code, not asset
+tags. To walk the scan-to-pair flow without a server, point it at
+demo-pairing.png (attached): that code pairs the app with the same demo.
+Scanning an asset tag there shows a message saying so.
+
   * Scans — pick a location or production, then type an asset tag where it says
-    "Manual entry". Tags run 40000001 to 40000014. The camera button works too:
-    demo-tags.png next to this file (also attached to our reply of 1 Sep 2026)
-    has QR codes for tags 40000001-40000004 to point it at.
+    "Manual entry" (tags run 40000001 to 40000014), or use the camera button on
+    the QR codes in demo-tags.png (attached).
   * Lookup — type the same tags to see an asset, where it is, and its history.
   * Inventory — lists every asset with its tag, so nothing has to be guessed.
   * Settings › Leave demo returns to the first screen.
@@ -56,9 +59,8 @@ browser (RFC 8628 device authorization) or an email and password. Settings ›
 Disconnect erases the stored token. Accounts are deleted in the web app on that
 server; the app cannot create one, so it has none to delete.
 
-There is no user-generated content and nothing is shared between users. The
-only thing a user contributes is a scan of a barcode on their own equipment,
-stored on their own server.
+There is no user-generated content and nothing is shared between users; a
+user only contributes scans of their own equipment, stored on their own server.
 
 EXTERNAL SERVICES
 

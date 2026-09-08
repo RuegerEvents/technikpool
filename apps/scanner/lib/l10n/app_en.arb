@@ -5,6 +5,13 @@
   "serverAddress": "Server address",
   "serverAddressHint": "https://technikpool.example.com",
   "scanServerQr": "Scan the QR code on the \"Tools › Scanners\" page, or type the address in by hand.",
+  "notAServerCode": "\"{code}\" is not a server address. Asset tags are scanned after connecting — or in the demo.",
+  "@notAServerCode": {
+    "description": "Shown on the pairing screen when the scanned code is not an http(s) URL, typically an asset tag.",
+    "placeholders": {
+      "code": { "type": "String", "example": "40000001" }
+    }
+  },
   "continueLabel": "Continue",
   "codeInstructions": "Enter this code under \"Tools › Scanners\" in your browser:",
   "waitingForApproval": "Waiting for approval…",

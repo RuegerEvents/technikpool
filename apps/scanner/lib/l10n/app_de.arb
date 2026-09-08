@@ -5,6 +5,7 @@
   "serverAddress": "Serveradresse",
   "serverAddressHint": "https://technikpool.example.com",
   "scanServerQr": "Scanne den QR-Code auf der Seite \"Werkzeuge › Scanner\" oder gib die Adresse von Hand ein.",
+  "notAServerCode": "„{code}“ ist keine Serveradresse. Etiketten werden nach dem Verbinden gescannt — oder in der Demo.",
   "continueLabel": "Weiter",
   "codeInstructions": "Gib diesen Code unter \"Werkzeuge › Scanner\" im Browser ein:",
   "waitingForApproval": "Warte auf Bestätigung…",

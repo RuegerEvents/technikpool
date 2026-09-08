@@ -1,1 +1,3 @@
 Nachschlagen und Bestand zeigen jetzt Stecker und Länge eines Kabels, sodass sich zwei Kabel desselben Typs unterscheiden lassen, ohne das Etikett zu lesen.
+
+Wird auf dem Verbinden-Bildschirm ein Etikett gescannt, sagt die App das jetzt, statt die Kamera wortlos zu schließen.

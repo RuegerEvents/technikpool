@@ -6,6 +6,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../api/auth_service.dart';
 import '../api/client.dart';
+import '../demo/demo_api.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../scan/camera_scan_screen.dart';
 import '../state/providers.dart';
@@ -47,7 +48,23 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
       if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
         _urlController.text = trimmed;
         _startDeviceFlow();
+        return;
       }
+      // A QR of the demo's own address pairs into the demo, so the scan-to-
+      // pair flow can be walked through by someone with no server — App
+      // Review among them (ios/fastlane/review_information/demo-pairing.png).
+      if (trimmed == demoBaseUrl) {
+        ref.read(credentialsProvider.notifier).startDemo();
+        return;
+      }
+      // Anything else is almost always an asset tag — the one QR a new user
+      // has to hand. Dropping it silently looks like the camera closed for no
+      // reason (App Review read it as "returns to the login page"), so say
+      // what it was and where tags go.
+      final shown = trimmed.length > 40
+          ? '${trimmed.substring(0, 40)}…'
+          : trimmed;
+      setState(() => _error = S.of(context).notAServerCode(shown));
     });
 
     ref.read(credentialsProvider.future).then((c) {
@@ -75,6 +92,11 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
   }
 
   Future<void> _startDeviceFlow() async {
+    // Typed rather than scanned, same destination.
+    if (_urlController.text.trim() == demoBaseUrl) {
+      await ref.read(credentialsProvider.notifier).startDemo();
+      return;
+    }
     final url = _normalisedUrl();
     if (url.isEmpty) return;
 
@@ -107,7 +129,10 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
     }
   }
 
-  Future<void> _awaitApproval(AuthService auth, PendingDeviceAuth pending) async {
+  Future<void> _awaitApproval(
+    AuthService auth,
+    PendingDeviceAuth pending,
+  ) async {
     final l10n = S.of(context);
     try {
       final token = await auth.awaitApproval(
@@ -115,7 +140,9 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
         cancelled: () => _cancelled || !mounted,
       );
       if (!mounted) return;
-      await ref.read(credentialsProvider.notifier).save(baseUrl: _baseUrl, token: token);
+      await ref
+          .read(credentialsProvider.notifier)
+          .save(baseUrl: _baseUrl, token: token);
     } on DeviceAuthDenied {
       if (mounted) setState(() => _error = l10n.accessDenied);
     } on DeviceAuthExpired {
@@ -144,7 +171,9 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
             password: _passwordController.text,
           );
       if (!mounted) return;
-      await ref.read(credentialsProvider.notifier).save(baseUrl: url, token: token);
+      await ref
+          .read(credentialsProvider.notifier)
+          .save(baseUrl: url, token: token);
     } catch (error) {
       if (!mounted) return;
       // Surface better-auth's own wording — an unverified address produces a
@@ -186,8 +215,9 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
             icon: const Icon(Icons.language),
             tooltip: l10n.language,
             initialValue: ref.watch(localeProvider).value?.languageCode ?? '',
-            onSelected: (code) =>
-                ref.read(localeProvider.notifier).save(code.isEmpty ? null : Locale(code)),
+            onSelected: (code) => ref
+                .read(localeProvider.notifier)
+                .save(code.isEmpty ? null : Locale(code)),
             itemBuilder: (_) => [
               PopupMenuItem(value: '', child: Text(l10n.languageSystem)),
               // Endonyms: someone hunting for their own language scans for the
@@ -276,11 +306,16 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
         Text(
           l10n.demoExplainer,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          style: TextStyle(
+            fontSize: 12,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 8),
         OutlinedButton.icon(
-          onPressed: _busy ? null : () => ref.read(credentialsProvider.notifier).startDemo(),
+          onPressed: _busy
+              ? null
+              : () => ref.read(credentialsProvider.notifier).startDemo(),
           icon: const Icon(Icons.science_outlined),
           label: Text(l10n.demoStart),
         ),
@@ -318,7 +353,9 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
         Text(
           pending?.verificationUri ?? '',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 24),
         if (_error != null)

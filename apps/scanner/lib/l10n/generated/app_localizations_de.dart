@@ -26,6 +26,11 @@ class SDe extends S {
       'Scanne den QR-Code auf der Seite \"Werkzeuge › Scanner\" oder gib die Adresse von Hand ein.';
 
   @override
+  String notAServerCode(String code) {
+    return '„$code“ ist keine Serveradresse. Etiketten werden nach dem Verbinden gescannt — oder in der Demo.';
+  }
+
+  @override
   String get continueLabel => 'Weiter';
 
   @override
