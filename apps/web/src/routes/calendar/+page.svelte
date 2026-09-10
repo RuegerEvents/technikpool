@@ -192,7 +192,10 @@
 		const e = new Date(rawEnd);
 		e.setDate(e.getDate() + 1);
 		const left = dateToX(s);
-		const width = Math.max(colWidth * 0.5, dateToX(e) - left);
+		// True width, never padded: the end is already inclusive, so a one-day
+		// production is a full day wide, and a minimum would push short bars
+		// over the next production's start.
+		const width = Math.max(0, dateToX(e) - left);
 		return { left, width };
 	}
 
