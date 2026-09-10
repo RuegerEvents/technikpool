@@ -562,8 +562,10 @@ export const createOfferFromProduction = command(createOfferSchema, async (data)
 		) ?? 1;
 
 	const lines = await computeProductionBillingLines(data.productionId, assetScope);
-	const serviceStartDate = production.showStartDate ?? production.startDate ?? new Date();
-	const serviceEndDate = production.showEndDate ?? production.endDate ?? serviceStartDate;
+	// The service period is the whole production — setup and teardown are part
+	// of the service even though only show days are billed.
+	const serviceStartDate = production.startDate ?? production.showStartDate ?? new Date();
+	const serviceEndDate = production.endDate ?? production.showEndDate ?? serviceStartDate;
 	const customer = data.customerId
 		? await prisma.customer.findFirst({
 				where: { id: data.customerId, organizationId: production.organizationId }

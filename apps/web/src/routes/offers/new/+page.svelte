@@ -123,8 +123,8 @@
 			const c = p.customer;
 			customerId = c?.id ?? '';
 			applyCustomerSnapshot(c);
-			const start = new Date(p.showStartDate ?? p.startDate ?? Date.now());
-			const end = new Date(p.showEndDate ?? p.endDate ?? start);
+			const start = new Date(p.startDate ?? p.showStartDate ?? Date.now());
+			const end = new Date(p.endDate ?? p.showEndDate ?? start);
 			const values = {
 				production: p.name,
 				startDate: formatBillingDate(start),
