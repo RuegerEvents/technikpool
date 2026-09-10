@@ -7,6 +7,7 @@
 	import { goto } from '$app/navigation';
 	import { OrgBadge } from '$lib/components/ui/org-badge';
 	import { FilterPopover } from '$lib/components/ui/filter-popover';
+	import { CalendarFeedButton } from '$lib/components/ui/calendar-feed';
 
 	type Granularity = 'day' | 'week' | 'month' | 'year';
 	type ViewMode = 'assets' | 'productions';
@@ -1038,6 +1039,10 @@
 					: 'Expand all'}
 			</button>
 		{/if}
+
+		<div class="ml-auto">
+			<CalendarFeedButton />
+		</div>
 	</div>
 
 	<!-- Month Grid View -->

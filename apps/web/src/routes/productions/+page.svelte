@@ -4,6 +4,7 @@
 	import { DataView } from '$lib/components/ui/data-view';
 	import type { Column } from '$lib/components/ui/data-view';
 	import { OrgMultiSelect } from '$lib/components/ui/org-multi-select';
+	import { CalendarFeedButton } from '$lib/components/ui/calendar-feed';
 	import { getProductions } from '$lib/remote/productions.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { page } from '$app/state';
@@ -139,6 +140,7 @@
 				Show archive
 			</label>
 			<OrgMultiSelect {orgs} value={selectedOrgIds} class="w-56" onchange={setSelectedOrgIds} />
+			<CalendarFeedButton />
 		</div>
 	</div>
 

@@ -21,6 +21,10 @@ model User {
   updatedAt     DateTime @updatedAt
   isAdmin       Boolean  @default(false)
 
+  // Signed into the user's iCal feed URL; incrementing it revokes every link
+  // handed out before. See src/lib/server/services/calendar-feed.ts.
+  calendarFeedVersion Int @default(0)
+
   sessions Session[]
   accounts Account[]
 

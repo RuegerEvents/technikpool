@@ -2714,6 +2714,7 @@ export const UserScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isAdmin: 'isAdmin',
+  calendarFeedVersion: 'calendarFeedVersion',
   homeOrgId: 'homeOrgId'
 } as const
 

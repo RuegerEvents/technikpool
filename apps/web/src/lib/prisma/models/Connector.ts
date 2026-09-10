@@ -678,9 +678,13 @@ export type $ConnectorPayload<ExtArgs extends runtime.Types.Extensions.InternalA
      */
     family: string | null
     /**
-     * `plug` (Stecker) or `socket` (Buchse) — whether this is the part that goes
-     * in or the part that receives. This is the mechanical fit: a connector
-     * mates with one of the opposite form in the same family.
+     * `plug` (Stecker) or `socket` (Einbaubuchse) — where this connector sits.
+     * A Stecker hangs off the end of a cable; an Einbaubuchse is mounted into a
+     * device or a panel. Almost everything in the catalogue is a Stecker,
+     * because almost everything in it is a cable end: a Schuko Kupplung and an
+     * XLR3 F are as much cable ends as their male counterparts.
+     * 
+     * Descriptive only. What a connector can be joined to is `gender`.
      */
     form: string | null
     /**

@@ -173,6 +173,7 @@ msgstr "Crew"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
+#: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/admin/connectors/+page.svelte
@@ -6172,3 +6173,47 @@ msgstr "Organization name"
 #: src/routes/stickers/+page.svelte
 msgid "Printed in the sheet header and along the bottom of every sticker."
 msgstr "Printed in the sheet header and along the bottom of every sticker."
+
+#: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
+msgid "Link copied"
+msgstr "Link copied"
+
+#: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
+msgid "New link created. The old one no longer works."
+msgstr "New link created. The old one no longer works."
+
+#: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
+msgid "Subscribe to productions"
+msgstr "Subscribe to productions"
+
+#: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
+msgid "Shows every production of your organizations in Google Calendar, Apple Calendar or Outlook. Your calendar app refreshes it on its own schedule, which can take a few hours."
+msgstr "Shows every production of your organizations in Google Calendar, Apple Calendar or Outlook. Your calendar app refreshes it on its own schedule, which can take a few hours."
+
+#: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
+msgid "Calendar link"
+msgstr "Calendar link"
+
+#: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
+msgid "<0/> Copy"
+msgstr "<0/> Copy"
+
+#: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
+msgid "Anyone with this link can see the names, dates and locations of your productions. If it was shared by mistake, reset it: the old link stops working immediately, and existing subscriptions have to be set up again with the new one."
+msgstr "Anyone with this link can see the names, dates and locations of your productions. If it was shared by mistake, reset it: the old link stops working immediately, and existing subscriptions have to be set up again with the new one."
+
+#: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
+msgid "<0/> Reset link"
+msgstr "<0/> Reset link"
+
+#: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
+msgid "<0/> Open in calendar app"
+msgstr "<0/> Open in calendar app"
+
+#: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
+msgid "Reset link…"
+msgstr "Reset link…"
+
+#: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
+msgid "<0/> Subscribe"
+msgstr "<0/> Subscribe"

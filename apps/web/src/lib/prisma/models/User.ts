@@ -20,8 +20,18 @@ export type UserModel = runtime.Types.Result.DefaultSelection<Prisma.$UserPayloa
 
 export type AggregateUser = {
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
+}
+
+export type UserAvgAggregateOutputType = {
+  calendarFeedVersion: number | null
+}
+
+export type UserSumAggregateOutputType = {
+  calendarFeedVersion: number | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -33,6 +43,7 @@ export type UserMinAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   isAdmin: boolean | null
+  calendarFeedVersion: number | null
   homeOrgId: string | null
 }
 
@@ -45,6 +56,7 @@ export type UserMaxAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   isAdmin: boolean | null
+  calendarFeedVersion: number | null
   homeOrgId: string | null
 }
 
@@ -57,10 +69,19 @@ export type UserCountAggregateOutputType = {
   createdAt: number
   updatedAt: number
   isAdmin: number
+  calendarFeedVersion: number
   homeOrgId: number
   _all: number
 }
 
+
+export type UserAvgAggregateInputType = {
+  calendarFeedVersion?: true
+}
+
+export type UserSumAggregateInputType = {
+  calendarFeedVersion?: true
+}
 
 export type UserMinAggregateInputType = {
   id?: true
@@ -71,6 +92,7 @@ export type UserMinAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   isAdmin?: true
+  calendarFeedVersion?: true
   homeOrgId?: true
 }
 
@@ -83,6 +105,7 @@ export type UserMaxAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   isAdmin?: true
+  calendarFeedVersion?: true
   homeOrgId?: true
 }
 
@@ -95,6 +118,7 @@ export type UserCountAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   isAdmin?: true
+  calendarFeedVersion?: true
   homeOrgId?: true
   _all?: true
 }
@@ -137,6 +161,18 @@ export type UserAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: UserAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: UserSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: UserMinAggregateInputType
@@ -167,6 +203,8 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: UserCountAggregateInputType | true
+  _avg?: UserAvgAggregateInputType
+  _sum?: UserSumAggregateInputType
   _min?: UserMinAggregateInputType
   _max?: UserMaxAggregateInputType
 }
@@ -180,8 +218,11 @@ export type UserGroupByOutputType = {
   createdAt: Date
   updatedAt: Date
   isAdmin: boolean
+  calendarFeedVersion: number
   homeOrgId: string | null
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
 }
@@ -213,6 +254,7 @@ export type UserWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   isAdmin?: Prisma.BoolFilter<"User"> | boolean
+  calendarFeedVersion?: Prisma.IntFilter<"User"> | number
   homeOrgId?: Prisma.StringNullableFilter<"User"> | string | null
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
@@ -232,6 +274,7 @@ export type UserOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isAdmin?: Prisma.SortOrder
+  calendarFeedVersion?: Prisma.SortOrder
   homeOrgId?: Prisma.SortOrderInput | Prisma.SortOrder
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   accounts?: Prisma.AccountOrderByRelationAggregateInput
@@ -254,6 +297,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   isAdmin?: Prisma.BoolFilter<"User"> | boolean
+  calendarFeedVersion?: Prisma.IntFilter<"User"> | number
   homeOrgId?: Prisma.StringNullableFilter<"User"> | string | null
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
@@ -273,10 +317,13 @@ export type UserOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isAdmin?: Prisma.SortOrder
+  calendarFeedVersion?: Prisma.SortOrder
   homeOrgId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
+  _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
+  _sum?: Prisma.UserSumOrderByAggregateInput
 }
 
 export type UserScalarWhereWithAggregatesInput = {
@@ -291,6 +338,7 @@ export type UserScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   isAdmin?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  calendarFeedVersion?: Prisma.IntWithAggregatesFilter<"User"> | number
   homeOrgId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
 }
 
@@ -303,6 +351,7 @@ export type UserCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
@@ -321,6 +370,7 @@ export type UserUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
   homeOrgId?: string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
@@ -339,6 +389,7 @@ export type UserUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
@@ -357,6 +408,7 @@ export type UserUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
   homeOrgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -375,6 +427,7 @@ export type UserCreateManyInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
   homeOrgId?: string | null
 }
 
@@ -387,6 +440,7 @@ export type UserUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -398,6 +452,7 @@ export type UserUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
   homeOrgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -410,7 +465,12 @@ export type UserCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isAdmin?: Prisma.SortOrder
+  calendarFeedVersion?: Prisma.SortOrder
   homeOrgId?: Prisma.SortOrder
+}
+
+export type UserAvgOrderByAggregateInput = {
+  calendarFeedVersion?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -422,6 +482,7 @@ export type UserMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isAdmin?: Prisma.SortOrder
+  calendarFeedVersion?: Prisma.SortOrder
   homeOrgId?: Prisma.SortOrder
 }
 
@@ -434,7 +495,12 @@ export type UserMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isAdmin?: Prisma.SortOrder
+  calendarFeedVersion?: Prisma.SortOrder
   homeOrgId?: Prisma.SortOrder
+}
+
+export type UserSumOrderByAggregateInput = {
+  calendarFeedVersion?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -466,6 +532,14 @@ export type BoolFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type UserCreateNestedOneWithoutSessionsInput = {
@@ -603,6 +677,7 @@ export type UserCreateWithoutSessionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
@@ -620,6 +695,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
   homeOrgId?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -653,6 +729,7 @@ export type UserUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
@@ -670,6 +747,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
   homeOrgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -687,6 +765,7 @@ export type UserCreateWithoutAccountsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
@@ -704,6 +783,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
   homeOrgId?: string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -737,6 +817,7 @@ export type UserUpdateWithoutAccountsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
@@ -754,6 +835,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
   homeOrgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -771,6 +853,7 @@ export type UserCreateWithoutHomeOrgInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
@@ -788,6 +871,7 @@ export type UserUncheckedCreateWithoutHomeOrgInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -834,6 +918,7 @@ export type UserScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   isAdmin?: Prisma.BoolFilter<"User"> | boolean
+  calendarFeedVersion?: Prisma.IntFilter<"User"> | number
   homeOrgId?: Prisma.StringNullableFilter<"User"> | string | null
 }
 
@@ -846,6 +931,7 @@ export type UserCreateWithoutMembershipsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
@@ -863,6 +949,7 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
   homeOrgId?: string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
@@ -896,6 +983,7 @@ export type UserUpdateWithoutMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
@@ -913,6 +1001,7 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
   homeOrgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -930,6 +1019,7 @@ export type UserCreateWithoutCrewAssignmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
@@ -947,6 +1037,7 @@ export type UserUncheckedCreateWithoutCrewAssignmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
   homeOrgId?: string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
@@ -980,6 +1071,7 @@ export type UserUpdateWithoutCrewAssignmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
@@ -997,6 +1089,7 @@ export type UserUncheckedUpdateWithoutCrewAssignmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
   homeOrgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -1014,6 +1107,7 @@ export type UserCreateWithoutTransactionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
@@ -1031,6 +1125,7 @@ export type UserUncheckedCreateWithoutTransactionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
   homeOrgId?: string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
@@ -1064,6 +1159,7 @@ export type UserUpdateWithoutTransactionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
@@ -1081,6 +1177,7 @@ export type UserUncheckedUpdateWithoutTransactionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
   homeOrgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -1098,6 +1195,7 @@ export type UserCreateWithoutCatalogTransactionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
@@ -1115,6 +1213,7 @@ export type UserUncheckedCreateWithoutCatalogTransactionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
   homeOrgId?: string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
@@ -1148,6 +1247,7 @@ export type UserUpdateWithoutCatalogTransactionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
@@ -1165,6 +1265,7 @@ export type UserUncheckedUpdateWithoutCatalogTransactionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
   homeOrgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -1182,6 +1283,7 @@ export type UserCreateManyHomeOrgInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isAdmin?: boolean
+  calendarFeedVersion?: number
 }
 
 export type UserUpdateWithoutHomeOrgInput = {
@@ -1193,6 +1295,7 @@ export type UserUpdateWithoutHomeOrgInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
@@ -1210,6 +1313,7 @@ export type UserUncheckedUpdateWithoutHomeOrgInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -1227,6 +1331,7 @@ export type UserUncheckedUpdateManyWithoutHomeOrgInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 
@@ -1314,6 +1419,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   isAdmin?: boolean
+  calendarFeedVersion?: boolean
   homeOrgId?: boolean
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
@@ -1334,6 +1440,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   createdAt?: boolean
   updatedAt?: boolean
   isAdmin?: boolean
+  calendarFeedVersion?: boolean
   homeOrgId?: boolean
   homeOrg?: boolean | Prisma.User$homeOrgArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -1347,6 +1454,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   createdAt?: boolean
   updatedAt?: boolean
   isAdmin?: boolean
+  calendarFeedVersion?: boolean
   homeOrgId?: boolean
   homeOrg?: boolean | Prisma.User$homeOrgArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -1360,10 +1468,11 @@ export type UserSelectScalar = {
   createdAt?: boolean
   updatedAt?: boolean
   isAdmin?: boolean
+  calendarFeedVersion?: boolean
   homeOrgId?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "emailVerified" | "image" | "createdAt" | "updatedAt" | "isAdmin" | "homeOrgId", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "emailVerified" | "image" | "createdAt" | "updatedAt" | "isAdmin" | "calendarFeedVersion" | "homeOrgId", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
@@ -1401,6 +1510,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     createdAt: Date
     updatedAt: Date
     isAdmin: boolean
+    calendarFeedVersion: number
     homeOrgId: string | null
   }, ExtArgs["result"]["user"]>
   composites: {}
@@ -1840,6 +1950,7 @@ export interface UserFieldRefs {
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly isAdmin: Prisma.FieldRef<"User", 'Boolean'>
+  readonly calendarFeedVersion: Prisma.FieldRef<"User", 'Int'>
   readonly homeOrgId: Prisma.FieldRef<"User", 'String'>
 }
     
