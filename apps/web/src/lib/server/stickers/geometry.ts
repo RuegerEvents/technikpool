@@ -159,10 +159,15 @@ export function flagCutPath(
 	];
 }
 
-/** Helvetica's cap height as a fraction of its em, for sizing type to a measured cap height. */
-export const HELVETICA_CAP_HEIGHT_RATIO = 0.717;
-/** Helvetica's descender depth as a fraction of its em, for centring mixed-case type by its ink. */
-export const HELVETICA_DESCENT_RATIO = 0.207;
+/**
+ * Metrics of the embedded face (Inter Regular, see `./fonts/`), as fractions
+ * of its em. Read off the font file's OS/2 table and glyph outlines, so if
+ * the face ever changes these move with it. They size type to a measured cap
+ * height and centre mixed-case type by its ink rather than by its baseline.
+ */
+export const FONT_CAP_HEIGHT_RATIO = 0.7275;
+/** Depth a descender (p, g, y) actually reaches — the ink, not the font's typographic descent. */
+export const FONT_DESCENT_RATIO = 0.21;
 
 /**
  * The square sticker's proportions, measured off the print shop's reference

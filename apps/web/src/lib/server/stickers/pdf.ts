@@ -3,7 +3,6 @@ import {
 	PDFNumber,
 	PDFOperator,
 	PDFOperatorNames,
-	StandardFonts,
 	degrees,
 	rgb,
 	type PDFFont,
@@ -11,13 +10,14 @@ import {
 	type PDFPage,
 	type PDFRef
 } from 'pdf-lib';
+import fontkit from '@pdf-lib/fontkit';
 import { normalizeOptions, parseHexColor, type RawGeneratorOptions } from './config';
 import { createDataMatrixPng } from './datamatrix';
 import {
 	CORNER_RADIUS_MM,
 	FLAG_TAIL_HALF_HEIGHT_RATIO,
-	HELVETICA_CAP_HEIGHT_RATIO,
-	HELVETICA_DESCENT_RATIO,
+	FONT_CAP_HEIGHT_RATIO,
+	FONT_DESCENT_RATIO,
 	SQUARE_STICKER,
 	flagCutPath,
 	roundedRectPath
@@ -26,6 +26,7 @@ import { fillPathRgb, registerKissCutColorSpace, strokeKissCutPath } from './kis
 import { paginateStickers } from './items';
 import type { GeneratorOptions, GridPosition, SheetPage, StickerItem } from './types';
 import { mm, ptToMm } from './units';
+import { loadSheetFont } from './font';
 
 const KISS_CUT_LINE_WIDTH_PT = 0.5;
 /** How far beyond the bleed the group box sits, so it never overlaps the bleed fill. */
@@ -58,7 +59,12 @@ export async function generateStickerSheet(rawOptions: RawGeneratorOptions): Pro
 	pdfDoc.setProducer('stickerbogen-generator');
 
 	const kissCutRef = registerKissCutColorSpace(pdfDoc.context);
-	const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+	// A real TrueType face, embedded and subset — not one of pdf-lib's
+	// "standard 14" fonts. Those are only ever *referenced* by name and left
+	// for the viewer to supply, which a print shop's preflight rejects as
+	// "Schriften nicht eingebettet".
+	pdfDoc.registerFontkit(fontkit);
+	const font = await pdfDoc.embedFont(loadSheetFont(), { subset: true });
 	const pages = paginateStickers(options);
 
 	for (const sheetPage of pages) {
@@ -161,7 +167,7 @@ function drawHeaderBrand(
 
 	const availableMm =
 		options.layout.pageWidthMm - HEADER.brandRightMm - fieldsRightMm - HEADER.brandClearanceMm;
-	const capSize = mm(HEADER.boxHeightMm * 0.9) / HELVETICA_CAP_HEIGHT_RATIO;
+	const capSize = mm(HEADER.boxHeightMm * 0.9) / FONT_CAP_HEIGHT_RATIO;
 	const size = Math.min(capSize, mm(availableMm) / font.widthOfTextAtSize(brand, 1));
 	const bottom = page.getHeight() - mm(HEADER.boxTopMm + HEADER.boxHeightMm);
 
@@ -377,14 +383,14 @@ function drawSquareSticker(
 
 	const orgName = options.orgName;
 	if (orgName) {
-		const capSize = (h * SQUARE_STICKER.bandCapHeightRatio) / HELVETICA_CAP_HEIGHT_RATIO;
+		const capSize = (h * SQUARE_STICKER.bandCapHeightRatio) / FONT_CAP_HEIGHT_RATIO;
 		const size = Math.min(capSize, (w - 2 * insetX) / font.widthOfTextAtSize(orgName, 1));
 		// Centred on cap-plus-descender rather than on the baseline, so a name
 		// with a descender in it doesn't hang into the band's bottom margin.
-		const descent = size * HELVETICA_DESCENT_RATIO;
+		const descent = size * FONT_DESCENT_RATIO;
 		page.drawText(orgName, {
 			x: x + (w - font.widthOfTextAtSize(orgName, size)) / 2,
-			y: y + (bandH - size * HELVETICA_CAP_HEIGHT_RATIO - descent) / 2 + descent,
+			y: y + (bandH - size * FONT_CAP_HEIGHT_RATIO - descent) / 2 + descent,
 			size,
 			font,
 			color: rgb(0.08, 0.08, 0.08)
@@ -402,10 +408,7 @@ function drawSquareSticker(
 function drawVerticalLabel(page: PDFPage, label: string, font: PDFFont, slot: Rect): void {
 	if (slot.w <= 0 || slot.h <= 0) return;
 
-	const size = Math.min(
-		slot.w / HELVETICA_CAP_HEIGHT_RATIO,
-		slot.h / font.widthOfTextAtSize(label, 1)
-	);
+	const size = Math.min(slot.w / FONT_CAP_HEIGHT_RATIO, slot.h / font.widthOfTextAtSize(label, 1));
 	const textWidth = font.widthOfTextAtSize(label, size);
 
 	page.drawText(label, {
