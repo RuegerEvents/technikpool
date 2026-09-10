@@ -51,7 +51,7 @@
 	);
 	const initialViewMode = page.url.searchParams.get('mode');
 	let viewMode = $state<ViewMode>(
-		VIEW_MODES.includes(initialViewMode as ViewMode) ? (initialViewMode as ViewMode) : 'assets'
+		VIEW_MODES.includes(initialViewMode as ViewMode) ? (initialViewMode as ViewMode) : 'productions'
 	);
 	let expandedProducts = $state(new Set<string>());
 	let viewDate = $state(parseDateParam(page.url.searchParams.get('date')) ?? new Date());
