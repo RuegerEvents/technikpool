@@ -167,6 +167,7 @@ msgstr "Added"
 msgid "No equipment booked yet."
 msgstr "No equipment booked yet."
 
+#: src/lib/components/ui/production-hover-card/production-hover-card.svelte
 #: src/routes/productions/[id]/+page.svelte
 msgid "Crew"
 msgstr "Crew"
@@ -2792,6 +2793,7 @@ msgstr "New Offer"
 msgid "No offers yet."
 msgstr "No offers yet."
 
+#: src/lib/components/ui/production-hover-card/production-hover-card.svelte
 #: src/routes/invoices/+page.svelte
 #: src/routes/offers/+page.svelte
 #: src/routes/offers/new/+page.svelte
@@ -3185,6 +3187,7 @@ msgstr "Replace"
 msgid "Equipment | {0} | Technikpool"
 msgstr "Equipment | {0} | Technikpool"
 
+#: src/lib/components/ui/production-hover-card/production-hover-card.svelte
 #: src/routes/productions/[id]/equipment/+page.svelte
 msgid "Equipment"
 msgstr "Equipment"
@@ -4334,7 +4337,9 @@ msgstr "Every product in this filter is done."
 msgid "Catalog"
 msgstr "Catalog"
 
+#. 0: info.booked.count; 1: info.booked.total
 #. 0: index + 1; 1: visible.length
+#: src/lib/components/ui/production-hover-card/production-hover-card.svelte
 #: src/routes/products/+page.svelte
 msgid "{0} of {1}"
 msgstr "{0} of {1}"
@@ -6217,3 +6222,42 @@ msgstr "Reset link…"
 #: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
 msgid "<0/> Subscribe"
 msgstr "<0/> Subscribe"
+
+#: src/lib/components/ui/production-hover-card/production-hover-card.svelte
+msgid "Pending approval"
+msgstr "Pending approval"
+
+#: src/lib/components/ui/production-hover-card/production-hover-card.svelte
+#: src/lib/components/ui/production-hover-card/production-hover-card.svelte
+msgid "# day"
+msgid_plural "# days"
+msgstr[0] "# day"
+msgstr[1] "# days"
+
+#: src/lib/components/ui/production-hover-card/production-hover-card.svelte
+msgid "Show days"
+msgstr "Show days"
+
+#: src/lib/components/ui/production-hover-card/production-hover-card.svelte
+msgid "Venue"
+msgstr "Venue"
+
+#: src/lib/components/ui/production-hover-card/production-hover-card.svelte
+msgid "# item"
+msgid_plural "# items"
+msgstr[0] "# item"
+msgstr[1] "# items"
+
+#: src/lib/components/ui/production-hover-card/production-hover-card.svelte
+msgid "# person"
+msgid_plural "# people"
+msgstr[0] "# person"
+msgstr[1] "# people"
+
+#: src/lib/components/ui/production-hover-card/production-hover-card.svelte
+msgid "Booked"
+msgstr "Booked"
+
+#: src/lib/components/ui/production-hover-card/production-hover-card.svelte
+msgid "Duration"
+msgstr "Duration"

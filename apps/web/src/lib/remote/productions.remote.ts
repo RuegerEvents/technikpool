@@ -1121,7 +1121,13 @@ export const getProductionsCalendar = query(async () => {
 			startDate: { not: null },
 			endDate: { not: null }
 		},
-		include: { organization: { select: { name: true, shortName: true } } },
+		// Customer, venue and counts feed the calendar's hover card.
+		include: {
+			organization: { select: { name: true, shortName: true } },
+			customer: { select: { companyName: true, contactPerson: true } },
+			address: { select: { line1: true, line2: true, postalCode: true, city: true } },
+			_count: { select: { items: true, crew: true } }
+		},
 		orderBy: { startDate: 'asc' }
 	});
 });

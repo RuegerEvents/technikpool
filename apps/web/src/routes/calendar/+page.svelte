@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { orgLabel } from '$lib/utils';
+	import { customerLabel, orgLabel } from '$lib/utils';
 	/* eslint-disable svelte/prefer-svelte-reactivity */
 	import { getCalendarData, getProductionsCalendar } from '$lib/remote/productions.remote';
 	import { resolve } from '$app/paths';
@@ -8,6 +8,10 @@
 	import { OrgBadge } from '$lib/components/ui/org-badge';
 	import { FilterPopover } from '$lib/components/ui/filter-popover';
 	import { CalendarFeedButton } from '$lib/components/ui/calendar-feed';
+	import {
+		ProductionHoverCard,
+		type ProductionHoverInfo
+	} from '$lib/components/ui/production-hover-card';
 
 	type Granularity = 'day' | 'week' | 'month' | 'year';
 	type ViewMode = 'assets' | 'productions';
@@ -112,6 +116,83 @@
 	// multi-week event into a separate bar per row, so CSS-only :hover can't
 	// span them — this drives the "highlight the whole event" behavior instead.
 	let hoveredEventId = $state<string | null>(null);
+
+	// Everything the hover card shows, keyed by production. Productions of
+	// other orgs only reach this page through the assets query, which carries
+	// their own columns and nothing related.
+	let productionInfo = $derived.by(() => {
+		const map = new Map<string, ProductionHoverInfo>();
+		for (const p of prodCalData) {
+			map.set(p.id, {
+				name: p.name,
+				color: prodColor(p.id),
+				startDate: p.startDate!,
+				endDate: p.endDate!,
+				showStartDate: p.showStartDate,
+				showEndDate: p.showEndDate,
+				organization: orgLabel(p.organization),
+				customer: p.customer ? customerLabel(p.customer) : null,
+				venue: p.address
+					? {
+							street: [p.address.line1, p.address.line2].filter(Boolean).join(', '),
+							city: `${p.address.postalCode} ${p.address.city}`
+						}
+					: null,
+				itemCount: p._count.items,
+				crewCount: p._count.crew
+			});
+		}
+		for (const a of rawData) {
+			for (const pi of a.productionItems) {
+				const p = pi.production;
+				if (map.has(p.id) || !p.startDate || !p.endDate) continue;
+				map.set(p.id, {
+					name: p.name,
+					color: prodColor(p.id),
+					startDate: p.startDate,
+					endDate: p.endDate,
+					showStartDate: p.showStartDate,
+					showEndDate: p.showEndDate,
+					organization: null,
+					customer: null,
+					venue: null,
+					itemCount: null,
+					crewCount: null
+				});
+			}
+		}
+		return map;
+	});
+
+	type BarExtra = Pick<ProductionHoverInfo, 'pending' | 'booked'>;
+	let hover = $state<({ productionId: string; x: number; rect: DOMRect } & BarExtra) | null>(null);
+	let hoverInfo = $derived.by(() => {
+		const info = hover && productionInfo.get(hover.productionId);
+		return info ? { ...info, pending: hover!.pending, booked: hover!.booked } : null;
+	});
+
+	// Spread onto every production bar. Also drives hoveredEventId, which the
+	// month and year grids use to highlight all of a production's row pieces.
+	function hoverCard(productionId: string, extra: BarExtra = {}) {
+		const open = (el: HTMLElement, x?: number) => {
+			const rect = el.getBoundingClientRect();
+			hover = { productionId, x: x ?? rect.left, rect, ...extra };
+			hoveredEventId = productionId;
+		};
+		const close = () => {
+			hover = null;
+			hoveredEventId = null;
+		};
+		return {
+			onmouseenter: (e: MouseEvent) => open(e.currentTarget as HTMLElement, e.clientX),
+			onmousemove: (e: MouseEvent) => {
+				if (hover) hover.x = e.clientX;
+			},
+			onmouseleave: close,
+			onfocus: (e: FocusEvent) => open(e.currentTarget as HTMLElement),
+			onblur: close
+		};
+	}
 
 	const SIDEBAR = 220;
 	const ROW_H = 36;
@@ -307,6 +388,8 @@
 		showWidth: number;
 		color: string;
 		fraction: number;
+		count: number;
+		total: number;
 		allPending: boolean;
 	};
 	type HeaderRow = {
@@ -414,6 +497,8 @@
 				...barDimsWithShow(p.start, p.end, p.showStart, p.showEnd),
 				color: prodColor(id),
 				fraction: p.count / assets.length,
+				count: p.count,
+				total: assets.length,
 				allPending: p.pendingCount === p.count
 			}));
 			rows.push({
@@ -584,6 +669,8 @@
 
 	function handleScroll() {
 		if (scrollEl) scrollLeft = scrollEl.scrollLeft;
+		// The card sits in viewport coordinates and would drift off its bar.
+		hover = null;
 	}
 
 	function goToday() {
@@ -900,6 +987,8 @@
 
 <svelte:head><title>Calendar | Technikpool</title></svelte:head>
 
+<ProductionHoverCard info={hoverInfo} anchor={hover} />
+
 <div class="flex h-full flex-col overflow-hidden">
 	<!-- Controls -->
 	<div class="flex flex-wrap items-center gap-3 border-b px-4 py-2">
@@ -1111,9 +1200,7 @@
 							{#each segments as seg, si (si)}
 								<a
 									href={resolve(`/productions/${bar.event.id}`)}
-									title={bar.event.name}
-									onmouseenter={() => (hoveredEventId = bar.event.id)}
-									onmouseleave={() => (hoveredEventId = null)}
+									{...hoverCard(bar.event.id)}
 									class="absolute flex items-center overflow-hidden px-1.5 text-[11px] font-medium text-white no-underline {hoveredEventId ===
 									bar.event.id
 										? 'brightness-110'
@@ -1179,9 +1266,8 @@
 										{#each barSegments(bar) as seg, si (si)}
 											<a
 												href={resolve(`/productions/${bar.event.id}`)}
-												title={bar.event.name}
-												onmouseenter={() => (hoveredEventId = bar.event.id)}
-												onmouseleave={() => (hoveredEventId = null)}
+												aria-label={bar.event.name}
+												{...hoverCard(bar.event.id)}
 												class="absolute no-underline {hoveredEventId === bar.event.id
 													? 'brightness-110'
 													: ''} {seg.roundedLeft ? 'rounded-l-sm' : ''} {seg.roundedRight
@@ -1380,7 +1466,7 @@
 									{#if bar.pending}
 										<a
 											href={resolve(`/productions/${bar.productionId}`)}
-											title="{bar.label} (pending)"
+											{...hoverCard(bar.productionId, { pending: true })}
 											class="absolute top-1 flex items-center overflow-hidden rounded px-1.5 text-[11px] font-medium text-white no-underline hover:brightness-110"
 											style="left: {bar.left}px; width: {bar.width}px; height: {h -
 												8}px; background-color: {bar.color}; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px); opacity: 0.75;"
@@ -1393,7 +1479,8 @@
 											{#each segs as seg, si (si)}
 												<a
 													href={resolve(`/productions/${bar.productionId}`)}
-													title={bar.label}
+													aria-label={bar.label}
+													{...hoverCard(bar.productionId)}
 													class="absolute top-1 flex items-center overflow-hidden px-1.5 text-[11px] font-medium text-white no-underline group-hover/bar:brightness-110 {seg.roundedLeft
 														? 'rounded-l'
 														: ''} {seg.roundedRight ? 'rounded-r' : ''}"
@@ -1419,7 +1506,10 @@
 									{#if bar.allPending}
 										<a
 											href={resolve(`/productions/${bar.productionId}`)}
-											title="{bar.label} ({Math.round(bar.fraction * 100)}%) · pending"
+											{...hoverCard(bar.productionId, {
+												pending: true,
+												booked: { count: bar.count, total: bar.total }
+											})}
 											class="absolute flex items-center overflow-hidden rounded-sm px-1 no-underline hover:brightness-110"
 											style="left: {bar.left}px; width: {bar.width}px; height: {barH}px; top: 3px; background-color: {bar.color}; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px);"
 										>
@@ -1433,7 +1523,9 @@
 											{#each segs as seg, si (si)}
 												<a
 													href={resolve(`/productions/${bar.productionId}`)}
-													title="{bar.label} ({Math.round(bar.fraction * 100)}%)"
+													{...hoverCard(bar.productionId, {
+														booked: { count: bar.count, total: bar.total }
+													})}
 													class="absolute flex items-center overflow-hidden px-1 no-underline group-hover/bar:brightness-110 {seg.roundedLeft
 														? 'rounded-l-sm'
 														: ''} {seg.roundedRight ? 'rounded-r-sm' : ''}"
