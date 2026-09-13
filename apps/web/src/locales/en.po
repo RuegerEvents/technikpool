@@ -118,6 +118,7 @@ msgstr "Done"
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/+page.svelte
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
@@ -143,6 +144,7 @@ msgstr "S/N"
 msgid "Org"
 msgstr "Org"
 
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
@@ -262,6 +264,7 @@ msgstr "Remove"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
@@ -385,6 +388,7 @@ msgstr "Asset Tag"
 
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
@@ -392,6 +396,7 @@ msgid "Bundle"
 msgstr "Bundle"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
@@ -426,6 +431,7 @@ msgstr "Add Asset"
 #~ msgid "No equipment units in the selected organization."
 #~ msgstr "No equipment units in the selected organization."
 
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/checkout/+page.svelte
@@ -1270,6 +1276,7 @@ msgstr "Edit"
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/+page.svelte
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
@@ -1817,6 +1824,7 @@ msgstr "All Categories"
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
@@ -4640,6 +4648,8 @@ msgstr "Facts about this individual unit. What it bills at is the product's pric
 #~ msgstr "What a rental rate is calculated from, for every unit of this product."
 
 #. 0: asset.parent.product.name
+#. 0: asset.parent.product.name
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 msgid "↳ Accessory of {0}"
 msgstr "↳ Accessory of {0}"
@@ -4753,6 +4763,7 @@ msgstr "How many"
 #~ msgstr "Two omega brackets on one fixture is one entry here, not two."
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/routes/assets/+page.svelte
 msgid "Serial number"
 msgstr "Serial number"
 
@@ -6261,3 +6272,11 @@ msgstr "Booked"
 #: src/lib/components/ui/production-hover-card/production-hover-card.svelte
 msgid "Duration"
 msgstr "Duration"
+
+#: src/routes/assets/+page.svelte
+msgid "Every unit on its own row — click one to open it."
+msgstr "Every unit on its own row — click one to open it."
+
+#: src/routes/assets/+page.svelte
+msgid "All Devices"
+msgstr "All Devices"

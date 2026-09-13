@@ -59,7 +59,13 @@
 	let connectorFilter = $state(initial.get('conn') ?? '');
 	let lengthMin = $state(initial.get('lmin') ?? '');
 	let lengthMax = $state(initial.get('lmax') ?? '');
-	let showBundleView = $state(initial.get('bundles') !== '0');
+	// Bundles → products → single units, from most structure to least. `devices`
+	// is one flat row per unit and only exists as a table: a photo wall of forty
+	// identical lamps says nothing the product tile doesn't.
+	const groupings = ['bundles', 'products', 'devices'] as const;
+	type Grouping = (typeof groupings)[number];
+	const initialGroup = initial.get('group');
+	let grouping = $state<Grouping>(groupings.find((g) => g === initialGroup) ?? 'bundles');
 	// A photo wall for browsing the catalogue; the table stays the working view.
 	let layout = $state<'list' | 'grid'>(initial.get('view') === 'grid' ? 'grid' : 'list');
 	let expanded = new SvelteMap<string, boolean>();
@@ -76,7 +82,7 @@
 			q: searchQuery,
 			status: statusFilter,
 			category: categoryFilter,
-			bundles: showBundleView ? '' : '0',
+			group: grouping === 'bundles' ? '' : grouping,
 			view: layout === 'grid' ? 'grid' : '',
 			ctype: cableTypeFilter,
 			conn: connectorFilter,
@@ -107,7 +113,10 @@
 
 	// Grouping is independent of presentation: switching between list and grid
 	// must not make kits disappear into their component product groups.
-	let bundleGrouping = $derived(showBundleView && !showingRetired);
+	let bundleGrouping = $derived(grouping === 'bundles' && !showingRetired);
+	// Grid shows the product grouping instead of switching the layout away, so
+	// going back to the table lands on the flat list again.
+	let showingDevices = $derived(grouping === 'devices' && layout === 'list');
 
 	let templates = $derived(
 		bundleGrouping ? await getBundleTemplates(filterOrgId || undefined) : ([] as TemplateData[])
@@ -254,26 +263,40 @@
 	);
 
 	let searchTrimmed = $derived(searchQuery.toLowerCase().trim());
+	// Per unit, so the flat list can use it as it is. A product group matches when
+	// any of its units does — everything a group row shows is taken from them.
+	function assetMatchesSearch(a: Asset) {
+		if (!searchTrimmed) return true;
+		return [
+			a.product.name,
+			a.product.manufacturer.name,
+			categoryLabel(a.product.category),
+			a.product.cableType,
+			a.product.connectorA,
+			a.product.connectorB,
+			a.serialNumber,
+			a.assetTag,
+			a.bundle?.template.name,
+			orgLabel(a.organization),
+			a.organization.name
+		].some((v) => v?.toLowerCase().includes(searchTrimmed));
+	}
+
 	let filteredGroups = $derived(
-		!searchTrimmed
-			? groups
-			: groups.filter(
-					(g) =>
-						g.name.toLowerCase().includes(searchTrimmed) ||
-						g.manufacturerName.toLowerCase().includes(searchTrimmed) ||
-						g.categoryName.toLowerCase().includes(searchTrimmed) ||
-						[g.cable?.cableType, g.cable?.connectorA, g.cable?.connectorB].some((v) =>
-							v?.toLowerCase().includes(searchTrimmed)
-						) ||
-						g.assets.some(
-							(a) =>
-								(a.serialNumber?.toLowerCase().includes(searchTrimmed) ?? false) ||
-								(a.assetTag?.toLowerCase().includes(searchTrimmed) ?? false) ||
-								(a.bundle?.template.name.toLowerCase().includes(searchTrimmed) ?? false) ||
-								orgLabel(a.organization).toLowerCase().includes(searchTrimmed) ||
-								a.organization.name.toLowerCase().includes(searchTrimmed)
-						)
-				)
+		showingDevices ? [] : groups.filter((g) => g.assets.some(assetMatchesSearch))
+	);
+
+	// Tag order rather than the server's product order: this is the list tags get
+	// read off, and the natural sort keeps RE00010 after RE00009. Untagged units
+	// go last and keep the server's order among themselves.
+	let filteredDevices = $derived(
+		!showingDevices
+			? []
+			: visibleAssets.filter(assetMatchesSearch).sort((a, b) => {
+					if (a.assetTag && b.assetTag) return collator.compare(a.assetTag, b.assetTag);
+					if (a.assetTag || b.assetTag) return a.assetTag ? -1 : 1;
+					return 0;
+				})
 	);
 
 	let filteredBundles = $derived(
@@ -336,7 +359,8 @@
 		...filteredBundles.flatMap((t) =>
 			t.instanceGroups.flatMap((i) => i.filteredAssets.map((a) => a.id))
 		),
-		...filteredGroups.flatMap((g) => g.assets.map((a) => a.id))
+		...filteredGroups.flatMap((g) => g.assets.map((a) => a.id)),
+		...filteredDevices.map((a) => a.id)
 	]);
 	let allFilteredSelected = $derived(
 		allFilteredAssetIds.length > 0 && allFilteredAssetIds.every((id) => selectedAssetIds.has(id))
@@ -367,7 +391,9 @@
 		statusFilter = value;
 	}
 
-	let hasResults = $derived(filteredBundles.length > 0 || filteredGroups.length > 0);
+	let hasResults = $derived(
+		filteredBundles.length > 0 || filteredGroups.length > 0 || filteredDevices.length > 0
+	);
 
 	function toggleGroupSelection(assetIds: string[], allSelected: boolean) {
 		if (allSelected) assetIds.forEach((id) => selectedAssetIds.delete(id));
@@ -386,7 +412,11 @@
 	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">Devices</h1>
-			<p class="text-muted-foreground">Product catalog — click a row to see individual units.</p>
+			<p class="text-muted-foreground">
+				{showingDevices
+					? 'Every unit on its own row — click one to open it.'
+					: 'Product catalog — click a row to see individual units.'}
+			</p>
 		</div>
 		<div class="flex items-center gap-2">
 			<select
@@ -457,22 +487,36 @@
 			{/each}
 		</div>
 		<div class="ml-auto flex items-center gap-3">
-			{#if !showingRetired}
+			<!-- Retired units have no bundles to group by, and the grid has no flat
+			     list — so a button that could only fall back to another is left out. -->
+			{#if !showingRetired || layout === 'list'}
 				<div class="flex items-center gap-1">
+					{#if !showingRetired}
+						<button
+							type="button"
+							onclick={() => (grouping = 'bundles')}
+							class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {bundleGrouping
+								? 'bg-primary text-primary-foreground'
+								: 'bg-muted text-muted-foreground hover:bg-muted/70'}">Bundle View</button
+						>
+					{/if}
 					<button
 						type="button"
-						onclick={() => (showBundleView = true)}
-						class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {showBundleView
-							? 'bg-primary text-primary-foreground'
-							: 'bg-muted text-muted-foreground hover:bg-muted/70'}">Bundle View</button
-					>
-					<button
-						type="button"
-						onclick={() => (showBundleView = false)}
-						class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {!showBundleView
+						onclick={() => (grouping = 'products')}
+						class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {!bundleGrouping &&
+						!showingDevices
 							? 'bg-primary text-primary-foreground'
 							: 'bg-muted text-muted-foreground hover:bg-muted/70'}">All Products</button
 					>
+					{#if layout === 'list'}
+						<button
+							type="button"
+							onclick={() => (grouping = 'devices')}
+							class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {showingDevices
+								? 'bg-primary text-primary-foreground'
+								: 'bg-muted text-muted-foreground hover:bg-muted/70'}">All Devices</button
+						>
+					{/if}
 				</div>
 			{/if}
 			<div class="flex overflow-hidden rounded-md border border-input">
@@ -554,6 +598,104 @@
 					>
 				{/if}
 			</div>
+		</div>
+	{:else if showingDevices}
+		<div class="overflow-x-auto rounded-md border">
+			<table class="w-full text-sm">
+				<thead>
+					<tr class="border-b bg-muted/30">
+						<th class="w-10 px-4 py-3">
+							<input
+								type="checkbox"
+								checked={allFilteredSelected}
+								use:indeterminate={someFilteredSelected && !allFilteredSelected}
+								onclick={toggleSelectAll}
+								class="h-4 w-4 cursor-pointer rounded border-input"
+							/>
+						</th>
+						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Tag</th>
+						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Product</th>
+						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Manufacturer</th>
+						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Serial number</th>
+						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
+						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+						{#if !showingRetired}
+							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Location</th>
+						{/if}
+						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Organization</th>
+						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Bundle</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each filteredDevices as asset (asset.id)}
+						<tr
+							class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
+							onclick={() => goto(resolve(`/assets/${asset.id}`))}
+						>
+							<td class="px-4 py-2">
+								<input
+									type="checkbox"
+									checked={selectedAssetIds.has(asset.id)}
+									onclick={(e) => {
+										e.stopPropagation();
+										toggleAssetSelection(asset.id);
+									}}
+									class="h-4 w-4 cursor-pointer rounded border-input"
+								/>
+							</td>
+							<td class="px-4 py-2 font-mono whitespace-nowrap">{asset.assetTag ?? '—'}</td>
+							<td class="px-4 py-2">
+								<div class="flex items-center gap-2">
+									<ProductThumb path={asset.product.imagePath} alt={asset.product.name} size={24} />
+									<div class="min-w-0">
+										<div class="flex flex-wrap items-center gap-1.5">
+											<span class="font-medium">{asset.product.name}</span>
+											{@render cableChips(isCable(asset.product) ? asset.product : null)}
+										</div>
+										{#if asset.parent}
+											<a
+												href={resolve(`/assets/${asset.parent.id}`)}
+												class="text-xs text-muted-foreground hover:underline"
+												onclick={(e) => e.stopPropagation()}
+											>
+												↳ Accessory of {asset.parent.product.name}
+											</a>
+										{/if}
+									</div>
+								</div>
+							</td>
+							<td class="px-4 py-2 text-muted-foreground">{asset.product.manufacturer.name}</td>
+							<td class="px-4 py-2 font-mono text-xs text-muted-foreground"
+								>{asset.serialNumber ?? '—'}</td
+							>
+							<td class="px-4 py-2">
+								<CategoryPill
+									name={categoryLabel(asset.product.category)}
+									color={asset.product.category.color}
+								/>
+							</td>
+							<td class="px-4 py-2"><AssetStatusBadge status={asset.status} /></td>
+							{#if !showingRetired}
+								<td class="px-4 py-2 text-muted-foreground">{asset.location?.name ?? '—'}</td>
+							{/if}
+							<td class="px-4 py-2 text-muted-foreground">{orgLabel(asset.organization)}</td>
+							<td class="px-4 py-2 text-muted-foreground">
+								{#if asset.bundle}
+									<a
+										href={resolve(`/assets/bundles/${asset.bundle.id}`)}
+										class="hover:underline"
+										onclick={(e) => e.stopPropagation()}
+									>
+										{asset.bundle.template.name}
+									</a>
+								{:else}
+									—
+								{/if}
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
 		</div>
 	{:else if layout === 'grid'}
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
@@ -749,7 +891,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#if showBundleView}
+					{#if bundleGrouping}
 						{#each filteredBundles as template (template.id)}
 							{@const templateAssetIds = template.instanceGroups.flatMap((i) =>
 								i.filteredAssets.map((a) => a.id)
