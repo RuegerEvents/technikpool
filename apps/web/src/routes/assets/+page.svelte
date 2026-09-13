@@ -25,7 +25,8 @@
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import BulkActionsBar from '$lib/components/ui/bulk-actions-bar.svelte';
 	import CsvImportModal from '$lib/components/CsvImportModal.svelte';
-	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
+	import { AssetStatusBadge, assetStatusLabel } from '$lib/components/ui/asset-status';
+	import { SortableHeader } from '$lib/components/ui/sortable-header';
 
 	let showImportModal = $state(false);
 
@@ -68,6 +69,9 @@
 	let grouping = $state<Grouping>(groupings.find((g) => g === initialGroup) ?? 'bundles');
 	// A photo wall for browsing the catalogue; the table stays the working view.
 	let layout = $state<'list' | 'grid'>(initial.get('view') === 'grid' ? 'grid' : 'list');
+	// An empty key is each table's default order.
+	let sortKey = $state(initial.get('sort') ?? '');
+	let sortDir = $state<'asc' | 'desc'>(initial.get('dir') === 'desc' ? 'desc' : 'asc');
 	let expanded = new SvelteMap<string, boolean>();
 	let selectedAssetIds = new SvelteSet<string>();
 
@@ -87,7 +91,9 @@
 			ctype: cableTypeFilter,
 			conn: connectorFilter,
 			lmin: lengthMin,
-			lmax: lengthMax
+			lmax: lengthMax,
+			sort: sortKey,
+			dir: sortKey && sortDir === 'desc' ? 'desc' : ''
 		};
 		for (const [key, value] of Object.entries(params)) {
 			if (value) url.searchParams.set(key, value);
@@ -286,18 +292,94 @@
 		showingDevices ? [] : groups.filter((g) => g.assets.some(assetMatchesSearch))
 	);
 
-	// Tag order rather than the server's product order: this is the list tags get
-	// read off, and the natural sort keeps RE00010 after RE00009. Untagged units
-	// go last and keep the server's order among themselves.
+	// A header click sorts by that column, a second reverses it, a third goes back
+	// to the default order. Both tables read the same key: a column they share
+	// stays sorted across a switch, and one the other table lacks is ignored there.
+	type SortValue = string | number | null;
+	type SortColumns<T> = Record<string, (row: T) => SortValue>;
+
+	function toggleSort(key: string) {
+		if (sortKey !== key) {
+			sortKey = key;
+			sortDir = 'asc';
+		} else if (sortDir === 'asc') {
+			sortDir = 'desc';
+		} else {
+			sortKey = '';
+		}
+	}
+
+	function sortDirection(key: string) {
+		return sortKey === key ? sortDir : null;
+	}
+
+	// Blanks stay at the bottom in both directions: sorting a column is looking
+	// for its values, and a descending sort shouldn't open on a page of dashes.
+	// The sort is stable, so ties keep the default order.
+	function sortRows<T>(rows: T[], columns: SortColumns<T>): T[] {
+		const value = Object.hasOwn(columns, sortKey) ? columns[sortKey] : undefined;
+		if (!value) return rows;
+		const sign = sortDir === 'asc' ? 1 : -1;
+		return [...rows].sort((a, b) => {
+			const x = value(a);
+			const y = value(b);
+			if (x === null || x === '') return y === null || y === '' ? 0 : 1;
+			if (y === null || y === '') return -1;
+			if (typeof x === 'number' && typeof y === 'number') return sign * (x - y);
+			return sign * collator.compare(String(x), String(y));
+		});
+	}
+
+	const deviceColumns: SortColumns<Asset> = {
+		tag: (a) => a.assetTag,
+		product: (a) => a.product.name,
+		manufacturer: (a) => a.product.manufacturer.name,
+		serial: (a) => a.serialNumber,
+		category: (a) => categoryLabel(a.product.category),
+		// By what the badge says, so the order matches what is on screen.
+		status: (a) => assetStatusLabel(a.status),
+		// The column is hidden for retired units; a sort by it must not linger there.
+		location: (a) => (showingRetired ? null : (a.location?.name ?? null)),
+		organization: (a) => orgLabel(a.organization),
+		bundle: (a) => a.bundle?.template.name ?? null
+	};
+
+	// Tag order by default rather than the server's product order: this is the
+	// list tags get read off, and the natural sort keeps RE00010 after RE00009.
+	// Untagged units go last and keep the server's order among themselves.
 	let filteredDevices = $derived(
 		!showingDevices
 			? []
-			: visibleAssets.filter(assetMatchesSearch).sort((a, b) => {
-					if (a.assetTag && b.assetTag) return collator.compare(a.assetTag, b.assetTag);
-					if (a.assetTag || b.assetTag) return a.assetTag ? -1 : 1;
-					return 0;
-				})
+			: sortRows(
+					visibleAssets.filter(assetMatchesSearch).sort((a, b) => {
+						if (a.assetTag && b.assetTag) return collator.compare(a.assetTag, b.assetTag);
+						if (a.assetTag || b.assetTag) return a.assetTag ? -1 : 1;
+						return 0;
+					}),
+					deviceColumns
+				)
 	);
+
+	// Bundles and products sort as one list, so sorting by Total puts the biggest
+	// line first whichever kind it is; unsorted, bundles stay on top. Location
+	// isn't sortable at this level — it is a dash on every row.
+	type TableRow =
+		| { kind: 'bundle'; key: string; template: TemplateGroup }
+		| { kind: 'group'; key: string; group: Group };
+
+	const tableColumns: SortColumns<TableRow> = {
+		product: (r) => (r.kind === 'bundle' ? r.template.name : r.group.name),
+		manufacturer: (r) => (r.kind === 'bundle' ? null : r.group.manufacturerName),
+		category: (r) => {
+			if (r.kind === 'group') return r.group.categoryName;
+			return r.template.category ? categoryLabel(r.template.category) : null;
+		},
+		total: (r) => (r.kind === 'bundle' ? r.template.totalInstances : r.group.assets.length),
+		available: (r) => (r.kind === 'bundle' ? r.template.availableInstances : r.group.available),
+		maintenance: (r) =>
+			r.kind === 'bundle' ? r.template.maintenanceInstances : r.group.maintenance,
+		broken: (r) => (r.kind === 'bundle' ? r.template.brokenInstances : r.group.broken)
+	};
 
 	let filteredBundles = $derived(
 		!bundleGrouping
@@ -349,6 +431,24 @@
 								)
 						);
 					})
+	);
+
+	let tableRows = $derived(
+		sortRows<TableRow>(
+			[
+				...filteredBundles.map((template) => ({
+					kind: 'bundle' as const,
+					key: `bundle:${template.id}`,
+					template
+				})),
+				...filteredGroups.map((group) => ({
+					kind: 'group' as const,
+					key: `product:${group.productId}`,
+					group
+				}))
+			],
+			tableColumns
+		)
 	);
 
 	function toggle(id: string) {
@@ -613,17 +713,40 @@
 								class="h-4 w-4 cursor-pointer rounded border-input"
 							/>
 						</th>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Tag</th>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Product</th>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Manufacturer</th>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Serial number</th>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+						<SortableHeader direction={sortDirection('tag')} onclick={() => toggleSort('tag')}
+							>Tag</SortableHeader
+						>
+						<SortableHeader
+							direction={sortDirection('product')}
+							onclick={() => toggleSort('product')}>Product</SortableHeader
+						>
+						<SortableHeader
+							direction={sortDirection('manufacturer')}
+							onclick={() => toggleSort('manufacturer')}>Manufacturer</SortableHeader
+						>
+						<SortableHeader direction={sortDirection('serial')} onclick={() => toggleSort('serial')}
+							>Serial number</SortableHeader
+						>
+						<SortableHeader
+							direction={sortDirection('category')}
+							onclick={() => toggleSort('category')}>Category</SortableHeader
+						>
+						<SortableHeader direction={sortDirection('status')} onclick={() => toggleSort('status')}
+							>Status</SortableHeader
+						>
 						{#if !showingRetired}
-							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Location</th>
+							<SortableHeader
+								direction={sortDirection('location')}
+								onclick={() => toggleSort('location')}>Location</SortableHeader
+							>
 						{/if}
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Organization</th>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Bundle</th>
+						<SortableHeader
+							direction={sortDirection('organization')}
+							onclick={() => toggleSort('organization')}>Organization</SortableHeader
+						>
+						<SortableHeader direction={sortDirection('bundle')} onclick={() => toggleSort('bundle')}
+							>Bundle</SortableHeader
+						>
 					</tr>
 				</thead>
 				<tbody>
@@ -880,19 +1003,45 @@
 								class="h-4 w-4 cursor-pointer rounded border-input"
 							/>
 						</th>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Product</th>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Manufacturer</th>
+						<SortableHeader
+							direction={sortDirection('product')}
+							onclick={() => toggleSort('product')}>Product</SortableHeader
+						>
+						<SortableHeader
+							direction={sortDirection('manufacturer')}
+							onclick={() => toggleSort('manufacturer')}>Manufacturer</SortableHeader
+						>
 						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Location</th>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
-						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Total</th>
-						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Available</th>
-						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Maint.</th>
-						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Broken</th>
+						<SortableHeader
+							direction={sortDirection('category')}
+							onclick={() => toggleSort('category')}>Category</SortableHeader
+						>
+						<SortableHeader
+							align="right"
+							direction={sortDirection('total')}
+							onclick={() => toggleSort('total')}>Total</SortableHeader
+						>
+						<SortableHeader
+							align="right"
+							direction={sortDirection('available')}
+							onclick={() => toggleSort('available')}>Available</SortableHeader
+						>
+						<SortableHeader
+							align="right"
+							direction={sortDirection('maintenance')}
+							onclick={() => toggleSort('maintenance')}>Maint.</SortableHeader
+						>
+						<SortableHeader
+							align="right"
+							direction={sortDirection('broken')}
+							onclick={() => toggleSort('broken')}>Broken</SortableHeader
+						>
 					</tr>
 				</thead>
 				<tbody>
-					{#if bundleGrouping}
-						{#each filteredBundles as template (template.id)}
+					{#each tableRows as row (row.key)}
+						{#if row.kind === 'bundle'}
+							{@const template = row.template}
 							{@const templateAssetIds = template.instanceGroups.flatMap((i) =>
 								i.filteredAssets.map((a) => a.id)
 							)}
@@ -1131,153 +1280,152 @@
 									{/if}
 								{/each}
 							{/if}
-						{/each}
-					{/if}
-
-					{#each filteredGroups as group (group.productId)}
-						{@const groupAssetIds = group.assets.map((a) => a.id)}
-						{@const allInGroupSelected =
-							groupAssetIds.length > 0 && groupAssetIds.every((id) => selectedAssetIds.has(id))}
-						<tr
-							class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
-							onclick={() => toggle(group.productId)}
-						>
-							<td class="px-4 py-3">
-								<input
-									type="checkbox"
-									checked={allInGroupSelected}
-									onclick={(e) => {
-										e.stopPropagation();
-										if (allInGroupSelected) {
-											groupAssetIds.forEach((id) => selectedAssetIds.delete(id));
-										} else {
-											groupAssetIds.forEach((id) => selectedAssetIds.add(id));
-										}
-									}}
-									class="h-4 w-4 cursor-pointer rounded border-input"
-								/>
-							</td>
-							<td class="px-4 py-3">
-								<div class="flex items-center gap-2">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="14"
-										height="14"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										class="shrink-0 text-muted-foreground transition-transform {expanded.get(
-											group.productId
-										)
-											? 'rotate-90'
-											: ''}"
-									>
-										<path d="m9 18 6-6-6-6" />
-									</svg>
-									<ProductThumb path={group.imagePath} alt={group.name} />
-									<span class="font-medium">{group.name}</span>
-									{@render cableChips(group.cable)}
-								</div>
-							</td>
-							<td class="px-4 py-3 text-muted-foreground">{group.manufacturerName}</td>
-							<td class="px-4 py-3 text-muted-foreground">—</td>
-							<td class="px-4 py-3">
-								<CategoryPill name={group.categoryName} color={group.categoryColor} />
-							</td>
-							<td class="px-4 py-3 text-right font-mono tabular-nums">
-								{group.assets.length}
-							</td>
-							<td
-								class="px-4 py-3 text-right font-mono text-green-700 tabular-nums dark:text-green-400"
+						{:else}
+							{@const group = row.group}
+							{@const groupAssetIds = group.assets.map((a) => a.id)}
+							{@const allInGroupSelected =
+								groupAssetIds.length > 0 && groupAssetIds.every((id) => selectedAssetIds.has(id))}
+							<tr
+								class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
+								onclick={() => toggle(group.productId)}
 							>
-								{group.available}
-							</td>
-							<td
-								class="px-4 py-3 text-right font-mono tabular-nums {group.maintenance > 0
-									? 'text-yellow-600 dark:text-yellow-400'
-									: 'text-muted-foreground'}"
-							>
-								{group.maintenance}
-							</td>
-							<td
-								class="px-4 py-3 text-right font-mono tabular-nums {group.broken > 0
-									? 'text-red-600 dark:text-red-400'
-									: 'text-muted-foreground'}"
-							>
-								{group.broken}
-							</td>
-						</tr>
-						{#if expanded.get(group.productId)}
-							{#each group.assets as asset (asset.id)}
-								<tr
-									class="cursor-pointer border-b bg-muted/10 transition-colors last:border-0 hover:bg-muted/30"
-									onclick={() => goto(resolve(`/assets/${asset.id}`))}
+								<td class="px-4 py-3">
+									<input
+										type="checkbox"
+										checked={allInGroupSelected}
+										onclick={(e) => {
+											e.stopPropagation();
+											if (allInGroupSelected) {
+												groupAssetIds.forEach((id) => selectedAssetIds.delete(id));
+											} else {
+												groupAssetIds.forEach((id) => selectedAssetIds.add(id));
+											}
+										}}
+										class="h-4 w-4 cursor-pointer rounded border-input"
+									/>
+								</td>
+								<td class="px-4 py-3">
+									<div class="flex items-center gap-2">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="14"
+											height="14"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2"
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											class="shrink-0 text-muted-foreground transition-transform {expanded.get(
+												group.productId
+											)
+												? 'rotate-90'
+												: ''}"
+										>
+											<path d="m9 18 6-6-6-6" />
+										</svg>
+										<ProductThumb path={group.imagePath} alt={group.name} />
+										<span class="font-medium">{group.name}</span>
+										{@render cableChips(group.cable)}
+									</div>
+								</td>
+								<td class="px-4 py-3 text-muted-foreground">{group.manufacturerName}</td>
+								<td class="px-4 py-3 text-muted-foreground">—</td>
+								<td class="px-4 py-3">
+									<CategoryPill name={group.categoryName} color={group.categoryColor} />
+								</td>
+								<td class="px-4 py-3 text-right font-mono tabular-nums">
+									{group.assets.length}
+								</td>
+								<td
+									class="px-4 py-3 text-right font-mono text-green-700 tabular-nums dark:text-green-400"
 								>
-									<td class="px-4 py-2">
-										<input
-											type="checkbox"
-											checked={selectedAssetIds.has(asset.id)}
-											onclick={(e) => {
-												e.stopPropagation();
-												if (selectedAssetIds.has(asset.id)) {
-													selectedAssetIds.delete(asset.id);
-												} else {
-													selectedAssetIds.add(asset.id);
-												}
-											}}
-											class="h-4 w-4 cursor-pointer rounded border-input"
-										/>
-									</td>
-									<td colspan="7" class="px-4 py-2">
-										<div class="flex items-center gap-6 text-sm">
-											<span class="w-36 font-mono text-xs text-muted-foreground">
-												{asset.serialNumber ? `S/N: ${asset.serialNumber}` : '—'}
-											</span>
-											<!-- An accessory still belongs in this listing — it gets
+									{group.available}
+								</td>
+								<td
+									class="px-4 py-3 text-right font-mono tabular-nums {group.maintenance > 0
+										? 'text-yellow-600 dark:text-yellow-400'
+										: 'text-muted-foreground'}"
+								>
+									{group.maintenance}
+								</td>
+								<td
+									class="px-4 py-3 text-right font-mono tabular-nums {group.broken > 0
+										? 'text-red-600 dark:text-red-400'
+										: 'text-muted-foreground'}"
+								>
+									{group.broken}
+								</td>
+							</tr>
+							{#if expanded.get(group.productId)}
+								{#each group.assets as asset (asset.id)}
+									<tr
+										class="cursor-pointer border-b bg-muted/10 transition-colors last:border-0 hover:bg-muted/30"
+										onclick={() => goto(resolve(`/assets/${asset.id}`))}
+									>
+										<td class="px-4 py-2">
+											<input
+												type="checkbox"
+												checked={selectedAssetIds.has(asset.id)}
+												onclick={(e) => {
+													e.stopPropagation();
+													if (selectedAssetIds.has(asset.id)) {
+														selectedAssetIds.delete(asset.id);
+													} else {
+														selectedAssetIds.add(asset.id);
+													}
+												}}
+												class="h-4 w-4 cursor-pointer rounded border-input"
+											/>
+										</td>
+										<td colspan="7" class="px-4 py-2">
+											<div class="flex items-center gap-6 text-sm">
+												<span class="w-36 font-mono text-xs text-muted-foreground">
+													{asset.serialNumber ? `S/N: ${asset.serialNumber}` : '—'}
+												</span>
+												<!-- An accessory still belongs in this listing — it gets
 											     inspected like anything else — but what it hangs off is
 											     the first thing you need to know about it. -->
-											{#if asset.parent}
+												{#if asset.parent}
+													<a
+														href={resolve(`/assets/${asset.parent.id}`)}
+														class="text-xs text-muted-foreground hover:underline"
+														onclick={(e) => e.stopPropagation()}
+													>
+														↳ Accessory of {asset.parent.product.name}
+													</a>
+												{/if}
+												{#if asset.assetTag}
+													<span class="text-xs text-muted-foreground">Tag: {asset.assetTag}</span>
+												{/if}
+												<AssetStatusBadge status={asset.status} />
+												{#if asset.location && !showingRetired}
+													<span class="text-xs text-muted-foreground">{asset.location.name}</span>
+												{/if}
+												<span class="flex-1 text-xs text-muted-foreground"
+													>{orgLabel(asset.organization)}</span
+												>
+												{#if asset.bundle}
+													<a
+														href={resolve(`/assets/bundles/${asset.bundle.id}`)}
+														class="text-xs text-muted-foreground hover:underline"
+														onclick={(e) => e.stopPropagation()}
+													>
+														{asset.bundle.template.name}
+													</a>
+												{/if}
 												<a
-													href={resolve(`/assets/${asset.parent.id}`)}
-													class="text-xs text-muted-foreground hover:underline"
+													href={resolve(`/assets/${asset.id}`)}
+													class="text-xs text-muted-foreground hover:text-foreground"
 													onclick={(e) => e.stopPropagation()}
 												>
-													↳ Accessory of {asset.parent.product.name}
+													View →
 												</a>
-											{/if}
-											{#if asset.assetTag}
-												<span class="text-xs text-muted-foreground">Tag: {asset.assetTag}</span>
-											{/if}
-											<AssetStatusBadge status={asset.status} />
-											{#if asset.location && !showingRetired}
-												<span class="text-xs text-muted-foreground">{asset.location.name}</span>
-											{/if}
-											<span class="flex-1 text-xs text-muted-foreground"
-												>{orgLabel(asset.organization)}</span
-											>
-											{#if asset.bundle}
-												<a
-													href={resolve(`/assets/bundles/${asset.bundle.id}`)}
-													class="text-xs text-muted-foreground hover:underline"
-													onclick={(e) => e.stopPropagation()}
-												>
-													{asset.bundle.template.name}
-												</a>
-											{/if}
-											<a
-												href={resolve(`/assets/${asset.id}`)}
-												class="text-xs text-muted-foreground hover:text-foreground"
-												onclick={(e) => e.stopPropagation()}
-											>
-												View →
-											</a>
-										</div>
-									</td>
-								</tr>
-							{/each}
+											</div>
+										</td>
+									</tr>
+								{/each}
+							{/if}
 						{/if}
 					{/each}
 				</tbody>
