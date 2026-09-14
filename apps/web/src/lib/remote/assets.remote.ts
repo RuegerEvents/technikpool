@@ -646,7 +646,51 @@ async function resolveProductRef(data: ProductRef, organizationId: string): Prom
 		await getProducts().refresh();
 	}
 
+	// A cable can arrive with no manufacturer at all — "New accessory" describes
+	// one by its ends — and is then filed where `createCableBatch` files it.
+	const cable = data.newProductCable ? normalizeCable(data.newProductCable) : null;
+	const newCable = cable && isCable(cable) ? cable : null;
+	if (!manufacturerId && !data.productId && data.newProductName && newCable) {
+		manufacturerId = await resolveGenericManufacturer();
+	}
+
 	let productId = data.productId;
+	if (data.newProductName && !productId && manufacturerId && newCable) {
+		// The same lead described twice is one product, as in `createCableBatch`:
+		// a second "Schuko 10 m" is a row the device list can never merge back.
+		// Nulls stay null, so a blank end only matches a blank end.
+		const existing = await prisma.product.findFirst({
+			where: {
+				manufacturerId,
+				cableType: newCable.cableType,
+				connectorA: newCable.connectorA,
+				connectorB: newCable.connectorB,
+				lengthCm: newCable.lengthCm
+			},
+			select: { id: true }
+		});
+		if (existing) {
+			productId = existing.id;
+			// A price typed for the "new" product still counts, but only where this
+			// org hasn't priced the existing one — it must not overwrite a tariff.
+			if (data.newProductNetPurchasePrice != null) {
+				const priced = await prisma.orgProductPrice.findFirst({
+					where: { organizationId, productId: existing.id },
+					select: { productId: true }
+				});
+				if (!priced) {
+					await prisma.orgProductPrice.create({
+						data: {
+							organizationId,
+							productId: existing.id,
+							netPurchasePrice: data.newProductNetPurchasePrice
+						}
+					});
+				}
+			}
+		}
+	}
+
 	if (data.newProductName && !productId && manufacturerId) {
 		if (!data.categoryId) throw new Error('Category is required when creating a new product');
 		await prisma.category.findUniqueOrThrow({ where: { id: data.categoryId } });
@@ -656,7 +700,7 @@ async function resolveProductRef(data: ProductRef, organizationId: string): Prom
 				manufacturerId,
 				categoryId: data.categoryId,
 				imagePath: data.newProductImagePath?.trim() || null,
-				...(data.newProductCable ? normalizeCable(data.newProductCable) : {})
+				...(cable ?? {})
 			}
 		});
 		// The price given alongside a brand-new product is the creating org's own

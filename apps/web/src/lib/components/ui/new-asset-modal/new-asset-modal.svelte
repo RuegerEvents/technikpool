@@ -21,9 +21,15 @@
 	// to be asked for, so both go through `createAssets` with `parentAssetId` or
 	// `bundleId` set and the unit is created already in place.
 	//
-	// This is deliberately smaller than /assets/new: no image, no price, no
-	// per-unit serial grid. Those belong to registering a shipment; this is one
-	// cable that turned out not to be in the system.
+	// This is deliberately smaller than /assets/new: no price, no per-unit serial
+	// grid. Those belong to registering a shipment; this is one cable that turned
+	// out not to be in the system.
+	//
+	// A cable is the common case here and is described rather than picked: its
+	// ends and its length are what make it that product. So the cable tab skips
+	// the manufacturer and product pickers for the same fields the product form
+	// has, and the server files it under the generic manufacturer — reusing an
+	// identical cable product where the catalogue already has one.
 	import type { Snippet } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Modal } from '$lib/components/ui/modal';
@@ -32,6 +38,11 @@
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { CategorySelect } from '$lib/components/ui/category-select';
 	import { ImageUpload } from '$lib/components/ui/image-upload';
+	import {
+		ProductFields,
+		cableInputFrom,
+		type ProductDraft
+	} from '$lib/components/ui/product-fields';
 	import { getErrorMessage } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
 	import {
@@ -44,6 +55,7 @@
 
 	type Selection = { id: string | null; name: string } | null;
 	type LocationOption = { id: string; name: string; address?: { city: string | null } | null };
+	type Kind = 'device' | 'cable';
 
 	type Props = {
 		open: boolean;
@@ -79,9 +91,11 @@
 		onCreated
 	}: Props = $props();
 
+	let kind = $state<Kind>('device');
 	let manufacturer = $state<Selection>(null);
 	let product = $state<Selection>(null);
 	let categoryId = $state('');
+	let cableDraft = $state<ProductDraft>(emptyCableDraft());
 	let quantity = $state(1);
 	let tag = $state('');
 	let serial = $state('');
@@ -107,13 +121,13 @@
 	// A brand-new product needs a category and is the only case where a photo can
 	// be set: the image belongs to the product, and an existing one already has
 	// its own (edited from the asset detail page, where it applies to every unit).
-	let isNewProduct = $derived(product !== null && product.id === null);
+	let isNewProduct = $derived(kind === 'device' && product !== null && product.id === null);
 
 	// What the org's other units of the chosen product already carry. Only asked
 	// once an existing product is picked, and never for an accessory: that is
 	// already one level deep, and an accessory has no accessories of its own.
 	let copyable = $derived(
-		open && product?.id && !parentAssetId
+		open && kind === 'device' && product?.id && !parentAssetId
 			? await getProductAccessoryProfile({ productId: product.id, organizationId })
 			: null
 	);
@@ -130,6 +144,26 @@
 		if (misc) categoryId = misc.id;
 	});
 
+	// A fresh object every time: ProductFields keys its "is the name still the
+	// derived one?" bookkeeping to the draft it was handed.
+	function emptyCableDraft(): ProductDraft {
+		return {
+			name: '',
+			categoryId: '',
+			imagePath: '',
+			netPurchasePrice: undefined,
+			cable: { cableType: '', connectorA: '', connectorB: '', lengthM: '' }
+		};
+	}
+
+	function setKind(next: Kind) {
+		kind = next;
+		// A cable goes without a sticker far more often than with one — the batch
+		// form starts untagged for the same reason. Switching back restores what
+		// this caller defaults to.
+		noTag = next === 'cable' || defaultNoTag;
+	}
+
 	/**
 	 * Call before setting `open` — resets the form and seeds the product. A
 	 * string is whatever was typed into the picker that sent us here, which is
@@ -138,9 +172,11 @@
 	 */
 	export function reset(seedValue: string | NewAssetSeed = '') {
 		const preselected = typeof seedValue === 'string' ? null : seedValue;
+		kind = 'device';
 		manufacturer = preselected?.manufacturer ?? null;
 		product = preselected?.product ?? null;
 		categoryId = '';
+		cableDraft = emptyCableDraft();
 		quantity = 1;
 		tag = '';
 		serial = '';
@@ -160,17 +196,33 @@
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
-		if (!manufacturer?.name.trim()) {
-			toast.error('Please choose or name a manufacturer');
-			return;
-		}
-		if (!product?.name.trim()) {
-			toast.error('Please choose or name a product');
-			return;
-		}
-		if (isNewProduct && !categoryId) {
-			toast.error('A new product needs a category');
-			return;
+		const cable = kind === 'cable' ? cableInputFrom(cableDraft.cable) : null;
+		if (kind === 'cable') {
+			if (!cable) {
+				toast.error('Describe the cable — its ends, a length or a type');
+				return;
+			}
+			if (!cableDraft.name.trim()) {
+				toast.error('Please name the cable');
+				return;
+			}
+			if (!cableDraft.categoryId) {
+				toast.error('A new product needs a category');
+				return;
+			}
+		} else {
+			if (!manufacturer?.name.trim()) {
+				toast.error('Please choose or name a manufacturer');
+				return;
+			}
+			if (!product?.name.trim()) {
+				toast.error('Please choose or name a product');
+				return;
+			}
+			if (isNewProduct && !categoryId) {
+				toast.error('A new product needs a category');
+				return;
+			}
 		}
 		if (locations && !chosenLocationId) {
 			toast.error('Please select a location');
@@ -178,6 +230,25 @@
 		}
 		saving = true;
 		try {
+			const productRef =
+				kind === 'cable'
+					? {
+							// No manufacturer on purpose — see the note at the top.
+							newProductName: cableDraft.name.trim(),
+							newProductImagePath: cableDraft.imagePath || undefined,
+							newProductCable: cable,
+							categoryId: cableDraft.categoryId
+						}
+					: {
+							manufacturerId: manufacturer?.id ?? undefined,
+							newManufacturerName: manufacturer?.id ? undefined : manufacturer?.name.trim(),
+							productId: product?.id ?? undefined,
+							newProductName: product?.id ? undefined : product?.name.trim(),
+							newProductImagePath: product?.id ? undefined : imagePath || undefined,
+							categoryId: product?.id ? undefined : categoryId,
+							copyProductAccessories:
+								copyAccessories && (copyable?.accessories.length ?? 0) > 0 ? true : undefined
+						};
 			const created = await createAssets({
 				organizationId,
 				// Overridden server-side by the parent's or the kit's own location
@@ -185,18 +256,12 @@
 				locationId: chosenLocationId || locationId || '',
 				parentAssetId,
 				bundleId,
-				manufacturerId: manufacturer.id ?? undefined,
-				newManufacturerName: manufacturer.id ? undefined : manufacturer.name.trim(),
-				productId: product.id ?? undefined,
-				newProductName: product.id ? undefined : product.name.trim(),
-				newProductImagePath: product.id ? undefined : imagePath || undefined,
-				categoryId: product.id ? undefined : categoryId,
-				copyProductAccessories:
-					copyAccessories && (copyable?.accessories.length ?? 0) > 0 ? true : undefined,
+				...productRef,
 				items: Array.from({ length: quantity }, () => ({
 					// A serial number and a typed tag identify one physical unit, so
 					// they are only offered when exactly one is being created.
-					serialNumber: quantity === 1 ? serial.trim() || undefined : undefined,
+					serialNumber:
+						quantity === 1 && kind === 'device' ? serial.trim() || undefined : undefined,
 					assetTag: quantity === 1 && !noTag ? tag.trim() || undefined : undefined,
 					noAssetTag: noTag || undefined
 				}))
@@ -213,62 +278,98 @@
 
 <Modal bind:open title={heading} dismissible={!saving} {description}>
 	<form id="new-asset-form" class="space-y-4" onsubmit={handleSubmit}>
-		<div class="space-y-2">
-			<Label>Manufacturer</Label>
-			<CreatableSelect
-				items={manufacturers}
-				value={manufacturer}
-				onchange={handleManufacturer}
-				oncreate={(name) => handleManufacturer({ id: null, name })}
-				placeholder="Search or type a new one…"
+		<!-- Two ways to say what is being registered, not two forms: quantity, tag
+		     and location below are the same either way. -->
+		<div class="flex gap-1 rounded-md border p-1 text-sm">
+			<button
+				type="button"
+				aria-pressed={kind === 'device'}
 				disabled={saving}
-			/>
+				onclick={() => setKind('device')}
+				class="flex-1 rounded px-3 py-1.5 transition-colors {kind === 'device'
+					? 'bg-primary text-primary-foreground'
+					: 'hover:bg-muted'}">Device</button
+			>
+			<button
+				type="button"
+				aria-pressed={kind === 'cable'}
+				disabled={saving}
+				onclick={() => setKind('cable')}
+				class="flex-1 rounded px-3 py-1.5 transition-colors {kind === 'cable'
+					? 'bg-primary text-primary-foreground'
+					: 'hover:bg-muted'}">Cable</button
+			>
 		</div>
 
-		{#if manufacturer}
-			{#key manufacturerKey}
-				<div class="space-y-2">
-					<Label>Product</Label>
-					<CreatableSelect
-						items={manufacturer.id ? productsForManufacturer : []}
-						bind:value={product}
-						placeholder="Search or type a new one…"
-						disabled={saving}
-					/>
-				</div>
-			{/key}
-		{/if}
-
-		{#if isNewProduct}
+		{#if kind === 'device'}
 			<div class="space-y-2">
-				<Label>Category</Label>
-				<CategorySelect {categories} bind:value={categoryId} disabled={saving} />
-				<p class="text-xs text-muted-foreground">
-					"{product?.name}" is new, so it needs a category. It becomes a product like any other —
-					the next unit of it is picked from the list.
-				</p>
-			</div>
-			<div class="space-y-2">
-				<Label>Product photo</Label>
-				<ImageUpload bind:value={imagePath} label="Product photo" />
-			</div>
-		{/if}
-
-		{#if copyable && copyable.accessories.length > 0}
-			<label class="flex items-start gap-2 text-sm">
-				<input
-					type="checkbox"
-					bind:checked={copyAccessories}
+				<Label>Manufacturer</Label>
+				<CreatableSelect
+					items={manufacturers}
+					value={manufacturer}
+					onchange={handleManufacturer}
+					oncreate={(name) => handleManufacturer({ id: null, name })}
+					placeholder="Search or type a new one…"
 					disabled={saving}
-					class="mt-0.5 h-4 w-4 rounded border-input"
 				/>
-				<span>
-					Also create what the other units carry
-					<span class="block text-xs text-muted-foreground">
-						{copyableSummary} — each new unit gets its own, attached.
+			</div>
+
+			{#if manufacturer}
+				{#key manufacturerKey}
+					<div class="space-y-2">
+						<Label>Product</Label>
+						<CreatableSelect
+							items={manufacturer.id ? productsForManufacturer : []}
+							bind:value={product}
+							placeholder="Search or type a new one…"
+							disabled={saving}
+						/>
+					</div>
+				{/key}
+			{/if}
+
+			{#if isNewProduct}
+				<div class="space-y-2">
+					<Label>Category</Label>
+					<CategorySelect {categories} bind:value={categoryId} disabled={saving} />
+					<p class="text-xs text-muted-foreground">
+						"{product?.name}" is new, so it needs a category. It becomes a product like any other —
+						the next unit of it is picked from the list.
+					</p>
+				</div>
+				<div class="space-y-2">
+					<Label>Product photo</Label>
+					<ImageUpload bind:value={imagePath} label="Product photo" />
+				</div>
+			{/if}
+
+			{#if copyable && copyable.accessories.length > 0}
+				<label class="flex items-start gap-2 text-sm">
+					<input
+						type="checkbox"
+						bind:checked={copyAccessories}
+						disabled={saving}
+						class="mt-0.5 h-4 w-4 rounded border-input"
+					/>
+					<span>
+						Also create what the other units carry
+						<span class="block text-xs text-muted-foreground">
+							{copyableSummary} — each new unit gets its own, attached.
+						</span>
 					</span>
-				</span>
-			</label>
+				</label>
+			{/if}
+		{:else}
+			<p class="text-xs text-muted-foreground">
+				No manufacturer to pick: a cable is filed under the generic one, and a cable with the same
+				ends and length already in the catalogue is reused rather than added twice.
+			</p>
+			<ProductFields
+				{categories}
+				bind:value={cableDraft}
+				idPrefix="new-asset-cable"
+				showPrice={false}
+			/>
 		{/if}
 
 		{#if locations}
@@ -316,10 +417,12 @@
 		</p>
 
 		{#if quantity === 1}
-			<div class="space-y-2">
-				<Label for="newAssetSerial">Serial number</Label>
-				<Input id="newAssetSerial" bind:value={serial} disabled={saving} />
-			</div>
+			{#if kind === 'device'}
+				<div class="space-y-2">
+					<Label for="newAssetSerial">Serial number</Label>
+					<Input id="newAssetSerial" bind:value={serial} disabled={saving} />
+				</div>
+			{/if}
 			{#if !noTag}
 				<div class="space-y-2">
 					<Label for="newAssetTag">Asset tag</Label>

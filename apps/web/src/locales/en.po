@@ -4722,6 +4722,7 @@ msgid "Please choose or name a product"
 msgstr "Please choose or name a product"
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 msgid "A new product needs a category"
 msgstr "A new product needs a category"
 
@@ -6279,6 +6280,26 @@ msgstr "Every unit on its own row — click one to open it."
 #: src/routes/assets/+page.svelte
 msgid "All Devices"
 msgstr "All Devices"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Describe the cable — its ends, a length or a type"
+msgstr "Describe the cable — its ends, a length or a type"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Please name the cable"
+msgstr "Please name the cable"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Device"
+msgstr "Device"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Cable"
+msgstr "Cable"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "No manufacturer to pick: a cable is filed under the generic one, and a cable with the same ends and length already in the catalogue is reused rather than added twice."
+msgstr "No manufacturer to pick: a cable is filed under the generic one, and a cable with the same ends and length already in the catalogue is reused rather than added twice."
 
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 msgid "This replaces the current line items with what's booked on the production now. Rates you set on a line are kept for every unit that is still booked."

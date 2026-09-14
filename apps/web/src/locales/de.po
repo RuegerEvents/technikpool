@@ -4722,6 +4722,7 @@ msgid "Please choose or name a product"
 msgstr "Bitte ein Produkt wählen oder eingeben"
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 msgid "A new product needs a category"
 msgstr "Ein neues Produkt braucht eine Kategorie"
 
@@ -6279,6 +6280,26 @@ msgstr "Jedes Gerät in einer eigenen Zeile — klicke darauf, um es zu öffnen.
 #: src/routes/assets/+page.svelte
 msgid "All Devices"
 msgstr "Alle Geräte"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Describe the cable — its ends, a length or a type"
+msgstr "Bitte Stecker, Länge oder Zusatz des Kabels angeben"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Please name the cable"
+msgstr "Bitte einen Namen für das Kabel angeben"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Device"
+msgstr "Gerät"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Cable"
+msgstr "Kabel"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "No manufacturer to pick: a cable is filed under the generic one, and a cable with the same ends and length already in the catalogue is reused rather than added twice."
+msgstr "Kein Hersteller nötig: Kabel werden unter dem generischen Hersteller abgelegt, und ein Kabel mit denselben Steckern und derselben Länge, das schon im Katalog ist, wird wiederverwendet statt doppelt angelegt."
 
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 msgid "This replaces the current line items with what's booked on the production now. Rates you set on a line are kept for every unit that is still booked."
