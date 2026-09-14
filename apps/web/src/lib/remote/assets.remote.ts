@@ -2445,8 +2445,10 @@ export const updateBundle = command(updateBundleSchema, async (input) => {
 	});
 
 	await getBundles(bundle.template.organizationId).refresh();
+	await getBundles().refresh();
 	await getBundle(input.bundleId).refresh();
 	await getAssets(bundle.template.organizationId).refresh();
+	await getAssets().refresh();
 	return updated;
 });
 
@@ -2493,9 +2495,14 @@ export const addAssetToBundle = command(bundleAssetSchema, async ({ bundleId, as
 		await syncAccessories(tx, assetId, updateData);
 	});
 	await getBundleTemplates(bundle.template.organizationId).refresh();
+	await getBundleTemplates().refresh();
 	await getBundles(bundle.template.organizationId).refresh();
+	await getBundles().refresh();
 	await getBundle(bundleId).refresh();
+	// Both variants: the bundle page and the unfiltered Devices list read the
+	// argument-less one, and it stayed stale after a bundle was put together.
 	await getAssets(bundle.template.organizationId).refresh();
+	await getAssets().refresh();
 	return { bundleId, assetId };
 });
 
@@ -2510,9 +2517,14 @@ export const removeAssetFromBundle = command(bundleAssetSchema, async ({ bundleI
 		await syncAccessories(tx, assetId, { bundleId: null });
 	});
 	await getBundleTemplates(bundle.template.organizationId).refresh();
+	await getBundleTemplates().refresh();
 	await getBundles(bundle.template.organizationId).refresh();
+	await getBundles().refresh();
 	await getBundle(bundleId).refresh();
+	// Both variants: the bundle page and the unfiltered Devices list read the
+	// argument-less one, and it stayed stale after a bundle was put together.
 	await getAssets(bundle.template.organizationId).refresh();
+	await getAssets().refresh();
 	return { bundleId, assetId };
 });
 

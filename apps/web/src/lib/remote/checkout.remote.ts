@@ -28,11 +28,15 @@ async function refreshAffected(affected: AffectedRecords) {
 	await Promise.all([
 		...affected.assetIds.map((id) => getAsset(id).refresh()),
 		...affected.organizationIds.map((id) => getAssets(id).refresh()),
+		// The Devices list without an org filter reads the argument-less variant,
+		// which is a cache entry of its own — refreshing only the per-org ones left
+		// a bulk move looking undone until the page was reloaded.
+		getAssets().refresh(),
 		...affected.bundleIds.map((id) => getBundle(id).refresh()),
 		// Only when a bundle actually moved — the org-wide bundle list is a
 		// heavy query and most scans don't touch one.
 		...(affected.bundleIds.length > 0
-			? affected.organizationIds.map((id) => getBundles(id).refresh())
+			? [...affected.organizationIds.map((id) => getBundles(id).refresh()), getBundles().refresh()]
 			: []),
 		...affected.productionIds.map((id) => getProduction(id).refresh())
 	]);
