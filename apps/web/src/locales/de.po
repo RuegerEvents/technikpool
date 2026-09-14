@@ -1263,6 +1263,7 @@ msgstr "Gerät"
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
@@ -2804,6 +2805,7 @@ msgstr "Noch keine Angebote."
 #: src/lib/components/ui/production-hover-card/production-hover-card.svelte
 #: src/routes/invoices/+page.svelte
 #: src/routes/offers/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
 #: src/routes/offers/new/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/new/+page.svelte
@@ -3728,7 +3730,6 @@ msgstr "{0} Tage · {1}"
 #: src/lib/components/ui/customer-select/customer-select.svelte
 #: src/routes/invoices/[id]/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
-#: src/routes/offers/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
 msgid "Edit customer"
 msgstr "Kunde bearbeiten"
@@ -5116,6 +5117,7 @@ msgid "Bundle converted — {0} attached"
 msgstr "Bundle umgewandelt — {0} angehängt"
 
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
 msgid "More actions"
 msgstr "Weitere Aktionen"
 
@@ -6304,3 +6306,21 @@ msgstr "Kein Hersteller nötig: Kabel werden unter dem generischen Hersteller ab
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 msgid "This replaces the current line items with what's booked on the production now. Rates you set on a line are kept for every unit that is still booked."
 msgstr "Dies ersetzt die aktuellen Positionen durch das, was gerade auf der Produktion gebucht ist. An einer Position gesetzte Mietsätze bleiben für alle weiterhin gebuchten Geräte erhalten."
+
+#. 0: offer.customerNumber
+#: src/routes/offers/[id]/+page.svelte
+msgid "Customer no. {0}"
+msgstr "Kundennr. {0}"
+
+#~ msgid "Document"
+#~ msgstr "Dokument"
+
+#~ msgid "A draft until it is finalized — then the PDF is archived and nothing can change."
+#~ msgstr "Entwurf bis zum Finalisieren – danach wird das PDF archiviert und nichts lässt sich mehr ändern."
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Edit discount"
+msgstr "Rabatt bearbeiten"
+
+#~ msgid "Discount<0/>"
+#~ msgstr ""

@@ -10,6 +10,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { DropdownMenu } from 'bits-ui';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
@@ -81,6 +82,16 @@
 		start: offer.production?.showStartDate ?? offer.production?.startDate ?? null,
 		end: offer.production?.showEndDate ?? offer.production?.endDate ?? null
 	});
+
+	// The address is stored as one string — newline- or "·"-separated depending on
+	// where it came from. Split the same way the PDF does, so the card shows the
+	// lines the customer will see.
+	let customerAddressLines = $derived(
+		offer.customerAddress
+			?.split(/\r?\n|\s+·\s+/)
+			.map((line) => line.trim())
+			.filter(Boolean) ?? []
+	);
 
 	let customers = $derived(await getCustomers(offer.organizationId));
 
@@ -217,6 +228,8 @@
 				{/if}
 			</p>
 		</div>
+		<!-- What moves the offer along stays up here; copying and deleting are
+		     rare enough to live behind the menu. -->
 		<div class="flex flex-wrap gap-2">
 			{#if offer.production}
 				<Button
@@ -227,37 +240,85 @@
 					Back to equipment
 				</Button>
 			{/if}
-			{#if offer.pdfPath}<Button
+			{#if offer.pdfPath}
+				<Button
 					icon="download"
 					variant="outline"
 					href={`/api/billing-documents/offers/${offerId}`}
 					target="_blank">Open archived PDF</Button
-				>{:else}<Button
+				>
+			{:else}
+				<Button
 					icon="print"
 					variant="outline"
 					href={`/api/billing-documents/offers/${offerId}`}
 					target="_blank">Preview PDF</Button
-				>{/if}
-			{#if !offer.finalizedAt}<Button icon="edit" variant="outline" onclick={openEditCustomer}
-					>Edit customer</Button
-				><Button disabled={finalizing} onclick={handleFinalize}
+				>
+			{/if}
+			{#if !offer.finalizedAt}
+				<Button disabled={finalizing} onclick={handleFinalize}
 					>{finalizing ? 'Finalizing…' : 'Finalize offer'}</Button
-				>{/if}
-			<Button variant="outline" onclick={() => (copyOpen = true)}>Copy to new customer</Button>
-			{#if offer.invoices.length === 0}<Button
-					variant="destructive"
-					disabled={deleting}
-					onclick={handleDelete}>{deleting ? 'Deleting…' : 'Delete offer'}</Button
-				>{/if}
-			{#if offer.invoices.length === 0}
-				<Button disabled={converting || !offer.finalizedAt} onclick={() => (convertOpen = true)}>
-					Convert to invoice
-				</Button>
-			{:else}
+				>
+			{/if}
+			{#if offer.invoices.length > 0}
 				<Button variant="outline" href={resolve(`/invoices/${offer.invoices[0].id}`)}>
 					View invoice {offer.invoices[0].number}
 				</Button>
+			{:else if offer.finalizedAt}
+				<!-- A draft can't be converted, so there is nothing to offer until it
+				     is finalized. -->
+				<Button disabled={converting} onclick={() => (convertOpen = true)}>
+					Convert to invoice
+				</Button>
 			{/if}
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger>
+					{#snippet child({ props })}
+						<button
+							{...props}
+							type="button"
+							class="flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+							aria-label="More actions"
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="18"
+								height="18"
+								viewBox="0 0 24 24"
+								fill="currentColor"
+							>
+								<circle cx="5" cy="12" r="1.75" />
+								<circle cx="12" cy="12" r="1.75" />
+								<circle cx="19" cy="12" r="1.75" />
+							</svg>
+						</button>
+					{/snippet}
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Portal>
+					<DropdownMenu.Content
+						align="end"
+						sideOffset={4}
+						class="z-50 min-w-[190px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+					>
+						<DropdownMenu.Item
+							onSelect={() => (copyOpen = true)}
+							class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+						>
+							Copy to new customer
+						</DropdownMenu.Item>
+						{#if offer.invoices.length === 0}
+							<DropdownMenu.Separator class="my-1 h-px bg-border" />
+							<DropdownMenu.Item
+								disabled={deleting}
+								onSelect={handleDelete}
+								class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm text-destructive transition-colors outline-none hover:bg-destructive/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-destructive/10"
+							>
+								{deleting ? 'Deleting…' : 'Delete offer'}
+							</DropdownMenu.Item>
+						{/if}
+					</DropdownMenu.Content>
+				</DropdownMenu.Portal>
+			</DropdownMenu.Root>
 		</div>
 	</div>
 	{#if offer.finalizedAt}<Card.Root class="bg-muted/30"
@@ -281,98 +342,6 @@
 			await updateDocumentOrgSnapshot({ id: offerId, kind: 'offer' });
 		}}
 	/>
-	<Card.Root
-		><Card.Header
-			><Card.Title>Document text</Card.Title><Card.Description
-				>Copied from the organization preset and editable for this offer.</Card.Description
-			></Card.Header
-		><Card.Content
-			>{#if offer.finalizedAt}<div class="space-y-4 text-sm">
-					<p class="whitespace-pre-line">{offer.introText}</p>
-					<p class="whitespace-pre-line">{offer.closingText}</p>
-				</div>{:else}<form class="space-y-4" onsubmit={saveText}>
-					<div class="space-y-2">
-						<Label for="offerIntroText">Introduction</Label><textarea
-							id="offerIntroText"
-							bind:value={introTextDraft}
-							rows="3"
-							class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
-					</div>
-					<div class="space-y-2">
-						<Label for="offerClosingText">Closing text</Label><textarea
-							id="offerClosingText"
-							bind:value={closingTextDraft}
-							rows="3"
-							class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
-					</div>
-					<div class="max-w-48 space-y-2">
-						<Label for="offerTerms">Payment term (days)</Label><Input
-							id="offerTerms"
-							type="number"
-							min="0"
-							bind:value={paymentTermsDraft}
-						/>
-					</div>
-					<Button icon="save" type="submit" disabled={savingText}
-						>{savingText ? 'Saving…' : 'Save text'}</Button
-					>
-				</form>{/if}</Card.Content
-		></Card.Root
-	>
-
-	<Modal bind:open={editCustomerOpen} title="Edit customer" size="lg" dismissible={!savingCustomer}>
-		{#snippet description()}
-			The selected customer's details are copied onto this offer.
-		{/snippet}
-
-		<form class="space-y-4" onsubmit={handleSaveCustomer}>
-			<CustomerSelect
-				organizationId={offer.organizationId}
-				bind:value={editCustomerId}
-				id="offer-edit-customer"
-				idPrefix="offer-edit-cust"
-				onChange={(c) => (editCustomerSelected = c)}
-			/>
-		</form>
-
-		{#snippet footer()}
-			<Button
-				icon="close"
-				variant="outline"
-				disabled={savingCustomer}
-				onclick={() => (editCustomerOpen = false)}
-			>
-				Cancel
-			</Button>
-			<Button icon="save" disabled={savingCustomer || !editCustomerId} onclick={handleSaveCustomer}>
-				{savingCustomer ? 'Saving…' : 'Save'}
-			</Button>
-		{/snippet}
-	</Modal>
-
-	<Modal bind:open={copyOpen} title="Copy to new customer" size="lg" dismissible={!copying}>
-		{#snippet description()}
-			Duplicates all line items into a new offer for the selected customer.
-		{/snippet}
-
-		<form class="space-y-4" onsubmit={handleCopy}>
-			<CustomerSelect
-				organizationId={offer.organizationId}
-				bind:value={copyCustomerId}
-				id="offer-copy-customer"
-				idPrefix="offer-copy-cust"
-			/>
-		</form>
-
-		{#snippet footer()}
-			<Button icon="close" variant="outline" disabled={copying} onclick={() => (copyOpen = false)}>
-				Cancel
-			</Button>
-			<Button icon="copy" disabled={copying || !copyCustomerId} onclick={handleCopy}>
-				{copying ? 'Copying…' : 'Copy'}
-			</Button>
-		{/snippet}
-	</Modal>
 
 	<BillingDocument
 		items={offer.items}
@@ -396,8 +365,136 @@
 			const updatedOffer = await updateOfferItemRate({ offerItemIds: itemIds, ratePercent });
 			getOffer(offerId).set(updatedOffer);
 		}}
-	/>
+	>
+		{#snippet asideTop()}
+			<Card.Root>
+				<Card.Header>
+					<Card.Title>Customer</Card.Title>
+					{#if !offer.finalizedAt}
+						<Card.Action>
+							<Button size="sm" variant="outline" icon="edit" onclick={openEditCustomer}
+								>Edit</Button
+							>
+						</Card.Action>
+					{/if}
+				</Card.Header>
+				<Card.Content class="space-y-1 text-sm">
+					<p class="font-medium">{offer.customerName}</p>
+					{#if offer.customerContactPerson}
+						<p>{offer.customerContactPerson}</p>
+					{/if}
+					{#each customerAddressLines as line, i (i)}
+						<p class="text-muted-foreground">{line}</p>
+					{/each}
+					{#if offer.customerEmail}
+						<p class="pt-1 text-muted-foreground">{offer.customerEmail}</p>
+					{/if}
+					{#if offer.customerPhone}
+						<p class="text-muted-foreground">{offer.customerPhone}</p>
+					{/if}
+					{#if offer.customerNumber}
+						<p class="pt-1 text-xs text-muted-foreground">Customer no. {offer.customerNumber}</p>
+					{/if}
+				</Card.Content>
+			</Card.Root>
+		{/snippet}
+
+		{#snippet afterItems()}
+			<Card.Root
+				><Card.Header
+					><Card.Title>Document text</Card.Title><Card.Description
+						>Copied from the organization preset and editable for this offer.</Card.Description
+					></Card.Header
+				><Card.Content
+					>{#if offer.finalizedAt}<div class="space-y-4 text-sm">
+							<p class="whitespace-pre-line">{offer.introText}</p>
+							<p class="whitespace-pre-line">{offer.closingText}</p>
+						</div>{:else}<form class="space-y-4" onsubmit={saveText}>
+							<div class="space-y-2">
+								<Label for="offerIntroText">Introduction</Label><textarea
+									id="offerIntroText"
+									bind:value={introTextDraft}
+									rows="3"
+									class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+							</div>
+							<div class="space-y-2">
+								<Label for="offerClosingText">Closing text</Label><textarea
+									id="offerClosingText"
+									bind:value={closingTextDraft}
+									rows="3"
+									class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+							</div>
+							<div class="max-w-48 space-y-2">
+								<Label for="offerTerms">Payment term (days)</Label><Input
+									id="offerTerms"
+									type="number"
+									min="0"
+									bind:value={paymentTermsDraft}
+								/>
+							</div>
+							<Button icon="save" type="submit" disabled={savingText}
+								>{savingText ? 'Saving…' : 'Save text'}</Button
+							>
+						</form>{/if}</Card.Content
+				></Card.Root
+			>
+		{/snippet}
+	</BillingDocument>
 </div>
+
+<Modal bind:open={editCustomerOpen} title="Edit customer" size="lg" dismissible={!savingCustomer}>
+	{#snippet description()}
+		The selected customer's details are copied onto this offer.
+	{/snippet}
+
+	<form class="space-y-4" onsubmit={handleSaveCustomer}>
+		<CustomerSelect
+			organizationId={offer.organizationId}
+			bind:value={editCustomerId}
+			id="offer-edit-customer"
+			idPrefix="offer-edit-cust"
+			onChange={(c) => (editCustomerSelected = c)}
+		/>
+	</form>
+
+	{#snippet footer()}
+		<Button
+			icon="close"
+			variant="outline"
+			disabled={savingCustomer}
+			onclick={() => (editCustomerOpen = false)}
+		>
+			Cancel
+		</Button>
+		<Button icon="save" disabled={savingCustomer || !editCustomerId} onclick={handleSaveCustomer}>
+			{savingCustomer ? 'Saving…' : 'Save'}
+		</Button>
+	{/snippet}
+</Modal>
+
+<Modal bind:open={copyOpen} title="Copy to new customer" size="lg" dismissible={!copying}>
+	{#snippet description()}
+		Duplicates all line items into a new offer for the selected customer.
+	{/snippet}
+
+	<form class="space-y-4" onsubmit={handleCopy}>
+		<CustomerSelect
+			organizationId={offer.organizationId}
+			bind:value={copyCustomerId}
+			id="offer-copy-customer"
+			idPrefix="offer-copy-cust"
+		/>
+	</form>
+
+	{#snippet footer()}
+		<Button icon="close" variant="outline" disabled={copying} onclick={() => (copyOpen = false)}>
+			Cancel
+		</Button>
+		<Button icon="copy" disabled={copying || !copyCustomerId} onclick={handleCopy}>
+			{copying ? 'Copying…' : 'Copy'}
+		</Button>
+	{/snippet}
+</Modal>
 
 <Modal bind:open={convertOpen} title="Convert to invoice" dismissible={!converting}>
 	{#snippet description()}

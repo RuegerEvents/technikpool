@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -21,8 +22,14 @@
 		onSaveDayCount,
 		onSaveDiscount,
 		onSaveItemRate,
-		categoryRates = []
+		categoryRates = [],
+		afterItems,
+		asideTop
 	}: {
+		/** Rendered under the line items, in the wide column. */
+		afterItems?: Snippet;
+		/** Rendered above the day count, at the top of the side column. */
+		asideTop?: Snippet;
 		items: BillingItem[];
 		emptyMessage: string;
 		editable: boolean;
@@ -71,6 +78,12 @@
 	// ── Day count ──
 	let dayCountDraft = $derived(String(dayCount));
 	let savingDayCount = $state(false);
+	// Same rule as the discount: Save only for a different, valid count.
+	let dayCountDirty = $derived(
+		String(dayCountDraft).trim() !== '' &&
+			Number(dayCountDraft) >= 1 &&
+			Number(dayCountDraft) !== dayCount
+	);
 	async function saveDayCount() {
 		savingDayCount = true;
 		try {
@@ -106,6 +119,40 @@
 		return Math.max(0, subtotal - netTarget);
 	});
 
+	// Save only appears once the draft says something the document doesn't. The
+	// drafts are reset from the props after a save, which is also what hides it
+	// again. "Until" is compared by the discount it works out to, since that is
+	// all that gets stored.
+	let discountDirty = $derived.by(() => {
+		const differs = (a: number, b: number | null) => b == null || Math.abs(a - b) > 0.000001;
+		switch (discountTypeDraft) {
+			case 'NONE':
+				return discountType != null;
+			case 'UNTIL':
+				return (
+					untilComputedDiscount != null &&
+					(discountType !== 'AMOUNT' || differs(untilComputedDiscount, discountValue))
+				);
+			default:
+				if (discountTypeDraft !== discountType) return true;
+				return (
+					discountValueDraft.trim() !== '' && differs(Number(discountValueDraft), discountValue)
+				);
+		}
+	});
+
+	// The discount is a single line of the totals until someone reaches for the
+	// pen; closing it again throws away whatever wasn't saved.
+	let editingDiscount = $state(false);
+	function toggleDiscountEditor() {
+		if (editingDiscount) {
+			discountTypeDraft = discountType ?? 'NONE';
+			discountValueDraft = discountValue?.toString() ?? '';
+			untilTargetDraft = '';
+		}
+		editingDiscount = !editingDiscount;
+	}
+
 	async function saveDiscount() {
 		if (discountTypeDraft === 'UNTIL' && untilComputedDiscount == null) {
 			toast.error('Enter a target amount');
@@ -122,6 +169,8 @@
 				);
 			}
 			toast.success('Discount updated');
+			editingDiscount = false;
+			untilTargetDraft = '';
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {
@@ -273,9 +322,13 @@
 				</table>
 			</div>
 		{/if}
+		{#if afterItems}
+			<div class="mt-6">{@render afterItems()}</div>
+		{/if}
 	</div>
 
 	<div class="space-y-4">
+		{@render asideTop?.()}
 		<Card.Root>
 			<Card.Header>
 				<Card.Title>Day count</Card.Title>
@@ -302,9 +355,11 @@
 				{#if editable}
 					<div class="flex items-center gap-2 border-t pt-3">
 						<Input type="number" min="1" bind:value={dayCountDraft} class="w-24" />
-						<Button size="sm" variant="outline" disabled={savingDayCount} onclick={saveDayCount}
-							>Save</Button
-						>
+						{#if dayCountDirty || savingDayCount}
+							<Button size="sm" variant="outline" disabled={savingDayCount} onclick={saveDayCount}
+								>Save</Button
+							>
+						{/if}
 					</div>
 					<p class="text-xs text-muted-foreground">Applies to all line items.</p>
 				{:else}
@@ -312,58 +367,6 @@
 				{/if}
 			</Card.Content>
 		</Card.Root>
-
-		{#if editable}
-			<Card.Root>
-				<Card.Header>
-					<Card.Title>Discount</Card.Title>
-				</Card.Header>
-				<Card.Content class="space-y-3">
-					<select
-						bind:value={discountTypeDraft}
-						class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
-					>
-						<option value="NONE">No discount</option>
-						<option value="PERCENT">Percent</option>
-						<option value="AMOUNT">Amount (€)</option>
-						<option value="UNTIL">Until (fixed price)</option>
-					</select>
-					{#if discountTypeDraft === 'PERCENT' || discountTypeDraft === 'AMOUNT'}
-						<Input type="number" min="0" step="0.01" bind:value={discountValueDraft} />
-					{:else if discountTypeDraft === 'UNTIL'}
-						<div class="space-y-2">
-							<div class="flex items-center gap-2">
-								<Input
-									type="number"
-									min="0"
-									step="0.01"
-									placeholder="Target price"
-									bind:value={untilTargetDraft}
-									class="flex-1"
-								/>
-								{#if !noVat}
-									<select
-										bind:value={untilMode}
-										class="h-10 rounded-md border border-input bg-background px-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
-									>
-										<option value="NET">Net</option>
-										<option value="GROSS">Gross</option>
-									</select>
-								{/if}
-							</div>
-							{#if untilComputedDiscount != null}
-								<p class="text-xs text-muted-foreground">
-									Computed discount: {fmtEUR(untilComputedDiscount)}
-								</p>
-							{/if}
-						</div>
-					{/if}
-					<Button size="sm" variant="outline" disabled={savingDiscount} onclick={saveDiscount}
-						>Save</Button
-					>
-				</Card.Content>
-			</Card.Root>
-		{/if}
 
 		<Card.Root>
 			<Card.Header>
@@ -373,7 +376,97 @@
 				<div class="flex justify-between">
 					<span>Subtotal</span><span>{fmtEUR(subtotal)}</span>
 				</div>
-				{#if discountAmount > 0}
+				<!-- The discount is edited on the line it produces, so the effect of a
+				     change can be read off right where it is made. -->
+				{#if editable}
+					<div class="space-y-1.5">
+						<div class="flex items-center justify-between text-muted-foreground">
+							<!-- The label in its own span, so the catalogue keeps the plain
+							     "Discount" rather than a message with the button inside it. -->
+							<span class="inline-flex items-center gap-1"
+								><span>Discount</span><button
+									type="button"
+									onclick={toggleDiscountEditor}
+									aria-expanded={editingDiscount}
+									title="Edit discount"
+									class="flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-muted hover:text-foreground {editingDiscount
+										? 'bg-muted text-foreground'
+										: ''}"
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="13"
+										height="13"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+									>
+										<path
+											d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+										/>
+										<path d="m15 5 4 4" />
+									</svg>
+								</button></span
+							><span>{discountAmount > 0 ? `−${fmtEUR(discountAmount)}` : '—'}</span>
+						</div>
+						{#if editingDiscount}
+							<div class="flex flex-wrap items-center gap-1.5">
+								<select
+									bind:value={discountTypeDraft}
+									class="h-8 min-w-0 flex-1 rounded-md border border-input bg-background px-2 text-xs focus:ring-2 focus:ring-ring focus:outline-none"
+								>
+									<option value="NONE">No discount</option>
+									<option value="PERCENT">Percent</option>
+									<option value="AMOUNT">Amount (€)</option>
+									<option value="UNTIL">Until (fixed price)</option>
+								</select>
+								{#if discountTypeDraft === 'PERCENT' || discountTypeDraft === 'AMOUNT'}
+									<Input
+										type="number"
+										min="0"
+										step="0.01"
+										bind:value={discountValueDraft}
+										class="h-8 w-20 text-right text-xs"
+									/>
+								{:else if discountTypeDraft === 'UNTIL'}
+									<Input
+										type="number"
+										min="0"
+										step="0.01"
+										placeholder="Target price"
+										bind:value={untilTargetDraft}
+										class="h-8 w-24 text-right text-xs"
+									/>
+									{#if !noVat}
+										<select
+											bind:value={untilMode}
+											class="h-8 rounded-md border border-input bg-background px-1.5 text-xs focus:ring-2 focus:ring-ring focus:outline-none"
+										>
+											<option value="NET">Net</option>
+											<option value="GROSS">Gross</option>
+										</select>
+									{/if}
+								{/if}
+								{#if discountDirty || savingDiscount}
+									<Button
+										size="sm"
+										variant="outline"
+										disabled={savingDiscount}
+										onclick={saveDiscount}>Save</Button
+									>
+								{/if}
+							</div>
+							{#if discountTypeDraft === 'UNTIL' && untilComputedDiscount != null}
+								<p class="text-xs text-muted-foreground">
+									Computed discount: {fmtEUR(untilComputedDiscount)}
+								</p>
+							{/if}
+						{/if}
+					</div>
+				{:else if discountAmount > 0}
 					<div class="flex justify-between text-muted-foreground">
 						<span>Discount</span><span>−{fmtEUR(discountAmount)}</span>
 					</div>
