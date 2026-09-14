@@ -437,6 +437,22 @@ function billingLineKey(assetId: string | null, bundleId: string | null, descrip
 	return assetId ?? (bundleId ? `bundle:${bundleId}` : description);
 }
 
+const toCents = (value: number) => Math.round(value * 100) / 100;
+
+/**
+ * A line's rate, daily rate and total, rounded the way their columns store them
+ * (Decimal(5,2) and Decimal(10,2)). Every writer and both staleness checks go
+ * through this one function. When the writers rounded at different points — the
+ * rate here, the daily rate there, the total only in the database — a line
+ * recomputed from its own stored values could come out a cent off and read as
+ * changed, which is how the "out of date" banner came back after a rate edit.
+ */
+function priceLine(netPurchasePrice: number, ratePercent: number, dayCount: number) {
+	const rate = toCents(ratePercent);
+	const daily = netPurchasePrice * (rate / 100);
+	return { ratePercent: rate, dailyRate: toCents(daily), lineTotal: toCents(daily * dayCount) };
+}
+
 type DiffLine = { key: string; description: string; lineTotal: number };
 type ChangedLine = { key: string; description: string; before: number; after: number };
 type Staleness = {
@@ -590,9 +606,7 @@ export const createOfferFromProduction = command(createOfferSchema, async (data)
 		categoryColor: line.categoryColor,
 		description: line.description,
 		netPurchasePrice: line.netPurchasePrice,
-		ratePercent: line.ratePercent,
-		dailyRate: line.dailyRate,
-		lineTotal: line.dailyRate * dayCount
+		...priceLine(line.netPurchasePrice, line.ratePercent, dayCount)
 	}));
 
 	const offer = await prisma.$transaction(async (tx) => {
@@ -702,7 +716,7 @@ export const getOfferStaleness = query(v.string(), async (offerId: string) => {
 		return {
 			key,
 			description: line.productLabel,
-			lineTotal: line.netPurchasePrice * (ratePercent / 100) * offer.dayCount
+			lineTotal: priceLine(line.netPurchasePrice, ratePercent, offer.dayCount).lineTotal
 		};
 	});
 
@@ -717,7 +731,10 @@ export const getOfferStaleness = query(v.string(), async (offerId: string) => {
 });
 
 export const updateOfferItemsFromProduction = command(v.string(), async (offerId: string) => {
-	const offer = await prisma.offer.findUniqueOrThrow({ where: { id: offerId } });
+	const offer = await prisma.offer.findUniqueOrThrow({
+		where: { id: offerId },
+		include: { items: true }
+	});
 	await requireOrgManageAccess(offer.organizationId);
 	if (offer.finalizedAt) throw new Error('This offer is finalized and immutable');
 
@@ -726,6 +743,16 @@ export const updateOfferItemsFromProduction = command(v.string(), async (offerId
 	}
 
 	const lines = await computeProductionBillingLines(offer.productionId, offer.assetScope);
+	// The same rule getOfferStaleness applies: a rate set on a line belongs to
+	// the document, so a unit that is still booked keeps it. Only lines new to
+	// the production take their category's rate. Rebuilding every line from the
+	// category rates is what used to throw away every custom rate on update.
+	const storedRates = new Map(
+		offer.items.map((item) => [
+			billingLineKey(item.assetId, item.bundleId, item.description),
+			Number(item.ratePercent)
+		])
+	);
 	const itemsData = lines.map((line) => ({
 		assetId: line.assetId,
 		bundleId: line.bundleId,
@@ -737,9 +764,12 @@ export const updateOfferItemsFromProduction = command(v.string(), async (offerId
 		categoryColor: line.categoryColor,
 		description: line.description,
 		netPurchasePrice: line.netPurchasePrice,
-		ratePercent: line.ratePercent,
-		dailyRate: line.dailyRate,
-		lineTotal: line.dailyRate * offer.dayCount
+		...priceLine(
+			line.netPurchasePrice,
+			storedRates.get(billingLineKey(line.assetId, line.bundleId, line.description)) ??
+				line.ratePercent,
+			offer.dayCount
+		)
 	}));
 
 	await prisma.$transaction([
@@ -749,6 +779,8 @@ export const updateOfferItemsFromProduction = command(v.string(), async (offerId
 
 	await getOffer(offerId).refresh();
 	await getOffers().refresh();
+	// The banner reads this, and nothing else tells it the update happened.
+	await getOfferStaleness(offerId).refresh();
 });
 
 const updateOfferDayCountSchema = v.object({ offerId: v.string(), dayCount: v.number() });
@@ -768,13 +800,17 @@ export const updateOfferDayCount = command(
 			...offer.items.map((item) =>
 				prisma.offerItem.update({
 					where: { id: item.id },
-					data: { lineTotal: Number(item.dailyRate) * dayCount }
+					// From price and rate rather than the stored, already-rounded daily
+					// rate: multiplied by the days, that rounding grew into cents the
+					// staleness check then read as a change.
+					data: priceLine(Number(item.netPurchasePrice), Number(item.ratePercent), dayCount)
 				})
 			)
 		]);
 
 		await getOffer(offerId).refresh();
 		await getOffers().refresh();
+		await getOfferStaleness(offerId).refresh();
 	}
 );
 
@@ -800,14 +836,14 @@ export const updateOfferItemRate = command(
 		if (items[0].offer.finalizedAt) throw new Error('This offer is finalized and immutable');
 
 		await prisma.$transaction(
-			items.map((item) => {
-				const dailyRate = Number(item.netPurchasePrice) * (ratePercent / 100);
-				return prisma.offerItem.update({
+			items.map((item) =>
+				prisma.offerItem.update({
 					where: { id: item.id },
-					data: { ratePercent, dailyRate, lineTotal: dailyRate * item.offer.dayCount }
-				});
-			})
+					data: priceLine(Number(item.netPurchasePrice), ratePercent, item.offer.dayCount)
+				})
+			)
 		);
+		await getOfferStaleness(offerIds[0]).refresh();
 
 		// Return the committed document so the caller can replace its active
 		// query value directly. A refresh alone can update only the cache while an
@@ -1212,11 +1248,26 @@ export const getInvoiceStaleness = query(v.string(), async (invoiceId: string) =
 		} satisfies Staleness;
 	}
 
-	const current: DiffLine[] = lines.map((line) => ({
-		key: billingLineKey(line.assetId, line.bundleId, line.description),
-		description: line.description,
-		lineTotal: line.dailyRate * invoice.dayCount
-	}));
+	// A rate set on a line is the document's, exactly as on an offer — see
+	// getOfferStaleness.
+	const storedRates = new Map(
+		invoice.items.map((item) => [
+			billingLineKey(item.assetId, item.bundleId, item.description),
+			Number(item.ratePercent)
+		])
+	);
+	const current: DiffLine[] = lines.map((line) => {
+		const key = billingLineKey(line.assetId, line.bundleId, line.description);
+		return {
+			key,
+			description: line.description,
+			lineTotal: priceLine(
+				line.netPurchasePrice,
+				storedRates.get(key) ?? line.ratePercent,
+				invoice.dayCount
+			).lineTotal
+		};
+	});
 
 	const { added, removed, changed } = diffBillingLines(stored, current);
 	return {
@@ -1229,7 +1280,10 @@ export const getInvoiceStaleness = query(v.string(), async (invoiceId: string) =
 });
 
 export const updateInvoiceItemsFromProduction = command(v.string(), async (invoiceId: string) => {
-	const invoice = await prisma.invoice.findUniqueOrThrow({ where: { id: invoiceId } });
+	const invoice = await prisma.invoice.findUniqueOrThrow({
+		where: { id: invoiceId },
+		include: { items: true }
+	});
 	await requireOrgManageAccess(invoice.organizationId);
 
 	if (invoice.sentAt) {
@@ -1240,6 +1294,13 @@ export const updateInvoiceItemsFromProduction = command(v.string(), async (invoi
 	}
 
 	const lines = await computeProductionBillingLines(invoice.productionId, invoice.assetScope);
+	// Custom rates survive the update — see updateOfferItemsFromProduction.
+	const storedRates = new Map(
+		invoice.items.map((item) => [
+			billingLineKey(item.assetId, item.bundleId, item.description),
+			Number(item.ratePercent)
+		])
+	);
 	const itemsData = lines.map((line) => ({
 		assetId: line.assetId,
 		bundleId: line.bundleId,
@@ -1251,9 +1312,12 @@ export const updateInvoiceItemsFromProduction = command(v.string(), async (invoi
 		categoryColor: line.categoryColor,
 		description: line.description,
 		netPurchasePrice: line.netPurchasePrice,
-		ratePercent: line.ratePercent,
-		dailyRate: line.dailyRate,
-		lineTotal: line.dailyRate * invoice.dayCount
+		...priceLine(
+			line.netPurchasePrice,
+			storedRates.get(billingLineKey(line.assetId, line.bundleId, line.description)) ??
+				line.ratePercent,
+			invoice.dayCount
+		)
 	}));
 
 	await prisma.$transaction([
@@ -1263,6 +1327,7 @@ export const updateInvoiceItemsFromProduction = command(v.string(), async (invoi
 
 	await getInvoice(invoiceId).refresh();
 	await getInvoices().refresh();
+	await getInvoiceStaleness(invoiceId).refresh();
 });
 
 export const finalizeInvoice = command(v.string(), async (invoiceId: string) => {
@@ -1394,13 +1459,15 @@ export const updateInvoiceDayCount = command(
 			...invoice.items.map((item) =>
 				prisma.invoiceItem.update({
 					where: { id: item.id },
-					data: { lineTotal: Number(item.dailyRate) * dayCount }
+					// See updateOfferDayCount for why this isn't the stored daily rate.
+					data: priceLine(Number(item.netPurchasePrice), Number(item.ratePercent), dayCount)
 				})
 			)
 		]);
 
 		await getInvoice(invoiceId).refresh();
 		await getInvoices().refresh();
+		await getInvoiceStaleness(invoiceId).refresh();
 	}
 );
 
@@ -1426,16 +1493,16 @@ export const updateInvoiceItemRate = command(
 		}
 
 		await prisma.$transaction(
-			items.map((item) => {
-				const dailyRate = Number(item.netPurchasePrice) * (ratePercent / 100);
-				return prisma.invoiceItem.update({
+			items.map((item) =>
+				prisma.invoiceItem.update({
 					where: { id: item.id },
-					data: { ratePercent, dailyRate, lineTotal: dailyRate * item.invoice.dayCount }
-				});
-			})
+					data: priceLine(Number(item.netPurchasePrice), ratePercent, item.invoice.dayCount)
+				})
+			)
 		);
 
 		await getInvoice(invoiceIds[0]).refresh();
+		await getInvoiceStaleness(invoiceIds[0]).refresh();
 	}
 );
 

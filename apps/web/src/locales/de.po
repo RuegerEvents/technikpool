@@ -3640,9 +3640,8 @@ msgstr "Prüfen & Aktualisieren"
 msgid "Update items"
 msgstr "Positionen aktualisieren"
 
-#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
-msgid "This replaces the current line items with what's booked on the production now."
-msgstr "Dies ersetzt die aktuellen Positionen durch das, was gerade auf der Produktion gebucht ist."
+#~ msgid "This replaces the current line items with what's booked on the production now."
+#~ msgstr "Dies ersetzt die aktuellen Positionen durch das, was gerade auf der Produktion gebucht ist."
 
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 msgid "Removed"
@@ -6280,3 +6279,7 @@ msgstr "Jedes Gerät in einer eigenen Zeile — klicke darauf, um es zu öffnen.
 #: src/routes/assets/+page.svelte
 msgid "All Devices"
 msgstr "Alle Geräte"
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "This replaces the current line items with what's booked on the production now. Rates you set on a line are kept for every unit that is still booked."
+msgstr "Dies ersetzt die aktuellen Positionen durch das, was gerade auf der Produktion gebucht ist. An einer Position gesetzte Mietsätze bleiben für alle weiterhin gebuchten Geräte erhalten."

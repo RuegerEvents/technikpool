@@ -58,7 +58,8 @@
 
 <Modal bind:open title="Update items" size="lg">
 	{#snippet description()}
-		This replaces the current line items with what's booked on the production now.
+		This replaces the current line items with what's booked on the production now. Rates you set on
+		a line are kept for every unit that is still booked.
 	{/snippet}
 	<div class="space-y-3 text-sm">
 		{#if staleness.added.length > 0}

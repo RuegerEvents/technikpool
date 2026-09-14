@@ -3640,9 +3640,8 @@ msgstr "Review & Update"
 msgid "Update items"
 msgstr "Update items"
 
-#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
-msgid "This replaces the current line items with what's booked on the production now."
-msgstr "This replaces the current line items with what's booked on the production now."
+#~ msgid "This replaces the current line items with what's booked on the production now."
+#~ msgstr "This replaces the current line items with what's booked on the production now."
 
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 msgid "Removed"
@@ -6280,3 +6279,7 @@ msgstr "Every unit on its own row — click one to open it."
 #: src/routes/assets/+page.svelte
 msgid "All Devices"
 msgstr "All Devices"
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "This replaces the current line items with what's booked on the production now. Rates you set on a line are kept for every unit that is still booked."
+msgstr "This replaces the current line items with what's booked on the production now. Rates you set on a line are kept for every unit that is still booked."
