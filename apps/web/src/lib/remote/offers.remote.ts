@@ -454,7 +454,25 @@ function priceLine(netPurchasePrice: number, ratePercent: number, dayCount: numb
 }
 
 type DiffLine = { key: string; description: string; lineTotal: number };
-type ChangedLine = { key: string; description: string; before: number; after: number };
+type SnapshotCategory = {
+	id: string | null;
+	name: string | null;
+	nameDe: string | null;
+	color: string | null;
+};
+type ChangedLine = {
+	key: string;
+	description: string;
+	before: number;
+	after: number;
+	priceChanged: boolean;
+	// Set only when that part of the line moved, so the update dialog can show
+	// what a rename or recategorisation rewrites rather than an unchanged price.
+	textBefore: string | null;
+	textAfter: string | null;
+	categoryBefore: SnapshotCategory | null;
+	categoryAfter: SnapshotCategory | null;
+};
 type Staleness = {
 	applicable: boolean;
 	stale: boolean;
@@ -464,9 +482,46 @@ type Staleness = {
 	changed: ChangedLine[];
 };
 
-function diffBillingLines(stored: DiffLine[], current: DiffLine[]) {
+/**
+ * Everything a line prints besides its price. A rename leaves the total alone,
+ * so a check on totals never saw one: a draft kept printing the old product
+ * name with no hint that the catalog had moved on.
+ */
+type LineSnapshot = {
+	description: string;
+	productLabel: string | null;
+	category: SnapshotCategory;
+};
+type ComparableLine = DiffLine & { snapshot: LineSnapshot };
+
+function lineSnapshot(line: {
+	description: string;
+	productLabel: string | null;
+	categoryId: string | null;
+	categoryName: string | null;
+	categoryNameDe: string | null;
+	categoryColor: string | null;
+}): LineSnapshot {
+	return {
+		description: line.description,
+		productLabel: line.productLabel,
+		category: {
+			id: line.categoryId,
+			name: line.categoryName,
+			nameDe: line.categoryNameDe,
+			color: line.categoryColor
+		}
+	};
+}
+
+function diffBillingLines(stored: ComparableLine[], current: ComparableLine[]) {
 	const storedByKey = new Map(stored.map((l) => [l.key, l]));
-	const currentByKey = new Map(current.map((l) => [l.key, l]));
+	const currentKeys = new Set(current.map((l) => l.key));
+	const toDiffLine = ({ key, description, lineTotal }: ComparableLine): DiffLine => ({
+		key,
+		description,
+		lineTotal
+	});
 
 	const added: DiffLine[] = [];
 	const removed: DiffLine[] = [];
@@ -475,18 +530,39 @@ function diffBillingLines(stored: DiffLine[], current: DiffLine[]) {
 	for (const line of current) {
 		const prev = storedByKey.get(line.key);
 		if (!prev) {
-			added.push(line);
-		} else if (Math.abs(prev.lineTotal - line.lineTotal) > 0.005) {
-			changed.push({
-				key: line.key,
-				description: line.description,
-				before: prev.lineTotal,
-				after: line.lineTotal
-			});
+			added.push(toDiffLine(line));
+			continue;
 		}
+		const priceChanged = Math.abs(prev.lineTotal - line.lineTotal) > 0.005;
+		const textChanged =
+			prev.snapshot.description !== line.snapshot.description ||
+			// Lines written before the label was snapshotted have none to compare;
+			// their description still carries the name.
+			(prev.snapshot.productLabel !== null &&
+				prev.snapshot.productLabel !== line.snapshot.productLabel);
+		const categoryBefore = prev.snapshot.category;
+		const categoryAfter = line.snapshot.category;
+		const categoryChanged =
+			categoryBefore.id !== categoryAfter.id ||
+			categoryBefore.name !== categoryAfter.name ||
+			categoryBefore.nameDe !== categoryAfter.nameDe ||
+			categoryBefore.color !== categoryAfter.color;
+		if (!priceChanged && !textChanged && !categoryChanged) continue;
+
+		changed.push({
+			key: line.key,
+			description: line.description,
+			before: prev.lineTotal,
+			after: line.lineTotal,
+			priceChanged,
+			textBefore: textChanged ? prev.snapshot.description : null,
+			textAfter: textChanged ? line.snapshot.description : null,
+			categoryBefore: categoryChanged ? categoryBefore : null,
+			categoryAfter: categoryChanged ? categoryAfter : null
+		});
 	}
 	for (const line of stored) {
-		if (!currentByKey.has(line.key)) removed.push(line);
+		if (!currentKeys.has(line.key)) removed.push(toDiffLine(line));
 	}
 
 	return { added, removed, changed };
@@ -685,10 +761,11 @@ export const getOfferStaleness = query(v.string(), async (offerId: string) => {
 	const storedByKey = new Map(
 		offer.items.map((item) => [billingLineKey(item.assetId, item.bundleId, item.description), item])
 	);
-	const stored: DiffLine[] = offer.items.map((item) => ({
+	const stored: ComparableLine[] = offer.items.map((item) => ({
 		key: billingLineKey(item.assetId, item.bundleId, item.description),
 		description: item.productLabel ?? item.description.split('\n', 1)[0],
-		lineTotal: Number(item.lineTotal)
+		lineTotal: Number(item.lineTotal),
+		snapshot: lineSnapshot(item)
 	}));
 
 	let lines: BillingLine[];
@@ -705,7 +782,7 @@ export const getOfferStaleness = query(v.string(), async (offerId: string) => {
 		} satisfies Staleness;
 	}
 
-	const current: DiffLine[] = lines.map((line) => {
+	const current: ComparableLine[] = lines.map((line) => {
 		const key = billingLineKey(line.assetId, line.bundleId, line.description);
 		const storedItem = storedByKey.get(key);
 		// A line-level rate is an intentional document override, not a change to
@@ -716,7 +793,8 @@ export const getOfferStaleness = query(v.string(), async (offerId: string) => {
 		return {
 			key,
 			description: line.productLabel,
-			lineTotal: priceLine(line.netPurchasePrice, ratePercent, offer.dayCount).lineTotal
+			lineTotal: priceLine(line.netPurchasePrice, ratePercent, offer.dayCount).lineTotal,
+			snapshot: lineSnapshot(line)
 		};
 	});
 
@@ -1228,10 +1306,11 @@ export const getInvoiceStaleness = query(v.string(), async (invoiceId: string) =
 		} satisfies Staleness;
 	}
 
-	const stored: DiffLine[] = invoice.items.map((item) => ({
+	const stored: ComparableLine[] = invoice.items.map((item) => ({
 		key: billingLineKey(item.assetId, item.bundleId, item.description),
 		description: item.description,
-		lineTotal: Number(item.lineTotal)
+		lineTotal: Number(item.lineTotal),
+		snapshot: lineSnapshot(item)
 	}));
 
 	let lines: BillingLine[];
@@ -1256,7 +1335,7 @@ export const getInvoiceStaleness = query(v.string(), async (invoiceId: string) =
 			Number(item.ratePercent)
 		])
 	);
-	const current: DiffLine[] = lines.map((line) => {
+	const current: ComparableLine[] = lines.map((line) => {
 		const key = billingLineKey(line.assetId, line.bundleId, line.description);
 		return {
 			key,
@@ -1265,7 +1344,8 @@ export const getInvoiceStaleness = query(v.string(), async (invoiceId: string) =
 				line.netPurchasePrice,
 				storedRates.get(key) ?? line.ratePercent,
 				invoice.dayCount
-			).lineTotal
+			).lineTotal,
+			snapshot: lineSnapshot(line)
 		};
 	});
 

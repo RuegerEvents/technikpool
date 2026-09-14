@@ -1858,8 +1858,9 @@ msgstr "Kategorie auswählen"
 #~ msgid "{0} — Category: <0/>{1}"
 #~ msgstr "{0} — Kategorie: <0/>{1}"
 
-#~ msgid "Category:"
-#~ msgstr "Kategorie:"
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Category:"
+msgstr "Kategorie:"
 
 #: src/routes/assets/[id]/+page.svelte
 msgid "Asset created"
@@ -3630,9 +3631,8 @@ msgstr "Aktualisierung kann nicht geprüft werden"
 msgid "Items are out of date"
 msgstr "Positionen sind nicht mehr aktuell"
 
-#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
-msgid "The production's booked equipment has changed since these items were set."
-msgstr "Die gebuchte Ausrüstung der Produktion hat sich geändert, seit diese Positionen festgelegt wurden."
+#~ msgid "The production's booked equipment has changed since these items were set."
+#~ msgstr "Die gebuchte Ausrüstung der Produktion hat sich geändert, seit diese Positionen festgelegt wurden."
 
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 msgid "Review & Update"
@@ -3737,8 +3737,9 @@ msgstr "Kunde bearbeiten"
 #~ msgid "Existing customer"
 #~ msgstr "Bestehender Kunde"
 
-#~ msgid "Uncategorized"
-#~ msgstr "Ohne Kategorie"
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Uncategorized"
+msgstr "Ohne Kategorie"
 
 #. 0: group.name
 #: src/lib/components/ui/billing-document/billing-document.svelte
@@ -6324,3 +6325,7 @@ msgstr "Rabatt bearbeiten"
 
 #~ msgid "Discount<0/>"
 #~ msgstr ""
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "The production's booked equipment or its catalog details have changed since these items were set."
+msgstr "Die gebuchte Ausrüstung der Produktion oder ihre Katalogdaten haben sich geändert, seit diese Positionen festgelegt wurden."

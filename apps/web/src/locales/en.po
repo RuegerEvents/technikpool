@@ -1858,8 +1858,9 @@ msgstr "Select a category"
 #~ msgid "{0} — Category: <0/>{1}"
 #~ msgstr "{0} — Category: <0/>{1}"
 
-#~ msgid "Category:"
-#~ msgstr "Category:"
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Category:"
+msgstr "Category:"
 
 #: src/routes/assets/[id]/+page.svelte
 msgid "Asset created"
@@ -3630,9 +3631,8 @@ msgstr "Can't check for updates"
 msgid "Items are out of date"
 msgstr "Items are out of date"
 
-#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
-msgid "The production's booked equipment has changed since these items were set."
-msgstr "The production's booked equipment has changed since these items were set."
+#~ msgid "The production's booked equipment has changed since these items were set."
+#~ msgstr "The production's booked equipment has changed since these items were set."
 
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 msgid "Review & Update"
@@ -3737,8 +3737,9 @@ msgstr "Edit customer"
 #~ msgid "Existing customer"
 #~ msgstr "Existing customer"
 
-#~ msgid "Uncategorized"
-#~ msgstr "Uncategorized"
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Uncategorized"
+msgstr "Uncategorized"
 
 #. 0: group.name
 #: src/lib/components/ui/billing-document/billing-document.svelte
@@ -6324,3 +6325,7 @@ msgstr "Edit discount"
 
 #~ msgid "Discount<0/>"
 #~ msgstr "Discount<0/>"
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "The production's booked equipment or its catalog details have changed since these items were set."
+msgstr "The production's booked equipment or its catalog details have changed since these items were set."

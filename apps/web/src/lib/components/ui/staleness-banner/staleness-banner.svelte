@@ -2,9 +2,10 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Modal } from '$lib/components/ui/modal';
+	import { localizedName } from '$lib/category';
 	import { getErrorMessage } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
-	import type { Staleness } from './types';
+	import type { SnapshotCategory, Staleness } from './types';
 
 	let {
 		staleness,
@@ -35,6 +36,13 @@
 	}
 </script>
 
+{#snippet category(value: SnapshotCategory)}
+	<span class="inline-flex items-center gap-1">
+		<span class="size-2 rounded-full" style="background-color: {value.color ?? '#a1a1aa'}"></span>
+		{localizedName(value.name, value.nameDe) || 'Uncategorized'}
+	</span>
+{/snippet}
+
 {#if staleness.applicable && (staleness.stale || staleness.error)}
 	<Card.Root class="border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40">
 		<Card.Content class="flex flex-wrap items-center justify-between gap-3 py-4">
@@ -45,7 +53,8 @@
 				{:else}
 					<p class="font-medium text-amber-900 dark:text-amber-200">Items are out of date</p>
 					<p class="text-amber-800/80 dark:text-amber-300/80">
-						The production's booked equipment has changed since these items were set.
+						The production's booked equipment or its catalog details have changed since these items
+						were set.
 					</p>
 				{/if}
 			</div>
@@ -103,9 +112,28 @@
 				</p>
 				<div class="space-y-1">
 					{#each staleness.changed as line (line.key)}
-						<div class="flex justify-between rounded-md bg-muted/50 px-2 py-1">
-							<span>{line.description}</span>
-							<span class="tabular-nums">{fmtEUR(line.before)} → {fmtEUR(line.after)}</span>
+						<div class="space-y-1 rounded-md bg-muted/50 px-2 py-1">
+							<div class="flex justify-between gap-3">
+								<span>{line.description}</span>
+								{#if line.priceChanged}
+									<span class="tabular-nums">{fmtEUR(line.before)} → {fmtEUR(line.after)}</span>
+								{/if}
+							</div>
+							{#if line.textBefore !== null && line.textAfter !== null}
+								<div class="flex flex-wrap items-baseline gap-x-2 text-xs text-muted-foreground">
+									<span class="whitespace-pre-line line-through">{line.textBefore}</span>
+									<span aria-hidden="true">→</span>
+									<span class="whitespace-pre-line text-foreground">{line.textAfter}</span>
+								</div>
+							{/if}
+							{#if line.categoryBefore && line.categoryAfter}
+								<div class="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
+									<span>Category:</span>
+									{@render category(line.categoryBefore)}
+									<span aria-hidden="true">→</span>
+									{@render category(line.categoryAfter)}
+								</div>
+							{/if}
 						</div>
 					{/each}
 				</div>
