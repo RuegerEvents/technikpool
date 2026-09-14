@@ -17,9 +17,12 @@
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import {
 		CABLE_END_LABEL,
+		QUICK_ENTRY_EXAMPLES,
 		cableDisplayName,
+		connectorLabel,
 		connectorRole,
 		counterpartConnector,
+		formatLength,
 		isCable,
 		endsAreReversed,
 		parseCableQuickEntry,
@@ -226,6 +229,27 @@
 	// out loud. Everything it fills in is still an ordinary row afterwards.
 	let quickEntry = $state('');
 
+	// Typed the way it's said, stored the way the catalogue spells it: "dmx" is
+	// the pool's "DMX", and only that spelling has a precedent to fill from.
+	function knownType(type: string) {
+		return vocab.types.find((t) => t.toLowerCase() === type.toLowerCase()) ?? type;
+	}
+
+	/** What an example line fills in, read off the same rules the entry itself uses. */
+	function describeQuickEntry(line: string) {
+		const parsed = parseCableQuickEntry(line);
+		if (!parsed) return '';
+		const type = knownType(parsed.cableType);
+		const precedent = vocab.byType[type];
+		const ends = connectorLabel({
+			connectorA: parsed.connectorA ?? precedent?.connectorA ?? null,
+			connectorB: parsed.connectorB ?? precedent?.connectorB ?? null
+		});
+		return [ends, type, parsed.lengthCm ? formatLength(parsed.lengthCm) : null]
+			.filter(Boolean)
+			.join(' · ');
+	}
+
 	function handleQuickEntry() {
 		const parsed = parseCableQuickEntry(quickEntry);
 		if (!parsed) {
@@ -235,7 +259,11 @@
 		const row = newRow(rows[rows.length - 1]);
 		row.quantity = parsed.quantity;
 		row.lengthM = parsed.lengthCm ? String(parsed.lengthCm / 100).replace('.', ',') : '';
-		applyTypeDefaults(row, parsed.cableType);
+		// Ends the line spelled out itself ("DMX 5-pol") go in first; the type's
+		// precedent below only fills cells that are still empty.
+		if (parsed.connectorA) setConnector(row, 'connectorA', parsed.connectorA);
+		if (parsed.connectorB) setConnector(row, 'connectorB', parsed.connectorB);
+		applyTypeDefaults(row, knownType(parsed.cableType));
 		// A blank first row is a placeholder, not an entry someone made.
 		if (rows.length === 1 && !rows[0].cableType.trim()) rows[0] = row;
 		else rows.push(row);
@@ -416,6 +444,22 @@
 							Type it the way you'd say it and press Enter. Everything it fills in is still editable
 							below.
 						</p>
+						<!-- Examples are input, typed the same in every language, so they sit in
+						     <code> where wuchale leaves them alone. Clicking one puts it in the
+						     field rather than adding it, so it can be adjusted first. -->
+						<ul class="space-y-1 text-xs text-muted-foreground">
+							{#each QUICK_ENTRY_EXAMPLES as example (example)}
+								<li class="flex flex-wrap items-baseline gap-x-2">
+									<button
+										type="button"
+										onclick={() => (quickEntry = example)}
+										class="rounded bg-muted px-1.5 py-0.5 hover:bg-muted/70"
+										><code class="font-mono text-foreground">{example}</code></button
+									>
+									<span>{describeQuickEntry(example)}</span>
+								</li>
+							{/each}
+						</ul>
 					</div>
 
 					<!-- The row grid deliberately has no scroll container. `overflow-x: auto`

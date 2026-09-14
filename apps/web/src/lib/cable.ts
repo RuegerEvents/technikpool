@@ -319,9 +319,14 @@ export function normalizeCable(input: {
  * 3-Pin", "3× 1,5 m XLR", or just "Schuko 10m" for a single one. Never throws —
  * a line it can't read comes back null and the caller says so.
  */
-export function parseCableQuickEntry(
-	line: string
-): { quantity: number; lengthCm: number | null; cableType: string } | null {
+export function parseCableQuickEntry(line: string): {
+	quantity: number;
+	lengthCm: number | null;
+	cableType: string;
+	/** Set only where the line names the ends itself, as "DMX 5-pol" does. */
+	connectorA?: string;
+	connectorB?: string;
+} | null {
 	let rest = line.trim();
 	if (!rest) return null;
 
@@ -348,8 +353,30 @@ export function parseCableQuickEntry(
 	}
 
 	if (!rest) return null;
+	const dmx = rest.match(DMX_ENTRY);
+	if (dmx) {
+		const xlr = dmx[1] === '5' ? 'XLR5' : 'XLR3';
+		return { quantity, lengthCm, cableType: 'DMX', connectorA: `${xlr} M`, connectorB: `${xlr} F` };
+	}
 	return { quantity, lengthCm, cableType: rest };
 }
+
+// DMX names the signal, not the plug: the same data runs over XLR3 and XLR5,
+// and which one a pool stocks is a house decision. "DMX" alone means XLR3 —
+// what most hire stock is — and a pin count picks XLR5 ("DMX 5-pol", "DMX5").
+// The type stays "DMX" either way, which is what the name is built from. The
+// ends run male to female like CABLE_TYPE_DEFAULTS: a console's DMX out is
+// female, so the cable's feeding end is male.
+const DMX_ENTRY = /^dmx(?:[\s-]*([35])[\s-]*(?:pol(?:ig)?|pins?|p)?)?(?:[\s-]*(?:kabel|cable))?$/i;
+
+/** Lines the quick-entry field offers as examples, one per shape it reads. */
+export const QUICK_ENTRY_EXAMPLES: readonly string[] = [
+	'10x 10m Schuko',
+	'5x 3m DMX',
+	'2x 15m DMX 5-pol',
+	'4x 1,5m XLR',
+	'3x 20m CAT'
+];
 
 // A starter list of cable types, merged with whatever the catalogue already
 // holds and losing to it on spelling: a first day's worth of vocabulary rather
@@ -386,9 +413,10 @@ export const CABLE_TYPE_DEFAULTS: Readonly<
 	// department's direction (Category.cableInputGender): audio inputs carry 48 V
 	// phantom and are female, so an audio cable's *female* end is the receiving
 	// one — while DMX reverses that, console out being female. Same shell, and
-	// deliberately opposite here.
+	// deliberately opposite here. DMX on XLR3, because that is what the stock
+	// mostly is; the quick entry reads "DMX 5-pol" for the other kind.
 	XLR: { connectorA: 'XLR3 F', connectorB: 'XLR3 M' },
-	DMX: { connectorA: 'XLR5 M', connectorB: 'XLR5 F' },
+	DMX: { connectorA: 'XLR3 M', connectorB: 'XLR3 F' },
 	Schuko: { connectorA: 'Schuko M', connectorB: 'Schuko F' },
 	CEE16: { connectorA: 'CEE16 M', connectorB: 'CEE16 F' },
 	CEE32: { connectorA: 'CEE32 M', connectorB: 'CEE32 F' },
