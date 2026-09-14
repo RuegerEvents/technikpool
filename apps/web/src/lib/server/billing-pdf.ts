@@ -142,9 +142,11 @@ function fmtDate(value: Date | null | undefined) {
 }
 function wrap(value: string, font: PDFFont, size: number, width: number) {
 	const result: string[] = [];
-	for (const paragraph of safe(value).split(/\r?\n/)) {
+	// Split before safe(): it turns line breaks and tabs into '?', so a split
+	// afterwards would find nothing to split on.
+	for (const paragraph of value.split(/\r?\n/)) {
 		let line = '';
-		for (const word of paragraph.split(/\s+/).filter(Boolean)) {
+		for (const word of paragraph.split(/\s+/).filter(Boolean).map(safe)) {
 			const candidate = line ? `${line} ${word}` : word;
 			if (font.widthOfTextAtSize(candidate, size) <= width) line = candidate;
 			else {
