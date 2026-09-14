@@ -114,6 +114,9 @@
 		}
 		product = { id: null, name: newProductDraft.name };
 		pendingProduct = { ...newProductDraft };
+		// A cable almost never carries a sticker — the batch form starts untagged
+		// for the same reason. Only set on the way in, so unticking it sticks.
+		if (cableInputFrom(newProductDraft.cable)) noAssetTag = true;
 		newProductOpen = false;
 	}
 
