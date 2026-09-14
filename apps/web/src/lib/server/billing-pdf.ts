@@ -206,7 +206,7 @@ export async function generateBillingPdf(
 	const newPage = () => {
 		page = pdf.addPage([W, H]);
 		pageNumber++;
-		y = pageNumber === 1 ? H - 58 : H - 72;
+		y = pageNumber === 1 ? H - 58 : H - 64;
 		pageTitle();
 	};
 	const ensure = (height: number, repeatTableHeader = false) => {
@@ -223,15 +223,37 @@ export async function generateBillingPdf(
 		}
 		y -= gap;
 	};
+	// Inside the table and the totals, `y` is the top edge of the next block, not
+	// a baseline, so the space above and below every rule and band can be read
+	// straight off the constants. Text is placed by its cap height: centring the
+	// full font box would sit it low, since the descender space carries no ink in
+	// labels like these.
+	const capHeight = (font: PDFFont, size: number) => font.heightAtSize(size, { descender: false });
+	const bandBaseline = (top: number, height: number, font: PDFFont, size: number) =>
+		top - (height + capHeight(font, size)) / 2;
+	const HEADER_H = 18;
+	const GROUP_H = 15;
+	const ROW_PAD_TOP = 5;
+	const ROW_PAD_BOTTOM = 6;
+	const SUBTOTAL_H = ROW_PAD_TOP + capHeight(regular, 7.5) + 11;
+	const TOTAL_ROW_H = 14;
+	const GRAND_TOTAL_H = 18;
 	const tableHeader = () => {
-		ensure(28);
-		page.drawRectangle({ x: LEFT, y: y - 5, width: CONTENT_W, height: 22, color: light });
-		draw('Pos.', LEFT + 4, y + 2, 8.5, bold);
-		draw('Bezeichnung', LEFT + 40, y + 2, 8.5, bold);
-		right('Menge', 400, y + 2, 8.5, bold);
-		right('Tage', 446, y + 2, 8.5, bold);
-		right('Gesamt EUR', W - RIGHT - 4, y + 2, 8.5, bold);
-		y -= 20;
+		ensure(HEADER_H + 6);
+		page.drawRectangle({
+			x: LEFT,
+			y: y - HEADER_H,
+			width: CONTENT_W,
+			height: HEADER_H,
+			color: light
+		});
+		const baseline = bandBaseline(y, HEADER_H, bold, 8.5);
+		draw('Pos.', LEFT + 4, baseline, 8.5, bold);
+		draw('Bezeichnung', LEFT + 40, baseline, 8.5, bold);
+		right('Menge', 400, baseline, 8.5, bold);
+		right('Tage', 446, baseline, 8.5, bold);
+		right('Gesamt EUR', W - RIGHT - 4, baseline, 8.5, bold);
+		y -= HEADER_H;
 	};
 
 	newPage();
@@ -279,47 +301,57 @@ export async function generateBillingPdf(
 	y = Math.min(y, H - 190);
 	draw(title, LEFT, y, 19, regular);
 	y -= 30;
-	if (data.introText) paragraph(data.introText, 10, 13);
+	// paragraph() leaves `y` at the next baseline; the table starts from there.
+	if (data.introText) paragraph(data.introText, 10, 3);
 	tableHeader();
 
 	for (const group of groups) {
-		ensure(38, true);
+		ensure(GROUP_H + 30, true);
 		page.drawRectangle({
 			x: LEFT,
-			y: y - 3,
+			y: y - GROUP_H,
 			width: CONTENT_W,
-			height: 18,
+			height: GROUP_H,
 			color: rgb(0.97, 0.97, 0.97)
 		});
-		draw(group.name, LEFT + 4, y + 2, 7.5, bold, muted);
-		y -= 18;
-		for (const line of group.lines) {
+		draw(group.name, LEFT + 4, bandBaseline(y, GROUP_H, bold, 7.5), 7.5, bold, muted);
+		y -= GROUP_H;
+		for (const [lineIndex, line] of group.lines.entries()) {
 			position++;
 			const subtitle = lineSubtitle(line);
 			const labelLines = wrap(line.label, bold, 9, 270);
 			const subtitleLines = subtitle ? wrap(subtitle, regular, 7.5, 270) : [];
-			const rowHeight = Math.max(30, labelLines.length * 11 + subtitleLines.length * 9 + 15);
-			ensure(rowHeight, true);
-			draw(String(position), LEFT + 11, y - 1, 8.5);
-			labelLines.forEach((value, i) => draw(value, LEFT + 40, y - 1 - i * 11, 9, bold));
-			const subtitleY = y - 2 - labelLines.length * 11;
+			// Offsets below the row's first baseline.
+			const subtitleOffset = (labelLines.length - 1) * 11 + 11;
+			const lastOffset = subtitleLines.length
+				? subtitleOffset + (subtitleLines.length - 1) * 9
+				: (labelLines.length - 1) * 11;
+			const firstBaseline = ROW_PAD_TOP + capHeight(bold, 9);
+			const rowHeight = firstBaseline + lastOffset + ROW_PAD_BOTTOM;
+			// The last line pulls the group subtotal onto its page with it.
+			const isLast = lineIndex === group.lines.length - 1;
+			ensure(rowHeight + (isLast ? SUBTOTAL_H : 0), true);
+			const baseline = y - firstBaseline;
+			draw(String(position), LEFT + 11, baseline, 8.5);
+			labelLines.forEach((value, i) => draw(value, LEFT + 40, baseline - i * 11, 9, bold));
 			subtitleLines.forEach((value, i) =>
-				draw(value, LEFT + 40, subtitleY - i * 9, 7.5, regular, muted)
+				draw(value, LEFT + 40, baseline - subtitleOffset - i * 9, 7.5, regular, muted)
 			);
-			right(String(line.quantity), 400, y - 1, 8.5);
-			right(String(data.dayCount), 446, y - 1, 8.5);
-			right(money(line.lineTotal), W - RIGHT - 4, y - 1, 8.5);
+			right(String(line.quantity), 400, baseline, 8.5);
+			right(String(data.dayCount), 446, baseline, 8.5);
+			right(money(line.lineTotal), W - RIGHT - 4, baseline, 8.5);
 			y -= rowHeight;
 			page.drawLine({
-				start: { x: LEFT, y: y + 8 },
-				end: { x: W - RIGHT, y: y + 8 },
+				start: { x: LEFT, y },
+				end: { x: W - RIGHT, y },
 				thickness: 0.35,
 				color: rgb(0.65, 0.65, 0.65)
 			});
 		}
-		draw(`Zwischensumme ${group.name}`, 300, y, 7.5, regular, muted);
-		right(money(group.subtotal), W - RIGHT - 4, y, 7.5, bold);
-		y -= 18;
+		const subtotalBaseline = y - ROW_PAD_TOP - capHeight(regular, 7.5);
+		draw(`Zwischensumme ${group.name}`, 300, subtotalBaseline, 7.5, regular, muted);
+		right(money(group.subtotal), W - RIGHT - 4, subtotalBaseline, 7.5, bold);
+		y -= SUBTOTAL_H;
 	}
 
 	const subtotal = data.items.reduce((sum, item) => sum + Number(item.lineTotal), 0);
@@ -344,16 +376,22 @@ export async function generateBillingPdf(
 		[`Umsatzsteuer ${vatRate.toLocaleString('de-DE')} %`, vat, false],
 		['Gesamtbetrag', net + vat, true]
 	);
-	ensure(totals.length * 17 + 30);
+	ensure(totals.length * TOTAL_ROW_H + GRAND_TOTAL_H);
 	for (const [label, value, strong] of totals) {
-		if (strong)
-			page.drawRectangle({ x: LEFT, y: y - 6, width: CONTENT_W, height: 22, color: light });
-		draw(label, LEFT + 4, y, 9, strong ? bold : regular);
-		right(money(value), W - RIGHT - 4, y, 9, strong ? bold : regular);
-		y -= strong ? 28 : 17;
+		const font = strong ? bold : regular;
+		const height = strong ? GRAND_TOTAL_H : TOTAL_ROW_H;
+		if (strong) {
+			y -= 3;
+			page.drawRectangle({ x: LEFT, y: y - height, width: CONTENT_W, height, color: light });
+		}
+		const baseline = bandBaseline(y, height, font, 9);
+		draw(label, LEFT + 4, baseline, 9, font);
+		right(money(value), W - RIGHT - 4, baseline, 9, font);
+		y -= height;
 	}
 	if (data.closingText) {
-		y -= 3;
+		// Back from a top edge to the baseline paragraph() expects.
+		y -= 14 + capHeight(regular, 9);
 		paragraph(data.closingText, 9, 0);
 	}
 
