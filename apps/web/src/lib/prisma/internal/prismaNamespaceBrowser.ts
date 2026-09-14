@@ -509,6 +509,8 @@ export const OfferScalarFieldEnum = {
   orgBankName: 'orgBankName',
   orgIban: 'orgIban',
   orgBic: 'orgBic',
+  originalOfferId: 'originalOfferId',
+  revision: 'revision',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

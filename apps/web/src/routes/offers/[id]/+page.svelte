@@ -18,6 +18,8 @@
 	import {
 		getOffer,
 		getOfferStaleness,
+		getOfferVersions,
+		createOfferRevision,
 		updateOfferItemsFromProduction,
 		updateOfferDayCount,
 		updateOfferItemRate,
@@ -41,6 +43,14 @@
 	const offerId = $derived(page.params.id as string);
 	let offer = $derived(await getOffer(offerId));
 	let staleness = $derived(await getOfferStaleness(offerId));
+	let versions = $derived(await getOfferVersions(offerId));
+	// Only the newest version of an offer moves on — to an invoice or to another
+	// revision. Older ones stay readable as what was sent at the time.
+	let isCurrentVersion = $derived(versions.latestId === offerId);
+	let currentVersion = $derived(
+		versions.versions.find((version) => version.id === versions.latestId)
+	);
+	let canRevise = $derived(!!offer.finalizedAt && isCurrentVersion && !versions.invoiced);
 	let introTextDraft = $state('');
 	let closingTextDraft = $state('');
 	let paymentTermsDraft = $state('14');
@@ -157,6 +167,26 @@
 		}
 	}
 
+	// ── Revise ──
+	// A finalized offer is never edited: a changed one is re-issued as the next
+	// version, and this one stays archived as it was sent.
+	let revising = $state(false);
+	async function reviseOffer() {
+		const revision = await createOfferRevision(offerId);
+		await goto(resolve(`/offers/${revision.id}`));
+	}
+	async function handleRevise() {
+		revising = true;
+		try {
+			await reviseOffer();
+			toast.success('Revision created');
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			revising = false;
+		}
+	}
+
 	// ── Convert to invoice ──
 	// The invoice number is typed in by hand: every org runs its own external
 	// numbering scheme, so the app checks uniqueness instead of inventing one.
@@ -183,7 +213,11 @@
 		try {
 			await deleteOffer(offerId);
 			toast.success('Offer deleted');
-			await goto(resolve('/offers'));
+			// Deleting a draft revision hands the offer back to the version before it.
+			const previous = versions.versions
+				.filter((version) => version.revision < offer.revision)
+				.at(-1);
+			await goto(previous ? resolve(`/offers/${previous.id}`) : resolve('/offers'));
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			deleting = false;
@@ -227,6 +261,25 @@
 					</a>
 				{/if}
 			</p>
+			{#if versions.versions.length > 1}
+				<div class="mt-2 flex flex-wrap items-center gap-1.5 text-sm">
+					<span class="text-muted-foreground">Versions:</span>
+					{#each versions.versions as version (version.id)}
+						{#if version.id === offerId}
+							<span
+								class="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground"
+								>V{version.revision}</span
+							>
+						{:else}
+							<a
+								href={resolve(`/offers/${version.id}`)}
+								class="rounded-full border px-2 py-0.5 text-xs font-semibold transition-colors hover:bg-muted"
+								title={version.number}>V{version.revision}</a
+							>
+						{/if}
+					{/each}
+				</div>
+			{/if}
 		</div>
 		<!-- What moves the offer along stays up here; copying and deleting are
 		     rare enough to live behind the menu. -->
@@ -264,7 +317,7 @@
 				<Button variant="outline" href={resolve(`/invoices/${offer.invoices[0].id}`)}>
 					View invoice {offer.invoices[0].number}
 				</Button>
-			{:else if offer.finalizedAt}
+			{:else if offer.finalizedAt && isCurrentVersion && !versions.invoiced}
 				<!-- A draft can't be converted, so there is nothing to offer until it
 				     is finalized. -->
 				<Button disabled={converting} onclick={() => (convertOpen = true)}>
@@ -306,6 +359,15 @@
 						>
 							Copy to new customer
 						</DropdownMenu.Item>
+						{#if canRevise}
+							<DropdownMenu.Item
+								disabled={revising}
+								onSelect={handleRevise}
+								class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-accent"
+							>
+								{revising ? 'Creating…' : `Create revision V${versions.nextRevision}`}
+							</DropdownMenu.Item>
+						{/if}
 						{#if offer.invoices.length === 0}
 							<DropdownMenu.Separator class="my-1 h-px bg-border" />
 							<DropdownMenu.Item
@@ -328,10 +390,33 @@
 			></Card.Root
 		>{/if}
 
+	{#if !isCurrentVersion && currentVersion}
+		<Card.Root class="bg-muted/30">
+			<Card.Content
+				class="flex flex-wrap items-center justify-between gap-3 py-4 text-sm text-muted-foreground"
+			>
+				<p>
+					{#if currentVersion.finalized}
+						This offer has been superseded by {currentVersion.number}.
+					{:else}
+						{currentVersion.number} is being drafted as a revision of this offer. Delete that draft to
+						invoice this version instead.
+					{/if}
+				</p>
+				<Button size="sm" variant="outline" href={resolve(`/offers/${currentVersion.id}`)}
+					>Open {currentVersion.number}</Button
+				>
+			</Card.Content>
+		</Card.Root>
+	{/if}
+
 	<StalenessBanner
 		{staleness}
+		mode={offer.finalizedAt ? 'revise' : 'update'}
+		nextRevision={versions.nextRevision}
 		onUpdate={async () => {
-			await updateOfferItemsFromProduction(offerId);
+			if (offer.finalizedAt) await reviseOffer();
+			else await updateOfferItemsFromProduction(offerId);
 		}}
 	/>
 	<OrgSnapshotBanner

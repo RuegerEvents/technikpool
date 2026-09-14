@@ -3,9 +3,11 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { getOffers } from '$lib/remote/offers.remote';
+	import { supersededOfferIds } from '$lib/offer-versions';
 	import { resolve } from '$app/paths';
 
 	let offers = $derived(await getOffers());
+	let superseded = $derived(supersededOfferIds(offers));
 
 	function offerTotal(offer: (typeof offers)[number]): number {
 		const subtotal = offer.items.reduce((sum, i) => sum + Number(i.lineTotal), 0);
@@ -70,6 +72,11 @@
 									>
 										Invoiced
 									</span>
+								{:else if superseded.has(offer.id)}
+									<span
+										class="rounded-full border px-2 py-0.5 text-xs font-semibold text-muted-foreground"
+										>Superseded</span
+									>
 								{:else if offer.finalizedAt}
 									<span
 										class="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800 dark:bg-blue-900 dark:text-blue-300"

@@ -687,6 +687,16 @@ model Offer {
   orgIban              String?
   orgBic               String?
 
+  // Revisions. A finalized offer is an issued document and is never rewritten;
+  // one that has to change is re-issued as a new offer. V2, V3… point at the
+  // first version (which points at nothing) and carry its number with a "-V2"
+  // suffix. The highest revision is the current one — only it can be invoiced
+  // or revised again.
+  originalOfferId String?
+  originalOffer   Offer?  @relation("OfferRevisions", fields: [originalOfferId], references: [id], onDelete: SetNull)
+  revisions       Offer[] @relation("OfferRevisions")
+  revision        Int     @default(1)
+
   items    OfferItem[]
   invoices Invoice[]
 
@@ -694,6 +704,8 @@ model Offer {
   updatedAt DateTime @updatedAt
 
   @@unique([organizationId, number])
+  // Two concurrent "create revision" clicks can't both become V2.
+  @@unique([originalOfferId, revision])
 }
 
 model OfferItem {

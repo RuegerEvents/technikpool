@@ -9,10 +9,16 @@
 
 	let {
 		staleness,
-		onUpdate
+		onUpdate,
+		mode = 'update',
+		nextRevision = 2
 	}: {
 		staleness: Staleness;
 		onUpdate: () => Promise<void>;
+		// 'revise' on a finalized offer: its lines can't be replaced, so the
+		// dialog creates the next version instead.
+		mode?: 'update' | 'revise';
+		nextRevision?: number;
 	} = $props();
 
 	let open = $state(false);
@@ -26,7 +32,7 @@
 		working = true;
 		try {
 			await onUpdate();
-			toast.success('Items updated');
+			toast.success(mode === 'revise' ? 'Revision created' : 'Items updated');
 			open = false;
 		} catch (err) {
 			toast.error(getErrorMessage(err));
@@ -50,6 +56,12 @@
 				{#if staleness.error}
 					<p class="font-medium text-amber-900 dark:text-amber-200">Can't check for updates</p>
 					<p class="text-amber-800/80 dark:text-amber-300/80">{staleness.error}</p>
+				{:else if mode === 'revise'}
+					<p class="font-medium text-amber-900 dark:text-amber-200">This offer is out of date</p>
+					<p class="text-amber-800/80 dark:text-amber-300/80">
+						The production's booked equipment or its catalog details have changed since this offer
+						was finalized.
+					</p>
 				{:else}
 					<p class="font-medium text-amber-900 dark:text-amber-200">Items are out of date</p>
 					<p class="text-amber-800/80 dark:text-amber-300/80">
@@ -59,16 +71,23 @@
 				{/if}
 			</div>
 			{#if !staleness.error}
-				<Button size="sm" onclick={() => (open = true)}>Review & Update</Button>
+				<Button size="sm" onclick={() => (open = true)}>
+					{#if mode === 'revise'}Review & create V{nextRevision}{:else}Review & Update{/if}
+				</Button>
 			{/if}
 		</Card.Content>
 	</Card.Root>
 {/if}
 
-<Modal bind:open title="Update items" size="lg">
+<Modal bind:open title={mode === 'revise' ? 'Create revision' : 'Update items'} size="lg">
 	{#snippet description()}
-		This replaces the current line items with what's booked on the production now. Rates you set on
-		a line are kept for every unit that is still booked.
+		{#if mode === 'revise'}
+			This creates V{nextRevision} as a new draft with what's booked on the production now. The finalized
+			offer stays archived as it is. Rates you set on a line are kept for every unit that is still booked.
+		{:else}
+			This replaces the current line items with what's booked on the production now. Rates you set
+			on a line are kept for every unit that is still booked.
+		{/if}
 	{/snippet}
 	<div class="space-y-3 text-sm">
 		{#if staleness.added.length > 0}
@@ -152,7 +171,11 @@
 			Cancel
 		</Button>
 		<Button type="button" onclick={handleUpdate} disabled={working}>
-			{working ? 'Updating…' : 'Update Items'}
+			{#if mode === 'revise'}
+				{working ? 'Creating…' : 'Create draft'}
+			{:else}
+				{working ? 'Updating…' : 'Update Items'}
+			{/if}
 		</Button>
 	{/snippet}
 </Modal>

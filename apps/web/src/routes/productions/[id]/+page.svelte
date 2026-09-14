@@ -22,6 +22,7 @@
 	import { getBundles } from '$lib/remote/assets.remote';
 	import { getOrgUsers } from '$lib/remote/orgs.remote';
 	import { getOffersForProduction, getInvoicesForProduction } from '$lib/remote/offers.remote';
+	import { supersededOfferIds } from '$lib/offer-versions';
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
@@ -53,6 +54,7 @@
 
 	let allBundles = $derived(await getBundles());
 	let offers = $derived(await getOffersForProduction(productionId));
+	let supersededOffers = $derived(supersededOfferIds(offers));
 	let invoices = $derived(await getInvoicesForProduction(productionId));
 
 	function fmtEUR(n: number): string {
@@ -528,6 +530,9 @@
 									<p class="font-medium">{offer.number} — {offer.customerName}</p>
 									<p class="text-xs text-muted-foreground">
 										{offer.dayCount} d
+										{#if supersededOffers.has(offer.id)}
+											· Superseded
+										{/if}
 										{#if offer.invoices.length > 0}
 											· Invoiced ({offer.invoices[0].number})
 										{/if}

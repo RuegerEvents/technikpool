@@ -723,7 +723,9 @@ msgid "What's in this bundle?"
 msgstr "Was ist in diesem Bundle?"
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 #: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
 #: src/routes/offers/new/+page.svelte
 msgid "Creating…"
 msgstr "Wird erstellt…"
@@ -3703,10 +3705,8 @@ msgstr "{0} Tage abgerechnet"
 msgid "· Invoiced ({0})"
 msgstr "· Abgerechnet ({0})"
 
-#. 0: offer.dayCount
-#: src/routes/productions/[id]/+page.svelte
-msgid "{0} d <0/>"
-msgstr "{0} Tage <0/>"
+#~ msgid "{0} d <0/>"
+#~ msgstr "{0} Tage <0/>"
 
 #: src/routes/productions/[id]/+page.svelte
 msgid "Sent"
@@ -6329,3 +6329,78 @@ msgstr "Rabatt bearbeiten"
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 msgid "The production's booked equipment or its catalog details have changed since these items were set."
 msgstr "Die gebuchte Ausrüstung der Produktion oder ihre Katalogdaten haben sich geändert, seit diese Positionen festgelegt wurden."
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+#: src/routes/offers/[id]/+page.svelte
+msgid "Revision created"
+msgstr "Neue Version erstellt"
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "This offer is out of date"
+msgstr "Dieses Angebot ist nicht mehr aktuell"
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "The production's booked equipment or its catalog details have changed since this offer was finalized."
+msgstr "Die gebuchte Ausrüstung der Produktion oder ihre Katalogdaten haben sich geändert, seit dieses Angebot finalisiert wurde."
+
+#. 0: nextRevision
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Review & create V{0}"
+msgstr "Prüfen & V{0} erstellen"
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Create revision"
+msgstr "Neue Version erstellen"
+
+#. 0: nextRevision
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "This creates V{0} as a new draft with what's booked on the production now. The finalized offer stays archived as it is. Rates you set on a line are kept for every unit that is still booked."
+msgstr "Dadurch wird V{0} als neuer Entwurf mit der aktuell auf der Produktion gebuchten Ausrüstung angelegt. Das finalisierte Angebot bleibt unverändert archiviert. Individuelle Sätze einer Position bleiben für jede weiterhin gebuchte Einheit erhalten."
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Create draft"
+msgstr "Entwurf erstellen"
+
+#. 0: version.revision
+#. 0: version.revision
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+msgid "V{0}"
+msgstr "V{0}"
+
+#: src/routes/offers/[id]/+page.svelte
+msgid "Versions:"
+msgstr "Versionen:"
+
+#. 0: versions.nextRevision
+#: src/routes/offers/[id]/+page.svelte
+msgid "Create revision V{0}"
+msgstr "Neue Version V{0} erstellen"
+
+#. 0: currentVersion.number
+#: src/routes/offers/[id]/+page.svelte
+msgid "This offer has been superseded by {0}."
+msgstr "Dieses Angebot wurde durch {0} ersetzt."
+
+#. 0: currentVersion.number
+#: src/routes/offers/[id]/+page.svelte
+msgid "{0} is being drafted as a revision of this offer. Delete that draft to invoice this version instead."
+msgstr "{0} wird als neue Version dieses Angebots vorbereitet. Wird dieser Entwurf gelöscht, kann stattdessen diese Version abgerechnet werden."
+
+#. 0: currentVersion.number
+#: src/routes/offers/[id]/+page.svelte
+msgid "Open {0}"
+msgstr "{0} öffnen"
+
+#: src/routes/productions/[id]/+page.svelte
+msgid "· Superseded"
+msgstr "· Ersetzt"
+
+#. 0: offer.dayCount
+#: src/routes/productions/[id]/+page.svelte
+msgid "{0} d <0/> <1/>"
+msgstr "{0} Tage <0/> <1/>"
+
+#: src/routes/offers/+page.svelte
+msgid "Superseded"
+msgstr "Ersetzt"

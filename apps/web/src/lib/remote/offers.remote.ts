@@ -50,6 +50,33 @@ async function nextOfferNumber(
 	return `A-${year}-${String(seq.lastNumber).padStart(4, '0')}`;
 }
 
+/**
+ * Every version of an offer, oldest first. Revisions point at the first
+ * version, so `originalOfferId ?? id` of any one of them finds all the others.
+ */
+async function loadOfferFamily(offer: { id: string; originalOfferId: string | null }) {
+	const familyId = offer.originalOfferId ?? offer.id;
+	const versions = await prisma.offer.findMany({
+		where: { OR: [{ id: familyId }, { originalOfferId: familyId }] },
+		select: {
+			id: true,
+			number: true,
+			revision: true,
+			finalizedAt: true,
+			_count: { select: { invoices: true } }
+		},
+		orderBy: { revision: 'asc' }
+	});
+	return {
+		original: versions[0],
+		versions,
+		latest: versions[versions.length - 1],
+		// One invoice settles the offer: a revision after that would be an offer
+		// for something already billed.
+		invoiced: versions.some((version) => version._count.invoices > 0)
+	};
+}
+
 // ── Offers ─────────────────────────────────────────────────────────────────
 
 export const getOffers = query(v.optional(v.string()), async (organizationId?: string) => {
@@ -92,6 +119,32 @@ export const getOffer = query(v.string(), async (id: string) => {
 		throw new Error('Unauthorized');
 	}
 	return offer;
+});
+
+// What the offer page needs to place an offer among its revisions: the version
+// strip, and whether this one may still be invoiced or revised.
+export const getOfferVersions = query(v.string(), async (offerId: string) => {
+	const user = await requireAuth();
+	const offer = await prisma.offer.findUniqueOrThrow({
+		where: { id: offerId },
+		select: { id: true, organizationId: true, originalOfferId: true }
+	});
+	const orgIds = await userOrgIds(user.id);
+	if (!(await isSystemAdmin(user.id)) && !orgIds.includes(offer.organizationId)) {
+		throw new Error('Unauthorized');
+	}
+	const family = await loadOfferFamily(offer);
+	return {
+		versions: family.versions.map((version) => ({
+			id: version.id,
+			number: version.number,
+			revision: version.revision,
+			finalized: version.finalizedAt !== null
+		})),
+		latestId: family.latest.id,
+		invoiced: family.invoiced,
+		nextRevision: family.latest.revision + 1
+	};
 });
 
 export const getOffersForProduction = query(v.string(), async (productionId: string) => {
@@ -453,6 +506,49 @@ function priceLine(netPurchasePrice: number, ratePercent: number, dayCount: numb
 	return { ratePercent: rate, dailyRate: toCents(daily), lineTotal: toCents(daily * dayCount) };
 }
 
+/**
+ * The production's current lines as document items, priced for `dayCount`.
+ * A rate set on a line belongs to the document, so a unit that is still booked
+ * keeps it; only lines new to the production take their category's rate.
+ * Rebuilding every line from the category rates is what used to throw away
+ * every custom rate on update.
+ */
+function itemsFromProduction(
+	lines: BillingLine[],
+	storedItems: {
+		assetId: string | null;
+		bundleId: string | null;
+		description: string;
+		ratePercent: unknown;
+	}[],
+	dayCount: number
+) {
+	const storedRates = new Map(
+		storedItems.map((item) => [
+			billingLineKey(item.assetId, item.bundleId, item.description),
+			Number(item.ratePercent)
+		])
+	);
+	return lines.map((line) => ({
+		assetId: line.assetId,
+		bundleId: line.bundleId,
+		productId: line.productId,
+		productLabel: line.productLabel,
+		categoryId: line.categoryId,
+		categoryName: line.categoryName,
+		categoryNameDe: line.categoryNameDe,
+		categoryColor: line.categoryColor,
+		description: line.description,
+		netPurchasePrice: line.netPurchasePrice,
+		...priceLine(
+			line.netPurchasePrice,
+			storedRates.get(billingLineKey(line.assetId, line.bundleId, line.description)) ??
+				line.ratePercent,
+			dayCount
+		)
+	}));
+}
+
 type DiffLine = { key: string; description: string; lineTotal: number };
 type SnapshotCategory = {
 	id: string | null;
@@ -749,13 +845,19 @@ export const getOfferStaleness = query(v.string(), async (offerId: string) => {
 		} satisfies Staleness;
 	}
 	if (offer.finalizedAt) {
-		return {
-			applicable: false,
-			stale: false,
-			added: [],
-			removed: [],
-			changed: []
-		} satisfies Staleness;
+		// A finalized offer is never rewritten, but it can still fall behind the
+		// production — the page then offers a revision instead of an update. Only
+		// the current version of an offer nobody has invoiced has one to make.
+		const family = await loadOfferFamily(offer);
+		if (family.invoiced || family.latest.id !== offer.id) {
+			return {
+				applicable: false,
+				stale: false,
+				added: [],
+				removed: [],
+				changed: []
+			} satisfies Staleness;
+		}
 	}
 
 	const storedByKey = new Map(
@@ -821,34 +923,8 @@ export const updateOfferItemsFromProduction = command(v.string(), async (offerId
 	}
 
 	const lines = await computeProductionBillingLines(offer.productionId, offer.assetScope);
-	// The same rule getOfferStaleness applies: a rate set on a line belongs to
-	// the document, so a unit that is still booked keeps it. Only lines new to
-	// the production take their category's rate. Rebuilding every line from the
-	// category rates is what used to throw away every custom rate on update.
-	const storedRates = new Map(
-		offer.items.map((item) => [
-			billingLineKey(item.assetId, item.bundleId, item.description),
-			Number(item.ratePercent)
-		])
-	);
-	const itemsData = lines.map((line) => ({
-		assetId: line.assetId,
-		bundleId: line.bundleId,
-		productId: line.productId,
-		productLabel: line.productLabel,
-		categoryId: line.categoryId,
-		categoryName: line.categoryName,
-		categoryNameDe: line.categoryNameDe,
-		categoryColor: line.categoryColor,
-		description: line.description,
-		netPurchasePrice: line.netPurchasePrice,
-		...priceLine(
-			line.netPurchasePrice,
-			storedRates.get(billingLineKey(line.assetId, line.bundleId, line.description)) ??
-				line.ratePercent,
-			offer.dayCount
-		)
-	}));
+	// The same rule getOfferStaleness applies: custom line rates are kept.
+	const itemsData = itemsFromProduction(lines, offer.items, offer.dayCount);
 
 	await prisma.$transaction([
 		prisma.offerItem.deleteMany({ where: { offerId } }),
@@ -1105,6 +1181,93 @@ export const finalizeOffer = command(v.string(), async (offerId: string) => {
 	if (count === 0) throw new Error('This offer has already been finalized');
 	await getOffer(offerId).refresh();
 	await getOffers().refresh();
+	await getOfferVersions(offerId).refresh();
+	await getOfferStaleness(offerId).refresh();
+});
+
+/**
+ * Re-issues a finalized offer as "<number>-V<n>". The finalized version stays
+ * archived as it was sent; its successor is a draft that keeps the document's
+ * own decisions — customer, texts, day count, discount, line rates — and takes
+ * its lines from the production as it is now.
+ */
+export const createOfferRevision = command(v.string(), async (offerId: string) => {
+	const source = await prisma.offer.findUniqueOrThrow({
+		where: { id: offerId },
+		include: {
+			items: { orderBy: { createdAt: 'asc' } },
+			organization: { include: { address: true } }
+		}
+	});
+	await requireOrgManageAccess(source.organizationId);
+	if (!source.finalizedAt) throw new Error('A draft offer can still be edited directly');
+	const family = await loadOfferFamily(source);
+	if (family.invoiced) throw new Error('An invoice was already created from this offer');
+	if (family.latest.id !== source.id) {
+		throw new Error(`${family.latest.number} is already the current version of this offer`);
+	}
+
+	const items = source.productionId
+		? itemsFromProduction(
+				await computeProductionBillingLines(source.productionId, source.assetScope),
+				source.items,
+				source.dayCount
+			)
+		: // Nothing to resync from: the revision starts as a copy to edit.
+			source.items.map((item) => ({
+				assetId: item.assetId,
+				bundleId: item.bundleId,
+				productId: item.productId,
+				productLabel: item.productLabel,
+				categoryId: item.categoryId,
+				categoryName: item.categoryName,
+				categoryNameDe: item.categoryNameDe,
+				categoryColor: item.categoryColor,
+				description: item.description,
+				netPurchasePrice: item.netPurchasePrice,
+				ratePercent: item.ratePercent,
+				dailyRate: item.dailyRate,
+				lineTotal: item.lineTotal
+			}));
+
+	const revision = family.latest.revision + 1;
+	const created = await prisma.offer.create({
+		data: {
+			number: `${family.original.number}-V${revision}`,
+			originalOfferId: family.original.id,
+			revision,
+			organizationId: source.organizationId,
+			productionId: source.productionId,
+			// A revision is a new document issued now, so it snapshots the org's
+			// current letterhead and VAT status, as any new offer does.
+			...orgSnapshotColumns(source.organization),
+			vatRatePercent: source.organization.isKleinunternehmer ? 0 : 19,
+			customerId: source.customerId,
+			customerName: source.customerName,
+			customerAddress: source.customerAddress,
+			customerContactPerson: source.customerContactPerson,
+			customerEmail: source.customerEmail,
+			customerNumber: source.customerNumber,
+			customerPhone: source.customerPhone,
+			customerVatId: source.customerVatId,
+			serviceStartDate: source.serviceStartDate,
+			serviceEndDate: source.serviceEndDate,
+			introText: source.introText,
+			closingText: source.closingText,
+			paymentTermsDays: source.paymentTermsDays,
+			dayCount: source.dayCount,
+			discountType: source.discountType,
+			discountValue: source.discountValue,
+			assetScope: source.assetScope,
+			items: { create: items }
+		},
+		select: { id: true, number: true }
+	});
+
+	await getOffers().refresh();
+	await getOfferVersions(offerId).refresh();
+	await getOfferStaleness(offerId).refresh();
+	return created;
 });
 
 const convertOfferSchema = v.object({
@@ -1128,6 +1291,13 @@ export const convertOfferToInvoice = command(convertOfferSchema, async ({ offerI
 	await requireOrgManageAccess(offer.organizationId);
 	if (!offer.finalizedAt || !offer.pdfPath)
 		throw new Error('Finalize the offer before creating an invoice');
+	const family = await loadOfferFamily(offer);
+	if (family.invoiced) throw new Error('An invoice was already created from this offer');
+	// A superseded version is what the customer was sent before; billing it
+	// would bill terms the offer no longer stands by.
+	if (family.latest.id !== offer.id) {
+		throw new Error(`Only the current version, ${family.latest.number}, can be invoiced`);
+	}
 
 	const clash = await prisma.invoice.findUnique({
 		where: { organizationId_number: { organizationId: offer.organizationId, number } },
@@ -1220,6 +1390,8 @@ export const convertOfferToInvoice = command(convertOfferSchema, async ({ offerI
 
 	await getInvoices().refresh();
 	await getOffer(offerId).refresh();
+	await getOfferVersions(offerId).refresh();
+	await getOfferStaleness(offerId).refresh();
 	return invoice;
 });
 
@@ -1374,31 +1546,8 @@ export const updateInvoiceItemsFromProduction = command(v.string(), async (invoi
 	}
 
 	const lines = await computeProductionBillingLines(invoice.productionId, invoice.assetScope);
-	// Custom rates survive the update — see updateOfferItemsFromProduction.
-	const storedRates = new Map(
-		invoice.items.map((item) => [
-			billingLineKey(item.assetId, item.bundleId, item.description),
-			Number(item.ratePercent)
-		])
-	);
-	const itemsData = lines.map((line) => ({
-		assetId: line.assetId,
-		bundleId: line.bundleId,
-		productId: line.productId,
-		productLabel: line.productLabel,
-		categoryId: line.categoryId,
-		categoryName: line.categoryName,
-		categoryNameDe: line.categoryNameDe,
-		categoryColor: line.categoryColor,
-		description: line.description,
-		netPurchasePrice: line.netPurchasePrice,
-		...priceLine(
-			line.netPurchasePrice,
-			storedRates.get(billingLineKey(line.assetId, line.bundleId, line.description)) ??
-				line.ratePercent,
-			invoice.dayCount
-		)
-	}));
+	// Custom rates survive the update, as on an offer.
+	const itemsData = itemsFromProduction(lines, invoice.items, invoice.dayCount);
 
 	await prisma.$transaction([
 		prisma.invoiceItem.deleteMany({ where: { invoiceId } }),
