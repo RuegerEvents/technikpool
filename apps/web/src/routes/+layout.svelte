@@ -16,6 +16,8 @@
 		FileText,
 		Factory,
 		FolderKanban,
+		LayoutDashboard,
+		Menu,
 		Package,
 		ReceiptText,
 		Users,
@@ -67,13 +69,157 @@
 {:else}
 	<div class="flex h-dvh flex-col bg-zinc-50 dark:bg-zinc-950">
 		<header class="sticky top-0 z-40 border-b bg-background shadow-sm">
-			<div class="flex h-16 w-full items-center justify-between px-4 py-4 md:px-6">
-				<div class="flex items-center gap-6 md:gap-10">
-					<a href={resolve('/')} class="flex items-center space-x-2">
-						<span class="inline-block text-xl font-bold tracking-tight">Technikpool</span>
+			<div class="flex h-16 w-full items-center justify-between gap-2 px-4 py-4 md:px-6">
+				<div class="flex min-w-0 items-center gap-2 lg:gap-10">
+					{#if data.user}
+						<!-- The desktop nav is `hidden md:flex`, so below that breakpoint this is the
+						     only way to reach anything but the dashboard. It mirrors the same
+						     destinations rather than a reduced set: a phone in the warehouse needs
+						     Checkout and Productions more than a desk browser does. -->
+						<DropdownMenu.Root>
+							<DropdownMenu.Trigger>
+								{#snippet child({ props })}
+									<button
+										{...props}
+										type="button"
+										aria-label="Menu"
+										class="-ml-2 flex size-9 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-accent lg:hidden"
+									>
+										<Menu aria-hidden="true" class="size-5" />
+									</button>
+								{/snippet}
+							</DropdownMenu.Trigger>
+							<DropdownMenu.Portal>
+								<DropdownMenu.Content
+									align="start"
+									sideOffset={6}
+									class="z-50 max-h-[70svh] w-56 overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md lg:hidden [&_svg]:size-4"
+								>
+									<DropdownMenu.Item
+										onSelect={() => goto(resolve('/'))}
+										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+									>
+										<LayoutDashboard aria-hidden="true" />
+										Dashboard
+									</DropdownMenu.Item>
+									<DropdownMenu.Item
+										onSelect={() => goto(resolve('/assets'))}
+										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+									>
+										<Package aria-hidden="true" />
+										Devices
+									</DropdownMenu.Item>
+									<DropdownMenu.Item
+										onSelect={() => goto(resolve('/productions'))}
+										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+									>
+										<Clapperboard aria-hidden="true" />
+										Productions
+									</DropdownMenu.Item>
+									<DropdownMenu.Item
+										onSelect={() => goto(resolve('/calendar'))}
+										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+									>
+										<CalendarDays aria-hidden="true" />
+										Calendar
+									</DropdownMenu.Item>
+									<DropdownMenu.Item
+										onSelect={() => goto(resolve('/checkout'))}
+										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+									>
+										<ScanBarcode aria-hidden="true" />
+										Checkout
+									</DropdownMenu.Item>
+									<DropdownMenu.Item
+										onSelect={() => goto(resolve('/offers'))}
+										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+									>
+										<FileText aria-hidden="true" />
+										Offers
+									</DropdownMenu.Item>
+									<DropdownMenu.Item
+										onSelect={() => goto(resolve('/invoices'))}
+										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+									>
+										<ReceiptText aria-hidden="true" />
+										Invoices
+									</DropdownMenu.Item>
+									<DropdownMenu.Separator class="my-1 h-px bg-border" />
+									<DropdownMenu.Item
+										onSelect={() => goto(resolve('/customers'))}
+										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+									>
+										<Users aria-hidden="true" />
+										Customers
+									</DropdownMenu.Item>
+									<DropdownMenu.Item
+										onSelect={() => goto(resolve('/products'))}
+										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+									>
+										<Boxes aria-hidden="true" />
+										Products
+									</DropdownMenu.Item>
+									<DropdownMenu.Item
+										onSelect={() => goto(resolve('/manufacturers'))}
+										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+									>
+										<Factory aria-hidden="true" />
+										Manufacturers
+									</DropdownMenu.Item>
+									<DropdownMenu.Item
+										onSelect={() => goto(resolve('/stickers'))}
+										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+									>
+										<Tags aria-hidden="true" />
+										Stickers
+									</DropdownMenu.Item>
+									<DropdownMenu.Item
+										onSelect={() => goto(resolve('/inspections'))}
+										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+									>
+										<ClipboardCheck aria-hidden="true" />
+										Inspections
+									</DropdownMenu.Item>
+									<DropdownMenu.Item
+										onSelect={() => goto(resolve('/devices'))}
+										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+									>
+										<ScanBarcode aria-hidden="true" />
+										Scanners
+									</DropdownMenu.Item>
+									{#if data.isAdmin}
+										<DropdownMenu.Separator class="my-1 h-px bg-border" />
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/admin/categories'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<Shapes aria-hidden="true" />
+											Categories
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/admin/connectors'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<PlugZap aria-hidden="true" />
+											Connectors
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/admin/users'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<FolderKanban aria-hidden="true" />
+											Admin
+										</DropdownMenu.Item>
+									{/if}
+								</DropdownMenu.Content>
+							</DropdownMenu.Portal>
+						</DropdownMenu.Root>
+					{/if}
+					<a href={resolve('/')} class="flex min-w-0 items-center space-x-2">
+						<span class="inline-block truncate text-xl font-bold tracking-tight">Technikpool</span>
 					</a>
 					{#if data.user}
-						<nav class="hidden gap-3 md:flex lg:gap-5">
+						<nav class="hidden gap-3 lg:flex lg:gap-5">
 							<a
 								href={resolve('/assets')}
 								class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(

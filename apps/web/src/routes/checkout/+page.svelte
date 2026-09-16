@@ -418,7 +418,7 @@
 				{/if}
 			</div>
 
-			<div class="overflow-hidden rounded-md border">
+			<div class="overflow-x-auto rounded-md border">
 				<table class="w-full text-sm">
 					<thead>
 						<tr class="border-b bg-muted/30">

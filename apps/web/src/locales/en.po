@@ -2379,6 +2379,7 @@ msgstr "Devices | Technikpool"
 msgid "Devices"
 msgstr "Devices"
 
+#: src/routes/+layout.svelte
 #: src/routes/+page.svelte
 msgid "<0/> Devices"
 msgstr "<0/> Devices"
@@ -5178,21 +5179,26 @@ msgid "<0/> Tools <1/>"
 msgstr "<0/> Tools <1/>"
 
 #: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
 msgid "<0/> Categories"
 msgstr "<0/> Categories"
 
+#: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 msgid "<0/> Products"
 msgstr "<0/> Products"
 
 #: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
 msgid "<0/> Stickers"
 msgstr "<0/> Stickers"
 
 #: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
 msgid "<0/> Inspections"
 msgstr "<0/> Inspections"
 
+#: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 msgid "<0/> Scanners"
 msgstr "<0/> Scanners"
@@ -5256,6 +5262,7 @@ msgstr "Apply to all"
 msgid "Category rate: {0}% / day"
 msgstr "Category rate: {0}% / day"
 
+#: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 msgid "<0/> Manufacturers"
 msgstr "<0/> Manufacturers"
@@ -5455,6 +5462,7 @@ msgstr "These values are copied into new offers and invoices."
 msgid "Save customer"
 msgstr "Save customer"
 
+#: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 msgid "<0/> Customers"
 msgstr "<0/> Customers"
@@ -6016,6 +6024,7 @@ msgid "Prefills the category on a new cable that ends in this connector — a Sc
 msgstr "Prefills the category on a new cable that ends in this connector — a Schuko plug is Power wherever it turns up. Only a starting point; the cable's own category still decides what it bills as."
 
 #: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
 msgid "<0/> Connectors"
 msgstr "<0/> Connectors"
 
@@ -6409,3 +6418,35 @@ msgstr "Superseded"
 #: src/routes/calendar/+page.svelte
 msgid "W {0}"
 msgstr "W {0}"
+
+#: src/routes/+layout.svelte
+msgid "Menu"
+msgstr "Menu"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Admin"
+msgstr "<0/> Admin"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Dashboard"
+msgstr "<0/> Dashboard"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Productions"
+msgstr "<0/> Productions"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Calendar"
+msgstr "<0/> Calendar"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Checkout"
+msgstr "<0/> Checkout"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Offers"
+msgstr "<0/> Offers"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Invoices"
+msgstr "<0/> Invoices"

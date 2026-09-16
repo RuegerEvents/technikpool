@@ -134,12 +134,17 @@
 			<h1 class="text-3xl font-bold tracking-tight">Productions</h1>
 			<p class="text-muted-foreground">Manage events and equipment bookings.</p>
 		</div>
-		<div class="flex items-center gap-4">
+		<div class="flex flex-wrap items-center gap-4">
 			<label class="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
 				<input type="checkbox" bind:checked={showArchive} class="h-4 w-4 rounded border" />
 				Show archive
 			</label>
-			<OrgMultiSelect {orgs} value={selectedOrgIds} class="w-56" onchange={setSelectedOrgIds} />
+			<OrgMultiSelect
+				{orgs}
+				value={selectedOrgIds}
+				class="w-full sm:w-56"
+				onchange={setSelectedOrgIds}
+			/>
 			<CalendarFeedButton />
 		</div>
 	</div>

@@ -780,7 +780,7 @@
 				</Card.Content>
 			</Card.Root>
 		{:else}
-			<div class="rounded-md border">
+			<div class="overflow-x-auto rounded-md border">
 				<table class="w-full text-sm">
 					<thead>
 						<tr class="border-b bg-muted/30">
@@ -1053,7 +1053,7 @@
 				</Card.Content>
 			</Card.Root>
 		{:else}
-			<div class="overflow-hidden rounded-lg border bg-card">
+			<div class="overflow-x-auto rounded-lg border bg-card">
 				<table class="w-full text-sm">
 					<thead>
 						<tr class="border-b bg-muted/30">

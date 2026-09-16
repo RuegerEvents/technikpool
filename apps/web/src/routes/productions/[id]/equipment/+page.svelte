@@ -412,9 +412,11 @@
 		</span>
 	</div>
 
-	<div class="grid gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-[210px_1fr_1fr]">
+	<div
+		class="grid min-w-0 gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-[210px_minmax(0,1fr)_minmax(0,1fr)]"
+	>
 		<!-- Categories -->
-		<div class="flex flex-col rounded-lg border lg:min-h-0">
+		<div class="flex min-w-0 flex-col rounded-lg border lg:min-h-0">
 			<div class="shrink-0 border-b px-3 py-2">
 				<h2 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
 					Categories
@@ -454,7 +456,7 @@
 		</div>
 
 		<!-- Available -->
-		<div class="flex flex-col rounded-lg border lg:min-h-0">
+		<div class="flex min-w-0 flex-col rounded-lg border lg:min-h-0">
 			<div class="shrink-0 border-b px-3 py-2">
 				<h2 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
 					{activeCat
@@ -638,7 +640,7 @@
 		</div>
 
 		<!-- Booked -->
-		<div class="flex flex-col rounded-lg border lg:min-h-0">
+		<div class="flex min-w-0 flex-col rounded-lg border lg:min-h-0">
 			<div class="shrink-0 border-b px-3 py-2">
 				<h2 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
 					Booked for this production

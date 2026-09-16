@@ -64,7 +64,7 @@
 				System admins can manage all organizations and grant admin access to others.
 			</Card.Description>
 		</Card.Header>
-		<Card.Content class="p-0">
+		<Card.Content class="overflow-x-auto p-0">
 			<table class="w-full text-sm">
 				<thead>
 					<tr class="border-b text-left text-muted-foreground">

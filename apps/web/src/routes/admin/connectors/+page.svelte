@@ -113,7 +113,7 @@
 		     rather than a card of its own. A table per family sized its columns to
 		     its own contents, so no two groups lined up — and the columns are
 		     exactly what you read down when checking a catalogue. -->
-		<div class="overflow-hidden rounded-lg border">
+		<div class="overflow-x-auto rounded-lg border">
 			<table class="w-full text-sm [&_tr:last-child]:border-0">
 				<thead>
 					<tr class="border-b bg-muted/40 text-left text-muted-foreground">

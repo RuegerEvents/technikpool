@@ -15,7 +15,7 @@
 <svelte:head><title>Asset Bundles | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
-	<div class="flex items-center justify-between">
+	<div class="flex flex-wrap items-center justify-between gap-4">
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">Asset Bundles</h1>
 			<p class="text-muted-foreground">Groups of assets that travel together.</p>
@@ -55,7 +55,7 @@
 						</div>
 					</Card.Header>
 					<Card.Content class="pt-0">
-						<div class="flex items-center justify-between">
+						<div class="flex flex-wrap items-center justify-between gap-4">
 							<CategoryPill
 								name={categoryLabel(template.category)}
 								color={template.category.color}

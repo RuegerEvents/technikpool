@@ -475,7 +475,7 @@
 			</div>
 		</div>
 	{:else if current}
-		<div class="grid gap-6 lg:grid-cols-[22rem_1fr]">
+		<div class="grid gap-6 lg:grid-cols-[22rem_minmax(0,1fr)] [&>*]:min-w-0">
 			<Card.Root class="overflow-hidden">
 				<Card.Header class="pb-3">
 					<Card.Title class="text-base">Catalog</Card.Title>
@@ -537,7 +537,7 @@
 								>
 							</Card.Description>
 						</div>
-						<div class="flex shrink-0 items-center gap-3">
+						<div class="flex flex-wrap items-center gap-3">
 							{#if canEdit}
 								{#if !current.hasAssets}
 									<Button variant="destructive" size="sm" onclick={() => (deleteOpen = true)}
@@ -603,7 +603,7 @@
 					{/if}
 				</Card.Content>
 				<Card.Footer class="flex flex-wrap items-center justify-between gap-3">
-					<div class="flex items-center gap-2 text-xs text-muted-foreground">
+					<div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
 						<kbd class="rounded border px-1.5 py-0.5 font-mono">←</kbd>
 						<kbd class="rounded border px-1.5 py-0.5 font-mono">→</kbd>
 						<span>step</span>
@@ -612,7 +612,7 @@
 						<kbd class="rounded border px-1.5 py-0.5 font-mono">{modLabel}S</kbd>
 						<span>save</span>
 					</div>
-					<div class="flex items-center gap-2">
+					<div class="flex flex-wrap items-center gap-2">
 						<Button
 							icon="back"
 							variant="outline"

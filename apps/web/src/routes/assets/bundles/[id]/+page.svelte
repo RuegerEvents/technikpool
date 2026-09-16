@@ -242,14 +242,14 @@
 <svelte:head><title>{bundle.template.name} | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
-	<div class="flex items-center justify-between">
+	<div class="flex flex-wrap items-center justify-between gap-4">
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">
 				{bundle.template.name}{bundle.tag ? ` — ${bundle.tag}` : ''}
 			</h1>
 			<p class="text-muted-foreground">{orgLabel(bundle.template.organization)}</p>
 		</div>
-		<div class="flex gap-2">
+		<div class="flex flex-wrap gap-2">
 			<Button
 				variant="outline"
 				href={resolve(`/assets/bundles/${bundleId}/inventory-list`)}
@@ -300,11 +300,11 @@
 		</div>
 	</div>
 
-	<div class="grid gap-6 lg:grid-cols-2">
+	<div class="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
 		<!-- Bundle details (left) -->
 		<Card.Root>
 			<Card.Header>
-				<div class="flex items-start justify-between gap-4">
+				<div class="flex flex-wrap items-start justify-between gap-4">
 					<div>
 						<Card.Title>Bundle</Card.Title>
 						<Card.Description>Name, category, pricing, and location.</Card.Description>
@@ -379,14 +379,14 @@
 		     opens past its edge. Nothing in this one is full-bleed. -->
 		<Card.Root class="overflow-visible">
 			<Card.Header>
-				<div class="flex items-start justify-between gap-4">
+				<div class="flex flex-wrap items-start justify-between gap-4">
 					<div>
 						<Card.Title>Contained Assets</Card.Title>
 						<Card.Description>Devices that belong to this bundle.</Card.Description>
 					</div>
-					<div class="flex items-center gap-2">
+					<div class="flex flex-wrap items-center gap-2">
 						<CategorySelect
-							class="w-44"
+							class="w-full sm:w-44"
 							{categories}
 							bind:value={categoryFilter}
 							allowEmpty

@@ -238,7 +238,7 @@
 						<p class="mb-2 text-sm font-medium">
 							Selected <span class="text-muted-foreground">({selectedAssets.length})</span>
 						</p>
-						<div class="rounded-md border">
+						<div class="overflow-x-auto rounded-md border">
 							<table class="w-full text-sm">
 								<tbody>
 									{#each selectedAssets as asset (asset.id)}

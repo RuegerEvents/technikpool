@@ -414,7 +414,7 @@
 <svelte:head><title>{asset.product.name} | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
-	<div class="flex items-center justify-between">
+	<div class="flex flex-wrap items-center justify-between gap-4">
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">{asset.product.name}</h1>
 			<p class="text-muted-foreground">
@@ -439,7 +439,7 @@
 		<!-- Asset details (left) -->
 		<Card.Root>
 			<Card.Header>
-				<div class="flex items-start justify-between gap-4">
+				<div class="flex flex-wrap items-start justify-between gap-4">
 					<div>
 						<Card.Title>Asset</Card.Title>
 						<Card.Description>
@@ -489,7 +489,7 @@
 		<!-- Pricing & inspection -->
 		<Card.Root>
 			<Card.Header>
-				<div class="flex items-start justify-between gap-4">
+				<div class="flex flex-wrap items-start justify-between gap-4">
 					<div>
 						<Card.Title>Purchase & Inspection</Card.Title>
 						<Card.Description>
@@ -677,7 +677,7 @@
 		<div class="space-y-6">
 			<Card.Root>
 				<Card.Header>
-					<div class="flex items-start justify-between gap-4">
+					<div class="flex flex-wrap items-start justify-between gap-4">
 						<div>
 							<Card.Title>Product</Card.Title>
 							<Card.Description>Shared product details for this asset type.</Card.Description>

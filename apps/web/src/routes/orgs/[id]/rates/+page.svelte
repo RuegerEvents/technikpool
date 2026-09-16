@@ -53,7 +53,7 @@
 		<Button
 			variant="ghost"
 			href={resolve(`/orgs/${orgId}`)}
-			class="flex items-center gap-1 text-muted-foreground"
+			class="flex max-w-full min-w-0 items-center gap-1 text-muted-foreground"
 		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -68,7 +68,7 @@
 			>
 				<path d="m15 18-6-6 6-6" />
 			</svg>
-			{org.name}
+			<span class="truncate">{org.name}</span>
 		</Button>
 	</div>
 
@@ -85,12 +85,14 @@
 			<div class="space-y-3">
 				{#each rates as row (row.category.id)}
 					<div
-						class="flex items-center justify-between gap-4 border-b pb-3 last:border-0 last:pb-0"
+						class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b pb-3 last:border-0 last:pb-0"
 					>
-						<div class="flex items-center gap-2">
-							<span class="h-2.5 w-2.5 rounded-full" style="background-color: {row.category.color}"
+						<div class="flex min-w-0 items-center gap-2">
+							<span
+								class="h-2.5 w-2.5 shrink-0 rounded-full"
+								style="background-color: {row.category.color}"
 							></span>
-							<span class="font-medium">{categoryLabel(row.category)}</span>
+							<span class="truncate font-medium">{categoryLabel(row.category)}</span>
 						</div>
 						{#if canManage}
 							<div class="flex items-center gap-2">

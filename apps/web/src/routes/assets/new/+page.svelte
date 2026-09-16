@@ -392,7 +392,7 @@
 
 					{#if quantity > 1}
 						{#if !noAssetTag}
-							<div class="overflow-hidden rounded-lg border">
+							<div class="overflow-x-auto rounded-lg border">
 								<table class="w-full text-sm">
 									<thead>
 										<tr class="border-b bg-muted/40">

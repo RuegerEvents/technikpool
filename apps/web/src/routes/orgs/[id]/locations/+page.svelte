@@ -102,7 +102,7 @@
 		</Button>
 	</div>
 
-	<div class="flex items-start justify-between gap-4">
+	<div class="flex flex-wrap items-start justify-between gap-4">
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">Locations</h1>
 			<p class="text-muted-foreground">Manage locations for {org.name}.</p>
@@ -129,7 +129,7 @@
 				{#each locations as loc (loc.id)}
 					<Card.Root>
 						<Card.Header>
-							<div class="flex items-start justify-between gap-4">
+							<div class="flex flex-wrap items-start justify-between gap-4">
 								<div class="min-w-0">
 									<Card.Title class="truncate">{loc.name}</Card.Title>
 									<Card.Description>{formatAddress(loc.address)}</Card.Description>

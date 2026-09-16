@@ -518,10 +518,10 @@
 					: 'Product catalog — click a row to see individual units.'}
 			</p>
 		</div>
-		<div class="flex items-center gap-2">
+		<div class="flex flex-wrap items-center gap-2">
 			<select
 				bind:value={filterOrgId}
-				class="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+				class="h-10 max-w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
 			>
 				<option value="">All Organizations</option>
 				{#each orgs as org (org.id)}<option value={org.id}>{orgLabel(org)}</option>{/each}
@@ -538,10 +538,10 @@
 			type="search"
 			bind:value={searchQuery}
 			placeholder="Search by product, manufacturer, S/N, tag, bundle…"
-			class="h-10 w-64 rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+			class="h-10 w-full min-w-48 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none sm:w-64 sm:flex-none"
 		/>
 		<CategorySelect
-			class="w-64"
+			class="w-full sm:w-64"
 			{categories}
 			bind:value={categoryFilter}
 			allowEmpty
@@ -575,7 +575,7 @@
 				class="h-10 w-20 rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
 			/>
 		{/if}
-		<div class="flex items-center gap-1">
+		<div class="flex flex-wrap items-center gap-1">
 			{#each statusFilterOptions as [val, label] (val)}
 				<button
 					type="button"
@@ -586,11 +586,11 @@
 				>
 			{/each}
 		</div>
-		<div class="ml-auto flex items-center gap-3">
+		<div class="flex flex-wrap items-center gap-3 sm:ml-auto">
 			<!-- Retired units have no bundles to group by, and the grid has no flat
 			     list — so a button that could only fall back to another is left out. -->
 			{#if !showingRetired || layout === 'list'}
-				<div class="flex items-center gap-1">
+				<div class="flex flex-wrap items-center gap-1">
 					{#if !showingRetired}
 						<button
 							type="button"
@@ -990,7 +990,7 @@
 			{/each}
 		</div>
 	{:else}
-		<div class="rounded-md border">
+		<div class="overflow-x-auto rounded-md border">
 			<table class="w-full text-sm">
 				<thead>
 					<tr class="border-b bg-muted/30">

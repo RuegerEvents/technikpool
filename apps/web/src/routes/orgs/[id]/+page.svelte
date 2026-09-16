@@ -253,8 +253,8 @@
 
 	<div>
 		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div>
-				<h1 class="text-3xl font-bold tracking-tight">{org.name}</h1>
+			<div class="min-w-0">
+				<h1 class="text-3xl font-bold tracking-tight break-words">{org.name}</h1>
 				<p class="text-muted-foreground">Manage members and roles.</p>
 			</div>
 			{#if canManage}
@@ -631,7 +631,7 @@
 			</div>
 		{/if}
 
-		<div class="space-y-4 {canManage ? 'lg:col-span-2' : 'lg:col-span-3'}">
+		<div class="min-w-0 space-y-4 {canManage ? 'lg:col-span-2' : 'lg:col-span-3'}">
 			<h2 class="text-xl font-semibold">Members ({org.members.length})</h2>
 			<div class="space-y-2">
 				{#each org.members as membership (membership.id)}

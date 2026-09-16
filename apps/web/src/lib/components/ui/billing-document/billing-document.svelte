@@ -211,7 +211,7 @@
 </script>
 
 <div class="grid gap-6 lg:grid-cols-3">
-	<div class="lg:col-span-2">
+	<div class="min-w-0 lg:col-span-2">
 		{#if items.length === 0}
 			<div class="rounded-md border py-12 text-center text-muted-foreground">
 				{emptyMessage}
@@ -327,7 +327,7 @@
 		{/if}
 	</div>
 
-	<div class="space-y-4">
+	<div class="min-w-0 space-y-4">
 		{@render asideTop?.()}
 		<Card.Root>
 			<Card.Header>
