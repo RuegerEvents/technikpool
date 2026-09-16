@@ -263,6 +263,15 @@
 		return d;
 	}
 
+	// ISO-8601 week number: the week containing the year's first Thursday is 1.
+	function isoWeek(d: Date): number {
+		const thu = startOfDay(d);
+		thu.setDate(thu.getDate() + 3 - ((thu.getDay() + 6) % 7));
+		const firstThu = new Date(thu.getFullYear(), 0, 4);
+		firstThu.setDate(firstThu.getDate() + 3 - ((firstThu.getDay() + 6) % 7));
+		return 1 + Math.round((thu.getTime() - firstThu.getTime()) / (MS_DAY * 7));
+	}
+
 	function dateToX(d: Date): number {
 		const unit = granularity === 'day' ? MS_DAY : MS_DAY * 7;
 		return ((d.getTime() - timelineStart.getTime()) / unit) * colWidth;
@@ -366,6 +375,28 @@
 		let h = 0;
 		for (const c of id) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
 		return COLORS[h % COLORS.length];
+	}
+
+	// Outlines a bar's label in the bar's own colour, so the type sits on a patch
+	// of solid production colour wherever it crosses the hatched setup fill.
+	// Eight hard 1px copies make the ring, the blurred one closes the diagonal
+	// gaps between them. Not -webkit-text-stroke: that needs `paint-order` to
+	// draw behind the glyph, and where paint-order is ignored the stroke eats
+	// the white instead.
+	const OUTLINE_OFFSETS = [
+		'1px 0 0',
+		'-1px 0 0',
+		'0 1px 0',
+		'0 -1px 0',
+		'1px 1px 0',
+		'-1px 1px 0',
+		'1px -1px 0',
+		'-1px -1px 0',
+		'0 0 2px'
+	];
+
+	function labelOutline(color: string): string {
+		return `text-shadow: ${OUTLINE_OFFSETS.map((o) => `${o} ${color}`).join(', ')};`;
 	}
 
 	type Bar = {
@@ -606,23 +637,31 @@
 		'Dec'
 	];
 
-	type Span = { label: string; col: number; span: number };
+	type Span = { label: string; left: number; width: number };
 
+	// The month row is laid out off the real calendar, in pixels, not by whole
+	// columns: in week granularity a month almost never starts on a Monday, so
+	// snapping its boundary to a column edge puts it up to six days out. Same
+	// dateToX() the bars use, so a month edge lands exactly where a booking
+	// starting on the 1st does.
 	let monthSpans = $derived.by((): Span[] => {
 		if (!visibleCols.length) return [];
+		const rangeStart = colDate(visibleCols[0]);
+		const rangeEnd = colDate(visibleCols[visibleCols.length - 1]);
+		rangeEnd.setDate(rangeEnd.getDate() + (granularity === 'day' ? 1 : 7));
+
 		const spans: Span[] = [];
-		let cur: Span | null = null;
-		for (const col of visibleCols) {
-			const d = colDate(col);
-			const label = `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-			if (!cur || cur.label !== label) {
-				if (cur) spans.push(cur);
-				cur = { label, col, span: 1 };
-			} else {
-				cur.span++;
-			}
+		const cur = new Date(rangeStart.getFullYear(), rangeStart.getMonth(), 1);
+		while (cur.getTime() < rangeEnd.getTime()) {
+			const next = new Date(cur.getFullYear(), cur.getMonth() + 1, 1);
+			const left = dateToX(cur);
+			spans.push({
+				label: `${MONTHS[cur.getMonth()]} ${cur.getFullYear()}`,
+				left,
+				width: dateToX(next) - left
+			});
+			cur.setMonth(cur.getMonth() + 1);
 		}
-		if (cur) spans.push(cur);
 		return spans;
 	});
 
@@ -989,6 +1028,20 @@
 
 <ProductionHoverCard info={hoverInfo} anchor={hover} />
 
+<!--
+	A Gantt bar's label, drawn over the bar rather than inside one of its
+	segments: it runs the full booking — get-in and get-out included — instead of
+	being clipped to the show days in the middle. Top-aligned, because a label
+	that wraps and is vertically centred shows its middle with both ends cut off.
+	The outline is what keeps it legible where it crosses the hatched setup fill.
+-->
+{#snippet barLabel(label: string, left: number, width: number, h: number, color: string)}
+	<span
+		class="pointer-events-none absolute top-1 overflow-hidden px-1.5 pt-px text-[11px] leading-tight font-medium text-white"
+		style="left: {left}px; width: {width}px; height: {h - 8}px; {labelOutline(color)}">{label}</span
+	>
+{/snippet}
+
 <div class="flex h-full flex-col overflow-hidden">
 	<!-- Controls -->
 	<div class="flex flex-wrap items-center gap-3 border-b px-4 py-2">
@@ -1325,12 +1378,18 @@
 					<div class="relative shrink-0" style="width: {totalWidth}px; height: 56px">
 						<!-- Month spans -->
 						<div class="absolute inset-x-0 top-0 border-b" style="height: 24px">
-							{#each monthSpans as span (span.col)}
+							{#each monthSpans as span (span.label)}
 								<div
-									class="absolute top-0 h-full overflow-hidden border-l px-1.5 text-xs leading-6 font-medium whitespace-nowrap text-muted-foreground"
-									style="left: {span.col * colWidth}px; width: {span.span * colWidth}px"
+									class="absolute top-0 h-full border-l px-1.5 text-xs leading-6 font-medium whitespace-nowrap text-muted-foreground"
+									style="left: {span.left}px; width: {span.width}px"
 								>
-									{span.label}
+									<!-- Sticks just past the sidebar so a month wider than the
+									     viewport keeps its name on screen, and is clamped by its
+									     own span so it never drifts into the next month. -->
+									<span
+										class="sticky inline-block max-w-full truncate align-top"
+										style="left: {SIDEBAR + 6}px">{span.label}</span
+									>
 								</div>
 							{/each}
 						</div>
@@ -1349,15 +1408,25 @@
 											: 'text-muted-foreground'} {weekend ? 'bg-muted/20' : ''}"
 									style="left: {col * colWidth}px; width: {colWidth}px"
 								>
-									{#if today}
-										<span
-											class="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground"
-										>
-											{colLabel(d)}
-										</span>
-									{:else}
-										{colLabel(d)}
-									{/if}
+									<!-- Baseline-aligned, not box-aligned: the week number is a
+									     size smaller than the date and centering both boxes would
+									     leave their text sitting a pixel apart. -->
+									<span class="flex items-baseline gap-1.5">
+										{#if granularity === 'week'}
+											<span class="text-[10px] text-muted-foreground/70 tabular-nums"
+												>W {isoWeek(d)}</span
+											>
+										{/if}
+										{#if today}
+											<span
+												class="flex h-5 w-5 items-center justify-center self-center rounded-full bg-primary text-[10px] text-primary-foreground"
+											>
+												{colLabel(d)}
+											</span>
+										{:else}
+											<span class="tabular-nums">{colLabel(d)}</span>
+										{/if}
+									</span>
 								</div>
 							{/each}
 
@@ -1466,13 +1535,13 @@
 									{#if bar.pending}
 										<a
 											href={resolve(`/productions/${bar.productionId}`)}
+											aria-label={bar.label}
 											{...hoverCard(bar.productionId, { pending: true })}
-											class="absolute top-1 flex items-center overflow-hidden rounded px-1.5 text-[11px] font-medium text-white no-underline hover:brightness-110"
+											class="absolute top-1 overflow-hidden rounded no-underline hover:brightness-110"
 											style="left: {bar.left}px; width: {bar.width}px; height: {h -
 												8}px; background-color: {bar.color}; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px); opacity: 0.75;"
-										>
-											{bar.label}
-										</a>
+										></a>
+										{@render barLabel(bar.label, bar.left, bar.width, h, bar.color)}
 									{:else}
 										{@const segs = ganttSegments(bar)}
 										<div class="group/bar">
@@ -1481,19 +1550,16 @@
 													href={resolve(`/productions/${bar.productionId}`)}
 													aria-label={bar.label}
 													{...hoverCard(bar.productionId)}
-													class="absolute top-1 flex items-center overflow-hidden px-1.5 text-[11px] font-medium text-white no-underline group-hover/bar:brightness-110 {seg.roundedLeft
+													class="absolute top-1 overflow-hidden no-underline group-hover/bar:brightness-110 {seg.roundedLeft
 														? 'rounded-l'
 														: ''} {seg.roundedRight ? 'rounded-r' : ''}"
 													style="left: {seg.left}px; width: {seg.width}px; height: {h -
 														8}px; background-color: {bar.color}; {seg.kind === 'setup'
 														? 'opacity: 0.65; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 4px, transparent 4px, transparent 8px);'
 														: ''}"
-												>
-													{#if seg.kind === 'show' || segs.length === 1}
-														{bar.label}
-													{/if}
-												</a>
+												></a>
 											{/each}
+											{@render barLabel(bar.label, bar.left, bar.width, h, bar.color)}
 										</div>
 									{/if}
 								{/each}

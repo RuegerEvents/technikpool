@@ -6404,3 +6404,8 @@ msgstr "{0} Tage <0/> <1/>"
 #: src/routes/offers/+page.svelte
 msgid "Superseded"
 msgstr "Ersetzt"
+
+#. 0: isoWeek(d)
+#: src/routes/calendar/+page.svelte
+msgid "W {0}"
+msgstr "KW {0}"
