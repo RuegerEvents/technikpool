@@ -262,6 +262,8 @@ msgstr "Noch keine Crewmitglieder hinzugefügt."
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/productions/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
+#: src/routes/profile/+page.svelte
+#: src/routes/profile/+page.svelte
 msgid "Name"
 msgstr "Name"
 
@@ -712,6 +714,7 @@ msgstr "<0/> Nach dem Speichern weiteres erstellen"
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/products/+page.svelte
+#: src/routes/profile/+page.svelte
 msgid "Saving…"
 msgstr "Wird gespeichert…"
 
@@ -782,6 +785,7 @@ msgstr "E-Mail-Adresse eingeben, um sich anzumelden"
 
 #: src/routes/auth/login/+page.svelte
 #: src/routes/auth/register/+page.svelte
+#: src/routes/profile/+page.svelte
 msgid "Password"
 msgstr "Passwort"
 
@@ -962,6 +966,7 @@ msgid "Add a registered user to this organization by email."
 msgstr "Registrierten Benutzer per E-Mail zur Organisation hinzufügen."
 
 #: src/routes/orgs/[id]/+page.svelte
+#: src/routes/profile/+page.svelte
 msgid "Email address"
 msgstr "E-Mail-Adresse"
 
@@ -3449,6 +3454,7 @@ msgid "Request a new reset link"
 msgstr "Neuen Link anfordern"
 
 #: src/routes/auth/reset-password/+page.svelte
+#: src/routes/profile/+page.svelte
 msgid "New password"
 msgstr "Neues Passwort"
 
@@ -7049,3 +7055,75 @@ msgstr "Alles wie Admin, dazu die Organisation: Mitglieder, deren Rollen, Einste
 #: src/routes/orgs/[id]/+page.svelte
 msgid "What the roles mean"
 msgstr "Was die Rollen bedeuten"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Profile"
+msgstr "<0/> Profil"
+
+#: src/routes/profile/+page.svelte
+msgid "Name updated"
+msgstr "Name aktualisiert"
+
+#: src/routes/profile/+page.svelte
+msgid "Check your inbox for the confirmation link."
+msgstr "Prüfen Sie Ihren Posteingang auf den Bestätigungslink."
+
+#: src/routes/profile/+page.svelte
+msgid "Password changed. Other devices have been signed out."
+msgstr "Passwort geändert. Andere Geräte wurden abgemeldet."
+
+#: src/routes/profile/+page.svelte
+msgid "Profile | Technikpool"
+msgstr "Profil | Technikpool"
+
+#: src/routes/profile/+page.svelte
+msgid "Profile"
+msgstr "Profil"
+
+#: src/routes/profile/+page.svelte
+msgid "How you appear to the other members of your organizations."
+msgstr "So erscheinen Sie für die anderen Mitglieder Ihrer Organisationen."
+
+#: src/routes/profile/+page.svelte
+msgid "Save name"
+msgstr "Namen speichern"
+
+#: src/routes/profile/+page.svelte
+msgid "Currently <0/>. Changing it takes a confirmation link sent to that address — the new one only takes effect once you follow it."
+msgstr "Aktuell <0/>. Eine Änderung erfordert einen Bestätigungslink an diese Adresse — die neue wird erst wirksam, wenn Sie ihm folgen."
+
+#: src/routes/profile/+page.svelte
+msgid "New email address"
+msgstr "Neue E-Mail-Adresse"
+
+#: src/routes/profile/+page.svelte
+msgid "Sending…"
+msgstr "Wird gesendet…"
+
+#: src/routes/profile/+page.svelte
+msgid "Send confirmation link"
+msgstr "Bestätigungslink senden"
+
+#: src/routes/profile/+page.svelte
+msgid "Changing your password signs out every other device, including paired scanners."
+msgstr "Ein Passwortwechsel meldet alle anderen Geräte ab, auch gekoppelte Scanner."
+
+#: src/routes/profile/+page.svelte
+msgid "Current password"
+msgstr "Aktuelles Passwort"
+
+#: src/routes/profile/+page.svelte
+msgid "The two passwords do not match."
+msgstr "Die beiden Passwörter stimmen nicht überein."
+
+#: src/routes/profile/+page.svelte
+msgid "Repeat new password"
+msgstr "Neues Passwort wiederholen"
+
+#: src/routes/profile/+page.svelte
+msgid "Changing…"
+msgstr "Wird geändert…"
+
+#: src/routes/profile/+page.svelte
+msgid "Change password"
+msgstr "Passwort ändern"

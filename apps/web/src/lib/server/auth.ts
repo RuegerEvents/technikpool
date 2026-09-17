@@ -11,6 +11,7 @@ import { sendMail } from './mail';
 import { passwordResetEmail } from './emails/password-reset';
 import { passwordChangedEmail } from './emails/password-changed';
 import { emailVerificationEmail } from './emails/email-verification';
+import { emailChangeConfirmationEmail } from './emails/email-change-confirmation';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -83,6 +84,22 @@ const createAuth = () =>
 			sendVerificationEmail: async ({ user, url }) => {
 				const { subject, html, text } = emailVerificationEmail({ name: user.name, url });
 				await sendMail({ to: user.email, subject, html, text });
+			}
+		},
+		user: {
+			changeEmail: {
+				enabled: true,
+				// Confirmation goes to the address on file. `updateEmailWithoutVerification`
+				// is deliberately left off: an account whose address was never verified
+				// would otherwise move on a single click, with no second party to object.
+				sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
+					const { subject, html, text } = emailChangeConfirmationEmail({
+						name: user.name,
+						newEmail,
+						url
+					});
+					await sendMail({ to: user.email, subject, html, text });
+				}
 			}
 		},
 		plugins: [
