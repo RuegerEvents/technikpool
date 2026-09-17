@@ -1,3 +1,1 @@
-Look up and Inventory now show a cable's connectors and length, so two cables of the same type can be told apart without reading the label.
-
-Scanning an asset tag on the connect screen now says so instead of closing the camera without a word.
+Look up and Inventory now show held-back units as unavailable, and scanning one says why it can't be taken out.
