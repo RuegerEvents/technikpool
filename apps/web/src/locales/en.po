@@ -28,12 +28,9 @@ msgstr "Productions"
 #~ msgid "Calendar"
 #~ msgstr "Calendar"
 
+#: src/lib/role-descriptions.svelte.ts
 #: src/routes/admin/users/+page.svelte
 #: src/routes/admin/users/+page.svelte
-#: src/routes/orgs/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
 msgid "Admin"
 msgstr "Admin"
 
@@ -608,7 +605,7 @@ msgstr "No organizations exist yet."
 msgid "You are not a member of any organization yet."
 msgstr "You are not a member of any organization yet."
 
-#. 0: roleLabels[org.role] ?? org.role
+#. 0: roleName(org.role)
 #: src/routes/orgs/+page.svelte
 msgid "Role: {0}"
 msgstr "Role: {0}"
@@ -936,27 +933,18 @@ msgstr "No results for \"{0}\""
 msgid "Role updated"
 msgstr "Role updated"
 
+#: src/lib/role-descriptions.svelte.ts
 #: src/routes/admin/users/+page.svelte
-#: src/routes/orgs/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
 msgid "Owner"
 msgstr "Owner"
 
+#: src/lib/role-descriptions.svelte.ts
 #: src/routes/admin/users/+page.svelte
-#: src/routes/orgs/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
 msgid "Member"
 msgstr "Member"
 
+#: src/lib/role-descriptions.svelte.ts
 #: src/routes/admin/users/+page.svelte
-#: src/routes/orgs/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
 msgid "Viewer"
 msgstr "Viewer"
 
@@ -7036,3 +7024,28 @@ msgstr "Gone: sold on. Out of every list and count; only the status can still be
 #: src/lib/components/ui/asset-status/asset-status.svelte.ts
 msgid "Gone: retired for good. Out of every list and count; only the status can still be changed."
 msgstr "Gone: retired for good. Out of every list and count; only the status can still be changed."
+
+#: src/routes/assets/new/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
+msgid "You need admin rights in one of your organizations to register equipment."
+msgstr "You need admin rights in one of your organizations to register equipment."
+
+#: src/lib/role-descriptions.svelte.ts
+msgid "Can see everything, but change nothing."
+msgstr "Can see everything, but change nothing."
+
+#: src/lib/role-descriptions.svelte.ts
+msgid "Can scan, check equipment out and back in, and plan productions."
+msgstr "Can scan, check equipment out and back in, and plan productions."
+
+#: src/lib/role-descriptions.svelte.ts
+msgid "Everything a member can, plus the inventory itself: register and retire units, prices, inspections, loan requests, offers and invoices."
+msgstr "Everything a member can, plus the inventory itself: register and retire units, prices, inspections, loan requests, offers and invoices."
+
+#: src/lib/role-descriptions.svelte.ts
+msgid "Everything an admin can, plus the organization: members, their roles, settings and category rates."
+msgstr "Everything an admin can, plus the organization: members, their roles, settings and category rates."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "What the roles mean"
+msgstr "What the roles mean"

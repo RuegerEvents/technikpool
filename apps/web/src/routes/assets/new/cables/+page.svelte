@@ -33,12 +33,16 @@
 	import { browser } from '$app/environment';
 	import { toast } from 'svelte-sonner';
 	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
+	import { canManageInventory } from '$lib/roles';
 
 	// ⌘ on a Mac, Ctrl everywhere else. Also keeps the symbol out of the
 	// translation catalogue, where it has no business being.
 	let modLabel = $derived(browser && /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘' : 'Ctrl');
 
 	let saving = $state(false);
+	// Same rule as /assets/new: an org the user can only read is not an org
+	// they can add cables to.
+	let orgs = $derived((await getMyOrgs()).filter(canManageInventory));
 	let selectedOrgId = $state('');
 	let locationId = $state('');
 	let locations = $derived(selectedOrgId ? await getLocations(selectedOrgId) : []);
@@ -386,8 +390,11 @@
 	     there is nothing left for the clipping to do. -->
 	<Card.Root class="overflow-visible">
 		<Card.Content class="pt-6">
-			{#if true}
-				{@const orgs = await getMyOrgs()}
+			{#if orgs.length === 0}
+				<p class="text-sm text-muted-foreground">
+					You need admin rights in one of your organizations to register equipment.
+				</p>
+			{:else}
 				{#if !selectedOrgId && orgs[0]}{((selectedOrgId = orgs[0].id), '')}{/if}
 				<form onsubmit={handleSubmit} class="space-y-6">
 					<div class="grid gap-4 sm:grid-cols-2">

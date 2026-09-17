@@ -13,6 +13,7 @@
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
 	import { plural, orgLabel } from '$lib/utils';
+	import { canManageInventory } from '$lib/roles';
 	import {
 		Package,
 		Layers,
@@ -29,7 +30,7 @@
 	let { data } = $props();
 
 	let orgs = $derived(data.user ? await getMyOrgs() : []);
-	let adminOrgs = $derived(orgs.filter((o) => o.role === 'ADMIN' || o.role === 'OWNER'));
+	let adminOrgs = $derived(orgs.filter(canManageInventory));
 	let pending = $derived(
 		data.user ? (await Promise.all(adminOrgs.map((o) => getPendingApprovals(o.id)))).flat() : []
 	);

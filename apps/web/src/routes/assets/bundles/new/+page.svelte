@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getErrorMessage, orgLabel } from '$lib/utils';
+	import { canManageInventory } from '$lib/roles';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -46,7 +47,9 @@
 	let selectedAssets = $state<SelectedAsset[]>([]);
 
 	// Remote data
-	let orgs = $derived(await getMyOrgs());
+	// Creating a kit is the same org-admin right as creating an asset, so the
+	// picker offers the same orgs the server would accept.
+	let orgs = $derived((await getMyOrgs()).filter(canManageInventory));
 	let categories = $derived(await getCategories());
 	let bundleTypes = $derived(selectedOrgId ? await getBundleTemplates(selectedOrgId) : []);
 

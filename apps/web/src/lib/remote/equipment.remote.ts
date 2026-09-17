@@ -3,7 +3,7 @@ import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import { orgLabel } from '$lib/utils';
 import { getProduction } from './productions.remote';
-import { requireAuth, userOrgIds } from '$lib/server/services/access';
+import { requireAuth, requireOrgWrite, userOrgIds } from '$lib/server/services/access';
 import { BOOKABLE_ASSET_WHERE } from '$lib/asset-status';
 import { accessoryIdsOf } from '$lib/server/services/accessories';
 import { appError } from '$lib/errors';
@@ -228,6 +228,7 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: data.productionId }
 	});
+	await requireOrgWrite(production.organizationId);
 
 	// A unit booked as part of a bundle belongs to that bundle's row, not to
 	// this product row: the quantity here counts and removes only individually

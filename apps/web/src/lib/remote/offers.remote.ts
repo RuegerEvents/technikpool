@@ -2,7 +2,12 @@ import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import { customerLabel, dayCountBetween, formatAddress, getErrorMessage } from '$lib/utils';
-import { isSystemAdmin, requireAuth, userOrgIds } from '$lib/server/services/access';
+import {
+	isSystemAdmin,
+	requireAuth,
+	requireOrgInventory,
+	userOrgIds
+} from '$lib/server/services/access';
 import {
 	DEFAULT_INVOICE_CLOSING,
 	DEFAULT_INVOICE_INTRO,
@@ -16,16 +21,14 @@ import { putObject } from '$lib/server/storage';
 import { orgSnapshotColumns } from '$lib/org-snapshot';
 import { appError, type AppErrorCode, type ErrorParams } from '$lib/errors';
 
-async function requireOrgManageAccess(orgId: string) {
-	const user = await requireAuth();
-	if (await isSystemAdmin(user.id)) return user;
-	const membership = await prisma.orgMembership.findUnique({
-		where: { userId_organizationId: { userId: user.id, organizationId: orgId } }
-	});
-	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		appError(403, 'billing_manage_forbidden');
-	}
-	return user;
+/**
+ * Offers and invoices are inventory-admin work, not org-owner work — deliberately
+ * named for what it guards. It used to be `requireOrgManageAccess`, the same name
+ * `orgs.remote.ts` gave a stricter, OWNER-only check: one name, two rules, and
+ * nothing to tell you which one you had imported.
+ */
+function requireOrgBilling(orgId: string) {
+	return requireOrgInventory(orgId, 'billing_manage_forbidden');
 }
 
 const ACTIVE_ITEM_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT', 'RETURNED'] as const;
@@ -742,7 +745,7 @@ export const createOfferFromProduction = command(createOfferSchema, async (data)
 		where: { id: data.productionId },
 		include: { organization: { include: { address: true } } }
 	});
-	await requireOrgManageAccess(production.organizationId);
+	await requireOrgBilling(production.organizationId);
 
 	const assetScope = data.assetScope ?? 'ALL';
 
@@ -920,7 +923,7 @@ export const updateOfferItemsFromProduction = command(v.string(), async (offerId
 		where: { id: offerId },
 		include: { items: true }
 	});
-	await requireOrgManageAccess(offer.organizationId);
+	await requireOrgBilling(offer.organizationId);
 	if (offer.finalizedAt) appError(409, 'offer_immutable');
 
 	if (!offer.productionId) {
@@ -951,7 +954,7 @@ export const updateOfferDayCount = command(
 			where: { id: offerId },
 			include: { items: true }
 		});
-		await requireOrgManageAccess(offer.organizationId);
+		await requireOrgBilling(offer.organizationId);
 		if (offer.finalizedAt) appError(409, 'offer_immutable');
 
 		await prisma.$transaction([
@@ -991,7 +994,7 @@ export const updateOfferItemRate = command(
 		if (items.length === 0) appError(404, 'offer_lines_not_found');
 		const offerIds = [...new Set(items.map((i) => i.offerId))];
 		if (offerIds.length > 1) appError(400, 'offer_lines_mixed');
-		await requireOrgManageAccess(items[0].offer.organizationId);
+		await requireOrgBilling(items[0].offer.organizationId);
 		if (items[0].offer.finalizedAt) appError(409, 'offer_immutable');
 
 		await prisma.$transaction(
@@ -1021,7 +1024,7 @@ export const updateOfferDiscount = command(
 	updateOfferDiscountSchema,
 	async ({ offerId, discountType, discountValue }) => {
 		const offer = await prisma.offer.findUniqueOrThrow({ where: { id: offerId } });
-		await requireOrgManageAccess(offer.organizationId);
+		await requireOrgBilling(offer.organizationId);
 		if (offer.finalizedAt) appError(409, 'offer_immutable');
 
 		await prisma.offer.update({
@@ -1047,7 +1050,7 @@ const updateOfferCustomerSchema = v.object({
 
 export const updateOfferCustomer = command(updateOfferCustomerSchema, async (data) => {
 	const offer = await prisma.offer.findUniqueOrThrow({ where: { id: data.offerId } });
-	await requireOrgManageAccess(offer.organizationId);
+	await requireOrgBilling(offer.organizationId);
 	if (offer.finalizedAt) appError(409, 'offer_immutable');
 	const customer = data.customerId
 		? await prisma.customer.findFirst({
@@ -1083,7 +1086,7 @@ export const copyOfferToNewCustomer = command(copyOfferSchema, async ({ offerId,
 		where: { id: offerId },
 		include: { items: true, organization: { include: { address: true } } }
 	});
-	await requireOrgManageAccess(source.organizationId);
+	await requireOrgBilling(source.organizationId);
 
 	// The copy goes to a real customer record, scoped to the same org —
 	// its details become the new document's snapshot.
@@ -1151,7 +1154,7 @@ export const deleteOffer = command(v.string(), async (offerId: string) => {
 		where: { id: offerId },
 		include: { _count: { select: { invoices: true } } }
 	});
-	await requireOrgManageAccess(offer.organizationId);
+	await requireOrgBilling(offer.organizationId);
 	if (offer._count.invoices > 0) appError(409, 'offer_has_invoice');
 	// A finalized offer is an issued commercial letter with an archived PDF —
 	// GoBD retention applies to it just as to an invoice, so it cannot be
@@ -1166,7 +1169,7 @@ export const finalizeOffer = command(v.string(), async (offerId: string) => {
 		where: { id: offerId },
 		include: { items: { orderBy: { createdAt: 'asc' } } }
 	});
-	await requireOrgManageAccess(offer.organizationId);
+	await requireOrgBilling(offer.organizationId);
 	if (offer.finalizedAt) appError(409, 'offer_already_finalized');
 	const pdfPath = `billing-documents/${offer.organizationId}/offers/${offer.id}.pdf`;
 	// The PDF renders from the offer's own org snapshot, never the live org —
@@ -1204,7 +1207,7 @@ export const createOfferRevision = command(v.string(), async (offerId: string) =
 			organization: { include: { address: true } }
 		}
 	});
-	await requireOrgManageAccess(source.organizationId);
+	await requireOrgBilling(source.organizationId);
 	if (!source.finalizedAt) appError(409, 'offer_draft_no_revision');
 	const family = await loadOfferFamily(source);
 	if (family.invoiced) appError(409, 'offer_has_invoice');
@@ -1293,7 +1296,7 @@ export const convertOfferToInvoice = command(convertOfferSchema, async ({ offerI
 			organization: { include: { address: true } }
 		}
 	});
-	await requireOrgManageAccess(offer.organizationId);
+	await requireOrgBilling(offer.organizationId);
 	if (!offer.finalizedAt || !offer.pdfPath) appError(409, 'offer_not_finalized');
 	const family = await loadOfferFamily(offer);
 	if (family.invoiced) appError(409, 'offer_has_invoice');
@@ -1540,7 +1543,7 @@ export const updateInvoiceItemsFromProduction = command(v.string(), async (invoi
 		where: { id: invoiceId },
 		include: { items: true }
 	});
-	await requireOrgManageAccess(invoice.organizationId);
+	await requireOrgBilling(invoice.organizationId);
 
 	if (invoice.sentAt) {
 		appError(409, 'invoice_immutable');
@@ -1568,7 +1571,7 @@ export const finalizeInvoice = command(v.string(), async (invoiceId: string) => 
 		where: { id: invoiceId },
 		include: { items: { orderBy: { createdAt: 'asc' } } }
 	});
-	await requireOrgManageAccess(invoice.organizationId);
+	await requireOrgBilling(invoice.organizationId);
 
 	if (invoice.pdfPath) {
 		appError(409, 'invoice_already_finalized');
@@ -1603,7 +1606,7 @@ export const updateInvoiceNumber = command(
 	updateInvoiceNumberSchema,
 	async ({ invoiceId, number }) => {
 		const invoice = await prisma.invoice.findUniqueOrThrow({ where: { id: invoiceId } });
-		await requireOrgManageAccess(invoice.organizationId);
+		await requireOrgBilling(invoice.organizationId);
 		if (invoice.sentAt) appError(409, 'invoice_immutable');
 		const clash = await prisma.invoice.findUnique({
 			where: { organizationId_number: { organizationId: invoice.organizationId, number } },
@@ -1632,7 +1635,7 @@ export const updateDocumentOrgSnapshot = command(updateDocumentOrgSnapshotSchema
 			where: { id: data.id },
 			include: { organization: { include: { address: true } } }
 		});
-		await requireOrgManageAccess(offer.organizationId);
+		await requireOrgBilling(offer.organizationId);
 		if (offer.finalizedAt) appError(409, 'offer_immutable');
 		const snapshot = orgSnapshotColumns(offer.organization);
 		await prisma.offer.update({
@@ -1649,7 +1652,7 @@ export const updateDocumentOrgSnapshot = command(updateDocumentOrgSnapshotSchema
 			where: { id: data.id },
 			include: { organization: { include: { address: true } } }
 		});
-		await requireOrgManageAccess(invoice.organizationId);
+		await requireOrgBilling(invoice.organizationId);
 		if (invoice.sentAt) appError(409, 'invoice_immutable');
 		const snapshot = orgSnapshotColumns(invoice.organization);
 		await prisma.invoice.update({
@@ -1665,7 +1668,7 @@ export const updateDocumentOrgSnapshot = command(updateDocumentOrgSnapshotSchema
 
 export const deleteInvoice = command(v.string(), async (invoiceId: string) => {
 	const invoice = await prisma.invoice.findUniqueOrThrow({ where: { id: invoiceId } });
-	await requireOrgManageAccess(invoice.organizationId);
+	await requireOrgBilling(invoice.organizationId);
 	if (invoice.sentAt) appError(409, 'invoice_finalized_no_delete');
 	await prisma.invoice.delete({ where: { id: invoiceId } });
 	await getInvoices().refresh();
@@ -1681,7 +1684,7 @@ export const updateInvoiceDayCount = command(
 			where: { id: invoiceId },
 			include: { items: true }
 		});
-		await requireOrgManageAccess(invoice.organizationId);
+		await requireOrgBilling(invoice.organizationId);
 		if (invoice.sentAt) {
 			appError(409, 'invoice_immutable');
 		}
@@ -1719,7 +1722,7 @@ export const updateInvoiceItemRate = command(
 		if (items.length === 0) appError(404, 'invoice_lines_not_found');
 		const invoiceIds = [...new Set(items.map((i) => i.invoiceId))];
 		if (invoiceIds.length > 1) appError(400, 'invoice_lines_mixed');
-		await requireOrgManageAccess(items[0].invoice.organizationId);
+		await requireOrgBilling(items[0].invoice.organizationId);
 		if (items[0].invoice.sentAt) {
 			appError(409, 'invoice_immutable');
 		}
@@ -1748,7 +1751,7 @@ export const updateInvoiceDiscount = command(
 	updateInvoiceDiscountSchema,
 	async ({ invoiceId, discountType, discountValue }) => {
 		const invoice = await prisma.invoice.findUniqueOrThrow({ where: { id: invoiceId } });
-		await requireOrgManageAccess(invoice.organizationId);
+		await requireOrgBilling(invoice.organizationId);
 		if (invoice.sentAt) {
 			appError(409, 'invoice_immutable');
 		}
@@ -1776,7 +1779,7 @@ const updateInvoiceCustomerSchema = v.object({
 
 export const updateInvoiceCustomer = command(updateInvoiceCustomerSchema, async (data) => {
 	const invoice = await prisma.invoice.findUniqueOrThrow({ where: { id: data.invoiceId } });
-	await requireOrgManageAccess(invoice.organizationId);
+	await requireOrgBilling(invoice.organizationId);
 	if (invoice.sentAt) {
 		appError(409, 'invoice_immutable');
 	}
@@ -1815,7 +1818,7 @@ const updateDocumentTextSchema = v.object({
 export const updateDocumentText = command(updateDocumentTextSchema, async (data) => {
 	if (data.kind === 'offer') {
 		const offer = await prisma.offer.findUniqueOrThrow({ where: { id: data.id } });
-		await requireOrgManageAccess(offer.organizationId);
+		await requireOrgBilling(offer.organizationId);
 		if (offer.finalizedAt) appError(409, 'offer_immutable');
 		await prisma.offer.update({
 			where: { id: data.id },
@@ -1828,7 +1831,7 @@ export const updateDocumentText = command(updateDocumentTextSchema, async (data)
 		await getOffer(data.id).refresh();
 	} else {
 		const invoice = await prisma.invoice.findUniqueOrThrow({ where: { id: data.id } });
-		await requireOrgManageAccess(invoice.organizationId);
+		await requireOrgBilling(invoice.organizationId);
 		if (invoice.sentAt) appError(409, 'invoice_immutable');
 		await prisma.invoice.update({
 			where: { id: data.id },

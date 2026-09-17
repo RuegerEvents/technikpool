@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { getErrorMessage, orgLabel } from '$lib/utils';
+	import { ORG_ROLES, type OrgRole } from '$lib/roles';
+	import { roleName, roleSummary } from '$lib/role-descriptions.svelte';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -54,7 +56,7 @@
 	}
 
 	let addEmail = $state('');
-	let addRole = $state<'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER'>('MEMBER');
+	let addRole = $state<OrgRole>('MEMBER');
 	let adding = $state(false);
 
 	async function handleAddUser(e: Event) {
@@ -86,7 +88,7 @@
 			await updateMemberRole({
 				orgId,
 				userId,
-				role: role as 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER'
+				role: role as OrgRole
 			});
 			toast.success('Role updated');
 		} catch (err) {
@@ -229,13 +231,6 @@
 			savingBilling = false;
 		}
 	}
-
-	const roleLabels: Record<string, string> = {
-		OWNER: 'Owner',
-		ADMIN: 'Admin',
-		MEMBER: 'Member',
-		VIEWER: 'Viewer'
-	};
 </script>
 
 <svelte:head><title>{org.name} | Technikpool</title></svelte:head>
@@ -629,11 +624,11 @@
 									bind:value={addRole}
 									class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
 								>
-									<option value="VIEWER">Viewer</option>
-									<option value="MEMBER">Member</option>
-									<option value="ADMIN">Admin</option>
-									<option value="OWNER">Owner</option>
+									{#each ORG_ROLES as role (role)}
+										<option value={role}>{roleName(role)}</option>
+									{/each}
 								</select>
+								<p class="text-sm text-muted-foreground">{roleSummary(addRole)}</p>
 							</div>
 							<Button type="submit" disabled={adding} class="w-full">
 								{adding ? 'Adding...' : 'Add Member'}
@@ -646,6 +641,22 @@
 
 		<div class="min-w-0 space-y-4 {canManage ? 'lg:col-span-2' : 'lg:col-span-3'}">
 			<h2 class="text-xl font-semibold">Members ({org.members.length})</h2>
+
+			<!-- The roles are a ladder: each one carries everything below it. Spelling
+			     that out where members are managed is the only place it is actionable. -->
+			<Card.Root>
+				<Card.Content class="space-y-2 py-4">
+					<p class="text-sm font-medium">What the roles mean</p>
+					<dl class="space-y-1.5">
+						{#each ORG_ROLES as role (role)}
+							<div class="grid gap-x-3 sm:grid-cols-[5rem_1fr]">
+								<dt class="text-sm font-medium">{roleName(role)}</dt>
+								<dd class="text-sm text-muted-foreground">{roleSummary(role)}</dd>
+							</div>
+						{/each}
+					</dl>
+				</Card.Content>
+			</Card.Root>
 			<div class="space-y-2">
 				{#each org.members as membership (membership.id)}
 					<Card.Root>
@@ -673,10 +684,9 @@
 											handleRoleChange(membership.userId, (e.target as HTMLSelectElement).value)}
 										class="h-8 rounded-md border border-input bg-background px-2 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
 									>
-										<option value="VIEWER">Viewer</option>
-										<option value="MEMBER">Member</option>
-										<option value="ADMIN">Admin</option>
-										<option value="OWNER">Owner</option>
+										{#each ORG_ROLES as role (role)}
+											<option value={role} title={roleSummary(role)}>{roleName(role)}</option>
+										{/each}
 									</select>
 									<Button
 										variant="destructive"
@@ -693,7 +703,7 @@
 									<span
 										class="rounded-md border border-input bg-background px-2 py-1 text-sm text-muted-foreground"
 									>
-										{roleLabels[membership.role]}
+										{roleName(membership.role)}
 									</span>
 								{/if}
 							</div>

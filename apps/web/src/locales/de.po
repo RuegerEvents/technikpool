@@ -28,12 +28,9 @@ msgstr "Produktionen"
 #~ msgid "Calendar"
 #~ msgstr "Kalender"
 
+#: src/lib/role-descriptions.svelte.ts
 #: src/routes/admin/users/+page.svelte
 #: src/routes/admin/users/+page.svelte
-#: src/routes/orgs/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
 msgid "Admin"
 msgstr "Admin"
 
@@ -608,7 +605,7 @@ msgstr "Noch keine Organisationen vorhanden."
 msgid "You are not a member of any organization yet."
 msgstr "Sie sind noch Mitglied keiner Organisation."
 
-#. 0: roleLabels[org.role] ?? org.role
+#. 0: roleName(org.role)
 #: src/routes/orgs/+page.svelte
 msgid "Role: {0}"
 msgstr "Rolle: {0}"
@@ -936,27 +933,18 @@ msgstr "Keine Ergebnisse für „{0}\""
 msgid "Role updated"
 msgstr "Rolle aktualisiert"
 
+#: src/lib/role-descriptions.svelte.ts
 #: src/routes/admin/users/+page.svelte
-#: src/routes/orgs/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
 msgid "Owner"
 msgstr "Inhaber"
 
+#: src/lib/role-descriptions.svelte.ts
 #: src/routes/admin/users/+page.svelte
-#: src/routes/orgs/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
 msgid "Member"
 msgstr "Mitglied"
 
+#: src/lib/role-descriptions.svelte.ts
 #: src/routes/admin/users/+page.svelte
-#: src/routes/orgs/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
 msgid "Viewer"
 msgstr "Betrachter"
 
@@ -7036,3 +7024,28 @@ msgstr "Weg: verkauft. Aus allen Listen und Zählungen; nur der Status lässt si
 #: src/lib/components/ui/asset-status/asset-status.svelte.ts
 msgid "Gone: retired for good. Out of every list and count; only the status can still be changed."
 msgstr "Weg: endgültig ausgemustert. Aus allen Listen und Zählungen; nur der Status lässt sich noch ändern."
+
+#: src/routes/assets/new/+page.svelte
+#: src/routes/assets/new/cables/+page.svelte
+msgid "You need admin rights in one of your organizations to register equipment."
+msgstr "Zum Anlegen von Geräten sind Admin-Rechte in einer Ihrer Organisationen nötig."
+
+#: src/lib/role-descriptions.svelte.ts
+msgid "Can see everything, but change nothing."
+msgstr "Sieht alles, ändert nichts."
+
+#: src/lib/role-descriptions.svelte.ts
+msgid "Can scan, check equipment out and back in, and plan productions."
+msgstr "Darf scannen, Geräte aus- und zurückbuchen und Produktionen planen."
+
+#: src/lib/role-descriptions.svelte.ts
+msgid "Everything a member can, plus the inventory itself: register and retire units, prices, inspections, loan requests, offers and invoices."
+msgstr "Alles wie Mitglied, dazu den Bestand selbst: Geräte anlegen und ausmustern, Preise, Prüfungen, Leihanfragen, Angebote und Rechnungen."
+
+#: src/lib/role-descriptions.svelte.ts
+msgid "Everything an admin can, plus the organization: members, their roles, settings and category rates."
+msgstr "Alles wie Admin, dazu die Organisation: Mitglieder, deren Rollen, Einstellungen und Kategoriesätze."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "What the roles mean"
+msgstr "Was die Rollen bedeuten"

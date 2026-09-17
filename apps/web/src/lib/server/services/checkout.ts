@@ -1,5 +1,5 @@
 import { prisma } from '$lib/server/auth';
-import { isSystemAdmin, userOrgIds } from './access';
+import { isSystemAdmin, writableOrgIds } from './access';
 import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '$lib/asset-status';
 import { withAccessories } from './accessories';
 
@@ -77,7 +77,7 @@ export class CheckoutError extends Error {
 }
 
 async function assertAssetAccess(userId: string, organizationId: string) {
-	const [orgIds, systemAdmin] = await Promise.all([userOrgIds(userId), isSystemAdmin(userId)]);
+	const [orgIds, systemAdmin] = await Promise.all([writableOrgIds(userId), isSystemAdmin(userId)]);
 	if (!systemAdmin && !orgIds.includes(organizationId)) {
 		throw new CheckoutError('forbidden', 'No access to this asset');
 	}
@@ -285,7 +285,7 @@ export async function performBulkCheckout(
 	userId: string,
 	input: BulkCheckoutInput
 ): Promise<{ result: { count: number; targetName: string }; affected: AffectedRecords }> {
-	const [orgIds, systemAdmin] = await Promise.all([userOrgIds(userId), isSystemAdmin(userId)]);
+	const [orgIds, systemAdmin] = await Promise.all([writableOrgIds(userId), isSystemAdmin(userId)]);
 
 	// Everything attached to a picked unit is picked with it, before anything
 	// else looks at the list — so the access and retirement checks, the

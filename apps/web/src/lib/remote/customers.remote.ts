@@ -1,16 +1,7 @@
 import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
-import { requireAuth } from '$lib/server/services/access';
-import { appError } from '$lib/errors';
-
-async function requireOrgMembership(userId: string, organizationId: string) {
-	const membership = await prisma.orgMembership.findUnique({
-		where: { userId_organizationId: { userId, organizationId } }
-	});
-	if (!membership) appError(403, 'not_org_member');
-	return membership;
-}
+import { requireOrgRead, requireOrgWrite } from '$lib/server/services/access';
 
 const addressInputSchema = v.object({
 	line1: v.string(),
@@ -20,8 +11,7 @@ const addressInputSchema = v.object({
 });
 
 export const getCustomers = query(v.string(), async (organizationId: string) => {
-	const user = await requireAuth();
-	await requireOrgMembership(user.id, organizationId);
+	await requireOrgRead(organizationId);
 	return prisma.customer.findMany({
 		where: { organizationId },
 		include: { address: true },
@@ -30,12 +20,11 @@ export const getCustomers = query(v.string(), async (organizationId: string) => 
 });
 
 export const getCustomer = query(v.string(), async (id: string) => {
-	const user = await requireAuth();
 	const customer = await prisma.customer.findUniqueOrThrow({
 		where: { id },
 		include: { address: true }
 	});
-	await requireOrgMembership(user.id, customer.organizationId);
+	await requireOrgRead(customer.organizationId);
 	return customer;
 });
 
@@ -63,8 +52,7 @@ const createCustomerSchema = v.object({
 });
 
 export const createCustomer = command(createCustomerSchema, async (data) => {
-	const user = await requireAuth();
-	await requireOrgMembership(user.id, data.organizationId);
+	await requireOrgWrite(data.organizationId);
 
 	const customer = await prisma.$transaction(async (tx) => {
 		const address = hasAnyAddressValue(data.address)
@@ -109,9 +97,8 @@ const updateCustomerSchema = v.object({
 });
 
 export const updateCustomer = command(updateCustomerSchema, async (input) => {
-	const user = await requireAuth();
 	const customer = await prisma.customer.findUniqueOrThrow({ where: { id: input.customerId } });
-	await requireOrgMembership(user.id, customer.organizationId);
+	await requireOrgWrite(customer.organizationId);
 
 	const updated = await prisma.$transaction(async (tx) => {
 		let addressId = customer.addressId;
@@ -162,9 +149,8 @@ export const updateCustomer = command(updateCustomerSchema, async (input) => {
 });
 
 export const deleteCustomer = command(v.string(), async (customerId) => {
-	const user = await requireAuth();
 	const customer = await prisma.customer.findUniqueOrThrow({ where: { id: customerId } });
-	await requireOrgMembership(user.id, customer.organizationId);
+	await requireOrgWrite(customer.organizationId);
 	await prisma.$transaction(async (tx) => {
 		await tx.production.updateMany({ where: { customerId }, data: { customerId: null } });
 		await tx.customer.delete({ where: { id: customerId } });

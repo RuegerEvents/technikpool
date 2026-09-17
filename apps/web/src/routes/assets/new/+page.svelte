@@ -26,9 +26,14 @@
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
 	import { plural, getErrorMessage, orgLabel } from '$lib/utils';
+	import { canManageInventory } from '$lib/roles';
 	import { browser } from '$app/environment';
 
 	let saving = $state(false);
+	// Only the orgs this user may actually register equipment in — being a
+	// MEMBER or VIEWER somewhere is no reason to be offered it here, since the
+	// server would reject the form on submit.
+	let orgs = $derived((await getMyOrgs()).filter(canManageInventory));
 	let selectedOrgId = $state('');
 	let locationId = $state('');
 	let locations = $derived(selectedOrgId ? await getLocations(selectedOrgId) : []);
@@ -62,7 +67,11 @@
 	let duplicatePrefilled = $state(false);
 	$effect(() => {
 		if (!duplicateSource || duplicatePrefilled) return;
-		selectedOrgId = duplicateSource.organizationId;
+		// The source may live in an org this user only reads — then the org
+		// stays whatever the picker defaulted to, and everything else prefills.
+		if (orgs.some((o) => o.id === duplicateSource.organizationId)) {
+			selectedOrgId = duplicateSource.organizationId;
+		}
 		manufacturer = {
 			id: duplicateSource.product.manufacturerId,
 			name: duplicateSource.product.manufacturer.name
@@ -258,8 +267,11 @@
 	     opens past its edge. Nothing in this one is full-bleed. -->
 	<Card.Root class="max-w-3xl overflow-visible">
 		<Card.Content class="pt-6">
-			{#if true}
-				{@const orgs = await getMyOrgs()}
+			{#if orgs.length === 0}
+				<p class="text-sm text-muted-foreground">
+					You need admin rights in one of your organizations to register equipment.
+				</p>
+			{:else}
 				{#if !selectedOrgId && orgs[0]}{((selectedOrgId = orgs[0].id), '')}{/if}
 				{@const orgPrefix = orgs.find((o) => o.id === selectedOrgId)?.assetIdPrefix ?? null}
 				<form onsubmit={handleSubmit} class="space-y-6">

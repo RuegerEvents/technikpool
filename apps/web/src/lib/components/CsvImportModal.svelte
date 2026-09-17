@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getErrorMessage, orgLabel } from '$lib/utils';
+	import { canManageInventory } from '$lib/roles';
 	import { Button } from '$lib/components/ui/button';
 	import { Modal } from '$lib/components/ui/modal';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
@@ -21,6 +22,10 @@
 	let fileInput = $state<HTMLInputElement>();
 
 	// Org + location
+	// An import registers assets, so it needs the same org-admin right the
+	// creation forms do — offering an org that will reject the import after a
+	// file has already been mapped is the worst moment to find out.
+	let orgs = $derived((await getMyOrgs()).filter(canManageInventory));
 	let selectedOrgId = $state('');
 	let selectedLocationId = $state('');
 	let locations = $derived(selectedOrgId ? await getLocations(selectedOrgId) : []);
@@ -388,76 +393,111 @@
 
 	<!-- Step 2: Mapping -->
 	{#if step === 'mapping'}
-		{#if true}
-			{@const orgs = await getMyOrgs()}
-			{#if !selectedOrgId && orgs[0]}{((selectedOrgId = orgs[0].id), '')}{/if}
+		{#if !selectedOrgId && orgs[0]}{((selectedOrgId = orgs[0].id), '')}{/if}
 
-			<div class="space-y-6">
-				<!-- Org + Location -->
-				<div class="grid grid-cols-2 gap-4">
-					<div class="space-y-1.5">
-						<label class="text-sm font-medium" for="import-org">Organization</label>
-						<select id="import-org" bind:value={selectedOrgId} class={selectClass}>
-							{#each orgs as org (org.id)}
-								<option value={org.id}>{orgLabel(org)}</option>
-							{/each}
-						</select>
-					</div>
-					<div class="space-y-1.5">
-						<label class="text-sm font-medium" for="import-loc">Location</label>
-						<select
-							id="import-loc"
-							bind:value={selectedLocationId}
-							disabled={locations.length === 0}
-							class={selectClass}
-						>
-							{#if locations.length === 0}
-								<option value="">No locations</option>
-							{:else}
-								{#each locations as loc (loc.id)}
-									<option value={loc.id}>{loc.name}</option>
-								{/each}
-							{/if}
-						</select>
-					</div>
+		<div class="space-y-6">
+			<!-- Org + Location -->
+			<div class="grid grid-cols-2 gap-4">
+				<div class="space-y-1.5">
+					<label class="text-sm font-medium" for="import-org">Organization</label>
+					<select id="import-org" bind:value={selectedOrgId} class={selectClass}>
+						{#each orgs as org (org.id)}
+							<option value={org.id}>{orgLabel(org)}</option>
+						{/each}
+					</select>
 				</div>
+				<div class="space-y-1.5">
+					<label class="text-sm font-medium" for="import-loc">Location</label>
+					<select
+						id="import-loc"
+						bind:value={selectedLocationId}
+						disabled={locations.length === 0}
+						class={selectClass}
+					>
+						{#if locations.length === 0}
+							<option value="">No locations</option>
+						{:else}
+							{#each locations as loc (loc.id)}
+								<option value={loc.id}>{loc.name}</option>
+							{/each}
+						{/if}
+					</select>
+				</div>
+			</div>
 
-				<!-- Column mapping -->
+			<!-- Column mapping -->
+			<div class="space-y-2">
+				<h3 class="text-sm font-medium">Column Mapping</h3>
+				<div class="overflow-hidden rounded-lg border">
+					<table class="w-full text-sm">
+						<thead>
+							<tr class="border-b bg-muted/30">
+								<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground"
+									>CSV Column</th
+								>
+								<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground"
+									>Maps To</th
+								>
+								<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground">Sample</th
+								>
+							</tr>
+						</thead>
+						<tbody>
+							{#each csvHeaders as header, i (i)}
+								<tr class="border-b last:border-0">
+									<td class="px-4 py-2 font-mono text-xs">{header}</td>
+									<td class="px-4 py-2">
+										<select
+											bind:value={columnMapping[i]}
+											class="h-8 rounded border border-input bg-background px-2 text-xs focus:ring-1 focus:ring-ring focus:outline-none"
+										>
+											{#each fieldOptions as opt (opt.value)}
+												<option value={opt.value}>{opt.label}</option>
+											{/each}
+										</select>
+									</td>
+									<td
+										class="max-w-[180px] truncate px-4 py-2 font-mono text-xs text-muted-foreground"
+									>
+										{csvRows[0]?.[i] ?? ''}
+									</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<!-- Category value mapping -->
+			{#if categoryColIdx >= 0 && uniqueCategoryValues.length > 0}
 				<div class="space-y-2">
-					<h3 class="text-sm font-medium">Column Mapping</h3>
+					<h3 class="text-sm font-medium">Category Values</h3>
 					<div class="overflow-hidden rounded-lg border">
 						<table class="w-full text-sm">
 							<thead>
 								<tr class="border-b bg-muted/30">
 									<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground"
-										>CSV Column</th
+										>Value in CSV</th
 									>
 									<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground"
-										>Maps To</th
-									>
-									<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground"
-										>Sample</th
+										>Maps To Category</th
 									>
 								</tr>
 							</thead>
 							<tbody>
-								{#each csvHeaders as header, i (i)}
+								{#each uniqueCategoryValues as val (val)}
 									<tr class="border-b last:border-0">
-										<td class="px-4 py-2 font-mono text-xs">{header}</td>
+										<td class="px-4 py-2 font-mono text-xs">{val}</td>
 										<td class="px-4 py-2">
 											<select
-												bind:value={columnMapping[i]}
-												class="h-8 rounded border border-input bg-background px-2 text-xs focus:ring-1 focus:ring-ring focus:outline-none"
+												bind:value={categoryValueMap[val]}
+												class="h-8 w-full rounded border border-input bg-background px-2 text-xs focus:ring-1 focus:ring-ring focus:outline-none"
 											>
-												{#each fieldOptions as opt (opt.value)}
-													<option value={opt.value}>{opt.label}</option>
+												<option value="">— Unassigned —</option>
+												{#each categories as cat (cat.id)}
+													<option value={cat.id}>{cat.name}</option>
 												{/each}
 											</select>
-										</td>
-										<td
-											class="max-w-[180px] truncate px-4 py-2 font-mono text-xs text-muted-foreground"
-										>
-											{csvRows[0]?.[i] ?? ''}
 										</td>
 									</tr>
 								{/each}
@@ -465,82 +505,43 @@
 						</table>
 					</div>
 				</div>
+			{/if}
 
-				<!-- Category value mapping -->
-				{#if categoryColIdx >= 0 && uniqueCategoryValues.length > 0}
-					<div class="space-y-2">
-						<h3 class="text-sm font-medium">Category Values</h3>
-						<div class="overflow-hidden rounded-lg border">
-							<table class="w-full text-sm">
-								<thead>
-									<tr class="border-b bg-muted/30">
-										<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground"
-											>Value in CSV</th
-										>
-										<th class="px-4 py-2 text-left text-xs font-medium text-muted-foreground"
-											>Maps To Category</th
-										>
-									</tr>
-								</thead>
-								<tbody>
-									{#each uniqueCategoryValues as val (val)}
-										<tr class="border-b last:border-0">
-											<td class="px-4 py-2 font-mono text-xs">{val}</td>
-											<td class="px-4 py-2">
-												<select
-													bind:value={categoryValueMap[val]}
-													class="h-8 w-full rounded border border-input bg-background px-2 text-xs focus:ring-1 focus:ring-ring focus:outline-none"
-												>
-													<option value="">— Unassigned —</option>
-													{#each categories as cat (cat.id)}
-														<option value={cat.id}>{cat.name}</option>
-													{/each}
-												</select>
-											</td>
-										</tr>
+			<!-- Preview -->
+			{#if previewRows.length > 0}
+				<div class="space-y-2">
+					<h3 class="text-sm font-medium">
+						Preview <span class="font-normal text-muted-foreground"
+							>(first {previewRows.length} of {csvRows.length} rows)</span
+						>
+					</h3>
+					<div class="overflow-x-auto rounded-lg border">
+						<table class="w-full text-xs">
+							<thead>
+								<tr class="border-b bg-muted/30">
+									{#each csvHeaders as h, i (i)}
+										{#if columnMapping[i] !== 'skip'}
+											<th class="px-3 py-2 text-left font-medium text-muted-foreground">{h}</th>
+										{/if}
 									{/each}
-								</tbody>
-							</table>
-						</div>
-					</div>
-				{/if}
-
-				<!-- Preview -->
-				{#if previewRows.length > 0}
-					<div class="space-y-2">
-						<h3 class="text-sm font-medium">
-							Preview <span class="font-normal text-muted-foreground"
-								>(first {previewRows.length} of {csvRows.length} rows)</span
-							>
-						</h3>
-						<div class="overflow-x-auto rounded-lg border">
-							<table class="w-full text-xs">
-								<thead>
-									<tr class="border-b bg-muted/30">
-										{#each csvHeaders as h, i (i)}
-											{#if columnMapping[i] !== 'skip'}
-												<th class="px-3 py-2 text-left font-medium text-muted-foreground">{h}</th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each previewRows as row, ri (ri)}
+									<tr class="border-b last:border-0">
+										{#each row as cell, ci (ci)}
+											{#if columnMapping[ci] !== 'skip'}
+												<td class="max-w-[160px] truncate px-3 py-2">{cell ?? ''}</td>
 											{/if}
 										{/each}
 									</tr>
-								</thead>
-								<tbody>
-									{#each previewRows as row, ri (ri)}
-										<tr class="border-b last:border-0">
-											{#each row as cell, ci (ci)}
-												{#if columnMapping[ci] !== 'skip'}
-													<td class="max-w-[160px] truncate px-3 py-2">{cell ?? ''}</td>
-												{/if}
-											{/each}
-										</tr>
-									{/each}
-								</tbody>
-							</table>
-						</div>
+								{/each}
+							</tbody>
+						</table>
 					</div>
-				{/if}
-			</div>
-		{/if}
+				</div>
+			{/if}
+		</div>
 	{/if}
 
 	<!-- Step 3: Importing -->

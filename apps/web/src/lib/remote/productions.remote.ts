@@ -6,7 +6,7 @@ import { pendingApprovalEmail } from '$lib/server/emails/pending-approval';
 import { bookingReviewedEmail } from '$lib/server/emails/booking-reviewed';
 import { addedAsCrewEmail } from '$lib/server/emails/added-as-crew';
 import * as v from 'valibot';
-import { requireAuth } from '$lib/server/services/access';
+import { requireAuth, requireOrgInventory, requireOrgWrite } from '$lib/server/services/access';
 import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '$lib/asset-status';
 import { accessoryIdsOf } from '$lib/server/services/accessories';
 import { appError } from '$lib/errors';
@@ -218,13 +218,7 @@ function validateDuration(input: {
 }
 
 export const createProduction = command(createProductionSchema, async (data) => {
-	const user = await requireAuth();
-
-	const membership = await prisma.orgMembership.findUnique({
-		where: { userId_organizationId: { userId: user.id, organizationId: data.organizationId } }
-	});
-
-	if (!membership) appError(403, 'not_org_member');
+	await requireOrgWrite(data.organizationId);
 
 	const startDate = data.startDate ? new Date(data.startDate) : null;
 	const endDate = data.endDate ? new Date(data.endDate) : null;
@@ -269,20 +263,11 @@ export const createProduction = command(createProductionSchema, async (data) => 
 });
 
 export const deleteProduction = command(v.string(), async (productionId: string) => {
-	const user = await requireAuth();
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: productionId },
 		select: { id: true, name: true, organizationId: true, addressId: true }
 	});
-	const membership = await prisma.orgMembership.findUnique({
-		where: {
-			userId_organizationId: { userId: user.id, organizationId: production.organizationId }
-		},
-		select: { role: true }
-	});
-	if (!membership || (membership.role !== 'OWNER' && membership.role !== 'ADMIN')) {
-		appError(403, 'production_delete_forbidden');
-	}
+	await requireOrgInventory(production.organizationId, 'production_delete_forbidden');
 
 	await prisma.$transaction(async (tx) => {
 		await tx.production.delete({ where: { id: productionId } });
@@ -314,19 +299,12 @@ const updateProductionAddressSchema = v.object({
 });
 
 export const updateProductionAddress = command(updateProductionAddressSchema, async (input) => {
-	const user = await requireAuth();
-
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: input.productionId },
 		select: { id: true, organizationId: true, addressId: true }
 	});
 
-	const membership = await prisma.orgMembership.findUnique({
-		where: {
-			userId_organizationId: { userId: user.id, organizationId: production.organizationId }
-		}
-	});
-	if (!membership) appError(403, 'not_org_member');
+	await requireOrgWrite(production.organizationId);
 
 	const hasAny = Object.values(input.address).some((v) => (v?.trim()?.length ?? 0) > 0);
 
@@ -384,19 +362,12 @@ const updateProductionDurationSchema = v.object({
 });
 
 export const updateProductionDuration = command(updateProductionDurationSchema, async (input) => {
-	const user = await requireAuth();
-
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: input.productionId },
 		select: { id: true, organizationId: true }
 	});
 
-	const membership = await prisma.orgMembership.findUnique({
-		where: {
-			userId_organizationId: { userId: user.id, organizationId: production.organizationId }
-		}
-	});
-	if (!membership) appError(403, 'not_org_member');
+	await requireOrgWrite(production.organizationId);
 
 	const startDate = input.startDate ? new Date(input.startDate) : null;
 	const endDate = input.endDate ? new Date(input.endDate) : null;
@@ -421,19 +392,12 @@ const updateProductionCustomerSchema = v.object({
 });
 
 export const updateProductionCustomer = command(updateProductionCustomerSchema, async (input) => {
-	const user = await requireAuth();
-
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: input.productionId },
 		select: { id: true, organizationId: true }
 	});
 
-	const membership = await prisma.orgMembership.findUnique({
-		where: {
-			userId_organizationId: { userId: user.id, organizationId: production.organizationId }
-		}
-	});
-	if (!membership) appError(403, 'not_org_member');
+	await requireOrgWrite(production.organizationId);
 
 	const updated = await prisma.production.update({
 		where: { id: input.productionId },
@@ -457,6 +421,8 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 		where: { id: data.productionId },
 		include: { organization: { select: { id: true, name: true, shortName: true } } }
 	});
+	await requireOrgWrite(production.organizationId);
+
 	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: data.assetId } });
 	if (isRetiredStatus(asset.status)) {
 		appError(409, 'asset_retired_no_booking');
@@ -561,13 +527,7 @@ export const approveProductionItem = command(v.string(), async (itemId: string) 
 		include: { asset: true, production: true }
 	});
 
-	const membership = await prisma.orgMembership.findUnique({
-		where: { userId_organizationId: { userId: user.id, organizationId: item.asset.organizationId } }
-	});
-
-	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		appError(403, 'approval_forbidden');
-	}
+	await requireOrgInventory(item.asset.organizationId, 'approval_forbidden');
 
 	const updated = await prisma.productionItem.update({
 		where: { id: itemId },
@@ -607,13 +567,7 @@ export const declineProductionItem = command(v.string(), async (itemId: string) 
 		include: { asset: true, production: true }
 	});
 
-	const membership = await prisma.orgMembership.findUnique({
-		where: { userId_organizationId: { userId: user.id, organizationId: item.asset.organizationId } }
-	});
-
-	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		appError(403, 'decline_forbidden');
-	}
+	await requireOrgInventory(item.asset.organizationId, 'decline_forbidden');
 
 	const updated = await prisma.productionItem.update({
 		where: { id: itemId },
@@ -646,15 +600,7 @@ export const declineProductionItem = command(v.string(), async (itemId: string) 
 });
 
 export const getPendingApprovals = query(v.string(), async (organizationId: string) => {
-	const user = await requireAuth();
-
-	const membership = await prisma.orgMembership.findUnique({
-		where: { userId_organizationId: { userId: user.id, organizationId } }
-	});
-
-	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		appError(403, 'unauthorized');
-	}
+	await requireOrgInventory(organizationId);
 
 	return await prisma.productionItem.findMany({
 		where: {
@@ -682,6 +628,8 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 		where: { id: data.productionId },
 		include: { organization: { select: { name: true } } }
 	});
+	await requireOrgWrite(production.organizationId);
+
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id: data.bundleId },
 		include: { assets: true }
@@ -802,7 +750,14 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 });
 
 export const removeProductionItem = command(v.string(), async (itemId: string) => {
-	await requireAuth();
+	// Read before the delete: the row is the only thing that names the org this
+	// has to be authorized against, and afterwards it is gone.
+	const { production } = await prisma.productionItem.findUniqueOrThrow({
+		where: { id: itemId },
+		select: { production: { select: { organizationId: true } } }
+	});
+	await requireOrgWrite(production.organizationId);
+
 	const item = await prisma.productionItem.delete({ where: { id: itemId } });
 	// The accessories were booked because the parent was; they go with it.
 	await prisma.productionItem.deleteMany({
@@ -820,10 +775,11 @@ const syncAssetAccessoriesSchema = v.object({
 export const syncAssetAccessoriesInProduction = command(
 	syncAssetAccessoriesSchema,
 	async ({ productionId, assetId }) => {
-		await requireAuth();
 		const parentItem = await prisma.productionItem.findUniqueOrThrow({
-			where: { productionId_assetId: { productionId, assetId } }
+			where: { productionId_assetId: { productionId, assetId } },
+			include: { production: { select: { organizationId: true } } }
 		});
+		await requireOrgWrite(parentItem.production.organizationId);
 		const currentAccessories = await prisma.asset.findMany({
 			where: { parentAssetId: assetId },
 			select: { id: true }
@@ -866,7 +822,12 @@ const removeBundleFromProductionSchema = v.object({
 export const removeBundleFromProduction = command(
 	removeBundleFromProductionSchema,
 	async (data) => {
-		await requireAuth();
+		const production = await prisma.production.findUniqueOrThrow({
+			where: { id: data.productionId },
+			select: { organizationId: true }
+		});
+		await requireOrgWrite(production.organizationId);
+
 		await prisma.productionItem.deleteMany({
 			where: { productionId: data.productionId, sourceBundleId: data.bundleId }
 		});
@@ -886,6 +847,8 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 		where: { id: data.productionId },
 		include: { organization: { select: { id: true, name: true } } }
 	});
+	await requireOrgWrite(production.organizationId);
+
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id: data.bundleId },
 		include: { assets: true }
@@ -1013,15 +976,15 @@ const addCrewSchema = v.object({
 });
 
 export const addCrewMember = command(addCrewSchema, async (data) => {
-	await requireAuth();
+	const production = await prisma.production.findUniqueOrThrow({
+		where: { id: data.productionId },
+		select: { name: true, startDate: true, endDate: true, organizationId: true }
+	});
+	await requireOrgWrite(production.organizationId);
+
 	const member = await prisma.productionCrew.create({
 		data,
 		include: { user: { select: { id: true, name: true, email: true } } }
-	});
-
-	const production = await prisma.production.findUniqueOrThrow({
-		where: { id: data.productionId },
-		select: { name: true, startDate: true, endDate: true }
 	});
 
 	try {
@@ -1043,7 +1006,12 @@ export const addCrewMember = command(addCrewSchema, async (data) => {
 });
 
 export const removeCrewMember = command(v.string(), async (id: string) => {
-	await requireAuth();
+	const { production } = await prisma.productionCrew.findUniqueOrThrow({
+		where: { id },
+		select: { production: { select: { organizationId: true } } }
+	});
+	await requireOrgWrite(production.organizationId);
+
 	const member = await prisma.productionCrew.delete({ where: { id } });
 	await getProduction(member.productionId).refresh();
 	return member;

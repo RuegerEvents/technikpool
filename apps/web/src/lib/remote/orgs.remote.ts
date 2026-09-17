@@ -4,25 +4,8 @@ import { sendMail } from '$lib/server/mail';
 import { appBaseUrl } from '$lib/server/app-url';
 import { addedToOrgEmail } from '$lib/server/emails/added-to-org';
 import * as v from 'valibot';
-import { requireAuth } from '$lib/server/services/access';
+import { isSystemAdmin, requireAuth, requireOrgOwner } from '$lib/server/services/access';
 import { appError } from '$lib/errors';
-
-async function isUserAdmin(userId: string) {
-	const u = await prisma.user.findUnique({ where: { id: userId }, select: { isAdmin: true } });
-	return u?.isAdmin ?? false;
-}
-
-async function requireOrgManageAccess(orgId: string) {
-	const user = await requireAuth();
-	if (await isUserAdmin(user.id)) return user;
-	const membership = await prisma.orgMembership.findUnique({
-		where: { userId_organizationId: { userId: user.id, organizationId: orgId } }
-	});
-	if (membership?.role !== 'OWNER') {
-		appError(403, 'org_manage_forbidden');
-	}
-	return user;
-}
 
 export const getMyOrgs = query(async () => {
 	const user = await requireAuth();
@@ -78,7 +61,7 @@ export const getOrgUsers = query(async () => {
 
 export const getOrgWithMembers = query(v.string(), async (orgId: string) => {
 	const user = await requireAuth();
-	const admin = await isUserAdmin(user.id);
+	const admin = await isSystemAdmin(user.id);
 	if (!admin) {
 		const m = await prisma.orgMembership.findUnique({
 			where: { userId_organizationId: { userId: user.id, organizationId: orgId } }
@@ -104,7 +87,7 @@ const roleSchema = v.picklist(['OWNER', 'ADMIN', 'MEMBER', 'VIEWER']);
 export const addUserToOrg = command(
 	v.object({ orgId: v.string(), email: v.string(), role: roleSchema }),
 	async ({ orgId, email, role }) => {
-		await requireOrgManageAccess(orgId);
+		await requireOrgOwner(orgId);
 		const target = await prisma.user.findUnique({ where: { email } });
 		if (!target) appError(404, 'user_not_found');
 
@@ -143,7 +126,7 @@ export const addUserToOrg = command(
 export const removeUserFromOrg = command(
 	v.object({ orgId: v.string(), userId: v.string() }),
 	async ({ orgId, userId }) => {
-		const current = await requireOrgManageAccess(orgId);
+		const current = await requireOrgOwner(orgId);
 		if (userId === current.id) appError(409, 'cannot_remove_self');
 		await prisma.orgMembership.delete({
 			where: { userId_organizationId: { userId, organizationId: orgId } }
@@ -155,7 +138,7 @@ export const removeUserFromOrg = command(
 export const updateMemberRole = command(
 	v.object({ orgId: v.string(), userId: v.string(), role: roleSchema }),
 	async ({ orgId, userId, role }) => {
-		await requireOrgManageAccess(orgId);
+		await requireOrgOwner(orgId);
 		await prisma.orgMembership.update({
 			where: { userId_organizationId: { userId, organizationId: orgId } },
 			data: { role }
@@ -198,7 +181,7 @@ function normalizeColor(raw: string): string {
  */
 export const getOrgIdentityInUse = query(async () => {
 	const user = await requireAuth();
-	const admin = await isUserAdmin(user.id);
+	const admin = await isSystemAdmin(user.id);
 	const visible = admin
 		? null
 		: new Set(
@@ -301,7 +284,7 @@ export const createOrg = command(
 		});
 
 		await getMyOrgs().refresh();
-		if (await isUserAdmin(user.id)) await getAllOrgs().refresh();
+		if (await isSystemAdmin(user.id)) await getAllOrgs().refresh();
 		await getOrgIdentityInUse().refresh();
 		return org;
 	}
@@ -361,7 +344,7 @@ export const updateOrg = command(
 		invoiceIntroTemplate,
 		invoiceClosingTemplate
 	}) => {
-		await requireOrgManageAccess(orgId);
+		await requireOrgOwner(orgId);
 		const prefix = normalizePrefix(assetIdPrefix);
 		const normalizedColor = normalizeColor(color);
 		const normalizedLabel = normalizeAvatarLabel(avatarLabel);
@@ -442,7 +425,7 @@ export const updateOrg = command(
 );
 
 export const deleteOrg = command(v.string(), async (orgId: string) => {
-	await requireOrgManageAccess(orgId);
+	await requireOrgOwner(orgId);
 	await prisma.organization.findUniqueOrThrow({ where: { id: orgId }, select: { id: true } });
 	const foreignAssetAtLocation = await prisma.asset.findFirst({
 		where: { organizationId: { not: orgId }, location: { organizationId: orgId } },
@@ -470,7 +453,7 @@ export const deleteOrg = command(v.string(), async (orgId: string) => {
 
 export const getAllOrgs = query(async () => {
 	const user = await requireAuth();
-	if (!(await isUserAdmin(user.id))) appError(403, 'admin_required');
+	if (!(await isSystemAdmin(user.id))) appError(403, 'admin_required');
 
 	const orgs = await prisma.organization.findMany({
 		include: {
@@ -492,7 +475,7 @@ export const getAllOrgs = query(async () => {
 
 export const getAllUsers = query(async () => {
 	const user = await requireAuth();
-	if (!(await isUserAdmin(user.id))) appError(403, 'admin_required');
+	if (!(await isSystemAdmin(user.id))) appError(403, 'admin_required');
 	return prisma.user.findMany({
 		select: {
 			id: true,
@@ -513,7 +496,7 @@ export const setUserAdmin = command(
 	v.object({ userId: v.string(), isAdmin: v.boolean() }),
 	async ({ userId, isAdmin }) => {
 		const current = await requireAuth();
-		if (!(await isUserAdmin(current.id))) appError(403, 'admin_required');
+		if (!(await isSystemAdmin(current.id))) appError(403, 'admin_required');
 		if (userId === current.id) appError(409, 'cannot_change_own_admin');
 		await prisma.user.update({ where: { id: userId }, data: { isAdmin } });
 		await getAllUsers().refresh();
@@ -522,7 +505,7 @@ export const setUserAdmin = command(
 
 export const deleteUser = command(v.string(), async (userId: string) => {
 	const current = await requireAuth();
-	if (!(await isUserAdmin(current.id))) appError(403, 'admin_required');
+	if (!(await isSystemAdmin(current.id))) appError(403, 'admin_required');
 	if (userId === current.id) appError(409, 'cannot_delete_own_account');
 
 	const user = await prisma.user.findUniqueOrThrow({
@@ -541,7 +524,7 @@ export const deleteUser = command(v.string(), async (userId: string) => {
 // ── Category rental rates (offers/invoices pricing, issue #9) ─────────────────
 
 export const getOrgCategoryRates = query(v.string(), async (orgId: string) => {
-	await requireOrgManageAccess(orgId);
+	await requireOrgOwner(orgId);
 	const [categories, rates] = await Promise.all([
 		prisma.category.findMany({ orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }] }),
 		prisma.orgCategoryRate.findMany({ where: { organizationId: orgId } })
@@ -562,7 +545,7 @@ const setOrgCategoryRateSchema = v.object({
 export const setOrgCategoryRate = command(
 	setOrgCategoryRateSchema,
 	async ({ orgId, categoryId, percentage }) => {
-		await requireOrgManageAccess(orgId);
+		await requireOrgOwner(orgId);
 		await prisma.orgCategoryRate.upsert({
 			where: { organizationId_categoryId: { organizationId: orgId, categoryId } },
 			create: { organizationId: orgId, categoryId, percentage },

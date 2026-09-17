@@ -7,6 +7,7 @@
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
 	import { plural, getErrorMessage, orgLabel, getContrastingTextColor } from '$lib/utils';
+	import { roleName } from '$lib/role-descriptions.svelte';
 	import { OrgBadge } from '$lib/components/ui/org-badge';
 	import { Modal } from '$lib/components/ui/modal';
 	import { ORG_COLOR_PALETTE, suggestOrgColor } from '$lib/org-colors';
@@ -31,13 +32,6 @@
 		newOrgColor = suggestOrgColor(takenColors);
 		createOpen = true;
 	}
-
-	const roleLabels: Record<string, string> = {
-		OWNER: 'Owner',
-		ADMIN: 'Admin',
-		MEMBER: 'Member',
-		VIEWER: 'Viewer'
-	};
 
 	async function handleCreateOrg(e: Event) {
 		e.preventDefault();
@@ -111,7 +105,7 @@
 								</p>
 								<p class="text-sm text-muted-foreground">
 									{#if org.role}
-										Role: {roleLabels[org.role] ?? org.role}
+										Role: {roleName(org.role)}
 									{:else if data.isAdmin && 'memberCount' in org}
 										{plural(org.memberCount, ['# member', '# members'])}
 									{/if}

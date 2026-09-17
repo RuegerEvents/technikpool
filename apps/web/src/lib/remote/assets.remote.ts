@@ -7,6 +7,8 @@ import {
 	isSystemAdmin,
 	managedOrgIds,
 	requireAuth,
+	requireOrgInventory,
+	requireOrgWrite,
 	requireSystemAdmin,
 	scopedOrgIds,
 	userOrgIds
@@ -386,19 +388,7 @@ const createLocationSchema = v.object({
 });
 
 export const createLocation = command(createLocationSchema, async (input) => {
-	const user = await requireAuth();
-	const systemAdmin = await isSystemAdmin(user.id);
-
-	if (!systemAdmin) {
-		const membership = await prisma.orgMembership.findUnique({
-			where: {
-				userId_organizationId: { userId: user.id, organizationId: input.organizationId }
-			}
-		});
-		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-			appError(403, 'unauthorized');
-		}
-	}
+	await requireOrgInventory(input.organizationId);
 
 	const location = await prisma.$transaction(async (tx) => {
 		const address = await tx.address.create({
@@ -432,24 +422,12 @@ const updateLocationSchema = v.object({
 });
 
 export const updateLocation = command(updateLocationSchema, async (input) => {
-	const user = await requireAuth();
-	const systemAdmin = await isSystemAdmin(user.id);
-
 	const location = await prisma.location.findUniqueOrThrow({
 		where: { id: input.locationId },
 		select: { id: true, organizationId: true, addressId: true }
 	});
 
-	if (!systemAdmin) {
-		const membership = await prisma.orgMembership.findUnique({
-			where: {
-				userId_organizationId: { userId: user.id, organizationId: location.organizationId }
-			}
-		});
-		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-			appError(403, 'unauthorized');
-		}
-	}
+	await requireOrgInventory(location.organizationId);
 
 	const updated = await prisma.$transaction(async (tx) => {
 		if (input.address) {
@@ -755,16 +733,6 @@ async function tagAllocator(tx: AssetTx, prefix: string): Promise<() => string> 
 	return () => `${prefix}${String(next++).padStart(5, '0')}`;
 }
 
-/** Registering equipment is an org-admin right; three commands ask the same question. */
-async function assertOrgAssetAdmin(userId: string, organizationId: string) {
-	const membership = await prisma.orgMembership.findUnique({
-		where: { userId_organizationId: { userId, organizationId } }
-	});
-	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		appError(403, 'asset_create_forbidden');
-	}
-}
-
 /** One unit as a caller asks for it — a tag it brought, one to allocate, or none. */
 type UnitSpec = {
 	productId: string;
@@ -939,7 +907,7 @@ const createAssetsSchema = v.object({
 
 export const createAssets = command(createAssetsSchema, async (data) => {
 	const user = await requireAuth();
-	await assertOrgAssetAdmin(user.id, data.organizationId);
+	await requireOrgInventory(data.organizationId, 'asset_create_forbidden');
 
 	const productId = await resolveProductRef(data, data.organizationId);
 
@@ -1083,7 +1051,7 @@ async function resolveGenericManufacturer(): Promise<string> {
 
 export const createCableBatch = command(createCableBatchSchema, async (data) => {
 	const user = await requireAuth();
-	await assertOrgAssetAdmin(user.id, data.organizationId);
+	await requireOrgInventory(data.organizationId, 'asset_create_forbidden');
 
 	const location = await prisma.location.findUniqueOrThrow({ where: { id: data.locationId } });
 	if (location.organizationId !== data.organizationId) appError(400, 'location_invalid');
@@ -1241,7 +1209,6 @@ const updateAssetSchema = v.object({
 
 export const updateAsset = command(updateAssetSchema, async (input) => {
 	const user = await requireAuth();
-	const systemAdmin = await isSystemAdmin(user.id);
 
 	const asset = await prisma.asset.findUniqueOrThrow({
 		where: { id: input.assetId },
@@ -1253,16 +1220,7 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 		}
 	});
 
-	if (!systemAdmin) {
-		const membership = await prisma.orgMembership.findUnique({
-			where: {
-				userId_organizationId: { userId: user.id, organizationId: asset.organizationId }
-			}
-		});
-		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-			appError(403, 'unauthorized');
-		}
-	}
+	await requireOrgInventory(asset.organizationId);
 
 	// A sold or decommissioned unit is a historical record. Its status stays
 	// editable so a mis-click can be undone; everything else is frozen.
@@ -1615,21 +1573,9 @@ export const bulkUpdateAssetStatus = command(bulkUpdateAssetStatusSchema, async 
 const UNUSED_ASSET_ACTIONS = ['CREATED', 'UPDATED'];
 
 export const deleteAsset = command(v.string(), async (assetId: string) => {
-	const user = await requireAuth();
-	const systemAdmin = await isSystemAdmin(user.id);
-
 	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: assetId } });
 
-	if (!systemAdmin) {
-		const membership = await prisma.orgMembership.findUnique({
-			where: {
-				userId_organizationId: { userId: user.id, organizationId: asset.organizationId }
-			}
-		});
-		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-			appError(403, 'unauthorized');
-		}
-	}
+	await requireOrgInventory(asset.organizationId);
 
 	const booked = await prisma.productionItem.findFirst({
 		where: { assetId },
@@ -2095,14 +2041,7 @@ export const setOrgProductPrice = command(
 	setOrgProductPriceSchema,
 	async ({ organizationId, productId, netPurchasePrice }) => {
 		const user = await requireAuth();
-		if (!(await isSystemAdmin(user.id))) {
-			const membership = await prisma.orgMembership.findUnique({
-				where: { userId_organizationId: { userId: user.id, organizationId } }
-			});
-			if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-				appError(403, 'rates_forbidden');
-			}
-		}
+		await requireOrgInventory(organizationId, 'rates_forbidden');
 		await prisma.product.findUniqueOrThrow({ where: { id: productId }, select: { id: true } });
 
 		const previous = await prisma.orgProductPrice.findUnique({
@@ -2283,7 +2222,6 @@ export const getBundle = query(v.string(), async (id: string) => {
 });
 
 export const regenerateBundleImage = command(v.string(), async (bundleId) => {
-	const user = await requireAuth();
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id: bundleId },
 		include: {
@@ -2291,15 +2229,7 @@ export const regenerateBundleImage = command(v.string(), async (bundleId) => {
 			assets: { include: { product: true } }
 		}
 	});
-	const membership = await prisma.orgMembership.findUnique({
-		where: {
-			userId_organizationId: {
-				userId: user.id,
-				organizationId: bundle.template.organizationId
-			}
-		}
-	});
-	if (!(await isSystemAdmin(user.id)) && !membership) appError(403, 'unauthorized');
+	await requireOrgWrite(bundle.template.organizationId);
 
 	const imagePath = await ensureBundleImage(bundle, true);
 	await Promise.all([
@@ -2334,13 +2264,7 @@ const createBundleInstanceSchema = v.object({
 });
 
 export const createBundleInstance = command(createBundleInstanceSchema, async (data) => {
-	const user = await requireAuth();
-	const membership = await prisma.orgMembership.findUnique({
-		where: { userId_organizationId: { userId: user.id, organizationId: data.organizationId } }
-	});
-	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		appError(403, 'unauthorized');
-	}
+	await requireOrgInventory(data.organizationId);
 
 	// An existing template must belong to the org the caller was authorized for —
 	// otherwise ADMIN in one org could hang instances off another org's template.
@@ -2395,18 +2319,10 @@ const updateBundleTemplateSchema = v.object({
 });
 
 export const updateBundleTemplate = command(updateBundleTemplateSchema, async (input) => {
-	const user = await requireAuth();
 	const template = await prisma.bundleTemplate.findUniqueOrThrow({
 		where: { id: input.templateId }
 	});
-	const membership = await prisma.orgMembership.findUnique({
-		where: {
-			userId_organizationId: { userId: user.id, organizationId: template.organizationId }
-		}
-	});
-	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		appError(403, 'unauthorized');
-	}
+	await requireOrgInventory(template.organizationId);
 
 	const data: { name?: string; description?: string | null; categoryId?: string } = {};
 	if (input.name !== undefined) data.name = input.name.trim();
@@ -2433,19 +2349,11 @@ const updateBundleSchema = v.object({
 });
 
 export const updateBundle = command(updateBundleSchema, async (input) => {
-	const user = await requireAuth();
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id: input.bundleId },
 		include: { template: true, assets: { select: { id: true } } }
 	});
-	const membership = await prisma.orgMembership.findUnique({
-		where: {
-			userId_organizationId: { userId: user.id, organizationId: bundle.template.organizationId }
-		}
-	});
-	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		appError(403, 'unauthorized');
-	}
+	await requireOrgInventory(bundle.template.organizationId);
 
 	const data: {
 		tag?: string | null;
@@ -2487,11 +2395,11 @@ export const updateBundle = command(updateBundleSchema, async (input) => {
 const bundleAssetSchema = v.object({ bundleId: v.string(), assetId: v.string() });
 
 export const addAssetToBundle = command(bundleAssetSchema, async ({ bundleId, assetId }) => {
-	await requireAuth();
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id: bundleId },
 		include: { template: true }
 	});
+	await requireOrgInventory(bundle.template.organizationId);
 	const asset = await prisma.asset.findUniqueOrThrow({
 		where: { id: assetId },
 		select: {
@@ -2538,11 +2446,11 @@ export const addAssetToBundle = command(bundleAssetSchema, async ({ bundleId, as
 });
 
 export const removeAssetFromBundle = command(bundleAssetSchema, async ({ bundleId, assetId }) => {
-	await requireAuth();
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id: bundleId },
 		include: { template: true }
 	});
+	await requireOrgInventory(bundle.template.organizationId);
 	await prisma.$transaction(async (tx) => {
 		await tx.asset.update({ where: { id: assetId }, data: { bundleId: null } });
 		await syncAccessories(tx, assetId, { bundleId: null });
@@ -2569,7 +2477,6 @@ export const convertBundleToAccessories = command(
 	convertBundleToAccessoriesSchema,
 	async ({ bundleId, mainAssetId }) => {
 		const user = await requireAuth();
-		const systemAdmin = await isSystemAdmin(user.id);
 		const bundle = await prisma.assetBundle.findUniqueOrThrow({
 			where: { id: bundleId },
 			include: {
@@ -2583,19 +2490,7 @@ export const convertBundleToAccessories = command(
 			}
 		});
 
-		if (!systemAdmin) {
-			const membership = await prisma.orgMembership.findUnique({
-				where: {
-					userId_organizationId: {
-						userId: user.id,
-						organizationId: bundle.template.organizationId
-					}
-				}
-			});
-			if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-				appError(403, 'unauthorized');
-			}
-		}
+		await requireOrgInventory(bundle.template.organizationId);
 
 		if (bundle.assets.length < 2) {
 			appError(409, 'bundle_too_small');
@@ -2904,17 +2799,7 @@ const addProductAccessoriesSchema = v.object({
  */
 export const addProductAccessories = command(addProductAccessoriesSchema, async (data) => {
 	const user = await requireAuth();
-	const systemAdmin = await isSystemAdmin(user.id);
-	if (!systemAdmin) {
-		const membership = await prisma.orgMembership.findUnique({
-			where: {
-				userId_organizationId: { userId: user.id, organizationId: data.organizationId }
-			}
-		});
-		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-			appError(403, 'unauthorized');
-		}
-	}
+	await requireOrgInventory(data.organizationId);
 
 	const accessoryProductId = await resolveProductRef(data, data.organizationId);
 	if (accessoryProductId === data.parentProductId) {
@@ -3015,7 +2900,6 @@ const accessoryLinkSchema = v.object({ parentId: v.string(), assetId: v.string()
 
 export const attachAccessory = command(accessoryLinkSchema, async ({ parentId, assetId }) => {
 	const user = await requireAuth();
-	const systemAdmin = await isSystemAdmin(user.id);
 
 	if (parentId === assetId) appError(400, 'accessory_self');
 
@@ -3053,16 +2937,7 @@ export const attachAccessory = command(accessoryLinkSchema, async ({ parentId, a
 		})
 	]);
 
-	if (!systemAdmin) {
-		const membership = await prisma.orgMembership.findUnique({
-			where: {
-				userId_organizationId: { userId: user.id, organizationId: parent.organizationId }
-			}
-		});
-		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-			appError(403, 'unauthorized');
-		}
-	}
+	await requireOrgInventory(parent.organizationId);
 
 	// Rule 1 of the feature, guard by guard. Every one of these is reachable
 	// from a stale page, so each says what to do rather than just refusing.
@@ -3117,7 +2992,6 @@ export const attachAccessory = command(accessoryLinkSchema, async ({ parentId, a
 
 export const detachAccessory = command(v.string(), async (assetId: string) => {
 	const user = await requireAuth();
-	const systemAdmin = await isSystemAdmin(user.id);
 
 	const asset = await prisma.asset.findUniqueOrThrow({
 		where: { id: assetId },
@@ -3137,16 +3011,7 @@ export const detachAccessory = command(v.string(), async (assetId: string) => {
 	});
 	if (!asset.parentAssetId || !asset.parent) appError(409, 'not_an_accessory');
 
-	if (!systemAdmin) {
-		const membership = await prisma.orgMembership.findUnique({
-			where: {
-				userId_organizationId: { userId: user.id, organizationId: asset.organizationId }
-			}
-		});
-		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-			appError(403, 'unauthorized');
-		}
-	}
+	await requireOrgInventory(asset.organizationId);
 
 	// It was only ever in that kit through the parent, so it leaves with the
 	// relation. Its location stays: detaching a cable doesn't move it.
@@ -3202,7 +3067,7 @@ export type ImportResult = {
 
 export const importAssets = command(importAssetsSchema, async (data): Promise<ImportResult> => {
 	const user = await requireAuth();
-	await assertOrgAssetAdmin(user.id, data.organizationId);
+	await requireOrgInventory(data.organizationId, 'asset_create_forbidden');
 
 	const location = await prisma.location.findUniqueOrThrow({ where: { id: data.locationId } });
 	if (location.organizationId !== data.organizationId) appError(400, 'location_invalid');

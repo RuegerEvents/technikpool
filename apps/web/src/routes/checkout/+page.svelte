@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { getErrorMessage, orgLabel } from '$lib/utils';
+	import { canWrite } from '$lib/roles';
 	import { getLocations } from '$lib/remote/assets.remote';
 	import { getAllProductions, scanAsset } from '$lib/remote/checkout.remote';
+	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -12,8 +14,16 @@
 	import { browser } from '$app/environment';
 	import type { Html5Qrcode } from 'html5-qrcode';
 
-	let locations = $derived(await getLocations());
-	let productions = $derived(await getAllProductions());
+	// Scanning writes, so the targets on offer are only the orgs this user may
+	// write in — a VIEWER sees the shelf everywhere but can move nothing, and a
+	// target that will refuse the scan has no business being in the list.
+	let writableOrgIds = $derived(new Set((await getMyOrgs()).filter(canWrite).map((org) => org.id)));
+	let locations = $derived(
+		(await getLocations()).filter((loc) => writableOrgIds.has(loc.organizationId))
+	);
+	let productions = $derived(
+		(await getAllProductions()).filter((prod) => writableOrgIds.has(prod.organizationId))
+	);
 
 	let locationItems = $derived(
 		locations.map((loc) => {

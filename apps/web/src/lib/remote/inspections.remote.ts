@@ -1,7 +1,12 @@
 import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
-import { isSystemAdmin, requireAuth, userOrgIds } from '$lib/server/services/access';
+import {
+	isSystemAdmin,
+	requireAuth,
+	requireOrgInventory,
+	userOrgIds
+} from '$lib/server/services/access';
 import { ACTIVE_ASSET_WHERE, isRetiredStatus } from '$lib/asset-status';
 import { appError } from '$lib/errors';
 
@@ -78,23 +83,12 @@ const logInspectionSchema = v.object({
 });
 
 export const logInspection = command(logInspectionSchema, async (input) => {
-	const user = await requireAuth();
 	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: input.assetId } });
 	if (isRetiredStatus(asset.status)) {
 		appError(409, 'asset_retired_no_inspection');
 	}
 
-	const systemAdmin = await isSystemAdmin(user.id);
-	if (!systemAdmin) {
-		const membership = await prisma.orgMembership.findUnique({
-			where: {
-				userId_organizationId: { userId: user.id, organizationId: asset.organizationId }
-			}
-		});
-		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-			appError(403, 'unauthorized');
-		}
-	}
+	await requireOrgInventory(asset.organizationId);
 
 	const performedAt = new Date(input.performedAt);
 	const nextDueDate = asset.inspectionIntervalMonths
