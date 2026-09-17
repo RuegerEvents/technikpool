@@ -4,7 +4,7 @@ import * as v from 'valibot';
 import { orgLabel } from '$lib/utils';
 import { getProduction } from './productions.remote';
 import { requireAuth, userOrgIds } from '$lib/server/services/access';
-import { ACTIVE_ASSET_WHERE } from '$lib/asset-status';
+import { BOOKABLE_ASSET_WHERE } from '$lib/asset-status';
 import { accessoryIdsOf } from '$lib/server/services/accessories';
 import { appError } from '$lib/errors';
 
@@ -28,7 +28,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 	// the counts as well as the picker, so `total` still means "units you can
 	// ask for".
 	const assets = await prisma.asset.findMany({
-		where: { organizationId: { in: orgIds }, parentAssetId: null, ...ACTIVE_ASSET_WHERE },
+		where: { organizationId: { in: orgIds }, parentAssetId: null, ...BOOKABLE_ASSET_WHERE },
 		include: {
 			product: { include: { manufacturer: true, category: true } },
 			organization: {
@@ -269,7 +269,7 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 				productId: data.productId,
 				organizationId: data.organizationId,
 				locationId: data.locationId,
-				...ACTIVE_ASSET_WHERE,
+				...BOOKABLE_ASSET_WHERE,
 				parentAssetId: null,
 				id: { notIn: bookedAssetIds },
 				...(data.includeBundled ? {} : { bundleId: null })

@@ -41,7 +41,11 @@
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { NewAssetModal, type NewAssetModalHandle } from '$lib/components/ui/new-asset-modal';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { AssetStatusBadge, assetStatusLabel } from '$lib/components/ui/asset-status';
+	import {
+		AssetStatusBadge,
+		assetStatusDescription,
+		assetStatusLabel
+	} from '$lib/components/ui/asset-status';
 	import type { TransactionData } from '$lib/types/asset-transaction';
 	import { ASSET_STATUSES, isRetiredStatus, type AssetStatus } from '$lib/asset-status';
 
@@ -959,6 +963,9 @@
 						<option value={s}>{assetStatusLabel(s)}</option>
 					{/each}
 				</select>
+				<p class="text-xs text-muted-foreground">
+					{assetStatusDescription(assetDraft.status)}
+				</p>
 			</div>
 			{#if !retired}
 				<div class="space-y-2">

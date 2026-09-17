@@ -5,7 +5,7 @@
 	import { bulkUpdateAssetStatus, getLocations } from '$lib/remote/assets.remote';
 	import { getAllProductions, checkoutAssets } from '$lib/remote/checkout.remote';
 	import { ASSET_STATUSES, isRetiredStatus, type AssetStatus } from '$lib/asset-status';
-	import { assetStatusLabel } from '$lib/components/ui/asset-status';
+	import { assetStatusDescription, assetStatusLabel } from '$lib/components/ui/asset-status';
 	import { toast } from 'svelte-sonner';
 
 	type Props = {
@@ -164,6 +164,13 @@
 					</Button>
 				{/if}
 			</div>
+			{#if canSetStatus && newStatus}
+				<!-- Its own line, and only once a status is picked: what a status does to a
+				     whole selection is worth spelling out, but not at the cost of the bar's height. -->
+				<p class="w-full text-xs text-muted-foreground">
+					{assetStatusDescription(newStatus)}
+				</p>
+			{/if}
 		</div>
 	</div>
 {/if}

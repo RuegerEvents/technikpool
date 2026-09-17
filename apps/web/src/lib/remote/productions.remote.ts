@@ -7,7 +7,7 @@ import { bookingReviewedEmail } from '$lib/server/emails/booking-reviewed';
 import { addedAsCrewEmail } from '$lib/server/emails/added-as-crew';
 import * as v from 'valibot';
 import { requireAuth } from '$lib/server/services/access';
-import { ACTIVE_ASSET_WHERE, isRetiredStatus } from '$lib/asset-status';
+import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '$lib/asset-status';
 import { accessoryIdsOf } from '$lib/server/services/accessories';
 import { appError } from '$lib/errors';
 
@@ -461,6 +461,9 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 	if (isRetiredStatus(asset.status)) {
 		appError(409, 'asset_retired_no_booking');
 	}
+	if (!isBookableStatus(asset.status)) {
+		appError(409, 'asset_unavailable_no_booking');
+	}
 
 	if (production.startDate && production.endDate) {
 		const conflict = await prisma.productionItem.findFirst({
@@ -701,8 +704,11 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 		(i) => bundleAssetIds.has(i.assetId) && i.sourceBundleId === null
 	);
 
+	// A unit the bundle carries but that cannot be planned with is simply left
+	// behind: booking the rest of the bundle is what the user asked for, and
+	// refusing the whole bundle over one unavailable unit helps nobody.
 	let newAssets = bundle.assets.filter(
-		(a) => !existingAssetIds.has(a.id) && !isRetiredStatus(a.status)
+		(a) => !existingAssetIds.has(a.id) && isBookableStatus(a.status)
 	);
 	if (newAssets.length === 0 && adoptable.length === 0) {
 		appError(409, 'bundle_all_in_production');

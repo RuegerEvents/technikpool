@@ -6984,3 +6984,55 @@ msgstr "You cannot delete your own account."
 #: src/lib/error-messages.svelte.ts
 msgid "The sticker sheet could not be generated: {0}"
 msgstr "The sticker sheet could not be generated: {0}"
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "Tag \"{0}\" not found."
+msgstr "Tag \"{0}\" not found."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This unit is marked unavailable and cannot be booked or checked out."
+msgstr "This unit is marked unavailable and cannot be booked or checked out."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This unit is marked unavailable and cannot be added to a bundle."
+msgstr "This unit is marked unavailable and cannot be added to a bundle."
+
+#: src/lib/error-messages.svelte.ts
+msgid "That belongs to a different organization."
+msgstr "That belongs to a different organization."
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/+page.svelte
+msgid "Unavailable"
+msgstr "Unavailable"
+
+#: src/routes/assets/+page.svelte
+msgid "Unavail."
+msgstr "Unavail."
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+msgid "In the pool and free to plan with."
+msgstr "In the pool and free to plan with."
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+msgid "Held back: cannot be booked, checked out or put in a bundle. Stays in the lists."
+msgstr "Held back: cannot be booked, checked out or put in a bundle. Stays in the lists."
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+msgid "Being serviced. Can still be booked — a unit back before the show is plannable."
+msgstr "Being serviced. Can still be booked — a unit back before the show is plannable."
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+msgid "Defective. Can still be booked — a repair that lands in time is plannable."
+msgstr "Defective. Can still be booked — a repair that lands in time is plannable."
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+msgid "Gone: sold on. Out of every list and count; only the status can still be changed."
+msgstr "Gone: sold on. Out of every list and count; only the status can still be changed."
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+msgid "Gone: retired for good. Out of every list and count; only the status can still be changed."
+msgstr "Gone: retired for good. Out of every list and count; only the status can still be changed."

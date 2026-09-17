@@ -6984,3 +6984,55 @@ msgstr "Sie können Ihr eigenes Konto nicht löschen."
 #: src/lib/error-messages.svelte.ts
 msgid "The sticker sheet could not be generated: {0}"
 msgstr "Der Stickerbogen konnte nicht erzeugt werden: {0}"
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "Tag \"{0}\" not found."
+msgstr ""
+
+#: src/lib/error-messages.svelte.ts
+msgid "This unit is marked unavailable and cannot be booked or checked out."
+msgstr "Diese Einheit ist als nicht verfügbar markiert und kann nicht gebucht oder ausgegeben werden."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This unit is marked unavailable and cannot be added to a bundle."
+msgstr "Diese Einheit ist als nicht verfügbar markiert und kann keinem Bundle hinzugefügt werden."
+
+#: src/lib/error-messages.svelte.ts
+msgid "That belongs to a different organization."
+msgstr "Das gehört zu einer anderen Organisation."
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/+page.svelte
+msgid "Unavailable"
+msgstr "Nicht verfügbar"
+
+#: src/routes/assets/+page.svelte
+msgid "Unavail."
+msgstr "Nicht verf."
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+msgid "In the pool and free to plan with."
+msgstr "Im Bestand und frei einplanbar."
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+msgid "Held back: cannot be booked, checked out or put in a bundle. Stays in the lists."
+msgstr "Zurückgehalten: nicht buchbar, nicht ausgebbar, nicht in ein Bundle legbar. Bleibt in den Listen."
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+msgid "Being serviced. Can still be booked — a unit back before the show is plannable."
+msgstr "In Wartung. Trotzdem buchbar — eine Einheit, die vor der Show zurück ist, lässt sich einplanen."
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+msgid "Defective. Can still be booked — a repair that lands in time is plannable."
+msgstr "Defekt. Trotzdem buchbar — eine Reparatur, die rechtzeitig fertig wird, lässt sich einplanen."
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+msgid "Gone: sold on. Out of every list and count; only the status can still be changed."
+msgstr "Weg: verkauft. Aus allen Listen und Zählungen; nur der Status lässt sich noch ändern."
+
+#: src/lib/components/ui/asset-status/asset-status.svelte.ts
+msgid "Gone: retired for good. Out of every list and count; only the status can still be changed."
+msgstr "Weg: endgültig ausgemustert. Aus allen Listen und Zählungen; nur der Status lässt sich noch ändern."

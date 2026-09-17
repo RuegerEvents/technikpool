@@ -48,6 +48,7 @@ export type AppErrorCode =
 	| 'connector_exists'
 	| 'connector_in_use'
 	// Assets
+	| 'asset_not_found'
 	| 'assets_not_found'
 	| 'asset_tag_prefix_mismatch'
 	| 'asset_retired_status_only'
@@ -56,6 +57,9 @@ export type AppErrorCode =
 	| 'asset_retired_no_booking'
 	| 'asset_retired_no_bundle'
 	| 'asset_retired_no_inspection'
+	| 'asset_unavailable_no_booking'
+	| 'asset_unavailable_no_bundle'
+	| 'asset_wrong_organization'
 	| 'asset_still_booked'
 	| 'assets_still_booked_one'
 	| 'assets_still_booked_many'

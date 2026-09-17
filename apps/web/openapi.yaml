@@ -378,7 +378,9 @@ components:
     Conflict:
       description: |
         The record exists but its state forbids the operation — a sold or
-        decommissioned asset can no longer be booked (`asset_retired`).
+        decommissioned asset can no longer be booked (`asset_retired`), and a
+        unit held back as unavailable cannot be checked out
+        (`asset_unavailable`).
       content:
         application/json:
           schema:
@@ -408,7 +410,7 @@ components:
             code:
               type: string
               description: Stable machine-readable identifier.
-              examples: [unauthorized, asset_not_found, forbidden, asset_retired]
+              examples: [unauthorized, asset_not_found, forbidden, asset_retired, asset_unavailable]
             message:
               type: string
               description: Human-readable text, safe to show to the operator.
@@ -613,7 +615,13 @@ components:
             sticker explains itself instead of reading as an unknown tag. Such a
             unit is no longer *at* its `location` — that is where it stood when
             it went.
-          enum: [AVAILABLE, MAINTENANCE, BROKEN, SOLD, DECOMMISSIONED]
+
+            `UNAVAILABLE` is held back rather than gone: still in the pool, still
+            listed, still scannable onto a location, but a scan that would check
+            it out to a production is refused with `asset_unavailable`.
+            `MAINTENANCE` and `BROKEN` describe condition only and do not stop a
+            checkout.
+          enum: [AVAILABLE, UNAVAILABLE, MAINTENANCE, BROKEN, SOLD, DECOMMISSIONED]
         product:
           $ref: '#/components/schemas/Product'
         location:

@@ -147,6 +147,7 @@ String describeError(S l10n, Object error) {
     'forbidden' => l10n.errorForbidden,
     'wrong_organization' => l10n.errorWrongOrganization,
     'asset_retired' => l10n.errorAssetRetired,
+    'asset_unavailable' => l10n.errorAssetUnavailable,
     'unauthorized' => l10n.errorUnauthorized,
     'invalid_request' => l10n.errorInvalidRequest,
     'invalid_limit' => l10n.errorInvalidLimit,

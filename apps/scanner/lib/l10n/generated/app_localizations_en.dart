@@ -244,6 +244,9 @@ class SEn extends S {
   String get statusAvailable => 'Available';
 
   @override
+  String get statusUnavailable => 'Unavailable';
+
+  @override
   String get statusMaintenance => 'In maintenance';
 
   @override
@@ -322,6 +325,10 @@ class SEn extends S {
   @override
   String get errorAssetRetired =>
       'This device has been sold or decommissioned and can no longer be booked.';
+
+  @override
+  String get errorAssetUnavailable =>
+      'This device is marked unavailable and cannot be checked out.';
 
   @override
   String get errorUnauthorized =>

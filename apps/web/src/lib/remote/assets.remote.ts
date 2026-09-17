@@ -15,8 +15,9 @@ import { fieldChanges, logCatalogChange } from '$lib/server/services/catalog-log
 import {
 	ACTIVE_ASSET_WHERE,
 	ASSET_STATUSES,
-	RETIRED_ASSET_WHERE,
-	isRetiredStatus
+	isBookableStatus,
+	isRetiredStatus,
+	RETIRED_ASSET_WHERE
 } from '$lib/asset-status';
 import { syncAccessories } from '$lib/server/services/accessories';
 import { ensureAssetImage, ensureBundleImage } from '$lib/server/services/bundle-image';
@@ -177,6 +178,7 @@ export const getInventorySummary = query(
 				manufacturer: p.manufacturer,
 				total: p.assets.length,
 				available: p.assets.filter((a) => a.status === 'AVAILABLE').length,
+				unavailable: p.assets.filter((a) => a.status === 'UNAVAILABLE').length,
 				maintenance: p.assets.filter((a) => a.status === 'MAINTENANCE').length,
 				broken: p.assets.filter((a) => a.status === 'BROKEN').length
 			}));
@@ -2501,6 +2503,9 @@ export const addAssetToBundle = command(bundleAssetSchema, async ({ bundleId, as
 	});
 	if (isRetiredStatus(asset.status)) {
 		appError(409, 'asset_retired_no_bundle');
+	}
+	if (!isBookableStatus(asset.status)) {
+		appError(409, 'asset_unavailable_no_bundle');
 	}
 	// An accessory is in whatever kit its parent is in and no other. Both
 	// pickers leave accessories out, so this is a stale page.

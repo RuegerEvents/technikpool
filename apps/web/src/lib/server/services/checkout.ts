@@ -1,6 +1,6 @@
 import { prisma } from '$lib/server/auth';
 import { isSystemAdmin, userOrgIds } from './access';
-import { ACTIVE_ASSET_WHERE, isRetiredStatus } from '$lib/asset-status';
+import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '$lib/asset-status';
 import { withAccessories } from './accessories';
 
 // Scan/checkout behaviour lives here rather than in checkout.remote.ts so the
@@ -61,8 +61,15 @@ function mergeAffected(into: AffectedRecords, from: Partial<AffectedRecords>) {
  */
 export class CheckoutError extends Error {
 	constructor(
-		readonly code: 'asset_not_found' | 'forbidden' | 'wrong_organization' | 'asset_retired',
-		message: string
+		readonly code:
+			| 'asset_not_found'
+			| 'forbidden'
+			| 'wrong_organization'
+			| 'asset_retired'
+			| 'asset_unavailable',
+		message: string,
+		/** The scanned tag, where there is one — a message naming it is worth more. */
+		readonly assetTag?: string
 	) {
 		super(message);
 		this.name = 'CheckoutError';
@@ -98,7 +105,7 @@ export async function performScan(
 	});
 
 	if (!asset) {
-		throw new CheckoutError('asset_not_found', `Tag "${input.assetTag}" not found`);
+		throw new CheckoutError('asset_not_found', `Tag "${input.assetTag}" not found`, input.assetTag);
 	}
 
 	const systemAdmin = await assertAssetAccess(userId, asset.organizationId);
@@ -206,6 +213,15 @@ export async function performScan(
 		};
 	}
 
+	// Only checking out is refused. Assigning a location still works: a unit held
+	// back from planning is still a unit someone has to be able to put on a shelf.
+	if (!isBookableStatus(asset.status)) {
+		throw new CheckoutError(
+			'asset_unavailable',
+			`Tag "${input.assetTag}" is marked unavailable and cannot be checked out`
+		);
+	}
+
 	const production = await prisma.production.findUniqueOrThrow({ where: { id: input.targetId } });
 
 	const existingItems = await prisma.productionItem.findMany({
@@ -275,6 +291,7 @@ export async function performBulkCheckout(
 	// else looks at the list — so the access and retirement checks, the
 	// per-asset writes and `movedBundleIds` below all see one flat set.
 	const assetIds = await withAccessories(input.assetIds);
+	const selected = new Set(input.assetIds);
 
 	const assets = await prisma.asset.findMany({
 		where: { id: { in: assetIds } },
@@ -289,6 +306,19 @@ export async function performBulkCheckout(
 			throw new CheckoutError(
 				'asset_retired',
 				'One or more assets are sold or decommissioned and can no longer be booked'
+			);
+		}
+		// Only what was actually picked. An accessory travels with its parent — it is
+		// never booked on its own — so a bracket marked unavailable does not hold back
+		// the fixture it is bolted to, and could not be left behind physically anyway.
+		if (
+			input.targetType === 'production' &&
+			selected.has(asset.id) &&
+			!isBookableStatus(asset.status)
+		) {
+			throw new CheckoutError(
+				'asset_unavailable',
+				'One or more assets are marked unavailable and cannot be checked out'
 			);
 		}
 	}

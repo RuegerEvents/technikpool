@@ -9,6 +9,7 @@ class Labels {
 
   static String assetStatus(S l10n, AssetStatus status) => switch (status) {
     AssetStatus.available => l10n.statusAvailable,
+    AssetStatus.unavailable => l10n.statusUnavailable,
     AssetStatus.maintenance => l10n.statusMaintenance,
     AssetStatus.broken => l10n.statusBroken,
     AssetStatus.sold => l10n.statusSold,

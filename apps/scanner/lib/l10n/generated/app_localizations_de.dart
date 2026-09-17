@@ -245,6 +245,9 @@ class SDe extends S {
   String get statusAvailable => 'Verfügbar';
 
   @override
+  String get statusUnavailable => 'Nicht verfügbar';
+
+  @override
   String get statusMaintenance => 'In Wartung';
 
   @override
@@ -323,6 +326,10 @@ class SDe extends S {
   @override
   String get errorAssetRetired =>
       'Dieses Gerät ist verkauft oder ausgemustert und kann nicht mehr gebucht werden.';
+
+  @override
+  String get errorAssetUnavailable =>
+      'Dieses Gerät ist als nicht verfügbar markiert und kann nicht ausgegeben werden.';
 
   @override
   String get errorUnauthorized =>

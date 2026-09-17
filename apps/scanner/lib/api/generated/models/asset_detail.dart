@@ -44,6 +44,12 @@ class AssetDetail {
   /// unit is no longer *at* its `location` — that is where it stood when.
   /// it went.
   ///
+  /// `UNAVAILABLE` is held back rather than gone: still in the pool, still.
+  /// listed, still scannable onto a location, but a scan that would check.
+  /// it out to a production is refused with `asset_unavailable`.
+  /// `MAINTENANCE` and `BROKEN` describe condition only and do not stop a.
+  /// checkout.
+  ///
   final AssetStatus status;
   final Product product;
   final Location location;

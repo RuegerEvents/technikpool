@@ -547,6 +547,12 @@ abstract class S {
   /// **'Available'**
   String get statusAvailable;
 
+  /// No description provided for @statusUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get statusUnavailable;
+
   /// No description provided for @statusMaintenance.
   ///
   /// In en, this message translates to:
@@ -690,6 +696,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'This device has been sold or decommissioned and can no longer be booked.'**
   String get errorAssetRetired;
+
+  /// No description provided for @errorAssetUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This device is marked unavailable and cannot be checked out.'**
+  String get errorAssetUnavailable;
 
   /// No description provided for @errorUnauthorized.
   ///

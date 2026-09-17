@@ -79,6 +79,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return `${p0} product(s) still use this connector. Rename it instead of deleting it.`;
 
 		// Assets
+		case 'asset_not_found':
+			return `Tag "${p0}" not found.`;
 		case 'assets_not_found':
 			return 'No assets found.';
 		case 'asset_tag_prefix_mismatch':
@@ -95,6 +97,12 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'This unit is sold or decommissioned and cannot be added to a bundle.';
 		case 'asset_retired_no_inspection':
 			return 'This unit is sold or decommissioned and can no longer be inspected.';
+		case 'asset_unavailable_no_booking':
+			return 'This unit is marked unavailable and cannot be booked or checked out.';
+		case 'asset_unavailable_no_bundle':
+			return 'This unit is marked unavailable and cannot be added to a bundle.';
+		case 'asset_wrong_organization':
+			return 'That belongs to a different organization.';
 		case 'asset_still_booked':
 			return `This unit is still booked for "${p0}" — remove it there first.`;
 		case 'assets_still_booked_one':

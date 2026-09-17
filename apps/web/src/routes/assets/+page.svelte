@@ -37,6 +37,7 @@
 	const statusFilterOptions = [
 		['', 'All'],
 		['AVAILABLE', 'Available'],
+		['UNAVAILABLE', 'Unavailable'],
 		['MAINTENANCE', 'Maintenance'],
 		['BROKEN', 'Broken'],
 		[RETIRED_FILTER, 'Sold / Decommissioned']
@@ -138,6 +139,7 @@
 		categoryColor: string;
 		cable: CableAttrs | null;
 		available: number;
+		unavailable: number;
 		maintenance: number;
 		broken: number;
 		assets: Asset[];
@@ -146,6 +148,7 @@
 	type InstanceGroup = BundleInstance & {
 		filteredAssets: BundleAsset[];
 		available: number;
+		unavailable: number;
 		maintenance: number;
 		broken: number;
 	};
@@ -157,6 +160,7 @@
 		// this type are ready to send out vs. need attention.
 		totalInstances: number;
 		availableInstances: number;
+		unavailableInstances: number;
 		maintenanceInstances: number;
 		brokenInstances: number;
 	};
@@ -243,6 +247,7 @@
 								}
 							: null,
 						available: 0,
+						unavailable: 0,
 						maintenance: 0,
 						broken: 0,
 						assets: []
@@ -261,6 +266,7 @@
 				}
 				g.assets.push(asset);
 				if (asset.status === 'AVAILABLE') g.available++;
+				else if (asset.status === 'UNAVAILABLE') g.unavailable++;
 				else if (asset.status === 'MAINTENANCE') g.maintenance++;
 				else if (asset.status === 'BROKEN') g.broken++;
 				return acc;
@@ -376,6 +382,8 @@
 		},
 		total: (r) => (r.kind === 'bundle' ? r.template.totalInstances : r.group.assets.length),
 		available: (r) => (r.kind === 'bundle' ? r.template.availableInstances : r.group.available),
+		unavailable: (r) =>
+			r.kind === 'bundle' ? r.template.unavailableInstances : r.group.unavailable,
 		maintenance: (r) =>
 			r.kind === 'bundle' ? r.template.maintenanceInstances : r.group.maintenance,
 		broken: (r) => (r.kind === 'bundle' ? r.template.brokenInstances : r.group.broken)
@@ -396,6 +404,7 @@
 								...inst,
 								filteredAssets,
 								available: filteredAssets.filter((a) => a.status === 'AVAILABLE').length,
+								unavailable: filteredAssets.filter((a) => a.status === 'UNAVAILABLE').length,
 								maintenance: filteredAssets.filter((a) => a.status === 'MAINTENANCE').length,
 								broken: filteredAssets.filter((a) => a.status === 'BROKEN').length
 							};
@@ -406,10 +415,19 @@
 							totalAssets: instanceGroups.reduce((sum, i) => sum + i.filteredAssets.length, 0),
 							totalInstances: instanceGroups.length,
 							availableInstances: instanceGroups.filter(
-								(i) => i.filteredAssets.length > 0 && i.maintenance === 0 && i.broken === 0
+								(i) =>
+									i.filteredAssets.length > 0 &&
+									i.unavailable === 0 &&
+									i.maintenance === 0 &&
+									i.broken === 0
+							).length,
+							// A bundle is booked whole, so a single unit held back makes the whole
+							// instance unbookable — that outranks a maintenance note elsewhere in it.
+							unavailableInstances: instanceGroups.filter(
+								(i) => i.broken === 0 && i.unavailable > 0
 							).length,
 							maintenanceInstances: instanceGroups.filter(
-								(i) => i.broken === 0 && i.maintenance > 0
+								(i) => i.broken === 0 && i.unavailable === 0 && i.maintenance > 0
 							).length,
 							brokenInstances: instanceGroups.filter((i) => i.broken > 0).length
 						};
@@ -867,6 +885,11 @@
 									<span class="text-green-700 dark:text-green-400" title="Available"
 										>{template.availableInstances}</span
 									>
+									{#if template.unavailableInstances > 0}
+										<span class="text-orange-600 dark:text-orange-400" title="Unavailable"
+											>{template.unavailableInstances}</span
+										>
+									{/if}
 									{#if template.maintenanceInstances > 0}
 										<span class="text-yellow-600 dark:text-yellow-400" title="Maintenance"
 											>{template.maintenanceInstances}</span
@@ -947,6 +970,11 @@
 									<span class="text-green-700 dark:text-green-400" title="Available"
 										>{group.available}</span
 									>
+									{#if group.unavailable > 0}
+										<span class="text-orange-600 dark:text-orange-400" title="Unavailable"
+											>{group.unavailable}</span
+										>
+									{/if}
 									{#if group.maintenance > 0}
 										<span class="text-yellow-600 dark:text-yellow-400" title="Maintenance"
 											>{group.maintenance}</span
@@ -1025,6 +1053,11 @@
 							align="right"
 							direction={sortDirection('available')}
 							onclick={() => toggleSort('available')}>Available</SortableHeader
+						>
+						<SortableHeader
+							align="right"
+							direction={sortDirection('unavailable')}
+							onclick={() => toggleSort('unavailable')}>Unavail.</SortableHeader
 						>
 						<SortableHeader
 							align="right"
@@ -1118,6 +1151,14 @@
 									{template.availableInstances}
 								</td>
 								<td
+									class="px-4 py-3 text-right font-mono tabular-nums {template.unavailableInstances >
+									0
+										? 'text-orange-600 dark:text-orange-400'
+										: 'text-muted-foreground'}"
+								>
+									{template.unavailableInstances}
+								</td>
+								<td
 									class="px-4 py-3 text-right font-mono tabular-nums {template.maintenanceInstances >
 									0
 										? 'text-yellow-600 dark:text-yellow-400'
@@ -1158,7 +1199,7 @@
 												class="h-4 w-4 cursor-pointer rounded border-input"
 											/>
 										</td>
-										<td colspan="7" class="px-4 py-2">
+										<td colspan="8" class="px-4 py-2">
 											<div class="flex items-center gap-6 text-sm">
 												<span class="flex w-40 min-w-0 items-center gap-1.5">
 													<svg
@@ -1240,7 +1281,7 @@
 														class="h-4 w-4 cursor-pointer rounded border-input"
 													/>
 												</td>
-												<td colspan="7" class="px-4 py-2">
+												<td colspan="8" class="px-4 py-2">
 													<div class="flex items-center gap-6 text-sm">
 														<span class="flex w-44 items-center gap-2">
 															<ProductThumb
@@ -1343,6 +1384,13 @@
 									{group.available}
 								</td>
 								<td
+									class="px-4 py-3 text-right font-mono tabular-nums {group.unavailable > 0
+										? 'text-orange-600 dark:text-orange-400'
+										: 'text-muted-foreground'}"
+								>
+									{group.unavailable}
+								</td>
+								<td
 									class="px-4 py-3 text-right font-mono tabular-nums {group.maintenance > 0
 										? 'text-yellow-600 dark:text-yellow-400'
 										: 'text-muted-foreground'}"
@@ -1378,7 +1426,7 @@
 												class="h-4 w-4 cursor-pointer rounded border-input"
 											/>
 										</td>
-										<td colspan="7" class="px-4 py-2">
+										<td colspan="8" class="px-4 py-2">
 											<div class="flex items-center gap-6 text-sm">
 												<span class="w-36 font-mono text-xs text-muted-foreground">
 													{asset.serialNumber ? `S/N: ${asset.serialNumber}` : '—'}

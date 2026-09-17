@@ -235,6 +235,7 @@ export interface components {
                  * @example asset_not_found
                  * @example forbidden
                  * @example asset_retired
+                 * @example asset_unavailable
                  */
                 code: string;
                 /** @description Human-readable text, safe to show to the operator. */
@@ -344,9 +345,15 @@ export interface components {
              *     sticker explains itself instead of reading as an unknown tag. Such a
              *     unit is no longer *at* its `location` — that is where it stood when
              *     it went.
+             *
+             *     `UNAVAILABLE` is held back rather than gone: still in the pool, still
+             *     listed, still scannable onto a location, but a scan that would check
+             *     it out to a production is refused with `asset_unavailable`.
+             *     `MAINTENANCE` and `BROKEN` describe condition only and do not stop a
+             *     checkout.
              * @enum {string}
              */
-            status: "AVAILABLE" | "MAINTENANCE" | "BROKEN" | "SOLD" | "DECOMMISSIONED";
+            status: "AVAILABLE" | "UNAVAILABLE" | "MAINTENANCE" | "BROKEN" | "SOLD" | "DECOMMISSIONED";
             product: components["schemas"]["Product"];
             location: components["schemas"]["Location"];
             organization: components["schemas"]["Organization"];
@@ -475,7 +482,9 @@ export interface components {
         };
         /**
          * @description The record exists but its state forbids the operation — a sold or
-         *     decommissioned asset can no longer be booked (`asset_retired`).
+         *     decommissioned asset can no longer be booked (`asset_retired`), and a
+         *     unit held back as unavailable cannot be checked out
+         *     (`asset_unavailable`).
          */
         Conflict: {
             headers: {
