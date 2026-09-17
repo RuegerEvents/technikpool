@@ -487,7 +487,6 @@ msgstr "Verfügbar"
 
 #: src/lib/components/ui/asset-status/asset-status.svelte.ts
 #: src/routes/admin/maintenance/+page.svelte
-#: src/routes/admin/users/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
@@ -624,7 +623,6 @@ msgstr "Verwalten"
 msgid "View Assets"
 msgstr "Geräte anzeigen"
 
-#: src/routes/admin/catalog-log/+page.svelte
 #: src/routes/admin/users/+page.svelte
 msgid "User Management"
 msgstr "Benutzerverwaltung"
@@ -5257,9 +5255,8 @@ msgstr "<0/> Prüfungen"
 msgid "<0/> Scanners"
 msgstr "<0/> Scanner"
 
-#: src/routes/+layout.svelte
-msgid "<0/>Admin"
-msgstr "<0/>Admin"
+#~ msgid "<0/>Admin"
+#~ msgstr "<0/>Admin"
 
 #: src/routes/+layout.svelte
 msgid "<0/>Devices"
@@ -5782,7 +5779,6 @@ msgid "Manufacturers are shared across all organizations, so renaming or merging
 msgstr "Hersteller werden von allen Organisationen gemeinsam genutzt — Umbenennen und Zusammenführen ist deshalb Systemadministratoren vorbehalten."
 
 #: src/routes/admin/catalog-log/+page.svelte
-#: src/routes/admin/users/+page.svelte
 msgid "Catalog Log"
 msgstr "Katalog-Protokoll"
 
@@ -6479,9 +6475,8 @@ msgstr "KW {0}"
 msgid "Menu"
 msgstr "Menü"
 
-#: src/routes/+layout.svelte
-msgid "<0/> Admin"
-msgstr "<0/> Admin"
+#~ msgid "<0/> Admin"
+#~ msgstr "<0/> Admin"
 
 #: src/routes/+layout.svelte
 msgid "<0/> Dashboard"
@@ -7456,3 +7451,22 @@ msgstr[1] "die anderen # Instanzen gelten ab dann als unvollständig"
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Show everything in the pool. A unit this kit has no room for changes what the bundle type holds, and {0}."
 msgstr "Alle Geräte im Pool anzeigen. Ein Gerät, für das in diesem Kit kein Platz ist, ändert den Bundle-Typ, und {0}."
+
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+msgid "<0/> Users"
+msgstr "<0/> Benutzer"
+
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+msgid "<0/> Maintenance"
+msgstr "<0/> Wartung"
+
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+msgid "<0/> Catalog Log"
+msgstr "<0/> Katalog-Protokoll"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Admin <1/>"
+msgstr "<0/> Admin <1/>"

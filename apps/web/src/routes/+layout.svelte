@@ -21,9 +21,11 @@
 		Package,
 		ReceiptText,
 		Users,
+		UserCog,
 		ScanBarcode,
 		PlugZap,
 		Shapes,
+		ScrollText,
 		Tags,
 		Wrench
 	} from '@lucide/svelte';
@@ -207,8 +209,22 @@
 											onSelect={() => goto(resolve('/admin/users'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
-											<FolderKanban aria-hidden="true" />
-											Admin
+											<UserCog aria-hidden="true" />
+											Users
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/admin/maintenance'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<Wrench aria-hidden="true" />
+											Maintenance
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/admin/catalog-log'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<ScrollText aria-hidden="true" />
+											Catalog Log
 										</DropdownMenu.Item>
 									{/if}
 								</DropdownMenu.Content>
@@ -379,15 +395,68 @@
 								</DropdownMenu.Portal>
 							</DropdownMenu.Root>
 							{#if data.isAdmin}
-								<a
-									href={resolve('/admin/users')}
-									class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
-										'/admin'
-									)
-										? 'text-foreground'
-										: 'text-muted-foreground hover:text-foreground'}"
-									><FolderKanban aria-hidden="true" class="size-4" />Admin</a
-								>
+								<DropdownMenu.Root>
+									<DropdownMenu.Trigger>
+										{#snippet child({ props })}
+											<button
+												{...props}
+												type="button"
+												class="flex items-center gap-1 text-sm font-medium transition-colors {page.url.pathname.startsWith(
+													'/admin/users'
+												) ||
+												page.url.pathname.startsWith('/admin/maintenance') ||
+												page.url.pathname.startsWith('/admin/catalog-log')
+													? 'text-foreground'
+													: 'text-muted-foreground hover:text-foreground'}"
+											>
+												<FolderKanban aria-hidden="true" class="size-4" />
+												Admin
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													width="13"
+													height="13"
+													viewBox="0 0 24 24"
+													fill="none"
+													stroke="currentColor"
+													stroke-width="2"
+													stroke-linecap="round"
+													stroke-linejoin="round"
+												>
+													<path d="m6 9 6 6 6-6" />
+												</svg>
+											</button>
+										{/snippet}
+									</DropdownMenu.Trigger>
+									<DropdownMenu.Portal>
+										<DropdownMenu.Content
+											align="start"
+											sideOffset={6}
+											class="z-50 min-w-[180px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md [&_svg]:size-4"
+										>
+											<DropdownMenu.Item
+												onSelect={() => goto(resolve('/admin/users'))}
+												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+											>
+												<UserCog aria-hidden="true" />
+												Users
+											</DropdownMenu.Item>
+											<DropdownMenu.Item
+												onSelect={() => goto(resolve('/admin/maintenance'))}
+												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+											>
+												<Wrench aria-hidden="true" />
+												Maintenance
+											</DropdownMenu.Item>
+											<DropdownMenu.Item
+												onSelect={() => goto(resolve('/admin/catalog-log'))}
+												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+											>
+												<ScrollText aria-hidden="true" />
+												Catalog Log
+											</DropdownMenu.Item>
+										</DropdownMenu.Content>
+									</DropdownMenu.Portal>
+								</DropdownMenu.Root>
 							{/if}
 						</nav>
 					{/if}

@@ -487,7 +487,6 @@ msgstr "Available"
 
 #: src/lib/components/ui/asset-status/asset-status.svelte.ts
 #: src/routes/admin/maintenance/+page.svelte
-#: src/routes/admin/users/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
@@ -624,7 +623,6 @@ msgstr "Manage"
 msgid "View Assets"
 msgstr "View Assets"
 
-#: src/routes/admin/catalog-log/+page.svelte
 #: src/routes/admin/users/+page.svelte
 msgid "User Management"
 msgstr "User Management"
@@ -5257,9 +5255,8 @@ msgstr "<0/> Inspections"
 msgid "<0/> Scanners"
 msgstr "<0/> Scanners"
 
-#: src/routes/+layout.svelte
-msgid "<0/>Admin"
-msgstr "<0/>Admin"
+#~ msgid "<0/>Admin"
+#~ msgstr "<0/>Admin"
 
 #: src/routes/+layout.svelte
 msgid "<0/>Devices"
@@ -5782,7 +5779,6 @@ msgid "Manufacturers are shared across all organizations, so renaming or merging
 msgstr "Manufacturers are shared across all organizations, so renaming or merging them is reserved for system administrators."
 
 #: src/routes/admin/catalog-log/+page.svelte
-#: src/routes/admin/users/+page.svelte
 msgid "Catalog Log"
 msgstr "Catalog Log"
 
@@ -6479,9 +6475,8 @@ msgstr "W {0}"
 msgid "Menu"
 msgstr "Menu"
 
-#: src/routes/+layout.svelte
-msgid "<0/> Admin"
-msgstr "<0/> Admin"
+#~ msgid "<0/> Admin"
+#~ msgstr "<0/> Admin"
 
 #: src/routes/+layout.svelte
 msgid "<0/> Dashboard"
@@ -7456,3 +7451,22 @@ msgstr[1] "the other # cases of it count as incomplete from then on"
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Show everything in the pool. A unit this kit has no room for changes what the bundle type holds, and {0}."
 msgstr "Show everything in the pool. A unit this kit has no room for changes what the bundle type holds, and {0}."
+
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+msgid "<0/> Users"
+msgstr "<0/> Users"
+
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+msgid "<0/> Maintenance"
+msgstr "<0/> Maintenance"
+
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+msgid "<0/> Catalog Log"
+msgstr "<0/> Catalog Log"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Admin <1/>"
+msgstr "<0/> Admin <1/>"

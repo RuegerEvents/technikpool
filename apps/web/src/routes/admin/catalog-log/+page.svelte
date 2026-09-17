@@ -1,8 +1,6 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
 	import { getCatalogTransactions } from '$lib/remote/assets.remote';
-	import { resolve } from '$app/paths';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
 	// The empty log the page renders before the first answer arrives. Spelled out
@@ -73,15 +71,12 @@
 <svelte:head><title>Catalog Log | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
-	<div class="flex flex-wrap items-start justify-between gap-3">
-		<div>
-			<h1 class="text-3xl font-bold tracking-tight">Catalog Log</h1>
-			<p class="text-muted-foreground">
-				Every change to the shared catalog — products, manufacturers, categories and per-org prices
-				— with who made it.
-			</p>
-		</div>
-		<Button variant="outline" href={resolve('/admin/users')}>User Management</Button>
+	<div>
+		<h1 class="text-3xl font-bold tracking-tight">Catalog Log</h1>
+		<p class="text-muted-foreground">
+			Every change to the shared catalog — products, manufacturers, categories and per-org prices —
+			with who made it.
+		</p>
 	</div>
 
 	{#if !logQuery.ready}
