@@ -113,8 +113,9 @@ msgstr "Fertig"
 #~ msgid "Search by name, manufacturer, S/N…"
 #~ msgstr "Nach Name, Hersteller, S/N suchen…"
 
-#~ msgid "No assets found."
-#~ msgstr "Keine Geräte gefunden."
+#: src/lib/error-messages.svelte.ts
+msgid "No assets found."
+msgstr "Keine Geräte gefunden."
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/+page.svelte
@@ -177,20 +178,42 @@ msgstr "Crew"
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
+#: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
+#: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+#: src/routes/+page.svelte
 #: src/routes/admin/connectors/+page.svelte
+#: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
+#: src/routes/inspections/+page.svelte
 #: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/manufacturers/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/offers/[id]/+page.svelte
+#: src/routes/orgs/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/[id]/+page.svelte
 #: src/routes/productions/new/+page.svelte
+#: src/routes/products/+page.svelte
 msgid "Cancel"
 msgstr "Abbrechen"
 
@@ -235,6 +258,7 @@ msgstr "Noch keine Crewmitglieder hinzugefügt."
 #: src/routes/admin/connectors/+page.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/auth/register/+page.svelte
@@ -267,6 +291,7 @@ msgstr "Entfernen"
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
@@ -295,7 +320,9 @@ msgstr "Ablehnen"
 msgid "How many of the {0} units do you want to {1}?"
 msgstr "Wie viele der {0} Einheiten möchten Sie {1}?"
 
+#. 0: m.pg.items.length
 #. 0: max
+#: src/routes/+page.svelte
 #: src/routes/productions/[id]/equipment/+page.svelte
 msgid "of {0}"
 msgstr "von {0}"
@@ -555,8 +582,9 @@ msgstr "Organisation erstellen"
 msgid "Create a new organization to manage assets and productions."
 msgstr "Erstellen Sie eine neue Organisation zur Verwaltung von Geräten und Produktionen."
 
-#~ msgid "Organization Name"
-#~ msgstr "Organisationsname"
+#: src/routes/orgs/+page.svelte
+msgid "Organization Name"
+msgstr "Organisationsname"
 
 #: src/routes/orgs/+page.svelte
 #: src/routes/productions/new/+page.svelte
@@ -1178,6 +1206,7 @@ msgstr "Ansehen →"
 msgid "Bundle Details"
 msgstr "Bundle-Details"
 
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "Description <0>(optional)</0>"
 msgstr "Beschreibung <0>(optional)</0>"
@@ -1284,6 +1313,7 @@ msgstr "Bearbeiten"
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/checkout/+page.svelte
@@ -1369,6 +1399,7 @@ msgstr "Postleitzahl"
 
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/routes/orgs/[id]/+page.svelte
+#: src/routes/productions/[id]/equipment/+page.svelte
 msgid "City"
 msgstr "Stadt"
 
@@ -1388,6 +1419,7 @@ msgstr "Adresse aktualisiert"
 
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/equipment/+page.svelte
 #: src/routes/productions/[id]/equipment/+page.svelte
 msgid "Locations"
 msgstr "Standorte"
@@ -1831,6 +1863,7 @@ msgstr "Alle Kategorien"
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
@@ -1959,8 +1992,9 @@ msgstr "Neues Produkt erstellen"
 msgid "Fill in the details for the new product model."
 msgstr "Details für das neue Produktmodell eingeben."
 
-#~ msgid "Add Product"
-#~ msgstr "Produkt hinzufügen"
+#: src/routes/assets/new/+page.svelte
+msgid "Add Product"
+msgstr "Produkt hinzufügen"
 
 #: src/routes/assets/+page.svelte
 msgid "Bundle View"
@@ -1973,6 +2007,7 @@ msgstr "Alle Produkte"
 #~ msgid "Bundle location updated"
 #~ msgstr "Bundle-Standort aktualisiert"
 
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 msgid "No location"
 msgstr "Kein Standort"
@@ -2170,8 +2205,9 @@ msgstr "So"
 #~ msgid "Asset ID"
 #~ msgstr "Inventar-ID"
 
-#~ msgid "Asset ID Prefix"
-#~ msgstr "Inventar-ID-Präfix"
+#: src/routes/orgs/+page.svelte
+msgid "Asset ID Prefix"
+msgstr "Inventar-ID-Präfix"
 
 #~ msgid "3-letter prefix for asset IDs (e.g. ABC → ABC-00001)."
 #~ msgstr ""
@@ -2186,8 +2222,9 @@ msgstr "So"
 msgid "Prefix"
 msgstr "Präfix"
 
-#~ msgid "3-digit prefix for asset IDs (e.g. 123 → 12300001)."
-#~ msgstr "3-stelliger Präfix für Inventar-IDs (z. B. 123 → 12300001)."
+#: src/routes/orgs/+page.svelte
+msgid "3-digit prefix for asset IDs (e.g. 123 → 12300001)."
+msgstr "3-stelliger Präfix für Inventar-IDs (z. B. 123 → 12300001)."
 
 #~ msgid "3-digit prefix for auto-generated asset IDs (e.g. 123 → 12300001)."
 #~ msgstr "3-stelliger Präfix für automatisch generierte Inventar-IDs (z. B. 123 → 12300001)."
@@ -2399,7 +2436,6 @@ msgstr "Zurück zu Geräte"
 msgid "End number must be greater than or equal to start number"
 msgstr "Endnummer muss größer oder gleich der Startnummer sein"
 
-#: src/routes/stickers/+page.svelte
 #: src/routes/stickers/+page.svelte
 msgid "Could not generate sticker sheet"
 msgstr "Stickerbogen konnte nicht erzeugt werden"
@@ -2844,16 +2880,19 @@ msgstr "Noch keine Rechnungen."
 msgid "Number"
 msgstr "Nummer"
 
+#: src/routes/orgs/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Color"
 msgstr "Farbe"
 
+#: src/routes/orgs/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Avatar label"
 msgstr "Avatar-Kürzel"
 
-#~ msgid "Color and a 2-letter label identify this org at a glance in the calendar and device lists."
-#~ msgstr "Farbe und ein 2-Buchstaben-Kürzel identifizieren diese Organisation auf einen Blick im Kalender und in Gerätelisten."
+#: src/routes/orgs/+page.svelte
+msgid "Color and a 2-letter label identify this org at a glance in the calendar and device lists."
+msgstr "Farbe und ein 2-Buchstaben-Kürzel identifizieren diese Organisation auf einen Blick im Kalender und in Gerätelisten."
 
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
@@ -2879,14 +2918,17 @@ msgstr "Preis & Prüfung aktualisiert"
 #: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Net purchase price (€)"
 msgstr "Netto-Einkaufspreis (€)"
 
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/[id]/+page.svelte
 msgid "Purchase date"
 msgstr "Kaufdatum"
 
+#: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 msgid "DGUV inspection interval (months)"
 msgstr "DGUV-Prüfintervall (Monate)"
@@ -3603,6 +3645,7 @@ msgid "Name, category, pricing, and location."
 msgstr "Name, Kategorie, Preis und Standort."
 
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 msgid "Billed as one line on offers."
 msgstr "Wird als eine Position auf Angeboten abgerechnet."
 
@@ -3927,16 +3970,19 @@ msgstr "Bundle-Typ"
 msgid "Search or create bundle type…"
 msgstr "Bundle-Typ suchen oder erstellen…"
 
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "Tag <0>(optional)</0>"
 msgstr "Tag <0>(optional)</0>"
 
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "Distinguishes this physical instance from others of the same type."
 msgstr "Unterscheidet diese physische Instanz von anderen desselben Typs."
 
-#~ msgid "Shared with every instance of this bundle type."
-#~ msgstr "Wird von allen Instanzen dieses Bundle-Typs gemeinsam verwendet."
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Shared with every instance of this bundle type."
+msgstr "Wird von allen Instanzen dieses Bundle-Typs gemeinsam verwendet."
 
 #. 0: template.instances.length
 #: src/routes/assets/bundles/+page.svelte
@@ -3970,11 +4016,13 @@ msgstr "Wird in Tabellen und Auswahllisten anstelle des vollständigen Namens an
 msgid "Short name"
 msgstr "Kurzname"
 
-#~ msgid "Short Name <0>(optional)</0>"
-#~ msgstr "Kurzname <0>(optional)</0>"
+#: src/routes/orgs/+page.svelte
+msgid "Short Name <0>(optional)</0>"
+msgstr "Kurzname <0>(optional)</0>"
 
-#~ msgid "Shown instead of the full name in tables and pickers."
-#~ msgstr "Wird in Tabellen und Auswahllisten anstelle des vollständigen Namens angezeigt."
+#: src/routes/orgs/+page.svelte
+msgid "Shown instead of the full name in tables and pickers."
+msgstr "Wird in Tabellen und Auswahllisten anstelle des vollständigen Namens angezeigt."
 
 #: src/routes/devices/+page.svelte
 msgid "Device connected"
@@ -4235,8 +4283,9 @@ msgstr "Gerät löschen"
 msgid "Delete this asset?"
 msgstr "Dieses Gerät löschen?"
 
-#~ msgid "This cannot be undone. Only the unit is removed — the product it belongs to stays."
-#~ msgstr "Das lässt sich nicht rückgängig machen. Nur das Gerät wird entfernt — das Produkt dazu bleibt bestehen."
+#: src/routes/assets/[id]/+page.svelte
+msgid "This cannot be undone. Only the unit is removed — the product it belongs to stays."
+msgstr "Das lässt sich nicht rückgängig machen. Nur das Gerät wird entfernt — das Produkt dazu bleibt bestehen."
 
 #~ msgid "Shift canary string"
 #~ msgstr ""
@@ -4846,6 +4895,7 @@ msgstr "Wird angelegt und diesem Bundle hinzugefügt. Es kommt ins Bundle, sobal
 msgid "Edit Asset"
 msgstr "Gerät bearbeiten"
 
+#: src/lib/error-messages.svelte.ts
 #: src/routes/assets/[id]/+page.svelte
 msgid "This unit is sold or decommissioned — only its status can be changed."
 msgstr "Diese Einheit ist verkauft oder ausgemustert — nur ihr Status lässt sich noch ändern."
@@ -4939,6 +4989,7 @@ msgid "Also create the accessories the other units carry <0>{0} — each new uni
 msgstr "Auch das Zubehör anlegen, das die anderen Einheiten mitführen <0>{0} — jede neue Einheit bekommt ihr eigenes, angehängt.</0>"
 
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 msgid "Register a new unit of…"
 msgstr "Neue Einheit anlegen von…"
 
@@ -5075,6 +5126,7 @@ msgstr "Bild neu erstellen"
 msgid "Select all units in bundle"
 msgstr "Alle Einheiten im Bundle auswählen"
 
+#: src/lib/error-messages.svelte.ts
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Manufacturer is required"
@@ -5153,6 +5205,7 @@ msgid "This permanently removes the catalogue entry. Products with any units, in
 msgstr "Dadurch wird der Katalogeintrag dauerhaft gelöscht. Produkte mit Einheiten – einschließlich ausgemusterter Einheiten – können nicht gelöscht werden."
 
 #: src/routes/admin/users/+page.svelte
+#: src/routes/productions/[id]/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Delete <0/>?"
 msgstr "<0/> löschen?"
@@ -5605,11 +5658,13 @@ msgstr "Finalisiert am {0} — diese Rechnung ist unveränderbar.<0/> Korrekture
 msgid "This invoice is a draft — items can still be corrected or resynced from the production. Finalizing archives its PDF and makes it immutable."
 msgstr "Diese Rechnung ist ein Entwurf — Positionen können noch korrigiert oder mit der Produktion synchronisiert werden. Beim Finalisieren wird die PDF archiviert und die Rechnung unveränderbar."
 
-#~ msgid "Delete <0/> and move its products to:"
-#~ msgstr "<0/> löschen und seine Produkte verschieben zu:"
+#: src/routes/manufacturers/+page.svelte
+msgid "Delete <0/> and move its products to:"
+msgstr "<0/> löschen und seine Produkte verschieben zu:"
 
-#~ msgid "Select manufacturer…"
-#~ msgstr "Hersteller auswählen…"
+#: src/routes/manufacturers/+page.svelte
+msgid "Select manufacturer…"
+msgstr "Hersteller auswählen…"
 
 #: src/routes/productions/[id]/+page.svelte
 msgid "# accessory added"
@@ -6450,3 +6505,482 @@ msgstr "<0/> Angebote"
 #: src/routes/+layout.svelte
 msgid "<0/> Invoices"
 msgstr "<0/> Rechnungen"
+
+#. 0: suggestion
+#: src/routes/orgs/+page.svelte
+msgid "Use {0}"
+msgstr "{0} verwenden"
+
+#: src/routes/orgs/+page.svelte
+msgid "Suggestions"
+msgstr "Vorschläge"
+
+#: src/routes/orgs/+page.svelte
+msgid "Already taken — every color, label and prefix can only be used once:"
+msgstr "Bereits vergeben — Farbe, Kürzel und Präfix können jeweils nur einmal vorkommen:"
+
+#: src/lib/error-messages.svelte.ts
+msgid "Pick a color as #RRGGBB."
+msgstr "Bitte eine Farbe als #RRGGBB angeben."
+
+#: src/lib/error-messages.svelte.ts
+msgid "The avatar label has to be exactly 2 letters."
+msgstr "Das Avatar-Kürzel muss genau 2 Buchstaben haben."
+
+#: src/lib/error-messages.svelte.ts
+msgid "The asset ID prefix has to be exactly 3 digits."
+msgstr "Das Inventar-ID-Präfix muss genau 3 Ziffern haben."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "The color {0} is already taken. Pick another one."
+msgstr "Die Farbe {0} ist bereits vergeben. Bitte eine andere wählen."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "The avatar label {0} is already taken. Pick another one."
+msgstr "Das Avatar-Kürzel {0} ist bereits vergeben. Bitte ein anderes wählen."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "The asset ID prefix {0} is already taken. Pick another one."
+msgstr "Das Inventar-ID-Präfix {0} ist bereits vergeben. Bitte ein anderes wählen."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Delete <0/> and all of its data?"
+msgstr "<0/> und alle zugehörigen Daten löschen?"
+
+#: src/routes/offers/[id]/+page.svelte
+msgid "Invoice number"
+msgstr "Rechnungsnummer"
+
+#: src/lib/error-messages.svelte.ts
+msgid "You are not allowed to do that."
+msgstr "Dazu fehlt die Berechtigung."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This needs system admin rights."
+msgstr "Dafür sind System-Admin-Rechte nötig."
+
+#: src/lib/error-messages.svelte.ts
+msgid "You are not a member of this organization."
+msgstr "Sie sind kein Mitglied dieser Organisation."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Only org owners or system admins can manage this organization."
+msgstr "Nur Inhaber der Organisation oder System-Admins können diese Organisation verwalten."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Only org admins and owners can manage offers and invoices."
+msgstr "Nur Admins und Inhaber der Organisation können Angebote und Rechnungen verwalten."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Only org admins and owners can delete productions."
+msgstr "Nur Admins und Inhaber der Organisation können Produktionen löschen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "You are not allowed to create assets in this organization."
+msgstr "In dieser Organisation dürfen Sie keine Geräte anlegen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "You are not allowed to approve assets from this organization."
+msgstr "Geräte dieser Organisation dürfen Sie nicht genehmigen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "You are not allowed to decline assets from this organization."
+msgstr "Geräte dieser Organisation dürfen Sie nicht ablehnen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "You need admin rights in one of your organizations to edit products."
+msgstr "Zum Bearbeiten von Produkten sind Admin-Rechte in einer Ihrer Organisationen nötig."
+
+#: src/lib/error-messages.svelte.ts
+msgid "You need admin rights in one of your organizations to delete products."
+msgstr "Zum Löschen von Produkten sind Admin-Rechte in einer Ihrer Organisationen nötig."
+
+#: src/lib/error-messages.svelte.ts
+msgid "You need admin rights in one of your organizations to merge products."
+msgstr "Zum Zusammenführen von Produkten sind Admin-Rechte in einer Ihrer Organisationen nötig."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "Units of this product belong to {0}. Only an admin there can change it."
+msgstr "Einheiten dieses Produkts gehören zu {0}. Nur ein Admin dort kann es ändern."
+
+#. 0: p0; 1: p1
+#: src/lib/error-messages.svelte.ts
+msgid "Units of \"{0}\" belong to {1}. Only an admin there can merge it."
+msgstr ""
+
+#: src/lib/error-messages.svelte.ts
+msgid "You need admin rights in one of your organizations to edit connectors."
+msgstr "Zum Bearbeiten von Steckern sind Admin-Rechte in einer Ihrer Organisationen nötig."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Only admins of this organization can set its prices."
+msgstr "Nur Admins dieser Organisation können ihre Preise festlegen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A manufacturer needs a name."
+msgstr "Ein Hersteller braucht einen Namen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A manufacturer with this name already exists. Merge them instead."
+msgstr "Ein Hersteller mit diesem Namen existiert bereits. Bitte stattdessen zusammenführen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A manufacturer cannot be merged into itself."
+msgstr "Ein Hersteller kann nicht mit sich selbst zusammengeführt werden."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A category needs an English name."
+msgstr "Eine Kategorie braucht einen englischen Namen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A category is required for a new product."
+msgstr "Für ein neues Produkt ist eine Kategorie erforderlich."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "Another category is already called \"{0}\"."
+msgstr ""
+
+#: src/lib/error-messages.svelte.ts
+msgid "A product is required."
+msgstr "Ein Produkt ist erforderlich."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This product still has units. Merge it into the correct product instead."
+msgstr "Zu diesem Produkt gibt es noch Einheiten. Bitte stattdessen mit dem richtigen Produkt zusammenführen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A product cannot be merged into itself."
+msgstr "Ein Produkt kann nicht mit sich selbst zusammengeführt werden."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A product cannot be an accessory of itself."
+msgstr "Ein Produkt kann nicht Zubehör von sich selbst sein."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This organization has no units of that product."
+msgstr "Diese Organisation hat keine Einheiten dieses Produkts."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "A connector called \"{0}\" already exists."
+msgstr ""
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "{0} product(s) still use this connector. Rename it instead of deleting it."
+msgstr "{0} Produkt(e) verwenden diesen Stecker noch. Bitte umbenennen statt löschen."
+
+#. 0: p0; 1: p1
+#: src/lib/error-messages.svelte.ts
+msgid "Asset tag \"{0}\" has to start with the org prefix \"{1}\"."
+msgstr ""
+
+#: src/lib/error-messages.svelte.ts
+msgid "A sold or decommissioned unit cannot have accessories attached to it."
+msgstr "An eine verkaufte oder ausgemusterte Einheit kann kein Zubehör angehängt werden."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A sold or decommissioned unit cannot be attached to anything."
+msgstr "Eine verkaufte oder ausgemusterte Einheit kann an nichts angehängt werden."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This unit is sold or decommissioned and can no longer be booked."
+msgstr "Diese Einheit ist verkauft oder ausgemustert und kann nicht mehr gebucht werden."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This unit is sold or decommissioned and cannot be added to a bundle."
+msgstr "Diese Einheit ist verkauft oder ausgemustert und kann keinem Bundle hinzugefügt werden."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This unit is sold or decommissioned and can no longer be inspected."
+msgstr "Diese Einheit ist verkauft oder ausgemustert und kann nicht mehr geprüft werden."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "This unit is still booked for \"{0}\" — remove it there first."
+msgstr ""
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "One unit is still booked for {0} — remove it there first."
+msgstr "Eine Einheit ist noch für {0} gebucht — bitte dort zuerst entfernen."
+
+#. 0: p0; 1: p1
+#: src/lib/error-messages.svelte.ts
+msgid "{0} units are still booked ({1}) — remove them there first."
+msgstr "{0} Einheiten sind noch gebucht ({1}) — bitte dort zuerst entfernen."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "This unit is already booked for \"{0}\" during this time."
+msgstr ""
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "This unit has been booked for \"{0}\" — decommission it instead of deleting it."
+msgstr ""
+
+#: src/lib/error-messages.svelte.ts
+msgid "This unit has been scanned or checked out — decommission it instead of deleting it."
+msgstr "Diese Einheit wurde gescannt oder ausgegeben — bitte ausmustern statt löschen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This unit has an inspection on record — decommission it instead of deleting it."
+msgstr "Zu dieser Einheit ist eine Prüfung hinterlegt — bitte ausmustern statt löschen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Other units are attached to this one as accessories — detach them first."
+msgstr "An dieser Einheit hängen andere Einheiten als Zubehör — bitte zuerst abhängen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This unit appears on an offer or invoice — decommission it instead of deleting it."
+msgstr "Diese Einheit steht auf einem Angebot oder einer Rechnung — bitte ausmustern statt löschen."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "This unit is already in the bundle \"{0}\" — remove it there first."
+msgstr ""
+
+#: src/lib/error-messages.svelte.ts
+msgid "That location does not belong to this organization."
+msgstr "Dieser Standort gehört nicht zu dieser Organisation."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A location is required."
+msgstr "Ein Standort ist erforderlich."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Another organization has a unit at one of these locations; move it first."
+msgstr "Eine andere Organisation hat eine Einheit an einem dieser Standorte; bitte zuerst umlagern."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A unit cannot be its own accessory."
+msgstr "Eine Einheit kann nicht ihr eigenes Zubehör sein."
+
+#: src/lib/error-messages.svelte.ts
+msgid "That unit is itself an accessory — accessories are one level deep."
+msgstr "Diese Einheit ist selbst Zubehör — Zubehör geht nur eine Ebene tief."
+
+#: src/lib/error-messages.svelte.ts
+msgid "An accessory has to belong to the same organization as what it is attached to."
+msgstr "Zubehör muss zur selben Organisation gehören wie das Gerät, an dem es hängt."
+
+#: src/lib/error-messages.svelte.ts
+msgid "An accessory is in whatever bundle its parent is in — pass one or the other."
+msgstr "Zubehör ist immer in dem Bundle seines Hauptgeräts — bitte nur eines von beiden angeben."
+
+#: src/lib/error-messages.svelte.ts
+msgid "That unit has accessories of its own — detach those first."
+msgstr "Diese Einheit hat eigenes Zubehör — bitte dieses zuerst abhängen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "That unit is already attached to another unit — detach it there first."
+msgstr "Diese Einheit hängt schon an einer anderen Einheit — bitte dort zuerst abhängen."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "That unit is in the bundle \"{0}\" — remove it there first."
+msgstr ""
+
+#: src/lib/error-messages.svelte.ts
+msgid "That unit is not an accessory."
+msgstr "Diese Einheit ist kein Zubehör."
+
+#: src/lib/error-messages.svelte.ts
+msgid "That bundle belongs to a different organization."
+msgstr "Dieses Bundle gehört zu einer anderen Organisation."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "Tag \"{0}\" is already used by another bundle."
+msgstr ""
+
+#: src/lib/error-messages.svelte.ts
+msgid "A category is required for a new bundle type."
+msgstr "Für einen neuen Bundle-Typ ist eine Kategorie erforderlich."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A bundle type is required."
+msgstr "Ein Bundle-Typ ist erforderlich."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This unit is an accessory — put the unit it is attached to in the bundle instead."
+msgstr "Diese Einheit ist Zubehör — bitte stattdessen das Gerät ins Bundle legen, an dem sie hängt."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A bundle needs at least two devices to be converted."
+msgstr "Ein Bundle braucht mindestens zwei Geräte, um umgewandelt zu werden."
+
+#: src/lib/error-messages.svelte.ts
+msgid "The selected main device is not in this bundle."
+msgstr "Das gewählte Hauptgerät ist nicht in diesem Bundle."
+
+#: src/lib/error-messages.svelte.ts
+msgid "The main device cannot itself be an accessory."
+msgstr "Das Hauptgerät kann nicht selbst Zubehör sein."
+
+#: src/lib/error-messages.svelte.ts
+msgid "All units in a bundle must belong to the same organization."
+msgstr "Alle Einheiten eines Bundles müssen zur selben Organisation gehören."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This bundle has no units."
+msgstr "Dieses Bundle hat keine Einheiten."
+
+#: src/lib/error-messages.svelte.ts
+msgid "All units of this bundle are already in this production."
+msgstr "Alle Einheiten dieses Bundles sind bereits in dieser Produktion."
+
+#: src/lib/error-messages.svelte.ts
+msgid "All units of this bundle are already booked during this production."
+msgstr "Alle Einheiten dieses Bundles sind während dieser Produktion bereits gebucht."
+
+#: src/lib/error-messages.svelte.ts
+msgid "The end date cannot be before the start date."
+msgstr "Das Enddatum kann nicht vor dem Startdatum liegen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "The show end cannot be before the show start."
+msgstr "Das Show-Ende kann nicht vor dem Show-Beginn liegen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "The show start cannot be before the overall start."
+msgstr "Der Show-Beginn kann nicht vor dem Gesamtbeginn liegen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "The show end cannot be after the overall end."
+msgstr "Das Show-Ende kann nicht nach dem Gesamtende liegen."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "Only {0} more unit(s) are available to add."
+msgstr "Es sind nur noch {0} Einheit(en) zum Hinzufügen verfügbar."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This offer is finalized and can no longer be changed."
+msgstr "Dieses Angebot ist finalisiert und kann nicht mehr geändert werden."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This offer has already been finalized."
+msgstr "Dieses Angebot ist bereits finalisiert."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Finalize the offer before creating an invoice."
+msgstr "Bitte das Angebot finalisieren, bevor eine Rechnung erstellt wird."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This offer is not linked to a production."
+msgstr "Dieses Angebot ist mit keiner Produktion verknüpft."
+
+#: src/lib/error-messages.svelte.ts
+msgid "No offer lines found."
+msgstr "Keine Angebotspositionen gefunden."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Those lines belong to different offers."
+msgstr "Diese Positionen gehören zu verschiedenen Angeboten."
+
+#: src/lib/error-messages.svelte.ts
+msgid "An invoice was already created from this offer."
+msgstr "Aus diesem Angebot wurde bereits eine Rechnung erstellt."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A finalized offer cannot be deleted."
+msgstr "Ein finalisiertes Angebot kann nicht gelöscht werden."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A draft offer can still be edited directly."
+msgstr "Ein Angebotsentwurf lässt sich direkt bearbeiten."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "{0} is already the current version of this offer."
+msgstr "{0} ist bereits die aktuelle Version dieses Angebots."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "Only the current version, {0}, can be invoiced."
+msgstr "Nur die aktuelle Version, {0}, kann abgerechnet werden."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This invoice has been sent and can no longer be changed."
+msgstr "Diese Rechnung ist versendet und kann nicht mehr geändert werden."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This invoice has already been finalized."
+msgstr "Diese Rechnung ist bereits finalisiert."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This invoice is not linked to a production."
+msgstr "Diese Rechnung ist mit keiner Produktion verknüpft."
+
+#: src/lib/error-messages.svelte.ts
+msgid "No invoice lines found."
+msgstr "Keine Rechnungspositionen gefunden."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Those lines belong to different invoices."
+msgstr "Diese Positionen gehören zu verschiedenen Rechnungen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A finalized invoice cannot be deleted."
+msgstr "Eine finalisierte Rechnung kann nicht gelöscht werden."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "Invoice number \"{0}\" is already taken in this organization."
+msgstr ""
+
+#: src/lib/error-messages.svelte.ts
+msgid "That customer no longer exists."
+msgstr "Dieser Kunde existiert nicht mehr."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "No net purchase price set for: {0}"
+msgstr "Kein Netto-Einkaufspreis hinterlegt für: {0}"
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "No rental rate set for category: {0}"
+msgstr "Kein Mietsatz hinterlegt für Kategorie: {0}"
+
+#. 0: p0; 1: p1
+#: src/lib/error-messages.svelte.ts
+msgid "No net purchase price set for: {0}. No rental rate set for category: {1}"
+msgstr "Kein Netto-Einkaufspreis hinterlegt für: {0}. Kein Mietsatz hinterlegt für Kategorie: {1}"
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "The PDF cannot be generated. Missing billing data: {0}"
+msgstr "Das PDF kann nicht erzeugt werden. Fehlende Abrechnungsdaten: {0}"
+
+#: src/lib/error-messages.svelte.ts
+msgid "No user found with that email."
+msgstr "Kein Benutzer mit dieser E-Mail-Adresse gefunden."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This user appears in asset history and cannot be deleted."
+msgstr "Dieser Benutzer kommt in der Gerätehistorie vor und kann nicht gelöscht werden."
+
+#: src/lib/error-messages.svelte.ts
+msgid "You cannot remove yourself from the organization."
+msgstr "Sie können sich nicht selbst aus der Organisation entfernen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "You cannot change your own admin status."
+msgstr "Sie können Ihren eigenen Admin-Status nicht ändern."
+
+#: src/lib/error-messages.svelte.ts
+msgid "You cannot delete your own account."
+msgstr "Sie können Ihr eigenes Konto nicht löschen."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "The sticker sheet could not be generated: {0}"
+msgstr "Der Stickerbogen konnte nicht erzeugt werden: {0}"

@@ -283,15 +283,17 @@
 			The selected customer's details are copied onto this invoice.
 		{/snippet}
 
-		<form class="space-y-4" onsubmit={handleSaveCustomer}>
-			<CustomerSelect
-				organizationId={invoice.organizationId}
-				bind:value={editCustomerId}
-				id="invoice-edit-customer"
-				idPrefix="invoice-edit-cust"
-				onChange={(c) => (editCustomerSelected = c)}
-			/>
-		</form>
+		{#snippet children()}
+			<form class="space-y-4" onsubmit={handleSaveCustomer}>
+				<CustomerSelect
+					organizationId={invoice.organizationId}
+					bind:value={editCustomerId}
+					id="invoice-edit-customer"
+					idPrefix="invoice-edit-cust"
+					onChange={(c) => (editCustomerSelected = c)}
+				/>
+			</form>
+		{/snippet}
 
 		{#snippet footer()}
 			<Button

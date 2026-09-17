@@ -128,9 +128,11 @@
 		These values are copied into new offers and invoices.
 	{/snippet}
 
-	<form class="space-y-4" onsubmit={save}>
-		<CustomerFields bind:value={draft} {idPrefix} />
-	</form>
+	{#snippet children()}
+		<form class="space-y-4" onsubmit={save}>
+			<CustomerFields bind:value={draft} {idPrefix} />
+		</form>
+	{/snippet}
 
 	{#snippet footer()}
 		{#if allowDelete && customer}

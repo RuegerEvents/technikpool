@@ -1,5 +1,6 @@
 import { PDFDocument, StandardFonts, degrees, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import { groupBillingItems, lineSubtitle, type GroupableItem } from '../billing-lines.ts';
+import { appError } from '$lib/errors';
 
 type PdfOrganization = {
 	name: string;
@@ -129,11 +130,9 @@ function validateDocument(kind: 'offer' | 'invoice', data: PdfDocumentData) {
 		if (!item.categoryName && !item.categoryNameDe) missing.push(`category for line ${index + 1}`);
 		if (!Number.isFinite(Number(item.lineTotal))) missing.push(`valid total for line ${index + 1}`);
 	});
-	if (missing.length)
-		throw new Error(
-			`PDF cannot be generated. Missing required billing data: ${[...new Set(missing)].join(', ')}`
-		);
+	if (missing.length) appError(400, 'billing_pdf_data_missing', [[...new Set(missing)].join(', ')]);
 }
+
 function money(value: number) {
 	return value.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }

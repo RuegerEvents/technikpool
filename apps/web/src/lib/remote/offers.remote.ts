@@ -1,5 +1,4 @@
 import { query, command } from '$app/server';
-import { error } from '@sveltejs/kit';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import { customerLabel, dayCountBetween, formatAddress, getErrorMessage } from '$lib/utils';
@@ -15,6 +14,7 @@ import {
 import { generateBillingPdf, organizationFromSnapshot } from '$lib/server/billing-pdf';
 import { putObject } from '$lib/server/storage';
 import { orgSnapshotColumns } from '$lib/org-snapshot';
+import { appError, type AppErrorCode, type ErrorParams } from '$lib/errors';
 
 async function requireOrgManageAccess(orgId: string) {
 	const user = await requireAuth();
@@ -23,7 +23,7 @@ async function requireOrgManageAccess(orgId: string) {
 		where: { userId_organizationId: { userId: user.id, organizationId: orgId } }
 	});
 	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		throw new Error('Only org admins/owners can manage offers and invoices');
+		appError(403, 'billing_manage_forbidden');
 	}
 	return user;
 }
@@ -116,7 +116,7 @@ export const getOffer = query(v.string(), async (id: string) => {
 	});
 	const orgIds = await userOrgIds(user.id);
 	if (!(await isSystemAdmin(user.id)) && !orgIds.includes(offer.organizationId)) {
-		throw new Error('Unauthorized');
+		appError(403, 'unauthorized');
 	}
 	return offer;
 });
@@ -131,7 +131,7 @@ export const getOfferVersions = query(v.string(), async (offerId: string) => {
 	});
 	const orgIds = await userOrgIds(user.id);
 	if (!(await isSystemAdmin(user.id)) && !orgIds.includes(offer.organizationId)) {
-		throw new Error('Unauthorized');
+		appError(403, 'unauthorized');
 	}
 	const family = await loadOfferFamily(offer);
 	return {
@@ -155,7 +155,7 @@ export const getOffersForProduction = query(v.string(), async (productionId: str
 	});
 	const orgIds = await userOrgIds(user.id);
 	if (!(await isSystemAdmin(user.id)) && !orgIds.includes(production.organizationId)) {
-		throw new Error('Unauthorized');
+		appError(403, 'unauthorized');
 	}
 	return prisma.offer.findMany({
 		where: { productionId },
@@ -458,18 +458,22 @@ async function computeProductionBilling(
 	};
 }
 
-function billingBlockerMessage(missingPrices: MissingPrice[], missingRates: MissingRate[]): string {
-	const parts: string[] = [];
-	if (missingPrices.length > 0) {
-		const named = missingPrices.map((m) => `${m.label} (${m.assets.length}×)`).join(', ');
-		parts.push(`No net purchase price set for: ${named}`);
+/**
+ * Which of the two things billing needs is missing, as the code the client translates.
+ * Both lists can be empty on their own, and naming them is the whole point of the error —
+ * an offer that cannot be priced has to say which products and categories to go fix.
+ */
+function billingBlocker(
+	missingPrices: MissingPrice[],
+	missingRates: MissingRate[]
+): { code: AppErrorCode; params: ErrorParams } {
+	const prices = missingPrices.map((m) => `${m.label} (${m.assets.length}×)`).join(', ');
+	const rates = missingRates.map((r) => r.categoryName).join(', ');
+	if (prices && rates) {
+		return { code: 'billing_missing_prices_and_rates', params: [prices, rates] };
 	}
-	if (missingRates.length > 0) {
-		parts.push(
-			`No rental rate set for category: ${missingRates.map((r) => r.categoryName).join(', ')}`
-		);
-	}
-	return parts.join('. ');
+	if (prices) return { code: 'billing_missing_prices', params: [prices] };
+	return { code: 'billing_missing_rates', params: [rates] };
 }
 
 async function computeProductionBillingLines(
@@ -481,7 +485,8 @@ async function computeProductionBillingLines(
 		assetScope
 	);
 	if (missingPrices.length > 0 || missingRates.length > 0) {
-		error(400, billingBlockerMessage(missingPrices, missingRates));
+		const { code, params } = billingBlocker(missingPrices, missingRates);
+		appError(400, code, params);
 	}
 	return lines;
 }
@@ -683,7 +688,7 @@ export const getProductionBillingReadiness = query(
 		});
 		const systemAdmin = await isSystemAdmin(user.id);
 		if (!systemAdmin && !(await userOrgIds(user.id)).includes(production.organizationId)) {
-			error(403, 'Unauthorized');
+			appError(403, 'unauthorized');
 		}
 
 		const { lines, missingPrices, missingRates } = await computeProductionBilling(
@@ -832,7 +837,7 @@ export const getOfferStaleness = query(v.string(), async (offerId: string) => {
 	});
 	const orgIds = await userOrgIds(user.id);
 	if (!(await isSystemAdmin(user.id)) && !orgIds.includes(offer.organizationId)) {
-		throw new Error('Unauthorized');
+		appError(403, 'unauthorized');
 	}
 
 	if (!offer.productionId) {
@@ -916,10 +921,10 @@ export const updateOfferItemsFromProduction = command(v.string(), async (offerId
 		include: { items: true }
 	});
 	await requireOrgManageAccess(offer.organizationId);
-	if (offer.finalizedAt) throw new Error('This offer is finalized and immutable');
+	if (offer.finalizedAt) appError(409, 'offer_immutable');
 
 	if (!offer.productionId) {
-		throw new Error('This offer is not linked to a production');
+		appError(409, 'offer_no_production');
 	}
 
 	const lines = await computeProductionBillingLines(offer.productionId, offer.assetScope);
@@ -947,7 +952,7 @@ export const updateOfferDayCount = command(
 			include: { items: true }
 		});
 		await requireOrgManageAccess(offer.organizationId);
-		if (offer.finalizedAt) throw new Error('This offer is finalized and immutable');
+		if (offer.finalizedAt) appError(409, 'offer_immutable');
 
 		await prisma.$transaction([
 			prisma.offer.update({ where: { id: offerId }, data: { dayCount } }),
@@ -983,11 +988,11 @@ export const updateOfferItemRate = command(
 			where: { id: { in: offerItemIds } },
 			include: { offer: true }
 		});
-		if (items.length === 0) error(404, 'No offer lines found');
+		if (items.length === 0) appError(404, 'offer_lines_not_found');
 		const offerIds = [...new Set(items.map((i) => i.offerId))];
-		if (offerIds.length > 1) error(400, 'Lines belong to different offers');
+		if (offerIds.length > 1) appError(400, 'offer_lines_mixed');
 		await requireOrgManageAccess(items[0].offer.organizationId);
-		if (items[0].offer.finalizedAt) throw new Error('This offer is finalized and immutable');
+		if (items[0].offer.finalizedAt) appError(409, 'offer_immutable');
 
 		await prisma.$transaction(
 			items.map((item) =>
@@ -1017,7 +1022,7 @@ export const updateOfferDiscount = command(
 	async ({ offerId, discountType, discountValue }) => {
 		const offer = await prisma.offer.findUniqueOrThrow({ where: { id: offerId } });
 		await requireOrgManageAccess(offer.organizationId);
-		if (offer.finalizedAt) throw new Error('This offer is finalized and immutable');
+		if (offer.finalizedAt) appError(409, 'offer_immutable');
 
 		await prisma.offer.update({
 			where: { id: offerId },
@@ -1043,7 +1048,7 @@ const updateOfferCustomerSchema = v.object({
 export const updateOfferCustomer = command(updateOfferCustomerSchema, async (data) => {
 	const offer = await prisma.offer.findUniqueOrThrow({ where: { id: data.offerId } });
 	await requireOrgManageAccess(offer.organizationId);
-	if (offer.finalizedAt) throw new Error('This offer is finalized and immutable');
+	if (offer.finalizedAt) appError(409, 'offer_immutable');
 	const customer = data.customerId
 		? await prisma.customer.findFirst({
 				where: { id: data.customerId, organizationId: offer.organizationId }
@@ -1086,7 +1091,7 @@ export const copyOfferToNewCustomer = command(copyOfferSchema, async ({ offerId,
 		where: { id: customerId, organizationId: source.organizationId },
 		include: { address: true }
 	});
-	if (!customer) throw new Error('Customer not found');
+	if (!customer) appError(404, 'customer_not_found');
 
 	const newOffer = await prisma.$transaction(async (tx) => {
 		return tx.offer.create({
@@ -1147,11 +1152,11 @@ export const deleteOffer = command(v.string(), async (offerId: string) => {
 		include: { _count: { select: { invoices: true } } }
 	});
 	await requireOrgManageAccess(offer.organizationId);
-	if (offer._count.invoices > 0) throw new Error('An invoice was created from this offer');
+	if (offer._count.invoices > 0) appError(409, 'offer_has_invoice');
 	// A finalized offer is an issued commercial letter with an archived PDF —
 	// GoBD retention applies to it just as to an invoice, so it cannot be
 	// deleted (deleting a finalized offer would also shred that archive).
-	if (offer.finalizedAt) throw new Error('A finalized offer cannot be deleted');
+	if (offer.finalizedAt) appError(409, 'offer_finalized_no_delete');
 	await prisma.offer.delete({ where: { id: offerId } });
 	await getOffers().refresh();
 });
@@ -1162,7 +1167,7 @@ export const finalizeOffer = command(v.string(), async (offerId: string) => {
 		include: { items: { orderBy: { createdAt: 'asc' } } }
 	});
 	await requireOrgManageAccess(offer.organizationId);
-	if (offer.finalizedAt) throw new Error('This offer has already been finalized');
+	if (offer.finalizedAt) appError(409, 'offer_already_finalized');
 	const pdfPath = `billing-documents/${offer.organizationId}/offers/${offer.id}.pdf`;
 	// The PDF renders from the offer's own org snapshot, never the live org —
 	// what is archived is what the document said, not what the org looks like
@@ -1178,7 +1183,7 @@ export const finalizeOffer = command(v.string(), async (offerId: string) => {
 		where: { id: offerId, finalizedAt: null },
 		data: { finalizedAt: new Date(), pdfPath }
 	});
-	if (count === 0) throw new Error('This offer has already been finalized');
+	if (count === 0) appError(409, 'offer_already_finalized');
 	await getOffer(offerId).refresh();
 	await getOffers().refresh();
 	await getOfferVersions(offerId).refresh();
@@ -1200,11 +1205,11 @@ export const createOfferRevision = command(v.string(), async (offerId: string) =
 		}
 	});
 	await requireOrgManageAccess(source.organizationId);
-	if (!source.finalizedAt) throw new Error('A draft offer can still be edited directly');
+	if (!source.finalizedAt) appError(409, 'offer_draft_no_revision');
 	const family = await loadOfferFamily(source);
-	if (family.invoiced) throw new Error('An invoice was already created from this offer');
+	if (family.invoiced) appError(409, 'offer_has_invoice');
 	if (family.latest.id !== source.id) {
-		throw new Error(`${family.latest.number} is already the current version of this offer`);
+		appError(409, 'offer_already_current', [family.latest.number]);
 	}
 
 	const items = source.productionId
@@ -1289,21 +1294,20 @@ export const convertOfferToInvoice = command(convertOfferSchema, async ({ offerI
 		}
 	});
 	await requireOrgManageAccess(offer.organizationId);
-	if (!offer.finalizedAt || !offer.pdfPath)
-		throw new Error('Finalize the offer before creating an invoice');
+	if (!offer.finalizedAt || !offer.pdfPath) appError(409, 'offer_not_finalized');
 	const family = await loadOfferFamily(offer);
-	if (family.invoiced) throw new Error('An invoice was already created from this offer');
+	if (family.invoiced) appError(409, 'offer_has_invoice');
 	// A superseded version is what the customer was sent before; billing it
 	// would bill terms the offer no longer stands by.
 	if (family.latest.id !== offer.id) {
-		throw new Error(`Only the current version, ${family.latest.number}, can be invoiced`);
+		appError(409, 'offer_not_current_version', [family.latest.number]);
 	}
 
 	const clash = await prisma.invoice.findUnique({
 		where: { organizationId_number: { organizationId: offer.organizationId, number } },
 		select: { id: true }
 	});
-	if (clash) error(409, `Invoice number "${number}" is already taken in this organisation`);
+	if (clash) appError(409, 'invoice_number_taken', [number]);
 
 	const invoice = await prisma.$transaction(async (tx) => {
 		return tx.invoice.create({
@@ -1432,7 +1436,7 @@ export const getInvoice = query(v.string(), async (id: string) => {
 	});
 	const orgIds = await userOrgIds(user.id);
 	if (!(await isSystemAdmin(user.id)) && !orgIds.includes(invoice.organizationId)) {
-		throw new Error('Unauthorized');
+		appError(403, 'unauthorized');
 	}
 	return invoice;
 });
@@ -1445,7 +1449,7 @@ export const getInvoicesForProduction = query(v.string(), async (productionId: s
 	});
 	const orgIds = await userOrgIds(user.id);
 	if (!(await isSystemAdmin(user.id)) && !orgIds.includes(production.organizationId)) {
-		throw new Error('Unauthorized');
+		appError(403, 'unauthorized');
 	}
 	return prisma.invoice.findMany({
 		where: { productionId },
@@ -1465,7 +1469,7 @@ export const getInvoiceStaleness = query(v.string(), async (invoiceId: string) =
 	});
 	const orgIds = await userOrgIds(user.id);
 	if (!(await isSystemAdmin(user.id)) && !orgIds.includes(invoice.organizationId)) {
-		throw new Error('Unauthorized');
+		appError(403, 'unauthorized');
 	}
 
 	if (invoice.sentAt || !invoice.productionId) {
@@ -1539,10 +1543,10 @@ export const updateInvoiceItemsFromProduction = command(v.string(), async (invoi
 	await requireOrgManageAccess(invoice.organizationId);
 
 	if (invoice.sentAt) {
-		throw new Error('This invoice has been sent and is immutable');
+		appError(409, 'invoice_immutable');
 	}
 	if (!invoice.productionId) {
-		throw new Error('This invoice is not linked to a production');
+		appError(409, 'invoice_no_production');
 	}
 
 	const lines = await computeProductionBillingLines(invoice.productionId, invoice.assetScope);
@@ -1567,7 +1571,7 @@ export const finalizeInvoice = command(v.string(), async (invoiceId: string) => 
 	await requireOrgManageAccess(invoice.organizationId);
 
 	if (invoice.pdfPath) {
-		throw new Error('This invoice has already been finalized');
+		appError(409, 'invoice_already_finalized');
 	}
 	const pdfPath = `billing-documents/${invoice.organizationId}/invoices/${invoice.id}.pdf`;
 	// Renders from the invoice's own org snapshot — see finalizeOffer.
@@ -1582,7 +1586,7 @@ export const finalizeInvoice = command(v.string(), async (invoiceId: string) => 
 		where: { id: invoiceId, pdfPath: null },
 		data: { sentAt: invoice.sentAt ?? new Date(), pdfPath }
 	});
-	if (count === 0) throw new Error('This invoice has already been finalized');
+	if (count === 0) appError(409, 'invoice_already_finalized');
 
 	await getInvoice(invoiceId).refresh();
 	await getInvoices().refresh();
@@ -1600,13 +1604,12 @@ export const updateInvoiceNumber = command(
 	async ({ invoiceId, number }) => {
 		const invoice = await prisma.invoice.findUniqueOrThrow({ where: { id: invoiceId } });
 		await requireOrgManageAccess(invoice.organizationId);
-		if (invoice.sentAt) throw new Error('This invoice has been sent and is immutable');
+		if (invoice.sentAt) appError(409, 'invoice_immutable');
 		const clash = await prisma.invoice.findUnique({
 			where: { organizationId_number: { organizationId: invoice.organizationId, number } },
 			select: { id: true }
 		});
-		if (clash && clash.id !== invoiceId)
-			error(409, `Invoice number "${number}" is already taken in this organisation`);
+		if (clash && clash.id !== invoiceId) appError(409, 'invoice_number_taken', [number]);
 
 		await prisma.invoice.update({ where: { id: invoiceId }, data: { number } });
 		await getInvoice(invoiceId).refresh();
@@ -1630,7 +1633,7 @@ export const updateDocumentOrgSnapshot = command(updateDocumentOrgSnapshotSchema
 			include: { organization: { include: { address: true } } }
 		});
 		await requireOrgManageAccess(offer.organizationId);
-		if (offer.finalizedAt) throw new Error('This offer is finalized and immutable');
+		if (offer.finalizedAt) appError(409, 'offer_immutable');
 		const snapshot = orgSnapshotColumns(offer.organization);
 		await prisma.offer.update({
 			where: { id: data.id },
@@ -1647,7 +1650,7 @@ export const updateDocumentOrgSnapshot = command(updateDocumentOrgSnapshotSchema
 			include: { organization: { include: { address: true } } }
 		});
 		await requireOrgManageAccess(invoice.organizationId);
-		if (invoice.sentAt) throw new Error('This invoice has been sent and is immutable');
+		if (invoice.sentAt) appError(409, 'invoice_immutable');
 		const snapshot = orgSnapshotColumns(invoice.organization);
 		await prisma.invoice.update({
 			where: { id: data.id },
@@ -1663,7 +1666,7 @@ export const updateDocumentOrgSnapshot = command(updateDocumentOrgSnapshotSchema
 export const deleteInvoice = command(v.string(), async (invoiceId: string) => {
 	const invoice = await prisma.invoice.findUniqueOrThrow({ where: { id: invoiceId } });
 	await requireOrgManageAccess(invoice.organizationId);
-	if (invoice.sentAt) throw new Error('A finalized invoice cannot be deleted');
+	if (invoice.sentAt) appError(409, 'invoice_finalized_no_delete');
 	await prisma.invoice.delete({ where: { id: invoiceId } });
 	await getInvoices().refresh();
 	if (invoice.offerId) await getOffer(invoice.offerId).refresh();
@@ -1680,7 +1683,7 @@ export const updateInvoiceDayCount = command(
 		});
 		await requireOrgManageAccess(invoice.organizationId);
 		if (invoice.sentAt) {
-			throw new Error('This invoice has been sent and is immutable');
+			appError(409, 'invoice_immutable');
 		}
 
 		await prisma.$transaction([
@@ -1713,12 +1716,12 @@ export const updateInvoiceItemRate = command(
 			where: { id: { in: invoiceItemIds } },
 			include: { invoice: true }
 		});
-		if (items.length === 0) error(404, 'No invoice lines found');
+		if (items.length === 0) appError(404, 'invoice_lines_not_found');
 		const invoiceIds = [...new Set(items.map((i) => i.invoiceId))];
-		if (invoiceIds.length > 1) error(400, 'Lines belong to different invoices');
+		if (invoiceIds.length > 1) appError(400, 'invoice_lines_mixed');
 		await requireOrgManageAccess(items[0].invoice.organizationId);
 		if (items[0].invoice.sentAt) {
-			throw new Error('This invoice has been sent and is immutable');
+			appError(409, 'invoice_immutable');
 		}
 
 		await prisma.$transaction(
@@ -1747,7 +1750,7 @@ export const updateInvoiceDiscount = command(
 		const invoice = await prisma.invoice.findUniqueOrThrow({ where: { id: invoiceId } });
 		await requireOrgManageAccess(invoice.organizationId);
 		if (invoice.sentAt) {
-			throw new Error('This invoice has been sent and is immutable');
+			appError(409, 'invoice_immutable');
 		}
 
 		await prisma.invoice.update({
@@ -1775,7 +1778,7 @@ export const updateInvoiceCustomer = command(updateInvoiceCustomerSchema, async 
 	const invoice = await prisma.invoice.findUniqueOrThrow({ where: { id: data.invoiceId } });
 	await requireOrgManageAccess(invoice.organizationId);
 	if (invoice.sentAt) {
-		throw new Error('This invoice has been sent and is immutable');
+		appError(409, 'invoice_immutable');
 	}
 	const customer = data.customerId
 		? await prisma.customer.findFirst({
@@ -1813,7 +1816,7 @@ export const updateDocumentText = command(updateDocumentTextSchema, async (data)
 	if (data.kind === 'offer') {
 		const offer = await prisma.offer.findUniqueOrThrow({ where: { id: data.id } });
 		await requireOrgManageAccess(offer.organizationId);
-		if (offer.finalizedAt) throw new Error('This offer is finalized and immutable');
+		if (offer.finalizedAt) appError(409, 'offer_immutable');
 		await prisma.offer.update({
 			where: { id: data.id },
 			data: {
@@ -1826,7 +1829,7 @@ export const updateDocumentText = command(updateDocumentTextSchema, async (data)
 	} else {
 		const invoice = await prisma.invoice.findUniqueOrThrow({ where: { id: data.id } });
 		await requireOrgManageAccess(invoice.organizationId);
-		if (invoice.sentAt) throw new Error('This invoice has been sent and is immutable');
+		if (invoice.sentAt) appError(409, 'invoice_immutable');
 		await prisma.invoice.update({
 			where: { id: data.id },
 			data: {

@@ -94,7 +94,9 @@
 		A picture is worth more than the name here — a connector is quicker to recognise than to read.
 	{/snippet}
 
-	<ConnectorFields bind:value={draft} {idPrefix} />
+	{#snippet children()}
+		<ConnectorFields bind:value={draft} {idPrefix} />
+	{/snippet}
 
 	{#snippet footer()}
 		<Button icon="close" type="button" variant="outline" onclick={() => (open = false)}

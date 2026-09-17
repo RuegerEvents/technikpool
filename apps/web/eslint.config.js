@@ -42,8 +42,14 @@ export default defineConfig(
 		}
 	},
 	{
-		// Override or add rule settings here, such as:
-		// 'svelte/button-has-type': 'error'
-		rules: {}
+		rules: {
+			// A `{#snippet children()}` wrapper is redundant to Svelte — and load-bearing to
+			// wuchale. Extraction of a component's children stops at the first {#snippet}, so
+			// plain markup beside one (a dialog body next to `description`/`footer`) is dropped
+			// from the catalogues without a warning. Wrapping the body makes every child a
+			// block, which is the only form that survives regardless of order. See the i18n
+			// section of CLAUDE.md.
+			'svelte/no-useless-children-snippet': 'off'
+		}
 	}
 );

@@ -137,19 +137,21 @@
 		{#snippet description()}
 			How many of the {m.pg.items.length} units do you want to {m.action}?
 		{/snippet}
-		<div class="flex items-center gap-3">
-			<input
-				type="number"
-				min="1"
-				max={m.pg.items.length}
-				bind:value={m.count}
-				oninput={(e) => {
-					m.count = Math.min(Math.max(1, +e.currentTarget.value), m.pg.items.length);
-				}}
-				class="w-24 rounded-md border border-input bg-background px-3 py-2 text-center text-sm focus:ring-1 focus:ring-ring focus:outline-none"
-			/>
-			<span class="text-sm text-muted-foreground">of {m.pg.items.length}</span>
-		</div>
+		{#snippet children()}
+			<div class="flex items-center gap-3">
+				<input
+					type="number"
+					min="1"
+					max={m.pg.items.length}
+					bind:value={m.count}
+					oninput={(e) => {
+						m.count = Math.min(Math.max(1, +e.currentTarget.value), m.pg.items.length);
+					}}
+					class="w-24 rounded-md border border-input bg-background px-3 py-2 text-center text-sm focus:ring-1 focus:ring-ring focus:outline-none"
+				/>
+				<span class="text-sm text-muted-foreground">of {m.pg.items.length}</span>
+			</div>
+		{/snippet}
 		{#snippet footer()}
 			<Button icon="close" variant="outline" onclick={() => (modal = null)}>Cancel</Button>
 			<Button variant={m.action === 'approve' ? 'default' : 'destructive'} onclick={confirmModal}>

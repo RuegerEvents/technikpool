@@ -161,13 +161,15 @@
 	{#snippet description()}
 		{editingId ? 'Rename it or correct its address.' : 'Add a new storage or pickup location.'}
 	{/snippet}
-	<form id="location-form" class="space-y-4" onsubmit={handleSubmit}>
-		<div class="space-y-2">
-			<Label for="loc-name">Name</Label>
-			<Input id="loc-name" bind:value={formName} placeholder="e.g. Warehouse" required />
-		</div>
-		<AddressInput bind:value={formAddress} idPrefix="loc" />
-	</form>
+	{#snippet children()}
+		<form id="location-form" class="space-y-4" onsubmit={handleSubmit}>
+			<div class="space-y-2">
+				<Label for="loc-name">Name</Label>
+				<Input id="loc-name" bind:value={formName} placeholder="e.g. Warehouse" required />
+			</div>
+			<AddressInput bind:value={formAddress} idPrefix="loc" />
+		</form>
+	{/snippet}
 	{#snippet footer()}
 		<Button
 			icon="close"

@@ -10,7 +10,8 @@
 		deleteOrg,
 		removeUserFromOrg,
 		updateMemberRole,
-		updateOrg
+		updateOrg,
+		getOrgIdentityInUse
 	} from '$lib/remote/orgs.remote';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
@@ -18,6 +19,7 @@
 	import { resolve } from '$app/paths';
 	import { OrgBadge } from '$lib/components/ui/org-badge';
 	import { Modal } from '$lib/components/ui/modal';
+	import { orgIdentityProblem } from '$lib/org-identity.svelte';
 	import {
 		DEFAULT_INVOICE_CLOSING,
 		DEFAULT_INVOICE_INTRO,
@@ -29,6 +31,9 @@
 
 	const orgId = $derived(page.params.id as string);
 	let org = $derived(await getOrgWithMembers(orgId));
+
+	// Colour, label and prefix are unique across every org — this org's own values don't count.
+	let identityInUse = $derived((await getOrgIdentityInUse()).filter((o) => o.id !== orgId));
 
 	let myMembership = $derived(org.members.find((m) => m.userId === data.user?.id));
 	let canManage = $derived(myMembership?.role === 'OWNER' || data.isAdmin);
@@ -111,6 +116,14 @@
 
 	async function handleSettingsSave(e: Event) {
 		e.preventDefault();
+		const problem = orgIdentityProblem(
+			{ color: colorDraft, avatarLabel: avatarLabelDraft, assetIdPrefix: prefixDraft },
+			identityInUse
+		);
+		if (problem) {
+			toast.error(problem);
+			return;
+		}
 		savingSettings = true;
 		try {
 			await updateOrg({
@@ -697,9 +710,11 @@
 		This permanently deletes the organization and all of its locations, assets, productions, offers,
 		and invoices.
 	{/snippet}
-	<p class="text-sm">
-		Delete <span class="font-medium">{org.name}</span> and all of its data?
-	</p>
+	{#snippet children()}
+		<p class="text-sm">
+			Delete <span class="font-medium">{org.name}</span> and all of its data?
+		</p>
+	{/snippet}
 	{#snippet footer()}
 		<Button icon="close" variant="outline" onclick={() => (deleteOpen = false)} disabled={deleting}
 			>Cancel</Button

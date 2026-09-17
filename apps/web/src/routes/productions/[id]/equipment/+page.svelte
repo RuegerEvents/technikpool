@@ -524,57 +524,64 @@
 							>
 						{/if}
 					{/snippet}
-					<div class="mb-1.5 flex gap-1">
-						<button
-							type="button"
-							onclick={() => (locMode = 'locations')}
-							class="flex-1 rounded-md border px-2 py-1 text-xs font-medium {locMode === 'locations'
-								? 'border-primary text-primary'
-								: ''}"
-						>
-							Locations
-						</button>
-						<button
-							type="button"
-							onclick={() => (locMode = 'city')}
-							class="flex-1 rounded-md border px-2 py-1 text-xs font-medium {locMode === 'city'
-								? 'border-primary text-primary'
-								: ''}"
-						>
-							City
-						</button>
-					</div>
-					{#if locMode === 'locations'}
-						{#each locations as loc (loc.id)}
-							<label class="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent">
-								<input
-									type="checkbox"
-									checked={selectedLocs.has(loc.id)}
-									onchange={() => {
-										if (selectedLocs.has(loc.id)) selectedLocs.delete(loc.id);
-										else selectedLocs.add(loc.id);
-									}}
-									class="h-4 w-4 rounded border-input"
-								/>
-								{loc.name}
-							</label>
-						{/each}
-					{:else}
-						{#each cities as city (city)}
-							<label class="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent">
-								<input
-									type="checkbox"
-									checked={selectedCities.has(city)}
-									onchange={() => {
-										if (selectedCities.has(city)) selectedCities.delete(city);
-										else selectedCities.add(city);
-									}}
-									class="h-4 w-4 rounded border-input"
-								/>
-								{city}
-							</label>
-						{/each}
-					{/if}
+					{#snippet children()}
+						<div class="mb-1.5 flex gap-1">
+							<button
+								type="button"
+								onclick={() => (locMode = 'locations')}
+								class="flex-1 rounded-md border px-2 py-1 text-xs font-medium {locMode ===
+								'locations'
+									? 'border-primary text-primary'
+									: ''}"
+							>
+								Locations
+							</button>
+							<button
+								type="button"
+								onclick={() => (locMode = 'city')}
+								class="flex-1 rounded-md border px-2 py-1 text-xs font-medium {locMode === 'city'
+									? 'border-primary text-primary'
+									: ''}"
+							>
+								City
+							</button>
+						</div>
+						{#if locMode === 'locations'}
+							{#each locations as loc (loc.id)}
+								<label
+									class="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
+								>
+									<input
+										type="checkbox"
+										checked={selectedLocs.has(loc.id)}
+										onchange={() => {
+											if (selectedLocs.has(loc.id)) selectedLocs.delete(loc.id);
+											else selectedLocs.add(loc.id);
+										}}
+										class="h-4 w-4 rounded border-input"
+									/>
+									{loc.name}
+								</label>
+							{/each}
+						{:else}
+							{#each cities as city (city)}
+								<label
+									class="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
+								>
+									<input
+										type="checkbox"
+										checked={selectedCities.has(city)}
+										onchange={() => {
+											if (selectedCities.has(city)) selectedCities.delete(city);
+											else selectedCities.add(city);
+										}}
+										class="h-4 w-4 rounded border-input"
+									/>
+									{city}
+								</label>
+							{/each}
+						{/if}
+					{/snippet}
 				</FilterPopover>
 			</div>
 			<div class="max-h-96 overflow-y-auto lg:max-h-none lg:flex-1">

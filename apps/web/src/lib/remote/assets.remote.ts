@@ -1,5 +1,4 @@
 import { query, command } from '$app/server';
-import { error } from '@sveltejs/kit';
 import { prisma } from '$lib/server/auth';
 import type { Prisma } from '$lib/prisma/client';
 import * as v from 'valibot';
@@ -25,6 +24,7 @@ import { getProduction } from '$lib/remote/productions.remote';
 import { CABLE_TYPE_DEFAULTS, CABLE_TYPE_SUGGESTIONS, isCable, normalizeCable } from '$lib/cable';
 import { ensureConnectors } from '$lib/server/services/connectors';
 import { getConnectors } from '$lib/remote/connectors.remote';
+import { appError } from '$lib/errors';
 
 async function ensureBundleImageWithoutBreakingRead(
 	bundle: Parameters<typeof ensureBundleImage>[0]
@@ -145,7 +145,7 @@ export const getAsset = query(v.string(), async (assetId: string) => {
 	});
 
 	if (!systemAdmin && !orgIds.includes(asset.organizationId)) {
-		throw new Error('Unauthorized');
+		appError(403, 'unauthorized');
 	}
 
 	await ensureAssetImageWithoutBreakingRead(asset);
@@ -204,12 +204,12 @@ const updateManufacturerSchema = v.object({
 export const updateManufacturer = command(updateManufacturerSchema, async (input) => {
 	const user = await requireSystemAdmin();
 	const name = input.name.trim();
-	if (!name) error(400, 'A manufacturer needs a name');
+	if (!name) appError(400, 'manufacturer_name_required');
 	const clash = await prisma.manufacturer.findFirst({
 		where: { name: { equals: name, mode: 'insensitive' }, id: { not: input.manufacturerId } },
 		select: { id: true }
 	});
-	if (clash) error(409, 'A manufacturer with this name already exists. Merge them instead.');
+	if (clash) appError(409, 'manufacturer_exists');
 	const previous = await prisma.manufacturer.findUniqueOrThrow({
 		where: { id: input.manufacturerId },
 		select: { name: true, generic: true }
@@ -245,7 +245,7 @@ export const mergeManufacturers = command(
 	async ({ targetManufacturerId, sourceManufacturerId }) => {
 		const user = await requireSystemAdmin();
 		if (targetManufacturerId === sourceManufacturerId) {
-			error(409, 'A manufacturer cannot be merged into itself');
+			appError(409, 'manufacturer_merge_self');
 		}
 		const [target, source] = await Promise.all([
 			prisma.manufacturer.findUniqueOrThrow({ where: { id: targetManufacturerId } }),
@@ -311,7 +311,7 @@ const updateCategorySchema = v.object({
  */
 export const updateCategory = command(updateCategorySchema, async (input) => {
 	const user = await requireAuth();
-	if (!(await isSystemAdmin(user.id))) error(403, 'Admin access required');
+	if (!(await isSystemAdmin(user.id))) appError(403, 'admin_required');
 
 	const data: {
 		name?: string;
@@ -322,12 +322,12 @@ export const updateCategory = command(updateCategorySchema, async (input) => {
 	} = {};
 	if ('name' in input) {
 		const name = input.name?.trim();
-		if (!name) error(400, 'A category needs an English name');
+		if (!name) appError(400, 'category_name_required');
 		const clash = await prisma.category.findFirst({
 			where: { name, id: { not: input.categoryId } },
 			select: { id: true }
 		});
-		if (clash) error(409, `Another category is already called "${name}"`);
+		if (clash) appError(409, 'category_exists', [name]);
 		data.name = name;
 	}
 	if ('nameDe' in input) data.nameDe = input.nameDe?.trim() || null;
@@ -394,7 +394,7 @@ export const createLocation = command(createLocationSchema, async (input) => {
 			}
 		});
 		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-			throw new Error('Unauthorized');
+			appError(403, 'unauthorized');
 		}
 	}
 
@@ -445,7 +445,7 @@ export const updateLocation = command(updateLocationSchema, async (input) => {
 			}
 		});
 		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-			throw new Error('Unauthorized');
+			appError(403, 'unauthorized');
 		}
 	}
 
@@ -692,7 +692,7 @@ async function resolveProductRef(data: ProductRef, organizationId: string): Prom
 	}
 
 	if (data.newProductName && !productId && manufacturerId) {
-		if (!data.categoryId) throw new Error('Category is required when creating a new product');
+		if (!data.categoryId) appError(400, 'category_required');
 		await prisma.category.findUniqueOrThrow({ where: { id: data.categoryId } });
 		const p = await prisma.product.create({
 			data: {
@@ -726,7 +726,7 @@ async function resolveProductRef(data: ProductRef, organizationId: string): Prom
 		}
 	}
 
-	if (!productId) throw new Error('Product is required');
+	if (!productId) appError(400, 'product_required');
 	return productId;
 }
 
@@ -759,7 +759,7 @@ async function assertOrgAssetAdmin(userId: string, organizationId: string) {
 		where: { userId_organizationId: { userId, organizationId } }
 	});
 	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		throw new Error('Unauthorized to create assets in this org');
+		appError(403, 'asset_create_forbidden');
 	}
 }
 
@@ -819,8 +819,7 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 				resolvedTag = null;
 			} else if (unit.assetTag?.trim()) {
 				const tag = unit.assetTag.trim();
-				if (!tag.startsWith(prefix))
-					throw new Error(`Asset tag "${tag}" must start with org prefix "${prefix}"`);
+				if (!tag.startsWith(prefix)) appError(400, 'asset_tag_prefix_mismatch', [tag, prefix]);
 				resolvedTag = tag;
 			} else {
 				resolvedTag = nextTag();
@@ -947,7 +946,7 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 	// parent-side guards are the ones from `attachAccessory`; the child-side ones
 	// can't fail for a unit that is being created here and now.
 	if (data.parentAssetId && data.bundleId) {
-		error(400, 'An accessory is in whatever kit its parent is in — pass one or the other');
+		appError(400, 'accessory_bundle_conflict');
 	}
 
 	const parent = data.parentAssetId
@@ -968,13 +967,13 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 		: null;
 	if (parent) {
 		if (parent.organizationId !== data.organizationId) {
-			error(409, 'An accessory has to belong to the same organisation as what it is attached to');
+			appError(409, 'accessory_org_mismatch');
 		}
 		if (isRetiredStatus(parent.status)) {
-			error(409, 'A sold or decommissioned unit cannot have accessories attached to it');
+			appError(409, 'asset_retired_no_accessories');
 		}
 		if (parent.parentAssetId) {
-			error(409, 'That unit is itself an accessory — accessories are one level deep');
+			appError(409, 'accessory_nested');
 		}
 	}
 
@@ -988,12 +987,12 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 			})
 		: null;
 	if (bundle && bundle.template.organizationId !== data.organizationId) {
-		error(409, 'That bundle belongs to a different organisation');
+		appError(409, 'bundle_org_mismatch');
 	}
 
 	const locationId = parent?.locationId ?? bundle?.locationId ?? data.locationId;
 	const location = await prisma.location.findUniqueOrThrow({ where: { id: locationId } });
-	if (location.organizationId !== data.organizationId) throw new Error('Invalid location');
+	if (location.organizationId !== data.organizationId) appError(400, 'location_invalid');
 
 	// What the org's other units of this product already carry. Read before the
 	// transaction opens, so it describes the fleet as it was — the units being
@@ -1085,7 +1084,7 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 	await assertOrgAssetAdmin(user.id, data.organizationId);
 
 	const location = await prisma.location.findUniqueOrThrow({ where: { id: data.locationId } });
-	if (location.organizationId !== data.organizationId) throw new Error('Invalid location');
+	if (location.organizationId !== data.organizationId) appError(400, 'location_invalid');
 
 	let genericManufacturerId: string | null = null;
 	if (data.rows.some((row) => row.manufacturerId === null)) {
@@ -1109,10 +1108,10 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 	for (const row of data.rows) {
 		const cable = normalizeCable(row);
 		const manufacturerId = row.manufacturerId ?? genericManufacturerId;
-		if (!manufacturerId) throw new Error('Manufacturer is required');
+		if (!manufacturerId) appError(400, 'manufacturer_required');
 
 		if (!isCable(cable)) {
-			error(400, `"${row.name}" says nothing about the cable — add ends, a length or a type.`);
+			appError(400, 'cable_row_incomplete', [row.name]);
 		}
 
 		const key = [
@@ -1215,7 +1214,7 @@ export const getAssetHistory = query(v.string(), async (assetId: string) => {
 		select: { organizationId: true }
 	});
 	if (!systemAdmin && !orgIds.includes(asset.organizationId)) {
-		throw new Error('Unauthorized');
+		appError(403, 'unauthorized');
 	}
 
 	return await prisma.assetTransaction.findMany({
@@ -1259,7 +1258,7 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 			}
 		});
 		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-			throw new Error('Unauthorized');
+			appError(403, 'unauthorized');
 		}
 	}
 
@@ -1268,7 +1267,7 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 	const nextStatus = input.status;
 	const editedFields = Object.keys(input).filter((k) => k !== 'assetId' && k !== 'status');
 	if (isRetiredStatus(asset.status) && editedFields.length > 0) {
-		throw new Error('This asset is sold or decommissioned — only its status can be changed');
+		appError(409, 'asset_retired_status_only');
 	}
 
 	const retiring = !!nextStatus && isRetiredStatus(nextStatus) && !isRetiredStatus(asset.status);
@@ -1278,9 +1277,7 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 			include: { production: { select: { name: true } } }
 		});
 		if (openItem) {
-			throw new Error(
-				`Asset is still booked for "${openItem.production.name}" — remove it there first`
-			);
+			appError(409, 'asset_still_booked', [openItem.production.name]);
 		}
 	}
 
@@ -1288,10 +1285,10 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 	if ('locationId' in input) {
 		if (input.locationId) {
 			const loc = await prisma.location.findUniqueOrThrow({ where: { id: input.locationId } });
-			if (loc.organizationId !== asset.organizationId) throw new Error('Invalid location');
+			if (loc.organizationId !== asset.organizationId) appError(400, 'location_invalid');
 			nextLocation = loc;
 		} else {
-			throw new Error('Location is required');
+			appError(400, 'location_required');
 		}
 	}
 
@@ -1458,7 +1455,7 @@ export const bulkUpdateAssetStatus = command(bulkUpdateAssetStatusSchema, async 
 			bundle: { select: { template: { select: { name: true } } } }
 		}
 	});
-	if (assets.length === 0) error(404, 'No assets found');
+	if (assets.length === 0) appError(404, 'assets_not_found');
 
 	const organizationIds = [...new Set(assets.map((a) => a.organizationId))];
 
@@ -1472,7 +1469,7 @@ export const bulkUpdateAssetStatus = command(bulkUpdateAssetStatusSchema, async 
 			select: { organizationId: true }
 		});
 		const allowed = new Set(memberships.map((m) => m.organizationId));
-		if (organizationIds.some((id) => !allowed.has(id))) error(403, 'Unauthorized');
+		if (organizationIds.some((id) => !allowed.has(id))) appError(403, 'unauthorized');
 	}
 
 	const changing = assets.filter((a) => a.status !== input.status);
@@ -1496,12 +1493,8 @@ export const bulkUpdateAssetStatus = command(bulkUpdateAssetStatusSchema, async 
 				.map((n) => `"${n}"`)
 				.join(', ');
 			const list = names.length > 3 ? `${shown}, …` : shown;
-			error(
-				409,
-				blocked === 1
-					? `One asset is still booked for ${list} — remove it there first`
-					: `${blocked} assets are still booked (${list}) — remove them there first`
-			);
+			if (blocked === 1) appError(409, 'assets_still_booked_one', [list]);
+			appError(409, 'assets_still_booked_many', [blocked, list]);
 		}
 	}
 
@@ -1611,11 +1604,10 @@ export const bulkUpdateAssetStatus = command(bulkUpdateAssetStatusSchema, async 
 // they reference an asset by id with no foreign key at all, so nothing but this
 // would stop a delete from orphaning a line on an issued invoice.
 
-// The guards below use SvelteKit's `error()` rather than `throw new Error()`
-// like the rest of this file. A plain Error from a remote function never
-// reaches the browser — SvelteKit replaces it with "Internal Error" — and here
-// the message *is* the feature: it names which kind of history is in the way
-// and points at decommissioning instead.
+// Like every other failure here, the guards below go through `appError`: a plain
+// Error from a remote function never reaches the browser — SvelteKit replaces it
+// with "Internal Error" — and here the message *is* the feature, naming which kind
+// of history is in the way and pointing at decommissioning instead.
 
 /** Actions an asset accumulates without ever leaving the shelf. */
 const UNUSED_ASSET_ACTIONS = ['CREATED', 'UPDATED'];
@@ -1633,7 +1625,7 @@ export const deleteAsset = command(v.string(), async (assetId: string) => {
 			}
 		});
 		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-			error(403, 'Unauthorized');
+			appError(403, 'unauthorized');
 		}
 	}
 
@@ -1642,22 +1634,19 @@ export const deleteAsset = command(v.string(), async (assetId: string) => {
 		include: { production: { select: { name: true } } }
 	});
 	if (booked) {
-		error(
-			409,
-			`Asset has been booked for "${booked.production.name}" — decommission it instead of deleting it`
-		);
+		appError(409, 'asset_delete_booked', [booked.production.name]);
 	}
 
 	const moved = await prisma.assetTransaction.findFirst({
 		where: { assetId, action: { notIn: UNUSED_ASSET_ACTIONS } }
 	});
 	if (moved) {
-		error(409, 'Asset has been scanned or checked out — decommission it instead of deleting it');
+		appError(409, 'asset_delete_history');
 	}
 
 	const inspected = await prisma.inspection.findFirst({ where: { assetId } });
 	if (inspected) {
-		error(409, 'Asset has an inspection on record — decommission it instead of deleting it');
+		appError(409, 'asset_delete_inspected');
 	}
 
 	// The FK is ON DELETE SET NULL, so this would succeed and quietly leave the
@@ -1665,7 +1654,7 @@ export const deleteAsset = command(v.string(), async (assetId: string) => {
 	// parent should be the one to decide where its accessories go.
 	const attached = await prisma.asset.findFirst({ where: { parentAssetId: assetId } });
 	if (attached) {
-		error(409, 'Other assets are attached to this one as accessories — detach them first');
+		appError(409, 'asset_delete_has_accessories');
 	}
 
 	const [offerLine, invoiceLine] = await Promise.all([
@@ -1673,7 +1662,7 @@ export const deleteAsset = command(v.string(), async (assetId: string) => {
 		prisma.invoiceItem.findFirst({ where: { assetId } })
 	]);
 	if (offerLine || invoiceLine) {
-		error(409, 'Asset appears on an offer or invoice — decommission it instead of deleting it');
+		appError(409, 'asset_delete_billed');
 	}
 
 	const { organizationId, bundleId, parentAssetId } = asset;
@@ -1717,7 +1706,7 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		// The message matters here: the product wizard is reachable by any member,
 		// and "Internal Error" would look like a broken save rather than a missing
 		// right.
-		error(403, 'You need admin rights in one of your organisations to edit products');
+		appError(403, 'product_edit_forbidden');
 	}
 
 	const previousProduct = await prisma.product.findUniqueOrThrow({
@@ -1775,10 +1764,7 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 				where: { id: { in: foreign } },
 				select: { name: true }
 			});
-			error(
-				403,
-				`Units of this product belong to ${orgs.map((o) => o.name).join(', ')}. Renaming or recategorizing it needs admin rights there, or a system admin.`
-			);
+			appError(403, 'product_units_other_orgs', [orgs.map((o) => o.name).join(', ')]);
 		}
 	}
 
@@ -1852,7 +1838,7 @@ export const deleteProduct = command(v.string(), async (productId: string) => {
 			select: { id: true }
 		});
 		if (!membership) {
-			error(403, 'You need admin rights in one of your organisations to delete products');
+			appError(403, 'product_delete_forbidden');
 		}
 	}
 
@@ -1861,7 +1847,7 @@ export const deleteProduct = command(v.string(), async (productId: string) => {
 		include: { manufacturer: true, _count: { select: { assets: true } } }
 	});
 	if (product._count.assets > 0) {
-		error(409, 'This product still has units. Merge it into the correct product instead.');
+		appError(409, 'product_has_units');
 	}
 
 	await prisma.product.delete({ where: { id: productId } });
@@ -1910,7 +1896,7 @@ export const mergeProducts = command(
 	mergeProductsSchema,
 	async ({ targetProductId, sourceProductId }) => {
 		const user = await requireAuth();
-		if (targetProductId === sourceProductId) error(409, 'A product cannot be merged into itself');
+		if (targetProductId === sourceProductId) appError(409, 'product_merge_self');
 
 		const [target, source] = await Promise.all([
 			prisma.product.findUniqueOrThrow({
@@ -1944,7 +1930,7 @@ export const mergeProducts = command(
 				select: { organizationId: true }
 			});
 			if (managed.length === 0) {
-				error(403, 'You need admin rights in one of your organisations to merge products');
+				appError(403, 'product_merge_forbidden');
 			}
 			// The catalogue is global — any org admin can already rename any product
 			// — but a merge moves *units*, and those belong to someone. The check is
@@ -1960,10 +1946,10 @@ export const mergeProducts = command(
 					where: { id: { in: foreign } },
 					select: { name: true }
 				});
-				error(
-					403,
-					`Units of "${source.name}" belong to ${orgs.map((o) => o.name).join(', ')}. Only a system admin can move another organisation's inventory.`
-				);
+				appError(403, 'product_merge_units_other_orgs', [
+					source.name,
+					orgs.map((o) => o.name).join(', ')
+				]);
 			}
 		}
 
@@ -2112,7 +2098,7 @@ export const setOrgProductPrice = command(
 				where: { userId_organizationId: { userId: user.id, organizationId } }
 			});
 			if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-				error(403, 'Only admins of this organisation can set its prices');
+				appError(403, 'rates_forbidden');
 			}
 		}
 		await prisma.product.findUniqueOrThrow({ where: { id: productId }, select: { id: true } });
@@ -2287,7 +2273,7 @@ export const getBundle = query(v.string(), async (id: string) => {
 
 	const orgIds = await userOrgIds(user.id);
 	if (!orgIds.includes(bundle.template.organizationId) && !(await isSystemAdmin(user.id))) {
-		throw new Error('Unauthorized');
+		appError(403, 'unauthorized');
 	}
 
 	await ensureBundleImageWithoutBreakingRead(bundle);
@@ -2311,7 +2297,7 @@ export const regenerateBundleImage = command(v.string(), async (bundleId) => {
 			}
 		}
 	});
-	if (!(await isSystemAdmin(user.id)) && !membership) error(403, 'Unauthorized');
+	if (!(await isSystemAdmin(user.id)) && !membership) appError(403, 'unauthorized');
 
 	const imagePath = await ensureBundleImage(bundle, true);
 	await Promise.all([
@@ -2332,7 +2318,7 @@ async function assertBundleTagAvailable(tag: string | null, exceptBundleId?: str
 		select: { id: true }
 	});
 	if (clash && clash.id !== exceptBundleId) {
-		throw new Error(`Tag "${tag}" is already used by another bundle`);
+		appError(409, 'bundle_tag_taken', [tag]);
 	}
 }
 
@@ -2351,7 +2337,7 @@ export const createBundleInstance = command(createBundleInstanceSchema, async (d
 		where: { userId_organizationId: { userId: user.id, organizationId: data.organizationId } }
 	});
 	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		throw new Error('Unauthorized');
+		appError(403, 'unauthorized');
 	}
 
 	// An existing template must belong to the org the caller was authorized for —
@@ -2361,14 +2347,14 @@ export const createBundleInstance = command(createBundleInstanceSchema, async (d
 			where: { id: data.templateId },
 			select: { organizationId: true }
 		});
-		if (existing.organizationId !== data.organizationId) throw new Error('Unauthorized');
+		if (existing.organizationId !== data.organizationId) appError(403, 'unauthorized');
 	}
 
 	await assertBundleTagAvailable(data.tag?.trim() || null);
 
 	let templateId = data.templateId;
 	if (data.newTemplateName && !templateId) {
-		if (!data.categoryId) throw new Error('Category is required when creating a new bundle type');
+		if (!data.categoryId) appError(400, 'bundle_category_required');
 		await prisma.category.findUniqueOrThrow({ where: { id: data.categoryId } });
 		const template = await prisma.bundleTemplate.create({
 			data: {
@@ -2383,7 +2369,7 @@ export const createBundleInstance = command(createBundleInstanceSchema, async (d
 		await getBundleTemplates().refresh();
 	}
 
-	if (!templateId) throw new Error('Bundle type is required');
+	if (!templateId) appError(400, 'bundle_type_required');
 
 	const bundle = await prisma.assetBundle.create({
 		data: {
@@ -2417,7 +2403,7 @@ export const updateBundleTemplate = command(updateBundleTemplateSchema, async (i
 		}
 	});
 	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		throw new Error('Unauthorized');
+		appError(403, 'unauthorized');
 	}
 
 	const data: { name?: string; description?: string | null; categoryId?: string } = {};
@@ -2456,7 +2442,7 @@ export const updateBundle = command(updateBundleSchema, async (input) => {
 		}
 	});
 	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		throw new Error('Unauthorized');
+		appError(403, 'unauthorized');
 	}
 
 	const data: {
@@ -2514,22 +2500,18 @@ export const addAssetToBundle = command(bundleAssetSchema, async ({ bundleId, as
 		}
 	});
 	if (isRetiredStatus(asset.status)) {
-		throw new Error('This asset is sold or decommissioned and cannot be added to a bundle');
+		appError(409, 'asset_retired_no_bundle');
 	}
 	// An accessory is in whatever kit its parent is in and no other. Both
 	// pickers leave accessories out, so this is a stale page.
 	if (asset.parentAssetId) {
-		throw new Error(
-			'This asset is an accessory — put the unit it is attached to in the bundle instead'
-		);
+		appError(409, 'bundle_accessory_member');
 	}
 	// A unit belongs to one kit at a time. Both pickers already leave bundled
 	// assets out, so reaching here means a stale page — moving it silently would
 	// take it out of the other bundle without anyone seeing.
 	if (asset.bundleId && asset.bundleId !== bundleId) {
-		throw new Error(
-			`This asset is already in the bundle "${asset.bundle?.template.name}" — remove it there first`
-		);
+		appError(409, 'asset_in_other_bundle', [asset.bundle?.template.name ?? '']);
 	}
 	const updateData: { bundleId: string; locationId?: string } = { bundleId };
 	if (bundle.locationId) updateData.locationId = bundle.locationId;
@@ -2606,20 +2588,20 @@ export const convertBundleToAccessories = command(
 				}
 			});
 			if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-				error(403, 'Unauthorized');
+				appError(403, 'unauthorized');
 			}
 		}
 
 		if (bundle.assets.length < 2) {
-			error(409, 'A bundle needs at least two devices to be converted');
+			appError(409, 'bundle_too_small');
 		}
 		const main = bundle.assets.find((asset) => asset.id === mainAssetId);
-		if (!main) error(409, 'The selected main device is not in this bundle');
+		if (!main) appError(409, 'bundle_main_not_member');
 		if (main.parentAssetId) {
-			error(409, 'The main device cannot itself be an accessory');
+			appError(409, 'bundle_main_is_accessory');
 		}
 		if (bundle.assets.some((asset) => asset.organizationId !== main.organizationId)) {
-			error(409, 'All bundle members must belong to the same organisation');
+			appError(409, 'bundle_members_org_mismatch');
 		}
 
 		const newlyAttached = bundle.assets.filter(
@@ -2830,7 +2812,7 @@ export const getProductAccessoryProfile = query(
 		const user = await requireAuth();
 		const orgIds = await userOrgIds(user.id);
 		if (!orgIds.includes(organizationId) && !(await isSystemAdmin(user.id))) {
-			throw new Error('Unauthorized');
+			appError(403, 'unauthorized');
 		}
 		return await productAccessoryProfile(productId, organizationId);
 	}
@@ -2925,13 +2907,13 @@ export const addProductAccessories = command(addProductAccessoriesSchema, async 
 			}
 		});
 		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-			error(403, 'Unauthorized');
+			appError(403, 'unauthorized');
 		}
 	}
 
 	const accessoryProductId = await resolveProductRef(data, data.organizationId);
 	if (accessoryProductId === data.parentProductId) {
-		error(409, 'A product cannot be an accessory of itself');
+		appError(409, 'product_accessory_self');
 	}
 
 	// Only units that can hold an accessory: active, and not accessories
@@ -2957,7 +2939,7 @@ export const addProductAccessories = command(addProductAccessoriesSchema, async 
 		},
 		orderBy: ASSET_ORDER_BY
 	});
-	if (units.length === 0) error(409, 'This organisation has no units of that product');
+	if (units.length === 0) appError(409, 'product_no_units_in_org');
 
 	const todo = units
 		.map((unit) => ({ unit, missing: data.perUnit - unit.accessories.length }))
@@ -3030,7 +3012,7 @@ export const attachAccessory = command(accessoryLinkSchema, async ({ parentId, a
 	const user = await requireAuth();
 	const systemAdmin = await isSystemAdmin(user.id);
 
-	if (parentId === assetId) error(400, 'An asset cannot be its own accessory');
+	if (parentId === assetId) appError(400, 'accessory_self');
 
 	const labelInclude = {
 		assetTag: true,
@@ -3073,33 +3055,30 @@ export const attachAccessory = command(accessoryLinkSchema, async ({ parentId, a
 			}
 		});
 		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-			error(403, 'Unauthorized');
+			appError(403, 'unauthorized');
 		}
 	}
 
 	// Rule 1 of the feature, guard by guard. Every one of these is reachable
 	// from a stale page, so each says what to do rather than just refusing.
 	if (isRetiredStatus(parent.status) || isRetiredStatus(asset.status)) {
-		error(409, 'A sold or decommissioned unit cannot be attached to anything');
+		appError(409, 'asset_retired_no_attach');
 	}
 	if (parent.organizationId !== asset.organizationId) {
-		error(409, 'An accessory has to belong to the same organisation as what it is attached to');
+		appError(409, 'accessory_org_mismatch');
 	}
 	if (parent.parentAssetId) {
-		error(409, 'That unit is itself an accessory — accessories are one level deep');
+		appError(409, 'accessory_nested');
 	}
 	if (asset.accessories.length > 0) {
-		error(409, 'That unit has accessories of its own — detach those first');
+		appError(409, 'accessory_has_accessories');
 	}
 	if (asset.parentAssetId && asset.parentAssetId !== parentId) {
-		error(409, 'That unit is already attached to another asset — detach it there first');
+		appError(409, 'accessory_already_attached');
 	}
 	// It follows the parent into a kit; it can't arrive carrying a different one.
 	if (asset.bundleId && asset.bundleId !== parent.bundleId) {
-		error(
-			409,
-			`That unit is in the bundle "${asset.bundle?.template.name}" — remove it there first`
-		);
+		appError(409, 'accessory_in_bundle', [asset.bundle?.template.name ?? '']);
 	}
 
 	await prisma.asset.update({
@@ -3151,7 +3130,7 @@ export const detachAccessory = command(v.string(), async (assetId: string) => {
 			}
 		}
 	});
-	if (!asset.parentAssetId || !asset.parent) error(409, 'That asset is not an accessory');
+	if (!asset.parentAssetId || !asset.parent) appError(409, 'not_an_accessory');
 
 	if (!systemAdmin) {
 		const membership = await prisma.orgMembership.findUnique({
@@ -3160,7 +3139,7 @@ export const detachAccessory = command(v.string(), async (assetId: string) => {
 			}
 		});
 		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-			error(403, 'Unauthorized');
+			appError(403, 'unauthorized');
 		}
 	}
 
@@ -3221,7 +3200,7 @@ export const importAssets = command(importAssetsSchema, async (data): Promise<Im
 	await assertOrgAssetAdmin(user.id, data.organizationId);
 
 	const location = await prisma.location.findUniqueOrThrow({ where: { id: data.locationId } });
-	if (location.organizationId !== data.organizationId) throw new Error('Invalid location');
+	if (location.organizationId !== data.organizationId) appError(400, 'location_invalid');
 
 	const org = await prisma.organization.findUniqueOrThrow({
 		where: { id: data.organizationId },

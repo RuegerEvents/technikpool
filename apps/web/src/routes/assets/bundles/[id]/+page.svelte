@@ -476,36 +476,38 @@
 		instance will be removed; its bundle price and tag will no longer apply. Existing bookings stay
 		intact as individual device bookings.
 	{/snippet}
-	<div class="space-y-4">
-		<fieldset class="space-y-2" aria-label="Choose main device">
-			{#each bundle.assets as asset (asset.id)}
-				<label
-					class="flex items-center gap-3 rounded-md border p-3 {asset.parentAssetId
-						? 'cursor-not-allowed opacity-50'
-						: 'cursor-pointer hover:bg-muted/40'}"
-				>
-					<input
-						type="radio"
-						name="main-device"
-						value={asset.id}
-						bind:group={mainAssetId}
-						disabled={asset.parentAssetId !== null || converting}
-					/>
-					<ProductThumb path={asset.product.imagePath} alt={asset.product.name} />
-					<span class="min-w-0">
-						<span class="block truncate font-medium">{asset.product.name}</span>
-						<span class="block text-xs text-muted-foreground">
-							{asset.product.manufacturer.name}{asset.assetTag
-								? ` · ${asset.assetTag}`
-								: ''}{#if asset.parentAssetId}
-								· already an accessory
-							{/if}
+	{#snippet children()}
+		<div class="space-y-4">
+			<fieldset class="space-y-2" aria-label="Choose main device">
+				{#each bundle.assets as asset (asset.id)}
+					<label
+						class="flex items-center gap-3 rounded-md border p-3 {asset.parentAssetId
+							? 'cursor-not-allowed opacity-50'
+							: 'cursor-pointer hover:bg-muted/40'}"
+					>
+						<input
+							type="radio"
+							name="main-device"
+							value={asset.id}
+							bind:group={mainAssetId}
+							disabled={asset.parentAssetId !== null || converting}
+						/>
+						<ProductThumb path={asset.product.imagePath} alt={asset.product.name} />
+						<span class="min-w-0">
+							<span class="block truncate font-medium">{asset.product.name}</span>
+							<span class="block text-xs text-muted-foreground">
+								{asset.product.manufacturer.name}{asset.assetTag
+									? ` · ${asset.assetTag}`
+									: ''}{#if asset.parentAssetId}
+									· already an accessory
+								{/if}
+							</span>
 						</span>
-					</span>
-				</label>
-			{/each}
-		</fieldset>
-	</div>
+					</label>
+				{/each}
+			</fieldset>
+		</div>
+	{/snippet}
 	{#snippet footer()}
 		<Button
 			icon="close"
@@ -531,91 +533,95 @@
 			Close
 		</Button>
 	{/snippet}
-	<input
-		type="search"
-		bind:value={searchQuery}
-		placeholder="Search assets…"
-		class="mb-3 h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-	/>
+	{#snippet children()}
+		<input
+			type="search"
+			bind:value={searchQuery}
+			placeholder="Search assets…"
+			class="mb-3 h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+		/>
 
-	{#if availableToAdd.length === 0}
-		<p class="text-sm text-muted-foreground">
-			{searchQuery.trim()
-				? `Nothing here matches "${searchQuery.trim()}".`
-				: 'No assets available to add.'}
-		</p>
-	{:else}
-		<div class="max-h-80 overflow-y-auto rounded-md border">
-			<table class="w-full text-sm">
-				<thead class="sticky top-0 bg-muted/80 backdrop-blur-sm">
-					<tr class="border-b">
-						<th class="px-3 py-2 text-left font-medium text-muted-foreground">Product</th>
-						<th class="px-3 py-2 text-left font-medium text-muted-foreground">S/N</th>
-						<th class="px-3 py-2 text-left font-medium text-muted-foreground">Org</th>
-						<th class="px-3 py-2"></th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each availableToAdd as asset (asset.id)}
-						<tr class="border-b bg-background last:border-0 hover:bg-muted/30">
-							<td class="px-3 py-2">
-								<div class="flex items-center gap-2">
-									<ProductThumb path={asset.product.imagePath} alt={asset.product.name} />
-									<div>
-										<p class="font-medium">{asset.product.name}</p>
-										<p class="text-xs text-muted-foreground">
-											{asset.product.manufacturer.name}
-										</p>
-									</div>
-								</div>
-							</td>
-							<td class="px-3 py-2 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
-							<td class="px-3 py-2 text-xs text-muted-foreground">{orgLabel(asset.organization)}</td
-							>
-							<td class="px-3 py-2 text-right">
-								<Button size="sm" disabled={working} onclick={() => handleAdd(asset.id)}>Add</Button
-								>
-							</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-		</div>
-	{/if}
-
-	<!-- The catalogue, under the units. Everything above is a unit standing
-	     loose in the warehouse; below is every product the system knows, so a
-	     kit short of a thing the pool has no spare of is one click from having
-	     one registered straight into it. -->
-	<p class="mt-4 mb-2 text-xs font-medium text-muted-foreground">Register a new unit of…</p>
-	{#if productMatches.length === 0}
-		{#if searchQuery.trim()}
+		{#if availableToAdd.length === 0}
 			<p class="text-sm text-muted-foreground">
-				No product matches "{searchQuery.trim()}" either.
+				{searchQuery.trim()
+					? `Nothing here matches "${searchQuery.trim()}".`
+					: 'No assets available to add.'}
 			</p>
+		{:else}
+			<div class="max-h-80 overflow-y-auto rounded-md border">
+				<table class="w-full text-sm">
+					<thead class="sticky top-0 bg-muted/80 backdrop-blur-sm">
+						<tr class="border-b">
+							<th class="px-3 py-2 text-left font-medium text-muted-foreground">Product</th>
+							<th class="px-3 py-2 text-left font-medium text-muted-foreground">S/N</th>
+							<th class="px-3 py-2 text-left font-medium text-muted-foreground">Org</th>
+							<th class="px-3 py-2"></th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each availableToAdd as asset (asset.id)}
+							<tr class="border-b bg-background last:border-0 hover:bg-muted/30">
+								<td class="px-3 py-2">
+									<div class="flex items-center gap-2">
+										<ProductThumb path={asset.product.imagePath} alt={asset.product.name} />
+										<div>
+											<p class="font-medium">{asset.product.name}</p>
+											<p class="text-xs text-muted-foreground">
+												{asset.product.manufacturer.name}
+											</p>
+										</div>
+									</div>
+								</td>
+								<td class="px-3 py-2 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
+								<td class="px-3 py-2 text-xs text-muted-foreground"
+									>{orgLabel(asset.organization)}</td
+								>
+								<td class="px-3 py-2 text-right">
+									<Button size="sm" disabled={working} onclick={() => handleAdd(asset.id)}
+										>Add</Button
+									>
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
 		{/if}
-		<Button size="sm" class="mt-3" disabled={working} onclick={openNewAsset}>
-			{searchQuery.trim() ? `Register "${searchQuery.trim()}" as a new device` : 'New device'}
-		</Button>
-	{:else}
-		<ul class="max-h-56 divide-y overflow-y-auto rounded-md border">
-			{#each productMatches as p (p.id)}
-				<li class="flex items-center gap-2 bg-background px-3 py-2">
-					<ProductThumb path={p.imagePath} alt={p.name} />
-					<div class="min-w-0 flex-1">
-						<p class="truncate text-sm font-medium">{p.name}</p>
-						<p class="text-xs text-muted-foreground">{p.manufacturer.name}</p>
-					</div>
-					<Button
-						size="sm"
-						variant="outline"
-						disabled={working}
-						onclick={() => openNewAssetOfProduct(p)}>New</Button
-					>
-				</li>
-			{/each}
-		</ul>
-	{/if}
+
+		<!-- The catalogue, under the units. Everything above is a unit standing
+		     loose in the warehouse; below is every product the system knows, so a
+		     kit short of a thing the pool has no spare of is one click from having
+		     one registered straight into it. -->
+		<p class="mt-4 mb-2 text-xs font-medium text-muted-foreground">Register a new unit of…</p>
+		{#if productMatches.length === 0}
+			{#if searchQuery.trim()}
+				<p class="text-sm text-muted-foreground">
+					No product matches "{searchQuery.trim()}" either.
+				</p>
+			{/if}
+			<Button size="sm" class="mt-3" disabled={working} onclick={openNewAsset}>
+				{searchQuery.trim() ? `Register "${searchQuery.trim()}" as a new device` : 'New device'}
+			</Button>
+		{:else}
+			<ul class="max-h-56 divide-y overflow-y-auto rounded-md border">
+				{#each productMatches as p (p.id)}
+					<li class="flex items-center gap-2 bg-background px-3 py-2">
+						<ProductThumb path={p.imagePath} alt={p.name} />
+						<div class="min-w-0 flex-1">
+							<p class="truncate text-sm font-medium">{p.name}</p>
+							<p class="text-xs text-muted-foreground">{p.manufacturer.name}</p>
+						</div>
+						<Button
+							size="sm"
+							variant="outline"
+							disabled={working}
+							onclick={() => openNewAssetOfProduct(p)}>New</Button
+						>
+					</li>
+				{/each}
+			</ul>
+		{/if}
+	{/snippet}
 </Modal>
 
 <NewAssetModal
@@ -644,61 +650,63 @@
 	{#snippet description()}
 		Name, category, pricing, and location.
 	{/snippet}
-	<form id="edit-bundle-form" class="space-y-4" onsubmit={handleBundleSave}>
-		<div class="space-y-2">
-			<Label for="name">Name</Label>
-			<Input id="name" bind:value={bundleDraft.name} />
-			<p class="text-xs text-muted-foreground">Shared with every instance of this bundle type.</p>
-		</div>
-		<div class="space-y-2">
-			<Label>Category</Label>
-			<CategorySelect {categories} bind:value={bundleDraft.categoryId} />
-		</div>
-		<div class="space-y-2">
-			<Label for="description"
-				>Description <span class="text-muted-foreground">(optional)</span></Label
-			>
-			<Input
-				id="description"
-				bind:value={bundleDraft.description}
-				placeholder="What's in this bundle?"
-			/>
-		</div>
-		<div class="space-y-2">
-			<Label for="tag">Tag <span class="text-muted-foreground">(optional)</span></Label>
-			<Input id="tag" bind:value={bundleDraft.tag} placeholder="e.g. Kit A" />
-			<p class="text-xs text-muted-foreground">
-				Distinguishes this physical instance from others of the same type.
-			</p>
-		</div>
-		<div class="space-y-2">
-			<Label for="netPurchasePrice">Net purchase price (€)</Label>
-			<Input
-				id="netPurchasePrice"
-				type="number"
-				min="0"
-				step="0.01"
-				bind:value={bundleDraft.netPurchasePrice}
-			/>
-			<p class="text-xs text-muted-foreground">Billed as one line on offers.</p>
-		</div>
-		<div class="space-y-2">
-			<Label for="location">Location</Label>
-			<select
-				id="location"
-				bind:value={bundleDraft.locationId}
-				class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-			>
-				<option value="">No location</option>
-				{#each locations as loc (loc.id)}
-					{@const city = loc.address?.city?.trim()}
-					{@const line1 = loc.address?.line1?.trim()}
-					{@const addrParts = [line1, city].filter(Boolean).join(', ')}
-					<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option>
-				{/each}
-			</select>
-		</div>
-	</form>
+	{#snippet children()}
+		<form id="edit-bundle-form" class="space-y-4" onsubmit={handleBundleSave}>
+			<div class="space-y-2">
+				<Label for="name">Name</Label>
+				<Input id="name" bind:value={bundleDraft.name} />
+				<p class="text-xs text-muted-foreground">Shared with every instance of this bundle type.</p>
+			</div>
+			<div class="space-y-2">
+				<Label>Category</Label>
+				<CategorySelect {categories} bind:value={bundleDraft.categoryId} />
+			</div>
+			<div class="space-y-2">
+				<Label for="description"
+					>Description <span class="text-muted-foreground">(optional)</span></Label
+				>
+				<Input
+					id="description"
+					bind:value={bundleDraft.description}
+					placeholder="What's in this bundle?"
+				/>
+			</div>
+			<div class="space-y-2">
+				<Label for="tag">Tag <span class="text-muted-foreground">(optional)</span></Label>
+				<Input id="tag" bind:value={bundleDraft.tag} placeholder="e.g. Kit A" />
+				<p class="text-xs text-muted-foreground">
+					Distinguishes this physical instance from others of the same type.
+				</p>
+			</div>
+			<div class="space-y-2">
+				<Label for="netPurchasePrice">Net purchase price (€)</Label>
+				<Input
+					id="netPurchasePrice"
+					type="number"
+					min="0"
+					step="0.01"
+					bind:value={bundleDraft.netPurchasePrice}
+				/>
+				<p class="text-xs text-muted-foreground">Billed as one line on offers.</p>
+			</div>
+			<div class="space-y-2">
+				<Label for="location">Location</Label>
+				<select
+					id="location"
+					bind:value={bundleDraft.locationId}
+					class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+				>
+					<option value="">No location</option>
+					{#each locations as loc (loc.id)}
+						{@const city = loc.address?.city?.trim()}
+						{@const line1 = loc.address?.line1?.trim()}
+						{@const addrParts = [line1, city].filter(Boolean).join(', ')}
+						<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option>
+					{/each}
+				</select>
+			</div>
+		</form>
+	{/snippet}
 	{#snippet footer()}
 		<Button
 			icon="close"

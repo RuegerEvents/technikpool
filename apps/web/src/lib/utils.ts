@@ -1,5 +1,7 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { errorCodeOf, errorParamsOf } from './errors';
+import { messageForErrorCode } from './error-messages.svelte';
 
 export function plural(num: number, candidates: string[], rule = (n: number) => (n === 1 ? 0 : 1)) {
 	return candidates[rule(num)].replace('#', String(num));
@@ -33,6 +35,12 @@ export function dayCountBetween(
 // SvelteKit remote functions reject with an `HttpError` (`{status, body: {message}}`),
 // not a plain `Error` — `(err as Error).message` is always undefined for those.
 export function getErrorMessage(err: unknown): string {
+	// A remote function's failure carries a stable code; the text for it is translated on this
+	// side (see error-messages.svelte.ts), so prefer it over whatever the server sent. Anything
+	// without a code — a thrown TypeError, a fetch failure — falls back to its own message.
+	const code = errorCodeOf(err);
+	if (code) return messageForErrorCode(code, errorParamsOf(err));
+
 	if (err && typeof err === 'object') {
 		if ('body' in err && err.body && typeof err.body === 'object' && 'message' in err.body) {
 			const message = (err.body as { message?: unknown }).message;

@@ -938,45 +938,47 @@
 			Serial number, tag, status, and location.
 		{/if}
 	{/snippet}
-	<form id="edit-asset-form" class="space-y-4" onsubmit={handleAssetSave}>
-		<div class="space-y-2">
-			<Label for="serial">Serial Number</Label>
-			<Input id="serial" bind:value={assetDraft.serialNumber} disabled={retired} />
-		</div>
-		<div class="space-y-2">
-			<Label for="tag">Asset Tag</Label>
-			<Input id="tag" bind:value={assetDraft.assetTag} disabled={retired} />
-		</div>
-		<div class="space-y-2">
-			<Label for="status">Status</Label>
-			<select
-				id="status"
-				bind:value={assetDraft.status}
-				class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-			>
-				{#each ASSET_STATUSES as s (s)}
-					<option value={s}>{assetStatusLabel(s)}</option>
-				{/each}
-			</select>
-		</div>
-		{#if !retired}
+	{#snippet children()}
+		<form id="edit-asset-form" class="space-y-4" onsubmit={handleAssetSave}>
 			<div class="space-y-2">
-				<Label for="location">Location</Label>
+				<Label for="serial">Serial Number</Label>
+				<Input id="serial" bind:value={assetDraft.serialNumber} disabled={retired} />
+			</div>
+			<div class="space-y-2">
+				<Label for="tag">Asset Tag</Label>
+				<Input id="tag" bind:value={assetDraft.assetTag} disabled={retired} />
+			</div>
+			<div class="space-y-2">
+				<Label for="status">Status</Label>
 				<select
-					id="location"
-					bind:value={assetDraft.locationId}
+					id="status"
+					bind:value={assetDraft.status}
 					class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 				>
-					{#each locations as loc (loc.id)}
-						{@const city = loc.address?.city?.trim()}
-						{@const line1 = loc.address?.line1?.trim()}
-						{@const addrParts = [line1, city].filter(Boolean).join(', ')}
-						<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option>
+					{#each ASSET_STATUSES as s (s)}
+						<option value={s}>{assetStatusLabel(s)}</option>
 					{/each}
 				</select>
 			</div>
-		{/if}
-	</form>
+			{#if !retired}
+				<div class="space-y-2">
+					<Label for="location">Location</Label>
+					<select
+						id="location"
+						bind:value={assetDraft.locationId}
+						class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+					>
+						{#each locations as loc (loc.id)}
+							{@const city = loc.address?.city?.trim()}
+							{@const line1 = loc.address?.line1?.trim()}
+							{@const addrParts = [line1, city].filter(Boolean).join(', ')}
+							<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option>
+						{/each}
+					</select>
+				</div>
+			{/if}
+		</form>
+	{/snippet}
 	{#snippet footer()}
 		<Button
 			icon="close"
@@ -997,21 +999,23 @@
 	{#snippet description()}
 		Facts about this individual unit. What it bills at is the product's price.
 	{/snippet}
-	<form id="edit-pricing-form" class="space-y-4" onsubmit={handlePricingSave}>
-		<div class="space-y-2">
-			<Label for="purchaseDate">Purchase date</Label>
-			<Input id="purchaseDate" type="date" bind:value={pricingDraft.purchaseDate} />
-		</div>
-		<div class="space-y-2">
-			<Label for="inspectionInterval">DGUV inspection interval (months)</Label>
-			<Input
-				id="inspectionInterval"
-				type="number"
-				min="1"
-				bind:value={pricingDraft.inspectionIntervalMonths}
-			/>
-		</div>
-	</form>
+	{#snippet children()}
+		<form id="edit-pricing-form" class="space-y-4" onsubmit={handlePricingSave}>
+			<div class="space-y-2">
+				<Label for="purchaseDate">Purchase date</Label>
+				<Input id="purchaseDate" type="date" bind:value={pricingDraft.purchaseDate} />
+			</div>
+			<div class="space-y-2">
+				<Label for="inspectionInterval">DGUV inspection interval (months)</Label>
+				<Input
+					id="inspectionInterval"
+					type="number"
+					min="1"
+					bind:value={pricingDraft.inspectionIntervalMonths}
+				/>
+			</div>
+		</form>
+	{/snippet}
 	{#snippet footer()}
 		<Button
 			icon="close"
@@ -1035,9 +1039,11 @@
 			? ` · ${asset.serialNumber}`
 			: ''}
 	{/snippet}
-	<p class="text-sm text-muted-foreground">
-		This cannot be undone. Only the unit is removed — the product it belongs to stays.
-	</p>
+	{#snippet children()}
+		<p class="text-sm text-muted-foreground">
+			This cannot be undone. Only the unit is removed — the product it belongs to stays.
+		</p>
+	{/snippet}
 
 	{#snippet footer()}
 		<Button
@@ -1087,17 +1093,19 @@
 	{#snippet description()}
 		Changes apply to all assets of this product type.
 	{/snippet}
-	<div class="space-y-2">
-		<p class="text-sm font-medium">Manufacturer</p>
-		<CreatableSelect
-			items={manufacturers}
-			bind:value={productManufacturer}
-			allowCreate={false}
-			disabled={savingProduct}
-			placeholder="Search manufacturers…"
-		/>
-	</div>
-	<ProductFields {categories} bind:value={productDraft} idPrefix="modal" />
+	{#snippet children()}
+		<div class="space-y-2">
+			<p class="text-sm font-medium">Manufacturer</p>
+			<CreatableSelect
+				items={manufacturers}
+				bind:value={productManufacturer}
+				allowCreate={false}
+				disabled={savingProduct}
+				placeholder="Search manufacturers…"
+			/>
+		</div>
+		<ProductFields {categories} bind:value={productDraft} idPrefix="modal" />
+	{/snippet}
 
 	{#snippet footer()}
 		<Button

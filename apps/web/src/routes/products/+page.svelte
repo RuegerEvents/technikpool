@@ -640,72 +640,75 @@
 		Pick the other entry, then say which of the two names is the one to keep.
 	{/snippet}
 
-	<div class="space-y-5">
-		<CreatableSelect
-			items={mergeOptions}
-			bind:value={mergePick}
-			allowCreate={false}
-			disabled={merging}
-			placeholder="Search the whole catalog for the duplicate…"
-		/>
+	{#snippet children()}
+		<div class="space-y-5">
+			<CreatableSelect
+				items={mergeOptions}
+				bind:value={mergePick}
+				allowCreate={false}
+				disabled={merging}
+				placeholder="Search the whole catalog for the duplicate…"
+			/>
 
-		{#if survivor && absorbed}
-			<fieldset class="space-y-2">
-				<legend class="pb-2 text-sm font-medium">Which name is right?</legend>
-				{#each [{ product: current, keep: true }, { product: picked, keep: false }] as choice (choice.keep)}
-					{#if choice.product}
-						<label
-							class="flex items-start gap-3 rounded-md border p-3 text-sm transition-colors hover:bg-muted/40"
-						>
-							<input
-								type="radio"
-								name="mergeSurvivor"
-								checked={keepCurrent === choice.keep}
-								onchange={() => (keepCurrent = choice.keep)}
-								disabled={merging}
-								class="mt-0.5 h-4 w-4"
-							/>
-							<span class="min-w-0 flex-1">
-								<span class="block font-medium"
-									>{choice.product.manufacturer.name}
-									{choice.product.name}</span
-								>
-								<span class="block text-xs text-muted-foreground">
-									{categoryLabel(choice.product.category)} ·
-									{plural(unitCount.get(choice.product.id) ?? 0, ['# unit here', '# units here'])}
+			{#if survivor && absorbed}
+				<fieldset class="space-y-2">
+					<legend class="pb-2 text-sm font-medium">Which name is right?</legend>
+					{#each [{ product: current, keep: true }, { product: picked, keep: false }] as choice (choice.keep)}
+						{#if choice.product}
+							<label
+								class="flex items-start gap-3 rounded-md border p-3 text-sm transition-colors hover:bg-muted/40"
+							>
+								<input
+									type="radio"
+									name="mergeSurvivor"
+									checked={keepCurrent === choice.keep}
+									onchange={() => (keepCurrent = choice.keep)}
+									disabled={merging}
+									class="mt-0.5 h-4 w-4"
+								/>
+								<span class="min-w-0 flex-1">
+									<span class="block font-medium"
+										>{choice.product.manufacturer.name}
+										{choice.product.name}</span
+									>
+									<span class="block text-xs text-muted-foreground">
+										{categoryLabel(choice.product.category)} ·
+										{plural(unitCount.get(choice.product.id) ?? 0, ['# unit here', '# units here'])}
+									</span>
 								</span>
-							</span>
-						</label>
-					{/if}
-				{/each}
-			</fieldset>
+							</label>
+						{/if}
+					{/each}
+				</fieldset>
 
-			<div class="space-y-1.5 rounded-md bg-muted/50 p-3 text-sm">
-				<p>
-					<span class="font-medium">{absorbed.manufacturer.name} {absorbed.name}</span> is deleted.
-					{plural(movingCount, ['Its # unit becomes', 'Its # units become'])}
-					<span class="font-medium">{survivor.manufacturer.name} {survivor.name}</span> — same tags, same
-					history, same accessories.
-				</p>
-				{#if inheritsImage}
-					<p class="text-muted-foreground">The image comes along — this entry has none.</p>
-				{/if}
-				<p class="text-muted-foreground">
-					Purchase prices are each organization's own and move over with the merge — an organization
-					that priced both entries keeps the surviving entry's price.
-				</p>
-				{#if survivor.manufacturerId !== absorbed.manufacturerId}
-					<p class="text-muted-foreground">
-						Different manufacturers: the units end up under
-						<span class="font-medium">{survivor.manufacturer.name}</span>.
+				<div class="space-y-1.5 rounded-md bg-muted/50 p-3 text-sm">
+					<p>
+						<span class="font-medium">{absorbed.manufacturer.name} {absorbed.name}</span> is
+						deleted.
+						{plural(movingCount, ['Its # unit becomes', 'Its # units become'])}
+						<span class="font-medium">{survivor.manufacturer.name} {survivor.name}</span> — same tags,
+						same history, same accessories.
 					</p>
-				{/if}
-				<p class="text-muted-foreground">
-					Offers and invoices already written are not touched — they say what they said.
-				</p>
-			</div>
-		{/if}
-	</div>
+					{#if inheritsImage}
+						<p class="text-muted-foreground">The image comes along — this entry has none.</p>
+					{/if}
+					<p class="text-muted-foreground">
+						Purchase prices are each organization's own and move over with the merge — an
+						organization that priced both entries keeps the surviving entry's price.
+					</p>
+					{#if survivor.manufacturerId !== absorbed.manufacturerId}
+						<p class="text-muted-foreground">
+							Different manufacturers: the units end up under
+							<span class="font-medium">{survivor.manufacturer.name}</span>.
+						</p>
+					{/if}
+					<p class="text-muted-foreground">
+						Offers and invoices already written are not touched — they say what they said.
+					</p>
+				</div>
+			{/if}
+		</div>
+	{/snippet}
 
 	{#snippet footer()}
 		<Button icon="close" variant="outline" onclick={() => (mergeOpen = false)} disabled={merging}>

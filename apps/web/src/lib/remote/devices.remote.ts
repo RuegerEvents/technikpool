@@ -3,6 +3,7 @@ import * as v from 'valibot';
 import { auth, prisma } from '$lib/server/auth';
 import { appBaseUrl } from '$lib/server/app-url';
 import { requireAuth } from '$lib/server/services/access';
+import { appError } from '$lib/errors';
 
 export const getPairingInfo = query(async () => {
 	await requireAuth();
@@ -150,7 +151,7 @@ export const disconnectDevice = command(
 			where: { id: sessionId },
 			select: { userId: true, token: true }
 		});
-		if (session.userId !== user.id) throw new Error('Unauthorized');
+		if (session.userId !== user.id) appError(403, 'unauthorized');
 
 		// Go through better-auth rather than deleting the row, so anything it keeps
 		// alongside the record goes with it.

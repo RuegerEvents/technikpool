@@ -481,7 +481,9 @@
 	{/snippet}
 	<!-- The same four fields the product page and the asset detail page edit.
 		     One component, so a field added there shows up here too. -->
-	<ProductFields {categories} bind:value={newProductDraft} idPrefix="modal-product" />
+	{#snippet children()}
+		<ProductFields {categories} bind:value={newProductDraft} idPrefix="modal-product" />
+	{/snippet}
 
 	{#snippet footer()}
 		<Button icon="close" type="button" variant="outline" onclick={cancelNewProduct}>Cancel</Button>

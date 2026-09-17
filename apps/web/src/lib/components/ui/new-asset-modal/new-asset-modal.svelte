@@ -277,165 +277,168 @@
 </script>
 
 <Modal bind:open title={heading} dismissible={!saving} {description}>
-	<form id="new-asset-form" class="space-y-4" onsubmit={handleSubmit}>
-		<!-- Two ways to say what is being registered, not two forms: quantity, tag
-		     and location below are the same either way. -->
-		<div class="flex gap-1 rounded-md border p-1 text-sm">
-			<button
-				type="button"
-				aria-pressed={kind === 'device'}
-				disabled={saving}
-				onclick={() => setKind('device')}
-				class="flex-1 rounded px-3 py-1.5 transition-colors {kind === 'device'
-					? 'bg-primary text-primary-foreground'
-					: 'hover:bg-muted'}">Device</button
-			>
-			<button
-				type="button"
-				aria-pressed={kind === 'cable'}
-				disabled={saving}
-				onclick={() => setKind('cable')}
-				class="flex-1 rounded px-3 py-1.5 transition-colors {kind === 'cable'
-					? 'bg-primary text-primary-foreground'
-					: 'hover:bg-muted'}">Cable</button
-			>
-		</div>
+	{#snippet children()}
+		<form id="new-asset-form" class="space-y-4" onsubmit={handleSubmit}>
+			<!-- Two ways to say what is being registered, not two forms: quantity, tag
+			     and location below are the same either way. -->
+			<div class="flex gap-1 rounded-md border p-1 text-sm">
+				<button
+					type="button"
+					aria-pressed={kind === 'device'}
+					disabled={saving}
+					onclick={() => setKind('device')}
+					class="flex-1 rounded px-3 py-1.5 transition-colors {kind === 'device'
+						? 'bg-primary text-primary-foreground'
+						: 'hover:bg-muted'}">Device</button
+				>
+				<button
+					type="button"
+					aria-pressed={kind === 'cable'}
+					disabled={saving}
+					onclick={() => setKind('cable')}
+					class="flex-1 rounded px-3 py-1.5 transition-colors {kind === 'cable'
+						? 'bg-primary text-primary-foreground'
+						: 'hover:bg-muted'}">Cable</button
+				>
+			</div>
 
-		{#if kind === 'device'}
+			{#if kind === 'device'}
+				<div class="space-y-2">
+					<Label>Manufacturer</Label>
+					<CreatableSelect
+						items={manufacturers}
+						value={manufacturer}
+						onchange={handleManufacturer}
+						oncreate={(name) => handleManufacturer({ id: null, name })}
+						placeholder="Search or type a new one…"
+						disabled={saving}
+					/>
+				</div>
+
+				{#if manufacturer}
+					{#key manufacturerKey}
+						<div class="space-y-2">
+							<Label>Product</Label>
+							<CreatableSelect
+								items={manufacturer.id ? productsForManufacturer : []}
+								bind:value={product}
+								placeholder="Search or type a new one…"
+								disabled={saving}
+							/>
+						</div>
+					{/key}
+				{/if}
+
+				{#if isNewProduct}
+					<div class="space-y-2">
+						<Label>Category</Label>
+						<CategorySelect {categories} bind:value={categoryId} disabled={saving} />
+						<p class="text-xs text-muted-foreground">
+							"{product?.name}" is new, so it needs a category. It becomes a product like any other
+							— the next unit of it is picked from the list.
+						</p>
+					</div>
+					<div class="space-y-2">
+						<Label>Product photo</Label>
+						<ImageUpload bind:value={imagePath} label="Product photo" />
+					</div>
+				{/if}
+
+				{#if copyable && copyable.accessories.length > 0}
+					<label class="flex items-start gap-2 text-sm">
+						<input
+							type="checkbox"
+							bind:checked={copyAccessories}
+							disabled={saving}
+							class="mt-0.5 h-4 w-4 rounded border-input"
+						/>
+						<span>
+							Also create what the other units carry
+							<span class="block text-xs text-muted-foreground">
+								{copyableSummary} — each new unit gets its own, attached.
+							</span>
+						</span>
+					</label>
+				{/if}
+			{:else}
+				<p class="text-xs text-muted-foreground">
+					No manufacturer to pick: a cable is filed under the generic one, and a cable with the same
+					ends and length already in the catalogue is reused rather than added twice.
+				</p>
+				<ProductFields
+					{categories}
+					bind:value={cableDraft}
+					idPrefix="new-asset-cable"
+					showPrice={false}
+				/>
+			{/if}
+
+			{#if locations}
+				<div class="space-y-2">
+					<Label for="newAssetLocation">Location</Label>
+					<select
+						id="newAssetLocation"
+						bind:value={chosenLocationId}
+						disabled={saving}
+						class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+					>
+						{#each locations as loc (loc.id)}
+							{@const city = loc.address?.city?.trim()}
+							<option value={loc.id}>{city ? `${loc.name} (${city})` : loc.name}</option>
+						{/each}
+					</select>
+				</div>
+			{/if}
+
 			<div class="space-y-2">
-				<Label>Manufacturer</Label>
-				<CreatableSelect
-					items={manufacturers}
-					value={manufacturer}
-					onchange={handleManufacturer}
-					oncreate={(name) => handleManufacturer({ id: null, name })}
-					placeholder="Search or type a new one…"
+				<Label for="newAssetQty">How many</Label>
+				<Input
+					id="newAssetQty"
+					type="number"
+					min="1"
+					max="20"
+					value={quantity}
+					oninput={(e) =>
+						(quantity = Math.max(1, Math.min(20, Number(e.currentTarget.value) || 1)))}
 					disabled={saving}
 				/>
 			</div>
 
-			{#if manufacturer}
-				{#key manufacturerKey}
+			<label class="flex items-center gap-2 text-sm">
+				<input
+					type="checkbox"
+					bind:checked={noTag}
+					disabled={saving}
+					class="h-4 w-4 rounded border-input"
+				/>
+				No asset tag
+			</label>
+			<p class="text-xs text-muted-foreground">
+				Without a tag the unit can't be scanned, and an inspection record has nothing to hang off —
+				so anything DGUV-relevant wants one.
+			</p>
+
+			{#if quantity === 1}
+				{#if kind === 'device'}
 					<div class="space-y-2">
-						<Label>Product</Label>
-						<CreatableSelect
-							items={manufacturer.id ? productsForManufacturer : []}
-							bind:value={product}
-							placeholder="Search or type a new one…"
+						<Label for="newAssetSerial">Serial number</Label>
+						<Input id="newAssetSerial" bind:value={serial} disabled={saving} />
+					</div>
+				{/if}
+				{#if !noTag}
+					<div class="space-y-2">
+						<Label for="newAssetTag">Asset tag</Label>
+						<Input
+							id="newAssetTag"
+							bind:value={tag}
 							disabled={saving}
+							placeholder="Leave blank for the next free number"
 						/>
 					</div>
-				{/key}
+				{/if}
 			{/if}
-
-			{#if isNewProduct}
-				<div class="space-y-2">
-					<Label>Category</Label>
-					<CategorySelect {categories} bind:value={categoryId} disabled={saving} />
-					<p class="text-xs text-muted-foreground">
-						"{product?.name}" is new, so it needs a category. It becomes a product like any other —
-						the next unit of it is picked from the list.
-					</p>
-				</div>
-				<div class="space-y-2">
-					<Label>Product photo</Label>
-					<ImageUpload bind:value={imagePath} label="Product photo" />
-				</div>
-			{/if}
-
-			{#if copyable && copyable.accessories.length > 0}
-				<label class="flex items-start gap-2 text-sm">
-					<input
-						type="checkbox"
-						bind:checked={copyAccessories}
-						disabled={saving}
-						class="mt-0.5 h-4 w-4 rounded border-input"
-					/>
-					<span>
-						Also create what the other units carry
-						<span class="block text-xs text-muted-foreground">
-							{copyableSummary} — each new unit gets its own, attached.
-						</span>
-					</span>
-				</label>
-			{/if}
-		{:else}
-			<p class="text-xs text-muted-foreground">
-				No manufacturer to pick: a cable is filed under the generic one, and a cable with the same
-				ends and length already in the catalogue is reused rather than added twice.
-			</p>
-			<ProductFields
-				{categories}
-				bind:value={cableDraft}
-				idPrefix="new-asset-cable"
-				showPrice={false}
-			/>
-		{/if}
-
-		{#if locations}
-			<div class="space-y-2">
-				<Label for="newAssetLocation">Location</Label>
-				<select
-					id="newAssetLocation"
-					bind:value={chosenLocationId}
-					disabled={saving}
-					class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-				>
-					{#each locations as loc (loc.id)}
-						{@const city = loc.address?.city?.trim()}
-						<option value={loc.id}>{city ? `${loc.name} (${city})` : loc.name}</option>
-					{/each}
-				</select>
-			</div>
-		{/if}
-
-		<div class="space-y-2">
-			<Label for="newAssetQty">How many</Label>
-			<Input
-				id="newAssetQty"
-				type="number"
-				min="1"
-				max="20"
-				value={quantity}
-				oninput={(e) => (quantity = Math.max(1, Math.min(20, Number(e.currentTarget.value) || 1)))}
-				disabled={saving}
-			/>
-		</div>
-
-		<label class="flex items-center gap-2 text-sm">
-			<input
-				type="checkbox"
-				bind:checked={noTag}
-				disabled={saving}
-				class="h-4 w-4 rounded border-input"
-			/>
-			No asset tag
-		</label>
-		<p class="text-xs text-muted-foreground">
-			Without a tag the unit can't be scanned, and an inspection record has nothing to hang off — so
-			anything DGUV-relevant wants one.
-		</p>
-
-		{#if quantity === 1}
-			{#if kind === 'device'}
-				<div class="space-y-2">
-					<Label for="newAssetSerial">Serial number</Label>
-					<Input id="newAssetSerial" bind:value={serial} disabled={saving} />
-				</div>
-			{/if}
-			{#if !noTag}
-				<div class="space-y-2">
-					<Label for="newAssetTag">Asset tag</Label>
-					<Input
-						id="newAssetTag"
-						bind:value={tag}
-						disabled={saving}
-						placeholder="Leave blank for the next free number"
-					/>
-				</div>
-			{/if}
-		{/if}
-	</form>
+		</form>
+	{/snippet}
 
 	{#snippet footer()}
 		<Button

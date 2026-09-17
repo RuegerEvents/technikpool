@@ -3,23 +3,34 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import { getMyOrgs, getAllOrgs, createOrg } from '$lib/remote/orgs.remote';
+	import { getMyOrgs, getAllOrgs, createOrg, getOrgIdentityInUse } from '$lib/remote/orgs.remote';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
-	import { plural, getErrorMessage, orgLabel } from '$lib/utils';
+	import { plural, getErrorMessage, orgLabel, getContrastingTextColor } from '$lib/utils';
 	import { OrgBadge } from '$lib/components/ui/org-badge';
 	import { Modal } from '$lib/components/ui/modal';
+	import { ORG_COLOR_PALETTE, suggestOrgColor } from '$lib/org-colors';
+	import { orgIdentityProblem } from '$lib/org-identity.svelte';
 
 	let { data } = $props();
 
 	let orgs = $derived(await (data.isAdmin ? getAllOrgs() : getMyOrgs()));
+	// Colour, label and prefix are unique across all orgs, including ones this user cannot see.
+	let identityInUse = $derived(await getOrgIdentityInUse());
+	let takenColors = $derived(identityInUse.map((o) => o.color.toLowerCase()));
+	let freePalette = $derived(ORG_COLOR_PALETTE.filter((c) => !takenColors.includes(c)));
 	let newOrgName = $state('');
 	let newOrgShortName = $state('');
 	let newOrgPrefix = $state('');
-	let newOrgColor = $state('#0069c9');
+	let newOrgColor = $state(ORG_COLOR_PALETTE[0]);
 	let newOrgAvatarLabel = $state('');
 	let creating = $state(false);
 	let createOpen = $state(false);
+
+	function openCreate() {
+		newOrgColor = suggestOrgColor(takenColors);
+		createOpen = true;
+	}
 
 	const roleLabels: Record<string, string> = {
 		OWNER: 'Owner',
@@ -31,6 +42,14 @@
 	async function handleCreateOrg(e: Event) {
 		e.preventDefault();
 		if (!newOrgName) return;
+		const problem = orgIdentityProblem(
+			{ color: newOrgColor, avatarLabel: newOrgAvatarLabel, assetIdPrefix: newOrgPrefix },
+			identityInUse
+		);
+		if (problem) {
+			toast.error(problem);
+			return;
+		}
 		try {
 			creating = true;
 			await createOrg({
@@ -41,11 +60,13 @@
 				avatarLabel: newOrgAvatarLabel
 			});
 			toast.success(`Organization "${newOrgName}" created!`);
+			createOpen = false;
 			newOrgName = '';
 			newOrgShortName = '';
 			newOrgPrefix = '';
-			newOrgColor = '#0069c9';
 			newOrgAvatarLabel = '';
+			// The colour is not reset here — `openCreate` picks the next free one when the
+			// dialog is opened again, by which time the new org is in `takenColors`.
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {
@@ -66,7 +87,7 @@
 					: 'Manage your organizations and memberships.'}
 			</p>
 		</div>
-		<Button onclick={() => (createOpen = true)}>New Organization</Button>
+		<Button onclick={openCreate}>New Organization</Button>
 	</div>
 
 	<div class="space-y-4">
@@ -113,66 +134,117 @@
 </div>
 
 <Modal bind:open={createOpen} title="Create Organization" dismissible={!creating}>
+	{#snippet children()}
+		<form id="create-org-form" onsubmit={handleCreateOrg} class="space-y-4">
+			<div class="space-y-2">
+				<Label for="orgName">Organization Name</Label>
+				<Input id="orgName" bind:value={newOrgName} placeholder="e.g. Acme Corp" required />
+			</div>
+			<div class="space-y-2">
+				<Label for="orgShortName"
+					>Short Name <span class="text-muted-foreground">(optional)</span></Label
+				>
+				<Input
+					id="orgShortName"
+					bind:value={newOrgShortName}
+					placeholder="e.g. Acme"
+					maxlength={24}
+				/>
+				<p class="text-xs text-muted-foreground">
+					Shown instead of the full name in tables and pickers.
+				</p>
+			</div>
+			<div class="space-y-2">
+				<Label for="orgPrefix">Asset ID Prefix</Label>
+				<Input
+					id="orgPrefix"
+					bind:value={newOrgPrefix}
+					placeholder="e.g. 123"
+					maxlength={3}
+					minlength={3}
+					pattern="[0-9][0-9][0-9]"
+					required
+					class="w-24"
+				/>
+				<p class="text-xs text-muted-foreground">
+					3-digit prefix for asset IDs (e.g. 123 → 12300001).
+				</p>
+			</div>
+			<div class="flex gap-4">
+				<div class="space-y-2">
+					<Label for="orgColor">Color</Label>
+					<div class="flex gap-2">
+						<Input id="orgColor" type="color" bind:value={newOrgColor} class="h-10 w-14 p-1" />
+						<Input bind:value={newOrgColor} class="w-28 font-mono" required />
+					</div>
+				</div>
+				<div class="space-y-2">
+					<Label for="orgAvatarLabel">Avatar label</Label>
+					<Input
+						id="orgAvatarLabel"
+						bind:value={newOrgAvatarLabel}
+						placeholder="e.g. RE"
+						maxlength={2}
+						minlength={2}
+						pattern="[A-Za-z][A-Za-z]"
+						required
+						class="w-20 font-mono uppercase"
+					/>
+				</div>
+			</div>
+			{#if freePalette.length > 0}
+				<div class="space-y-2">
+					<p class="text-xs text-muted-foreground">Suggestions</p>
+					<div class="flex flex-wrap gap-2">
+						{#each freePalette as suggestion (suggestion)}
+							<button
+								type="button"
+								title="Use {suggestion}"
+								onclick={() => (newOrgColor = suggestion)}
+								class="h-7 w-7 rounded-full border-2 transition-transform hover:scale-110 {newOrgColor.toLowerCase() ===
+								suggestion
+									? 'border-foreground'
+									: 'border-transparent'}"
+								style={`background-color: ${suggestion};`}
+							></button>
+						{/each}
+					</div>
+				</div>
+			{/if}
+			{#if identityInUse.length > 0}
+				<div class="space-y-2">
+					<p class="text-xs text-muted-foreground">
+						Already taken — every color, label and prefix can only be used once:
+					</p>
+					<div class="flex flex-wrap gap-2">
+						{#each identityInUse as org (org.id)}
+							<span
+								class="inline-flex items-center gap-1.5 rounded-full border py-0.5 pr-2 pl-0.5 text-xs"
+								title={org.color}
+							>
+								<span
+									class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold"
+									style={`background-color: ${org.color}; color: ${getContrastingTextColor(org.color)};`}
+								>
+									{org.avatarLabel}
+								</span>
+								<span class="font-mono">{org.assetIdPrefix}</span>
+								{#if org.name}
+									<span class="text-muted-foreground">{org.name}</span>
+								{/if}
+							</span>
+						{/each}
+					</div>
+				</div>
+			{/if}
+			<p class="text-xs text-muted-foreground">
+				Color and a 2-letter label identify this org at a glance in the calendar and device lists.
+			</p>
+		</form>
+	{/snippet}
 	{#snippet description()}
 		Create a new organization to manage assets and productions.
 	{/snippet}
-	<form id="create-org-form" onsubmit={handleCreateOrg} class="space-y-4">
-		<div class="space-y-2">
-			<Label for="orgName">Organization Name</Label>
-			<Input id="orgName" bind:value={newOrgName} placeholder="e.g. Acme Corp" required />
-		</div>
-		<div class="space-y-2">
-			<Label for="orgShortName"
-				>Short Name <span class="text-muted-foreground">(optional)</span></Label
-			>
-			<Input
-				id="orgShortName"
-				bind:value={newOrgShortName}
-				placeholder="e.g. Acme"
-				maxlength={24}
-			/>
-			<p class="text-xs text-muted-foreground">
-				Shown instead of the full name in tables and pickers.
-			</p>
-		</div>
-		<div class="space-y-2">
-			<Label for="orgPrefix">Asset ID Prefix</Label>
-			<Input
-				id="orgPrefix"
-				bind:value={newOrgPrefix}
-				placeholder="e.g. 123"
-				maxlength={3}
-				required
-				class="w-24"
-			/>
-			<p class="text-xs text-muted-foreground">
-				3-digit prefix for asset IDs (e.g. 123 → 12300001).
-			</p>
-		</div>
-		<div class="flex gap-4">
-			<div class="space-y-2">
-				<Label for="orgColor">Color</Label>
-				<div class="flex gap-2">
-					<Input id="orgColor" type="color" bind:value={newOrgColor} class="h-10 w-14 p-1" />
-					<Input bind:value={newOrgColor} class="w-28 font-mono" required />
-				</div>
-			</div>
-			<div class="space-y-2">
-				<Label for="orgAvatarLabel">Avatar label</Label>
-				<Input
-					id="orgAvatarLabel"
-					bind:value={newOrgAvatarLabel}
-					placeholder="e.g. RE"
-					maxlength={2}
-					required
-					class="w-20 font-mono uppercase"
-				/>
-			</div>
-		</div>
-		<p class="text-xs text-muted-foreground">
-			Color and a 2-letter label identify this org at a glance in the calendar and device lists.
-		</p>
-	</form>
 	{#snippet footer()}
 		<Button
 			icon="close"

@@ -2,12 +2,13 @@ import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import { requireAuth } from '$lib/server/services/access';
+import { appError } from '$lib/errors';
 
 async function requireOrgMembership(userId: string, organizationId: string) {
 	const membership = await prisma.orgMembership.findUnique({
 		where: { userId_organizationId: { userId, organizationId } }
 	});
-	if (!membership) throw new Error('Not a member');
+	if (!membership) appError(403, 'not_org_member');
 	return membership;
 }
 

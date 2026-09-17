@@ -3,6 +3,7 @@ import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import { isSystemAdmin, requireAuth, userOrgIds } from '$lib/server/services/access';
 import { ACTIVE_ASSET_WHERE, isRetiredStatus } from '$lib/asset-status';
+import { appError } from '$lib/errors';
 
 const UPCOMING_WINDOW_DAYS = 30;
 
@@ -59,7 +60,7 @@ export const getAssetInspections = query(v.string(), async (assetId: string) => 
 			select: { organizationId: true }
 		});
 		const orgIds = await userOrgIds(user.id);
-		if (!orgIds.includes(asset.organizationId)) throw new Error('Unauthorized');
+		if (!orgIds.includes(asset.organizationId)) appError(403, 'unauthorized');
 	}
 
 	return prisma.inspection.findMany({
@@ -80,7 +81,7 @@ export const logInspection = command(logInspectionSchema, async (input) => {
 	const user = await requireAuth();
 	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: input.assetId } });
 	if (isRetiredStatus(asset.status)) {
-		throw new Error('This asset is sold or decommissioned and can no longer be inspected');
+		appError(409, 'asset_retired_no_inspection');
 	}
 
 	const systemAdmin = await isSystemAdmin(user.id);
@@ -91,7 +92,7 @@ export const logInspection = command(logInspectionSchema, async (input) => {
 			}
 		});
 		if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-			throw new Error('Unauthorized');
+			appError(403, 'unauthorized');
 		}
 	}
 

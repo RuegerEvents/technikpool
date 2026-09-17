@@ -1,11 +1,11 @@
 import { query, command } from '$app/server';
-import { error } from '@sveltejs/kit';
 import { prisma } from '$lib/server/auth';
 import { sendMail } from '$lib/server/mail';
 import { appBaseUrl } from '$lib/server/app-url';
 import { addedToOrgEmail } from '$lib/server/emails/added-to-org';
 import * as v from 'valibot';
 import { requireAuth } from '$lib/server/services/access';
+import { appError } from '$lib/errors';
 
 async function isUserAdmin(userId: string) {
 	const u = await prisma.user.findUnique({ where: { id: userId }, select: { isAdmin: true } });
@@ -19,7 +19,7 @@ async function requireOrgManageAccess(orgId: string) {
 		where: { userId_organizationId: { userId: user.id, organizationId: orgId } }
 	});
 	if (membership?.role !== 'OWNER') {
-		throw new Error('Only org owners or system admins can manage this organization');
+		appError(403, 'org_manage_forbidden');
 	}
 	return user;
 }
@@ -52,7 +52,7 @@ export const getOrg = query(v.string(), async (orgId: string) => {
 	});
 
 	if (!membership) {
-		throw new Error('Not a member of this organization');
+		appError(403, 'not_org_member');
 	}
 
 	return membership.organization;
@@ -83,7 +83,7 @@ export const getOrgWithMembers = query(v.string(), async (orgId: string) => {
 		const m = await prisma.orgMembership.findUnique({
 			where: { userId_organizationId: { userId: user.id, organizationId: orgId } }
 		});
-		if (!m) throw new Error('Not a member of this organization');
+		if (!m) appError(403, 'not_org_member');
 	}
 	return prisma.organization.findUniqueOrThrow({
 		where: { id: orgId },
@@ -106,7 +106,7 @@ export const addUserToOrg = command(
 	async ({ orgId, email, role }) => {
 		await requireOrgManageAccess(orgId);
 		const target = await prisma.user.findUnique({ where: { email } });
-		if (!target) throw new Error('No user found with that email');
+		if (!target) appError(404, 'user_not_found');
 
 		const existing = await prisma.orgMembership.findUnique({
 			where: { userId_organizationId: { userId: target.id, organizationId: orgId } }
@@ -144,7 +144,7 @@ export const removeUserFromOrg = command(
 	v.object({ orgId: v.string(), userId: v.string() }),
 	async ({ orgId, userId }) => {
 		const current = await requireOrgManageAccess(orgId);
-		if (userId === current.id) throw new Error('Cannot remove yourself from the organization');
+		if (userId === current.id) appError(409, 'cannot_remove_self');
 		await prisma.orgMembership.delete({
 			where: { userId_organizationId: { userId, organizationId: orgId } }
 		});
@@ -169,7 +169,7 @@ function normalizePrefix(raw: string): string {
 		.trim()
 		.replace(/[^0-9]/g, '')
 		.slice(0, 3);
-	if (prefix.length !== 3) throw new Error('Asset ID prefix must be exactly 3 digits');
+	if (prefix.length !== 3) appError(400, 'org_prefix_invalid');
 	return prefix;
 }
 
@@ -179,16 +179,86 @@ function normalizeAvatarLabel(raw: string): string {
 		.toUpperCase()
 		.replace(/[^A-Z]/g, '')
 		.slice(0, 2);
-	if (label.length !== 2) throw new Error('Avatar label must be exactly 2 letters');
+	if (label.length !== 2) appError(400, 'org_avatar_label_invalid');
 	return label;
 }
 
 function normalizeColor(raw: string): string {
 	const color = raw.trim();
 	if (!/^#[0-9a-fA-F]{6}$/.test(color)) {
-		throw new Error('Color must be a #RRGGBB hex value');
+		appError(400, 'org_color_invalid');
 	}
 	return color.toLowerCase();
+}
+
+/**
+ * Colour, avatar label and asset-ID prefix are globally unique, so the create/edit forms need to
+ * know what is already spoken for. Names are only included for orgs the caller can already see —
+ * the identity values themselves are harmless, an org's name is not.
+ */
+export const getOrgIdentityInUse = query(async () => {
+	const user = await requireAuth();
+	const admin = await isUserAdmin(user.id);
+	const visible = admin
+		? null
+		: new Set(
+				(
+					await prisma.orgMembership.findMany({
+						where: { userId: user.id },
+						select: { organizationId: true }
+					})
+				).map((m) => m.organizationId)
+			);
+
+	const orgs = await prisma.organization.findMany({
+		select: {
+			id: true,
+			name: true,
+			shortName: true,
+			color: true,
+			avatarLabel: true,
+			assetIdPrefix: true
+		},
+		orderBy: { name: 'asc' }
+	});
+
+	return orgs.map((org) => ({
+		id: org.id,
+		color: org.color,
+		avatarLabel: org.avatarLabel,
+		assetIdPrefix: org.assetIdPrefix,
+		name: !visible || visible.has(org.id) ? org.shortName || org.name : null
+	}));
+});
+
+/**
+ * Turns the three unique constraints into readable 409s. Without this the duplicate lands as a
+ * raw Prisma P2002 and the client only ever sees "Internal Error".
+ */
+async function assertOrgIdentityFree(
+	identity: { color: string; avatarLabel: string; assetIdPrefix: string },
+	exceptOrgId?: string
+) {
+	const clashes = await prisma.organization.findMany({
+		where: {
+			...(exceptOrgId ? { id: { not: exceptOrgId } } : {}),
+			OR: [
+				{ color: identity.color },
+				{ avatarLabel: identity.avatarLabel },
+				{ assetIdPrefix: identity.assetIdPrefix }
+			]
+		},
+		select: { color: true, avatarLabel: true, assetIdPrefix: true }
+	});
+	if (clashes.some((o) => o.color === identity.color)) {
+		appError(409, 'org_color_taken', [identity.color]);
+	}
+	if (clashes.some((o) => o.avatarLabel === identity.avatarLabel)) {
+		appError(409, 'org_avatar_label_taken', [identity.avatarLabel]);
+	}
+	if (clashes.some((o) => o.assetIdPrefix === identity.assetIdPrefix)) {
+		appError(409, 'org_prefix_taken', [identity.assetIdPrefix]);
+	}
 }
 
 const createOrgSchema = v.object({
@@ -206,6 +276,11 @@ export const createOrg = command(
 		const prefix = normalizePrefix(assetIdPrefix);
 		const normalizedColor = normalizeColor(color);
 		const normalizedLabel = normalizeAvatarLabel(avatarLabel);
+		await assertOrgIdentityFree({
+			color: normalizedColor,
+			avatarLabel: normalizedLabel,
+			assetIdPrefix: prefix
+		});
 
 		const org = await prisma.$transaction(async (tx) => {
 			return await tx.organization.create({
@@ -226,6 +301,8 @@ export const createOrg = command(
 		});
 
 		await getMyOrgs().refresh();
+		if (await isUserAdmin(user.id)) await getAllOrgs().refresh();
+		await getOrgIdentityInUse().refresh();
 		return org;
 	}
 );
@@ -288,6 +365,10 @@ export const updateOrg = command(
 		const prefix = normalizePrefix(assetIdPrefix);
 		const normalizedColor = normalizeColor(color);
 		const normalizedLabel = normalizeAvatarLabel(avatarLabel);
+		await assertOrgIdentityFree(
+			{ color: normalizedColor, avatarLabel: normalizedLabel, assetIdPrefix: prefix },
+			orgId
+		);
 
 		const org = await prisma.$transaction(async (tx) => {
 			let addressId: string | null | undefined = undefined;
@@ -355,6 +436,7 @@ export const updateOrg = command(
 
 		await getOrgWithMembers(orgId).refresh();
 		await getMyOrgs().refresh();
+		await getOrgIdentityInUse().refresh();
 		return org;
 	}
 );
@@ -367,7 +449,7 @@ export const deleteOrg = command(v.string(), async (orgId: string) => {
 		select: { id: true }
 	});
 	if (foreignAssetAtLocation) {
-		error(409, 'Another organization has an asset at one of these locations; move it first');
+		appError(409, 'location_used_by_other_org');
 	}
 
 	await prisma.$transaction(async (tx) => {
@@ -388,7 +470,7 @@ export const deleteOrg = command(v.string(), async (orgId: string) => {
 
 export const getAllOrgs = query(async () => {
 	const user = await requireAuth();
-	if (!(await isUserAdmin(user.id))) throw new Error('Admin access required');
+	if (!(await isUserAdmin(user.id))) appError(403, 'admin_required');
 
 	const orgs = await prisma.organization.findMany({
 		include: {
@@ -410,7 +492,7 @@ export const getAllOrgs = query(async () => {
 
 export const getAllUsers = query(async () => {
 	const user = await requireAuth();
-	if (!(await isUserAdmin(user.id))) throw new Error('Admin access required');
+	if (!(await isUserAdmin(user.id))) appError(403, 'admin_required');
 	return prisma.user.findMany({
 		select: {
 			id: true,
@@ -431,8 +513,8 @@ export const setUserAdmin = command(
 	v.object({ userId: v.string(), isAdmin: v.boolean() }),
 	async ({ userId, isAdmin }) => {
 		const current = await requireAuth();
-		if (!(await isUserAdmin(current.id))) throw new Error('Admin access required');
-		if (userId === current.id) throw new Error('Cannot change your own admin status');
+		if (!(await isUserAdmin(current.id))) appError(403, 'admin_required');
+		if (userId === current.id) appError(409, 'cannot_change_own_admin');
 		await prisma.user.update({ where: { id: userId }, data: { isAdmin } });
 		await getAllUsers().refresh();
 	}
@@ -440,15 +522,15 @@ export const setUserAdmin = command(
 
 export const deleteUser = command(v.string(), async (userId: string) => {
 	const current = await requireAuth();
-	if (!(await isUserAdmin(current.id))) error(403, 'Admin access required');
-	if (userId === current.id) error(409, 'You cannot delete your own account');
+	if (!(await isUserAdmin(current.id))) appError(403, 'admin_required');
+	if (userId === current.id) appError(409, 'cannot_delete_own_account');
 
 	const user = await prisma.user.findUniqueOrThrow({
 		where: { id: userId },
 		select: { id: true, _count: { select: { transactions: true } } }
 	});
 	if (user._count.transactions > 0) {
-		error(409, 'This user appears in asset history and cannot be deleted');
+		appError(409, 'user_has_history');
 	}
 
 	await prisma.user.delete({ where: { id: userId } });

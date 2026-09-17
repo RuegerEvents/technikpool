@@ -97,6 +97,46 @@ browsable docs; `/api/v1/openapi.json` serves the spec itself.
   payloads directly** — they carry fields the API doesn't promise, so a new column would
   silently widen every response.
 
+## Errors
+
+A remote function reports every failure with `appError(status, code, params?)` from
+`src/lib/errors.ts`. **Never `throw new Error()` from server code a user can reach** — SvelteKit
+turns a plain Error into a bare 500 "Internal Error" and the message never leaves the server, which
+is how a one-letter avatar label used to look like a crash.
+
+Three pieces, each with one job:
+
+| File                                    | Holds                                                                  |
+| --------------------------------------- | ---------------------------------------------------------------------- |
+| `src/lib/errors.ts`                     | the `AppErrorCode` union, `appError`, `errorCodeOf`/`errorParamsOf`    |
+| `src/lib/error-messages.svelte.ts`      | the wording for every code, and the only copy of it                    |
+| `getErrorMessage` in `src/lib/utils.ts` | what call sites use: code → translated text, else the server's message |
+
+The code is the contract and the wording is not, which is what makes the text translatable: it
+lives in a `.svelte.ts` module so wuchale extracts it (see the i18n section), and both sides read
+the same table — `appError` on the server for logs and the error page, `getErrorMessage` on the
+client for the toast. So `toast.error(getErrorMessage(err))` at a call site already renders German;
+nothing has to be passed through by hand.
+
+**Adding a failure:** add the code to the union, add its message to the switch, call
+`appError(409, 'your_code', [value])`. The `never` in the switch's default branch means `pnpm check`
+fails until the message exists, and the German goes in `de.po` like any other string. Values are
+interpolated by position — `${p0}`, `${p1}` — so no message is assembled from fragments.
+
+This mirrors `/api/v1`, which has always answered `{ error: { code, message } }` and lets the
+scanner localise from the code (`describeError` in the Flutter client). The two code lists stay
+separate: `/api/v1`'s are published in `openapi.yaml` and can't change without a spec revision,
+these are internal to the web client.
+
+Deliberately left as plain `throw`: `src/lib/server/stickers/config.ts` (guards behind the form's
+own validation — the endpoint wraps whatever they say in `sticker_config_invalid`), and outright
+misconfiguration such as a missing `BETTER_AUTH_SECRET` or an unreachable S3 bucket, which no user
+can act on.
+
+**Validation a user can hit while typing belongs on the client**, not behind a round trip — see
+`src/lib/org-identity.svelte.ts`, which checks the three unique org fields against
+`getOrgIdentityInUse()` and formats the message from the same table the server would have used.
+
 ## Service Layer
 
 Logic needed by both remote functions and `/api/v1` lives in `src/lib/server/services/`:
@@ -173,6 +213,36 @@ re-transform. Source-triggered writes are left alone, so ordinary HMR is untouch
 - Strings starting with lowercase are **not** extracted — keep internal/technical strings lowercase to avoid extraction
 
 **DO NOT** translate enum values (`OWNER`, `APPROVED`, etc.), variable names, or internal keys — wuchale won't touch them as long as they start with a lowercase letter or are not inside a function.
+
+**A `{#snippet}` inside a component silently ends extraction for everything plain that follows
+it.** wuchale accumulates a fragment's messages in one shared slot, and a nested fragment
+(`{#snippet}`, and `{#if}`/`{#each}`) flushes and replaces that slot — so text and elements that
+come _after_ a snippet in the same component's children are dropped without a warning, along with
+their whole subtree. This is how every `<Modal>` written as
+
+```svelte
+<Modal …>
+	{#snippet description()}…{/snippet}
+	<!-- every label and hint in here is lost -->
+	<form>…</form>
+</Modal>
+```
+
+lost its German: the strings go obsolete in `de.po` on the next full extraction and render in
+English. **Put the body first and the `{#snippet}` blocks last** (verified against wuchale 0.26 as
+well, so it is not a version we can upgrade out of), or wrap the body in an explicit
+`{#snippet children()}`, which is order-independent. Blocks and `{…}` expressions are unaffected,
+which is why the loss is so easy to miss — half the dialog still translates.
+
+After fixing one, check the strings actually came back:
+`grep -A1 'msgid "Your String"' src/locales/de.po` — an entry prefixed `#~` is obsolete, not active,
+and its translation is not compiled. Re-added strings recover their old German automatically.
+
+**Server-side strings are not extracted.** `wuchale.config.js` only covers `src/**/*.svelte` and
+`src/**/*.svelte.{js,ts}`, so every message thrown from a remote function or `/api/v1` is English
+wherever it surfaces. A validation message a user is meant to read belongs on the client — put it
+in a `.svelte.ts` module (see `src/lib/org-identity.svelte.ts`) so it lands in the catalogs, and
+leave the server's `error(4xx, …)` as the backstop it is.
 
 ## Authorization Model
 

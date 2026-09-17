@@ -1,5 +1,6 @@
 import { getRequestEvent } from '$app/server';
 import { prisma } from '$lib/server/auth';
+import { appError } from '$lib/errors';
 
 // Authorisation primitives shared by the remote functions and the /api/v1
 // endpoints. Both surfaces must scope reads identically — the API is not
@@ -9,7 +10,7 @@ import { prisma } from '$lib/server/auth';
 export async function requireAuth() {
 	const event = await getRequestEvent();
 	if (!event?.locals.user) {
-		throw new Error('Unauthorized');
+		appError(403, 'unauthorized');
 	}
 	return event.locals.user;
 }
@@ -36,7 +37,7 @@ export async function isSystemAdmin(userId: string) {
 export async function requireSystemAdmin() {
 	const user = await requireAuth();
 	if (!(await isSystemAdmin(user.id))) {
-		throw new Error('System admin access required');
+		appError(403, 'admin_required');
 	}
 	return user;
 }
@@ -63,5 +64,5 @@ export async function scopedOrgIds(userId: string, organizationId?: string): Pro
 	if (!organizationId) return orgIds;
 	if (orgIds.includes(organizationId)) return [organizationId];
 	if (await isSystemAdmin(userId)) return [organizationId];
-	throw new Error('Unauthorized');
+	appError(403, 'unauthorized');
 }

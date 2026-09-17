@@ -157,21 +157,23 @@
 	{#snippet description()}
 		All products move to the selected manufacturer. Existing offers and invoices are not changed.
 	{/snippet}
-	<div class="space-y-3">
-		<p class="text-sm">
-			Delete <span class="font-medium">{mergeSource?.name}</span> and move its products to:
-		</p>
-		<select
-			bind:value={mergeTargetId}
-			disabled={merging}
-			class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-		>
-			<option value="">Select manufacturer…</option>
-			{#each manufacturers.filter((manufacturer) => manufacturer.id !== mergeSource?.id) as manufacturer (manufacturer.id)}
-				<option value={manufacturer.id}>{manufacturer.name}</option>
-			{/each}
-		</select>
-	</div>
+	{#snippet children()}
+		<div class="space-y-3">
+			<p class="text-sm">
+				Delete <span class="font-medium">{mergeSource?.name}</span> and move its products to:
+			</p>
+			<select
+				bind:value={mergeTargetId}
+				disabled={merging}
+				class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+			>
+				<option value="">Select manufacturer…</option>
+				{#each manufacturers.filter((manufacturer) => manufacturer.id !== mergeSource?.id) as manufacturer (manufacturer.id)}
+					<option value={manufacturer.id}>{manufacturer.name}</option>
+				{/each}
+			</select>
+		</div>
+	{/snippet}
 	{#snippet footer()}
 		<Button variant="outline" disabled={merging} onclick={() => (mergeOpen = false)}>Cancel</Button>
 		<Button icon="merge" disabled={!mergeTargetId || merging} onclick={merge}>

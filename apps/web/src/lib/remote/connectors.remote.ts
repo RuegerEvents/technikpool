@@ -1,5 +1,4 @@
 import { query, command } from '$app/server';
-import { error } from '@sveltejs/kit';
 import * as v from 'valibot';
 import { prisma } from '$lib/server/auth';
 import {
@@ -9,6 +8,7 @@ import {
 	requireSystemAdmin
 } from '$lib/server/services/access';
 import { connectorSlug } from '$lib/server/services/connectors';
+import { appError } from '$lib/errors';
 
 /**
  * The connector catalogue: what a cable's ends are called, and what they look
@@ -35,7 +35,7 @@ async function requireCatalogAdmin() {
 	if (await isSystemAdmin(user.id)) return user;
 	const managed = await managedOrgIds(user.id);
 	if (managed.length === 0) {
-		error(403, 'You need admin rights in one of your organisations to edit connectors');
+		appError(403, 'connector_edit_forbidden');
 	}
 	return user;
 }
@@ -112,7 +112,7 @@ export const updateConnector = command(updateConnectorSchema, async (input) => {
 
 	const clash = await prisma.connector.findUnique({ where: { slug } });
 	if (clash && clash.id !== input.connectorId) {
-		error(409, `A connector called "${clash.name}" already exists.`);
+		appError(409, 'connector_exists', [clash.name]);
 	}
 
 	const connector = await prisma.connector.update({
@@ -172,7 +172,7 @@ export const deleteConnector = command(v.string(), async (connectorId: string) =
 		}
 	});
 	if (inUse > 0) {
-		error(409, `${inUse} product(s) still use this connector. Rename it instead of deleting it.`);
+		appError(409, 'connector_in_use', [inUse]);
 	}
 
 	await prisma.connector.delete({ where: { id: connectorId } });

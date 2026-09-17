@@ -9,6 +9,7 @@ import * as v from 'valibot';
 import { requireAuth } from '$lib/server/services/access';
 import { ACTIVE_ASSET_WHERE, isRetiredStatus } from '$lib/asset-status';
 import { accessoryIdsOf } from '$lib/server/services/accessories';
+import { appError } from '$lib/errors';
 
 // Returns which of `ownerOrgIds` do NOT currently have any PENDING item in
 // this production — i.e. the orgs for which a new PENDING item would be the
@@ -203,16 +204,16 @@ function validateDuration(input: {
 }) {
 	const { startDate, endDate, showStartDate, showEndDate } = input;
 	if (startDate && endDate && endDate.getTime() < startDate.getTime()) {
-		throw new Error('End date cannot be before start date');
+		appError(400, 'dates_end_before_start');
 	}
 	if (showStartDate && showEndDate && showEndDate.getTime() < showStartDate.getTime()) {
-		throw new Error('Show end date cannot be before show start date');
+		appError(400, 'show_end_before_show_start');
 	}
 	if (showStartDate && startDate && showStartDate.getTime() < startDate.getTime()) {
-		throw new Error('Show start date cannot be before the total start date');
+		appError(400, 'show_start_before_start');
 	}
 	if (showEndDate && endDate && showEndDate.getTime() > endDate.getTime()) {
-		throw new Error('Show end date cannot be after the total end date');
+		appError(400, 'show_end_after_end');
 	}
 }
 
@@ -223,7 +224,7 @@ export const createProduction = command(createProductionSchema, async (data) => 
 		where: { userId_organizationId: { userId: user.id, organizationId: data.organizationId } }
 	});
 
-	if (!membership) throw new Error('Not a member');
+	if (!membership) appError(403, 'not_org_member');
 
 	const startDate = data.startDate ? new Date(data.startDate) : null;
 	const endDate = data.endDate ? new Date(data.endDate) : null;
@@ -280,7 +281,7 @@ export const deleteProduction = command(v.string(), async (productionId: string)
 		select: { role: true }
 	});
 	if (!membership || (membership.role !== 'OWNER' && membership.role !== 'ADMIN')) {
-		throw new Error('Only organization admins and owners can delete productions');
+		appError(403, 'production_delete_forbidden');
 	}
 
 	await prisma.$transaction(async (tx) => {
@@ -325,7 +326,7 @@ export const updateProductionAddress = command(updateProductionAddressSchema, as
 			userId_organizationId: { userId: user.id, organizationId: production.organizationId }
 		}
 	});
-	if (!membership) throw new Error('Not a member');
+	if (!membership) appError(403, 'not_org_member');
 
 	const hasAny = Object.values(input.address).some((v) => (v?.trim()?.length ?? 0) > 0);
 
@@ -395,7 +396,7 @@ export const updateProductionDuration = command(updateProductionDurationSchema, 
 			userId_organizationId: { userId: user.id, organizationId: production.organizationId }
 		}
 	});
-	if (!membership) throw new Error('Not a member');
+	if (!membership) appError(403, 'not_org_member');
 
 	const startDate = input.startDate ? new Date(input.startDate) : null;
 	const endDate = input.endDate ? new Date(input.endDate) : null;
@@ -432,7 +433,7 @@ export const updateProductionCustomer = command(updateProductionCustomerSchema, 
 			userId_organizationId: { userId: user.id, organizationId: production.organizationId }
 		}
 	});
-	if (!membership) throw new Error('Not a member');
+	if (!membership) appError(403, 'not_org_member');
 
 	const updated = await prisma.production.update({
 		where: { id: input.productionId },
@@ -458,7 +459,7 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 	});
 	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: data.assetId } });
 	if (isRetiredStatus(asset.status)) {
-		throw new Error('This asset is sold or decommissioned and can no longer be booked');
+		appError(409, 'asset_retired_no_booking');
 	}
 
 	if (production.startDate && production.endDate) {
@@ -479,7 +480,7 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 			include: { production: { select: { name: true } } }
 		});
 		if (conflict) {
-			throw new Error(`Asset is already booked for "${conflict.production.name}" during this time`);
+			appError(409, 'asset_booking_conflict', [conflict.production.name]);
 		}
 	}
 
@@ -562,7 +563,7 @@ export const approveProductionItem = command(v.string(), async (itemId: string) 
 	});
 
 	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		throw new Error('Unauthorized to approve assets from this org');
+		appError(403, 'approval_forbidden');
 	}
 
 	const updated = await prisma.productionItem.update({
@@ -608,7 +609,7 @@ export const declineProductionItem = command(v.string(), async (itemId: string) 
 	});
 
 	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		throw new Error('Unauthorized to decline assets from this org');
+		appError(403, 'decline_forbidden');
 	}
 
 	const updated = await prisma.productionItem.update({
@@ -649,7 +650,7 @@ export const getPendingApprovals = query(v.string(), async (organizationId: stri
 	});
 
 	if (!membership || (membership.role !== 'ADMIN' && membership.role !== 'OWNER')) {
-		throw new Error('Unauthorized');
+		appError(403, 'unauthorized');
 	}
 
 	return await prisma.productionItem.findMany({
@@ -689,7 +690,7 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	});
 	const existingAssetIds = new Set(existingItems.map((i) => i.assetId));
 
-	if (bundle.assets.length === 0) throw new Error('Bundle has no assets');
+	if (bundle.assets.length === 0) appError(409, 'bundle_empty');
 
 	// Units of this bundle that are already booked here on their own — putting
 	// booked assets into a bundle and then adding that bundle is the ordinary
@@ -704,7 +705,7 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 		(a) => !existingAssetIds.has(a.id) && !isRetiredStatus(a.status)
 	);
 	if (newAssets.length === 0 && adoptable.length === 0) {
-		throw new Error('All bundle assets are already in this production');
+		appError(409, 'bundle_all_in_production');
 	}
 
 	let skippedConflicts = 0;
@@ -732,8 +733,7 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 		newAssets = newAssets.filter((a) => !conflictIds.has(a.id));
 	}
 
-	if (newAssets.length === 0 && adoptable.length === 0)
-		throw new Error('All bundle assets are already booked during this production');
+	if (newAssets.length === 0 && adoptable.length === 0) appError(409, 'bundle_all_booked');
 
 	const crossOrgIds = [
 		...new Set(

@@ -73,38 +73,40 @@
 		{#snippet description()}
 			{target.assetTag ?? target.serialNumber ?? target.id}
 		{/snippet}
-		<form
-			id="log-inspection-form"
-			class="space-y-4"
-			onsubmit={(e) => {
-				e.preventDefault();
-				handleLog();
-			}}
-		>
-			<div class="space-y-2">
-				<Label for="performedAt">Date</Label>
-				<Input id="performedAt" type="date" bind:value={performedAt} required />
-			</div>
-			<div class="space-y-2">
-				<Label for="result">Result</Label>
-				<select
-					id="result"
-					bind:value={result}
-					class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
-				>
-					<option value="PASSED">Passed</option>
-					<option value="FAILED">Failed</option>
-				</select>
-			</div>
-			<div class="space-y-2">
-				<Label for="inspectorName">Inspector</Label>
-				<Input id="inspectorName" bind:value={inspectorName} placeholder="e.g. TÜV Nord" />
-			</div>
-			<div class="space-y-2">
-				<Label for="notes">Notes</Label>
-				<Input id="notes" bind:value={notes} placeholder="Optional" />
-			</div>
-		</form>
+		{#snippet children()}
+			<form
+				id="log-inspection-form"
+				class="space-y-4"
+				onsubmit={(e) => {
+					e.preventDefault();
+					handleLog();
+				}}
+			>
+				<div class="space-y-2">
+					<Label for="performedAt">Date</Label>
+					<Input id="performedAt" type="date" bind:value={performedAt} required />
+				</div>
+				<div class="space-y-2">
+					<Label for="result">Result</Label>
+					<select
+						id="result"
+						bind:value={result}
+						class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+					>
+						<option value="PASSED">Passed</option>
+						<option value="FAILED">Failed</option>
+					</select>
+				</div>
+				<div class="space-y-2">
+					<Label for="inspectorName">Inspector</Label>
+					<Input id="inspectorName" bind:value={inspectorName} placeholder="e.g. TÜV Nord" />
+				</div>
+				<div class="space-y-2">
+					<Label for="notes">Notes</Label>
+					<Input id="notes" bind:value={notes} placeholder="Optional" />
+				</div>
+			</form>
+		{/snippet}
 
 		{#snippet footer()}
 			<Button

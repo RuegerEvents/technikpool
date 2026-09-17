@@ -532,15 +532,17 @@
 		The selected customer's details are copied onto this offer.
 	{/snippet}
 
-	<form class="space-y-4" onsubmit={handleSaveCustomer}>
-		<CustomerSelect
-			organizationId={offer.organizationId}
-			bind:value={editCustomerId}
-			id="offer-edit-customer"
-			idPrefix="offer-edit-cust"
-			onChange={(c) => (editCustomerSelected = c)}
-		/>
-	</form>
+	{#snippet children()}
+		<form class="space-y-4" onsubmit={handleSaveCustomer}>
+			<CustomerSelect
+				organizationId={offer.organizationId}
+				bind:value={editCustomerId}
+				id="offer-edit-customer"
+				idPrefix="offer-edit-cust"
+				onChange={(c) => (editCustomerSelected = c)}
+			/>
+		</form>
+	{/snippet}
 
 	{#snippet footer()}
 		<Button
@@ -562,14 +564,16 @@
 		Duplicates all line items into a new offer for the selected customer.
 	{/snippet}
 
-	<form class="space-y-4" onsubmit={handleCopy}>
-		<CustomerSelect
-			organizationId={offer.organizationId}
-			bind:value={copyCustomerId}
-			id="offer-copy-customer"
-			idPrefix="offer-copy-cust"
-		/>
-	</form>
+	{#snippet children()}
+		<form class="space-y-4" onsubmit={handleCopy}>
+			<CustomerSelect
+				organizationId={offer.organizationId}
+				bind:value={copyCustomerId}
+				id="offer-copy-customer"
+				idPrefix="offer-copy-cust"
+			/>
+		</form>
+	{/snippet}
 
 	{#snippet footer()}
 		<Button icon="close" variant="outline" disabled={copying} onclick={() => (copyOpen = false)}>
@@ -587,12 +591,14 @@
 		to be unique within the organization and can still be corrected while the invoice is a draft.
 	{/snippet}
 
-	<form class="space-y-4" onsubmit={handleConvert}>
-		<div class="space-y-2">
-			<Label for="invoiceNumber">Invoice number</Label>
-			<Input id="invoiceNumber" bind:value={invoiceNumber} placeholder="2026-0042" required />
-		</div>
-	</form>
+	{#snippet children()}
+		<form class="space-y-4" onsubmit={handleConvert}>
+			<div class="space-y-2">
+				<Label for="invoiceNumber">Invoice number</Label>
+				<Input id="invoiceNumber" bind:value={invoiceNumber} placeholder="2026-0042" required />
+			</div>
+		</form>
+	{/snippet}
 
 	{#snippet footer()}
 		<Button

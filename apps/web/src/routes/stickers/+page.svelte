@@ -8,6 +8,8 @@
 	import { DEFAULT_ORG_NAME, DEFAULT_STICKER_COLOR, stickerOrgName } from '$lib/stickers';
 	import { toast } from 'svelte-sonner';
 	import { browser } from '$app/environment';
+	import type { AppErrorCode } from '$lib/errors';
+	import { messageForErrorCode } from '$lib/error-messages.svelte';
 
 	const orgs = await getMyOrgs();
 
@@ -225,10 +227,14 @@
 			});
 
 			if (!response.ok) {
-				const error = await response
+				const body: { code?: AppErrorCode; detail?: string } | null = await response
 					.json()
-					.catch(() => ({ message: 'Could not generate sticker sheet' }));
-				throw new Error(error.message);
+					.catch(() => null);
+				throw new Error(
+					body?.code
+						? messageForErrorCode(body.code, [body.detail ?? ''])
+						: 'Could not generate sticker sheet'
+				);
 			}
 
 			const blob = await response.blob();

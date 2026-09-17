@@ -89,76 +89,80 @@
 			on a line are kept for every unit that is still booked.
 		{/if}
 	{/snippet}
-	<div class="space-y-3 text-sm">
-		{#if staleness.added.length > 0}
-			<div>
-				<p class="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-					Added
-				</p>
-				<div class="space-y-1">
-					{#each staleness.added as line (line.key)}
-						<div class="flex justify-between rounded-md bg-green-50 px-2 py-1 dark:bg-green-950/40">
-							<span>{line.description}</span>
-							<span class="text-green-700 tabular-nums dark:text-green-400"
-								>+{fmtEUR(line.lineTotal)}</span
+	{#snippet children()}
+		<div class="space-y-3 text-sm">
+			{#if staleness.added.length > 0}
+				<div>
+					<p class="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+						Added
+					</p>
+					<div class="space-y-1">
+						{#each staleness.added as line (line.key)}
+							<div
+								class="flex justify-between rounded-md bg-green-50 px-2 py-1 dark:bg-green-950/40"
 							>
-						</div>
-					{/each}
-				</div>
-			</div>
-		{/if}
-		{#if staleness.removed.length > 0}
-			<div>
-				<p class="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-					Removed
-				</p>
-				<div class="space-y-1">
-					{#each staleness.removed as line (line.key)}
-						<div class="flex justify-between rounded-md bg-red-50 px-2 py-1 dark:bg-red-950/40">
-							<span class="line-through">{line.description}</span>
-							<span class="text-red-700 tabular-nums dark:text-red-400"
-								>−{fmtEUR(line.lineTotal)}</span
-							>
-						</div>
-					{/each}
-				</div>
-			</div>
-		{/if}
-		{#if staleness.changed.length > 0}
-			<div>
-				<p class="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-					Changed
-				</p>
-				<div class="space-y-1">
-					{#each staleness.changed as line (line.key)}
-						<div class="space-y-1 rounded-md bg-muted/50 px-2 py-1">
-							<div class="flex justify-between gap-3">
 								<span>{line.description}</span>
-								{#if line.priceChanged}
-									<span class="tabular-nums">{fmtEUR(line.before)} → {fmtEUR(line.after)}</span>
+								<span class="text-green-700 tabular-nums dark:text-green-400"
+									>+{fmtEUR(line.lineTotal)}</span
+								>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
+			{#if staleness.removed.length > 0}
+				<div>
+					<p class="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+						Removed
+					</p>
+					<div class="space-y-1">
+						{#each staleness.removed as line (line.key)}
+							<div class="flex justify-between rounded-md bg-red-50 px-2 py-1 dark:bg-red-950/40">
+								<span class="line-through">{line.description}</span>
+								<span class="text-red-700 tabular-nums dark:text-red-400"
+									>−{fmtEUR(line.lineTotal)}</span
+								>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
+			{#if staleness.changed.length > 0}
+				<div>
+					<p class="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+						Changed
+					</p>
+					<div class="space-y-1">
+						{#each staleness.changed as line (line.key)}
+							<div class="space-y-1 rounded-md bg-muted/50 px-2 py-1">
+								<div class="flex justify-between gap-3">
+									<span>{line.description}</span>
+									{#if line.priceChanged}
+										<span class="tabular-nums">{fmtEUR(line.before)} → {fmtEUR(line.after)}</span>
+									{/if}
+								</div>
+								{#if line.textBefore !== null && line.textAfter !== null}
+									<div class="flex flex-wrap items-baseline gap-x-2 text-xs text-muted-foreground">
+										<span class="whitespace-pre-line line-through">{line.textBefore}</span>
+										<span aria-hidden="true">→</span>
+										<span class="whitespace-pre-line text-foreground">{line.textAfter}</span>
+									</div>
+								{/if}
+								{#if line.categoryBefore && line.categoryAfter}
+									<div class="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
+										<span>Category:</span>
+										{@render category(line.categoryBefore)}
+										<span aria-hidden="true">→</span>
+										{@render category(line.categoryAfter)}
+									</div>
 								{/if}
 							</div>
-							{#if line.textBefore !== null && line.textAfter !== null}
-								<div class="flex flex-wrap items-baseline gap-x-2 text-xs text-muted-foreground">
-									<span class="whitespace-pre-line line-through">{line.textBefore}</span>
-									<span aria-hidden="true">→</span>
-									<span class="whitespace-pre-line text-foreground">{line.textAfter}</span>
-								</div>
-							{/if}
-							{#if line.categoryBefore && line.categoryAfter}
-								<div class="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
-									<span>Category:</span>
-									{@render category(line.categoryBefore)}
-									<span aria-hidden="true">→</span>
-									{@render category(line.categoryAfter)}
-								</div>
-							{/if}
-						</div>
-					{/each}
+						{/each}
+					</div>
 				</div>
-			</div>
-		{/if}
-	</div>
+			{/if}
+		</div>
+	{/snippet}
 
 	{#snippet footer()}
 		<Button

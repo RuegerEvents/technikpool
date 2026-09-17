@@ -1094,9 +1094,11 @@
 		This permanently deletes the production, its equipment bookings, and its crew assignments.
 		Existing offers and invoices are preserved but will no longer be linked to this production.
 	{/snippet}
-	<p class="text-sm">
-		Delete <span class="font-medium">{production.name}</span>?
-	</p>
+	{#snippet children()}
+		<p class="text-sm">
+			Delete <span class="font-medium">{production.name}</span>?
+		</p>
+	{/snippet}
 	{#snippet footer()}
 		<Button variant="outline" disabled={deleting} onclick={() => (deleteOpen = false)}
 			>Cancel</Button

@@ -6,6 +6,7 @@ import { getProduction } from './productions.remote';
 import { requireAuth, userOrgIds } from '$lib/server/services/access';
 import { ACTIVE_ASSET_WHERE } from '$lib/asset-status';
 import { accessoryIdsOf } from '$lib/server/services/accessories';
+import { appError } from '$lib/errors';
 
 const ACTIVE_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT', 'RETURNED'] as const;
 const CONFLICT_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT'] as const;
@@ -294,7 +295,7 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 		}
 
 		if (candidates.length < delta) {
-			throw new Error(`Only ${candidates.length} more unit(s) available to add`);
+			appError(409, 'not_enough_units', [candidates.length]);
 		}
 
 		const toAdd = candidates.slice(0, delta);
