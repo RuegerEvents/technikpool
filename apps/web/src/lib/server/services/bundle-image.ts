@@ -7,6 +7,12 @@ type BundleForImage = {
 	id: string;
 	imagePath: string | null;
 	imageFingerprint: string | null;
+	// Required rather than optional on purpose: the marked products are part of
+	// what the fingerprint is taken over, so a caller that forgot to load them
+	// would not draw a stale picture — it would draw a *different* one, and the
+	// next caller that did load them would redraw it again, on every read.
+	// `pnpm check` refuses the omission instead.
+	template: { featuredProducts: Array<{ id: string }> };
 	assets: Array<{
 		parentAssetId: string | null;
 		product: { id: string; imagePath: string | null };
@@ -23,12 +29,28 @@ type AssetForImage = {
 
 type ImageContents = BundleForImage['assets'];
 
-function fingerprint(assets: ImageContents) {
+/**
+ * Products the kit is built around — the distro in a power kit, the hazer in a
+ * haze kit. Empty means nobody has said, and the old rule stands: a loose unit
+ * is a main device, an attached accessory is not.
+ */
+type FeaturedProducts = ReadonlySet<string>;
+
+function featuredSet(bundle: Pick<BundleForImage, 'template'>): FeaturedProducts {
+	return new Set(bundle.template.featuredProducts.map((product) => product.id));
+}
+
+function fingerprint(assets: ImageContents, featured: FeaturedProducts) {
 	const contents = assets
-		.map((asset) => [asset.product.id, asset.product.imagePath, Boolean(asset.parentAssetId)])
+		.map((asset) => [
+			asset.product.id,
+			asset.product.imagePath,
+			Boolean(asset.parentAssetId),
+			featured.has(asset.product.id)
+		])
 		.sort((a, b) => String(a).localeCompare(String(b)));
 	return createHash('sha256')
-		.update(JSON.stringify(['thumbnail-v10', contents]))
+		.update(JSON.stringify(['thumbnail-v11', contents]))
 		.digest('hex')
 		.slice(0, 20);
 }
@@ -87,37 +109,55 @@ async function embeddedImage(path: string | null, box: { width: number; height: 
 	}
 }
 
-async function render(assets: ImageContents) {
+/** How many tiles the bottom strip holds before the rest are summed into one. */
+const STRIP_SLOTS = 5;
+
+async function render(assets: ImageContents, featured: FeaturedProducts) {
 	const uniqueProducts = new Map<
 		string,
-		{ imagePath: string | null; count: number; accessory: boolean }
+		{ imagePath: string | null; count: number; main: boolean }
 	>();
 	for (const { product, parentAssetId } of assets) {
-		const accessory = parentAssetId !== null;
-		const key = `${accessory ? 'accessory' : 'primary'}:${product.id}`;
+		// With products marked, the marking is the whole answer and it holds
+		// wherever the unit sits — a marked device attached to something else is
+		// still what the kit is for. With none marked, a loose unit is a main
+		// device and an accessory is not, which is how this always worked.
+		const main = featured.size > 0 ? featured.has(product.id) : parentAssetId === null;
+		const key = `${main ? 'main' : 'rest'}:${product.id}`;
 		const existing = uniqueProducts.get(key);
 		if (existing) existing.count++;
-		else uniqueProducts.set(key, { imagePath: product.imagePath, count: 1, accessory });
+		else uniqueProducts.set(key, { imagePath: product.imagePath, count: 1, main });
 	}
 	const allProducts = [...uniqueProducts.values()];
 	const productsWithImages = allProducts.filter((product) => product.imagePath);
-	const primary = productsWithImages
-		.filter((product) => !product.accessory)
-		.sort((a, b) => b.count - a.count);
-	const accessories = productsWithImages
-		.filter((product) => product.accessory)
-		.sort((a, b) => b.count - a.count);
+	const byCount = (a: { count: number }, b: { count: number }) => b.count - a.count;
+	let primary = productsWithImages.filter((product) => product.main).sort(byCount);
+	let rest = productsWithImages.filter((product) => !product.main).sort(byCount);
+	// Every marked product being one we have no photo of leaves nothing to draw
+	// large. Falling back to the unmarked layout beats an empty top half.
+	if (primary.length === 0) {
+		primary = rest;
+		rest = [];
+	}
 	const missingImageCount = allProducts
 		.filter((product) => !product.imagePath)
 		.reduce((total, product) => total + product.count, 0);
-	const secondary = accessories.slice(0, 4);
-	if (missingImageCount > 0) {
-		if (secondary.length === 4) secondary.pop();
-		secondary.push({ imagePath: null, count: missingImageCount, accessory: true });
+	// Anything past the strip's last slot is summed into a single placeholder
+	// tile, the same one products without a photo end up in: a kit that holds
+	// more kinds of part than fit says so rather than quietly dropping them.
+	const overflow = rest.slice(STRIP_SLOTS).reduce((total, product) => total + product.count, 0);
+	const secondary = rest.slice(0, STRIP_SLOTS);
+	const placeholderCount = missingImageCount + overflow;
+	if (placeholderCount > 0) {
+		if (secondary.length === STRIP_SLOTS) secondary.pop();
+		secondary.push({ imagePath: null, count: placeholderCount, main: false });
 	}
-	// Larger bundles reserve a compact bottom strip for accessories. For small
-	// bundles all products share the expressive 1–4 item layouts instead.
-	const useAccessoryStrip = primary.length >= 2 && secondary.length > 0;
+	// One marked device is a hero shot with its parts under it, so a single
+	// primary is enough to reserve the strip. Without a marking the old rule
+	// stands: two or more loose units before accessories are pushed down there,
+	// and anything smaller shares the expressive 1–4 item layouts.
+	const minimumPrimaries = featured.size > 0 ? 1 : 2;
+	const useAccessoryStrip = primary.length >= minimumPrimaries && secondary.length > 0;
 	const products = useAccessoryStrip
 		? [...primary.slice(0, 6), ...secondary]
 		: [...primary, ...secondary].slice(0, 9);
@@ -200,10 +240,11 @@ async function render(assets: ImageContents) {
 
 /** Generate only when contents changed; force creates a fresh URL to bust browser caches. */
 export async function ensureBundleImage(bundle: BundleForImage, force = false) {
-	const currentFingerprint = fingerprint(bundle.assets);
+	const featured = featuredSet(bundle);
+	const currentFingerprint = fingerprint(bundle.assets, featured);
 	if (!force && bundle.imagePath && bundle.imageFingerprint === currentFingerprint)
 		return bundle.imagePath;
-	const svg = await render(bundle.assets);
+	const svg = await render(bundle.assets, featured);
 	const suffix = force ? `${currentFingerprint}-${randomUUID()}` : currentFingerprint;
 	const path = `${PUBLIC_PREFIX}/bundles/${bundle.id}-${suffix}.svg`;
 	await putObject(path, new TextEncoder().encode(svg), 'image/svg+xml');
@@ -226,7 +267,11 @@ export async function ensureAssetImage(asset: AssetForImage, force = false) {
 			product: accessory.product
 		}))
 	];
-	const currentFingerprint = fingerprint(contents);
+	// A unit's preview needs nobody to mark anything: the unit *is* the main
+	// device and everything else in the picture hangs off it, so it is drawn
+	// large and its accessories share the strip underneath however many there are.
+	const featured: FeaturedProducts = new Set([asset.product.id]);
+	const currentFingerprint = fingerprint(contents, featured);
 	if (
 		!force &&
 		asset.generatedImagePath &&
@@ -234,7 +279,7 @@ export async function ensureAssetImage(asset: AssetForImage, force = false) {
 	) {
 		return asset.generatedImagePath;
 	}
-	const svg = await render(contents);
+	const svg = await render(contents, featured);
 	const suffix = force ? `${currentFingerprint}-${randomUUID()}` : currentFingerprint;
 	const path = `${PUBLIC_PREFIX}/assets/${asset.id}-${suffix}.svg`;
 	await putObject(path, new TextEncoder().encode(svg), 'image/svg+xml');

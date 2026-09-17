@@ -7368,3 +7368,31 @@ msgid "Create the copy"
 msgid_plural "Create # copies"
 msgstr[0] "Kopie anlegen"
 msgstr[1] "# Kopien anlegen"
+
+#: src/lib/error-messages.svelte.ts
+msgid "A main device has to be a product this bundle type actually contains."
+msgstr "Ein Hauptgerät muss ein Produkt sein, das dieser Bundle-Typ auch enthält."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "The starred devices are drawn large; everything else shares the strip below them."
+msgstr "Die markierten Geräte werden groß dargestellt; alles andere teilt sich die Leiste darunter."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Star the devices this kit is actually for — in the list opposite — and they are drawn large, with the rest of the kit in a strip below."
+msgstr "Markiere in der Liste nebenan die Geräte, um die es in diesem Kit eigentlich geht — sie werden groß dargestellt, der Rest in einer Leiste darunter."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Main device"
+msgstr "Hauptgerät"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Main"
+msgstr "Haupt"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Main device of this kit"
+msgstr "Hauptgerät dieses Kits"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Mark as a main device"
+msgstr "Als Hauptgerät markieren"

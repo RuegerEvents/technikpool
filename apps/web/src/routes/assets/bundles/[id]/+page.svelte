@@ -11,6 +11,7 @@
 	import { CategorySelect } from '$lib/components/ui/category-select';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
+	import { Star } from '@lucide/svelte';
 	import {
 		getBundle,
 		getCategories,
@@ -22,6 +23,7 @@
 		updateBundleTemplate,
 		updateBundle,
 		regenerateBundleImage,
+		setBundleFeaturedProducts,
 		convertBundleToAccessories,
 		duplicateBundle,
 		getBundleCopyPlan
@@ -196,6 +198,27 @@
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			converting = false;
+		}
+	}
+
+	// ── Main devices ─────────────────────────────────────────────────────────
+	// Which products the kit is *for*, so the preview draws those large and the
+	// accompanying parts small. The mark is on the product and the bundle type,
+	// not on the unit, so every case built to this spec is drawn the same way.
+	let featuredProductIds = $derived(new Set(bundle.template.featuredProducts.map((p) => p.id)));
+	let featuringProductId = $state('');
+
+	async function toggleFeatured(productId: string) {
+		const next = featuredProductIds.has(productId)
+			? [...featuredProductIds].filter((id) => id !== productId)
+			: [...featuredProductIds, productId];
+		featuringProductId = productId;
+		try {
+			await setBundleFeaturedProducts({ templateId: bundle.templateId, productIds: next });
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			featuringProductId = '';
 		}
 	}
 
@@ -398,6 +421,14 @@
 						<Button variant="outline" disabled={regeneratingImage} onclick={handleRegenerateImage}>
 							{regeneratingImage ? 'Regenerating…' : 'Regenerate image'}
 						</Button>
+						<p class="text-xs text-muted-foreground">
+							{#if featuredProductIds.size > 0}
+								The starred devices are drawn large; everything else shares the strip below them.
+							{:else}
+								Star the devices this kit is actually for — in the list opposite — and they are
+								drawn large, with the rest of the kit in a strip below.
+							{/if}
+						</p>
 					</div>
 					<div class="space-y-2">
 						<Label>Organization</Label>
@@ -483,11 +514,18 @@
 									<th class="px-4 py-3 text-left font-medium text-muted-foreground">Serial</th>
 									<th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
 									<th class="px-4 py-3 text-left font-medium text-muted-foreground">Location</th>
+									<th
+										class="px-4 py-3 text-center font-medium text-muted-foreground"
+										title="Main device">Main</th
+									>
 									<th class="px-4 py-3"></th>
 								</tr>
 							</thead>
 							<tbody>
 								{#each visibleBundleAssets as { asset, nested } (asset.id)}
+									<!-- The mark is per product, so every unit of one product shows the
+									     same star and toggling any of them moves all of them. -->
+									{@const featured = featuredProductIds.has(asset.productId)}
 									<!-- The whole row navigates, as it does on the Devices list, but the
 									     product name is a real anchor so the unit can be opened in a new
 									     tab and reached by keyboard. -->
@@ -518,6 +556,23 @@
 										</td>
 										<td class="px-4 py-3 text-sm text-muted-foreground">
 											{asset.location?.name ?? '—'}
+										</td>
+										<td class="px-4 py-3 text-center">
+											<button
+												type="button"
+												class="rounded-md p-1.5 transition-colors hover:bg-muted disabled:opacity-50 {featured
+													? 'text-foreground'
+													: 'text-muted-foreground/40'}"
+												disabled={featuringProductId !== ''}
+												aria-pressed={featured}
+												title={featured ? 'Main device of this kit' : 'Mark as a main device'}
+												onclick={(e) => {
+													e.stopPropagation();
+													toggleFeatured(asset.productId);
+												}}
+											>
+												<Star class="size-4" fill={featured ? 'currentColor' : 'none'} />
+											</button>
 										</td>
 										<td class="px-4 py-3 text-right">
 											{#if !nested}

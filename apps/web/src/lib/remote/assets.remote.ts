@@ -79,6 +79,10 @@ const ASSET_ORDER_BY: Prisma.AssetOrderByWithRelationInput[] = [
 	{ id: 'asc' }
 ];
 
+// Which products a bundle type is built around. Loaded wherever a preview may
+// be drawn, because the answer is part of the picture — see bundle-image.ts.
+const FEATURED_PRODUCTS_SELECT = { select: { id: true } } as const;
+
 const ACCESSORIES_INCLUDE = {
 	where: ACTIVE_ASSET_WHERE,
 	include: { product: { include: { manufacturer: true, category: true } } },
@@ -2203,6 +2207,7 @@ export const getBundleTemplates = query(v.optional(v.string()), async (organizat
 		include: {
 			organization: true,
 			category: true,
+			featuredProducts: FEATURED_PRODUCTS_SELECT,
 			instances: {
 				include: {
 					location: true,
@@ -2224,7 +2229,9 @@ export const getBundleTemplates = query(v.optional(v.string()), async (organizat
 	await Promise.all(
 		templates.flatMap((template) =>
 			template.instances.map(async (bundle) => {
-				bundle.imagePath = await ensureBundleImageWithoutBreakingRead(bundle);
+				// The instances are nested under their template here rather than
+				// carrying one, so the marked products are handed over explicitly.
+				bundle.imagePath = await ensureBundleImageWithoutBreakingRead({ ...bundle, template });
 			})
 		)
 	);
@@ -2240,7 +2247,9 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 	const bundles = await prisma.assetBundle.findMany({
 		where: { template: { organizationId: { in: queryOrgIds } } },
 		include: {
-			template: { include: { organization: true, category: true } },
+			template: {
+				include: { organization: true, category: true, featuredProducts: FEATURED_PRODUCTS_SELECT }
+			},
 			location: true,
 			assets: {
 				include: { product: { include: { manufacturer: true, category: true } }, location: true },
@@ -2258,7 +2267,9 @@ export const getBundle = query(v.string(), async (id: string) => {
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id },
 		include: {
-			template: { include: { organization: true, category: true } },
+			template: {
+				include: { organization: true, category: true, featuredProducts: FEATURED_PRODUCTS_SELECT }
+			},
 			location: true,
 			assets: {
 				include: {
@@ -2284,7 +2295,7 @@ export const regenerateBundleImage = command(v.string(), async (bundleId) => {
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id: bundleId },
 		include: {
-			template: { include: { category: true } },
+			template: { include: { category: true, featuredProducts: FEATURED_PRODUCTS_SELECT } },
 			assets: { include: { product: true } }
 		}
 	});
@@ -2399,6 +2410,69 @@ export const updateBundleTemplate = command(updateBundleTemplateSchema, async (i
 	await getBundles(template.organizationId).refresh();
 	return updated;
 });
+
+const setBundleFeaturedProductsSchema = v.object({
+	templateId: v.string(),
+	productIds: v.array(v.string())
+});
+
+/**
+ * Which products this bundle type is built around — the distro in a power kit,
+ * the hazer in a haze kit.
+ *
+ * It sits on the template, so it holds for every case built to that spec, and
+ * the only thing that reads it is the generated preview: the marked products are
+ * drawn large and everything else shares the strip underneath. Marking nothing
+ * leaves the old rule in place (loose units large, accessories small), which is
+ * why this is a plain set and not a flag per member.
+ */
+export const setBundleFeaturedProducts = command(
+	setBundleFeaturedProductsSchema,
+	async ({ templateId, productIds }) => {
+		const template = await prisma.bundleTemplate.findUniqueOrThrow({
+			where: { id: templateId },
+			include: { instances: { select: { id: true } } }
+		});
+		await requireOrgInventory(template.organizationId);
+
+		// A product nothing in the kit is an instance of would mark a device that
+		// never appears in the picture — always a mistake, never a preference.
+		const wanted = [...new Set(productIds)];
+		if (wanted.length > 0) {
+			const held = await prisma.asset.groupBy({
+				by: ['productId'],
+				where: { bundle: { templateId }, productId: { in: wanted } }
+			});
+			const heldIds = new Set(held.map((row) => row.productId));
+			if (wanted.some((id) => !heldIds.has(id))) appError(400, 'bundle_featured_not_member');
+		}
+
+		await prisma.bundleTemplate.update({
+			where: { id: templateId },
+			data: { featuredProducts: { set: wanted.map((id) => ({ id })) } }
+		});
+
+		// Redraw now rather than on the next read: the person who just moved the
+		// mark is looking at the picture it changes.
+		const instances = await prisma.assetBundle.findMany({
+			where: { templateId },
+			include: {
+				template: { select: { featuredProducts: FEATURED_PRODUCTS_SELECT } },
+				assets: { include: { product: true } }
+			}
+		});
+		await Promise.all(instances.map((bundle) => ensureBundleImageWithoutBreakingRead(bundle)));
+
+		await Promise.all([
+			...instances.map((bundle) => getBundle(bundle.id).refresh()),
+			getBundles(template.organizationId).refresh(),
+			getBundles().refresh(),
+			getBundleTemplates(template.organizationId).refresh(),
+			getBundleTemplates().refresh()
+		]);
+		return { featuredProductIds: wanted };
+	}
+);
 
 const updateBundleSchema = v.object({
 	bundleId: v.string(),
@@ -4064,7 +4138,10 @@ export const regenerateGeneratedPreview = command(
 		if (kind === 'bundle') {
 			const bundle = await prisma.assetBundle.findUniqueOrThrow({
 				where: { id },
-				include: { assets: { include: { product: true } } }
+				include: {
+					template: { select: { featuredProducts: FEATURED_PRODUCTS_SELECT } },
+					assets: { include: { product: true } }
+				}
 			});
 			await ensureBundleImage(bundle, true);
 			return;

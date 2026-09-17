@@ -201,6 +201,7 @@ export type BundleTemplateWhereInput = {
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   category?: Prisma.XOR<Prisma.CategoryScalarRelationFilter, Prisma.CategoryWhereInput>
   instances?: Prisma.AssetBundleListRelationFilter
+  featuredProducts?: Prisma.ProductListRelationFilter
 }
 
 export type BundleTemplateOrderByWithRelationInput = {
@@ -214,6 +215,7 @@ export type BundleTemplateOrderByWithRelationInput = {
   organization?: Prisma.OrganizationOrderByWithRelationInput
   category?: Prisma.CategoryOrderByWithRelationInput
   instances?: Prisma.AssetBundleOrderByRelationAggregateInput
+  featuredProducts?: Prisma.ProductOrderByRelationAggregateInput
 }
 
 export type BundleTemplateWhereUniqueInput = Prisma.AtLeast<{
@@ -230,6 +232,7 @@ export type BundleTemplateWhereUniqueInput = Prisma.AtLeast<{
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   category?: Prisma.XOR<Prisma.CategoryScalarRelationFilter, Prisma.CategoryWhereInput>
   instances?: Prisma.AssetBundleListRelationFilter
+  featuredProducts?: Prisma.ProductListRelationFilter
 }, "id">
 
 export type BundleTemplateOrderByWithAggregationInput = {
@@ -267,6 +270,7 @@ export type BundleTemplateCreateInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutBundleTemplatesInput
   category: Prisma.CategoryCreateNestedOneWithoutBundleTemplatesInput
   instances?: Prisma.AssetBundleCreateNestedManyWithoutTemplateInput
+  featuredProducts?: Prisma.ProductCreateNestedManyWithoutFeaturedInBundleTemplatesInput
 }
 
 export type BundleTemplateUncheckedCreateInput = {
@@ -278,6 +282,7 @@ export type BundleTemplateUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   instances?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutTemplateInput
+  featuredProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutFeaturedInBundleTemplatesInput
 }
 
 export type BundleTemplateUpdateInput = {
@@ -289,6 +294,7 @@ export type BundleTemplateUpdateInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundleTemplatesNestedInput
   category?: Prisma.CategoryUpdateOneRequiredWithoutBundleTemplatesNestedInput
   instances?: Prisma.AssetBundleUpdateManyWithoutTemplateNestedInput
+  featuredProducts?: Prisma.ProductUpdateManyWithoutFeaturedInBundleTemplatesNestedInput
 }
 
 export type BundleTemplateUncheckedUpdateInput = {
@@ -300,6 +306,7 @@ export type BundleTemplateUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   instances?: Prisma.AssetBundleUncheckedUpdateManyWithoutTemplateNestedInput
+  featuredProducts?: Prisma.ProductUncheckedUpdateManyWithoutFeaturedInBundleTemplatesNestedInput
 }
 
 export type BundleTemplateCreateManyInput = {
@@ -459,6 +466,44 @@ export type BundleTemplateUncheckedUpdateManyWithoutCategoryNestedInput = {
   deleteMany?: Prisma.BundleTemplateScalarWhereInput | Prisma.BundleTemplateScalarWhereInput[]
 }
 
+export type BundleTemplateCreateNestedManyWithoutFeaturedProductsInput = {
+  create?: Prisma.XOR<Prisma.BundleTemplateCreateWithoutFeaturedProductsInput, Prisma.BundleTemplateUncheckedCreateWithoutFeaturedProductsInput> | Prisma.BundleTemplateCreateWithoutFeaturedProductsInput[] | Prisma.BundleTemplateUncheckedCreateWithoutFeaturedProductsInput[]
+  connectOrCreate?: Prisma.BundleTemplateCreateOrConnectWithoutFeaturedProductsInput | Prisma.BundleTemplateCreateOrConnectWithoutFeaturedProductsInput[]
+  connect?: Prisma.BundleTemplateWhereUniqueInput | Prisma.BundleTemplateWhereUniqueInput[]
+}
+
+export type BundleTemplateUncheckedCreateNestedManyWithoutFeaturedProductsInput = {
+  create?: Prisma.XOR<Prisma.BundleTemplateCreateWithoutFeaturedProductsInput, Prisma.BundleTemplateUncheckedCreateWithoutFeaturedProductsInput> | Prisma.BundleTemplateCreateWithoutFeaturedProductsInput[] | Prisma.BundleTemplateUncheckedCreateWithoutFeaturedProductsInput[]
+  connectOrCreate?: Prisma.BundleTemplateCreateOrConnectWithoutFeaturedProductsInput | Prisma.BundleTemplateCreateOrConnectWithoutFeaturedProductsInput[]
+  connect?: Prisma.BundleTemplateWhereUniqueInput | Prisma.BundleTemplateWhereUniqueInput[]
+}
+
+export type BundleTemplateUpdateManyWithoutFeaturedProductsNestedInput = {
+  create?: Prisma.XOR<Prisma.BundleTemplateCreateWithoutFeaturedProductsInput, Prisma.BundleTemplateUncheckedCreateWithoutFeaturedProductsInput> | Prisma.BundleTemplateCreateWithoutFeaturedProductsInput[] | Prisma.BundleTemplateUncheckedCreateWithoutFeaturedProductsInput[]
+  connectOrCreate?: Prisma.BundleTemplateCreateOrConnectWithoutFeaturedProductsInput | Prisma.BundleTemplateCreateOrConnectWithoutFeaturedProductsInput[]
+  upsert?: Prisma.BundleTemplateUpsertWithWhereUniqueWithoutFeaturedProductsInput | Prisma.BundleTemplateUpsertWithWhereUniqueWithoutFeaturedProductsInput[]
+  set?: Prisma.BundleTemplateWhereUniqueInput | Prisma.BundleTemplateWhereUniqueInput[]
+  disconnect?: Prisma.BundleTemplateWhereUniqueInput | Prisma.BundleTemplateWhereUniqueInput[]
+  delete?: Prisma.BundleTemplateWhereUniqueInput | Prisma.BundleTemplateWhereUniqueInput[]
+  connect?: Prisma.BundleTemplateWhereUniqueInput | Prisma.BundleTemplateWhereUniqueInput[]
+  update?: Prisma.BundleTemplateUpdateWithWhereUniqueWithoutFeaturedProductsInput | Prisma.BundleTemplateUpdateWithWhereUniqueWithoutFeaturedProductsInput[]
+  updateMany?: Prisma.BundleTemplateUpdateManyWithWhereWithoutFeaturedProductsInput | Prisma.BundleTemplateUpdateManyWithWhereWithoutFeaturedProductsInput[]
+  deleteMany?: Prisma.BundleTemplateScalarWhereInput | Prisma.BundleTemplateScalarWhereInput[]
+}
+
+export type BundleTemplateUncheckedUpdateManyWithoutFeaturedProductsNestedInput = {
+  create?: Prisma.XOR<Prisma.BundleTemplateCreateWithoutFeaturedProductsInput, Prisma.BundleTemplateUncheckedCreateWithoutFeaturedProductsInput> | Prisma.BundleTemplateCreateWithoutFeaturedProductsInput[] | Prisma.BundleTemplateUncheckedCreateWithoutFeaturedProductsInput[]
+  connectOrCreate?: Prisma.BundleTemplateCreateOrConnectWithoutFeaturedProductsInput | Prisma.BundleTemplateCreateOrConnectWithoutFeaturedProductsInput[]
+  upsert?: Prisma.BundleTemplateUpsertWithWhereUniqueWithoutFeaturedProductsInput | Prisma.BundleTemplateUpsertWithWhereUniqueWithoutFeaturedProductsInput[]
+  set?: Prisma.BundleTemplateWhereUniqueInput | Prisma.BundleTemplateWhereUniqueInput[]
+  disconnect?: Prisma.BundleTemplateWhereUniqueInput | Prisma.BundleTemplateWhereUniqueInput[]
+  delete?: Prisma.BundleTemplateWhereUniqueInput | Prisma.BundleTemplateWhereUniqueInput[]
+  connect?: Prisma.BundleTemplateWhereUniqueInput | Prisma.BundleTemplateWhereUniqueInput[]
+  update?: Prisma.BundleTemplateUpdateWithWhereUniqueWithoutFeaturedProductsInput | Prisma.BundleTemplateUpdateWithWhereUniqueWithoutFeaturedProductsInput[]
+  updateMany?: Prisma.BundleTemplateUpdateManyWithWhereWithoutFeaturedProductsInput | Prisma.BundleTemplateUpdateManyWithWhereWithoutFeaturedProductsInput[]
+  deleteMany?: Prisma.BundleTemplateScalarWhereInput | Prisma.BundleTemplateScalarWhereInput[]
+}
+
 export type BundleTemplateCreateNestedOneWithoutInstancesInput = {
   create?: Prisma.XOR<Prisma.BundleTemplateCreateWithoutInstancesInput, Prisma.BundleTemplateUncheckedCreateWithoutInstancesInput>
   connectOrCreate?: Prisma.BundleTemplateCreateOrConnectWithoutInstancesInput
@@ -481,6 +526,7 @@ export type BundleTemplateCreateWithoutOrganizationInput = {
   updatedAt?: Date | string
   category: Prisma.CategoryCreateNestedOneWithoutBundleTemplatesInput
   instances?: Prisma.AssetBundleCreateNestedManyWithoutTemplateInput
+  featuredProducts?: Prisma.ProductCreateNestedManyWithoutFeaturedInBundleTemplatesInput
 }
 
 export type BundleTemplateUncheckedCreateWithoutOrganizationInput = {
@@ -491,6 +537,7 @@ export type BundleTemplateUncheckedCreateWithoutOrganizationInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   instances?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutTemplateInput
+  featuredProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutFeaturedInBundleTemplatesInput
 }
 
 export type BundleTemplateCreateOrConnectWithoutOrganizationInput = {
@@ -540,6 +587,7 @@ export type BundleTemplateCreateWithoutCategoryInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBundleTemplatesInput
   instances?: Prisma.AssetBundleCreateNestedManyWithoutTemplateInput
+  featuredProducts?: Prisma.ProductCreateNestedManyWithoutFeaturedInBundleTemplatesInput
 }
 
 export type BundleTemplateUncheckedCreateWithoutCategoryInput = {
@@ -550,6 +598,7 @@ export type BundleTemplateUncheckedCreateWithoutCategoryInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   instances?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutTemplateInput
+  featuredProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutFeaturedInBundleTemplatesInput
 }
 
 export type BundleTemplateCreateOrConnectWithoutCategoryInput = {
@@ -578,6 +627,49 @@ export type BundleTemplateUpdateManyWithWhereWithoutCategoryInput = {
   data: Prisma.XOR<Prisma.BundleTemplateUpdateManyMutationInput, Prisma.BundleTemplateUncheckedUpdateManyWithoutCategoryInput>
 }
 
+export type BundleTemplateCreateWithoutFeaturedProductsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutBundleTemplatesInput
+  category: Prisma.CategoryCreateNestedOneWithoutBundleTemplatesInput
+  instances?: Prisma.AssetBundleCreateNestedManyWithoutTemplateInput
+}
+
+export type BundleTemplateUncheckedCreateWithoutFeaturedProductsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  organizationId: string
+  categoryId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  instances?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutTemplateInput
+}
+
+export type BundleTemplateCreateOrConnectWithoutFeaturedProductsInput = {
+  where: Prisma.BundleTemplateWhereUniqueInput
+  create: Prisma.XOR<Prisma.BundleTemplateCreateWithoutFeaturedProductsInput, Prisma.BundleTemplateUncheckedCreateWithoutFeaturedProductsInput>
+}
+
+export type BundleTemplateUpsertWithWhereUniqueWithoutFeaturedProductsInput = {
+  where: Prisma.BundleTemplateWhereUniqueInput
+  update: Prisma.XOR<Prisma.BundleTemplateUpdateWithoutFeaturedProductsInput, Prisma.BundleTemplateUncheckedUpdateWithoutFeaturedProductsInput>
+  create: Prisma.XOR<Prisma.BundleTemplateCreateWithoutFeaturedProductsInput, Prisma.BundleTemplateUncheckedCreateWithoutFeaturedProductsInput>
+}
+
+export type BundleTemplateUpdateWithWhereUniqueWithoutFeaturedProductsInput = {
+  where: Prisma.BundleTemplateWhereUniqueInput
+  data: Prisma.XOR<Prisma.BundleTemplateUpdateWithoutFeaturedProductsInput, Prisma.BundleTemplateUncheckedUpdateWithoutFeaturedProductsInput>
+}
+
+export type BundleTemplateUpdateManyWithWhereWithoutFeaturedProductsInput = {
+  where: Prisma.BundleTemplateScalarWhereInput
+  data: Prisma.XOR<Prisma.BundleTemplateUpdateManyMutationInput, Prisma.BundleTemplateUncheckedUpdateManyWithoutFeaturedProductsInput>
+}
+
 export type BundleTemplateCreateWithoutInstancesInput = {
   id?: string
   name: string
@@ -586,6 +678,7 @@ export type BundleTemplateCreateWithoutInstancesInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBundleTemplatesInput
   category: Prisma.CategoryCreateNestedOneWithoutBundleTemplatesInput
+  featuredProducts?: Prisma.ProductCreateNestedManyWithoutFeaturedInBundleTemplatesInput
 }
 
 export type BundleTemplateUncheckedCreateWithoutInstancesInput = {
@@ -596,6 +689,7 @@ export type BundleTemplateUncheckedCreateWithoutInstancesInput = {
   categoryId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  featuredProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutFeaturedInBundleTemplatesInput
 }
 
 export type BundleTemplateCreateOrConnectWithoutInstancesInput = {
@@ -622,6 +716,7 @@ export type BundleTemplateUpdateWithoutInstancesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundleTemplatesNestedInput
   category?: Prisma.CategoryUpdateOneRequiredWithoutBundleTemplatesNestedInput
+  featuredProducts?: Prisma.ProductUpdateManyWithoutFeaturedInBundleTemplatesNestedInput
 }
 
 export type BundleTemplateUncheckedUpdateWithoutInstancesInput = {
@@ -632,6 +727,7 @@ export type BundleTemplateUncheckedUpdateWithoutInstancesInput = {
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  featuredProducts?: Prisma.ProductUncheckedUpdateManyWithoutFeaturedInBundleTemplatesNestedInput
 }
 
 export type BundleTemplateCreateManyOrganizationInput = {
@@ -651,6 +747,7 @@ export type BundleTemplateUpdateWithoutOrganizationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.CategoryUpdateOneRequiredWithoutBundleTemplatesNestedInput
   instances?: Prisma.AssetBundleUpdateManyWithoutTemplateNestedInput
+  featuredProducts?: Prisma.ProductUpdateManyWithoutFeaturedInBundleTemplatesNestedInput
 }
 
 export type BundleTemplateUncheckedUpdateWithoutOrganizationInput = {
@@ -661,6 +758,7 @@ export type BundleTemplateUncheckedUpdateWithoutOrganizationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   instances?: Prisma.AssetBundleUncheckedUpdateManyWithoutTemplateNestedInput
+  featuredProducts?: Prisma.ProductUncheckedUpdateManyWithoutFeaturedInBundleTemplatesNestedInput
 }
 
 export type BundleTemplateUncheckedUpdateManyWithoutOrganizationInput = {
@@ -689,6 +787,7 @@ export type BundleTemplateUpdateWithoutCategoryInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundleTemplatesNestedInput
   instances?: Prisma.AssetBundleUpdateManyWithoutTemplateNestedInput
+  featuredProducts?: Prisma.ProductUpdateManyWithoutFeaturedInBundleTemplatesNestedInput
 }
 
 export type BundleTemplateUncheckedUpdateWithoutCategoryInput = {
@@ -699,6 +798,7 @@ export type BundleTemplateUncheckedUpdateWithoutCategoryInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   instances?: Prisma.AssetBundleUncheckedUpdateManyWithoutTemplateNestedInput
+  featuredProducts?: Prisma.ProductUncheckedUpdateManyWithoutFeaturedInBundleTemplatesNestedInput
 }
 
 export type BundleTemplateUncheckedUpdateManyWithoutCategoryInput = {
@@ -710,6 +810,38 @@ export type BundleTemplateUncheckedUpdateManyWithoutCategoryInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type BundleTemplateUpdateWithoutFeaturedProductsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundleTemplatesNestedInput
+  category?: Prisma.CategoryUpdateOneRequiredWithoutBundleTemplatesNestedInput
+  instances?: Prisma.AssetBundleUpdateManyWithoutTemplateNestedInput
+}
+
+export type BundleTemplateUncheckedUpdateWithoutFeaturedProductsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instances?: Prisma.AssetBundleUncheckedUpdateManyWithoutTemplateNestedInput
+}
+
+export type BundleTemplateUncheckedUpdateManyWithoutFeaturedProductsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 /**
  * Count Type BundleTemplateCountOutputType
@@ -717,10 +849,12 @@ export type BundleTemplateUncheckedUpdateManyWithoutCategoryInput = {
 
 export type BundleTemplateCountOutputType = {
   instances: number
+  featuredProducts: number
 }
 
 export type BundleTemplateCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   instances?: boolean | BundleTemplateCountOutputTypeCountInstancesArgs
+  featuredProducts?: boolean | BundleTemplateCountOutputTypeCountFeaturedProductsArgs
 }
 
 /**
@@ -740,6 +874,13 @@ export type BundleTemplateCountOutputTypeCountInstancesArgs<ExtArgs extends runt
   where?: Prisma.AssetBundleWhereInput
 }
 
+/**
+ * BundleTemplateCountOutputType without action
+ */
+export type BundleTemplateCountOutputTypeCountFeaturedProductsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProductWhereInput
+}
+
 
 export type BundleTemplateSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -752,6 +893,7 @@ export type BundleTemplateSelect<ExtArgs extends runtime.Types.Extensions.Intern
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
   instances?: boolean | Prisma.BundleTemplate$instancesArgs<ExtArgs>
+  featuredProducts?: boolean | Prisma.BundleTemplate$featuredProductsArgs<ExtArgs>
   _count?: boolean | Prisma.BundleTemplateCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["bundleTemplate"]>
 
@@ -794,6 +936,7 @@ export type BundleTemplateInclude<ExtArgs extends runtime.Types.Extensions.Inter
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
   instances?: boolean | Prisma.BundleTemplate$instancesArgs<ExtArgs>
+  featuredProducts?: boolean | Prisma.BundleTemplate$featuredProductsArgs<ExtArgs>
   _count?: boolean | Prisma.BundleTemplateCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type BundleTemplateIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -811,6 +954,7 @@ export type $BundleTemplatePayload<ExtArgs extends runtime.Types.Extensions.Inte
     organization: Prisma.$OrganizationPayload<ExtArgs>
     category: Prisma.$CategoryPayload<ExtArgs>
     instances: Prisma.$AssetBundlePayload<ExtArgs>[]
+    featuredProducts: Prisma.$ProductPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1217,6 +1361,7 @@ export interface Prisma__BundleTemplateClient<T, Null = never, ExtArgs extends r
   organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   category<T extends Prisma.CategoryDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CategoryDefaultArgs<ExtArgs>>): Prisma.Prisma__CategoryClient<runtime.Types.Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   instances<T extends Prisma.BundleTemplate$instancesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BundleTemplate$instancesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetBundlePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  featuredProducts<T extends Prisma.BundleTemplate$featuredProductsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BundleTemplate$featuredProductsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1675,6 +1820,30 @@ export type BundleTemplate$instancesArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.AssetBundleScalarFieldEnum | Prisma.AssetBundleScalarFieldEnum[]
+}
+
+/**
+ * BundleTemplate.featuredProducts
+ */
+export type BundleTemplate$featuredProductsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Product
+   */
+  select?: Prisma.ProductSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Product
+   */
+  omit?: Prisma.ProductOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProductInclude<ExtArgs> | null
+  where?: Prisma.ProductWhereInput
+  orderBy?: Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[]
+  cursor?: Prisma.ProductWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProductScalarFieldEnum | Prisma.ProductScalarFieldEnum[]
 }
 
 /**

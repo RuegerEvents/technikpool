@@ -92,6 +92,7 @@ export type AppErrorCode =
 	| 'bundle_too_small'
 	| 'bundle_main_not_member'
 	| 'bundle_main_is_accessory'
+	| 'bundle_featured_not_member'
 	| 'bundle_members_org_mismatch'
 	| 'bundle_empty'
 	| 'bundle_all_in_production'

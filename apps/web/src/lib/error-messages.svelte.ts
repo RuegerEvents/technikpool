@@ -167,6 +167,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'The selected main device is not in this bundle.';
 		case 'bundle_main_is_accessory':
 			return 'The main device cannot itself be an accessory.';
+		case 'bundle_featured_not_member':
+			return 'A main device has to be a product this bundle type actually contains.';
 		case 'bundle_members_org_mismatch':
 			return 'All units in a bundle must belong to the same organization.';
 		case 'bundle_empty':

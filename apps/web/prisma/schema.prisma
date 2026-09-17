@@ -307,6 +307,8 @@ model Product {
   updatedAt DateTime @updatedAt
   assets    Asset[]
   orgPrices OrgProductPrice[]
+
+  featuredInBundleTemplates BundleTemplate[] @relation("BundleTemplateFeaturedProducts")
 }
 
 // The catalog price a rental rate is calculated from — per organization, not
@@ -425,6 +427,13 @@ model BundleTemplate {
   category       Category     @relation(fields: [categoryId], references: [id])
 
   instances AssetBundle[]
+
+  // The products this kit is actually *for* — the distro in a power kit, the
+  // hazer in a haze kit. Everything else a kit contains is the accompanying
+  // parts, so the generated preview draws these large and the rest in the strip
+  // below. It sits on the template, not the instance: two cases built to the
+  // same spec are the same kit, and the answer can't differ between them.
+  featuredProducts Product[] @relation("BundleTemplateFeaturedProducts")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
