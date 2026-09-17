@@ -849,11 +849,12 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 	const reusedAccessoryIds: string[] = [];
 	if (args.accessoryProfile) {
 		const pool = args.reuseAccessoryStock
-			? await accessoryStockPool(tx, {
+			? await stockPool(tx, {
 					organizationId: args.organizationId,
 					productIds: args.accessoryProfile.accessories.map((acc) => acc.productId),
 					bundleId: parent?.bundleId ?? args.bundleId ?? null,
-					locationId: args.locationId
+					locationId: args.locationId,
+					bare: true
 				})
 			: new Map<string, StockUnit[]>();
 
@@ -868,7 +869,7 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 						product: unit.product
 					};
 					const taken = pool.get(acc.productId)?.shift();
-					if (taken && (await attachStockUnit(tx, args.userId, taken, parentRecord))) {
+					if (taken && (await attachStockUnit(tx, args.userId, taken.id, parentRecord))) {
 						reusedAccessoryIds.push(taken.id);
 						continue;
 					}
@@ -2525,6 +2526,483 @@ export const removeAssetFromBundle = command(bundleAssetSchema, async ({ bundleI
 	return { bundleId, assetId };
 });
 
+// ── Duplicating a bundle ─────────────────────────────────────────────────────
+// A second identical case is an ordinary thing to need, and building it by hand
+// means registering every unit and adding it one at a time. What a copy copies
+// is the *composition*, not the units: a fixture is in one case at a time, so
+// the copy's members have to be other physical units — either ones already on
+// the shelf or newly registered ones. That is the same question the accessory
+// fan-out asks, and it is asked the same way.
+
+/** Enough of a source member to build its counterpart from. */
+const BUNDLE_COPY_ASSET_SELECT = {
+	id: true,
+	productId: true,
+	assetTag: true,
+	parentAssetId: true,
+	locationId: true,
+	product: { select: { name: true, manufacturer: { select: { name: true } } } }
+} satisfies Prisma.AssetSelect;
+
+type BundleCopyAsset = Prisma.AssetGetPayload<{ select: typeof BUNDLE_COPY_ASSET_SELECT }>;
+
+/** One unit the copy needs, described by the one it mirrors. */
+type BundleCopySlot = {
+	productId: string;
+	name: string;
+	manufacturerName: string;
+	/** A tagged original begets a tagged copy. */
+	tagged: boolean;
+};
+
+type BundleCopyMember = BundleCopySlot & {
+	/** Where the original lives, as the last fallback for its counterpart. */
+	locationId: string;
+	/** What hangs off the original, and therefore has to hang off the copy. */
+	accessories: (BundleCopySlot & { count: number })[];
+};
+
+/**
+ * What the copy has to contain. Accessories are folded into the member they
+ * hang off rather than listed beside it: `assets` carries both, because an
+ * accessory mirrors its parent's `bundleId`.
+ */
+function bundleCopyMembers(assets: BundleCopyAsset[]): BundleCopyMember[] {
+	const byParent = new Map<string, BundleCopyAsset[]>();
+	for (const asset of assets) {
+		if (!asset.parentAssetId) continue;
+		const list = byParent.get(asset.parentAssetId);
+		if (list) list.push(asset);
+		else byParent.set(asset.parentAssetId, [asset]);
+	}
+
+	const slotOf = (asset: BundleCopyAsset): BundleCopySlot => ({
+		productId: asset.productId,
+		name: asset.product.name,
+		manufacturerName: asset.product.manufacturer.name,
+		tagged: asset.assetTag !== null
+	});
+
+	return assets
+		.filter((asset) => asset.parentAssetId === null)
+		.map((asset) => {
+			const tally = new Map<string, BundleCopySlot & { count: number }>();
+			for (const accessory of byParent.get(asset.id) ?? []) {
+				const line = tally.get(accessory.productId);
+				if (line) {
+					line.count++;
+					// Tagged if any of the originals is: a fleet whose cables carry
+					// tags is one where somebody decided they should.
+					line.tagged = line.tagged || accessory.assetTag !== null;
+				} else {
+					tally.set(accessory.productId, { ...slotOf(accessory), count: 1 });
+				}
+			}
+			return {
+				...slotOf(asset),
+				locationId: asset.locationId,
+				accessories: [...tally.values()]
+			};
+		});
+}
+
+type BundleCopyAllocation = {
+	member: BundleCopyMember;
+	/** Comes off the shelf, or null when one has to be registered. */
+	take: StockUnit | null;
+	/** What is still missing once whatever `take` arrived carrying is counted. */
+	accessories: (BundleCopySlot & { take: StockUnit | null })[];
+}[];
+
+/**
+ * Decide, for every unit every copy needs, whether it comes off the shelf or
+ * has to be registered. Run by the dialog against the live pool to say what it
+ * would do, and again inside the command's transaction to do it — one function,
+ * so what somebody agreed to is what they get.
+ *
+ * All the copies are allocated in one go because they draw on one shelf: asking
+ * for five copies where the pool covers two means two off the shelf and three
+ * built, not five of whichever answer the first copy happened to get.
+ */
+async function allocateBundleCopy(
+	client: Pick<typeof prisma, 'asset'>,
+	args: {
+		organizationId: string;
+		members: BundleCopyMember[];
+		copies: number;
+		locationId: string;
+		reuse: boolean;
+	}
+): Promise<BundleCopyAllocation[]> {
+	const empty = () => new Map<string, StockUnit[]>();
+	const copies = Array.from({ length: args.copies }, () => args.members);
+
+	// Members are served before accessories, and across every copy, because the
+	// two draw on one shelf: a cable that is a member of the kit in its own right
+	// is not also available to be bolted onto a fixture.
+	const memberPool = args.reuse
+		? await stockPool(client, {
+				organizationId: args.organizationId,
+				productIds: args.members.map((member) => member.productId),
+				locationId: args.locationId,
+				bundleId: null
+			})
+		: empty();
+
+	const taken = copies.map((members) =>
+		members.map((member) => ({
+			member,
+			take: memberPool.get(member.productId)?.shift() ?? null
+		}))
+	);
+
+	// A unit that comes off the shelf already dressed keeps what it has; only
+	// the difference is made up.
+	const missing = taken.map((copy) =>
+		copy.map(({ member, take }) => {
+			const already = new Map<string, number>();
+			for (const accessory of take?.accessories ?? []) {
+				already.set(accessory.productId, (already.get(accessory.productId) ?? 0) + 1);
+			}
+			return member.accessories.flatMap((line) => {
+				const short = line.count - (already.get(line.productId) ?? 0);
+				return Array.from({ length: Math.max(0, short) }, () => line as BundleCopySlot);
+			});
+		})
+	);
+
+	const accessoryPool = args.reuse
+		? await stockPool(client, {
+				organizationId: args.organizationId,
+				productIds: missing.flat(2).map((slot) => slot.productId),
+				locationId: args.locationId,
+				bundleId: null,
+				bare: true,
+				// Not the ones the members were just promised: when the dialog asks,
+				// the write that would have excluded them hasn't happened.
+				excludeIds: taken.flat().flatMap(({ take }) => (take ? [take.id] : []))
+			})
+		: empty();
+
+	return taken.map((copy, copyIndex) =>
+		copy.map(({ member, take }, index) => ({
+			member,
+			take,
+			accessories: missing[copyIndex][index].map((slot) => ({
+				...slot,
+				take: accessoryPool.get(slot.productId)?.shift() ?? null
+			}))
+		}))
+	);
+}
+
+/** Per product, how many the copies need and how many of those the shelf covers. */
+function bundleCopySummary(allocations: BundleCopyAllocation[]) {
+	const lines = new Map<
+		string,
+		{ productId: string; name: string; manufacturerName: string; needed: number; fromStock: number }
+	>();
+	const count = (slot: BundleCopySlot, fromStock: boolean) => {
+		const line = lines.get(slot.productId) ?? {
+			productId: slot.productId,
+			name: slot.name,
+			manufacturerName: slot.manufacturerName,
+			needed: 0,
+			fromStock: 0
+		};
+		line.needed++;
+		if (fromStock) line.fromStock++;
+		lines.set(slot.productId, line);
+	};
+
+	for (const allocation of allocations) {
+		for (const entry of allocation) {
+			count(entry.member, entry.take !== null);
+			for (const slot of entry.accessories) count(slot, slot.take !== null);
+		}
+	}
+
+	const all = [...lines.values()].sort(
+		(a, b) => b.needed - a.needed || a.name.localeCompare(b.name)
+	);
+	return {
+		needed: all.reduce((sum, line) => sum + line.needed, 0),
+		fromStock: all.reduce((sum, line) => sum + line.fromStock, 0),
+		lines: all
+	};
+}
+
+/**
+ * At most this many copies in one go. The ceiling is the transaction: every
+ * unit is its own insert, because an accessory needs its parent's id and a tag
+ * comes from a running allocator, so twenty copies of a thirty-piece kit is six
+ * hundred round trips holding one transaction open. That is what
+ * `BUNDLE_COPY_TIMEOUT_MS` is for, and this is what keeps it reachable.
+ */
+const MAX_BUNDLE_COPIES = 20;
+
+/**
+ * Prisma's default interactive-transaction budget is five seconds, which a kit
+ * of any size blows through against a database that isn't on localhost.
+ */
+const BUNDLE_COPY_TIMEOUT_MS = 60_000;
+
+const bundleCopyPlanSchema = v.object({
+	bundleId: v.string(),
+	copies: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(MAX_BUNDLE_COPIES))
+});
+
+/**
+ * What the copy dialog puts in front of someone: what the new kits would
+ * contain, and how much of it the pool can cover without registering anything.
+ * Asked when the dialog opens, and again whenever the number of copies moves,
+ * because it is a question about right now.
+ */
+export const getBundleCopyPlan = query(bundleCopyPlanSchema, async ({ bundleId, copies }) => {
+	const user = await requireAuth();
+	const bundle = await prisma.assetBundle.findUniqueOrThrow({
+		where: { id: bundleId },
+		select: {
+			locationId: true,
+			template: { select: { organizationId: true } },
+			assets: {
+				where: ACTIVE_ASSET_WHERE,
+				select: BUNDLE_COPY_ASSET_SELECT,
+				orderBy: ASSET_ORDER_BY
+			}
+		}
+	});
+
+	const orgIds = await userOrgIds(user.id);
+	if (!orgIds.includes(bundle.template.organizationId) && !(await isSystemAdmin(user.id))) {
+		appError(403, 'unauthorized');
+	}
+
+	const members = bundleCopyMembers(bundle.assets);
+	return bundleCopySummary(
+		await allocateBundleCopy(prisma, {
+			organizationId: bundle.template.organizationId,
+			members,
+			copies,
+			locationId: bundle.locationId ?? members[0]?.locationId ?? '',
+			reuse: true
+		})
+	);
+});
+
+/**
+ * Move a unit off the shelf into a kit, reporting whether it worked. Same
+ * guard as `attachStockUnit` and for the same reason: the pool was read before
+ * the write, so whoever put this unit in a case in the meantime wins, and the
+ * caller registers a new one rather than emptying their case.
+ */
+async function claimIntoBundle(
+	tx: AssetTx,
+	unitId: string,
+	bundleId: string,
+	locationId: string
+): Promise<boolean> {
+	const { count } = await tx.asset.updateMany({
+		where: { id: unitId, bundleId: null, parentAssetId: null },
+		data: { bundleId, locationId }
+	});
+	if (count !== 1) return false;
+	// Whatever is bolted to it comes along — the kit ships as one thing.
+	await syncAccessories(tx, unitId, { bundleId, locationId });
+	return true;
+}
+
+const duplicateBundleSchema = v.object({
+	bundleId: v.string(),
+	/** How many copies to build. They are allocated together — see `allocateBundleCopy`. */
+	copies: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(MAX_BUNDLE_COPIES))),
+	/**
+	 * The copy's own tag, and only meaningful for a single one: a tag names one
+	 * physical case, so there is nothing sensible to do with it when five are
+	 * being built. Same rule `createAssets` follows for a serial number.
+	 */
+	tag: v.optional(v.string()),
+	locationId: v.optional(v.string()),
+	/**
+	 * Fill the copy from loose stock as far as it goes, registering only what is
+	 * left over. Opt-in, so a caller that says nothing never empties a shelf by
+	 * accident; the dialog does pre-select it, because a second case is usually
+	 * assembled from gear that is already here.
+	 */
+	reuseExistingAssets: v.optional(v.boolean())
+});
+
+/**
+ * Build further instances of a bundle type with the same contents. Each new kit
+ * is an `AssetBundle` on the same `BundleTemplate` — name, description and
+ * category are the type's and stay shared — carrying its own units.
+ */
+export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
+	const user = await requireAuth();
+	const source = await prisma.assetBundle.findUniqueOrThrow({
+		where: { id: data.bundleId },
+		select: {
+			templateId: true,
+			locationId: true,
+			netPurchasePrice: true,
+			template: { select: { organizationId: true } },
+			assets: {
+				where: ACTIVE_ASSET_WHERE,
+				select: BUNDLE_COPY_ASSET_SELECT,
+				orderBy: ASSET_ORDER_BY
+			}
+		}
+	});
+	const organizationId = source.template.organizationId;
+	await requireOrgInventory(organizationId);
+
+	const copies = data.copies ?? 1;
+	const tag = data.tag?.trim() || null;
+	// Reachable from a stale page, so it says what to do rather than dropping the
+	// tag on the floor or hanging it on an arbitrary one of the copies.
+	if (tag && copies > 1) appError(400, 'bundle_copy_tag_single');
+	await assertBundleTagAvailable(tag);
+
+	if (data.locationId) {
+		const location = await prisma.location.findUniqueOrThrow({ where: { id: data.locationId } });
+		if (location.organizationId !== organizationId) appError(400, 'location_invalid');
+	}
+
+	const members = bundleCopyMembers(source.assets);
+	// A kit with no location of its own leaves each unit where its counterpart is.
+	const bundleLocationId = data.locationId ?? source.locationId ?? null;
+
+	const result = await prisma.$transaction(
+		async (tx) => {
+			const { assetIdPrefix: prefix, defaultInspectionIntervalMonths } =
+				await tx.organization.findUniqueOrThrow({
+					where: { id: organizationId },
+					select: { assetIdPrefix: true, defaultInspectionIntervalMonths: true }
+				});
+			const now = new Date();
+			const nextInspectionDue = defaultInspectionIntervalMonths
+				? new Date(
+						now.getFullYear(),
+						now.getMonth() + defaultInspectionIntervalMonths,
+						now.getDate()
+					)
+				: null;
+			const nextTag = await tagAllocator(tx, prefix);
+
+			// Every copy is allocated before any of it is written, so the shelf is
+			// divided up once rather than raided copy by copy.
+			const allocations = await allocateBundleCopy(tx, {
+				organizationId,
+				members,
+				copies,
+				locationId: bundleLocationId ?? members[0]?.locationId ?? '',
+				reuse: data.reuseExistingAssets === true
+			});
+
+			let reused = 0;
+			let created = 0;
+			const bundleIds: string[] = [];
+			const touched: string[] = [];
+
+			for (const allocation of allocations) {
+				const copy = await tx.assetBundle.create({
+					data: {
+						templateId: source.templateId,
+						tag,
+						locationId: bundleLocationId,
+						// The instance's own price, which is what bills it as one line.
+						netPurchasePrice: source.netPurchasePrice
+					},
+					select: { id: true }
+				});
+				bundleIds.push(copy.id);
+
+				for (const entry of allocation) {
+					const locationId = bundleLocationId ?? entry.take?.locationId ?? entry.member.locationId;
+					let parent: AccessoryParent;
+
+					if (entry.take && (await claimIntoBundle(tx, entry.take.id, copy.id, locationId))) {
+						reused++;
+						touched.push(entry.take.id);
+						parent = { ...entry.take, locationId, bundleId: copy.id };
+					} else {
+						const unit = await tx.asset.create({
+							data: {
+								organizationId,
+								productId: entry.member.productId,
+								locationId,
+								assetTag: entry.member.tagged ? nextTag() : null,
+								status: 'AVAILABLE',
+								bundleId: copy.id,
+								inspectionIntervalMonths: defaultInspectionIntervalMonths,
+								nextInspectionDue,
+								transactions: {
+									create: [{ userId: user.id, action: 'CREATED', data: { type: 'CREATED' } }]
+								}
+							},
+							select: {
+								id: true,
+								assetTag: true,
+								product: { select: { name: true, manufacturer: { select: { name: true } } } }
+							}
+						});
+						created++;
+						parent = { ...unit, locationId, bundleId: copy.id };
+					}
+
+					for (const slot of entry.accessories) {
+						if (slot.take && (await attachStockUnit(tx, user.id, slot.take.id, parent))) {
+							reused++;
+							touched.push(slot.take.id);
+							continue;
+						}
+						await createAccessoryRecord(tx, {
+							userId: user.id,
+							organizationId,
+							productId: slot.productId,
+							assetTag: slot.tagged ? nextTag() : null,
+							inspectionIntervalMonths: defaultInspectionIntervalMonths,
+							nextInspectionDue,
+							parent
+						});
+						created++;
+					}
+				}
+			}
+
+			return { bundleIds, reused, created, touched };
+		},
+		{ timeout: BUNDLE_COPY_TIMEOUT_MS, maxWait: 15_000 }
+	);
+
+	await Promise.all([
+		getBundles(organizationId).refresh(),
+		getBundles().refresh(),
+		getBundleTemplates(organizationId).refresh(),
+		getBundleTemplates().refresh(),
+		getBundle(data.bundleId).refresh(),
+		// The dialog counted the shelf and it has just been spent. Only the two
+		// counts anyone lands on again are refreshed — it reopens at one, and a
+		// refresh re-runs the query on the server, so sweeping every possible
+		// count would cost more than the copy did.
+		...[...new Set([1, copies])].map((n) =>
+			getBundleCopyPlan({ bundleId: data.bundleId, copies: n }).refresh()
+		),
+		getAssets(organizationId).refresh(),
+		getAssets().refresh(),
+		getInventorySummary(organizationId).refresh(),
+		getInventorySummary().refresh(),
+		// Units that came off the shelf changed kit and possibly shelf, and the
+		// products involved have less loose stock than they did.
+		...result.touched.flatMap((id) => [getAsset(id).refresh(), getAssetHistory(id).refresh()]),
+		...[...new Set(members.map((member) => member.productId))].map((productId) =>
+			getProductAccessoryProfile({ productId, organizationId }).refresh()
+		)
+	]);
+
+	return { bundleIds: result.bundleIds, reused: result.reused, created: result.created };
+});
+
 const convertBundleToAccessoriesSchema = v.object({
 	bundleId: v.string(),
 	mainAssetId: v.string()
@@ -2883,45 +3361,53 @@ const STOCK_UNIT_SELECT = {
 	locationId: true,
 	bundleId: true,
 	assetTag: true,
-	product: { select: { name: true, manufacturer: { select: { name: true } } } }
+	product: { select: { name: true, manufacturer: { select: { name: true } } } },
+	// What it already carries, so a unit that comes off the shelf dressed is
+	// only topped up to what is wanted rather than dressed twice.
+	accessories: { where: ACTIVE_ASSET_WHERE, select: { productId: true } }
 } satisfies Prisma.AssetSelect;
 
 type StockUnit = Prisma.AssetGetPayload<{ select: typeof STOCK_UNIT_SELECT }>;
 
 /**
- * Loose stock of these accessory products, grouped by product and ordered the
- * way it should be spent. Same shelf first: attaching relocates the unit, which
- * is right for a cable on the same shelf and merely optimistic for one in
- * another warehouse.
+ * Loose stock of these products, grouped by product and ordered the way it
+ * should be spent. Same shelf first: taking a unit relocates it, which is right
+ * for a cable on the same shelf and merely optimistic for one in another
+ * warehouse.
  *
  * Not limited to what is needed, because the premise of taking stock at all is
  * that there is a modest pile of it — and a limit would have to be applied per
  * product, in SQL, before the ordering this does in memory.
  */
-async function accessoryStockPool(
-	tx: Pick<typeof prisma, 'asset'>,
+async function stockPool(
+	client: Pick<typeof prisma, 'asset'>,
 	args: {
 		organizationId: string;
 		productIds: string[];
-		/** What the units being attached to are in, if anything. */
-		bundleId: string | null;
-		/** Where they are, for the same-shelf preference. */
+		/** Where the units are headed, for the same-shelf preference. */
 		locationId: string;
+		/** The kit they are joining, if any: a candidate already in it is fine. */
+		bundleId?: string | null;
+		/** Candidates must carry nothing of their own — an accessory has none. */
+		bare?: boolean;
+		/** Promised to something else earlier in this same run. */
+		excludeIds?: string[];
 	}
 ): Promise<Map<string, StockUnit[]>> {
 	const byProduct = new Map<string, StockUnit[]>();
 	if (args.productIds.length === 0) return byProduct;
 
-	const units = await tx.asset.findMany({
+	const units = await client.asset.findMany({
 		where: {
 			productId: { in: args.productIds },
 			organizationId: args.organizationId,
 			parentAssetId: null,
-			accessories: { none: {} },
 			productionItems: { none: { status: { in: COMMITTED_ITEM_STATUSES } } },
 			// Loose, or already in the kit it would be joining — anything else
 			// would have to be pulled out of somebody else's case.
 			OR: [{ bundleId: null }, ...(args.bundleId ? [{ bundleId: args.bundleId }] : [])],
+			...(args.bare ? { accessories: { none: {} } } : {}),
+			...(args.excludeIds?.length ? { id: { notIn: args.excludeIds } } : {}),
 			...BOOKABLE_ASSET_WHERE
 		},
 		select: STOCK_UNIT_SELECT,
@@ -2952,18 +3438,18 @@ async function accessoryStockPool(
 async function attachStockUnit(
 	tx: AssetTx,
 	userId: string,
-	unit: { id: string },
+	unitId: string,
 	parent: AccessoryParent
 ): Promise<boolean> {
 	const { count } = await tx.asset.updateMany({
-		where: { id: unit.id, parentAssetId: null },
+		where: { id: unitId, parentAssetId: null },
 		data: { parentAssetId: parent.id, locationId: parent.locationId, bundleId: parent.bundleId }
 	});
 	if (count !== 1) return false;
 
 	await tx.assetTransaction.create({
 		data: {
-			assetId: unit.id,
+			assetId: unitId,
 			userId,
 			action: 'ACCESSORY_ATTACHED',
 			data: {
@@ -3054,7 +3540,10 @@ async function accessoryFanoutPlan(args: {
  * right when the bracket is on the same shelf and merely optimistic when it is
  * in another warehouse, so same-location stock goes first.
  */
-function claimReusable(pool: StockUnit[], unit: StockUnit): StockUnit | null {
+function claimReusable(
+	pool: StockUnit[],
+	unit: { locationId: string; bundleId: string | null }
+): StockUnit | null {
 	let fallback = -1;
 	for (let i = 0; i < pool.length; i++) {
 		const candidate = pool[i];
@@ -3174,7 +3663,7 @@ export const addProductAccessories = command(addProductAccessoriesSchema, async 
 		for (const { unit, missing } of todo) {
 			for (let n = 0; n < missing; n++) {
 				const claimed = claimReusable(pool, unit);
-				if (claimed && (await attachStockUnit(tx, user.id, claimed, unit))) {
+				if (claimed && (await attachStockUnit(tx, user.id, claimed.id, unit))) {
 					reused.push(claimed.id);
 					continue;
 				}

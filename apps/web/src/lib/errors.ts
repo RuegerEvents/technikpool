@@ -96,6 +96,7 @@ export type AppErrorCode =
 	| 'bundle_empty'
 	| 'bundle_all_in_production'
 	| 'bundle_all_booked'
+	| 'bundle_copy_tag_single'
 	// Productions
 	| 'dates_end_before_start'
 	| 'show_end_before_show_start'

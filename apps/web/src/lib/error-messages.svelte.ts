@@ -175,6 +175,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'All units of this bundle are already in this production.';
 		case 'bundle_all_booked':
 			return 'All units of this bundle are already booked during this production.';
+		case 'bundle_copy_tag_single':
+			return 'A tag names one case — leave it empty when copying a bundle more than once.';
 
 		// Productions
 		case 'dates_end_before_start':

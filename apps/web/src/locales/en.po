@@ -189,6 +189,7 @@ msgstr "Crew"
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
@@ -1310,6 +1311,7 @@ msgstr "Edit"
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/checkout/+page.svelte
@@ -2003,6 +2005,7 @@ msgstr "All Products"
 #~ msgid "Bundle location updated"
 #~ msgstr "Bundle location updated"
 
+#: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 msgid "No location"
@@ -7181,6 +7184,7 @@ msgstr[0] "1 attached from stock"
 msgstr[1] "# attached from stock"
 
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 msgid "1 newly created"
 msgid_plural "# newly created"
 msgstr[0] "1 newly created"
@@ -7210,15 +7214,19 @@ msgid "All {0} come off the shelf. Nothing new is registered."
 msgstr "All {0} come off the shelf. Nothing new is registered."
 
 #. 0: fanoutPlan.reusable; 1: fanoutPlan.missing - fanoutPlan.reusable
+#. 0: copyPlan.fromStock; 1: copyPlan.needed - copyPlan.fromStock
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 msgid "{0} come off the shelf; the remaining {1} are registered as new units."
 msgstr "{0} come off the shelf; the remaining {1} are registered as new units."
 
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 msgid "Take them out of stock"
 msgstr "Take them out of stock"
 
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/bundles/[id]/+page.svelte
 msgid "Register new units"
 msgstr "Register new units"
 
@@ -7242,3 +7250,121 @@ msgstr "A unit taken out of stock moves to the shelf and the kit of whatever it 
 #: src/routes/assets/new/+page.svelte
 msgid "Take them out of stock where the pool has them <0>Free right now: {0}. Anything the shelf can't cover is still registered new.</0>"
 msgstr "Take them out of stock where the pool has them <0>Free right now: {0}. Anything the shelf can't cover is still registered new.</0>"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "1 from stock"
+msgid_plural "# from stock"
+msgstr[0] "1 from stock"
+msgstr[1] "# from stock"
+
+#~ msgid "Copy created · {0}"
+#~ msgstr "Copy created · {0}"
+
+#~ msgid "Copy created"
+#~ msgstr "Copy created"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Duplicate bundle"
+msgstr "Duplicate bundle"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Duplicate this bundle"
+msgstr "Duplicate this bundle"
+
+#~ msgid "A second {0} of the same type, with its own units."
+#~ msgstr "A second {0} of the same type, with its own units."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "This bundle is empty, so the copy will be too."
+msgstr "This bundle is empty, so the copy will be too."
+
+#. 0: line.fromStock
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "— {0} free in the pool"
+msgstr "— {0} free in the pool"
+
+#. 0: copyPlan.needed
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "The copy needs {0} units"
+msgstr "The copy needs {0} units"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Nothing free to take right now — what the pool holds is already in a kit, attached, or booked."
+msgstr "Nothing free to take right now — what the pool holds is already in a kit, attached, or booked."
+
+#~ msgid "The whole kit comes off the shelf. Nothing new is registered."
+#~ msgstr "The whole kit comes off the shelf. Nothing new is registered."
+
+#~ msgid "{0} new units are created for the copy. Whatever is on the shelf stays there."
+#~ msgstr "{0} new units are created for the copy. Whatever is on the shelf stays there."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Tag for the copy"
+msgstr "Tag for the copy"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Optional, and how two kits of one type are told apart."
+msgstr "Optional, and how two kits of one type are told apart."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Every unit in the copy is moved here. Leave it empty to keep each where it is."
+msgstr "Every unit in the copy is moved here. Leave it empty to keep each where it is."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Duplicating…"
+msgstr "Duplicating…"
+
+#~ msgid "Create the copy"
+#~ msgstr "Create the copy"
+
+#: src/lib/error-messages.svelte.ts
+msgid "A tag names one case — leave it empty when copying a bundle more than once."
+msgstr "A tag names one case — leave it empty when copying a bundle more than once."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Copy created"
+msgid_plural "# copies created"
+msgstr[0] "Copy created"
+msgstr[1] "# copies created"
+
+#. 0: bundle.template.name
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Further instances of {0}, each with its own units."
+msgstr "Further instances of {0}, each with its own units."
+
+#. 0: copies; 1: copyPlan.needed
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "{0} copies need {1} units between them"
+msgstr "{0} copies need {1} units between them"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Everything comes off the shelf. Nothing new is registered."
+msgstr "Everything comes off the shelf. Nothing new is registered."
+
+#. 0: copyPlan.needed
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "{0} new units are registered. Whatever is on the shelf stays there."
+msgstr "{0} new units are registered. Whatever is on the shelf stays there."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "How many copies"
+msgstr "How many copies"
+
+#. 0: MAX_COPIES
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Up to {0} at a time, all drawing on the same shelf."
+msgstr "Up to {0} at a time, all drawing on the same shelf."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Tags"
+msgstr "Tags"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "A tag names one case, so the copies are made without one. Give each its own on its own page afterwards."
+msgstr "A tag names one case, so the copies are made without one. Give each its own on its own page afterwards."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Create the copy"
+msgid_plural "Create # copies"
+msgstr[0] "Create the copy"
+msgstr[1] "Create # copies"

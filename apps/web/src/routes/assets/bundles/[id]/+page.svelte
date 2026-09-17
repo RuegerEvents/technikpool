@@ -22,7 +22,9 @@
 		updateBundleTemplate,
 		updateBundle,
 		regenerateBundleImage,
-		convertBundleToAccessories
+		convertBundleToAccessories,
+		duplicateBundle,
+		getBundleCopyPlan
 	} from '$lib/remote/assets.remote';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
@@ -31,12 +33,77 @@
 	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
 	import { NewAssetModal, type NewAssetModalHandle } from '$lib/components/ui/new-asset-modal';
 
+	// Mirrors MAX_BUNDLE_COPIES on the command, which refuses anything above it.
+	const MAX_COPIES = 20;
+
 	const bundleId = $derived(page.params.id as string);
 
 	let bundle = $derived(await getBundle(bundleId));
 	let allAssets = $derived(await getAssets());
 	let categories = $derived(await getCategories());
 	let locations = $derived(await getLocations(bundle.template.organizationId));
+
+	// ── Duplicating ───────────────────────────────────────────────────────────
+	// A copy is the same composition made of other units, because a fixture is in
+	// one case at a time. So the one thing to settle is where those units come
+	// from: off the shelf, as far as the shelf goes, or registered new. Building
+	// a second case usually means assembling it from gear that is already here,
+	// which is why the dialog starts on the shelf — but only when there is
+	// anything on it.
+	let copyOpen = $state(false);
+	let copying = $state(false);
+	let copyReuse = $state(true);
+	let copies = $state(1);
+	let copyDraft = $state({ tag: '', locationId: '' });
+
+	function setCopies(n: number) {
+		copies = Math.max(1, Math.min(MAX_COPIES, Math.floor(n) || 1));
+	}
+
+	let copyPlan = $derived(copyOpen ? await getBundleCopyPlan({ bundleId, copies }) : null);
+	let canCopyFromStock = $derived((copyPlan?.fromStock ?? 0) > 0);
+	let copyFromStock = $derived(canCopyFromStock && copyReuse);
+
+	function openCopy() {
+		copyDraft = { tag: '', locationId: bundle.locationId ?? '' };
+		copyReuse = true;
+		copies = 1;
+		copyOpen = true;
+	}
+
+	async function handleCopy() {
+		copying = true;
+		try {
+			const result = await duplicateBundle({
+				bundleId,
+				copies,
+				// A tag names one case, so it is only asked for — and only sent —
+				// when there is exactly one to name.
+				tag: copies === 1 ? copyDraft.tag.trim() || undefined : undefined,
+				locationId: copyDraft.locationId || undefined,
+				reuseExistingAssets: copyFromStock || undefined
+			});
+			copyOpen = false;
+			// Both numbers, because they mean different things to whoever counts the
+			// shelf afterwards.
+			const parts: string[] = [];
+			if (result.reused > 0) parts.push(plural(result.reused, ['1 from stock', '# from stock']));
+			if (result.created > 0)
+				parts.push(plural(result.created, ['1 newly created', '# newly created']));
+			const made = plural(result.bundleIds.length, ['Copy created', '# copies created']);
+			toast.success(parts.length > 0 ? `${made} · ${parts.join(' · ')}` : made);
+			// One copy is a place to go; several are a list to look at.
+			await goto(
+				result.bundleIds.length === 1
+					? resolve(`/assets/bundles/${result.bundleIds[0]}`)
+					: resolve('/assets/bundles')
+			);
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			copying = false;
+		}
+	}
 
 	// ── Bundle editing ───────────────────────────────────────────────────────
 	let editingBundle = $state(false);
@@ -288,6 +355,12 @@
 						class="z-50 min-w-[190px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
 					>
 						<DropdownMenu.Item
+							onSelect={openCopy}
+							class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-accent"
+						>
+							Duplicate bundle
+						</DropdownMenu.Item>
+						<DropdownMenu.Item
 							disabled={bundle.assets.length < 2}
 							onSelect={openConvert}
 							class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-accent"
@@ -469,6 +542,168 @@
 		</Card.Root>
 	</div>
 </div>
+
+<Modal
+	bind:open={copyOpen}
+	title="Duplicate this bundle"
+	size="lg"
+	dismissible={!copying}
+	onclose={() => (copyOpen = false)}
+>
+	{#snippet description()}
+		Further instances of {bundle.template.name}, each with its own units.
+	{/snippet}
+
+	{#snippet children()}
+		{#if copyPlan}
+			<div class="space-y-5">
+				{#if copyPlan.needed === 0}
+					<p class="text-sm text-muted-foreground">
+						This bundle is empty, so the copy will be too.
+					</p>
+				{:else}
+					<div class="space-y-2">
+						<p class="text-sm font-medium">
+							{#if copies === 1}
+								The copy needs {copyPlan.needed} units
+							{:else}
+								{copies} copies need {copyPlan.needed} units between them
+							{/if}
+						</p>
+						<ul class="space-y-1 text-sm text-muted-foreground">
+							{#each copyPlan.lines as line (line.productId)}
+								<li>
+									{line.needed}× {line.manufacturerName}
+									{line.name}
+									{#if line.fromStock > 0}
+										<span class="text-xs">— {line.fromStock} free in the pool</span>
+									{/if}
+								</li>
+							{/each}
+						</ul>
+					</div>
+					<div class="space-y-3">
+						<label
+							class="flex gap-3 rounded-md border p-3 text-sm {canCopyFromStock
+								? 'cursor-pointer'
+								: 'opacity-60'}"
+						>
+							<input
+								type="radio"
+								name="bundle-copy-source"
+								class="mt-1"
+								checked={copyFromStock}
+								disabled={!canCopyFromStock || copying}
+								onchange={() => (copyReuse = true)}
+							/>
+							<span>
+								<span class="block font-medium">Take them out of stock</span>
+								<span class="mt-1 block text-xs text-muted-foreground">
+									{#if !canCopyFromStock}
+										Nothing free to take right now — what the pool holds is already in a kit,
+										attached, or booked.
+									{:else if copyPlan.fromStock >= copyPlan.needed}
+										Everything comes off the shelf. Nothing new is registered.
+									{:else}
+										{copyPlan.fromStock} come off the shelf; the remaining {copyPlan.needed -
+											copyPlan.fromStock} are registered as new units.
+									{/if}
+								</span>
+							</span>
+						</label>
+						<label class="flex cursor-pointer gap-3 rounded-md border p-3 text-sm">
+							<input
+								type="radio"
+								name="bundle-copy-source"
+								class="mt-1"
+								checked={!copyFromStock}
+								disabled={copying}
+								onchange={() => (copyReuse = false)}
+							/>
+							<span>
+								<span class="block font-medium">Register new units</span>
+								<span class="mt-1 block text-xs text-muted-foreground">
+									{copyPlan.needed} new units are registered. Whatever is on the shelf stays there.
+								</span>
+							</span>
+						</label>
+					</div>
+				{/if}
+
+				<div class="grid gap-4 sm:grid-cols-2">
+					<div class="space-y-2">
+						<Label for="copy-count">How many copies</Label>
+						<Input
+							id="copy-count"
+							type="number"
+							min="1"
+							max={MAX_COPIES}
+							value={copies}
+							disabled={copying}
+							oninput={(e) => setCopies(e.currentTarget.valueAsNumber)}
+						/>
+						<p class="text-xs text-muted-foreground">
+							Up to {MAX_COPIES} at a time, all drawing on the same shelf.
+						</p>
+					</div>
+					{#if copies === 1}
+						<div class="space-y-2">
+							<Label for="copy-tag">Tag for the copy</Label>
+							<Input id="copy-tag" bind:value={copyDraft.tag} disabled={copying} />
+							<p class="text-xs text-muted-foreground">
+								Optional, and how two kits of one type are told apart.
+							</p>
+						</div>
+					{:else}
+						<div class="space-y-2">
+							<Label for="copy-tags-note">Tags</Label>
+							<p id="copy-tags-note" class="pt-2 text-xs text-muted-foreground">
+								A tag names one case, so the copies are made without one. Give each its own on its
+								own page afterwards.
+							</p>
+						</div>
+					{/if}
+					<div class="space-y-2">
+						<Label for="copy-location">Location</Label>
+						<select
+							id="copy-location"
+							bind:value={copyDraft.locationId}
+							disabled={copying}
+							class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+						>
+							<option value="">No location</option>
+							{#each locations as loc (loc.id)}
+								{@const city = loc.address?.city?.trim()}
+								{@const line1 = loc.address?.line1?.trim()}
+								{@const addrParts = [line1, city].filter(Boolean).join(', ')}
+								<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option
+								>
+							{/each}
+						</select>
+						<p class="text-xs text-muted-foreground">
+							Every unit in the copy is moved here. Leave it empty to keep each where it is.
+						</p>
+					</div>
+				</div>
+			</div>
+		{/if}
+	{/snippet}
+
+	{#snippet footer()}
+		<Button
+			icon="close"
+			type="button"
+			variant="outline"
+			onclick={() => (copyOpen = false)}
+			disabled={copying}
+		>
+			Cancel
+		</Button>
+		<Button type="button" disabled={copying || copyPlan === null} onclick={handleCopy}>
+			{copying ? 'Duplicating…' : plural(copies, ['Create the copy', 'Create # copies'])}
+		</Button>
+	{/snippet}
+</Modal>
 
 <Modal bind:open={convertOpen} title="Convert Bundle to Device" dismissible={!converting}>
 	{#snippet description()}
