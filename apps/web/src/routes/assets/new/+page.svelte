@@ -149,6 +149,16 @@
 		accessoryProfile?.accessories.map((a) => `${a.perUnit}× ${a.name}`).join(' · ') ?? ''
 	);
 	let copyAccessories = $state(true);
+	// Where those copies come from — the same choice the asset page's fan-out
+	// offers, with the opposite default: a unit being registered now is usually a
+	// delivery, and a delivery arrives with its own cables.
+	let reuseAccessories = $state(false);
+	let reusableSummary = $derived(
+		accessoryProfile?.accessories
+			.filter((a) => a.freeStock > 0)
+			.map((a) => `${a.freeStock}× ${a.name}`)
+			.join(' · ') ?? ''
+	);
 
 	let quantity = $state(1);
 	let noAssetTag = $state(false);
@@ -176,6 +186,7 @@
 		manufacturer = null;
 		newManufacturerLogoPath = '';
 		copyAccessories = true;
+		reuseAccessories = false;
 		product = null;
 		pendingProduct = null;
 		manufacturerKey++;
@@ -217,6 +228,8 @@
 				categoryId: product.id ? undefined : pendingProduct?.categoryId,
 				copyProductAccessories:
 					copyAccessories && (accessoryProfile?.accessories.length ?? 0) > 0 ? true : undefined,
+				reuseExistingAccessories:
+					copyAccessories && reuseAccessories && reusableSummary ? true : undefined,
 				items: items.map((item) => ({
 					serialNumber: item.serialNumber || undefined,
 					assetTag: noAssetTag ? undefined : item.assetTag || undefined,
@@ -367,21 +380,37 @@
 					{/if}
 
 					{#if accessoryProfile && accessoryProfile.accessories.length > 0}
-						<label
-							class="flex cursor-pointer items-start gap-2 rounded-md border border-dashed p-3 text-sm select-none"
-						>
-							<input
-								type="checkbox"
-								bind:checked={copyAccessories}
-								class="mt-0.5 h-4 w-4 rounded border-input"
-							/>
-							<span>
-								Also create the accessories the other units carry
-								<span class="block text-xs text-muted-foreground">
-									{accessorySummary} — each new unit gets its own, attached.
+						<div class="space-y-2 rounded-md border border-dashed p-3">
+							<label class="flex cursor-pointer items-start gap-2 text-sm select-none">
+								<input
+									type="checkbox"
+									bind:checked={copyAccessories}
+									class="mt-0.5 h-4 w-4 rounded border-input"
+								/>
+								<span>
+									Also create the accessories the other units carry
+									<span class="block text-xs text-muted-foreground">
+										{accessorySummary} — each new unit gets its own, attached.
+									</span>
 								</span>
-							</span>
-						</label>
+							</label>
+							{#if copyAccessories && reusableSummary}
+								<label class="flex cursor-pointer items-start gap-2 pl-6 text-sm select-none">
+									<input
+										type="checkbox"
+										bind:checked={reuseAccessories}
+										class="mt-0.5 h-4 w-4 rounded border-input"
+									/>
+									<span>
+										Take them out of stock where the pool has them
+										<span class="block text-xs text-muted-foreground">
+											Free right now: {reusableSummary}. Anything the shelf can't cover is still
+											registered new.
+										</span>
+									</span>
+								</label>
+							{/if}
+						</div>
 					{/if}
 
 					<div class="space-y-2">

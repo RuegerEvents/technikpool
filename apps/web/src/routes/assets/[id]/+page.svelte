@@ -32,6 +32,7 @@
 		attachAccessory,
 		detachAccessory,
 		addProductAccessories,
+		getAccessoryFanoutPlan,
 		getProductAccessoryProfile,
 		getProducts,
 		getManufacturers,
@@ -47,7 +48,12 @@
 		assetStatusLabel
 	} from '$lib/components/ui/asset-status';
 	import type { TransactionData } from '$lib/types/asset-transaction';
-	import { ASSET_STATUSES, isRetiredStatus, type AssetStatus } from '$lib/asset-status';
+	import {
+		ASSET_STATUSES,
+		isBookableStatus,
+		isRetiredStatus,
+		type AssetStatus
+	} from '$lib/asset-status';
 
 	let assetId = $derived(page.params.id as string);
 	let asset = $derived(await getAsset(assetId));
@@ -195,31 +201,110 @@
 		});
 	});
 
+	// Where the copies come from is a question about the warehouse rather than
+	// about the data. A pool that already has twenty brackets on a shelf wants
+	// those bolted onto the fixtures; a pool whose brackets arrived with the
+	// fixtures wants twenty new rows. Nothing here can tell which, and getting it
+	// wrong either doubles the inventory or leaves stock lying around, so the
+	// dialog asks — but only when there is stock to argue about.
+	let fanout = $state<{
+		productId: string;
+		name: string;
+		count: number;
+		tagged: boolean;
+	} | null>(null);
+	let fanoutOpen = $state(false);
+	let fanoutReuse = $state(true);
 	let copyingProductId = $state<string | null>(null);
+
+	let fanoutPlan = $derived(
+		fanoutOpen && fanout
+			? await getAccessoryFanoutPlan({
+					organizationId: asset.organizationId,
+					parentProductId: asset.productId,
+					productId: fanout.productId,
+					perUnit: fanout.count
+				})
+			: null
+	);
+	// The server's count is the one that is spent; it knows about kits and about
+	// units already booked on a job. If it comes back at zero there is no choice
+	// left to make, so the offer is taken off the table rather than left as a
+	// button that quietly does the other thing.
+	let canReuse = $derived((fanoutPlan?.reusable ?? 0) > 0);
+	let reuseChoice = $derived(canReuse && fanoutReuse);
+
+	/**
+	 * Free stock of this accessory product as far as the listing this page
+	 * already has can tell: unattached, carrying nothing itself, still in the
+	 * pool. An upper bound — it cannot see what is booked on a production — and
+	 * used for nothing but deciding whether there is a question worth asking.
+	 */
+	function looseStockOf(productId: string) {
+		return orgAssets.filter(
+			(a) =>
+				a.productId === productId &&
+				a.parent === null &&
+				a.accessories.length === 0 &&
+				isBookableStatus(a.status)
+		).length;
+	}
+
+	function startCopy(
+		accessory: { productId: string; product: { name: string; manufacturer: { name: string } } },
+		standing: { count: number; tagged: boolean }
+	) {
+		if (looseStockOf(accessory.productId) === 0) {
+			// Nothing on the shelf, so there is only one way to do this.
+			copyAccessoryToOtherUnits(accessory.productId, standing, false);
+			return;
+		}
+		fanout = {
+			productId: accessory.productId,
+			name: `${accessory.product.manufacturer.name} ${accessory.product.name}`,
+			count: standing.count,
+			tagged: standing.tagged
+		};
+		fanoutReuse = true;
+		fanoutOpen = true;
+	}
+
+	function closeFanout() {
+		fanoutOpen = false;
+		fanout = null;
+	}
 
 	async function copyAccessoryToOtherUnits(
 		productId: string,
-		standing: { count: number; tagged: boolean }
+		standing: { count: number; tagged: boolean },
+		reuseExisting: boolean
 	) {
 		copyingProductId = productId;
 		try {
-			const { created, unitsTouched, unitsSkipped } = await addProductAccessories({
+			const { created, reused, unitsTouched, unitsSkipped } = await addProductAccessories({
 				organizationId: asset.organizationId,
 				parentProductId: asset.productId,
 				productId,
 				perUnit: standing.count,
-				noAssetTag: standing.tagged ? undefined : true
+				noAssetTag: standing.tagged ? undefined : true,
+				reuseExisting
 			});
-			if (created === 0) {
+			closeFanout();
+			if (created === 0 && reused === 0) {
 				toast.info('Every unit already has that — nothing to do');
 				return;
 			}
-			const made = plural(created, ['1 accessory', '# accessories']);
+			// Both numbers are named because they mean different things to whoever
+			// counts the shelf afterwards.
+			const parts: string[] = [];
+			if (reused > 0)
+				parts.push(plural(reused, ['1 attached from stock', '# attached from stock']));
+			if (created > 0) parts.push(plural(created, ['1 newly created', '# newly created']));
 			const onUnits = plural(unitsTouched, ['1 unit', '# units']);
 			toast.success(
 				unitsSkipped > 0
-					? `${made} created on ${onUnits} · ${unitsSkipped} already had one`
-					: `${made} created on ${onUnits}`
+					? `${parts.join(' · ')} on ${onUnits} · ${unitsSkipped} already had one`
+					: `${parts.join(' · ')} on ${onUnits}`
 			);
 		} catch (err) {
 			toast.error(getErrorMessage(err));
@@ -631,7 +716,7 @@
 														variant="outline"
 														size="sm"
 														disabled={copyingProductId !== null}
-														onclick={() => copyAccessoryToOtherUnits(accessory.productId, standing)}
+														onclick={() => startCopy(accessory, standing)}
 													>
 														{copyingProductId === accessory.productId
 															? 'Copying…'
@@ -1069,6 +1154,99 @@
 			disabled={deleting}
 		>
 			{deleting ? 'Deleting…' : 'Delete asset'}
+		</Button>
+	{/snippet}
+</Modal>
+
+<Modal
+	bind:open={fanoutOpen}
+	title="Copy to the other units"
+	size="md"
+	dismissible={copyingProductId === null}
+	onclose={closeFanout}
+>
+	{#snippet children()}
+		{#if fanout && fanoutPlan}
+			<div class="space-y-5">
+				<p class="text-sm text-muted-foreground">
+					{fanoutPlan.unitsTouched} of {fanoutPlan.unitCount} units are still without {fanout.name}
+					— {fanoutPlan.missing} in all.
+				</p>
+				<div class="space-y-3">
+					<label
+						class="flex gap-3 rounded-md border p-3 text-sm {canReuse
+							? 'cursor-pointer'
+							: 'opacity-60'}"
+					>
+						<input
+							type="radio"
+							name="fanout-source"
+							class="mt-1"
+							checked={reuseChoice}
+							disabled={!canReuse}
+							onchange={() => (fanoutReuse = true)}
+						/>
+						<span>
+							<span class="block font-medium">Take them out of stock</span>
+							<span class="mt-1 block text-xs text-muted-foreground">
+								{#if !canReuse}
+									Nothing free to take right now — what the pool holds is already attached, booked,
+									or in another kit.
+								{:else if fanoutPlan.reusable >= fanoutPlan.missing}
+									All {fanoutPlan.missing} come off the shelf. Nothing new is registered.
+								{:else}
+									{fanoutPlan.reusable} come off the shelf; the remaining {fanoutPlan.missing -
+										fanoutPlan.reusable} are registered as new units.
+								{/if}
+							</span>
+						</span>
+					</label>
+					<label class="flex cursor-pointer gap-3 rounded-md border p-3 text-sm">
+						<input
+							type="radio"
+							name="fanout-source"
+							class="mt-1"
+							checked={!reuseChoice}
+							onchange={() => (fanoutReuse = false)}
+						/>
+						<span>
+							<span class="block font-medium">Register new units</span>
+							<span class="mt-1 block text-xs text-muted-foreground">
+								{fanoutPlan.missing} new units are created and attached. Whatever is on the shelf stays
+								there.
+							</span>
+						</span>
+					</label>
+				</div>
+				<p class="text-xs text-muted-foreground">
+					A unit taken out of stock moves to the shelf and the kit of whatever it is attached to.
+				</p>
+			</div>
+		{/if}
+	{/snippet}
+
+	{#snippet footer()}
+		<Button
+			icon="close"
+			type="button"
+			variant="outline"
+			onclick={closeFanout}
+			disabled={copyingProductId !== null}
+		>
+			Cancel
+		</Button>
+		<Button
+			type="button"
+			disabled={copyingProductId !== null || fanoutPlan === null}
+			onclick={() =>
+				fanout &&
+				copyAccessoryToOtherUnits(
+					fanout.productId,
+					{ count: fanout.count, tagged: fanout.tagged },
+					reuseChoice
+				)}
+		>
+			{copyingProductId !== null ? 'Copying…' : 'Copy to the others'}
 		</Button>
 	{/snippet}
 </Modal>

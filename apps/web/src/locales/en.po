@@ -186,6 +186,7 @@ msgstr "Crew"
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
@@ -3062,6 +3063,7 @@ msgstr "View invoice {0}"
 #~ msgstr "Duplicates all line items into a new offer."
 
 #: src/routes/assets/[id]/+page.svelte
+#: src/routes/assets/[id]/+page.svelte
 #: src/routes/offers/[id]/+page.svelte
 msgid "Copying…"
 msgstr "Copying…"
@@ -4937,7 +4939,6 @@ msgstr "Also create what the other units carry <0>{0} — each new unit gets its
 msgid "Every unit already has that — nothing to do"
 msgstr "Every unit already has that — nothing to do"
 
-#: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 msgid "1 accessory"
 msgid_plural "# accessories"
@@ -4956,15 +4957,11 @@ msgstr[1] "# units"
 #~ msgid "Every unit of {0} {1} in this organisation gets its own copy, attached, at that unit's location."
 #~ msgstr "Every unit of {0} {1} in this organisation gets its own copy, attached, at that unit's location."
 
-#. 0: made; 1: onUnits; 2: unitsSkipped
-#: src/routes/assets/[id]/+page.svelte
-msgid "{0} created on {1} · {2} already had one"
-msgstr "{0} created on {1} · {2} already had one"
+#~ msgid "{0} created on {1} · {2} already had one"
+#~ msgstr "{0} created on {1} · {2} already had one"
 
-#. 0: made; 1: onUnits
-#: src/routes/assets/[id]/+page.svelte
-msgid "{0} created on {1}"
-msgstr "{0} created on {1}"
+#~ msgid "{0} created on {1}"
+#~ msgstr "{0} created on {1}"
 
 #~ msgid "the one unit already registered has"
 #~ msgid_plural "# units already registered have"
@@ -5008,6 +5005,7 @@ msgstr "Cases, power supplies and brackets that belong to this unit. They follow
 msgid "All {0} units of this product have this."
 msgstr "All {0} units of this product have this."
 
+#: src/routes/assets/[id]/+page.svelte
 #: src/routes/assets/[id]/+page.svelte
 msgid "Copy to the others"
 msgstr "Copy to the others"
@@ -7175,3 +7173,72 @@ msgstr "Regenerate all previews"
 #: src/routes/admin/maintenance/+page.svelte
 msgid "Reload a page showing bundles afterwards — an already-loaded list keeps the addresses it was given until then."
 msgstr "Reload a page showing bundles afterwards — an already-loaded list keeps the addresses it was given until then."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "1 attached from stock"
+msgid_plural "# attached from stock"
+msgstr[0] "1 attached from stock"
+msgstr[1] "# attached from stock"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "1 newly created"
+msgid_plural "# newly created"
+msgstr[0] "1 newly created"
+msgstr[1] "# newly created"
+
+#. 0: parts.join(' · '); 1: onUnits; 2: unitsSkipped
+#: src/routes/assets/[id]/+page.svelte
+msgid "{0} on {1} · {2} already had one"
+msgstr "{0} on {1} · {2} already had one"
+
+#. 0: parts.join(' · '); 1: onUnits
+#: src/routes/assets/[id]/+page.svelte
+msgid "{0} on {1}"
+msgstr "{0} on {1}"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Copy to the other units"
+msgstr "Copy to the other units"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Nothing free to take right now — what the pool holds is already attached, booked, or in another kit."
+msgstr "Nothing free to take right now — what the pool holds is already attached, booked, or in another kit."
+
+#. 0: fanoutPlan.missing
+#: src/routes/assets/[id]/+page.svelte
+msgid "All {0} come off the shelf. Nothing new is registered."
+msgstr "All {0} come off the shelf. Nothing new is registered."
+
+#. 0: fanoutPlan.reusable; 1: fanoutPlan.missing - fanoutPlan.reusable
+#: src/routes/assets/[id]/+page.svelte
+msgid "{0} come off the shelf; the remaining {1} are registered as new units."
+msgstr "{0} come off the shelf; the remaining {1} are registered as new units."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Take them out of stock"
+msgstr "Take them out of stock"
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "Register new units"
+msgstr "Register new units"
+
+#. 0: fanoutPlan.missing
+#: src/routes/assets/[id]/+page.svelte
+msgid "{0} new units are created and attached. Whatever is on the shelf stays there."
+msgstr "{0} new units are created and attached. Whatever is on the shelf stays there."
+
+#. 0: fanoutPlan.unitsTouched; 1: fanoutPlan.unitCount; 2: fanout.name; 3: fanoutPlan.missing
+#: src/routes/assets/[id]/+page.svelte
+msgid "{0} of {1} units are still without {2} — {3} in all."
+msgstr "{0} of {1} units are still without {2} — {3} in all."
+
+#: src/routes/assets/[id]/+page.svelte
+msgid "A unit taken out of stock moves to the shelf and the kit of whatever it is attached to."
+msgstr "A unit taken out of stock moves to the shelf and the kit of whatever it is attached to."
+
+#. 0.0: reusableSummary
+#. 0.0: reusableSummary
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/routes/assets/new/+page.svelte
+msgid "Take them out of stock where the pool has them <0>Free right now: {0}. Anything the shelf can't cover is still registered new.</0>"
+msgstr "Take them out of stock where the pool has them <0>Free right now: {0}. Anything the shelf can't cover is still registered new.</0>"

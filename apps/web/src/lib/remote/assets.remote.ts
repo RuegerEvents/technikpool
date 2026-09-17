@@ -17,6 +17,7 @@ import { fieldChanges, logCatalogChange } from '$lib/server/services/catalog-log
 import {
 	ACTIVE_ASSET_WHERE,
 	ASSET_STATUSES,
+	BOOKABLE_ASSET_WHERE,
 	isBookableStatus,
 	isRetiredStatus,
 	RETIRED_ASSET_WHERE
@@ -711,7 +712,7 @@ async function resolveProductRef(data: ProductRef, organizationId: string): Prom
 }
 
 /** The subset of a Prisma client these helpers need — the real one or a `$transaction` handle. */
-type AssetTx = Pick<typeof prisma, 'asset' | 'organization'>;
+type AssetTx = Pick<typeof prisma, 'asset' | 'organization' | 'assetTransaction'>;
 
 /**
  * Hands out an org's next free asset tags, in order, for the length of one
@@ -750,6 +751,14 @@ type CreateUnitsArgs = {
 	parent?: (AccessoryParent & { productId: string }) | null;
 	bundleId?: string | null;
 	accessoryProfile?: ProductAccessoryProfile | null;
+	/**
+	 * Bolt loose units the pool already holds onto the new ones before
+	 * registering any. Off by default, and deliberately the opposite default to
+	 * the fan-out on the asset detail page: a unit being registered now is
+	 * usually a delivery, and a delivery arrives with its own cables. Bringing an
+	 * existing fleet into line is the other way round — see `addProductAccessories`.
+	 */
+	reuseAccessoryStock?: boolean;
 };
 
 /**
@@ -837,10 +846,32 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 	// In the same transaction as the units themselves: a fixture that reaches
 	// the pool without the brackets every other one of its kind has is worse
 	// than one that was never created — nothing about it looks wrong later.
+	const reusedAccessoryIds: string[] = [];
 	if (args.accessoryProfile) {
+		const pool = args.reuseAccessoryStock
+			? await accessoryStockPool(tx, {
+					organizationId: args.organizationId,
+					productIds: args.accessoryProfile.accessories.map((acc) => acc.productId),
+					bundleId: parent?.bundleId ?? args.bundleId ?? null,
+					locationId: args.locationId
+				})
+			: new Map<string, StockUnit[]>();
+
 		for (const unit of created) {
 			for (const acc of args.accessoryProfile.accessories) {
 				for (let n = 0; n < acc.perUnit; n++) {
+					const parentRecord = {
+						id: unit.id,
+						locationId: unit.locationId,
+						bundleId: unit.bundleId,
+						assetTag: unit.assetTag,
+						product: unit.product
+					};
+					const taken = pool.get(acc.productId)?.shift();
+					if (taken && (await attachStockUnit(tx, args.userId, taken, parentRecord))) {
+						reusedAccessoryIds.push(taken.id);
+						continue;
+					}
 					await createAccessoryRecord(tx, {
 						userId: args.userId,
 						organizationId: args.organizationId,
@@ -848,20 +879,17 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 						assetTag: acc.tagged ? nextTag() : null,
 						inspectionIntervalMonths: defaultInspectionIntervalMonths,
 						nextInspectionDue,
-						parent: {
-							id: unit.id,
-							locationId: unit.locationId,
-							bundleId: unit.bundleId,
-							assetTag: unit.assetTag,
-							product: unit.product
-						}
+						parent: parentRecord
 					});
 				}
 			}
 		}
 	}
 
-	return created;
+	// The units themselves, and separately whatever was taken off the shelf to
+	// dress them — the caller decides what to invalidate, the same way
+	// `performScan` reports what it touched.
+	return { created, reusedAccessoryIds };
 }
 
 /** What a listing shows once an org has gained units of some products. */
@@ -896,6 +924,12 @@ const createAssetsSchema = v.object({
 	 * fixture registered without its brackets is not obviously missing them.
 	 */
 	copyProductAccessories: v.optional(v.boolean()),
+	/**
+	 * Take those accessories out of the pool's loose stock where it has any,
+	 * instead of registering a new one per unit. Only meaningful alongside
+	 * `copyProductAccessories`, and off by default — see `reuseAccessoryStock`.
+	 */
+	reuseExistingAccessories: v.optional(v.boolean()),
 	items: v.array(
 		v.object({
 			serialNumber: v.optional(v.string()),
@@ -973,7 +1007,7 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 			? await productAccessoryProfile(productId, data.organizationId)
 			: null;
 
-	const assets = await prisma.$transaction((tx) =>
+	const { created: assets, reusedAccessoryIds } = await prisma.$transaction((tx) =>
 		createUnitsInTx(tx, {
 			userId: user.id,
 			organizationId: data.organizationId,
@@ -981,13 +1015,19 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 			units: data.items.map((item) => ({ ...item, productId })),
 			parent,
 			bundleId: bundle?.id ?? null,
-			accessoryProfile
+			accessoryProfile,
+			reuseAccessoryStock: data.reuseExistingAccessories
 		})
 	);
 
 	await refreshAfterUnitsCreated(data.organizationId, [productId]);
 	if (accessoryProfile) {
-		await Promise.all(assets.map((a) => getAsset(a.id).refresh()));
+		await Promise.all([
+			...assets.map((a) => getAsset(a.id).refresh()),
+			// A unit taken off the shelf has its own page, and it has just changed
+			// parent, kit and possibly shelf on it.
+			...reusedAccessoryIds.flatMap((id) => [getAsset(id).refresh(), getAssetHistory(id).refresh()])
+		]);
 	}
 	// If these were accessories, the parent's product now carries one more of them.
 	if (parent) {
@@ -1142,7 +1182,7 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 		}))
 	);
 
-	const created = await prisma.$transaction((tx) =>
+	const { created } = await prisma.$transaction((tx) =>
 		createUnitsInTx(tx, {
 			userId: user.id,
 			organizationId: data.organizationId,
@@ -1553,10 +1593,11 @@ export const bulkUpdateAssetStatus = command(bulkUpdateAssetStatusSchema, async 
 });
 
 // Deleting an asset is only ever right for one that was never actually used: a
-// mis-scan, or a row created to try something out. Anything that moved has an
-// audit trail, a place in a production's history, or a billing line pointing at
-// it, and those records exist precisely so they can't be quietly rewritten. The
-// honest way out of a real unit is retiring it — see RETIRED_ASSET_STATUSES.
+// mis-scan, or a row created to try something out. Used means it left the
+// house — it went out on a job, it was inspected, or it is named on an offer or
+// an invoice — and each of those is a record outside this asset that exists
+// precisely so it can't be quietly rewritten. The honest way out of a real unit
+// is retiring it — see RETIRED_ASSET_STATUSES.
 //
 // Every check below is the reason this isn't left to the database. Prisma
 // cascades ProductionItem, AssetTransaction and Inspection, so the delete would
@@ -1569,8 +1610,25 @@ export const bulkUpdateAssetStatus = command(bulkUpdateAssetStatusSchema, async 
 // with "Internal Error" — and here the message *is* the feature, naming which kind
 // of history is in the way and pointing at decommissioning instead.
 
-/** Actions an asset accumulates without ever leaving the shelf. */
-const UNUSED_ASSET_ACTIONS = ['CREATED', 'UPDATED'];
+/**
+ * Actions an asset accumulates without ever leaving the shelf. Being edited,
+ * moved between locations, or bolted onto a unit and taken off again are all
+ * internal bookkeeping: the only record of them is this asset's own history,
+ * which goes when the asset does, so none of them leaves anything pointing at a
+ * row that isn't there. A bracket that spent a week on a fixture and came off
+ * again is still a bracket nobody ever used.
+ *
+ * Deliberately a positive list rather than a list of the actions that block:
+ * a future action nobody has thought about here should stop a delete, not wave
+ * it through.
+ */
+const UNUSED_ASSET_ACTIONS = [
+	'CREATED',
+	'UPDATED',
+	'LOCATION_ASSIGNED',
+	'ACCESSORY_ATTACHED',
+	'ACCESSORY_DETACHED'
+];
 
 export const deleteAsset = command(v.string(), async (assetId: string) => {
 	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: assetId } });
@@ -2675,11 +2733,37 @@ async function productAccessoryProfile(productId: string, organizationId: string
 		}
 	}
 
+	// How many of each of these the pool is holding loose right now: unattached,
+	// carrying nothing of their own, not spoken for by a job, not in a case. It
+	// is the number the create flow can offer to take instead of registering new
+	// ones, and it belongs here because the surfaces that ask what the fleet
+	// carries are exactly the ones that then have to decide where the next copy
+	// comes from.
+	const accessoryProductIds = [...byProduct.keys()];
+	const freeStock = new Map<string, number>();
+	if (accessoryProductIds.length > 0) {
+		const rows = await prisma.asset.groupBy({
+			by: ['productId'],
+			where: {
+				productId: { in: accessoryProductIds },
+				organizationId,
+				parentAssetId: null,
+				bundleId: null,
+				accessories: { none: {} },
+				productionItems: { none: { status: { in: COMMITTED_ITEM_STATUSES } } },
+				...BOOKABLE_ASSET_WHERE
+			},
+			_count: { _all: true }
+		});
+		for (const row of rows) freeStock.set(row.productId, row._count._all);
+	}
+
 	return {
 		unitCount: units.length,
 		accessories: [...byProduct.values()]
 			.map((tally) => ({
 				productId: tally.productId,
+				freeStock: freeStock.get(tally.productId) ?? 0,
 				name: tally.name,
 				manufacturerName: tally.manufacturerName,
 				unitsWith: tally.unitsWith,
@@ -2774,24 +2858,279 @@ function createAccessoryRecord(
 	});
 }
 
+// ── Giving every unit of a product the same accessory ────────────────────────
+// Adding a power cable to each of twenty fixtures one unit at a time is forty
+// clicks and a list to keep in your head of which ones you have done. The
+// fan-out below does it in one, and the interesting question it has to answer
+// is where the copies come from.
+//
+// Each unit gets its *own* accessory assets rather than a shared one — that is
+// what an accessory is here, a full asset with its own tag and its own DGUV
+// record, and a cable in the case of fixture 12 is not the cable in the case of
+// fixture 13. But "its own" does not mean "newly invented": a pool that already
+// holds twenty brackets on a shelf should end up with those twenty brackets
+// bolted onto the fixtures, not with forty brackets on the books. Which of the
+// two it is, is the user's call — `reuseExisting` — because only they know
+// whether the shelf stock is the same physical thing they are describing.
+
+/** A production still has a claim on the unit; a returned line is done with it. */
+const COMMITTED_ITEM_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT'];
+
+/** What a unit has to say about itself to be attached, or attached to. */
+const STOCK_UNIT_SELECT = {
+	id: true,
+	productId: true,
+	locationId: true,
+	bundleId: true,
+	assetTag: true,
+	product: { select: { name: true, manufacturer: { select: { name: true } } } }
+} satisfies Prisma.AssetSelect;
+
+type StockUnit = Prisma.AssetGetPayload<{ select: typeof STOCK_UNIT_SELECT }>;
+
+/**
+ * Loose stock of these accessory products, grouped by product and ordered the
+ * way it should be spent. Same shelf first: attaching relocates the unit, which
+ * is right for a cable on the same shelf and merely optimistic for one in
+ * another warehouse.
+ *
+ * Not limited to what is needed, because the premise of taking stock at all is
+ * that there is a modest pile of it — and a limit would have to be applied per
+ * product, in SQL, before the ordering this does in memory.
+ */
+async function accessoryStockPool(
+	tx: Pick<typeof prisma, 'asset'>,
+	args: {
+		organizationId: string;
+		productIds: string[];
+		/** What the units being attached to are in, if anything. */
+		bundleId: string | null;
+		/** Where they are, for the same-shelf preference. */
+		locationId: string;
+	}
+): Promise<Map<string, StockUnit[]>> {
+	const byProduct = new Map<string, StockUnit[]>();
+	if (args.productIds.length === 0) return byProduct;
+
+	const units = await tx.asset.findMany({
+		where: {
+			productId: { in: args.productIds },
+			organizationId: args.organizationId,
+			parentAssetId: null,
+			accessories: { none: {} },
+			productionItems: { none: { status: { in: COMMITTED_ITEM_STATUSES } } },
+			// Loose, or already in the kit it would be joining — anything else
+			// would have to be pulled out of somebody else's case.
+			OR: [{ bundleId: null }, ...(args.bundleId ? [{ bundleId: args.bundleId }] : [])],
+			...BOOKABLE_ASSET_WHERE
+		},
+		select: STOCK_UNIT_SELECT,
+		orderBy: ASSET_ORDER_BY
+	});
+
+	for (const unit of units) {
+		const list = byProduct.get(unit.productId);
+		if (list) list.push(unit);
+		else byProduct.set(unit.productId, [unit]);
+	}
+	for (const list of byProduct.values()) {
+		list.sort(
+			(a, b) => Number(b.locationId === args.locationId) - Number(a.locationId === args.locationId)
+		);
+	}
+	return byProduct;
+}
+
+/**
+ * Bolt a unit that already exists onto a parent, reporting whether it worked.
+ *
+ * The pool it came from was read before the write, so `parentAssetId` is in the
+ * where clause rather than trusted: somebody attaching the same cable by hand
+ * in the meantime must win, and the caller makes a new one instead of quietly
+ * undoing their work.
+ */
+async function attachStockUnit(
+	tx: AssetTx,
+	userId: string,
+	unit: { id: string },
+	parent: AccessoryParent
+): Promise<boolean> {
+	const { count } = await tx.asset.updateMany({
+		where: { id: unit.id, parentAssetId: null },
+		data: { parentAssetId: parent.id, locationId: parent.locationId, bundleId: parent.bundleId }
+	});
+	if (count !== 1) return false;
+
+	await tx.assetTransaction.create({
+		data: {
+			assetId: unit.id,
+			userId,
+			action: 'ACCESSORY_ATTACHED',
+			data: {
+				type: 'ACCESSORY_ATTACHED',
+				parentAssetId: parent.id,
+				parentLabel: assetLabel(parent)
+			}
+		}
+	});
+	return true;
+}
+
+/**
+ * What one run of the fan-out would do, worked out before anything is written:
+ * which units are short, by how many, and which free units of the accessory
+ * product could cover it.
+ *
+ * Shared by the command and the query the dialog asks, so the count offered to
+ * the user is produced by the same rule that will spend it.
+ */
+async function accessoryFanoutPlan(args: {
+	organizationId: string;
+	parentProductId: string;
+	accessoryProductId: string;
+	perUnit: number;
+}) {
+	// Only units that can hold an accessory: active, and not accessories
+	// themselves. `accessories` is narrowed to the one product so its length is
+	// the count this run is topping up.
+	const units = await prisma.asset.findMany({
+		where: {
+			productId: args.parentProductId,
+			organizationId: args.organizationId,
+			parentAssetId: null,
+			...ACTIVE_ASSET_WHERE
+		},
+		select: {
+			...STOCK_UNIT_SELECT,
+			accessories: {
+				where: { productId: args.accessoryProductId, ...ACTIVE_ASSET_WHERE },
+				select: { id: true }
+			}
+		},
+		orderBy: ASSET_ORDER_BY
+	});
+
+	const todo = units
+		.map((unit) => ({ unit, missing: args.perUnit - unit.accessories.length }))
+		.filter(({ missing }) => missing > 0);
+	const missing = todo.reduce((sum, t) => sum + t.missing, 0);
+
+	// Stock that could be bolted on instead of bought twice. Bookable rather than
+	// merely active: `UNAVAILABLE` means the unit isn't actually here — lent out,
+	// missing — and pretending it is now part of a fixture's kit would put it on
+	// a packing list. One already booked on a job is spoken for too, and would
+	// otherwise travel twice, once as itself and once as somebody's accessory.
+	const kits = [...new Set(todo.map(({ unit }) => unit.bundleId).filter((id) => id !== null))];
+	const pool =
+		missing === 0
+			? []
+			: await prisma.asset.findMany({
+					where: {
+						productId: args.accessoryProductId,
+						organizationId: args.organizationId,
+						parentAssetId: null,
+						accessories: { none: {} },
+						productionItems: { none: { status: { in: COMMITTED_ITEM_STATUSES } } },
+						// Loose, or already in a kit one of the targets is in — see
+						// `claimReusable` for why anything else is somebody else's decision.
+						OR: [{ bundleId: null }, { bundleId: { in: kits as string[] } }],
+						...BOOKABLE_ASSET_WHERE
+					},
+					select: STOCK_UNIT_SELECT,
+					orderBy: ASSET_ORDER_BY
+				});
+
+	return { units, todo, missing, pool };
+}
+
+/**
+ * Take the free unit that best fits this target, or nothing. Mutates `pool`:
+ * a bracket handed to fixture 12 is not available to fixture 13.
+ *
+ * A candidate already in a kit can only go to a unit in that same kit — an
+ * accessory takes its parent's kit, so moving it anywhere else is a decision
+ * about the kit's contents and not one to make on somebody's behalf. Location
+ * is a preference rather than a rule: attaching relocates the unit, which is
+ * right when the bracket is on the same shelf and merely optimistic when it is
+ * in another warehouse, so same-location stock goes first.
+ */
+function claimReusable(pool: StockUnit[], unit: StockUnit): StockUnit | null {
+	let fallback = -1;
+	for (let i = 0; i < pool.length; i++) {
+		const candidate = pool[i];
+		if (candidate.bundleId !== null && candidate.bundleId !== unit.bundleId) continue;
+		if (candidate.locationId === unit.locationId) return pool.splice(i, 1)[0];
+		if (fallback < 0) fallback = i;
+	}
+	return fallback < 0 ? null : pool.splice(fallback, 1)[0];
+}
+
+const accessoryFanoutQuerySchema = v.object({
+	organizationId: v.string(),
+	parentProductId: v.string(),
+	productId: v.string(),
+	perUnit: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(20))
+});
+
+/**
+ * The numbers the fan-out dialog puts in front of someone: how much is missing
+ * across the fleet, and how much of it the pool could cover from stock. Asked
+ * for only when the dialog opens, because it is a question about right now —
+ * the shelf empties while a page is left open.
+ */
+export const getAccessoryFanoutPlan = query(accessoryFanoutQuerySchema, async (input) => {
+	const user = await requireAuth();
+	const orgIds = await userOrgIds(user.id);
+	if (!orgIds.includes(input.organizationId) && !(await isSystemAdmin(user.id))) {
+		appError(403, 'unauthorized');
+	}
+	if (input.productId === input.parentProductId) appError(409, 'product_accessory_self');
+
+	const plan = await accessoryFanoutPlan({
+		organizationId: input.organizationId,
+		parentProductId: input.parentProductId,
+		accessoryProductId: input.productId,
+		perUnit: input.perUnit
+	});
+
+	// Counted the way the command will spend it, kit rule and all, so the dialog
+	// can't promise a bracket that turns out to be locked into another case.
+	const pool = [...plan.pool];
+	let reusable = 0;
+	for (const { unit, missing } of plan.todo) {
+		for (let n = 0; n < missing; n++) {
+			if (!claimReusable(pool, unit)) break;
+			reusable++;
+		}
+	}
+
+	return {
+		unitCount: plan.units.length,
+		unitsTouched: plan.todo.length,
+		missing: plan.missing,
+		reusable
+	};
+});
+
 const addProductAccessoriesSchema = v.object({
 	organizationId: v.string(),
 	/** The product whose every unit is getting one — not the accessory's own. */
 	parentProductId: v.string(),
 	...productRefSchema,
 	perUnit: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(20)),
-	noAssetTag: v.optional(v.boolean())
+	noAssetTag: v.optional(v.boolean()),
+	/**
+	 * Attach free units the pool already holds before registering any new ones.
+	 * Off by default, and asked rather than assumed: whether the brackets on the
+	 * shelf are the brackets that belong on these fixtures is a fact about the
+	 * warehouse that no query can settle.
+	 */
+	reuseExisting: v.optional(v.boolean())
 });
 
 /**
- * Give every unit of a product its own copy of the same accessory. Adding a
- * power cable to each of twenty fixtures one unit at a time is forty clicks and
- * a list to keep in your head of which ones you have done.
- *
- * Each unit gets its *own* accessory assets rather than a shared one — that is
- * what an accessory is here, a full asset with its own tag and its own DGUV
- * record, and a cable in the case of fixture 12 is not the cable in the case of
- * fixture 13.
+ * Give every unit of a product the same accessory — see the note above for
+ * where the copies come from.
  *
  * It tops up rather than adding blindly: `perUnit` is the number each unit
  * should end with, so running it twice does nothing the second time and a unit
@@ -2806,36 +3145,18 @@ export const addProductAccessories = command(addProductAccessoriesSchema, async 
 		appError(409, 'product_accessory_self');
 	}
 
-	// Only units that can hold an accessory: active, and not accessories
-	// themselves. `accessories` is narrowed to the one product so its length is
-	// the count this run is topping up.
-	const units = await prisma.asset.findMany({
-		where: {
-			productId: data.parentProductId,
-			organizationId: data.organizationId,
-			parentAssetId: null,
-			...ACTIVE_ASSET_WHERE
-		},
-		select: {
-			id: true,
-			locationId: true,
-			bundleId: true,
-			assetTag: true,
-			product: { select: { name: true, manufacturer: { select: { name: true } } } },
-			accessories: {
-				where: { productId: accessoryProductId, ...ACTIVE_ASSET_WHERE },
-				select: { id: true }
-			}
-		},
-		orderBy: ASSET_ORDER_BY
+	const plan = await accessoryFanoutPlan({
+		organizationId: data.organizationId,
+		parentProductId: data.parentProductId,
+		accessoryProductId,
+		perUnit: data.perUnit
 	});
-	if (units.length === 0) appError(409, 'product_no_units_in_org');
+	if (plan.units.length === 0) appError(409, 'product_no_units_in_org');
 
-	const todo = units
-		.map((unit) => ({ unit, missing: data.perUnit - unit.accessories.length }))
-		.filter(({ missing }) => missing > 0);
+	const { todo } = plan;
+	const pool = data.reuseExisting ? [...plan.pool] : [];
 
-	const createdIds = await prisma.$transaction(async (tx) => {
+	const { createdIds, reusedIds } = await prisma.$transaction(async (tx) => {
 		const { assetIdPrefix: prefix, defaultInspectionIntervalMonths } =
 			await tx.organization.findUniqueOrThrow({
 				where: { id: data.organizationId },
@@ -2848,10 +3169,16 @@ export const addProductAccessories = command(addProductAccessoriesSchema, async 
 			: null;
 		const nextTag = await tagAllocator(tx, prefix);
 
-		const ids: string[] = [];
+		const created: string[] = [];
+		const reused: string[] = [];
 		for (const { unit, missing } of todo) {
 			for (let n = 0; n < missing; n++) {
-				const created = await createAccessoryRecord(tx, {
+				const claimed = claimReusable(pool, unit);
+				if (claimed && (await attachStockUnit(tx, user.id, claimed, unit))) {
+					reused.push(claimed.id);
+					continue;
+				}
+				const record = await createAccessoryRecord(tx, {
 					userId: user.id,
 					organizationId: data.organizationId,
 					productId: accessoryProductId,
@@ -2860,10 +3187,10 @@ export const addProductAccessories = command(addProductAccessoriesSchema, async 
 					nextInspectionDue,
 					parent: unit
 				});
-				ids.push(created.id);
+				created.push(record.id);
 			}
 		}
-		return ids;
+		return { createdIds: created, reusedIds: reused };
 	});
 
 	await Promise.all([
@@ -2875,10 +3202,20 @@ export const addProductAccessories = command(addProductAccessoriesSchema, async 
 			productId: data.parentProductId,
 			organizationId: data.organizationId
 		}).refresh(),
+		// The dialog that asked for this counted the shelf; it has just been spent.
+		getAccessoryFanoutPlan({
+			organizationId: data.organizationId,
+			parentProductId: data.parentProductId,
+			productId: accessoryProductId,
+			perUnit: data.perUnit
+		}).refresh(),
 		...todo.flatMap(({ unit }) => [
 			getAsset(unit.id).refresh(),
 			getAssetHistory(unit.id).refresh()
 		]),
+		// A reused unit has its own page, and it has just changed parent, kit and
+		// possibly shelf on all of them.
+		...reusedIds.flatMap((id) => [getAsset(id).refresh(), getAssetHistory(id).refresh()]),
 		...[...new Set(todo.map(({ unit }) => unit.bundleId).filter((id) => id !== null))].map((id) =>
 			getBundle(id as string).refresh()
 		)
@@ -2891,8 +3228,9 @@ export const addProductAccessories = command(addProductAccessoriesSchema, async 
 
 	return {
 		created: createdIds.length,
+		reused: reusedIds.length,
 		unitsTouched: todo.length,
-		unitsSkipped: units.length - todo.length
+		unitsSkipped: plan.units.length - todo.length
 	};
 });
 

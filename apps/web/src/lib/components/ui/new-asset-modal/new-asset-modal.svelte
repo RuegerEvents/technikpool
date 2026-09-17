@@ -135,6 +135,17 @@
 		copyable?.accessories.map((a) => `${a.perUnit}× ${a.name}`).join(' · ') ?? ''
 	);
 	let copyAccessories = $state(true);
+	// Where those copies come from. Only offered when the pool actually holds
+	// some, and off by default: a unit being registered now is usually a delivery,
+	// and a delivery arrives with its own cables. Bringing an existing fleet into
+	// line is the other way round — that is the asset page's fan-out.
+	let reuseAccessories = $state(false);
+	let reusableSummary = $derived(
+		copyable?.accessories
+			.filter((acc) => acc.freeStock > 0)
+			.map((acc) => `${acc.freeStock}× ${acc.name}`)
+			.join(' · ') ?? ''
+	);
 
 	// Same defaulting the product wizard uses: an unclassified thing is
 	// Miscellaneous until someone says otherwise. Refills after every reset.
@@ -183,6 +194,7 @@
 		noTag = defaultNoTag;
 		imagePath = '';
 		copyAccessories = true;
+		reuseAccessories = false;
 		chosenLocationId = locationId ?? locations?.[0]?.id ?? '';
 		manufacturerKey++;
 		seed = typeof seedValue === 'string' ? seedValue.trim() : '';
@@ -247,7 +259,9 @@
 							newProductImagePath: product?.id ? undefined : imagePath || undefined,
 							categoryId: product?.id ? undefined : categoryId,
 							copyProductAccessories:
-								copyAccessories && (copyable?.accessories.length ?? 0) > 0 ? true : undefined
+								copyAccessories && (copyable?.accessories.length ?? 0) > 0 ? true : undefined,
+							reuseExistingAccessories:
+								copyAccessories && reuseAccessories && reusableSummary ? true : undefined
 						};
 			const created = await createAssets({
 				organizationId,
@@ -345,20 +359,39 @@
 				{/if}
 
 				{#if copyable && copyable.accessories.length > 0}
-					<label class="flex items-start gap-2 text-sm">
-						<input
-							type="checkbox"
-							bind:checked={copyAccessories}
-							disabled={saving}
-							class="mt-0.5 h-4 w-4 rounded border-input"
-						/>
-						<span>
-							Also create what the other units carry
-							<span class="block text-xs text-muted-foreground">
-								{copyableSummary} — each new unit gets its own, attached.
+					<div class="space-y-2">
+						<label class="flex items-start gap-2 text-sm">
+							<input
+								type="checkbox"
+								bind:checked={copyAccessories}
+								disabled={saving}
+								class="mt-0.5 h-4 w-4 rounded border-input"
+							/>
+							<span>
+								Also create what the other units carry
+								<span class="block text-xs text-muted-foreground">
+									{copyableSummary} — each new unit gets its own, attached.
+								</span>
 							</span>
-						</span>
-					</label>
+						</label>
+						{#if copyAccessories && reusableSummary}
+							<label class="flex items-start gap-2 pl-6 text-sm">
+								<input
+									type="checkbox"
+									bind:checked={reuseAccessories}
+									disabled={saving}
+									class="mt-0.5 h-4 w-4 rounded border-input"
+								/>
+								<span>
+									Take them out of stock where the pool has them
+									<span class="block text-xs text-muted-foreground">
+										Free right now: {reusableSummary}. Anything the shelf can't cover is still
+										registered new.
+									</span>
+								</span>
+							</label>
+						{/if}
+					</div>
 				{/if}
 			{:else}
 				<p class="text-xs text-muted-foreground">
