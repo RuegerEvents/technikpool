@@ -484,6 +484,8 @@ msgid "Available"
 msgstr "Verfügbar"
 
 #: src/lib/components/ui/asset-status/asset-status.svelte.ts
+#: src/routes/admin/maintenance/+page.svelte
+#: src/routes/admin/users/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
@@ -5108,6 +5110,8 @@ msgstr "Bundle-Bild neu erstellt"
 msgid "Generated preview of {0}"
 msgstr "Erzeugte Vorschau von {0}"
 
+#: src/routes/admin/maintenance/+page.svelte
+#: src/routes/admin/maintenance/+page.svelte
 #: src/routes/assets/bundles/[id]/+page.svelte
 msgid "Regenerating…"
 msgstr "Wird neu erstellt…"
@@ -7127,3 +7131,47 @@ msgstr "Wird geändert…"
 #: src/routes/profile/+page.svelte
 msgid "Change password"
 msgstr "Passwort ändern"
+
+#. 0: done - failed; 1: total; 2: failed
+#: src/routes/admin/maintenance/+page.svelte
+msgid "{0} of {1} previews regenerated, {2} failed"
+msgstr "{0} von {1} Vorschaubildern neu erstellt, {2} fehlgeschlagen"
+
+#. 0: total
+#: src/routes/admin/maintenance/+page.svelte
+msgid "{0} previews regenerated"
+msgstr "{0} Vorschaubilder neu erstellt"
+
+#: src/routes/admin/maintenance/+page.svelte
+msgid "Maintenance | Technikpool"
+msgstr "Wartung | Technikpool"
+
+#: src/routes/admin/maintenance/+page.svelte
+msgid "Instance-wide jobs for system admins."
+msgstr "Instanzweite Aufgaben für System-Administratoren."
+
+#: src/routes/admin/maintenance/+page.svelte
+msgid "Bundle previews"
+msgstr "Bundle-Vorschaubilder"
+
+#. 0: previews.length
+#: src/routes/admin/maintenance/+page.svelte
+msgid "The collage shown for every bundle and for every unit that has accessories. These are redrawn automatically when a bundle's contents change — run this after the way they are drawn has changed, to redraw all {0} of them now."
+msgstr "Die Collage, die für jedes Bundle und für jede Einheit mit Zubehör angezeigt wird. Sie wird automatisch neu gezeichnet, wenn sich der Inhalt eines Bundles ändert — diese Aufgabe erstellt alle {0} sofort neu, nachdem sich die Art der Darstellung geändert hat."
+
+#: src/routes/admin/maintenance/+page.svelte
+msgid "Finished"
+msgstr "Fertig"
+
+#. 0: failed
+#: src/routes/admin/maintenance/+page.svelte
+msgid "· {0} failed"
+msgstr "· {0} fehlgeschlagen"
+
+#: src/routes/admin/maintenance/+page.svelte
+msgid "Regenerate all previews"
+msgstr "Alle Vorschaubilder neu erstellen"
+
+#: src/routes/admin/maintenance/+page.svelte
+msgid "Reload a page showing bundles afterwards — an already-loaded list keeps the addresses it was given until then."
+msgstr "Danach eine Seite mit Bundles neu laden — eine bereits geladene Liste behält bis dahin die Adressen, die sie bekommen hat."

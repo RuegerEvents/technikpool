@@ -319,7 +319,7 @@
 							<img
 								src={imageSrc(bundle.imagePath)}
 								alt={`Generated preview of ${bundle.template.name}`}
-								class="aspect-[4/3] w-full rounded-md border bg-muted/30 object-contain"
+								class="aspect-[4/3] w-full max-w-xl rounded-md border bg-muted/30 object-contain"
 							/>
 						{/if}
 						<Button variant="outline" disabled={regeneratingImage} onclick={handleRegenerateImage}>

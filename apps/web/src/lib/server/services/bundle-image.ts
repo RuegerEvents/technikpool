@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
+import sharp from 'sharp';
 import { prisma } from '$lib/server/auth';
 import { getObject, PUBLIC_PREFIX, putObject } from '$lib/server/storage';
 
@@ -27,18 +28,59 @@ function fingerprint(assets: ImageContents) {
 		.map((asset) => [asset.product.id, asset.product.imagePath, Boolean(asset.parentAssetId)])
 		.sort((a, b) => String(a).localeCompare(String(b)));
 	return createHash('sha256')
-		.update(JSON.stringify(['thumbnail-v9', contents]))
+		.update(JSON.stringify(['thumbnail-v10', contents]))
 		.digest('hex')
 		.slice(0, 20);
 }
 
-async function embeddedImage(path: string | null) {
+/**
+ * Device pixels a viewBox unit is worth, and the reason the photos are resized
+ * at all.
+ *
+ * A preview is shown at roughly card width — ~400 CSS px for the grid at
+ * /assets/bundles, capped on the detail page — so 600 units span ~600 CSS px at
+ * most, twice that in device pixels on a HiDPI screen. Embedding the stored
+ * photo at full size instead is what made these blurry in Firefox: every tile
+ * carried a 480x480 PNG that decodes to ~900 KB of RGBA, twelve bundles' worth
+ * on one page, and under that much cache pressure Firefox draws an `<image>`
+ * from whatever undersized surface it still holds rather than blocking on a
+ * re-decode. The badges stayed sharp because they are vector; only the photos
+ * went soft, and a browser zoom (which re-requests at a new size) fixed it.
+ */
+const DEVICE_PIXELS_PER_UNIT = 2;
+
+/**
+ * The photo, scaled to the tile it is drawn into and re-encoded as WebP.
+ *
+ * `box` is that tile in viewBox units. sharp's `fit: 'inside'` is the same rule
+ * as the `preserveAspectRatio="xMidYMid meet"` the `<image>` is drawn with, so
+ * the stored pixels land one-to-one on the drawn ones and a square photo in a
+ * wide strip is sized by the strip's height, not its width. `withoutEnlargement`
+ * keeps a photo that is already small from being upscaled into the payload.
+ */
+async function embeddedImage(path: string | null, box: { width: number; height: number }) {
 	if (!path || /^(https?:)?\/\//i.test(path) || path.startsWith('data:')) return null;
 	try {
 		const object = await getObject(path);
 		if (!object.contentType.startsWith('image/') || object.contentType === 'image/svg+xml')
 			return null;
-		return `data:${object.contentType};base64,${Buffer.from(object.bytes).toString('base64')}`;
+		try {
+			const thumbnail = await sharp(Buffer.from(object.bytes))
+				.resize({
+					width: Math.ceil(box.width * DEVICE_PIXELS_PER_UNIT),
+					height: Math.ceil(box.height * DEVICE_PIXELS_PER_UNIT),
+					fit: 'inside',
+					withoutEnlargement: true
+				})
+				.webp({ quality: 82 })
+				.toBuffer();
+			return `data:image/webp;base64,${thumbnail.toString('base64')}`;
+		} catch (cause) {
+			// A photo sharp cannot decode is still worth more at full size than
+			// replaced by the "no image" placeholder the caller falls back to.
+			console.warn(`Could not downscale product image "${path}"; embedding it as-is:`, cause);
+			return `data:${object.contentType};base64,${Buffer.from(object.bytes).toString('base64')}`;
+		}
 	} catch (error) {
 		console.warn(`Could not include product image "${path}" in bundle preview:`, error);
 		return null;
@@ -79,7 +121,6 @@ async function render(assets: ImageContents) {
 	const products = useAccessoryStrip
 		? [...primary.slice(0, 6), ...secondary]
 		: [...primary, ...secondary].slice(0, 9);
-	const images = await Promise.all(products.map((product) => embeddedImage(product.imagePath)));
 
 	const gap = 24;
 	type Rect = { x: number; y: number; width: number; height: number };
@@ -128,6 +169,13 @@ async function render(assets: ImageContents) {
 	} else {
 		addGrid(products.length, fullArea, 3);
 	}
+
+	// Fetched only now that the layout is known: each photo is resized to the
+	// tile it lands in, and an accessory in the bottom strip is a quarter the
+	// height of a main tile.
+	const images = await Promise.all(
+		products.map((product, index) => embeddedImage(product.imagePath, rects[index]))
+	);
 
 	const tiles = products
 		.map((product, index) => {

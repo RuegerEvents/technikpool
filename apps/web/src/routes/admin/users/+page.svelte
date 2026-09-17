@@ -54,7 +54,10 @@
 			<h1 class="text-3xl font-bold tracking-tight">User Management</h1>
 			<p class="text-muted-foreground">Manage system admin privileges for all users.</p>
 		</div>
-		<Button variant="outline" href={resolve('/admin/catalog-log')}>Catalog Log</Button>
+		<div class="flex gap-2">
+			<Button variant="outline" href={resolve('/admin/maintenance')}>Maintenance</Button>
+			<Button variant="outline" href={resolve('/admin/catalog-log')}>Catalog Log</Button>
+		</div>
 	</div>
 
 	<Card.Root>

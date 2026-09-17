@@ -3196,3 +3196,56 @@ export const importAssets = command(importAssetsSchema, async (data): Promise<Im
 
 	return { created, skipped, errors };
 });
+
+// ── Generated previews: instance-wide regeneration ───────────────────────────
+//
+// `ensureBundleImage`/`ensureAssetImage` only redraw when a bundle's contents
+// changed, which is right: a preview costs an object-store round trip per photo.
+// So a change to how they are *drawn* leaves every stored image stale until
+// something else happens to touch it. Bumping the fingerprint's version string
+// invalidates them, but only lazily, one page view at a time.
+//
+// This pair is the eager version, for an admin who wants the whole estate
+// redrawn now. It is deliberately split into a list and a per-item command
+// rather than one long-running call: the work is entirely I/O against the
+// object store, a few hundred bundles take minutes, and a single request would
+// give the browser nothing to show and a proxy something to time out. The
+// client walks the list and knows exactly how far along it is.
+
+export const listGeneratedPreviews = query(async () => {
+	await requireSystemAdmin();
+	const [bundles, assets] = await Promise.all([
+		prisma.assetBundle.findMany({ select: { id: true }, orderBy: { id: 'asc' } }),
+		// Only units that have accessories have a preview at all — for anything
+		// else `ensureAssetImage` returns null and there is nothing to redraw.
+		prisma.asset.findMany({
+			where: { accessories: { some: {} } },
+			select: { id: true },
+			orderBy: { id: 'asc' }
+		})
+	]);
+	return [
+		...bundles.map((bundle) => ({ kind: 'bundle' as const, id: bundle.id })),
+		...assets.map((asset) => ({ kind: 'asset' as const, id: asset.id }))
+	];
+});
+
+export const regenerateGeneratedPreview = command(
+	v.object({ kind: v.picklist(['bundle', 'asset']), id: v.string() }),
+	async ({ kind, id }) => {
+		await requireSystemAdmin();
+		if (kind === 'bundle') {
+			const bundle = await prisma.assetBundle.findUniqueOrThrow({
+				where: { id },
+				include: { assets: { include: { product: true } } }
+			});
+			await ensureBundleImage(bundle, true);
+			return;
+		}
+		const asset = await prisma.asset.findUniqueOrThrow({
+			where: { id },
+			include: { product: true, accessories: { include: { product: true } } }
+		});
+		await ensureAssetImage(asset, true);
+	}
+);
