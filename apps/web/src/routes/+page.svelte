@@ -14,6 +14,7 @@
 	import { resolve } from '$app/paths';
 	import { plural, orgLabel } from '$lib/utils';
 	import { canManageInventory } from '$lib/roles';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 	import {
 		Package,
 		Layers,
@@ -29,12 +30,17 @@
 
 	let { data } = $props();
 
-	let orgs = $derived(data.user ? await getMyOrgs() : []);
+	// Read through the queries rather than awaited: an `await` in a `$derived`
+	// holds the whole page back until it answers, so the dashboard would show
+	// nothing at all — not even its heading — while the counts were being
+	// totted up. See CLAUDE.md, "Loading states".
+	let orgs = $derived(data.user ? (getMyOrgs().current ?? []) : []);
 	let adminOrgs = $derived(orgs.filter(canManageInventory));
-	let pending = $derived(
-		data.user ? (await Promise.all(adminOrgs.map((o) => getPendingApprovals(o.id)))).flat() : []
-	);
-	let stats = $derived(data.user ? await getDashboardStats() : null);
+	let pendingQueries = $derived(data.user ? adminOrgs.map((o) => getPendingApprovals(o.id)) : []);
+	let pendingReady = $derived(pendingQueries.every((q) => q.ready));
+	let pending = $derived(pendingQueries.flatMap((q) => q.current ?? []));
+	let statsQuery = $derived(data.user ? getDashboardStats() : null);
+	let stats = $derived(statsQuery?.current ?? null);
 
 	type PendingItem = (typeof pending)[number];
 
@@ -182,7 +188,9 @@
 		</div>
 
 		<!-- Stats row -->
-		{#if stats}
+		{#if !stats}
+			<ContentSkeleton shape="cards" count={5} error={statsQuery?.error} />
+		{:else}
 			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
 				<!-- Assets -->
 				<a href={resolve('/assets')} class="group block">
@@ -448,7 +456,9 @@
 		<!-- Action Required -->
 		<div>
 			<h2 class="mb-4 text-xl font-semibold">Action Required</h2>
-			{#if groups.length === 0}
+			{#if !pendingReady}
+				<ContentSkeleton count={3} error={pendingQueries.find((q) => q.error)?.error} />
+			{:else if groups.length === 0}
 				<Card.Root>
 					<Card.Content class="py-8 text-center text-muted-foreground">
 						No pending approvals at this time.

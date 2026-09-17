@@ -14,9 +14,11 @@
 	import * as Card from '$lib/components/ui/card';
 	import { toast } from 'svelte-sonner';
 	import { getErrorMessage } from '$lib/utils';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
-	let pairing = $derived(await getPairingInfo());
-	let devices = $derived(await getConnectedDevices());
+	let pairing = $derived(getPairingInfo().current ?? { baseUrl: '' });
+	let devicesQuery = $derived(getConnectedDevices());
+	let devices = $derived(devicesQuery.current ?? []);
 
 	let disconnecting = $state<string | null>(null);
 
@@ -184,7 +186,9 @@
 			</Card.Description>
 		</Card.Header>
 		<Card.Content>
-			{#if devices.length === 0}
+			{#if !devicesQuery.ready}
+				<ContentSkeleton count={2} />
+			{:else if devices.length === 0}
 				<p class="text-sm text-muted-foreground">No devices are connected.</p>
 			{:else}
 				<ul class="divide-y">

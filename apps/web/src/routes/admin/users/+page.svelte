@@ -6,10 +6,12 @@
 	import { deleteUser, getAllUsers, setUserAdmin } from '$lib/remote/orgs.remote';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
 	let { data } = $props();
 
-	let users = $derived(await getAllUsers());
+	let usersQuery = $derived(getAllUsers());
+	let users = $derived(usersQuery.current ?? []);
 	let deleteTarget = $state<(typeof users)[number] | null>(null);
 	let deleteOpen = $state(false);
 	let deleting = $state(false);
@@ -68,85 +70,90 @@
 			</Card.Description>
 		</Card.Header>
 		<Card.Content class="overflow-x-auto p-0">
-			<table class="w-full text-sm">
-				<thead>
-					<tr class="border-b text-left text-muted-foreground">
-						<th class="px-6 py-3 font-medium">Name</th>
-						<th class="px-6 py-3 font-medium">Email</th>
-						<th class="px-6 py-3 font-medium">Organizations</th>
-						<th class="px-6 py-3 font-medium">Joined</th>
-						<th class="px-6 py-3 font-medium"></th>
-					</tr>
-				</thead>
-				<tbody class="divide-y">
-					{#each users as user (user.id)}
-						<tr class="hover:bg-muted/30">
-							<td class="px-6 py-3">
-								<div class="flex items-center gap-2">
-									<span class="font-medium">{user.name || '—'}</span>
-									{#if user.isAdmin}
-										<span
-											class="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary"
-											>Admin</span
-										>
-									{/if}
-									{#if user.id === data.user?.id}
-										<span
-											class="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground"
-											>You</span
-										>
-									{/if}
-								</div>
-							</td>
-							<td class="px-6 py-3 text-muted-foreground">{user.email}</td>
-							<td class="px-6 py-3">
-								{#if user.memberships.length === 0}
-									<span class="text-muted-foreground">—</span>
-								{:else}
-									<div class="flex flex-wrap gap-1">
-										{#each user.memberships as m (m.organization.id)}
-											<a
-												href={resolve(`/orgs/${m.organization.id}`)}
-												class="rounded border px-1.5 py-0.5 text-xs hover:bg-muted"
-											>
-												{orgLabel(m.organization)}
-												<span class="text-muted-foreground">({roleLabels[m.role] ?? m.role})</span>
-											</a>
-										{/each}
-									</div>
-								{/if}
-							</td>
-							<td class="px-6 py-3 text-muted-foreground">
-								{new Date(user.createdAt).toLocaleDateString()}
-							</td>
-							<td class="px-6 py-3 text-right">
-								{#if user.id !== data.user?.id}
-									<div class="flex justify-end gap-2">
-										<Button
-											variant={user.isAdmin ? 'destructive' : 'outline'}
-											size="sm"
-											onclick={() =>
-												handleToggleAdmin(user.id, user.isAdmin, user.name || user.email)}
-										>
-											{user.isAdmin ? 'Revoke Admin' : 'Make Admin'}
-										</Button>
-										<Button
-											variant="destructive"
-											size="sm"
-											onclick={() => {
-												deleteTarget = user;
-												deleteOpen = true;
-											}}
-										>
-											Delete
-										</Button>
-									</div>
-								{/if}
-							</td>
+			{#if !usersQuery.ready}
+				<div class="p-6"><ContentSkeleton count={6} error={usersQuery.error} /></div>
+			{:else}
+				<table class="w-full text-sm">
+					<thead>
+						<tr class="border-b text-left text-muted-foreground">
+							<th class="px-6 py-3 font-medium">Name</th>
+							<th class="px-6 py-3 font-medium">Email</th>
+							<th class="px-6 py-3 font-medium">Organizations</th>
+							<th class="px-6 py-3 font-medium">Joined</th>
+							<th class="px-6 py-3 font-medium"></th>
 						</tr>
-					{/each}
-				</tbody>
-			</table>
+					</thead>
+					<tbody class="divide-y">
+						{#each users as user (user.id)}
+							<tr class="hover:bg-muted/30">
+								<td class="px-6 py-3">
+									<div class="flex items-center gap-2">
+										<span class="font-medium">{user.name || '—'}</span>
+										{#if user.isAdmin}
+											<span
+												class="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary"
+												>Admin</span
+											>
+										{/if}
+										{#if user.id === data.user?.id}
+											<span
+												class="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground"
+												>You</span
+											>
+										{/if}
+									</div>
+								</td>
+								<td class="px-6 py-3 text-muted-foreground">{user.email}</td>
+								<td class="px-6 py-3">
+									{#if user.memberships.length === 0}
+										<span class="text-muted-foreground">—</span>
+									{:else}
+										<div class="flex flex-wrap gap-1">
+											{#each user.memberships as m (m.organization.id)}
+												<a
+													href={resolve(`/orgs/${m.organization.id}`)}
+													class="rounded border px-1.5 py-0.5 text-xs hover:bg-muted"
+												>
+													{orgLabel(m.organization)}
+													<span class="text-muted-foreground">({roleLabels[m.role] ?? m.role})</span
+													>
+												</a>
+											{/each}
+										</div>
+									{/if}
+								</td>
+								<td class="px-6 py-3 text-muted-foreground">
+									{new Date(user.createdAt).toLocaleDateString()}
+								</td>
+								<td class="px-6 py-3 text-right">
+									{#if user.id !== data.user?.id}
+										<div class="flex justify-end gap-2">
+											<Button
+												variant={user.isAdmin ? 'destructive' : 'outline'}
+												size="sm"
+												onclick={() =>
+													handleToggleAdmin(user.id, user.isAdmin, user.name || user.email)}
+											>
+												{user.isAdmin ? 'Revoke Admin' : 'Make Admin'}
+											</Button>
+											<Button
+												variant="destructive"
+												size="sm"
+												onclick={() => {
+													deleteTarget = user;
+													deleteOpen = true;
+												}}
+											>
+												Delete
+											</Button>
+										</div>
+									{/if}
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			{/if}
 		</Card.Content>
 	</Card.Root>
 </div>

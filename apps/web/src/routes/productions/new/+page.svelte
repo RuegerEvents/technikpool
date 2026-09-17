@@ -62,7 +62,7 @@
 
 	<Card.Root class="max-w-2xl">
 		<Card.Content class="pt-6">
-			{@const orgs = await getMyOrgs()}
+			{@const orgs = getMyOrgs().current ?? []}
 			{#if !organizationId && orgs[0]}
 				{((organizationId = orgs[0].id), '')}
 			{/if}

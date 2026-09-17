@@ -28,9 +28,9 @@
 
 	const preselectedProductionId = page.url.searchParams.get('productionId');
 
-	let orgs = $derived(await getMyOrgs());
+	let orgs = $derived(getMyOrgs().current ?? []);
 	let selectedOrgId = $state('');
-	let productions = $derived(selectedOrgId ? await getProductions(selectedOrgId) : []);
+	let productions = $derived(selectedOrgId ? (getProductions(selectedOrgId).current ?? []) : []);
 
 	let productionId = $state('');
 	let customerId = $state('');
@@ -99,7 +99,7 @@
 	let effectiveScope = $derived<'ALL' | 'OWN_ORG_ONLY'>(hasCrossOrgItems ? assetScope : 'ALL');
 	let readinessArgs = $derived({ productionId, assetScope: effectiveScope });
 	let readiness = $derived(
-		productionId ? await getProductionBillingReadiness(readinessArgs) : null
+		productionId ? (getProductionBillingReadiness(readinessArgs).current ?? null) : null
 	);
 	let blockers = $derived(
 		readiness ? readiness.missingPrices.length + readiness.missingRates.length : 0

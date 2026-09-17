@@ -27,6 +27,7 @@
 	import CsvImportModal from '$lib/components/CsvImportModal.svelte';
 	import { AssetStatusBadge, assetStatusLabel } from '$lib/components/ui/asset-status';
 	import { SortableHeader } from '$lib/components/ui/sortable-header';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
 	let showImportModal = $state(false);
 
@@ -105,13 +106,17 @@
 		goto(url, { replaceState: true, noScroll: true, keepFocus: true });
 	});
 
-	let orgs = $derived(await getMyOrgs());
-	let assets = $derived(
+	// Read through the queries rather than awaited: an `await` in a `$derived`
+	// suspends the whole page until it answers — heading, filters and all — and
+	// this one asks for every unit in the pool. See CLAUDE.md, "Loading states".
+	let orgs = $derived(getMyOrgs().current ?? []);
+	let assetsQuery = $derived(
 		showingRetired
-			? await getRetiredAssets(filterOrgId || undefined)
-			: await getAssets(filterOrgId || undefined)
+			? getRetiredAssets(filterOrgId || undefined)
+			: getAssets(filterOrgId || undefined)
 	);
-	let categories = $derived(await getCategories());
+	let assets = $derived(assetsQuery.current ?? []);
+	let categories = $derived(getCategories().current ?? []);
 
 	type Asset = Awaited<ReturnType<typeof getAssets>>[number];
 	type TemplateData = Awaited<ReturnType<typeof getBundleTemplates>>[number];
@@ -126,7 +131,9 @@
 	let showingDevices = $derived(grouping === 'devices' && layout === 'list');
 
 	let templates = $derived(
-		bundleGrouping ? await getBundleTemplates(filterOrgId || undefined) : ([] as TemplateData[])
+		bundleGrouping
+			? (getBundleTemplates(filterOrgId || undefined).current ?? ([] as TemplateData[]))
+			: ([] as TemplateData[])
 	);
 
 	type Group = {
@@ -699,7 +706,9 @@
 		{/if}
 	{/snippet}
 
-	{#if !hasResults}
+	{#if !assetsQuery.ready}
+		<ContentSkeleton shape="table" count={10} />
+	{:else if !hasResults}
 		<div class="rounded-md border">
 			<div class="flex flex-col items-center justify-center py-12 text-center">
 				<p class="text-lg font-medium">

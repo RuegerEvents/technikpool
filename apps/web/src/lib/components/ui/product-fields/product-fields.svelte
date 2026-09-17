@@ -130,8 +130,8 @@
 
 	// Only loaded once the box is ticked: a form for a moving head has no use for
 	// the cable vocabulary, and every page carrying ProductFields would pay for it.
-	let vocab = $derived(value.cable ? await getCableVocabulary() : null);
-	let connectors = $derived(value.cable ? await getConnectors() : []);
+	let vocab = $derived(value.cable ? (getCableVocabulary().current ?? null) : null);
+	let connectors = $derived(value.cable ? (getConnectors().current ?? []) : []);
 
 	let typeItems = $derived((vocab?.types ?? []).map((name) => ({ id: name, name })));
 

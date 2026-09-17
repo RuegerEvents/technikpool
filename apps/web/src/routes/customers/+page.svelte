@@ -8,13 +8,19 @@
 	import { getCustomers } from '$lib/remote/customers.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { customerLabel, formatAddress, orgLabel } from '$lib/utils';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
-	let orgs = $derived(await getMyOrgs());
+	// Read through the query rather than awaited: `await` in a `$derived`
+	// suspends the whole component until it answers, heading and all. See
+	// CLAUDE.md, "Loading states".
+	let orgsQuery = $derived(getMyOrgs());
+	let orgs = $derived(orgsQuery.current ?? []);
 	let organizationId = $state('');
 	$effect(() => {
 		if (!organizationId && orgs[0]) organizationId = orgs[0].id;
 	});
-	let customers = $derived(organizationId ? await getCustomers(organizationId) : []);
+	let customersQuery = $derived(organizationId ? getCustomers(organizationId) : null);
+	let customers = $derived(customersQuery?.current ?? []);
 
 	let modalOpen = $state(false);
 	let editing = $state<CustomerWithAddress | null>(null);
@@ -44,24 +50,28 @@
 	<Card.Root>
 		<Card.Header><Card.Title>Customer list</Card.Title></Card.Header>
 		<Card.Content class="space-y-2">
-			{#each customers as customer (customer.id)}
-				<button
-					type="button"
-					onclick={() => openCustomer(customer)}
-					class="w-full rounded-md border p-3 text-left hover:bg-muted"
-				>
-					<div class="font-medium">{customerLabel(customer)}</div>
-					<div class="text-sm text-muted-foreground">
-						{customer.customerNumber ? `${customer.customerNumber} · ` : ''}{formatAddress(
-							customer.address
-						) ||
-							customer.email ||
-							'No address'}
-					</div>
-				</button>
+			{#if !customersQuery?.ready}
+				<ContentSkeleton count={4} error={customersQuery?.error} />
 			{:else}
-				<p class="py-8 text-center text-sm text-muted-foreground">No customers yet.</p>
-			{/each}
+				{#each customers as customer (customer.id)}
+					<button
+						type="button"
+						onclick={() => openCustomer(customer)}
+						class="w-full rounded-md border p-3 text-left hover:bg-muted"
+					>
+						<div class="font-medium">{customerLabel(customer)}</div>
+						<div class="text-sm text-muted-foreground">
+							{customer.customerNumber ? `${customer.customerNumber} · ` : ''}{formatAddress(
+								customer.address
+							) ||
+								customer.email ||
+								'No address'}
+						</div>
+					</button>
+				{:else}
+					<p class="py-8 text-center text-sm text-muted-foreground">No customers yet.</p>
+				{/each}
+			{/if}
 		</Card.Content>
 	</Card.Root>
 </div>

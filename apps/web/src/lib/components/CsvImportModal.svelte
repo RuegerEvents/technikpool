@@ -25,11 +25,11 @@
 	// An import registers assets, so it needs the same org-admin right the
 	// creation forms do — offering an org that will reject the import after a
 	// file has already been mapped is the worst moment to find out.
-	let orgs = $derived((await getMyOrgs()).filter(canManageInventory));
+	let orgs = $derived((getMyOrgs().current ?? []).filter(canManageInventory));
 	let selectedOrgId = $state('');
 	let selectedLocationId = $state('');
-	let locations = $derived(selectedOrgId ? await getLocations(selectedOrgId) : []);
-	let categories = $derived(await getCategories());
+	let locations = $derived(selectedOrgId ? (getLocations(selectedOrgId).current ?? []) : []);
+	let categories = $derived(getCategories().current ?? []);
 
 	$effect(() => {
 		if (!selectedOrgId) {

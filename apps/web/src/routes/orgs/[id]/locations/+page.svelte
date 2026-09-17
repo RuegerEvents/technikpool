@@ -11,14 +11,17 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
 	let { data } = $props();
 
 	const orgId = $derived(page.params.id as string);
-	let org = $derived(await getOrgWithMembers(orgId));
-	let locations = $derived(await getLocations(orgId));
+	let orgQuery = $derived(getOrgWithMembers(orgId));
+	let org = $derived(orgQuery.current);
+	let locationsQuery = $derived(getLocations(orgId));
+	let locations = $derived(locationsQuery.current ?? []);
 
-	let myMembership = $derived(org.members.find((m) => m.userId === data.user?.id));
+	let myMembership = $derived(org?.members.find((m) => m.userId === data.user?.id));
 	let canManage = $derived(
 		myMembership?.role === 'OWNER' || myMembership?.role === 'ADMIN' || data.isAdmin
 	);
@@ -93,7 +96,7 @@
 	}
 </script>
 
-<svelte:head><title>Locations – {org.name} | Technikpool</title></svelte:head>
+<svelte:head><title>Locations – {org?.name ?? ''} | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
 	<div class="flex items-center gap-4">
@@ -105,7 +108,7 @@
 	<div class="flex flex-wrap items-start justify-between gap-4">
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">Locations</h1>
-			<p class="text-muted-foreground">Manage locations for {org.name}.</p>
+			<p class="text-muted-foreground">Manage locations for {org?.name ?? '…'}.</p>
 		</div>
 		{#if canManage}
 			<Button icon="add" onclick={startCreate}>New Location</Button>
@@ -122,7 +125,9 @@
 
 	<div class="space-y-2">
 		<h2 class="text-xl font-semibold">Existing Locations ({locations.length})</h2>
-		{#if locations.length === 0}
+		{#if !locationsQuery.ready}
+			<ContentSkeleton count={4} error={locationsQuery.error} />
+		{:else if locations.length === 0}
 			<p class="text-muted-foreground">No locations yet.</p>
 		{:else}
 			<div class="space-y-3">

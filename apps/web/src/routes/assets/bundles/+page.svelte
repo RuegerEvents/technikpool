@@ -6,10 +6,12 @@
 	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import { getBundleTemplates } from '$lib/remote/assets.remote';
 	import { resolve } from '$app/paths';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 	import { Layers } from '@lucide/svelte';
 	import { imageSrc } from '$lib/images';
 
-	let templates = $derived(await getBundleTemplates());
+	let templatesQuery = $derived(getBundleTemplates());
+	let templates = $derived(templatesQuery.current ?? []);
 </script>
 
 <svelte:head><title>Asset Bundles | Technikpool</title></svelte:head>
@@ -23,7 +25,9 @@
 		<Button icon="add" href={resolve('/assets/bundles/new')}>New Bundle</Button>
 	</div>
 
-	{#if templates.length === 0}
+	{#if !templatesQuery.ready}
+		<ContentSkeleton shape="cards" count={6} />
+	{:else if templates.length === 0}
 		<Card.Root>
 			<Card.Content class="py-12 text-center text-muted-foreground">
 				No bundles yet.

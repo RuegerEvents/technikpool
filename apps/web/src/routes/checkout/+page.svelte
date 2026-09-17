@@ -17,12 +17,17 @@
 	// Scanning writes, so the targets on offer are only the orgs this user may
 	// write in — a VIEWER sees the shelf everywhere but can move nothing, and a
 	// target that will refuse the scan has no business being in the list.
-	let writableOrgIds = $derived(new Set((await getMyOrgs()).filter(canWrite).map((org) => org.id)));
+	// Read through the queries rather than awaited: the scan field is the point
+	// of this page and it works without any of them. See CLAUDE.md, "Loading
+	// states".
+	let writableOrgIds = $derived(
+		new Set((getMyOrgs().current ?? []).filter(canWrite).map((org) => org.id))
+	);
 	let locations = $derived(
-		(await getLocations()).filter((loc) => writableOrgIds.has(loc.organizationId))
+		(getLocations().current ?? []).filter((loc) => writableOrgIds.has(loc.organizationId))
 	);
 	let productions = $derived(
-		(await getAllProductions()).filter((prod) => writableOrgIds.has(prod.organizationId))
+		(getAllProductions().current ?? []).filter((prod) => writableOrgIds.has(prod.organizationId))
 	);
 
 	let locationItems = $derived(

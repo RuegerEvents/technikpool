@@ -33,13 +33,15 @@
 	// Only the orgs this user may actually register equipment in — being a
 	// MEMBER or VIEWER somewhere is no reason to be offered it here, since the
 	// server would reject the form on submit.
-	let orgs = $derived((await getMyOrgs()).filter(canManageInventory));
+	let orgs = $derived((getMyOrgs().current ?? []).filter(canManageInventory));
 	let selectedOrgId = $state('');
 	let locationId = $state('');
-	let locations = $derived(selectedOrgId ? await getLocations(selectedOrgId) : []);
+	let locations = $derived(selectedOrgId ? (getLocations(selectedOrgId).current ?? []) : []);
 
 	let duplicateFromId = $derived(page.url.searchParams.get('duplicateFrom'));
-	let duplicateSource = $derived(duplicateFromId ? await getAsset(duplicateFromId) : null);
+	let duplicateSource = $derived(
+		duplicateFromId ? (getAsset(duplicateFromId).current ?? null) : null
+	);
 
 	$effect(() => {
 		if (!selectedOrgId) {
@@ -62,7 +64,7 @@
 	let manufacturer = $state<SelectionOrNew>(null);
 	let newManufacturerLogoPath = $state('');
 	let product = $state<SelectionOrNew>(null);
-	let categories = $derived(await getCategories());
+	let categories = $derived(getCategories().current ?? []);
 
 	let duplicatePrefilled = $state(false);
 	$effect(() => {
@@ -334,7 +336,7 @@
 					{/if}
 
 					{#if true}
-						{@const manufacturers = await getManufacturers()}
+						{@const manufacturers = getManufacturers().current ?? []}
 						<div class="space-y-2">
 							<Label>Manufacturer</Label>
 							<CreatableSelect
@@ -355,7 +357,7 @@
 
 					{#if manufacturer}
 						{#key manufacturerKey}
-							{@const products = await getProducts(manufacturer.id ?? undefined)}
+							{@const products = getProducts(manufacturer.id ?? undefined).current ?? []}
 							<div class="space-y-2">
 								<Label>Product Model</Label>
 								<CreatableSelect

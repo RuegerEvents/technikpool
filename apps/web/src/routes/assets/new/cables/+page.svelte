@@ -42,10 +42,10 @@
 	let saving = $state(false);
 	// Same rule as /assets/new: an org the user can only read is not an org
 	// they can add cables to.
-	let orgs = $derived((await getMyOrgs()).filter(canManageInventory));
+	let orgs = $derived((getMyOrgs().current ?? []).filter(canManageInventory));
 	let selectedOrgId = $state('');
 	let locationId = $state('');
-	let locations = $derived(selectedOrgId ? await getLocations(selectedOrgId) : []);
+	let locations = $derived(selectedOrgId ? (getLocations(selectedOrgId).current ?? []) : []);
 
 	$effect(() => {
 		if (!selectedOrgId || locations.length === 0) {
@@ -55,9 +55,17 @@
 		if (!locationId || !locations.some((l) => l.id === locationId)) locationId = locations[0].id;
 	});
 
-	let categories = $derived(await getCategories());
-	let manufacturers = $derived(await getManufacturers());
-	let vocab = $derived(await getCableVocabulary());
+	let categories = $derived(getCategories().current ?? []);
+	let manufacturers = $derived(getManufacturers().current ?? []);
+	// An empty vocabulary until it arrives: everything that reads it is a
+	// suggestion — the precedents a cable type fills in — and a suggestion that
+	// isn't here yet is simply no suggestion.
+	const EMPTY_VOCABULARY: Awaited<ReturnType<typeof getCableVocabulary>> = {
+		hasCables: false,
+		types: [],
+		byType: {}
+	};
+	let vocab = $derived(getCableVocabulary().current ?? EMPTY_VOCABULARY);
 
 	// Cables belong to nobody in particular, so the generic manufacturer is the
 	// default. Before any exists there is nothing to name it with, and the server
@@ -65,7 +73,7 @@
 	let genericManufacturer = $derived(manufacturers.find((m) => m.generic) ?? null);
 	let realManufacturers = $derived(manufacturers.filter((m) => !m.generic));
 
-	let connectors = $derived(await getConnectors());
+	let connectors = $derived(getConnectors().current ?? []);
 	let typeItems = $derived(vocab.types.map((name) => ({ id: name, name })));
 
 	// The connector list arranged for the slot it fills — see ProductFields for

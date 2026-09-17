@@ -32,7 +32,7 @@
 
 	let { value = $bindable(emptyConnectorDraft()), idPrefix = 'connector' }: Props = $props();
 
-	let categories = $derived(await getCategories());
+	let categories = $derived(getCategories().current ?? []);
 </script>
 
 <div class="space-y-4">

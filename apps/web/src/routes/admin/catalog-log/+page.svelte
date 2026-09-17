@@ -3,8 +3,21 @@
 	import { Button } from '$lib/components/ui/button';
 	import { getCatalogTransactions } from '$lib/remote/assets.remote';
 	import { resolve } from '$app/paths';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
-	let log = $derived(await getCatalogTransactions());
+	// The empty log the page renders before the first answer arrives. Spelled out
+	// rather than left undefined so nothing below has to ask twice whether the
+	// data is here — the skeleton in the template is the one place that asks.
+	const EMPTY_LOG: Awaited<ReturnType<typeof getCatalogTransactions>> = {
+		entries: [],
+		products: {},
+		manufacturers: {},
+		categories: {},
+		organizations: {}
+	};
+
+	let logQuery = $derived(getCatalogTransactions());
+	let log = $derived(logQuery.current ?? EMPTY_LOG);
 
 	const actionLabels: Record<string, string> = {
 		PRODUCT_UPDATED: 'Product updated',
@@ -71,7 +84,9 @@
 		<Button variant="outline" href={resolve('/admin/users')}>User Management</Button>
 	</div>
 
-	{#if log.entries.length === 0}
+	{#if !logQuery.ready}
+		<ContentSkeleton shape="table" count={8} error={logQuery.error} />
+	{:else if log.entries.length === 0}
 		<Card.Root>
 			<Card.Content class="py-12 text-center text-muted-foreground"
 				>No catalog changes recorded yet.</Card.Content

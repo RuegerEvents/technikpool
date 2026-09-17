@@ -113,8 +113,8 @@
 	// Gated on `open`: this component is mounted on three pages and spends most
 	// of its life closed, and an async derived nothing reads until it opens is
 	// both a wasted round trip and the await_waterfall warning.
-	let categories = $derived(open ? await getCategories() : []);
-	let manufacturers = $derived(open ? await getManufacturers() : []);
+	let categories = $derived(open ? (getCategories().current ?? []) : []);
+	let manufacturers = $derived(open ? (getManufacturers().current ?? []) : []);
 	let productsForManufacturer = $derived(
 		open && manufacturer?.id ? await getProducts(manufacturer.id) : []
 	);

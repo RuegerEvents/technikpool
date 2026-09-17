@@ -322,11 +322,13 @@ Located in `src/lib/components/ui/`: `button`, `card`, `input`, `label`, `creata
 
 ## Svelte 5 Reactivity
 
-**DO** use `$derived(await getData())` for async data — no manual loading state, no `onMount`, no `$effect` for fetching:
+**DO** read remote data through a `$derived` — no `onMount`, no `$effect` for fetching, no
+manual loading flag of your own. Whether it is awaited depends on who is waiting for it; see
+"Loading States" below.
 
 ```svelte
-let production = $derived(await getProduction(productionId)); let allAssets = $derived(await
-getAssets());
+let production = $derived(await getProduction(productionId)); // in a detail component let
+assetsQuery = $derived(getAssets()); // on a page that must render before it answers
 ```
 
 **DON'T** use the Svelte 4 pattern of `$state + onMount + loading flag`:
@@ -349,6 +351,65 @@ const productionId = $derived(page.params.id as string);
 **DO** use `SvelteMap` instead of plain `Map` when the map is used reactively in templates.
 
 **DO** import `page` from `$app/state`, not `$app/stores`.
+
+## Loading States
+
+**`await` in a component is not local to the line it sits on.** An async `$derived` suspends
+the _whole component_ — Svelte registers the suspension against the boundary that encloses the
+component, not against the place the value is read. So one slow query holds back the heading,
+the buttons and the empty card frames along with the table nobody can draw yet, which is what
+used to make a click sit on the previous page for a beat before anything moved.
+
+So a page reads its queries **without awaiting them**:
+
+```svelte
+let assetsQuery = $derived(getAssets(orgId)); let assets = $derived(assetsQuery.current ?? []);
+```
+
+`current` is the answer once it is here and `undefined` until then, `ready` says which, and
+`error` carries a failure. Nothing suspends, so the page is on screen immediately and only the
+part that is actually waiting shows a skeleton:
+
+```svelte
+{#if !assetsQuery.ready}
+	<ContentSkeleton shape="table" count={8} error={assetsQuery.error} />
+{:else if assets.length === 0}
+	…
+{/if}
+```
+
+The error goes to the same component because **a query that failed is never going to be ready**:
+without it the skeleton would pulse in that spot for ever. `ContentSkeleton`
+(`src/lib/components/ui/skeleton/`) draws the shape the data will take — `rows`, `table`,
+`cards`, `form`, `block`, `inline`, `text` — and fades in after 120ms, so a page whose data is
+already in hand goes straight to the real thing instead of flashing a skeleton at it.
+
+**`ready`, not `loading`.** `loading` is true during a refresh after a mutation as well, and
+blanking a table someone is looking at in order to redraw it is worse than letting the old rows
+stand for a moment.
+
+**Where the heading _is_ the data** — a detail page for one record — the page is in two files:
+`+page.svelte` holds a `<svelte:boundary>` with a `pending` snippet, and the component beside it
+(`asset-detail.svelte`, `offer-detail.svelte`, …) takes the id as a prop and awaits in the
+ordinary style. Two things to know about that boundary:
+
+- It shows `pending` when it is **created and never again**, so it is wrapped in `{#key id}` —
+  without that, opening a second record would sit on the first one's contents until the new one
+  arrived.
+- Server-side, a boundary with a `pending` snippet renders **only the pending snippet**; its
+  children are not rendered at all. That is the trade: the shell arrives immediately, and the
+  data comes from the client.
+
+**Print routes keep `await`** (`packing-list`, `delivery-note`, `crew-passes`,
+`inventory-list`). A page that is about to be printed should arrive complete, and nobody is
+watching it load.
+
+**Shared components answer to the same rule**, because a component that suspends takes the page
+that renders it down with it — `BulkActionsBar` held back the whole Devices list for its own
+three queries until it stopped awaiting them.
+
+**`pnpm check` does not catch a malformed attribute** like `count={4}error={q.error}`; it
+compiles and then fails at render. Load a page you changed before calling it done.
 
 ## Links and Paths
 

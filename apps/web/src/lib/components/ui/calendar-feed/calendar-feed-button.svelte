@@ -11,7 +11,7 @@
 
 	// Only fetched once the dialog opens — the link is a credential, and the
 	// pages hosting this button have no other use for it.
-	let url = $derived(open ? await getCalendarFeedUrl() : null);
+	let url = $derived(open ? (getCalendarFeedUrl().current ?? null) : null);
 	// webcal:// hands the feed to the OS calendar app as a subscription; Google
 	// Calendar's "From URL" field wants the plain https link instead.
 	let webcalUrl = $derived(url?.replace(/^https?:/, 'webcal:') ?? null);

@@ -7,8 +7,10 @@
 	import { getErrorMessage } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
-	let categories = $derived(await getCategories());
+	let categoriesQuery = $derived(getCategories());
+	let categories = $derived(categoriesQuery.current ?? []);
 
 	type Draft = {
 		name: string;
@@ -73,6 +75,9 @@
 
 	<Card.Root>
 		<Card.Content class="space-y-3 pt-6">
+			{#if !categoriesQuery.ready}
+				<ContentSkeleton count={6} error={categoriesQuery.error} />
+			{/if}
 			{#each categories as category (category.id)}
 				{@const draft = draftFor(category)}
 				{@const dirty = drafts.has(category.id)}

@@ -15,9 +15,12 @@
 	import { CABLE_END_LABEL, connectorRole } from '$lib/cable';
 	import { getErrorMessage, plural } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
-	let connectors = $derived(await getConnectors());
-	let usage = $derived(await getConnectorUsage());
+	let connectorsQuery = $derived(getConnectors());
+	let connectors = $derived(connectorsQuery.current ?? []);
+	let usageQuery = $derived(getConnectorUsage());
+	let usage = $derived(usageQuery.current ?? {});
 
 	type Row = (typeof connectors)[number];
 
@@ -102,7 +105,9 @@
 		class="h-10 w-72 rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
 	/>
 
-	{#if families.length === 0}
+	{#if !connectorsQuery.ready}
+		<ContentSkeleton count={6} error={connectorsQuery.error} />
+	{:else if families.length === 0}
 		<Card.Root>
 			<Card.Content class="py-12 text-center text-muted-foreground">
 				Nothing matches that.

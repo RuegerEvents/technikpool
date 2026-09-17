@@ -51,9 +51,11 @@
 	// Remote data
 	// Creating a kit is the same org-admin right as creating an asset, so the
 	// picker offers the same orgs the server would accept.
-	let orgs = $derived((await getMyOrgs()).filter(canManageInventory));
-	let categories = $derived(await getCategories());
-	let bundleTypes = $derived(selectedOrgId ? await getBundleTemplates(selectedOrgId) : []);
+	let orgs = $derived((getMyOrgs().current ?? []).filter(canManageInventory));
+	let categories = $derived(getCategories().current ?? []);
+	let bundleTypes = $derived(
+		selectedOrgId ? (getBundleTemplates(selectedOrgId).current ?? []) : []
+	);
 
 	let isNewBundleType = $derived(bundleType !== null && bundleType.id === null);
 
@@ -67,8 +69,8 @@
 		if (!selectedOrgId && orgs[0]) selectedOrgId = orgs[0].id;
 	});
 
-	let availableAssets = $derived(selectedOrgId ? await getAssets(selectedOrgId) : []);
-	let orgLocations = $derived(selectedOrgId ? await getLocations(selectedOrgId) : []);
+	let availableAssets = $derived(selectedOrgId ? (getAssets(selectedOrgId).current ?? []) : []);
+	let orgLocations = $derived(selectedOrgId ? (getLocations(selectedOrgId).current ?? []) : []);
 	let selectedIds = $derived(new Set(selectedAssets.map((a) => a.id)));
 
 	// ── What this case has to hold ───────────────────────────────────────────
@@ -77,7 +79,7 @@
 	// offers only what is still short, and the button stays out of reach until
 	// the kit is complete — the server refuses the same thing, this is so nobody
 	// finds that out after picking twenty units.
-	let spec = $derived(bundleType?.id ? await getBundleTypeSpec(bundleType.id) : null);
+	let spec = $derived(bundleType?.id ? (getBundleTypeSpec(bundleType.id).current ?? null) : null);
 	let specLines = $derived(spec?.lines ?? []);
 	let selectedCounts = $derived(countProducts(selectedAssets));
 	let shortfall = $derived(specShortfall(specLines, selectedCounts));

@@ -27,6 +27,7 @@
 	import { resolve } from '$app/paths';
 	import { browser } from '$app/environment';
 	import { toast } from 'svelte-sonner';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
 	let { data } = $props();
 
@@ -38,10 +39,13 @@
 	let searchQuery = $state('');
 	let onlyMissingImage = $state(false);
 
-	let orgs = $derived(await getMyOrgs());
-	let categories = $derived(await getCategories());
-	let manufacturers = $derived(await getManufacturers());
-	let products = $derived(await getProductCatalog(filterOrgId || undefined));
+	// Read through the queries rather than awaited, so the page is on screen
+	// while the catalogue is on its way. See CLAUDE.md, "Loading states".
+	let orgs = $derived(getMyOrgs().current ?? []);
+	let categories = $derived(getCategories().current ?? []);
+	let manufacturers = $derived(getManufacturers().current ?? []);
+	let productsQuery = $derived(getProductCatalog(filterOrgId || undefined));
+	let products = $derived(productsQuery.current ?? []);
 
 	type CatalogProduct = Awaited<ReturnType<typeof getProductCatalog>>[number];
 
@@ -272,7 +276,7 @@
 	// The picker lists *every* product, not the org catalogue behind this page:
 	// a duplicate that ended up with no units at all is invisible here and is
 	// the easiest kind to clean up.
-	let allProducts = $derived(await getProducts());
+	let allProducts = $derived(getProducts().current ?? []);
 	type GlobalProduct = Awaited<ReturnType<typeof getProducts>>[number];
 
 	let mergeOpen = $state(false);
@@ -461,7 +465,9 @@
 		</div>
 	{/if}
 
-	{#if visible.length === 0}
+	{#if !productsQuery.ready}
+		<ContentSkeleton shape="table" count={8} error={productsQuery.error} />
+	{:else if visible.length === 0}
 		<div class="rounded-md border">
 			<div class="flex flex-col items-center justify-center py-12 text-center">
 				<p class="text-lg font-medium">

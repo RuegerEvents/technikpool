@@ -33,7 +33,7 @@
 		onChange
 	}: Props = $props();
 
-	let customers = $derived(organizationId ? await getCustomers(organizationId) : []);
+	let customers = $derived(organizationId ? (getCustomers(organizationId).current ?? []) : []);
 	let selected = $derived(customers.find((c) => c.id === value) ?? null);
 
 	let modalOpen = $state(false);

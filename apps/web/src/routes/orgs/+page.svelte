@@ -12,12 +12,14 @@
 	import { Modal } from '$lib/components/ui/modal';
 	import { ORG_COLOR_PALETTE, suggestOrgColor } from '$lib/org-colors';
 	import { orgIdentityProblem } from '$lib/org-identity.svelte';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
 	let { data } = $props();
 
-	let orgs = $derived(await (data.isAdmin ? getAllOrgs() : getMyOrgs()));
+	let orgsQuery = $derived(data.isAdmin ? getAllOrgs() : getMyOrgs());
+	let orgs = $derived(orgsQuery.current ?? []);
 	// Colour, label and prefix are unique across all orgs, including ones this user cannot see.
-	let identityInUse = $derived(await getOrgIdentityInUse());
+	let identityInUse = $derived(getOrgIdentityInUse().current ?? []);
 	let takenColors = $derived(identityInUse.map((o) => o.color.toLowerCase()));
 	let freePalette = $derived(ORG_COLOR_PALETTE.filter((c) => !takenColors.includes(c)));
 	let newOrgName = $state('');
@@ -88,7 +90,9 @@
 		<h2 class="text-xl font-semibold">
 			{data.isAdmin ? `All Organizations (${orgs.length})` : 'Your Organizations'}
 		</h2>
-		{#if orgs.length === 0}
+		{#if !orgsQuery.ready}
+			<ContentSkeleton count={4} error={orgsQuery.error} />
+		{:else if orgs.length === 0}
 			<p class="text-muted-foreground">
 				{data.isAdmin
 					? 'No organizations exist yet.'

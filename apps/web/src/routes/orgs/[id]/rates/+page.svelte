@@ -13,14 +13,17 @@
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
 	let { data } = $props();
 
 	const orgId = $derived(page.params.id as string);
-	let org = $derived(await getOrgWithMembers(orgId));
-	let rates = $derived(await getOrgCategoryRates(orgId));
+	let orgQuery = $derived(getOrgWithMembers(orgId));
+	let org = $derived(orgQuery.current);
+	let ratesQuery = $derived(getOrgCategoryRates(orgId));
+	let rates = $derived(ratesQuery.current ?? []);
 
-	let myMembership = $derived(org.members.find((m) => m.userId === data.user?.id));
+	let myMembership = $derived(org?.members.find((m) => m.userId === data.user?.id));
 	let canManage = $derived(myMembership?.role === 'OWNER' || data.isAdmin);
 
 	let drafts = new SvelteMap<string, string>();
@@ -46,7 +49,7 @@
 	}
 </script>
 
-<svelte:head><title>Rental Rates | {org.name} | Technikpool</title></svelte:head>
+<svelte:head><title>Rental Rates | {org?.name ?? ''} | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
 	<div class="flex items-center gap-4">
@@ -68,7 +71,7 @@
 			>
 				<path d="m15 18-6-6 6-6" />
 			</svg>
-			<span class="truncate">{org.name}</span>
+			<span class="truncate">{org?.name ?? ''}</span>
 		</Button>
 	</div>
 
@@ -83,6 +86,9 @@
 	<Card.Root class="max-w-2xl">
 		<Card.Content class="pt-6">
 			<div class="space-y-3">
+				{#if !ratesQuery.ready}
+					<ContentSkeleton count={5} error={ratesQuery.error} />
+				{/if}
 				{#each rates as row (row.category.id)}
 					<div
 						class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b pb-3 last:border-0 last:pb-0"

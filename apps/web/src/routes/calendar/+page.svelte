@@ -8,6 +8,7 @@
 	import { OrgBadge } from '$lib/components/ui/org-badge';
 	import { FilterPopover } from '$lib/components/ui/filter-popover';
 	import { CalendarFeedButton } from '$lib/components/ui/calendar-feed';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 	import {
 		ProductionHoverCard,
 		type ProductionHoverInfo
@@ -16,8 +17,13 @@
 	type Granularity = 'day' | 'week' | 'month' | 'year';
 	type ViewMode = 'assets' | 'productions';
 
-	let rawData = $derived(await getCalendarData());
-	let prodCalData = $derived(await getProductionsCalendar());
+	// Read through the queries rather than awaited, so the controls along the top
+	// are usable while the bookings are still on their way — see CLAUDE.md,
+	// "Loading states".
+	let calendarQuery = $derived(getCalendarData());
+	let rawData = $derived(calendarQuery.current ?? []);
+	let productionsQuery = $derived(getProductionsCalendar());
+	let prodCalData = $derived(productionsQuery.current ?? []);
 
 	// View state is persisted in URL query params (?view=&mode=&date=&orgs=) so
 	// a refresh or shared link keeps the same view.
@@ -1190,8 +1196,12 @@
 		</div>
 	</div>
 
-	<!-- Month Grid View -->
-	{#if granularity === 'month'}
+	{#if !calendarQuery.ready}
+		<div class="flex-1 p-4">
+			<ContentSkeleton shape="block" class="h-full" error={calendarQuery.error} />
+		</div>
+		<!-- Month Grid View -->
+	{:else if granularity === 'month'}
 		<div class="flex flex-1 flex-col overflow-hidden">
 			<!-- Day-of-week header -->
 			<div class="grid shrink-0 grid-cols-7 border-b">

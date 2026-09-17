@@ -4,7 +4,8 @@
 	import { listGeneratedPreviews, regenerateGeneratedPreview } from '$lib/remote/assets.remote';
 	import { toast } from 'svelte-sonner';
 
-	let previews = $derived(await listGeneratedPreviews());
+	let previewsQuery = $derived(listGeneratedPreviews());
+	let previews = $derived(previewsQuery.current ?? []);
 
 	let running = $state(false);
 	let done = $state(0);

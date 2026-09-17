@@ -10,6 +10,7 @@
 	import { page } from '$app/state';
 	import { plural, orgLabel } from '$lib/utils';
 	import { browser } from '$app/environment';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
 	const ORG_FILTER_STORAGE_KEY = 'productions.selectedOrgIds';
 	const urlOrgId = page.url.searchParams.get('org');
@@ -35,8 +36,10 @@
 
 	// One query for every org the user belongs to; the org filter is applied
 	// client-side so toggling it never refetches.
-	let orgs = $derived(await getMyOrgs());
-	let allProductions = $derived(await getProductions());
+	let orgsQuery = $derived(getMyOrgs());
+	let orgs = $derived(orgsQuery.current ?? []);
+	let productionsQuery = $derived(getProductions());
+	let allProductions = $derived(productionsQuery.current ?? []);
 
 	let selectedOrgIds = $derived(
 		storedOrgIds
@@ -149,7 +152,9 @@
 		</div>
 	</div>
 
-	{#if selectedOrgIds.length > 0}
+	{#if !productionsQuery.ready}
+		<ContentSkeleton shape="cards" count={6} error={productionsQuery.error} />
+	{:else if selectedOrgIds.length > 0}
 		<DataView
 			rows={visibleProductions}
 			{columns}

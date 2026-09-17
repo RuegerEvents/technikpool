@@ -10,9 +10,11 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Modal } from '$lib/components/ui/modal';
 	import { toast } from 'svelte-sonner';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
 	let { data } = $props();
-	let manufacturers = $derived(await getManufacturers());
+	let manufacturersQuery = $derived(getManufacturers());
+	let manufacturers = $derived(manufacturersQuery.current ?? []);
 	// Manufacturers are global rows shared by every org — renaming or merging
 	// one rewrites labels on other orgs' inventory, so it's system-admin
 	// territory (creating one from the asset wizard stays open to everyone).
@@ -105,6 +107,9 @@
 
 	<Card.Root>
 		<Card.Content class="p-0">
+			{#if !manufacturersQuery.ready}
+				<div class="p-4"><ContentSkeleton count={8} error={manufacturersQuery.error} /></div>
+			{/if}
 			{#each visible as manufacturer (manufacturer.id)}
 				<div
 					class="grid gap-3 border-b p-4 last:border-0 md:grid-cols-[1fr_auto_auto_auto] md:items-center"

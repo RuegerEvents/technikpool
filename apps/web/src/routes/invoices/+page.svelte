@@ -4,8 +4,10 @@
 	import { Button } from '$lib/components/ui/button';
 	import { getInvoices } from '$lib/remote/offers.remote';
 	import { resolve } from '$app/paths';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
-	let invoices = $derived(await getInvoices());
+	let invoicesQuery = $derived(getInvoices());
+	let invoices = $derived(invoicesQuery.current ?? []);
 
 	function fmtEUR(n: number): string {
 		return n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
@@ -33,7 +35,9 @@
 		</p>
 	</div>
 
-	{#if invoices.length === 0}
+	{#if !invoicesQuery.ready}
+		<ContentSkeleton shape="table" count={6} error={invoicesQuery.error} />
+	{:else if invoices.length === 0}
 		<Card.Root
 			><Card.Content class="py-12 text-center text-muted-foreground">No invoices yet.</Card.Content
 			></Card.Root

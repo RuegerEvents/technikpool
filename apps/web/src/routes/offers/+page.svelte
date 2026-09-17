@@ -5,8 +5,10 @@
 	import { getOffers } from '$lib/remote/offers.remote';
 	import { supersededOfferIds } from '$lib/offer-versions';
 	import { resolve } from '$app/paths';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
-	let offers = $derived(await getOffers());
+	let offersQuery = $derived(getOffers());
+	let offers = $derived(offersQuery.current ?? []);
 	let superseded = $derived(supersededOfferIds(offers));
 
 	function offerTotal(offer: (typeof offers)[number]): number {
@@ -36,7 +38,9 @@
 		<Button icon="add" href={resolve('/offers/new')}>New Offer</Button>
 	</div>
 
-	{#if offers.length === 0}
+	{#if !offersQuery.ready}
+		<ContentSkeleton shape="table" count={6} error={offersQuery.error} />
+	{:else if offers.length === 0}
 		<Card.Root
 			><Card.Content class="py-12 text-center text-muted-foreground">No offers yet.</Card.Content
 			></Card.Root

@@ -11,7 +11,9 @@
 	import type { AppErrorCode } from '$lib/errors';
 	import { messageForErrorCode } from '$lib/error-messages.svelte';
 
-	const orgs = await getMyOrgs();
+	// Read through the query instead of awaited: an `await` here would hold the
+	// whole page back, heading and all, until the answer came.
+	let orgs = $derived(getMyOrgs().current ?? []);
 
 	// v2: the square preset moved to the print shop's own 15 x 10 sheet, so any
 	// v1 settings would fight the new defaults rather than refine them.
@@ -58,21 +60,15 @@
 
 	const saved = loadSavedSettings();
 
-	// A saved org id can outlive membership in it, so fall back rather than
-	// leaving the select on an id that matches no option.
-	const initialOrg = orgs.find((org) => org.id === saved.selectedOrgId) ?? orgs[0];
-
-	let selectedOrgId = $state(initialOrg?.id ?? '');
+	let selectedOrgId = $state('');
 	let type = $state<'quadratisch' | 'faehnchen'>(saved.type ?? 'quadratisch');
-	let color = $state(saved.color ?? initialOrg?.color ?? DEFAULT_STICKER_COLOR);
-	let orgName = $state(
-		saved.orgName ?? (initialOrg ? stickerOrgName(initialOrg.name) : DEFAULT_ORG_NAME)
-	);
+	let color = $state(saved.color ?? DEFAULT_STICKER_COLOR);
+	let orgName = $state(saved.orgName ?? DEFAULT_ORG_NAME);
 	let from = $state(saved.from ?? 1);
 	let to = $state(saved.to ?? 150);
 	let copies = $state(saved.copies ?? 1);
 	let payloadTemplate = $state(saved.payloadTemplate ?? '{label}');
-	let labelPrefix = $state(saved.labelPrefix ?? initialOrg?.assetIdPrefix ?? 'RE');
+	let labelPrefix = $state(saved.labelPrefix ?? 'RE');
 	let padLength = $state(saved.padLength ?? 5);
 	let advanced = $state(saved.advanced ?? false);
 	const payloadPlaceholder = 'https://technik.example/assets/{label}';
@@ -97,6 +93,20 @@
 	let nestFlagTails = $state(saved.nestFlagTails ?? initialType === 'faehnchen');
 
 	let selectedOrg = $derived(orgs.find((org) => org.id === selectedOrgId));
+
+	// The sheet's colour, name and prefix come from an org, and the orgs arrive
+	// after the first render — so they are filled in when they get here, and
+	// only while nothing has been chosen. A saved org id can outlive membership
+	// in it, so it falls back rather than leaving the select on an id that
+	// matches no option.
+	$effect(() => {
+		if (selectedOrgId || orgs.length === 0) return;
+		const org = orgs.find((candidate) => candidate.id === saved.selectedOrgId) ?? orgs[0];
+		selectedOrgId = org.id;
+		color = saved.color ?? org.color ?? DEFAULT_STICKER_COLOR;
+		orgName = saved.orgName ?? stickerOrgName(org.name);
+		labelPrefix = saved.labelPrefix ?? org.assetIdPrefix ?? 'RE';
+	});
 	let totalLabels = $derived(Math.max(0, to - from + 1) * copies);
 	let labelsPerPage = $derived(columns * rows);
 	let pageCount = $derived(Math.max(1, Math.ceil(totalLabels / labelsPerPage)));
