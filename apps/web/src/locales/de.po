@@ -7396,3 +7396,61 @@ msgstr "Hauptgerät dieses Kits"
 #: src/routes/assets/bundles/[id]/+page.svelte
 msgid "Mark as a main device"
 msgstr "Als Hauptgerät markieren"
+
+#: src/lib/error-messages.svelte.ts
+msgid "This bundle type does not contain that product. Every case of a type holds the same gear."
+msgstr "Dieser Bundle-Typ enthält dieses Produkt nicht. Jede Instanz eines Typs enthält dieselbe Ausstattung."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "This bundle type holds no more {0} than it already has."
+msgstr "Dieser Bundle-Typ enthält nicht mehr {0}, als bereits vorhanden ist."
+
+#. 0: p0; 1: p1
+#: src/lib/error-messages.svelte.ts
+msgid "A case of this bundle type is still short of {0}× {1}."
+msgstr "Einer Instanz dieses Bundle-Typs fehlen noch {0}× {1}."
+
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "This case holds the kit."
+msgstr "Diese Instanz enthält das komplette Kit."
+
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "This bundle type is already on the shelf, so this case has to hold the same gear."
+msgstr "Diesen Bundle-Typ gibt es bereits, also muss diese Instanz dieselbe Ausstattung enthalten."
+
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "One more unit and this case is the kit."
+msgid_plural "# units short of the kit."
+msgstr[0] "Noch ein Gerät und diese Instanz ist das komplette Kit."
+msgstr[1] "Es fehlen noch # Geräte zum kompletten Kit."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Complete — this case holds the kit."
+msgstr "Vollständig — diese Instanz enthält das komplette Kit."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Incomplete — one unit short of the kit:"
+msgid_plural "Incomplete — # units short of the kit:"
+msgstr[0] "Unvollständig — ein Gerät fehlt zum Kit:"
+msgstr[1] "Unvollständig — # Geräte fehlen zum Kit:"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "This case holds the kit, so only a change to the bundle type itself adds anything further."
+msgstr "Diese Instanz enthält das komplette Kit — weiteres kommt nur hinzu, wenn sich der Bundle-Typ selbst ändert."
+
+#. 0: shortfall .filter((line) => line.missing > 0) .map((line) => `${line.missing}× ${line.line.manufacturerName} ${line.line.name}`) .join(', ')
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Offered here is what this case is short of: {0}."
+msgstr "Angeboten wird hier, was dieser Instanz noch fehlt: {0}."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "the other case of it counts as incomplete from then on"
+msgid_plural "the other # cases of it count as incomplete from then on"
+msgstr[0] "die andere Instanz gilt ab dann als unvollständig"
+msgstr[1] "die anderen # Instanzen gelten ab dann als unvollständig"
+
+#. 0: plural(typeSpec.instanceCount - 1, [ 'the other case of it counts as incomplete from then on', 'the other # cases of it count as incomplete from then on' ])
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Show everything in the pool. A unit this kit has no room for changes what the bundle type holds, and {0}."
+msgstr "Alle Geräte im Pool anzeigen. Ein Gerät, für das in diesem Kit kein Platz ist, ändert den Bundle-Typ, und {0}."

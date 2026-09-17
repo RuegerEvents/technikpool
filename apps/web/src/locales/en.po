@@ -7396,3 +7396,61 @@ msgstr "Main device of this kit"
 #: src/routes/assets/bundles/[id]/+page.svelte
 msgid "Mark as a main device"
 msgstr "Mark as a main device"
+
+#: src/lib/error-messages.svelte.ts
+msgid "This bundle type does not contain that product. Every case of a type holds the same gear."
+msgstr "This bundle type does not contain that product. Every case of a type holds the same gear."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "This bundle type holds no more {0} than it already has."
+msgstr "This bundle type holds no more {0} than it already has."
+
+#. 0: p0; 1: p1
+#: src/lib/error-messages.svelte.ts
+msgid "A case of this bundle type is still short of {0}× {1}."
+msgstr "A case of this bundle type is still short of {0}× {1}."
+
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "This case holds the kit."
+msgstr "This case holds the kit."
+
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "This bundle type is already on the shelf, so this case has to hold the same gear."
+msgstr "This bundle type is already on the shelf, so this case has to hold the same gear."
+
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "One more unit and this case is the kit."
+msgid_plural "# units short of the kit."
+msgstr[0] "One more unit and this case is the kit."
+msgstr[1] "# units short of the kit."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Complete — this case holds the kit."
+msgstr "Complete — this case holds the kit."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Incomplete — one unit short of the kit:"
+msgid_plural "Incomplete — # units short of the kit:"
+msgstr[0] "Incomplete — one unit short of the kit:"
+msgstr[1] "Incomplete — # units short of the kit:"
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "This case holds the kit, so only a change to the bundle type itself adds anything further."
+msgstr "This case holds the kit, so only a change to the bundle type itself adds anything further."
+
+#. 0: shortfall .filter((line) => line.missing > 0) .map((line) => `${line.missing}× ${line.line.manufacturerName} ${line.line.name}`) .join(', ')
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Offered here is what this case is short of: {0}."
+msgstr "Offered here is what this case is short of: {0}."
+
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "the other case of it counts as incomplete from then on"
+msgid_plural "the other # cases of it count as incomplete from then on"
+msgstr[0] "the other case of it counts as incomplete from then on"
+msgstr[1] "the other # cases of it count as incomplete from then on"
+
+#. 0: plural(typeSpec.instanceCount - 1, [ 'the other case of it counts as incomplete from then on', 'the other # cases of it count as incomplete from then on' ])
+#: src/routes/assets/bundles/[id]/+page.svelte
+msgid "Show everything in the pool. A unit this kit has no room for changes what the bundle type holds, and {0}."
+msgstr "Show everything in the pool. A unit this kit has no room for changes what the bundle type holds, and {0}."

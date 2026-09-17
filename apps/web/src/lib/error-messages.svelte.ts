@@ -169,6 +169,12 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'The main device cannot itself be an accessory.';
 		case 'bundle_featured_not_member':
 			return 'A main device has to be a product this bundle type actually contains.';
+		case 'bundle_product_not_in_type':
+			return 'This bundle type does not contain that product. Every case of a type holds the same gear.';
+		case 'bundle_product_quantity_exceeded':
+			return `This bundle type holds no more ${p0} than it already has.`;
+		case 'bundle_composition_incomplete':
+			return `A case of this bundle type is still short of ${p0}× ${p1}.`;
 		case 'bundle_members_org_mismatch':
 			return 'All units in a bundle must belong to the same organization.';
 		case 'bundle_empty':

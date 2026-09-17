@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getErrorMessage, orgLabel } from '$lib/utils';
+	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
 	import { canManageInventory } from '$lib/roles';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -13,9 +13,10 @@
 		getCategories,
 		getLocations,
 		getBundleTemplates,
-		createBundleInstance,
-		addAssetToBundle
+		getBundleTypeSpec,
+		createBundleInstance
 	} from '$lib/remote/assets.remote';
+	import { countProducts, matchesSpec, roomFor, specShortfall } from '$lib/bundle-spec';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -37,6 +38,7 @@
 
 	type SelectedAsset = {
 		id: string;
+		productId: string;
 		productName: string;
 		manufacturerName: string;
 		serialNumber: string | null;
@@ -69,11 +71,28 @@
 	let orgLocations = $derived(selectedOrgId ? await getLocations(selectedOrgId) : []);
 	let selectedIds = $derived(new Set(selectedAssets.map((a) => a.id)));
 
+	// ── What this case has to hold ───────────────────────────────────────────
+	// Every case of a bundle type holds the same gear, so a case of a type that
+	// already exists is not a free selection: it is a list to fill. The picker
+	// offers only what is still short, and the button stays out of reach until
+	// the kit is complete — the server refuses the same thing, this is so nobody
+	// finds that out after picking twenty units.
+	let spec = $derived(bundleType?.id ? await getBundleTypeSpec(bundleType.id) : null);
+	let specLines = $derived(spec?.lines ?? []);
+	let selectedCounts = $derived(countProducts(selectedAssets));
+	let shortfall = $derived(specShortfall(specLines, selectedCounts));
+	let stillMissing = $derived(shortfall.reduce((total, line) => total + line.missing, 0));
+	let fitsType = $derived(specLines.length === 0 || matchesSpec(specLines, selectedCounts));
+
 	type ExistingAsset = (typeof availableAssets)[number];
 
 	let filteredAvailable = $derived(
 		availableAssets.filter((a) => {
 			if (selectedIds.has(a.id)) return false;
+			// Nothing the kit has no room for: a unit of a product this type does
+			// not hold, or one more than it holds.
+			if (specLines.length > 0 && roomFor(specLines, selectedCounts, a.productId) === 0)
+				return false;
 			// A unit belongs to one kit at a time, so one already in a bundle isn't
 			// on offer here — same rule the bundle detail page's picker applies.
 			if (a.bundleId) return false;
@@ -95,6 +114,7 @@
 			...selectedAssets,
 			{
 				id: a.id,
+				productId: a.productId,
 				productName: a.product.name,
 				manufacturerName: a.product.manufacturer.name,
 				serialNumber: a.serialNumber,
@@ -135,11 +155,9 @@
 				newTemplateName: bundleType.id ? undefined : bundleType.name.trim(),
 				description: isNewBundleType ? bundleDescription.trim() || undefined : undefined,
 				categoryId: isNewBundleType ? bundleCategoryId : undefined,
-				tag: bundleTag.trim() || undefined
+				tag: bundleTag.trim() || undefined,
+				assetIds: selectedAssets.map((a) => a.id)
 			});
-			await Promise.all(
-				selectedAssets.map((a) => addAssetToBundle({ bundleId: bundle.id, assetId: a.id }))
-			);
 			toast.success('Bundle created!');
 			goto(resolve(`/assets/bundles/${bundle.id}`));
 		} catch (err) {
@@ -235,6 +253,27 @@
 				</div>
 			</Card.Header>
 			<Card.Content class="space-y-4">
+				{#if specLines.length > 0}
+					<div class="rounded-md border bg-muted/30 p-3">
+						<p class="text-sm font-medium">
+							{#if stillMissing === 0}
+								This case holds the kit.
+							{:else}
+								This bundle type is already on the shelf, so this case has to hold the same gear.
+							{/if}
+						</p>
+						<ul class="mt-2 space-y-1 text-sm">
+							{#each shortfall as { line, have, missing } (line.productId)}
+								<li class={missing > 0 ? 'text-muted-foreground' : ''}>
+									<span class="font-mono text-xs">{have}/{line.quantity}</span>
+									{line.manufacturerName}
+									{line.name}
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{/if}
+
 				<!-- Selected assets -->
 				{#if selectedAssets.length > 0}
 					<div>
@@ -328,12 +367,20 @@
 			</Card.Content>
 		</Card.Root>
 
-		<div class="flex justify-end gap-3">
+		<div class="flex flex-wrap items-center justify-end gap-3">
+			{#if specLines.length > 0 && stillMissing > 0}
+				<p class="mr-auto text-sm text-muted-foreground">
+					{plural(stillMissing, [
+						'One more unit and this case is the kit.',
+						'# units short of the kit.'
+					])}
+				</p>
+			{/if}
 			<Button icon="close" type="button" variant="outline" href={resolve('/assets')}>Cancel</Button>
 			<Button
 				icon="add"
 				type="submit"
-				disabled={saving || !bundleType?.name.trim() || !selectedOrgId}
+				disabled={saving || !bundleType?.name.trim() || !selectedOrgId || !fitsType}
 			>
 				{saving ? 'Creating…' : 'Create Bundle'}
 			</Button>
@@ -354,6 +401,7 @@
 			...selectedAssets,
 			...created.map((a) => ({
 				id: a.id,
+				productId: a.productId,
 				productName: a.product.name,
 				manufacturerName: a.product.manufacturer.name,
 				serialNumber: a.serialNumber,

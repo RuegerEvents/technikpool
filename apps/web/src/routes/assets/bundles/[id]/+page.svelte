@@ -14,6 +14,7 @@
 	import { Star } from '@lucide/svelte';
 	import {
 		getBundle,
+		getBundleTypeSpec,
 		getCategories,
 		getAssets,
 		getLocations,
@@ -34,6 +35,7 @@
 	import { toast } from 'svelte-sonner';
 	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
 	import { NewAssetModal, type NewAssetModalHandle } from '$lib/components/ui/new-asset-modal';
+	import { countProducts, roomFor, specShortfall } from '$lib/bundle-spec';
 
 	// Mirrors MAX_BUNDLE_COPIES on the command, which refuses anything above it.
 	const MAX_COPIES = 20;
@@ -252,11 +254,34 @@
 			]);
 	});
 
+	// ── What this case has to hold ───────────────────────────────────────────
+	// Every case of a bundle type holds the same gear, so once a second case
+	// exists neither of them is a free selection any more. What a case is short
+	// of is said plainly here — a fixture away for repair leaves an incomplete
+	// kit, not a new kind of kit — and the picker offers only what fills a gap.
+	// Putting something else in changes the type itself, which is what the
+	// checkbox in the picker is for.
+	let typeSpec = $derived(await getBundleTypeSpec(bundle.templateId));
+	// A type's only case *is* the type: there is nothing for it to match.
+	let specLines = $derived(typeSpec.instanceCount > 1 ? typeSpec.lines : []);
+	let memberCounts = $derived(countProducts(bundle.assets.filter((a) => a.parentAssetId === null)));
+	let shortfall = $derived(specShortfall(specLines, memberCounts));
+	let missingUnits = $derived(shortfall.reduce((total, line) => total + line.missing, 0));
+	// Deliberate, and the acknowledgement at the same time: ticking it is what
+	// says the kit itself is changing.
+	let changeType = $state(false);
+
 	let availableToAdd = $derived.by(() => {
 		const bundleAssetIds = new Set(bundle.assets.map((a) => a.id));
 		const q = searchQuery.toLowerCase().trim();
 		return allAssets.filter((a) => {
 			if (bundleAssetIds.has(a.id)) return false;
+			if (
+				!changeType &&
+				specLines.length > 0 &&
+				roomFor(specLines, memberCounts, a.productId) === 0
+			)
+				return false;
 			if (a.bundle) return false;
 			// An accessory is in whatever kit its parent is in — adding the parent
 			// brings it along, and there is no way to add it on its own.
@@ -291,9 +316,16 @@
 	let catalogue = $derived(await getProducts());
 	let productMatches = $derived.by(() => {
 		const q = searchQuery.toLowerCase().trim();
-		return catalogue
-			.map((p) => ({ ...p, label: `${p.manufacturer.name} ${p.name}` }))
-			.filter((p) => !q || p.label.toLowerCase().includes(q));
+		return (
+			catalogue
+				.map((p) => ({ ...p, label: `${p.manufacturer.name} ${p.name}` }))
+				.filter((p) => !q || p.label.toLowerCase().includes(q))
+				// Registering a unit straight into the kit answers to the type like
+				// every other way in, so the catalogue is cut to the same list.
+				.filter(
+					(p) => changeType || specLines.length === 0 || roomFor(specLines, memberCounts, p.id) > 0
+				)
+		);
 	});
 
 	function openNewAssetOfProduct(p: (typeof productMatches)[number]) {
@@ -307,7 +339,7 @@
 	async function handleAdd(assetId: string) {
 		working = true;
 		try {
-			await addAssetToBundle({ bundleId, assetId });
+			await addAssetToBundle({ bundleId, assetId, allowTypeChange: changeType || undefined });
 			toast.success('Asset added to bundle');
 		} catch (err) {
 			toast.error(getErrorMessage(err));
@@ -487,6 +519,28 @@
 					<div>
 						<Card.Title>Contained Assets</Card.Title>
 						<Card.Description>Devices that belong to this bundle.</Card.Description>
+						{#if specLines.length > 0}
+							<p class="mt-1 text-sm">
+								{#if missingUnits === 0}
+									<span class="text-muted-foreground">Complete — this case holds the kit.</span>
+								{:else}
+									<span class="font-medium"
+										>{plural(missingUnits, [
+											'Incomplete — one unit short of the kit:',
+											'Incomplete — # units short of the kit:'
+										])}</span
+									>
+									<span class="text-muted-foreground">
+										{shortfall
+											.filter((line) => line.missing > 0)
+											.map(
+												(line) => `${line.missing}× ${line.line.manufacturerName} ${line.line.name}`
+											)
+											.join(', ')}
+									</span>
+								{/if}
+							</p>
+						{/if}
 					</div>
 					<div class="flex flex-wrap items-center gap-2">
 						<CategorySelect
@@ -830,6 +884,33 @@
 			placeholder="Search assets…"
 			class="mb-3 h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
 		/>
+
+		{#if specLines.length > 0}
+			<div class="mb-3 rounded-md border bg-muted/30 p-3 text-sm">
+				<p>
+					{#if missingUnits === 0}
+						This case holds the kit, so only a change to the bundle type itself adds anything
+						further.
+					{:else}
+						Offered here is what this case is short of:
+						{shortfall
+							.filter((line) => line.missing > 0)
+							.map((line) => `${line.missing}× ${line.line.manufacturerName} ${line.line.name}`)
+							.join(', ')}.
+					{/if}
+				</p>
+				<label class="mt-2 flex cursor-pointer items-start gap-2 text-xs text-muted-foreground">
+					<input type="checkbox" bind:checked={changeType} class="mt-0.5" />
+					<span>
+						Show everything in the pool. A unit this kit has no room for changes what the bundle
+						type holds, and {plural(typeSpec.instanceCount - 1, [
+							'the other case of it counts as incomplete from then on',
+							'the other # cases of it count as incomplete from then on'
+						])}.
+					</span>
+				</label>
+			</div>
+		{/if}
 
 		{#if availableToAdd.length === 0}
 			<p class="text-sm text-muted-foreground">
