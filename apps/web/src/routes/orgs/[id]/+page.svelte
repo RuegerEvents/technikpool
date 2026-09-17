@@ -597,45 +597,6 @@
 						</Button>
 					</Card.Content>
 				</Card.Root>
-
-				<Card.Root>
-					<Card.Header>
-						<Card.Title>Add Member</Card.Title>
-						<Card.Description>
-							Add a registered user to this organization by email.
-						</Card.Description>
-					</Card.Header>
-					<Card.Content>
-						<form onsubmit={handleAddUser} class="space-y-4">
-							<div class="space-y-2">
-								<Label for="addEmail">Email address</Label>
-								<Input
-									id="addEmail"
-									type="email"
-									bind:value={addEmail}
-									placeholder="user@example.com"
-									required
-								/>
-							</div>
-							<div class="space-y-2">
-								<Label for="addRole">Role</Label>
-								<select
-									id="addRole"
-									bind:value={addRole}
-									class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
-								>
-									{#each ORG_ROLES as role (role)}
-										<option value={role}>{roleName(role)}</option>
-									{/each}
-								</select>
-								<p class="text-sm text-muted-foreground">{roleSummary(addRole)}</p>
-							</div>
-							<Button type="submit" disabled={adding} class="w-full">
-								{adding ? 'Adding...' : 'Add Member'}
-							</Button>
-						</form>
-					</Card.Content>
-				</Card.Root>
 			</div>
 		{/if}
 
@@ -711,6 +672,51 @@
 					</Card.Root>
 				{/each}
 			</div>
+
+			<!-- Below the list it is describing: you read who is already in, then
+			     add. It also sits in the wide column now, so the two fields are
+			     side by side rather than stacked for a sidebar. -->
+			{#if canManage}
+				<Card.Root>
+					<Card.Header>
+						<Card.Title>Add Member</Card.Title>
+						<Card.Description>Add a registered user to this organization by email.</Card.Description
+						>
+					</Card.Header>
+					<Card.Content>
+						<form onsubmit={handleAddUser} class="space-y-4">
+							<div class="grid gap-4 sm:grid-cols-2">
+								<div class="space-y-2">
+									<Label for="addEmail">Email address</Label>
+									<Input
+										id="addEmail"
+										type="email"
+										bind:value={addEmail}
+										placeholder="user@example.com"
+										required
+									/>
+								</div>
+								<div class="space-y-2">
+									<Label for="addRole">Role</Label>
+									<select
+										id="addRole"
+										bind:value={addRole}
+										class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+									>
+										{#each ORG_ROLES as role (role)}
+											<option value={role}>{roleName(role)}</option>
+										{/each}
+									</select>
+								</div>
+							</div>
+							<p class="text-sm text-muted-foreground">{roleSummary(addRole)}</p>
+							<Button type="submit" disabled={adding}>
+								{adding ? 'Adding...' : 'Add Member'}
+							</Button>
+						</form>
+					</Card.Content>
+				</Card.Root>
+			{/if}
 		</div>
 	</div>
 </div>
