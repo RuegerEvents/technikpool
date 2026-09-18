@@ -72,7 +72,6 @@ msgstr "Crewmitglied hinzugefügt"
 #: src/lib/components/ui/image-upload/image-upload.svelte
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/productions/[id]/crew-passes/+page.svelte
-#: src/routes/productions/[id]/delivery-note/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Back"
@@ -83,7 +82,6 @@ msgstr "Zurück"
 msgid "Packing List"
 msgstr "Packliste"
 
-#: src/routes/productions/[id]/delivery-note/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Delivery Note"
 msgstr "Lieferschein"
@@ -197,8 +195,8 @@ msgstr "Crew"
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/inspections/+page.svelte
-#: src/routes/invoices/[id]/+page.svelte
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/manufacturers/+page.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
@@ -406,7 +404,6 @@ msgstr "Einige ablehnen…"
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
-#: src/routes/productions/[id]/delivery-note/+page.svelte
 msgid "Serial Number"
 msgstr "Seriennummer"
 
@@ -710,9 +707,9 @@ msgstr "<0/> Nach dem Speichern weiteres erstellen"
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/inspections/+page.svelte
-#: src/routes/invoices/[id]/+page.svelte
-#: src/routes/invoices/[id]/+page.svelte
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/manufacturers/+page.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
@@ -1026,7 +1023,6 @@ msgid "Search assets…"
 msgstr "Geräte suchen…"
 
 #: src/lib/components/ui/skeleton/content-skeleton.svelte
-#: src/lib/components/ui/skeleton/page-skeleton.svelte
 msgid "Loading…"
 msgstr "Wird geladen…"
 
@@ -1040,7 +1036,6 @@ msgstr "Noch keine Geräte in diesem Bundle. Klicken Sie auf „Geräte hinzufü
 
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/productions/[id]/crew-passes/+page.svelte
-#: src/routes/productions/[id]/delivery-note/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Print"
 msgstr "Drucken"
@@ -1061,66 +1056,50 @@ msgstr "Von: <0/>"
 msgid "To: <0/>"
 msgstr "Bis: <0/>"
 
-#. 0: production.name
-#: src/routes/productions/[id]/delivery-note/+page.svelte
-msgid "Delivery Note - {0}"
-msgstr "Lieferschein – {0}"
+#~ msgid "Delivery Note - {0}"
+#~ msgstr "Lieferschein – {0}"
 
-#. 0: production.id.slice(0, 8).toUpperCase()
-#: src/routes/productions/[id]/delivery-note/+page.svelte
-msgid "No. DN-{0}"
-msgstr "Nr. LS-{0}"
+#~ msgid "No. DN-{0}"
+#~ msgstr "Nr. LS-{0}"
 
-#: src/routes/productions/[id]/delivery-note/+page.svelte
-msgid "Equipment Management"
-msgstr "Geräteverwaltung"
+#~ msgid "Equipment Management"
+#~ msgstr "Geräteverwaltung"
 
-#: src/routes/productions/[id]/delivery-note/+page.svelte
-msgid "Delivery To"
-msgstr "Lieferung an"
+#~ msgid "Delivery To"
+#~ msgstr "Lieferung an"
 
-#: src/routes/productions/[id]/delivery-note/+page.svelte
-msgid "Production Period:<0/> <1/> – <2/>"
-msgstr "Produktionszeitraum:<0/> <1/> – <2/>"
+#~ msgid "Production Period:<0/> <1/> – <2/>"
+#~ msgstr "Produktionszeitraum:<0/> <1/> – <2/>"
 
 #: src/routes/inspections/+page.svelte
 #: src/routes/invoices/+page.svelte
-#: src/routes/productions/[id]/delivery-note/+page.svelte
 msgid "Date"
 msgstr "Datum"
 
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
-#: src/routes/productions/[id]/delivery-note/+page.svelte
 msgid "Qty"
 msgstr "Menge"
 
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
-#: src/routes/productions/[id]/delivery-note/+page.svelte
 msgid "Description"
 msgstr "Beschreibung"
 
-#: src/routes/productions/[id]/delivery-note/+page.svelte
-msgid "Remarks"
-msgstr "Bemerkungen"
+#~ msgid "Remarks"
+#~ msgstr "Bemerkungen"
 
-#: src/routes/productions/[id]/delivery-note/+page.svelte
-msgid "Delivered By"
-msgstr "Ausgeliefert von"
+#~ msgid "Delivered By"
+#~ msgstr "Ausgeliefert von"
 
-#: src/routes/productions/[id]/delivery-note/+page.svelte
-#: src/routes/productions/[id]/delivery-note/+page.svelte
-msgid "Signature & Date"
-msgstr "Unterschrift & Datum"
+#~ msgid "Signature & Date"
+#~ msgstr "Unterschrift & Datum"
 
-#: src/routes/productions/[id]/delivery-note/+page.svelte
-msgid "Received By"
-msgstr "Empfangen von"
+#~ msgid "Received By"
+#~ msgstr "Empfangen von"
 
-#: src/routes/productions/[id]/delivery-note/+page.svelte
-msgid "Please verify all equipment is present and in good condition before signing."
-msgstr "Bitte alle Geräte auf Vollständigkeit und einwandfreien Zustand prüfen, bevor Sie unterschreiben."
+#~ msgid "Please verify all equipment is present and in good condition before signing."
+#~ msgstr "Bitte alle Geräte auf Vollständigkeit und einwandfreien Zustand prüfen, bevor Sie unterschreiben."
 
 #. 0: production.name
 #: src/routes/productions/[id]/packing-list/+page.svelte
@@ -1345,8 +1324,8 @@ msgstr "Standort"
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
-#: src/routes/invoices/[id]/+page.svelte
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/manufacturers/+page.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/offers/new/+page.svelte
@@ -1446,7 +1425,7 @@ msgstr "Standort aktualisiert"
 msgid "← Organization"
 msgstr "← Organisation"
 
-#. 0: org.name
+#. 0: org?.name ?? '…'
 #: src/routes/orgs/[id]/locations/+page.svelte
 msgid "Manage locations for {0}."
 msgstr "Standorte für {0} verwalten."
@@ -1515,7 +1494,7 @@ msgstr "Gerätebundles | Technikpool"
 
 #. 0: asset.product.name
 #. 0: bundle.template.name
-#. 0: org.name
+#. 0: org?.name ?? ''
 #. 0: production.name
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
@@ -1536,7 +1515,7 @@ msgstr "Organisationen | Technikpool"
 msgid "Productions | Technikpool"
 msgstr "Produktionen | Technikpool"
 
-#. 0: org.name
+#. 0: org?.name ?? ''
 #: src/routes/orgs/[id]/locations/+page.svelte
 msgid "Locations – {0} | Technikpool"
 msgstr "Standorte – {0} | Technikpool"
@@ -1558,8 +1537,6 @@ msgid "Calendar | Technikpool"
 msgstr "Kalender | Technikpool"
 
 #. 0: group.productCounts.map((p) => `${p.count}× ${p.name}`).join(', ')
-#. 0: group.productCounts.map((p) => `${p.count}× ${p.name}`).join(', ')
-#: src/routes/productions/[id]/delivery-note/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Contains: {0}"
 msgstr "Enthält: {0}"
@@ -2954,7 +2931,7 @@ msgid "Next due: {0}"
 msgstr "Nächste Fälligkeit: {0}"
 
 #. 0: invoice.number
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "Invoice {0} | Technikpool"
 msgstr "Rechnung {0} | Technikpool"
 
@@ -3319,7 +3296,7 @@ msgstr "Noch nichts gebucht."
 #~ msgid "Gemäß § 19 UStG wird keine Umsatzsteuer berechnet."
 #~ msgstr "Gemäß § 19 UStG wird keine Umsatzsteuer berechnet."
 
-#. 0: org.name
+#. 0: org?.name ?? ''
 #: src/routes/orgs/[id]/rates/+page.svelte
 msgid "Rental Rates | {0} | Technikpool"
 msgstr "Mietpreise | {0} | Technikpool"
@@ -3592,7 +3569,7 @@ msgstr "Ansprechpartner"
 #~ msgid "Cancel new customer"
 #~ msgstr "Neuen Kunden abbrechen"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Customer updated"
@@ -3744,7 +3721,7 @@ msgstr "Noch keine Positionen auf diesem Angebot."
 #~ msgid "This invoice hasn't been sent yet — items can still be corrected or resynced from the production. Once marked as sent, it becomes immutable (GoBD/§14 UStG)."
 #~ msgstr "Diese Rechnung wurde noch nicht versendet — Positionen können noch korrigiert oder aus der Produktion neu synchronisiert werden. Sobald sie als versendet markiert ist, wird sie unveränderlich (GoBD/§14 UStG)."
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "No items on this invoice yet."
 msgstr "Noch keine Positionen auf dieser Rechnung."
 
@@ -3789,8 +3766,8 @@ msgstr "{0} Tage · {1}"
 
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/lib/components/ui/customer-select/customer-select.svelte
-#: src/routes/invoices/[id]/+page.svelte
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 msgid "Edit customer"
 msgstr "Kunde bearbeiten"
@@ -4284,7 +4261,7 @@ msgstr "Löschen"
 #: src/routes/admin/connectors/+page.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -5422,24 +5399,24 @@ msgstr "USt-IdNr."
 msgid "{0} bis {1}"
 msgstr "{0} bis {1}"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/offers/new/+page.svelte
 msgid "Introduction"
 msgstr "Einleitung"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/offers/new/+page.svelte
 msgid "Closing text"
 msgstr "Schlusstext"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 msgid "Document text updated"
 msgstr "Dokumenttext aktualisiert"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 msgid "Document text"
 msgstr "Dokumenttext"
@@ -5448,13 +5425,13 @@ msgstr "Dokumenttext"
 msgid "Copied from the organization preset and editable for this offer."
 msgstr "Aus der Organisationsvorlage übernommen und für dieses Angebot bearbeitbar."
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Payment term (days)"
 msgstr "Zahlungsziel (Tage)"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 msgid "Save text"
 msgstr "Text speichern"
@@ -5534,7 +5511,7 @@ msgstr "Kunden speichern"
 msgid "<0/> Customers"
 msgstr "<0/> Kunden"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "Copied from the organization preset and frozen when the invoice is marked as sent."
 msgstr "Aus der Organisationsvorlage übernommen und beim Markieren als versendet festgeschrieben."
 
@@ -5587,7 +5564,7 @@ msgstr "Dieses Angebot endgültig löschen?"
 msgid "Offer deleted"
 msgstr "Angebot gelöscht"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 msgid "Open archived PDF"
 msgstr "Archivierte PDF öffnen"
@@ -5595,7 +5572,7 @@ msgstr "Archivierte PDF öffnen"
 #~ msgid "Preview"
 #~ msgstr ""
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 msgid "Finalizing…"
 msgstr "Wird finalisiert…"
@@ -5618,57 +5595,57 @@ msgstr "Finalisiert am {0} — dieses Angebot ist unveränderbar. Die archiviert
 msgid "Finalized"
 msgstr "Finalisiert"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 msgid "Preview PDF"
 msgstr "PDF-Vorschau"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "Finalize this invoice? It can no longer be edited or deleted afterwards."
 msgstr "Diese Rechnung finalisieren? Sie kann danach weder bearbeitet noch gelöscht werden."
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "Invoice finalized and PDF archived"
 msgstr "Rechnung finalisiert und PDF archiviert"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "Delete this draft invoice permanently?"
 msgstr "Diesen Rechnungsentwurf endgültig löschen?"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "Invoice deleted"
 msgstr "Rechnung gelöscht"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "Delete invoice"
 msgstr "Rechnung löschen"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "Finalize invoice"
 msgstr "Rechnung finalisieren"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "Archiving…"
 msgstr "Wird archiviert…"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "Archive PDF"
 msgstr "PDF archivieren"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "Its archived PDF is authoritative."
 msgstr "Die archivierte PDF ist maßgeblich."
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "Its PDF has not been archived yet."
 msgstr "Die PDF wurde noch nicht archiviert."
 
 #. 0: new Date(invoice.sentAt).toLocaleDateString('de-DE')
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "Finalized on {0} — this invoice is immutable.<0/> Corrections require a new document."
 msgstr "Finalisiert am {0} — diese Rechnung ist unveränderbar.<0/> Korrekturen erfordern ein neues Dokument."
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "This invoice is a draft — items can still be corrected or resynced from the production. Finalizing archives its PDF and makes it immutable."
 msgstr "Diese Rechnung ist ein Entwurf — Positionen können noch korrigiert oder mit der Produktion synchronisiert werden. Beim Finalisieren wird die PDF archiviert und die Rechnung unveränderbar."
 
@@ -5773,16 +5750,16 @@ msgstr "Die Rechnungsnummer vergeben Sie selbst — es gilt das eigene Nummernsc
 msgid "Create invoice"
 msgstr "Rechnung erstellen"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "Invoice number updated"
 msgstr "Rechnungsnummer aktualisiert"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "Edit invoice number"
 msgstr "Rechnungsnummer bearbeiten"
 
 #. 0: invoice.number
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "Invoice {0} <0/>"
 msgstr "Rechnung {0} <0/>"
 
@@ -5867,7 +5844,7 @@ msgstr "Kunden erstellen"
 msgid "Select a customer"
 msgstr "Kunden auswählen"
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/offers/new/+page.svelte
@@ -5882,7 +5859,7 @@ msgstr "Die Daten des ausgewählten Kunden werden in dieses Angebot übernommen.
 msgid "Duplicates all line items into a new offer for the selected customer."
 msgstr "Dupliziert alle Positionen in ein neues Angebot für den ausgewählten Kunden."
 
-#: src/routes/invoices/[id]/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "The selected customer's details are copied onto this invoice."
 msgstr "Die Daten des ausgewählten Kunden werden in diese Rechnung übernommen."
 

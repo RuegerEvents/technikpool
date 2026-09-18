@@ -5,6 +5,27 @@ import { localizedName } from '$lib/category';
 // document lists them once with a quantity. This is the one place that collapse
 // happens, so the web view and both print layouts always agree.
 
+/** How a product is named on a customer document: a generic maker is no name worth printing. */
+export function productBillingLabel(product: {
+	name: string;
+	manufacturer: { name: string; generic: boolean };
+}): string {
+	return product.manufacturer.generic
+		? product.name
+		: `${product.manufacturer.name} ${product.name}`;
+}
+
+/** "2× Stativ, Kabel" — what a kit or a unit ships with, counted and sorted. */
+export function summarizeContents(labels: string[]): string {
+	const counts = new Map<string, number>();
+	for (const label of labels) counts.set(label, (counts.get(label) ?? 0) + 1);
+	const collator = new Intl.Collator('de', { numeric: true, sensitivity: 'base' });
+	return [...counts]
+		.sort(([a], [b]) => collator.compare(a, b))
+		.map(([label, count]) => (count > 1 ? `${count}× ${label}` : label))
+		.join(', ');
+}
+
 export type GroupableItem = {
 	id: string;
 	categoryId: string | null;

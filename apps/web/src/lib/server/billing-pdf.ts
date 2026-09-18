@@ -1,6 +1,7 @@
 import { PDFDocument, StandardFonts, degrees, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import { groupBillingItems, lineSubtitle, type GroupableItem } from '../billing-lines.ts';
 import { appError } from '$lib/errors';
+import { fmtDate, safe, wrap } from './pdf-text.ts';
 
 type PdfOrganization = {
 	name: string;
@@ -89,14 +90,6 @@ const black = rgb(0.05, 0.05, 0.05);
 const muted = rgb(0.35, 0.35, 0.35);
 const light = rgb(0.93, 0.93, 0.93);
 
-function safe(value: string) {
-	return value
-		.replace(/[„“”]/g, '"')
-		.replace(/[‘’]/g, "'")
-		.replace(/[–—]/g, '-')
-		.replace(/[^\x20-\xFF\u20AC]/g, '?');
-}
-
 function validateDocument(kind: 'offer' | 'invoice', data: PdfDocumentData) {
 	const missing: string[] = [];
 	const required = (value: unknown, label: string) => {
@@ -136,28 +129,6 @@ function validateDocument(kind: 'offer' | 'invoice', data: PdfDocumentData) {
 function money(value: number) {
 	return value.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
-function fmtDate(value: Date | null | undefined) {
-	return value ? value.toLocaleDateString('de-DE') : '';
-}
-function wrap(value: string, font: PDFFont, size: number, width: number) {
-	const result: string[] = [];
-	// Split before safe(): it turns line breaks and tabs into '?', so a split
-	// afterwards would find nothing to split on.
-	for (const paragraph of value.split(/\r?\n/)) {
-		let line = '';
-		for (const word of paragraph.split(/\s+/).filter(Boolean).map(safe)) {
-			const candidate = line ? `${line} ${word}` : word;
-			if (font.widthOfTextAtSize(candidate, size) <= width) line = candidate;
-			else {
-				if (line) result.push(line);
-				line = word;
-			}
-		}
-		result.push(line);
-	}
-	return result;
-}
-
 export async function generateBillingPdf(
 	kind: 'offer' | 'invoice',
 	data: PdfDocumentData,

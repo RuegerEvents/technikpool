@@ -39,7 +39,7 @@
 
 	let isAuthRoute = $derived(page.url.pathname.startsWith('/auth'));
 	let isPrintRoute = $derived(
-		/\/(packing-list|delivery-note|crew-passes|inventory-list|print)$/.test(page.url.pathname)
+		/\/(packing-list|crew-passes|inventory-list|print)$/.test(page.url.pathname)
 	);
 	let isCalendarRoute = $derived(page.url.pathname.startsWith('/calendar'));
 	let isEquipmentRoute = $derived(/\/equipment$/.test(page.url.pathname));

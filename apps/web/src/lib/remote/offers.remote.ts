@@ -19,6 +19,7 @@ import {
 import { generateBillingPdf, organizationFromSnapshot } from '$lib/server/billing-pdf';
 import { putObject } from '$lib/server/storage';
 import { orgSnapshotColumns } from '$lib/org-snapshot';
+import { productBillingLabel, summarizeContents } from '$lib/billing-lines';
 import { appError, type AppErrorCode, type ErrorParams } from '$lib/errors';
 
 /**
@@ -227,25 +228,6 @@ function assetLabel(asset: {
 	id: string;
 }): string {
 	return asset.assetTag ?? asset.serialNumber ?? asset.id;
-}
-
-function summarizeContents(labels: string[]): string {
-	const counts = new Map<string, number>();
-	for (const label of labels) counts.set(label, (counts.get(label) ?? 0) + 1);
-	const collator = new Intl.Collator('de', { numeric: true, sensitivity: 'base' });
-	return [...counts]
-		.sort(([a], [b]) => collator.compare(a, b))
-		.map(([label, count]) => (count > 1 ? `${count}× ${label}` : label))
-		.join(', ');
-}
-
-function productBillingLabel(product: {
-	name: string;
-	manufacturer: { name: string; generic: boolean };
-}): string {
-	return product.manufacturer.generic
-		? product.name
-		: `${product.manufacturer.name} ${product.name}`;
 }
 
 // Recomputes what a production's currently-booked equipment would bill as,
