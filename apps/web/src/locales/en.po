@@ -1176,12 +1176,8 @@ msgstr "Add your first asset"
 msgid "Maint."
 msgstr "Maint."
 
-#. 0: asset.assetTag
-#. 0: asset.assetTag
-#: src/routes/assets/+page.svelte
-#: src/routes/assets/+page.svelte
-msgid "Tag: {0}"
-msgstr "Tag: {0}"
+#~ msgid "Tag: {0}"
+#~ msgstr "Tag: {0}"
 
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
@@ -3947,26 +3943,18 @@ msgid "Instance {0}"
 msgstr "Instance {0}"
 
 #. 0: instance.filteredAssets.length
-#. 0: instance.filteredAssets.length
-#: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 msgid "{0} items"
 msgstr "{0} items"
 
-#. 0: instance.available
-#: src/routes/assets/+page.svelte
-msgid "{0} available"
-msgstr "{0} available"
+#~ msgid "{0} available"
+#~ msgstr "{0} available"
 
-#. 0: instance.maintenance
-#: src/routes/assets/+page.svelte
-msgid "{0} maint."
-msgstr "{0} maint."
+#~ msgid "{0} maint."
+#~ msgstr "{0} maint."
 
-#. 0: instance.broken
-#: src/routes/assets/+page.svelte
-msgid "{0} broken"
-msgstr "{0} broken"
+#~ msgid "{0} broken"
+#~ msgstr "{0} broken"
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "Bundle Type"
@@ -8051,3 +8039,14 @@ msgstr "Enter a new address"
 #: src/lib/components/ui/address-input/address-input.svelte
 msgid "Choose an existing address"
 msgstr "Choose an existing address"
+
+#: src/routes/assets/+page.svelte
+msgid "Mixed"
+msgstr "Mixed"
+
+#. 0: asset.serialNumber
+#. 0: asset.serialNumber
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/+page.svelte
+msgid "S/N: {0}"
+msgstr "S/N: {0}"

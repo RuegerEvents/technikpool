@@ -171,6 +171,7 @@
 
 	type InstanceGroup = BundleInstance & {
 		filteredAssets: BundleAsset[];
+		locationLabel: string | null;
 		available: number;
 		unavailable: number;
 		maintenance: number;
@@ -179,6 +180,7 @@
 
 	type TemplateGroup = TemplateData & {
 		instanceGroups: InstanceGroup[];
+		locationLabel: string | null;
 		totalAssets: number;
 		// Bundle-instance counts (not asset counts) — how many physical kits of
 		// this type are ready to send out vs. need attention.
@@ -415,9 +417,28 @@
 				)
 	);
 
+	// A row that stands for several units names the place they share, or says
+	// that they don't. Read off the units rather than `AssetBundle.location`: a
+	// case is wherever its contents are, and those get moved one at a time.
+	// Units nobody has placed yet don't make the rest "mixed".
+	function mixedLabel() {
+		return 'Mixed';
+	}
+
+	function sharedLocation(units: { location: { name: string } | null }[]): string | null {
+		const names = new Set(units.flatMap((u) => (u.location ? [u.location.name] : [])));
+		if (names.size === 0) return null;
+		if (names.size > 1) return mixedLabel();
+		return [...names][0];
+	}
+
+	// Retired units have left their shelf, so the column stays a dash there.
+	function groupLocation(group: Group): string | null {
+		return showingRetired ? null : sharedLocation(group.assets);
+	}
+
 	// Bundles and products sort as one list, so sorting by Total puts the biggest
-	// line first whichever kind it is; unsorted, bundles stay on top. Location
-	// isn't sortable at this level — it is a dash on every row.
+	// line first whichever kind it is; unsorted, bundles stay on top.
 	type TableRow =
 		| { kind: 'bundle'; key: string; template: TemplateGroup }
 		| { kind: 'group'; key: string; group: Group };
@@ -425,6 +446,7 @@
 	const tableColumns: SortColumns<TableRow> = {
 		product: (r) => (r.kind === 'bundle' ? r.template.name : r.group.name),
 		manufacturer: (r) => (r.kind === 'bundle' ? null : r.group.manufacturerName),
+		location: (r) => (r.kind === 'bundle' ? r.template.locationLabel : groupLocation(r.group)),
 		category: (r) => {
 			if (r.kind === 'group') return r.group.categoryName;
 			return r.template.category ? categoryLabel(r.template.category) : null;
@@ -452,6 +474,10 @@
 							return {
 								...inst,
 								filteredAssets,
+								// Every unit in the case, not the filtered ones: a status
+								// filter doesn't move anything. An empty case has only the
+								// place it was given.
+								locationLabel: sharedLocation(inst.assets) ?? inst.location?.name ?? null,
 								available: filteredAssets.filter((a) => a.status === 'AVAILABLE').length,
 								unavailable: filteredAssets.filter((a) => a.status === 'UNAVAILABLE').length,
 								maintenance: filteredAssets.filter((a) => a.status === 'MAINTENANCE').length,
@@ -461,6 +487,7 @@
 						return {
 							...t,
 							instanceGroups,
+							locationLabel: sharedLocation(t.instances.flatMap((inst) => inst.assets)),
 							totalAssets: instanceGroups.reduce((sum, i) => sum + i.filteredAssets.length, 0),
 							totalInstances: instanceGroups.length,
 							availableInstances: instanceGroups.filter(
@@ -753,6 +780,14 @@
 
 	<!-- What the name can't be trusted to say: the ends and the length, spelled
 	     the same way on every row. -->
+	{#snippet sharedLocationLabel(label: string | null)}
+		{#if label === mixedLabel()}
+			<span class="opacity-60">{label}</span>
+		{:else}
+			{label ?? '—'}
+		{/if}
+	{/snippet}
+
 	{#snippet cableChips(cable: CableAttrs | null)}
 		{#if cable}
 			{@const ends = connectorLabel(cable)}
@@ -990,7 +1025,14 @@
 									<span class="min-w-0 flex-1 truncate font-medium">
 										{instance.tag ?? `Instance ${i + 1}`}
 									</span>
-									<span class="text-muted-foreground">{instance.filteredAssets.length} items</span>
+									{#if instance.locationLabel}
+										<span class="truncate text-muted-foreground"
+											>{@render sharedLocationLabel(instance.locationLabel)}</span
+										>
+									{/if}
+									<span class="whitespace-nowrap text-muted-foreground"
+										>{instance.filteredAssets.length} items</span
+									>
 								</a>
 							{/each}
 						</div>
@@ -1112,7 +1154,10 @@
 							direction={sortDirection('manufacturer')}
 							onclick={() => toggleSort('manufacturer')}>Manufacturer</SortableHeader
 						>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Location</th>
+						<SortableHeader
+							direction={sortDirection('location')}
+							onclick={() => toggleSort('location')}>Location</SortableHeader
+						>
 						<SortableHeader
 							direction={sortDirection('category')}
 							onclick={() => toggleSort('category')}>Category</SortableHeader
@@ -1206,7 +1251,9 @@
 									</div>
 								</td>
 								<td class="px-4 py-3 text-muted-foreground">—</td>
-								<td class="px-4 py-3 text-muted-foreground">—</td>
+								<td class="px-4 py-3 text-muted-foreground">
+									{@render sharedLocationLabel(template.locationLabel)}
+								</td>
 								<td class="px-4 py-3">
 									{#if template.category}
 										<CategoryPill
@@ -1272,65 +1319,84 @@
 												class="h-4 w-4 cursor-pointer rounded border-input"
 											/>
 										</td>
-										<td colspan="8" class="px-4 py-2">
-											<div class="flex items-center gap-6 text-sm">
-												<span class="flex w-40 min-w-0 items-center gap-1.5">
-													<svg
-														xmlns="http://www.w3.org/2000/svg"
-														width="12"
-														height="12"
-														viewBox="0 0 24 24"
-														fill="none"
-														stroke="currentColor"
-														stroke-width="2"
-														stroke-linecap="round"
-														stroke-linejoin="round"
-														class="shrink-0 text-muted-foreground transition-transform {expanded.get(
-															instance.id
-														)
-															? 'rotate-90'
-															: ''}"
-													>
-														<path d="m9 18 6-6-6-6" />
-													</svg>
-													<ProductThumb
-														path={instance.imagePath}
-														alt={instance.tag ?? template.name}
-														size={24}
-														class="border-0 bg-transparent p-0"
-													/>
-													<span class="truncate text-xs font-medium">
-														{instance.tag ?? `Instance ${i + 1}`}
-													</span>
+										<!-- The same columns as the row above, one step in: a strip of
+										     its own lined up with nothing, and the counts are the ones
+										     the header already names. Total is what the row holds —
+										     cases for a bundle type, units for a case. -->
+										<td class="py-2 pr-4 pl-10">
+											<div class="flex items-center gap-2">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													width="12"
+													height="12"
+													viewBox="0 0 24 24"
+													fill="none"
+													stroke="currentColor"
+													stroke-width="2"
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													class="shrink-0 text-muted-foreground transition-transform {expanded.get(
+														instance.id
+													)
+														? 'rotate-90'
+														: ''}"
+												>
+													<path d="m9 18 6-6-6-6" />
+												</svg>
+												<ProductThumb
+													path={instance.imagePath}
+													alt={instance.tag ?? template.name}
+													size={24}
+													class="border-0 bg-transparent p-0"
+												/>
+												<span class="truncate font-mono text-xs font-medium">
+													{instance.tag ?? `Instance ${i + 1}`}
 												</span>
-												{#if instance.location}
-													<span class="text-xs text-muted-foreground">{instance.location.name}</span
-													>
-												{/if}
-												<span class="text-xs text-muted-foreground">
-													{instance.filteredAssets.length} items
-												</span>
-												<span class="text-xs text-green-700 dark:text-green-400">
-													{instance.available} available
-												</span>
-												{#if instance.maintenance > 0}
-													<span class="text-xs text-yellow-600 dark:text-yellow-400">
-														{instance.maintenance} maint.
-													</span>
-												{/if}
-												{#if instance.broken > 0}
-													<span class="text-xs text-red-600 dark:text-red-400">
-														{instance.broken} broken
-													</span>
-												{/if}
 												<a
 													href={resolve(`/assets/bundles/${instance.id}`)}
-													class="ml-auto text-xs text-muted-foreground hover:text-foreground"
+													class="text-xs whitespace-nowrap text-muted-foreground hover:text-foreground"
 													onclick={(e) => e.stopPropagation()}
 												>
 													View →
 												</a>
 											</div>
+										</td>
+										<td class="px-4 py-2"></td>
+										<td class="px-4 py-2 text-xs text-muted-foreground">
+											{@render sharedLocationLabel(instance.locationLabel)}
+										</td>
+										<td class="px-4 py-2"></td>
+										<td class="px-4 py-2 text-right font-mono text-xs tabular-nums">
+											{instance.filteredAssets.length}
+										</td>
+										<td
+											class="px-4 py-2 text-right font-mono text-xs text-green-700 tabular-nums dark:text-green-400"
+										>
+											{instance.available}
+										</td>
+										<td
+											class="px-4 py-2 text-right font-mono text-xs tabular-nums {instance.unavailable >
+											0
+												? 'text-orange-600 dark:text-orange-400'
+												: 'text-muted-foreground'}"
+										>
+											{instance.unavailable}
+										</td>
+										<td
+											class="px-4 py-2 text-right font-mono text-xs tabular-nums {instance.maintenance >
+											0
+												? 'text-yellow-600 dark:text-yellow-400'
+												: 'text-muted-foreground'}"
+										>
+											{instance.maintenance}
+										</td>
+										<td
+											class="px-4 py-2 text-right font-mono text-xs tabular-nums {instance.broken >
+											0
+												? 'text-red-600 dark:text-red-400'
+												: 'text-muted-foreground'}"
+										>
+											{instance.broken}
 										</td>
 									</tr>
 									{#if expanded.get(instance.id)}
@@ -1354,35 +1420,49 @@
 														class="h-4 w-4 cursor-pointer rounded border-input"
 													/>
 												</td>
-												<td colspan="8" class="px-4 py-2">
-													<div class="flex items-center gap-6 text-sm">
-														<span class="flex w-44 items-center gap-2">
-															<ProductThumb
-																path={asset.product.imagePath}
-																alt={asset.product.name}
-																size={22}
-															/>
-															<span class="truncate text-xs font-medium">
-																{asset.product.name}
-															</span>
-														</span>
-														<span class="w-36 font-mono text-xs text-muted-foreground">
-															{asset.serialNumber ? `S/N: ${asset.serialNumber}` : '—'}
+												<td class="py-2 pr-4 pl-16">
+													<div class="flex items-center gap-2">
+														<ProductThumb
+															path={asset.product.imagePath}
+															alt={asset.product.name}
+															size={22}
+														/>
+														<span class="truncate text-xs font-medium">
+															{asset.product.name}
 														</span>
 														{#if asset.assetTag}
-															<span class="text-xs text-muted-foreground"
-																>Tag: {asset.assetTag}</span
+															<span
+																class="font-mono text-xs whitespace-nowrap text-muted-foreground"
 															>
+																{asset.assetTag}
+															</span>
+														{/if}
+													</div>
+												</td>
+												<td class="px-4 py-2 text-xs text-muted-foreground">
+													{asset.product.manufacturer.name}
+												</td>
+												<td class="px-4 py-2 text-xs text-muted-foreground">
+													{asset.location?.name ?? '—'}
+												</td>
+												<td class="px-4 py-2">
+													<CategoryPill
+														name={categoryLabel(asset.product.category)}
+														color={asset.product.category.color}
+													/>
+												</td>
+												<!-- One unit has a status, not five counts. -->
+												<td colspan="5" class="px-4 py-2">
+													<div class="flex items-center justify-end gap-4">
+														{#if asset.serialNumber}
+															<span class="truncate font-mono text-xs text-muted-foreground">
+																S/N: {asset.serialNumber}
+															</span>
 														{/if}
 														<AssetStatusBadge status={asset.status} />
-														{#if asset.location}
-															<span class="text-xs text-muted-foreground"
-																>{asset.location.name}</span
-															>
-														{/if}
 														<a
 															href={resolve(`/assets/${asset.id}`)}
-															class="ml-auto text-xs text-muted-foreground hover:text-foreground"
+															class="text-xs whitespace-nowrap text-muted-foreground hover:text-foreground"
 															onclick={(e) => e.stopPropagation()}
 														>
 															View →
@@ -1444,7 +1524,9 @@
 									</div>
 								</td>
 								<td class="px-4 py-3 text-muted-foreground">{group.manufacturerName}</td>
-								<td class="px-4 py-3 text-muted-foreground">—</td>
+								<td class="px-4 py-3 text-muted-foreground">
+									{@render sharedLocationLabel(groupLocation(group))}
+								</td>
 								<td class="px-4 py-3">
 									<CategoryPill name={group.categoryName} color={group.categoryColor} />
 								</td>
@@ -1499,45 +1581,51 @@
 												class="h-4 w-4 cursor-pointer rounded border-input"
 											/>
 										</td>
-										<td colspan="8" class="px-4 py-2">
-											<div class="flex items-center gap-6 text-sm">
-												<span class="w-36 font-mono text-xs text-muted-foreground">
-													{asset.serialNumber ? `S/N: ${asset.serialNumber}` : '—'}
+										<!-- Product, manufacturer and category are the row above; what
+										     tells two units apart is the tag and the serial number. -->
+										<td colspan="2" class="py-2 pr-4 pl-10">
+											<div class="flex items-center gap-4 text-xs">
+												<span class="font-mono font-medium whitespace-nowrap">
+													{asset.assetTag ?? '—'}
 												</span>
+												{#if asset.serialNumber}
+													<span class="truncate font-mono text-muted-foreground">
+														S/N: {asset.serialNumber}
+													</span>
+												{/if}
 												<!-- An accessory still belongs in this listing — it gets
 											     inspected like anything else — but what it hangs off is
 											     the first thing you need to know about it. -->
 												{#if asset.parent}
 													<a
 														href={resolve(`/assets/${asset.parent.id}`)}
-														class="text-xs text-muted-foreground hover:underline"
+														class="text-muted-foreground hover:underline"
 														onclick={(e) => e.stopPropagation()}
 													>
 														↳ Accessory of {asset.parent.product.name}
 													</a>
 												{/if}
-												{#if asset.assetTag}
-													<span class="text-xs text-muted-foreground">Tag: {asset.assetTag}</span>
-												{/if}
-												<AssetStatusBadge status={asset.status} />
-												{#if asset.location && !showingRetired}
-													<span class="text-xs text-muted-foreground">{asset.location.name}</span>
-												{/if}
-												<span class="flex-1 text-xs text-muted-foreground"
-													>{orgLabel(asset.organization)}</span
-												>
+											</div>
+										</td>
+										<td class="px-4 py-2 text-xs text-muted-foreground">
+											{showingRetired ? '—' : (asset.location?.name ?? '—')}
+										</td>
+										<td colspan="6" class="px-4 py-2">
+											<div class="flex items-center gap-4 text-xs text-muted-foreground">
+												<span class="truncate">{orgLabel(asset.organization)}</span>
 												{#if asset.bundle}
 													<a
 														href={resolve(`/assets/bundles/${asset.bundle.id}`)}
-														class="text-xs text-muted-foreground hover:underline"
+														class="truncate hover:underline"
 														onclick={(e) => e.stopPropagation()}
 													>
 														{asset.bundle.template.name}
 													</a>
 												{/if}
+												<span class="ml-auto"><AssetStatusBadge status={asset.status} /></span>
 												<a
 													href={resolve(`/assets/${asset.id}`)}
-													class="text-xs text-muted-foreground hover:text-foreground"
+													class="whitespace-nowrap hover:text-foreground"
 													onclick={(e) => e.stopPropagation()}
 												>
 													View →
