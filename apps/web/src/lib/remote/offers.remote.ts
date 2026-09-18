@@ -4,9 +4,9 @@ import * as v from 'valibot';
 import { customerLabel, dayCountBetween, formatAddress, getErrorMessage } from '$lib/utils';
 import {
 	isSystemAdmin,
+	managedOrgIds,
 	requireAuth,
-	requireOrgInventory,
-	userOrgIds
+	requireOrgInventory
 } from '$lib/server/services/access';
 import {
 	DEFAULT_INVOICE_CLOSING,
@@ -29,6 +29,20 @@ import { appError, type AppErrorCode, type ErrorParams } from '$lib/errors';
  */
 function requireOrgBilling(orgId: string) {
 	return requireOrgInventory(orgId, 'billing_manage_forbidden');
+}
+
+/**
+ * The orgs whose offers and invoices a list may show. Reading them takes the
+ * same rung as writing them: a document is prices and a customer's bill, and a
+ * VIEWER or MEMBER who may see the equipment has no business seeing either. An
+ * explicit filter is checked rather than trusted — it arrives from the client.
+ */
+async function billingOrgIds(organizationId?: string): Promise<string[]> {
+	if (organizationId) {
+		await requireOrgBilling(organizationId);
+		return [organizationId];
+	}
+	return managedOrgIds((await requireAuth()).id);
 }
 
 const ACTIVE_ITEM_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT', 'RETURNED'] as const;
@@ -83,8 +97,7 @@ async function loadOfferFamily(offer: { id: string; originalOfferId: string | nu
 // ── Offers ─────────────────────────────────────────────────────────────────
 
 export const getOffers = query(v.optional(v.string()), async (organizationId?: string) => {
-	const user = await requireAuth();
-	const orgIds = organizationId ? [organizationId] : await userOrgIds(user.id);
+	const orgIds = await billingOrgIds(organizationId);
 	return prisma.offer.findMany({
 		where: { organizationId: { in: orgIds } },
 		include: {
@@ -98,7 +111,7 @@ export const getOffers = query(v.optional(v.string()), async (organizationId?: s
 });
 
 export const getOffer = query(v.string(), async (id: string) => {
-	const user = await requireAuth();
+	await requireAuth();
 	const offer = await prisma.offer.findUniqueOrThrow({
 		where: { id },
 		include: {
@@ -117,25 +130,19 @@ export const getOffer = query(v.string(), async (id: string) => {
 			invoices: { select: { id: true, number: true } }
 		}
 	});
-	const orgIds = await userOrgIds(user.id);
-	if (!(await isSystemAdmin(user.id)) && !orgIds.includes(offer.organizationId)) {
-		appError(403, 'unauthorized');
-	}
+	await requireOrgBilling(offer.organizationId);
 	return offer;
 });
 
 // What the offer page needs to place an offer among its revisions: the version
 // strip, and whether this one may still be invoiced or revised.
 export const getOfferVersions = query(v.string(), async (offerId: string) => {
-	const user = await requireAuth();
+	await requireAuth();
 	const offer = await prisma.offer.findUniqueOrThrow({
 		where: { id: offerId },
 		select: { id: true, organizationId: true, originalOfferId: true }
 	});
-	const orgIds = await userOrgIds(user.id);
-	if (!(await isSystemAdmin(user.id)) && !orgIds.includes(offer.organizationId)) {
-		appError(403, 'unauthorized');
-	}
+	await requireOrgBilling(offer.organizationId);
 	const family = await loadOfferFamily(offer);
 	return {
 		versions: family.versions.map((version) => ({
@@ -151,15 +158,12 @@ export const getOfferVersions = query(v.string(), async (offerId: string) => {
 });
 
 export const getOffersForProduction = query(v.string(), async (productionId: string) => {
-	const user = await requireAuth();
+	await requireAuth();
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: productionId },
 		select: { organizationId: true }
 	});
-	const orgIds = await userOrgIds(user.id);
-	if (!(await isSystemAdmin(user.id)) && !orgIds.includes(production.organizationId)) {
-		appError(403, 'unauthorized');
-	}
+	await requireOrgBilling(production.organizationId);
 	return prisma.offer.findMany({
 		where: { productionId },
 		include: { items: true, invoices: { select: { id: true, number: true } } },
@@ -689,10 +693,8 @@ export const getProductionBillingReadiness = query(
 			where: { id: productionId },
 			select: { organizationId: true }
 		});
+		await requireOrgBilling(production.organizationId);
 		const systemAdmin = await isSystemAdmin(user.id);
-		if (!systemAdmin && !(await userOrgIds(user.id)).includes(production.organizationId)) {
-			appError(403, 'unauthorized');
-		}
 
 		const { lines, missingPrices, missingRates } = await computeProductionBilling(
 			productionId,
@@ -833,15 +835,12 @@ export const createOfferFromProduction = command(createOfferSchema, async (data)
 });
 
 export const getOfferStaleness = query(v.string(), async (offerId: string) => {
-	const user = await requireAuth();
+	await requireAuth();
 	const offer = await prisma.offer.findUniqueOrThrow({
 		where: { id: offerId },
 		include: { items: true }
 	});
-	const orgIds = await userOrgIds(user.id);
-	if (!(await isSystemAdmin(user.id)) && !orgIds.includes(offer.organizationId)) {
-		appError(403, 'unauthorized');
-	}
+	await requireOrgBilling(offer.organizationId);
 
 	if (!offer.productionId) {
 		return {
@@ -1405,8 +1404,7 @@ export const convertOfferToInvoice = command(convertOfferSchema, async ({ offerI
 // ── Invoices ───────────────────────────────────────────────────────────────
 
 export const getInvoices = query(v.optional(v.string()), async (organizationId?: string) => {
-	const user = await requireAuth();
-	const orgIds = organizationId ? [organizationId] : await userOrgIds(user.id);
+	const orgIds = await billingOrgIds(organizationId);
 	return prisma.invoice.findMany({
 		where: { organizationId: { in: orgIds } },
 		include: {
@@ -1419,7 +1417,7 @@ export const getInvoices = query(v.optional(v.string()), async (organizationId?:
 });
 
 export const getInvoice = query(v.string(), async (id: string) => {
-	const user = await requireAuth();
+	await requireAuth();
 	const invoice = await prisma.invoice.findUniqueOrThrow({
 		where: { id },
 		include: {
@@ -1437,23 +1435,17 @@ export const getInvoice = query(v.string(), async (id: string) => {
 			items: { orderBy: { createdAt: 'asc' } }
 		}
 	});
-	const orgIds = await userOrgIds(user.id);
-	if (!(await isSystemAdmin(user.id)) && !orgIds.includes(invoice.organizationId)) {
-		appError(403, 'unauthorized');
-	}
+	await requireOrgBilling(invoice.organizationId);
 	return invoice;
 });
 
 export const getInvoicesForProduction = query(v.string(), async (productionId: string) => {
-	const user = await requireAuth();
+	await requireAuth();
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: productionId },
 		select: { organizationId: true }
 	});
-	const orgIds = await userOrgIds(user.id);
-	if (!(await isSystemAdmin(user.id)) && !orgIds.includes(production.organizationId)) {
-		appError(403, 'unauthorized');
-	}
+	await requireOrgBilling(production.organizationId);
 	return prisma.invoice.findMany({
 		where: { productionId },
 		include: { items: true },
@@ -1465,15 +1457,12 @@ export const getInvoicesForProduction = query(v.string(), async (productionId: s
 // resynced from the production just like an offer's. Once sent, it's a
 // GoBD/§14-UStG-immutable document — no more staleness checks or updates.
 export const getInvoiceStaleness = query(v.string(), async (invoiceId: string) => {
-	const user = await requireAuth();
+	await requireAuth();
 	const invoice = await prisma.invoice.findUniqueOrThrow({
 		where: { id: invoiceId },
 		include: { items: true }
 	});
-	const orgIds = await userOrgIds(user.id);
-	if (!(await isSystemAdmin(user.id)) && !orgIds.includes(invoice.organizationId)) {
-		appError(403, 'unauthorized');
-	}
+	await requireOrgBilling(invoice.organizationId);
 
 	if (invoice.sentAt || !invoice.productionId) {
 		return {

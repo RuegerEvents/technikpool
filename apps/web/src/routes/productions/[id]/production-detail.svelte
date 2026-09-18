@@ -20,9 +20,11 @@
 		updateProductionCustomer
 	} from '$lib/remote/productions.remote';
 	import { getBundles } from '$lib/remote/assets.remote';
-	import { getOrgUsers } from '$lib/remote/orgs.remote';
+	import { getMyOrgs, getOrgUsers } from '$lib/remote/orgs.remote';
 	import { getOffersForProduction, getInvoicesForProduction } from '$lib/remote/offers.remote';
 	import { supersededOfferIds } from '$lib/offer-versions';
+	import { ROLE_FOR, roleAtLeast, type OrgRole } from '$lib/roles';
+	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
 	import type { Prisma } from '$lib/prisma/client';
@@ -52,9 +54,23 @@
 	}
 
 	let allBundles = $derived(await getBundles());
-	let offers = $derived(await getOffersForProduction(productionId));
+	// The user's rung in the org that runs this production, asked the way the
+	// server asks it (`requireOrgRole`): a system admin clears every rung. The
+	// page only offers what that rung may do — a VIEWER reads, and every button
+	// would otherwise end in a refusal.
+	let role = $derived<OrgRole | null>(
+		page.data.isAdmin
+			? 'OWNER'
+			: ((await getMyOrgs()).find((org) => org.id === production.organizationId)?.role ?? null)
+	);
+	let canEdit = $derived(!!role && roleAtLeast(role, ROLE_FOR.write));
+	// Deleting it, and its offers and invoices — which are read by the org's
+	// billing admins only (see `billingOrgIds` in offers.remote.ts), so nobody
+	// else is shown the section or has the queries run on their behalf.
+	let canManage = $derived(!!role && roleAtLeast(role, ROLE_FOR.inventory));
+	let offers = $derived(canManage ? await getOffersForProduction(productionId) : []);
 	let supersededOffers = $derived(supersededOfferIds(offers));
-	let invoices = $derived(await getInvoicesForProduction(productionId));
+	let invoices = $derived(canManage ? await getInvoicesForProduction(productionId) : []);
 
 	function fmtEUR(n: number): string {
 		return n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
@@ -487,7 +503,9 @@
 		</div>
 		<div class="flex flex-wrap gap-2">
 			<Button icon="back" variant="outline" href={resolve('/productions')}>Back</Button>
-			<Button variant="destructive" onclick={() => (deleteOpen = true)}>Delete</Button>
+			{#if canManage}
+				<Button variant="destructive" onclick={() => (deleteOpen = true)}>Delete</Button>
+			{/if}
 			<Button
 				variant="secondary"
 				href={resolve(`/productions/${production.id}/packing-list`)}
@@ -503,78 +521,82 @@
 				href={resolve(`/productions/${production.id}/crew-passes`)}
 				target="_blank">Crew Passes</Button
 			>
-			<Button icon="add" href={resolve(`/offers/new?productionId=${production.id}`)}
-				>Create Offer</Button
-			>
+			{#if canManage}
+				<Button icon="add" href={resolve(`/offers/new?productionId=${production.id}`)}
+					>Create Offer</Button
+				>
+			{/if}
 		</div>
 	</div>
 
 	<!-- Offers & Invoices -->
-	<div class="grid gap-4 sm:grid-cols-2">
-		<Card.Root>
-			<Card.Header>
-				<Card.Title>Offers</Card.Title>
-			</Card.Header>
-			<Card.Content>
-				{#if offers.length === 0}
-					<p class="text-sm text-muted-foreground">No offers yet.</p>
-				{:else}
-					<div class="space-y-2">
-						{#each offers as offer (offer.id)}
-							<a
-								href={resolve(`/offers/${offer.id}`)}
-								class="flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
-							>
-								<div>
-									<p class="font-medium">{offer.number} — {offer.customerName}</p>
-									<p class="text-xs text-muted-foreground">
-										{offer.dayCount} d
-										{#if supersededOffers.has(offer.id)}
-											· Superseded
-										{/if}
-										{#if offer.invoices.length > 0}
-											· Invoiced ({offer.invoices[0].number})
-										{/if}
-									</p>
-								</div>
-								<span class="font-medium tabular-nums">{fmtEUR(offerTotal(offer))}</span>
-							</a>
-						{/each}
-					</div>
-				{/if}
-			</Card.Content>
-		</Card.Root>
+	{#if canManage}
+		<div class="grid gap-4 sm:grid-cols-2">
+			<Card.Root>
+				<Card.Header>
+					<Card.Title>Offers</Card.Title>
+				</Card.Header>
+				<Card.Content>
+					{#if offers.length === 0}
+						<p class="text-sm text-muted-foreground">No offers yet.</p>
+					{:else}
+						<div class="space-y-2">
+							{#each offers as offer (offer.id)}
+								<a
+									href={resolve(`/offers/${offer.id}`)}
+									class="flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
+								>
+									<div>
+										<p class="font-medium">{offer.number} — {offer.customerName}</p>
+										<p class="text-xs text-muted-foreground">
+											{offer.dayCount} d
+											{#if supersededOffers.has(offer.id)}
+												· Superseded
+											{/if}
+											{#if offer.invoices.length > 0}
+												· Invoiced ({offer.invoices[0].number})
+											{/if}
+										</p>
+									</div>
+									<span class="font-medium tabular-nums">{fmtEUR(offerTotal(offer))}</span>
+								</a>
+							{/each}
+						</div>
+					{/if}
+				</Card.Content>
+			</Card.Root>
 
-		<Card.Root>
-			<Card.Header>
-				<Card.Title>Invoices</Card.Title>
-			</Card.Header>
-			<Card.Content>
-				{#if invoices.length === 0}
-					<p class="text-sm text-muted-foreground">
-						No invoices yet — an invoice is created from an offer.
-					</p>
-				{:else}
-					<div class="space-y-2">
-						{#each invoices as invoice (invoice.id)}
-							<a
-								href={resolve(`/invoices/${invoice.id}`)}
-								class="flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
-							>
-								<div>
-									<p class="font-medium">{invoice.number}</p>
-									<p class="text-xs text-muted-foreground">
-										{invoice.dayCount} d · {invoice.sentAt ? 'Sent' : 'Draft'}
-									</p>
-								</div>
-								<span class="font-medium tabular-nums">{fmtEUR(invoiceTotal(invoice))}</span>
-							</a>
-						{/each}
-					</div>
-				{/if}
-			</Card.Content>
-		</Card.Root>
-	</div>
+			<Card.Root>
+				<Card.Header>
+					<Card.Title>Invoices</Card.Title>
+				</Card.Header>
+				<Card.Content>
+					{#if invoices.length === 0}
+						<p class="text-sm text-muted-foreground">
+							No invoices yet — an invoice is created from an offer.
+						</p>
+					{:else}
+						<div class="space-y-2">
+							{#each invoices as invoice (invoice.id)}
+								<a
+									href={resolve(`/invoices/${invoice.id}`)}
+									class="flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
+								>
+									<div>
+										<p class="font-medium">{invoice.number}</p>
+										<p class="text-xs text-muted-foreground">
+											{invoice.dayCount} d · {invoice.sentAt ? 'Sent' : 'Draft'}
+										</p>
+									</div>
+									<span class="font-medium tabular-nums">{fmtEUR(invoiceTotal(invoice))}</span>
+								</a>
+							{/each}
+						</div>
+					{/if}
+				</Card.Content>
+			</Card.Root>
+		</div>
+	{/if}
 
 	<!-- Main info -->
 	<Card.Root>
@@ -605,7 +627,7 @@
 							</p>
 						</div>
 					</div>
-					{#if !editingDuration}
+					{#if canEdit && !editingDuration}
 						<Button icon="edit" variant="outline" onclick={() => (editingDuration = true)}>
 							Edit
 						</Button>
@@ -690,7 +712,7 @@
 						</h3>
 						<p class="text-sm">{formatAddress(production.address)}</p>
 					</div>
-					{#if !editingAddress}
+					{#if canEdit && !editingAddress}
 						<Button icon="edit" variant="outline" onclick={() => (editingAddress = true)}>
 							Edit
 						</Button>
@@ -729,7 +751,7 @@
 							{production.customer ? customerLabel(production.customer) : '—'}
 						</p>
 					</div>
-					{#if !editingCustomer}
+					{#if canEdit && !editingCustomer}
 						<Button icon="edit" variant="outline" onclick={() => (editingCustomer = true)}>
 							Edit
 						</Button>
@@ -769,7 +791,9 @@
 	<div>
 		<div class="mb-4 flex items-center justify-between">
 			<h2 class="text-xl font-semibold">Booked Equipment</h2>
-			<Button href={resolve(`/productions/${productionId}/equipment`)}>Manage Equipment</Button>
+			{#if canEdit}
+				<Button href={resolve(`/productions/${productionId}/equipment`)}>Manage Equipment</Button>
+			{/if}
 		</div>
 
 		{#if production.items.length === 0}
@@ -855,7 +879,7 @@
 												>Bundle</span
 											>
 											<span class="font-medium">{section.bundleName}</span>
-											{#if divergence}
+											{#if canEdit && divergence}
 												<span
 													class="rounded bg-yellow-100 px-1.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
 													title="{divergence.addedCount > 0
@@ -878,16 +902,18 @@
 													Update from bundle
 												</button>
 											{/if}
-											<button
-												type="button"
-												onclick={(e) => {
-													e.stopPropagation();
-													handleRemoveBundle(section.bundleId);
-												}}
-												class="ml-auto text-xs text-muted-foreground transition-colors hover:text-destructive"
-											>
-												Remove
-											</button>
+											{#if canEdit}
+												<button
+													type="button"
+													onclick={(e) => {
+														e.stopPropagation();
+														handleRemoveBundle(section.bundleId);
+													}}
+													class="ml-auto text-xs text-muted-foreground transition-colors hover:text-destructive"
+												>
+													Remove
+												</button>
+											{/if}
 										{:else}
 											<ProductThumb path={section.imagePath} alt={section.productName} />
 											<span class="font-medium">{section.productName}</span>
@@ -956,7 +982,7 @@
 														item.status
 													] ?? ''}">{statusLabels[item.status] ?? item.status}</span
 												>
-												{#if accessoriesChanged(item)}
+												{#if canEdit && accessoriesChanged(item)}
 													<span
 														class="rounded bg-yellow-100 px-1.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
 														>Accessories changed</span
@@ -970,13 +996,15 @@
 														Update accessories
 													</button>
 												{/if}
-												<button
-													type="button"
-													onclick={() => handleRemoveItem(item.id)}
-													class="ml-auto text-xs text-muted-foreground transition-colors hover:text-destructive"
-												>
-													Remove
-												</button>
+												{#if canEdit}
+													<button
+														type="button"
+														onclick={() => handleRemoveItem(item.id)}
+														class="ml-auto text-xs text-muted-foreground transition-colors hover:text-destructive"
+													>
+														Remove
+													</button>
+												{/if}
 											</div>
 											{#if item.accessories.length > 0}
 												<!-- Attached to this unit, so booked and removed with it —
@@ -1000,9 +1028,11 @@
 	<div>
 		<div class="mb-4 flex items-center justify-between">
 			<h2 class="text-xl font-semibold">Crew</h2>
-			<Button variant="outline" onclick={() => (showCrewForm = !showCrewForm)}>
-				{showCrewForm ? 'Cancel' : 'Add Crew Member'}
-			</Button>
+			{#if canEdit}
+				<Button variant="outline" onclick={() => (showCrewForm = !showCrewForm)}>
+					{showCrewForm ? 'Cancel' : 'Add Crew Member'}
+				</Button>
+			{/if}
 		</div>
 
 		{#if showCrewForm}
@@ -1069,13 +1099,15 @@
 								<td class="px-4 py-3 text-muted-foreground">{member.role ?? '—'}</td>
 								<td class="px-4 py-3 text-muted-foreground">{member.user.email ?? '—'}</td>
 								<td class="px-4 py-3 text-right">
-									<button
-										type="button"
-										onclick={() => handleRemoveCrew(member.id)}
-										class="text-xs text-muted-foreground transition-colors hover:text-destructive"
-									>
-										Remove
-									</button>
+									{#if canEdit}
+										<button
+											type="button"
+											onclick={() => handleRemoveCrew(member.id)}
+											class="text-xs text-muted-foreground transition-colors hover:text-destructive"
+										>
+											Remove
+										</button>
+									{/if}
 								</td>
 							</tr>
 						{/each}

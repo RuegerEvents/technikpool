@@ -7,6 +7,7 @@
 	import { CalendarFeedButton } from '$lib/components/ui/calendar-feed';
 	import { getProductions } from '$lib/remote/productions.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
+	import { canWrite } from '$lib/roles';
 	import { page } from '$app/state';
 	import { plural, orgLabel } from '$lib/utils';
 	import { browser } from '$app/environment';
@@ -163,7 +164,7 @@
 			href={(p) => `/productions/${p.id}`}
 			searchFn={(p, q) => p.name.toLowerCase().includes(q)}
 			searchPlaceholder="Search productions…"
-			addHref="/productions/new"
+			addHref={orgs.some(canWrite) ? '/productions/new' : undefined}
 			addLabel="New Production"
 			emptyTitle="No productions found"
 			emptyDescription="Create a new production to start checking out equipment."

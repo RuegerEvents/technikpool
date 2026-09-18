@@ -6,12 +6,15 @@ import type { FieldChange } from '$lib/types/asset-transaction';
 import {
 	isSystemAdmin,
 	managedOrgIds,
+	productionVisibility,
 	requireAuth,
 	requireOrgInventory,
 	requireOrgWrite,
 	requireSystemAdmin,
 	scopedOrgIds,
-	userOrgIds
+	userOrgIds,
+	visibleProductionIds,
+	visibleProductionName
 } from '$lib/server/services/access';
 import { fieldChanges, logCatalogChange } from '$lib/server/services/catalog-log';
 import {
@@ -1241,6 +1244,14 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 	return { created: created.length, rows: resolved };
 });
 
+// Enough of a production to name it to someone who may not be allowed to —
+// see `visibleProductionName`.
+const PRODUCTION_NAME_SELECT = {
+	name: true,
+	organizationId: true,
+	organization: { select: { name: true, shortName: true } }
+} as const;
+
 export const getAssetHistory = query(v.string(), async (assetId: string) => {
 	const user = await requireAuth();
 	const orgIds = await userOrgIds(user.id);
@@ -1254,13 +1265,34 @@ export const getAssetHistory = query(v.string(), async (assetId: string) => {
 		appError(403, 'unauthorized');
 	}
 
-	return await prisma.assetTransaction.findMany({
+	const canSee = await productionVisibility(user.id);
+	const history = await prisma.assetTransaction.findMany({
 		where: { assetId },
 		include: {
 			user: { select: { name: true, email: true } },
-			production: { select: { name: true } }
+			production: { select: PRODUCTION_NAME_SELECT }
 		},
 		orderBy: { createdAt: 'desc' }
+	});
+
+	// A unit lent to another org's production did go there, so the entry stays —
+	// named after the org, and flagged so the page doesn't link to a production
+	// that would only refuse to open. The name lives in the entry's JSON as well
+	// as on the relation, and both have to go.
+	return history.map(({ production, ...tx }) => {
+		if (!production || canSee(production.organizationId)) {
+			return { ...tx, productionRestricted: false };
+		}
+		const name = visibleProductionName(production, canSee);
+		const data =
+			tx.data && typeof tx.data === 'object' && !Array.isArray(tx.data)
+				? {
+						...tx.data,
+						...('productionName' in tx.data ? { productionName: name } : {}),
+						...('fromProductionName' in tx.data ? { fromProductionName: name } : {})
+					}
+				: tx.data;
+		return { ...tx, data, productionRestricted: true };
 	});
 });
 
@@ -1301,10 +1333,11 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 	if (retiring) {
 		const openItem = await prisma.productionItem.findFirst({
 			where: { assetId: asset.id, status: { in: ['PENDING', 'APPROVED', 'CHECKED_OUT'] } },
-			include: { production: { select: { name: true } } }
+			include: { production: { select: PRODUCTION_NAME_SELECT } }
 		});
 		if (openItem) {
-			appError(409, 'asset_still_booked', [openItem.production.name]);
+			const canSee = await productionVisibility(user.id);
+			appError(409, 'asset_still_booked', [visibleProductionName(openItem.production, canSee)]);
 		}
 	}
 
@@ -1510,11 +1543,12 @@ export const bulkUpdateAssetStatus = command(bulkUpdateAssetStatusSchema, async 
 				assetId: { in: retiring.map((a) => a.id) },
 				status: { in: ['PENDING', 'APPROVED', 'CHECKED_OUT'] }
 			},
-			include: { production: { select: { name: true } } }
+			include: { production: { select: PRODUCTION_NAME_SELECT } }
 		});
 		if (openItems.length > 0) {
+			const canSee = await productionVisibility(user.id);
 			const blocked = new Set(openItems.map((i) => i.assetId)).size;
-			const names = [...new Set(openItems.map((i) => i.production.name))];
+			const names = [...new Set(openItems.map((i) => visibleProductionName(i.production, canSee)))];
 			const shown = names
 				.slice(0, 3)
 				.map((n) => `"${n}"`)
@@ -1660,14 +1694,15 @@ const UNUSED_ASSET_ACTIONS = [
 export const deleteAsset = command(v.string(), async (assetId: string) => {
 	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: assetId } });
 
-	await requireOrgInventory(asset.organizationId);
+	const user = await requireOrgInventory(asset.organizationId);
 
 	const booked = await prisma.productionItem.findFirst({
 		where: { assetId },
-		include: { production: { select: { name: true } } }
+		include: { production: { select: PRODUCTION_NAME_SELECT } }
 	});
 	if (booked) {
-		appError(409, 'asset_delete_booked', [booked.production.name]);
+		const canSee = await productionVisibility(user.id);
+		appError(409, 'asset_delete_booked', [visibleProductionName(booked.production, canSee)]);
 	}
 
 	const moved = await prisma.assetTransaction.findFirst({
@@ -3226,7 +3261,11 @@ export const convertBundleToAccessories = command(
 		const newlyAttached = bundle.assets.filter(
 			(asset) => asset.id !== main.id && asset.parentAssetId !== main.id
 		);
-		const productionIds = [...new Set(bundle.productionItems.map((item) => item.productionId))];
+		// The bundle may be lent to a production this user cannot open, and that
+		// one keeps its booking but is not refreshed — see `visibleProductionIds`.
+		const productionIds = await visibleProductionIds(user.id, [
+			...new Set(bundle.productionItems.map((item) => item.productionId))
+		]);
 		await prisma.$transaction(async (tx) => {
 			// Existing nested groups are deliberately flattened: after conversion the
 			// selected device is the only parent and every other member follows it.

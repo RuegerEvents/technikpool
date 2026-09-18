@@ -705,7 +705,12 @@ components:
           required: [history, currentProduction]
           properties:
             currentProduction:
-              description: The production this asset is currently checked out to, if any.
+              description: >-
+                The production this asset is currently checked out to, if any. A
+                production of an organization the caller is not a member of is
+                still reported — the unit is not free — but its `name` is that
+                organization's name, since the caller may not see the production
+                itself.
               oneOf:
                 - $ref: '#/components/schemas/Production'
                 - type: 'null'
@@ -732,6 +737,9 @@ components:
           description: Who performed it. Null if the account has since been removed.
         productionName:
           type: [string, 'null']
+          description: >-
+            The production involved, if any. For a production of an organization
+            the caller is not a member of, that organization's name instead.
 
     AssetPage:
       type: object

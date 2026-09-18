@@ -63,7 +63,7 @@ class AssetDetail {
   ///
   final String? parentAssetId;
 
-  /// The production this asset is currently checked out to, if any.
+  /// The production this asset is currently checked out to, if any. A production of an organization the caller is not a member of is still reported — the unit is not free — but its `name` is that organization's name, since the caller may not see the production itself.
   final Production? currentProduction;
 
   /// Most recent transactions first.

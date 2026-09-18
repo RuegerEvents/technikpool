@@ -2,7 +2,12 @@ import type { RequestHandler } from './$types';
 import { prisma } from '$lib/server/auth';
 import { apiError, apiJson, handleApi, requireApiUser, type Schemas } from '$lib/server/api';
 import { ApiResponse } from '$lib/server/api';
-import { isSystemAdmin, userOrgIds } from '$lib/server/services/access';
+import {
+	isSystemAdmin,
+	productionVisibility,
+	userOrgIds,
+	visibleProductionName
+} from '$lib/server/services/access';
 import { toAsset, toAssetTransaction, toProduction } from '$lib/server/services/api-mappers';
 
 const HISTORY_LIMIT = 20;
@@ -40,17 +45,36 @@ export const GET: RequestHandler = ({ locals, params }) =>
 				where: { assetId: asset.id },
 				include: {
 					user: { select: { name: true, email: true } },
-					production: { select: { name: true } }
+					production: {
+						select: {
+							name: true,
+							organizationId: true,
+							organization: { select: { name: true, shortName: true } }
+						}
+					}
 				},
 				orderBy: { createdAt: 'desc' },
 				take: HISTORY_LIMIT
 			})
 		]);
 
+		// Someone else's production still holds the unit, so it is reported — under
+		// its org's name, as openapi.yaml promises. Same rule as the web's history.
+		const canSee = await productionVisibility(user.id);
 		const body: Schemas['AssetDetail'] = {
 			...toAsset(asset),
-			currentProduction: openItem ? toProduction(openItem.production) : null,
-			history: history.map(toAssetTransaction)
+			currentProduction: openItem
+				? toProduction({
+						...openItem.production,
+						name: visibleProductionName(openItem.production, canSee)
+					})
+				: null,
+			history: history.map((tx) =>
+				toAssetTransaction({
+					...tx,
+					production: tx.production && { name: visibleProductionName(tx.production, canSee) }
+				})
+			)
 		};
 		return apiJson('AssetDetail', body);
 	});

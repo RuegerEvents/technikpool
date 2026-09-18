@@ -3,10 +3,16 @@ import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import { orgLabel } from '$lib/utils';
 import { getProduction } from './productions.remote';
-import { requireAuth, requireOrgWrite, userOrgIds } from '$lib/server/services/access';
+import {
+	requireAuth,
+	requireOrgRead,
+	requireOrgWrite,
+	userOrgIds
+} from '$lib/server/services/access';
 import { BOOKABLE_ASSET_WHERE } from '$lib/asset-status';
 import { accessoryIdsOf } from '$lib/server/services/accessories';
 import { appError } from '$lib/errors';
+import type { AddedToProductionData, RequestedData } from '$lib/types/asset-transaction';
 
 const ACTIVE_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT', 'RETURNED'] as const;
 const CONFLICT_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT'] as const;
@@ -21,6 +27,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 		where: { id: productionId },
 		select: { id: true, name: true, startDate: true, endDate: true, organizationId: true }
 	});
+	await requireOrgRead(production.organizationId);
 
 	// Accessories are not bookable on their own: they follow whatever they are
 	// attached to, and a row for "8× Omega Bracket" next to the fixtures they
@@ -226,7 +233,8 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 	const user = await requireAuth();
 
 	const production = await prisma.production.findUniqueOrThrow({
-		where: { id: data.productionId }
+		where: { id: data.productionId },
+		include: { organization: { select: { id: true, name: true } } }
 	});
 	await requireOrgWrite(production.organizationId);
 
@@ -339,11 +347,19 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 					userId: user.id,
 					productionId: data.productionId,
 					action: isCrossOrg ? 'REQUESTED' : 'ADDED_TO_PRODUCTION',
-					data: {
-						type: isCrossOrg ? 'REQUESTED' : 'ADDED_TO_PRODUCTION',
-						productionId: data.productionId,
-						productionName: production.name
-					}
+					data: isCrossOrg
+						? ({
+								type: 'REQUESTED',
+								productionId: data.productionId,
+								productionName: production.name,
+								requestingOrgId: production.organization.id,
+								requestingOrgName: production.organization.name
+							} satisfies RequestedData)
+						: ({
+								type: 'ADDED_TO_PRODUCTION',
+								productionId: data.productionId,
+								productionName: production.name
+							} satisfies AddedToProductionData)
 				}))
 			})
 		]);

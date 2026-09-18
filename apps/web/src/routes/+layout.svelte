@@ -132,20 +132,22 @@
 										<ScanBarcode aria-hidden="true" />
 										Checkout
 									</DropdownMenu.Item>
-									<DropdownMenu.Item
-										onSelect={() => goto(resolve('/offers'))}
-										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-									>
-										<FileText aria-hidden="true" />
-										Offers
-									</DropdownMenu.Item>
-									<DropdownMenu.Item
-										onSelect={() => goto(resolve('/invoices'))}
-										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-									>
-										<ReceiptText aria-hidden="true" />
-										Invoices
-									</DropdownMenu.Item>
+									{#if data.canBill}
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/offers'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<FileText aria-hidden="true" />
+											Offers
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/invoices'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<ReceiptText aria-hidden="true" />
+											Invoices
+										</DropdownMenu.Item>
+									{/if}
 									<DropdownMenu.Separator class="my-1 h-px bg-border" />
 									<DropdownMenu.Item
 										onSelect={() => goto(resolve('/customers'))}
@@ -272,24 +274,26 @@
 									: 'text-muted-foreground hover:text-foreground'}"
 								><ScanBarcode aria-hidden="true" class="size-4" />Checkout</a
 							>
-							<a
-								href={resolve('/offers')}
-								class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
-									'/offers'
-								)
-									? 'text-foreground'
-									: 'text-muted-foreground hover:text-foreground'}"
-								><FileText aria-hidden="true" class="size-4" />Offers</a
-							>
-							<a
-								href={resolve('/invoices')}
-								class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
-									'/invoices'
-								)
-									? 'text-foreground'
-									: 'text-muted-foreground hover:text-foreground'}"
-								><ReceiptText aria-hidden="true" class="size-4" />Invoices</a
-							>
+							{#if data.canBill}
+								<a
+									href={resolve('/offers')}
+									class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
+										'/offers'
+									)
+										? 'text-foreground'
+										: 'text-muted-foreground hover:text-foreground'}"
+									><FileText aria-hidden="true" class="size-4" />Offers</a
+								>
+								<a
+									href={resolve('/invoices')}
+									class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
+										'/invoices'
+									)
+										? 'text-foreground'
+										: 'text-muted-foreground hover:text-foreground'}"
+									><ReceiptText aria-hidden="true" class="size-4" />Invoices</a
+								>
+							{/if}
 							<DropdownMenu.Root>
 								<DropdownMenu.Trigger>
 									{#snippet child({ props })}

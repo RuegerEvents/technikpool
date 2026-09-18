@@ -1,5 +1,10 @@
 import { prisma } from '$lib/server/auth';
-import { isSystemAdmin, writableOrgIds } from './access';
+import {
+	isSystemAdmin,
+	productionVisibility,
+	visibleProductionName,
+	writableOrgIds
+} from './access';
 import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '$lib/asset-status';
 import { withAccessories } from './accessories';
 
@@ -29,7 +34,10 @@ export interface ScanResult {
 	asset: ScannedAsset;
 	action: 'LOCATION_ASSIGNED' | 'CHECKED_OUT';
 	targetName: string;
-	/** Names of productions the asset was automatically returned from. */
+	/**
+	 * Names of productions the asset was automatically returned from — or, for
+	 * one of an org the user doesn't belong to, that org's name.
+	 */
 	returnedFrom: string[];
 }
 
@@ -73,6 +81,47 @@ export class CheckoutError extends Error {
 	) {
 		super(message);
 		this.name = 'CheckoutError';
+	}
+}
+
+const RETURNED_FROM_SELECT = {
+	id: true,
+	name: true,
+	organizationId: true,
+	organization: { select: { name: true, shortName: true } }
+} as const;
+
+// Deduped: the parent and each of its accessories were on the same production,
+// and the scanner reports one return, not five. Named by `visibleProductionName`,
+// because the production a unit comes back from may be another org's.
+async function returnedFromNames(
+	userId: string,
+	items: {
+		production: {
+			name: string;
+			organizationId: string;
+			organization: { name: string; shortName: string | null };
+		};
+	}[]
+) {
+	if (items.length === 0) return [];
+	const canSee = await productionVisibility(userId);
+	return [...new Set(items.map((i) => visibleProductionName(i.production, canSee)))];
+}
+
+/**
+ * Checking a unit out to a production changes that production, so it takes the
+ * same right as any other change to it: MEMBER in the org that runs it. Owning
+ * the unit is checked separately and is not enough on its own.
+ */
+async function assertProductionAccess(
+	userId: string,
+	production: { organizationId: string },
+	systemAdmin: boolean
+) {
+	if (systemAdmin) return;
+	if (!(await writableOrgIds(userId)).includes(production.organizationId)) {
+		throw new CheckoutError('forbidden', 'No access to this production');
 	}
 }
 
@@ -146,7 +195,7 @@ export async function performScan(
 
 		const checkedOutItems = await prisma.productionItem.findMany({
 			where: { assetId: { in: touchedIds }, status: 'CHECKED_OUT' },
-			include: { production: { select: { id: true, name: true } } }
+			include: { production: { select: RETURNED_FROM_SELECT } }
 		});
 
 		await prisma.$transaction(async (tx) => {
@@ -205,9 +254,7 @@ export async function performScan(
 				asset: scannedAsset,
 				action: 'LOCATION_ASSIGNED',
 				targetName: location.name,
-				// Deduped: the parent and each of its accessories were on the same
-				// production, and the scanner reports one return, not five.
-				returnedFrom: [...new Set(checkedOutItems.map((i) => i.production.name))]
+				returnedFrom: await returnedFromNames(userId, checkedOutItems)
 			},
 			affected
 		};
@@ -223,6 +270,7 @@ export async function performScan(
 	}
 
 	const production = await prisma.production.findUniqueOrThrow({ where: { id: input.targetId } });
+	await assertProductionAccess(userId, production, systemAdmin);
 
 	const existingItems = await prisma.productionItem.findMany({
 		where: { productionId: input.targetId, assetId: { in: touchedIds } },
@@ -354,7 +402,7 @@ export async function performBulkCheckout(
 
 			const checkedOutItems = await prisma.productionItem.findMany({
 				where: { assetId: asset.id, status: 'CHECKED_OUT' },
-				include: { production: { select: { id: true, name: true } } }
+				include: { production: { select: RETURNED_FROM_SELECT } }
 			});
 
 			await prisma.$transaction(async (tx) => {
@@ -406,6 +454,7 @@ export async function performBulkCheckout(
 	}
 
 	const production = await prisma.production.findUniqueOrThrow({ where: { id: input.targetId } });
+	await assertProductionAccess(userId, production, systemAdmin);
 
 	for (const asset of assets) {
 		const existing = await prisma.productionItem.findFirst({

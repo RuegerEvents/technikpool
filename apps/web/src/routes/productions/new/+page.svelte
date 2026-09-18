@@ -7,6 +7,7 @@
 	import { AddressInput } from '$lib/components/ui/address-input';
 	import { CustomerSelect } from '$lib/components/ui/customer-select';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
+	import { canWrite } from '$lib/roles';
 	import { createProduction } from '$lib/remote/productions.remote';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -62,7 +63,8 @@
 
 	<Card.Root class="max-w-2xl">
 		<Card.Content class="pt-6">
-			{@const orgs = getMyOrgs().current ?? []}
+			<!-- An org the user only reads in would reject the production. -->
+			{@const orgs = (getMyOrgs().current ?? []).filter(canWrite)}
 			{#if !organizationId && orgs[0]}
 				{((organizationId = orgs[0].id), '')}
 			{/if}

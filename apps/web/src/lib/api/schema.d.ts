@@ -405,7 +405,7 @@ export interface components {
             sortOrder: number;
         };
         AssetDetail: components["schemas"]["Asset"] & {
-            /** @description The production this asset is currently checked out to, if any. */
+            /** @description The production this asset is currently checked out to, if any. A production of an organization the caller is not a member of is still reported — the unit is not free — but its `name` is that organization's name, since the caller may not see the production itself. */
             currentProduction: components["schemas"]["Production"] | null;
             /** @description Most recent transactions first. */
             history: components["schemas"]["AssetTransaction"][];
@@ -422,6 +422,7 @@ export interface components {
             createdAt: string;
             /** @description Who performed it. Null if the account has since been removed. */
             userName?: string | null;
+            /** @description The production involved, if any. For a production of an organization the caller is not a member of, that organization's name instead. */
             productionName?: string | null;
         };
         AssetPage: {

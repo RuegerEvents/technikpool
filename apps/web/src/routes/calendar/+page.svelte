@@ -154,7 +154,7 @@
 				if (map.has(p.id) || !p.startDate || !p.endDate) continue;
 				map.set(p.id, {
 					name: p.name,
-					color: prodColor(p.id),
+					color: barColor(p),
 					startDate: p.startDate,
 					endDate: p.endDate,
 					showStartDate: p.showStartDate,
@@ -383,6 +383,15 @@
 		return COLORS[h % COLORS.length];
 	}
 
+	// Another org's production that this user may not open (see getCalendarData):
+	// one neutral grey, so the unit reads as taken without passing for one of
+	// our own productions. Fixed rather than a theme token — the label on it is
+	// white in both themes.
+	const RESTRICTED_COLOR = '#737373';
+	function barColor(p: { id: string; restricted: boolean }): string {
+		return p.restricted ? RESTRICTED_COLOR : prodColor(p.id);
+	}
+
 	// Outlines a bar's label in the bar's own colour, so the type sits on a patch
 	// of solid production colour wherever it crosses the hatched setup fill.
 	// Eight hard 1px copies make the ring, the blurred one closes the diagonal
@@ -415,6 +424,7 @@
 		showWidth: number;
 		color: string;
 		pending: boolean;
+		restricted: boolean;
 	};
 	type CollapsedBar = {
 		productionId: string;
@@ -428,6 +438,7 @@
 		count: number;
 		total: number;
 		allPending: boolean;
+		restricted: boolean;
 	};
 	type HeaderRow = {
 		kind: 'header';
@@ -464,7 +475,8 @@
 						label: p.name,
 						...barDimsWithShow(p.startDate!, p.endDate!, p.showStartDate, p.showEndDate),
 						color: prodColor(p.id),
-						pending: false
+						pending: false,
+						restricted: false
 					}
 				]
 			}));
@@ -509,6 +521,7 @@
 					showEnd: Date | null;
 					count: number;
 					pendingCount: number;
+					restricted: boolean;
 				}
 			>();
 			for (const a of assets) {
@@ -522,7 +535,8 @@
 							showStart: pi.production.showStartDate,
 							showEnd: pi.production.showEndDate,
 							count: 0,
-							pendingCount: 0
+							pendingCount: 0,
+							restricted: pi.production.restricted
 						});
 					prodAgg.get(pi.production.id)!.count++;
 					if (pi.status === 'PENDING') prodAgg.get(pi.production.id)!.pendingCount++;
@@ -532,11 +546,12 @@
 				productionId: id,
 				label: p.label,
 				...barDimsWithShow(p.start, p.end, p.showStart, p.showEnd),
-				color: prodColor(id),
+				color: barColor({ id, restricted: p.restricted }),
 				fraction: p.count / assets.length,
 				count: p.count,
 				total: assets.length,
-				allPending: p.pendingCount === p.count
+				allPending: p.pendingCount === p.count,
+				restricted: p.restricted
 			}));
 			rows.push({
 				kind: 'header',
@@ -574,8 +589,9 @@
 										pi.production.showStartDate,
 										pi.production.showEndDate
 									),
-									color: prodColor(pi.production.id),
-									pending: pi.status === 'PENDING'
+									color: barColor(pi.production),
+									pending: pi.status === 'PENDING',
+									restricted: pi.production.restricted
 								});
 							}
 						}
@@ -601,8 +617,9 @@
 									pi.production.showStartDate,
 									pi.production.showEndDate
 								),
-								color: prodColor(pi.production.id),
-								pending: pi.status === 'PENDING'
+								color: barColor(pi.production),
+								pending: pi.status === 'PENDING',
+								restricted: pi.production.restricted
 							}));
 						rows.push({
 							kind: 'asset',
@@ -762,6 +779,7 @@
 		endTs: number;
 		showStartTs: number;
 		showEndTs: number;
+		restricted: boolean;
 	};
 
 	// Show dates narrow the full booked/loaded range down to the actual event
@@ -796,7 +814,8 @@
 						color: prodColor(p.id),
 						startTs,
 						endTs,
-						...showRange(startTs, endTs, p.showStartDate, p.showEndDate)
+						...showRange(startTs, endTs, p.showStartDate, p.showEndDate),
+						restricted: false
 					};
 				});
 		}
@@ -812,10 +831,11 @@
 				result.push({
 					id: pi.production.id,
 					name: pi.production.name,
-					color: prodColor(pi.production.id),
+					color: barColor(pi.production),
 					startTs,
 					endTs,
-					...showRange(startTs, endTs, pi.production.showStartDate, pi.production.showEndDate)
+					...showRange(startTs, endTs, pi.production.showStartDate, pi.production.showEndDate),
+					restricted: pi.production.restricted
 				});
 			}
 		}
@@ -1262,7 +1282,7 @@
 							{@const segments = barSegments(bar)}
 							{#each segments as seg, si (si)}
 								<a
-									href={resolve(`/productions/${bar.event.id}`)}
+									href={bar.event.restricted ? undefined : resolve(`/productions/${bar.event.id}`)}
 									{...hoverCard(bar.event.id)}
 									class="absolute flex items-center overflow-hidden px-1.5 text-[11px] font-medium text-white no-underline {hoveredEventId ===
 									bar.event.id
@@ -1328,7 +1348,9 @@
 									{#each weekRow.bars as bar (bar.event.id)}
 										{#each barSegments(bar) as seg, si (si)}
 											<a
-												href={resolve(`/productions/${bar.event.id}`)}
+												href={bar.event.restricted
+													? undefined
+													: resolve(`/productions/${bar.event.id}`)}
 												aria-label={bar.event.name}
 												{...hoverCard(bar.event.id)}
 												class="absolute no-underline {hoveredEventId === bar.event.id
@@ -1544,7 +1566,9 @@
 								{#each row.bars as bar (bar.id)}
 									{#if bar.pending}
 										<a
-											href={resolve(`/productions/${bar.productionId}`)}
+											href={bar.restricted
+												? undefined
+												: resolve(`/productions/${bar.productionId}`)}
 											aria-label={bar.label}
 											{...hoverCard(bar.productionId, { pending: true })}
 											class="absolute top-1 overflow-hidden rounded no-underline hover:brightness-110"
@@ -1557,7 +1581,9 @@
 										<div class="group/bar">
 											{#each segs as seg, si (si)}
 												<a
-													href={resolve(`/productions/${bar.productionId}`)}
+													href={bar.restricted
+														? undefined
+														: resolve(`/productions/${bar.productionId}`)}
 													aria-label={bar.label}
 													{...hoverCard(bar.productionId)}
 													class="absolute top-1 overflow-hidden no-underline group-hover/bar:brightness-110 {seg.roundedLeft
@@ -1581,7 +1607,9 @@
 									{@const barH = Math.max(3, Math.round(bar.fraction * (PRODUCT_H - 6)))}
 									{#if bar.allPending}
 										<a
-											href={resolve(`/productions/${bar.productionId}`)}
+											href={bar.restricted
+												? undefined
+												: resolve(`/productions/${bar.productionId}`)}
 											{...hoverCard(bar.productionId, {
 												pending: true,
 												booked: { count: bar.count, total: bar.total }
@@ -1598,7 +1626,9 @@
 										<div class="group/bar">
 											{#each segs as seg, si (si)}
 												<a
-													href={resolve(`/productions/${bar.productionId}`)}
+													href={bar.restricted
+														? undefined
+														: resolve(`/productions/${bar.productionId}`)}
 													{...hoverCard(bar.productionId, {
 														booked: { count: bar.count, total: bar.total }
 													})}

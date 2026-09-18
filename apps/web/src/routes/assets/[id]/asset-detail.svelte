@@ -911,16 +911,22 @@
 											{:else if tx?.type === 'CHECKED_OUT'}
 												Checked out for
 												<a
-													href={resolve(`/productions/${tx.productionId}`)}
-													class="text-foreground underline underline-offset-2"
-													>{tx.productionName}</a
+													href={item.productionRestricted
+														? undefined
+														: resolve(`/productions/${tx.productionId}`)}
+													class="text-foreground {item.productionRestricted
+														? ''
+														: 'underline underline-offset-2'}">{tx.productionName}</a
 												>
 											{:else if tx?.type === 'RETURNED'}
 												Returned from
 												<a
-													href={resolve(`/productions/${tx.fromProductionId}`)}
-													class="text-foreground underline underline-offset-2"
-													>{tx.fromProductionName}</a
+													href={item.productionRestricted
+														? undefined
+														: resolve(`/productions/${tx.fromProductionId}`)}
+													class="text-foreground {item.productionRestricted
+														? ''
+														: 'underline underline-offset-2'}">{tx.fromProductionName}</a
 												>
 												<span class="font-normal text-muted-foreground">
 													to <span class="font-medium text-foreground">{tx.toLocationName}</span>
@@ -928,9 +934,12 @@
 											{:else if tx?.type === 'REQUESTED'}
 												Requested for
 												<a
-													href={resolve(`/productions/${tx.productionId}`)}
-													class="text-foreground underline underline-offset-2"
-													>{tx.productionName}</a
+													href={item.productionRestricted
+														? undefined
+														: resolve(`/productions/${tx.productionId}`)}
+													class="text-foreground {item.productionRestricted
+														? ''
+														: 'underline underline-offset-2'}">{tx.productionName}</a
 												>
 												<span class="font-normal text-muted-foreground">
 													by <span class="font-medium text-foreground">{tx.requestingOrgName}</span>
@@ -938,23 +947,32 @@
 											{:else if tx?.type === 'ADDED_TO_PRODUCTION'}
 												Added to
 												<a
-													href={resolve(`/productions/${tx.productionId}`)}
-													class="text-foreground underline underline-offset-2"
-													>{tx.productionName}</a
+													href={item.productionRestricted
+														? undefined
+														: resolve(`/productions/${tx.productionId}`)}
+													class="text-foreground {item.productionRestricted
+														? ''
+														: 'underline underline-offset-2'}">{tx.productionName}</a
 												>
 											{:else if tx?.type === 'APPROVED'}
 												Approved for
 												<a
-													href={resolve(`/productions/${tx.productionId}`)}
-													class="text-foreground underline underline-offset-2"
-													>{tx.productionName}</a
+													href={item.productionRestricted
+														? undefined
+														: resolve(`/productions/${tx.productionId}`)}
+													class="text-foreground {item.productionRestricted
+														? ''
+														: 'underline underline-offset-2'}">{tx.productionName}</a
 												>
 											{:else if tx?.type === 'DECLINED'}
 												Declined for
 												<a
-													href={resolve(`/productions/${tx.productionId}`)}
-													class="text-foreground underline underline-offset-2"
-													>{tx.productionName}</a
+													href={item.productionRestricted
+														? undefined
+														: resolve(`/productions/${tx.productionId}`)}
+													class="text-foreground {item.productionRestricted
+														? ''
+														: 'underline underline-offset-2'}">{tx.productionName}</a
 												>
 											{:else if tx?.type === 'ACCESSORY_ATTACHED'}
 												Attached as an accessory of

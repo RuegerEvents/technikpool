@@ -2,7 +2,7 @@ import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
 import { prisma } from '$lib/server/auth';
 import { getObject } from '$lib/server/storage';
-import { isSystemAdmin, userOrgIds } from '$lib/server/services/access';
+import { requireOrgInventory } from '$lib/server/services/access';
 import { generateBillingPdf, organizationFromSnapshot } from '$lib/server/billing-pdf';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
@@ -20,10 +20,8 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 					})
 				: null;
 	if (!document) error(404, 'Document not found');
-	const allowed =
-		(await isSystemAdmin(locals.user.id)) ||
-		(await userOrgIds(locals.user.id)).includes(document.organizationId);
-	if (!allowed) error(403, 'Unauthorized');
+	// Same rung as the pages that link here — see `billingOrgIds` in offers.remote.ts.
+	await requireOrgInventory(document.organizationId, 'billing_manage_forbidden');
 	let bytes: Uint8Array;
 	if (document.pdfPath) bytes = (await getObject(document.pdfPath)).bytes;
 	else {

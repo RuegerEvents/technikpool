@@ -6,10 +6,20 @@ import { pendingApprovalEmail } from '$lib/server/emails/pending-approval';
 import { bookingReviewedEmail } from '$lib/server/emails/booking-reviewed';
 import { addedAsCrewEmail } from '$lib/server/emails/added-as-crew';
 import * as v from 'valibot';
-import { requireAuth, requireOrgInventory, requireOrgWrite } from '$lib/server/services/access';
+import {
+	productionVisibility,
+	requireAuth,
+	requireOrgInventory,
+	requireOrgRead,
+	requireOrgWrite,
+	scopedOrgIds,
+	visibleProductionIds
+} from '$lib/server/services/access';
 import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '$lib/asset-status';
 import { accessoryIdsOf } from '$lib/server/services/accessories';
 import { appError } from '$lib/errors';
+import { orgLabel } from '$lib/utils';
+import type { AddedToProductionData, RequestedData } from '$lib/types/asset-transaction';
 
 // Returns which of `ownerOrgIds` do NOT currently have any PENDING item in
 // this production — i.e. the orgs for which a new PENDING item would be the
@@ -118,11 +128,7 @@ async function notifyRequesterIfQueueCleared(
 
 export const getProductions = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
-	const memberships = await prisma.orgMembership.findMany({
-		where: { userId: user.id },
-		select: { organizationId: true }
-	});
-	const orgIds = organizationId ? [organizationId] : memberships.map((m) => m.organizationId);
+	const orgIds = await scopedOrgIds(user.id, organizationId);
 	return await prisma.production.findMany({
 		where: { organizationId: { in: orgIds } },
 		include: {
@@ -141,7 +147,7 @@ export const getProductions = query(v.optional(v.string()), async (organizationI
 
 export const getProduction = query(v.string(), async (id: string) => {
 	await requireAuth();
-	return await prisma.production.findUniqueOrThrow({
+	const production = await prisma.production.findUniqueOrThrow({
 		where: { id },
 		include: {
 			items: {
@@ -174,6 +180,10 @@ export const getProduction = query(v.string(), async (id: string) => {
 			organization: true
 		}
 	});
+	// Any member of the org reads it, VIEWER included; every command that
+	// changes it asks for MEMBER on its own.
+	await requireOrgRead(production.organizationId);
+	return production;
 });
 
 const addressInputSchema = v.object({
@@ -491,18 +501,18 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 			productionId: data.productionId,
 			action: isCrossOrg ? 'REQUESTED' : 'ADDED_TO_PRODUCTION',
 			data: isCrossOrg
-				? {
+				? ({
 						type: 'REQUESTED',
 						productionId: data.productionId,
 						productionName: production.name,
 						requestingOrgId: production.organization.id,
 						requestingOrgName: production.organization.name
-					}
-				: {
+					} satisfies RequestedData)
+				: ({
 						type: 'ADDED_TO_PRODUCTION',
 						productionId: data.productionId,
 						productionName: production.name
-					}
+					} satisfies AddedToProductionData)
 		}
 	});
 
@@ -554,7 +564,11 @@ export const approveProductionItem = command(v.string(), async (itemId: string) 
 		item.asset.organizationId
 	);
 
-	await getProduction(item.productionId).refresh();
+	// The approver answers for the unit, not for the production that asked for
+	// it, and may not be allowed to open that — see `visibleProductionIds`.
+	if ((await visibleProductionIds(user.id, [item.productionId])).length > 0) {
+		await getProduction(item.productionId).refresh();
+	}
 	await getPendingApprovals(item.asset.organizationId).refresh();
 	return updated;
 });
@@ -594,15 +608,20 @@ export const declineProductionItem = command(v.string(), async (itemId: string) 
 		item.asset.organizationId
 	);
 
-	await getProduction(item.productionId).refresh();
+	// The approver answers for the unit, not for the production that asked for
+	// it, and may not be allowed to open that — see `visibleProductionIds`.
+	if ((await visibleProductionIds(user.id, [item.productionId])).length > 0) {
+		await getProduction(item.productionId).refresh();
+	}
 	await getPendingApprovals(item.asset.organizationId).refresh();
 	return updated;
 });
 
 export const getPendingApprovals = query(v.string(), async (organizationId: string) => {
-	await requireOrgInventory(organizationId);
+	const user = await requireOrgInventory(organizationId);
+	const canSee = await productionVisibility(user.id);
 
-	return await prisma.productionItem.findMany({
+	const items = await prisma.productionItem.findMany({
 		where: {
 			asset: { organizationId },
 			status: 'PENDING'
@@ -612,6 +631,13 @@ export const getPendingApprovals = query(v.string(), async (organizationId: stri
 			production: { include: { organization: true } }
 		}
 	});
+	// A request names the production it is for — deciding to lend means knowing
+	// what to — but the lender usually belongs to a different org and may not
+	// open it, so the page is told whether to link it.
+	return items.map((item) => ({
+		...item,
+		productionVisible: canSee(item.production.organizationId)
+	}));
 });
 
 // ── Bundles in productions ────────────────────────────────────────────────────
@@ -730,9 +756,10 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 			productionId: data.productionId,
 			action: 'ADDED_TO_PRODUCTION',
 			data: {
+				type: 'ADDED_TO_PRODUCTION',
 				productionId: data.productionId,
 				productionName: production.name
-			}
+			} satisfies AddedToProductionData
 		}))
 	});
 
@@ -944,7 +971,11 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 				userId: user.id,
 				productionId: data.productionId,
 				action: 'ADDED_TO_PRODUCTION',
-				data: { productionId: data.productionId, productionName: production.name }
+				data: {
+					type: 'ADDED_TO_PRODUCTION',
+					productionId: data.productionId,
+					productionName: production.name
+				} satisfies AddedToProductionData
 			}))
 		});
 	}
@@ -1017,38 +1048,6 @@ export const removeCrewMember = command(v.string(), async (id: string) => {
 	return member;
 });
 
-export const getBookedAssets = query(
-	v.string(),
-	async (productionId: string): Promise<{ assetId: string; productionName: string }[]> => {
-		await requireAuth();
-		const production = await prisma.production.findUniqueOrThrow({
-			where: { id: productionId },
-			select: { startDate: true, endDate: true }
-		});
-		if (!production.startDate || !production.endDate) return [];
-		const items = await prisma.productionItem.findMany({
-			where: {
-				productionId: { not: productionId },
-				status: { in: ['PENDING', 'APPROVED', 'CHECKED_OUT'] },
-				production: {
-					AND: [
-						{ startDate: { not: null } },
-						{ endDate: { not: null } },
-						{ startDate: { lte: production.endDate } },
-						{ endDate: { gte: production.startDate } }
-					]
-				}
-			},
-			select: { assetId: true, production: { select: { name: true } } }
-		});
-		const seen = new Map<string, string>();
-		for (const item of items) {
-			if (!seen.has(item.assetId)) seen.set(item.assetId, item.production.name);
-		}
-		return [...seen.entries()].map(([assetId, productionName]) => ({ assetId, productionName }));
-	}
-);
-
 export const getCalendarData = query(async () => {
 	const user = await requireAuth();
 
@@ -1058,6 +1057,7 @@ export const getCalendarData = query(async () => {
 		where: { userId: user.id }
 	});
 	const orgIds = memberships.map((m) => m.organizationId);
+	const canSee = await productionVisibility(user.id);
 
 	// An accessory's availability is its parent's — it is booked and returned
 	// with it, so a row per power cable is noise on a calendar.
@@ -1075,12 +1075,45 @@ export const getCalendarData = query(async () => {
 						endDate: { not: null }
 					}
 				},
-				include: { production: true }
+				include: {
+					production: {
+						select: {
+							id: true,
+							name: true,
+							startDate: true,
+							endDate: true,
+							showStartDate: true,
+							showEndDate: true,
+							organizationId: true,
+							organization: { select: { name: true, shortName: true } }
+						}
+					}
+				}
 			}
 		}
 	});
 
-	return assets;
+	// A unit lent to another org's production is booked all the same, so the
+	// booking stays — but someone outside that org gets a block with the org's
+	// name on it and nothing else: no title, no setup/show split, nothing to open.
+	return assets.map((asset) => ({
+		...asset,
+		productionItems: asset.productionItems.map(({ production, ...item }) => {
+			const { organization, organizationId, ...rest } = production;
+			return {
+				...item,
+				production: canSee(organizationId)
+					? { ...rest, restricted: false }
+					: {
+							...rest,
+							name: orgLabel(organization),
+							showStartDate: null,
+							showEndDate: null,
+							restricted: true
+						}
+			};
+		})
+	}));
 });
 
 export const getProductionsCalendar = query(async () => {

@@ -2,6 +2,7 @@ import { getRequestEvent } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import { appError, type AppErrorCode } from '$lib/errors';
 import { ROLE_FOR, roleAtLeast, rolesAtLeast, type OrgRole } from '$lib/roles';
+import { orgLabel } from '$lib/utils';
 
 // Authorisation primitives shared by the remote functions and the /api/v1
 // endpoints. Both surfaces must scope reads identically — the API is not
@@ -103,6 +104,57 @@ export function requireOrgOwner(
 	code: AppErrorCode = 'org_manage_forbidden'
 ) {
 	return requireOrgRole(organizationId, ROLE_FOR.organization, code);
+}
+
+/**
+ * Whether a user may open a production of a given org: any member of that org,
+ * VIEWER up, or a system admin — the same rule `requireOrgRead` enforces on the
+ * production itself. Resolved once and handed back as a predicate, so a list
+ * that mixes productions of several orgs is masked row by row without a query
+ * per row.
+ *
+ * What a list does with a production this says no to is the caller's business,
+ * but it must never *drop* it: a unit booked by someone else's production is
+ * still booked, and leaving it out makes it look free. Name it with
+ * `visibleProductionName` instead.
+ */
+export async function productionVisibility(userId: string) {
+	const [orgIds, admin] = await Promise.all([userOrgIds(userId), isSystemAdmin(userId)]);
+	const visible = new Set(orgIds);
+	return (organizationId: string) => admin || visible.has(organizationId);
+}
+
+/**
+ * Of these productions, the ones a user may open. For refreshing after a change
+ * that reaches into a production the user may not read — returning a lent unit,
+ * approving a loan request — where refreshing it would be refused, and fail a
+ * command whose write has already gone through.
+ */
+export async function visibleProductionIds(userId: string, productionIds: string[]) {
+	if (productionIds.length === 0) return [];
+	const [canSee, productions] = await Promise.all([
+		productionVisibility(userId),
+		prisma.production.findMany({
+			where: { id: { in: productionIds } },
+			select: { id: true, organizationId: true }
+		})
+	]);
+	return productions.filter((p) => canSee(p.organizationId)).map((p) => p.id);
+}
+
+/**
+ * A production's name, or — for someone who may not open it — the org that
+ * holds it, which is all they get to know about it.
+ */
+export function visibleProductionName(
+	production: {
+		name: string;
+		organizationId: string;
+		organization: { name: string; shortName: string | null };
+	},
+	canSee: (organizationId: string) => boolean
+) {
+	return canSee(production.organizationId) ? production.name : orgLabel(production.organization);
 }
 
 /** The ids of orgs the user can manage (ADMIN or OWNER role). */

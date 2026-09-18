@@ -3,7 +3,7 @@ import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import { getAsset, getAssets, getBundle, getBundles } from './assets.remote';
 import { getProduction } from './productions.remote';
-import { requireAuth, userOrgIds } from '$lib/server/services/access';
+import { requireAuth, userOrgIds, visibleProductionIds } from '$lib/server/services/access';
 import {
 	CheckoutError,
 	performBulkCheckout,
@@ -26,7 +26,10 @@ export const getAllProductions = query(async () => {
  * Invalidate the queries backing whatever the service just changed. The service
  * itself is framework-agnostic and only reports which records it touched.
  */
-async function refreshAffected(affected: AffectedRecords) {
+async function refreshAffected(userId: string, affected: AffectedRecords) {
+	// A unit scanned back onto a shelf is returned from whatever production held
+	// it, which may be one this user cannot open — see `visibleProductionIds`.
+	const productionIds = await visibleProductionIds(userId, affected.productionIds);
 	await Promise.all([
 		...affected.assetIds.map((id) => getAsset(id).refresh()),
 		...affected.organizationIds.map((id) => getAssets(id).refresh()),
@@ -40,7 +43,7 @@ async function refreshAffected(affected: AffectedRecords) {
 		...(affected.bundleIds.length > 0
 			? [...affected.organizationIds.map((id) => getBundles(id).refresh()), getBundles().refresh()]
 			: []),
-		...affected.productionIds.map((id) => getProduction(id).refresh())
+		...productionIds.map((id) => getProduction(id).refresh())
 	]);
 }
 
@@ -86,7 +89,7 @@ const scanAssetSchema = v.object({
 export const scanAsset = command(scanAssetSchema, async (input) => {
 	const user = await requireAuth();
 	const { result, affected } = await withCheckoutErrors(() => performScan(user.id, input));
-	await refreshAffected(affected);
+	await refreshAffected(user.id, affected);
 	return result;
 });
 
@@ -99,6 +102,6 @@ const checkoutAssetsSchema = v.object({
 export const checkoutAssets = command(checkoutAssetsSchema, async (input) => {
 	const user = await requireAuth();
 	const { result, affected } = await withCheckoutErrors(() => performBulkCheckout(user.id, input));
-	await refreshAffected(affected);
+	await refreshAffected(user.id, affected);
 	return result;
 });

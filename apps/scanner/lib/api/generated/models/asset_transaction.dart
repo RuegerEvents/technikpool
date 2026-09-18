@@ -24,6 +24,8 @@ class AssetTransaction {
 
   /// Who performed it. Null if the account has since been removed.
   final String? userName;
+
+  /// The production involved, if any. For a production of an organization the caller is not a member of, that organization's name instead.
   final String? productionName;
 
   Map<String, Object?> toJson() => _$AssetTransactionToJson(this);

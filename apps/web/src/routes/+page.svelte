@@ -53,6 +53,7 @@
 	type RequestGroup = {
 		productionId: string;
 		productionName: string;
+		productionVisible: boolean;
 		requesterOrg: string;
 		productGroups: ProductGroup[];
 		allItems: PendingItem[];
@@ -65,6 +66,7 @@
 					acc[item.productionId] = {
 						productionId: item.productionId,
 						productionName: item.production.name,
+						productionVisible: item.productionVisible,
 						requesterOrg: orgLabel(item.production.organization),
 						productGroups: [],
 						allItems: []
@@ -471,8 +473,11 @@
 							<Card.Header class="flex flex-row items-start justify-between gap-4 pb-3">
 								<div>
 									<a
-										href={resolve(`/productions/${group.productionId}`)}
-										class="font-semibold hover:underline">{group.productionName}</a
+										href={group.productionVisible
+											? resolve(`/productions/${group.productionId}`)
+											: undefined}
+										class="font-semibold {group.productionVisible ? 'hover:underline' : ''}"
+										>{group.productionName}</a
 									>
 									<p class="mt-0.5 text-sm text-muted-foreground">
 										Requested by <span class="font-medium text-foreground"
