@@ -2,6 +2,7 @@
 	import { categoryLabel } from '$lib/category';
 	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
 	import {
+		getBundles,
 		getCategories,
 		deleteProduct,
 		getManufacturers,
@@ -9,6 +10,7 @@
 		getProducts,
 		mergeProducts,
 		setOrgProductPrice,
+		updateBundle,
 		updateProduct
 	} from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
@@ -37,7 +39,13 @@
 
 	let filterOrgId = $state('');
 	let searchQuery = $state('');
-	let onlyMissingImage = $state(false);
+	// What still needs doing. 'price' is one org's price, never "any org's": a
+	// price is that org's own fact, and a filter across several would keep a
+	// product in the list that you have already priced for the org in front.
+	let missing = $state<'none' | 'image' | 'price'>('none');
+	// Accessory-only products are billed with the unit they hang off, so they
+	// usually need no price of their own. Off unless asked.
+	let includeAccessories = $state(false);
 
 	// Read through the queries rather than awaited, so the page is on screen
 	// while the catalogue is on its way. See CLAUDE.md, "Loading states".
@@ -69,6 +77,69 @@
 		filterOrgId ? managedOrgs.filter((o) => o.id === filterOrgId) : managedOrgs
 	);
 
+	// The "missing price" filter asks about exactly one org, and only one this
+	// user may price for — so choosing it narrows the page to that org.
+	let filterOrgManaged = $derived(managedOrgIdSet.has(filterOrgId));
+
+	function showMissingPrice() {
+		if (!filterOrgManaged) filterOrgId = managedOrgs[0]?.id ?? '';
+		missing = 'price';
+	}
+
+	// Leaving the org the price filter was about ends the filter as well; it has
+	// no answer for "all organizations" or for one whose prices aren't yours.
+	function onOrgChange() {
+		if (missing === 'price' && !filterOrgManaged) missing = 'none';
+	}
+
+	// Bundles only ever join the "missing price" list: their price is the one
+	// field on them this page has anything to say about. Like a product's, it is
+	// the org's own, so they are only read for an org this user prices for.
+	let bundlesQuery = $derived(filterOrgManaged ? getBundles(filterOrgId) : null);
+	let bundles = $derived(bundlesQuery?.current ?? []);
+
+	type CatalogBundle = Awaited<ReturnType<typeof getBundles>>[number];
+
+	// One list, two kinds of row. Ids are prefixed per table, so both kinds can
+	// share `currentId` without colliding.
+	type Entry =
+		| { kind: 'product'; id: string; item: CatalogProduct }
+		| { kind: 'bundle'; id: string; item: CatalogBundle };
+
+	function bundleLabel(bundle: CatalogBundle) {
+		return bundle.tag ? `${bundle.template.name} ${bundle.tag}` : bundle.template.name;
+	}
+
+	function storedBundlePrice(bundle: CatalogBundle): number | null {
+		return bundle.netPurchasePrice == null ? null : Number(bundle.netPurchasePrice);
+	}
+
+	// What a bundle holds, one line per product — what its price is judged against.
+	function bundleContents(bundle: CatalogBundle) {
+		const lines: Record<string, { productId: string; label: string; count: number }> = {};
+		for (const asset of bundle.assets) {
+			lines[asset.productId] ??= {
+				productId: asset.productId,
+				label: `${asset.product.manufacturer.name} ${asset.product.name}`,
+				count: 0
+			};
+			lines[asset.productId].count++;
+		}
+		return Object.values(lines);
+	}
+
+	function isAccessoryOnly(product: CatalogProduct) {
+		return product.assetCount > 0 && product.accessoryCount === product.assetCount;
+	}
+
+	// Only products the org actually holds: a price is what a rental of its own
+	// units is billed from, and one it owns none of has nothing to bill.
+	function needsPrice(product: CatalogProduct) {
+		if (product.assetCount === 0) return false;
+		if (!includeAccessories && isAccessoryOnly(product)) return false;
+		return storedPrice(product, filterOrgId) == null;
+	}
+
 	// Renaming or recategorizing follows the ownership rule the server
 	// enforces: every org holding units must be one this user admins. Locked
 	// fields are greyed out rather than failing on save.
@@ -85,7 +156,8 @@
 	let searchTrimmed = $derived(searchQuery.toLowerCase().trim());
 
 	function matches(product: CatalogProduct) {
-		if (onlyMissingImage && product.imagePath) return false;
+		if (missing === 'image' && product.imagePath) return false;
+		if (missing === 'price' && !needsPrice(product)) return false;
 		if (!searchTrimmed) return true;
 		return (
 			product.name.toLowerCase().includes(searchTrimmed) ||
@@ -98,13 +170,38 @@
 		);
 	}
 
+	function matchesBundle(bundle: CatalogBundle) {
+		if (missing !== 'price' || storedBundlePrice(bundle) != null) return false;
+		if (!searchTrimmed) return true;
+		return [bundle.template.name, bundle.tag, categoryLabel(bundle.template.category)].some((v) =>
+			v?.toLowerCase().includes(searchTrimmed)
+		);
+	}
+
+	let entries = $derived<Entry[]>([
+		...products.map((p) => ({ kind: 'product' as const, id: p.id, item: p })),
+		...bundles.map((b) => ({ kind: 'bundle' as const, id: b.id, item: b }))
+	]);
+
 	// Whatever is in front stays in the list even once it stops matching: giving
 	// a product the image it was missing is exactly what drops it out of the
 	// "missing image" filter, and the list must not shift out from under the
 	// person who just did that. It leaves as soon as they move on.
-	let visible = $derived(products.filter((p) => p.id === currentId || matches(p)));
+	let visible = $derived(
+		entries.filter(
+			(e) => e.id === currentId || (e.kind === 'product' ? matches(e.item) : matchesBundle(e.item))
+		)
+	);
 
 	let missingImageCount = $derived(products.filter((p) => !p.imagePath).length);
+	// Only meaningful once the catalog is scoped to that org — across all of
+	// them, unit counts and price rows belong to several orgs at once.
+	let missingPriceCount = $derived(
+		filterOrgManaged
+			? products.filter(needsPrice).length +
+					bundles.filter((b) => storedBundlePrice(b) == null).length
+			: null
+	);
 
 	let index = $derived(
 		Math.max(
@@ -112,7 +209,9 @@
 			visible.findIndex((p) => p.id === currentId)
 		)
 	);
-	let current = $derived(visible.at(index));
+	let entry = $derived(visible.at(index));
+	let current = $derived(entry?.kind === 'product' ? entry.item : undefined);
+	let currentBundle = $derived(entry?.kind === 'bundle' ? entry.item : undefined);
 
 	let draft = $state<ProductDraft>({
 		name: '',
@@ -165,6 +264,20 @@
 		);
 	});
 
+	let bundlePriceDraft = $state<number | null | undefined>(null);
+	let bundleDraftFor = $state('');
+	$effect(() => {
+		const bundle = currentBundle;
+		if (!bundle || bundle.id === bundleDraftFor) return;
+		bundleDraftFor = bundle.id;
+		bundlePriceDraft = storedBundlePrice(bundle);
+	});
+	let bundleDirty = $derived(
+		!!currentBundle &&
+			bundleDraftFor === currentBundle.id &&
+			(bundlePriceDraft ?? null) !== storedBundlePrice(currentBundle)
+	);
+
 	let identityLocked = $derived(!!current && isIdentityLocked(current));
 
 	// What a cable is counts as identity here for the same reason the server
@@ -200,11 +313,27 @@
 					)
 			: []
 	);
-	let dirty = $derived(identityDirty || imageDirty || dirtyPriceOrgIds.length > 0);
+	let dirty = $derived(identityDirty || imageDirty || dirtyPriceOrgIds.length > 0 || bundleDirty);
+
+	async function saveBundle(bundle: CatalogBundle): Promise<boolean> {
+		saving = true;
+		try {
+			// Refreshes getBundles itself.
+			await updateBundle({ bundleId: bundle.id, netPurchasePrice: bundlePriceDraft ?? null });
+			return true;
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+			return false;
+		} finally {
+			saving = false;
+		}
+	}
 
 	/** Returns whether the save went through, so a caller can hold position on failure. */
 	async function save(): Promise<boolean> {
-		if (!current || !dirty || saving) return true;
+		if (!dirty || saving) return true;
+		if (currentBundle) return saveBundle(currentBundle);
+		if (!current) return true;
 		if (!draft.name.trim()) {
 			toast.error('Product name is required');
 			return false;
@@ -251,7 +380,8 @@
 	}
 
 	async function saveAndStay() {
-		if (await save()) toast.success('Product updated');
+		const wasBundle = !!currentBundle;
+		if (await save()) toast.success(wasBundle ? 'Bundle updated' : 'Product updated');
 	}
 
 	async function go(delta: number) {
@@ -264,10 +394,10 @@
 
 	// Switching by click saves too — the whole point of the wizard is not having
 	// to remember to.
-	async function select(product: CatalogProduct) {
-		if (product.id === currentId) return;
+	async function select(row: Entry) {
+		if (row.id === currentId) return;
 		if (dirty && !(await save())) return;
-		currentId = product.id;
+		currentId = row.id;
 	}
 
 	// ── Merging a duplicate away ──────────────────────────────────────────────
@@ -394,7 +524,7 @@
 		// The merge dialog focuses its own panel, which is not a field — so
 		// without this, an arrow key aimed at nothing steps the wizard behind it
 		// and the dialog ends up describing a product that is no longer in front.
-		if (!current || mergeOpen) return;
+		if (!entry || mergeOpen) return;
 		const mod = e.metaKey || e.ctrlKey;
 		const key = e.key.toLowerCase();
 		const step = key === 'arrowright' ? 1 : key === 'arrowleft' ? -1 : 0;
@@ -429,6 +559,7 @@
 		</div>
 		<select
 			bind:value={filterOrgId}
+			onchange={onOrgChange}
 			class="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
 		>
 			<option value="">All Organizations</option>
@@ -446,20 +577,37 @@
 		<div class="flex items-center gap-1">
 			<button
 				type="button"
-				onclick={() => (onlyMissingImage = false)}
-				class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {!onlyMissingImage
+				onclick={() => (missing = 'none')}
+				class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {missing === 'none'
 					? 'bg-primary text-primary-foreground'
 					: 'bg-muted text-muted-foreground hover:bg-muted/70'}">All products</button
 			>
 			<button
 				type="button"
-				onclick={() => (onlyMissingImage = true)}
-				class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {onlyMissingImage
+				onclick={() => (missing = 'image')}
+				class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {missing === 'image'
 					? 'bg-primary text-primary-foreground'
 					: 'bg-muted text-muted-foreground hover:bg-muted/70'}"
 				>Missing image ({missingImageCount})</button
 			>
+			{#if managedOrgs.length > 0}
+				<button
+					type="button"
+					onclick={showMissingPrice}
+					class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {missing === 'price'
+						? 'bg-primary text-primary-foreground'
+						: 'bg-muted text-muted-foreground hover:bg-muted/70'}"
+				>
+					{#if missingPriceCount == null}Missing price{:else}Missing price ({missingPriceCount}){/if}
+				</button>
+			{/if}
 		</div>
+		{#if missing === 'price'}
+			<label class="flex items-center gap-2 text-sm text-muted-foreground">
+				<input type="checkbox" bind:checked={includeAccessories} class="h-4 w-4" />
+				Include accessories
+			</label>
+		{/if}
 	</div>
 
 	{#if !canEdit}
@@ -469,8 +617,8 @@
 		</div>
 	{/if}
 
-	{#if !productsQuery.ready}
-		<ContentSkeleton shape="table" count={8} error={productsQuery.error} />
+	{#if !productsQuery.ready || (missing === 'price' && bundlesQuery && !bundlesQuery.ready)}
+		<ContentSkeleton shape="table" count={8} error={productsQuery.error ?? bundlesQuery?.error} />
 	{:else if visible.length === 0}
 		<div class="rounded-md border">
 			<div class="flex flex-col items-center justify-center py-12 text-center">
@@ -484,7 +632,7 @@
 				</p>
 			</div>
 		</div>
-	{:else if current}
+	{:else if entry}
 		<div class="grid gap-6 lg:grid-cols-[22rem_minmax(0,1fr)] [&>*]:min-w-0">
 			<Card.Root class="overflow-hidden">
 				<Card.Header class="pb-3">
@@ -492,28 +640,42 @@
 					<Card.Description>{index + 1} of {visible.length}</Card.Description>
 				</Card.Header>
 				<Card.Content class="max-h-[32rem] overflow-y-auto p-0">
-					{#each visible as product (product.id)}
-						{@const active = product.id === current.id}
+					{#each visible as row (row.id)}
+						{@const active = row.id === entry.id}
 						<button
 							type="button"
 							use:scrollIntoViewWhenActive={active}
-							onclick={() => select(product)}
+							onclick={() => select(row)}
 							class="flex w-full items-center gap-3 border-b px-4 py-2.5 text-left transition-colors last:border-0 {active
 								? 'bg-muted'
 								: 'hover:bg-muted/40'}"
 						>
-							<ProductThumb path={product.imagePath} alt={product.name} size={32} />
-							<span class="min-w-0 flex-1">
-								<span class="block truncate text-sm font-medium">{product.name}</span>
-								<span class="block truncate text-xs text-muted-foreground"
-									>{product.manufacturer.name}</span
-								>
-							</span>
-							{#if !product.imagePath}
-								<span
-									class="shrink-0 rounded-full bg-yellow-100 px-1.5 py-0.5 text-[10px] font-semibold text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-									>No image</span
-								>
+							{#if row.kind === 'product'}
+								{@const product = row.item}
+								<ProductThumb path={product.imagePath} alt={product.name} size={32} />
+								<span class="min-w-0 flex-1">
+									<span class="block truncate text-sm font-medium">{product.name}</span>
+									<span class="block truncate text-xs text-muted-foreground"
+										>{product.manufacturer.name}</span
+									>
+								</span>
+								{#if !product.imagePath}
+									<span
+										class="shrink-0 rounded-full bg-yellow-100 px-1.5 py-0.5 text-[10px] font-semibold text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+										>No image</span
+									>
+								{/if}
+							{:else}
+								<ProductThumb path={row.item.imagePath} alt={bundleLabel(row.item)} size={32} />
+								<span class="min-w-0 flex-1">
+									<span class="block truncate text-sm font-medium">{bundleLabel(row.item)}</span>
+									<!-- Untagged cases of one type share a name; where they are is
+									     what tells them apart in this list. -->
+									<span class="block truncate text-xs text-muted-foreground"
+										>Bundle{#if row.item.location}
+											· {row.item.location.name}{/if}</span
+									>
+								</span>
 							{/if}
 						</button>
 					{/each}
@@ -523,95 +685,160 @@
 			<!-- The card clips to its rounded corners, cutting off any picker that
 			     opens past its edge. Nothing in this one is full-bleed. -->
 			<Card.Root class="overflow-visible">
-				<Card.Header>
-					<div class="flex flex-wrap items-start justify-between gap-3">
-						<div class="min-w-0">
-							<Card.Title class="flex items-center gap-2">
-								{current.manufacturer.name}
-								{current.name}
-								{#if dirty}
-									<span class="h-2 w-2 shrink-0 rounded-full bg-yellow-500" title="Unsaved changes"
-									></span>
-								{/if}
-							</Card.Title>
-							<Card.Description class="flex flex-wrap items-center gap-2 pt-1">
-								<CategoryPill
-									name={categoryLabel(current.category)}
-									color={current.category.color}
-								/>
-								<span>{current.assetCount} units</span>
-								<a
-									href="{resolve('/assets')}?q={encodeURIComponent(current.name)}"
-									class="underline-offset-2 hover:text-foreground hover:underline"
-									>View in Devices →</a
-								>
-							</Card.Description>
-						</div>
-						<div class="flex flex-wrap items-center gap-3">
-							{#if canEdit}
-								{#if !current.hasAssets}
-									<Button variant="destructive" size="sm" onclick={() => (deleteOpen = true)}
-										>Delete unused</Button
+				{#if current}
+					<Card.Header>
+						<div class="flex flex-wrap items-start justify-between gap-3">
+							<div class="min-w-0">
+								<Card.Title class="flex items-center gap-2">
+									{current.manufacturer.name}
+									{current.name}
+									{#if dirty}
+										<span
+											class="h-2 w-2 shrink-0 rounded-full bg-yellow-500"
+											title="Unsaved changes"
+										></span>
+									{/if}
+								</Card.Title>
+								<Card.Description class="flex flex-wrap items-center gap-2 pt-1">
+									<CategoryPill
+										name={categoryLabel(current.category)}
+										color={current.category.color}
+									/>
+									<span>{current.assetCount} units</span>
+									<a
+										href="{resolve('/assets')}?q={encodeURIComponent(current.name)}"
+										class="underline-offset-2 hover:text-foreground hover:underline"
+										>View in Devices →</a
+									>
+								</Card.Description>
+							</div>
+							<div class="flex flex-wrap items-center gap-3">
+								{#if canEdit}
+									{#if !current.hasAssets}
+										<Button variant="destructive" size="sm" onclick={() => (deleteOpen = true)}
+											>Delete unused</Button
+										>
+									{/if}
+									<Button icon="merge" variant="outline" size="sm" onclick={openMerge}
+										>Merge duplicate…</Button
 									>
 								{/if}
-								<Button icon="merge" variant="outline" size="sm" onclick={openMerge}
-									>Merge duplicate…</Button
+								<span class="font-mono text-sm text-muted-foreground tabular-nums"
+									>{index + 1} / {visible.length}</span
 								>
-							{/if}
+							</div>
+						</div>
+					</Card.Header>
+					<Card.Content>
+						{#if identityLocked}
+							<div class="mb-4 rounded-md border border-dashed p-3 text-sm text-muted-foreground">
+								Units of this product belong to organizations you don't administer, so its name,
+								manufacturer and category are locked here. Your image contribution and your own
+								organization's price still save.
+							</div>
+						{/if}
+						<div class="mb-4 space-y-2">
+							<p class="text-sm font-medium">Manufacturer</p>
+							<CreatableSelect
+								items={manufacturers}
+								bind:value={manufacturer}
+								allowCreate={false}
+								disabled={!canEdit || identityLocked}
+								placeholder="Search manufacturers…"
+							/>
+						</div>
+						<ProductFields
+							{categories}
+							bind:value={draft}
+							idPrefix="wizard"
+							showPrice={false}
+							identityDisabled={!canEdit || identityLocked}
+						/>
+						{#if priceOrgs.length > 0}
+							<div class="mt-4 space-y-2">
+								<p class="text-sm font-medium">Net purchase price (€)</p>
+								<p class="text-sm text-muted-foreground">
+									Per organization — what that organization's rental rate is calculated from. Other
+									organizations set their own price.
+								</p>
+								{#each priceOrgs as org (org.id)}
+									<div class="flex items-center gap-3">
+										<span class="w-40 truncate text-sm">{orgLabel(org)}</span>
+										<input
+											type="number"
+											min="0"
+											step="0.01"
+											placeholder="Unknown"
+											bind:value={priceDrafts[org.id]}
+											class="h-10 w-40 rounded-md border border-input bg-background px-3 py-2 text-right text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+										/>
+									</div>
+								{/each}
+							</div>
+						{/if}
+					</Card.Content>
+				{:else if currentBundle}
+					<Card.Header>
+						<div class="flex flex-wrap items-start justify-between gap-3">
+							<div class="min-w-0">
+								<Card.Title class="flex items-center gap-2">
+									{bundleLabel(currentBundle)}
+									{#if dirty}
+										<span
+											class="h-2 w-2 shrink-0 rounded-full bg-yellow-500"
+											title="Unsaved changes"
+										></span>
+									{/if}
+								</Card.Title>
+								<Card.Description class="flex flex-wrap items-center gap-2 pt-1">
+									<span class="rounded-full bg-muted px-2 py-0.5 text-xs font-medium">Bundle</span>
+									<CategoryPill
+										name={categoryLabel(currentBundle.template.category)}
+										color={currentBundle.template.category.color}
+									/>
+									<span>{currentBundle.assets.length} units</span>
+									<a
+										href={resolve(`/assets/bundles/${currentBundle.id}`)}
+										class="underline-offset-2 hover:text-foreground hover:underline"
+										>Open bundle →</a
+									>
+								</Card.Description>
+							</div>
 							<span class="font-mono text-sm text-muted-foreground tabular-nums"
 								>{index + 1} / {visible.length}</span
 							>
 						</div>
-					</div>
-				</Card.Header>
-				<Card.Content>
-					{#if identityLocked}
-						<div class="mb-4 rounded-md border border-dashed p-3 text-sm text-muted-foreground">
-							Units of this product belong to organizations you don't administer, so its name,
-							manufacturer and category are locked here. Your image contribution and your own
-							organization's price still save.
-						</div>
-					{/if}
-					<div class="mb-4 space-y-2">
-						<p class="text-sm font-medium">Manufacturer</p>
-						<CreatableSelect
-							items={manufacturers}
-							bind:value={manufacturer}
-							allowCreate={false}
-							disabled={!canEdit || identityLocked}
-							placeholder="Search manufacturers…"
-						/>
-					</div>
-					<ProductFields
-						{categories}
-						bind:value={draft}
-						idPrefix="wizard"
-						showPrice={false}
-						identityDisabled={!canEdit || identityLocked}
-					/>
-					{#if priceOrgs.length > 0}
-						<div class="mt-4 space-y-2">
+					</Card.Header>
+					<Card.Content class="space-y-4">
+						<div class="space-y-2">
 							<p class="text-sm font-medium">Net purchase price (€)</p>
 							<p class="text-sm text-muted-foreground">
-								Per organization — what that organization's rental rate is calculated from. Other
-								organizations set their own price.
+								If set, offers and invoices bill this bundle as one line at this price. Left empty,
+								its contents are billed one by one.
 							</p>
-							{#each priceOrgs as org (org.id)}
-								<div class="flex items-center gap-3">
-									<span class="w-40 truncate text-sm">{orgLabel(org)}</span>
-									<input
-										type="number"
-										min="0"
-										step="0.01"
-										placeholder="Unknown"
-										bind:value={priceDrafts[org.id]}
-										class="h-10 w-40 rounded-md border border-input bg-background px-3 py-2 text-right text-sm focus:ring-2 focus:ring-ring focus:outline-none"
-									/>
-								</div>
-							{/each}
+							<input
+								type="number"
+								min="0"
+								step="0.01"
+								placeholder="Unknown"
+								bind:value={bundlePriceDraft}
+								class="h-10 w-40 rounded-md border border-input bg-background px-3 py-2 text-right text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+							/>
 						</div>
-					{/if}
-				</Card.Content>
+						<div class="space-y-2">
+							<p class="text-sm font-medium">Contents</p>
+							{#if currentBundle.assets.length === 0}
+								<p class="text-sm text-muted-foreground">This bundle is empty.</p>
+							{:else}
+								<ul class="space-y-1 text-sm text-muted-foreground">
+									{#each bundleContents(currentBundle) as line (line.productId)}
+										<li>{line.count}× {line.label}</li>
+									{/each}
+								</ul>
+							{/if}
+						</div>
+					</Card.Content>
+				{/if}
 				<Card.Footer class="flex flex-wrap items-center justify-between gap-3">
 					<div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
 						<kbd class="rounded border px-1.5 py-0.5 font-mono">←</kbd>

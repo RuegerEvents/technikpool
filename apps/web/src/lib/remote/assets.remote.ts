@@ -578,9 +578,21 @@ export const getProductCatalog = query(v.optional(v.string()), async (organizati
 		orderBy: [{ manufacturer: { name: 'asc' } }, { name: 'asc' }]
 	});
 
+	// Units that hang off a parent. A product whose every unit does is only ever
+	// an accessory — nobody rents it on its own, so the "missing price" filter
+	// leaves it out unless asked. Its own query: `_count` can't count one
+	// relation twice with two different filters.
+	const accessoryCounts = await prisma.asset.groupBy({
+		by: ['productId'],
+		where: { ...assetScope, parentAssetId: { not: null } },
+		_count: { _all: true }
+	});
+	const accessoryCountOf = new Map(accessoryCounts.map((r) => [r.productId, r._count._all]));
+
 	return products.map(({ _count, assets, orgPrices, ...product }) => ({
 		...product,
 		assetCount: _count.assets,
+		accessoryCount: accessoryCountOf.get(product.id) ?? 0,
 		hasAssets: assets.length > 0,
 		owningOrgIds: assets.map((a) => a.organizationId),
 		prices: orgPrices

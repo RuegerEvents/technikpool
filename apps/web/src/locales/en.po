@@ -422,6 +422,7 @@ msgstr "Asset Tag"
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/products/+page.svelte
 msgid "Bundle"
 msgstr "Bundle"
 
@@ -2011,6 +2012,7 @@ msgid "Add Bundle"
 msgstr "Add Bundle"
 
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/routes/products/+page.svelte
 msgid "Bundle updated"
 msgstr "Bundle updated"
 
@@ -2914,6 +2916,7 @@ msgstr "Pricing & inspection updated"
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/routes/products/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Net purchase price (€)"
 msgstr "Net purchase price (€)"
@@ -4406,10 +4409,13 @@ msgid "No image"
 msgstr "No image"
 
 #: src/routes/products/+page.svelte
+#: src/routes/products/+page.svelte
 msgid "Unsaved changes"
 msgstr "Unsaved changes"
 
 #. 0: current.assetCount
+#. 0: currentBundle.assets.length
+#: src/routes/products/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "{0} units"
 msgstr "{0} units"
@@ -4653,6 +4659,7 @@ msgstr[0] "# already-booked asset moved into the bundle"
 msgstr[1] "# already-booked assets moved into the bundle"
 
 #: src/lib/components/ui/product-fields/product-fields.svelte
+#: src/routes/products/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Unknown"
 msgstr "Unknown"
@@ -7807,3 +7814,36 @@ msgstr[1] "Book # items"
 #: src/routes/productions/[id]/copy-equipment-modal.svelte
 msgid "Book items"
 msgstr "Book items"
+
+#: src/routes/products/+page.svelte
+msgid "Missing price"
+msgstr "Missing price"
+
+#. 0: missingPriceCount
+#: src/routes/products/+page.svelte
+msgid "Missing price ({0})"
+msgstr "Missing price ({0})"
+
+#: src/routes/products/+page.svelte
+msgid "<0/> Include accessories"
+msgstr "<0/> Include accessories"
+
+#: src/routes/products/+page.svelte
+msgid "Open bundle →"
+msgstr "Open bundle →"
+
+#: src/routes/products/+page.svelte
+msgid "If set, offers and invoices bill this bundle as one line at this price. Left empty, its contents are billed one by one."
+msgstr "If set, offers and invoices bill this bundle as one line at this price. Left empty, its contents are billed one by one."
+
+#: src/routes/products/+page.svelte
+msgid "This bundle is empty."
+msgstr "This bundle is empty."
+
+#: src/routes/products/+page.svelte
+msgid "Contents"
+msgstr "Contents"
+
+#: src/routes/products/+page.svelte
+msgid "Bundle<0/>"
+msgstr "Bundle<0/>"
