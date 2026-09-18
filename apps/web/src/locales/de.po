@@ -7847,3 +7847,11 @@ msgstr "Inhalt"
 #: src/routes/products/+page.svelte
 msgid "Bundle<0/>"
 msgstr "Bundle<0/>"
+
+#: src/lib/components/ui/address-input/address-input.svelte
+msgid "Stadthalle, club, open air…"
+msgstr "Stadthalle, Club, Open Air…"
+
+#: src/lib/components/ui/address-input/address-input.svelte
+msgid "Venue name"
+msgstr "Name der Location"

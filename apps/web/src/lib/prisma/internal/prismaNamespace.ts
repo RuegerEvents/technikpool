@@ -3067,6 +3067,7 @@ export const ProductionScalarFieldEnum = {
   showStartDate: 'showStartDate',
   showEndDate: 'showEndDate',
   organizationId: 'organizationId',
+  venueName: 'venueName',
   addressId: 'addressId',
   customerId: 'customerId',
   createdAt: 'createdAt',

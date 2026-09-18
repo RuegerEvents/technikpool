@@ -32,6 +32,7 @@ export type ProductionMinAggregateOutputType = {
   showStartDate: Date | null
   showEndDate: Date | null
   organizationId: string | null
+  venueName: string | null
   addressId: string | null
   customerId: string | null
   createdAt: Date | null
@@ -46,6 +47,7 @@ export type ProductionMaxAggregateOutputType = {
   showStartDate: Date | null
   showEndDate: Date | null
   organizationId: string | null
+  venueName: string | null
   addressId: string | null
   customerId: string | null
   createdAt: Date | null
@@ -60,6 +62,7 @@ export type ProductionCountAggregateOutputType = {
   showStartDate: number
   showEndDate: number
   organizationId: number
+  venueName: number
   addressId: number
   customerId: number
   createdAt: number
@@ -76,6 +79,7 @@ export type ProductionMinAggregateInputType = {
   showStartDate?: true
   showEndDate?: true
   organizationId?: true
+  venueName?: true
   addressId?: true
   customerId?: true
   createdAt?: true
@@ -90,6 +94,7 @@ export type ProductionMaxAggregateInputType = {
   showStartDate?: true
   showEndDate?: true
   organizationId?: true
+  venueName?: true
   addressId?: true
   customerId?: true
   createdAt?: true
@@ -104,6 +109,7 @@ export type ProductionCountAggregateInputType = {
   showStartDate?: true
   showEndDate?: true
   organizationId?: true
+  venueName?: true
   addressId?: true
   customerId?: true
   createdAt?: true
@@ -191,6 +197,7 @@ export type ProductionGroupByOutputType = {
   showStartDate: Date | null
   showEndDate: Date | null
   organizationId: string
+  venueName: string | null
   addressId: string | null
   customerId: string | null
   createdAt: Date
@@ -226,6 +233,7 @@ export type ProductionWhereInput = {
   showStartDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
   showEndDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
   organizationId?: Prisma.StringFilter<"Production"> | string
+  venueName?: Prisma.StringNullableFilter<"Production"> | string | null
   addressId?: Prisma.StringNullableFilter<"Production"> | string | null
   customerId?: Prisma.StringNullableFilter<"Production"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Production"> | Date | string
@@ -248,6 +256,7 @@ export type ProductionOrderByWithRelationInput = {
   showStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
   showEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  venueName?: Prisma.SortOrderInput | Prisma.SortOrder
   addressId?: Prisma.SortOrderInput | Prisma.SortOrder
   customerId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -273,6 +282,7 @@ export type ProductionWhereUniqueInput = Prisma.AtLeast<{
   showStartDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
   showEndDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
   organizationId?: Prisma.StringFilter<"Production"> | string
+  venueName?: Prisma.StringNullableFilter<"Production"> | string | null
   addressId?: Prisma.StringNullableFilter<"Production"> | string | null
   customerId?: Prisma.StringNullableFilter<"Production"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Production"> | Date | string
@@ -295,6 +305,7 @@ export type ProductionOrderByWithAggregationInput = {
   showStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
   showEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  venueName?: Prisma.SortOrderInput | Prisma.SortOrder
   addressId?: Prisma.SortOrderInput | Prisma.SortOrder
   customerId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -315,6 +326,7 @@ export type ProductionScalarWhereWithAggregatesInput = {
   showStartDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Production"> | Date | string | null
   showEndDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Production"> | Date | string | null
   organizationId?: Prisma.StringWithAggregatesFilter<"Production"> | string
+  venueName?: Prisma.StringNullableWithAggregatesFilter<"Production"> | string | null
   addressId?: Prisma.StringNullableWithAggregatesFilter<"Production"> | string | null
   customerId?: Prisma.StringNullableWithAggregatesFilter<"Production"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Production"> | Date | string
@@ -328,6 +340,7 @@ export type ProductionCreateInput = {
   endDate?: Date | string | null
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
+  venueName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
@@ -348,6 +361,7 @@ export type ProductionUncheckedCreateInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   organizationId: string
+  venueName?: string | null
   addressId?: string | null
   customerId?: string | null
   createdAt?: Date | string
@@ -366,6 +380,7 @@ export type ProductionUpdateInput = {
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
@@ -386,6 +401,7 @@ export type ProductionUncheckedUpdateInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -405,6 +421,7 @@ export type ProductionCreateManyInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   organizationId: string
+  venueName?: string | null
   addressId?: string | null
   customerId?: string | null
   createdAt?: Date | string
@@ -418,6 +435,7 @@ export type ProductionUpdateManyMutationInput = {
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -430,6 +448,7 @@ export type ProductionUncheckedUpdateManyInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -454,6 +473,7 @@ export type ProductionCountOrderByAggregateInput = {
   showStartDate?: Prisma.SortOrder
   showEndDate?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  venueName?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -468,6 +488,7 @@ export type ProductionMaxOrderByAggregateInput = {
   showStartDate?: Prisma.SortOrder
   showEndDate?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  venueName?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -482,6 +503,7 @@ export type ProductionMinOrderByAggregateInput = {
   showStartDate?: Prisma.SortOrder
   showEndDate?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  venueName?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -707,6 +729,7 @@ export type ProductionCreateWithoutOrganizationInput = {
   endDate?: Date | string | null
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
+  venueName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
@@ -725,6 +748,7 @@ export type ProductionUncheckedCreateWithoutOrganizationInput = {
   endDate?: Date | string | null
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
+  venueName?: string | null
   addressId?: string | null
   customerId?: string | null
   createdAt?: Date | string
@@ -773,6 +797,7 @@ export type ProductionScalarWhereInput = {
   showStartDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
   showEndDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
   organizationId?: Prisma.StringFilter<"Production"> | string
+  venueName?: Prisma.StringNullableFilter<"Production"> | string | null
   addressId?: Prisma.StringNullableFilter<"Production"> | string | null
   customerId?: Prisma.StringNullableFilter<"Production"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Production"> | Date | string
@@ -786,6 +811,7 @@ export type ProductionCreateWithoutAddressInput = {
   endDate?: Date | string | null
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
+  venueName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
@@ -805,6 +831,7 @@ export type ProductionUncheckedCreateWithoutAddressInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   organizationId: string
+  venueName?: string | null
   customerId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -848,6 +875,7 @@ export type ProductionCreateWithoutCustomerInput = {
   endDate?: Date | string | null
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
+  venueName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
@@ -867,6 +895,7 @@ export type ProductionUncheckedCreateWithoutCustomerInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   organizationId: string
+  venueName?: string | null
   addressId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -910,6 +939,7 @@ export type ProductionCreateWithoutItemsInput = {
   endDate?: Date | string | null
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
+  venueName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
@@ -929,6 +959,7 @@ export type ProductionUncheckedCreateWithoutItemsInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   organizationId: string
+  venueName?: string | null
   addressId?: string | null
   customerId?: string | null
   createdAt?: Date | string
@@ -962,6 +993,7 @@ export type ProductionUpdateWithoutItemsInput = {
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
@@ -981,6 +1013,7 @@ export type ProductionUncheckedUpdateWithoutItemsInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -998,6 +1031,7 @@ export type ProductionCreateWithoutCrewInput = {
   endDate?: Date | string | null
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
+  venueName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
@@ -1017,6 +1051,7 @@ export type ProductionUncheckedCreateWithoutCrewInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   organizationId: string
+  venueName?: string | null
   addressId?: string | null
   customerId?: string | null
   createdAt?: Date | string
@@ -1050,6 +1085,7 @@ export type ProductionUpdateWithoutCrewInput = {
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
@@ -1069,6 +1105,7 @@ export type ProductionUncheckedUpdateWithoutCrewInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1086,6 +1123,7 @@ export type ProductionCreateWithoutTransactionsInput = {
   endDate?: Date | string | null
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
+  venueName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
@@ -1105,6 +1143,7 @@ export type ProductionUncheckedCreateWithoutTransactionsInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   organizationId: string
+  venueName?: string | null
   addressId?: string | null
   customerId?: string | null
   createdAt?: Date | string
@@ -1138,6 +1177,7 @@ export type ProductionUpdateWithoutTransactionsInput = {
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
@@ -1157,6 +1197,7 @@ export type ProductionUncheckedUpdateWithoutTransactionsInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1174,6 +1215,7 @@ export type ProductionCreateWithoutOffersInput = {
   endDate?: Date | string | null
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
+  venueName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
@@ -1193,6 +1235,7 @@ export type ProductionUncheckedCreateWithoutOffersInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   organizationId: string
+  venueName?: string | null
   addressId?: string | null
   customerId?: string | null
   createdAt?: Date | string
@@ -1226,6 +1269,7 @@ export type ProductionUpdateWithoutOffersInput = {
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
@@ -1245,6 +1289,7 @@ export type ProductionUncheckedUpdateWithoutOffersInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1262,6 +1307,7 @@ export type ProductionCreateWithoutInvoicesInput = {
   endDate?: Date | string | null
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
+  venueName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
@@ -1281,6 +1327,7 @@ export type ProductionUncheckedCreateWithoutInvoicesInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   organizationId: string
+  venueName?: string | null
   addressId?: string | null
   customerId?: string | null
   createdAt?: Date | string
@@ -1314,6 +1361,7 @@ export type ProductionUpdateWithoutInvoicesInput = {
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
@@ -1333,6 +1381,7 @@ export type ProductionUncheckedUpdateWithoutInvoicesInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1350,6 +1399,7 @@ export type ProductionCreateManyOrganizationInput = {
   endDate?: Date | string | null
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
+  venueName?: string | null
   addressId?: string | null
   customerId?: string | null
   createdAt?: Date | string
@@ -1363,6 +1413,7 @@ export type ProductionUpdateWithoutOrganizationInput = {
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
@@ -1381,6 +1432,7 @@ export type ProductionUncheckedUpdateWithoutOrganizationInput = {
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1399,6 +1451,7 @@ export type ProductionUncheckedUpdateManyWithoutOrganizationInput = {
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1413,6 +1466,7 @@ export type ProductionCreateManyAddressInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   organizationId: string
+  venueName?: string | null
   customerId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1425,6 +1479,7 @@ export type ProductionUpdateWithoutAddressInput = {
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
@@ -1444,6 +1499,7 @@ export type ProductionUncheckedUpdateWithoutAddressInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1462,6 +1518,7 @@ export type ProductionUncheckedUpdateManyWithoutAddressInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1475,6 +1532,7 @@ export type ProductionCreateManyCustomerInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   organizationId: string
+  venueName?: string | null
   addressId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1487,6 +1545,7 @@ export type ProductionUpdateWithoutCustomerInput = {
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
@@ -1506,6 +1565,7 @@ export type ProductionUncheckedUpdateWithoutCustomerInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1524,6 +1584,7 @@ export type ProductionUncheckedUpdateManyWithoutCustomerInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1604,6 +1665,7 @@ export type ProductionSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   showStartDate?: boolean
   showEndDate?: boolean
   organizationId?: boolean
+  venueName?: boolean
   addressId?: boolean
   customerId?: boolean
   createdAt?: boolean
@@ -1627,6 +1689,7 @@ export type ProductionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   showStartDate?: boolean
   showEndDate?: boolean
   organizationId?: boolean
+  venueName?: boolean
   addressId?: boolean
   customerId?: boolean
   createdAt?: boolean
@@ -1644,6 +1707,7 @@ export type ProductionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   showStartDate?: boolean
   showEndDate?: boolean
   organizationId?: boolean
+  venueName?: boolean
   addressId?: boolean
   customerId?: boolean
   createdAt?: boolean
@@ -1661,13 +1725,14 @@ export type ProductionSelectScalar = {
   showStartDate?: boolean
   showEndDate?: boolean
   organizationId?: boolean
+  venueName?: boolean
   addressId?: boolean
   customerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProductionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "startDate" | "endDate" | "showStartDate" | "showEndDate" | "organizationId" | "addressId" | "customerId" | "createdAt" | "updatedAt", ExtArgs["result"]["production"]>
+export type ProductionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "startDate" | "endDate" | "showStartDate" | "showEndDate" | "organizationId" | "venueName" | "addressId" | "customerId" | "createdAt" | "updatedAt", ExtArgs["result"]["production"]>
 export type ProductionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   address?: boolean | Prisma.Production$addressArgs<ExtArgs>
@@ -1710,6 +1775,7 @@ export type $ProductionPayload<ExtArgs extends runtime.Types.Extensions.Internal
     showStartDate: Date | null
     showEndDate: Date | null
     organizationId: string
+    venueName: string | null
     addressId: string | null
     customerId: string | null
     createdAt: Date
@@ -2152,6 +2218,7 @@ export interface ProductionFieldRefs {
   readonly showStartDate: Prisma.FieldRef<"Production", 'DateTime'>
   readonly showEndDate: Prisma.FieldRef<"Production", 'DateTime'>
   readonly organizationId: Prisma.FieldRef<"Production", 'String'>
+  readonly venueName: Prisma.FieldRef<"Production", 'String'>
   readonly addressId: Prisma.FieldRef<"Production", 'String'>
   readonly customerId: Prisma.FieldRef<"Production", 'String'>
   readonly createdAt: Prisma.FieldRef<"Production", 'DateTime'>

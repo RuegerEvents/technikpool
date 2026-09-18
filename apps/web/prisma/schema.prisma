@@ -511,6 +511,10 @@ model Production {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
 
+  // The venue's own name ("Stadthalle Musterstadt"), printed above the street.
+  // Kept here rather than on Address because every other owner of an address
+  // (organization, customer, location) already has a name of its own.
+  venueName String?
   addressId String?
   address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
 

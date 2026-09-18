@@ -22,6 +22,7 @@
 	let showStartDate = $state('');
 	let showEndDate = $state('');
 	let address = $state({
+		name: '',
 		line1: '',
 		line2: '',
 		postalCode: '',
@@ -146,7 +147,7 @@
 					<p class="text-sm text-muted-foreground">Optional delivery / venue address.</p>
 				</div>
 
-				<AddressInput bind:value={address} idPrefix="addr" />
+				<AddressInput bind:value={address} idPrefix="addr" withName />
 
 				<div class="space-y-3">
 					<div>

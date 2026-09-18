@@ -9,6 +9,16 @@
 
 	const productionId = $derived(page.params.id as string);
 	let production = $derived(await getProduction(productionId));
+	let venue = $derived(
+		[
+			production.venueName,
+			production.address?.line1,
+			production.address?.line2,
+			[production.address?.postalCode, production.address?.city].filter(Boolean).join(' ')
+		]
+			.map((line) => line?.trim())
+			.filter(Boolean)
+	);
 
 	onMount(() => {
 		const timer = window.setTimeout(() => window.print(), 500);
@@ -73,16 +83,8 @@
 			<div>
 				<h1 class="text-4xl font-bold tracking-wider uppercase">Packing List</h1>
 				<h2 class="mt-2 text-2xl">{production.name}</h2>
-				{#if production.address}
-					<p class="mt-2 text-sm text-zinc-700">
-						{#if production.address.line1}{production.address.line1}{/if}
-						{#if production.address.line2}
-							· {production.address.line2}
-						{/if}
-						{#if production.address.postalCode || production.address.city}
-							· {production.address.postalCode ?? ''} {production.address.city ?? ''}
-						{/if}
-					</p>
+				{#if venue.length}
+					<p class="mt-2 text-sm text-zinc-700">{venue.join(' · ')}</p>
 				{/if}
 			</div>
 			<div class="text-right">

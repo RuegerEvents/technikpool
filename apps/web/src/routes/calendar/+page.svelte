@@ -138,12 +138,14 @@
 				showEndDate: p.showEndDate,
 				organization: orgLabel(p.organization),
 				customer: p.customer ? customerLabel(p.customer) : null,
-				venue: p.address
-					? {
-							street: [p.address.line1, p.address.line2].filter(Boolean).join(', '),
-							city: `${p.address.postalCode} ${p.address.city}`
-						}
-					: null,
+				venue:
+					p.venueName || p.address
+						? {
+								name: p.venueName,
+								street: [p.address?.line1, p.address?.line2].filter(Boolean).join(', '),
+								city: [p.address?.postalCode, p.address?.city].filter(Boolean).join(' ')
+							}
+						: null,
 				itemCount: p._count.items,
 				crewCount: p._count.crew
 			});

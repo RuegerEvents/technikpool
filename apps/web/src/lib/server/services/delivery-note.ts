@@ -202,7 +202,10 @@ export async function deliveryNoteData(productionId: string) {
 					.map((line) => line?.trim())
 					.filter((line): line is string => Boolean(line))
 			: [];
-	const venue = production.address ? addressLines(production.address) : [];
+	const venue = [
+		...(production.venueName?.trim() ? [production.venueName.trim()] : []),
+		...addressLines(production.address)
+	];
 	const data: DeliveryNoteData = {
 		organization: {
 			name: organization.name,

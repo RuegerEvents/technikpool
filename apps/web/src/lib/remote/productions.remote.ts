@@ -125,6 +125,8 @@ export const getProduction = query(v.string(), async (id: string) => {
 });
 
 const addressInputSchema = v.object({
+	// The venue's name — stored on the production, not the address row.
+	name: v.optional(v.string()),
 	line1: v.string(),
 	line2: v.optional(v.string()),
 	postalCode: v.string(),
@@ -141,6 +143,14 @@ const createProductionSchema = v.object({
 	address: v.optional(addressInputSchema),
 	customerId: v.optional(v.string())
 });
+
+// A venue name on its own is not an address: the production keeps the name
+// and gets no Address row.
+function hasAddressLines(address: v.InferOutput<typeof addressInputSchema>) {
+	return [address.line1, address.line2, address.postalCode, address.city].some(
+		(line) => (line?.trim().length ?? 0) > 0
+	);
+}
 
 // Total duration governs asset blocking/calendar; show duration (if set) must
 // fall inside it and is used for offer/invoice day-count.
@@ -174,9 +184,7 @@ export const createProduction = command(createProductionSchema, async (data) => 
 	const showEndDate = data.showEndDate ? new Date(data.showEndDate) : null;
 	validateDuration({ startDate, endDate, showStartDate, showEndDate });
 
-	const hasAnyAddress =
-		!!data.address &&
-		Object.values(data.address).some((v) => (typeof v === 'string' ? v.trim().length > 0 : false));
+	const hasAnyAddress = !!data.address && hasAddressLines(data.address);
 
 	const production = await prisma.$transaction(async (tx) => {
 		const address = hasAnyAddress
@@ -198,6 +206,7 @@ export const createProduction = command(createProductionSchema, async (data) => 
 				endDate,
 				showStartDate,
 				showEndDate,
+				venueName: data.address?.name?.trim() || null,
 				addressId: address?.id,
 				customerId: data.customerId || null
 			},
@@ -254,13 +263,14 @@ export const updateProductionAddress = command(updateProductionAddressSchema, as
 
 	await requireOrgWrite(production.organizationId);
 
-	const hasAny = Object.values(input.address).some((v) => (v?.trim()?.length ?? 0) > 0);
+	const hasAny = hasAddressLines(input.address);
+	const venueName = input.address.name?.trim() || null;
 
 	const updated = await prisma.$transaction(async (tx) => {
 		if (!hasAny) {
 			return await tx.production.update({
 				where: { id: input.productionId },
-				data: { addressId: null },
+				data: { venueName, addressId: null },
 				include: { address: true, organization: true }
 			});
 		}
@@ -290,7 +300,7 @@ export const updateProductionAddress = command(updateProductionAddressSchema, as
 
 		return await tx.production.update({
 			where: { id: input.productionId },
-			data: { addressId },
+			data: { venueName, addressId },
 			include: { address: true, organization: true }
 		});
 	});

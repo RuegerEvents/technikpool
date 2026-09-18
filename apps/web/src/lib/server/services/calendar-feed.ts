@@ -85,11 +85,15 @@ export async function renderProductionsCalendar(userId: string): Promise<string>
 				end: p.endDate,
 				summary: p.name,
 				description: lines.join('\n'),
-				location: p.address
-					? [p.address.line1, p.address.line2, `${p.address.postalCode} ${p.address.city}`.trim()]
-							.filter(Boolean)
-							.join(', ')
-					: undefined,
+				location:
+					[
+						p.venueName,
+						p.address?.line1,
+						p.address?.line2,
+						[p.address?.postalCode, p.address?.city].filter(Boolean).join(' ')
+					]
+						.filter(Boolean)
+						.join(', ') || undefined,
 				url,
 				lastModified: p.updatedAt
 			}

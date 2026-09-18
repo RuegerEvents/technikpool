@@ -355,6 +355,7 @@
 	let editingAddress = $state(false);
 	let savingAddress = $state(false);
 	let addressDraft = $state({
+		name: '',
 		line1: '',
 		line2: '',
 		postalCode: '',
@@ -364,6 +365,7 @@
 	$effect(() => {
 		if (editingAddress) return;
 		addressDraft = {
+			name: production.venueName ?? '',
 			line1: production.address?.line1 ?? '',
 			line2: production.address?.line2 ?? '',
 			postalCode: production.address?.postalCode ?? '',
@@ -385,12 +387,12 @@
 		}
 	}
 
-	function formatAddress(addr: typeof production.address) {
-		if (!addr) return '—';
+	function formatAddress(venueName: string | null, addr: typeof production.address) {
 		const parts = [
-			addr.line1?.trim(),
-			addr.line2?.trim(),
-			[addr.postalCode?.trim(), addr.city?.trim()].filter(Boolean).join(' ')
+			venueName?.trim(),
+			addr?.line1?.trim(),
+			addr?.line2?.trim(),
+			[addr?.postalCode?.trim(), addr?.city?.trim()].filter(Boolean).join(' ')
 		].filter(Boolean);
 		return parts.length ? parts.join(' · ') : '—';
 	}
@@ -730,7 +732,7 @@
 						<h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
 							Address
 						</h3>
-						<p class="text-sm">{formatAddress(production.address)}</p>
+						<p class="text-sm">{formatAddress(production.venueName, production.address)}</p>
 					</div>
 					{#if canEdit && !editingAddress}
 						<Button icon="edit" variant="outline" onclick={() => (editingAddress = true)}>
@@ -741,7 +743,7 @@
 
 				{#if editingAddress}
 					<form class="space-y-4" onsubmit={handleSaveAddress}>
-						<AddressInput bind:value={addressDraft} idPrefix="addr" />
+						<AddressInput bind:value={addressDraft} idPrefix="addr" withName />
 
 						<div class="flex justify-end gap-2">
 							<Button

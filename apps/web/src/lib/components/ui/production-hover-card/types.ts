@@ -9,7 +9,7 @@ export type ProductionHoverInfo = {
 	// assets calendar shows those bookings but only carries their own columns.
 	organization: string | null;
 	customer: string | null;
-	venue: { street: string; city: string } | null;
+	venue: { name: string | null; street: string; city: string } | null;
 	itemCount: number | null;
 	crewCount: number | null;
 	// Per bar rather than per production: one asset's booking can be pending

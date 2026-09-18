@@ -102,8 +102,9 @@
 			{#if info.venue}
 				<dt class="text-muted-foreground">Venue</dt>
 				<dd>
-					<div>{info.venue.street}</div>
-					<div>{info.venue.city}</div>
+					{#if info.venue.name}<div>{info.venue.name}</div>{/if}
+					{#if info.venue.street}<div>{info.venue.street}</div>{/if}
+					{#if info.venue.city}<div>{info.venue.city}</div>{/if}
 				</dd>
 			{/if}
 			{#if info.itemCount !== null}
