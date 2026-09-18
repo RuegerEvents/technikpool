@@ -30,6 +30,8 @@
 		 * the product is already known and only the unit is missing.
 		 */
 		suggestions?: { label: string; items: Item[]; onselect: (item: Item) => void };
+		/** For a `<Label for>` — lands on the text input. */
+		id?: string;
 		placeholder?: string;
 		required?: boolean;
 		disabled?: boolean;
@@ -49,6 +51,7 @@
 		onchange,
 		oncreate,
 		suggestions,
+		id,
 		placeholder = 'Search…',
 		required = false,
 		disabled = false,
@@ -213,6 +216,7 @@
 	{/if}
 	<input
 		bind:this={inputEl}
+		{id}
 		bind:value={inputValue}
 		oninput={handleInput}
 		onkeydown={handleKeydown}

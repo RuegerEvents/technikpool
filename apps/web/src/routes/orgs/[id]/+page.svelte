@@ -26,6 +26,7 @@
 	import { resolve } from '$app/paths';
 	import { OrgBadge } from '$lib/components/ui/org-badge';
 	import { Modal } from '$lib/components/ui/modal';
+	import { AddressInput, type AddressValue } from '$lib/components/ui/address-input';
 	import { orgIdentityProblem } from '$lib/org-identity.svelte';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 	import {
@@ -164,11 +165,8 @@
 
 	let editingBilling = $state(false);
 	let savingBilling = $state(false);
+	let billingAddress = $state<AddressValue>({ line1: '', line2: '', postalCode: '', city: '' });
 	let billingDraft = $state({
-		line1: '',
-		line2: '',
-		postalCode: '',
-		city: '',
 		taxId: '',
 		bankAccountHolder: '',
 		iban: '',
@@ -185,11 +183,13 @@
 
 	$effect(() => {
 		if (!editingBilling && org) {
-			billingDraft = {
+			billingAddress = {
 				line1: org.address?.line1 ?? '',
 				line2: org.address?.line2 ?? '',
 				postalCode: org.address?.postalCode ?? '',
-				city: org.address?.city ?? '',
+				city: org.address?.city ?? ''
+			};
+			billingDraft = {
 				taxId: org.taxId ?? '',
 				bankAccountHolder: org.bankAccountHolder ?? '',
 				iban: org.iban ?? '',
@@ -211,7 +211,7 @@
 		if (!org) return;
 		savingBilling = true;
 		try {
-			const hasAddress = billingDraft.line1 || billingDraft.postalCode || billingDraft.city;
+			const hasAddress = billingAddress.line1 || billingAddress.postalCode || billingAddress.city;
 			await updateOrg({
 				orgId,
 				assetIdPrefix: org.assetIdPrefix,
@@ -219,10 +219,10 @@
 				avatarLabel: org.avatarLabel,
 				address: hasAddress
 					? {
-							line1: billingDraft.line1,
-							line2: billingDraft.line2 || undefined,
-							postalCode: billingDraft.postalCode,
-							city: billingDraft.city
+							line1: billingAddress.line1,
+							line2: billingAddress.line2 || undefined,
+							postalCode: billingAddress.postalCode,
+							city: billingAddress.city
 						}
 					: null,
 				taxId: billingDraft.taxId || null,
@@ -450,28 +450,7 @@
 						<Card.Content>
 							{#if editingBilling}
 								<form onsubmit={handleBillingSave} class="space-y-4">
-									<div class="space-y-2">
-										<Label for="billingLine1">Address line 1</Label>
-										<Input id="billingLine1" bind:value={billingDraft.line1} />
-									</div>
-									<div class="space-y-2">
-										<Label for="billingLine2">Address line 2</Label>
-										<Input
-											id="billingLine2"
-											bind:value={billingDraft.line2}
-											placeholder="Optional"
-										/>
-									</div>
-									<div class="flex gap-4">
-										<div class="space-y-2">
-											<Label for="billingPostal">Postal code</Label>
-											<Input id="billingPostal" bind:value={billingDraft.postalCode} class="w-28" />
-										</div>
-										<div class="flex-1 space-y-2">
-											<Label for="billingCity">City</Label>
-											<Input id="billingCity" bind:value={billingDraft.city} />
-										</div>
-									</div>
+									<AddressInput bind:value={billingAddress} idPrefix="billing" />
 									<div class="space-y-2">
 										<Label for="billingTaxId">Tax ID (Steuernummer / USt-IdNr.)</Label>
 										<Input id="billingTaxId" bind:value={billingDraft.taxId} />

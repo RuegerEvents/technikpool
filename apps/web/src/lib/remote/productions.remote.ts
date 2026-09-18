@@ -22,6 +22,7 @@ import {
 } from '$lib/server/services/approval-notifications';
 import { appError } from '$lib/errors';
 import { orgLabel } from '$lib/utils';
+import { getKnownAddresses } from './addresses.remote';
 import type { AddedToProductionData, RequestedData } from '$lib/types/asset-transaction';
 
 // Called after an item is approved/declined. Once the (production, ownerOrg)
@@ -216,6 +217,7 @@ export const createProduction = command(createProductionSchema, async (data) => 
 
 	await getProductions(data.organizationId).refresh();
 	await getProductions().refresh();
+	await getKnownAddresses().refresh();
 	return production;
 });
 
@@ -245,7 +247,8 @@ export const deleteProduction = command(v.string(), async (productionId: string)
 
 	await Promise.all([
 		getProductions(production.organizationId).refresh(),
-		getProductions().refresh()
+		getProductions().refresh(),
+		getKnownAddresses().refresh()
 	]);
 	return { id: production.id, name: production.name };
 });
@@ -308,6 +311,7 @@ export const updateProductionAddress = command(updateProductionAddressSchema, as
 	await getProduction(input.productionId).refresh();
 	await getProductions(production.organizationId).refresh();
 	await getProductions().refresh();
+	await getKnownAddresses().refresh();
 	return updated;
 });
 

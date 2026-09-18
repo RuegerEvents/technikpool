@@ -8,6 +8,7 @@ import { isSystemAdmin, requireAuth, requireOrgOwner } from '$lib/server/service
 import { appError } from '$lib/errors';
 import { issueInvitation } from '$lib/server/services/invitations';
 import { getInvitations } from './invitations.remote';
+import { getKnownAddresses } from './addresses.remote';
 
 export const getMyOrgs = query(async () => {
 	const user = await requireAuth();
@@ -439,6 +440,7 @@ export const updateOrg = command(
 		await getOrgWithMembers(orgId).refresh();
 		await getMyOrgs().refresh();
 		await getOrgIdentityInUse().refresh();
+		await getKnownAddresses().refresh();
 		return org;
 	}
 );

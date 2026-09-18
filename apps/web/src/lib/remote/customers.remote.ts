@@ -2,6 +2,7 @@ import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import { requireOrgRead, requireOrgWrite } from '$lib/server/services/access';
+import { getKnownAddresses } from './addresses.remote';
 
 const addressInputSchema = v.object({
 	line1: v.string(),
@@ -82,6 +83,7 @@ export const createCustomer = command(createCustomerSchema, async (data) => {
 	});
 
 	await getCustomers(data.organizationId).refresh();
+	await getKnownAddresses().refresh();
 	return customer;
 });
 
@@ -145,6 +147,7 @@ export const updateCustomer = command(updateCustomerSchema, async (input) => {
 
 	await getCustomers(customer.organizationId).refresh();
 	await getCustomer(input.customerId).refresh();
+	await getKnownAddresses().refresh();
 	return updated;
 });
 
@@ -157,4 +160,5 @@ export const deleteCustomer = command(v.string(), async (customerId) => {
 		if (customer.addressId) await tx.address.deleteMany({ where: { id: customer.addressId } });
 	});
 	await getCustomers(customer.organizationId).refresh();
+	await getKnownAddresses().refresh();
 });

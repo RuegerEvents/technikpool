@@ -172,6 +172,7 @@ msgid "Crew"
 msgstr "Crew"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
@@ -281,6 +282,7 @@ msgstr "Name"
 msgid "Email"
 msgstr "Email"
 
+#: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
@@ -428,6 +430,7 @@ msgid "Bundle"
 msgstr "Bundle"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/ui/address-input/address-input.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -1298,6 +1301,7 @@ msgid "Edit"
 msgstr "Edit"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/+page.svelte
@@ -1358,6 +1362,8 @@ msgstr "Please select a location"
 msgid "No locations yet. Create one in <0>Locations</0>."
 msgstr "No locations yet. Create one in <0>Locations</0>."
 
+#: src/lib/components/ui/address-input/address-input.svelte
+#: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -1370,7 +1376,6 @@ msgid "Optional delivery / venue address."
 msgstr "Optional delivery / venue address."
 
 #: src/lib/components/ui/address-input/address-input.svelte
-#: src/routes/orgs/[id]/+page.svelte
 msgid "Address line 1"
 msgstr "Address line 1"
 
@@ -1379,7 +1384,6 @@ msgid "Street and number"
 msgstr "Street and number"
 
 #: src/lib/components/ui/address-input/address-input.svelte
-#: src/routes/orgs/[id]/+page.svelte
 msgid "Address line 2"
 msgstr "Address line 2"
 
@@ -1388,12 +1392,10 @@ msgid "Building, floor, c/o"
 msgstr "Building, floor, c/o"
 
 #: src/lib/components/ui/address-input/address-input.svelte
-#: src/routes/orgs/[id]/+page.svelte
 msgid "Postal code"
 msgstr "Postal code"
 
 #: src/lib/components/ui/address-input/address-input.svelte
-#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
 msgid "City"
 msgstr "City"
@@ -2782,7 +2784,6 @@ msgid "Notes"
 msgstr "Notes"
 
 #: src/routes/inspections/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
 msgid "Optional"
 msgstr "Optional"
 
@@ -2841,6 +2842,7 @@ msgstr "New Offer"
 msgid "No offers yet."
 msgstr "No offers yet."
 
+#: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/production-hover-card/production-hover-card.svelte
 #: src/routes/invoices/+page.svelte
 #: src/routes/offers/+page.svelte
@@ -6319,6 +6321,7 @@ msgstr[1] "# days"
 msgid "Show days"
 msgstr "Show days"
 
+#: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/production-hover-card/production-hover-card.svelte
 msgid "Venue"
 msgstr "Venue"
@@ -8029,3 +8032,22 @@ msgstr "Reverted"
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Add someone by email. If they have no account yet, they get an invitation to create one and join this organization."
 msgstr "Add someone by email. If they have no account yet, they get an invitation to create one and join this organization."
+
+#: src/lib/components/ui/address-input/address-input.svelte
+msgid "Search by name, street or city…"
+msgstr "Search by name, street or city…"
+
+#~ msgid "Use an existing address"
+#~ msgstr "Use an existing address"
+
+#: src/lib/components/ui/address-input/address-input.svelte
+msgid "Change"
+msgstr "Change"
+
+#: src/lib/components/ui/address-input/address-input.svelte
+msgid "Enter a new address"
+msgstr "Enter a new address"
+
+#: src/lib/components/ui/address-input/address-input.svelte
+msgid "Choose an existing address"
+msgstr "Choose an existing address"

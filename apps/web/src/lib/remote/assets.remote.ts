@@ -38,6 +38,7 @@ import { getProduction } from '$lib/remote/productions.remote';
 import { CABLE_TYPE_DEFAULTS, CABLE_TYPE_SUGGESTIONS, isCable, normalizeCable } from '$lib/cable';
 import { ensureConnectors } from '$lib/server/services/connectors';
 import { getConnectors } from '$lib/remote/connectors.remote';
+import { getKnownAddresses } from '$lib/remote/addresses.remote';
 import { appError } from '$lib/errors';
 
 async function ensureBundleImageWithoutBreakingRead(
@@ -427,6 +428,7 @@ export const createLocation = command(createLocationSchema, async (input) => {
 
 	await getLocations(input.organizationId).refresh();
 	await getLocations().refresh();
+	await getKnownAddresses().refresh();
 	return location;
 });
 
@@ -466,6 +468,7 @@ export const updateLocation = command(updateLocationSchema, async (input) => {
 
 	await getLocations(location.organizationId).refresh();
 	await getLocations().refresh();
+	await getKnownAddresses().refresh();
 	return updated;
 });
 
