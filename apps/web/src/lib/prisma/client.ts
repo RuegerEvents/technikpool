@@ -77,6 +77,19 @@ export type Organization = Prisma.OrganizationModel
  */
 export type OrgMembership = Prisma.OrgMembershipModel
 /**
+ * Model SystemSettings
+ * Instance-wide switches, one row. The id is fixed so an upsert can never make
+ * a second one.
+ */
+export type SystemSettings = Prisma.SystemSettingsModel
+/**
+ * Model Invitation
+ * A link that lets one email address create an account while sign-up is
+ * closed, optionally landing in an org with a role. Only the hash of the token
+ * is stored, like a password: the link is a credential until it is used.
+ */
+export type Invitation = Prisma.InvitationModel
+/**
  * Model Manufacturer
  * 
  */

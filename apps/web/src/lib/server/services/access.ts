@@ -32,9 +32,9 @@ export async function isSystemAdmin(userId: string) {
 
 /**
  * System admin (User.isAdmin) is a deliberately separate permission from being
- * ADMIN/OWNER of an org — anyone can create an org and own it, so "admin of
- * some org" grants nothing beyond that org's own data. Global, shared state
- * (manufacturers, categories) gates on this instead.
+ * ADMIN/OWNER of an org: "admin of some org" grants nothing beyond that org's
+ * own data. Global, shared state (manufacturers, categories, who gets an org
+ * or an account at all) gates on this instead.
  */
 export async function requireSystemAdmin() {
 	const user = await requireAuth();

@@ -14,8 +14,10 @@ import {
 	scopedOrgIds,
 	userOrgIds,
 	visibleProductionIds,
-	visibleProductionName
+	visibleProductionName,
+	writableOrgIds
 } from '$lib/server/services/access';
+import { productControl } from '$lib/server/services/product-control';
 import { fieldChanges, logCatalogChange } from '$lib/server/services/catalog-log';
 import {
 	ACTIVE_ASSET_WHERE,
@@ -638,7 +640,11 @@ type ProductRef = {
  * order they are resolved in matters — a new product needs its manufacturer to
  * exist first.
  */
-async function resolveProductRef(data: ProductRef, organizationId: string): Promise<string> {
+async function resolveProductRef(
+	data: ProductRef,
+	organizationId: string,
+	userId: string
+): Promise<string> {
 	let manufacturerId = data.manufacturerId;
 	if (data.newManufacturerName && !manufacturerId) {
 		const m = await prisma.manufacturer.create({
@@ -708,7 +714,8 @@ async function resolveProductRef(data: ProductRef, organizationId: string): Prom
 				imagePath: data.newProductImagePath?.trim() || null,
 				...(cable ?? {}),
 				// A cable is a physical thing; a product can't be both.
-				isLicense: !cable && !!data.newProductIsLicense
+				isLicense: !cable && !!data.newProductIsLicense,
+				createdById: userId
 			}
 		});
 		// The price given alongside a brand-new product is the creating org's own
@@ -983,7 +990,7 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 	const user = await requireAuth();
 	await requireOrgInventory(data.organizationId, 'asset_create_forbidden');
 
-	const productId = await resolveProductRef(data, data.organizationId);
+	const productId = await resolveProductRef(data, data.organizationId, user.id);
 
 	// An accessory is wherever its parent is and in whatever kit its parent is
 	// in, so the parent decides both — the caller's locationId is ignored. The
@@ -1212,7 +1219,8 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 						name: row.name.trim(),
 						manufacturerId,
 						categoryId: row.categoryId,
-						...cable
+						...cable,
+						createdById: user.id
 					},
 					select: { id: true }
 				});
@@ -1804,16 +1812,11 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 	const user = await requireAuth();
 	const systemAdmin = await isSystemAdmin(user.id);
 	const managed = systemAdmin ? [] : await managedOrgIds(user.id);
-	if (!systemAdmin && managed.length === 0) {
-		// The message matters here: the product wizard is reachable by any member,
-		// and "Internal Error" would look like a broken save rather than a missing
-		// right.
-		appError(403, 'product_edit_forbidden');
-	}
 
 	const previousProduct = await prisma.product.findUniqueOrThrow({
 		where: { id: input.productId },
 		select: {
+			createdById: true,
 			name: true,
 			manufacturerId: true,
 			categoryId: true,
@@ -1849,11 +1852,9 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 			nextCable.lengthCm !== previousProduct.lengthCm);
 
 	// Identity (name, manufacturer, category) follows the same rule as
-	// `mergeProducts`: whoever's gear it is controls what it is called. Every
-	// org holding units must be one this user admins — a product nobody owns
-	// units of is free to fix up, and an image is work rather than identity, so
-	// any org admin may contribute one. Recategorizing is identity *and* money:
-	// the category decides which rental rate other orgs' offers apply.
+	// `mergeProducts` — see `productControl`: whoever's gear it is controls what
+	// it is called. Recategorizing is identity *and* money: the category decides
+	// which rental rate other orgs' offers apply.
 	const changesIdentity =
 		(input.name !== undefined && input.name.trim() !== previousProduct.name) ||
 		(input.manufacturerId !== undefined &&
@@ -1861,20 +1862,33 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		(input.categoryId !== undefined && input.categoryId !== previousProduct.categoryId) ||
 		cableChanged ||
 		licenseChanged;
-	if (changesIdentity && !systemAdmin) {
-		const owners = await prisma.asset.findMany({
-			where: { productId: input.productId },
-			select: { organizationId: true },
-			distinct: ['organizationId']
-		});
-		const foreign = owners.map((o) => o.organizationId).filter((id) => !managed.includes(id));
-		if (foreign.length > 0) {
-			const orgs = await prisma.organization.findMany({
-				where: { id: { in: foreign } },
-				select: { name: true }
-			});
-			appError(403, 'product_units_other_orgs', [orgs.map((o) => o.name).join(', ')]);
+
+	// A first picture is a contribution and open to anyone who works in an org
+	// at all. Replacing or removing one somebody else took is not: that was the
+	// way to deface the whole catalog with nothing but an account.
+	const nextImagePath = input.imagePath === undefined ? undefined : input.imagePath.trim() || null;
+	const imageChanged = nextImagePath !== undefined && nextImagePath !== previousProduct.imagePath;
+	const replacesImage = imageChanged && !!previousProduct.imagePath;
+
+	if (changesIdentity || replacesImage) {
+		if (!systemAdmin && managed.length === 0) {
+			// The message matters here: the product wizard is reachable by any member,
+			// and "Internal Error" would look like a broken save rather than a missing
+			// right.
+			appError(403, 'product_edit_forbidden');
 		}
+		const control = await productControl(
+			{ id: user.id, systemAdmin, managed },
+			{ id: input.productId, createdById: previousProduct.createdById }
+		);
+		if (!control.allowed) {
+			if (control.reason === 'foreign_units') {
+				appError(403, 'product_units_other_orgs', [control.orgNames]);
+			}
+			appError(403, 'product_unowned_not_creator', [previousProduct.name]);
+		}
+	} else if (imageChanged && !systemAdmin && (await writableOrgIds(user.id)).length === 0) {
+		appError(403, 'product_edit_forbidden');
 	}
 
 	const product = await prisma.product.update({
@@ -1883,7 +1897,7 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 			...(input.name ? { name: input.name.trim() } : {}),
 			...(input.manufacturerId ? { manufacturerId: input.manufacturerId } : {}),
 			...(input.categoryId ? { categoryId: input.categoryId } : {}),
-			imagePath: input.imagePath !== undefined ? input.imagePath?.trim() || null : undefined,
+			imagePath: nextImagePath,
 			...(nextCable ?? {}),
 			...(nextIsLicense !== undefined ? { isLicense: nextIsLicense } : {})
 		},
@@ -1894,7 +1908,7 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		...(input.name ? { name: input.name.trim() } : {}),
 		...(input.manufacturerId ? { manufacturerId: input.manufacturerId } : {}),
 		...(input.categoryId ? { categoryId: input.categoryId } : {}),
-		...(input.imagePath !== undefined ? { imagePath: input.imagePath.trim() || null } : {}),
+		...(nextImagePath !== undefined ? { imagePath: nextImagePath } : {}),
 		...(nextCable ?? {}),
 		...(nextIsLicense !== undefined ? { isLicense: nextIsLicense } : {})
 	});
@@ -1908,13 +1922,30 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		});
 	}
 
+	await refreshProductViews(product, previousProduct.manufacturerId, {
+		cable: cableChanged ? [nextCable?.connectorA, nextCable?.connectorB] : null
+	});
+
+	return product;
+});
+
+/**
+ * Everything that shows a product's name, picture or cable attributes. Shared
+ * by `updateProduct` and `revertCatalogChange`, which move the same fields in
+ * opposite directions.
+ */
+async function refreshProductViews(
+	product: { id: string; manufacturerId: string },
+	previousManufacturerId: string,
+	changed: { cable: (string | null | undefined)[] | null }
+) {
 	await getProducts(product.manufacturerId).refresh();
-	if (previousProduct.manufacturerId !== product.manufacturerId) {
-		await getProducts(previousProduct.manufacturerId).refresh();
+	if (previousManufacturerId !== product.manufacturerId) {
+		await getProducts(previousManufacturerId).refresh();
 	}
 	await getProducts().refresh();
-	if (cableChanged) {
-		const added = await ensureConnectors([nextCable?.connectorA, nextCable?.connectorB]);
+	if (changed.cable) {
+		const added = await ensureConnectors(changed.cable);
 		if (added.length > 0) await getConnectors().refresh();
 		await getCableVocabulary().refresh();
 	}
@@ -1935,22 +1966,15 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		...affectedOrgIds.map((id) => getInventorySummary(id).refresh()),
 		getInventorySummary().refresh()
 	]);
-
-	return product;
-});
+}
 
 /** Delete a catalogue row only when no unit, including a retired one, refers to it. */
 export const deleteProduct = command(v.string(), async (productId: string) => {
 	const user = await requireAuth();
 	const systemAdmin = await isSystemAdmin(user.id);
-	if (!systemAdmin) {
-		const membership = await prisma.orgMembership.findFirst({
-			where: { userId: user.id, role: { in: ['ADMIN', 'OWNER'] } },
-			select: { id: true }
-		});
-		if (!membership) {
-			appError(403, 'product_delete_forbidden');
-		}
+	const managed = systemAdmin ? [] : await managedOrgIds(user.id);
+	if (!systemAdmin && managed.length === 0) {
+		appError(403, 'product_delete_forbidden');
 	}
 
 	const product = await prisma.product.findUniqueOrThrow({
@@ -1960,6 +1984,10 @@ export const deleteProduct = command(v.string(), async (productId: string) => {
 	if (product._count.assets > 0) {
 		appError(409, 'product_has_units');
 	}
+	// Without units there is no owning org, so this is the creator's call or a
+	// system admin's — see `productControl`.
+	const control = await productControl({ id: user.id, systemAdmin, managed }, product);
+	if (!control.allowed) appError(403, 'product_unowned_not_creator', [product.name]);
 
 	await prisma.product.delete({ where: { id: productId } });
 	await logCatalogChange({
@@ -2036,31 +2064,20 @@ export const mergeProducts = command(
 
 		const systemAdmin = await isSystemAdmin(user.id);
 		if (!systemAdmin) {
-			const managed = await prisma.orgMembership.findMany({
-				where: { userId: user.id, role: { in: ['ADMIN', 'OWNER'] } },
-				select: { organizationId: true }
-			});
+			const managed = await managedOrgIds(user.id);
 			if (managed.length === 0) {
 				appError(403, 'product_merge_forbidden');
 			}
-			// The catalogue is global — any org admin can already rename any product
-			// — but a merge moves *units*, and those belong to someone. The check is
-			// on the source alone because it is the only side that loses records:
-			// the target's units are not touched. A duplicate nobody owns has no
-			// owning orgs and passes freely, which is the common cleanup case.
-			const managedIds = managed.map((m) => m.organizationId);
-			const foreign = [...new Set(moving.map((a) => a.organizationId))].filter(
-				(id) => !managedIds.includes(id)
-			);
-			if (foreign.length > 0) {
-				const orgs = await prisma.organization.findMany({
-					where: { id: { in: foreign } },
-					select: { name: true }
-				});
-				appError(403, 'product_merge_units_other_orgs', [
-					source.name,
-					orgs.map((o) => o.name).join(', ')
-				]);
+			// A merge moves *units*, and those belong to someone. The check is on the
+			// source alone because it is the only side that loses records: the
+			// target's units are not touched, and what it is called does not change.
+			// A duplicate nobody holds units of is its creator's to clean up.
+			const control = await productControl({ id: user.id, systemAdmin, managed }, source);
+			if (!control.allowed) {
+				if (control.reason === 'foreign_units') {
+					appError(403, 'product_merge_units_other_orgs', [source.name, control.orgNames]);
+				}
+				appError(403, 'product_unowned_not_creator', [source.name]);
 			}
 		}
 
@@ -2294,6 +2311,81 @@ export const getCatalogTransactions = query(async () => {
 			organizations.map((o) => [o.id, o.shortName || o.name] as const)
 		)
 	};
+});
+
+/** The product columns a `PRODUCT_UPDATED` entry can carry, and so the ones a revert may write. */
+const REVERTIBLE_PRODUCT_FIELDS = [
+	'name',
+	'manufacturerId',
+	'categoryId',
+	'imagePath',
+	'cableType',
+	'connectorA',
+	'connectorB',
+	'lengthCm',
+	'isLicense'
+] as const;
+type RevertibleProductField = (typeof REVERTIBLE_PRODUCT_FIELDS)[number];
+
+/**
+ * Put a product back the way one log entry found it.
+ *
+ * Field by field, and only where the product still holds the value that entry
+ * wrote: a field somebody has edited again since is theirs now, and rolling it
+ * back would undo a change this entry knows nothing about. The revert is itself
+ * logged as an update (`revertOf` names the entry), so it can be undone the
+ * same way and the log never has to be rewritten.
+ */
+export const revertCatalogChange = command(v.string(), async (entryId: string) => {
+	const user = await requireSystemAdmin();
+	const entry = await prisma.catalogTransaction.findUniqueOrThrow({ where: { id: entryId } });
+	const logged = (entry.data as { changes?: FieldChange[] } | null)?.changes ?? [];
+	if (entry.action !== 'PRODUCT_UPDATED' || !entry.productId || logged.length === 0) {
+		appError(409, 'catalog_revert_unavailable');
+	}
+
+	const product = await prisma.product.findUnique({ where: { id: entry.productId } });
+	if (!product) appError(409, 'catalog_revert_unavailable');
+
+	const data: Partial<Record<RevertibleProductField, string | number | boolean | null>> = {};
+	for (const change of logged) {
+		const field = REVERTIBLE_PRODUCT_FIELDS.find((f) => f === change.field);
+		if (!field) continue;
+		if (String(product[field] ?? null) !== String(change.to ?? null)) continue;
+		data[field] = (change.from ?? null) as string | number | boolean | null;
+	}
+	if (Object.keys(data).length === 0) appError(409, 'catalog_revert_stale');
+
+	// The rows an old value points at can be gone — merges delete them.
+	if (typeof data.manufacturerId === 'string') {
+		const exists = await prisma.manufacturer.findUnique({ where: { id: data.manufacturerId } });
+		if (!exists) delete data.manufacturerId;
+	}
+	if (typeof data.categoryId === 'string') {
+		const exists = await prisma.category.findUnique({ where: { id: data.categoryId } });
+		if (!exists) delete data.categoryId;
+	}
+	if (Object.keys(data).length === 0) appError(409, 'catalog_revert_stale');
+
+	const updated = await prisma.product.update({
+		where: { id: product.id },
+		data: data as Prisma.ProductUncheckedUpdateInput
+	});
+	await logCatalogChange({
+		userId: user.id,
+		action: 'PRODUCT_UPDATED',
+		productId: updated.id,
+		manufacturerId: updated.manufacturerId,
+		data: { changes: fieldChanges(product, data), revertOf: entry.id }
+	});
+
+	const cableTouched = (['cableType', 'connectorA', 'connectorB', 'lengthCm'] as const).some(
+		(field) => field in data
+	);
+	await refreshProductViews(updated, product.manufacturerId, {
+		cable: cableTouched ? [updated.connectorA, updated.connectorB] : null
+	});
+	await getCatalogTransactions().refresh();
 });
 
 // ── Bundle templates ─────────────────────────────────────────────────────────
@@ -3894,7 +3986,7 @@ export const addProductAccessories = command(addProductAccessoriesSchema, async 
 	const user = await requireAuth();
 	await requireOrgInventory(data.organizationId);
 
-	const accessoryProductId = await resolveProductRef(data, data.organizationId);
+	const accessoryProductId = await resolveProductRef(data, data.organizationId, user.id);
 	if (accessoryProductId === data.parentProductId) {
 		appError(409, 'product_accessory_self');
 	}
@@ -4210,7 +4302,12 @@ export const importAssets = command(importAssetsSchema, async (data): Promise<Im
 		if (!p) {
 			if (!row.categoryId) continue;
 			p = await prisma.product.create({
-				data: { name: row.productName.trim(), manufacturerId, categoryId: row.categoryId }
+				data: {
+					name: row.productName.trim(),
+					manufacturerId,
+					categoryId: row.categoryId,
+					createdById: user.id
+				}
 			});
 		}
 		productCache.set(prodKey, p.id);

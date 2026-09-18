@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { bearer, deviceAuthorization } from 'better-auth/plugins';
+import { APIError } from 'better-auth/api';
 import { Prisma, PrismaClient } from '$lib/prisma/client';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -12,6 +13,7 @@ import { passwordResetEmail } from './emails/password-reset';
 import { passwordChangedEmail } from './emails/password-changed';
 import { emailVerificationEmail } from './emails/email-verification';
 import { emailChangeConfirmationEmail } from './emails/email-change-confirmation';
+import { completeSignUp, decideSignUp, signUpRefusalMessages } from './signup-gate';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -51,13 +53,19 @@ const prefixes: Partial<Record<ModelName, string>> = {
 	InvoiceItem: 'ivi',
 	OrgProductPrice: 'opp',
 	CatalogTransaction: 'cltx',
-	LicenseCredential: 'lcrd'
+	LicenseCredential: 'lcrd',
+	Invitation: 'invt'
 };
 
 // Extend the client with prefixed IDs
 export const prisma = extendPrismaClient(originalPrisma, {
 	prefixes
 });
+
+function inviteTokenOf(body: unknown) {
+	const token = (body as { inviteToken?: unknown } | null | undefined)?.inviteToken;
+	return typeof token === 'string' ? token : null;
+}
 
 // Wrapped in a factory so `auth` can be typed as the *configured* instance.
 // `ReturnType<typeof betterAuth>` would erase the plugins' endpoints, leaving
@@ -83,6 +91,9 @@ const createAuth = () =>
 			sendOnSignUp: true,
 			autoSignInAfterVerification: true,
 			sendVerificationEmail: async ({ user, url }) => {
+				// An invited account is verified by the link it came in through;
+				// better-auth sends this on every sign-up regardless.
+				if (user.emailVerified) return;
 				const { subject, html, text } = emailVerificationEmail({ name: user.name, url });
 				await sendMail({ to: user.email, subject, html, text });
 			}
@@ -100,6 +111,36 @@ const createAuth = () =>
 						url
 					});
 					await sendMail({ to: user.email, subject, html, text });
+				}
+			}
+		},
+		// Sign-up is gated where the row is written rather than on the
+		// /sign-up/email path, so a second way of creating accounts (a social
+		// provider, say) cannot arrive without passing it. The register form
+		// sends the invitation token along as an extra body field.
+		databaseHooks: {
+			user: {
+				create: {
+					before: async (user, ctx) => {
+						const decision = await decideSignUp(prisma, {
+							email: user.email,
+							token: inviteTokenOf(ctx?.body)
+						});
+						if (!decision.allowed) {
+							throw new APIError('FORBIDDEN', {
+								code: decision.reason,
+								message: signUpRefusalMessages[decision.reason]
+							});
+						}
+						if (decision.invited) return { data: { ...user, emailVerified: true } };
+					},
+					after: async (user, ctx) => {
+						await completeSignUp(prisma, {
+							userId: user.id,
+							email: user.email,
+							token: inviteTokenOf(ctx?.body)
+						});
+					}
 				}
 			}
 		},

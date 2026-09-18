@@ -3,7 +3,17 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Modal } from '$lib/components/ui/modal';
-	import { deleteUser, getAllUsers, setUserAdmin } from '$lib/remote/orgs.remote';
+	import { deleteUser, getAllOrgs, getAllUsers, setUserAdmin } from '$lib/remote/orgs.remote';
+	import { getSignUpSettings, inviteUser, setSignUpEnabled } from '$lib/remote/invitations.remote';
+	import {
+		InvitationLink,
+		InvitationList,
+		type IssuedInvitation
+	} from '$lib/components/ui/invitations';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import { ORG_ROLES, type OrgRole } from '$lib/roles';
+	import { roleName } from '$lib/role-descriptions.svelte';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
@@ -15,6 +25,45 @@
 	let deleteTarget = $state<(typeof users)[number] | null>(null);
 	let deleteOpen = $state(false);
 	let deleting = $state(false);
+
+	let settingsQuery = $derived(getSignUpSettings());
+	let signUpEnabled = $derived(settingsQuery.current?.signUpEnabled ?? false);
+	let orgs = $derived(getAllOrgs().current ?? []);
+
+	let inviteEmail = $state('');
+	let inviteOrgId = $state('');
+	let inviteRole = $state<OrgRole>('MEMBER');
+	let inviting = $state(false);
+	let issued = $state<IssuedInvitation | null>(null);
+
+	async function handleToggleSignUp(enabled: boolean) {
+		try {
+			await setSignUpEnabled(enabled);
+			toast.success(enabled ? 'Sign-up is open to everyone' : 'Sign-up is by invitation only');
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		}
+	}
+
+	async function handleInvite(e: Event) {
+		e.preventDefault();
+		if (!inviteEmail || inviting) return;
+		inviting = true;
+		try {
+			issued = await inviteUser({
+				email: inviteEmail,
+				...(inviteOrgId ? { organizationId: inviteOrgId, role: inviteRole } : {})
+			});
+			inviteEmail = '';
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			inviting = false;
+		}
+	}
+
+	const selectClass =
+		'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none';
 
 	const roleLabels: Record<string, string> = {
 		OWNER: 'Owner',
@@ -53,8 +102,88 @@
 <div class="space-y-6">
 	<div>
 		<h1 class="text-3xl font-bold tracking-tight">User Management</h1>
-		<p class="text-muted-foreground">Manage system admin privileges for all users.</p>
+		<p class="text-muted-foreground">
+			Manage who can get in, and system admin privileges for all users.
+		</p>
 	</div>
+
+	<Card.Root>
+		<Card.Header>
+			<Card.Title>Access</Card.Title>
+			<Card.Description>
+				Who can create an account. An invitation works whether sign-up is open or not.
+			</Card.Description>
+		</Card.Header>
+		<Card.Content class="space-y-6">
+			{#if !settingsQuery.ready}
+				<ContentSkeleton shape="inline" error={settingsQuery.error} />
+			{:else}
+				<label class="flex items-start gap-3 text-sm">
+					<input
+						type="checkbox"
+						class="mt-0.5 h-4 w-4"
+						checked={signUpEnabled}
+						onchange={(e) => handleToggleSignUp(e.currentTarget.checked)}
+					/>
+					<span>
+						<span class="font-medium">Allow anyone to sign up</span>
+						<span class="block text-muted-foreground">
+							When this is off, the register page only accepts invitation links.
+						</span>
+					</span>
+				</label>
+			{/if}
+
+			<form onsubmit={handleInvite} class="space-y-4">
+				<div class="grid gap-4 sm:grid-cols-3">
+					<div class="space-y-2">
+						<Label for="inviteEmail">Email address</Label>
+						<Input
+							id="inviteEmail"
+							type="email"
+							bind:value={inviteEmail}
+							placeholder="user@example.com"
+							required
+						/>
+					</div>
+					<div class="space-y-2">
+						<Label for="inviteOrg">Organization</Label>
+						<select id="inviteOrg" bind:value={inviteOrgId} class={selectClass}>
+							<option value="">No organization</option>
+							{#each orgs as org (org.id)}
+								<option value={org.id}>{orgLabel(org)}</option>
+							{/each}
+						</select>
+					</div>
+					<div class="space-y-2">
+						<Label for="inviteRole">Role</Label>
+						<select
+							id="inviteRole"
+							bind:value={inviteRole}
+							disabled={!inviteOrgId}
+							class="{selectClass} disabled:opacity-50"
+						>
+							{#each ORG_ROLES as role (role)}
+								<option value={role}>{roleName(role)}</option>
+							{/each}
+						</select>
+					</div>
+				</div>
+				<Button icon="send" type="submit" disabled={inviting}>
+					{inviting ? 'Sending…' : 'Send invitation'}
+				</Button>
+			</form>
+
+			{#if issued}
+				<InvitationLink {issued} onclose={() => (issued = null)} />
+			{/if}
+
+			<div class="space-y-2">
+				<h3 class="text-sm font-medium">Open invitations</h3>
+				<InvitationList onissued={(result) => (issued = result)} />
+			</div>
+		</Card.Content>
+	</Card.Root>
 
 	<Card.Root>
 		<Card.Header>

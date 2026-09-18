@@ -7,6 +7,7 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import { getSignUpStatus } from '$lib/remote/invitations.remote';
 
 	let email = $state('');
 	let password = $state('');
@@ -25,6 +26,10 @@
 			? `${resolve('/auth/register')}?redirectTo=${encodeURIComponent(redirectTo)}`
 			: resolve('/auth/register')
 	);
+
+	// Not awaited: the form must not wait for this. While it is on its way the
+	// link stays hidden, which is also the right answer when sign-up is closed.
+	let signUpOpen = $derived(getSignUpStatus().current?.open ?? false);
 
 	async function handleLogin(e: Event) {
 		e.preventDefault();
@@ -82,11 +87,13 @@
 					{loading ? 'Logging in...' : 'Login'}
 				</Button>
 			</form>
-			<div class="mt-4 text-center text-sm">
-				Don't have an account?
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-				<a href={registerHref} class="underline"> Sign up </a>
-			</div>
+			{#if signUpOpen}
+				<div class="mt-4 text-center text-sm">
+					Don't have an account?
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+					<a href={registerHref} class="underline"> Sign up </a>
+				</div>
+			{/if}
 		</Card.Content>
 	</Card.Root>
 </div>

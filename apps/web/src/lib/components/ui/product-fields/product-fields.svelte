@@ -89,6 +89,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { CategorySelect } from '$lib/components/ui/category-select';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
+	import { ProductThumb } from '$lib/components/ui/product-thumb';
 	import { ImageUpload } from '$lib/components/ui/image-upload';
 	import { ConnectorFormModal } from '$lib/components/ui/connector-form-modal';
 	import { getCableVocabulary } from '$lib/remote/assets.remote';
@@ -114,6 +115,12 @@
 		 * does: it decides which product a unit belongs to.
 		 */
 		identityDisabled?: boolean;
+		/**
+		 * Show the picture without the upload. A first picture is anyone's to add;
+		 * one that is already there follows the identity rule, so this is set where
+		 * the identity is locked *and* the product has an image.
+		 */
+		imageDisabled?: boolean;
 	};
 
 	let {
@@ -128,7 +135,8 @@
 		categories,
 		idPrefix = 'product',
 		showPrice = true,
-		identityDisabled = false
+		identityDisabled = false,
+		imageDisabled = false
 	}: Props = $props();
 
 	// Only loaded once the box is ticked: a form for a moving head has no use for
@@ -446,7 +454,11 @@
 
 	<div class="space-y-2">
 		<Label>Product Image</Label>
-		<ImageUpload bind:value={value.imagePath} label="Product photo" />
+		{#if imageDisabled}
+			<ProductThumb path={value.imagePath} alt={value.name} size={96} />
+		{:else}
+			<ImageUpload bind:value={value.imagePath} label="Product photo" />
+		{/if}
 	</div>
 </div>
 

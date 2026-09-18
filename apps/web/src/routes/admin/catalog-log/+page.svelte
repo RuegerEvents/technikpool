@@ -1,7 +1,10 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
-	import { getCatalogTransactions } from '$lib/remote/assets.remote';
+	import { getCatalogTransactions, revertCatalogChange } from '$lib/remote/assets.remote';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { Button } from '$lib/components/ui/button';
+	import { getErrorMessage } from '$lib/utils';
+	import { toast } from 'svelte-sonner';
 
 	// The empty log the page renders before the first answer arrives. Spelled out
 	// rather than left undefined so nothing below has to ask twice whether the
@@ -44,6 +47,48 @@
 			return log.manufacturers[entry.manufacturerId] ?? entry.manufacturerId;
 		if (entry.categoryId) return log.categories[entry.categoryId] ?? entry.categoryId;
 		return '—';
+	}
+
+	type Payload = {
+		changes?: { field: string; from: unknown; to: unknown }[];
+		revertOf?: string;
+	} | null;
+
+	// Entries some later entry has already put back. Only as far as the page
+	// reaches — for anything older the server still refuses a second revert,
+	// because no field holds the value that entry wrote any more.
+	let revertedIds = $derived(
+		new Set(
+			log.entries
+				.map((entry) => (entry.data as Payload)?.revertOf)
+				.filter((id): id is string => !!id)
+		)
+	);
+
+	// Field edits to a product that still exists: the one kind of entry that says
+	// what was there before. A merge or a delete does not, so neither can be undone.
+	function canRevert(entry: Entry): boolean {
+		return (
+			entry.action === 'PRODUCT_UPDATED' &&
+			!!entry.productId &&
+			entry.productId in log.products &&
+			((entry.data as Payload)?.changes?.length ?? 0) > 0 &&
+			!revertedIds.has(entry.id)
+		);
+	}
+
+	let revertingId = $state<string | null>(null);
+
+	async function revert(entry: Entry) {
+		revertingId = entry.id;
+		try {
+			await revertCatalogChange(entry.id);
+			toast.success('Change reverted');
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			revertingId = null;
+		}
 	}
 
 	function details(entry: Entry): string {
@@ -98,6 +143,7 @@
 						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Subject</th>
 						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Org</th>
 						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Details</th>
+						<th class="px-4 py-3"></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -107,7 +153,14 @@
 								{new Date(entry.createdAt).toLocaleString('de-DE')}
 							</td>
 							<td class="px-4 py-3">{entry.user.name || entry.user.email}</td>
-							<td class="px-4 py-3">{actionLabels[entry.action] ?? entry.action}</td>
+							<td class="px-4 py-3">
+								{actionLabels[entry.action] ?? entry.action}
+								{#if (entry.data as Payload)?.revertOf}
+									<span class="ml-1 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground"
+										>Revert</span
+									>
+								{/if}
+							</td>
 							<td class="px-4 py-3 font-medium">{subject(entry)}</td>
 							<td class="px-4 py-3 text-muted-foreground">
 								{entry.organizationId
@@ -116,6 +169,20 @@
 							</td>
 							<td class="max-w-md px-4 py-3 text-muted-foreground">
 								<span class="line-clamp-2">{details(entry)}</span>
+							</td>
+							<td class="px-4 py-3 text-right whitespace-nowrap">
+								{#if revertedIds.has(entry.id)}
+									<span class="text-xs text-muted-foreground">Reverted</span>
+								{:else if canRevert(entry)}
+									<Button
+										variant="outline"
+										size="sm"
+										disabled={revertingId === entry.id}
+										onclick={() => revert(entry)}
+									>
+										Revert
+									</Button>
+								{/if}
 							</td>
 						</tr>
 					{/each}

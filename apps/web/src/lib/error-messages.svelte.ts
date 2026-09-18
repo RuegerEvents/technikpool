@@ -23,6 +23,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'You are not a member of this organization.';
 		case 'org_manage_forbidden':
 			return 'Only org owners or system admins can manage this organization.';
+		case 'org_create_forbidden':
+			return 'Only system admins can create organizations.';
 		case 'billing_manage_forbidden':
 			return 'Only org admins and owners can manage offers and invoices.';
 		case 'production_delete_forbidden':
@@ -43,12 +45,24 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return `Units of this product belong to ${p0}. Only an admin there can change it.`;
 		case 'product_merge_units_other_orgs':
 			return `Units of "${p0}" belong to ${p1}. Only an admin there can merge it.`;
+		case 'product_unowned_not_creator':
+			return `No organization holds units of "${p0}", so only whoever added it or a system admin can change it.`;
 		case 'connector_edit_forbidden':
 			return 'You need admin rights in one of your organizations to edit connectors.';
 		case 'rates_forbidden':
 			return 'Only admins of this organization can set its prices.';
 
+		// Invitations
+		case 'invite_user_exists':
+			return `${p0} already has an account. Add them from the organization's page.`;
+		case 'invitation_not_found':
+			return 'This invitation no longer exists.';
+
 		// Catalogue: manufacturers, categories, products, connectors
+		case 'catalog_revert_unavailable':
+			return 'This change cannot be reverted because the product no longer exists.';
+		case 'catalog_revert_stale':
+			return 'Nothing left to revert: every field of this change has been edited again since.';
 		case 'manufacturer_name_required':
 			return 'A manufacturer needs a name.';
 		case 'manufacturer_required':
@@ -273,8 +287,6 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return `The avatar label ${p0} is already taken. Pick another one.`;
 		case 'org_color_taken':
 			return `The color ${p0} is already taken. Pick another one.`;
-		case 'user_not_found':
-			return 'No user found with that email.';
 		case 'user_has_history':
 			return 'This user appears in asset history and cannot be deleted.';
 		case 'cannot_remove_self':

@@ -2,6 +2,11 @@
 	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import { ORG_ROLES, type OrgRole } from '$lib/roles';
 	import { roleName, roleSummary } from '$lib/role-descriptions.svelte';
+	import {
+		InvitationLink,
+		InvitationList,
+		type IssuedInvitation
+	} from '$lib/components/ui/invitations';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -60,14 +65,21 @@
 	let addEmail = $state('');
 	let addRole = $state<OrgRole>('MEMBER');
 	let adding = $state(false);
+	let issued = $state<IssuedInvitation | null>(null);
 
 	async function handleAddUser(e: Event) {
 		e.preventDefault();
 		if (!addEmail) return;
 		try {
 			adding = true;
-			await addUserToOrg({ orgId, email: addEmail, role: addRole });
-			toast.success(`${addEmail} added to organization`);
+			const result = await addUserToOrg({ orgId, email: addEmail, role: addRole });
+			if (result.status === 'invited') {
+				// No account by that address yet, so the server sent an invitation
+				// into this org instead.
+				issued = { email: addEmail, url: result.url, mailed: result.mailed };
+			} else {
+				toast.success(`${addEmail} added to organization`);
+			}
 			addEmail = '';
 		} catch (err) {
 			toast.error(getErrorMessage(err));
@@ -696,7 +708,8 @@
 						<Card.Header>
 							<Card.Title>Add Member</Card.Title>
 							<Card.Description
-								>Add a registered user to this organization by email.</Card.Description
+								>Add someone by email. If they have no account yet, they get an invitation to create
+								one and join this organization.</Card.Description
 							>
 						</Card.Header>
 						<Card.Content>
@@ -730,6 +743,15 @@
 									{adding ? 'Adding...' : 'Add Member'}
 								</Button>
 							</form>
+							{#if issued}
+								<div class="mt-4">
+									<InvitationLink {issued} onclose={() => (issued = null)} />
+								</div>
+							{/if}
+							<div class="mt-6 space-y-2">
+								<h3 class="text-sm font-medium">Open invitations</h3>
+								<InvitationList organizationId={orgId} onissued={(result) => (issued = result)} />
+							</div>
 						</Card.Content>
 					</Card.Root>
 				{/if}

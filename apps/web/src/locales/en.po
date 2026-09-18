@@ -230,6 +230,7 @@ msgstr "User *"
 msgid "Select a user…"
 msgstr "Select a user…"
 
+#: src/routes/admin/users/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -427,6 +428,7 @@ msgid "Bundle"
 msgstr "Bundle"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/routes/admin/users/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
@@ -632,9 +634,8 @@ msgstr "View Assets"
 msgid "User Management"
 msgstr "User Management"
 
-#: src/routes/admin/users/+page.svelte
-msgid "Manage system admin privileges for all users."
-msgstr "Manage system admin privileges for all users."
+#~ msgid "Manage system admin privileges for all users."
+#~ msgstr "Manage system admin privileges for all users."
 
 #. 0: users.length
 #: src/routes/admin/users/+page.svelte
@@ -973,10 +974,10 @@ msgstr "Manage members and roles."
 msgid "Add Member"
 msgstr "Add Member"
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Add a registered user to this organization by email."
-msgstr "Add a registered user to this organization by email."
+#~ msgid "Add a registered user to this organization by email."
+#~ msgstr "Add a registered user to this organization by email."
 
+#: src/routes/admin/users/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/profile/+page.svelte
 msgid "Email address"
@@ -1008,6 +1009,7 @@ msgstr "Asset removed from bundle"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/ui/invitations/invitation-link.svelte
 #: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Close"
@@ -3071,6 +3073,7 @@ msgstr "View invoice {0}"
 msgid "Copying…"
 msgstr "Copying…"
 
+#: src/lib/components/ui/invitations/invitation-link.svelte
 #: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 msgid "Copy"
@@ -4373,9 +4376,8 @@ msgstr "All products"
 msgid "Missing image ({0})"
 msgstr "Missing image ({0})"
 
-#: src/routes/products/+page.svelte
-msgid "You can look through the catalog, but editing a product needs admin or owner rights in one of your organizations."
-msgstr "You can look through the catalog, but editing a product needs admin or owner rights in one of your organizations."
+#~ msgid "You can look through the catalog, but editing a product needs admin or owner rights in one of your organizations."
+#~ msgstr "You can look through the catalog, but editing a product needs admin or owner rights in one of your organizations."
 
 #: src/routes/products/+page.svelte
 msgid "No products yet"
@@ -5786,9 +5788,8 @@ msgstr "Manufacturers are shared across all organizations, so renaming or mergin
 msgid "Catalog Log"
 msgstr "Catalog Log"
 
-#: src/routes/products/+page.svelte
-msgid "Units of this product belong to organizations you don't administer, so its name, manufacturer and category are locked here. Your image contribution and your own organization's price still save."
-msgstr "Units of this product belong to organizations you don't administer, so its name, manufacturer and category are locked here. Your image contribution and your own organization's price still save."
+#~ msgid "Units of this product belong to organizations you don't administer, so its name, manufacturer and category are locked here. Your image contribution and your own organization's price still save."
+#~ msgstr "Units of this product belong to organizations you don't administer, so its name, manufacturer and category are locked here. Your image contribution and your own organization's price still save."
 
 #: src/routes/products/+page.svelte
 msgid "Per organization — what that organization's rental rate is calculated from. Other organizations set their own price."
@@ -6259,6 +6260,7 @@ msgid "Printed in the sheet header and along the bottom of every sticker."
 msgstr "Printed in the sheet header and along the bottom of every sticker."
 
 #: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
+#: src/lib/components/ui/invitations/invitation-link.svelte
 msgid "Link copied"
 msgstr "Link copied"
 
@@ -6960,9 +6962,8 @@ msgstr "No net purchase price set for: {0}. No rental rate set for category: {1}
 msgid "The PDF cannot be generated. Missing billing data: {0}"
 msgstr "The PDF cannot be generated. Missing billing data: {0}"
 
-#: src/lib/error-messages.svelte.ts
-msgid "No user found with that email."
-msgstr "No user found with that email."
+#~ msgid "No user found with that email."
+#~ msgstr "No user found with that email."
 
 #: src/lib/error-messages.svelte.ts
 msgid "This user appears in asset history and cannot be deleted."
@@ -7102,6 +7103,7 @@ msgstr "Currently <0/>. Changing it takes a confirmation link sent to that addre
 msgid "New email address"
 msgstr "New email address"
 
+#: src/routes/admin/users/+page.svelte
 #: src/routes/profile/+page.svelte
 msgid "Sending…"
 msgstr "Sending…"
@@ -7855,3 +7857,175 @@ msgstr "Stadthalle, club, open air…"
 #: src/lib/components/ui/address-input/address-input.svelte
 msgid "Venue name"
 msgstr "Venue name"
+
+#: src/lib/error-messages.svelte.ts
+msgid "Only system admins can create organizations."
+msgstr "Only system admins can create organizations."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "No organization holds units of \"{0}\", so only whoever added it or a system admin can change it."
+msgstr "No organization holds units of \"{0}\", so only whoever added it or a system admin can change it."
+
+#~ msgid "{0} already has an account."
+#~ msgstr "{0} already has an account."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This invitation no longer exists."
+msgstr "This invitation no longer exists."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This change cannot be reverted because the product no longer exists."
+msgstr "This change cannot be reverted because the product no longer exists."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Nothing left to revert: every field of this change has been edited again since."
+msgstr "Nothing left to revert: every field of this change has been edited again since."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "{0} already has an account. Add them from the organization's page."
+msgstr "{0} already has an account. Add them from the organization's page."
+
+#: src/routes/products/+page.svelte
+msgid "You can look through the catalog and add a picture where one is missing. Editing a product needs admin or owner rights in one of your organizations."
+msgstr "You can look through the catalog and add a picture where one is missing. Editing a product needs admin or owner rights in one of your organizations."
+
+#: src/routes/products/+page.svelte
+msgid "Units of this product belong to organizations you don't administer, so its name, manufacturer and category are locked here."
+msgstr "Units of this product belong to organizations you don't administer, so its name, manufacturer and category are locked here."
+
+#: src/routes/products/+page.svelte
+msgid "No organization holds units of this product, so only whoever added it or a system admin can change its name, manufacturer and category."
+msgstr "No organization holds units of this product, so only whoever added it or a system admin can change its name, manufacturer and category."
+
+#: src/routes/products/+page.svelte
+msgid "Your own organization's price still saves."
+msgstr "Your own organization's price still saves."
+
+#: src/routes/products/+page.svelte
+msgid "A first picture and your own organization's price still save."
+msgstr "A first picture and your own organization's price still save."
+
+#: src/routes/auth/register/+page.svelte
+msgid "Sign-up is by invitation only."
+msgstr "Sign-up is by invitation only."
+
+#: src/routes/auth/register/+page.svelte
+#: src/routes/auth/register/+page.svelte
+msgid "This invitation is no longer valid."
+msgstr "This invitation is no longer valid."
+
+#: src/routes/auth/register/+page.svelte
+msgid "This invitation was issued for a different email address."
+msgstr "This invitation was issued for a different email address."
+
+#. 0: invite.organizationName
+#: src/routes/auth/register/+page.svelte
+msgid "You have been invited to join {0}."
+msgstr "You have been invited to join {0}."
+
+#: src/routes/auth/register/+page.svelte
+msgid "You have been invited to Technikpool."
+msgstr "You have been invited to Technikpool."
+
+#: src/routes/auth/register/+page.svelte
+msgid "Sign-up is by invitation only. Ask an administrator or the owner of your organization to send you an invitation."
+msgstr "Sign-up is by invitation only. Ask an administrator or the owner of your organization to send you an invitation."
+
+#: src/routes/auth/register/+page.svelte
+msgid "The invitation is tied to this address."
+msgstr "The invitation is tied to this address."
+
+#: src/routes/admin/users/+page.svelte
+msgid "Sign-up is open to everyone"
+msgstr "Sign-up is open to everyone"
+
+#: src/routes/admin/users/+page.svelte
+msgid "Sign-up is by invitation only"
+msgstr "Sign-up is by invitation only"
+
+#: src/routes/admin/users/+page.svelte
+msgid "Manage who can get in, and system admin privileges for all users."
+msgstr "Manage who can get in, and system admin privileges for all users."
+
+#: src/routes/admin/users/+page.svelte
+msgid "Access"
+msgstr "Access"
+
+#: src/routes/admin/users/+page.svelte
+msgid "Who can create an account. An invitation works whether sign-up is open or not."
+msgstr "Who can create an account. An invitation works whether sign-up is open or not."
+
+#: src/routes/admin/users/+page.svelte
+msgid "Allow anyone to sign up"
+msgstr "Allow anyone to sign up"
+
+#: src/routes/admin/users/+page.svelte
+msgid "When this is off, the register page only accepts invitation links."
+msgstr "When this is off, the register page only accepts invitation links."
+
+#: src/routes/admin/users/+page.svelte
+msgid "No organization"
+msgstr "No organization"
+
+#: src/routes/admin/users/+page.svelte
+msgid "Send invitation"
+msgstr "Send invitation"
+
+#: src/routes/admin/users/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Open invitations"
+msgstr "Open invitations"
+
+#. 0: email
+#: src/lib/components/ui/invitations/invitation-list.svelte
+msgid "Invitation for {0} withdrawn"
+msgstr "Invitation for {0} withdrawn"
+
+#: src/lib/components/ui/invitations/invitation-list.svelte
+msgid "No open invitations."
+msgstr "No open invitations."
+
+#: src/lib/components/ui/invitations/invitation-list.svelte
+msgid "Expired"
+msgstr "Expired"
+
+#. 0: new Date(invitation.expiresAt).toLocaleDateString()
+#: src/lib/components/ui/invitations/invitation-list.svelte
+msgid "Valid until {0}"
+msgstr "Valid until {0}"
+
+#: src/lib/components/ui/invitations/invitation-list.svelte
+msgid "New link"
+msgstr "New link"
+
+#: src/lib/components/ui/invitations/invitation-list.svelte
+msgid "Withdraw"
+msgstr "Withdraw"
+
+#: src/lib/components/ui/invitations/invitation-link.svelte
+msgid "Invitation sent to <0/>. You can also pass the link on yourself. It is shown only once."
+msgstr "Invitation sent to <0/>. You can also pass the link on yourself. It is shown only once."
+
+#. 0: issued.email
+#: src/lib/components/ui/invitations/invitation-link.svelte
+msgid "The email to {0} could not be sent. Pass this link on yourself. It is shown only once."
+msgstr "The email to {0} could not be sent. Pass this link on yourself. It is shown only once."
+
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "Change reverted"
+msgstr "Change reverted"
+
+#: src/routes/admin/catalog-log/+page.svelte
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "Revert"
+msgstr "Revert"
+
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "Reverted"
+msgstr "Reverted"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Add someone by email. If they have no account yet, they get an invitation to create one and join this organization."
+msgstr "Add someone by email. If they have no account yet, they get an invitation to create one and join this organization."

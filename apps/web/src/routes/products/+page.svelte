@@ -145,6 +145,9 @@
 	// fields are greyed out rather than failing on save.
 	function isIdentityLocked(product: CatalogProduct) {
 		if (data.isAdmin) return false;
+		// Nobody holds units, so there is no owning org to be admin of: it
+		// answers to whoever added it. See `productControl` on the server.
+		if (product.owningOrgIds.length === 0) return product.createdById !== data.user?.id;
 		return product.owningOrgIds.some((id) => !managedOrgIdSet.has(id));
 	}
 
@@ -278,7 +281,11 @@
 			(bundlePriceDraft ?? null) !== storedBundlePrice(currentBundle)
 	);
 
-	let identityLocked = $derived(!!current && isIdentityLocked(current));
+	let identityLocked = $derived(!!current && (!canEdit || isIdentityLocked(current)));
+	// A first picture is open to everyone who works in an org; replacing one
+	// follows the identity rule.
+	let imageLocked = $derived(!!current && identityLocked && !!current.imagePath);
+	let canContribute = $derived(data.isAdmin || orgs.some((o) => o.role !== 'VIEWER'));
 
 	// What a cable is counts as identity here for the same reason the server
 	// treats it as such: it decides which product a unit belongs to.
@@ -612,8 +619,8 @@
 
 	{#if !canEdit}
 		<div class="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
-			You can look through the catalog, but editing a product needs admin or owner rights in one of
-			your organizations.
+			You can look through the catalog and add a picture where one is missing. Editing a product
+			needs admin or owner rights in one of your organizations.
 		</div>
 	{/if}
 
@@ -714,7 +721,7 @@
 							</div>
 							<div class="flex flex-wrap items-center gap-3">
 								{#if canEdit}
-									{#if !current.hasAssets}
+									{#if !current.hasAssets && !identityLocked}
 										<Button variant="destructive" size="sm" onclick={() => (deleteOpen = true)}
 											>Delete unused</Button
 										>
@@ -730,11 +737,20 @@
 						</div>
 					</Card.Header>
 					<Card.Content>
-						{#if identityLocked}
+						{#if identityLocked && canEdit}
 							<div class="mb-4 rounded-md border border-dashed p-3 text-sm text-muted-foreground">
-								Units of this product belong to organizations you don't administer, so its name,
-								manufacturer and category are locked here. Your image contribution and your own
-								organization's price still save.
+								{#if current.hasAssets}
+									Units of this product belong to organizations you don't administer, so its name,
+									manufacturer and category are locked here.
+								{:else}
+									No organization holds units of this product, so only whoever added it or a system
+									admin can change its name, manufacturer and category.
+								{/if}
+								{#if current.imagePath}
+									Your own organization's price still saves.
+								{:else}
+									A first picture and your own organization's price still save.
+								{/if}
 							</div>
 						{/if}
 						<div class="mb-4 space-y-2">
@@ -743,7 +759,7 @@
 								items={manufacturers}
 								bind:value={manufacturer}
 								allowCreate={false}
-								disabled={!canEdit || identityLocked}
+								disabled={identityLocked}
 								placeholder="Search manufacturers…"
 							/>
 						</div>
@@ -752,7 +768,8 @@
 							bind:value={draft}
 							idPrefix="wizard"
 							showPrice={false}
-							identityDisabled={!canEdit || identityLocked}
+							identityDisabled={identityLocked}
+							imageDisabled={imageLocked || !canContribute}
 						/>
 						{#if priceOrgs.length > 0}
 							<div class="mt-4 space-y-2">

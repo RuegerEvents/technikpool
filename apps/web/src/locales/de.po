@@ -230,6 +230,7 @@ msgstr "Person *"
 msgid "Select a user…"
 msgstr "Person auswählen…"
 
+#: src/routes/admin/users/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -427,6 +428,7 @@ msgid "Bundle"
 msgstr "Bundle"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/routes/admin/users/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
@@ -632,9 +634,8 @@ msgstr "Geräte anzeigen"
 msgid "User Management"
 msgstr "Benutzerverwaltung"
 
-#: src/routes/admin/users/+page.svelte
-msgid "Manage system admin privileges for all users."
-msgstr "Systemadministratorrechte für alle Benutzer verwalten."
+#~ msgid "Manage system admin privileges for all users."
+#~ msgstr "Systemadministratorrechte für alle Benutzer verwalten."
 
 #. 0: users.length
 #: src/routes/admin/users/+page.svelte
@@ -973,10 +974,10 @@ msgstr "Mitglieder und Rollen verwalten."
 msgid "Add Member"
 msgstr "Mitglied hinzufügen"
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Add a registered user to this organization by email."
-msgstr "Registrierten Benutzer per E-Mail zur Organisation hinzufügen."
+#~ msgid "Add a registered user to this organization by email."
+#~ msgstr "Registrierten Benutzer per E-Mail zur Organisation hinzufügen."
 
+#: src/routes/admin/users/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/profile/+page.svelte
 msgid "Email address"
@@ -1008,6 +1009,7 @@ msgstr "Gerät aus Bundle entfernt"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/ui/invitations/invitation-link.svelte
 #: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Close"
@@ -3071,6 +3073,7 @@ msgstr "Rechnung {0} ansehen"
 msgid "Copying…"
 msgstr "Wird kopiert…"
 
+#: src/lib/components/ui/invitations/invitation-link.svelte
 #: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 msgid "Copy"
@@ -4373,9 +4376,8 @@ msgstr "Alle Produkte"
 msgid "Missing image ({0})"
 msgstr "Ohne Bild ({0})"
 
-#: src/routes/products/+page.svelte
-msgid "You can look through the catalog, but editing a product needs admin or owner rights in one of your organizations."
-msgstr "Sie können den Katalog ansehen, aber zum Bearbeiten brauchen Sie Admin- oder Owner-Rechte in einer Ihrer Organisationen."
+#~ msgid "You can look through the catalog, but editing a product needs admin or owner rights in one of your organizations."
+#~ msgstr "Sie können den Katalog ansehen, aber zum Bearbeiten brauchen Sie Admin- oder Owner-Rechte in einer Ihrer Organisationen."
 
 #: src/routes/products/+page.svelte
 msgid "No products yet"
@@ -5786,9 +5788,8 @@ msgstr "Hersteller werden von allen Organisationen gemeinsam genutzt — Umbenen
 msgid "Catalog Log"
 msgstr "Katalog-Protokoll"
 
-#: src/routes/products/+page.svelte
-msgid "Units of this product belong to organizations you don't administer, so its name, manufacturer and category are locked here. Your image contribution and your own organization's price still save."
-msgstr "Einheiten dieses Produkts gehören Organisationen, die Sie nicht verwalten — Name, Hersteller und Kategorie sind hier deshalb gesperrt. Ein Bild und der Preis Ihrer eigenen Organisation lassen sich weiterhin speichern."
+#~ msgid "Units of this product belong to organizations you don't administer, so its name, manufacturer and category are locked here. Your image contribution and your own organization's price still save."
+#~ msgstr "Einheiten dieses Produkts gehören Organisationen, die Sie nicht verwalten — Name, Hersteller und Kategorie sind hier deshalb gesperrt. Ein Bild und der Preis Ihrer eigenen Organisation lassen sich weiterhin speichern."
 
 #: src/routes/products/+page.svelte
 msgid "Per organization — what that organization's rental rate is calculated from. Other organizations set their own price."
@@ -6259,6 +6260,7 @@ msgid "Printed in the sheet header and along the bottom of every sticker."
 msgstr "Wird in der Kopfzeile des Bogens und unten auf jedem Aufkleber gedruckt."
 
 #: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
+#: src/lib/components/ui/invitations/invitation-link.svelte
 msgid "Link copied"
 msgstr "Link kopiert"
 
@@ -6960,9 +6962,8 @@ msgstr "Kein Netto-Einkaufspreis hinterlegt für: {0}. Kein Mietsatz hinterlegt 
 msgid "The PDF cannot be generated. Missing billing data: {0}"
 msgstr "Das PDF kann nicht erzeugt werden. Fehlende Abrechnungsdaten: {0}"
 
-#: src/lib/error-messages.svelte.ts
-msgid "No user found with that email."
-msgstr "Kein Benutzer mit dieser E-Mail-Adresse gefunden."
+#~ msgid "No user found with that email."
+#~ msgstr "Kein Benutzer mit dieser E-Mail-Adresse gefunden."
 
 #: src/lib/error-messages.svelte.ts
 msgid "This user appears in asset history and cannot be deleted."
@@ -7102,6 +7103,7 @@ msgstr "Aktuell <0/>. Eine Änderung erfordert einen Bestätigungslink an diese 
 msgid "New email address"
 msgstr "Neue E-Mail-Adresse"
 
+#: src/routes/admin/users/+page.svelte
 #: src/routes/profile/+page.svelte
 msgid "Sending…"
 msgstr "Wird gesendet…"
@@ -7855,3 +7857,175 @@ msgstr "Stadthalle, Club, Open Air…"
 #: src/lib/components/ui/address-input/address-input.svelte
 msgid "Venue name"
 msgstr "Name der Location"
+
+#: src/lib/error-messages.svelte.ts
+msgid "Only system admins can create organizations."
+msgstr "Nur System-Admins können Organisationen anlegen."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "No organization holds units of \"{0}\", so only whoever added it or a system admin can change it."
+msgstr "Keine Organisation besitzt Einheiten von „{0}“. Ändern kann es deshalb nur, wer es angelegt hat, oder ein System-Admin."
+
+#~ msgid "{0} already has an account."
+#~ msgstr ""
+
+#: src/lib/error-messages.svelte.ts
+msgid "This invitation no longer exists."
+msgstr "Diese Einladung gibt es nicht mehr."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This change cannot be reverted because the product no longer exists."
+msgstr "Diese Änderung lässt sich nicht rückgängig machen, weil es das Produkt nicht mehr gibt."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Nothing left to revert: every field of this change has been edited again since."
+msgstr "Nichts mehr rückgängig zu machen: Alle Felder dieser Änderung wurden seitdem erneut bearbeitet."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "{0} already has an account. Add them from the organization's page."
+msgstr "{0} hat bereits ein Konto. Fügen Sie die Person auf der Seite der Organisation hinzu."
+
+#: src/routes/products/+page.svelte
+msgid "You can look through the catalog and add a picture where one is missing. Editing a product needs admin or owner rights in one of your organizations."
+msgstr "Sie können den Katalog ansehen und ein Bild ergänzen, wo noch keines vorhanden ist. Zum Bearbeiten eines Produkts brauchen Sie Admin- oder Owner-Rechte in einer Ihrer Organisationen."
+
+#: src/routes/products/+page.svelte
+msgid "Units of this product belong to organizations you don't administer, so its name, manufacturer and category are locked here."
+msgstr "Einheiten dieses Produkts gehören Organisationen, die Sie nicht verwalten. Name, Hersteller und Kategorie sind hier deshalb gesperrt."
+
+#: src/routes/products/+page.svelte
+msgid "No organization holds units of this product, so only whoever added it or a system admin can change its name, manufacturer and category."
+msgstr "Keine Organisation besitzt Einheiten dieses Produkts. Name, Hersteller und Kategorie kann deshalb nur ändern, wer es angelegt hat, oder ein System-Admin."
+
+#: src/routes/products/+page.svelte
+msgid "Your own organization's price still saves."
+msgstr "Der Preis Ihrer eigenen Organisation lässt sich weiterhin speichern."
+
+#: src/routes/products/+page.svelte
+msgid "A first picture and your own organization's price still save."
+msgstr "Ein erstes Bild und der Preis Ihrer eigenen Organisation lassen sich weiterhin speichern."
+
+#: src/routes/auth/register/+page.svelte
+msgid "Sign-up is by invitation only."
+msgstr "Die Registrierung ist nur mit Einladung möglich."
+
+#: src/routes/auth/register/+page.svelte
+#: src/routes/auth/register/+page.svelte
+msgid "This invitation is no longer valid."
+msgstr "Diese Einladung ist nicht mehr gültig."
+
+#: src/routes/auth/register/+page.svelte
+msgid "This invitation was issued for a different email address."
+msgstr "Diese Einladung wurde für eine andere E-Mail-Adresse ausgestellt."
+
+#. 0: invite.organizationName
+#: src/routes/auth/register/+page.svelte
+msgid "You have been invited to join {0}."
+msgstr "Sie wurden eingeladen, {0} beizutreten."
+
+#: src/routes/auth/register/+page.svelte
+msgid "You have been invited to Technikpool."
+msgstr "Sie wurden zu Technikpool eingeladen."
+
+#: src/routes/auth/register/+page.svelte
+msgid "Sign-up is by invitation only. Ask an administrator or the owner of your organization to send you an invitation."
+msgstr "Die Registrierung ist nur mit Einladung möglich. Bitten Sie einen Administrator oder den Inhaber Ihrer Organisation, Ihnen eine Einladung zu schicken."
+
+#: src/routes/auth/register/+page.svelte
+msgid "The invitation is tied to this address."
+msgstr "Die Einladung gilt nur für diese Adresse."
+
+#: src/routes/admin/users/+page.svelte
+msgid "Sign-up is open to everyone"
+msgstr "Die Registrierung ist für alle offen"
+
+#: src/routes/admin/users/+page.svelte
+msgid "Sign-up is by invitation only"
+msgstr "Die Registrierung ist nur mit Einladung möglich"
+
+#: src/routes/admin/users/+page.svelte
+msgid "Manage who can get in, and system admin privileges for all users."
+msgstr "Verwalten Sie, wer Zugang bekommt, und die Systemadministratorrechte aller Benutzer."
+
+#: src/routes/admin/users/+page.svelte
+msgid "Access"
+msgstr "Zugang"
+
+#: src/routes/admin/users/+page.svelte
+msgid "Who can create an account. An invitation works whether sign-up is open or not."
+msgstr "Wer ein Konto anlegen kann. Eine Einladung funktioniert unabhängig davon, ob die Registrierung offen ist."
+
+#: src/routes/admin/users/+page.svelte
+msgid "Allow anyone to sign up"
+msgstr "Registrierung für alle erlauben"
+
+#: src/routes/admin/users/+page.svelte
+msgid "When this is off, the register page only accepts invitation links."
+msgstr "Ist dies ausgeschaltet, nimmt die Registrierungsseite nur Einladungslinks an."
+
+#: src/routes/admin/users/+page.svelte
+msgid "No organization"
+msgstr "Keine Organisation"
+
+#: src/routes/admin/users/+page.svelte
+msgid "Send invitation"
+msgstr "Einladung senden"
+
+#: src/routes/admin/users/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Open invitations"
+msgstr "Offene Einladungen"
+
+#. 0: email
+#: src/lib/components/ui/invitations/invitation-list.svelte
+msgid "Invitation for {0} withdrawn"
+msgstr "Einladung für {0} zurückgezogen"
+
+#: src/lib/components/ui/invitations/invitation-list.svelte
+msgid "No open invitations."
+msgstr "Keine offenen Einladungen."
+
+#: src/lib/components/ui/invitations/invitation-list.svelte
+msgid "Expired"
+msgstr "Abgelaufen"
+
+#. 0: new Date(invitation.expiresAt).toLocaleDateString()
+#: src/lib/components/ui/invitations/invitation-list.svelte
+msgid "Valid until {0}"
+msgstr "Gültig bis {0}"
+
+#: src/lib/components/ui/invitations/invitation-list.svelte
+msgid "New link"
+msgstr "Neuer Link"
+
+#: src/lib/components/ui/invitations/invitation-list.svelte
+msgid "Withdraw"
+msgstr "Zurückziehen"
+
+#: src/lib/components/ui/invitations/invitation-link.svelte
+msgid "Invitation sent to <0/>. You can also pass the link on yourself. It is shown only once."
+msgstr "Einladung an <0/> gesendet. Sie können den Link auch selbst weitergeben. Er wird nur dieses eine Mal angezeigt."
+
+#. 0: issued.email
+#: src/lib/components/ui/invitations/invitation-link.svelte
+msgid "The email to {0} could not be sent. Pass this link on yourself. It is shown only once."
+msgstr "Die E-Mail an {0} konnte nicht gesendet werden. Geben Sie diesen Link selbst weiter. Er wird nur dieses eine Mal angezeigt."
+
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "Change reverted"
+msgstr "Änderung rückgängig gemacht"
+
+#: src/routes/admin/catalog-log/+page.svelte
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "Revert"
+msgstr "Rückgängig"
+
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "Reverted"
+msgstr "Rückgängig gemacht"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Add someone by email. If they have no account yet, they get an invitation to create one and join this organization."
+msgstr "Fügen Sie jemanden per E-Mail hinzu. Wer noch kein Konto hat, bekommt eine Einladung, eines anzulegen und dieser Organisation beizutreten."

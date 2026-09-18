@@ -83,7 +83,10 @@
 					: 'Manage your organizations and memberships.'}
 			</p>
 		</div>
-		<Button onclick={openCreate}>New Organization</Button>
+		<!-- Creating an org is a system admin's call: see `createOrg`. -->
+		{#if data.isAdmin}
+			<Button onclick={openCreate}>New Organization</Button>
+		{/if}
 	</div>
 
 	<div class="space-y-4">

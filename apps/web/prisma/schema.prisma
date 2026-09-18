@@ -29,6 +29,8 @@ model User {
   accounts Account[]
 
   catalogTransactions CatalogTransaction[]
+  createdProducts     Product[]            @relation("ProductCreator")
+  sentInvitations     Invitation[]
 
   // App-specific relations
   homeOrgId       String?
@@ -154,8 +156,9 @@ model Organization {
   invoiceIntroTemplate  String? @db.Text
   invoiceClosingTemplate String? @db.Text
 
-  homeUsers User[]          @relation("HomeOrg")
-  members   OrgMembership[]
+  homeUsers   User[]          @relation("HomeOrg")
+  members     OrgMembership[]
+  invitations Invitation[]
 
   locations       Location[]
   assets          Asset[]
@@ -188,6 +191,41 @@ model OrgMembership {
   updatedAt DateTime @updatedAt
 
   @@unique([userId, organizationId])
+}
+
+/// Instance-wide switches, one row. The id is fixed so an upsert can never make
+/// a second one.
+model SystemSettings {
+  id Int @id @default(1)
+
+  /// Whether /auth/register takes anyone. Off by default: the catalog is
+  /// shared, so an account is a write permission of sorts. An invitation gets
+  /// through either way, and so does the very first account of an install.
+  signUpEnabled Boolean @default(false)
+
+  updatedAt DateTime @updatedAt
+}
+
+/// A link that lets one email address create an account while sign-up is
+/// closed, optionally landing in an org with a role. Only the hash of the token
+/// is stored, like a password: the link is a credential until it is used.
+model Invitation {
+  id        String @id @default(cuid())
+  email     String
+  tokenHash String @unique
+
+  invitedById String
+  invitedBy   User   @relation(fields: [invitedById], references: [id], onDelete: Cascade)
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role           Role?
+
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([email])
 }
 
 model Manufacturer {
@@ -308,6 +346,13 @@ model Product {
   /// A flag and not a category, because the category is what bills — a
   /// Resolume licence is Video like the media server it runs on.
   isLicense Boolean @default(false)
+
+  /// Who added the row. While no org holds a unit of a product there is no
+  /// owner to ask, so this is the only person besides a system admin who may
+  /// rename, merge or delete it. Null on everything older than the column,
+  /// which leaves those to system admins.
+  createdById String?
+  createdBy   User?   @relation("ProductCreator", fields: [createdById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

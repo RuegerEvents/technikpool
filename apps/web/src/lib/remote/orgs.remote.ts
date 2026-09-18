@@ -6,6 +6,8 @@ import { addedToOrgEmail } from '$lib/server/emails/added-to-org';
 import * as v from 'valibot';
 import { isSystemAdmin, requireAuth, requireOrgOwner } from '$lib/server/services/access';
 import { appError } from '$lib/errors';
+import { issueInvitation } from '$lib/server/services/invitations';
+import { getInvitations } from './invitations.remote';
 
 export const getMyOrgs = query(async () => {
 	const user = await requireAuth();
@@ -87,9 +89,21 @@ const roleSchema = v.picklist(['OWNER', 'ADMIN', 'MEMBER', 'VIEWER']);
 export const addUserToOrg = command(
 	v.object({ orgId: v.string(), email: v.string(), role: roleSchema }),
 	async ({ orgId, email, role }) => {
-		await requireOrgOwner(orgId);
-		const target = await prisma.user.findUnique({ where: { email } });
-		if (!target) appError(404, 'user_not_found');
+		const current = await requireOrgOwner(orgId);
+		const target = await prisma.user.findUnique({ where: { email: email.trim().toLowerCase() } });
+		if (!target) {
+			// Nobody by that address yet: with sign-up closed they could not get
+			// one either, so the owner's "add" becomes an invitation into this org.
+			const invitation = await issueInvitation({
+				email,
+				invitedBy: current,
+				organizationId: orgId,
+				role
+			});
+			await getInvitations(orgId).refresh();
+			if (await isSystemAdmin(current.id)) await getInvitations().refresh();
+			return { status: 'invited' as const, url: invitation.url, mailed: invitation.mailed };
+		}
 
 		const existing = await prisma.orgMembership.findUnique({
 			where: { userId_organizationId: { userId: target.id, organizationId: orgId } }
@@ -120,6 +134,7 @@ export const addUserToOrg = command(
 		}
 
 		await getOrgWithMembers(orgId).refresh();
+		return { status: 'added' as const };
 	}
 );
 
@@ -255,7 +270,11 @@ const createOrgSchema = v.object({
 export const createOrg = command(
 	createOrgSchema,
 	async ({ name, shortName, assetIdPrefix, color, avatarLabel }) => {
+		// An org is what makes someone an admin of anything, and org admins write
+		// to the shared catalog — so handing them out is the instance's decision.
+		// The creator still becomes OWNER, as the first member.
 		const user = await requireAuth();
+		if (!(await isSystemAdmin(user.id))) appError(403, 'org_create_forbidden');
 		const prefix = normalizePrefix(assetIdPrefix);
 		const normalizedColor = normalizeColor(color);
 		const normalizedLabel = normalizeAvatarLabel(avatarLabel);

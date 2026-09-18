@@ -58,6 +58,8 @@ export const ModelName = {
   DeviceCode: 'DeviceCode',
   Organization: 'Organization',
   OrgMembership: 'OrgMembership',
+  SystemSettings: 'SystemSettings',
+  Invitation: 'Invitation',
   Manufacturer: 'Manufacturer',
   Connector: 'Connector',
   Category: 'Category',
@@ -220,6 +222,30 @@ export const OrgMembershipScalarFieldEnum = {
 export type OrgMembershipScalarFieldEnum = (typeof OrgMembershipScalarFieldEnum)[keyof typeof OrgMembershipScalarFieldEnum]
 
 
+export const SystemSettingsScalarFieldEnum = {
+  id: 'id',
+  signUpEnabled: 'signUpEnabled',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SystemSettingsScalarFieldEnum = (typeof SystemSettingsScalarFieldEnum)[keyof typeof SystemSettingsScalarFieldEnum]
+
+
+export const InvitationScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  tokenHash: 'tokenHash',
+  invitedById: 'invitedById',
+  organizationId: 'organizationId',
+  role: 'role',
+  expiresAt: 'expiresAt',
+  acceptedAt: 'acceptedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type InvitationScalarFieldEnum = (typeof InvitationScalarFieldEnum)[keyof typeof InvitationScalarFieldEnum]
+
+
 export const ManufacturerScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -273,6 +299,7 @@ export const ProductScalarFieldEnum = {
   connectorB: 'connectorB',
   lengthCm: 'lengthCm',
   isLicense: 'isLicense',
+  createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

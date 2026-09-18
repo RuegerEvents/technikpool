@@ -74,6 +74,7 @@ async function requireAuth() {
 | `src/lib/remote/assets.remote.ts`      | `getAssets`, `getInventorySummary`, `getManufacturers`, `getProducts`, `createAssets`, `getAssetHistory`, `getBundles`, `getBundle`, `createBundle`, `addAssetToBundle`, `removeAssetFromBundle`               |
 | `src/lib/remote/productions.remote.ts` | `getProductions`, `getProduction`, `createProduction`, `addAssetToProduction`, `approveProductionItem`, `getPendingApprovals`, `addBundleToProduction`, `addCrewMember`, `removeCrewMember`, `getCalendarData` |
 | `src/lib/remote/licenses.remote.ts`    | `getLicenses`, `getLicenseStatus`, `revealLicenseCredentials`, `setLicenseCredentials`, `clearLicenseCredentials`                                                                                              |
+| `src/lib/remote/invitations.remote.ts` | `getSignUpStatus`, `getInvitationPreview`, `getSignUpSettings`, `setSignUpEnabled`, `getInvitations`, `inviteUser`, `resendInvitation`, `revokeInvitation`                                                     |
 
 ## External API (`/api/v1`)
 
@@ -183,6 +184,54 @@ carry them anywhere by accident.
 - Auth routes: `/auth/login`, `/auth/register`
 - API handler: `/api/auth/[...all]/+server.ts`
 
+## Who gets in: sign-up, invitations, orgs
+
+The catalog is shared between orgs, so an account is a write permission of sorts. Three gates,
+all decided by system admins:
+
+- **Sign-up is closed by default** (`SystemSettings.signUpEnabled`, one row, switched on
+  `/admin/users`). The very first account of an install always gets through and becomes system
+  admin, otherwise nobody could ever flip the switch.
+- **An invitation works either way.** `Invitation` stores only the SHA-256 of the link token,
+  is tied to one email address, runs out after 14 days and is single-use. The account it creates
+  starts out verified, because the link already proved the mailbox, and lands in the invited org
+  with the invited role. System admins invite from `/admin/users`; an org OWNER invites into
+  their own org simply by adding an address that has no account yet (`addUserToOrg` falls back
+  to `issueInvitation`). The link is shown to the inviter once, since it cannot be recovered.
+- **`createOrg` is system admin only.** Being ADMIN/OWNER of _some_ org is what the catalog
+  rules below key on, so handing out orgs is the instance's decision.
+
+The gate itself is `src/lib/server/signup-gate.ts`, called from `databaseHooks.user.create` in
+`auth.ts` rather than from the `/sign-up/email` route, so a second way of creating accounts
+cannot arrive without passing it. It takes the Prisma client as an argument because `auth.ts`
+is its caller and the services import `prisma` from there. The register form sends the token as
+an extra body field (`inviteToken`); better-auth's refusal comes back with our `code`
+(`SIGNUP_DISABLED`, `INVITATION_INVALID`, `INVITATION_EMAIL_MISMATCH`), which the register
+page maps to translated text.
+
+`getSignUpStatus` and `getInvitationPreview` are the only remote functions meant to be called
+signed out. They work because a remote request carries the _calling page's_ path, and the
+guard in `hooks.server.ts` lets `/auth/*` through.
+
+## Who may change a product
+
+`productControl` in `src/lib/server/services/product-control.ts` is the one rule behind
+renaming, recategorizing, merging away, deleting, and replacing a picture:
+
+- a system admin, always
+- otherwise an org ADMIN/OWNER who admins **every** org holding units of the product
+- a product nobody holds units of answers to `Product.createdById` alone. Rows older than the
+  column have no creator, which leaves them to system admins.
+
+A **first** picture is open to any MEMBER+, replacing or clearing one is not. Prices are
+per-org (`OrgProductPrice`) and unaffected by any of this.
+
+Every change is in `CatalogTransaction`, and `/admin/catalog-log` can revert a
+`PRODUCT_UPDATED` entry (`revertCatalogChange`). It reverts field by field and only where the
+product still holds the value that entry wrote, and logs the revert as a new entry with
+`revertOf`, so the log is never rewritten. Merges and deletes record no "before" and cannot be
+reverted.
+
 ## Internationalisation (wuchale)
 
 The app supports **German** (default) and **English** via [wuchale](https://wuchale.dev/) — a compile-time i18n toolkit.
@@ -289,7 +338,7 @@ src/routes/
 │   ├── +page.svelte        # List orgs; Manage button for OWNER/admin
 │   └── [id]/+page.svelte   # Manage org members: add/remove/role
 ├── admin/
-│   └── users/+page.svelte  # System admin: grant/revoke isAdmin per user
+│   └── users/+page.svelte  # System admin: sign-up switch, invitations, grant/revoke isAdmin
 ├── inventory/
 │   ├── +page.svelte        # Product catalog with stock levels
 │   ├── [id]/+page.svelte   # Asset detail
