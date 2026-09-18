@@ -15,6 +15,7 @@
 		getRetiredAssets
 	} from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
+	import { getLicenses } from '$lib/remote/licenses.remote';
 	import { Button } from '$lib/components/ui/button';
 	import { CategorySelect } from '$lib/components/ui/category-select';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
@@ -28,6 +29,7 @@
 	import { AssetStatusBadge, assetStatusLabel } from '$lib/components/ui/asset-status';
 	import { SortableHeader } from '$lib/components/ui/sortable-header';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import LicenseList from './license-list.svelte';
 
 	let showImportModal = $state(false);
 
@@ -56,12 +58,26 @@
 		statusFilterOptions.some(([value]) => value === initialStatus) ? initialStatus : ''
 	);
 	let categoryFilter = $state(initial.get('category') ?? '');
+	// What kind of thing is listed: devices, licenses or cables — and among the
+	// cables, one type. One select, because the three exclude each other and a
+	// cable type only means something once cables are what is being looked at.
+	const kinds = ['devices', 'licenses', 'cables'] as const;
+	type Kind = '' | (typeof kinds)[number];
+	const initialKind = initial.get('kind');
 	// Cable filters. Length is held as the metres someone typed, not centimetres:
 	// it round-trips through the URL as what is in the box.
-	let cableTypeFilter = $state(initial.get('ctype') ?? '');
+	const initialCableType = initial.get('ctype') ?? '';
+	let cableTypeFilter = $state(initialCableType);
+	let kindFilter = $state<Kind>(
+		kinds.find((k) => k === initialKind) ?? (initialCableType ? 'cables' : '')
+	);
 	let connectorFilter = $state(initial.get('conn') ?? '');
 	let lengthMin = $state(initial.get('lmin') ?? '');
 	let lengthMax = $state(initial.get('lmax') ?? '');
+	// Licenses get a list of their own rather than a share of the device tables:
+	// the question there is who has one, which no other view answers.
+	let showingLicenses = $derived(kindFilter === 'licenses');
+	let showingCables = $derived(kindFilter === 'cables');
 	// Bundles → products → single units, from most structure to least. `devices`
 	// is one flat row per unit and only exists as a table: a photo wall of forty
 	// identical lamps says nothing the product tile doesn't.
@@ -90,6 +106,7 @@
 			category: categoryFilter,
 			group: grouping === 'bundles' ? '' : grouping,
 			view: layout === 'grid' ? 'grid' : '',
+			kind: kindFilter,
 			ctype: cableTypeFilter,
 			conn: connectorFilter,
 			lmin: lengthMin,
@@ -182,6 +199,30 @@
 	// A pool of lamps shouldn't grow a row of controls that can only ever match
 	// nothing, so the cable filters appear once the pool holds a cable.
 	let hasCables = $derived(assets.some((a) => isCable(a.product)));
+	// From the license list itself rather than from `assets`: it also holds the
+	// licenses another org lent to a production this user crews, which is how
+	// they find the key without belonging to the org that keeps it.
+	let hasLicenses = $derived((getLicenses(filterOrgId || undefined).current?.length ?? 0) > 0);
+
+	// The select's value: a kind, or `ctype:<type>` for one cable type.
+	let kindValue = $derived(cableTypeFilter ? `ctype:${cableTypeFilter}` : kindFilter);
+
+	function setKind(value: string) {
+		const type = value.startsWith('ctype:') ? value.slice('ctype:'.length) : '';
+		const next: Kind = type ? 'cables' : (kinds.find((k) => k === value) ?? '');
+		// Neither list's selection means anything in the other.
+		if ((next === 'licenses') !== showingLicenses) selectedAssetIds.clear();
+		kindFilter = next;
+		cableTypeFilter = type;
+		// The connector and length boxes go with the cables; left set, they would
+		// keep filtering a list that no longer shows them.
+		if (next !== 'cables') {
+			connectorFilter = '';
+			lengthMin = '';
+			lengthMax = '';
+		}
+		if (next === 'licenses' && showingRetired) statusFilter = '';
+	}
 	const collator = new Intl.Collator('de', { numeric: true });
 	let cableTypes = $derived(
 		[...new Set(assets.map((a) => a.product.cableType).filter((t): t is string => !!t))].sort(
@@ -203,12 +244,13 @@
 
 	// A connector matches on either end: "everything with a TRUE1 on it" is the
 	// question, and which end it is on is not something anyone knows in advance.
-	function matchesCable(product: {
-		cableType: string | null;
-		connectorA: string | null;
-		connectorB: string | null;
-		lengthCm: number | null;
-	}) {
+	function matchesKind(product: CableAttrs & { isLicense: boolean }) {
+		if (kindFilter === 'devices') return !isCable(product) && !product.isLicense;
+		if (kindFilter === 'cables') return isCable(product) && matchesCable(product);
+		return true;
+	}
+
+	function matchesCable(product: CableAttrs) {
 		if (cableTypeFilter && product.cableType !== cableTypeFilter) return false;
 		if (
 			connectorFilter &&
@@ -226,7 +268,7 @@
 		baseAssets
 			.filter((a) => (!statusFilter || showingRetired ? true : a.status === statusFilter))
 			.filter((a) => (!categoryFilter ? true : a.product.categoryId === categoryFilter))
-			.filter((a) => matchesCable(a.product))
+			.filter((a) => matchesKind(a.product))
 	);
 
 	let groups = $derived(
@@ -406,7 +448,7 @@
 								.filter((a) => !a.parentAssetId)
 								.filter((a) => !statusFilter || a.status === statusFilter)
 								.filter((a) => !categoryFilter || a.product.categoryId === categoryFilter)
-								.filter((a) => matchesCable(a.product));
+								.filter((a) => matchesKind(a.product));
 							return {
 								...inst,
 								filteredAssets,
@@ -572,14 +614,29 @@
 			allowEmpty
 			allLabel="All Categories"
 		/>
-		{#if hasCables}
+		{#if hasCables || hasLicenses || kindFilter}
+			<!-- Every cable is a kind of its own; one cable type narrows it further. -->
 			<select
-				bind:value={cableTypeFilter}
+				value={kindValue}
+				onchange={(e) => setKind((e.currentTarget as HTMLSelectElement).value)}
 				class="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
 			>
 				<option value="">All types</option>
-				{#each cableTypes as type (type)}<option value={type}>{type}</option>{/each}
+				<option value="devices">Devices</option>
+				{#if hasLicenses || showingLicenses}
+					<option value="licenses">Licenses</option>
+				{/if}
+				{#if hasCables || showingCables}
+					<option value="cables">Cables</option>
+				{/if}
+				{#if cableTypes.length > 0}
+					<optgroup label="By cable type">
+						{#each cableTypes as type (type)}<option value="ctype:{type}">{type}</option>{/each}
+					</optgroup>
+				{/if}
 			</select>
+		{/if}
+		{#if hasCables && showingCables}
 			<select
 				bind:value={connectorFilter}
 				class="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
@@ -600,7 +657,7 @@
 				class="h-10 w-20 rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
 			/>
 		{/if}
-		<div class="flex flex-wrap items-center gap-1">
+		<div class="flex flex-wrap items-center gap-1 {showingLicenses ? 'hidden' : ''}">
 			{#each statusFilterOptions as [val, label] (val)}
 				<button
 					type="button"
@@ -611,7 +668,7 @@
 				>
 			{/each}
 		</div>
-		<div class="flex flex-wrap items-center gap-3 sm:ml-auto">
+		<div class="flex flex-wrap items-center gap-3 sm:ml-auto {showingLicenses ? 'hidden' : ''}">
 			<!-- Retired units have no bundles to group by, and the grid has no flat
 			     list — so a button that could only fall back to another is left out. -->
 			{#if !showingRetired || layout === 'list'}
@@ -706,7 +763,14 @@
 		{/if}
 	{/snippet}
 
-	{#if !assetsQuery.ready}
+	{#if showingLicenses}
+		<LicenseList
+			organizationId={filterOrgId}
+			search={searchQuery}
+			categoryId={categoryFilter}
+			selectedIds={selectedAssetIds}
+		/>
+	{:else if !assetsQuery.ready}
 		<ContentSkeleton shape="table" count={10} />
 	{:else if !hasResults}
 		<div class="rounded-md border">

@@ -91,7 +91,8 @@
 		categoryId: '',
 		imagePath: '',
 		netPurchasePrice: undefined,
-		cable: null
+		cable: null,
+		isLicense: false
 	});
 
 	$effect(() => {
@@ -114,7 +115,7 @@
 	function handleProductCreate(name: string) {
 		// A fresh object, not a mutation: ProductFields keys its "is the name still
 		// the derived one?" bookkeeping to the draft it was handed.
-		newProductDraft = { ...newProductDraft, name, cable: null };
+		newProductDraft = { ...newProductDraft, name, cable: null, isLicense: false };
 		newProductOpen = true;
 	}
 
@@ -127,7 +128,8 @@
 		pendingProduct = { ...newProductDraft };
 		// A cable almost never carries a sticker — the batch form starts untagged
 		// for the same reason. Only set on the way in, so unticking it sticks.
-		if (cableInputFrom(newProductDraft.cable)) noAssetTag = true;
+		// A license has nothing to stick one on.
+		if (cableInputFrom(newProductDraft.cable) || newProductDraft.isLicense) noAssetTag = true;
 		newProductOpen = false;
 	}
 
@@ -227,6 +229,7 @@
 				newProductImagePath: product.id ? undefined : pendingProduct?.imagePath || undefined,
 				newProductNetPurchasePrice: product.id ? undefined : pendingProduct?.netPurchasePrice,
 				newProductCable: product.id ? undefined : cableInputFrom(pendingProduct?.cable ?? null),
+				newProductIsLicense: product.id ? undefined : pendingProduct?.isLicense || undefined,
 				categoryId: product.id ? undefined : pendingProduct?.categoryId,
 				copyProductAccessories:
 					copyAccessories && (accessoryProfile?.accessories.length ?? 0) > 0 ? true : undefined,

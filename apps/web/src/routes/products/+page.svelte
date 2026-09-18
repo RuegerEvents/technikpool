@@ -119,7 +119,8 @@
 		categoryId: '',
 		imagePath: '',
 		netPurchasePrice: undefined,
-		cable: null
+		cable: null,
+		isLicense: false
 	});
 	let manufacturer = $state<{ id: string | null; name: string } | null>(null);
 	// One price per org the user manages — prices are per-org, and undefined
@@ -145,7 +146,8 @@
 			categoryId: product.categoryId,
 			imagePath: product.imagePath ?? '',
 			netPurchasePrice: undefined,
-			cable: cableDraftFrom(product)
+			cable: cableDraftFrom(product),
+			isLicense: product.isLicense
 		};
 	});
 
@@ -183,6 +185,7 @@
 			(draft.name.trim() !== current.name ||
 				manufacturer?.id !== current.manufacturerId ||
 				draft.categoryId !== current.categoryId ||
+				draft.isLicense !== current.isLicense ||
 				cableDirty)
 	);
 	let imageDirty = $derived(
@@ -224,7 +227,8 @@
 								name: draft.name,
 								manufacturerId: manufacturer.id,
 								categoryId: draft.categoryId,
-								cable: cableDraftInput
+								cable: cableDraftInput,
+								isLicense: draft.isLicense
 							}),
 					imagePath: draft.imagePath
 				});

@@ -303,6 +303,12 @@ model Product {
   /// Whole centimetres; the UI reads and writes metres.
   lengthCm   Int?
 
+  /// A software licence rather than a device: what is lent out is the right
+  /// to use it, and each unit carries its own credentials (LicenseCredential).
+  /// A flag and not a category, because the category is what bills — a
+  /// Resolume licence is Video like the media server it runs on.
+  isLicense Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   assets    Asset[]
@@ -408,10 +414,33 @@ model Asset {
   productionItems ProductionItem[]
   transactions    AssetTransaction[]
   inspections     Inspection[]
+  credentials     LicenseCredential?
 
   // The one index this schema declares: every booking, scan and print walks
   // parent → accessories, and Prisma indexes no relation scalar on its own.
   @@index([parentAssetId])
+}
+
+// The secret half of a licence unit — its key, or the account it is used
+// through. A table of its own rather than columns on Asset, so that no existing
+// `include`/`findMany` on assets can carry it to a browser by accident: the only
+// way to it is `revealLicenseCredentials`, which checks who is asking and writes
+// the asking into the asset's history. See src/lib/server/services/licenses.ts.
+model LicenseCredential {
+  id      String @id @default(cuid())
+  assetId String @unique
+  asset   Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  /// `key` or `login` — which fields the sealed payload holds. Not secret, and
+  /// kept outside the ciphertext so a page can say what is stored without
+  /// decrypting it.
+  kind String
+
+  /// AES-256-GCM over the JSON payload, sealed by src/lib/server/secrets.ts.
+  sealed String @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // The catalog entry for a kind of bundle (e.g. "Standard Lighting Kit") — like

@@ -98,6 +98,11 @@ export type Location = Prisma.LocationModel
  */
 export type Asset = Prisma.AssetModel
 /**
+ * Model LicenseCredential
+ * 
+ */
+export type LicenseCredential = Prisma.LicenseCredentialModel
+/**
  * Model BundleTemplate
  * 
  */

@@ -147,6 +147,7 @@ msgstr "Org"
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/assets/license-list.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/invoices/+page.svelte
 #: src/routes/offers/+page.svelte
@@ -178,6 +179,8 @@ msgstr "Crew"
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 #: src/routes/+page.svelte
@@ -278,6 +281,7 @@ msgstr "Name"
 msgid "Email"
 msgstr "Email"
 
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
@@ -428,6 +432,7 @@ msgstr "Bundle"
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/assets/license-list.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/offers/new/+page.svelte
@@ -696,6 +701,7 @@ msgstr "<0/> Create another after saving"
 
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -785,6 +791,8 @@ msgstr "Login to Technikpool"
 msgid "Enter your email below to login to your account"
 msgstr "Enter your email below to login to your account"
 
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+#: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
 #: src/routes/auth/login/+page.svelte
 #: src/routes/auth/register/+page.svelte
 #: src/routes/profile/+page.svelte
@@ -998,6 +1006,7 @@ msgstr "Asset removed from bundle"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Close"
 msgstr "Close"
@@ -1328,6 +1337,7 @@ msgstr "Location"
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/routes/admin/categories/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -1674,6 +1684,7 @@ msgstr "Camera access denied. Switched to text input."
 msgid "Assigned to location"
 msgstr "Assigned to location"
 
+#: src/routes/assets/license-list.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Checked out"
@@ -1808,6 +1819,7 @@ msgid "Search locations…"
 msgstr "Search locations…"
 
 #: src/routes/assets/+page.svelte
+#: src/routes/assets/license-list.svelte
 msgid "All"
 msgstr "All"
 
@@ -1819,6 +1831,7 @@ msgstr "Select all"
 #~ msgstr "Deselect all"
 
 #: src/routes/assets/+page.svelte
+#: src/routes/assets/license-list.svelte
 msgid "Try a different search term or filter."
 msgstr "Try a different search term or filter."
 
@@ -2411,6 +2424,7 @@ msgstr "No bundles yet. <0>Create your first bundle →</0>"
 msgid "Devices | Technikpool"
 msgstr "Devices | Technikpool"
 
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 msgid "Devices"
 msgstr "Devices"
@@ -3071,6 +3085,7 @@ msgstr "View invoice {0}"
 msgid "Copying…"
 msgstr "Copying…"
 
+#: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 msgid "Copy"
 msgstr "Copy"
@@ -3208,6 +3223,7 @@ msgstr "Continue"
 #~ msgstr "Background removed"
 
 #: src/lib/components/ui/image-upload/image-upload.svelte
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
 msgid "Removing…"
 msgstr "Removing…"
 
@@ -7470,3 +7486,235 @@ msgstr "<0/> Catalog Log"
 #: src/routes/+layout.svelte
 msgid "<0/> Admin <1/>"
 msgstr "<0/> Admin <1/>"
+
+#: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
+msgid "Copied to clipboard"
+msgstr "Copied to clipboard"
+
+#: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
+msgid "Could not copy — select the text instead"
+msgstr "Could not copy — select the text instead"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "Credentials saved"
+msgstr "Credentials saved"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Credentials removed"
+msgstr "Credentials removed"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "Nobody — not checked out to a production."
+msgstr "Nobody — not checked out to a production."
+
+#. 0: formatDate(holder.since)
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "· since {0}"
+msgstr "· since {0}"
+
+#. 0: holder.checkedOutBy
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "· checked out by {0}"
+msgstr "· checked out by {0}"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+#: src/routes/assets/license-list.svelte
+msgid "Currently with"
+msgstr "Currently with"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+#: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
+msgid "License key"
+msgstr "License key"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+#: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
+msgid "Username"
+msgstr "Username"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+#: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
+msgid "Note"
+msgstr "Note"
+
+#~ msgid "Hides itself in {0} s. Viewing is recorded in the audit log."
+#~ msgstr "Hides itself in {0} s. Viewing is recorded in the audit log."
+
+#~ msgid "Hide"
+#~ msgstr "Hide"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "License key stored"
+msgstr "License key stored"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Login stored"
+msgstr "Login stored"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "Hidden until you ask for it. Viewing is recorded in the audit log."
+msgstr "Hidden until you ask for it. Viewing is recorded in the audit log."
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "Only shown to whoever has this license checked out to their production, and to the organization that keeps it."
+msgstr "Only shown to whoever has this license checked out to their production, and to the organization that keeps it."
+
+#: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
+msgid "Opening…"
+msgstr "Opening…"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "Show credentials"
+msgstr "Show credentials"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "No credentials stored for this license yet."
+msgstr "No credentials stored for this license yet."
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "Replace credentials"
+msgstr "Replace credentials"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "Add credentials"
+msgstr "Add credentials"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "License credentials"
+msgstr "License credentials"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "Username & password"
+msgstr "Username & password"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "Registered email, activations left…"
+msgstr "Registered email, activations left…"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "Stored encrypted with the credentials."
+msgstr "Stored encrypted with the credentials."
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "This replaces what is stored. The current credentials are not shown here."
+msgstr "This replaces what is stored. The current credentials are not shown here."
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "Remove credentials?"
+msgstr "Remove credentials?"
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "The stored key or login is deleted and cannot be recovered. The license itself stays."
+msgstr "The stored key or login is deleted and cannot be recovered. The license itself stays."
+
+#: src/lib/components/ui/license-credentials/license-credentials.svelte
+msgid "Remove credentials"
+msgstr "Remove credentials"
+
+#: src/lib/error-messages.svelte.ts
+msgid "This unit is not a license, so it has no credentials."
+msgstr "This unit is not a license, so it has no credentials."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Credentials are only shown to whoever has this license checked out to their production, and to the organization that keeps it."
+msgstr "Credentials are only shown to whoever has this license checked out to their production, and to the organization that keeps it."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Only org admins and owners can change a license's credentials."
+msgstr "Only org admins and owners can change a license's credentials."
+
+#: src/lib/error-messages.svelte.ts
+msgid "No credentials are stored for this license yet."
+msgstr "No credentials are stored for this license yet."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Enter a license key, or a username and password."
+msgstr "Enter a license key, or a username and password."
+
+#: src/routes/assets/license-list.svelte
+msgid "Not checked out"
+msgstr "Not checked out"
+
+#: src/routes/assets/license-list.svelte
+msgid "Mark a product as a software license to register licenses."
+msgstr "Mark a product as a software license to register licenses."
+
+#: src/routes/assets/license-list.svelte
+msgid "No licenses"
+msgstr "No licenses"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/assets/license-list.svelte
+msgid "License"
+msgstr "License"
+
+#: src/routes/assets/license-list.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Credentials"
+msgstr "Credentials"
+
+#. 0: license.location.name
+#: src/routes/assets/license-list.svelte
+msgid "In stock · {0}"
+msgstr "In stock · {0}"
+
+#. 0: formatDate(holder.since)
+#: src/routes/assets/license-list.svelte
+msgid "since {0}"
+msgstr "since {0}"
+
+#: src/routes/assets/license-list.svelte
+msgid "Key"
+msgstr "Key"
+
+#~ msgid "Show"
+#~ msgstr "Show"
+
+#: src/routes/assets/+page.svelte
+msgid "Licenses"
+msgstr "Licenses"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "<0/> This is a software license"
+msgstr "<0/> This is a software license"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "Each unit gets its own license key or login, stored encrypted. It is only shown on request — to whoever has the license checked out to their production, and to the organization that keeps it."
+msgstr "Each unit gets its own license key or login, stored encrypted. It is only shown on request — to whoever has the license checked out to their production, and to the organization that keeps it."
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Who has this license, and its key or login. The credentials are stored encrypted and only shown on request."
+msgstr "Who has this license, and its key or login. The credentials are stored encrypted and only shown on request."
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "for <0/>"
+msgstr "for <0/>"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Credentials viewed <0/>"
+msgstr "Credentials viewed <0/>"
+
+#: src/routes/assets/license-list.svelte
+msgid "Account"
+msgstr "Account"
+
+#. 0: secondsLeft
+#: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
+msgid "Closes itself in {0} s. Viewing is recorded in the audit log."
+msgstr "Closes itself in {0} s. Viewing is recorded in the audit log."
+
+#: src/routes/assets/+page.svelte
+msgid "Cables"
+msgstr "Cables"
+
+#~ msgid "All cables"
+#~ msgstr "All cables"
+
+#: src/routes/assets/+page.svelte
+msgid "By cable type"
+msgstr "By cable type"

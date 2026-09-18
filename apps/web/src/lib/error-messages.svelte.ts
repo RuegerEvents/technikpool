@@ -132,6 +132,18 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 		case 'cable_row_incomplete':
 			return `"${p0}" says nothing about the cable — add ends, a length or a type.`;
 
+		// Licences
+		case 'license_not_a_license':
+			return 'This unit is not a license, so it has no credentials.';
+		case 'license_reveal_forbidden':
+			return 'Credentials are only shown to whoever has this license checked out to their production, and to the organization that keeps it.';
+		case 'license_edit_forbidden':
+			return "Only org admins and owners can change a license's credentials.";
+		case 'license_nothing_stored':
+			return 'No credentials are stored for this license yet.';
+		case 'license_credentials_empty':
+			return 'Enter a license key, or a username and password.';
+
 		// Accessories
 		case 'accessory_self':
 			return 'A unit cannot be its own accessory.';

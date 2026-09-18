@@ -71,6 +71,25 @@ export type AccessoryDetachedData = {
 	parentLabel: string;
 };
 
+/** A licence's credentials were stored or replaced. The values never go in here. */
+export type CredentialsSetData = {
+	type: 'CREDENTIALS_SET';
+	kind: 'key' | 'login';
+};
+
+export type CredentialsRemovedData = { type: 'CREDENTIALS_REMOVED' };
+
+/**
+ * Someone looked at a licence's credentials, and on what grounds — the entry
+ * that makes "who has seen the key" answerable after the fact.
+ */
+export type CredentialsRevealedData = {
+	type: 'CREDENTIALS_REVEALED';
+	via: 'location' | 'production' | 'admin';
+	productionId?: string;
+	productionName?: string;
+};
+
 export type TransactionData =
 	| CreatedData
 	| UpdatedData
@@ -82,4 +101,7 @@ export type TransactionData =
 	| ApprovedData
 	| DeclinedData
 	| AccessoryAttachedData
-	| AccessoryDetachedData;
+	| AccessoryDetachedData
+	| CredentialsSetData
+	| CredentialsRemovedData
+	| CredentialsRevealedData;

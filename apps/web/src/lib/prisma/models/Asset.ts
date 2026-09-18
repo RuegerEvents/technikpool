@@ -313,6 +313,7 @@ export type AssetWhereInput = {
   productionItems?: Prisma.ProductionItemListRelationFilter
   transactions?: Prisma.AssetTransactionListRelationFilter
   inspections?: Prisma.InspectionListRelationFilter
+  credentials?: Prisma.XOR<Prisma.LicenseCredentialNullableScalarRelationFilter, Prisma.LicenseCredentialWhereInput> | null
 }
 
 export type AssetOrderByWithRelationInput = {
@@ -341,6 +342,7 @@ export type AssetOrderByWithRelationInput = {
   productionItems?: Prisma.ProductionItemOrderByRelationAggregateInput
   transactions?: Prisma.AssetTransactionOrderByRelationAggregateInput
   inspections?: Prisma.InspectionOrderByRelationAggregateInput
+  credentials?: Prisma.LicenseCredentialOrderByWithRelationInput
 }
 
 export type AssetWhereUniqueInput = Prisma.AtLeast<{
@@ -372,6 +374,7 @@ export type AssetWhereUniqueInput = Prisma.AtLeast<{
   productionItems?: Prisma.ProductionItemListRelationFilter
   transactions?: Prisma.AssetTransactionListRelationFilter
   inspections?: Prisma.InspectionListRelationFilter
+  credentials?: Prisma.XOR<Prisma.LicenseCredentialNullableScalarRelationFilter, Prisma.LicenseCredentialWhereInput> | null
 }, "id" | "assetTag">
 
 export type AssetOrderByWithAggregationInput = {
@@ -441,6 +444,7 @@ export type AssetCreateInput = {
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateInput = {
@@ -464,6 +468,7 @@ export type AssetUncheckedCreateInput = {
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionUncheckedCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUpdateInput = {
@@ -487,6 +492,7 @@ export type AssetUpdateInput = {
   productionItems?: Prisma.ProductionItemUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateInput = {
@@ -510,6 +516,7 @@ export type AssetUncheckedUpdateInput = {
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUncheckedUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateManyInput = {
@@ -833,6 +840,20 @@ export type AssetUncheckedUpdateManyWithoutParentNestedInput = {
   deleteMany?: Prisma.AssetScalarWhereInput | Prisma.AssetScalarWhereInput[]
 }
 
+export type AssetCreateNestedOneWithoutCredentialsInput = {
+  create?: Prisma.XOR<Prisma.AssetCreateWithoutCredentialsInput, Prisma.AssetUncheckedCreateWithoutCredentialsInput>
+  connectOrCreate?: Prisma.AssetCreateOrConnectWithoutCredentialsInput
+  connect?: Prisma.AssetWhereUniqueInput
+}
+
+export type AssetUpdateOneRequiredWithoutCredentialsNestedInput = {
+  create?: Prisma.XOR<Prisma.AssetCreateWithoutCredentialsInput, Prisma.AssetUncheckedCreateWithoutCredentialsInput>
+  connectOrCreate?: Prisma.AssetCreateOrConnectWithoutCredentialsInput
+  upsert?: Prisma.AssetUpsertWithoutCredentialsInput
+  connect?: Prisma.AssetWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AssetUpdateToOneWithWhereWithoutCredentialsInput, Prisma.AssetUpdateWithoutCredentialsInput>, Prisma.AssetUncheckedUpdateWithoutCredentialsInput>
+}
+
 export type AssetCreateNestedManyWithoutBundleInput = {
   create?: Prisma.XOR<Prisma.AssetCreateWithoutBundleInput, Prisma.AssetUncheckedCreateWithoutBundleInput> | Prisma.AssetCreateWithoutBundleInput[] | Prisma.AssetUncheckedCreateWithoutBundleInput[]
   connectOrCreate?: Prisma.AssetCreateOrConnectWithoutBundleInput | Prisma.AssetCreateOrConnectWithoutBundleInput[]
@@ -937,6 +958,7 @@ export type AssetCreateWithoutOrganizationInput = {
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutOrganizationInput = {
@@ -959,6 +981,7 @@ export type AssetUncheckedCreateWithoutOrganizationInput = {
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionUncheckedCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutOrganizationInput = {
@@ -1029,6 +1052,7 @@ export type AssetCreateWithoutProductInput = {
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutProductInput = {
@@ -1051,6 +1075,7 @@ export type AssetUncheckedCreateWithoutProductInput = {
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionUncheckedCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutProductInput = {
@@ -1099,6 +1124,7 @@ export type AssetCreateWithoutLocationInput = {
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutLocationInput = {
@@ -1121,6 +1147,7 @@ export type AssetUncheckedCreateWithoutLocationInput = {
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionUncheckedCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutLocationInput = {
@@ -1169,6 +1196,7 @@ export type AssetCreateWithoutAccessoriesInput = {
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutAccessoriesInput = {
@@ -1191,6 +1219,7 @@ export type AssetUncheckedCreateWithoutAccessoriesInput = {
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionUncheckedCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutAccessoriesInput = {
@@ -1218,6 +1247,7 @@ export type AssetCreateWithoutParentInput = {
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutParentInput = {
@@ -1240,6 +1270,7 @@ export type AssetUncheckedCreateWithoutParentInput = {
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionUncheckedCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutParentInput = {
@@ -1283,6 +1314,7 @@ export type AssetUpdateWithoutAccessoriesInput = {
   productionItems?: Prisma.ProductionItemUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutAccessoriesInput = {
@@ -1305,6 +1337,7 @@ export type AssetUncheckedUpdateWithoutAccessoriesInput = {
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUncheckedUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUpsertWithWhereUniqueWithoutParentInput = {
@@ -1321,6 +1354,114 @@ export type AssetUpdateWithWhereUniqueWithoutParentInput = {
 export type AssetUpdateManyWithWhereWithoutParentInput = {
   where: Prisma.AssetScalarWhereInput
   data: Prisma.XOR<Prisma.AssetUpdateManyMutationInput, Prisma.AssetUncheckedUpdateManyWithoutParentInput>
+}
+
+export type AssetCreateWithoutCredentialsInput = {
+  id?: string
+  serialNumber?: string | null
+  assetTag?: string | null
+  status?: string
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutAssetsInput
+  product: Prisma.ProductCreateNestedOneWithoutAssetsInput
+  location: Prisma.LocationCreateNestedOneWithoutAssetsInput
+  bundle?: Prisma.AssetBundleCreateNestedOneWithoutAssetsInput
+  parent?: Prisma.AssetCreateNestedOneWithoutAccessoriesInput
+  accessories?: Prisma.AssetCreateNestedManyWithoutParentInput
+  productionItems?: Prisma.ProductionItemCreateNestedManyWithoutAssetInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutAssetInput
+  inspections?: Prisma.InspectionCreateNestedManyWithoutAssetInput
+}
+
+export type AssetUncheckedCreateWithoutCredentialsInput = {
+  id?: string
+  organizationId: string
+  productId: string
+  locationId: string
+  serialNumber?: string | null
+  assetTag?: string | null
+  status?: string
+  bundleId?: string | null
+  parentAssetId?: string | null
+  generatedImagePath?: string | null
+  generatedImageFingerprint?: string | null
+  purchaseDate?: Date | string | null
+  inspectionIntervalMonths?: number | null
+  nextInspectionDue?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accessories?: Prisma.AssetUncheckedCreateNestedManyWithoutParentInput
+  productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutAssetInput
+  inspections?: Prisma.InspectionUncheckedCreateNestedManyWithoutAssetInput
+}
+
+export type AssetCreateOrConnectWithoutCredentialsInput = {
+  where: Prisma.AssetWhereUniqueInput
+  create: Prisma.XOR<Prisma.AssetCreateWithoutCredentialsInput, Prisma.AssetUncheckedCreateWithoutCredentialsInput>
+}
+
+export type AssetUpsertWithoutCredentialsInput = {
+  update: Prisma.XOR<Prisma.AssetUpdateWithoutCredentialsInput, Prisma.AssetUncheckedUpdateWithoutCredentialsInput>
+  create: Prisma.XOR<Prisma.AssetCreateWithoutCredentialsInput, Prisma.AssetUncheckedCreateWithoutCredentialsInput>
+  where?: Prisma.AssetWhereInput
+}
+
+export type AssetUpdateToOneWithWhereWithoutCredentialsInput = {
+  where?: Prisma.AssetWhereInput
+  data: Prisma.XOR<Prisma.AssetUpdateWithoutCredentialsInput, Prisma.AssetUncheckedUpdateWithoutCredentialsInput>
+}
+
+export type AssetUpdateWithoutCredentialsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutAssetsNestedInput
+  product?: Prisma.ProductUpdateOneRequiredWithoutAssetsNestedInput
+  location?: Prisma.LocationUpdateOneRequiredWithoutAssetsNestedInput
+  bundle?: Prisma.AssetBundleUpdateOneWithoutAssetsNestedInput
+  parent?: Prisma.AssetUpdateOneWithoutAccessoriesNestedInput
+  accessories?: Prisma.AssetUpdateManyWithoutParentNestedInput
+  productionItems?: Prisma.ProductionItemUpdateManyWithoutAssetNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutAssetNestedInput
+  inspections?: Prisma.InspectionUpdateManyWithoutAssetNestedInput
+}
+
+export type AssetUncheckedUpdateWithoutCredentialsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  productId?: Prisma.StringFieldUpdateOperationsInput | string
+  locationId?: Prisma.StringFieldUpdateOperationsInput | string
+  serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assetTag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  bundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  parentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  generatedImageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nextInspectionDue?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accessories?: Prisma.AssetUncheckedUpdateManyWithoutParentNestedInput
+  productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutAssetNestedInput
+  inspections?: Prisma.InspectionUncheckedUpdateManyWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutBundleInput = {
@@ -1343,6 +1484,7 @@ export type AssetCreateWithoutBundleInput = {
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutBundleInput = {
@@ -1365,6 +1507,7 @@ export type AssetUncheckedCreateWithoutBundleInput = {
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionUncheckedCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutBundleInput = {
@@ -1413,6 +1556,7 @@ export type AssetCreateWithoutProductionItemsInput = {
   accessories?: Prisma.AssetCreateNestedManyWithoutParentInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutProductionItemsInput = {
@@ -1435,6 +1579,7 @@ export type AssetUncheckedCreateWithoutProductionItemsInput = {
   accessories?: Prisma.AssetUncheckedCreateNestedManyWithoutParentInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionUncheckedCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutProductionItemsInput = {
@@ -1473,6 +1618,7 @@ export type AssetUpdateWithoutProductionItemsInput = {
   accessories?: Prisma.AssetUpdateManyWithoutParentNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutProductionItemsInput = {
@@ -1495,6 +1641,7 @@ export type AssetUncheckedUpdateWithoutProductionItemsInput = {
   accessories?: Prisma.AssetUncheckedUpdateManyWithoutParentNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUncheckedUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutTransactionsInput = {
@@ -1517,6 +1664,7 @@ export type AssetCreateWithoutTransactionsInput = {
   accessories?: Prisma.AssetCreateNestedManyWithoutParentInput
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutTransactionsInput = {
@@ -1539,6 +1687,7 @@ export type AssetUncheckedCreateWithoutTransactionsInput = {
   accessories?: Prisma.AssetUncheckedCreateNestedManyWithoutParentInput
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
   inspections?: Prisma.InspectionUncheckedCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutTransactionsInput = {
@@ -1577,6 +1726,7 @@ export type AssetUpdateWithoutTransactionsInput = {
   accessories?: Prisma.AssetUpdateManyWithoutParentNestedInput
   productionItems?: Prisma.ProductionItemUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutTransactionsInput = {
@@ -1599,6 +1749,7 @@ export type AssetUncheckedUpdateWithoutTransactionsInput = {
   accessories?: Prisma.AssetUncheckedUpdateManyWithoutParentNestedInput
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUncheckedUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutInspectionsInput = {
@@ -1621,6 +1772,7 @@ export type AssetCreateWithoutInspectionsInput = {
   accessories?: Prisma.AssetCreateNestedManyWithoutParentInput
   productionItems?: Prisma.ProductionItemCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutInspectionsInput = {
@@ -1643,6 +1795,7 @@ export type AssetUncheckedCreateWithoutInspectionsInput = {
   accessories?: Prisma.AssetUncheckedCreateNestedManyWithoutParentInput
   productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutAssetInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutAssetInput
+  credentials?: Prisma.LicenseCredentialUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutInspectionsInput = {
@@ -1681,6 +1834,7 @@ export type AssetUpdateWithoutInspectionsInput = {
   accessories?: Prisma.AssetUpdateManyWithoutParentNestedInput
   productionItems?: Prisma.ProductionItemUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutInspectionsInput = {
@@ -1703,6 +1857,7 @@ export type AssetUncheckedUpdateWithoutInspectionsInput = {
   accessories?: Prisma.AssetUncheckedUpdateManyWithoutParentNestedInput
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateManyOrganizationInput = {
@@ -1743,6 +1898,7 @@ export type AssetUpdateWithoutOrganizationInput = {
   productionItems?: Prisma.ProductionItemUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutOrganizationInput = {
@@ -1765,6 +1921,7 @@ export type AssetUncheckedUpdateWithoutOrganizationInput = {
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUncheckedUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateManyWithoutOrganizationInput = {
@@ -1823,6 +1980,7 @@ export type AssetUpdateWithoutProductInput = {
   productionItems?: Prisma.ProductionItemUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutProductInput = {
@@ -1845,6 +2003,7 @@ export type AssetUncheckedUpdateWithoutProductInput = {
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUncheckedUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateManyWithoutProductInput = {
@@ -1903,6 +2062,7 @@ export type AssetUpdateWithoutLocationInput = {
   productionItems?: Prisma.ProductionItemUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutLocationInput = {
@@ -1925,6 +2085,7 @@ export type AssetUncheckedUpdateWithoutLocationInput = {
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUncheckedUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateManyWithoutLocationInput = {
@@ -1983,6 +2144,7 @@ export type AssetUpdateWithoutParentInput = {
   productionItems?: Prisma.ProductionItemUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutParentInput = {
@@ -2005,6 +2167,7 @@ export type AssetUncheckedUpdateWithoutParentInput = {
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUncheckedUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateManyWithoutParentInput = {
@@ -2063,6 +2226,7 @@ export type AssetUpdateWithoutBundleInput = {
   productionItems?: Prisma.ProductionItemUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutBundleInput = {
@@ -2085,6 +2249,7 @@ export type AssetUncheckedUpdateWithoutBundleInput = {
   productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutAssetNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutAssetNestedInput
   inspections?: Prisma.InspectionUncheckedUpdateManyWithoutAssetNestedInput
+  credentials?: Prisma.LicenseCredentialUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateManyWithoutBundleInput = {
@@ -2189,6 +2354,7 @@ export type AssetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   productionItems?: boolean | Prisma.Asset$productionItemsArgs<ExtArgs>
   transactions?: boolean | Prisma.Asset$transactionsArgs<ExtArgs>
   inspections?: boolean | Prisma.Asset$inspectionsArgs<ExtArgs>
+  credentials?: boolean | Prisma.Asset$credentialsArgs<ExtArgs>
   _count?: boolean | Prisma.AssetCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["asset"]>
 
@@ -2270,6 +2436,7 @@ export type AssetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   productionItems?: boolean | Prisma.Asset$productionItemsArgs<ExtArgs>
   transactions?: boolean | Prisma.Asset$transactionsArgs<ExtArgs>
   inspections?: boolean | Prisma.Asset$inspectionsArgs<ExtArgs>
+  credentials?: boolean | Prisma.Asset$credentialsArgs<ExtArgs>
   _count?: boolean | Prisma.AssetCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AssetIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2299,6 +2466,7 @@ export type $AssetPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     productionItems: Prisma.$ProductionItemPayload<ExtArgs>[]
     transactions: Prisma.$AssetTransactionPayload<ExtArgs>[]
     inspections: Prisma.$InspectionPayload<ExtArgs>[]
+    credentials: Prisma.$LicenseCredentialPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2720,6 +2888,7 @@ export interface Prisma__AssetClient<T, Null = never, ExtArgs extends runtime.Ty
   productionItems<T extends Prisma.Asset$productionItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$productionItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   transactions<T extends Prisma.Asset$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   inspections<T extends Prisma.Asset$inspectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$inspectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InspectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  credentials<T extends Prisma.Asset$credentialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$credentialsArgs<ExtArgs>>): Prisma.Prisma__LicenseCredentialClient<runtime.Types.Result.GetResult<Prisma.$LicenseCredentialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3297,6 +3466,25 @@ export type Asset$inspectionsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.InspectionScalarFieldEnum | Prisma.InspectionScalarFieldEnum[]
+}
+
+/**
+ * Asset.credentials
+ */
+export type Asset$credentialsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LicenseCredential
+   */
+  select?: Prisma.LicenseCredentialSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LicenseCredential
+   */
+  omit?: Prisma.LicenseCredentialOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LicenseCredentialInclude<ExtArgs> | null
+  where?: Prisma.LicenseCredentialWhereInput
 }
 
 /**

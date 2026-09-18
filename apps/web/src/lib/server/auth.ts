@@ -50,7 +50,8 @@ const prefixes: Partial<Record<ModelName, string>> = {
 	Invoice: 'inv',
 	InvoiceItem: 'ivi',
 	OrgProductPrice: 'opp',
-	CatalogTransaction: 'cltx'
+	CatalogTransaction: 'cltx',
+	LicenseCredential: 'lcrd'
 };
 
 // Extend the client with prefixed IDs

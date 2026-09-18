@@ -33,6 +33,7 @@
 	import BulkActionsBar from '$lib/components/ui/bulk-actions-bar.svelte';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
 	import { Modal } from '$lib/components/ui/modal';
+	import { LicenseRevealModal } from '$lib/components/ui/license-credentials';
 	import { accessorySummary, nestAccessories, type Nested } from '$lib/production-items';
 
 	let { productionId }: { productionId: string } = $props();
@@ -478,6 +479,23 @@
 		} finally {
 			savingDuration = false;
 		}
+	}
+
+	// A license checked out here is what its crew needs the key for — this is
+	// the page they will be on. Whether they may see it is the server's call.
+	let credentialsFor = $state<{ assetId: string; label: string } | null>(null);
+	let credentialsOpen = $state(false);
+
+	function openCredentials(asset: {
+		id: string;
+		assetTag: string | null;
+		product: { name: string };
+	}) {
+		credentialsFor = {
+			assetId: asset.id,
+			label: asset.assetTag ? `${asset.product.name} · ${asset.assetTag}` : asset.product.name
+		};
+		credentialsOpen = true;
 	}
 </script>
 
@@ -982,6 +1000,15 @@
 														item.status
 													] ?? ''}">{statusLabels[item.status] ?? item.status}</span
 												>
+												{#if item.asset.product.isLicense && item.status === 'CHECKED_OUT'}
+													<button
+														type="button"
+														onclick={() => openCredentials(item.asset)}
+														class="rounded border px-2 py-0.5 text-xs transition-colors hover:bg-muted"
+													>
+														Credentials
+													</button>
+												{/if}
 												{#if canEdit && accessoriesChanged(item)}
 													<span
 														class="rounded bg-yellow-100 px-1.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
@@ -1139,3 +1166,9 @@
 		</Button>
 	{/snippet}
 </Modal>
+
+<LicenseRevealModal
+	bind:open={credentialsOpen}
+	assetId={credentialsFor?.assetId ?? null}
+	title={credentialsFor?.label ?? ''}
+/>

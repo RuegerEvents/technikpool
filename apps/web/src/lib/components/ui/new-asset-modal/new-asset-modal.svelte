@@ -163,7 +163,8 @@
 			categoryId: '',
 			imagePath: '',
 			netPurchasePrice: undefined,
-			cable: { cableType: '', connectorA: '', connectorB: '', lengthM: '' }
+			cable: { cableType: '', connectorA: '', connectorB: '', lengthM: '' },
+			isLicense: false
 		};
 	}
 

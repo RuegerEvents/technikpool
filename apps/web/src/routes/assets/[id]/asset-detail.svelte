@@ -41,6 +41,7 @@
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { NewAssetModal, type NewAssetModalHandle } from '$lib/components/ui/new-asset-modal';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
+	import { LicenseCredentials } from '$lib/components/ui/license-credentials';
 	import {
 		AssetStatusBadge,
 		assetStatusDescription,
@@ -433,7 +434,8 @@
 		categoryId: '',
 		imagePath: '',
 		netPurchasePrice: undefined,
-		cable: null
+		cable: null,
+		isLicense: false
 	});
 	let productManufacturer = $state<{ id: string | null; name: string } | null>(null);
 	let manufacturers = $derived(await getManufacturers());
@@ -462,7 +464,8 @@
 			imagePath: asset.product.imagePath ?? '',
 			// The owning org's price — prices are per-org now.
 			netPurchasePrice: orgNetPurchasePrice,
-			cable: cableDraftFrom(asset.product)
+			cable: cableDraftFrom(asset.product),
+			isLicense: asset.product.isLicense
 		};
 		productModalOpen = true;
 	}
@@ -480,7 +483,8 @@
 				name: productDraft.name,
 				categoryId: productDraft.categoryId,
 				imagePath: productDraft.imagePath,
-				cable: cableInputFrom(productDraft.cable)
+				cable: cableInputFrom(productDraft.cable),
+				isLicense: productDraft.isLicense
 			});
 			if ((productDraft.netPurchasePrice ?? null) !== (orgNetPurchasePrice ?? null)) {
 				await setOrgProductPrice({
@@ -524,6 +528,22 @@
 	</div>
 
 	<div class="grid gap-6 lg:grid-cols-2">
+		{#if asset.product.isLicense}
+			<!-- First, because for a license this is what the page is for. -->
+			<Card.Root class="lg:col-span-2">
+				<Card.Header>
+					<Card.Title>License</Card.Title>
+					<Card.Description>
+						Who has this license, and its key or login. The credentials are stored encrypted and
+						only shown on request.
+					</Card.Description>
+				</Card.Header>
+				<Card.Content>
+					<LicenseCredentials {assetId} />
+				</Card.Content>
+			</Card.Root>
+		{/if}
+
 		<!-- Asset details (left) -->
 		<Card.Root>
 			<Card.Header>
@@ -980,6 +1000,25 @@
 													href={resolve(`/assets/${tx.parentAssetId}`)}
 													class="text-foreground underline underline-offset-2">{tx.parentLabel}</a
 												>
+											{:else if tx?.type === 'CREDENTIALS_SET'}
+												{tx.kind === 'key' ? 'License key stored' : 'Login stored'}
+											{:else if tx?.type === 'CREDENTIALS_REMOVED'}
+												Credentials removed
+											{:else if tx?.type === 'CREDENTIALS_REVEALED'}
+												Credentials viewed
+												{#if tx.via === 'production' && tx.productionId && tx.productionName}
+													<span class="font-normal text-muted-foreground">
+														for
+														<a
+															href={item.productionRestricted
+																? undefined
+																: resolve(`/productions/${tx.productionId}`)}
+															class="font-medium text-foreground {item.productionRestricted
+																? ''
+																: 'underline underline-offset-2'}">{tx.productionName}</a
+														>
+													</span>
+												{/if}
 											{:else if tx?.type === 'ACCESSORY_DETACHED'}
 												Detached from
 												<a

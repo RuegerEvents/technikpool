@@ -38,6 +38,8 @@
 		netPurchasePrice: number | undefined;
 		/** null means "not a cable" — the four columns stay null on the row. */
 		cable: CableDraft | null;
+		/** A software license: each unit carries credentials. Never also a cable. */
+		isLicense: boolean;
 	};
 
 	/** A stored product → the form. Null for anything that is not a cable. */
@@ -120,7 +122,8 @@
 			categoryId: '',
 			imagePath: '',
 			netPurchasePrice: undefined,
-			cable: null
+			cable: null,
+			isLicense: false
 		}),
 		categories,
 		idPrefix = 'product',
@@ -170,6 +173,12 @@
 
 	function toggleCable(on: boolean) {
 		value.cable = on ? { cableType: '', connectorA: '', connectorB: '', lengthM: '' } : null;
+		if (on) value.isLicense = false;
+	}
+
+	function toggleLicense(on: boolean) {
+		value.isLicense = on;
+		if (on) value.cable = null;
 	}
 
 	// Picking a type fills in what this pool's newest cable of that type has —
@@ -273,16 +282,37 @@
 	<!-- Cables are the one product class the name alone can't answer questions
 	     about ("everything with a TRUE1 end", "all XLR ≥ 5 m"), so they get four
 	     columns of their own. The name stays the label everywhere. -->
-	<label class="flex cursor-pointer items-center gap-2 text-sm select-none">
-		<input
-			type="checkbox"
-			checked={!!value.cable}
-			disabled={identityDisabled}
-			onchange={(e) => toggleCable((e.currentTarget as HTMLInputElement).checked)}
-			class="h-4 w-4 rounded border-input"
-		/>
-		This is a cable
-	</label>
+	<div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+		<label class="flex cursor-pointer items-center gap-2 text-sm select-none">
+			<input
+				type="checkbox"
+				checked={!!value.cable}
+				disabled={identityDisabled}
+				onchange={(e) => toggleCable((e.currentTarget as HTMLInputElement).checked)}
+				class="h-4 w-4 rounded border-input"
+			/>
+			This is a cable
+		</label>
+		<!-- A license is lent like a device, but what travels is a key or an
+		     account — stored per unit and only shown on request. -->
+		<label class="flex cursor-pointer items-center gap-2 text-sm select-none">
+			<input
+				type="checkbox"
+				checked={value.isLicense}
+				disabled={identityDisabled}
+				onchange={(e) => toggleLicense((e.currentTarget as HTMLInputElement).checked)}
+				class="h-4 w-4 rounded border-input"
+			/>
+			This is a software license
+		</label>
+	</div>
+	{#if value.isLicense}
+		<p class="-mt-2 text-xs text-muted-foreground">
+			Each unit gets its own license key or login, stored encrypted. It is only shown on request —
+			to whoever has the license checked out to their production, and to the organization that keeps
+			it.
+		</p>
+	{/if}
 
 	{#if value.cable}
 		<div class="grid gap-4 rounded-md border border-dashed p-3 sm:grid-cols-2">

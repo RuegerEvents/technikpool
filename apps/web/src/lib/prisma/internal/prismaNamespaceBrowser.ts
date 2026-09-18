@@ -66,6 +66,7 @@ export const ModelName = {
   Address: 'Address',
   Location: 'Location',
   Asset: 'Asset',
+  LicenseCredential: 'LicenseCredential',
   BundleTemplate: 'BundleTemplate',
   AssetBundle: 'AssetBundle',
   Production: 'Production',
@@ -271,6 +272,7 @@ export const ProductScalarFieldEnum = {
   connectorA: 'connectorA',
   connectorB: 'connectorB',
   lengthCm: 'lengthCm',
+  isLicense: 'isLicense',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -335,6 +337,18 @@ export const AssetScalarFieldEnum = {
 } as const
 
 export type AssetScalarFieldEnum = (typeof AssetScalarFieldEnum)[keyof typeof AssetScalarFieldEnum]
+
+
+export const LicenseCredentialScalarFieldEnum = {
+  id: 'id',
+  assetId: 'assetId',
+  kind: 'kind',
+  sealed: 'sealed',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LicenseCredentialScalarFieldEnum = (typeof LicenseCredentialScalarFieldEnum)[keyof typeof LicenseCredentialScalarFieldEnum]
 
 
 export const BundleTemplateScalarFieldEnum = {

@@ -3,6 +3,7 @@ import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import { getAsset, getAssets, getBundle, getBundles } from './assets.remote';
 import { getProduction } from './productions.remote';
+import { getLicenses, getLicenseStatus } from './licenses.remote';
 import { requireAuth, userOrgIds, visibleProductionIds } from '$lib/server/services/access';
 import {
 	CheckoutError,
@@ -43,7 +44,12 @@ async function refreshAffected(userId: string, affected: AffectedRecords) {
 		...(affected.bundleIds.length > 0
 			? [...affected.organizationIds.map((id) => getBundles(id).refresh()), getBundles().refresh()]
 			: []),
-		...productionIds.map((id) => getProduction(id).refresh())
+		...productionIds.map((id) => getProduction(id).refresh()),
+		// A licence's holder is whichever production it is checked out to, and
+		// checking it out is also what lets that production's crew see the key.
+		...affected.assetIds.map((id) => getLicenseStatus(id).refresh()),
+		...affected.organizationIds.map((id) => getLicenses(id).refresh()),
+		getLicenses().refresh()
 	]);
 }
 

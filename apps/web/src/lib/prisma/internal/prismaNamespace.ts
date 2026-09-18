@@ -412,6 +412,7 @@ export const ModelName = {
   Address: 'Address',
   Location: 'Location',
   Asset: 'Asset',
+  LicenseCredential: 'LicenseCredential',
   BundleTemplate: 'BundleTemplate',
   AssetBundle: 'AssetBundle',
   Production: 'Production',
@@ -442,7 +443,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "manufacturer" | "connector" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem"
+    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "manufacturer" | "connector" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1553,6 +1554,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.AssetCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.AssetCountAggregateOutputType> | number
+        }
+      }
+    }
+    LicenseCredential: {
+      payload: Prisma.$LicenseCredentialPayload<ExtArgs>
+      fields: Prisma.LicenseCredentialFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LicenseCredentialFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LicenseCredentialPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LicenseCredentialFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LicenseCredentialPayload>
+        }
+        findFirst: {
+          args: Prisma.LicenseCredentialFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LicenseCredentialPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LicenseCredentialFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LicenseCredentialPayload>
+        }
+        findMany: {
+          args: Prisma.LicenseCredentialFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LicenseCredentialPayload>[]
+        }
+        create: {
+          args: Prisma.LicenseCredentialCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LicenseCredentialPayload>
+        }
+        createMany: {
+          args: Prisma.LicenseCredentialCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LicenseCredentialCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LicenseCredentialPayload>[]
+        }
+        delete: {
+          args: Prisma.LicenseCredentialDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LicenseCredentialPayload>
+        }
+        update: {
+          args: Prisma.LicenseCredentialUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LicenseCredentialPayload>
+        }
+        deleteMany: {
+          args: Prisma.LicenseCredentialDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LicenseCredentialUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LicenseCredentialUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LicenseCredentialPayload>[]
+        }
+        upsert: {
+          args: Prisma.LicenseCredentialUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LicenseCredentialPayload>
+        }
+        aggregate: {
+          args: Prisma.LicenseCredentialAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLicenseCredential>
+        }
+        groupBy: {
+          args: Prisma.LicenseCredentialGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LicenseCredentialGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LicenseCredentialCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LicenseCredentialCountAggregateOutputType> | number
         }
       }
     }
@@ -2877,6 +2952,7 @@ export const ProductScalarFieldEnum = {
   connectorA: 'connectorA',
   connectorB: 'connectorB',
   lengthCm: 'lengthCm',
+  isLicense: 'isLicense',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2941,6 +3017,18 @@ export const AssetScalarFieldEnum = {
 } as const
 
 export type AssetScalarFieldEnum = (typeof AssetScalarFieldEnum)[keyof typeof AssetScalarFieldEnum]
+
+
+export const LicenseCredentialScalarFieldEnum = {
+  id: 'id',
+  assetId: 'assetId',
+  kind: 'kind',
+  sealed: 'sealed',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LicenseCredentialScalarFieldEnum = (typeof LicenseCredentialScalarFieldEnum)[keyof typeof LicenseCredentialScalarFieldEnum]
 
 
 export const BundleTemplateScalarFieldEnum = {
@@ -3547,6 +3635,7 @@ export type GlobalOmitConfig = {
   address?: Prisma.AddressOmit
   location?: Prisma.LocationOmit
   asset?: Prisma.AssetOmit
+  licenseCredential?: Prisma.LicenseCredentialOmit
   bundleTemplate?: Prisma.BundleTemplateOmit
   assetBundle?: Prisma.AssetBundleOmit
   production?: Prisma.ProductionOmit

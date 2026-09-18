@@ -608,6 +608,7 @@ const productRefSchema = {
 	newProductImagePath: v.optional(v.string()),
 	newProductNetPurchasePrice: v.optional(v.nullable(v.pipe(v.number(), v.minValue(0)))),
 	newProductCable: v.optional(v.nullable(cableAttrsSchema)),
+	newProductIsLicense: v.optional(v.boolean()),
 	categoryId: v.optional(v.string()),
 	manufacturerId: v.optional(v.string()),
 	newManufacturerName: v.optional(v.string()),
@@ -693,7 +694,9 @@ async function resolveProductRef(data: ProductRef, organizationId: string): Prom
 				manufacturerId,
 				categoryId: data.categoryId,
 				imagePath: data.newProductImagePath?.trim() || null,
-				...(cable ?? {})
+				...(cable ?? {}),
+				// A cable is a physical thing; a product can't be both.
+				isLicense: !cable && !!data.newProductIsLicense
 			}
 		});
 		// The price given alongside a brand-new product is the creating org's own
@@ -724,7 +727,7 @@ async function resolveProductRef(data: ProductRef, organizationId: string): Prom
 }
 
 /** The subset of a Prisma client these helpers need — the real one or a `$transaction` handle. */
-type AssetTx = Pick<typeof prisma, 'asset' | 'organization' | 'assetTransaction'>;
+type AssetTx = Pick<typeof prisma, 'asset' | 'organization' | 'assetTransaction' | 'product'>;
 
 /**
  * Hands out an org's next free asset tags, in order, for the length of one
@@ -801,6 +804,16 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 	const nextTag = await tagAllocator(tx, prefix);
 	const parent = args.parent ?? null;
 
+	// A licence has no wiring to test, so it never gets a DGUV interval.
+	const licenseProductIds = new Set(
+		(
+			await tx.product.findMany({
+				where: { id: { in: args.units.map((u) => u.productId) }, isLicense: true },
+				select: { id: true }
+			})
+		).map((p) => p.id)
+	);
+
 	const created = await Promise.all(
 		// `nextTag()` is called synchronously inside the map, before anything is
 		// awaited, so the tags land in row order rather than completion order.
@@ -827,8 +840,10 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 					parentAssetId: parent?.id ?? null,
 					bundleId: parent?.bundleId ?? args.bundleId ?? null,
 					// Snapshot, not a live reference — see Organization.defaultInspectionIntervalMonths.
-					inspectionIntervalMonths: defaultInspectionIntervalMonths,
-					nextInspectionDue,
+					inspectionIntervalMonths: licenseProductIds.has(unit.productId)
+						? null
+						: defaultInspectionIntervalMonths,
+					nextInspectionDue: licenseProductIds.has(unit.productId) ? null : nextInspectionDue,
 					transactions: {
 						create: [
 							{ userId: args.userId, action: 'CREATED', data: { type: 'CREATED' } },
@@ -1688,7 +1703,12 @@ const UNUSED_ASSET_ACTIONS = [
 	'UPDATED',
 	'LOCATION_ASSIGNED',
 	'ACCESSORY_ATTACHED',
-	'ACCESSORY_DETACHED'
+	'ACCESSORY_DETACHED',
+	// Storing a licence key is setting the unit up, not using it. Revealing one
+	// is use, and deliberately not in this list: deleting the unit would take
+	// the record of who saw the key with it.
+	'CREDENTIALS_SET',
+	'CREDENTIALS_REMOVED'
 ];
 
 export const deleteAsset = command(v.string(), async (assetId: string) => {
@@ -1763,7 +1783,9 @@ const updateProductSchema = v.object({
 	 * any more and clears all four. Anything else replaces them wholesale — a
 	 * cable's four attributes describe one physical thing and are edited together.
 	 */
-	cable: v.optional(v.nullable(cableAttrsSchema))
+	cable: v.optional(v.nullable(cableAttrsSchema)),
+	/** Whether units of this product are licences carrying credentials. */
+	isLicense: v.optional(v.boolean())
 });
 
 export const updateProduct = command(updateProductSchema, async (input) => {
@@ -1787,7 +1809,8 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 			cableType: true,
 			connectorA: true,
 			connectorB: true,
-			lengthCm: true
+			lengthCm: true,
+			isLicense: true
 		}
 	});
 
@@ -1801,6 +1824,11 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 			: input.cable === null
 				? { cableType: null, connectorA: null, connectorB: null, lengthCm: null }
 				: normalizeCable(input.cable);
+	// Being a licence is identity as well: it decides whether every unit of the
+	// product carries credentials. Never both a cable and a licence.
+	const nextIsLicense =
+		input.isLicense === undefined ? undefined : input.isLicense && !nextCable?.cableType;
+	const licenseChanged = nextIsLicense !== undefined && nextIsLicense !== previousProduct.isLicense;
 	const cableChanged =
 		nextCable !== undefined &&
 		(nextCable.cableType !== previousProduct.cableType ||
@@ -1819,7 +1847,8 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		(input.manufacturerId !== undefined &&
 			input.manufacturerId !== previousProduct.manufacturerId) ||
 		(input.categoryId !== undefined && input.categoryId !== previousProduct.categoryId) ||
-		cableChanged;
+		cableChanged ||
+		licenseChanged;
 	if (changesIdentity && !systemAdmin) {
 		const owners = await prisma.asset.findMany({
 			where: { productId: input.productId },
@@ -1843,7 +1872,8 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 			...(input.manufacturerId ? { manufacturerId: input.manufacturerId } : {}),
 			...(input.categoryId ? { categoryId: input.categoryId } : {}),
 			imagePath: input.imagePath !== undefined ? input.imagePath?.trim() || null : undefined,
-			...(nextCable ?? {})
+			...(nextCable ?? {}),
+			...(nextIsLicense !== undefined ? { isLicense: nextIsLicense } : {})
 		},
 		include: { manufacturer: true, category: true }
 	});
@@ -1853,7 +1883,8 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		...(input.manufacturerId ? { manufacturerId: input.manufacturerId } : {}),
 		...(input.categoryId ? { categoryId: input.categoryId } : {}),
 		...(input.imagePath !== undefined ? { imagePath: input.imagePath.trim() || null } : {}),
-		...(nextCable ?? {})
+		...(nextCable ?? {}),
+		...(nextIsLicense !== undefined ? { isLicense: nextIsLicense } : {})
 	});
 	if (changes.length > 0) {
 		await logCatalogChange({

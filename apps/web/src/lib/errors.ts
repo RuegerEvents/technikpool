@@ -74,6 +74,12 @@ export type AppErrorCode =
 	| 'location_required'
 	| 'location_used_by_other_org'
 	| 'cable_row_incomplete'
+	// Licences
+	| 'license_not_a_license'
+	| 'license_reveal_forbidden'
+	| 'license_edit_forbidden'
+	| 'license_nothing_stored'
+	| 'license_credentials_empty'
 	// Accessories
 	| 'accessory_self'
 	| 'accessory_nested'

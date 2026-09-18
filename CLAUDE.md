@@ -73,6 +73,7 @@ async function requireAuth() {
 | `src/lib/remote/orgs.remote.ts`        | `getMyOrgs`, `getOrg`, `getOrgUsers`, `getOrgWithMembers`, `createOrg`, `addUserToOrg`, `removeUserFromOrg`, `updateMemberRole`, `getAllUsers`, `setUserAdmin`                                                 |
 | `src/lib/remote/assets.remote.ts`      | `getAssets`, `getInventorySummary`, `getManufacturers`, `getProducts`, `createAssets`, `getAssetHistory`, `getBundles`, `getBundle`, `createBundle`, `addAssetToBundle`, `removeAssetFromBundle`               |
 | `src/lib/remote/productions.remote.ts` | `getProductions`, `getProduction`, `createProduction`, `addAssetToProduction`, `approveProductionItem`, `getPendingApprovals`, `addBundleToProduction`, `addCrewMember`, `removeCrewMember`, `getCalendarData` |
+| `src/lib/remote/licenses.remote.ts`    | `getLicenses`, `getLicenseStatus`, `revealLicenseCredentials`, `setLicenseCredentials`, `clearLicenseCredentials`                                                                                              |
 
 ## External API (`/api/v1`)
 
@@ -146,6 +147,27 @@ Logic needed by both remote functions and `/api/v1` lives in `src/lib/server/ser
 - `checkout.ts` — `performScan`, `performBulkCheckout`. Framework-agnostic: they take a user id
   and report touched records via `affected`, and the caller decides what to invalidate
   (`query().refresh()` only means something in the remote-function layer).
+
+## Licenses
+
+A product with `isLicense` is software, not a device: its units are booked, checked out and
+returned like any other asset, and each carries credentials (a license key, or username and
+password, plus a note) in `LicenseCredential` — a table of its own so no `include` on assets can
+carry them anywhere by accident.
+
+- Sealed with AES-256-GCM by `src/lib/server/secrets.ts`, keyed by **`CREDENTIALS_ENCRYPTION_KEY`**
+  (any long random string). It is deliberately not derived from `BETTER_AUTH_SECRET`, which gets
+  rotated; losing or changing this one makes every stored key unreadable. Read through
+  `$env/dynamic/private`, so a dev server picks up a newly added value without a restart.
+- `src/lib/remote/licenses.remote.ts` is the only door. `revealLicenseCredentials` is a
+  _command_ so no cache or refresh ever fetches a key, and it writes `CREDENTIALS_REVEALED` into
+  the asset's history with the grounds it was allowed on.
+- Who may reveal (`revealGrants` in `src/lib/server/services/licenses.ts`): MEMBER+ of the org
+  whose location keeps the license, or crew / MEMBER+ of a production it is **checked out** to.
+  VIEWER alone is not enough. Editing takes ADMIN of the owning org, and the form is write-only.
+- The Devices page's type select (Devices / Licenses / Cables) lists licenses with who has each
+  one; the table never reveals a key. The production page offers the
+  credentials on checked-out license items.
 
 ## Auth & Session
 
