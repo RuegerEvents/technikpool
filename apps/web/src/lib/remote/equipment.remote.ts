@@ -12,6 +12,7 @@ import {
 import { BOOKABLE_ASSET_WHERE } from '$lib/asset-status';
 import { accessoryIdsOf } from '$lib/server/services/accessories';
 import { appError } from '$lib/errors';
+import { copyEquipment, planEquipmentCopy } from '$lib/server/services/equipment-copy';
 import type { AddedToProductionData, RequestedData } from '$lib/types/asset-transaction';
 
 const ACTIVE_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT', 'RETURNED'] as const;
@@ -382,3 +383,79 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 	await getProduction(data.productionId).refresh();
 	return { changed: delta };
 });
+
+// ── Taking over another production's list ─────────────────────────────────
+// The rules live in services/equipment-copy.ts; these are the doors to them.
+
+/** The productions whose equipment could be taken over into this one. */
+export const getEquipmentCopySources = query(v.string(), async (targetId: string) => {
+	const user = await requireAuth();
+	const target = await prisma.production.findUniqueOrThrow({
+		where: { id: targetId },
+		select: { organizationId: true }
+	});
+	await requireOrgWrite(target.organizationId);
+	// Any production the user may open — a partner org's show is as good a
+	// template as one's own — that has something on it to take over.
+	const orgIds = await userOrgIds(user.id);
+	const productions = await prisma.production.findMany({
+		where: {
+			id: { not: targetId },
+			organizationId: { in: [...new Set([...orgIds, target.organizationId])] },
+			items: { some: { status: { in: [...ACTIVE_STATUSES] } } }
+		},
+		select: {
+			id: true,
+			name: true,
+			startDate: true,
+			endDate: true,
+			organization: { select: { name: true, shortName: true } },
+			_count: { select: { items: { where: { status: { in: [...ACTIVE_STATUSES] } } } } }
+		},
+		orderBy: [{ startDate: { sort: 'desc', nulls: 'last' } }, { name: 'asc' }]
+	});
+	return productions.map((p) => ({
+		id: p.id,
+		name: p.name,
+		startDate: p.startDate,
+		endDate: p.endDate,
+		organizationName: orgLabel(p.organization),
+		itemCount: p._count.items
+	}));
+});
+
+const copyPlanSchema = v.object({ sourceId: v.string(), targetId: v.string() });
+
+async function requireCopyAccess(sourceId: string, targetId: string) {
+	if (sourceId === targetId) appError(400, 'equipment_copy_same_production');
+	const [source, target] = await Promise.all([
+		prisma.production.findUniqueOrThrow({
+			where: { id: sourceId },
+			select: { organizationId: true }
+		}),
+		prisma.production.findUniqueOrThrow({
+			where: { id: targetId },
+			select: { organizationId: true }
+		})
+	]);
+	await requireOrgRead(source.organizationId);
+	return requireOrgWrite(target.organizationId);
+}
+
+/** What taking over would book, line by line — a preview, not a reservation. */
+export const getEquipmentCopyPlan = query(copyPlanSchema, async ({ sourceId, targetId }) => {
+	await requireCopyAccess(sourceId, targetId);
+	return (await planEquipmentCopy(sourceId, targetId)).lines;
+});
+
+export const copyEquipmentFromProduction = command(
+	v.object({ sourceId: v.string(), targetId: v.string(), keys: v.array(v.string()) }),
+	async ({ sourceId, targetId, keys }) => {
+		const user = await requireCopyAccess(sourceId, targetId);
+		const result = await copyEquipment(sourceId, targetId, keys, user.id);
+		await getEquipmentEditorData(targetId).refresh();
+		await getProduction(targetId).refresh();
+		await getEquipmentCopyPlan({ sourceId, targetId }).refresh();
+		return result;
+	}
+);

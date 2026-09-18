@@ -34,6 +34,7 @@
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
 	import { Modal } from '$lib/components/ui/modal';
 	import { LicenseRevealModal } from '$lib/components/ui/license-credentials';
+	import CopyEquipmentModal from './copy-equipment-modal.svelte';
 	import { accessorySummary, nestAccessories, type Nested } from '$lib/production-items';
 
 	let { productionId }: { productionId: string } = $props();
@@ -485,6 +486,7 @@
 	// the page they will be on. Whether they may see it is the server's call.
 	let credentialsFor = $state<{ assetId: string; label: string } | null>(null);
 	let credentialsOpen = $state(false);
+	let copyEquipmentOpen = $state(false);
 
 	function openCredentials(asset: {
 		id: string;
@@ -810,7 +812,12 @@
 		<div class="mb-4 flex items-center justify-between">
 			<h2 class="text-xl font-semibold">Booked Equipment</h2>
 			{#if canEdit}
-				<Button href={resolve(`/productions/${productionId}/equipment`)}>Manage Equipment</Button>
+				<div class="flex flex-wrap gap-2">
+					<Button variant="outline" onclick={() => (copyEquipmentOpen = true)}
+						>Copy equipment from…</Button
+					>
+					<Button href={resolve(`/productions/${productionId}/equipment`)}>Manage Equipment</Button>
+				</div>
 			{/if}
 		</div>
 
@@ -1172,3 +1179,11 @@
 	assetId={credentialsFor?.assetId ?? null}
 	title={credentialsFor?.label ?? ''}
 />
+
+{#if canEdit}
+	<CopyEquipmentModal
+		{productionId}
+		organizationId={production.organizationId}
+		bind:open={copyEquipmentOpen}
+	/>
+{/if}

@@ -113,6 +113,7 @@ export type AppErrorCode =
 	| 'show_start_before_start'
 	| 'show_end_after_end'
 	| 'not_enough_units'
+	| 'equipment_copy_same_production'
 	// Offers and invoices
 	| 'offer_immutable'
 	| 'offer_already_finalized'

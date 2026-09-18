@@ -14,6 +14,7 @@
 	import { toast } from 'svelte-sonner';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { onDestroy } from 'svelte';
+	import CopyEquipmentModal from '../copy-equipment-modal.svelte';
 
 	let { productionId }: { productionId: string } = $props();
 	let data = $derived(await getEquipmentEditorData(productionId));
@@ -43,6 +44,7 @@
 	let selectedLocs = new SvelteSet<string>();
 	let selectedCities = new SvelteSet<string>();
 	let showBundledItems = $state(false);
+	let copyEquipmentOpen = $state(false);
 
 	// ── Optimistic editing ──────────────────────────────────────────────────
 	// A click changes the number on screen at once; the server hears about it
@@ -599,9 +601,14 @@
 			</Button>
 			<h1 class="text-2xl font-semibold tracking-tight">Equipment</h1>
 		</div>
-		<span class="rounded-full bg-muted px-3 py-1 text-sm font-semibold text-muted-foreground">
-			{totalBooked} device{totalBooked !== 1 ? 's' : ''} booked
-		</span>
+		<div class="flex items-center gap-3">
+			<Button variant="outline" size="sm" onclick={() => (copyEquipmentOpen = true)}
+				>Copy equipment from…</Button
+			>
+			<span class="rounded-full bg-muted px-3 py-1 text-sm font-semibold text-muted-foreground">
+				{totalBooked} device{totalBooked !== 1 ? 's' : ''} booked
+			</span>
+		</div>
 	</div>
 
 	<div
@@ -947,3 +954,9 @@
 		{/if}
 	</div>
 {/if}
+
+<CopyEquipmentModal
+	{productionId}
+	organizationId={data.production.organizationId}
+	bind:open={copyEquipmentOpen}
+/>

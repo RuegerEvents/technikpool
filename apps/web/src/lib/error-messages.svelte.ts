@@ -209,6 +209,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'The show end cannot be after the overall end.';
 		case 'not_enough_units':
 			return `Only ${p0} more unit(s) are available to add.`;
+		case 'equipment_copy_same_production':
+			return 'A production cannot take over its own equipment.';
 
 		// Offers and invoices
 		case 'offer_immutable':

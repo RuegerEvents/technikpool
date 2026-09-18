@@ -206,6 +206,7 @@ msgstr "Crew"
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -484,6 +485,7 @@ msgstr "Gesamt"
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
 msgid "Available"
 msgstr "Verfügbar"
 
@@ -1023,6 +1025,7 @@ msgid "Search assets…"
 msgstr "Geräte suchen…"
 
 #: src/lib/components/ui/skeleton/content-skeleton.svelte
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
 msgid "Loading…"
 msgstr "Wird geladen…"
 
@@ -3061,6 +3064,7 @@ msgstr "Rechnung {0} ansehen"
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
 msgid "Copying…"
 msgstr "Wird kopiert…"
 
@@ -7720,3 +7724,86 @@ msgstr "<0/> Alle Änderungen gespeichert"
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
 msgid "All {0}"
 msgstr "Alle {0}"
+
+#: src/lib/error-messages.svelte.ts
+msgid "A production cannot take over its own equipment."
+msgstr "Eine Produktion kann ihr eigenes Equipment nicht übernehmen."
+
+#: src/routes/productions/[id]/equipment/equipment-planner.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Copy equipment from…"
+msgstr "Equipment übernehmen von…"
+
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
+msgid "Already booked here"
+msgstr "Bereits gebucht"
+
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
+msgid "Not available"
+msgstr "Nicht verfügbar"
+
+#. 0: line.available; 1: need
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
+msgid "{0} of {1} available"
+msgstr "{0} von {1} verfügbar"
+
+#. 0: line.alreadyHere
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
+msgid "{0} already here"
+msgstr "{0} bereits gebucht"
+
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
+msgid "# kit incomplete"
+msgid_plural "# kits incomplete"
+msgstr[0] "# Kit unvollständig"
+msgstr[1] "# Kits unvollständig"
+
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
+msgid "# device booked"
+msgid_plural "# devices booked"
+msgstr[0] "# Gerät gebucht"
+msgstr[1] "# Geräte gebucht"
+
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
+msgid "# not available"
+msgid_plural "# not available"
+msgstr[0] "# nicht verfügbar"
+msgstr[1] "# nicht verfügbar"
+
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
+msgid "Copy equipment from another production"
+msgstr "Equipment aus einer anderen Produktion übernehmen"
+
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
+msgid "Choose a production…"
+msgstr "Produktion auswählen…"
+
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
+msgid "No other production has equipment booked."
+msgstr "Keine andere Produktion hat Equipment gebucht."
+
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
+msgid "Source production"
+msgstr "Quellproduktion"
+
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
+msgid "This production has no equipment booked."
+msgstr "Diese Produktion hat kein Equipment gebucht."
+
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
+msgid "Kit"
+msgstr "Kit"
+
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
+msgid "Units are booked by product: the source's own units where they are free on this production's dates, otherwise other free units of the same product. What is already booked here counts towards each line."
+msgstr "Gebucht wird je Produkt: die Geräte der Quellproduktion, wenn sie im Zeitraum dieser Produktion frei sind, sonst andere freie Geräte desselben Produkts. Was hier schon gebucht ist, wird auf jede Position angerechnet."
+
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
+msgid "Book # item"
+msgid_plural "Book # items"
+msgstr[0] "# Position übernehmen"
+msgstr[1] "# Positionen übernehmen"
+
+#: src/routes/productions/[id]/copy-equipment-modal.svelte
+msgid "Book items"
+msgstr "Übernehmen"
