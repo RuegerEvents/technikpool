@@ -326,7 +326,7 @@ msgid "How many of the {0} units do you want to {1}?"
 msgstr "How many of the {0} units do you want to {1}?"
 
 #. 0: m.pg.items.length
-#. 0: max
+#. 0: shownMax
 #: src/routes/+page.svelte
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
 msgid "of {0}"
@@ -692,6 +692,7 @@ msgid "Search or create product…"
 msgstr "Search or create product…"
 
 #: src/routes/assets/new/+page.svelte
+#: src/routes/productions/[id]/equipment/equipment-planner.svelte
 msgid "Quantity"
 msgstr "Quantity"
 
@@ -902,6 +903,7 @@ msgstr "ArrowDown"
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
+#: src/routes/productions/[id]/equipment/equipment-planner.svelte
 msgid "Enter"
 msgstr "Enter"
 
@@ -3642,10 +3644,8 @@ msgstr "No organizations"
 msgid "Select none"
 msgstr "Select none"
 
-#. 0: b.name
-#: src/routes/productions/[id]/equipment/equipment-planner.svelte
-msgid "Removed \"{0}\" from production"
-msgstr "Removed \"{0}\" from production"
+#~ msgid "Removed \"{0}\" from production"
+#~ msgstr "Removed \"{0}\" from production"
 
 #~ msgid "Bundle · {0}"
 #~ msgstr "Bundle · {0}"
@@ -7718,3 +7718,28 @@ msgstr "Cables"
 #: src/routes/assets/+page.svelte
 msgid "By cable type"
 msgstr "By cable type"
+
+#: src/routes/productions/[id]/equipment/equipment-planner.svelte
+msgid "Add all available"
+msgstr "Add all available"
+
+#: src/routes/productions/[id]/equipment/equipment-planner.svelte
+msgid "Remove all"
+msgstr "Remove all"
+
+#: src/routes/productions/[id]/equipment/equipment-planner.svelte
+msgid "None"
+msgstr "None"
+
+#: src/routes/productions/[id]/equipment/equipment-planner.svelte
+msgid "<0/> Saving…"
+msgstr "<0/> Saving…"
+
+#: src/routes/productions/[id]/equipment/equipment-planner.svelte
+msgid "<0/> All changes saved"
+msgstr "<0/> All changes saved"
+
+#. 0: limit
+#: src/routes/productions/[id]/equipment/equipment-planner.svelte
+msgid "All {0}"
+msgstr "All {0}"

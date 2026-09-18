@@ -13,6 +13,7 @@
 	} from '$lib/remote/productions.remote';
 	import { toast } from 'svelte-sonner';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
+	import { onDestroy } from 'svelte';
 
 	let { productionId }: { productionId: string } = $props();
 	let data = $derived(await getEquipmentEditorData(productionId));
@@ -43,12 +44,43 @@
 	let selectedCities = new SvelteSet<string>();
 	let showBundledItems = $state(false);
 
+	// ── Optimistic editing ──────────────────────────────────────────────────
+	// A click changes the number on screen at once; the server hears about it
+	// after SAVE_DELAY of quiet, so five clicks on + are one request, and no
+	// click ever waits for the previous one to come back. The wanted values
+	// stay laid over the server's until the server agrees with them.
+	const SAVE_DELAY = 600;
+	/** Individually booked units the user asked for, by group key */
+	const wantedQty = new SvelteMap<string, number>();
+	/** Booked kits the user asked for, by bundle template */
+	const wantedKits = new SvelteMap<string, number>();
+	/** Rows whose change is still inside the debounce window */
+	const scheduled = new SvelteSet<string>();
+	/** Rows with a request in flight */
+	const saving = new SvelteSet<string>();
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- bookkeeping, never rendered
+	const timers = new Map<string, ReturnType<typeof setTimeout>>();
+	/** The last quantity sent per group, so a save loop knows when it has caught up */
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- bookkeeping, never rendered
+	const lastSent = new Map<string, number>();
+
+	let dirty = $derived(scheduled.size + saving.size > 0);
+	let justSaved = $state(false);
+	let justSavedTimer: ReturnType<typeof setTimeout> | undefined;
+
+	let groups = $derived(
+		data.groups.map((g) => {
+			const want = wantedQty.get(g.key);
+			return want === undefined ? g : { ...g, bookedHere: g.bookedFromBundle + want };
+		})
+	);
+
 	let categories = $derived.by(() => {
 		const seen = new SvelteMap<
 			string,
 			{ id: string; name: string; color: string; sortOrder: number }
 		>();
-		for (const g of data.groups) {
+		for (const g of groups) {
 			if (!seen.has(g.categoryId)) {
 				seen.set(g.categoryId, {
 					id: g.categoryId,
@@ -78,7 +110,7 @@
 			string,
 			{ id: string; name: string; color: string; avatarLabel: string }
 		>();
-		for (const g of data.groups) {
+		for (const g of groups) {
 			if (!seen.has(g.organizationId)) {
 				seen.set(g.organizationId, {
 					id: g.organizationId,
@@ -103,7 +135,7 @@
 
 	let locations = $derived.by(() => {
 		const seen = new SvelteMap<string, { id: string; name: string; city: string }>();
-		for (const g of data.groups) {
+		for (const g of groups) {
 			if (!seen.has(g.locationId)) {
 				seen.set(g.locationId, { id: g.locationId, name: g.locationName, city: g.city });
 			}
@@ -175,7 +207,7 @@
 	let categoryCounts = $derived.by(() => {
 		const counts = new SvelteMap<string, number>();
 		let total = 0;
-		for (const g of data.groups) {
+		for (const g of groups) {
 			if (!matchesFiltersExceptCategory(g)) continue;
 			const remaining = groupAvailable(g);
 			counts.set(g.categoryId, (counts.get(g.categoryId) ?? 0) + remaining);
@@ -191,7 +223,7 @@
 	});
 
 	let availableGroups = $derived(
-		data.groups.filter(matchesFilters).sort((a, b) => a.productName.localeCompare(b.productName))
+		groups.filter(matchesFilters).sort((a, b) => a.productName.localeCompare(b.productName))
 	);
 	// Bundles are picked by type, not by physical kit: two instances of "Camera A
 	// Kit" read as "2 of 2 available", and +/− books or releases one whole kit.
@@ -221,6 +253,17 @@
 		return [...rows.values()].sort((a, b) => a.name.localeCompare(b.name));
 	}
 
+	// Lays a pending kit count over the server's: kits are added from the front
+	// of `addable` and released from the end of `booked`, the same order
+	// saveKits works through them in, so the tags on screen are the ones booked.
+	function withWantedKits(row: BundleTemplateRow): BundleTemplateRow {
+		const want = wantedKits.get(row.templateId);
+		if (want === undefined) return row;
+		const all = [...row.booked, ...row.addable];
+		const n = Math.min(Math.max(want, 0), all.length);
+		return { ...row, booked: all.slice(0, n), addable: all.slice(n) };
+	}
+
 	// Only when every instance sits in the same place — otherwise the row spans
 	// locations and naming one of them would be misleading.
 	function sharedLocationName(row: BundleTemplateRow): string | null {
@@ -239,14 +282,20 @@
 		return tags.length > 0 ? tags.join(', ') : null;
 	}
 
-	let availableBundles = $derived(groupByTemplate(data.bundles.filter(matchesBundleFilters)));
+	let availableBundles = $derived(
+		groupByTemplate(data.bundles.filter(matchesBundleFilters)).map(withWantedKits)
+	);
 
 	// Never filtered by the center pane's search/category/org/location — always
 	// shows everything booked for this production.
-	let bookedGroups = $derived(data.groups.filter((g) => g.bookedHere > 0));
+	let bookedGroups = $derived(groups.filter((g) => g.bookedHere > 0));
 	// Grouped from every instance, not just the booked ones, so the stepper here
 	// can still add a second kit of a type that's already in the production.
-	let bookedBundles = $derived(groupByTemplate(data.bundles).filter((r) => r.booked.length > 0));
+	let bookedBundles = $derived(
+		groupByTemplate(data.bundles)
+			.map(withWantedKits)
+			.filter((r) => r.booked.length > 0)
+	);
 	let bookedSummary = $derived.by(() => {
 		const orgNames = [...new SvelteSet(bookedGroups.map((g) => g.organizationName))].sort();
 		const locNames = [...new SvelteSet(bookedGroups.map((g) => g.locationName))].sort();
@@ -254,130 +303,274 @@
 	});
 	let totalBooked = $derived(bookedGroups.reduce((sum, g) => sum + g.bookedHere, 0));
 
-	let pending = new SvelteSet<string>();
+	function schedule(key: string, save: () => Promise<void>) {
+		clearTimeout(timers.get(key));
+		scheduled.add(key);
+		timers.set(
+			key,
+			setTimeout(() => {
+				timers.delete(key);
+				scheduled.delete(key);
+				void save();
+			}, SAVE_DELAY)
+		);
+	}
 
-	async function setQty(g: Group, quantity: number) {
-		pending.add(g.key);
+	function setQty(g: Group, quantity: number) {
+		const max = groupMaxQty(g) - g.bookedFromBundle;
+		wantedQty.set(g.key, Math.min(Math.max(0, Math.round(quantity)), max));
+		schedule(`g:${g.key}`, () => saveQty(g));
+	}
+
+	function setKits(row: BundleTemplateRow, count: number) {
+		const max = row.booked.length + row.addable.length;
+		wantedKits.set(row.templateId, Math.min(Math.max(0, Math.round(count)), max));
+		schedule(`b:${row.templateId}`, () => saveKits(row.templateId));
+	}
+
+	// Sends the wanted quantity, and again if it moved while the request was
+	// out. The command sets an absolute count, so resending is harmless.
+	async function saveQty(g: Group) {
+		const key = `g:${g.key}`;
+		if (saving.has(key)) return; // the running loop picks the new value up
+		saving.add(key);
 		try {
-			await setProductionQuantity({
-				productionId,
-				productId: g.productId,
-				organizationId: g.organizationId,
-				locationId: g.locationId,
-				quantity,
-				includeBundled: showBundledItems
-			});
+			let want = wantedQty.get(g.key);
+			while (want !== undefined && want !== lastSent.get(g.key)) {
+				await setProductionQuantity({
+					productionId,
+					productId: g.productId,
+					organizationId: g.organizationId,
+					locationId: g.locationId,
+					quantity: want,
+					includeBundled: showBundledItems
+				});
+				lastSent.set(g.key, want);
+				want = wantedQty.get(g.key);
+			}
+			// The command answers with the refreshed data; if it still disagrees,
+			// someone else moved the same units meanwhile and theirs is the truth.
+			const fresh = getEquipmentEditorData(productionId).current;
+			const fg = fresh?.groups.find((x) => x.key === g.key);
+			if (want !== undefined && fg && groupBookedIndividually(fg) !== want) wantedQty.delete(g.key);
 		} catch (err) {
-			toast.error(getErrorMessage(err));
+			toast.error(`${g.productName}: ${getErrorMessage(err)}`);
+			wantedQty.delete(g.key);
 		} finally {
-			pending.delete(g.key);
+			lastSent.delete(g.key);
+			saving.delete(key);
+			settled();
 		}
 	}
 
-	let bundlePending = new SvelteSet<string>();
-
-	async function handleAddBundle(b: Bundle) {
-		bundlePending.add(b.id);
+	// Kits are booked one instance at a time, so this walks from what the
+	// server has towards what was asked for, rereading the server's answer
+	// after every step rather than trusting a plan made before the first one.
+	async function saveKits(templateId: string) {
+		const key = `b:${templateId}`;
+		if (saving.has(key)) return;
+		saving.add(key);
 		try {
-			const result = await addBundleToProduction({ productionId, bundleId: b.id });
-			await getEquipmentEditorData(productionId).refresh();
-			const parts: string[] = [plural(result.added, ['# asset added', '# assets added'])];
-			if (result.adopted > 0)
-				parts.push(
-					plural(result.adopted, [
-						'# was already booked individually and moved into the bundle',
-						'# were already booked individually and moved into the bundle'
-					])
-				);
-			if (result.skippedConflicts > 0)
-				parts.push(
-					plural(result.skippedConflicts, [
-						'# skipped, already booked elsewhere',
-						'# skipped, already booked elsewhere'
-					])
-				);
-			toast.success(`${parts.join(' · ')} — "${b.name}"`);
+			for (;;) {
+				const want = wantedKits.get(templateId);
+				const fresh = getEquipmentEditorData(productionId).current ?? data;
+				const row = groupByTemplate(fresh.bundles).find((r) => r.templateId === templateId);
+				if (want === undefined || !row) break;
+				if (row.booked.length < want && row.addable.length > 0) {
+					const b = row.addable[0];
+					const result = await addBundleToProduction({ productionId, bundleId: b.id });
+					reportAdded(b, result);
+				} else if (row.booked.length > want && row.booked.length > 0) {
+					const b = row.booked[row.booked.length - 1];
+					await removeBundleFromProduction({ productionId, bundleId: b.id });
+				} else {
+					// Out of kits to add (someone else booked the last one): show what is.
+					if (row.booked.length !== want) wantedKits.delete(templateId);
+					break;
+				}
+				await getEquipmentEditorData(productionId).refresh();
+			}
 		} catch (err) {
 			toast.error(getErrorMessage(err));
+			wantedKits.delete(templateId);
 		} finally {
-			bundlePending.delete(b.id);
+			saving.delete(key);
+			settled();
 		}
 	}
 
-	async function handleRemoveBundle(b: Bundle) {
-		bundlePending.add(b.id);
-		try {
-			await removeBundleFromProduction({ productionId, bundleId: b.id });
-			await getEquipmentEditorData(productionId).refresh();
-			toast.success(`Removed "${b.name}" from production`);
-		} catch (err) {
-			toast.error(getErrorMessage(err));
-		} finally {
-			bundlePending.delete(b.id);
+	// A plain add needs no word: the row already shows it. Adopting units or
+	// skipping ones that are booked elsewhere does, since the count alone hides it.
+	function reportAdded(
+		b: Bundle,
+		result: { added: number; adopted: number; skippedConflicts: number }
+	) {
+		if (result.adopted === 0 && result.skippedConflicts === 0) return;
+		const parts: string[] = [plural(result.added, ['# asset added', '# assets added'])];
+		if (result.adopted > 0)
+			parts.push(
+				plural(result.adopted, [
+					'# was already booked individually and moved into the bundle',
+					'# were already booked individually and moved into the bundle'
+				])
+			);
+		if (result.skippedConflicts > 0)
+			parts.push(
+				plural(result.skippedConflicts, [
+					'# skipped, already booked elsewhere',
+					'# skipped, already booked elsewhere'
+				])
+			);
+		toast.info(`${parts.join(' · ')} — "${b.name}"`);
+	}
+
+	function settled() {
+		if (dirty) return;
+		justSaved = true;
+		clearTimeout(justSavedTimer);
+		justSavedTimer = setTimeout(() => (justSaved = false), 2000);
+	}
+
+	// Drop an overlay once the server's own numbers have caught up with it —
+	// not the moment the request returns, because the refreshed data can land
+	// a tick later and the row would flick back to the old count in between.
+	$effect(() => {
+		for (const [key, want] of wantedQty) {
+			if (scheduled.has(`g:${key}`) || saving.has(`g:${key}`)) continue;
+			const g = data.groups.find((x) => x.key === key);
+			if (!g || groupBookedIndividually(g) === want) wantedQty.delete(key);
 		}
+		for (const [templateId, want] of wantedKits) {
+			if (scheduled.has(`b:${templateId}`) || saving.has(`b:${templateId}`)) continue;
+			// Counted by hand: groupByTemplate builds a SvelteMap, and one created,
+			// read and written inside an effect reschedules it for ever.
+			const booked = data.bundles.filter(
+				(b) => b.templateId === templateId && b.bookedHere > 0
+			).length;
+			if (booked === want) wantedKits.delete(templateId);
+		}
+	});
+
+	// Leaving the page inside the debounce window saves right away instead of
+	// dropping the change; the requests outlive the component.
+	onDestroy(() => {
+		clearTimeout(justSavedTimer);
+		for (const [key, timer] of timers) {
+			clearTimeout(timer);
+			if (key.startsWith('g:')) {
+				const g = data.groups.find((x) => `g:${x.key}` === key);
+				if (g) void saveQty(g);
+			} else void saveKits(key.slice(2));
+		}
+		timers.clear();
+	});
+
+	function onBeforeUnload(e: BeforeUnloadEvent) {
+		if (dirty) e.preventDefault();
+	}
+
+	function commitTyped(e: Event, max: number, apply: (n: number) => void, current: number) {
+		const input = e.currentTarget as HTMLInputElement;
+		const n = Number(input.value);
+		const next = Number.isFinite(n) ? Math.min(Math.max(0, Math.round(n)), max) : current;
+		// Clamping to the value already shown changes no state, so nothing would
+		// redraw the input — put the number back by hand.
+		input.value = String(next);
+		if (next !== current) apply(next);
 	}
 </script>
 
-{#snippet countStepper(
-	current: number,
-	max: number,
-	decDisabled: boolean,
-	incDisabled: boolean,
-	onDec: () => void,
-	onInc: () => void
-)}
-	<div class="flex items-center gap-2">
+<!--
+  `limit` is what this row can reach on its own; `shownMax` is the "of n" beside
+  it, which for a product also counts units that came in through a bundle.
+-->
+{#snippet countStepper(current: number, limit: number, shownMax: number, set: (n: number) => void)}
+	<!-- None and All only appear when they would do something, but keep their
+	     width either way, so the steppers line up down the list. -->
+	<div class="flex items-center gap-1.5">
 		<button
 			type="button"
-			disabled={decDisabled}
+			disabled={current <= 0}
+			title="Remove all"
 			onclick={(e) => {
 				e.stopPropagation();
-				onDec();
+				set(0);
+			}}
+			class="h-6 w-12 rounded-md border text-xs font-medium hover:bg-muted {current <= 0
+				? 'invisible'
+				: ''}"
+		>
+			None
+		</button>
+		<button
+			type="button"
+			disabled={current <= 0}
+			onclick={(e) => {
+				e.stopPropagation();
+				set(current - 1);
 			}}
 			class="flex h-6 w-6 items-center justify-center rounded-md border text-base disabled:cursor-not-allowed disabled:opacity-40"
 		>
 			−
 		</button>
-		<span class="w-4 text-center text-sm font-semibold tabular-nums">{current}</span>
+		<input
+			type="number"
+			inputmode="numeric"
+			min="0"
+			max={limit}
+			value={current}
+			aria-label="Quantity"
+			onclick={(e) => e.stopPropagation()}
+			onfocus={(e) => e.currentTarget.select()}
+			onkeydown={(e) => {
+				if (e.key === 'Enter') e.currentTarget.blur();
+			}}
+			onchange={(e) => commitTyped(e, limit, set, current)}
+			class="h-6 w-9 [appearance:textfield] rounded-md border border-transparent bg-transparent text-center text-sm font-semibold tabular-nums hover:border-input focus:border-input focus:bg-background focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+		/>
 		<button
 			type="button"
-			disabled={incDisabled}
+			disabled={current >= limit}
 			onclick={(e) => {
 				e.stopPropagation();
-				onInc();
+				set(current + 1);
 			}}
 			class="flex h-6 w-6 items-center justify-center rounded-md border text-base disabled:cursor-not-allowed disabled:opacity-40"
 		>
 			+
 		</button>
+		<button
+			type="button"
+			disabled={current >= limit}
+			title="Add all available"
+			onclick={(e) => {
+				e.stopPropagation();
+				set(limit);
+			}}
+			class="h-6 w-14 rounded-md border text-xs font-medium whitespace-nowrap tabular-nums hover:bg-muted {current >=
+			limit
+				? 'invisible'
+				: ''}"
+		>
+			All {limit}
+		</button>
 	</div>
-	<div class="w-14 shrink-0 text-right text-[10px] text-muted-foreground">of {max}</div>
+	<div class="w-10 shrink-0 text-right text-[10px] text-muted-foreground">of {shownMax}</div>
 {/snippet}
 
 {#snippet stepper(g: Group)}
 	{@const maxQty = groupMaxQty(g)}
-	{@const booked = groupBookedIndividually(g)}
-	{@render countStepper(
-		booked,
-		maxQty,
-		pending.has(g.key) || booked <= 0,
-		pending.has(g.key) || g.bookedHere >= maxQty,
-		() => setQty(g, booked - 1),
-		() => setQty(g, booked + 1)
+	{@render countStepper(groupBookedIndividually(g), maxQty - g.bookedFromBundle, maxQty, (n) =>
+		setQty(g, n)
 	)}
 {/snippet}
 
 {#snippet bundleStepper(row: BundleTemplateRow)}
-	{@const busy = row.instances.some((b) => bundlePending.has(b.id))}
-	{@render countStepper(
-		row.booked.length,
-		row.booked.length + row.addable.length,
-		busy || row.booked.length === 0,
-		busy || row.addable.length === 0,
-		() => handleRemoveBundle(row.booked[row.booked.length - 1]),
-		() => handleAddBundle(row.addable[0])
-	)}
+	{@const kits = row.booked.length + row.addable.length}
+	{@render countStepper(row.booked.length, kits, kits, (n) => setKits(row, n))}
 {/snippet}
+
+<svelte:window onbeforeunload={onBeforeUnload} />
 
 <svelte:head><title>Equipment | {data.production.name} | Technikpool</title></svelte:head>
 
@@ -588,14 +781,13 @@
 					<p class="p-6 text-center text-sm text-muted-foreground">No matching devices.</p>
 				{:else}
 					{#each availableBundles as row (row.templateId)}
-						{@const bundleAddDisabled =
-							row.instances.some((b) => bundlePending.has(b.id)) || row.addable.length === 0}
+						{@const bundleAddDisabled = row.addable.length === 0}
 						{@const locationName = sharedLocationName(row)}
 						<div
 							class="flex items-center gap-2 border-b bg-muted/20 px-3 py-2 last:border-0 {bundleAddDisabled
 								? 'opacity-50'
 								: 'cursor-pointer hover:bg-muted/40'}"
-							onclick={() => !bundleAddDisabled && handleAddBundle(row.addable[0])}
+							onclick={() => !bundleAddDisabled && setKits(row, row.booked.length + 1)}
 						>
 							<ProductThumb path={row.imagePath} alt={row.name} />
 							<div class="min-w-0 flex-1">
@@ -617,7 +809,7 @@
 						</div>
 					{/each}
 					{#each availableGroups as g (g.key)}
-						{@const groupAddDisabled = pending.has(g.key) || g.bookedHere >= groupMaxQty(g)}
+						{@const groupAddDisabled = g.bookedHere >= groupMaxQty(g)}
 						<!-- the centre pane's + always adds one more individually booked unit -->
 						<div
 							class="flex items-center gap-2 border-b px-3 py-2 last:border-0 {groupAddDisabled
@@ -725,3 +917,33 @@
 		</div>
 	</div>
 </div>
+
+<!-- Bottom-left, because toasts own the bottom-right corner. -->
+{#if dirty || justSaved}
+	<div
+		role="status"
+		class="fixed bottom-4 left-4 z-50 flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-sm text-muted-foreground shadow-md"
+	>
+		{#if dirty}
+			<span
+				class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground"
+			></span>
+			Saving…
+		{:else}
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="14"
+				height="14"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2.5"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<path d="M20 6 9 17l-5-5" />
+			</svg>
+			All changes saved
+		{/if}
+	</div>
+{/if}
