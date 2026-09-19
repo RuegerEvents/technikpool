@@ -1,7 +1,7 @@
 // Plain server-side templates — not covered by wuchale (Svelte-only), so
 // these are written in German to match the app's default locale.
 
-function escapeHtml(value: string) {
+export function escapeHtml(value: string) {
 	return value
 		.replace(/&/g, '&amp;')
 		.replace(/</g, '&lt;')

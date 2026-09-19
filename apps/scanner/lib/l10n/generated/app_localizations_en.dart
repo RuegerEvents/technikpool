@@ -331,6 +331,10 @@ class SEn extends S {
       'This device is marked unavailable and cannot be checked out.';
 
   @override
+  String get errorProductionCancelled =>
+      'This production has been cancelled. Nothing can be checked out to it.';
+
+  @override
   String get errorUnauthorized =>
       'The session has expired. Please connect again.';
 

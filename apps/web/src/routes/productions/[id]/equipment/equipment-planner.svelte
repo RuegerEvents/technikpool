@@ -602,14 +602,25 @@
 			<h1 class="text-2xl font-semibold tracking-tight">Equipment</h1>
 		</div>
 		<div class="flex items-center gap-3">
-			<Button variant="outline" size="sm" onclick={() => (copyEquipmentOpen = true)}
-				>Copy equipment from…</Button
-			>
+			{#if !data.production.cancelledAt}
+				<Button variant="outline" size="sm" onclick={() => (copyEquipmentOpen = true)}
+					>Copy equipment from…</Button
+				>
+			{/if}
 			<span class="rounded-full bg-muted px-3 py-1 text-sm font-semibold text-muted-foreground">
 				{totalBooked} device{totalBooked !== 1 ? 's' : ''} booked
 			</span>
 		</div>
 	</div>
+
+	{#if data.production.cancelledAt}
+		<!-- The server refuses every booking onto it; say so before the first try. -->
+		<p
+			class="shrink-0 rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+		>
+			This production has been cancelled. Reopen it before booking equipment onto it.
+		</p>
+	{/if}
 
 	<div
 		class="grid min-w-0 gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-[210px_minmax(0,1fr)_minmax(0,1fr)]"

@@ -216,6 +216,7 @@ msgstr "Crew"
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/new/+page.svelte
 msgid "Cancel"
 msgstr "Abbrechen"
@@ -4255,7 +4256,6 @@ msgstr "Nur möglich, solange es nie gebucht, gescannt, geprüft oder abgerechne
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/orgs/[id]/+page.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 msgid "Delete"
 msgstr "Löschen"
 
@@ -5165,6 +5165,7 @@ msgstr "Bundle umgewandelt — {0} angehängt"
 
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 msgid "More actions"
 msgstr "Weitere Aktionen"
 
@@ -5366,6 +5367,7 @@ msgstr "Alle Produkte werden zum ausgewählten Hersteller verschoben. Bestehende
 msgid "Production deleted"
 msgstr "Produktion gelöscht"
 
+#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Delete production"
@@ -8206,3 +8208,145 @@ msgstr "Noch keine Stecker hinterlegt — auf der Produktseite hinzufügen."
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "Serial number, tag, status, location, purchase and inspection."
 msgstr "Seriennummer, Tag, Status, Lagerort, Kauf und Prüfung."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Only org admins and owners can cancel or reopen productions."
+msgstr "Nur Org-Admins und -Owner können Produktionen absagen oder wieder aufnehmen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This production has been cancelled — reopen it before booking anything onto it."
+msgstr "Diese Produktion wurde abgesagt — nimm sie wieder auf, bevor du etwas darauf buchst."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This production has already been cancelled."
+msgstr "Diese Produktion wurde bereits abgesagt."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This production has not been cancelled."
+msgstr "Diese Produktion ist nicht abgesagt."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Give a reason for the cancellation."
+msgstr "Gib einen Grund für die Absage an."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This request is no longer open — it was withdrawn or has already been answered."
+msgstr "Diese Anfrage ist nicht mehr offen — sie wurde zurückgezogen oder bereits beantwortet."
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Production cancelled"
+msgstr "Produktion abgesagt"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Production reopened — # unit was booked elsewhere in the meantime and has been removed"
+msgid_plural "Production reopened — # units were booked elsewhere in the meantime and have been removed"
+msgstr[0] "Produktion wieder aufgenommen — # Gerät war inzwischen anderweitig gebucht und wurde entfernt"
+msgstr[1] "Produktion wieder aufgenommen — # Geräte waren inzwischen anderweitig gebucht und wurden entfernt"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Production reopened"
+msgstr "Produktion wieder aufgenommen"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Released"
+msgstr "Freigegeben"
+
+#: src/routes/productions/+page.svelte
+#: src/routes/productions/+page.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Cancelled"
+msgstr "Abgesagt"
+
+#: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Cancel production"
+msgstr "Produktion absagen"
+
+#. 0: new Date(production.cancelledAt).toLocaleDateString('de-DE'); 1: production .cancelledBy.name || production.cancelledBy.email
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Cancelled on {0} by {1}"
+msgstr "Abgesagt am {0} von {1}"
+
+#. 0: new Date(production.cancelledAt).toLocaleDateString('de-DE')
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Cancelled on {0}"
+msgstr "Abgesagt am {0}"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Nothing is held back for it any more. Units that were already out on it are still returned by scanning them onto a location."
+msgstr "Dafür wird nichts mehr zurückgehalten. Geräte, die schon ausgegeben waren, werden weiterhin zurückgenommen, indem man sie auf einen Lagerort scannt."
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Reopen"
+msgstr "Wieder aufnehmen"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "# booking or open request is released"
+msgid_plural "# bookings and open requests are released"
+msgstr[0] "# Buchung oder offene Anfrage wird freigegeben"
+msgstr[1] "# Buchungen und offene Anfragen werden freigegeben"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "# unit is checked out and stays out until it is scanned back"
+msgid_plural "# units are checked out and stay out until they are scanned back"
+msgstr[0] "# Gerät ist ausgegeben und bleibt es, bis es zurückgescannt wird"
+msgstr[1] "# Geräte sind ausgegeben und bleiben es, bis sie zurückgescannt werden"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "The crew and any organization lending units to it are told by email"
+msgstr "Die Crew und alle Organisationen, die Geräte dafür verleihen, werden per E-Mail informiert"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Customer called off the event"
+msgstr "Kunde hat die Veranstaltung abgesagt"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Reason *"
+msgstr "Grund *"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "<0/> stays on record with its offers and invoices, but holds nothing back any more."
+msgstr "<0/> bleibt mit Angeboten und Rechnungen erhalten, hält aber nichts mehr zurück."
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Cancelling…"
+msgstr "Wird abgesagt…"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Keep production"
+msgstr "Nicht absagen"
+
+#: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Reopen production"
+msgstr "Produktion wieder aufnehmen"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Units of your own organization are booked straight away"
+msgstr "Geräte der eigenen Organisation werden sofort gebucht"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Units of other organizations go back to their owners as requests"
+msgstr "Geräte anderer Organisationen gehen als Anfrage erneut an ihre Besitzer"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "A unit booked elsewhere for these days in the meantime is removed"
+msgstr "Ein Gerät, das inzwischen für diese Tage anderweitig gebucht ist, wird entfernt"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "What the cancellation released is booked again for <0/>, as far as it is still free."
+msgstr "Was die Absage freigegeben hat, wird wieder für <0/> gebucht, soweit es noch frei ist."
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Reopening…"
+msgstr "Wird wieder aufgenommen…"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Released — <0/> was cancelled"
+msgstr "Freigegeben — <0/> wurde abgesagt"
+
+#: src/routes/productions/[id]/equipment/equipment-planner.svelte
+msgid "This production has been cancelled. Reopen it before booking equipment onto it."
+msgstr "Diese Produktion wurde abgesagt. Nimm sie wieder auf, bevor du Equipment darauf buchst."

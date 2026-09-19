@@ -11,6 +11,8 @@ export type AllDayEvent = {
 	description?: string;
 	location?: string;
 	url?: string;
+	/** A calendar app shows a cancelled event as such, where a dropped one just vanishes. */
+	cancelled?: boolean;
 	lastModified: Date;
 };
 
@@ -88,6 +90,7 @@ export function renderCalendar(opts: { name: string; events: AllDayEvent[] }): s
 		if (event.description) lines.push(`DESCRIPTION:${escapeText(event.description)}`);
 		if (event.location) lines.push(`LOCATION:${escapeText(event.location)}`);
 		if (event.url) lines.push(`URL:${event.url}`);
+		if (event.cancelled) lines.push('STATUS:CANCELLED');
 		lines.push('TRANSP:TRANSPARENT', 'END:VEVENT');
 	}
 

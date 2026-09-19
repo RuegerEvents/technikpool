@@ -990,6 +990,17 @@
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
 												>
+											{:else if tx?.type === 'BOOKING_CANCELLED'}
+												Released —
+												<a
+													href={item.productionRestricted
+														? undefined
+														: resolve(`/productions/${tx.productionId}`)}
+													class="text-foreground {item.productionRestricted
+														? ''
+														: 'underline underline-offset-2'}">{tx.productionName}</a
+												>
+												was cancelled
 											{:else if tx?.type === 'ACCESSORY_ATTACHED'}
 												Attached as an accessory of
 												<a

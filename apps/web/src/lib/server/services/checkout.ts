@@ -74,7 +74,8 @@ export class CheckoutError extends Error {
 			| 'forbidden'
 			| 'wrong_organization'
 			| 'asset_retired'
-			| 'asset_unavailable',
+			| 'asset_unavailable'
+			| 'production_cancelled',
 		message: string,
 		/** The scanned tag, where there is one — a message naming it is worth more. */
 		readonly assetTag?: string
@@ -122,6 +123,19 @@ async function assertProductionAccess(
 	if (systemAdmin) return;
 	if (!(await writableOrgIds(userId)).includes(production.organizationId)) {
 		throw new CheckoutError('forbidden', 'No access to this production');
+	}
+}
+
+/**
+ * Nothing is checked out to a cancelled production. Units already out on it
+ * still come back through a scan to a location, which never gets here.
+ */
+function assertProductionOpen(production: { name: string; cancelledAt: Date | null }) {
+	if (production.cancelledAt) {
+		throw new CheckoutError(
+			'production_cancelled',
+			`"${production.name}" has been cancelled and takes no checkouts`
+		);
 	}
 }
 
@@ -271,6 +285,7 @@ export async function performScan(
 
 	const production = await prisma.production.findUniqueOrThrow({ where: { id: input.targetId } });
 	await assertProductionAccess(userId, production, systemAdmin);
+	assertProductionOpen(production);
 
 	const existingItems = await prisma.productionItem.findMany({
 		where: { productionId: input.targetId, assetId: { in: touchedIds } },
@@ -457,6 +472,7 @@ export async function performBulkCheckout(
 
 	const production = await prisma.production.findUniqueOrThrow({ where: { id: input.targetId } });
 	await assertProductionAccess(userId, production, systemAdmin);
+	assertProductionOpen(production);
 
 	for (const asset of assets) {
 		const existing = await prisma.productionItem.findFirst({

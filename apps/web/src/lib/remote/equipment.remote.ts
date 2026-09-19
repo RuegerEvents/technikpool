@@ -12,6 +12,7 @@ import {
 import { BOOKABLE_ASSET_WHERE } from '$lib/asset-status';
 import { accessoryIdsOf } from '$lib/server/services/accessories';
 import { appError } from '$lib/errors';
+import { requireOpenProduction } from '$lib/server/services/production-state';
 import { copyEquipment, planEquipmentCopy } from '$lib/server/services/equipment-copy';
 import type { AddedToProductionData, RequestedData } from '$lib/types/asset-transaction';
 
@@ -26,7 +27,14 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: productionId },
-		select: { id: true, name: true, startDate: true, endDate: true, organizationId: true }
+		select: {
+			id: true,
+			name: true,
+			startDate: true,
+			endDate: true,
+			organizationId: true,
+			cancelledAt: true
+		}
 	});
 	await requireOrgRead(production.organizationId);
 
@@ -238,6 +246,7 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 		include: { organization: { select: { id: true, name: true } } }
 	});
 	await requireOrgWrite(production.organizationId);
+	requireOpenProduction(production);
 
 	// A unit booked as part of a bundle belongs to that bundle's row, not to
 	// this product row: the quantity here counts and removes only individually
@@ -435,11 +444,13 @@ async function requireCopyAccess(sourceId: string, targetId: string) {
 		}),
 		prisma.production.findUniqueOrThrow({
 			where: { id: targetId },
-			select: { organizationId: true }
+			select: { organizationId: true, cancelledAt: true }
 		})
 	]);
 	await requireOrgRead(source.organizationId);
-	return requireOrgWrite(target.organizationId);
+	const user = await requireOrgWrite(target.organizationId);
+	requireOpenProduction(target);
+	return user;
 }
 
 /** What taking over would book, line by line — a preview, not a reservation. */

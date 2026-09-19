@@ -64,6 +64,7 @@ export async function renderProductionsCalendar(userId: string): Promise<string>
 		// Server-side copy is German, like the emails: a calendar app fetches
 		// with no locale cookie to go by.
 		const lines = [`Organisation: ${orgLabel(p.organization)}`];
+		if (p.cancelledAt) lines.unshift(`Abgesagt: ${p.cancellationReason ?? ''}`.trim(), '');
 		const showStart = p.showStartDate ?? p.startDate;
 		const showEnd = p.showEndDate ?? p.endDate;
 		if (
@@ -83,7 +84,8 @@ export async function renderProductionsCalendar(userId: string): Promise<string>
 				uid: `${p.id}@technikpool`,
 				start: p.startDate,
 				end: p.endDate,
-				summary: p.name,
+				summary: p.cancelledAt ? `Abgesagt: ${p.name}` : p.name,
+				cancelled: !!p.cancelledAt,
 				description: lines.join('\n'),
 				location:
 					[

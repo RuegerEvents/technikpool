@@ -430,6 +430,9 @@ export const ProductionScalarFieldEnum = {
   venueName: 'venueName',
   addressId: 'addressId',
   customerId: 'customerId',
+  cancelledAt: 'cancelledAt',
+  cancellationReason: 'cancellationReason',
+  cancelledById: 'cancelledById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

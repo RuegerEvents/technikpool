@@ -21,7 +21,11 @@ abstract class InventoryClient {
   @GET('/api/v1/locations')
   Future<List<Location>> listLocations();
 
-  /// Productions across the user's organizations
+  /// Productions across the user's organizations.
+  ///
+  /// Cancelled productions are left out: nothing can be checked out to one,.
+  /// so it is never a scan target. Units still out on a cancelled production.
+  /// come back by scanning them onto a location, as always.
   @GET('/api/v1/productions')
   Future<List<Production>> listProductions();
 

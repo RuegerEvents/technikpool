@@ -27,6 +27,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'Only org admins and owners can manage offers and invoices.';
 		case 'production_delete_forbidden':
 			return 'Only org admins and owners can delete productions.';
+		case 'production_cancel_forbidden':
+			return 'Only org admins and owners can cancel or reopen productions.';
 		case 'asset_create_forbidden':
 			return 'You are not allowed to create assets in this organization.';
 		case 'approval_forbidden':
@@ -225,6 +227,16 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return `Only ${p0} more unit(s) are available to add.`;
 		case 'equipment_copy_same_production':
 			return 'A production cannot take over its own equipment.';
+		case 'production_cancelled':
+			return 'This production has been cancelled — reopen it before booking anything onto it.';
+		case 'production_already_cancelled':
+			return 'This production has already been cancelled.';
+		case 'production_not_cancelled':
+			return 'This production has not been cancelled.';
+		case 'cancellation_reason_required':
+			return 'Give a reason for the cancellation.';
+		case 'booking_not_pending':
+			return 'This request is no longer open — it was withdrawn or has already been answered.';
 
 		// Offers and invoices
 		case 'offer_immutable':

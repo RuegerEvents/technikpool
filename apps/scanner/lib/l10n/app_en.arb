@@ -145,6 +145,7 @@
   "errorWrongOrganization": "That location belongs to a different organisation.",
   "errorAssetRetired": "This device has been sold or decommissioned and can no longer be booked.",
   "errorAssetUnavailable": "This device is marked unavailable and cannot be checked out.",
+  "errorProductionCancelled": "This production has been cancelled. Nothing can be checked out to it.",
   "errorUnauthorized": "The session has expired. Please connect again.",
   "errorInvalidRequest": "Invalid request.",
   "errorInvalidLimit": "Invalid page size.",

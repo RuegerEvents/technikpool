@@ -12,7 +12,8 @@ export const GET: RequestHandler = ({ locals }) =>
 		const orgIds = await userOrgIds(user.id);
 
 		const productions = await prisma.production.findMany({
-			where: admin ? {} : { organizationId: { in: orgIds } },
+			// Cancelled ones are left out: a scan to them is refused.
+			where: { cancelledAt: null, ...(admin ? {} : { organizationId: { in: orgIds } }) },
 			include: { organization: true },
 			orderBy: [{ startDate: 'desc' }, { name: 'asc' }]
 		});

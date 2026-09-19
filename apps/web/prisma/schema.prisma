@@ -33,11 +33,12 @@ model User {
   sentInvitations     Invitation[]
 
   // App-specific relations
-  homeOrgId       String?
-  homeOrg         Organization?      @relation("HomeOrg", fields: [homeOrgId], references: [id])
-  memberships     OrgMembership[]
-  transactions    AssetTransaction[]
-  crewAssignments ProductionCrew[]
+  homeOrgId            String?
+  homeOrg              Organization?      @relation("HomeOrg", fields: [homeOrgId], references: [id])
+  memberships          OrgMembership[]
+  transactions         AssetTransaction[]
+  crewAssignments      ProductionCrew[]
+  cancelledProductions Production[]       @relation("ProductionCanceller")
 
   @@map("user")
 }
@@ -148,12 +149,12 @@ model Organization {
   bic               String?
   bankName          String?
 
-  billingEmail      String?
-  billingWebsite    String?
-  paymentTermsDays  Int     @default(14)
-  offerIntroTemplate    String? @db.Text
-  offerClosingTemplate  String? @db.Text
-  invoiceIntroTemplate  String? @db.Text
+  billingEmail           String?
+  billingWebsite         String?
+  paymentTermsDays       Int     @default(14)
+  offerIntroTemplate     String? @db.Text
+  offerClosingTemplate   String? @db.Text
+  invoiceIntroTemplate   String? @db.Text
   invoiceClosingTemplate String? @db.Text
 
   homeUsers   User[]          @relation("HomeOrg")
@@ -229,13 +230,13 @@ model Invitation {
 }
 
 model Manufacturer {
-  id      String  @id @default(cuid())
-  name    String
-  generic Boolean @default(false)
+  id        String    @id @default(cuid())
+  name      String
+  generic   Boolean   @default(false)
   // The object key in the S3-compatible store, not an address: see
   // src/lib/images.ts. A stored URL would pin the row to whichever host the
   // store was on when it was uploaded.
-  logoPath String?
+  logoPath  String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   products  Product[]
@@ -248,17 +249,17 @@ model Manufacturer {
 /// front of it: a warehouse at 22:00 with an unlisted connector must never be
 /// stuck.
 model Connector {
-  id   String @id @default(cuid())
-  name String
+  id         String    @id @default(cuid())
+  name       String
   /// Lowercased `name`. The unique key, so "Schuko M", "schuko m" and
   /// "SCHUKO M" cannot become three rows of the same thing.
-  slug String @unique
+  slug       String    @unique
   /// What this connector mates with — "Schuko M" and "Schuko F" are both
   /// `Schuko`, "C13" and "C14" are both `C13/C14`. Not derivable from the name:
   /// "USB-A" and "USB-C" share a prefix and mate with nothing of each other's,
   /// while "powerCON blau" and "powerCON grau" share a family and look no more
   /// alike. It is what tells an ordinary extension lead from a converter.
-  family String?
+  family     String?
   /// `plug` (Stecker) or `socket` (Einbaubuchse) — where this connector sits.
   /// A Stecker hangs off the end of a cable; an Einbaubuchse is mounted into a
   /// device or a panel. Almost everything in the catalogue is a Stecker,
@@ -266,7 +267,7 @@ model Connector {
   /// XLR3 F are as much cable ends as their male counterparts.
   ///
   /// Descriptive only. What a connector can be joined to is `gender`.
-  form String?
+  form       String?
   /// `male` (Stifte) or `female` (Buchsen) — what the contacts are.
   ///
   /// Separate from `form`, because the two come apart on exactly the
@@ -274,7 +275,7 @@ model Connector {
   /// the Stecker you push into the chassis, and every powerCON cable end is
   /// the same way round. They agree on Schuko, XLR, CEE and C13/C14, which is
   /// what makes one column look sufficient until it isn't.
-  gender String?
+  gender     String?
   /// Which department a cable ending in this connector belongs to. A Schuko
   /// plug is Power wherever it turns up, so this prefills the category on a new
   /// cable — a better guess than the cable type, which is free text. Only a
@@ -282,7 +283,7 @@ model Connector {
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   /// Object key, like Manufacturer.logoPath.
-  imagePath String?
+  imagePath  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -318,7 +319,7 @@ model ProductPort {
 }
 
 model Category {
-  id String @id @default(cuid())
+  id        String   @id @default(cuid())
   // English is the source name — it's what `name` has always held, what the
   // API returns, and what a billing line snapshots. `nameDe` is the German
   // display name; empty means "no translation yet", and the English name shows
@@ -383,8 +384,8 @@ model Product {
   createdById String?
   createdBy   User?   @relation("ProductCreator", fields: [createdById], references: [id], onDelete: SetNull)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
   assets    Asset[]
   orgPrices OrgProductPrice[]
   /// The connectors built into this device. Empty on cables, whose ends are
@@ -598,6 +599,15 @@ model Production {
   customerId String?
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
+  // A cancelled production stays on record — with its offers, invoices and
+  // history — but holds nothing back any more: its PENDING and APPROVED items
+  // were set to CANCELLED when it was cancelled. Units already checked out
+  // stay CHECKED_OUT until they come back. Null on all three means it is on.
+  cancelledAt        DateTime?
+  cancellationReason String?
+  cancelledById      String?
+  cancelledBy        User?     @relation("ProductionCanceller", fields: [cancelledById], references: [id], onDelete: SetNull)
+
   items        ProductionItem[]
   crew         ProductionCrew[]
   transactions AssetTransaction[]
@@ -618,9 +628,9 @@ model Customer {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  companyName   String?
-  contactPerson String?
-  email         String?
+  companyName    String?
+  contactPerson  String?
+  email          String?
   customerNumber String?
   phone          String?
   vatId          String?
@@ -656,7 +666,9 @@ model ProductionItem {
   // production is synchronized.
   sourceParentAssetId String?
 
-  status String @default("PENDING") // PENDING, APPROVED, CHECKED_OUT, RETURNED
+  // PENDING, APPROVED, CHECKED_OUT, RETURNED, DECLINED — and CANCELLED, a
+  // booking the production's cancellation released (see Production.cancelledAt).
+  status String @default("PENDING")
 
   @@unique([productionId, assetId])
 }
@@ -766,9 +778,9 @@ model Offer {
 
   serviceStartDate DateTime?
   serviceEndDate   DateTime?
-  introText        String? @db.Text
-  closingText      String? @db.Text
-  paymentTermsDays Int    @default(14)
+  introText        String?   @db.Text
+  closingText      String?   @db.Text
+  paymentTermsDays Int       @default(14)
   finalizedAt      DateTime?
   pdfPath          String?
 
@@ -834,7 +846,7 @@ model OfferItem {
 
   // Soft reference only (no FK/relation): a line must survive the asset it
   // was priced from being edited or deleted later.
-  assetId String?
+  assetId  String?
   // Soft reference only — set instead of assetId for bundle-priced lines, so
   // re-syncing from the production can match a bundle line across updates
   // even as its member count/description changes.
@@ -892,9 +904,9 @@ model Invoice {
 
   serviceStartDate DateTime?
   serviceEndDate   DateTime?
-  introText        String? @db.Text
-  closingText      String? @db.Text
-  paymentTermsDays Int    @default(14)
+  introText        String?   @db.Text
+  closingText      String?   @db.Text
+  paymentTermsDays Int       @default(14)
 
   issueDate DateTime @default(now())
   dayCount  Int
@@ -909,7 +921,7 @@ model Invoice {
   // Null while the invoice is still a draft — items can be corrected and
   // re-synced from the production. Once set, the invoice is immutable
   // (GoBD/§14 UStG): no more item updates, no more field edits.
-  sentAt DateTime?
+  sentAt  DateTime?
   pdfPath String?
 
   // Snapshot of the org's Kleinunternehmer status at issuance — GoBD requires
@@ -967,7 +979,7 @@ model InvoiceItem {
   invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   // Soft reference only — see OfferItem.assetId.
-  assetId String?
+  assetId  String?
   // Soft reference only — see OfferItem.bundleId.
   bundleId String?
 

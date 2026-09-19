@@ -15,6 +15,8 @@
 		removeCrewMember,
 		removeProductionItem,
 		deleteProduction,
+		cancelProduction,
+		reopenProduction,
 		updateProductionAddress,
 		updateProductionDuration,
 		updateProductionCustomer
@@ -33,6 +35,7 @@
 	import BulkActionsBar from '$lib/components/ui/bulk-actions-bar.svelte';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
 	import { Modal } from '$lib/components/ui/modal';
+	import { DropdownMenu } from 'bits-ui';
 	import { LicenseRevealModal } from '$lib/components/ui/license-credentials';
 	import CopyEquipmentModal from './copy-equipment-modal.svelte';
 	import { accessorySummary, nestAccessories, type Nested } from '$lib/production-items';
@@ -55,6 +58,59 @@
 		}
 	}
 
+	// A cancelled production takes nothing new; see `requireOpenProduction`.
+	// What it still holds can be taken off it, so Remove stays on `canEdit`.
+	let cancelled = $derived(!!production.cancelledAt);
+
+	let cancelOpen = $state(false);
+	let cancelReason = $state('');
+	let cancelling = $state(false);
+	// What the dialog says it is about to do: bookings and open requests are
+	// released, units that are physically out stay out.
+	let releasableCount = $derived(
+		production.items.filter((i) => i.status === 'PENDING' || i.status === 'APPROVED').length
+	);
+	let checkedOutCount = $derived(production.items.filter((i) => i.status === 'CHECKED_OUT').length);
+	async function handleCancelProduction() {
+		if (!cancelReason.trim()) return;
+		cancelling = true;
+		try {
+			await cancelProduction({ productionId, reason: cancelReason });
+			toast.success('Production cancelled');
+			cancelOpen = false;
+			cancelReason = '';
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			cancelling = false;
+		}
+	}
+
+	let reopenOpen = $state(false);
+	let reopening = $state(false);
+	async function handleReopenProduction() {
+		reopening = true;
+		try {
+			const result = await reopenProduction(productionId);
+			reopenOpen = false;
+			if (result.dropped.length > 0) {
+				toast.warning(
+					plural(result.dropped.length, [
+						'Production reopened — # unit was booked elsewhere in the meantime and has been removed',
+						'Production reopened — # units were booked elsewhere in the meantime and have been removed'
+					]),
+					{ description: result.dropped.join(', ') }
+				);
+			} else {
+				toast.success('Production reopened');
+			}
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			reopening = false;
+		}
+	}
+
 	let allBundles = $derived(await getBundles());
 	// The user's rung in the org that runs this production, asked the way the
 	// server asks it (`requireOrgRole`): a system admin clears every rung. The
@@ -66,6 +122,7 @@
 			: ((await getMyOrgs()).find((org) => org.id === production.organizationId)?.role ?? null)
 	);
 	let canEdit = $derived(!!role && roleAtLeast(role, ROLE_FOR.write));
+	let canPlan = $derived(canEdit && !cancelled);
 	// Deleting it, and its offers and invoices — which are read by the org's
 	// billing admins only (see `billingOrgIds` in offers.remote.ts), so nobody
 	// else is shown the section or has the queries run on their behalf.
@@ -342,14 +399,16 @@
 		APPROVED: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
 		PENDING: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
 		CHECKED_OUT: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-		RETURNED: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+		RETURNED: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+		CANCELLED: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
 	};
 
 	const statusLabels: Record<string, string> = {
 		APPROVED: 'Approved',
 		PENDING: 'Pending',
 		CHECKED_OUT: 'Checked out',
-		RETURNED: 'Returned'
+		RETURNED: 'Returned',
+		CANCELLED: 'Released'
 	};
 
 	let editingAddress = $state(false);
@@ -509,7 +568,14 @@
 	<!-- Header -->
 	<div class="flex flex-wrap items-center justify-between gap-4">
 		<div>
-			<h1 class="text-3xl font-bold tracking-tight">{production.name}</h1>
+			<div class="flex flex-wrap items-center gap-3">
+				<h1 class="text-3xl font-bold tracking-tight">{production.name}</h1>
+				{#if cancelled}
+					<span class="rounded bg-destructive/10 px-2 py-0.5 text-sm font-medium text-destructive"
+						>Cancelled</span
+					>
+				{/if}
+			</div>
 			<p class="text-muted-foreground">
 				Owned by {orgLabel(production.organization)} · {formatDateRange(
 					production.startDate,
@@ -525,9 +591,6 @@
 		</div>
 		<div class="flex flex-wrap gap-2">
 			<Button icon="back" variant="outline" href={resolve('/productions')}>Back</Button>
-			{#if canManage}
-				<Button variant="destructive" onclick={() => (deleteOpen = true)}>Delete</Button>
-			{/if}
 			<Button
 				variant="secondary"
 				href={resolve(`/productions/${production.id}/packing-list`)}
@@ -547,9 +610,88 @@
 				<Button icon="add" href={resolve(`/offers/new?productionId=${production.id}`)}
 					>Create Offer</Button
 				>
+				<DropdownMenu.Root>
+					<DropdownMenu.Trigger>
+						{#snippet child({ props })}
+							<button
+								{...props}
+								type="button"
+								class="flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+								aria-label="More actions"
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="18"
+									height="18"
+									viewBox="0 0 24 24"
+									fill="currentColor"
+								>
+									<circle cx="5" cy="12" r="1.75" />
+									<circle cx="12" cy="12" r="1.75" />
+									<circle cx="19" cy="12" r="1.75" />
+								</svg>
+							</button>
+						{/snippet}
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Portal>
+						<DropdownMenu.Content
+							align="end"
+							sideOffset={4}
+							class="z-50 min-w-[190px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+						>
+							{#if cancelled}
+								<DropdownMenu.Item
+									onSelect={() => (reopenOpen = true)}
+									class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+								>
+									Reopen production
+								</DropdownMenu.Item>
+							{:else}
+								<DropdownMenu.Item
+									onSelect={() => (cancelOpen = true)}
+									class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+								>
+									Cancel production
+								</DropdownMenu.Item>
+							{/if}
+							<DropdownMenu.Separator class="my-1 h-px bg-border" />
+							<DropdownMenu.Item
+								onSelect={() => (deleteOpen = true)}
+								class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm text-destructive transition-colors outline-none hover:bg-destructive/10 data-[highlighted]:bg-destructive/10"
+							>
+								Delete production
+							</DropdownMenu.Item>
+						</DropdownMenu.Content>
+					</DropdownMenu.Portal>
+				</DropdownMenu.Root>
 			{/if}
 		</div>
 	</div>
+
+	{#if production.cancelledAt}
+		<div
+			class="flex flex-wrap items-start justify-between gap-4 rounded-lg border border-destructive/40 bg-destructive/5 p-4"
+		>
+			<div class="space-y-1">
+				<p class="font-medium text-destructive">
+					{#if production.cancelledBy}
+						Cancelled on {new Date(production.cancelledAt).toLocaleDateString('de-DE')} by {production
+							.cancelledBy.name || production.cancelledBy.email}
+					{:else}
+						Cancelled on {new Date(production.cancelledAt).toLocaleDateString('de-DE')}
+					{/if}
+				</p>
+				<p class="text-sm whitespace-pre-line">{production.cancellationReason}</p>
+				<p class="text-xs text-muted-foreground">
+					Nothing is held back for it any more. Units that were already out on it are still returned
+					by scanning them onto a location.
+				</p>
+			</div>
+			{#if canManage}
+				<Button variant="outline" onclick={() => (reopenOpen = true)}>Reopen</Button>
+			{/if}
+		</div>
+	{/if}
 
 	<!-- Offers & Invoices -->
 	{#if canManage}
@@ -813,7 +955,7 @@
 	<div>
 		<div class="mb-4 flex items-center justify-between">
 			<h2 class="text-xl font-semibold">Booked Equipment</h2>
-			{#if canEdit}
+			{#if canPlan}
 				<div class="flex flex-wrap gap-2">
 					<Button variant="outline" onclick={() => (copyEquipmentOpen = true)}
 						>Copy equipment from…</Button
@@ -906,7 +1048,7 @@
 												>Bundle</span
 											>
 											<span class="font-medium">{section.bundleName}</span>
-											{#if canEdit && divergence}
+											{#if canPlan && divergence}
 												<span
 													class="rounded bg-yellow-100 px-1.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
 													title="{divergence.addedCount > 0
@@ -1018,7 +1160,7 @@
 														Credentials
 													</button>
 												{/if}
-												{#if canEdit && accessoriesChanged(item)}
+												{#if canPlan && accessoriesChanged(item)}
 													<span
 														class="rounded bg-yellow-100 px-1.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
 														>Accessories changed</span
@@ -1064,7 +1206,7 @@
 	<div>
 		<div class="mb-4 flex items-center justify-between">
 			<h2 class="text-xl font-semibold">Crew</h2>
-			{#if canEdit}
+			{#if canPlan}
 				<Button variant="outline" onclick={() => (showCrewForm = !showCrewForm)}>
 					{showCrewForm ? 'Cancel' : 'Add Crew Member'}
 				</Button>
@@ -1176,13 +1318,87 @@
 	{/snippet}
 </Modal>
 
+<Modal bind:open={cancelOpen} title="Cancel production" size="md" dismissible={!cancelling}>
+	{#snippet children()}
+		<div class="space-y-4">
+			<p class="text-sm text-muted-foreground">
+				<span class="font-medium text-foreground">{production.name}</span> stays on record with its offers
+				and invoices, but holds nothing back any more.
+			</p>
+			<ul class="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+				<li>
+					{plural(releasableCount, [
+						'# booking or open request is released',
+						'# bookings and open requests are released'
+					])}
+				</li>
+				{#if checkedOutCount > 0}
+					<li>
+						{plural(checkedOutCount, [
+							'# unit is checked out and stays out until it is scanned back',
+							'# units are checked out and stay out until they are scanned back'
+						])}
+					</li>
+				{/if}
+				<li>The crew and any organization lending units to it are told by email</li>
+			</ul>
+			<div class="space-y-2">
+				<Label for="cancelReason">Reason *</Label>
+				<textarea
+					id="cancelReason"
+					bind:value={cancelReason}
+					rows="3"
+					placeholder="Customer called off the event"
+					class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+			</div>
+		</div>
+	{/snippet}
+	{#snippet footer()}
+		<Button variant="outline" disabled={cancelling} onclick={() => (cancelOpen = false)}
+			>Keep production</Button
+		>
+		<Button
+			variant="destructive"
+			disabled={cancelling || !cancelReason.trim()}
+			onclick={handleCancelProduction}
+		>
+			{cancelling ? 'Cancelling…' : 'Cancel production'}
+		</Button>
+	{/snippet}
+</Modal>
+
+<Modal bind:open={reopenOpen} title="Reopen production" size="md" dismissible={!reopening}>
+	{#snippet children()}
+		<div class="space-y-3 text-sm text-muted-foreground">
+			<p>
+				What the cancellation released is booked again for
+				<span class="font-medium text-foreground">{production.name}</span>, as far as it is still
+				free.
+			</p>
+			<ul class="list-disc space-y-1 pl-5">
+				<li>Units of your own organization are booked straight away</li>
+				<li>Units of other organizations go back to their owners as requests</li>
+				<li>A unit booked elsewhere for these days in the meantime is removed</li>
+			</ul>
+		</div>
+	{/snippet}
+	{#snippet footer()}
+		<Button variant="outline" disabled={reopening} onclick={() => (reopenOpen = false)}
+			>Cancel</Button
+		>
+		<Button disabled={reopening} onclick={handleReopenProduction}>
+			{reopening ? 'Reopening…' : 'Reopen production'}
+		</Button>
+	{/snippet}
+</Modal>
+
 <LicenseRevealModal
 	bind:open={credentialsOpen}
 	assetId={credentialsFor?.assetId ?? null}
 	title={credentialsFor?.label ?? ''}
 />
 
-{#if canEdit}
+{#if canPlan}
 	<CopyEquipmentModal
 		{productionId}
 		organizationId={production.organizationId}

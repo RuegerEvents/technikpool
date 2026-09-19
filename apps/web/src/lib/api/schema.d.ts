@@ -132,7 +132,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Productions across the user's organizations */
+        /**
+         * Productions across the user's organizations
+         * @description Cancelled productions are left out: nothing can be checked out to one,
+         *     so it is never a scan target. Units still out on a cancelled production
+         *     come back by scanning them onto a location, as always.
+         */
         get: operations["listProductions"];
         put?: never;
         post?: never;
@@ -236,6 +241,7 @@ export interface components {
                  * @example forbidden
                  * @example asset_retired
                  * @example asset_unavailable
+                 * @example production_cancelled
                  */
                 code: string;
                 /** @description Human-readable text, safe to show to the operator. */
@@ -485,7 +491,8 @@ export interface components {
          * @description The record exists but its state forbids the operation — a sold or
          *     decommissioned asset can no longer be booked (`asset_retired`), and a
          *     unit held back as unavailable cannot be checked out
-         *     (`asset_unavailable`).
+         *     (`asset_unavailable`), and nothing is checked out to a production that
+         *     has been cancelled (`production_cancelled`).
          */
         Conflict: {
             headers: {

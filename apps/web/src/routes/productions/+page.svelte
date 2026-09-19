@@ -127,7 +127,8 @@
 		return `${now.getFullYear()}-${month}-${day}`;
 	}
 
-	function prodStatus(p: Production): 'past' | 'active' | 'upcoming' {
+	function prodStatus(p: Production): 'cancelled' | 'past' | 'active' | 'upcoming' {
+		if (p.cancelledAt) return 'cancelled';
 		const today = todayKey();
 		if (p.endDate && dayKey(p.endDate) < today) return 'past';
 		if (p.startDate && dayKey(p.startDate) <= today) return 'active';
@@ -136,7 +137,7 @@
 
 	function prodRowClass(p: Production): string {
 		const s = prodStatus(p);
-		if (s === 'past') return 'opacity-40';
+		if (s === 'past' || s === 'cancelled') return 'opacity-40';
 		if (s === 'active') return 'bg-primary/5';
 		return '';
 	}
@@ -189,7 +190,15 @@
 						: ''}"
 				>
 					<Card.Header>
-						<Card.Title class="text-lg">{prod.name}</Card.Title>
+						<Card.Title class="flex flex-wrap items-center gap-2 text-lg">
+							<span class={prod.cancelledAt ? 'line-through' : ''}>{prod.name}</span>
+							{#if prod.cancelledAt}
+								<span
+									class="rounded bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive"
+									>Cancelled</span
+								>
+							{/if}
+						</Card.Title>
 						<Card.Description>
 							<span class="block">{orgLabel(prod.organization)}</span>
 							{#if prod.startDate}
@@ -212,7 +221,13 @@
 
 			{#snippet cell(prod, key)}
 				{#if key === 'name'}
-					<span class="font-medium">{prod.name}</span>
+					<span class="font-medium {prod.cancelledAt ? 'line-through' : ''}">{prod.name}</span>
+					{#if prod.cancelledAt}
+						<span
+							class="ml-2 rounded bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive"
+							>Cancelled</span
+						>
+					{/if}
 				{:else if key === 'org'}
 					{orgLabel(prod.organization)}
 				{:else if key === 'kw'}

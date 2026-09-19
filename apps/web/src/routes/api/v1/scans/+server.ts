@@ -11,7 +11,8 @@ const STATUS_BY_CODE: Record<CheckoutError['code'], number> = {
 	forbidden: 403,
 	wrong_organization: 403,
 	asset_retired: 409,
-	asset_unavailable: 409
+	asset_unavailable: 409,
+	production_cancelled: 409
 };
 
 export const POST: RequestHandler = ({ locals, request }) =>

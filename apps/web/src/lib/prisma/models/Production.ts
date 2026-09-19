@@ -35,6 +35,9 @@ export type ProductionMinAggregateOutputType = {
   venueName: string | null
   addressId: string | null
   customerId: string | null
+  cancelledAt: Date | null
+  cancellationReason: string | null
+  cancelledById: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -50,6 +53,9 @@ export type ProductionMaxAggregateOutputType = {
   venueName: string | null
   addressId: string | null
   customerId: string | null
+  cancelledAt: Date | null
+  cancellationReason: string | null
+  cancelledById: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -65,6 +71,9 @@ export type ProductionCountAggregateOutputType = {
   venueName: number
   addressId: number
   customerId: number
+  cancelledAt: number
+  cancellationReason: number
+  cancelledById: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -82,6 +91,9 @@ export type ProductionMinAggregateInputType = {
   venueName?: true
   addressId?: true
   customerId?: true
+  cancelledAt?: true
+  cancellationReason?: true
+  cancelledById?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -97,6 +109,9 @@ export type ProductionMaxAggregateInputType = {
   venueName?: true
   addressId?: true
   customerId?: true
+  cancelledAt?: true
+  cancellationReason?: true
+  cancelledById?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -112,6 +127,9 @@ export type ProductionCountAggregateInputType = {
   venueName?: true
   addressId?: true
   customerId?: true
+  cancelledAt?: true
+  cancellationReason?: true
+  cancelledById?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -200,6 +218,9 @@ export type ProductionGroupByOutputType = {
   venueName: string | null
   addressId: string | null
   customerId: string | null
+  cancelledAt: Date | null
+  cancellationReason: string | null
+  cancelledById: string | null
   createdAt: Date
   updatedAt: Date
   _count: ProductionCountAggregateOutputType | null
@@ -236,11 +257,15 @@ export type ProductionWhereInput = {
   venueName?: Prisma.StringNullableFilter<"Production"> | string | null
   addressId?: Prisma.StringNullableFilter<"Production"> | string | null
   customerId?: Prisma.StringNullableFilter<"Production"> | string | null
+  cancelledAt?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
+  cancellationReason?: Prisma.StringNullableFilter<"Production"> | string | null
+  cancelledById?: Prisma.StringNullableFilter<"Production"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Production"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Production"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   address?: Prisma.XOR<Prisma.AddressNullableScalarRelationFilter, Prisma.AddressWhereInput> | null
   customer?: Prisma.XOR<Prisma.CustomerNullableScalarRelationFilter, Prisma.CustomerWhereInput> | null
+  cancelledBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   items?: Prisma.ProductionItemListRelationFilter
   crew?: Prisma.ProductionCrewListRelationFilter
   transactions?: Prisma.AssetTransactionListRelationFilter
@@ -259,11 +284,15 @@ export type ProductionOrderByWithRelationInput = {
   venueName?: Prisma.SortOrderInput | Prisma.SortOrder
   addressId?: Prisma.SortOrderInput | Prisma.SortOrder
   customerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancellationReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancelledById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
   address?: Prisma.AddressOrderByWithRelationInput
   customer?: Prisma.CustomerOrderByWithRelationInput
+  cancelledBy?: Prisma.UserOrderByWithRelationInput
   items?: Prisma.ProductionItemOrderByRelationAggregateInput
   crew?: Prisma.ProductionCrewOrderByRelationAggregateInput
   transactions?: Prisma.AssetTransactionOrderByRelationAggregateInput
@@ -285,11 +314,15 @@ export type ProductionWhereUniqueInput = Prisma.AtLeast<{
   venueName?: Prisma.StringNullableFilter<"Production"> | string | null
   addressId?: Prisma.StringNullableFilter<"Production"> | string | null
   customerId?: Prisma.StringNullableFilter<"Production"> | string | null
+  cancelledAt?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
+  cancellationReason?: Prisma.StringNullableFilter<"Production"> | string | null
+  cancelledById?: Prisma.StringNullableFilter<"Production"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Production"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Production"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   address?: Prisma.XOR<Prisma.AddressNullableScalarRelationFilter, Prisma.AddressWhereInput> | null
   customer?: Prisma.XOR<Prisma.CustomerNullableScalarRelationFilter, Prisma.CustomerWhereInput> | null
+  cancelledBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   items?: Prisma.ProductionItemListRelationFilter
   crew?: Prisma.ProductionCrewListRelationFilter
   transactions?: Prisma.AssetTransactionListRelationFilter
@@ -308,6 +341,9 @@ export type ProductionOrderByWithAggregationInput = {
   venueName?: Prisma.SortOrderInput | Prisma.SortOrder
   addressId?: Prisma.SortOrderInput | Prisma.SortOrder
   customerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancellationReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancelledById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ProductionCountOrderByAggregateInput
@@ -329,6 +365,9 @@ export type ProductionScalarWhereWithAggregatesInput = {
   venueName?: Prisma.StringNullableWithAggregatesFilter<"Production"> | string | null
   addressId?: Prisma.StringNullableWithAggregatesFilter<"Production"> | string | null
   customerId?: Prisma.StringNullableWithAggregatesFilter<"Production"> | string | null
+  cancelledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Production"> | Date | string | null
+  cancellationReason?: Prisma.StringNullableWithAggregatesFilter<"Production"> | string | null
+  cancelledById?: Prisma.StringNullableWithAggregatesFilter<"Production"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Production"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Production"> | Date | string
 }
@@ -341,11 +380,14 @@ export type ProductionCreateInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   venueName?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
   address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
   customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
+  cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledProductionsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
@@ -364,6 +406,9 @@ export type ProductionUncheckedCreateInput = {
   venueName?: string | null
   addressId?: string | null
   customerId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  cancelledById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
@@ -381,11 +426,14 @@ export type ProductionUpdateInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
   address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
   customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
+  cancelledBy?: Prisma.UserUpdateOneWithoutCancelledProductionsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
@@ -404,6 +452,9 @@ export type ProductionUncheckedUpdateInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
@@ -424,6 +475,9 @@ export type ProductionCreateManyInput = {
   venueName?: string | null
   addressId?: string | null
   customerId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  cancelledById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -436,6 +490,8 @@ export type ProductionUpdateManyMutationInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -451,6 +507,9 @@ export type ProductionUncheckedUpdateManyInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -476,6 +535,9 @@ export type ProductionCountOrderByAggregateInput = {
   venueName?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrder
+  cancellationReason?: Prisma.SortOrder
+  cancelledById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -491,6 +553,9 @@ export type ProductionMaxOrderByAggregateInput = {
   venueName?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrder
+  cancellationReason?: Prisma.SortOrder
+  cancelledById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -506,6 +571,9 @@ export type ProductionMinOrderByAggregateInput = {
   venueName?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrder
+  cancellationReason?: Prisma.SortOrder
+  cancelledById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -518,6 +586,48 @@ export type ProductionScalarRelationFilter = {
 export type ProductionNullableScalarRelationFilter = {
   is?: Prisma.ProductionWhereInput | null
   isNot?: Prisma.ProductionWhereInput | null
+}
+
+export type ProductionCreateNestedManyWithoutCancelledByInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutCancelledByInput, Prisma.ProductionUncheckedCreateWithoutCancelledByInput> | Prisma.ProductionCreateWithoutCancelledByInput[] | Prisma.ProductionUncheckedCreateWithoutCancelledByInput[]
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutCancelledByInput | Prisma.ProductionCreateOrConnectWithoutCancelledByInput[]
+  createMany?: Prisma.ProductionCreateManyCancelledByInputEnvelope
+  connect?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+}
+
+export type ProductionUncheckedCreateNestedManyWithoutCancelledByInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutCancelledByInput, Prisma.ProductionUncheckedCreateWithoutCancelledByInput> | Prisma.ProductionCreateWithoutCancelledByInput[] | Prisma.ProductionUncheckedCreateWithoutCancelledByInput[]
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutCancelledByInput | Prisma.ProductionCreateOrConnectWithoutCancelledByInput[]
+  createMany?: Prisma.ProductionCreateManyCancelledByInputEnvelope
+  connect?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+}
+
+export type ProductionUpdateManyWithoutCancelledByNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutCancelledByInput, Prisma.ProductionUncheckedCreateWithoutCancelledByInput> | Prisma.ProductionCreateWithoutCancelledByInput[] | Prisma.ProductionUncheckedCreateWithoutCancelledByInput[]
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutCancelledByInput | Prisma.ProductionCreateOrConnectWithoutCancelledByInput[]
+  upsert?: Prisma.ProductionUpsertWithWhereUniqueWithoutCancelledByInput | Prisma.ProductionUpsertWithWhereUniqueWithoutCancelledByInput[]
+  createMany?: Prisma.ProductionCreateManyCancelledByInputEnvelope
+  set?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+  disconnect?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+  delete?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+  connect?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+  update?: Prisma.ProductionUpdateWithWhereUniqueWithoutCancelledByInput | Prisma.ProductionUpdateWithWhereUniqueWithoutCancelledByInput[]
+  updateMany?: Prisma.ProductionUpdateManyWithWhereWithoutCancelledByInput | Prisma.ProductionUpdateManyWithWhereWithoutCancelledByInput[]
+  deleteMany?: Prisma.ProductionScalarWhereInput | Prisma.ProductionScalarWhereInput[]
+}
+
+export type ProductionUncheckedUpdateManyWithoutCancelledByNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutCancelledByInput, Prisma.ProductionUncheckedCreateWithoutCancelledByInput> | Prisma.ProductionCreateWithoutCancelledByInput[] | Prisma.ProductionUncheckedCreateWithoutCancelledByInput[]
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutCancelledByInput | Prisma.ProductionCreateOrConnectWithoutCancelledByInput[]
+  upsert?: Prisma.ProductionUpsertWithWhereUniqueWithoutCancelledByInput | Prisma.ProductionUpsertWithWhereUniqueWithoutCancelledByInput[]
+  createMany?: Prisma.ProductionCreateManyCancelledByInputEnvelope
+  set?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+  disconnect?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+  delete?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+  connect?: Prisma.ProductionWhereUniqueInput | Prisma.ProductionWhereUniqueInput[]
+  update?: Prisma.ProductionUpdateWithWhereUniqueWithoutCancelledByInput | Prisma.ProductionUpdateWithWhereUniqueWithoutCancelledByInput[]
+  updateMany?: Prisma.ProductionUpdateManyWithWhereWithoutCancelledByInput | Prisma.ProductionUpdateManyWithWhereWithoutCancelledByInput[]
+  deleteMany?: Prisma.ProductionScalarWhereInput | Prisma.ProductionScalarWhereInput[]
 }
 
 export type ProductionCreateNestedManyWithoutOrganizationInput = {
@@ -722,6 +832,97 @@ export type ProductionUpdateOneWithoutInvoicesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProductionUpdateToOneWithWhereWithoutInvoicesInput, Prisma.ProductionUpdateWithoutInvoicesInput>, Prisma.ProductionUncheckedUpdateWithoutInvoicesInput>
 }
 
+export type ProductionCreateWithoutCancelledByInput = {
+  id?: string
+  name: string
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
+  venueName?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
+  address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
+  items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
+  crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
+}
+
+export type ProductionUncheckedCreateWithoutCancelledByInput = {
+  id?: string
+  name: string
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
+  organizationId: string
+  venueName?: string | null
+  addressId?: string | null
+  customerId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
+  crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
+}
+
+export type ProductionCreateOrConnectWithoutCancelledByInput = {
+  where: Prisma.ProductionWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductionCreateWithoutCancelledByInput, Prisma.ProductionUncheckedCreateWithoutCancelledByInput>
+}
+
+export type ProductionCreateManyCancelledByInputEnvelope = {
+  data: Prisma.ProductionCreateManyCancelledByInput | Prisma.ProductionCreateManyCancelledByInput[]
+  skipDuplicates?: boolean
+}
+
+export type ProductionUpsertWithWhereUniqueWithoutCancelledByInput = {
+  where: Prisma.ProductionWhereUniqueInput
+  update: Prisma.XOR<Prisma.ProductionUpdateWithoutCancelledByInput, Prisma.ProductionUncheckedUpdateWithoutCancelledByInput>
+  create: Prisma.XOR<Prisma.ProductionCreateWithoutCancelledByInput, Prisma.ProductionUncheckedCreateWithoutCancelledByInput>
+}
+
+export type ProductionUpdateWithWhereUniqueWithoutCancelledByInput = {
+  where: Prisma.ProductionWhereUniqueInput
+  data: Prisma.XOR<Prisma.ProductionUpdateWithoutCancelledByInput, Prisma.ProductionUncheckedUpdateWithoutCancelledByInput>
+}
+
+export type ProductionUpdateManyWithWhereWithoutCancelledByInput = {
+  where: Prisma.ProductionScalarWhereInput
+  data: Prisma.XOR<Prisma.ProductionUpdateManyMutationInput, Prisma.ProductionUncheckedUpdateManyWithoutCancelledByInput>
+}
+
+export type ProductionScalarWhereInput = {
+  AND?: Prisma.ProductionScalarWhereInput | Prisma.ProductionScalarWhereInput[]
+  OR?: Prisma.ProductionScalarWhereInput[]
+  NOT?: Prisma.ProductionScalarWhereInput | Prisma.ProductionScalarWhereInput[]
+  id?: Prisma.StringFilter<"Production"> | string
+  name?: Prisma.StringFilter<"Production"> | string
+  startDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
+  endDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
+  showStartDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
+  showEndDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
+  organizationId?: Prisma.StringFilter<"Production"> | string
+  venueName?: Prisma.StringNullableFilter<"Production"> | string | null
+  addressId?: Prisma.StringNullableFilter<"Production"> | string | null
+  customerId?: Prisma.StringNullableFilter<"Production"> | string | null
+  cancelledAt?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
+  cancellationReason?: Prisma.StringNullableFilter<"Production"> | string | null
+  cancelledById?: Prisma.StringNullableFilter<"Production"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"Production"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Production"> | Date | string
+}
+
 export type ProductionCreateWithoutOrganizationInput = {
   id?: string
   name: string
@@ -730,10 +931,13 @@ export type ProductionCreateWithoutOrganizationInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   venueName?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
   customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
+  cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledProductionsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
@@ -751,6 +955,9 @@ export type ProductionUncheckedCreateWithoutOrganizationInput = {
   venueName?: string | null
   addressId?: string | null
   customerId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  cancelledById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
@@ -786,24 +993,6 @@ export type ProductionUpdateManyWithWhereWithoutOrganizationInput = {
   data: Prisma.XOR<Prisma.ProductionUpdateManyMutationInput, Prisma.ProductionUncheckedUpdateManyWithoutOrganizationInput>
 }
 
-export type ProductionScalarWhereInput = {
-  AND?: Prisma.ProductionScalarWhereInput | Prisma.ProductionScalarWhereInput[]
-  OR?: Prisma.ProductionScalarWhereInput[]
-  NOT?: Prisma.ProductionScalarWhereInput | Prisma.ProductionScalarWhereInput[]
-  id?: Prisma.StringFilter<"Production"> | string
-  name?: Prisma.StringFilter<"Production"> | string
-  startDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
-  endDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
-  showStartDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
-  showEndDate?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
-  organizationId?: Prisma.StringFilter<"Production"> | string
-  venueName?: Prisma.StringNullableFilter<"Production"> | string | null
-  addressId?: Prisma.StringNullableFilter<"Production"> | string | null
-  customerId?: Prisma.StringNullableFilter<"Production"> | string | null
-  createdAt?: Prisma.DateTimeFilter<"Production"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Production"> | Date | string
-}
-
 export type ProductionCreateWithoutAddressInput = {
   id?: string
   name: string
@@ -812,10 +1001,13 @@ export type ProductionCreateWithoutAddressInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   venueName?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
   customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
+  cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledProductionsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
@@ -833,6 +1025,9 @@ export type ProductionUncheckedCreateWithoutAddressInput = {
   organizationId: string
   venueName?: string | null
   customerId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  cancelledById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
@@ -876,10 +1071,13 @@ export type ProductionCreateWithoutCustomerInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   venueName?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
   address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
+  cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledProductionsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
@@ -897,6 +1095,9 @@ export type ProductionUncheckedCreateWithoutCustomerInput = {
   organizationId: string
   venueName?: string | null
   addressId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  cancelledById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
@@ -940,11 +1141,14 @@ export type ProductionCreateWithoutItemsInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   venueName?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
   address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
   customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
+  cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledProductionsInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
@@ -962,6 +1166,9 @@ export type ProductionUncheckedCreateWithoutItemsInput = {
   venueName?: string | null
   addressId?: string | null
   customerId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  cancelledById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
@@ -994,11 +1201,14 @@ export type ProductionUpdateWithoutItemsInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
   address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
   customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
+  cancelledBy?: Prisma.UserUpdateOneWithoutCancelledProductionsNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
@@ -1016,6 +1226,9 @@ export type ProductionUncheckedUpdateWithoutItemsInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
@@ -1032,11 +1245,14 @@ export type ProductionCreateWithoutCrewInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   venueName?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
   address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
   customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
+  cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledProductionsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
@@ -1054,6 +1270,9 @@ export type ProductionUncheckedCreateWithoutCrewInput = {
   venueName?: string | null
   addressId?: string | null
   customerId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  cancelledById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
@@ -1086,11 +1305,14 @@ export type ProductionUpdateWithoutCrewInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
   address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
   customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
+  cancelledBy?: Prisma.UserUpdateOneWithoutCancelledProductionsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
@@ -1108,6 +1330,9 @@ export type ProductionUncheckedUpdateWithoutCrewInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
@@ -1124,11 +1349,14 @@ export type ProductionCreateWithoutTransactionsInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   venueName?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
   address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
   customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
+  cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledProductionsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
@@ -1146,6 +1374,9 @@ export type ProductionUncheckedCreateWithoutTransactionsInput = {
   venueName?: string | null
   addressId?: string | null
   customerId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  cancelledById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
@@ -1178,11 +1409,14 @@ export type ProductionUpdateWithoutTransactionsInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
   address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
   customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
+  cancelledBy?: Prisma.UserUpdateOneWithoutCancelledProductionsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
@@ -1200,6 +1434,9 @@ export type ProductionUncheckedUpdateWithoutTransactionsInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
@@ -1216,11 +1453,14 @@ export type ProductionCreateWithoutOffersInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   venueName?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
   address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
   customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
+  cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledProductionsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
@@ -1238,6 +1478,9 @@ export type ProductionUncheckedCreateWithoutOffersInput = {
   venueName?: string | null
   addressId?: string | null
   customerId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  cancelledById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
@@ -1270,11 +1513,14 @@ export type ProductionUpdateWithoutOffersInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
   address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
   customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
+  cancelledBy?: Prisma.UserUpdateOneWithoutCancelledProductionsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
@@ -1292,6 +1538,9 @@ export type ProductionUncheckedUpdateWithoutOffersInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
@@ -1308,11 +1557,14 @@ export type ProductionCreateWithoutInvoicesInput = {
   showStartDate?: Date | string | null
   showEndDate?: Date | string | null
   venueName?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
   address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
   customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
+  cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledProductionsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
@@ -1330,6 +1582,9 @@ export type ProductionUncheckedCreateWithoutInvoicesInput = {
   venueName?: string | null
   addressId?: string | null
   customerId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  cancelledById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
@@ -1362,11 +1617,14 @@ export type ProductionUpdateWithoutInvoicesInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
   address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
   customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
+  cancelledBy?: Prisma.UserUpdateOneWithoutCancelledProductionsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
@@ -1384,12 +1642,93 @@ export type ProductionUncheckedUpdateWithoutInvoicesInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
+}
+
+export type ProductionCreateManyCancelledByInput = {
+  id?: string
+  name: string
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
+  organizationId: string
+  venueName?: string | null
+  addressId?: string | null
+  customerId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ProductionUpdateWithoutCancelledByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
+  address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
+  items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
+  crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
+}
+
+export type ProductionUncheckedUpdateWithoutCancelledByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
+  crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
+}
+
+export type ProductionUncheckedUpdateManyWithoutCancelledByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ProductionCreateManyOrganizationInput = {
@@ -1402,6 +1741,9 @@ export type ProductionCreateManyOrganizationInput = {
   venueName?: string | null
   addressId?: string | null
   customerId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  cancelledById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1414,10 +1756,13 @@ export type ProductionUpdateWithoutOrganizationInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
   customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
+  cancelledBy?: Prisma.UserUpdateOneWithoutCancelledProductionsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
@@ -1435,6 +1780,9 @@ export type ProductionUncheckedUpdateWithoutOrganizationInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
@@ -1454,6 +1802,9 @@ export type ProductionUncheckedUpdateManyWithoutOrganizationInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1468,6 +1819,9 @@ export type ProductionCreateManyAddressInput = {
   organizationId: string
   venueName?: string | null
   customerId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  cancelledById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1480,10 +1834,13 @@ export type ProductionUpdateWithoutAddressInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
   customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
+  cancelledBy?: Prisma.UserUpdateOneWithoutCancelledProductionsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
@@ -1501,6 +1858,9 @@ export type ProductionUncheckedUpdateWithoutAddressInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
@@ -1520,6 +1880,9 @@ export type ProductionUncheckedUpdateManyWithoutAddressInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1534,6 +1897,9 @@ export type ProductionCreateManyCustomerInput = {
   organizationId: string
   venueName?: string | null
   addressId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  cancelledById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1546,10 +1912,13 @@ export type ProductionUpdateWithoutCustomerInput = {
   showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
   address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
+  cancelledBy?: Prisma.UserUpdateOneWithoutCancelledProductionsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
@@ -1567,6 +1936,9 @@ export type ProductionUncheckedUpdateWithoutCustomerInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
@@ -1586,6 +1958,9 @@ export type ProductionUncheckedUpdateManyWithoutCustomerInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1668,11 +2043,15 @@ export type ProductionSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   venueName?: boolean
   addressId?: boolean
   customerId?: boolean
+  cancelledAt?: boolean
+  cancellationReason?: boolean
+  cancelledById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   address?: boolean | Prisma.Production$addressArgs<ExtArgs>
   customer?: boolean | Prisma.Production$customerArgs<ExtArgs>
+  cancelledBy?: boolean | Prisma.Production$cancelledByArgs<ExtArgs>
   items?: boolean | Prisma.Production$itemsArgs<ExtArgs>
   crew?: boolean | Prisma.Production$crewArgs<ExtArgs>
   transactions?: boolean | Prisma.Production$transactionsArgs<ExtArgs>
@@ -1692,11 +2071,15 @@ export type ProductionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   venueName?: boolean
   addressId?: boolean
   customerId?: boolean
+  cancelledAt?: boolean
+  cancellationReason?: boolean
+  cancelledById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   address?: boolean | Prisma.Production$addressArgs<ExtArgs>
   customer?: boolean | Prisma.Production$customerArgs<ExtArgs>
+  cancelledBy?: boolean | Prisma.Production$cancelledByArgs<ExtArgs>
 }, ExtArgs["result"]["production"]>
 
 export type ProductionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1710,11 +2093,15 @@ export type ProductionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   venueName?: boolean
   addressId?: boolean
   customerId?: boolean
+  cancelledAt?: boolean
+  cancellationReason?: boolean
+  cancelledById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   address?: boolean | Prisma.Production$addressArgs<ExtArgs>
   customer?: boolean | Prisma.Production$customerArgs<ExtArgs>
+  cancelledBy?: boolean | Prisma.Production$cancelledByArgs<ExtArgs>
 }, ExtArgs["result"]["production"]>
 
 export type ProductionSelectScalar = {
@@ -1728,15 +2115,19 @@ export type ProductionSelectScalar = {
   venueName?: boolean
   addressId?: boolean
   customerId?: boolean
+  cancelledAt?: boolean
+  cancellationReason?: boolean
+  cancelledById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProductionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "startDate" | "endDate" | "showStartDate" | "showEndDate" | "organizationId" | "venueName" | "addressId" | "customerId" | "createdAt" | "updatedAt", ExtArgs["result"]["production"]>
+export type ProductionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "startDate" | "endDate" | "showStartDate" | "showEndDate" | "organizationId" | "venueName" | "addressId" | "customerId" | "cancelledAt" | "cancellationReason" | "cancelledById" | "createdAt" | "updatedAt", ExtArgs["result"]["production"]>
 export type ProductionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   address?: boolean | Prisma.Production$addressArgs<ExtArgs>
   customer?: boolean | Prisma.Production$customerArgs<ExtArgs>
+  cancelledBy?: boolean | Prisma.Production$cancelledByArgs<ExtArgs>
   items?: boolean | Prisma.Production$itemsArgs<ExtArgs>
   crew?: boolean | Prisma.Production$crewArgs<ExtArgs>
   transactions?: boolean | Prisma.Production$transactionsArgs<ExtArgs>
@@ -1748,11 +2139,13 @@ export type ProductionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.E
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   address?: boolean | Prisma.Production$addressArgs<ExtArgs>
   customer?: boolean | Prisma.Production$customerArgs<ExtArgs>
+  cancelledBy?: boolean | Prisma.Production$cancelledByArgs<ExtArgs>
 }
 export type ProductionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   address?: boolean | Prisma.Production$addressArgs<ExtArgs>
   customer?: boolean | Prisma.Production$customerArgs<ExtArgs>
+  cancelledBy?: boolean | Prisma.Production$cancelledByArgs<ExtArgs>
 }
 
 export type $ProductionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1761,6 +2154,7 @@ export type $ProductionPayload<ExtArgs extends runtime.Types.Extensions.Internal
     organization: Prisma.$OrganizationPayload<ExtArgs>
     address: Prisma.$AddressPayload<ExtArgs> | null
     customer: Prisma.$CustomerPayload<ExtArgs> | null
+    cancelledBy: Prisma.$UserPayload<ExtArgs> | null
     items: Prisma.$ProductionItemPayload<ExtArgs>[]
     crew: Prisma.$ProductionCrewPayload<ExtArgs>[]
     transactions: Prisma.$AssetTransactionPayload<ExtArgs>[]
@@ -1778,6 +2172,9 @@ export type $ProductionPayload<ExtArgs extends runtime.Types.Extensions.Internal
     venueName: string | null
     addressId: string | null
     customerId: string | null
+    cancelledAt: Date | null
+    cancellationReason: string | null
+    cancelledById: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["production"]>
@@ -2177,6 +2574,7 @@ export interface Prisma__ProductionClient<T, Null = never, ExtArgs extends runti
   organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   address<T extends Prisma.Production$addressArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$addressArgs<ExtArgs>>): Prisma.Prisma__AddressClient<runtime.Types.Result.GetResult<Prisma.$AddressPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   customer<T extends Prisma.Production$customerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$customerArgs<ExtArgs>>): Prisma.Prisma__CustomerClient<runtime.Types.Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  cancelledBy<T extends Prisma.Production$cancelledByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$cancelledByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   items<T extends Prisma.Production$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   crew<T extends Prisma.Production$crewArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$crewArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionCrewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   transactions<T extends Prisma.Production$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2221,6 +2619,9 @@ export interface ProductionFieldRefs {
   readonly venueName: Prisma.FieldRef<"Production", 'String'>
   readonly addressId: Prisma.FieldRef<"Production", 'String'>
   readonly customerId: Prisma.FieldRef<"Production", 'String'>
+  readonly cancelledAt: Prisma.FieldRef<"Production", 'DateTime'>
+  readonly cancellationReason: Prisma.FieldRef<"Production", 'String'>
+  readonly cancelledById: Prisma.FieldRef<"Production", 'String'>
   readonly createdAt: Prisma.FieldRef<"Production", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Production", 'DateTime'>
 }
@@ -2659,6 +3060,25 @@ export type Production$customerArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   include?: Prisma.CustomerInclude<ExtArgs> | null
   where?: Prisma.CustomerWhereInput
+}
+
+/**
+ * Production.cancelledBy
+ */
+export type Production$cancelledByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

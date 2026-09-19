@@ -4,6 +4,7 @@ import { sendMail } from '$lib/server/mail';
 import { appBaseUrl } from '$lib/server/app-url';
 import { bookingReviewedEmail } from '$lib/server/emails/booking-reviewed';
 import { addedAsCrewEmail } from '$lib/server/emails/added-as-crew';
+import { productionCancelledEmail } from '$lib/server/emails/production-cancelled';
 import * as v from 'valibot';
 import {
 	productionVisibility,
@@ -11,6 +12,7 @@ import {
 	requireOrgInventory,
 	requireOrgRead,
 	requireOrgWrite,
+	managedOrgIds,
 	scopedOrgIds,
 	visibleProductionIds
 } from '$lib/server/services/access';
@@ -21,9 +23,14 @@ import {
 	notifyPendingApproval
 } from '$lib/server/services/approval-notifications';
 import { appError } from '$lib/errors';
+import { requireOpenProduction } from '$lib/server/services/production-state';
 import { orgLabel } from '$lib/utils';
 import { getKnownAddresses } from './addresses.remote';
-import type { AddedToProductionData, RequestedData } from '$lib/types/asset-transaction';
+import type {
+	AddedToProductionData,
+	BookingCancelledData,
+	RequestedData
+} from '$lib/types/asset-transaction';
 
 // Called after an item is approved/declined. Once the (production, ownerOrg)
 // PENDING queue is fully cleared, tells the requesting org's OWNER/ADMIN
@@ -116,6 +123,7 @@ export const getProduction = query(v.string(), async (id: string) => {
 				orderBy: { createdAt: 'asc' },
 				include: { user: { select: { id: true, name: true, email: true } } }
 			},
+			cancelledBy: { select: { name: true, email: true } },
 			organization: true
 		}
 	});
@@ -253,6 +261,272 @@ export const deleteProduction = command(v.string(), async (productionId: string)
 	return { id: production.id, name: production.name };
 });
 
+// ── Cancelling ────────────────────────────────────────────────────────────────
+
+// What a production still holds back. A checked-out unit is physically out and
+// stays CHECKED_OUT until it comes back; returned and declined ones hold nothing.
+const RELEASABLE_STATUSES = ['PENDING', 'APPROVED'];
+
+const cancelProductionSchema = v.object({ productionId: v.string(), reason: v.string() });
+
+/**
+ * Cancelling keeps the production, its offers and invoices on record, and frees
+ * everything it had booked: PENDING and APPROVED items become CANCELLED, which
+ * every availability check already ignores. The org that ran it and the orgs
+ * that lent to it are told; see `productionCancelledEmail`.
+ */
+export const cancelProduction = command(cancelProductionSchema, async (input) => {
+	const production = await prisma.production.findUniqueOrThrow({
+		where: { id: input.productionId },
+		include: {
+			organization: { select: { name: true, shortName: true } },
+			crew: { include: { user: { select: { id: true, email: true, name: true } } } }
+		}
+	});
+	const user = await requireOrgInventory(production.organizationId, 'production_cancel_forbidden');
+	if (production.cancelledAt) appError(409, 'production_already_cancelled');
+	const reason = input.reason.trim();
+	if (!reason) appError(400, 'cancellation_reason_required');
+
+	const released = await prisma.$transaction(async (tx) => {
+		const items = await tx.productionItem.findMany({
+			where: { productionId: production.id, status: { in: RELEASABLE_STATUSES } },
+			select: { id: true, assetId: true, asset: { select: { organizationId: true } } }
+		});
+		await tx.production.update({
+			where: { id: production.id },
+			data: { cancelledAt: new Date(), cancellationReason: reason, cancelledById: user.id }
+		});
+		await tx.productionItem.updateMany({
+			where: { id: { in: items.map((i) => i.id) } },
+			data: { status: 'CANCELLED' }
+		});
+		await tx.assetTransaction.createMany({
+			data: items.map((item) => ({
+				assetId: item.assetId,
+				userId: user.id,
+				productionId: production.id,
+				action: 'BOOKING_CANCELLED',
+				data: {
+					type: 'BOOKING_CANCELLED',
+					productionId: production.id,
+					productionName: production.name
+				} satisfies BookingCancelledData
+			}))
+		});
+		return items;
+	});
+
+	await notifyCancellation(production, reason, released, user.id);
+
+	const lenderOrgIds = new Set(released.map((i) => i.asset.organizationId));
+	const managed = (await managedOrgIds(user.id)).filter((id) => lenderOrgIds.has(id));
+	await Promise.all([
+		getProduction(production.id).refresh(),
+		getProductions(production.organizationId).refresh(),
+		getProductions().refresh(),
+		getProductionsCalendar().refresh(),
+		getDashboardStats().refresh(),
+		...managed.map((id) => getPendingApprovals(id).refresh())
+	]);
+	return { released: released.length };
+});
+
+// Mail is a courtesy: a production that is cancelled stays cancelled whether or
+// not the SMTP server answered.
+async function notifyCancellation(
+	production: {
+		id: string;
+		name: string;
+		organizationId: string;
+		organization: { name: string; shortName: string | null };
+		crew: { user: { id: string; email: string; name: string | null } }[];
+	},
+	reason: string,
+	released: { asset: { organizationId: string } }[],
+	cancelledById: string
+) {
+	const orgName = orgLabel(production.organization);
+	const releasedPerLender = new Map<string, number>();
+	for (const item of released) {
+		const orgId = item.asset.organizationId;
+		if (orgId === production.organizationId) continue;
+		releasedPerLender.set(orgId, (releasedPerLender.get(orgId) ?? 0) + 1);
+	}
+
+	try {
+		const lenderAdmins = await prisma.orgMembership.findMany({
+			where: {
+				organizationId: { in: [...releasedPerLender.keys()] },
+				role: { in: ['OWNER', 'ADMIN'] }
+			},
+			include: { user: { select: { email: true, name: true } } }
+		});
+		const mails = [
+			...production.crew
+				// Whoever cancelled it knows.
+				.filter((member) => member.user.id !== cancelledById)
+				.map((member) => ({
+					to: member.user.email,
+					...productionCancelledEmail({
+						audience: 'crew',
+						name: member.user.name,
+						productionName: production.name,
+						orgName,
+						reason,
+						url: `${appBaseUrl}/productions/${production.id}`
+					})
+				})),
+			...lenderAdmins.map((membership) => ({
+				to: membership.user.email,
+				...productionCancelledEmail({
+					audience: 'lender',
+					name: membership.user.name,
+					productionName: production.name,
+					orgName,
+					releasedCount: releasedPerLender.get(membership.organizationId) ?? 0
+				})
+			}))
+		];
+		await Promise.all(mails.map((mail) => sendMail(mail)));
+	} catch (err) {
+		console.error(`Failed to send cancellation email for production ${production.id}:`, err);
+	}
+}
+
+/**
+ * Takes the cancellation back and books again what it released, as far as that
+ * still goes: a unit booked elsewhere for the same days in the meantime, or no
+ * longer bookable, is dropped and named in the result. Units of another org go
+ * back to PENDING — the lender was told they were free, so it answers again.
+ */
+export const reopenProduction = command(v.string(), async (productionId: string) => {
+	const production = await prisma.production.findUniqueOrThrow({
+		where: { id: productionId },
+		include: { organization: { select: { id: true, name: true } } }
+	});
+	const user = await requireOrgInventory(production.organizationId, 'production_cancel_forbidden');
+	if (!production.cancelledAt) appError(409, 'production_not_cancelled');
+
+	const items = await prisma.productionItem.findMany({
+		where: { productionId, status: 'CANCELLED' },
+		select: {
+			id: true,
+			assetId: true,
+			sourceParentAssetId: true,
+			asset: {
+				select: {
+					status: true,
+					organizationId: true,
+					assetTag: true,
+					product: { select: { name: true } }
+				}
+			}
+		}
+	});
+
+	const taken = new Set<string>();
+	if (production.startDate && production.endDate) {
+		const clashes = await prisma.productionItem.findMany({
+			where: {
+				assetId: { in: items.map((i) => i.assetId) },
+				productionId: { not: productionId },
+				status: { in: ['PENDING', 'APPROVED', 'CHECKED_OUT'] },
+				production: {
+					AND: [
+						{ startDate: { not: null } },
+						{ endDate: { not: null } },
+						{ startDate: { lte: production.endDate } },
+						{ endDate: { gte: production.startDate } }
+					]
+				}
+			},
+			select: { assetId: true }
+		});
+		for (const clash of clashes) taken.add(clash.assetId);
+	}
+	const lost = new Set(
+		items
+			.filter((i) => taken.has(i.assetId) || !isBookableStatus(i.asset.status))
+			.map((i) => i.assetId)
+	);
+	// An accessory goes where its parent goes.
+	const dropped = items.filter(
+		(i) => lost.has(i.assetId) || (!!i.sourceParentAssetId && lost.has(i.sourceParentAssetId))
+	);
+	const droppedIds = new Set(dropped.map((i) => i.id));
+	const restored = items.filter((i) => !droppedIds.has(i.id));
+	const isCrossOrg = (item: (typeof items)[number]) =>
+		item.asset.organizationId !== production.organizationId;
+
+	const orgsToNotify = await getOrgIdsNeedingApprovalNotification(productionId, [
+		...new Set(restored.filter(isCrossOrg).map((i) => i.asset.organizationId))
+	]);
+
+	await prisma.$transaction(async (tx) => {
+		await tx.production.update({
+			where: { id: productionId },
+			data: { cancelledAt: null, cancellationReason: null, cancelledById: null }
+		});
+		await tx.productionItem.deleteMany({ where: { id: { in: [...droppedIds] } } });
+		await tx.productionItem.updateMany({
+			where: { id: { in: restored.filter((i) => !isCrossOrg(i)).map((i) => i.id) } },
+			data: { status: 'APPROVED' }
+		});
+		await tx.productionItem.updateMany({
+			where: { id: { in: restored.filter(isCrossOrg).map((i) => i.id) } },
+			data: { status: 'PENDING' }
+		});
+		await tx.assetTransaction.createMany({
+			data: restored.map((item) => ({
+				assetId: item.assetId,
+				userId: user.id,
+				productionId,
+				action: isCrossOrg(item) ? 'REQUESTED' : 'ADDED_TO_PRODUCTION',
+				data: isCrossOrg(item)
+					? ({
+							type: 'REQUESTED',
+							productionId,
+							productionName: production.name,
+							requestingOrgId: production.organization.id,
+							requestingOrgName: production.organization.name
+						} satisfies RequestedData)
+					: ({
+							type: 'ADDED_TO_PRODUCTION',
+							productionId,
+							productionName: production.name
+						} satisfies AddedToProductionData)
+			}))
+		});
+	});
+
+	if (orgsToNotify.length > 0) {
+		await notifyPendingApproval(
+			productionId,
+			production.name,
+			production.organization.name,
+			orgsToNotify
+		);
+	}
+
+	await Promise.all([
+		getProduction(productionId).refresh(),
+		getProductions(production.organizationId).refresh(),
+		getProductions().refresh(),
+		getProductionsCalendar().refresh(),
+		getDashboardStats().refresh()
+	]);
+	return {
+		restored: restored.length,
+		// Accessories are left out: they were dropped because their parent was.
+		dropped: dropped
+			.filter((i) => !i.sourceParentAssetId || !lost.has(i.sourceParentAssetId))
+			.map((i) =>
+				i.asset.assetTag ? `${i.asset.product.name} · ${i.asset.assetTag}` : i.asset.product.name
+			)
+	};
+});
+
 const updateProductionAddressSchema = v.object({
 	productionId: v.string(),
 	address: addressInputSchema
@@ -384,6 +658,7 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 		include: { organization: { select: { id: true, name: true, shortName: true } } }
 	});
 	await requireOrgWrite(production.organizationId);
+	requireOpenProduction(production);
 
 	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: data.assetId } });
 	if (isRetiredStatus(asset.status)) {
@@ -490,6 +765,9 @@ export const approveProductionItem = command(v.string(), async (itemId: string) 
 	});
 
 	await requireOrgInventory(item.asset.organizationId, 'approval_forbidden');
+	// A request withdrawn by the production's cancellation is gone, whatever
+	// the lender's page still showed.
+	if (item.status !== 'PENDING') appError(409, 'booking_not_pending');
 
 	const updated = await prisma.productionItem.update({
 		where: { id: itemId },
@@ -534,6 +812,9 @@ export const declineProductionItem = command(v.string(), async (itemId: string) 
 	});
 
 	await requireOrgInventory(item.asset.organizationId, 'decline_forbidden');
+	// A request withdrawn by the production's cancellation is gone, whatever
+	// the lender's page still showed.
+	if (item.status !== 'PENDING') appError(409, 'booking_not_pending');
 
 	const updated = await prisma.productionItem.update({
 		where: { id: itemId },
@@ -607,6 +888,7 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 		include: { organization: { select: { name: true } } }
 	});
 	await requireOrgWrite(production.organizationId);
+	requireOpenProduction(production);
 
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id: data.bundleId },
@@ -756,9 +1038,10 @@ export const syncAssetAccessoriesInProduction = command(
 	async ({ productionId, assetId }) => {
 		const parentItem = await prisma.productionItem.findUniqueOrThrow({
 			where: { productionId_assetId: { productionId, assetId } },
-			include: { production: { select: { organizationId: true } } }
+			include: { production: { select: { organizationId: true, cancelledAt: true } } }
 		});
 		await requireOrgWrite(parentItem.production.organizationId);
+		requireOpenProduction(parentItem.production);
 		const currentAccessories = await prisma.asset.findMany({
 			where: { parentAssetId: assetId },
 			select: { id: true }
@@ -827,6 +1110,7 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 		include: { organization: { select: { id: true, name: true } } }
 	});
 	await requireOrgWrite(production.organizationId);
+	requireOpenProduction(production);
 
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id: data.bundleId },
@@ -961,9 +1245,10 @@ const addCrewSchema = v.object({
 export const addCrewMember = command(addCrewSchema, async (data) => {
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: data.productionId },
-		select: { name: true, startDate: true, endDate: true, organizationId: true }
+		select: { name: true, startDate: true, endDate: true, organizationId: true, cancelledAt: true }
 	});
 	await requireOrgWrite(production.organizationId);
+	requireOpenProduction(production);
 
 	const member = await prisma.productionCrew.create({
 		data,
@@ -1077,6 +1362,7 @@ export const getProductionsCalendar = query(async () => {
 	return await prisma.production.findMany({
 		where: {
 			organizationId: { in: orgIds },
+			cancelledAt: null,
 			startDate: { not: null },
 			endDate: { not: null }
 		},
@@ -1111,7 +1397,7 @@ export const getDashboardStats = query(async () => {
 		prisma.asset.count({ where: { organizationId: { in: orgIds }, status: 'MAINTENANCE' } }),
 		prisma.asset.count({ where: { organizationId: { in: orgIds }, status: 'BROKEN' } }),
 		prisma.production.findMany({
-			where: { organizationId: { in: orgIds }, startDate: { gte: now } },
+			where: { organizationId: { in: orgIds }, cancelledAt: null, startDate: { gte: now } },
 			orderBy: { startDate: 'asc' },
 			take: 5,
 			select: {

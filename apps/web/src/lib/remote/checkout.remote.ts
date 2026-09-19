@@ -17,7 +17,8 @@ export const getAllProductions = query(async () => {
 	const user = await requireAuth();
 	const orgIds = await userOrgIds(user.id);
 	return await prisma.production.findMany({
-		where: { organizationId: { in: orgIds } },
+		// A cancelled production takes no checkouts, so it is not offered as a target.
+		where: { organizationId: { in: orgIds }, cancelledAt: null },
 		include: { organization: { select: { name: true, shortName: true } } },
 		orderBy: [{ startDate: 'desc' }, { name: 'asc' }]
 	});
@@ -70,7 +71,8 @@ const ERROR_CODES: Record<CheckoutError['code'], AppErrorCode> = {
 	forbidden: 'unauthorized',
 	wrong_organization: 'asset_wrong_organization',
 	asset_retired: 'asset_retired_no_booking',
-	asset_unavailable: 'asset_unavailable_no_booking'
+	asset_unavailable: 'asset_unavailable_no_booking',
+	production_cancelled: 'production_cancelled'
 };
 
 const STATUS_BY_CODE: Record<CheckoutError['code'], number> = {
@@ -78,7 +80,8 @@ const STATUS_BY_CODE: Record<CheckoutError['code'], number> = {
 	forbidden: 403,
 	wrong_organization: 403,
 	asset_retired: 409,
-	asset_unavailable: 409
+	asset_unavailable: 409,
+	production_cancelled: 409
 };
 
 async function withCheckoutErrors<T>(fn: () => Promise<T>): Promise<T> {

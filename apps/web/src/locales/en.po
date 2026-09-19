@@ -216,6 +216,7 @@ msgstr "Crew"
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/new/+page.svelte
 msgid "Cancel"
 msgstr "Cancel"
@@ -4255,7 +4256,6 @@ msgstr "Only possible while it has never been booked, scanned, inspected or bill
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/orgs/[id]/+page.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 msgid "Delete"
 msgstr "Delete"
 
@@ -5165,6 +5165,7 @@ msgstr "Bundle converted — {0} attached"
 
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 msgid "More actions"
 msgstr "More actions"
 
@@ -5366,6 +5367,7 @@ msgstr "All products move to the selected manufacturer. Existing offers and invo
 msgid "Production deleted"
 msgstr "Production deleted"
 
+#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Delete production"
@@ -8206,3 +8208,145 @@ msgstr "No connectors recorded yet — add them on the product page."
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "Serial number, tag, status, location, purchase and inspection."
 msgstr "Serial number, tag, status, location, purchase and inspection."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Only org admins and owners can cancel or reopen productions."
+msgstr "Only org admins and owners can cancel or reopen productions."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This production has been cancelled — reopen it before booking anything onto it."
+msgstr "This production has been cancelled — reopen it before booking anything onto it."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This production has already been cancelled."
+msgstr "This production has already been cancelled."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This production has not been cancelled."
+msgstr "This production has not been cancelled."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Give a reason for the cancellation."
+msgstr "Give a reason for the cancellation."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This request is no longer open — it was withdrawn or has already been answered."
+msgstr "This request is no longer open — it was withdrawn or has already been answered."
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Production cancelled"
+msgstr "Production cancelled"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Production reopened — # unit was booked elsewhere in the meantime and has been removed"
+msgid_plural "Production reopened — # units were booked elsewhere in the meantime and have been removed"
+msgstr[0] "Production reopened — # unit was booked elsewhere in the meantime and has been removed"
+msgstr[1] "Production reopened — # units were booked elsewhere in the meantime and have been removed"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Production reopened"
+msgstr "Production reopened"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Released"
+msgstr "Released"
+
+#: src/routes/productions/+page.svelte
+#: src/routes/productions/+page.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Cancelled"
+msgstr "Cancelled"
+
+#: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Cancel production"
+msgstr "Cancel production"
+
+#. 0: new Date(production.cancelledAt).toLocaleDateString('de-DE'); 1: production .cancelledBy.name || production.cancelledBy.email
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Cancelled on {0} by {1}"
+msgstr "Cancelled on {0} by {1}"
+
+#. 0: new Date(production.cancelledAt).toLocaleDateString('de-DE')
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Cancelled on {0}"
+msgstr "Cancelled on {0}"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Nothing is held back for it any more. Units that were already out on it are still returned by scanning them onto a location."
+msgstr "Nothing is held back for it any more. Units that were already out on it are still returned by scanning them onto a location."
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Reopen"
+msgstr "Reopen"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "# booking or open request is released"
+msgid_plural "# bookings and open requests are released"
+msgstr[0] "# booking or open request is released"
+msgstr[1] "# bookings and open requests are released"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "# unit is checked out and stays out until it is scanned back"
+msgid_plural "# units are checked out and stay out until they are scanned back"
+msgstr[0] "# unit is checked out and stays out until it is scanned back"
+msgstr[1] "# units are checked out and stay out until they are scanned back"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "The crew and any organization lending units to it are told by email"
+msgstr "The crew and any organization lending units to it are told by email"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Customer called off the event"
+msgstr "Customer called off the event"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Reason *"
+msgstr "Reason *"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "<0/> stays on record with its offers and invoices, but holds nothing back any more."
+msgstr "<0/> stays on record with its offers and invoices, but holds nothing back any more."
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Cancelling…"
+msgstr "Cancelling…"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Keep production"
+msgstr "Keep production"
+
+#: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Reopen production"
+msgstr "Reopen production"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Units of your own organization are booked straight away"
+msgstr "Units of your own organization are booked straight away"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Units of other organizations go back to their owners as requests"
+msgstr "Units of other organizations go back to their owners as requests"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "A unit booked elsewhere for these days in the meantime is removed"
+msgstr "A unit booked elsewhere for these days in the meantime is removed"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "What the cancellation released is booked again for <0/>, as far as it is still free."
+msgstr "What the cancellation released is booked again for <0/>, as far as it is still free."
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Reopening…"
+msgstr "Reopening…"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Released — <0/> was cancelled"
+msgstr "Released — <0/> was cancelled"
+
+#: src/routes/productions/[id]/equipment/equipment-planner.svelte
+msgid "This production has been cancelled. Reopen it before booking equipment onto it."
+msgstr "This production has been cancelled. Reopen it before booking equipment onto it."

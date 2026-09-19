@@ -703,6 +703,12 @@ abstract class S {
   /// **'This device is marked unavailable and cannot be checked out.'**
   String get errorAssetUnavailable;
 
+  /// No description provided for @errorProductionCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'This production has been cancelled. Nothing can be checked out to it.'**
+  String get errorProductionCancelled;
+
   /// No description provided for @errorUnauthorized.
   ///
   /// In en, this message translates to:

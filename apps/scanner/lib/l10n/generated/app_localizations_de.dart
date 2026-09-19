@@ -332,6 +332,10 @@ class SDe extends S {
       'Dieses Gerät ist als nicht verfügbar markiert und kann nicht ausgegeben werden.';
 
   @override
+  String get errorProductionCancelled =>
+      'Diese Produktion wurde abgesagt. Es kann nichts mehr an sie ausgegeben werden.';
+
+  @override
   String get errorUnauthorized =>
       'Die Sitzung ist abgelaufen. Bitte erneut verbinden.';
 

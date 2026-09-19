@@ -59,6 +59,13 @@ export type DeclinedData = {
 	productionName: string;
 };
 
+/** The production this unit was requested for or booked to was cancelled, which freed it. */
+export type BookingCancelledData = {
+	type: 'BOOKING_CANCELLED';
+	productionId: string;
+	productionName: string;
+};
+
 export type AccessoryAttachedData = {
 	type: 'ACCESSORY_ATTACHED';
 	parentAssetId: string;
@@ -100,6 +107,7 @@ export type TransactionData =
 	| AddedToProductionData
 	| ApprovedData
 	| DeclinedData
+	| BookingCancelledData
 	| AccessoryAttachedData
 	| AccessoryDetachedData
 	| CredentialsSetData

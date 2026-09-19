@@ -265,6 +265,7 @@ export type UserWhereInput = {
   memberships?: Prisma.OrgMembershipListRelationFilter
   transactions?: Prisma.AssetTransactionListRelationFilter
   crewAssignments?: Prisma.ProductionCrewListRelationFilter
+  cancelledProductions?: Prisma.ProductionListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -287,6 +288,7 @@ export type UserOrderByWithRelationInput = {
   memberships?: Prisma.OrgMembershipOrderByRelationAggregateInput
   transactions?: Prisma.AssetTransactionOrderByRelationAggregateInput
   crewAssignments?: Prisma.ProductionCrewOrderByRelationAggregateInput
+  cancelledProductions?: Prisma.ProductionOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -312,6 +314,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   memberships?: Prisma.OrgMembershipListRelationFilter
   transactions?: Prisma.AssetTransactionListRelationFilter
   crewAssignments?: Prisma.ProductionCrewListRelationFilter
+  cancelledProductions?: Prisma.ProductionListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -367,6 +370,7 @@ export type UserCreateInput = {
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -388,6 +392,7 @@ export type UserUncheckedCreateInput = {
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserUpdateInput = {
@@ -409,6 +414,7 @@ export type UserUpdateInput = {
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -430,6 +436,7 @@ export type UserUncheckedUpdateInput = {
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -675,6 +682,22 @@ export type UserUpdateOneWithoutCreatedProductsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCreatedProductsInput, Prisma.UserUpdateWithoutCreatedProductsInput>, Prisma.UserUncheckedUpdateWithoutCreatedProductsInput>
 }
 
+export type UserCreateNestedOneWithoutCancelledProductionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCancelledProductionsInput, Prisma.UserUncheckedCreateWithoutCancelledProductionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCancelledProductionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutCancelledProductionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCancelledProductionsInput, Prisma.UserUncheckedCreateWithoutCancelledProductionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCancelledProductionsInput
+  upsert?: Prisma.UserUpsertWithoutCancelledProductionsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCancelledProductionsInput, Prisma.UserUpdateWithoutCancelledProductionsInput>, Prisma.UserUncheckedUpdateWithoutCancelledProductionsInput>
+}
+
 export type UserCreateNestedOneWithoutCrewAssignmentsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutCrewAssignmentsInput, Prisma.UserUncheckedCreateWithoutCrewAssignmentsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutCrewAssignmentsInput
@@ -735,6 +758,7 @@ export type UserCreateWithoutSessionsInput = {
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -755,6 +779,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -791,6 +816,7 @@ export type UserUpdateWithoutSessionsInput = {
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -811,6 +837,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -831,6 +858,7 @@ export type UserCreateWithoutAccountsInput = {
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -851,6 +879,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -887,6 +916,7 @@ export type UserUpdateWithoutAccountsInput = {
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -907,6 +937,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserCreateWithoutHomeOrgInput = {
@@ -927,6 +958,7 @@ export type UserCreateWithoutHomeOrgInput = {
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserUncheckedCreateWithoutHomeOrgInput = {
@@ -947,6 +979,7 @@ export type UserUncheckedCreateWithoutHomeOrgInput = {
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserCreateOrConnectWithoutHomeOrgInput = {
@@ -1009,6 +1042,7 @@ export type UserCreateWithoutMembershipsInput = {
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -1029,6 +1063,7 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -1065,6 +1100,7 @@ export type UserUpdateWithoutMembershipsInput = {
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -1085,6 +1121,7 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserCreateWithoutSentInvitationsInput = {
@@ -1105,6 +1142,7 @@ export type UserCreateWithoutSentInvitationsInput = {
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserUncheckedCreateWithoutSentInvitationsInput = {
@@ -1125,6 +1163,7 @@ export type UserUncheckedCreateWithoutSentInvitationsInput = {
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserCreateOrConnectWithoutSentInvitationsInput = {
@@ -1161,6 +1200,7 @@ export type UserUpdateWithoutSentInvitationsInput = {
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSentInvitationsInput = {
@@ -1181,6 +1221,7 @@ export type UserUncheckedUpdateWithoutSentInvitationsInput = {
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserCreateWithoutCreatedProductsInput = {
@@ -1201,6 +1242,7 @@ export type UserCreateWithoutCreatedProductsInput = {
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserUncheckedCreateWithoutCreatedProductsInput = {
@@ -1221,6 +1263,7 @@ export type UserUncheckedCreateWithoutCreatedProductsInput = {
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserCreateOrConnectWithoutCreatedProductsInput = {
@@ -1257,6 +1300,7 @@ export type UserUpdateWithoutCreatedProductsInput = {
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedProductsInput = {
@@ -1273,6 +1317,107 @@ export type UserUncheckedUpdateWithoutCreatedProductsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
+  sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+}
+
+export type UserCreateWithoutCancelledProductionsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
+  homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
+  memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutCancelledProductionsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  homeOrgId?: string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutCancelledProductionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCancelledProductionsInput, Prisma.UserUncheckedCreateWithoutCancelledProductionsInput>
+}
+
+export type UserUpsertWithoutCancelledProductionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCancelledProductionsInput, Prisma.UserUncheckedUpdateWithoutCancelledProductionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCancelledProductionsInput, Prisma.UserUncheckedCreateWithoutCancelledProductionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCancelledProductionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCancelledProductionsInput, Prisma.UserUncheckedUpdateWithoutCancelledProductionsInput>
+}
+
+export type UserUpdateWithoutCancelledProductionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
+  homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
+  memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCancelledProductionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  homeOrgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -1297,6 +1442,7 @@ export type UserCreateWithoutCrewAssignmentsInput = {
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserUncheckedCreateWithoutCrewAssignmentsInput = {
@@ -1317,6 +1463,7 @@ export type UserUncheckedCreateWithoutCrewAssignmentsInput = {
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserCreateOrConnectWithoutCrewAssignmentsInput = {
@@ -1353,6 +1500,7 @@ export type UserUpdateWithoutCrewAssignmentsInput = {
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCrewAssignmentsInput = {
@@ -1373,6 +1521,7 @@ export type UserUncheckedUpdateWithoutCrewAssignmentsInput = {
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserCreateWithoutTransactionsInput = {
@@ -1393,6 +1542,7 @@ export type UserCreateWithoutTransactionsInput = {
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserUncheckedCreateWithoutTransactionsInput = {
@@ -1413,6 +1563,7 @@ export type UserUncheckedCreateWithoutTransactionsInput = {
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserCreateOrConnectWithoutTransactionsInput = {
@@ -1449,6 +1600,7 @@ export type UserUpdateWithoutTransactionsInput = {
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTransactionsInput = {
@@ -1469,6 +1621,7 @@ export type UserUncheckedUpdateWithoutTransactionsInput = {
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserCreateWithoutCatalogTransactionsInput = {
@@ -1489,6 +1642,7 @@ export type UserCreateWithoutCatalogTransactionsInput = {
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserUncheckedCreateWithoutCatalogTransactionsInput = {
@@ -1509,6 +1663,7 @@ export type UserUncheckedCreateWithoutCatalogTransactionsInput = {
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
 }
 
 export type UserCreateOrConnectWithoutCatalogTransactionsInput = {
@@ -1545,6 +1700,7 @@ export type UserUpdateWithoutCatalogTransactionsInput = {
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCatalogTransactionsInput = {
@@ -1565,6 +1721,7 @@ export type UserUncheckedUpdateWithoutCatalogTransactionsInput = {
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserCreateManyHomeOrgInput = {
@@ -1597,6 +1754,7 @@ export type UserUpdateWithoutHomeOrgInput = {
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutHomeOrgInput = {
@@ -1617,6 +1775,7 @@ export type UserUncheckedUpdateWithoutHomeOrgInput = {
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutHomeOrgInput = {
@@ -1645,6 +1804,7 @@ export type UserCountOutputType = {
   memberships: number
   transactions: number
   crewAssignments: number
+  cancelledProductions: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1656,6 +1816,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   memberships?: boolean | UserCountOutputTypeCountMembershipsArgs
   transactions?: boolean | UserCountOutputTypeCountTransactionsArgs
   crewAssignments?: boolean | UserCountOutputTypeCountCrewAssignmentsArgs
+  cancelledProductions?: boolean | UserCountOutputTypeCountCancelledProductionsArgs
 }
 
 /**
@@ -1724,6 +1885,13 @@ export type UserCountOutputTypeCountCrewAssignmentsArgs<ExtArgs extends runtime.
   where?: Prisma.ProductionCrewWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCancelledProductionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProductionWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1745,6 +1913,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
   transactions?: boolean | Prisma.User$transactionsArgs<ExtArgs>
   crewAssignments?: boolean | Prisma.User$crewAssignmentsArgs<ExtArgs>
+  cancelledProductions?: boolean | Prisma.User$cancelledProductionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1800,6 +1969,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
   transactions?: boolean | Prisma.User$transactionsArgs<ExtArgs>
   crewAssignments?: boolean | Prisma.User$crewAssignmentsArgs<ExtArgs>
+  cancelledProductions?: boolean | Prisma.User$cancelledProductionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1821,6 +1991,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     memberships: Prisma.$OrgMembershipPayload<ExtArgs>[]
     transactions: Prisma.$AssetTransactionPayload<ExtArgs>[]
     crewAssignments: Prisma.$ProductionCrewPayload<ExtArgs>[]
+    cancelledProductions: Prisma.$ProductionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2236,6 +2407,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   memberships<T extends Prisma.User$membershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrgMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   transactions<T extends Prisma.User$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   crewAssignments<T extends Prisma.User$crewAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$crewAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionCrewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  cancelledProductions<T extends Prisma.User$cancelledProductionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$cancelledProductionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2884,6 +3056,30 @@ export type User$crewAssignmentsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.ProductionCrewScalarFieldEnum | Prisma.ProductionCrewScalarFieldEnum[]
+}
+
+/**
+ * User.cancelledProductions
+ */
+export type User$cancelledProductionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Production
+   */
+  select?: Prisma.ProductionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Production
+   */
+  omit?: Prisma.ProductionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProductionInclude<ExtArgs> | null
+  where?: Prisma.ProductionWhereInput
+  orderBy?: Prisma.ProductionOrderByWithRelationInput | Prisma.ProductionOrderByWithRelationInput[]
+  cursor?: Prisma.ProductionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProductionScalarFieldEnum | Prisma.ProductionScalarFieldEnum[]
 }
 
 /**
