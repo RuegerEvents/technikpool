@@ -4,9 +4,10 @@ import * as v from 'valibot';
 import { orgLabel } from '$lib/utils';
 import { getProduction } from './productions.remote';
 import {
+	productionReadWhere,
 	requireAuth,
-	requireOrgRead,
 	requireOrgWrite,
+	requireProductionRead,
 	userOrgIds
 } from '$lib/server/services/access';
 import { BOOKABLE_ASSET_WHERE } from '$lib/asset-status';
@@ -36,7 +37,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 			cancelledAt: true
 		}
 	});
-	await requireOrgRead(production.organizationId);
+	await requireProductionRead(production);
 
 	// Accessories are not bookable on their own: they follow whatever they are
 	// attached to, and a row for "8× Omega Bracket" next to the fixtures they
@@ -406,11 +407,10 @@ export const getEquipmentCopySources = query(v.string(), async (targetId: string
 	await requireOrgWrite(target.organizationId);
 	// Any production the user may open — a partner org's show is as good a
 	// template as one's own — that has something on it to take over.
-	const orgIds = await userOrgIds(user.id);
 	const productions = await prisma.production.findMany({
 		where: {
 			id: { not: targetId },
-			organizationId: { in: [...new Set([...orgIds, target.organizationId])] },
+			OR: [await productionReadWhere(user.id), { organizationId: target.organizationId }],
 			items: { some: { status: { in: [...ACTIVE_STATUSES] } } }
 		},
 		select: {
@@ -440,14 +440,14 @@ async function requireCopyAccess(sourceId: string, targetId: string) {
 	const [source, target] = await Promise.all([
 		prisma.production.findUniqueOrThrow({
 			where: { id: sourceId },
-			select: { organizationId: true }
+			select: { id: true, organizationId: true }
 		}),
 		prisma.production.findUniqueOrThrow({
 			where: { id: targetId },
 			select: { organizationId: true, cancelledAt: true }
 		})
 	]);
-	await requireOrgRead(source.organizationId);
+	await requireProductionRead(source);
 	const user = await requireOrgWrite(target.organizationId);
 	requireOpenProduction(target);
 	return user;

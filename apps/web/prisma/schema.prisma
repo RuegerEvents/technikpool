@@ -173,11 +173,16 @@ model Organization {
   customers       Customer[]
 }
 
+// Declared highest first, so `orderBy: { role: 'asc' }` lists owners at the
+// top. The ladder itself is ranked in `src/lib/roles.ts`.
 enum Role {
   OWNER
   ADMIN
   MEMBER
   VIEWER
+  /// Sees the equipment only — no productions, customers or prices, except a
+  /// production they are crew on.
+  DEVICE_VIEWER
 }
 
 model OrgMembership {
@@ -186,7 +191,7 @@ model OrgMembership {
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  role           Role         @default(MEMBER)
+  role           Role         @default(DEVICE_VIEWER)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

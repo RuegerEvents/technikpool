@@ -111,7 +111,7 @@ export async function licenseHolders(
 	]);
 
 	for (const item of items) {
-		const visible = canSee(item.production.organizationId);
+		const visible = canSee(item.production);
 		const checkout = checkouts.find(
 			(c) => c.assetId === item.assetId && c.productionId === item.production.id
 		);

@@ -1,6 +1,11 @@
 import { query } from '$app/server';
 import { prisma } from '$lib/server/auth';
-import { isSystemAdmin, requireAuth, userOrgIds } from '$lib/server/services/access';
+import {
+	isSystemAdmin,
+	readableOrgIds,
+	requireAuth,
+	userOrgIds
+} from '$lib/server/services/access';
 import { orgLabel } from '$lib/utils';
 
 export type KnownAddressKind = 'venue' | 'location' | 'customer' | 'organization';
@@ -27,9 +32,14 @@ export const getKnownAddresses = query(async (): Promise<KnownAddress[]> => {
 	const user = await requireAuth();
 	// A system admin edits orgs they hold no membership in, and an empty picker
 	// there would be the one place the feature silently isn't.
-	const orgIds = (await isSystemAdmin(user.id)) ? null : await userOrgIds(user.id);
+	const admin = await isSystemAdmin(user.id);
+	const orgIds = admin ? null : await userOrgIds(user.id);
 	const scope = orgIds ? { organizationId: { in: orgIds } } : {};
 	const orgScope = orgIds ? { id: { in: orgIds } } : {};
+	// Venues and customers' addresses are the business, not the equipment, so
+	// they come only from the orgs whose productions and customers the user reads.
+	const readable = admin ? null : await readableOrgIds(user.id);
+	const recordScope = readable ? { organizationId: { in: readable } } : {};
 
 	const [locations, productions, customers, organizations] = await Promise.all([
 		prisma.location.findMany({
@@ -37,12 +47,12 @@ export const getKnownAddresses = query(async (): Promise<KnownAddress[]> => {
 			select: { name: true, address: true }
 		}),
 		prisma.production.findMany({
-			where: { ...scope, addressId: { not: null } },
+			where: { ...recordScope, addressId: { not: null } },
 			select: { venueName: true, address: true },
 			orderBy: { createdAt: 'desc' }
 		}),
 		prisma.customer.findMany({
-			where: { ...scope, addressId: { not: null } },
+			where: { ...recordScope, addressId: { not: null } },
 			select: { companyName: true, contactPerson: true, address: true }
 		}),
 		prisma.organization.findMany({

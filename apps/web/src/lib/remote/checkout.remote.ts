@@ -4,7 +4,11 @@ import * as v from 'valibot';
 import { getAsset, getAssets, getBundle, getBundles, getBundleTemplates } from './assets.remote';
 import { getProduction } from './productions.remote';
 import { getLicenses, getLicenseStatus } from './licenses.remote';
-import { requireAuth, userOrgIds, visibleProductionIds } from '$lib/server/services/access';
+import {
+	productionReadWhere,
+	requireAuth,
+	visibleProductionIds
+} from '$lib/server/services/access';
 import {
 	CheckoutError,
 	performBulkCheckout,
@@ -15,10 +19,9 @@ import { appError, type AppErrorCode } from '$lib/errors';
 
 export const getAllProductions = query(async () => {
 	const user = await requireAuth();
-	const orgIds = await userOrgIds(user.id);
 	return await prisma.production.findMany({
 		// A cancelled production takes no checkouts, so it is not offered as a target.
-		where: { organizationId: { in: orgIds }, cancelledAt: null },
+		where: { ...(await productionReadWhere(user.id)), cancelledAt: null },
 		include: { organization: { select: { name: true, shortName: true } } },
 		orderBy: [{ startDate: 'desc' }, { name: 'asc' }]
 	});

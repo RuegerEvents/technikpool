@@ -7,6 +7,8 @@ import {
 	isSystemAdmin,
 	managedOrgIds,
 	productionVisibility,
+	readableOrgIds,
+	readsOrgRecords,
 	requireAuth,
 	requireOrgInventory,
 	requireOrgWrite,
@@ -112,6 +114,25 @@ const ACCESSORIES_INCLUDE = {
 	include: { product: { include: { manufacturer: true, category: true } } },
 	orderBy: ASSET_ORDER_BY
 } as const;
+
+/**
+ * Of these orgs, the ones whose prices the user may see: not the ones they are
+ * only a DEVICE_VIEWER of. A system admin sees every org's.
+ */
+async function priceVisibleOrgIds(userId: string, orgIds: string[]) {
+	if (await isSystemAdmin(userId)) return orgIds;
+	const readable = new Set(await readableOrgIds(userId));
+	return orgIds.filter((id) => readable.has(id));
+}
+
+/** A bundle's price with the ones the user may not see taken out — see `priceVisibleOrgIds`. */
+function maskBundlePrice<T extends { netPurchasePrice: unknown }>(
+	bundle: T,
+	organizationId: string,
+	visible: string[]
+): T {
+	return visible.includes(organizationId) ? bundle : { ...bundle, netPurchasePrice: null };
+}
 
 export const getAssets = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
@@ -582,6 +603,7 @@ export const getCableVocabulary = query(async () => {
 export const getProductCatalog = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
 	const queryOrgIds = await scopedOrgIds(user.id, organizationId);
+	const priceOrgIds = await priceVisibleOrgIds(user.id, queryOrgIds);
 
 	const assetScope = { organizationId: { in: queryOrgIds }, ...ACTIVE_ASSET_WHERE };
 
@@ -592,9 +614,10 @@ export const getProductCatalog = query(v.optional(v.string()), async (organizati
 			// One row per org that owns units — `owningOrgIds` is what lets the
 			// wizard grey out identity fields the server would refuse to change.
 			assets: { select: { organizationId: true }, distinct: ['organizationId'] },
-			// Prices are per-org and only the user's own orgs' are anyone's business.
+			// Prices are per-org and only the user's own orgs' are anyone's business —
+			// and of those, only the ones they read more than the equipment of.
 			orgPrices: {
-				where: { organizationId: { in: queryOrgIds } },
+				where: { organizationId: { in: priceOrgIds } },
 				select: { organizationId: true, netPurchasePrice: true }
 			},
 			_count: { select: { assets: { where: assetScope } } },
@@ -1313,6 +1336,7 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 // Enough of a production to name it to someone who may not be allowed to —
 // see `visibleProductionName`.
 const PRODUCTION_NAME_SELECT = {
+	id: true,
 	name: true,
 	organizationId: true,
 	organization: { select: { name: true, shortName: true } }
@@ -1346,7 +1370,7 @@ export const getAssetHistory = query(v.string(), async (assetId: string) => {
 	// that would only refuse to open. The name lives in the entry's JSON as well
 	// as on the relation, and both have to go.
 	return history.map(({ production, ...tx }) => {
-		if (!production || canSee(production.organizationId)) {
+		if (!production || canSee(production)) {
 			return { ...tx, productionRestricted: false };
 		}
 		const name = visibleProductionName(production, canSee);
@@ -2309,6 +2333,10 @@ export const mergeProducts = command(
 export const getOrgProductPrices = query(v.string(), async (organizationId: string) => {
 	const user = await requireAuth();
 	await scopedOrgIds(user.id, organizationId);
+	// A DEVICE_VIEWER belongs to the org and sees its equipment, but a price is
+	// the business. Null rather than an empty list, so the page leaves the price
+	// out instead of saying none is set.
+	if (!(await readsOrgRecords(user.id, organizationId))) return null;
 	return prisma.orgProductPrice.findMany({
 		where: { organizationId },
 		select: { productId: true, netPurchasePrice: true }
@@ -2565,7 +2593,13 @@ export const getBundleTemplates = query(v.optional(v.string()), async (organizat
 			})
 		)
 	);
-	return templates;
+	const priceOrgIds = await priceVisibleOrgIds(user.id, queryOrgIds);
+	return templates.map((template) => ({
+		...template,
+		instances: template.instances.map((bundle) =>
+			maskBundlePrice(bundle, template.organizationId, priceOrgIds)
+		)
+	}));
 });
 
 /**
@@ -2609,7 +2643,10 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 		orderBy: [{ template: { name: 'asc' } }, { tag: { sort: 'asc', nulls: 'last' } }]
 	});
 	await Promise.all(bundles.map((bundle) => ensureBundleImageWithoutBreakingRead(bundle)));
-	return bundles;
+	const priceOrgIds = await priceVisibleOrgIds(user.id, queryOrgIds);
+	return bundles.map((bundle) =>
+		maskBundlePrice(bundle, bundle.template.organizationId, priceOrgIds)
+	);
 });
 
 export const getBundle = query(v.string(), async (id: string) => {
@@ -2638,7 +2675,10 @@ export const getBundle = query(v.string(), async (id: string) => {
 	}
 
 	await ensureBundleImageWithoutBreakingRead(bundle);
-	return bundle;
+	// The page says "Not set" for a bundle without a price, so it has to be told
+	// apart from one whose price this user may not see.
+	const pricesVisible = await readsOrgRecords(user.id, bundle.template.organizationId);
+	return { ...(pricesVisible ? bundle : { ...bundle, netPurchasePrice: null }), pricesVisible };
 });
 
 export const regenerateBundleImage = command(v.string(), async (bundleId) => {

@@ -569,16 +569,18 @@
 						<span class="font-normal text-muted-foreground">No location</span>
 					{/if}
 				</Fact>
-				<Fact icon={Euro} label="Net purchase price" hint="Billed as one line on offers.">
-					{#if bundle.netPurchasePrice}
-						{Number(bundle.netPurchasePrice).toLocaleString('de-DE', {
-							style: 'currency',
-							currency: 'EUR'
-						})}
-					{:else}
-						<span class="font-normal text-muted-foreground">Not set</span>
-					{/if}
-				</Fact>
+				{#if bundle.pricesVisible}
+					<Fact icon={Euro} label="Net purchase price" hint="Billed as one line on offers.">
+						{#if bundle.netPurchasePrice}
+							{Number(bundle.netPurchasePrice).toLocaleString('de-DE', {
+								style: 'currency',
+								currency: 'EUR'
+							})}
+						{:else}
+							<span class="font-normal text-muted-foreground">Not set</span>
+						{/if}
+					</Fact>
+				{/if}
 			</dl>
 		</div>
 	</div>

@@ -4,7 +4,8 @@ const roleLabels: Record<string, string> = {
 	OWNER: 'Inhaber',
 	ADMIN: 'Admin',
 	MEMBER: 'Mitglied',
-	VIEWER: 'Betrachter'
+	VIEWER: 'Betrachter',
+	DEVICE_VIEWER: 'Geräte-Betrachter'
 };
 
 export function invitationEmail(opts: {

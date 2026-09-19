@@ -152,13 +152,15 @@
 											</DropdownMenu.Item>
 										{/if}
 										<DropdownMenu.Separator class="my-1 h-px bg-border" />
-										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/customers'))}
-											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-										>
-											<Users aria-hidden="true" />
-											Customers
-										</DropdownMenu.Item>
+										{#if data.canReadRecords}
+											<DropdownMenu.Item
+												onSelect={() => goto(resolve('/customers'))}
+												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+											>
+												<Users aria-hidden="true" />
+												Customers
+											</DropdownMenu.Item>
+										{/if}
 										<DropdownMenu.Item
 											onSelect={() => goto(resolve('/products'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
@@ -342,13 +344,15 @@
 											sideOffset={6}
 											class="z-50 min-w-[180px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md [&_svg]:size-4"
 										>
-											<DropdownMenu.Item
-												onSelect={() => goto(resolve('/customers'))}
-												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-											>
-												<Users aria-hidden="true" />
-												Customers
-											</DropdownMenu.Item>
+											{#if data.canReadRecords}
+												<DropdownMenu.Item
+													onSelect={() => goto(resolve('/customers'))}
+													class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+												>
+													<Users aria-hidden="true" />
+													Customers
+												</DropdownMenu.Item>
+											{/if}
 											<DropdownMenu.Item
 												onSelect={() => goto(resolve('/products'))}
 												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"

@@ -3,7 +3,7 @@ import { sendMail } from '$lib/server/mail';
 import { appBaseUrl } from '$lib/server/app-url';
 import { invitationEmail } from '$lib/server/emails/invitation';
 import { invitationExpiry, newInviteToken } from '$lib/server/signup-gate';
-import type { OrgRole } from '$lib/roles';
+import { DEFAULT_ORG_ROLE, type OrgRole } from '$lib/roles';
 
 /**
  * Invite one address, replacing whatever invitation to the same place was
@@ -32,7 +32,7 @@ export async function issueInvitation(input: {
 				tokenHash,
 				invitedById: input.invitedBy.id,
 				organizationId,
-				role: organizationId ? (input.role ?? 'MEMBER') : null,
+				role: organizationId ? (input.role ?? DEFAULT_ORG_ROLE) : null,
 				expiresAt: invitationExpiry()
 			},
 			include: { organization: { select: { name: true } } }

@@ -166,7 +166,7 @@ carry them anywhere by accident.
   the asset's history with the grounds it was allowed on.
 - Who may reveal (`revealGrants` in `src/lib/server/services/licenses.ts`): MEMBER+ of the org
   whose location keeps the license, or crew / MEMBER+ of a production it is **checked out** to.
-  VIEWER alone is not enough. Editing takes ADMIN of the owning org, and the form is write-only.
+  VIEWER or DEVICE_VIEWER alone is not enough. Editing takes ADMIN of the owning org, and the form is write-only.
 - The Devices page's type select (Devices / Licenses / Cables) lists licenses with who has each
   one; the table never reveals a key. The production page offers the
   credentials on checked-out license items.
@@ -321,7 +321,15 @@ leave the server's `error(4xx, …)` as the backstop it is.
 ## Authorization Model
 
 - `user.isAdmin` (DB field) — system-level admin: can manage all orgs, grant/revoke admin
-- `OrgMembership.role` — per-org role: `OWNER | ADMIN | MEMBER | VIEWER`
+- `OrgMembership.role` — per-org role, a ladder ranked in `src/lib/roles.ts`:
+  `DEVICE_VIEWER < VIEWER < MEMBER < ADMIN < OWNER`
+- `DEVICE_VIEWER` (the default for new members and invitations) sees the equipment only — no
+  productions, customers or prices, except a production they are **crew** on. VIEWER reads
+  everything but billing. Offers and invoices are ADMIN+ for reading as well as writing.
+- Production reads go through `productionVisibility` / `productionReadWhere` /
+  `requireProductionRead` in `access.ts` (VIEWER+ of the org, or its crew), never through
+  `userOrgIds`, which is every membership and scopes only the equipment. Prices go through
+  `readableOrgIds` / `readsOrgRecords`.
 - Org `OWNER` role = can manage that org's members
 - System admins bypass org membership checks
 
@@ -378,7 +386,7 @@ Located in `src/lib/components/ui/`: `button`, `card`, `input`, `label`, `creata
 
 - `User` — `isAdmin Boolean @default(false)` for system-level admin
 - `Organization` — multi-tenant root; has `defaultAssetVisibility`
-- `OrgMembership` — `userId + organizationId` unique; role enum `OWNER|ADMIN|MEMBER|VIEWER`
+- `OrgMembership` — `userId + organizationId` unique; role enum `OWNER|ADMIN|MEMBER|VIEWER|DEVICE_VIEWER`
 - `Asset` — belongs to an org; can be in a `AssetBundle`
 - `Production` — belongs to an org; has `ProductionItem[]` (assets) and `ProductionCrew[]` (users)
 - `ProductionItem.status` — `PENDING` for cross-org requests, `APPROVED|CHECKED_OUT|RETURNED` otherwise

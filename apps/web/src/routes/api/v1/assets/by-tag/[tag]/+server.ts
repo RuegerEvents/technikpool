@@ -47,6 +47,7 @@ export const GET: RequestHandler = ({ locals, params }) =>
 					user: { select: { name: true, email: true } },
 					production: {
 						select: {
+							id: true,
 							name: true,
 							organizationId: true,
 							organization: { select: { name: true, shortName: true } }

@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 import type { prisma } from './auth';
+import { DEFAULT_ORG_ROLE } from '../roles';
 
 // Who may create an account. Lives outside `services/` and takes the client as
 // an argument because `auth.ts` is its first caller: the services import
@@ -108,7 +109,7 @@ export async function completeSignUp(
 			create: {
 				userId: input.userId,
 				organizationId: invitation.organizationId,
-				role: invitation.role ?? 'MEMBER'
+				role: invitation.role ?? DEFAULT_ORG_ROLE
 			},
 			update: {}
 		});

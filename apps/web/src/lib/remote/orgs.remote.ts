@@ -4,6 +4,7 @@ import { sendMail } from '$lib/server/mail';
 import { appBaseUrl } from '$lib/server/app-url';
 import { addedToOrgEmail } from '$lib/server/emails/added-to-org';
 import * as v from 'valibot';
+import { ORG_ROLES, type OrgRole } from '$lib/roles';
 import { isSystemAdmin, requireAuth, requireOrgOwner } from '$lib/server/services/access';
 import { appError } from '$lib/errors';
 import { issueInvitation } from '$lib/server/services/invitations';
@@ -85,7 +86,7 @@ export const getOrgWithMembers = query(v.string(), async (orgId: string) => {
 	});
 });
 
-const roleSchema = v.picklist(['OWNER', 'ADMIN', 'MEMBER', 'VIEWER']);
+const roleSchema = v.picklist(ORG_ROLES);
 
 export const addUserToOrg = command(
 	v.object({ orgId: v.string(), email: v.string(), role: roleSchema }),
@@ -488,7 +489,7 @@ export const getAllOrgs = query(async () => {
 
 	return orgs.map(({ members, _count, ...org }) => ({
 		...org,
-		role: (members[0]?.role ?? null) as 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER' | null,
+		role: (members[0]?.role ?? null) as OrgRole | null,
 		memberCount: _count.members
 	}));
 });

@@ -1,4 +1,5 @@
 import { getRequestEvent } from '$app/server';
+import type { Prisma } from '$lib/prisma/client';
 import { prisma } from '$lib/server/auth';
 import { appError, type AppErrorCode } from '$lib/errors';
 import { ROLE_FOR, roleAtLeast, rolesAtLeast, type OrgRole } from '$lib/roles';
@@ -17,6 +18,11 @@ export async function requireAuth() {
 	return event.locals.user;
 }
 
+/**
+ * Every org the user belongs to, at any rung — what the equipment is scoped
+ * to. Productions, customers and prices are not: see `readableOrgIds` and
+ * `productionReadWhere`.
+ */
 export async function userOrgIds(userId: string) {
 	const memberships = await prisma.orgMembership.findMany({
 		where: { userId },
@@ -83,7 +89,11 @@ export async function requireOrgRole(
 	return user;
 }
 
-/** Belongs to the org at all. Reads only — a VIEWER clears this and nothing above it. */
+/**
+ * Reads the org's business: productions, customers, prices. A VIEWER clears
+ * this; a DEVICE_VIEWER, who sees the equipment only, does not. A production
+ * goes through `requireProductionRead` instead, which also lets its crew in.
+ */
 export function requireOrgRead(organizationId: string, code?: AppErrorCode) {
 	return requireOrgRole(organizationId, ROLE_FOR.read, code);
 }
@@ -107,11 +117,11 @@ export function requireOrgOwner(
 }
 
 /**
- * Whether a user may open a production of a given org: any member of that org,
- * VIEWER up, or a system admin — the same rule `requireOrgRead` enforces on the
- * production itself. Resolved once and handed back as a predicate, so a list
- * that mixes productions of several orgs is masked row by row without a query
- * per row.
+ * Whether a user may open a given production: a VIEWER or above of the org
+ * that holds it, anyone of that org who is on its crew — which is how a
+ * DEVICE_VIEWER gets to see the job they are working — or a system admin.
+ * Resolved once and handed back as a predicate, so a list that mixes
+ * productions of several orgs is masked row by row without a query per row.
  *
  * What a list does with a production this says no to is the caller's business,
  * but it must never *drop* it: a unit booked by someone else's production is
@@ -119,9 +129,65 @@ export function requireOrgOwner(
  * `visibleProductionName` instead.
  */
 export async function productionVisibility(userId: string) {
-	const [orgIds, admin] = await Promise.all([userOrgIds(userId), isSystemAdmin(userId)]);
-	const visible = new Set(orgIds);
-	return (organizationId: string) => admin || visible.has(organizationId);
+	const [readable, crewOn, admin] = await Promise.all([
+		readableOrgIds(userId),
+		crewProductionIds(userId),
+		isSystemAdmin(userId)
+	]);
+	const orgs = new Set(readable);
+	const crew = new Set(crewOn);
+	return (production: ProductionRef) =>
+		admin || orgs.has(production.organizationId) || crew.has(production.id);
+}
+
+type ProductionRef = { id: string; organizationId: string };
+
+/**
+ * The productions a user is crew on, in orgs they still belong to. Crew is only
+ * picked from members, but a membership can end while the crew row stays — and
+ * leaving the org is where access to its productions ends.
+ */
+async function crewProductionIds(userId: string) {
+	const rows = await prisma.productionCrew.findMany({
+		where: {
+			userId,
+			production: { organization: { members: { some: { userId } } } }
+		},
+		select: { productionId: true }
+	});
+	return rows.map((r) => r.productionId);
+}
+
+/** Throws unless the user may open this production — see `productionVisibility`. */
+export async function requireProductionRead(production: ProductionRef) {
+	const user = await requireAuth();
+	const canSee = await productionVisibility(user.id);
+	if (canSee(production)) return user;
+	const role = await orgRole(user.id, production.organizationId);
+	appError(403, role ? 'unauthorized' : 'not_org_member');
+}
+
+/**
+ * The `where` that scopes a list of productions to the ones a user may open,
+ * optionally narrowed to one org — the list counterpart of
+ * `productionVisibility`. Like `scopedOrgIds`, a filter for an org the user
+ * doesn't belong to is refused rather than ignored.
+ */
+export async function productionReadWhere(
+	userId: string,
+	organizationId?: string
+): Promise<Prisma.ProductionWhereInput> {
+	const memberOf = await scopedOrgIds(userId, organizationId);
+	const [readable, admin] = await Promise.all([readableOrgIds(userId), isSystemAdmin(userId)]);
+	const readableSet = new Set(readable);
+	const fullOrgIds = admin ? memberOf : memberOf.filter((id) => readableSet.has(id));
+	const crewOrgIds = memberOf.filter((id) => !fullOrgIds.includes(id));
+	return {
+		OR: [
+			{ organizationId: { in: fullOrgIds } },
+			{ organizationId: { in: crewOrgIds }, crew: { some: { userId } } }
+		]
+	};
 }
 
 /**
@@ -139,7 +205,7 @@ export async function visibleProductionIds(userId: string, productionIds: string
 			select: { id: true, organizationId: true }
 		})
 	]);
-	return productions.filter((p) => canSee(p.organizationId)).map((p) => p.id);
+	return productions.filter(canSee).map((p) => p.id);
 }
 
 /**
@@ -148,13 +214,14 @@ export async function visibleProductionIds(userId: string, productionIds: string
  */
 export function visibleProductionName(
 	production: {
+		id: string;
 		name: string;
 		organizationId: string;
 		organization: { name: string; shortName: string | null };
 	},
-	canSee: (organizationId: string) => boolean
+	canSee: (production: ProductionRef) => boolean
 ) {
-	return canSee(production.organizationId) ? production.name : orgLabel(production.organization);
+	return canSee(production) ? production.name : orgLabel(production.organization);
 }
 
 /** The ids of orgs the user can manage (ADMIN or OWNER role). */
@@ -169,6 +236,25 @@ export async function managedOrgIds(userId: string) {
  */
 export async function writableOrgIds(userId: string) {
 	return orgIdsAtLeast(userId, ROLE_FOR.write);
+}
+
+/**
+ * The orgs whose business a user may read — productions, customers, prices —
+ * which is `userOrgIds` minus the ones they only see the equipment of.
+ */
+export async function readableOrgIds(userId: string) {
+	return orgIdsAtLeast(userId, ROLE_FOR.read);
+}
+
+/**
+ * Whether a user reads this org's business — `readableOrgIds` for one org,
+ * with the system admin's bypass. For a read of the equipment that carries a
+ * price along, which is left out rather than refused.
+ */
+export async function readsOrgRecords(userId: string, organizationId: string) {
+	if (await isSystemAdmin(userId)) return true;
+	const role = await orgRole(userId, organizationId);
+	return !!role && roleAtLeast(role, ROLE_FOR.read);
 }
 
 async function orgIdsAtLeast(userId: string, min: OrgRole) {

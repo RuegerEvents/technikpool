@@ -1,6 +1,7 @@
 import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
+import { ORG_ROLES } from '$lib/roles';
 import {
 	isSystemAdmin,
 	requireAuth,
@@ -12,7 +13,7 @@ import { findOpenInvitation, signUpOpen } from '$lib/server/signup-gate';
 import { appError } from '$lib/errors';
 import { orgLabel } from '$lib/utils';
 
-const roleSchema = v.picklist(['OWNER', 'ADMIN', 'MEMBER', 'VIEWER']);
+const roleSchema = v.picklist(ORG_ROLES);
 
 // ── Public: what the login and register pages need before anyone is signed in ──
 

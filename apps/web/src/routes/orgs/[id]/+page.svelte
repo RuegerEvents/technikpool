@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getErrorMessage, orgLabel } from '$lib/utils';
-	import { ORG_ROLES, type OrgRole } from '$lib/roles';
+	import { DEFAULT_ORG_ROLE, ORG_ROLES, type OrgRole } from '$lib/roles';
 	import { roleName, roleSummary } from '$lib/role-descriptions.svelte';
 	import {
 		InvitationLink,
@@ -64,7 +64,7 @@
 	}
 
 	let addEmail = $state('');
-	let addRole = $state<OrgRole>('MEMBER');
+	let addRole = $state<OrgRole>(DEFAULT_ORG_ROLE);
 	let adding = $state(false);
 	let issued = $state<IssuedInvitation | null>(null);
 

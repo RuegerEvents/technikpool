@@ -84,10 +84,10 @@
 	let categories = $derived(await getCategories());
 
 	// Prices are per-org — this page shows and edits the owning org's price
-	// for the unit's product.
+	// for the unit's product. Null when the user only sees the org's equipment.
 	let orgPrices = $derived(await getOrgProductPrices(asset.organizationId));
 	let orgNetPurchasePrice = $derived.by(() => {
-		const row = orgPrices.find((p) => p.productId === asset.productId);
+		const row = orgPrices?.find((p) => p.productId === asset.productId);
 		return row == null ? undefined : Number(row.netPurchasePrice);
 	});
 
@@ -785,17 +785,22 @@
 							color={asset.product.category.color}
 						/>
 					</Fact>
-					<Fact icon={Euro} label="Net purchase price" class="sm:col-span-2">
-						{#if orgNetPurchasePrice != null}
-							{orgNetPurchasePrice.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
-						{:else}
-							<span class="font-normal text-muted-foreground">Not set</span>
-						{/if}
-						<p class="mt-1 text-xs font-normal text-muted-foreground">
-							{orgLabel(asset.organization)}'s price for this product — what its rental rate is
-							calculated from. Other organizations price it themselves.
-						</p>
-					</Fact>
+					{#if orgPrices}
+						<Fact icon={Euro} label="Net purchase price" class="sm:col-span-2">
+							{#if orgNetPurchasePrice != null}
+								{orgNetPurchasePrice.toLocaleString('de-DE', {
+									style: 'currency',
+									currency: 'EUR'
+								})}
+							{:else}
+								<span class="font-normal text-muted-foreground">Not set</span>
+							{/if}
+							<p class="mt-1 text-xs font-normal text-muted-foreground">
+								{orgLabel(asset.organization)}'s price for this product — what its rental rate is
+								calculated from. Other organizations price it themselves.
+							</p>
+						</Fact>
+					{/if}
 				</dl>
 
 				{#if asset.product.cableType}

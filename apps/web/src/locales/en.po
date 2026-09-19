@@ -30,7 +30,6 @@ msgstr "Productions"
 
 #: src/lib/role-descriptions.svelte.ts
 #: src/routes/admin/users/+page.svelte
-#: src/routes/admin/users/+page.svelte
 msgid "Admin"
 msgstr "Admin"
 
@@ -956,17 +955,14 @@ msgid "Role updated"
 msgstr "Role updated"
 
 #: src/lib/role-descriptions.svelte.ts
-#: src/routes/admin/users/+page.svelte
 msgid "Owner"
 msgstr "Owner"
 
 #: src/lib/role-descriptions.svelte.ts
-#: src/routes/admin/users/+page.svelte
 msgid "Member"
 msgstr "Member"
 
 #: src/lib/role-descriptions.svelte.ts
-#: src/routes/admin/users/+page.svelte
 msgid "Viewer"
 msgstr "Viewer"
 
@@ -2841,6 +2837,7 @@ msgid "No offers yet."
 msgstr "No offers yet."
 
 #: src/lib/components/ui/address-input/address-input.svelte
+#: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/lib/components/ui/production-hover-card/production-hover-card.svelte
 #: src/routes/invoices/+page.svelte
 #: src/routes/offers/+page.svelte
@@ -7024,9 +7021,8 @@ msgstr "Gone: retired for good. Out of every list and count; only the status can
 msgid "You need admin rights in one of your organizations to register equipment."
 msgstr "You need admin rights in one of your organizations to register equipment."
 
-#: src/lib/role-descriptions.svelte.ts
-msgid "Can see everything, but change nothing."
-msgstr "Can see everything, but change nothing."
+#~ msgid "Can see everything, but change nothing."
+#~ msgstr "Can see everything, but change nothing."
 
 #: src/lib/role-descriptions.svelte.ts
 msgid "Can scan, check equipment out and back in, and plan productions."
@@ -8405,3 +8401,15 @@ msgstr "<0/> Duplicate"
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "<0/> Delete"
 msgstr "<0/> Delete"
+
+#: src/lib/role-descriptions.svelte.ts
+msgid "Device viewer"
+msgstr "Device viewer"
+
+#: src/lib/role-descriptions.svelte.ts
+msgid "Can see the equipment, but no productions, customers or prices — only the productions they are crew on."
+msgstr "Can see the equipment, but no productions, customers or prices — only the productions they are crew on."
+
+#: src/lib/role-descriptions.svelte.ts
+msgid "Can see everything except offers and invoices, but change nothing."
+msgstr "Can see everything except offers and invoices, but change nothing."

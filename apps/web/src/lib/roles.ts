@@ -9,11 +9,20 @@
  * lives in `role-descriptions.svelte.ts`, the way error codes and their
  * messages are split (see `errors.ts` / `error-messages.svelte.ts`).
  */
-export type OrgRole = 'VIEWER' | 'MEMBER' | 'ADMIN' | 'OWNER';
+export type OrgRole = 'DEVICE_VIEWER' | 'VIEWER' | 'MEMBER' | 'ADMIN' | 'OWNER';
 
-export const ORG_ROLES = ['VIEWER', 'MEMBER', 'ADMIN', 'OWNER'] as const;
+export const ORG_ROLES = ['DEVICE_VIEWER', 'VIEWER', 'MEMBER', 'ADMIN', 'OWNER'] as const;
 
-const ROLE_RANK: Record<OrgRole, number> = { VIEWER: 0, MEMBER: 1, ADMIN: 2, OWNER: 3 };
+const ROLE_RANK: Record<OrgRole, number> = {
+	DEVICE_VIEWER: 0,
+	VIEWER: 1,
+	MEMBER: 2,
+	ADMIN: 3,
+	OWNER: 4
+};
+
+/** The rung a new membership or invitation starts on unless someone picks another. */
+export const DEFAULT_ORG_ROLE: OrgRole = 'DEVICE_VIEWER';
 
 export function roleAtLeast(role: OrgRole, min: OrgRole): boolean {
 	return ROLE_RANK[role] >= ROLE_RANK[min];
@@ -27,13 +36,21 @@ export function rolesAtLeast(min: OrgRole): OrgRole[] {
 /**
  * What each rung is for, named after the work rather than the rank:
  *
- * - VIEWER  — reads. Nothing they do changes a record.
+ * - DEVICE_VIEWER — the equipment and nothing else: devices, bundles, locations,
+ *             inspections. No productions, customers or prices — except a
+ *             production they are crew on, which they may open. This is the
+ *             rung for people who help out but have no business seeing the
+ *             business: which customer, which gig, at what price.
+ * - VIEWER  — reads everything but billing. Nothing they do changes a record.
  * - MEMBER  — the warehouse floor: scan, check out and back in, plan productions.
  * - ADMIN   — the inventory itself: register and retire units, prices,
  *             inspections, approving another org's loan request, offers and invoices.
  * - OWNER   — the organization: members, roles, settings, category rates.
  */
 export const ROLE_FOR = {
+	/** Belongs to the org at all: sees its equipment. */
+	equipment: 'DEVICE_VIEWER',
+	/** Productions, customers, prices — the business, as opposed to the equipment. */
 	read: 'VIEWER',
 	/** Anything that writes at all — the line VIEWER does not cross. */
 	write: 'MEMBER',

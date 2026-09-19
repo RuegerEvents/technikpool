@@ -12,7 +12,7 @@
 	} from '$lib/components/ui/invitations';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import { ORG_ROLES, type OrgRole } from '$lib/roles';
+	import { DEFAULT_ORG_ROLE, ORG_ROLES, type OrgRole } from '$lib/roles';
 	import { roleName } from '$lib/role-descriptions.svelte';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
@@ -32,7 +32,7 @@
 
 	let inviteEmail = $state('');
 	let inviteOrgId = $state('');
-	let inviteRole = $state<OrgRole>('MEMBER');
+	let inviteRole = $state<OrgRole>(DEFAULT_ORG_ROLE);
 	let inviting = $state(false);
 	let issued = $state<IssuedInvitation | null>(null);
 
@@ -64,13 +64,6 @@
 
 	const selectClass =
 		'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none';
-
-	const roleLabels: Record<string, string> = {
-		OWNER: 'Owner',
-		ADMIN: 'Admin',
-		MEMBER: 'Member',
-		VIEWER: 'Viewer'
-	};
 
 	async function handleToggleAdmin(userId: string, currentIsAdmin: boolean, name: string) {
 		try {
@@ -238,8 +231,7 @@
 													class="rounded border px-1.5 py-0.5 text-xs hover:bg-muted"
 												>
 													{orgLabel(m.organization)}
-													<span class="text-muted-foreground">({roleLabels[m.role] ?? m.role})</span
-													>
+													<span class="text-muted-foreground">({roleName(m.role)})</span>
 												</a>
 											{/each}
 										</div>

@@ -30,7 +30,6 @@ msgstr "Produktionen"
 
 #: src/lib/role-descriptions.svelte.ts
 #: src/routes/admin/users/+page.svelte
-#: src/routes/admin/users/+page.svelte
 msgid "Admin"
 msgstr "Admin"
 
@@ -956,17 +955,14 @@ msgid "Role updated"
 msgstr "Rolle aktualisiert"
 
 #: src/lib/role-descriptions.svelte.ts
-#: src/routes/admin/users/+page.svelte
 msgid "Owner"
 msgstr "Inhaber"
 
 #: src/lib/role-descriptions.svelte.ts
-#: src/routes/admin/users/+page.svelte
 msgid "Member"
 msgstr "Mitglied"
 
 #: src/lib/role-descriptions.svelte.ts
-#: src/routes/admin/users/+page.svelte
 msgid "Viewer"
 msgstr "Betrachter"
 
@@ -2841,6 +2837,7 @@ msgid "No offers yet."
 msgstr "Noch keine Angebote."
 
 #: src/lib/components/ui/address-input/address-input.svelte
+#: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/lib/components/ui/production-hover-card/production-hover-card.svelte
 #: src/routes/invoices/+page.svelte
 #: src/routes/offers/+page.svelte
@@ -7024,9 +7021,8 @@ msgstr "Weg: endgültig ausgemustert. Aus allen Listen und Zählungen; nur der S
 msgid "You need admin rights in one of your organizations to register equipment."
 msgstr "Zum Anlegen von Geräten sind Admin-Rechte in einer Ihrer Organisationen nötig."
 
-#: src/lib/role-descriptions.svelte.ts
-msgid "Can see everything, but change nothing."
-msgstr "Sieht alles, ändert nichts."
+#~ msgid "Can see everything, but change nothing."
+#~ msgstr "Sieht alles, ändert nichts."
 
 #: src/lib/role-descriptions.svelte.ts
 msgid "Can scan, check equipment out and back in, and plan productions."
@@ -8405,3 +8401,15 @@ msgstr "<0/> Duplizieren"
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "<0/> Delete"
 msgstr "<0/> Löschen"
+
+#: src/lib/role-descriptions.svelte.ts
+msgid "Device viewer"
+msgstr "Geräte-Betrachter"
+
+#: src/lib/role-descriptions.svelte.ts
+msgid "Can see the equipment, but no productions, customers or prices — only the productions they are crew on."
+msgstr "Sieht die Geräte, aber keine Produktionen, Kunden oder Preise – außer Produktionen, für die man in der Crew eingetragen ist."
+
+#: src/lib/role-descriptions.svelte.ts
+msgid "Can see everything except offers and invoices, but change nothing."
+msgstr "Sieht alles außer Angeboten und Rechnungen, ändert nichts."

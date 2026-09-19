@@ -11,6 +11,7 @@
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
 	import { categoryLabel } from '$lib/category';
+	import { canWrite } from '$lib/roles';
 	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
 	import {
 		deleteProduct,
@@ -120,7 +121,7 @@
 	let priceOrgs = $derived(
 		priceOrgId ? managedOrgs.filter((o) => o.id === priceOrgId) : managedOrgs
 	);
-	let canContribute = $derived(isAdmin || orgs.some((o) => o.role !== 'VIEWER'));
+	let canContribute = $derived(isAdmin || orgs.some(canWrite));
 
 	// Renaming or recategorizing follows the ownership rule the server
 	// enforces: every org holding units must be one this user admins. Locked

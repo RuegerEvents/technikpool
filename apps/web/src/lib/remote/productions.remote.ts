@@ -7,13 +7,13 @@ import { addedAsCrewEmail } from '$lib/server/emails/added-as-crew';
 import { productionCancelledEmail } from '$lib/server/emails/production-cancelled';
 import * as v from 'valibot';
 import {
+	productionReadWhere,
 	productionVisibility,
 	requireAuth,
 	requireOrgInventory,
-	requireOrgRead,
 	requireOrgWrite,
+	requireProductionRead,
 	managedOrgIds,
-	scopedOrgIds,
 	visibleProductionIds
 } from '$lib/server/services/access';
 import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '$lib/asset-status';
@@ -74,9 +74,8 @@ async function notifyRequesterIfQueueCleared(
 
 export const getProductions = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
-	const orgIds = await scopedOrgIds(user.id, organizationId);
 	return await prisma.production.findMany({
-		where: { organizationId: { in: orgIds } },
+		where: await productionReadWhere(user.id, organizationId),
 		include: {
 			organization: { select: { name: true, shortName: true } },
 			items: {
@@ -127,9 +126,9 @@ export const getProduction = query(v.string(), async (id: string) => {
 			organization: true
 		}
 	});
-	// Any member of the org reads it, VIEWER included; every command that
-	// changes it asks for MEMBER on its own.
-	await requireOrgRead(production.organizationId);
+	// A VIEWER of the org reads it, and so does its crew whatever their rung;
+	// every command that changes it asks for MEMBER on its own.
+	await requireProductionRead(production);
 	return production;
 });
 
@@ -869,7 +868,7 @@ export const getPendingApprovals = query(v.string(), async (organizationId: stri
 	// open it, so the page is told whether to link it.
 	return items.map((item) => ({
 		...item,
-		productionVisible: canSee(item.production.organizationId)
+		productionVisible: canSee(item.production)
 	}));
 });
 
@@ -1339,7 +1338,7 @@ export const getCalendarData = query(async () => {
 			const { organization, organizationId, ...rest } = production;
 			return {
 				...item,
-				production: canSee(organizationId)
+				production: canSee({ id: production.id, organizationId })
 					? { ...rest, restricted: false }
 					: {
 							...rest,
@@ -1355,13 +1354,9 @@ export const getCalendarData = query(async () => {
 
 export const getProductionsCalendar = query(async () => {
 	const user = await requireAuth();
-	const memberships = await prisma.orgMembership.findMany({
-		where: { userId: user.id }
-	});
-	const orgIds = memberships.map((m) => m.organizationId);
 	return await prisma.production.findMany({
 		where: {
-			organizationId: { in: orgIds },
+			...(await productionReadWhere(user.id)),
 			cancelledAt: null,
 			startDate: { not: null },
 			endDate: { not: null }
@@ -1381,6 +1376,7 @@ export const getDashboardStats = query(async () => {
 	const user = await requireAuth();
 	const memberships = await prisma.orgMembership.findMany({ where: { userId: user.id } });
 	const orgIds = memberships.map((m) => m.organizationId);
+	const productionScope = await productionReadWhere(user.id);
 	const now = new Date();
 
 	const [
@@ -1397,7 +1393,7 @@ export const getDashboardStats = query(async () => {
 		prisma.asset.count({ where: { organizationId: { in: orgIds }, status: 'MAINTENANCE' } }),
 		prisma.asset.count({ where: { organizationId: { in: orgIds }, status: 'BROKEN' } }),
 		prisma.production.findMany({
-			where: { organizationId: { in: orgIds }, cancelledAt: null, startDate: { gte: now } },
+			where: { ...productionScope, cancelledAt: null, startDate: { gte: now } },
 			orderBy: { startDate: 'asc' },
 			take: 5,
 			select: {

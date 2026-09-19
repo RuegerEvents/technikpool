@@ -11,6 +11,8 @@ import type { OrgRole } from './roles';
  */
 export function roleName(role: OrgRole): string {
 	switch (role) {
+		case 'DEVICE_VIEWER':
+			return 'Device viewer';
 		case 'VIEWER':
 			return 'Viewer';
 		case 'MEMBER':
@@ -25,8 +27,10 @@ export function roleName(role: OrgRole): string {
 /** One line, phrased as what the person can do — not as what the rank is called. */
 export function roleSummary(role: OrgRole): string {
 	switch (role) {
+		case 'DEVICE_VIEWER':
+			return 'Can see the equipment, but no productions, customers or prices — only the productions they are crew on.';
 		case 'VIEWER':
-			return 'Can see everything, but change nothing.';
+			return 'Can see everything except offers and invoices, but change nothing.';
 		case 'MEMBER':
 			return 'Can scan, check equipment out and back in, and plan productions.';
 		case 'ADMIN':

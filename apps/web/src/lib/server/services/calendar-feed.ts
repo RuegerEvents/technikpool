@@ -3,7 +3,7 @@ import { prisma } from '$lib/server/auth';
 import { appBaseUrl } from '$lib/server/app-url';
 import { renderCalendar, type AllDayEvent } from '$lib/server/ical';
 import { orgLabel } from '$lib/utils';
-import { userOrgIds } from './access';
+import { productionReadWhere } from './access';
 
 // A calendar app subscribes to a URL and polls it with no cookie and no bearer
 // token, so the URL itself is the credential. It is signed rather than stored:
@@ -39,14 +39,14 @@ const formatDay = (d: Date) =>
 	`${String(d.getUTCDate()).padStart(2, '0')}.${String(d.getUTCMonth() + 1).padStart(2, '0')}.${d.getUTCFullYear()}`;
 
 /**
- * Every dated production in the user's orgs — the same scope as the calendar
- * page. Membership is resolved on each fetch, so leaving an org drops its
- * productions from the feed on the next refresh.
+ * Every dated production the user may open — the same scope as the calendar
+ * page. Membership is resolved on each fetch, so leaving an org (or a crew)
+ * drops its productions from the feed on the next refresh.
  */
 export async function renderProductionsCalendar(userId: string): Promise<string> {
 	const productions = await prisma.production.findMany({
 		where: {
-			organizationId: { in: await userOrgIds(userId) },
+			...(await productionReadWhere(userId)),
 			startDate: { not: null },
 			endDate: { not: null }
 		},
