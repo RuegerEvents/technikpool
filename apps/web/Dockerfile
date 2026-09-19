@@ -28,6 +28,12 @@ FROM node:24-alpine AS runner
 ENV NODE_ENV=production
 ENV HUSKY=0
 
+# sharp renders the kit previews' count badges ("2x") as SVG <text> for the
+# delivery note, and finds fonts through fontconfig. The alpine image ships
+# none, so every glyph came out as a box. Liberation Sans is metric-compatible
+# with the Arial the badges ask for, so the badge widths still fit the text.
+RUN apk add --no-cache fontconfig ttf-liberation
+
 WORKDIR /app
 
 # pnpm links a workspace package's dependencies as symlinks into the root
