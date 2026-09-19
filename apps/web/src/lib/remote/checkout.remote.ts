@@ -1,7 +1,7 @@
 import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
-import { getAsset, getAssets, getBundle, getBundles } from './assets.remote';
+import { getAsset, getAssets, getBundle, getBundles, getBundleTemplates } from './assets.remote';
 import { getProduction } from './productions.remote';
 import { getLicenses, getLicenseStatus } from './licenses.remote';
 import { requireAuth, userOrgIds, visibleProductionIds } from '$lib/server/services/access';
@@ -39,10 +39,16 @@ async function refreshAffected(userId: string, affected: AffectedRecords) {
 		// a bulk move looking undone until the page was reloaded.
 		getAssets().refresh(),
 		...affected.bundleIds.map((id) => getBundle(id).refresh()),
-		// Only when a bundle actually moved — the org-wide bundle list is a
-		// heavy query and most scans don't touch one.
+		// Only when a unit of a bundle moved — the org-wide bundle lists are heavy
+		// queries and most scans don't touch one. The templates are what the
+		// Devices page groups by bundle with, which is its default view.
 		...(affected.bundleIds.length > 0
-			? [...affected.organizationIds.map((id) => getBundles(id).refresh()), getBundles().refresh()]
+			? [
+					...affected.organizationIds.map((id) => getBundles(id).refresh()),
+					getBundles().refresh(),
+					...affected.organizationIds.map((id) => getBundleTemplates(id).refresh()),
+					getBundleTemplates().refresh()
+				]
 			: []),
 		...productionIds.map((id) => getProduction(id).refresh()),
 		// A licence's holder is whichever production it is checked out to, and

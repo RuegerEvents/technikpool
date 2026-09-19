@@ -447,8 +447,10 @@ export async function performBulkCheckout(
 				where: { id: { in: movedBundleIds } },
 				data: { locationId: input.targetId }
 			});
-			mergeAffected(affected, { bundleIds: movedBundleIds });
 		}
+		// Every bundle a unit left, moved or not: the bundle views place a case by
+		// where its units are, so a half-moved one reads differently too.
+		mergeAffected(affected, { bundleIds });
 
 		return { result: { count: assets.length, targetName: location.name }, affected };
 	}
