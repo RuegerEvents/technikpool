@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { customerLabel, orgLabel } from '$lib/utils';
+	import { customerLabel, getContrastingTextColor, orgLabel } from '$lib/utils';
 	/* eslint-disable svelte/prefer-svelte-reactivity */
 	import { getCalendarData, getProductionsCalendar } from '$lib/remote/productions.remote';
 	import { resolve } from '$app/paths';
@@ -131,7 +131,7 @@
 		for (const p of prodCalData) {
 			map.set(p.id, {
 				name: p.name,
-				color: prodColor(p.id),
+				color: p.organization.color,
 				startDate: p.startDate!,
 				endDate: p.endDate!,
 				showStartDate: p.showStartDate,
@@ -237,15 +237,36 @@
 		return granularity === 'day' ? startOfDay(d) : startOfWeek(d);
 	}
 
+	// The window is the bookings themselves plus a month of air, not a fixed
+	// span around today: day and week have no date navigation of their own —
+	// the only way through them is the horizontal scroll — so three fixed years
+	// of past left the scrollbar thumb a sliver over empty timeline, and every
+	// drag overshot. Today is always inside the window even with nothing booked,
+	// so the Today button and the marker line always have somewhere to land.
+	let eventRange = $derived.by(() => {
+		let min = Infinity;
+		let max = -Infinity;
+		const span = (start: Date | string | null, end: Date | string | null) => {
+			if (!start || !end) return;
+			min = Math.min(min, new Date(start).getTime());
+			max = Math.max(max, new Date(end).getTime());
+		};
+		for (const p of prodCalData) span(p.startDate, p.endDate);
+		for (const a of rawData) {
+			for (const pi of a.productionItems) span(pi.production.startDate, pi.production.endDate);
+		}
+		return { min, max };
+	});
+
 	let timelineStart = $derived.by(() => {
-		const d = new Date();
-		d.setFullYear(d.getFullYear() - 3);
+		const d = new Date(Math.min(eventRange.min, Date.now()));
+		d.setMonth(d.getMonth() - 1);
 		return snapToCol(d);
 	});
 
 	let timelineEnd = $derived.by(() => {
-		const d = new Date();
-		d.setFullYear(d.getFullYear() + 3);
+		const d = new Date(Math.max(eventRange.max, Date.now()));
+		d.setMonth(d.getMonth() + 1);
 		return snapToCol(d);
 	});
 
@@ -368,30 +389,32 @@
 		return segs;
 	}
 
-	const COLORS = [
-		'#3b82f6',
-		'#10b981',
-		'#f59e0b',
-		'#8b5cf6',
-		'#ef4444',
-		'#06b6d4',
-		'#f97316',
-		'#84cc16'
-	];
-
-	function prodColor(id: string): string {
-		let h = 0;
-		for (const c of id) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
-		return COLORS[h % COLORS.length];
+	// A bar is painted in its owner's colour — the one an org owner picked, unique
+	// per org, the same one `OrgBadge` draws — so colour on this page means the
+	// same thing it means everywhere else in the app. It used to be a hash of the
+	// production id into a fixed palette, which no reader could decode. Two of an
+	// org's bookings touching on one row are told apart by their rounded ends and
+	// their labels, not by hue.
+	//
+	// Another org's production that this user may not open (see getCalendarData)
+	// has no colour of ours to wear and stays neutral grey, so the unit reads as
+	// taken without passing for one of our own productions.
+	const RESTRICTED_COLOR = '#737373';
+	function barColor(p: { restricted: boolean; orgColor?: string | null }): string {
+		return p.restricted || !p.orgColor ? RESTRICTED_COLOR : p.orgColor;
 	}
 
-	// Another org's production that this user may not open (see getCalendarData):
-	// one neutral grey, so the unit reads as taken without passing for one of
-	// our own productions. Fixed rather than a theme token — the label on it is
-	// white in both themes.
-	const RESTRICTED_COLOR = '#737373';
-	function barColor(p: { id: string; restricted: boolean }): string {
-		return p.restricted ? RESTRICTED_COLOR : prodColor(p.id);
+	// Everything drawn on top of a bar mixes from the fill's contrasting ink rather
+	// than from white: org colours are chosen by hand and some of them are pale,
+	// and white diagonals over pale yellow are no marking at all.
+	function barInk(color: string): string {
+		return getContrastingTextColor(color) === '#000000' ? '0, 0, 0' : '255, 255, 255';
+	}
+
+	// Marks setup days and pending bookings.
+	function hatch(color: string, strength = 0.35): string {
+		const ink = barInk(color);
+		return `background-image: repeating-linear-gradient(45deg, rgba(${ink}, ${strength}) 0px, rgba(${ink}, ${strength}) 4px, transparent 4px, transparent 8px);`;
 	}
 
 	// Outlines a bar's label in the bar's own colour, so the type sits on a patch
@@ -476,7 +499,7 @@
 						productionId: p.id,
 						label: p.name,
 						...barDimsWithShow(p.startDate!, p.endDate!, p.showStartDate, p.showEndDate),
-						color: prodColor(p.id),
+						color: p.organization.color,
 						pending: false,
 						restricted: false
 					}
@@ -524,6 +547,7 @@
 					count: number;
 					pendingCount: number;
 					restricted: boolean;
+					orgColor: string | null;
 				}
 			>();
 			for (const a of assets) {
@@ -538,7 +562,8 @@
 							showEnd: pi.production.showEndDate,
 							count: 0,
 							pendingCount: 0,
-							restricted: pi.production.restricted
+							restricted: pi.production.restricted,
+							orgColor: pi.production.orgColor
 						});
 					prodAgg.get(pi.production.id)!.count++;
 					if (pi.status === 'PENDING') prodAgg.get(pi.production.id)!.pendingCount++;
@@ -548,7 +573,7 @@
 				productionId: id,
 				label: p.label,
 				...barDimsWithShow(p.start, p.end, p.showStart, p.showEnd),
-				color: barColor({ id, restricted: p.restricted }),
+				color: barColor(p),
 				fraction: p.count / assets.length,
 				count: p.count,
 				total: assets.length,
@@ -759,12 +784,18 @@
 		return () => ro.disconnect();
 	});
 
-	// Scroll to today on mount and whenever granularity changes (timeline resets)
+	// Centre on today when the timeline appears, and again whenever granularity
+	// changes (which rebuilds it). `scrollEl` is read here in the effect body,
+	// not inside a callback: the Gantt sits behind the loading skeleton, so on
+	// the first run there is no element yet, and an untracked read would never
+	// bring the effect back once one existed. The width comes off the element
+	// for the same reason — `viewportWidth` is still its 900px default until
+	// the ResizeObserver reports.
 	$effect(() => {
 		void granularity;
-		setTimeout(() => {
-			if (scrollEl) scrollEl.scrollLeft = Math.max(0, todayX - viewportWidth / 2);
-		}, 0);
+		const el = scrollEl;
+		if (!el) return;
+		el.scrollLeft = Math.max(0, todayX - el.clientWidth / 2);
 	});
 
 	// Grid view (month/year) helpers
@@ -813,7 +844,7 @@
 					return {
 						id: p.id,
 						name: p.name,
-						color: prodColor(p.id),
+						color: p.organization.color,
 						startTs,
 						endTs,
 						...showRange(startTs, endTs, p.showStartDate, p.showEndDate),
@@ -968,7 +999,7 @@
 	function segmentStyle(bar: EventBar, seg: BarSegment): string {
 		if (bar.dimmed) return 'opacity: 0.2;';
 		if (seg.kind === 'setup') {
-			return 'opacity: 0.65; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 4px, transparent 4px, transparent 8px);';
+			return `opacity: 0.65; ${hatch(bar.event.color)}`;
 		}
 		return '';
 	}
@@ -1065,8 +1096,10 @@
 -->
 {#snippet barLabel(label: string, left: number, width: number, h: number, color: string)}
 	<span
-		class="pointer-events-none absolute top-1 overflow-hidden px-1.5 pt-px text-[11px] leading-tight font-medium text-white"
-		style="left: {left}px; width: {width}px; height: {h - 8}px; {labelOutline(color)}">{label}</span
+		class="pointer-events-none absolute top-1 overflow-hidden px-1.5 pt-px text-[11px] leading-tight font-medium"
+		style="left: {left}px; width: {width}px; height: {h - 8}px; color: {getContrastingTextColor(
+			color
+		)}; {labelOutline(color)}">{label}</span
 	>
 {/snippet}
 
@@ -1286,7 +1319,7 @@
 								<a
 									href={bar.event.restricted ? undefined : resolve(`/productions/${bar.event.id}`)}
 									{...hoverCard(bar.event.id)}
-									class="absolute flex items-center overflow-hidden px-1.5 text-[11px] font-medium text-white no-underline {hoveredEventId ===
+									class="absolute flex items-center overflow-hidden px-1.5 text-[11px] font-medium no-underline {hoveredEventId ===
 									bar.event.id
 										? 'brightness-110'
 										: ''} {seg.roundedLeft ? 'rounded-l' : ''} {seg.roundedRight
@@ -1301,7 +1334,10 @@
 										bar.lane *
 											(MONTH_BAR_H +
 												MONTH_BAR_GAP)}px; height: {MONTH_BAR_H}px; background-color: {bar.event
-										.color}; {segmentStyle(bar, seg)}"
+										.color}; color: {getContrastingTextColor(bar.event.color)}; {segmentStyle(
+										bar,
+										seg
+									)}"
 								>
 									{#if seg.kind === 'show' || segments.length === 1}
 										{bar.event.name}
@@ -1575,7 +1611,10 @@
 											{...hoverCard(bar.productionId, { pending: true })}
 											class="absolute top-1 overflow-hidden rounded no-underline hover:brightness-110"
 											style="left: {bar.left}px; width: {bar.width}px; height: {h -
-												8}px; background-color: {bar.color}; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px); opacity: 0.75;"
+												8}px; background-color: {bar.color}; {hatch(
+												bar.color,
+												0.25
+											)} opacity: 0.75;"
 										></a>
 										{@render barLabel(bar.label, bar.left, bar.width, h, bar.color)}
 									{:else}
@@ -1593,7 +1632,7 @@
 														: ''} {seg.roundedRight ? 'rounded-r' : ''}"
 													style="left: {seg.left}px; width: {seg.width}px; height: {h -
 														8}px; background-color: {bar.color}; {seg.kind === 'setup'
-														? 'opacity: 0.65; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 4px, transparent 4px, transparent 8px);'
+														? `opacity: 0.65; ${hatch(bar.color)}`
 														: ''}"
 												></a>
 											{/each}
@@ -1617,10 +1656,14 @@
 												booked: { count: bar.count, total: bar.total }
 											})}
 											class="absolute flex items-center overflow-hidden rounded-sm px-1 no-underline hover:brightness-110"
-											style="left: {bar.left}px; width: {bar.width}px; height: {barH}px; top: 3px; background-color: {bar.color}; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0px, rgba(255,255,255,0.25) 4px, transparent 4px, transparent 8px);"
+											style="left: {bar.left}px; width: {bar.width}px; height: {barH}px; top: 3px; background-color: {bar.color}; {hatch(
+												bar.color,
+												0.25
+											)}"
 										>
-											<span class="truncate text-[9px] leading-none font-medium text-white"
-												>{bar.label}</span
+											<span
+												class="truncate text-[9px] leading-none font-medium"
+												style="color: {getContrastingTextColor(bar.color)}">{bar.label}</span
 											>
 										</a>
 									{:else}
@@ -1639,12 +1682,13 @@
 														: ''} {seg.roundedRight ? 'rounded-r-sm' : ''}"
 													style="left: {seg.left}px; width: {seg.width}px; height: {barH}px; top: 3px; background-color: {bar.color}; {seg.kind ===
 													'setup'
-														? 'opacity: 0.65; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 4px, transparent 4px, transparent 8px);'
+														? `opacity: 0.65; ${hatch(bar.color)}`
 														: ''}"
 												>
 													{#if seg.kind === 'show' || segs.length === 1}
-														<span class="truncate text-[9px] leading-none font-medium text-white"
-															>{bar.label}</span
+														<span
+															class="truncate text-[9px] leading-none font-medium"
+															style="color: {getContrastingTextColor(bar.color)}">{bar.label}</span
 														>
 													{/if}
 												</a>

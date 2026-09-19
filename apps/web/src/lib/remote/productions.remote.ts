@@ -1321,7 +1321,7 @@ export const getCalendarData = query(async () => {
 							showStartDate: true,
 							showEndDate: true,
 							organizationId: true,
-							organization: { select: { name: true, shortName: true } }
+							organization: { select: { name: true, shortName: true, color: true } }
 						}
 					}
 				}
@@ -1339,12 +1339,15 @@ export const getCalendarData = query(async () => {
 			return {
 				...item,
 				production: canSee({ id: production.id, organizationId })
-					? { ...rest, restricted: false }
+					? { ...rest, orgColor: organization.color, restricted: false }
 					: {
 							...rest,
 							name: orgLabel(organization),
 							showStartDate: null,
 							showEndDate: null,
+							// The calendar paints a restricted booking neutral grey rather
+							// than its owner's colour, so it can't pass for one of ours.
+							orgColor: null,
 							restricted: true
 						}
 			};
@@ -1363,7 +1366,7 @@ export const getProductionsCalendar = query(async () => {
 		},
 		// Customer, venue and counts feed the calendar's hover card.
 		include: {
-			organization: { select: { name: true, shortName: true } },
+			organization: { select: { name: true, shortName: true, color: true } },
 			customer: { select: { companyName: true, contactPerson: true } },
 			address: { select: { line1: true, line2: true, postalCode: true, city: true } },
 			_count: { select: { items: true, crew: true } }
