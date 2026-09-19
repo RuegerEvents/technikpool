@@ -7,20 +7,32 @@
 	} from '$lib/components/ui/customer-form-modal';
 	import { getCustomers } from '$lib/remote/customers.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
+	import { page } from '$app/state';
+	import { ROLE_FOR, canWrite, roleAtLeast } from '$lib/roles';
 	import { customerLabel, formatAddress, orgLabel } from '$lib/utils';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
 	// Read through the query rather than awaited: `await` in a `$derived`
 	// suspends the whole component until it answers, heading and all. See
 	// CLAUDE.md, "Loading states".
+	// Customers are the business, not the equipment: an org someone only sees
+	// the devices of would answer with a refusal, so it isn't offered.
 	let orgsQuery = $derived(getMyOrgs());
-	let orgs = $derived(orgsQuery.current ?? []);
+	let orgs = $derived(
+		(orgsQuery.current ?? []).filter(
+			(org) => page.data.isAdmin || roleAtLeast(org.role, ROLE_FOR.read)
+		)
+	);
 	let organizationId = $state('');
 	$effect(() => {
 		if (!organizationId && orgs[0]) organizationId = orgs[0].id;
 	});
 	let customersQuery = $derived(organizationId ? getCustomers(organizationId) : null);
 	let customers = $derived(customersQuery?.current ?? []);
+	// A VIEWER reads the list; changing it takes MEMBER, like the server asks.
+	let canEdit = $derived(
+		page.data.isAdmin || !!orgs.find((org) => org.id === organizationId && canWrite(org))
+	);
 
 	let modalOpen = $state(false);
 	let editing = $state<CustomerWithAddress | null>(null);
@@ -43,7 +55,9 @@
 			<select bind:value={organizationId} class="h-10 rounded-md border bg-background px-3 text-sm">
 				{#each orgs as org (org.id)}<option value={org.id}>{orgLabel(org)}</option>{/each}
 			</select>
-			<Button icon="add" onclick={() => openCustomer(null)}>New customer</Button>
+			{#if canEdit}
+				<Button icon="add" onclick={() => openCustomer(null)}>New customer</Button>
+			{/if}
 		</div>
 	</div>
 
@@ -81,5 +95,6 @@
 	{organizationId}
 	customer={editing}
 	allowDelete
+	readonly={!canEdit}
 	idPrefix="customer-management"
 />

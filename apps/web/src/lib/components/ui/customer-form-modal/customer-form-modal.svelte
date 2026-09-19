@@ -28,6 +28,8 @@
 		customer?: CustomerWithAddress | null;
 		/** Offer deletion — only where managing the customer list is the point. */
 		allowDelete?: boolean;
+		/** Show the record without offering to change it — for a VIEWER. */
+		readonly?: boolean;
 		/** Distinct per instance — two of these on one page would share label targets. */
 		idPrefix?: string;
 		onSaved?: (customer: CustomerWithAddress) => void;
@@ -39,6 +41,7 @@
 		organizationId,
 		customer = null,
 		allowDelete = false,
+		readonly = false,
 		idPrefix = 'customer-modal',
 		onSaved,
 		onDeleted
@@ -120,7 +123,7 @@
 
 <Modal
 	bind:open
-	title={customer ? 'Edit customer' : 'New customer'}
+	title={readonly ? 'Customer' : customer ? 'Edit customer' : 'New customer'}
 	size="xl"
 	dismissible={!saving && !deleting}
 >
@@ -130,12 +133,14 @@
 
 	{#snippet children()}
 		<form class="space-y-4" onsubmit={save}>
-			<CustomerFields bind:value={draft} {idPrefix} />
+			<fieldset disabled={readonly} class="contents">
+				<CustomerFields bind:value={draft} {idPrefix} />
+			</fieldset>
 		</form>
 	{/snippet}
 
 	{#snippet footer()}
-		{#if allowDelete && customer}
+		{#if allowDelete && customer && !readonly}
 			<Button
 				icon="delete"
 				variant="destructive"
@@ -154,8 +159,10 @@
 		>
 			Cancel
 		</Button>
-		<Button icon="save" disabled={saving || deleting} onclick={save}>
-			{saving ? 'Saving…' : customer ? 'Save customer' : 'Create customer'}
-		</Button>
+		{#if !readonly}
+			<Button icon="save" disabled={saving || deleting} onclick={save}>
+				{saving ? 'Saving…' : customer ? 'Save customer' : 'Create customer'}
+			</Button>
+		{/if}
 	{/snippet}
 </Modal>

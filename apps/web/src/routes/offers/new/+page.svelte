@@ -5,6 +5,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { CustomerSelect } from '$lib/components/ui/customer-select';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
+	import { canManageInventory } from '$lib/roles';
 	import { setOrgCategoryRate } from '$lib/remote/orgs.remote';
 	import { getProduction, getProductions } from '$lib/remote/productions.remote';
 	import { setOrgProductPrice } from '$lib/remote/assets.remote';
@@ -28,7 +29,11 @@
 
 	const preselectedProductionId = page.url.searchParams.get('productionId');
 
-	let orgs = $derived(getMyOrgs().current ?? []);
+	// Only orgs whose offers this user writes: the server refuses the rest
+	// (`requireOrgBilling`), and it would do so only after a production was picked.
+	let orgs = $derived(
+		(getMyOrgs().current ?? []).filter((org) => page.data.isAdmin || canManageInventory(org))
+	);
 	let selectedOrgId = $state('');
 	let productions = $derived(selectedOrgId ? (getProductions(selectedOrgId).current ?? []) : []);
 
