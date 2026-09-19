@@ -114,11 +114,23 @@
 	);
 	let archivedCount = $derived(productions.filter(isArchived).length);
 
-	function prodStatus(p: Production): 'past' | 'active' | 'upcoming' {
+	// Start and end come from a date input, so they are stored as midnight UTC of that day.
+	// Measured against the clock, a production ending today was over at 00:00 — compare days.
+	function dayKey(d: Date): string {
+		return new Date(d).toISOString().slice(0, 10);
+	}
+
+	function todayKey(): string {
 		const now = new Date();
-		if (p.endDate && new Date(p.endDate) < now) return 'past';
-		if (p.startDate && new Date(p.startDate) <= now && (!p.endDate || new Date(p.endDate) >= now))
-			return 'active';
+		const month = String(now.getMonth() + 1).padStart(2, '0');
+		const day = String(now.getDate()).padStart(2, '0');
+		return `${now.getFullYear()}-${month}-${day}`;
+	}
+
+	function prodStatus(p: Production): 'past' | 'active' | 'upcoming' {
+		const today = todayKey();
+		if (p.endDate && dayKey(p.endDate) < today) return 'past';
+		if (p.startDate && dayKey(p.startDate) <= today) return 'active';
 		return 'upcoming';
 	}
 
