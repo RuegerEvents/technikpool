@@ -1105,6 +1105,11 @@
 						</div>
 					</button>
 					{#if expanded.get(group.productId)}
+						<a
+							href={resolve(`/products/${group.productId}`)}
+							class="block border-t px-3 py-1.5 text-xs font-medium underline-offset-2 hover:bg-muted/30 hover:underline"
+							>Open product page →</a
+						>
 						<div class="max-h-56 overflow-y-auto border-t">
 							{#each group.assets as asset (asset.id)}
 								<div
@@ -1519,7 +1524,13 @@
 											<path d="m9 18 6-6-6-6" />
 										</svg>
 										<ProductThumb path={group.imagePath} alt={group.name} />
-										<span class="font-medium">{group.name}</span>
+										<!-- The row itself expands the group; the name goes to the
+										     product's own page. -->
+										<a
+											href={resolve(`/products/${group.productId}`)}
+											onclick={(e) => e.stopPropagation()}
+											class="font-medium underline-offset-2 hover:underline">{group.name}</a
+										>
 										{@render cableChips(group.cable)}
 									</div>
 								</td>

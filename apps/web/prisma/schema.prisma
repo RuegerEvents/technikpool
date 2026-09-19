@@ -286,6 +286,35 @@ model Connector {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  ports ProductPort[]
+}
+
+/// A connector built into a device: "16× XLR3 F, Input 1–16", "1× powerCON
+/// TRUE1 M, Power in". Per product, not per unit — every unit of a mixer has
+/// the same panel.
+///
+/// Unlike `Product.connectorA/B` this is a foreign key. A cable end is part of
+/// what the cable *is* and stays free text so registering one never stalls on
+/// the catalogue; a device's panel is a description added afterwards, and a
+/// real reference is what lets a connector rename reach it and lets the admin
+/// page refuse to delete a row a device still uses.
+model ProductPort {
+  id          String    @id @default(cuid())
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  connectorId String
+  connector   Connector @relation(fields: [connectorId], references: [id], onDelete: Restrict)
+  count       Int       @default(1)
+  /// What the panel calls it — "DMX In", "Mic 1–16", "Power Thru". Free text:
+  /// direction, channel range and purpose are all things a person writes
+  /// better than a column would.
+  label       String?
+  /// Order on the panel as entered, so the list reads the way the device does.
+  sortOrder   Int       @default(0)
+
+  @@index([productId])
+  @@index([connectorId])
 }
 
 model Category {
@@ -358,6 +387,9 @@ model Product {
   updatedAt DateTime @updatedAt
   assets    Asset[]
   orgPrices OrgProductPrice[]
+  /// The connectors built into this device. Empty on cables, whose ends are
+  /// `connectorA/B`, and on licences.
+  ports     ProductPort[]
 
   featuredInBundleTemplates BundleTemplate[] @relation("BundleTemplateFeaturedProducts")
 }

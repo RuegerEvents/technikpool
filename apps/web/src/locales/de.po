@@ -121,6 +121,7 @@ msgstr "Keine Geräte gefunden."
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/products/[id]/product-detail.svelte
 msgid "Product"
 msgstr "Produkt"
 
@@ -181,10 +182,11 @@ msgstr "Crew"
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 #: src/routes/+page.svelte
 #: src/routes/admin/connectors/+page.svelte
-#: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -215,7 +217,6 @@ msgstr "Crew"
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/new/+page.svelte
-#: src/routes/products/+page.svelte
 msgid "Cancel"
 msgstr "Abbrechen"
 
@@ -284,6 +285,7 @@ msgstr "E-Mail"
 
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
+#: src/lib/components/ui/product-ports/product-ports.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
@@ -295,6 +297,7 @@ msgstr "Entfernen"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -305,7 +308,6 @@ msgstr "Entfernen"
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
-#: src/routes/products/+page.svelte
 msgid "Manufacturer"
 msgstr "Hersteller"
 
@@ -707,7 +709,7 @@ msgstr "<0/> Nach dem Speichern weiteres erstellen"
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
-#: src/routes/assets/[id]/asset-detail.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
@@ -1284,7 +1286,6 @@ msgstr "Gerät"
 #: src/routes/admin/connectors/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/orgs/[id]/+page.svelte
@@ -1325,8 +1326,8 @@ msgstr "Standort"
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/admin/categories/+page.svelte
-#: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
@@ -1500,10 +1501,12 @@ msgstr "Gerätebundles | Technikpool"
 #. 0: bundle.template.name
 #. 0: org?.name ?? ''
 #. 0: production.name
+#. 0: product?.name ?? 'Product'
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/products/[id]/product-detail.svelte
 msgid "{0} | Technikpool"
 msgstr "{0} | Technikpool"
 
@@ -1926,16 +1929,15 @@ msgstr "Abgelehnt für <0/>"
 #~ msgid "Tab"
 #~ msgstr ""
 
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/admin/catalog-log/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/products/+page.svelte
 msgid "Product updated"
 msgstr "Produkt aktualisiert"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Serial number, tag, status, and location."
-msgstr "Seriennummer, Tag, Status und Lagerort."
+#~ msgid "Serial number, tag, status, and location."
+#~ msgstr "Seriennummer, Tag, Status und Lagerort."
 
 #~ msgid "Asset Image URL"
 #~ msgstr "Asset-Bild-URL"
@@ -2856,6 +2858,7 @@ msgstr "Abgerechnet"
 #~ msgid "Offer"
 #~ msgstr "Angebot"
 
+#: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/invoices/+page.svelte
 #: src/routes/offers/+page.svelte
 msgid "View"
@@ -2902,9 +2905,8 @@ msgstr "Herstellerlogo"
 msgid "Product photo"
 msgstr "Produktfoto"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Pricing & inspection updated"
-msgstr "Preis & Prüfung aktualisiert"
+#~ msgid "Pricing & inspection updated"
+#~ msgstr "Preis & Prüfung aktualisiert"
 
 #~ msgid "Pricing & Inspection"
 #~ msgstr "Preis & Prüfung"
@@ -2912,11 +2914,11 @@ msgstr "Preis & Prüfung aktualisiert"
 #~ msgid "Feeds offer/invoice pricing and DGUV due-date tracking."
 #~ msgstr "Fließt in die Angebots-/Rechnungspreisberechnung und die DGUV-Fälligkeitsverfolgung ein."
 
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
-#: src/routes/products/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Net purchase price (€)"
 msgstr "Netto-Einkaufspreis (€)"
@@ -4258,6 +4260,7 @@ msgid "Delete"
 msgstr "Löschen"
 
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/admin/connectors/+page.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -4265,7 +4268,6 @@ msgstr "Löschen"
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
-#: src/routes/products/+page.svelte
 msgid "Deleting…"
 msgstr "Wird gelöscht…"
 
@@ -4331,7 +4333,7 @@ msgstr "Sie verlassen den Pool: nicht mehr buchbar, scanbar oder gelistet und au
 msgid "Products"
 msgstr "Produkte"
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Product name is required"
 msgstr "Produktname ist erforderlich"
 
@@ -4400,19 +4402,19 @@ msgstr "{0} von {1}"
 msgid "No image"
 msgstr "Kein Bild"
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/products/+page.svelte
 msgid "Unsaved changes"
 msgstr "Nicht gespeicherte Änderungen"
 
-#. 0: current.assetCount
+#. 0: product.assetCount
 #. 0: currentBundle.assets.length
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/products/+page.svelte
 msgid "{0} units"
 msgstr "{0} Einheiten"
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "View in Devices →"
 msgstr "In Geräten ansehen →"
 
@@ -4650,8 +4652,8 @@ msgid_plural "# already-booked assets moved into the bundle"
 msgstr[0] "# bereits gebuchtes Gerät ins Bundle übernommen"
 msgstr[1] "# bereits gebuchte Geräte ins Bundle übernommen"
 
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
-#: src/routes/products/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "Unknown"
 msgstr "Unbekannt"
@@ -4682,15 +4684,11 @@ msgstr "Preis für {0} gespeichert"
 #~ msgid "Set on the product — it applies to every unit of {0}. Change it in the Product card."
 #~ msgstr "Am Produkt hinterlegt — gilt für jede Einheit von {0}. Änderbar in der Produkt-Karte."
 
-#: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Purchase & Inspection"
-msgstr "Kauf & Prüfung"
+#~ msgid "Purchase & Inspection"
+#~ msgstr "Kauf & Prüfung"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Facts about this individual unit. What it bills at is the product's price."
-msgstr "Angaben zu dieser einzelnen Einheit. Abgerechnet wird mit dem Preis des Produkts."
+#~ msgid "Facts about this individual unit. What it bills at is the product's price."
+#~ msgstr "Angaben zu dieser einzelnen Einheit. Abgerechnet wird mit dem Preis des Produkts."
 
 #~ msgid "What a rental rate is calculated from, for every unit of this product."
 #~ msgstr "Grundlage für die Mietsatz-Berechnung, für jede Einheit dieses Produkts."
@@ -5014,17 +5012,17 @@ msgstr "Auf die übrigen übertragen"
 msgid "{0} of {1} units of this product have this."
 msgstr "{0} von {1} Einheiten dieses Produkts haben das."
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Merged — # unit moved"
 msgid_plural "Merged — # units moved"
 msgstr[0] "Zusammengeführt — # Einheit verschoben"
 msgstr[1] "Zusammengeführt — # Einheiten verschoben"
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Merge duplicate…"
 msgstr "Duplikat zusammenführen…"
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Merge duplicate product"
 msgstr "Doppeltes Produkt zusammenführen"
 
@@ -5034,13 +5032,13 @@ msgstr "Doppeltes Produkt zusammenführen"
 #~ msgid "Search the whole catalog…"
 #~ msgstr ""
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "# unit here"
 msgid_plural "# units here"
 msgstr[0] "# Einheit hier"
 msgstr[1] "# Einheiten hier"
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Which name is right?"
 msgstr "Welcher Name ist der richtige?"
 
@@ -5052,47 +5050,47 @@ msgstr "Welcher Name ist der richtige?"
 #~ msgid "The image and the purchase price come along — this entry has neither."
 #~ msgstr "Bild und Einkaufspreis kommen mit — dieser Eintrag hat beides nicht."
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "The image comes along — this entry has none."
 msgstr "Das Bild kommt mit — dieser Eintrag hat keins."
 
 #~ msgid "The purchase price comes along — this entry has none."
 #~ msgstr "Der Einkaufspreis kommt mit — dieser Eintrag hat keinen."
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Different manufacturers: the units end up under <0/>."
 msgstr "Unterschiedliche Hersteller: Die Einheiten landen unter <0/>."
 
 #. 0: plural(movingCount, ['Its # unit becomes', 'Its # units become'])
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "<0/> is deleted. {0} <1/> — same tags, same history, same accessories."
 msgstr "<0/> wird gelöscht. {0} <1/> — gleiche Tags, gleiche Historie, gleiches Zubehör."
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Offers and invoices already written are not touched — they say what they said."
 msgstr "Bereits geschriebene Angebote und Rechnungen bleiben unberührt — sie sagen, was sie gesagt haben."
 
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/manufacturers/+page.svelte
-#: src/routes/products/+page.svelte
 msgid "Merging…"
 msgstr "Wird zusammengeführt…"
 
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/manufacturers/+page.svelte
-#: src/routes/products/+page.svelte
 msgid "Merge"
 msgstr "Zusammenführen"
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Its # unit becomes"
 msgid_plural "Its # units become"
 msgstr[0] "Seine # Einheit wird zu"
 msgstr[1] "Seine # Einheiten werden zu"
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Search the whole catalog for the duplicate…"
 msgstr "Im gesamten Katalog nach dem Duplikat suchen…"
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Two entries for one device split its units in half, and every count built on them is half right. Pick the other entry, then say which of the two names is the one to keep."
 msgstr "Zwei Einträge für dasselbe Gerät teilen seine Einheiten auf, und jede Zahl, die darauf aufbaut, stimmt nur zur Hälfte. Wählen Sie den anderen Eintrag und sagen Sie dann, welcher der beiden Namen bleiben soll."
 
@@ -5121,15 +5119,15 @@ msgstr "Bild neu erstellen"
 msgid "Select all units in bundle"
 msgstr "Alle Einheiten im Bundle auswählen"
 
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/lib/error-messages.svelte.ts
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/products/+page.svelte
 msgid "Manufacturer is required"
 msgstr "Hersteller ist erforderlich"
 
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/manufacturers/+page.svelte
-#: src/routes/products/+page.svelte
 msgid "Search manufacturers…"
 msgstr "Hersteller suchen…"
 
@@ -5182,30 +5180,30 @@ msgstr "Wähle das Hauptgerät aus. Alle anderen Geräte in diesem Bundle werden
 msgid "Choose main device"
 msgstr "Hauptgerät auswählen"
 
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/admin/catalog-log/+page.svelte
-#: src/routes/products/+page.svelte
 msgid "Product deleted"
 msgstr "Produkt gelöscht"
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Delete unused"
 msgstr "Ungenutztes löschen"
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Delete unused product"
 msgstr "Ungenutztes Produkt löschen"
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "This permanently removes the catalogue entry. Products with any units, including retired units, cannot be deleted."
 msgstr "Dadurch wird der Katalogeintrag dauerhaft gelöscht. Produkte mit Einheiten – einschließlich ausgemusterter Einheiten – können nicht gelöscht werden."
 
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
-#: src/routes/products/+page.svelte
 msgid "Delete <0/>?"
 msgstr "<0/> löschen?"
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Delete product"
 msgstr "Produkt löschen"
 
@@ -5782,11 +5780,11 @@ msgstr "Katalog-Protokoll"
 #~ msgid "Units of this product belong to organizations you don't administer, so its name, manufacturer and category are locked here. Your image contribution and your own organization's price still save."
 #~ msgstr "Einheiten dieses Produkts gehören Organisationen, die Sie nicht verwalten — Name, Hersteller und Kategorie sind hier deshalb gesperrt. Ein Bild und der Preis Ihrer eigenen Organisation lassen sich weiterhin speichern."
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Per organization — what that organization's rental rate is calculated from. Other organizations set their own price."
 msgstr "Pro Organisation — Grundlage für den Mietpreis dieser Organisation. Andere Organisationen legen ihren eigenen Preis fest."
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Purchase prices are each organization's own and move over with the merge — an organization that priced both entries keeps the surviving entry's price."
 msgstr "Anschaffungspreise gehören der jeweiligen Organisation und wandern beim Zusammenführen mit — eine Organisation, die beide Einträge bepreist hat, behält den Preis des verbleibenden Eintrags."
 
@@ -6021,6 +6019,7 @@ msgid "Connector photo"
 msgstr "Steckerfoto"
 
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
+#: src/lib/components/ui/product-ports/product-ports.svelte
 msgid "Add connector"
 msgstr "Stecker hinzufügen"
 
@@ -6084,7 +6083,9 @@ msgstr "Stecker gelöscht"
 msgid "Connectors | Technikpool"
 msgstr "Stecker | Technikpool"
 
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/admin/connectors/+page.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
 msgid "Connectors"
 msgstr "Stecker"
 
@@ -7882,19 +7883,19 @@ msgstr "{0} hat bereits ein Konto. Fügen Sie die Person auf der Seite der Organ
 msgid "You can look through the catalog and add a picture where one is missing. Editing a product needs admin or owner rights in one of your organizations."
 msgstr "Sie können den Katalog ansehen und ein Bild ergänzen, wo noch keines vorhanden ist. Zum Bearbeiten eines Produkts brauchen Sie Admin- oder Owner-Rechte in einer Ihrer Organisationen."
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Units of this product belong to organizations you don't administer, so its name, manufacturer and category are locked here."
 msgstr "Einheiten dieses Produkts gehören Organisationen, die Sie nicht verwalten. Name, Hersteller und Kategorie sind hier deshalb gesperrt."
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "No organization holds units of this product, so only whoever added it or a system admin can change its name, manufacturer and category."
 msgstr "Keine Organisation besitzt Einheiten dieses Produkts. Name, Hersteller und Kategorie kann deshalb nur ändern, wer es angelegt hat, oder ein System-Admin."
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Your own organization's price still saves."
 msgstr "Der Preis Ihrer eigenen Organisation lässt sich weiterhin speichern."
 
-#: src/routes/products/+page.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "A first picture and your own organization's price still save."
 msgstr "Ein erstes Bild und der Preis Ihrer eigenen Organisation lassen sich weiterhin speichern."
 
@@ -8088,6 +8089,15 @@ msgstr "Sie wurden noch keiner Organisation hinzugefügt."
 msgid "<0/> New Organization"
 msgstr "<0/> Neue Organisation"
 
+#~ msgid "Invite users"
+#~ msgstr "Benutzer einladen"
+
+#~ msgid "Create an organization first"
+#~ msgstr "Legen Sie zuerst eine Organisation an"
+
+#~ msgid "Devices, productions, offers and everything else belong to an organization, and you are not a member of one yet. Create one to get started — you become its owner."
+#~ msgstr "Geräte, Produktionen, Angebote und alles Weitere gehören zu einer Organisation, und Sie sind noch in keiner Mitglied. Legen Sie eine an, um loszulegen – Sie werden ihr Inhaber."
+
 #: src/routes/+page.svelte
 msgid "Check again"
 msgstr "Erneut prüfen"
@@ -8096,6 +8106,103 @@ msgstr "Erneut prüfen"
 msgid "You are not in an organization yet"
 msgstr "Sie gehören noch keiner Organisation an"
 
+#~ msgid "Devices, productions and everything else belong to an organization, so there is nothing to show you yet. Ask an owner of your organization to add you with this email address:"
+#~ msgstr "Geräte, Produktionen und alles Weitere gehören zu einer Organisation, deshalb gibt es für Sie noch nichts zu sehen. Bitten Sie einen Inhaber Ihrer Organisation, Sie mit dieser E-Mail-Adresse hinzuzufügen:"
+
+#~ msgid "New organizations are set up by an administrator of this Technikpool."
+#~ msgstr "Neue Organisationen richtet ein Administrator dieses Technikpools ein."
+
 #: src/routes/+page.svelte
 msgid "Devices, productions and everything else belong to an organization, so there is nothing to show you yet. Create one — you become its owner — or ask an owner of an existing one to add you with this email address:"
 msgstr "Geräte, Produktionen und alles Weitere gehören zu einer Organisation, deshalb gibt es für Sie noch nichts zu sehen. Legen Sie eine an – Sie werden ihr Inhaber – oder bitten Sie einen Inhaber einer bestehenden Organisation, Sie mit dieser E-Mail-Adresse hinzuzufügen:"
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "What this device's panel has — the same for every unit of this product."
+msgstr "Welche Anschlüsse dieses Gerät hat — gleich für jede Einheit dieses Produkts."
+
+#: src/lib/error-messages.svelte.ts
+msgid "One of these connectors is no longer in the catalog. Pick it again."
+msgstr "Einer dieser Stecker ist nicht mehr im Katalog. Bitte erneut auswählen."
+
+#~ msgid "Each connector needs a count of at least 1"
+#~ msgstr "Jeder Stecker braucht eine Anzahl von mindestens 1"
+
+#~ msgid "Connectors saved"
+#~ msgstr "Stecker gespeichert"
+
+#~ msgid "Connector"
+#~ msgstr "Stecker"
+
+#: src/lib/components/ui/product-ports/product-ports.svelte
+msgid "Count"
+msgstr "Anzahl"
+
+#: src/lib/components/ui/product-ports/product-ports.svelte
+msgid "Label"
+msgstr "Bezeichnung"
+
+#: src/lib/components/ui/product-ports/product-ports.svelte
+msgid "No connectors recorded for this device yet."
+msgstr "Für dieses Gerät sind noch keine Stecker hinterlegt."
+
+#~ msgid "Edit connectors"
+#~ msgstr "Stecker bearbeiten"
+
+#~ msgid "Add connectors"
+#~ msgstr "Stecker hinzufügen"
+
+#~ msgid "DMX In, Mic 1–16"
+#~ msgstr "DMX In, Mic 1–16"
+
+#~ msgid "Label (optional), e.g. DMX In"
+#~ msgstr "Bezeichnung (optional), z. B. DMX In"
+
+#: src/lib/components/ui/product-ports/product-ports.svelte
+msgid "Label (optional)"
+msgstr "Bezeichnung (optional)"
+
+#: src/lib/components/ui/product-ports/product-ports.svelte
+msgid "Already added"
+msgstr "Bereits hinzugefügt"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Product not found"
+msgstr "Produkt nicht gefunden"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "It may have been merged into another product or deleted."
+msgstr "Es wurde vielleicht mit einem anderen Produkt zusammengeführt oder gelöscht."
+
+#: src/routes/products/[id]/product-detail.svelte
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Back to Products"
+msgstr "Zurück zu den Produkten"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Units"
+msgstr "Einheiten"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Every unit of this product in your organizations. Retired units are not listed."
+msgstr "Jede Einheit dieses Produkts in Ihren Organisationen. Ausgemusterte Einheiten sind nicht aufgeführt."
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "None of your organizations holds a unit of this product."
+msgstr "Keine Ihrer Organisationen hat eine Einheit dieses Produkts."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+#: src/routes/assets/+page.svelte
+msgid "Open product page →"
+msgstr "Produktseite öffnen →"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "No connectors recorded yet — add them on the product page."
+msgstr "Noch keine Stecker hinterlegt — auf der Produktseite hinzufügen."
+
+#~ msgid "Serial number, tag, status, location, purchase and inspection — facts about this individual unit. What it bills at is the product's price."
+#~ msgstr "Seriennummer, Tag, Status, Lagerort, Kauf und Prüfung — Angaben zu dieser einzelnen Einheit. Abgerechnet wird mit dem Preis des Produkts."
+
+#: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Serial number, tag, status, location, purchase and inspection."
+msgstr "Seriennummer, Tag, Status, Lagerort, Kauf und Prüfung."

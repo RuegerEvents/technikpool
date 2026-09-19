@@ -81,6 +81,19 @@ export type Manufacturer = Prisma.ManufacturerModel
  */
 export type Connector = Prisma.ConnectorModel
 /**
+ * Model ProductPort
+ * A connector built into a device: "16× XLR3 F, Input 1–16", "1× powerCON
+ * TRUE1 M, Power in". Per product, not per unit — every unit of a mixer has
+ * the same panel.
+ * 
+ * Unlike `Product.connectorA/B` this is a foreign key. A cable end is part of
+ * what the cable *is* and stays free text so registering one never stalls on
+ * the catalogue; a device's panel is a description added afterwards, and a
+ * real reference is what lets a connector rename reach it and lets the admin
+ * page refuse to delete a row a device still uses.
+ */
+export type ProductPort = Prisma.ProductPortModel
+/**
  * Model Category
  * 
  */

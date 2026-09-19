@@ -408,6 +408,7 @@ export const ModelName = {
   Invitation: 'Invitation',
   Manufacturer: 'Manufacturer',
   Connector: 'Connector',
+  ProductPort: 'ProductPort',
   Category: 'Category',
   Product: 'Product',
   OrgProductPrice: 'OrgProductPrice',
@@ -445,7 +446,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "invitation" | "manufacturer" | "connector" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem"
+    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "invitation" | "manufacturer" | "connector" | "productPort" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1260,6 +1261,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ConnectorCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ConnectorCountAggregateOutputType> | number
+        }
+      }
+    }
+    ProductPort: {
+      payload: Prisma.$ProductPortPayload<ExtArgs>
+      fields: Prisma.ProductPortFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ProductPortFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductPortPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ProductPortFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductPortPayload>
+        }
+        findFirst: {
+          args: Prisma.ProductPortFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductPortPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ProductPortFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductPortPayload>
+        }
+        findMany: {
+          args: Prisma.ProductPortFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductPortPayload>[]
+        }
+        create: {
+          args: Prisma.ProductPortCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductPortPayload>
+        }
+        createMany: {
+          args: Prisma.ProductPortCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ProductPortCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductPortPayload>[]
+        }
+        delete: {
+          args: Prisma.ProductPortDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductPortPayload>
+        }
+        update: {
+          args: Prisma.ProductPortUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductPortPayload>
+        }
+        deleteMany: {
+          args: Prisma.ProductPortDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ProductPortUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ProductPortUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductPortPayload>[]
+        }
+        upsert: {
+          args: Prisma.ProductPortUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductPortPayload>
+        }
+        aggregate: {
+          args: Prisma.ProductPortAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProductPort>
+        }
+        groupBy: {
+          args: Prisma.ProductPortGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProductPortGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ProductPortCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProductPortCountAggregateOutputType> | number
         }
       }
     }
@@ -3102,6 +3177,18 @@ export const ConnectorScalarFieldEnum = {
 export type ConnectorScalarFieldEnum = (typeof ConnectorScalarFieldEnum)[keyof typeof ConnectorScalarFieldEnum]
 
 
+export const ProductPortScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  connectorId: 'connectorId',
+  count: 'count',
+  label: 'label',
+  sortOrder: 'sortOrder'
+} as const
+
+export type ProductPortScalarFieldEnum = (typeof ProductPortScalarFieldEnum)[keyof typeof ProductPortScalarFieldEnum]
+
+
 export const CategoryScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -3807,6 +3894,7 @@ export type GlobalOmitConfig = {
   invitation?: Prisma.InvitationOmit
   manufacturer?: Prisma.ManufacturerOmit
   connector?: Prisma.ConnectorOmit
+  productPort?: Prisma.ProductPortOmit
   category?: Prisma.CategoryOmit
   product?: Prisma.ProductOmit
   orgProductPrice?: Prisma.OrgProductPriceOmit

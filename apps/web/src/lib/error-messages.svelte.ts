@@ -89,6 +89,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return `A connector called "${p0}" already exists.`;
 		case 'connector_in_use':
 			return `${p0} product(s) still use this connector. Rename it instead of deleting it.`;
+		case 'connector_not_found':
+			return 'One of these connectors is no longer in the catalog. Pick it again.';
 
 		// Assets
 		case 'asset_not_found':

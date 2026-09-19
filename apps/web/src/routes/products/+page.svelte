@@ -1,32 +1,21 @@
 <script lang="ts">
 	import { categoryLabel } from '$lib/category';
 	import { cableTwinGroups, cableTwinKey } from '$lib/cable';
-	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
+	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import {
 		getBundles,
 		getCategories,
-		deleteProduct,
 		getManufacturers,
 		getProductCatalog,
 		getProducts,
-		mergeProducts,
-		setOrgProductPrice,
-		updateBundle,
-		updateProduct
+		updateBundle
 	} from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
-	import { CreatableSelect } from '$lib/components/ui/creatable-select';
-	import { Modal } from '$lib/components/ui/modal';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import {
-		ProductFields,
-		cableDraftFrom,
-		cableInputFrom,
-		type ProductDraft
-	} from '$lib/components/ui/product-fields';
+	import { ProductEditor } from '$lib/components/ui/product-editor';
 	import { resolve } from '$app/paths';
 	import { browser } from '$app/environment';
 	import { toast } from 'svelte-sonner';
@@ -72,13 +61,6 @@
 		orgs.filter((o) => data.isAdmin || o.role === 'ADMIN' || o.role === 'OWNER')
 	);
 	let managedOrgIdSet = $derived(new Set(managedOrgs.map((o) => o.id)));
-
-	// With an org filter active the catalog only carries that org's price rows,
-	// so only that org's field can be shown — a field initialised from the rows
-	// that aren't there would read as "no price" and delete a stored one on save.
-	let priceOrgs = $derived(
-		filterOrgId ? managedOrgs.filter((o) => o.id === filterOrgId) : managedOrgs
-	);
 
 	// The "missing price" filter asks about exactly one org, and only one this
 	// user may price for — so choosing it narrows the page to that org.
@@ -141,17 +123,6 @@
 		if (product.assetCount === 0) return false;
 		if (!includeAccessories && isAccessoryOnly(product)) return false;
 		return storedPrice(product, filterOrgId) == null;
-	}
-
-	// Renaming or recategorizing follows the ownership rule the server
-	// enforces: every org holding units must be one this user admins. Locked
-	// fields are greyed out rather than failing on save.
-	function isIdentityLocked(product: CatalogProduct) {
-		if (data.isAdmin) return false;
-		// Nobody holds units, so there is no owning org to be admin of: it
-		// answers to whoever added it. See `productControl` on the server.
-		if (product.owningOrgIds.length === 0) return product.createdById !== data.user?.id;
-		return product.owningOrgIds.some((id) => !managedOrgIdSet.has(id));
 	}
 
 	// The position is held as an id, not an index: a product that stops matching
@@ -220,56 +191,16 @@
 	let current = $derived(entry?.kind === 'product' ? entry.item : undefined);
 	let currentBundle = $derived(entry?.kind === 'bundle' ? entry.item : undefined);
 
-	let draft = $state<ProductDraft>({
-		name: '',
-		categoryId: '',
-		imagePath: '',
-		netPurchasePrice: undefined,
-		cable: null,
-		isLicense: false
-	});
-	let manufacturer = $state<{ id: string | null; name: string } | null>(null);
-	// One price per org the user manages — prices are per-org, and undefined
-	// means "no price set for this org".
-	let priceDrafts = $state<Record<string, number | undefined>>({});
-	let draftFor = $state('');
 	let saving = $state(false);
+	// The editor's own state, read so a step knows whether it has to save first.
+	let productDirty = $state(false);
+	let editorModalOpen = $state(false);
+	let editor = $state<ReturnType<typeof ProductEditor>>();
 
 	function storedPrice(product: CatalogProduct, orgId: string): number | undefined {
 		const row = product.prices.find((p) => p.organizationId === orgId);
 		return row == null ? undefined : Number(row.netPurchasePrice);
 	}
-
-	// The draft follows whatever product is in front — an effect rather than a
-	// derived, because from there on it is the user's own state to edit.
-	$effect(() => {
-		const product = current;
-		if (!product || product.id === draftFor) return;
-		draftFor = product.id;
-		manufacturer = { id: product.manufacturerId, name: product.manufacturer.name };
-		draft = {
-			name: product.name,
-			categoryId: product.categoryId,
-			imagePath: product.imagePath ?? '',
-			netPurchasePrice: undefined,
-			cable: cableDraftFrom(product),
-			isLicense: product.isLicense
-		};
-	});
-
-	// Price drafts additionally follow the org filter: switching it swaps which
-	// price rows the catalog even carries, so stale drafts for the previous
-	// selection must not survive into a save.
-	let pricesFor = $state('');
-	$effect(() => {
-		const product = current;
-		const key = `${product?.id ?? ''}:${filterOrgId}`;
-		if (!product || key === pricesFor) return;
-		pricesFor = key;
-		priceDrafts = Object.fromEntries(
-			priceOrgs.map((org) => [org.id, storedPrice(product, org.id)])
-		);
-	});
 
 	let bundlePriceDraft = $state<number | null | undefined>(null);
 	let bundleDraftFor = $state('');
@@ -285,46 +216,7 @@
 			(bundlePriceDraft ?? null) !== storedBundlePrice(currentBundle)
 	);
 
-	let identityLocked = $derived(!!current && (!canEdit || isIdentityLocked(current)));
-	// A first picture is open to everyone who works in an org; replacing one
-	// follows the identity rule.
-	let imageLocked = $derived(!!current && identityLocked && !!current.imagePath);
-	let canContribute = $derived(data.isAdmin || orgs.some((o) => o.role !== 'VIEWER'));
-
-	// What a cable is counts as identity here for the same reason the server
-	// treats it as such: it decides which product a unit belongs to.
-	let cableDraftInput = $derived(cableInputFrom(draft.cable));
-	let cableDirty = $derived(
-		!!current &&
-			draftFor === current.id &&
-			((cableDraftInput?.cableType ?? null) !== current.cableType ||
-				(cableDraftInput?.connectorA ?? null) !== current.connectorA ||
-				(cableDraftInput?.connectorB ?? null) !== current.connectorB ||
-				(cableDraftInput?.lengthCm ?? null) !== current.lengthCm)
-	);
-
-	let identityDirty = $derived(
-		!!current &&
-			draftFor === current.id &&
-			(draft.name.trim() !== current.name ||
-				manufacturer?.id !== current.manufacturerId ||
-				draft.categoryId !== current.categoryId ||
-				draft.isLicense !== current.isLicense ||
-				cableDirty)
-	);
-	let imageDirty = $derived(
-		!!current && draftFor === current.id && draft.imagePath.trim() !== (current.imagePath ?? '')
-	);
-	let dirtyPriceOrgIds = $derived(
-		current && draftFor === current.id
-			? priceOrgs
-					.map((org) => org.id)
-					.filter(
-						(orgId) => (priceDrafts[orgId] ?? null) !== (storedPrice(current!, orgId) ?? null)
-					)
-			: []
-	);
-	let dirty = $derived(identityDirty || imageDirty || dirtyPriceOrgIds.length > 0 || bundleDirty);
+	let dirty = $derived((!!current && productDirty) || bundleDirty);
 
 	async function saveBundle(bundle: CatalogBundle): Promise<boolean> {
 		saving = true;
@@ -344,50 +236,12 @@
 	async function save(): Promise<boolean> {
 		if (!dirty || saving) return true;
 		if (currentBundle) return saveBundle(currentBundle);
-		if (!current) return true;
-		if (!draft.name.trim()) {
-			toast.error('Product name is required');
-			return false;
-		}
-		if (!manufacturer?.id) {
-			toast.error('Manufacturer is required');
-			return false;
-		}
-		saving = true;
-		try {
-			if (identityDirty || imageDirty) {
-				await updateProduct({
-					productId: current.id,
-					// Locked identity fields are greyed out in the form; not sending
-					// them keeps an image-only save from tripping the server's
-					// ownership check on an unchanged name.
-					...(identityLocked
-						? {}
-						: {
-								name: draft.name,
-								manufacturerId: manufacturer.id,
-								categoryId: draft.categoryId,
-								cable: cableDraftInput,
-								isLicense: draft.isLicense
-							}),
-					imagePath: draft.imagePath
-				});
-			}
-			for (const orgId of dirtyPriceOrgIds) {
-				await setOrgProductPrice({
-					organizationId: orgId,
-					productId: current.id,
-					netPurchasePrice: priceDrafts[orgId] ?? null
-				});
-			}
-			await getProductCatalog(filterOrgId || undefined).refresh();
-			return true;
-		} catch (err) {
-			toast.error(getErrorMessage(err));
-			return false;
-		} finally {
-			saving = false;
-		}
+		if (!current || !editor) return true;
+		return editor.save();
+	}
+
+	async function refreshCatalog() {
+		await getProductCatalog(filterOrgId || undefined).refresh();
 	}
 
 	async function saveAndStay() {
@@ -411,18 +265,11 @@
 		currentId = row.id;
 	}
 
-	// ── Merging a duplicate away ──────────────────────────────────────────────
-	// Two rows for one device is the failure mode this catalogue has: nothing
-	// stops a second "Robin 600" from being typed in next to "Robe Robin 600",
-	// and once both hold units, every count is half right. The wizard is where
-	// they are noticed — stepping through the catalogue is exactly the activity
-	// that puts two spellings of one lamp under your nose.
-
-	// The picker lists *every* product, not the org catalogue behind this page:
-	// a duplicate that ended up with no units at all is invisible here and is
-	// the easiest kind to clean up.
+	// ── Duplicates ────────────────────────────────────────────────────────────
+	// Two rows for one device is the failure mode this catalogue has, and the
+	// wizard is where they are noticed. Merging one away is the editor's job;
+	// finding them is this list's.
 	let allProducts = $derived(getProducts().current ?? []);
-	type GlobalProduct = Awaited<ReturnType<typeof getProducts>>[number];
 
 	// Cables are where duplicates can be *found* rather than stumbled over: the
 	// name is free text, but what the cable is sits in columns. Grouped over the
@@ -437,96 +284,11 @@
 
 	let twinCount = $derived(products.filter(hasTwin).length);
 
-	let mergeOpen = $state(false);
-	let mergePick = $state<{ id: string | null; name: string } | null>(null);
-	// Which of the two names survives. Defaults to the card in front, because
-	// that is the one whose fields are being curated — but only defaults: the
-	// moment a duplicate turns up you know which spelling is right, and being
-	// sent to the other card first to act on it is how the wrong one wins.
-	let keepCurrent = $state(true);
-	let merging = $state(false);
+	let unitCounts = $derived(new Map(products.map((p) => [p.id, p.assetCount])));
 
-	let mergeOptions = $derived(
-		current
-			? allProducts
-					.filter((p) => p.id !== current.id)
-					.map((p) => ({ id: p.id, name: `${p.manufacturer.name} ${p.name}` }))
-			: []
-	);
-
-	let picked = $derived<GlobalProduct | null>(
-		allProducts.find((p) => p.id === mergePick?.id) ?? null
-	);
-	let survivor = $derived(keepCurrent ? current : picked);
-	let absorbed = $derived(keepCurrent ? picked : current);
-
-	// Only the units this page can see. A product with units in an organization
-	// the user isn't in is not counted here and not mergeable either — the
-	// command refuses it by name rather than moving somebody else's inventory.
-	let unitCount = $derived(new Map(products.map((p) => [p.id, p.assetCount])));
-	let movingCount = $derived(absorbed ? (unitCount.get(absorbed.id) ?? 0) : 0);
-
-	// Name, manufacturer and category are the survivor's; an image is not
-	// identity but work someone did, so the merge keeps it when the survivor
-	// has none. Said out loud here because it is the one part of the operation
-	// that isn't obvious from picking a side. (Per-org prices move over the
-	// same way — each org keeps its own — noted statically below.)
-	let inheritsImage = $derived(
-		!!survivor && !!absorbed && !survivor.imagePath && !!absorbed.imagePath
-	);
-
-	/** With a pick where the duplicate is already known — the cable warning hands one over. */
-	function openMerge(pick: { id: string; name: string } | null = null) {
-		mergePick = pick;
-		keepCurrent = true;
-		mergeOpen = true;
-	}
-
-	async function doMerge() {
-		if (!survivor || !absorbed || merging) return;
-		if (dirty && !(await save())) return;
-		merging = true;
-		try {
-			const { movedAssets } = await mergeProducts({
-				targetProductId: survivor.id,
-				sourceProductId: absorbed.id
-			});
-			// The absorbed product may have been the card in front, and the survivor
-			// may have just inherited an image or a price — so both the position and
-			// the draft have to be pointed at what actually exists now.
-			currentId = survivor.id;
-			draftFor = '';
-			pricesFor = '';
-			mergeOpen = false;
-			toast.success(plural(movedAssets, ['Merged — # unit moved', 'Merged — # units moved']));
-		} catch (err) {
-			toast.error(getErrorMessage(err));
-		} finally {
-			merging = false;
-		}
-	}
-
-	let deleteOpen = $state(false);
-	let deleting = $state(false);
-
-	async function doDelete() {
-		if (!current || current.hasAssets || deleting) return;
-		const deletedId = current.id;
-		const nextId = visible[index + 1]?.id ?? visible[index - 1]?.id ?? '';
-		deleting = true;
-		try {
-			await deleteProduct(deletedId);
-			currentId = nextId;
-			draftFor = '';
-			pricesFor = '';
-			deleteOpen = false;
-			toast.success('Product deleted');
-		} catch (err) {
-			toast.error(getErrorMessage(err));
-		} finally {
-			deleting = false;
-		}
-	}
+	// Where the editor's delete lands: the neighbour of the deleted product,
+	// read while it is still in the list.
+	let afterDelete = '';
 
 	function scrollIntoViewWhenActive(node: HTMLElement, active: boolean) {
 		if (active) node.scrollIntoView({ block: 'nearest' });
@@ -549,7 +311,7 @@
 		// The merge dialog focuses its own panel, which is not a field — so
 		// without this, an arrow key aimed at nothing steps the wizard behind it
 		// and the dialog ends up describing a product that is no longer in front.
-		if (!entry || mergeOpen) return;
+		if (!entry || editorModalOpen) return;
 		const mod = e.metaKey || e.ctrlKey;
 		const key = e.key.toLowerCase();
 		const step = key === 'arrowright' ? 1 : key === 'arrowleft' ? -1 : 0;
@@ -725,114 +487,33 @@
 				</Card.Content>
 			</Card.Root>
 
-			<!-- The card clips to its rounded corners, cutting off any picker that
-			     opens past its edge. Nothing in this one is full-bleed. -->
-			<Card.Root class="overflow-visible">
-				{#if current}
-					<Card.Header>
-						<div class="flex flex-wrap items-start justify-between gap-3">
-							<div class="min-w-0">
-								<Card.Title class="flex items-center gap-2">
-									{current.manufacturer.name}
-									{current.name}
-									{#if dirty}
-										<span
-											class="h-2 w-2 shrink-0 rounded-full bg-yellow-500"
-											title="Unsaved changes"
-										></span>
-									{/if}
-								</Card.Title>
-								<Card.Description class="flex flex-wrap items-center gap-2 pt-1">
-									<CategoryPill
-										name={categoryLabel(current.category)}
-										color={current.category.color}
-									/>
-									<span>{current.assetCount} units</span>
-									<a
-										href="{resolve('/assets')}?q={encodeURIComponent(current.name)}"
-										class="underline-offset-2 hover:text-foreground hover:underline"
-										>View in Devices →</a
-									>
-								</Card.Description>
-							</div>
-							<div class="flex flex-wrap items-center gap-3">
-								{#if canEdit}
-									{#if !current.hasAssets && !identityLocked}
-										<Button variant="destructive" size="sm" onclick={() => (deleteOpen = true)}
-											>Delete unused</Button
-										>
-									{/if}
-									<Button icon="merge" variant="outline" size="sm" onclick={() => openMerge()}
-										>Merge duplicate…</Button
-									>
-								{/if}
-								<span class="font-mono text-sm text-muted-foreground tabular-nums"
-									>{index + 1} / {visible.length}</span
-								>
-							</div>
-						</div>
-					</Card.Header>
-					<Card.Content>
-						{#if identityLocked && canEdit}
-							<div class="mb-4 rounded-md border border-dashed p-3 text-sm text-muted-foreground">
-								{#if current.hasAssets}
-									Units of this product belong to organizations you don't administer, so its name,
-									manufacturer and category are locked here.
-								{:else}
-									No organization holds units of this product, so only whoever added it or a system
-									admin can change its name, manufacturer and category.
-								{/if}
-								{#if current.imagePath}
-									Your own organization's price still saves.
-								{:else}
-									A first picture and your own organization's price still save.
-								{/if}
-							</div>
-						{/if}
-						<div class="mb-4 space-y-2">
-							<p class="text-sm font-medium">Manufacturer</p>
-							<CreatableSelect
-								items={manufacturers}
-								bind:value={manufacturer}
-								allowCreate={false}
-								disabled={identityLocked}
-								placeholder="Search manufacturers…"
-							/>
-						</div>
-						<ProductFields
-							{categories}
-							bind:value={draft}
-							idPrefix="wizard"
-							showPrice={false}
-							identityDisabled={identityLocked}
-							imageDisabled={imageLocked || !canContribute}
-							productId={current.id}
-							onMergeTwin={canEdit ? openMerge : undefined}
-						/>
-						{#if priceOrgs.length > 0}
-							<div class="mt-4 space-y-2">
-								<p class="text-sm font-medium">Net purchase price (€)</p>
-								<p class="text-sm text-muted-foreground">
-									Per organization — what that organization's rental rate is calculated from. Other
-									organizations set their own price.
-								</p>
-								{#each priceOrgs as org (org.id)}
-									<div class="flex items-center gap-3">
-										<span class="w-40 truncate text-sm">{orgLabel(org)}</span>
-										<input
-											type="number"
-											min="0"
-											step="0.01"
-											placeholder="Unknown"
-											bind:value={priceDrafts[org.id]}
-											class="h-10 w-40 rounded-md border border-input bg-background px-3 py-2 text-right text-sm focus:ring-2 focus:ring-ring focus:outline-none"
-										/>
-									</div>
-								{/each}
-							</div>
-						{/if}
-					</Card.Content>
-				{:else if currentBundle}
+			{#if current}
+				<ProductEditor
+					bind:this={editor}
+					product={current}
+					{orgs}
+					{categories}
+					{manufacturers}
+					{allProducts}
+					{unitCounts}
+					isAdmin={data.isAdmin}
+					userId={data.user?.id}
+					priceOrgId={filterOrgId}
+					bind:dirty={productDirty}
+					bind:saving
+					bind:modalOpen={editorModalOpen}
+					headerExtra={position}
+					footerActions={wizardFooter}
+					showProductLink
+					idPrefix="wizard"
+					onSaved={refreshCatalog}
+					onMerged={(survivorId) => (currentId = survivorId)}
+					onBeforeDelete={() =>
+						(afterDelete = visible[index + 1]?.id ?? visible[index - 1]?.id ?? '')}
+					onDeleted={() => (currentId = afterDelete)}
+				/>
+			{:else if currentBundle}
+				<Card.Root>
 					<Card.Header>
 						<div class="flex flex-wrap items-start justify-between gap-3">
 							<div class="min-w-0">
@@ -859,9 +540,7 @@
 									>
 								</Card.Description>
 							</div>
-							<span class="font-mono text-sm text-muted-foreground tabular-nums"
-								>{index + 1} / {visible.length}</span
-							>
+							{@render position()}
 						</div>
 					</Card.Header>
 					<Card.Content class="space-y-4">
@@ -893,148 +572,41 @@
 							{/if}
 						</div>
 					</Card.Content>
-				{/if}
-				<Card.Footer class="flex flex-wrap items-center justify-between gap-3">
-					<div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-						<kbd class="rounded border px-1.5 py-0.5 font-mono">←</kbd>
-						<kbd class="rounded border px-1.5 py-0.5 font-mono">→</kbd>
-						<span>step</span>
-						<kbd class="rounded border px-1.5 py-0.5 font-mono">{modLabel}↵</kbd>
-						<span>save &amp; next</span>
-						<kbd class="rounded border px-1.5 py-0.5 font-mono">{modLabel}S</kbd>
-						<span>save</span>
-					</div>
-					<div class="flex flex-wrap items-center gap-2">
-						<Button
-							icon="back"
-							variant="outline"
-							onclick={() => go(-1)}
-							disabled={index === 0 || saving}
-						>
-							Previous
-						</Button>
-						<Button icon="save" variant="outline" onclick={saveAndStay} disabled={!dirty || saving}>
-							{saving ? 'Saving…' : 'Save'}
-						</Button>
-						<Button icon="forward" onclick={() => go(1)} disabled={saving}>
-							{index + 1 === visible.length ? 'Save & finish' : 'Save & next'}
-						</Button>
-					</div>
-				</Card.Footer>
-			</Card.Root>
+					<Card.Footer class="flex flex-wrap items-center justify-between gap-3">
+						{@render wizardFooter()}
+					</Card.Footer>
+				</Card.Root>
+			{/if}
 		</div>
 	{/if}
 </div>
 
-<Modal bind:open={mergeOpen} title="Merge duplicate product" size="lg" dismissible={!merging}>
-	{#snippet description()}
-		Two entries for one device split its units in half, and every count built on them is half right.
-		Pick the other entry, then say which of the two names is the one to keep.
-	{/snippet}
+<!-- Last in the file on purpose: see CLAUDE.md on wuchale and snippets. -->
+{#snippet position()}
+	<span class="font-mono text-sm text-muted-foreground tabular-nums"
+		>{index + 1} / {visible.length}</span
+	>
+{/snippet}
 
-	{#snippet children()}
-		<div class="space-y-5">
-			<CreatableSelect
-				items={mergeOptions}
-				bind:value={mergePick}
-				allowCreate={false}
-				disabled={merging}
-				placeholder="Search the whole catalog for the duplicate…"
-			/>
-
-			{#if survivor && absorbed}
-				<fieldset class="space-y-2">
-					<legend class="pb-2 text-sm font-medium">Which name is right?</legend>
-					{#each [{ product: current, keep: true }, { product: picked, keep: false }] as choice (choice.keep)}
-						{#if choice.product}
-							<label
-								class="flex items-start gap-3 rounded-md border p-3 text-sm transition-colors hover:bg-muted/40"
-							>
-								<input
-									type="radio"
-									name="mergeSurvivor"
-									checked={keepCurrent === choice.keep}
-									onchange={() => (keepCurrent = choice.keep)}
-									disabled={merging}
-									class="mt-0.5 h-4 w-4"
-								/>
-								<span class="min-w-0 flex-1">
-									<span class="block font-medium"
-										>{choice.product.manufacturer.name}
-										{choice.product.name}</span
-									>
-									<span class="block text-xs text-muted-foreground">
-										{categoryLabel(choice.product.category)} ·
-										{plural(unitCount.get(choice.product.id) ?? 0, ['# unit here', '# units here'])}
-									</span>
-								</span>
-							</label>
-						{/if}
-					{/each}
-				</fieldset>
-
-				<div class="space-y-1.5 rounded-md bg-muted/50 p-3 text-sm">
-					<p>
-						<span class="font-medium">{absorbed.manufacturer.name} {absorbed.name}</span> is
-						deleted.
-						{plural(movingCount, ['Its # unit becomes', 'Its # units become'])}
-						<span class="font-medium">{survivor.manufacturer.name} {survivor.name}</span> — same tags,
-						same history, same accessories.
-					</p>
-					{#if inheritsImage}
-						<p class="text-muted-foreground">The image comes along — this entry has none.</p>
-					{/if}
-					<p class="text-muted-foreground">
-						Purchase prices are each organization's own and move over with the merge — an
-						organization that priced both entries keeps the surviving entry's price.
-					</p>
-					{#if survivor.manufacturerId !== absorbed.manufacturerId}
-						<p class="text-muted-foreground">
-							Different manufacturers: the units end up under
-							<span class="font-medium">{survivor.manufacturer.name}</span>.
-						</p>
-					{/if}
-					<p class="text-muted-foreground">
-						Offers and invoices already written are not touched — they say what they said.
-					</p>
-				</div>
-			{/if}
-		</div>
-	{/snippet}
-
-	{#snippet footer()}
-		<Button icon="close" variant="outline" onclick={() => (mergeOpen = false)} disabled={merging}>
-			Cancel
+{#snippet wizardFooter()}
+	<div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+		<kbd class="rounded border px-1.5 py-0.5 font-mono">←</kbd>
+		<kbd class="rounded border px-1.5 py-0.5 font-mono">→</kbd>
+		<span>step</span>
+		<kbd class="rounded border px-1.5 py-0.5 font-mono">{modLabel}↵</kbd>
+		<span>save &amp; next</span>
+		<kbd class="rounded border px-1.5 py-0.5 font-mono">{modLabel}S</kbd>
+		<span>save</span>
+	</div>
+	<div class="flex flex-wrap items-center gap-2">
+		<Button icon="back" variant="outline" onclick={() => go(-1)} disabled={index === 0 || saving}>
+			Previous
 		</Button>
-		<Button icon="merge" onclick={doMerge} disabled={!picked || merging}>
-			{merging ? 'Merging…' : 'Merge'}
+		<Button icon="save" variant="outline" onclick={saveAndStay} disabled={!dirty || saving}>
+			{saving ? 'Saving…' : 'Save'}
 		</Button>
-	{/snippet}
-</Modal>
-
-<Modal bind:open={deleteOpen} title="Delete unused product" dismissible={!deleting}>
-	{#snippet description()}
-		This permanently removes the catalogue entry. Products with any units, including retired units,
-		cannot be deleted.
-	{/snippet}
-
-	{#if current}
-		<p class="text-sm">
-			Delete <span class="font-medium">{current.manufacturer.name} {current.name}</span>?
-		</p>
-	{/if}
-
-	{#snippet footer()}
-		<Button icon="close" variant="outline" onclick={() => (deleteOpen = false)} disabled={deleting}
-			>Cancel</Button
-		>
-		<Button
-			icon="delete"
-			variant="destructive"
-			onclick={doDelete}
-			disabled={!current || current.hasAssets || deleting}
-		>
-			{deleting ? 'Deleting…' : 'Delete product'}
+		<Button icon="forward" onclick={() => go(1)} disabled={saving}>
+			{index + 1 === visible.length ? 'Save & finish' : 'Save & next'}
 		</Button>
-	{/snippet}
-</Modal>
+	</div>
+{/snippet}

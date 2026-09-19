@@ -351,7 +351,9 @@
 		serialNumber: '',
 		assetTag: '',
 		status: 'AVAILABLE' as AssetStatus,
-		locationId: ''
+		locationId: '',
+		purchaseDate: '',
+		inspectionIntervalMonths: ''
 	});
 
 	$effect(() => {
@@ -360,7 +362,11 @@
 			serialNumber: asset.serialNumber ?? '',
 			assetTag: asset.assetTag ?? '',
 			status: asset.status as AssetStatus,
-			locationId: asset.locationId
+			locationId: asset.locationId,
+			purchaseDate: asset.purchaseDate
+				? new Date(asset.purchaseDate).toISOString().slice(0, 10)
+				: '',
+			inspectionIntervalMonths: asset.inspectionIntervalMonths?.toString() ?? ''
 		};
 	});
 
@@ -368,6 +374,16 @@
 		e.preventDefault();
 		savingAsset = true;
 		try {
+			// Purchase date and interval only when they moved: sending the interval
+			// makes the server recompute the next due date, which would quietly
+			// replace one set any other way whenever someone only moved the unit.
+			const purchaseDate = assetDraft.purchaseDate || null;
+			const inspectionIntervalMonths = assetDraft.inspectionIntervalMonths
+				? Number(assetDraft.inspectionIntervalMonths)
+				: null;
+			const storedPurchaseDate = asset.purchaseDate
+				? new Date(asset.purchaseDate).toISOString().slice(0, 10)
+				: null;
 			await updateAsset(
 				retired
 					? { assetId, status: assetDraft.status }
@@ -376,7 +392,11 @@
 							serialNumber: assetDraft.serialNumber,
 							assetTag: assetDraft.assetTag,
 							status: assetDraft.status,
-							locationId: assetDraft.locationId
+							locationId: assetDraft.locationId,
+							...(purchaseDate !== storedPurchaseDate ? { purchaseDate } : {}),
+							...(inspectionIntervalMonths !== (asset.inspectionIntervalMonths ?? null)
+								? { inspectionIntervalMonths }
+								: {})
 						}
 			);
 			toast.success('Asset updated');
@@ -385,44 +405,6 @@
 			toast.error(getErrorMessage(err));
 		} finally {
 			savingAsset = false;
-		}
-	}
-
-	// ── Pricing & inspection editing ─────────────────────────────────────────
-	let editingPricing = $state(false);
-	let savingPricing = $state(false);
-	let pricingDraft = $state({
-		purchaseDate: '',
-		inspectionIntervalMonths: ''
-	});
-
-	$effect(() => {
-		if (editingPricing) return;
-		pricingDraft = {
-			purchaseDate: asset.purchaseDate
-				? new Date(asset.purchaseDate).toISOString().slice(0, 10)
-				: '',
-			inspectionIntervalMonths: asset.inspectionIntervalMonths?.toString() ?? ''
-		};
-	});
-
-	async function handlePricingSave(e: Event) {
-		e.preventDefault();
-		savingPricing = true;
-		try {
-			await updateAsset({
-				assetId,
-				purchaseDate: pricingDraft.purchaseDate || null,
-				inspectionIntervalMonths: pricingDraft.inspectionIntervalMonths
-					? Number(pricingDraft.inspectionIntervalMonths)
-					: null
-			});
-			toast.success('Pricing & inspection updated');
-			editingPricing = false;
-		} catch (err) {
-			toast.error(getErrorMessage(err));
-		} finally {
-			savingPricing = false;
 		}
 	}
 
@@ -555,7 +537,7 @@
 								This unit has left the pool. It can't be booked or edited — set the status back to
 								bring it into service again.
 							{:else}
-								Serial number, tag, status, and location.
+								Serial number, tag, status, location, purchase and inspection.
 							{/if}
 						</Card.Description>
 					</div>
@@ -590,29 +572,6 @@
 						<Label>{retired ? 'Last known location' : 'Location'}</Label>
 						<Input value={asset.location?.name ?? '—'} disabled />
 					</div>
-				</div>
-			</Card.Content>
-		</Card.Root>
-
-		<!-- Pricing & inspection -->
-		<Card.Root>
-			<Card.Header>
-				<div class="flex flex-wrap items-start justify-between gap-4">
-					<div>
-						<Card.Title>Purchase & Inspection</Card.Title>
-						<Card.Description>
-							Facts about this individual unit. What it bills at is the product's price.
-						</Card.Description>
-					</div>
-					{#if !retired}
-						<Button icon="edit" variant="outline" onclick={() => (editingPricing = true)}>
-							Edit
-						</Button>
-					{/if}
-				</div>
-			</Card.Header>
-			<Card.Content>
-				<div class="space-y-4">
 					<div class="space-y-2">
 						<Label>Purchase date</Label>
 						<Input
@@ -631,6 +590,161 @@
 							</p>
 						{/if}
 					</div>
+				</div>
+			</Card.Content>
+		</Card.Root>
+
+		<!-- Product details (right) -->
+		<Card.Root>
+			<Card.Header>
+				<div class="flex flex-wrap items-start justify-between gap-4">
+					<div>
+						<Card.Title>Product</Card.Title>
+						<Card.Description>Shared product details for this asset type.</Card.Description>
+					</div>
+					<div class="flex gap-2">
+						<!-- The product's own page: every unit of it, and its connectors. -->
+						<Button variant="outline" href={resolve(`/products/${asset.product.id}`)}>View</Button>
+						<Button icon="edit" variant="outline" onclick={openProductModal}>Edit</Button>
+					</div>
+				</div>
+			</Card.Header>
+			<Card.Content class="space-y-4">
+				<div class="space-y-2">
+					<Label>Manufacturer</Label>
+					<Input value={asset.product.manufacturer.name} disabled />
+				</div>
+				<div class="space-y-2">
+					<Label>Product Name</Label>
+					<Input value={asset.product.name} disabled />
+				</div>
+				<div class="space-y-2">
+					<Label>Category</Label>
+					<div
+						class="flex h-10 items-center rounded-md border border-input bg-background px-3 py-2 text-sm"
+					>
+						<CategoryPill
+							name={categoryLabel(asset.product.category)}
+							color={asset.product.category.color}
+						/>
+					</div>
+				</div>
+				{#if asset.product.cableType}
+					{@const endA = connectorInfo(asset.product.connectorA)}
+					{@const endB = connectorInfo(asset.product.connectorB)}
+					<div class="space-y-2">
+						<Label>Cable type</Label>
+						<Input value={asset.product.cableType} disabled />
+					</div>
+					<div class="grid gap-4 sm:grid-cols-2">
+						<div class="space-y-2">
+							<Label>
+								Connector A
+								{#if endA.end}
+									<span class="ml-1 font-mono text-xs font-normal text-muted-foreground"
+										>{endA.end}</span
+									>
+								{/if}
+							</Label>
+							<div
+								class="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm"
+							>
+								<ProductThumb path={endA.imagePath} alt="" size={22} />
+								<span>{asset.product.connectorA ?? '—'}</span>
+							</div>
+						</div>
+						<div class="space-y-2">
+							<Label>
+								Connector B
+								{#if endB.end}
+									<span class="ml-1 font-mono text-xs font-normal text-muted-foreground"
+										>{endB.end}</span
+									>
+								{/if}
+							</Label>
+							<div
+								class="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm"
+							>
+								<ProductThumb path={endB.imagePath} alt="" size={22} />
+								<span>{asset.product.connectorB ?? '—'}</span>
+							</div>
+						</div>
+					</div>
+					{#if asset.product.lengthCm}
+						<div class="space-y-2">
+							<Label>Length</Label>
+							<Input value={formatLength(asset.product.lengthCm)} disabled />
+						</div>
+					{/if}
+				{/if}
+
+				{#if !asset.product.cableType && !asset.product.isLicense}
+					<!-- What the device's panel has. Edited on the product's own page,
+						     where it belongs to every unit at once. -->
+					<div class="space-y-2">
+						<Label>Connectors</Label>
+						{#if asset.product.ports.length === 0}
+							<p class="text-sm text-muted-foreground">
+								No connectors recorded yet — add them on the product page.
+							</p>
+						{:else}
+							<ul class="divide-y rounded-md border">
+								{#each asset.product.ports as port (port.id)}
+									<li class="flex items-center gap-3 px-3 py-2">
+										<ProductThumb
+											path={port.connector.imagePath}
+											alt={port.connector.name}
+											size={28}
+										/>
+										<span class="w-10 shrink-0 text-right font-mono text-sm tabular-nums"
+											>{port.count}×</span
+										>
+										<span class="text-sm font-medium">{port.connector.name}</span>
+										{#if port.label}
+											<span class="ml-auto text-sm text-muted-foreground">{port.label}</span>
+										{/if}
+									</li>
+								{/each}
+							</ul>
+						{/if}
+					</div>
+				{/if}
+
+				<div class="space-y-2">
+					<Label>Net purchase price (€)</Label>
+					<div
+						class="flex h-10 items-center rounded-md border border-input bg-background px-3 py-2 text-sm"
+					>
+						{orgNetPurchasePrice != null
+							? orgNetPurchasePrice.toLocaleString('de-DE', {
+									style: 'currency',
+									currency: 'EUR'
+								})
+							: 'Not set'}
+					</div>
+					<p class="text-sm text-muted-foreground">
+						{orgLabel(asset.organization)}'s price for this product — what its rental rate is
+						calculated from. Other organizations price it themselves.
+					</p>
+				</div>
+
+				<div class="space-y-2">
+					<Label>{asset.accessories.length > 0 ? 'Device Image' : 'Product Image'}</Label>
+					{#if displayImagePath}
+						<img
+							src={imageSrc(displayImagePath)}
+							alt={asset.accessories.length > 0
+								? `${asset.product.name} with accessories`
+								: asset.product.name}
+							class="h-40 w-full rounded-md border bg-muted/30 object-contain p-2"
+						/>
+					{:else}
+						<div
+							class="flex h-40 w-full items-center justify-center rounded-md border border-dashed text-sm text-muted-foreground"
+						>
+							No image yet — add one with Edit.
+						</div>
+					{/if}
 				</div>
 			</Card.Content>
 		</Card.Root>
@@ -781,126 +895,8 @@
 			</Card.Content>
 		</Card.Root>
 
-		<!-- Product details (right) -->
+		<!-- Audit log (right) -->
 		<div class="space-y-6">
-			<Card.Root>
-				<Card.Header>
-					<div class="flex flex-wrap items-start justify-between gap-4">
-						<div>
-							<Card.Title>Product</Card.Title>
-							<Card.Description>Shared product details for this asset type.</Card.Description>
-						</div>
-						<Button icon="edit" variant="outline" onclick={openProductModal}>Edit</Button>
-					</div>
-				</Card.Header>
-				<Card.Content class="space-y-4">
-					<div class="space-y-2">
-						<Label>Manufacturer</Label>
-						<Input value={asset.product.manufacturer.name} disabled />
-					</div>
-					<div class="space-y-2">
-						<Label>Product Name</Label>
-						<Input value={asset.product.name} disabled />
-					</div>
-					<div class="space-y-2">
-						<Label>Category</Label>
-						<div
-							class="flex h-10 items-center rounded-md border border-input bg-background px-3 py-2 text-sm"
-						>
-							<CategoryPill
-								name={categoryLabel(asset.product.category)}
-								color={asset.product.category.color}
-							/>
-						</div>
-					</div>
-					{#if asset.product.cableType}
-						{@const endA = connectorInfo(asset.product.connectorA)}
-						{@const endB = connectorInfo(asset.product.connectorB)}
-						<div class="space-y-2">
-							<Label>Cable type</Label>
-							<Input value={asset.product.cableType} disabled />
-						</div>
-						<div class="grid gap-4 sm:grid-cols-2">
-							<div class="space-y-2">
-								<Label>
-									Connector A
-									{#if endA.end}
-										<span class="ml-1 font-mono text-xs font-normal text-muted-foreground"
-											>{endA.end}</span
-										>
-									{/if}
-								</Label>
-								<div
-									class="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm"
-								>
-									<ProductThumb path={endA.imagePath} alt="" size={22} />
-									<span>{asset.product.connectorA ?? '—'}</span>
-								</div>
-							</div>
-							<div class="space-y-2">
-								<Label>
-									Connector B
-									{#if endB.end}
-										<span class="ml-1 font-mono text-xs font-normal text-muted-foreground"
-											>{endB.end}</span
-										>
-									{/if}
-								</Label>
-								<div
-									class="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm"
-								>
-									<ProductThumb path={endB.imagePath} alt="" size={22} />
-									<span>{asset.product.connectorB ?? '—'}</span>
-								</div>
-							</div>
-						</div>
-						{#if asset.product.lengthCm}
-							<div class="space-y-2">
-								<Label>Length</Label>
-								<Input value={formatLength(asset.product.lengthCm)} disabled />
-							</div>
-						{/if}
-					{/if}
-
-					<div class="space-y-2">
-						<Label>Net purchase price (€)</Label>
-						<div
-							class="flex h-10 items-center rounded-md border border-input bg-background px-3 py-2 text-sm"
-						>
-							{orgNetPurchasePrice != null
-								? orgNetPurchasePrice.toLocaleString('de-DE', {
-										style: 'currency',
-										currency: 'EUR'
-									})
-								: 'Not set'}
-						</div>
-						<p class="text-sm text-muted-foreground">
-							{orgLabel(asset.organization)}'s price for this product — what its rental rate is
-							calculated from. Other organizations price it themselves.
-						</p>
-					</div>
-
-					<div class="space-y-2">
-						<Label>{asset.accessories.length > 0 ? 'Device Image' : 'Product Image'}</Label>
-						{#if displayImagePath}
-							<img
-								src={imageSrc(displayImagePath)}
-								alt={asset.accessories.length > 0
-									? `${asset.product.name} with accessories`
-									: asset.product.name}
-								class="h-40 w-full rounded-md border bg-muted/30 object-contain p-2"
-							/>
-						{:else}
-							<div
-								class="flex h-40 w-full items-center justify-center rounded-md border border-dashed text-sm text-muted-foreground"
-							>
-								No image yet — add one with Edit.
-							</div>
-						{/if}
-					</div>
-				</Card.Content>
-			</Card.Root>
-
 			<!-- Audit log -->
 			<Card.Root>
 				<Card.Header>
@@ -1080,7 +1076,7 @@
 		{#if retired}
 			This unit is sold or decommissioned — only its status can be changed.
 		{:else}
-			Serial number, tag, status, and location.
+			Serial number, tag, status, location, purchase and inspection.
 		{/if}
 	{/snippet}
 	{#snippet children()}
@@ -1124,6 +1120,19 @@
 						{/each}
 					</select>
 				</div>
+				<div class="space-y-2">
+					<Label for="purchaseDate">Purchase date</Label>
+					<Input id="purchaseDate" type="date" bind:value={assetDraft.purchaseDate} />
+				</div>
+				<div class="space-y-2">
+					<Label for="inspectionInterval">DGUV inspection interval (months)</Label>
+					<Input
+						id="inspectionInterval"
+						type="number"
+						min="1"
+						bind:value={assetDraft.inspectionIntervalMonths}
+					/>
+				</div>
 			{/if}
 		</form>
 	{/snippet}
@@ -1139,43 +1148,6 @@
 		</Button>
 		<Button icon="save" type="submit" form="edit-asset-form" disabled={savingAsset}>
 			{savingAsset ? 'Saving…' : 'Save'}
-		</Button>
-	{/snippet}
-</Modal>
-
-<Modal bind:open={editingPricing} title="Purchase & Inspection" dismissible={!savingPricing}>
-	{#snippet description()}
-		Facts about this individual unit. What it bills at is the product's price.
-	{/snippet}
-	{#snippet children()}
-		<form id="edit-pricing-form" class="space-y-4" onsubmit={handlePricingSave}>
-			<div class="space-y-2">
-				<Label for="purchaseDate">Purchase date</Label>
-				<Input id="purchaseDate" type="date" bind:value={pricingDraft.purchaseDate} />
-			</div>
-			<div class="space-y-2">
-				<Label for="inspectionInterval">DGUV inspection interval (months)</Label>
-				<Input
-					id="inspectionInterval"
-					type="number"
-					min="1"
-					bind:value={pricingDraft.inspectionIntervalMonths}
-				/>
-			</div>
-		</form>
-	{/snippet}
-	{#snippet footer()}
-		<Button
-			icon="close"
-			type="button"
-			variant="outline"
-			onclick={() => (editingPricing = false)}
-			disabled={savingPricing}
-		>
-			Cancel
-		</Button>
-		<Button icon="save" type="submit" form="edit-pricing-form" disabled={savingPricing}>
-			{savingPricing ? 'Saving…' : 'Save'}
 		</Button>
 	{/snippet}
 </Modal>

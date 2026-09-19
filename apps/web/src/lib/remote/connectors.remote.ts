@@ -132,10 +132,11 @@ export const updateConnector = command(updateConnectorSchema, async (input) => {
 });
 
 /**
- * How many products name this connector on either end. `Product.connectorA` is
- * a string, not a foreign key — the whole point is that a product can name a
- * connector nobody has catalogued — so this is counted, not enforced, and it is
- * what the admin page shows before offering to delete a row.
+ * How many products use this connector: cables that name it on either end, and
+ * devices that have it built in. `Product.connectorA` is a string, not a
+ * foreign key — the whole point is that a product can name a connector nobody
+ * has catalogued — so this is counted, not enforced, and it is what the admin
+ * page shows before offering to delete a row.
  */
 export const getConnectorUsage = query(async () => {
 	await requireAuth();
@@ -153,6 +154,15 @@ export const getConnectorUsage = query(async () => {
 			counts[slug] = (counts[slug] ?? 0) + 1;
 		}
 	}
+	// A device with two lines of the same connector ("XLR3 F, Input" and "XLR3
+	// F, Return") is still one product using it.
+	const ports = await prisma.productPort.findMany({
+		distinct: ['productId', 'connectorId'],
+		select: { connector: { select: { slug: true } } }
+	});
+	for (const port of ports) {
+		counts[port.connector.slug] = (counts[port.connector.slug] ?? 0) + 1;
+	}
 	return counts;
 });
 
@@ -163,11 +173,14 @@ export const deleteConnector = command(v.string(), async (connectorId: string) =
 	// Deleting the row does not break the products that name it — they hold the
 	// string — but it does throw away the picture and the family, and they would
 	// silently get a fresh guessed row the next time one of them is saved.
+	// Devices hold a real reference, so for them this is also what keeps the
+	// foreign key from turning the delete into a bare 500.
 	const inUse = await prisma.product.count({
 		where: {
 			OR: [
 				{ connectorA: { equals: connector.name, mode: 'insensitive' } },
-				{ connectorB: { equals: connector.name, mode: 'insensitive' } }
+				{ connectorB: { equals: connector.name, mode: 'insensitive' } },
+				{ ports: { some: { connectorId } } }
 			]
 		}
 	});

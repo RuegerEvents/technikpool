@@ -53,6 +53,7 @@ export type AppErrorCode =
 	| 'product_no_units_in_org'
 	| 'connector_exists'
 	| 'connector_in_use'
+	| 'connector_not_found'
 	// Assets
 	| 'asset_not_found'
 	| 'assets_not_found'

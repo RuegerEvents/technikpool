@@ -91,6 +91,17 @@
 		}
 	}
 
+	// A device's connectors are logged as the whole list on both sides — see
+	// `setProductPorts`.
+	type LoggedPort = { connector: string; count: number; label: string | null };
+	function logValue(value: unknown): string {
+		if (!Array.isArray(value)) return String(value ?? '—');
+		if (value.length === 0) return '—';
+		return (value as LoggedPort[])
+			.map((p) => `${p.count}× ${p.connector}${p.label ? ` (${p.label})` : ''}`)
+			.join(', ');
+	}
+
 	function details(entry: Entry): string {
 		const payload = entry.data as {
 			changes?: { field: string; from: unknown; to: unknown }[];
@@ -102,7 +113,7 @@
 		if (!payload) return '';
 		if (payload.changes) {
 			return payload.changes
-				.map((change) => `${change.field}: ${change.from ?? '—'} → ${change.to ?? '—'}`)
+				.map((change) => `${change.field}: ${logValue(change.from)} → ${logValue(change.to)}`)
 				.join(' · ');
 		}
 		if (payload.source && payload.target) {

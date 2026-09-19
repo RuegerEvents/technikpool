@@ -11,6 +11,13 @@
 		hint?: string | null;
 		/** Listed but not choosable: the wrong end of a cable, say. */
 		disabled?: boolean;
+		/**
+		 * A heading drawn above the first item of a run with this group. Items are
+		 * shown in the order given, so a caller groups by sorting.
+		 */
+		group?: string | null;
+		/** Greyed but still choosable: an option that is usually not the answer. */
+		muted?: boolean;
 	};
 	type Selection = { id: string | null; name: string };
 
@@ -239,6 +246,16 @@
 			<ul class="max-h-60 overflow-y-auto py-1">
 				{#each options as opt, i (opt.type === 'create' ? `create-${opt.name}` : `${opt.type}-${opt.item.id}`)}
 					{@const disabled = opt.type !== 'create' && !!opt.item.disabled}
+					{#if opt.type === 'item' && opt.item.group && (i === 0 || options[i - 1].type !== 'item' || (options[i - 1] as { item: Item }).item.group !== opt.item.group)}
+						<li
+							class="px-3 pt-2 pb-1 text-xs font-medium text-muted-foreground {i > 0
+								? 'mt-1 border-t'
+								: ''}"
+							aria-hidden="true"
+						>
+							{opt.item.group}
+						</li>
+					{/if}
 					{#if i === firstSuggestionIndex && suggestions}
 						<li
 							class="mt-1 border-t px-3 pt-2 pb-1 text-xs font-medium text-muted-foreground"
@@ -262,7 +279,9 @@
 							}}
 							class="px-3 py-2 text-sm {disabled
 								? 'cursor-not-allowed opacity-45'
-								: 'cursor-pointer'} {highlightedIndex === i && !disabled
+								: 'cursor-pointer'} {opt.type === 'item' && opt.item.muted && !disabled
+								? 'text-muted-foreground opacity-70'
+								: ''} {highlightedIndex === i && !disabled
 								? 'bg-accent text-accent-foreground'
 								: ''}"
 						>

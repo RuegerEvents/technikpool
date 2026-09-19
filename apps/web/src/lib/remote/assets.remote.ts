@@ -43,7 +43,14 @@ import {
 	type CableInput
 } from '$lib/cable';
 import { ensureConnectors } from '$lib/server/services/connectors';
-import { getConnectors } from '$lib/remote/connectors.remote';
+import {
+	normalizePorts,
+	portSnapshot,
+	samePorts,
+	writePorts,
+	type PortSnapshot
+} from '$lib/server/services/product-ports';
+import { getConnectors, getConnectorUsage } from '$lib/remote/connectors.remote';
 import { getKnownAddresses } from '$lib/remote/addresses.remote';
 import { appError } from '$lib/errors';
 
@@ -160,7 +167,13 @@ export const getAsset = query(v.string(), async (assetId: string) => {
 	const asset = await prisma.asset.findUniqueOrThrow({
 		where: { id: assetId },
 		include: {
-			product: { include: { manufacturer: true, category: true } },
+			product: {
+				include: {
+					manufacturer: true,
+					category: true,
+					ports: { include: { connector: true }, orderBy: { sortOrder: 'asc' } }
+				}
+			},
 			location: true,
 			organization: true,
 			bundle: { select: { id: true, template: { select: { name: true } } } },
@@ -584,7 +597,10 @@ export const getProductCatalog = query(v.optional(v.string()), async (organizati
 				where: { organizationId: { in: queryOrgIds } },
 				select: { organizationId: true, netPurchasePrice: true }
 			},
-			_count: { select: { assets: { where: assetScope } } }
+			_count: { select: { assets: { where: assetScope } } },
+			// The device's panel. Carried here because the product editor is built
+			// on this row, on /products and on a product's own page alike.
+			ports: { include: { connector: true }, orderBy: { sortOrder: 'asc' } }
 		},
 		orderBy: [{ manufacturer: { name: 'asc' } }, { name: 'asc' }]
 	});
@@ -1944,6 +1960,70 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 	return product;
 });
 
+const setProductPortsSchema = v.object({
+	productId: v.string(),
+	ports: v.pipe(
+		v.array(
+			v.object({
+				connectorId: v.pipe(v.string(), v.minLength(1)),
+				count: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(999)),
+				label: v.nullable(v.pipe(v.string(), v.maxLength(80)))
+			})
+		),
+		v.maxLength(100)
+	)
+});
+
+/**
+ * The connectors built into a device, replaced as one list.
+ *
+ * Follows the picture rule rather than the identity rule, because a panel is
+ * the same kind of thing: a description someone looked up, not what decides
+ * which product a unit is. So the first panel is open to anyone who works in
+ * an org at all, and changing one somebody already entered answers to
+ * `productControl` like a replaced picture does.
+ */
+export const setProductPorts = command(setProductPortsSchema, async (input) => {
+	const user = await requireAuth();
+	const systemAdmin = await isSystemAdmin(user.id);
+
+	const product = await prisma.product.findUniqueOrThrow({
+		where: { id: input.productId },
+		select: { id: true, name: true, createdById: true, manufacturerId: true }
+	});
+	const before = await portSnapshot(product.id);
+	const next = normalizePorts(input.ports);
+	if (samePorts(before, next)) return;
+
+	if (!systemAdmin) {
+		if (before.length === 0) {
+			if ((await writableOrgIds(user.id)).length === 0) appError(403, 'product_edit_forbidden');
+		} else {
+			const managed = await managedOrgIds(user.id);
+			if (managed.length === 0) appError(403, 'product_edit_forbidden');
+			const control = await productControl({ id: user.id, systemAdmin, managed }, product);
+			if (!control.allowed) {
+				if (control.reason === 'foreign_units') {
+					appError(403, 'product_units_other_orgs', [control.orgNames]);
+				}
+				appError(403, 'product_unowned_not_creator', [product.name]);
+			}
+		}
+	}
+
+	await writePorts(product.id, next);
+	await logCatalogChange({
+		userId: user.id,
+		action: 'PRODUCT_UPDATED',
+		productId: product.id,
+		manufacturerId: product.manufacturerId,
+		data: { changes: [{ field: 'ports', from: before, to: await portSnapshot(product.id) }] }
+	});
+
+	await refreshProductViews(product, product.manufacturerId, { cable: null });
+	await getConnectorUsage().refresh();
+});
+
 /**
  * Everything that shows a product's name, picture or cable attributes. Shared
  * by `updateProduct` and `revertCatalogChange`, which move the same fields in
@@ -2132,6 +2212,16 @@ export const mergeProducts = command(
 			});
 			if (Object.keys(inherited).length > 0) {
 				await tx.product.update({ where: { id: targetProductId }, data: inherited });
+			}
+			// A device's panel is the same kind of work as its picture: the target
+			// takes the source's where it has none of its own, and keeps its own
+			// otherwise — two panels are never mixed into one.
+			const targetPorts = await tx.productPort.count({ where: { productId: targetProductId } });
+			if (targetPorts === 0) {
+				await tx.productPort.updateMany({
+					where: { productId: sourceProductId },
+					data: { productId: targetProductId }
+				});
 			}
 			const pricedOrgs = await tx.orgProductPrice.findMany({
 				where: { productId: targetProductId },
@@ -2369,7 +2459,31 @@ export const revertCatalogChange = command(v.string(), async (entryId: string) =
 		if (String(product[field] ?? null) !== String(change.to ?? null)) continue;
 		data[field] = (change.from ?? null) as string | number | boolean | null;
 	}
-	if (Object.keys(data).length === 0) appError(409, 'catalog_revert_stale');
+
+	// A device's panel is logged as the whole list on both sides, so it is
+	// reverted the same way: only while the product still has exactly the list
+	// this entry wrote. `FieldChange` types from/to as strings; for this field
+	// they are the snapshots `setProductPorts` logged.
+	const portsChange = logged.find((change) => change.field === 'ports');
+	const portsBefore = portsChange ? await portSnapshot(product.id) : [];
+	let portsRevert: PortSnapshot[] | null = null;
+	if (portsChange) {
+		const wrote = (portsChange.to ?? []) as unknown as PortSnapshot[];
+		if (samePorts(portsBefore, wrote)) {
+			const from = (portsChange.from ?? []) as unknown as PortSnapshot[];
+			// A connector nobody uses any more can have been deleted since.
+			const alive = new Set(
+				(
+					await prisma.connector.findMany({
+						where: { id: { in: from.map((p) => p.connectorId) } },
+						select: { id: true }
+					})
+				).map((c) => c.id)
+			);
+			portsRevert = from.filter((p) => alive.has(p.connectorId));
+		}
+	}
+	if (Object.keys(data).length === 0 && !portsRevert) appError(409, 'catalog_revert_stale');
 
 	// The rows an old value points at can be gone — merges delete them.
 	if (typeof data.manufacturerId === 'string') {
@@ -2380,18 +2494,26 @@ export const revertCatalogChange = command(v.string(), async (entryId: string) =
 		const exists = await prisma.category.findUnique({ where: { id: data.categoryId } });
 		if (!exists) delete data.categoryId;
 	}
-	if (Object.keys(data).length === 0) appError(409, 'catalog_revert_stale');
+	if (Object.keys(data).length === 0 && !portsRevert) appError(409, 'catalog_revert_stale');
 
-	const updated = await prisma.product.update({
-		where: { id: product.id },
-		data: data as Prisma.ProductUncheckedUpdateInput
-	});
+	const updated =
+		Object.keys(data).length > 0
+			? await prisma.product.update({
+					where: { id: product.id },
+					data: data as Prisma.ProductUncheckedUpdateInput
+				})
+			: product;
+	const changes = fieldChanges(product, data);
+	if (portsRevert) {
+		await writePorts(product.id, portsRevert);
+		changes.push({ field: 'ports', from: portsBefore, to: await portSnapshot(product.id) });
+	}
 	await logCatalogChange({
 		userId: user.id,
 		action: 'PRODUCT_UPDATED',
 		productId: updated.id,
 		manufacturerId: updated.manufacturerId,
-		data: { changes: fieldChanges(product, data), revertOf: entry.id }
+		data: { changes, revertOf: entry.id }
 	});
 
 	const cableTouched = (['cableType', 'connectorA', 'connectorB', 'lengthCm'] as const).some(
@@ -2400,6 +2522,7 @@ export const revertCatalogChange = command(v.string(), async (entryId: string) =
 	await refreshProductViews(updated, product.manufacturerId, {
 		cable: cableTouched ? [updated.connectorA, updated.connectorB] : null
 	});
+	if (portsRevert) await getConnectorUsage().refresh();
 	await getCatalogTransactions().refresh();
 });
 
