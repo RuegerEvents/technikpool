@@ -6,6 +6,8 @@
 	import { getMyOrgs, getAllOrgs, createOrg, getOrgIdentityInUse } from '$lib/remote/orgs.remote';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
+	import { invalidateAll } from '$app/navigation';
 	import { plural, getErrorMessage, orgLabel, getContrastingTextColor } from '$lib/utils';
 	import { roleName } from '$lib/role-descriptions.svelte';
 	import { OrgBadge } from '$lib/components/ui/org-badge';
@@ -19,7 +21,8 @@
 	let orgsQuery = $derived(data.isAdmin ? getAllOrgs() : getMyOrgs());
 	let orgs = $derived(orgsQuery.current ?? []);
 	// Colour, label and prefix are unique across all orgs, including ones this user cannot see.
-	let identityInUse = $derived(getOrgIdentityInUse().current ?? []);
+	let identityQuery = $derived(getOrgIdentityInUse());
+	let identityInUse = $derived(identityQuery.current ?? []);
 	let takenColors = $derived(identityInUse.map((o) => o.color.toLowerCase()));
 	let freePalette = $derived(ORG_COLOR_PALETTE.filter((c) => !takenColors.includes(c)));
 	let newOrgName = $state('');
@@ -34,6 +37,17 @@
 		newOrgColor = suggestOrgColor(takenColors);
 		createOpen = true;
 	}
+
+	// The dashboard sends someone who has no org yet here with `?new`, to land in
+	// the dialog rather than next to it. It waits for the identities in use, since
+	// the colour it suggests is the first one nobody has taken.
+	let openOnArrival = $state(page.url.searchParams.has('new'));
+
+	$effect(() => {
+		if (!openOnArrival || !identityQuery.ready) return;
+		openOnArrival = false;
+		openCreate();
+	});
 
 	async function handleCreateOrg(e: Event) {
 		e.preventDefault();
@@ -56,6 +70,9 @@
 				avatarLabel: newOrgAvatarLabel
 			});
 			toast.success(`Organization "${newOrgName}" created!`);
+			// The nav keeps the org-scoped pages from someone without an org, and that
+			// answer comes from the layout's load — a first org has to reach it.
+			if (!data.hasOrg) await invalidateAll();
 			createOpen = false;
 			newOrgName = '';
 			newOrgShortName = '';
@@ -83,10 +100,7 @@
 					: 'Manage your organizations and memberships.'}
 			</p>
 		</div>
-		<!-- Creating an org is a system admin's call: see `createOrg`. -->
-		{#if data.isAdmin}
-			<Button onclick={openCreate}>New Organization</Button>
-		{/if}
+		<Button onclick={openCreate}>New Organization</Button>
 	</div>
 
 	<div class="space-y-4">

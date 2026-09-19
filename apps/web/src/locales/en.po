@@ -7850,9 +7850,8 @@ msgstr "Stadthalle, club, open air…"
 msgid "Venue name"
 msgstr "Venue name"
 
-#: src/lib/error-messages.svelte.ts
-msgid "Only system admins can create organizations."
-msgstr "Only system admins can create organizations."
+#~ msgid "Only system admins can create organizations."
+#~ msgstr "Only system admins can create organizations."
 
 #. 0: p0
 #: src/lib/error-messages.svelte.ts
@@ -8080,3 +8079,23 @@ msgstr "Already in the catalog as <0/> — the units are added there, under that
 #: src/routes/products/+page.svelte
 msgid "Duplicate cable"
 msgstr "Duplicate cable"
+
+#: src/routes/+page.svelte
+msgid "You have not been added to an organization yet."
+msgstr "You have not been added to an organization yet."
+
+#: src/routes/+page.svelte
+msgid "<0/> New Organization"
+msgstr "<0/> New Organization"
+
+#: src/routes/+page.svelte
+msgid "Check again"
+msgstr "Check again"
+
+#: src/routes/+page.svelte
+msgid "You are not in an organization yet"
+msgstr "You are not in an organization yet"
+
+#: src/routes/+page.svelte
+msgid "Devices, productions and everything else belong to an organization, so there is nothing to show you yet. Create one — you become its owner — or ask an owner of an existing one to add you with this email address:"
+msgstr "Devices, productions and everything else belong to an organization, so there is nothing to show you yet. Create one — you become its owner — or ask an owner of an existing one to add you with this email address:"

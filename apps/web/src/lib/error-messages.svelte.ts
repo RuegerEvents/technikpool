@@ -23,8 +23,6 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'You are not a member of this organization.';
 		case 'org_manage_forbidden':
 			return 'Only org owners or system admins can manage this organization.';
-		case 'org_create_forbidden':
-			return 'Only system admins can create organizations.';
 		case 'billing_manage_forbidden':
 			return 'Only org admins and owners can manage offers and invoices.';
 		case 'production_delete_forbidden':

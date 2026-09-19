@@ -12,6 +12,7 @@
 	} from '$lib/remote/productions.remote';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
+	import { invalidateAll } from '$app/navigation';
 	import { plural, orgLabel } from '$lib/utils';
 	import { canManageInventory } from '$lib/roles';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
@@ -34,12 +35,16 @@
 	// holds the whole page back until it answers, so the dashboard would show
 	// nothing at all — not even its heading — while the counts were being
 	// totted up. See CLAUDE.md, "Loading states".
-	let orgs = $derived(data.user ? (getMyOrgs().current ?? []) : []);
+	//
+	// None of them is asked without an org: every answer would be a zero, and the
+	// page says what to do about that instead.
+	let active = $derived(!!data.user && data.hasOrg);
+	let orgs = $derived(active ? (getMyOrgs().current ?? []) : []);
 	let adminOrgs = $derived(orgs.filter(canManageInventory));
-	let pendingQueries = $derived(data.user ? adminOrgs.map((o) => getPendingApprovals(o.id)) : []);
+	let pendingQueries = $derived(active ? adminOrgs.map((o) => getPendingApprovals(o.id)) : []);
 	let pendingReady = $derived(pendingQueries.every((q) => q.ready));
 	let pending = $derived(pendingQueries.flatMap((q) => q.current ?? []));
-	let statsQuery = $derived(data.user ? getDashboardStats() : null);
+	let statsQuery = $derived(active ? getDashboardStats() : null);
 	let stats = $derived(statsQuery?.current ?? null);
 
 	type PendingItem = (typeof pending)[number];
@@ -129,6 +134,20 @@
 			month: 'short'
 		});
 	}
+
+	// `hasOrg` comes from the layout's server load, which has no reason to run
+	// again while someone sits on this page waiting to be added.
+	let checking = $state(false);
+
+	async function checkAgain() {
+		checking = true;
+		try {
+			await invalidateAll();
+			if (!data.hasOrg) toast.info('You have not been added to an organization yet.');
+		} finally {
+			checking = false;
+		}
+	}
 </script>
 
 <svelte:head><title>Technikpool</title></svelte:head>
@@ -180,6 +199,28 @@
 		<div class="mt-8 flex gap-4">
 			<Button href={resolve('/auth/login')} size="lg">Login</Button>
 			<Button href={resolve('/auth/register')} variant="outline" size="lg">Sign Up</Button>
+		</div>
+	</div>
+{:else if !data.hasOrg}
+	<div class="mx-auto flex max-w-xl flex-col items-center py-16 text-center">
+		<div class="flex size-14 items-center justify-center rounded-full bg-muted">
+			<Building2 aria-hidden="true" class="size-7 text-muted-foreground" />
+		</div>
+		<h1 class="mt-6 text-3xl font-bold tracking-tight">You are not in an organization yet</h1>
+		<p class="mt-3 text-muted-foreground">
+			Devices, productions and everything else belong to an organization, so there is nothing to
+			show you yet. Create one — you become its owner — or ask an owner of an existing one to add
+			you with this email address:
+		</p>
+		<p class="mt-4 rounded-md border bg-card px-4 py-2 font-mono text-sm select-all">
+			{data.user.email}
+		</p>
+		<div class="mt-8 flex flex-wrap justify-center gap-3">
+			<Button href={resolve('/orgs?new')}>
+				<Plus aria-hidden="true" class="mr-1 size-4" />
+				New Organization
+			</Button>
+			<Button variant="outline" onclick={checkAgain} disabled={checking}>Check again</Button>
 		</div>
 	</div>
 {:else}

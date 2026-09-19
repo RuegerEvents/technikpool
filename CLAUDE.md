@@ -187,8 +187,8 @@ carry them anywhere by accident.
 
 ## Who gets in: sign-up, invitations, orgs
 
-The catalog is shared between orgs, so an account is a write permission of sorts. Three gates,
-all decided by system admins:
+The catalog is shared between orgs, so an account is a write permission of sorts. The gate is
+on **accounts**, and system admins decide it:
 
 - **Sign-up is closed by default** (`SystemSettings.signUpEnabled`, one row, switched on
   `/admin/users`). The very first account of an install always gets through and becomes system
@@ -199,8 +199,10 @@ all decided by system admins:
   with the invited role. System admins invite from `/admin/users`; an org OWNER invites into
   their own org simply by adding an address that has no account yet (`addUserToOrg` falls back
   to `issueInvitation`). The link is shown to the inviter once, since it cannot be recovered.
-- **`createOrg` is system admin only.** Being ADMIN/OWNER of _some_ org is what the catalog
-  rules below key on, so handing out orgs is the instance's decision.
+- **`createOrg` is open to every account**, and the creator becomes OWNER. Who gets in is
+  settled at sign-up; past that an account without an org can do nothing, so making it ask
+  someone for one only adds a step. An account with no org is kept on the dashboard, which
+  says exactly this (`hasOrg` in `+layout.server.ts`, the guard in `+layout.ts`).
 
 The gate itself is `src/lib/server/signup-gate.ts`, called from `databaseHooks.user.create` in
 `auth.ts` rather than from the `/sign-up/email` route, so a second way of creating accounts

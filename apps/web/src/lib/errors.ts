@@ -20,7 +20,6 @@ export type AppErrorCode =
 	| 'admin_required'
 	| 'not_org_member'
 	| 'org_manage_forbidden'
-	| 'org_create_forbidden'
 	| 'billing_manage_forbidden'
 	| 'production_delete_forbidden'
 	| 'asset_create_forbidden'

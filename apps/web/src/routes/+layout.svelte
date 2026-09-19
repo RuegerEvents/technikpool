@@ -104,93 +104,97 @@
 										<LayoutDashboard aria-hidden="true" />
 										Dashboard
 									</DropdownMenu.Item>
-									<DropdownMenu.Item
-										onSelect={() => goto(resolve('/assets'))}
-										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-									>
-										<Package aria-hidden="true" />
-										Devices
-									</DropdownMenu.Item>
-									<DropdownMenu.Item
-										onSelect={() => goto(resolve('/productions'))}
-										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-									>
-										<Clapperboard aria-hidden="true" />
-										Productions
-									</DropdownMenu.Item>
-									<DropdownMenu.Item
-										onSelect={() => goto(resolve('/calendar'))}
-										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-									>
-										<CalendarDays aria-hidden="true" />
-										Calendar
-									</DropdownMenu.Item>
-									<DropdownMenu.Item
-										onSelect={() => goto(resolve('/checkout'))}
-										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-									>
-										<ScanBarcode aria-hidden="true" />
-										Checkout
-									</DropdownMenu.Item>
-									{#if data.canBill}
+									<!-- Every one of these lists what the user's orgs hold, so without an org
+									     they are all empty pages: see the guard in `+layout.ts`. -->
+									{#if data.hasOrg}
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/offers'))}
+											onSelect={() => goto(resolve('/assets'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
-											<FileText aria-hidden="true" />
-											Offers
+											<Package aria-hidden="true" />
+											Devices
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/invoices'))}
+											onSelect={() => goto(resolve('/productions'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
-											<ReceiptText aria-hidden="true" />
-											Invoices
+											<Clapperboard aria-hidden="true" />
+											Productions
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/calendar'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<CalendarDays aria-hidden="true" />
+											Calendar
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/checkout'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<ScanBarcode aria-hidden="true" />
+											Checkout
+										</DropdownMenu.Item>
+										{#if data.canBill}
+											<DropdownMenu.Item
+												onSelect={() => goto(resolve('/offers'))}
+												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+											>
+												<FileText aria-hidden="true" />
+												Offers
+											</DropdownMenu.Item>
+											<DropdownMenu.Item
+												onSelect={() => goto(resolve('/invoices'))}
+												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+											>
+												<ReceiptText aria-hidden="true" />
+												Invoices
+											</DropdownMenu.Item>
+										{/if}
+										<DropdownMenu.Separator class="my-1 h-px bg-border" />
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/customers'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<Users aria-hidden="true" />
+											Customers
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/products'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<Boxes aria-hidden="true" />
+											Products
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/manufacturers'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<Factory aria-hidden="true" />
+											Manufacturers
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/stickers'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<Tags aria-hidden="true" />
+											Stickers
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/inspections'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<ClipboardCheck aria-hidden="true" />
+											Inspections
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/devices'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<ScanBarcode aria-hidden="true" />
+											Scanners
 										</DropdownMenu.Item>
 									{/if}
-									<DropdownMenu.Separator class="my-1 h-px bg-border" />
-									<DropdownMenu.Item
-										onSelect={() => goto(resolve('/customers'))}
-										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-									>
-										<Users aria-hidden="true" />
-										Customers
-									</DropdownMenu.Item>
-									<DropdownMenu.Item
-										onSelect={() => goto(resolve('/products'))}
-										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-									>
-										<Boxes aria-hidden="true" />
-										Products
-									</DropdownMenu.Item>
-									<DropdownMenu.Item
-										onSelect={() => goto(resolve('/manufacturers'))}
-										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-									>
-										<Factory aria-hidden="true" />
-										Manufacturers
-									</DropdownMenu.Item>
-									<DropdownMenu.Item
-										onSelect={() => goto(resolve('/stickers'))}
-										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-									>
-										<Tags aria-hidden="true" />
-										Stickers
-									</DropdownMenu.Item>
-									<DropdownMenu.Item
-										onSelect={() => goto(resolve('/inspections'))}
-										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-									>
-										<ClipboardCheck aria-hidden="true" />
-										Inspections
-									</DropdownMenu.Item>
-									<DropdownMenu.Item
-										onSelect={() => goto(resolve('/devices'))}
-										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-									>
-										<ScanBarcode aria-hidden="true" />
-										Scanners
-									</DropdownMenu.Item>
 									{#if data.isAdmin}
 										<DropdownMenu.Separator class="my-1 h-px bg-border" />
 										<DropdownMenu.Item
@@ -238,166 +242,168 @@
 					</a>
 					{#if data.user}
 						<nav class="hidden gap-3 lg:flex lg:gap-5">
-							<a
-								href={resolve('/assets')}
-								class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
-									'/assets'
-								)
-									? 'text-foreground'
-									: 'text-muted-foreground hover:text-foreground'}"
-								><Package aria-hidden="true" class="size-4" />Devices</a
-							>
-							<a
-								href={resolve('/productions')}
-								class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
-									'/productions'
-								)
-									? 'text-foreground'
-									: 'text-muted-foreground hover:text-foreground'}"
-								><Clapperboard aria-hidden="true" class="size-4" />Productions</a
-							>
-							<a
-								href={resolve('/calendar')}
-								class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
-									'/calendar'
-								)
-									? 'text-foreground'
-									: 'text-muted-foreground hover:text-foreground'}"
-								><CalendarDays aria-hidden="true" class="size-4" />Calendar</a
-							>
-							<a
-								href={resolve('/checkout')}
-								class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
-									'/checkout'
-								)
-									? 'text-foreground'
-									: 'text-muted-foreground hover:text-foreground'}"
-								><ScanBarcode aria-hidden="true" class="size-4" />Checkout</a
-							>
-							{#if data.canBill}
+							{#if data.hasOrg}
 								<a
-									href={resolve('/offers')}
+									href={resolve('/assets')}
 									class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
-										'/offers'
+										'/assets'
 									)
 										? 'text-foreground'
 										: 'text-muted-foreground hover:text-foreground'}"
-									><FileText aria-hidden="true" class="size-4" />Offers</a
+									><Package aria-hidden="true" class="size-4" />Devices</a
 								>
 								<a
-									href={resolve('/invoices')}
+									href={resolve('/productions')}
 									class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
-										'/invoices'
+										'/productions'
 									)
 										? 'text-foreground'
 										: 'text-muted-foreground hover:text-foreground'}"
-									><ReceiptText aria-hidden="true" class="size-4" />Invoices</a
+									><Clapperboard aria-hidden="true" class="size-4" />Productions</a
 								>
-							{/if}
-							<DropdownMenu.Root>
-								<DropdownMenu.Trigger>
-									{#snippet child({ props })}
-										<button
-											{...props}
-											type="button"
-											class="flex items-center gap-1 text-sm font-medium transition-colors {page.url.pathname.startsWith(
-												'/stickers'
-											) ||
-											page.url.pathname.startsWith('/products') ||
-											page.url.pathname.startsWith('/manufacturers') ||
-											page.url.pathname.startsWith('/devices') ||
-											page.url.pathname.startsWith('/inspections') ||
-											page.url.pathname.startsWith('/customers') ||
-											page.url.pathname.startsWith('/admin/categories') ||
-											page.url.pathname.startsWith('/admin/connectors')
-												? 'text-foreground'
-												: 'text-muted-foreground hover:text-foreground'}"
-										>
-											<Wrench aria-hidden="true" class="size-4" />
-											Tools
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												width="13"
-												height="13"
-												viewBox="0 0 24 24"
-												fill="none"
-												stroke="currentColor"
-												stroke-width="2"
-												stroke-linecap="round"
-												stroke-linejoin="round"
-											>
-												<path d="m6 9 6 6 6-6" />
-											</svg>
-										</button>
-									{/snippet}
-								</DropdownMenu.Trigger>
-								<DropdownMenu.Portal>
-									<DropdownMenu.Content
-										align="start"
-										sideOffset={6}
-										class="z-50 min-w-[180px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md [&_svg]:size-4"
+								<a
+									href={resolve('/calendar')}
+									class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
+										'/calendar'
+									)
+										? 'text-foreground'
+										: 'text-muted-foreground hover:text-foreground'}"
+									><CalendarDays aria-hidden="true" class="size-4" />Calendar</a
+								>
+								<a
+									href={resolve('/checkout')}
+									class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
+										'/checkout'
+									)
+										? 'text-foreground'
+										: 'text-muted-foreground hover:text-foreground'}"
+									><ScanBarcode aria-hidden="true" class="size-4" />Checkout</a
+								>
+								{#if data.canBill}
+									<a
+										href={resolve('/offers')}
+										class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
+											'/offers'
+										)
+											? 'text-foreground'
+											: 'text-muted-foreground hover:text-foreground'}"
+										><FileText aria-hidden="true" class="size-4" />Offers</a
 									>
-										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/customers'))}
-											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+									<a
+										href={resolve('/invoices')}
+										class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
+											'/invoices'
+										)
+											? 'text-foreground'
+											: 'text-muted-foreground hover:text-foreground'}"
+										><ReceiptText aria-hidden="true" class="size-4" />Invoices</a
+									>
+								{/if}
+								<DropdownMenu.Root>
+									<DropdownMenu.Trigger>
+										{#snippet child({ props })}
+											<button
+												{...props}
+												type="button"
+												class="flex items-center gap-1 text-sm font-medium transition-colors {page.url.pathname.startsWith(
+													'/stickers'
+												) ||
+												page.url.pathname.startsWith('/products') ||
+												page.url.pathname.startsWith('/manufacturers') ||
+												page.url.pathname.startsWith('/devices') ||
+												page.url.pathname.startsWith('/inspections') ||
+												page.url.pathname.startsWith('/customers') ||
+												page.url.pathname.startsWith('/admin/categories') ||
+												page.url.pathname.startsWith('/admin/connectors')
+													? 'text-foreground'
+													: 'text-muted-foreground hover:text-foreground'}"
+											>
+												<Wrench aria-hidden="true" class="size-4" />
+												Tools
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													width="13"
+													height="13"
+													viewBox="0 0 24 24"
+													fill="none"
+													stroke="currentColor"
+													stroke-width="2"
+													stroke-linecap="round"
+													stroke-linejoin="round"
+												>
+													<path d="m6 9 6 6 6-6" />
+												</svg>
+											</button>
+										{/snippet}
+									</DropdownMenu.Trigger>
+									<DropdownMenu.Portal>
+										<DropdownMenu.Content
+											align="start"
+											sideOffset={6}
+											class="z-50 min-w-[180px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md [&_svg]:size-4"
 										>
-											<Users aria-hidden="true" />
-											Customers
-										</DropdownMenu.Item>
-										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/products'))}
-											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-										>
-											<Boxes aria-hidden="true" />
-											Products
-										</DropdownMenu.Item>
-										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/manufacturers'))}
-											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-										>
-											<Factory aria-hidden="true" />
-											Manufacturers
-										</DropdownMenu.Item>
-										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/stickers'))}
-											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-										>
-											<Tags aria-hidden="true" />
-											Stickers
-										</DropdownMenu.Item>
-										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/inspections'))}
-											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-										>
-											<ClipboardCheck aria-hidden="true" />
-											Inspections
-										</DropdownMenu.Item>
-										{#if data.isAdmin}
 											<DropdownMenu.Item
-												onSelect={() => goto(resolve('/admin/categories'))}
+												onSelect={() => goto(resolve('/customers'))}
 												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 											>
-												<Shapes aria-hidden="true" />
-												Categories
+												<Users aria-hidden="true" />
+												Customers
 											</DropdownMenu.Item>
 											<DropdownMenu.Item
-												onSelect={() => goto(resolve('/admin/connectors'))}
+												onSelect={() => goto(resolve('/products'))}
 												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 											>
-												<PlugZap aria-hidden="true" />
-												Connectors
+												<Boxes aria-hidden="true" />
+												Products
 											</DropdownMenu.Item>
-										{/if}
-										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/devices'))}
-											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-										>
-											<ScanBarcode aria-hidden="true" />
-											Scanners
-										</DropdownMenu.Item>
-									</DropdownMenu.Content>
-								</DropdownMenu.Portal>
-							</DropdownMenu.Root>
+											<DropdownMenu.Item
+												onSelect={() => goto(resolve('/manufacturers'))}
+												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+											>
+												<Factory aria-hidden="true" />
+												Manufacturers
+											</DropdownMenu.Item>
+											<DropdownMenu.Item
+												onSelect={() => goto(resolve('/stickers'))}
+												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+											>
+												<Tags aria-hidden="true" />
+												Stickers
+											</DropdownMenu.Item>
+											<DropdownMenu.Item
+												onSelect={() => goto(resolve('/inspections'))}
+												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+											>
+												<ClipboardCheck aria-hidden="true" />
+												Inspections
+											</DropdownMenu.Item>
+											{#if data.isAdmin}
+												<DropdownMenu.Item
+													onSelect={() => goto(resolve('/admin/categories'))}
+													class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+												>
+													<Shapes aria-hidden="true" />
+													Categories
+												</DropdownMenu.Item>
+												<DropdownMenu.Item
+													onSelect={() => goto(resolve('/admin/connectors'))}
+													class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+												>
+													<PlugZap aria-hidden="true" />
+													Connectors
+												</DropdownMenu.Item>
+											{/if}
+											<DropdownMenu.Item
+												onSelect={() => goto(resolve('/devices'))}
+												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+											>
+												<ScanBarcode aria-hidden="true" />
+												Scanners
+											</DropdownMenu.Item>
+										</DropdownMenu.Content>
+									</DropdownMenu.Portal>
+								</DropdownMenu.Root>
+							{/if}
 							{#if data.isAdmin}
 								<DropdownMenu.Root>
 									<DropdownMenu.Trigger>

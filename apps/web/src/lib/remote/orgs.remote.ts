@@ -271,11 +271,10 @@ const createOrgSchema = v.object({
 export const createOrg = command(
 	createOrgSchema,
 	async ({ name, shortName, assetIdPrefix, color, avatarLabel }) => {
-		// An org is what makes someone an admin of anything, and org admins write
-		// to the shared catalog — so handing them out is the instance's decision.
-		// The creator still becomes OWNER, as the first member.
+		// Open to every account: who gets an account at all is what the instance
+		// decides (see `signup-gate.ts`), and an account without an org can do
+		// nothing. The creator becomes OWNER, as the first member.
 		const user = await requireAuth();
-		if (!(await isSystemAdmin(user.id))) appError(403, 'org_create_forbidden');
 		const prefix = normalizePrefix(assetIdPrefix);
 		const normalizedColor = normalizeColor(color);
 		const normalizedLabel = normalizeAvatarLabel(avatarLabel);
