@@ -63,6 +63,21 @@ export const getOrgUsers = query(async () => {
 	return orgMembers.map((m) => m.user);
 });
 
+/**
+ * Stars an org as the user's home: the one lists open on (see `homeOrgId` in
+ * `+layout.server.ts`). Only an org they belong to — a system admin sees every
+ * org, but a list scoped to one they are not in would only come back empty.
+ */
+export const setHomeOrg = command(v.string(), async (orgId: string) => {
+	const user = await requireAuth();
+	const membership = await prisma.orgMembership.findUnique({
+		where: { userId_organizationId: { userId: user.id, organizationId: orgId } },
+		select: { id: true }
+	});
+	if (!membership) appError(403, 'not_org_member');
+	await prisma.user.update({ where: { id: user.id }, data: { homeOrgId: orgId } });
+});
+
 export const getOrgWithMembers = query(v.string(), async (orgId: string) => {
 	const user = await requireAuth();
 	const admin = await isSystemAdmin(user.id);

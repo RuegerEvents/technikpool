@@ -1,21 +1,23 @@
 import type { LayoutServerLoad } from './$types';
 import { prisma } from '$lib/server/auth';
-import { ROLE_FOR, roleAtLeast } from '$lib/roles';
+import { ROLE_FOR, roleAtLeast, roleRank } from '$lib/roles';
 
 export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 	let isAdmin = false;
 	let canBill = false;
 	let canReadRecords = false;
 	let hasOrg = false;
+	let homeOrgId: string | null = null;
 	if (locals.user?.id) {
 		const [dbUser, memberships] = await Promise.all([
 			prisma.user.findUnique({
 				where: { id: locals.user.id },
-				select: { isAdmin: true }
+				select: { isAdmin: true, homeOrgId: true }
 			}),
 			prisma.orgMembership.findMany({
 				where: { userId: locals.user.id },
-				select: { role: true }
+				select: { role: true, organizationId: true },
+				orderBy: { createdAt: 'asc' }
 			})
 		]);
 		isAdmin = dbUser?.isAdmin ?? false;
@@ -30,6 +32,13 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 		// Productions stay in the nav for them — the list holds the ones they
 		// are crew on.
 		canReadRecords = isAdmin || memberships.some((m) => roleAtLeast(m.role, ROLE_FOR.read));
+		// The org a list starts on: the one set as home, while still a member of
+		// it, else the one this user has the most say in — the oldest on a tie,
+		// since the sort is stable and the memberships come oldest first.
+		homeOrgId =
+			memberships.find((m) => m.organizationId === dbUser?.homeOrgId)?.organizationId ??
+			memberships.toSorted((a, b) => roleRank(b.role) - roleRank(a.role))[0]?.organizationId ??
+			null;
 	}
 	return {
 		user: locals.user,
@@ -37,6 +46,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 		isAdmin,
 		canBill,
 		canReadRecords,
+		homeOrgId,
 		hasOrg,
 		locale: cookies.get('locale') ?? 'de'
 	};

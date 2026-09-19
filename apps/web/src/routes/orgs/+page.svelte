@@ -3,7 +3,14 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import { getMyOrgs, getAllOrgs, createOrg, getOrgIdentityInUse } from '$lib/remote/orgs.remote';
+	import {
+		getMyOrgs,
+		getAllOrgs,
+		createOrg,
+		getOrgIdentityInUse,
+		setHomeOrg
+	} from '$lib/remote/orgs.remote';
+	import { Star } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -32,6 +39,24 @@
 	let newOrgAvatarLabel = $state('');
 	let creating = $state(false);
 	let createOpen = $state(false);
+
+	// One star per user: the home org, which the device list opens on. The layout
+	// works out which one it is — a starred org, or the fallback when none is —
+	// so re-running it after a change is what moves the star.
+	let starring = $state<string | null>(null);
+
+	async function star(orgId: string) {
+		if (orgId === data.homeOrgId || starring) return;
+		starring = orgId;
+		try {
+			await setHomeOrg(orgId);
+			await invalidateAll();
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			starring = null;
+		}
+	}
 
 	function openCreate() {
 		newOrgColor = suggestOrgColor(takenColors);
@@ -121,7 +146,23 @@
 					<Card.Root>
 						<Card.Content class="flex items-center justify-between py-4">
 							<div>
-								<p class="font-medium">
+								<p class="flex items-center gap-1.5 font-medium">
+									{#if org.role}
+										{@const home = org.id === data.homeOrgId}
+										<button
+											type="button"
+											class="rounded-sm p-1 text-muted-foreground transition-colors hover:text-foreground disabled:cursor-default"
+											aria-pressed={home}
+											aria-label={home ? 'Home organization' : 'Make home organization'}
+											title={home
+												? 'Home organization — lists open on it'
+												: 'Make home organization — lists open on it'}
+											disabled={home || starring !== null}
+											onclick={() => star(org.id)}
+										>
+											<Star class="size-4 {home ? 'fill-foreground text-foreground' : ''}" />
+										</button>
+									{/if}
 									<OrgBadge name={orgLabel(org)} color={org.color} avatarLabel={org.avatarLabel} />
 								</p>
 								<p class="text-sm text-muted-foreground">

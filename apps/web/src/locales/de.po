@@ -8413,3 +8413,19 @@ msgstr "Sieht die Geräte, aber keine Produktionen, Kunden oder Preise – auße
 #: src/lib/role-descriptions.svelte.ts
 msgid "Can see everything except offers and invoices, but change nothing."
 msgstr "Sieht alles außer Angeboten und Rechnungen, ändert nichts."
+
+#: src/routes/orgs/+page.svelte
+msgid "Home organization"
+msgstr "Home-Organisation"
+
+#: src/routes/orgs/+page.svelte
+msgid "Make home organization"
+msgstr "Als Home-Organisation festlegen"
+
+#: src/routes/orgs/+page.svelte
+msgid "Home organization — lists open on it"
+msgstr "Home-Organisation — Listen öffnen mit ihr"
+
+#: src/routes/orgs/+page.svelte
+msgid "Make home organization — lists open on it"
+msgstr "Als Home-Organisation festlegen — Listen öffnen dann mit ihr"

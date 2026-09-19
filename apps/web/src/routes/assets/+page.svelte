@@ -52,7 +52,13 @@
 	const initial = page.url.searchParams;
 	const initialStatus = initial.get('status') ?? '';
 
-	let filterOrgId = $state(initial.get('org') ?? '');
+	// The list opens on the user's own org, not the whole pool: that is the
+	// equipment they look after. "All organizations" is a choice of its own, so
+	// it has its own value in the URL.
+	const ALL_ORGS = 'all';
+	const defaultOrgId = page.data.homeOrgId ?? ALL_ORGS;
+	let filterOrgId = $state(initial.get('org') ?? defaultOrgId);
+	let queryOrgId = $derived(filterOrgId === ALL_ORGS ? undefined : filterOrgId);
 	let searchQuery = $state(initial.get('q') ?? '');
 	let statusFilter = $state(
 		statusFilterOptions.some(([value]) => value === initialStatus) ? initialStatus : ''
@@ -100,7 +106,7 @@
 	$effect(() => {
 		const url = new URL(page.url);
 		const params = {
-			org: filterOrgId,
+			org: filterOrgId === defaultOrgId ? '' : filterOrgId,
 			q: searchQuery,
 			status: statusFilter,
 			category: categoryFilter,
@@ -127,11 +133,7 @@
 	// suspends the whole page until it answers — heading, filters and all — and
 	// this one asks for every unit in the pool. See CLAUDE.md, "Loading states".
 	let orgs = $derived(getMyOrgs().current ?? []);
-	let assetsQuery = $derived(
-		showingRetired
-			? getRetiredAssets(filterOrgId || undefined)
-			: getAssets(filterOrgId || undefined)
-	);
+	let assetsQuery = $derived(showingRetired ? getRetiredAssets(queryOrgId) : getAssets(queryOrgId));
 	let assets = $derived(assetsQuery.current ?? []);
 	let categories = $derived(getCategories().current ?? []);
 
@@ -149,7 +151,7 @@
 
 	let templates = $derived(
 		bundleGrouping
-			? (getBundleTemplates(filterOrgId || undefined).current ?? ([] as TemplateData[]))
+			? (getBundleTemplates(queryOrgId).current ?? ([] as TemplateData[]))
 			: ([] as TemplateData[])
 	);
 
@@ -204,7 +206,7 @@
 	// From the license list itself rather than from `assets`: it also holds the
 	// licenses another org lent to a production this user crews, which is how
 	// they find the key without belonging to the org that keeps it.
-	let hasLicenses = $derived((getLicenses(filterOrgId || undefined).current?.length ?? 0) > 0);
+	let hasLicenses = $derived((getLicenses(queryOrgId).current?.length ?? 0) > 0);
 
 	// The select's value: a kind, or `ctype:<type>` for one cable type.
 	let kindValue = $derived(cableTypeFilter ? `ctype:${cableTypeFilter}` : kindFilter);
@@ -617,7 +619,7 @@
 				bind:value={filterOrgId}
 				class="h-10 max-w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
 			>
-				<option value="">All Organizations</option>
+				<option value={ALL_ORGS}>All Organizations</option>
 				{#each orgs as org (org.id)}<option value={org.id}>{orgLabel(org)}</option>{/each}
 			</select>
 			<Button variant="outline" onclick={() => (showImportModal = true)}>Import CSV</Button>
@@ -800,7 +802,7 @@
 
 	{#if showingLicenses}
 		<LicenseList
-			organizationId={filterOrgId}
+			organizationId={queryOrgId ?? ''}
 			search={searchQuery}
 			categoryId={categoryFilter}
 			selectedIds={selectedAssetIds}

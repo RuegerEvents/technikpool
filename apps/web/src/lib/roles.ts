@@ -28,6 +28,11 @@ export function roleAtLeast(role: OrgRole, min: OrgRole): boolean {
 	return ROLE_RANK[role] >= ROLE_RANK[min];
 }
 
+/** Position on the ladder, for sorting — higher has more say. */
+export function roleRank(role: OrgRole): number {
+	return ROLE_RANK[role];
+}
+
 /** Every rung that clears `min`, for a `role: { in: … }` filter. */
 export function rolesAtLeast(min: OrgRole): OrgRole[] {
 	return ORG_ROLES.filter((role) => roleAtLeast(role, min));
