@@ -11,7 +11,9 @@
 	import { CategorySelect } from '$lib/components/ui/category-select';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { Star } from '@lucide/svelte';
+	import { OrgBadge } from '$lib/components/ui/org-badge';
+	import { Fact } from '$lib/components/ui/fact';
+	import { Boxes, CircleAlert, CircleCheck, Euro, Layers, MapPin, Star, Tag } from '@lucide/svelte';
 	import {
 		getBundle,
 		getBundleTypeSpec,
@@ -30,6 +32,9 @@
 		getBundleCopyPlan
 	} from '$lib/remote/assets.remote';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
+	import { canWrite } from '$lib/roles';
+	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
@@ -223,6 +228,14 @@
 		}
 	}
 
+	// Same line `regenerateBundleImage` draws: anyone who may write to the org.
+	// Read without awaiting, so the page doesn't wait on it — the button just
+	// turns up once the answer is in.
+	let myOrgs = $derived(getMyOrgs().current ?? []);
+	let canRegenerateImage = $derived(
+		page.data.isAdmin || myOrgs.some((o) => o.id === bundle.template.organizationId && canWrite(o))
+	);
+
 	async function handleRegenerateImage() {
 		regeneratingImage = true;
 		try {
@@ -266,6 +279,11 @@
 	let memberCounts = $derived(countProducts(bundle.assets.filter((a) => a.parentAssetId === null)));
 	let shortfall = $derived(specShortfall(specLines, memberCounts));
 	let missingUnits = $derived(shortfall.reduce((total, line) => total + line.missing, 0));
+	let specTotal = $derived(specLines.reduce((total, line) => total + line.quantity, 0));
+	let specHave = $derived(specTotal - missingUnits);
+
+	let mainDeviceCount = $derived(bundle.assets.filter((a) => a.parentAssetId === null).length);
+	let accessoryCount = $derived(bundle.assets.length - mainDeviceCount);
 	// Deliberate, and the acknowledgement at the same time: ticking it is what
 	// says the kit itself is changing.
 	let changeType = $state(false);
@@ -363,292 +381,340 @@
 <svelte:head><title>{bundle.template.name} | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
-	<div class="flex flex-wrap items-center justify-between gap-4">
-		<div>
-			<h1 class="text-3xl font-bold tracking-tight">
-				{bundle.template.name}{bundle.tag ? ` — ${bundle.tag}` : ''}
-			</h1>
-			<p class="text-muted-foreground">{orgLabel(bundle.template.organization)}</p>
-		</div>
-		<div class="flex flex-wrap gap-2">
-			<Button
-				variant="outline"
-				href={resolve(`/assets/bundles/${bundleId}/inventory-list`)}
-				target="_blank"
-			>
-				Print Inventory List
-			</Button>
+	<!-- The case at a glance: what it looks like, whether it is all there, and where. -->
+	<div
+		class="flex flex-col gap-6 rounded-xl bg-card p-6 shadow-xs ring-1 ring-foreground/10 lg:flex-row"
+	>
+		<!-- On a phone the image stacks above everything else, so the way back
+		     would otherwise sit a whole picture further down. -->
+		<div class="lg:hidden">
 			<Button icon="back" variant="outline" href={resolve('/assets')}>Back to Devices</Button>
-			<DropdownMenu.Root>
-				<DropdownMenu.Trigger>
-					{#snippet child({ props })}
-						<button
-							{...props}
-							type="button"
-							class="flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-							aria-label="More actions"
-						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="18"
-								height="18"
-								viewBox="0 0 24 24"
-								fill="currentColor"
+		</div>
+		<div
+			class="relative w-full shrink-0 overflow-hidden rounded-lg bg-muted/40 lg:w-96 lg:self-start"
+		>
+			{#if bundle.imagePath}
+				<img
+					src={imageSrc(bundle.imagePath)}
+					alt={`Generated preview of ${bundle.template.name}`}
+					class="aspect-[4/3] w-full object-contain"
+				/>
+			{:else}
+				<div class="flex aspect-[4/3] w-full items-center justify-center text-muted-foreground">
+					<Layers class="size-10" />
+				</div>
+			{/if}
+			{#if canRegenerateImage}
+				<!-- Top left: the drawing puts its own count badge in the top right. -->
+				<Button
+					icon="refresh"
+					variant="outline"
+					size="icon-sm"
+					class="absolute top-2 left-2 bg-background/80 backdrop-blur-sm"
+					title="Regenerate image"
+					aria-label="Regenerate image"
+					disabled={regeneratingImage}
+					onclick={handleRegenerateImage}
+				/>
+			{/if}
+		</div>
+
+		<div class="flex min-w-0 flex-1 flex-col gap-4">
+			<div class="flex flex-wrap items-start justify-between gap-4">
+				<div class="min-w-0 space-y-2">
+					<OrgBadge
+						name={orgLabel(bundle.template.organization)}
+						color={bundle.template.organization.color}
+						avatarLabel={bundle.template.organization.avatarLabel}
+						class="text-sm text-muted-foreground"
+					/>
+					<h1 class="text-3xl font-bold tracking-tight">{bundle.template.name}</h1>
+					<div class="flex flex-wrap items-center gap-2">
+						<CategoryPill
+							name={categoryLabel(bundle.template.category)}
+							color={bundle.template.category.color}
+						/>
+						{#if bundle.tag}
+							<span
+								class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 font-mono text-xs"
+								title="Tag"
 							>
-								<circle cx="5" cy="12" r="1.75" />
-								<circle cx="12" cy="12" r="1.75" />
-								<circle cx="19" cy="12" r="1.75" />
-							</svg>
-						</button>
-					{/snippet}
-				</DropdownMenu.Trigger>
-				<DropdownMenu.Portal>
-					<DropdownMenu.Content
-						align="end"
-						sideOffset={4}
-						class="z-50 min-w-[190px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+								<Tag class="size-3 text-muted-foreground" />{bundle.tag}
+							</span>
+						{/if}
+					</div>
+				</div>
+				<div class="flex flex-wrap gap-2">
+					<Button icon="edit" variant="outline" onclick={() => (editingBundle = true)}>Edit</Button>
+					<Button
+						icon="print"
+						variant="outline"
+						href={resolve(`/assets/bundles/${bundleId}/inventory-list`)}
+						target="_blank"
 					>
-						<DropdownMenu.Item
-							onSelect={openCopy}
-							class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-accent"
-						>
-							Duplicate bundle
-						</DropdownMenu.Item>
-						<DropdownMenu.Item
-							disabled={bundle.assets.length < 2}
-							onSelect={openConvert}
-							class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-accent"
-						>
-							Convert to device
-						</DropdownMenu.Item>
-					</DropdownMenu.Content>
-				</DropdownMenu.Portal>
-			</DropdownMenu.Root>
+						Print Inventory List
+					</Button>
+					<Button
+						icon="back"
+						variant="outline"
+						class="hidden lg:inline-flex"
+						href={resolve('/assets')}>Back to Devices</Button
+					>
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger>
+							{#snippet child({ props })}
+								<button
+									{...props}
+									type="button"
+									class="flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+									aria-label="More actions"
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="18"
+										height="18"
+										viewBox="0 0 24 24"
+										fill="currentColor"
+									>
+										<circle cx="5" cy="12" r="1.75" />
+										<circle cx="12" cy="12" r="1.75" />
+										<circle cx="19" cy="12" r="1.75" />
+									</svg>
+								</button>
+							{/snippet}
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Portal>
+							<DropdownMenu.Content
+								align="end"
+								sideOffset={4}
+								class="z-50 min-w-[190px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+							>
+								<DropdownMenu.Item
+									onSelect={openCopy}
+									class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-accent"
+								>
+									Duplicate bundle
+								</DropdownMenu.Item>
+								<DropdownMenu.Item
+									disabled={bundle.assets.length < 2}
+									onSelect={openConvert}
+									class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-accent"
+								>
+									Convert to device
+								</DropdownMenu.Item>
+							</DropdownMenu.Content>
+						</DropdownMenu.Portal>
+					</DropdownMenu.Root>
+				</div>
+			</div>
+
+			{#if bundle.template.description}
+				<p class="max-w-prose text-sm text-muted-foreground">{bundle.template.description}</p>
+			{/if}
+
+			{#if specLines.length > 0}
+				<!-- Measured against the type: every case of it holds the same gear. -->
+				<div class="space-y-2 rounded-lg border p-3">
+					<div class="flex items-center justify-between gap-4 text-sm">
+						{#if missingUnits === 0}
+							<span class="inline-flex items-center gap-1.5 font-medium">
+								<CircleCheck class="size-4 text-green-600 dark:text-green-500" />
+								Complete — this case holds the kit.
+							</span>
+						{:else}
+							<span class="inline-flex items-center gap-1.5 font-medium">
+								<CircleAlert class="size-4 text-amber-600 dark:text-amber-500" />
+								{plural(missingUnits, [
+									'Incomplete — one unit short of the kit',
+									'Incomplete — # units short of the kit'
+								])}
+							</span>
+						{/if}
+						<span class="shrink-0 text-xs text-muted-foreground tabular-nums">
+							{specHave} / {specTotal}
+						</span>
+					</div>
+					<div class="h-2 overflow-hidden rounded-full bg-muted">
+						<div
+							class="h-full rounded-full {missingUnits === 0
+								? 'bg-green-600 dark:bg-green-500'
+								: 'bg-amber-500'}"
+							style="width: {specTotal > 0 ? (specHave / specTotal) * 100 : 100}%"
+						></div>
+					</div>
+					{#if missingUnits > 0}
+						<p class="text-xs text-muted-foreground">
+							Missing: {shortfall
+								.filter((line) => line.missing > 0)
+								.map((line) => `${line.missing}× ${line.line.manufacturerName} ${line.line.name}`)
+								.join(', ')}
+						</p>
+					{/if}
+				</div>
+			{/if}
+
+			<dl class="mt-auto grid gap-4 border-t pt-4 sm:grid-cols-3">
+				<Fact icon={Boxes} label="Devices">
+					{mainDeviceCount}
+					{#if accessoryCount > 0}
+						<span class="font-normal text-muted-foreground">
+							+ {plural(accessoryCount, ['1 accessory', '# accessories'])}
+						</span>
+					{/if}
+				</Fact>
+				<Fact icon={MapPin} label="Location">
+					{#if bundle.location}
+						{bundle.location.name}
+					{:else}
+						<span class="font-normal text-muted-foreground">No location</span>
+					{/if}
+				</Fact>
+				<Fact icon={Euro} label="Net purchase price" hint="Billed as one line on offers.">
+					{#if bundle.netPurchasePrice}
+						{Number(bundle.netPurchasePrice).toLocaleString('de-DE', {
+							style: 'currency',
+							currency: 'EUR'
+						})}
+					{:else}
+						<span class="font-normal text-muted-foreground">Not set</span>
+					{/if}
+				</Fact>
+			</dl>
 		</div>
 	</div>
 
-	<div class="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
-		<!-- Bundle details (left) -->
-		<Card.Root>
-			<Card.Header>
-				<div class="flex flex-wrap items-start justify-between gap-4">
-					<div>
-						<Card.Title>Bundle</Card.Title>
-						<Card.Description>Name, category, pricing, and location.</Card.Description>
-					</div>
-					<Button icon="edit" variant="outline" onclick={() => (editingBundle = true)}>Edit</Button>
+	<!-- Contained assets -->
+	<!-- The card clips to its rounded corners, cutting off any picker that
+	     opens past its edge. Nothing in this one is full-bleed. -->
+	<Card.Root class="overflow-visible">
+		<Card.Header>
+			<div class="flex flex-wrap items-start justify-between gap-4">
+				<div>
+					<Card.Title>Contained Assets</Card.Title>
+					<Card.Description>Devices that belong to this bundle.</Card.Description>
 				</div>
-			</Card.Header>
-			<Card.Content>
-				<div class="space-y-4">
-					<div class="space-y-2">
-						{#if bundle.imagePath}
-							<img
-								src={imageSrc(bundle.imagePath)}
-								alt={`Generated preview of ${bundle.template.name}`}
-								class="aspect-[4/3] w-full max-w-xl rounded-md border bg-muted/30 object-contain"
-							/>
-						{/if}
-						<Button variant="outline" disabled={regeneratingImage} onclick={handleRegenerateImage}>
-							{regeneratingImage ? 'Regenerating…' : 'Regenerate image'}
-						</Button>
-						<p class="text-xs text-muted-foreground">
-							{#if featuredProductIds.size > 0}
-								The starred devices are drawn large; everything else shares the strip below them.
-							{:else}
-								Star the devices this kit is actually for — in the list opposite — and they are
-								drawn large, with the rest of the kit in a strip below.
-							{/if}
-						</p>
-					</div>
-					<div class="space-y-2">
-						<Label>Organization</Label>
-						<Input value={orgLabel(bundle.template.organization)} disabled />
-					</div>
-					<div class="space-y-2">
-						<Label>Name</Label>
-						<Input value={bundle.template.name} disabled />
-					</div>
-					<div class="space-y-2">
-						<Label>Category</Label>
-						<div
-							class="flex h-10 items-center rounded-md border border-input bg-background px-3 py-2 text-sm"
-						>
-							<CategoryPill
-								name={categoryLabel(bundle.template.category)}
-								color={bundle.template.category.color}
-							/>
-						</div>
-					</div>
-					<div class="space-y-2">
-						<Label>Description</Label>
-						<Input value={bundle.template.description ?? '—'} disabled />
-					</div>
-					<div class="space-y-2">
-						<Label>Tag</Label>
-						<Input value={bundle.tag ?? '—'} disabled />
-					</div>
-					<div class="space-y-2">
-						<Label>Net purchase price (€)</Label>
-						<Input
-							value={bundle.netPurchasePrice
-								? Number(bundle.netPurchasePrice).toLocaleString('de-DE', {
-										style: 'currency',
-										currency: 'EUR'
-									})
-								: 'Not set'}
-							disabled
-						/>
-						<p class="text-xs text-muted-foreground">Billed as one line on offers.</p>
-					</div>
-					<div class="space-y-2">
-						<Label>Location</Label>
-						<Input value={bundle.location?.name ?? 'No location'} disabled />
-					</div>
+				<div class="flex flex-wrap items-center gap-2">
+					<CategorySelect
+						class="w-full sm:w-44"
+						{categories}
+						bind:value={categoryFilter}
+						allowEmpty
+						allLabel="All Categories"
+					/>
+					<Button icon="add" size="sm" onclick={() => (showAddModal = true)}>Add Assets</Button>
 				</div>
-			</Card.Content>
-		</Card.Root>
-
-		<!-- Contained assets (right) -->
-		<!-- The card clips to its rounded corners, cutting off any picker that
-		     opens past its edge. Nothing in this one is full-bleed. -->
-		<Card.Root class="overflow-visible">
-			<Card.Header>
-				<div class="flex flex-wrap items-start justify-between gap-4">
-					<div>
-						<Card.Title>Contained Assets</Card.Title>
-						<Card.Description>Devices that belong to this bundle.</Card.Description>
-						{#if specLines.length > 0}
-							<p class="mt-1 text-sm">
-								{#if missingUnits === 0}
-									<span class="text-muted-foreground">Complete — this case holds the kit.</span>
-								{:else}
-									<span class="font-medium"
-										>{plural(missingUnits, [
-											'Incomplete — one unit short of the kit:',
-											'Incomplete — # units short of the kit:'
-										])}</span
-									>
-									<span class="text-muted-foreground">
-										{shortfall
-											.filter((line) => line.missing > 0)
-											.map(
-												(line) => `${line.missing}× ${line.line.manufacturerName} ${line.line.name}`
-											)
-											.join(', ')}
-									</span>
-								{/if}
-							</p>
-						{/if}
-					</div>
-					<div class="flex flex-wrap items-center gap-2">
-						<CategorySelect
-							class="w-full sm:w-44"
-							{categories}
-							bind:value={categoryFilter}
-							allowEmpty
-							allLabel="All Categories"
-						/>
-						<Button size="sm" onclick={() => (showAddModal = true)}>Add Assets</Button>
-					</div>
+			</div>
+		</Card.Header>
+		<Card.Content class="px-0">
+			{#if bundle.assets.length === 0}
+				<div class="flex flex-col items-center gap-2 py-10 text-center text-muted-foreground">
+					<Boxes class="size-8" />
+					<p>No assets in this bundle yet. Click "Add Assets" to get started.</p>
 				</div>
-			</Card.Header>
-			<Card.Content>
-				{#if bundle.assets.length === 0}
-					<p class="py-8 text-center text-muted-foreground">
-						No assets in this bundle yet. Click "Add Assets" to get started.
-					</p>
-				{:else}
-					<div class="overflow-x-auto">
-						<table class="w-full text-sm">
-							<thead>
-								<tr class="border-b bg-muted/30">
-									<th class="px-4 py-3 text-left font-medium text-muted-foreground">Product</th>
-									<th class="px-4 py-3 text-left font-medium text-muted-foreground">Serial</th>
-									<th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
-									<th class="px-4 py-3 text-left font-medium text-muted-foreground">Location</th>
-									<th
-										class="px-4 py-3 text-center font-medium text-muted-foreground"
-										title="Main device">Main</th
-									>
-									<th class="px-4 py-3"></th>
-								</tr>
-							</thead>
-							<tbody>
-								{#each visibleBundleAssets as { asset, nested } (asset.id)}
-									<!-- The mark is per product, so every unit of one product shows the
-									     same star and toggling any of them moves all of them. -->
-									{@const featured = featuredProductIds.has(asset.productId)}
-									<!-- The whole row navigates, as it does on the Devices list, but the
-									     product name is a real anchor so the unit can be opened in a new
-									     tab and reached by keyboard. -->
-									<tr
-										class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
-										onclick={() => goto(resolve(`/assets/${asset.id}`))}
-									>
-										<td class="px-4 py-3 {nested ? 'pl-10' : ''}">
-											<div class="flex items-center gap-2">
-												{#if nested}
-													<span class="text-muted-foreground">↳</span>
-												{/if}
-												<ProductThumb path={asset.product.imagePath} alt={asset.product.name} />
-												<CategoryPill
-													name={categoryLabel(asset.product.category)}
-													color={asset.product.category.color}
-												/>
+			{:else}
+				<div class="overflow-x-auto">
+					<table class="w-full text-sm">
+						<thead>
+							<tr class="border-y bg-muted/30">
+								<th class="px-6 py-3 text-left font-medium text-muted-foreground">Product</th>
+								<th class="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
+								<th class="px-4 py-3 text-left font-medium text-muted-foreground">Tag</th>
+								<th class="px-4 py-3 text-left font-medium text-muted-foreground">Serial</th>
+								<th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+								<th class="px-4 py-3 text-left font-medium text-muted-foreground">Location</th>
+								<th
+									class="px-4 py-3 text-center font-medium text-muted-foreground"
+									title="Main device">Main</th
+								>
+								<th class="px-6 py-3"></th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each visibleBundleAssets as { asset, nested } (asset.id)}
+								<!-- The mark is per product, so every unit of one product shows the
+								     same star and toggling any of them moves all of them. -->
+								{@const featured = featuredProductIds.has(asset.productId)}
+								<!-- The whole row navigates, as it does on the Devices list, but the
+								     product name is a real anchor so the unit can be opened in a new
+								     tab and reached by keyboard. -->
+								<tr
+									class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
+									onclick={() => goto(resolve(`/assets/${asset.id}`))}
+								>
+									<td class="px-6 py-3 {nested ? 'pl-12' : ''}">
+										<div class="flex items-center gap-3">
+											{#if nested}
+												<span class="text-muted-foreground">↳</span>
+											{/if}
+											<ProductThumb
+												path={asset.product.imagePath}
+												alt={asset.product.name}
+												size={nested ? 32 : 40}
+											/>
+											<div class="min-w-0">
 												<a
 													href={resolve(`/assets/${asset.id}`)}
 													class="font-medium hover:underline"
 													onclick={(e) => e.stopPropagation()}>{asset.product.name}</a
 												>
+												<p class="text-xs text-muted-foreground">
+													{asset.product.manufacturer.name}
+												</p>
 											</div>
-										</td>
-										<td class="px-4 py-3 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
-										<td class="px-4 py-3">
-											<AssetStatusBadge status={asset.status} class="px-2.5" />
-										</td>
-										<td class="px-4 py-3 text-sm text-muted-foreground">
-											{asset.location?.name ?? '—'}
-										</td>
-										<td class="px-4 py-3 text-center">
-											<button
-												type="button"
-												class="rounded-md p-1.5 transition-colors hover:bg-muted disabled:opacity-50 {featured
-													? 'text-foreground'
-													: 'text-muted-foreground/40'}"
-												disabled={featuringProductId !== ''}
-												aria-pressed={featured}
-												title={featured ? 'Main device of this kit' : 'Mark as a main device'}
+										</div>
+									</td>
+									<td class="px-4 py-3">
+										<CategoryPill
+											name={categoryLabel(asset.product.category)}
+											color={asset.product.category.color}
+										/>
+									</td>
+									<td class="px-4 py-3 font-mono text-xs">{asset.assetTag ?? '—'}</td>
+									<td class="px-4 py-3 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
+									<td class="px-4 py-3">
+										<AssetStatusBadge status={asset.status} class="px-2.5" />
+									</td>
+									<td class="px-4 py-3 text-sm text-muted-foreground">
+										{asset.location?.name ?? '—'}
+									</td>
+									<td class="px-4 py-3 text-center">
+										<button
+											type="button"
+											class="rounded-md p-1.5 transition-colors hover:bg-muted disabled:opacity-50 {featured
+												? 'text-amber-500'
+												: 'text-muted-foreground/40'}"
+											disabled={featuringProductId !== ''}
+											aria-pressed={featured}
+											title={featured ? 'Main device of this kit' : 'Mark as a main device'}
+											onclick={(e) => {
+												e.stopPropagation();
+												toggleFeatured(asset.productId);
+											}}
+										>
+											<Star class="size-4" fill={featured ? 'currentColor' : 'none'} />
+										</button>
+									</td>
+									<td class="px-6 py-3 text-right">
+										{#if !nested}
+											<Button
+												size="sm"
+												variant="outline"
+												disabled={working}
 												onclick={(e) => {
 													e.stopPropagation();
-													toggleFeatured(asset.productId);
-												}}
+													handleRemove(asset.id);
+												}}>Remove</Button
 											>
-												<Star class="size-4" fill={featured ? 'currentColor' : 'none'} />
-											</button>
-										</td>
-										<td class="px-4 py-3 text-right">
-											{#if !nested}
-												<Button
-													size="sm"
-													variant="outline"
-													disabled={working}
-													onclick={(e) => {
-														e.stopPropagation();
-														handleRemove(asset.id);
-													}}>Remove</Button
-												>
-											{/if}
-										</td>
-									</tr>
-								{/each}
-							</tbody>
-						</table>
-					</div>
-				{/if}
-			</Card.Content>
-		</Card.Root>
-	</div>
+										{/if}
+									</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			{/if}
+		</Card.Content>
+	</Card.Root>
 </div>
 
 <Modal

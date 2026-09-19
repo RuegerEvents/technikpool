@@ -263,7 +263,6 @@ msgstr "No crew members added yet."
 #: src/routes/admin/connectors/+page.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/auth/register/+page.svelte
@@ -417,6 +416,7 @@ msgstr "Serial Number"
 #: src/lib/components/CsvImportModal.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Asset Tag"
@@ -426,7 +426,6 @@ msgstr "Asset Tag"
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/products/+page.svelte
 msgid "Bundle"
@@ -437,7 +436,6 @@ msgstr "Bundle"
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/license-list.svelte
 #: src/routes/assets/new/+page.svelte
@@ -472,6 +470,7 @@ msgstr "Add Asset"
 #~ msgstr "No equipment units in the selected organization."
 
 #: src/routes/assets/+page.svelte
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/checkout/+page.svelte
@@ -1094,9 +1093,8 @@ msgstr "Date"
 msgid "Qty"
 msgstr "Qty"
 
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
-msgid "Description"
-msgstr "Description"
+#~ msgid "Description"
+#~ msgstr "Description"
 
 #~ msgid "Remarks"
 #~ msgstr "Remarks"
@@ -1948,12 +1946,10 @@ msgid "Shared product details for this asset type."
 msgstr "Shared product details for this asset type."
 
 #: src/lib/components/ui/product-fields/product-fields.svelte
-#: src/routes/assets/[id]/asset-detail.svelte
 msgid "Product Name"
 msgstr "Product Name"
 
 #: src/lib/components/ui/product-fields/product-fields.svelte
-#: src/routes/assets/[id]/asset-detail.svelte
 msgid "Product Image"
 msgstr "Product Image"
 
@@ -2413,6 +2409,7 @@ msgstr "Devices | Technikpool"
 
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Devices"
 msgstr "Devices"
 
@@ -2422,6 +2419,8 @@ msgid "<0/> Devices"
 msgstr "<0/> Devices"
 
 #: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Back to Devices"
 msgstr "Back to Devices"
@@ -2917,8 +2916,6 @@ msgstr "Product photo"
 
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
-#: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/products/+page.svelte
 msgid "Net purchase price (€)"
@@ -2930,14 +2927,11 @@ msgid "Purchase date"
 msgstr "Purchase date"
 
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/[id]/asset-detail.svelte
 msgid "DGUV inspection interval (months)"
 msgstr "DGUV inspection interval (months)"
 
-#. 0: new Date(asset.nextInspectionDue).toLocaleDateString('de-DE')
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Next due: {0}"
-msgstr "Next due: {0}"
+#~ msgid "Next due: {0}"
+#~ msgstr "Next due: {0}"
 
 #. 0: invoice.number
 #: src/routes/invoices/[id]/invoice-detail.svelte
@@ -3487,9 +3481,8 @@ msgstr "Save new password"
 msgid "Duplicating <0/> — organization, location, manufacturer and product are prefilled. Serial number and asset tag are left blank."
 msgstr "Duplicating <0/> — organization, location, manufacturer and product are prefilled. Serial number and asset tag are left blank."
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Duplicate"
-msgstr "Duplicate"
+#~ msgid "Duplicate"
+#~ msgstr "Duplicate"
 
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/new/+page.svelte
@@ -3644,7 +3637,6 @@ msgstr "Select none"
 #~ msgid "{0} — Category: <0/>{1} <1/>"
 #~ msgstr "{0} — Category: <0/>{1} <1/>"
 
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Name, category, pricing, and location."
 msgstr "Name, category, pricing, and location."
@@ -4180,9 +4172,8 @@ msgstr "Disconnect"
 #~ msgid "Starting…"
 #~ msgstr "Starting…"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "No image yet — add one with Edit."
-msgstr "No image yet — add one with Edit."
+#~ msgid "No image yet — add one with Edit."
+#~ msgstr "No image yet — add one with Edit."
 
 #: src/lib/components/ui/image-upload/image-upload.svelte
 msgid "Use image"
@@ -4242,9 +4233,8 @@ msgstr "Pick one — it is uploaded straight away. The background is removed in 
 msgid "Asset deleted"
 msgstr "Asset deleted"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Delete this asset"
-msgstr "Delete this asset"
+#~ msgid "Delete this asset"
+#~ msgstr "Delete this asset"
 
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "Only possible while it has never been booked, scanned, inspected or billed. A unit that has been in use is decommissioned instead, so its history survives."
@@ -4254,7 +4244,6 @@ msgstr "Only possible while it has never been booked, scanned, inspected or bill
 #: src/routes/admin/connectors/+page.svelte
 #: src/routes/admin/connectors/+page.svelte
 #: src/routes/admin/users/+page.svelte
-#: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Delete"
 msgstr "Delete"
@@ -4937,6 +4926,7 @@ msgid "Every unit already has that — nothing to do"
 msgstr "Every unit already has that — nothing to do"
 
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "1 accessory"
 msgid_plural "# accessories"
 msgstr[0] "1 accessory"
@@ -5107,10 +5097,10 @@ msgstr "Generated preview of {0}"
 
 #: src/routes/admin/maintenance/+page.svelte
 #: src/routes/admin/maintenance/+page.svelte
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Regenerating…"
 msgstr "Regenerating…"
 
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Regenerate image"
 msgstr "Regenerate image"
@@ -5131,9 +5121,8 @@ msgstr "Manufacturer is required"
 msgid "Search manufacturers…"
 msgstr "Search manufacturers…"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Device Image"
-msgstr "Device Image"
+#~ msgid "Device Image"
+#~ msgstr "Device Image"
 
 #. 0: asset.product.name
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -5163,6 +5152,7 @@ msgstr "Convert bundle"
 msgid "Bundle converted — {0} attached"
 msgstr "Bundle converted — {0} attached"
 
+#: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -5899,9 +5889,8 @@ msgstr "Registering cables? <0>Add them by the drawer</0> instead — one row pe
 #~ msgid "XLR, Schuko, DMX…"
 #~ msgstr "XLR, Schuko, DMX…"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Cable type"
-msgstr "Cable type"
+#~ msgid "Cable type"
+#~ msgstr "Cable type"
 
 #~ msgid "Connector A"
 #~ msgstr "Connector A"
@@ -6206,14 +6195,12 @@ msgid "Built-in socket"
 msgstr "Built-in socket"
 
 #: src/lib/components/ui/product-fields/product-fields.svelte
-#: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 msgid "Connector A <0/>"
 msgstr "Connector A <0/>"
 
 #: src/lib/components/ui/product-fields/product-fields.svelte
-#: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 msgid "Connector B <0/>"
@@ -6223,9 +6210,8 @@ msgstr "Connector B <0/>"
 msgid "Direction"
 msgstr "Direction"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Length"
-msgstr "Length"
+#~ msgid "Length"
+#~ msgstr "Length"
 
 #: src/lib/components/ui/product-fields/product-fields.svelte
 msgid "Additional info, e.g. CAT7 or 2.5mm²"
@@ -7371,13 +7357,11 @@ msgstr[1] "Create # copies"
 msgid "A main device has to be a product this bundle type actually contains."
 msgstr "A main device has to be a product this bundle type actually contains."
 
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
-msgid "The starred devices are drawn large; everything else shares the strip below them."
-msgstr "The starred devices are drawn large; everything else shares the strip below them."
+#~ msgid "The starred devices are drawn large; everything else shares the strip below them."
+#~ msgstr "The starred devices are drawn large; everything else shares the strip below them."
 
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
-msgid "Star the devices this kit is actually for — in the list opposite — and they are drawn large, with the rest of the kit in a strip below."
-msgstr "Star the devices this kit is actually for — in the list opposite — and they are drawn large, with the rest of the kit in a strip below."
+#~ msgid "Star the devices this kit is actually for — in the list opposite — and they are drawn large, with the rest of the kit in a strip below."
+#~ msgstr "Star the devices this kit is actually for — in the list opposite — and they are drawn large, with the rest of the kit in a strip below."
 
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Main device"
@@ -7423,15 +7407,13 @@ msgid_plural "# units short of the kit."
 msgstr[0] "One more unit and this case is the kit."
 msgstr[1] "# units short of the kit."
 
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
-msgid "Complete — this case holds the kit."
-msgstr "Complete — this case holds the kit."
+#~ msgid "Complete — this case holds the kit."
+#~ msgstr "Complete — this case holds the kit."
 
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
-msgid "Incomplete — one unit short of the kit:"
-msgid_plural "Incomplete — # units short of the kit:"
-msgstr[0] "Incomplete — one unit short of the kit:"
-msgstr[1] "Incomplete — # units short of the kit:"
+#~ msgid "Incomplete — one unit short of the kit:"
+#~ msgid_plural "Incomplete — # units short of the kit:"
+#~ msgstr[0] "Incomplete — one unit short of the kit:"
+#~ msgstr[1] "Incomplete — # units short of the kit:"
 
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "This case holds the kit, so only a change to the bundle type itself adds anything further."
@@ -8350,3 +8332,76 @@ msgstr "Released — <0/> was cancelled"
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
 msgid "This production has been cancelled. Reopen it before booking equipment onto it."
 msgstr "This production has been cancelled. Reopen it before booking equipment onto it."
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "No image yet — add one under Product › Edit."
+msgstr "No image yet — add one under Product › Edit."
+
+#. 0: asset.parent.product.name
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "<0/> Accessory of {0}"
+msgstr "<0/> Accessory of {0}"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Not in a bundle"
+msgstr "Not in a bundle"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Next inspection"
+msgstr "Next inspection"
+
+#~ msgid "overdue"
+#~ msgstr "overdue"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Not scheduled"
+msgstr "Not scheduled"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "DGUV inspection interval"
+msgstr "DGUV inspection interval"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Every month"
+msgid_plural "Every # months"
+msgstr[0] "Every month"
+msgstr[1] "Every # months"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "No interval set"
+msgstr "No interval set"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Net purchase price"
+msgstr "Net purchase price"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Overdue"
+msgstr "Overdue"
+
+#~ msgid "Star the devices this kit is actually for — in the list below — and they are drawn large, with the rest of the kit in a strip below."
+#~ msgstr "Star the devices this kit is actually for — in the list below — and they are drawn large, with the rest of the kit in a strip below."
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "<0/> Complete — this case holds the kit."
+msgstr "<0/> Complete — this case holds the kit."
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Incomplete — one unit short of the kit"
+msgid_plural "Incomplete — # units short of the kit"
+msgstr[0] "Incomplete — one unit short of the kit"
+msgstr[1] "Incomplete — # units short of the kit"
+
+#. 0: shortfall .filter((line) => line.missing > 0) .map((line) => `${line.missing}× ${line.line.manufacturerName} ${line.line.name}`) .join(', ')
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Missing: {0}"
+msgstr "Missing: {0}"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "<0/> Duplicate"
+msgstr "<0/> Duplicate"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "<0/> Delete"
+msgstr "<0/> Delete"

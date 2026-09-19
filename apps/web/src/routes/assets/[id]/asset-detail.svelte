@@ -10,12 +10,34 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
+	import { OrgBadge } from '$lib/components/ui/org-badge';
+	import { Fact } from '$lib/components/ui/fact';
+	import {
+		Activity,
+		Building2,
+		CalendarDays,
+		ClipboardCheck,
+		Copy,
+		Ellipsis,
+		Euro,
+		Factory,
+		Hash,
+		ImageOff,
+		Link2,
+		MapPin,
+		Package,
+		Repeat,
+		Shapes,
+		Tag,
+		Trash2
+	} from '@lucide/svelte';
 	import {
 		ProductFields,
 		cableDraftFrom,
 		cableInputFrom,
 		type ProductDraft
 	} from '$lib/components/ui/product-fields';
+	import { DropdownMenu } from 'bits-ui';
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
@@ -74,6 +96,23 @@
 	let retired = $derived(isRetiredStatus(asset.status));
 	let displayImagePath = $derived(
 		asset.accessories.length > 0 ? asset.generatedImagePath : asset.product.imagePath
+	);
+
+	// Same window the inspections page calls "upcoming".
+	const DUE_SOON_DAYS = 30;
+	let inspectionState = $derived.by(() => {
+		if (!asset.nextInspectionDue) return null;
+		const due = new Date(asset.nextInspectionDue).getTime();
+		if (due < Date.now()) return 'overdue';
+		if (due < Date.now() + DUE_SOON_DAYS * 86_400_000) return 'soon';
+		return 'ok';
+	});
+	let inspectionTone = $derived(
+		inspectionState === 'overdue'
+			? 'text-destructive'
+			: inspectionState === 'soon'
+				? 'text-amber-600 dark:text-amber-500'
+				: ''
 	);
 
 	// ── Accessories ───────────────────────────────────────────────────────────
@@ -488,28 +527,164 @@
 <svelte:head><title>{asset.product.name} | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
-	<div class="flex flex-wrap items-center justify-between gap-4">
-		<div>
-			<h1 class="text-3xl font-bold tracking-tight">{asset.product.name}</h1>
-			<p class="text-muted-foreground">
-				{[
-					asset.product.manufacturer.name,
-					connectorLabel(asset.product),
-					asset.product.lengthCm ? formatLength(asset.product.lengthCm) : ''
-				]
-					.filter(Boolean)
-					.join(' · ')}
-			</p>
-		</div>
-		<div class="flex gap-2">
-			<Button variant="outline" href={resolve(`/assets/new?duplicateFrom=${asset.id}`)}
-				>Duplicate</Button
-			>
+	<!-- The unit at a glance: what it is, what state it is in, and where. -->
+	<div
+		class="flex flex-col gap-6 rounded-xl bg-card p-6 shadow-xs ring-1 ring-foreground/10 sm:flex-row"
+	>
+		<!-- On a phone the image stacks above everything else, so the way back
+		     would otherwise sit a whole picture further down. -->
+		<div class="sm:hidden">
 			<Button icon="back" variant="outline" href={resolve('/assets')}>Back to Devices</Button>
+		</div>
+		<div
+			class="flex h-48 w-full shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted/40 sm:size-48"
+		>
+			{#if displayImagePath}
+				<img
+					src={imageSrc(displayImagePath)}
+					alt={asset.accessories.length > 0
+						? `${asset.product.name} with accessories`
+						: asset.product.name}
+					class="h-full w-full object-contain p-3"
+				/>
+			{:else}
+				<div class="flex flex-col items-center gap-2 px-4 text-center text-muted-foreground">
+					<ImageOff class="size-8" />
+					<p class="text-xs">No image yet — add one under Product › Edit.</p>
+				</div>
+			{/if}
+		</div>
+
+		<div class="flex min-w-0 flex-1 flex-col gap-4">
+			<div class="flex flex-wrap items-start justify-between gap-4">
+				<div class="min-w-0 space-y-1">
+					<p class="text-sm font-medium text-muted-foreground">
+						{asset.product.manufacturer.name}
+					</p>
+					<h1 class="text-3xl font-bold tracking-tight">{asset.product.name}</h1>
+					{#if asset.product.cableType}
+						<p class="text-sm text-muted-foreground">
+							{[
+								connectorLabel(asset.product),
+								asset.product.lengthCm ? formatLength(asset.product.lengthCm) : ''
+							]
+								.filter(Boolean)
+								.join(' · ')}
+						</p>
+					{/if}
+				</div>
+				<div class="flex flex-wrap gap-2">
+					<Button
+						icon="back"
+						variant="outline"
+						class="hidden sm:inline-flex"
+						href={resolve('/assets')}>Back to Devices</Button
+					>
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger>
+							{#snippet child({ props })}
+								<button
+									{...props}
+									type="button"
+									class="flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+									aria-label="More actions"
+								>
+									<Ellipsis class="size-[18px]" />
+								</button>
+							{/snippet}
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Portal>
+							<DropdownMenu.Content
+								align="end"
+								sideOffset={4}
+								class="z-50 min-w-[190px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+							>
+								<DropdownMenu.Item
+									onSelect={() => goto(resolve(`/assets/new?duplicateFrom=${asset.id}`))}
+									class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+								>
+									<Copy class="size-4" />
+									Duplicate
+								</DropdownMenu.Item>
+								<DropdownMenu.Separator class="my-1 h-px bg-border" />
+								<DropdownMenu.Item
+									onSelect={() => (confirmingDelete = true)}
+									class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-destructive transition-colors outline-none hover:bg-destructive/10 data-[highlighted]:bg-destructive/10"
+								>
+									<Trash2 class="size-4" />
+									Delete
+								</DropdownMenu.Item>
+							</DropdownMenu.Content>
+						</DropdownMenu.Portal>
+					</DropdownMenu.Root>
+				</div>
+			</div>
+
+			<div class="flex flex-wrap items-center gap-2">
+				<AssetStatusBadge status={asset.status} class="px-2.5 py-1" />
+				<CategoryPill
+					name={categoryLabel(asset.product.category)}
+					color={asset.product.category.color}
+				/>
+				{#if asset.assetTag}
+					<span
+						class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 font-mono text-xs"
+						title="Asset Tag"
+					>
+						<Tag class="size-3 text-muted-foreground" />{asset.assetTag}
+					</span>
+				{/if}
+				{#if asset.parent}
+					<a
+						href={resolve(`/assets/${asset.parent.id}`)}
+						class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs transition-colors hover:bg-muted"
+					>
+						<Link2 class="size-3 text-muted-foreground" />
+						Accessory of {asset.parent.product.name}
+					</a>
+				{/if}
+			</div>
+
+			<dl class="mt-auto grid gap-4 border-t pt-4 sm:grid-cols-2 xl:grid-cols-4">
+				<!-- A unit that has left the pool isn't anywhere any more; the stored
+				     location is only where it stood when it went. -->
+				<Fact icon={MapPin} label={retired ? 'Last known location' : 'Location'}>
+					{asset.location?.name ?? '—'}
+				</Fact>
+				<Fact icon={Package} label="Bundle">
+					{#if asset.bundle}
+						<a
+							href={resolve(`/assets/bundles/${asset.bundle.id}`)}
+							class="underline underline-offset-2">{asset.bundle.template.name}</a
+						>
+					{:else}
+						<span class="font-normal text-muted-foreground">Not in a bundle</span>
+					{/if}
+				</Fact>
+				<Fact icon={ClipboardCheck} label="Next inspection">
+					{#if asset.nextInspectionDue}
+						<span class={inspectionTone}>
+							{new Date(asset.nextInspectionDue).toLocaleDateString('de-DE')}
+						</span>
+						{#if inspectionState === 'overdue'}
+							<span class="ml-1 text-xs font-normal text-destructive">Overdue</span>
+						{/if}
+					{:else}
+						<span class="font-normal text-muted-foreground">Not scheduled</span>
+					{/if}
+				</Fact>
+				<Fact icon={Building2} label="Organization">
+					<OrgBadge
+						name={orgLabel(asset.organization)}
+						color={asset.organization.color}
+						avatarLabel={asset.organization.avatarLabel}
+					/>
+				</Fact>
+			</dl>
 		</div>
 	</div>
 
-	<div class="grid gap-6 lg:grid-cols-2">
+	<div class="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
 		{#if asset.product.isLicense}
 			<!-- First, because for a license this is what the page is for. -->
 			<Card.Root class="lg:col-span-2">
@@ -545,52 +720,44 @@
 				</div>
 			</Card.Header>
 			<Card.Content>
-				<div class="space-y-4">
-					<div class="space-y-2">
-						<Label>Organization</Label>
-						<Input value={orgLabel(asset.organization)} disabled />
-					</div>
-					<div class="space-y-2">
-						<Label>Bundle</Label>
-						<Input value={asset.bundle?.template.name ?? '—'} disabled />
-					</div>
-					<div class="space-y-2">
-						<Label>Serial Number</Label>
-						<Input value={asset.serialNumber ?? '—'} disabled />
-					</div>
-					<div class="space-y-2">
-						<Label>Asset Tag</Label>
-						<Input value={asset.assetTag ?? '—'} disabled />
-					</div>
-					<div class="space-y-2">
-						<Label>Status</Label>
-						<Input value={assetStatusLabel(asset.status as AssetStatus)} disabled />
-					</div>
-					<div class="space-y-2">
-						<!-- A unit that has left the pool isn't anywhere any more; the stored
-						     location is only where it stood when it went. -->
-						<Label>{retired ? 'Last known location' : 'Location'}</Label>
-						<Input value={asset.location?.name ?? '—'} disabled />
-					</div>
-					<div class="space-y-2">
-						<Label>Purchase date</Label>
-						<Input
-							value={asset.purchaseDate
-								? new Date(asset.purchaseDate).toLocaleDateString('de-DE')
-								: '—'}
-							disabled
-						/>
-					</div>
-					<div class="space-y-2">
-						<Label>DGUV inspection interval (months)</Label>
-						<Input value={asset.inspectionIntervalMonths?.toString() ?? '—'} disabled />
-						{#if asset.nextInspectionDue}
-							<p class="text-xs text-muted-foreground">
-								Next due: {new Date(asset.nextInspectionDue).toLocaleDateString('de-DE')}
-							</p>
+				<dl class="grid gap-x-6 gap-y-5 sm:grid-cols-2">
+					<Fact icon={Hash} label="Serial Number">
+						{#if asset.serialNumber}
+							<span class="font-mono">{asset.serialNumber}</span>
+						{:else}
+							<span class="font-normal text-muted-foreground">—</span>
 						{/if}
-					</div>
-				</div>
+					</Fact>
+					<Fact icon={Tag} label="Asset Tag">
+						{#if asset.assetTag}
+							<span class="font-mono">{asset.assetTag}</span>
+						{:else}
+							<span class="font-normal text-muted-foreground">—</span>
+						{/if}
+					</Fact>
+					<Fact
+						icon={Activity}
+						label="Status"
+						hint={assetStatusDescription(asset.status as AssetStatus)}
+						class="sm:col-span-2"
+					>
+						<AssetStatusBadge status={asset.status} />
+					</Fact>
+					<Fact icon={CalendarDays} label="Purchase date">
+						{#if asset.purchaseDate}
+							{new Date(asset.purchaseDate).toLocaleDateString('de-DE')}
+						{:else}
+							<span class="font-normal text-muted-foreground">—</span>
+						{/if}
+					</Fact>
+					<Fact icon={Repeat} label="DGUV inspection interval">
+						{#if asset.inspectionIntervalMonths}
+							{plural(asset.inspectionIntervalMonths, ['Every month', 'Every # months'])}
+						{:else}
+							<span class="font-normal text-muted-foreground">No interval set</span>
+						{/if}
+					</Fact>
+				</dl>
 			</Card.Content>
 		</Card.Root>
 
@@ -609,150 +776,96 @@
 					</div>
 				</div>
 			</Card.Header>
-			<Card.Content class="space-y-4">
-				<div class="space-y-2">
-					<Label>Manufacturer</Label>
-					<Input value={asset.product.manufacturer.name} disabled />
-				</div>
-				<div class="space-y-2">
-					<Label>Product Name</Label>
-					<Input value={asset.product.name} disabled />
-				</div>
-				<div class="space-y-2">
-					<Label>Category</Label>
-					<div
-						class="flex h-10 items-center rounded-md border border-input bg-background px-3 py-2 text-sm"
-					>
+			<Card.Content class="space-y-6">
+				<dl class="grid gap-x-6 gap-y-5 sm:grid-cols-2">
+					<Fact icon={Factory} label="Manufacturer">{asset.product.manufacturer.name}</Fact>
+					<Fact icon={Shapes} label="Category">
 						<CategoryPill
 							name={categoryLabel(asset.product.category)}
 							color={asset.product.category.color}
 						/>
-					</div>
-				</div>
+					</Fact>
+					<Fact icon={Euro} label="Net purchase price" class="sm:col-span-2">
+						{#if orgNetPurchasePrice != null}
+							{orgNetPurchasePrice.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
+						{:else}
+							<span class="font-normal text-muted-foreground">Not set</span>
+						{/if}
+						<p class="mt-1 text-xs font-normal text-muted-foreground">
+							{orgLabel(asset.organization)}'s price for this product — what its rental rate is
+							calculated from. Other organizations price it themselves.
+						</p>
+					</Fact>
+				</dl>
+
 				{#if asset.product.cableType}
-					{@const endA = connectorInfo(asset.product.connectorA)}
-					{@const endB = connectorInfo(asset.product.connectorB)}
-					<div class="space-y-2">
-						<Label>Cable type</Label>
-						<Input value={asset.product.cableType} disabled />
-					</div>
-					<div class="grid gap-4 sm:grid-cols-2">
-						<div class="space-y-2">
-							<Label>
-								Connector A
-								{#if endA.end}
-									<span class="ml-1 font-mono text-xs font-normal text-muted-foreground"
-										>{endA.end}</span
-									>
+					<!-- The cable drawn end to end: what plugs in where, and how far apart. -->
+					<div class="rounded-lg border bg-muted/20 p-4">
+						<div class="flex items-center gap-3">
+							{#each [{ name: asset.product.connectorA, ...connectorInfo(asset.product.connectorA) }, { name: asset.product.connectorB, ...connectorInfo(asset.product.connectorB) }] as end, i (i)}
+								{#if i === 1}
+									<div class="flex min-w-0 flex-1 flex-col items-center gap-1.5">
+										<span class="text-xs font-medium">
+											{asset.product.lengthCm ? formatLength(asset.product.lengthCm) : ''}
+										</span>
+										<div class="h-1.5 w-full rounded-full bg-foreground/70"></div>
+										<span class="truncate text-xs text-muted-foreground">
+											{asset.product.cableType}
+										</span>
+									</div>
 								{/if}
-							</Label>
-							<div
-								class="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm"
-							>
-								<ProductThumb path={endA.imagePath} alt="" size={22} />
-								<span>{asset.product.connectorA ?? '—'}</span>
-							</div>
-						</div>
-						<div class="space-y-2">
-							<Label>
-								Connector B
-								{#if endB.end}
-									<span class="ml-1 font-mono text-xs font-normal text-muted-foreground"
-										>{endB.end}</span
-									>
-								{/if}
-							</Label>
-							<div
-								class="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm"
-							>
-								<ProductThumb path={endB.imagePath} alt="" size={22} />
-								<span>{asset.product.connectorB ?? '—'}</span>
-							</div>
+								<div class="flex w-24 shrink-0 flex-col items-center gap-1 text-center">
+									<ProductThumb path={end.imagePath} alt="" size={48} class="bg-background" />
+									<span class="text-sm leading-tight font-medium">{end.name ?? '—'}</span>
+									{#if end.end}
+										<span class="font-mono text-xs text-muted-foreground">{end.end}</span>
+									{/if}
+								</div>
+							{/each}
 						</div>
 					</div>
-					{#if asset.product.lengthCm}
-						<div class="space-y-2">
-							<Label>Length</Label>
-							<Input value={formatLength(asset.product.lengthCm)} disabled />
-						</div>
-					{/if}
 				{/if}
 
 				{#if !asset.product.cableType && !asset.product.isLicense}
 					<!-- What the device's panel has. Edited on the product's own page,
-						     where it belongs to every unit at once. -->
+					     where it belongs to every unit at once. -->
 					<div class="space-y-2">
-						<Label>Connectors</Label>
+						<p class="text-xs text-muted-foreground">Connectors</p>
 						{#if asset.product.ports.length === 0}
 							<p class="text-sm text-muted-foreground">
 								No connectors recorded yet — add them on the product page.
 							</p>
 						{:else}
-							<ul class="divide-y rounded-md border">
+							<ul class="grid gap-2 sm:grid-cols-2">
 								{#each asset.product.ports as port (port.id)}
-									<li class="flex items-center gap-3 px-3 py-2">
+									<li class="flex items-center gap-3 rounded-lg border p-2">
 										<ProductThumb
 											path={port.connector.imagePath}
 											alt={port.connector.name}
-											size={28}
+											size={36}
 										/>
-										<span class="w-10 shrink-0 text-right font-mono text-sm tabular-nums"
-											>{port.count}×</span
-										>
-										<span class="text-sm font-medium">{port.connector.name}</span>
-										{#if port.label}
-											<span class="ml-auto text-sm text-muted-foreground">{port.label}</span>
-										{/if}
+										<div class="min-w-0">
+											<p class="truncate text-sm font-medium">
+												<span class="font-mono tabular-nums">{port.count}×</span>
+												{port.connector.name}
+											</p>
+											{#if port.label}
+												<p class="truncate text-xs text-muted-foreground">{port.label}</p>
+											{/if}
+										</div>
 									</li>
 								{/each}
 							</ul>
 						{/if}
 					</div>
 				{/if}
-
-				<div class="space-y-2">
-					<Label>Net purchase price (€)</Label>
-					<div
-						class="flex h-10 items-center rounded-md border border-input bg-background px-3 py-2 text-sm"
-					>
-						{orgNetPurchasePrice != null
-							? orgNetPurchasePrice.toLocaleString('de-DE', {
-									style: 'currency',
-									currency: 'EUR'
-								})
-							: 'Not set'}
-					</div>
-					<p class="text-sm text-muted-foreground">
-						{orgLabel(asset.organization)}'s price for this product — what its rental rate is
-						calculated from. Other organizations price it themselves.
-					</p>
-				</div>
-
-				<div class="space-y-2">
-					<Label>{asset.accessories.length > 0 ? 'Device Image' : 'Product Image'}</Label>
-					{#if displayImagePath}
-						<img
-							src={imageSrc(displayImagePath)}
-							alt={asset.accessories.length > 0
-								? `${asset.product.name} with accessories`
-								: asset.product.name}
-							class="h-40 w-full rounded-md border bg-muted/30 object-contain p-2"
-						/>
-					{:else}
-						<div
-							class="flex h-40 w-full items-center justify-center rounded-md border border-dashed text-sm text-muted-foreground"
-						>
-							No image yet — add one with Edit.
-						</div>
-					{/if}
-				</div>
 			</Card.Content>
 		</Card.Root>
 
 		<!-- Accessories: what travels with this unit, or what it travels with -->
 		<!-- The card clips to its rounded corners, cutting off any picker that
 		     opens past its edge. Nothing in this one is full-bleed. -->
-		<Card.Root class="overflow-visible">
+		<Card.Root class="overflow-visible lg:self-start">
 			<Card.Header>
 				<Card.Title>Accessories</Card.Title>
 				<Card.Description>
@@ -896,19 +1009,20 @@
 		</Card.Root>
 
 		<!-- Audit log (right) -->
-		<div class="space-y-6">
-			<!-- Audit log -->
-			<Card.Root>
-				<Card.Header>
-					<Card.Title>Audit Log</Card.Title>
-					<Card.Description
-						>History of transactions and status changes for this asset.</Card.Description
-					>
-				</Card.Header>
-				<Card.Content>
-					{#if history.length === 0}
-						<p class="text-muted-foreground">No history available for this asset.</p>
-					{:else}
+		<Card.Root class="lg:self-start">
+			<Card.Header>
+				<Card.Title>Audit Log</Card.Title>
+				<Card.Description
+					>History of transactions and status changes for this asset.</Card.Description
+				>
+			</Card.Header>
+			<Card.Content>
+				{#if history.length === 0}
+					<p class="text-muted-foreground">No history available for this asset.</p>
+				{:else}
+					<!-- Scrolls past a screenful: a unit in use for years has hundreds of
+					     entries, and the page would otherwise be mostly history. -->
+					<div class="max-h-[36rem] overflow-y-auto pr-2">
 						<div class="relative ml-3 space-y-8 border-l border-muted-foreground/20 py-4">
 							{#each history as item (item.id)}
 								{@const tx = item.data as TransactionData | null}
@@ -1056,29 +1170,10 @@
 								</div>
 							{/each}
 						</div>
-					{/if}
-				</Card.Content>
-			</Card.Root>
-
-			<div
-				class="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-destructive/30 p-4"
-			>
-				<div>
-					<p class="text-sm font-medium">Delete this asset</p>
-					<p class="text-xs text-muted-foreground">
-						Only possible while it has never been booked, scanned, inspected or billed. A unit that
-						has been in use is decommissioned instead, so its history survives.
-					</p>
-				</div>
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					class="border-destructive/40 text-destructive hover:bg-destructive/10"
-					onclick={() => (confirmingDelete = true)}>Delete</Button
-				>
-			</div>
-		</div>
+					</div>
+				{/if}
+			</Card.Content>
+		</Card.Root>
 	</div>
 </div>
 
@@ -1171,9 +1266,13 @@
 			: ''}
 	{/snippet}
 	{#snippet children()}
-		<p class="text-sm text-muted-foreground">
-			This cannot be undone. Only the unit is removed — the product it belongs to stays.
-		</p>
+		<div class="space-y-2 text-sm text-muted-foreground">
+			<p>This cannot be undone. Only the unit is removed — the product it belongs to stays.</p>
+			<p>
+				Only possible while it has never been booked, scanned, inspected or billed. A unit that has
+				been in use is decommissioned instead, so its history survives.
+			</p>
+		</div>
 	{/snippet}
 
 	{#snippet footer()}
