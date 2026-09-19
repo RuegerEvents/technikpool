@@ -1345,7 +1345,12 @@
 				placeholder="Search manufacturers…"
 			/>
 		</div>
-		<ProductFields {categories} bind:value={productDraft} idPrefix="modal" />
+		<ProductFields
+			{categories}
+			bind:value={productDraft}
+			idPrefix="modal"
+			productId={asset.productId}
+		/>
 	{/snippet}
 
 	{#snippet footer()}

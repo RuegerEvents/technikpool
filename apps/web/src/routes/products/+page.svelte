@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { categoryLabel } from '$lib/category';
+	import { cableTwinGroups, cableTwinKey } from '$lib/cable';
 	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
 	import {
 		getBundles,
@@ -42,7 +43,9 @@
 	// What still needs doing. 'price' is one org's price, never "any org's": a
 	// price is that org's own fact, and a filter across several would keep a
 	// product in the list that you have already priced for the org in front.
-	let missing = $state<'none' | 'image' | 'price'>('none');
+	// 'twin' is the odd one out — nothing is missing, there is one entry too
+	// many: a cable the catalogue holds a second time under another name.
+	let missing = $state<'none' | 'image' | 'price' | 'twin'>('none');
 	// Accessory-only products are billed with the unit they hang off, so they
 	// usually need no price of their own. Off unless asked.
 	let includeAccessories = $state(false);
@@ -161,6 +164,7 @@
 	function matches(product: CatalogProduct) {
 		if (missing === 'image' && product.imagePath) return false;
 		if (missing === 'price' && !needsPrice(product)) return false;
+		if (missing === 'twin' && !hasTwin(product)) return false;
 		if (!searchTrimmed) return true;
 		return (
 			product.name.toLowerCase().includes(searchTrimmed) ||
@@ -420,6 +424,19 @@
 	let allProducts = $derived(getProducts().current ?? []);
 	type GlobalProduct = Awaited<ReturnType<typeof getProducts>>[number];
 
+	// Cables are where duplicates can be *found* rather than stumbled over: the
+	// name is free text, but what the cable is sits in columns. Grouped over the
+	// whole catalogue for the same reason the picker lists it — the other half of
+	// a pair may be an entry nobody here holds units of. See `cableTwinKey`.
+	let twinGroups = $derived(cableTwinGroups(allProducts));
+
+	function hasTwin(product: CatalogProduct) {
+		const key = cableTwinKey(product);
+		return !!key && twinGroups.has(key);
+	}
+
+	let twinCount = $derived(products.filter(hasTwin).length);
+
 	let mergeOpen = $state(false);
 	let mergePick = $state<{ id: string | null; name: string } | null>(null);
 	// Which of the two names survives. Defaults to the card in front, because
@@ -458,8 +475,9 @@
 		!!survivor && !!absorbed && !survivor.imagePath && !!absorbed.imagePath
 	);
 
-	function openMerge() {
-		mergePick = null;
+	/** With a pick where the duplicate is already known — the cable warning hands one over. */
+	function openMerge(pick: { id: string; name: string } | null = null) {
+		mergePick = pick;
 		keepCurrent = true;
 		mergeOpen = true;
 	}
@@ -597,6 +615,18 @@
 					: 'bg-muted text-muted-foreground hover:bg-muted/70'}"
 				>Missing image ({missingImageCount})</button
 			>
+			<!-- Only once there is one: unlike a missing image, most catalogues never
+			     have a duplicate cable, and a permanent "(0)" is a button to nowhere. -->
+			{#if twinCount > 0 || missing === 'twin'}
+				<button
+					type="button"
+					onclick={() => (missing = 'twin')}
+					class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {missing === 'twin'
+						? 'bg-primary text-primary-foreground'
+						: 'bg-muted text-muted-foreground hover:bg-muted/70'}"
+					>Duplicate cables ({twinCount})</button
+				>
+			{/if}
 			{#if managedOrgs.length > 0}
 				<button
 					type="button"
@@ -666,6 +696,12 @@
 										>{product.manufacturer.name}</span
 									>
 								</span>
+								{#if hasTwin(product)}
+									<span
+										class="shrink-0 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800 dark:bg-amber-900 dark:text-amber-300"
+										>Duplicate cable</span
+									>
+								{/if}
 								{#if !product.imagePath}
 									<span
 										class="shrink-0 rounded-full bg-yellow-100 px-1.5 py-0.5 text-[10px] font-semibold text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
@@ -726,7 +762,7 @@
 											>Delete unused</Button
 										>
 									{/if}
-									<Button icon="merge" variant="outline" size="sm" onclick={openMerge}
+									<Button icon="merge" variant="outline" size="sm" onclick={() => openMerge()}
 										>Merge duplicate…</Button
 									>
 								{/if}
@@ -770,6 +806,8 @@
 							showPrice={false}
 							identityDisabled={identityLocked}
 							imageDisabled={imageLocked || !canContribute}
+							productId={current.id}
+							onMergeTwin={canEdit ? openMerge : undefined}
 						/>
 						{#if priceOrgs.length > 0}
 							<div class="mt-4 space-y-2">

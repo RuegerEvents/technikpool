@@ -1,6 +1,7 @@
 <script module lang="ts">
 	import {
 		cableDisplayName,
+		cableTwinKey,
 		counterpartConnector,
 		formatLength,
 		isCable,
@@ -44,9 +45,11 @@
 
 	/** A stored product → the form. Null for anything that is not a cable. */
 	export function cableDraftFrom(p: CableAttrs): CableDraft | null {
-		if (!p.cableType) return null;
+		// Any of the four columns, not just the type: a lead described by its ends
+		// alone would otherwise open as "not a cable" and lose them on the next save.
+		if (!isCable(p)) return null;
 		return {
-			cableType: p.cableType,
+			cableType: p.cableType ?? '',
 			connectorA: p.connectorA ?? '',
 			connectorB: p.connectorB ?? '',
 			// Round-trips through the same fixed-locale formatting the derived name
@@ -92,7 +95,7 @@
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
 	import { ImageUpload } from '$lib/components/ui/image-upload';
 	import { ConnectorFormModal } from '$lib/components/ui/connector-form-modal';
-	import { getCableVocabulary } from '$lib/remote/assets.remote';
+	import { getCableVocabulary, getProducts } from '$lib/remote/assets.remote';
 	import { getConnectors } from '$lib/remote/connectors.remote';
 
 	type Props = {
@@ -121,6 +124,13 @@
 		 * the identity is locked *and* the product has an image.
 		 */
 		imageDisabled?: boolean;
+		/** The product being edited, so it is not reported as its own duplicate. */
+		productId?: string;
+		/**
+		 * Where a duplicate can be dealt with on the spot — the product wizard —
+		 * each one listed gets a button that hands it here.
+		 */
+		onMergeTwin?: (twin: { id: string; name: string }) => void;
 	};
 
 	let {
@@ -136,7 +146,9 @@
 		idPrefix = 'product',
 		showPrice = true,
 		identityDisabled = false,
-		imageDisabled = false
+		imageDisabled = false,
+		productId,
+		onMergeTwin
 	}: Props = $props();
 
 	// Only loaded once the box is ticked: a form for a moving head has no use for
@@ -145,6 +157,30 @@
 	let connectors = $derived(value.cable ? (getConnectors().current ?? []) : []);
 
 	let typeItems = $derived((vocab?.types ?? []).map((name) => ({ id: name, name })));
+
+	// The same cable under another name: identical ends, length, additional info
+	// and category. Nothing in the catalogue stops that pair, and once both hold
+	// units every count of "Schuko 10 m" is half right. Compared against the
+	// draft rather than the stored row, so editing a cable *into* a duplicate
+	// says so before the save, not after.
+	let twinKey = $derived(
+		value.cable
+			? cableTwinKey({
+					cableType: value.cable.cableType,
+					connectorA: value.cable.connectorA,
+					connectorB: value.cable.connectorB,
+					lengthCm: parseLengthMeters(value.cable.lengthM),
+					categoryId: value.categoryId
+				})
+			: null
+	);
+	let twins = $derived(
+		twinKey
+			? (getProducts().current ?? []).filter(
+					(p) => p.id !== productId && cableTwinKey(p) === twinKey
+				)
+			: []
+	);
 
 	// The connector list, arranged for the slot it is filling: this end's
 	// connectors first, then the ones with no direction, then the opposite end
@@ -420,6 +456,37 @@
 					a patch lead whether they are CAT6A or CAT7.
 				</p>
 			</div>
+
+			{#if twins.length > 0}
+				<div
+					class="space-y-1 rounded-md border border-amber-500/40 bg-amber-500/10 p-2 text-xs sm:col-span-2"
+				>
+					<p>
+						The catalog already has this cable — same connectors, length, additional info and
+						category:
+					</p>
+					<ul class="space-y-0.5">
+						{#each twins as twin (twin.id)}
+							<li class="flex flex-wrap items-center gap-x-2">
+								<span class="font-medium">{twin.manufacturer.name} {twin.name}</span>
+								{#if onMergeTwin}
+									<button
+										type="button"
+										onclick={() =>
+											onMergeTwin({ id: twin.id, name: `${twin.manufacturer.name} ${twin.name}` })}
+										class="font-medium underline underline-offset-2"
+									>
+										Merge…
+									</button>
+								{/if}
+							</li>
+						{/each}
+					</ul>
+					<p class="text-muted-foreground">
+						Two entries for one cable split its units between them, and every count is half right.
+					</p>
+				</div>
+			{/if}
 		</div>
 	{/if}
 

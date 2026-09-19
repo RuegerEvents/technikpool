@@ -11,7 +11,8 @@
 		getCableVocabulary,
 		getCategories,
 		getLocations,
-		getManufacturers
+		getManufacturers,
+		getProducts
 	} from '$lib/remote/assets.remote';
 	import { getConnectors } from '$lib/remote/connectors.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
@@ -19,6 +20,7 @@
 		CABLE_END_LABEL,
 		QUICK_ENTRY_EXAMPLES,
 		cableDisplayName,
+		cableTwinKey,
 		connectorLabel,
 		connectorRole,
 		counterpartConnector,
@@ -193,6 +195,34 @@
 			connectors,
 			inputGender
 		);
+	}
+
+	// A row describing a cable the catalogue already has. The server reuses an
+	// entry only under the same manufacturer, so the same lead typed here as
+	// generic and filed there under a brand becomes a second product — which is
+	// the one case worth interrupting for. Under the same manufacturer there is
+	// nothing to warn about, only to say: the units join the entry that exists,
+	// and the name typed in this row is not used.
+	let catalog = $derived(getProducts().current ?? []);
+
+	function rowTwin(row: Row) {
+		const key = cableTwinKey({
+			cableType: row.cableType,
+			connectorA: row.connectorA,
+			connectorB: row.connectorB,
+			lengthCm: parseLengthMeters(row.lengthM),
+			categoryId: row.categoryId
+		});
+		if (!key) return null;
+		const twins = catalog.filter((p) => cableTwinKey(p) === key);
+		if (twins.length === 0) return null;
+		const manufacturerId = row.manufacturerId || genericManufacturer?.id;
+		const same = twins.find((p) => p.manufacturerId === manufacturerId);
+		return same ? { product: same, reused: true } : { product: twins[0], reused: false };
+	}
+
+	function useTwin(row: Row, twin: { manufacturerId: string }) {
+		row.manufacturerId = twin.manufacturerId === genericManufacturer?.id ? '' : twin.manufacturerId;
 	}
 
 	function swapEnds(row: Row) {
@@ -613,6 +643,34 @@
 											class="font-medium underline underline-offset-2">Swap the ends</button
 										>
 									</div>
+								{/if}
+
+								{#if rowTwin(row)}
+									{@const twin = rowTwin(row)!}
+									{#if !twin.reused}
+										<div
+											class="col-span-2 flex flex-wrap items-center gap-x-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-xs sm:col-span-4 xl:col-span-9"
+										>
+											<span
+												>The catalog already has this cable as
+												<span class="font-medium"
+													>{twin.product.manufacturer.name} {twin.product.name}</span
+												>. Saved like this, it becomes a second entry.</span
+											>
+											<button
+												type="button"
+												onclick={() => useTwin(row, twin.product)}
+												class="font-medium underline underline-offset-2"
+												>Add to that entry instead</button
+											>
+										</div>
+									{:else if twin.product.name !== row.name.trim()}
+										<p class="col-span-2 text-xs text-muted-foreground sm:col-span-4 xl:col-span-9">
+											Already in the catalog as
+											<span class="font-medium">{twin.product.name}</span> — the units are added there,
+											under that name.
+										</p>
+									{/if}
 								{/if}
 							</div>
 						{/each}

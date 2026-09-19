@@ -35,7 +35,13 @@ import {
 	bundleTypeSpec
 } from '$lib/server/services/bundle-spec';
 import { getProduction } from '$lib/remote/productions.remote';
-import { CABLE_TYPE_DEFAULTS, CABLE_TYPE_SUGGESTIONS, isCable, normalizeCable } from '$lib/cable';
+import {
+	CABLE_TYPE_DEFAULTS,
+	CABLE_TYPE_SUGGESTIONS,
+	isCable,
+	normalizeCable,
+	type CableInput
+} from '$lib/cable';
 import { ensureConnectors } from '$lib/server/services/connectors';
 import { getConnectors } from '$lib/remote/connectors.remote';
 import { getKnownAddresses } from '$lib/remote/addresses.remote';
@@ -618,6 +624,24 @@ const cableAttrsSchema = v.object({
 	lengthCm: v.optional(v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1))))
 });
 
+/**
+ * "The same cable" as a Prisma filter. The three text columns are free text, so
+ * they are compared without case — "schuko m" typed by hand is the "Schuko M"
+ * the picker wrote, and the forms' duplicate warning (`cableTwinKey`) already
+ * reads them that way. A null stays a plain `null`, which Prisma reads as IS
+ * NULL: a blank end only ever matches a blank end.
+ */
+function sameCableWhere(cable: CableInput): Prisma.ProductWhereInput {
+	const text = (value: string | null) =>
+		value === null ? null : { equals: value, mode: 'insensitive' as const };
+	return {
+		cableType: text(cable.cableType),
+		connectorA: text(cable.connectorA),
+		connectorB: text(cable.connectorB),
+		lengthCm: cable.lengthCm
+	};
+}
+
 /** The manufacturer/product half of a create form, which two commands now ask for. */
 const productRefSchema = {
 	productId: v.optional(v.string()),
@@ -675,13 +699,7 @@ async function resolveProductRef(
 		// a second "Schuko 10 m" is a row the device list can never merge back.
 		// Nulls stay null, so a blank end only matches a blank end.
 		const existing = await prisma.product.findFirst({
-			where: {
-				manufacturerId,
-				cableType: newCable.cableType,
-				connectorA: newCable.connectorA,
-				connectorB: newCable.connectorB,
-				lengthCm: newCable.lengthCm
-			},
+			where: { manufacturerId, ...sameCableWhere(newCable) },
 			select: { id: true }
 		});
 		if (existing) {
@@ -1205,13 +1223,7 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 			// `undefined` means "don't filter on this", so a blank connector would
 			// match any cable and a second product would be created every time.
 			const existing = await prisma.product.findFirst({
-				where: {
-					manufacturerId,
-					cableType: cable.cableType,
-					connectorA: cable.connectorA,
-					connectorB: cable.connectorB,
-					lengthCm: cable.lengthCm
-				},
+				where: { manufacturerId, ...sameCableWhere(cable) },
 				select: { id: true }
 			});
 			if (existing) {

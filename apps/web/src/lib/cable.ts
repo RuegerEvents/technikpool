@@ -315,6 +315,48 @@ export function normalizeCable(input: {
 }
 
 /**
+ * What makes two catalogue rows the same cable: both ends, the length, the
+ * additional info and the department — everything but the name. Null for
+ * anything that is not a cable, which therefore never has a twin.
+ *
+ * The manufacturer is left out on purpose. The create commands already reuse a
+ * product where it matches, so what is left to find is exactly the pair they
+ * let through: "Generisch Schuko 10 m" next to somebody's "Schuko Verlängerung
+ * 10m". Case is ignored because the columns are free text. The ends are *not*
+ * sorted: they are an ordered pair (see `endsAreReversed`), and a lead recorded
+ * backwards is that warning's business, not a second product.
+ */
+export function cableTwinKey(
+	p: Partial<CableAttrs> & { categoryId?: string | null }
+): string | null {
+	const cable = normalizeCable(p);
+	if (!isCable(cable)) return null;
+	return [
+		p.categoryId ?? '',
+		cable.cableType?.toLowerCase() ?? '',
+		cable.connectorA?.toLowerCase() ?? '',
+		cable.connectorB?.toLowerCase() ?? '',
+		cable.lengthCm ?? ''
+	].join('|');
+}
+
+/** Every product sharing a `cableTwinKey` with at least one other, by key. */
+export function cableTwinGroups<T extends Partial<CableAttrs> & { categoryId?: string | null }>(
+	products: readonly T[]
+): Map<string, T[]> {
+	const groups = new Map<string, T[]>();
+	for (const product of products) {
+		const key = cableTwinKey(product);
+		if (!key) continue;
+		const group = groups.get(key);
+		if (group) group.push(product);
+		else groups.set(key, [product]);
+	}
+	for (const [key, group] of groups) if (group.length < 2) groups.delete(key);
+	return groups;
+}
+
+/**
  * One line of the batch form's quick entry: "10x 10m Schuko", "2 x 3m DMX
  * 3-Pin", "3× 1,5 m XLR", or just "Schuko 10m" for a single one. Never throws —
  * a line it can't read comes back null and the caller says so.

@@ -5347,6 +5347,7 @@ msgid_plural "# products"
 msgstr[0] "# Produkt"
 msgstr[1] "# Produkte"
 
+#: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/manufacturers/+page.svelte
 msgid "Merge…"
 msgstr "Zusammenführen…"
@@ -8050,3 +8051,32 @@ msgstr "Gemischt"
 #: src/routes/assets/+page.svelte
 msgid "S/N: {0}"
 msgstr "S/N: {0}"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "The catalog already has this cable — same connectors, length, additional info and category:"
+msgstr "Dieses Kabel gibt es im Katalog schon — gleiche Stecker, Länge, Zusatzinfo und Kategorie:"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "Two entries for one cable split its units between them, and every count is half right."
+msgstr "Zwei Einträge für ein Kabel teilen dessen Einheiten unter sich auf, und jede Zählung stimmt nur zur Hälfte."
+
+#. 0: twinCount
+#: src/routes/products/+page.svelte
+msgid "Duplicate cables ({0})"
+msgstr "Doppelte Kabel ({0})"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "The catalog already has this cable as <0/>. Saved like this, it becomes a second entry."
+msgstr "Dieses Kabel gibt es im Katalog schon als <0/>. So gespeichert, entsteht ein zweiter Eintrag."
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Add to that entry instead"
+msgstr "Stattdessen dort hinzufügen"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Already in the catalog as <0/> — the units are added there, under that name."
+msgstr "Schon im Katalog als <0/> — die Einheiten kommen dort dazu, unter diesem Namen."
+
+#: src/routes/products/+page.svelte
+msgid "Duplicate cable"
+msgstr "Doppeltes Kabel"
