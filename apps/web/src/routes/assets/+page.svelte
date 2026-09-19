@@ -14,7 +14,7 @@
 		getBundleTemplates,
 		getRetiredAssets
 	} from '$lib/remote/assets.remote';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
+	import { getAllOrgs, getMyOrgs } from '$lib/remote/orgs.remote';
 	import { getLicenses } from '$lib/remote/licenses.remote';
 	import { Button } from '$lib/components/ui/button';
 	import { CategorySelect } from '$lib/components/ui/category-select';
@@ -133,6 +133,15 @@
 	// suspends the whole page until it answers — heading, filters and all — and
 	// this one asks for every unit in the pool. See CLAUDE.md, "Loading states".
 	let orgs = $derived(getMyOrgs().current ?? []);
+	// A system admin may scope any read to any org — `scopedOrgIds` lets them
+	// through whether or not they are a member — so the orgs they do not belong
+	// to are offered too, in a group of their own rather than mixed in with the
+	// memberships.
+	let otherOrgs = $derived(
+		page.data.isAdmin
+			? (getAllOrgs().current ?? []).filter((org) => !orgs.some((mine) => mine.id === org.id))
+			: []
+	);
 	let assetsQuery = $derived(showingRetired ? getRetiredAssets(queryOrgId) : getAssets(queryOrgId));
 	let assets = $derived(assetsQuery.current ?? []);
 	let categories = $derived(getCategories().current ?? []);
@@ -621,6 +630,11 @@
 			>
 				<option value={ALL_ORGS}>All Organizations</option>
 				{#each orgs as org (org.id)}<option value={org.id}>{orgLabel(org)}</option>{/each}
+				{#if otherOrgs.length > 0}
+					<optgroup label="Other Organizations">
+						{#each otherOrgs as org (org.id)}<option value={org.id}>{orgLabel(org)}</option>{/each}
+					</optgroup>
+				{/if}
 			</select>
 			<Button variant="outline" onclick={() => (showImportModal = true)}>Import CSV</Button>
 			<Button icon="add" variant="outline" href={resolve('/assets/bundles/new')}>Add Bundle</Button>

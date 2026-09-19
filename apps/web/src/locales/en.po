@@ -8429,3 +8429,7 @@ msgstr "Home organization — lists open on it"
 #: src/routes/orgs/+page.svelte
 msgid "Make home organization — lists open on it"
 msgstr "Make home organization — lists open on it"
+
+#: src/routes/assets/+page.svelte
+msgid "Other Organizations"
+msgstr "Other Organizations"
