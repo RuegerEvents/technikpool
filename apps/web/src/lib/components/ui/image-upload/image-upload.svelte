@@ -477,7 +477,9 @@
 	// one mounted and swaps the product underneath it. `step` is seeded from
 	// `value` at mount, so without this the previous product's photo stays on
 	// screen — under a Replace button, on a product that has no image at all.
-	// A plain variable rather than $state: it records which value this component
+	// ProductFields also remounts it per product, which covers a half-finished
+	// crop, but the remount can come before the new product's draft arrives, so
+	// this is still what settles the photo shown. A plain variable rather than $state: it records which value this component
 	// has already reacted to, and re-running the effect on it would be circular.
 	let shownValue = value;
 

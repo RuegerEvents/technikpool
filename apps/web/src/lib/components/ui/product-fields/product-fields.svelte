@@ -524,7 +524,12 @@
 		{#if imageDisabled}
 			<ProductThumb path={value.imagePath} alt={value.name} size={96} />
 		{:else}
-			<ImageUpload bind:value={value.imagePath} label="Product photo" />
+			<!-- Remounted per product: a pasted photo still being cropped hasn't
+			     touched `value` yet, so the uploader can't tell from `value` alone
+			     that the wizard has moved on to a product with no image either. -->
+			{#key productId}
+				<ImageUpload bind:value={value.imagePath} label="Product photo" />
+			{/key}
 		{/if}
 	</div>
 </div>
