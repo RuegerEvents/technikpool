@@ -409,6 +409,7 @@ export const ModelName = {
   Manufacturer: 'Manufacturer',
   Connector: 'Connector',
   ProductPort: 'ProductPort',
+  CableWay: 'CableWay',
   Category: 'Category',
   Product: 'Product',
   OrgProductPrice: 'OrgProductPrice',
@@ -446,7 +447,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "invitation" | "manufacturer" | "connector" | "productPort" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem"
+    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "invitation" | "manufacturer" | "connector" | "productPort" | "cableWay" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1335,6 +1336,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ProductPortCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ProductPortCountAggregateOutputType> | number
+        }
+      }
+    }
+    CableWay: {
+      payload: Prisma.$CableWayPayload<ExtArgs>
+      fields: Prisma.CableWayFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CableWayFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CableWayPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CableWayFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CableWayPayload>
+        }
+        findFirst: {
+          args: Prisma.CableWayFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CableWayPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CableWayFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CableWayPayload>
+        }
+        findMany: {
+          args: Prisma.CableWayFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CableWayPayload>[]
+        }
+        create: {
+          args: Prisma.CableWayCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CableWayPayload>
+        }
+        createMany: {
+          args: Prisma.CableWayCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CableWayCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CableWayPayload>[]
+        }
+        delete: {
+          args: Prisma.CableWayDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CableWayPayload>
+        }
+        update: {
+          args: Prisma.CableWayUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CableWayPayload>
+        }
+        deleteMany: {
+          args: Prisma.CableWayDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CableWayUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CableWayUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CableWayPayload>[]
+        }
+        upsert: {
+          args: Prisma.CableWayUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CableWayPayload>
+        }
+        aggregate: {
+          args: Prisma.CableWayAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCableWay>
+        }
+        groupBy: {
+          args: Prisma.CableWayGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CableWayGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CableWayCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CableWayCountAggregateOutputType> | number
         }
       }
     }
@@ -3189,6 +3264,19 @@ export const ProductPortScalarFieldEnum = {
 export type ProductPortScalarFieldEnum = (typeof ProductPortScalarFieldEnum)[keyof typeof ProductPortScalarFieldEnum]
 
 
+export const CableWayScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  count: 'count',
+  connectorA: 'connectorA',
+  connectorB: 'connectorB',
+  cableType: 'cableType',
+  sortOrder: 'sortOrder'
+} as const
+
+export type CableWayScalarFieldEnum = (typeof CableWayScalarFieldEnum)[keyof typeof CableWayScalarFieldEnum]
+
+
 export const CategoryScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -3898,6 +3986,7 @@ export type GlobalOmitConfig = {
   manufacturer?: Prisma.ManufacturerOmit
   connector?: Prisma.ConnectorOmit
   productPort?: Prisma.ProductPortOmit
+  cableWay?: Prisma.CableWayOmit
   category?: Prisma.CategoryOmit
   product?: Prisma.ProductOmit
   orgProductPrice?: Prisma.OrgProductPriceOmit

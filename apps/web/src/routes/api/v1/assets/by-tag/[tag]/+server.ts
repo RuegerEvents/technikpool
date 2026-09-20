@@ -37,7 +37,9 @@ export const GET: RequestHandler = ({ locals, params }) =>
 		const asset = await prisma.asset.findUniqueOrThrow({
 			where: { id: match.assetId },
 			include: {
-				product: { include: { manufacturer: true, category: true } },
+				product: {
+					include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+				},
 				location: { include: { address: true, organization: true } },
 				organization: true
 			}

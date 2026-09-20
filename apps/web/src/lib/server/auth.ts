@@ -30,6 +30,7 @@ const prefixes: Partial<Record<ModelName, string>> = {
 	AssetBundle: 'astb',
 	AssetTransaction: 'astx',
 	BundleTemplate: 'bndt',
+	CableWay: 'cway',
 	Category: 'catg',
 	Connector: 'conn',
 	Customer: 'cust',

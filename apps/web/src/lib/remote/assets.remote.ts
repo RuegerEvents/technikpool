@@ -43,9 +43,14 @@ import {
 	CABLE_TYPE_SUGGESTIONS,
 	isCable,
 	normalizeCable,
-	type CableInput
+	normalizeWays,
+	sameWays,
+	waysKey,
+	type CableInput,
+	type CableWayAttrs
 } from '$lib/cable';
 import { ensureConnectors } from '$lib/server/services/connectors';
+import { waySnapshot, writeWays, type WayInput } from '$lib/server/services/cable-ways';
 import {
 	normalizePorts,
 	portSnapshot,
@@ -112,7 +117,11 @@ const FEATURED_PRODUCTS_SELECT = { select: { id: true } } as const;
 
 const ACCESSORIES_INCLUDE = {
 	where: ACTIVE_ASSET_WHERE,
-	include: { product: { include: { manufacturer: true, category: true } } },
+	include: {
+		product: {
+			include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+		}
+	},
 	orderBy: ASSET_ORDER_BY
 } as const;
 
@@ -142,7 +151,9 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 	const assets = await prisma.asset.findMany({
 		where: { organizationId: { in: queryOrgIds }, ...ACTIVE_ASSET_WHERE },
 		include: {
-			product: { include: { manufacturer: true, category: true } },
+			product: {
+				include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+			},
 			location: true,
 			organization: true,
 			bundle: { select: { id: true, template: { select: { name: true } } } },
@@ -167,7 +178,9 @@ export const getRetiredAssets = query(v.optional(v.string()), async (organizatio
 	return await prisma.asset.findMany({
 		where: { organizationId: { in: queryOrgIds }, ...RETIRED_ASSET_WHERE },
 		include: {
-			product: { include: { manufacturer: true, category: true } },
+			product: {
+				include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+			},
 			location: true,
 			organization: true,
 			bundle: { select: { id: true, template: { select: { name: true } } } },
@@ -193,6 +206,7 @@ export const getAsset = query(v.string(), async (assetId: string) => {
 				include: {
 					manufacturer: true,
 					category: true,
+					ways: { orderBy: { sortOrder: 'asc' } },
 					ports: { include: { connector: true }, orderBy: { sortOrder: 'asc' } }
 				}
 			},
@@ -518,7 +532,7 @@ export const getProducts = query(v.optional(v.string()), async (manufacturerId?:
 	return await prisma.product.findMany({
 		where: manufacturerId ? { manufacturerId } : undefined,
 		orderBy: { name: 'asc' },
-		include: { manufacturer: true, category: true }
+		include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
 	});
 });
 
@@ -622,8 +636,10 @@ export const getProductCatalog = query(v.optional(v.string()), async (organizati
 				select: { organizationId: true, netPurchasePrice: true }
 			},
 			_count: { select: { assets: { where: assetScope } } },
-			// The device's panel. Carried here because the product editor is built
-			// on this row, on /products and on a product's own page alike.
+			// A loom's ways, and the device's panel. Carried here because the
+			// product editor is built on this row, on /products and on a product's
+			// own page alike.
+			ways: { orderBy: { sortOrder: 'asc' } },
 			ports: { include: { connector: true }, orderBy: { sortOrder: 'asc' } }
 		},
 		orderBy: [{ manufacturer: { name: 'asc' } }, { name: 'asc' }]
@@ -650,18 +666,27 @@ export const getProductCatalog = query(v.optional(v.string()), async (organizati
 	}));
 });
 
-/**
- * The four cable columns as a form sends them. `cableType` is what makes a
- * product a cable, so it is the one that has to be there; the ends and the
- * length are each unknown often enough to be optional.
- */
+/** One way of a loom as a form sends it. */
+const cableWaySchema = v.object({
+	count: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(99)),
+	cableType: v.optional(v.nullable(v.string())),
+	connectorA: v.optional(v.nullable(v.string())),
+	connectorB: v.optional(v.nullable(v.string()))
+});
+
 const cableAttrsSchema = v.object({
 	/** The wire, not the ends: CAT7, 2,5 mm². Optional — most cables have nothing
 	 * to say here that the connectors do not already say. */
 	cableType: v.optional(v.nullable(v.string())),
 	connectorA: v.optional(v.nullable(v.string())),
 	connectorB: v.optional(v.nullable(v.string())),
-	lengthCm: v.optional(v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1))))
+	lengthCm: v.optional(v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1)))),
+	/**
+	 * A loom's ways, where the cable carries more than one pair of ends. Empty on
+	 * an ordinary lead, whose single pair is `connectorA`/`connectorB` above — a
+	 * cable is one or the other, never both.
+	 */
+	ways: v.optional(v.array(cableWaySchema))
 });
 
 /**
@@ -680,6 +705,35 @@ function sameCableWhere(cable: CableInput): Prisma.ProductWhereInput {
 		connectorB: text(cable.connectorB),
 		lengthCm: cable.lengthCm
 	};
+}
+
+/**
+ * The catalogue row this cable already is, if it is one. An ordinary lead is a
+ * filter; a loom is not, because "the same multiset of ways" is not something a
+ * `where` can ask — `every`/`some` cannot count. So its ways are compared here,
+ * over the few candidates that already match the columns.
+ *
+ * Which branch runs matters in both directions: an ordinary lead must not match
+ * a loom that happens to share its length, so it asks for a product with no
+ * ways at all.
+ */
+async function findSameCable(
+	manufacturerId: string,
+	cable: CableInput,
+	ways: readonly CableWayAttrs[]
+): Promise<{ id: string } | null> {
+	if (ways.length === 0) {
+		return await prisma.product.findFirst({
+			where: { manufacturerId, ...sameCableWhere(cable), ways: { none: {} } },
+			select: { id: true }
+		});
+	}
+	const candidates = await prisma.product.findMany({
+		where: { manufacturerId, ...sameCableWhere(cable), ways: { some: {} } },
+		select: { id: true, ways: { orderBy: { sortOrder: 'asc' } } }
+	});
+	const key = waysKey(ways);
+	return candidates.find((p) => waysKey(p.ways) === key) ?? null;
 }
 
 /** The manufacturer/product half of a create form, which two commands now ask for. */
@@ -728,7 +782,8 @@ async function resolveProductRef(
 	// A cable can arrive with no manufacturer at all — "New accessory" describes
 	// one by its ends — and is then filed where `createCableBatch` files it.
 	const cable = data.newProductCable ? normalizeCable(data.newProductCable) : null;
-	const newCable = cable && isCable(cable) ? cable : null;
+	const ways = normalizeWays(data.newProductCable?.ways);
+	const newCable = cable && isCable({ ...cable, ways }) ? cable : null;
 	if (!manufacturerId && !data.productId && data.newProductName && newCable) {
 		manufacturerId = await resolveGenericManufacturer();
 	}
@@ -738,10 +793,7 @@ async function resolveProductRef(
 		// The same lead described twice is one product, as in `createCableBatch`:
 		// a second "Schuko 10 m" is a row the device list can never merge back.
 		// Nulls stay null, so a blank end only matches a blank end.
-		const existing = await prisma.product.findFirst({
-			where: { manufacturerId, ...sameCableWhere(newCable) },
-			select: { id: true }
-		});
+		const existing = await findSameCable(manufacturerId, newCable, ways);
 		if (existing) {
 			productId = existing.id;
 			// A price typed for the "new" product still counts, but only where this
@@ -776,7 +828,11 @@ async function resolveProductRef(
 				...(cable ?? {}),
 				// A cable is a physical thing; a product can't be both.
 				isLicense: !cable && !!data.newProductIsLicense,
-				createdById: userId
+				createdById: userId,
+				ways:
+					ways.length > 0
+						? { create: ways.map((w, sortOrder) => ({ ...w, sortOrder })) }
+						: undefined
 			}
 		});
 		// The price given alongside a brand-new product is the creating org's own
@@ -795,7 +851,10 @@ async function resolveProductRef(
 		if (data.newProductCable) {
 			const added = await ensureConnectors([
 				data.newProductCable.connectorA,
-				data.newProductCable.connectorB
+				data.newProductCable.connectorB,
+				// A loom's ends are ends like any other: they belong in the connector
+				// catalogue, where a picture and a department can be hung on them.
+				...ways.flatMap((w) => [w.connectorA, w.connectorB])
 			]);
 			if (added.length > 0) await getConnectors().refresh();
 			await getCableVocabulary().refresh();
@@ -945,7 +1004,12 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 						]
 					}
 				},
-				include: { product: { include: { manufacturer: true, category: true } }, location: true }
+				include: {
+					product: {
+						include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+					},
+					location: true
+				}
 			});
 		})
 	);
@@ -1245,7 +1309,9 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 		const manufacturerId = row.manufacturerId ?? genericManufacturerId;
 		if (!manufacturerId) appError(400, 'manufacturer_required');
 
-		if (!isCable(cable)) {
+		// The batch grid is for ordinary leads: one pair of ends per row. A loom is
+		// made up in the product form, where its ways have somewhere to go.
+		if (!isCable({ ...cable, ways: [] })) {
 			appError(400, 'cable_row_incomplete', [row.name]);
 		}
 
@@ -1262,10 +1328,7 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 			// Nulls are passed as `null`, never left undefined: to Prisma
 			// `undefined` means "don't filter on this", so a blank connector would
 			// match any cable and a second product would be created every time.
-			const existing = await prisma.product.findFirst({
-				where: { manufacturerId, ...sameCableWhere(cable) },
-				select: { id: true }
-			});
+			const existing = await findSameCable(manufacturerId, cable, []);
 			if (existing) {
 				entry = { productId: existing.id, created: false };
 			} else {
@@ -1856,8 +1919,9 @@ const updateProductSchema = v.object({
 	imagePath: v.optional(v.string()),
 	/**
 	 * `undefined` leaves the cable columns alone; `null` says this is not a cable
-	 * any more and clears all four. Anything else replaces them wholesale — a
-	 * cable's four attributes describe one physical thing and are edited together.
+	 * any more and clears all four, the loom's ways included. Anything else
+	 * replaces them wholesale — a cable's attributes describe one physical thing
+	 * and are edited together.
 	 */
 	cable: v.optional(v.nullable(cableAttrsSchema)),
 	/** Whether units of this product are licences carrying credentials. */
@@ -1885,27 +1949,33 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		}
 	});
 
-	// What a cable *is* — its type, its ends, its length — is identity in exactly
-	// the way a name is: it decides which product a unit belongs to, and every
-	// packing list groups by it. Normalised on both sides so a blank field
-	// arriving as '' doesn't read as a change from null.
+	// What a cable *is* — its type, its ends or its ways, its length — is identity
+	// in exactly the way a name is: it decides which product a unit belongs to,
+	// and every packing list groups by it. Normalised on both sides so a blank
+	// field arriving as '' doesn't read as a change from null.
 	const nextCable =
 		input.cable === undefined
 			? undefined
 			: input.cable === null
 				? { cableType: null, connectorA: null, connectorB: null, lengthCm: null }
 				: normalizeCable(input.cable);
+	// The ways travel with the cable: clearing it clears them, and a lead that
+	// never had any keeps an empty list rather than a null nobody can compare.
+	const nextWays = input.cable === undefined ? undefined : normalizeWays(input.cable?.ways);
+	const previousWays = await waySnapshot(input.productId);
 	// Being a licence is identity as well: it decides whether every unit of the
 	// product carries credentials. Never both a cable and a licence.
 	const nextIsLicense =
 		input.isLicense === undefined ? undefined : input.isLicense && !nextCable?.cableType;
 	const licenseChanged = nextIsLicense !== undefined && nextIsLicense !== previousProduct.isLicense;
+	const waysChanged = nextWays !== undefined && !sameWays(previousWays, nextWays);
 	const cableChanged =
-		nextCable !== undefined &&
-		(nextCable.cableType !== previousProduct.cableType ||
-			nextCable.connectorA !== previousProduct.connectorA ||
-			nextCable.connectorB !== previousProduct.connectorB ||
-			nextCable.lengthCm !== previousProduct.lengthCm);
+		waysChanged ||
+		(nextCable !== undefined &&
+			(nextCable.cableType !== previousProduct.cableType ||
+				nextCable.connectorA !== previousProduct.connectorA ||
+				nextCable.connectorB !== previousProduct.connectorB ||
+				nextCable.lengthCm !== previousProduct.lengthCm));
 
 	// Identity (name, manufacturer, category) follows the same rule as
 	// `mergeProducts` — see `productControl`: whoever's gear it is controls what
@@ -1947,6 +2017,9 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		appError(403, 'product_edit_forbidden');
 	}
 
+	// Before the row, so the product that comes back already carries them.
+	if (waysChanged && nextWays) await writeWays(input.productId, nextWays);
+
 	const product = await prisma.product.update({
 		where: { id: input.productId },
 		data: {
@@ -1957,7 +2030,7 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 			...(nextCable ?? {}),
 			...(nextIsLicense !== undefined ? { isLicense: nextIsLicense } : {})
 		},
-		include: { manufacturer: true, category: true }
+		include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
 	});
 
 	const changes = fieldChanges(previousProduct, {
@@ -1968,6 +2041,11 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		...(nextCable ?? {}),
 		...(nextIsLicense !== undefined ? { isLicense: nextIsLicense } : {})
 	});
+	// The loom is logged as the whole list on both sides, like a device's panel:
+	// a way has no id a revert could match, so what it can put back is the list.
+	if (waysChanged && nextWays) {
+		changes.push({ field: 'ways', from: previousWays, to: nextWays });
+	}
 	if (changes.length > 0) {
 		await logCatalogChange({
 			userId: user.id,
@@ -1979,7 +2057,13 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 	}
 
 	await refreshProductViews(product, previousProduct.manufacturerId, {
-		cable: cableChanged ? [nextCable?.connectorA, nextCable?.connectorB] : null
+		cable: cableChanged
+			? [
+					nextCable?.connectorA,
+					nextCable?.connectorB,
+					...(nextWays ?? []).flatMap((w) => [w.connectorA, w.connectorB])
+				]
+			: null
 	});
 
 	return product;
@@ -2489,6 +2573,17 @@ export const revertCatalogChange = command(v.string(), async (entryId: string) =
 		data[field] = (change.from ?? null) as string | number | boolean | null;
 	}
 
+	// A loom's ways are logged as the whole list on both sides, like the panel
+	// below, and reverted on the same terms: only while the product still has
+	// exactly the list this entry wrote.
+	const waysChange = logged.find((change) => change.field === 'ways');
+	const waysBefore = waysChange ? await waySnapshot(product.id) : [];
+	let waysRevert: WayInput[] | null = null;
+	if (waysChange) {
+		const wrote = (waysChange.to ?? []) as unknown as WayInput[];
+		if (sameWays(waysBefore, wrote)) waysRevert = (waysChange.from ?? []) as unknown as WayInput[];
+	}
+
 	// A device's panel is logged as the whole list on both sides, so it is
 	// reverted the same way: only while the product still has exactly the list
 	// this entry wrote. `FieldChange` types from/to as strings; for this field
@@ -2512,7 +2607,9 @@ export const revertCatalogChange = command(v.string(), async (entryId: string) =
 			portsRevert = from.filter((p) => alive.has(p.connectorId));
 		}
 	}
-	if (Object.keys(data).length === 0 && !portsRevert) appError(409, 'catalog_revert_stale');
+	if (Object.keys(data).length === 0 && !portsRevert && !waysRevert) {
+		appError(409, 'catalog_revert_stale');
+	}
 
 	// The rows an old value points at can be gone — merges delete them.
 	if (typeof data.manufacturerId === 'string') {
@@ -2523,7 +2620,9 @@ export const revertCatalogChange = command(v.string(), async (entryId: string) =
 		const exists = await prisma.category.findUnique({ where: { id: data.categoryId } });
 		if (!exists) delete data.categoryId;
 	}
-	if (Object.keys(data).length === 0 && !portsRevert) appError(409, 'catalog_revert_stale');
+	if (Object.keys(data).length === 0 && !portsRevert && !waysRevert) {
+		appError(409, 'catalog_revert_stale');
+	}
 
 	const updated =
 		Object.keys(data).length > 0
@@ -2533,6 +2632,10 @@ export const revertCatalogChange = command(v.string(), async (entryId: string) =
 				})
 			: product;
 	const changes = fieldChanges(product, data);
+	if (waysRevert) {
+		await writeWays(product.id, waysRevert);
+		changes.push({ field: 'ways', from: waysBefore, to: await waySnapshot(product.id) });
+	}
 	if (portsRevert) {
 		await writePorts(product.id, portsRevert);
 		changes.push({ field: 'ports', from: portsBefore, to: await portSnapshot(product.id) });
@@ -2545,11 +2648,17 @@ export const revertCatalogChange = command(v.string(), async (entryId: string) =
 		data: { changes, revertOf: entry.id }
 	});
 
-	const cableTouched = (['cableType', 'connectorA', 'connectorB', 'lengthCm'] as const).some(
-		(field) => field in data
-	);
+	const cableTouched =
+		!!waysRevert ||
+		(['cableType', 'connectorA', 'connectorB', 'lengthCm'] as const).some((field) => field in data);
 	await refreshProductViews(updated, product.manufacturerId, {
-		cable: cableTouched ? [updated.connectorA, updated.connectorB] : null
+		cable: cableTouched
+			? [
+					updated.connectorA,
+					updated.connectorB,
+					...(waysRevert ?? []).flatMap((w) => [w.connectorA, w.connectorB])
+				]
+			: null
 	});
 	if (portsRevert) await getConnectorUsage().refresh();
 	await getCatalogTransactions().refresh();
@@ -2572,7 +2681,13 @@ export const getBundleTemplates = query(v.optional(v.string()), async (organizat
 					location: true,
 					assets: {
 						include: {
-							product: { include: { manufacturer: true, category: true } },
+							product: {
+								include: {
+									manufacturer: true,
+									category: true,
+									ways: { orderBy: { sortOrder: 'asc' } }
+								}
+							},
 							location: true
 						},
 						orderBy: ASSET_ORDER_BY
@@ -2637,7 +2752,12 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 			},
 			location: true,
 			assets: {
-				include: { product: { include: { manufacturer: true, category: true } }, location: true },
+				include: {
+					product: {
+						include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+					},
+					location: true
+				},
 				orderBy: ASSET_ORDER_BY
 			}
 		},
@@ -2661,7 +2781,9 @@ export const getBundle = query(v.string(), async (id: string) => {
 			location: true,
 			assets: {
 				include: {
-					product: { include: { manufacturer: true, category: true } },
+					product: {
+						include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+					},
 					organization: true,
 					location: true
 				},

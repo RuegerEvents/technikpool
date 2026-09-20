@@ -289,6 +289,12 @@ abstract class S {
   /// **'Current location'**
   String get currentLocation;
 
+  /// A loom's ways — the pairs of ends running through one cable. Listed on the lookup screen, one per line.
+  ///
+  /// In en, this message translates to:
+  /// **'Ways'**
+  String get ways;
+
   /// A cable's two ends, shown as "XLR3 M → XLR3 F" on the lookup screen.
   ///
   /// In en, this message translates to:

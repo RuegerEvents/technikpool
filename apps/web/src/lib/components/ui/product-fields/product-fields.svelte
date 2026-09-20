@@ -2,6 +2,7 @@
 	import {
 		cableDisplayName,
 		cableTwinKey,
+		normalizeWays,
 		counterpartConnector,
 		formatLength,
 		isCable,
@@ -12,7 +13,9 @@
 		type CableAttrs,
 		type CableEndRole,
 		type CableInput,
-		type ConnectorRow
+		type CableWayAttrs,
+		type ConnectorRow,
+		type WithWays
 	} from '$lib/cable';
 
 	/**
@@ -25,7 +28,30 @@
 		connectorA: string;
 		connectorB: string;
 		lengthM: string;
+		/**
+		 * A loom's ways. Empty on an ordinary lead, whose single pair is the two
+		 * connectors above — a cable is one or the other, and the form only ever
+		 * shows the one it is.
+		 */
+		ways: WayDraft[];
 	};
+
+	/** One way of a loom in the form. `count` is how many identical ways there are. */
+	export type WayDraft = {
+		count: number;
+		cableType: string;
+		connectorA: string;
+		connectorB: string;
+	};
+
+	function emptyWay(): WayDraft {
+		return { count: 1, cableType: '', connectorA: '', connectorB: '' };
+	}
+
+	/** The form's ways → what a command is sent. */
+	export function wayInputFrom(ways: readonly WayDraft[]): CableWayAttrs[] {
+		return normalizeWays(ways);
+	}
 
 	export type ProductDraft = {
 		name: string;
@@ -44,7 +70,7 @@
 	};
 
 	/** A stored product → the form. Null for anything that is not a cable. */
-	export function cableDraftFrom(p: CableAttrs): CableDraft | null {
+	export function cableDraftFrom(p: CableAttrs & WithWays): CableDraft | null {
 		// Any of the four columns, not just the type: a lead described by its ends
 		// alone would otherwise open as "not a cable" and lose them on the next save.
 		if (!isCable(p)) return null;
@@ -52,6 +78,12 @@
 			cableType: p.cableType ?? '',
 			connectorA: p.connectorA ?? '',
 			connectorB: p.connectorB ?? '',
+			ways: p.ways.map((w) => ({
+				count: w.count,
+				cableType: w.cableType ?? '',
+				connectorA: w.connectorA ?? '',
+				connectorB: w.connectorB ?? ''
+			})),
 			// Round-trips through the same fixed-locale formatting the derived name
 			// uses, so reopening a form and saving it unchanged writes nothing.
 			lengthM: p.lengthCm ? formatLength(p.lengthCm).replace(/\s*m$/, '') : ''
@@ -59,13 +91,20 @@
 	}
 
 	/** The form → what `updateProduct` / `createAssets` are sent. */
-	export function cableInputFrom(d: CableDraft | null): CableInput | null {
+	export function cableInputFrom(
+		d: CableDraft | null
+	): (CableInput & { ways: CableWayAttrs[] }) | null {
 		if (!d) return null;
-		const input: CableInput = {
-			cableType: d.cableType.trim() || null,
-			connectorA: d.connectorA.trim() || null,
-			connectorB: d.connectorB.trim() || null,
-			lengthCm: parseLengthMeters(d.lengthM)
+		const ways = wayInputFrom(d.ways);
+		const input = {
+			// A loom carries its ends *and* its wire in its ways; the single pair
+			// stays empty, so nothing has to decide later which of the two to
+			// believe.
+			cableType: ways.length ? null : d.cableType.trim() || null,
+			connectorA: ways.length ? null : d.connectorA.trim() || null,
+			connectorB: ways.length ? null : d.connectorB.trim() || null,
+			lengthCm: parseLengthMeters(d.lengthM),
+			ways
 		};
 		// Null when the draft says nothing at all: ticking "this is a cable" and
 		// filling none of it in leaves an ordinary product, not four empty columns.
@@ -80,7 +119,8 @@
 				cableType: cable.cableType,
 				connectorA: cable.connectorA,
 				connectorB: cable.connectorB,
-				lengthCm: parseLengthMeters(cable.lengthM)
+				lengthCm: parseLengthMeters(cable.lengthM),
+				ways: wayInputFrom(cable.ways)
 			},
 			connectors
 		);
@@ -88,6 +128,7 @@
 </script>
 
 <script lang="ts">
+	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { CategorySelect } from '$lib/components/ui/category-select';
@@ -170,7 +211,8 @@
 					connectorA: value.cable.connectorA,
 					connectorB: value.cable.connectorB,
 					lengthCm: parseLengthMeters(value.cable.lengthM),
-					categoryId: value.categoryId
+					categoryId: value.categoryId,
+					ways: wayInputFrom(value.cable.ways)
 				})
 			: null
 	);
@@ -216,8 +258,66 @@
 	}
 
 	function toggleCable(on: boolean) {
-		value.cable = on ? { cableType: '', connectorA: '', connectorB: '', lengthM: '' } : null;
+		value.cable = on
+			? { cableType: '', connectorA: '', connectorB: '', lengthM: '', ways: [] }
+			: null;
 		if (on) value.isLicense = false;
+	}
+
+	// A loom is a cable carrying two or more pairs of ends — 6× Schuko, or power
+	// and data in one jacket. Having ways is what makes it one; there is no flag
+	// to disagree with them.
+	let isLoom = $derived(!!value.cable?.ways.length);
+
+	function toggleLoom(on: boolean) {
+		const cable = value.cable;
+		if (!cable) return;
+		if (!on) {
+			cable.ways = [];
+			return;
+		}
+		// Whatever is already typed becomes the first way rather than being thrown
+		// away: "Schuko M → Schuko F" is usually the way there are six of. The wire
+		// goes with it — a loom has one per way, since a hybrid's power way is
+		// 2,5 mm² where its data way is CAT7, and no field on the product could
+		// say both.
+		const first = emptyWay();
+		if (cable.connectorA.trim() || cable.connectorB.trim()) {
+			first.connectorA = cable.connectorA;
+			first.connectorB = cable.connectorB;
+			cable.connectorA = '';
+			cable.connectorB = '';
+		}
+		if (cable.cableType.trim()) {
+			first.cableType = cable.cableType;
+			cable.cableType = '';
+		}
+		cable.ways = [first, emptyWay()];
+	}
+
+	function addWay() {
+		value.cable?.ways.push(emptyWay());
+	}
+
+	function removeWay(index: number) {
+		const cable = value.cable;
+		if (!cable) return;
+		cable.ways.splice(index, 1);
+	}
+
+	/** The same courtesies as `setConnector`, for one way of a loom. */
+	function setWayConnector(way: WayDraft, side: 'connectorA' | 'connectorB', name: string) {
+		way[side] = name;
+		const far = side === 'connectorA' ? 'connectorB' : 'connectorA';
+		if (name && !way[far].trim()) {
+			const mate = counterpartConnector(name, connectors);
+			if (mate) way[far] = mate.name;
+		}
+		if (value.categoryId) return;
+		const department = connectors.find(
+			(c) => c.name.toLowerCase() === name.trim().toLowerCase()
+		)?.categoryId;
+		if (department) value.categoryId = department;
 	}
 
 	function toggleLicense(on: boolean) {
@@ -360,70 +460,148 @@
 
 	{#if value.cable}
 		<div class="grid gap-4 rounded-md border border-dashed p-3 sm:grid-cols-2">
-			<div class="space-y-2">
-				<!-- Once the department states which end feeds, the slots can say so
-				     themselves — better than catching it afterwards with the warning
-				     below. Blank for a department with no direction (Netzwerk, USB). -->
-				<Label>
-					Connector A
-					{#if inputGender}
-						<span class="ml-1 font-mono text-xs font-normal text-muted-foreground"
-							>{CABLE_END_LABEL.in}</span
-						>
-					{/if}
-				</Label>
-				<CreatableSelect
-					items={connectorsIn}
-					value={value.cable.connectorA
-						? { id: value.cable.connectorA, name: value.cable.connectorA }
-						: null}
-					onchange={(sel) => setConnector('connectorA', sel?.name ?? '')}
-					oncreate={(name) => openConnectorModal('connectorA', name)}
+			<!-- A loom carries two or more pairs of ends in one jacket: six Schuko
+			     ways, or power and data together. It is the same cable otherwise —
+			     one length, one category — so only the ends change shape here. -->
+			<label class="flex cursor-pointer items-center gap-2 text-sm select-none sm:col-span-2">
+				<input
+					type="checkbox"
+					checked={isLoom}
 					disabled={identityDisabled}
-					showImages
-					placeholder="XLR3 M…"
+					onchange={(e) => toggleLoom((e.currentTarget as HTMLInputElement).checked)}
+					class="h-4 w-4 rounded border-input"
 				/>
-			</div>
+				This is a loom — several cables in one
+			</label>
 
-			<div class="space-y-2">
-				<Label>
-					Connector B
-					{#if inputGender}
-						<span class="ml-1 font-mono text-xs font-normal text-muted-foreground"
-							>{CABLE_END_LABEL.out}</span
+			{#if isLoom}
+				<div class="space-y-2 sm:col-span-2">
+					<Label>Ways</Label>
+					{#each value.cable.ways as way, i (i)}
+						<div
+							class="grid grid-cols-[3.5rem_1fr_auto] gap-2 sm:grid-cols-[3.5rem_1fr_1fr_9rem_auto]"
 						>
-					{/if}
-				</Label>
-				<CreatableSelect
-					items={connectorsOut}
-					value={value.cable.connectorB
-						? { id: value.cable.connectorB, name: value.cable.connectorB }
-						: null}
-					onchange={(sel) => setConnector('connectorB', sel?.name ?? '')}
-					oncreate={(name) => openConnectorModal('connectorB', name)}
-					disabled={identityDisabled}
-					showImages
-					placeholder="XLR3 F…"
-				/>
-			</div>
-
-			{#if reversed}
-				<div
-					class="rounded-md border border-amber-500/40 bg-amber-500/10 p-2 text-xs sm:col-span-2"
-				>
-					<p>
-						These look the wrong way round. Connector A should be the end power or signal comes in
-						on — the end that goes into the supply.
-					</p>
-					<button
-						type="button"
-						onclick={swapEnds}
-						disabled={identityDisabled}
-						class="mt-1 font-medium underline underline-offset-2 disabled:no-underline disabled:opacity-50"
+							<Input
+								type="number"
+								min="1"
+								max="99"
+								bind:value={way.count}
+								disabled={identityDisabled}
+								aria-label="How many"
+							/>
+							<CreatableSelect
+								items={connectorsIn}
+								value={way.connectorA ? { id: way.connectorA, name: way.connectorA } : null}
+								onchange={(sel) => setWayConnector(way, 'connectorA', sel?.name ?? '')}
+								oncreate={(name) => setWayConnector(way, 'connectorA', name)}
+								disabled={identityDisabled}
+								showImages
+								placeholder="Schuko M…"
+							/>
+							<CreatableSelect
+								items={connectorsOut}
+								value={way.connectorB ? { id: way.connectorB, name: way.connectorB } : null}
+								onchange={(sel) => setWayConnector(way, 'connectorB', sel?.name ?? '')}
+								oncreate={(name) => setWayConnector(way, 'connectorB', name)}
+								disabled={identityDisabled}
+								showImages
+								placeholder="Schuko F…"
+							/>
+							<Input
+								bind:value={way.cableType}
+								disabled={identityDisabled}
+								placeholder="2,5mm²"
+								aria-label="This way's wire"
+							/>
+							<button
+								type="button"
+								onclick={() => removeWay(i)}
+								disabled={identityDisabled}
+								aria-label="Remove this way"
+								class="rounded-md border px-2 text-muted-foreground hover:bg-muted disabled:opacity-50"
+							>
+								×
+							</button>
+						</div>
+					{/each}
+					<Button
+						variant="outline"
+						size="sm"
+						icon="add"
+						onclick={addWay}
+						disabled={identityDisabled}>Add a way</Button
 					>
-						Swap the ends
-					</button>
+					<p class="text-xs text-muted-foreground">
+						How many of each, and what is on its ends. Identical ways are one line with a count —
+						six Schuko ways are a 6, not six lines.
+					</p>
 				</div>
+			{:else}
+				<div class="space-y-2">
+					<!-- Once the department states which end feeds, the slots can say so
+					     themselves — better than catching it afterwards with the warning
+					     below. Blank for a department with no direction (Netzwerk, USB). -->
+					<Label>
+						Connector A
+						{#if inputGender}
+							<span class="ml-1 font-mono text-xs font-normal text-muted-foreground"
+								>{CABLE_END_LABEL.in}</span
+							>
+						{/if}
+					</Label>
+					<CreatableSelect
+						items={connectorsIn}
+						value={value.cable.connectorA
+							? { id: value.cable.connectorA, name: value.cable.connectorA }
+							: null}
+						onchange={(sel) => setConnector('connectorA', sel?.name ?? '')}
+						oncreate={(name) => openConnectorModal('connectorA', name)}
+						disabled={identityDisabled}
+						showImages
+						placeholder="XLR3 M…"
+					/>
+				</div>
+
+				<div class="space-y-2">
+					<Label>
+						Connector B
+						{#if inputGender}
+							<span class="ml-1 font-mono text-xs font-normal text-muted-foreground"
+								>{CABLE_END_LABEL.out}</span
+							>
+						{/if}
+					</Label>
+					<CreatableSelect
+						items={connectorsOut}
+						value={value.cable.connectorB
+							? { id: value.cable.connectorB, name: value.cable.connectorB }
+							: null}
+						onchange={(sel) => setConnector('connectorB', sel?.name ?? '')}
+						oncreate={(name) => openConnectorModal('connectorB', name)}
+						disabled={identityDisabled}
+						showImages
+						placeholder="XLR3 F…"
+					/>
+				</div>
+
+				{#if reversed}
+					<div
+						class="rounded-md border border-amber-500/40 bg-amber-500/10 p-2 text-xs sm:col-span-2"
+					>
+						<p>
+							These look the wrong way round. Connector A should be the end power or signal comes in
+							on — the end that goes into the supply.
+						</p>
+						<button
+							type="button"
+							onclick={swapEnds}
+							disabled={identityDisabled}
+							class="mt-1 font-medium underline underline-offset-2 disabled:no-underline disabled:opacity-50"
+						>
+							Swap the ends
+						</button>
+					</div>
+				{/if}
 			{/if}
 
 			<div class="space-y-2">
@@ -439,23 +617,25 @@
 				/>
 			</div>
 
-			<div class="space-y-2 sm:col-span-2">
-				<Label>Additional info</Label>
-				<CreatableSelect
-					items={typeItems}
-					value={value.cable.cableType
-						? { id: value.cable.cableType, name: value.cable.cableType }
-						: null}
-					onchange={(sel) => pickType(sel?.name ?? '')}
-					oncreate={(name) => pickType(name)}
-					disabled={identityDisabled}
-					placeholder="Additional info, e.g. CAT7 or 2.5mm²"
-				/>
-				<p class="text-xs text-muted-foreground">
-					Optional, and only for what the connectors cannot say — the wire itself. Two RJ45 ends are
-					a patch lead whether they are CAT6A or CAT7.
-				</p>
-			</div>
+			{#if !isLoom}
+				<div class="space-y-2 sm:col-span-2">
+					<Label>Additional info</Label>
+					<CreatableSelect
+						items={typeItems}
+						value={value.cable.cableType
+							? { id: value.cable.cableType, name: value.cable.cableType }
+							: null}
+						onchange={(sel) => pickType(sel?.name ?? '')}
+						oncreate={(name) => pickType(name)}
+						disabled={identityDisabled}
+						placeholder="Additional info, e.g. CAT7 or 2.5mm²"
+					/>
+					<p class="text-xs text-muted-foreground">
+						Optional, and only for what the connectors cannot say — the wire itself. Two RJ45 ends
+						are a patch lead whether they are CAT6A or CAT7.
+					</p>
+				</div>
+			{/if}
 
 			{#if twins.length > 0}
 				<div

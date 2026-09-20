@@ -211,7 +211,9 @@
 			connectorA: row.connectorA,
 			connectorB: row.connectorB,
 			lengthCm: parseLengthMeters(row.lengthM),
-			categoryId: row.categoryId
+			categoryId: row.categoryId,
+			// The grid writes ordinary leads; a loom is made up in the product form.
+			ways: []
 		});
 		if (!key) return null;
 		const twins = catalog.filter((p) => cableTwinKey(p) === key);
@@ -345,7 +347,8 @@
 				cableType: r.cableType.trim() || null,
 				connectorA: r.connectorA.trim() || null,
 				connectorB: r.connectorB.trim() || null,
-				lengthCm: parseLengthMeters(r.lengthM)
+				lengthCm: parseLengthMeters(r.lengthM),
+				ways: []
 			})
 		);
 		if (filled.length === 0) {

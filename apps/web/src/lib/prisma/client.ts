@@ -118,6 +118,17 @@ export type Connector = Prisma.ConnectorModel
  */
 export type ProductPort = Prisma.ProductPortModel
 /**
+ * Model CableWay
+ * One way of a loom: a pair of ends that runs the length of a cable carrying
+ * two or more of them — "6× Schuko M→F", "1× DMX XLR3 M→F". A plain lead has
+ * none of these; its single pair is on the Product itself.
+ * 
+ * The ends are free text like `Product.connectorA/B`, and for the same reason
+ * the comment on ProductPort gives: a cable end is part of what the cable *is*,
+ * so registering one must never stall on the connector catalogue.
+ */
+export type CableWay = Prisma.CableWayModel
+/**
  * Model Category
  * 
  */

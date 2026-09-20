@@ -4,6 +4,8 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import 'cable_way.dart';
+
 part 'cable_spec.g.dart';
 
 @JsonSerializable()
@@ -13,6 +15,7 @@ class CableSpec {
     required this.connectorA,
     required this.connectorB,
     required this.lengthCm,
+    required this.ways,
   });
   
   factory CableSpec.fromJson(Map<String, Object?> json) => _$CableSpecFromJson(json);
@@ -22,11 +25,20 @@ class CableSpec {
   /// completely by its connectors and its length.
   ///
   final String? type;
+
+  /// The single pair of an ordinary lead. Null on a loom, which carries.
+  /// its ends in `ways` instead — a cable is one or the other, never both.
+  ///
   final String? connectorA;
   final String? connectorB;
 
   /// Whole centimetres.
   final int? lengthCm;
+
+  /// A loom's ways: two or more pairs of ends running the length of one.
+  /// cable. Empty on an ordinary lead.
+  ///
+  final List<CableWay> ways;
 
   Map<String, Object?> toJson() => _$CableSpecToJson(this);
 }

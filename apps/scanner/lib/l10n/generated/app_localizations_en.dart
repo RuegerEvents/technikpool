@@ -110,6 +110,9 @@ class SEn extends S {
   String get currentLocation => 'Current location';
 
   @override
+  String get ways => 'Ways';
+
+  @override
   String get connectors => 'Connectors';
 
   @override

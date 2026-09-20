@@ -4788,6 +4788,7 @@ msgid "\"{0}\" is new, so it needs a category. It becomes a product like any oth
 msgstr "\"{0}\" ist neu und braucht deshalb eine Kategorie. Es wird ein Produkt wie jedes andere — die nächste Einheit davon wird aus der Liste gewählt."
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/ui/product-fields/product-fields.svelte
 msgid "How many"
 msgstr "Anzahl"
 
@@ -8538,3 +8539,42 @@ msgstr "Stickerbogen extrem stark haftend, zum Beispiel von <0>WIRmachenDRUCK.de
 #: src/routes/stickers/+page.svelte
 msgid "Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for WIRmachenDRUCK.de square stickers and flag labels."
 msgstr "Erzeuge Data-Matrix-Stickerbogen für Technikpool-Inventarnummern, mit Presets für quadratische Sticker und Fähnchen-Etiketten von WIRmachenDRUCK.de."
+
+#~ msgid "Additional info, e.g. Rev. B or 128 GB"
+#~ msgstr "Zusatzinfo, z. B. Rev. B oder 128 GB"
+
+#~ msgid "Optional, and only for what the name does not say — what tells this apart from an otherwise identical product."
+#~ msgstr "Optional, und nur für das, was der Name nicht sagt — was dieses Produkt von einem sonst identischen unterscheidet."
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "Schuko M…"
+msgstr "Schuko M…"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "Schuko F…"
+msgstr "Schuko F…"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "This way's wire"
+msgstr "Der Draht dieses Wegs"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "Remove this way"
+msgstr "Diesen Weg entfernen"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Ways"
+msgstr "Wege"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "Add a way"
+msgstr "Weg hinzufügen"
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "How many of each, and what is on its ends. Identical ways are one line with a count — six Schuko ways are a 6, not six lines."
+msgstr "Wie viele von jeder Sorte, und was an ihren Enden sitzt. Gleiche Wege sind eine Zeile mit Anzahl — sechs Schuko-Wege sind eine 6, nicht sechs Zeilen."
+
+#: src/lib/components/ui/product-fields/product-fields.svelte
+msgid "<0/> This is a loom — several cables in one"
+msgstr "<0/> Das ist ein Loom — mehrere Kabel in einem"

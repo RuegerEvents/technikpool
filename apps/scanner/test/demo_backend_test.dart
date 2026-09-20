@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:technikpool_scanner/cable_format.dart';
 import 'package:technikpool_scanner/api/client.dart';
 import 'package:technikpool_scanner/api/generated/export.dart';
 import 'package:technikpool_scanner/demo/demo_api.dart';
@@ -72,6 +73,21 @@ void main() {
     // the mapper is inventing one.
     final lamp = await api.inventory.getAssetByTag(tag: '40000001');
     expect(lamp.product.cable, isNull);
+  });
+
+  test('a loom carries its ways instead of a pair of ends', () async {
+    final detail = await api.inventory.getAssetByTag(tag: '40000015');
+    final cable = detail.product.cable;
+    expect(cable, isNotNull);
+    // No ends of its own: they are the ways, and something reading the pair
+    // would otherwise show a loom as a cable with nothing on either end.
+    expect(cable!.connectorA, isNull);
+    expect(cable.ways, hasLength(2));
+    expect(cable.ways.first.count, 6);
+    expect(cableConnectors(cable), '6× Schuko M → Schuko F + XLR3 M → XLR3 F');
+    // An ordinary lead has no ways, which is what tells the two apart.
+    final xlr = await api.inventory.getAssetByTag(tag: '40000013');
+    expect(xlr.product.cable!.ways, isEmpty);
   });
 
   test(

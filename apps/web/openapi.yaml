@@ -738,7 +738,7 @@ components:
 
     CableSpec:
       type: object
-      required: [type, connectorA, connectorB, lengthCm]
+      required: [type, connectorA, connectorB, lengthCm, ways]
       properties:
         type:
           type: [string, 'null']
@@ -748,11 +748,39 @@ components:
             completely by its connectors and its length.
         connectorA:
           type: [string, 'null']
+          description: |
+            The single pair of an ordinary lead. Null on a loom, which carries
+            its ends in `ways` instead — a cable is one or the other, never both.
         connectorB:
           type: [string, 'null']
         lengthCm:
           type: [integer, 'null']
           description: Whole centimetres.
+        ways:
+          type: array
+          description: |
+            A loom's ways: two or more pairs of ends running the length of one
+            cable. Empty on an ordinary lead.
+          items:
+            $ref: '#/components/schemas/CableWay'
+
+    CableWay:
+      type: object
+      required: [count, type, connectorA, connectorB]
+      description: |
+        One way of a loom. Identical ways are one entry with a count — "6× Schuko
+        M→F" is a number, not six entries.
+      properties:
+        count:
+          type: integer
+          minimum: 1
+        type:
+          type: [string, 'null']
+          description: This way's wire, where a loom's ways differ — `2,5 mm²`, `CAT7`.
+        connectorA:
+          type: [string, 'null']
+        connectorB:
+          type: [string, 'null']
 
     Category:
       type: object

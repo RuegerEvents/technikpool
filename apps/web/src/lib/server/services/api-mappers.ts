@@ -119,6 +119,12 @@ type ProductRow = {
 	connectorA: string | null;
 	connectorB: string | null;
 	lengthCm: number | null;
+	ways: {
+		count: number;
+		cableType: string | null;
+		connectorA: string | null;
+		connectorB: string | null;
+	}[];
 	manufacturer: { name: string };
 	category: CategoryRow;
 };
@@ -135,13 +141,20 @@ export function toProduct(product: ProductRow): Schemas['Product'] {
 		// request rather than needing every row rewritten.
 		imageUrl: imageSrc(product.imagePath),
 		// Any of the four columns makes it a cable — see isCable. `type` is the
-		// wire (CAT7, 2,5 mm²) and is null on most of them.
+		// wire (CAT7, 2,5 mm²) and is null on most of them. A loom carries its
+		// ends in `ways` and has none of its own.
 		cable: isCable(product)
 			? {
 					type: product.cableType,
 					connectorA: product.connectorA,
 					connectorB: product.connectorB,
-					lengthCm: product.lengthCm
+					lengthCm: product.lengthCm,
+					ways: product.ways.map((way) => ({
+						count: way.count,
+						type: way.cableType,
+						connectorA: way.connectorA,
+						connectorB: way.connectorB
+					}))
 				}
 			: null
 	};

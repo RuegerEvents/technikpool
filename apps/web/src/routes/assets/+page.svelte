@@ -5,8 +5,10 @@
 		connectorLabel,
 		formatLength,
 		isCable,
+		loomSummary,
 		parseLengthMeters,
-		type CableAttrs
+		type CableAttrs,
+		type WithWays
 	} from '$lib/cable';
 	import {
 		getAssets,
@@ -172,7 +174,7 @@
 		categoryId: string;
 		categoryName: string;
 		categoryColor: string;
-		cable: CableAttrs | null;
+		cable: (CableAttrs & WithWays) | null;
 		available: number;
 		unavailable: number;
 		maintenance: number;
@@ -257,21 +259,23 @@
 
 	// A connector matches on either end: "everything with a TRUE1 on it" is the
 	// question, and which end it is on is not something anyone knows in advance.
-	function matchesKind(product: CableAttrs & { isLicense: boolean }) {
+	function matchesKind(product: CableAttrs & WithWays & { isLicense: boolean }) {
 		if (kindFilter === 'devices') return !isCable(product) && !product.isLicense;
 		if (kindFilter === 'cables') return isCable(product) && matchesCable(product);
 		return true;
 	}
 
-	function matchesCable(product: CableAttrs) {
-		if (cableTypeFilter && product.cableType !== cableTypeFilter) return false;
-		if (
-			connectorFilter &&
-			product.connectorA !== connectorFilter &&
-			product.connectorB !== connectorFilter
-		) {
-			return false;
-		}
+	function matchesCable(product: CableAttrs & WithWays) {
+		// A loom answers for every way it carries: someone looking for "TRUE1"
+		// wants the hybrid that has a TRUE1 way as much as the plain lead.
+		const ends = [
+			product.connectorA,
+			product.connectorB,
+			...product.ways.flatMap((w) => [w.connectorA, w.connectorB])
+		];
+		const types = [product.cableType, ...product.ways.map((w) => w.cableType)];
+		if (cableTypeFilter && !types.includes(cableTypeFilter)) return false;
+		if (connectorFilter && !ends.includes(connectorFilter)) return false;
 		if (lengthMinCm !== null && (product.lengthCm ?? -1) < lengthMinCm) return false;
 		if (lengthMaxCm !== null && (product.lengthCm ?? Infinity) > lengthMaxCm) return false;
 		return true;
@@ -305,7 +309,8 @@
 									cableType: asset.product.cableType,
 									connectorA: asset.product.connectorA,
 									connectorB: asset.product.connectorB,
-									lengthCm: asset.product.lengthCm
+									lengthCm: asset.product.lengthCm,
+									ways: asset.product.ways
 								}
 							: null,
 						available: 0,
@@ -348,6 +353,8 @@
 			a.product.cableType,
 			a.product.connectorA,
 			a.product.connectorB,
+			// A loom is found by what runs through it, the same as a lead by its ends.
+			...a.product.ways.flatMap((w) => [w.cableType, w.connectorA, w.connectorB]),
 			a.serialNumber,
 			a.assetTag,
 			a.bundle?.template.name,
@@ -804,9 +811,9 @@
 		{/if}
 	{/snippet}
 
-	{#snippet cableChips(cable: CableAttrs | null)}
+	{#snippet cableChips(cable: (CableAttrs & WithWays) | null)}
 		{#if cable}
-			{@const ends = connectorLabel(cable)}
+			{@const ends = cable.ways.length ? loomSummary(cable.ways) : connectorLabel(cable)}
 			{#if ends}<span class="rounded bg-muted px-1.5 py-0.5 text-xs">{ends}</span>{/if}
 			{#if cable.lengthCm}
 				<span class="rounded bg-muted px-1.5 py-0.5 text-xs">{formatLength(cable.lengthCm)}</span>

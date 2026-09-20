@@ -171,10 +171,14 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
         _row(l10n.currentLocation, asset.location.name),
         // A cable's ends and length are the two things you actually want off a
         // label, and the product name can't be trusted to carry both.
-        if (asset.product.cable != null) ...[
-          _row(l10n.connectors, cableConnectors(asset.product.cable!)),
-          if (cableLength(asset.product.cable!, l10n.localeName)
-              case final length?)
+        if (asset.product.cable case final cable?) ...[
+          // A loom is a list rather than a pair of ends: what runs through it,
+          // and how many of each.
+          if (cable.ways.isNotEmpty)
+            _row(l10n.ways, cableWays(cable))
+          else
+            _row(l10n.connectors, cableConnectors(cable)),
+          if (cableLength(cable, l10n.localeName) case final length?)
             _row(l10n.cableLength, length),
         ],
         if (asset.currentProduction != null)

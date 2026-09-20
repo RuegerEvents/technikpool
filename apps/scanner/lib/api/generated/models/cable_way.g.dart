@@ -1,25 +1,21 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'cable_spec.dart';
+part of 'cable_way.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-CableSpec _$CableSpecFromJson(Map<String, dynamic> json) => CableSpec(
+CableWay _$CableWayFromJson(Map<String, dynamic> json) => CableWay(
+  count: (json['count'] as num).toInt(),
   type: json['type'] as String?,
   connectorA: json['connectorA'] as String?,
   connectorB: json['connectorB'] as String?,
-  lengthCm: (json['lengthCm'] as num?)?.toInt(),
-  ways: (json['ways'] as List<dynamic>)
-      .map((e) => CableWay.fromJson(e as Map<String, dynamic>))
-      .toList(),
 );
 
-Map<String, dynamic> _$CableSpecToJson(CableSpec instance) => <String, dynamic>{
+Map<String, dynamic> _$CableWayToJson(CableWay instance) => <String, dynamic>{
+  'count': instance.count,
   'type': ?instance.type,
   'connectorA': ?instance.connectorA,
   'connectorB': ?instance.connectorB,
-  'lengthCm': ?instance.lengthCm,
-  'ways': instance.ways,
 };

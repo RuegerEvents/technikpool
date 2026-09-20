@@ -323,6 +323,31 @@ model ProductPort {
   @@index([connectorId])
 }
 
+/// One way of a loom: a pair of ends that runs the length of a cable carrying
+/// two or more of them — "6× Schuko M→F", "1× DMX XLR3 M→F". A plain lead has
+/// none of these; its single pair is on the Product itself.
+///
+/// The ends are free text like `Product.connectorA/B`, and for the same reason
+/// the comment on ProductPort gives: a cable end is part of what the cable *is*,
+/// so registering one must never stall on the connector catalogue.
+model CableWay {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  /// Identical ways are one row: "6× Schuko M→F" is a count, not six rows.
+  count      Int     @default(1)
+  connectorA String?
+  connectorB String?
+  /// This way's wire, where the ways differ — a hybrid's power way is 2,5 mm²
+  /// and its data way is CAT7, which no single field on the product could say.
+  cableType  String?
+  /// Order as entered, so the list reads the way the loom is made up.
+  sortOrder  Int     @default(0)
+
+  @@index([productId])
+}
+
 model Category {
   id        String   @id @default(cuid())
   // English is the source name — it's what `name` has always held, what the
@@ -366,15 +391,20 @@ model Product {
   /// Object key, like Manufacturer.logoPath.
   imagePath      String?
 
-  /// Cable attributes — null on anything that is not a cable. `cableType` set is
-  /// what makes a product a cable; the name is still the label everywhere, these
-  /// drive filters, prefills and the API's `cable` object. Category stays the
-  /// department (DMX → Light, XLR → Audio): OrgCategoryRate bills per category.
+  /// Cable attributes — null on anything that is not a cable. Any of them set is
+  /// what makes a product a cable (`isCable` in src/lib/cable.ts); the name is
+  /// still the label everywhere, these drive filters, prefills and the API's
+  /// `cable` object. Category stays the department (DMX → Light, XLR → Audio):
+  /// OrgCategoryRate bills per category.
+  ///
+  /// `connectorA/B` are the single pair of an ordinary lead. A loom has none —
+  /// its pairs are `ways` — but it does have a `lengthCm` like any other cable.
   cableType  String?
   connectorA String?
   connectorB String?
   /// Whole centimetres; the UI reads and writes metres.
   lengthCm   Int?
+  ways       CableWay[]
 
   /// A software licence rather than a device: what is lent out is the right
   /// to use it, and each unit carries its own credentials (LicenseCredential).

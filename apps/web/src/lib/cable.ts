@@ -20,7 +20,33 @@ export type CableAttrs = {
 export type CableInput = CableAttrs;
 
 /**
- * Whether a product is a cable at all: any one of the four columns being set.
+ * One way of a loom: a pair of ends running the length of a cable that carries
+ * several of them. `count` is how many identical ways there are — six Schuko
+ * ways are one of these, not six.
+ */
+export type CableWayAttrs = {
+	count: number;
+	cableType: string | null;
+	connectorA: string | null;
+	connectorB: string | null;
+};
+
+/**
+ * A product's ways, as every helper here takes them. Not optional on purpose:
+ * a caller that has not loaded the relation would otherwise read a loom as an
+ * ordinary product, silently, and `pnpm check` is the only thing that can catch
+ * that. Nothing to say means `ways: []`, spelled out.
+ */
+export type WithWays = { ways: readonly CableWayAttrs[] };
+
+/** Whether a product carries its ends as a loom rather than as one pair. */
+export function isLoom(p: { ways: readonly unknown[] }): boolean {
+	return p.ways.length > 0;
+}
+
+/**
+ * Whether a product is a cable at all: any one of the four columns being set,
+ * or a loom's ways standing in for the single pair.
  *
  * Deliberately not "has a type". A cable is defined by its ends and its length;
  * `cableType` is the *wire* — CAT7, 2,5 mm², 4×4 — which the connectors cannot
@@ -28,8 +54,8 @@ export type CableInput = CableAttrs;
  * made people invent a word for a lead that is fully described by "Schuko M to
  * Schuko F, 10 m".
  */
-export function isCable(p: CableAttrs): boolean {
-	return !!(p.cableType || p.connectorA || p.connectorB || p.lengthCm);
+export function isCable(p: Partial<CableAttrs> & { ways: readonly unknown[] }): boolean {
+	return !!(p.cableType || p.connectorA || p.connectorB || p.lengthCm || p.ways.length);
 }
 
 // Fixed locale, not the user's: the derived name is *stored*, so it has to come
@@ -234,8 +260,48 @@ export function cableDisplayName(
 		connectorA?: string | null;
 		connectorB?: string | null;
 		lengthCm: number | null;
+		ways?: readonly CableWayAttrs[];
 	},
 	connectors: readonly ConnectorRow[] = []
+): string {
+	// A loom is named by what runs through it. Each way is read by exactly the
+	// rules below, so "6× Schuko + DMX" is three applications of one idea rather
+	// than a second naming scheme.
+	const ways = a.ways ?? [];
+	const head = ways.length ? loomSummary(ways, connectors) : pairHead(a, connectors);
+
+	if (!head) return '';
+	return a.lengthCm ? `${head} ${formatLength(a.lengthCm)}` : head;
+}
+
+/**
+ * What runs through a loom, in one line: "6× Schuko + DMX". Each way is read by
+ * exactly the rules `pairHead` applies to an ordinary lead, so a loom is three
+ * applications of one idea rather than a naming scheme of its own. Used for the
+ * name and wherever a loom has to fit on one row.
+ *
+ * Which means a way that states its wire is called by it, like any other cable:
+ * ways of "2,5 mm²" and "CAT7" make "2,5 mm² + CAT7", which is what a hybrid
+ * is. Leave a way's wire blank and its ends name it instead — that is how a
+ * six-way Schuko loom stays "6× Schuko".
+ */
+export function loomSummary(
+	ways: readonly CableWayAttrs[],
+	connectors: readonly ConnectorRow[] = []
+): string {
+	return ways
+		.map((way) => {
+			const label = pairHead(way, connectors);
+			return label && way.count > 1 ? `${way.count}× ${label}` : label;
+		})
+		.filter(Boolean)
+		.join(' + ');
+}
+
+/** What one pair of ends is called, which is most of `cableDisplayName`. */
+function pairHead(
+	a: { cableType?: string | null; connectorA?: string | null; connectorB?: string | null },
+	connectors: readonly ConnectorRow[]
 ): string {
 	const rows = new Map(connectors.map((c) => [c.name.trim().toLowerCase(), c]));
 	const familyOf = (name: string) =>
@@ -266,24 +332,19 @@ export function cableDisplayName(
 	const stated = a.cableType?.trim() ?? '';
 	const fromEnds = nameA ? connectorBase(nameA) : nameB ? connectorBase(nameB) : '';
 
-	let head: string;
 	// Both ends have to be known before they can be compared at all — one end
 	// alone is no evidence of anything.
-	if (!nameA || !nameB) {
-		head = stated || fromEnds;
-	} else if (familyA.toLowerCase() !== familyB.toLowerCase()) {
+	if (!nameA || !nameB) return stated || fromEnds;
+	if (familyA.toLowerCase() !== familyB.toLowerCase()) {
 		// Compared by family, but labelled by the name with its gender dropped.
 		// A family is a *group* name and reads like one — C13's family is
 		// "Kaltgeräte", which nobody calls a cable end. "Schuko → C13" is the cable.
-		head = `${connectorBase(nameA)} → ${connectorBase(nameB)}`;
-	} else if (nameA.toLowerCase() === nameB.toLowerCase() && familyHasAlternatives(familyA, nameA)) {
-		head = `${nameA} → ${nameB}`;
-	} else {
-		head = stated || fromEnds;
+		return `${connectorBase(nameA)} → ${connectorBase(nameB)}`;
 	}
-
-	if (!head) return '';
-	return a.lengthCm ? `${head} ${formatLength(a.lengthCm)}` : head;
+	if (nameA.toLowerCase() === nameB.toLowerCase() && familyHasAlternatives(familyA, nameA)) {
+		return `${nameA} → ${nameB}`;
+	}
+	return stated || fromEnds;
 }
 
 /** "XLR3 M → XLR3 F", one side alone if that is all that's known, '' for neither. */
@@ -315,9 +376,48 @@ export function normalizeCable(input: {
 }
 
 /**
+ * Trims a loom's ways and drops the ones that say nothing, the way
+ * `normalizeCable` does for a single pair. A way with a count and no ends
+ * describes nothing, and keeping it would make two identical looms compare
+ * different.
+ */
+export function normalizeWays(
+	ways: readonly Partial<CableWayAttrs>[] | undefined | null
+): CableWayAttrs[] {
+	return (ways ?? [])
+		.map((way) => ({
+			count: Math.max(1, Math.round(way.count ?? 1)),
+			cableType: way.cableType?.trim() || null,
+			connectorA: way.connectorA?.trim() || null,
+			connectorB: way.connectorB?.trim() || null
+		}))
+		.filter((way) => way.cableType || way.connectorA || way.connectorB);
+}
+
+/**
+ * Whether two looms are made up the same way. Order does *not* count: a loom is
+ * a bundle, not a panel — the same six Schuko ways and one DMX way are the same
+ * loom whichever was typed first. `ProductPort` compares the other way round,
+ * because a device's panel reads in the order it is printed on.
+ */
+export function sameWays(a: readonly CableWayAttrs[], b: readonly CableWayAttrs[]): boolean {
+	return waysKey(a) === waysKey(b);
+}
+
+/** A loom's ways as one comparable string, for identity rather than display. */
+export function waysKey(ways: readonly CableWayAttrs[]): string {
+	return normalizeWays(ways)
+		.map((w) =>
+			[w.count, w.cableType ?? '', w.connectorA ?? '', w.connectorB ?? ''].join('~').toLowerCase()
+		)
+		.sort()
+		.join('|');
+}
+
+/**
  * What makes two catalogue rows the same cable: both ends, the length, the
- * additional info and the department — everything but the name. Null for
- * anything that is not a cable, which therefore never has a twin.
+ * additional info, the ways and the department — everything but the name. Null
+ * for anything that is not a cable, which therefore never has a twin.
  *
  * The manufacturer is left out on purpose. The create commands already reuse a
  * product where it matches, so what is left to find is exactly the pair they
@@ -327,23 +427,25 @@ export function normalizeCable(input: {
  * backwards is that warning's business, not a second product.
  */
 export function cableTwinKey(
-	p: Partial<CableAttrs> & { categoryId?: string | null }
+	p: Partial<CableAttrs> & WithWays & { categoryId?: string | null }
 ): string | null {
 	const cable = normalizeCable(p);
-	if (!isCable(cable)) return null;
+	const ways = normalizeWays(p.ways);
+	if (!isCable({ ...cable, ways })) return null;
 	return [
 		p.categoryId ?? '',
 		cable.cableType?.toLowerCase() ?? '',
 		cable.connectorA?.toLowerCase() ?? '',
 		cable.connectorB?.toLowerCase() ?? '',
-		cable.lengthCm ?? ''
+		cable.lengthCm ?? '',
+		waysKey(ways)
 	].join('|');
 }
 
 /** Every product sharing a `cableTwinKey` with at least one other, by key. */
-export function cableTwinGroups<T extends Partial<CableAttrs> & { categoryId?: string | null }>(
-	products: readonly T[]
-): Map<string, T[]> {
+export function cableTwinGroups<
+	T extends Partial<CableAttrs> & WithWays & { categoryId?: string | null }
+>(products: readonly T[]): Map<string, T[]> {
 	const groups = new Map<string, T[]>();
 	for (const product of products) {
 		const key = cableTwinKey(product);

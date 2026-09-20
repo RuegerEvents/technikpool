@@ -164,7 +164,7 @@
 			categoryId: '',
 			imagePath: '',
 			netPurchasePrice: undefined,
-			cable: { cableType: '', connectorA: '', connectorB: '', lengthM: '' },
+			cable: { cableType: '', connectorA: '', connectorB: '', lengthM: '', ways: [] },
 			isLicense: false
 		};
 	}
@@ -292,7 +292,7 @@
 	}
 </script>
 
-<Modal bind:open title={heading} dismissible={!saving} {description}>
+<Modal bind:open title={heading} size="xl" dismissible={!saving} {description}>
 	{#snippet children()}
 		<form id="new-asset-form" class="space-y-4" onsubmit={handleSubmit}>
 			<!-- Two ways to say what is being registered, not two forms: quantity, tag

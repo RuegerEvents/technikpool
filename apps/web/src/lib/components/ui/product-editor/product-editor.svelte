@@ -27,6 +27,7 @@
 	import type { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
+	import { sameWays } from '$lib/cable';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { Modal } from '$lib/components/ui/modal';
@@ -197,7 +198,10 @@
 			((cableDraftInput?.cableType ?? null) !== product.cableType ||
 				(cableDraftInput?.connectorA ?? null) !== product.connectorA ||
 				(cableDraftInput?.connectorB ?? null) !== product.connectorB ||
-				(cableDraftInput?.lengthCm ?? null) !== product.lengthCm)
+				(cableDraftInput?.lengthCm ?? null) !== product.lengthCm ||
+				// A loom's make-up is identity as much as a lead's two ends, and it is
+				// the only part of it that can change while all four columns stay put.
+				!sameWays(product.ways, cableDraftInput?.ways ?? []))
 	);
 	let identityDirty = $derived(
 		seeded &&

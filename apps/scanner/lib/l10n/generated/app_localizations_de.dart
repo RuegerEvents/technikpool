@@ -110,6 +110,9 @@ class SDe extends S {
   String get currentLocation => 'Aktueller Lagerort';
 
   @override
+  String get ways => 'Wege';
+
+  @override
   String get connectors => 'Stecker';
 
   @override

@@ -11,7 +11,9 @@ const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 200;
 
 const ASSET_INCLUDE = {
-	product: { include: { manufacturer: true, category: true } },
+	product: {
+		include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+	},
 	location: { include: { address: true, organization: true } },
 	organization: true
 } satisfies Prisma.AssetInclude;

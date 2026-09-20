@@ -91,14 +91,30 @@
 		}
 	}
 
-	// A device's connectors are logged as the whole list on both sides — see
-	// `setProductPorts`.
+	// A device's connectors and a loom's ways are both logged as the whole list on
+	// both sides — see `setProductPorts` and `writeWays`. They are told apart by
+	// what a row carries: a port names a connector, a way has two ends.
 	type LoggedPort = { connector: string; count: number; label: string | null };
+	type LoggedWay = {
+		count: number;
+		cableType: string | null;
+		connectorA: string | null;
+		connectorB: string | null;
+	};
 	function logValue(value: unknown): string {
 		if (!Array.isArray(value)) return String(value ?? '—');
 		if (value.length === 0) return '—';
-		return (value as LoggedPort[])
-			.map((p) => `${p.count}× ${p.connector}${p.label ? ` (${p.label})` : ''}`)
+		if ('connector' in (value[0] ?? {})) {
+			return (value as LoggedPort[])
+				.map((p) => `${p.count}× ${p.connector}${p.label ? ` (${p.label})` : ''}`)
+				.join(', ');
+		}
+		return (value as LoggedWay[])
+			.map((w) =>
+				[`${w.count}×`, [w.connectorA ?? '—', w.connectorB ?? '—'].join(' → '), w.cableType ?? '']
+					.filter(Boolean)
+					.join(' ')
+			)
 			.join(', ');
 	}
 

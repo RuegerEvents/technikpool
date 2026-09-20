@@ -209,6 +209,42 @@ class DemoData {
       connectorA: 'XLR3 M',
       connectorB: 'XLR3 F',
       lengthCm: 1000,
+      ways: [],
+    ),
+  );
+
+  /// A loom, the other shape a cable comes in: several pairs of ends in one
+  /// jacket, so it has no ends of its own. Here as a fixture because it is the
+  /// one product shape the lookup screen renders differently.
+  static const _loom = Product(
+    id: 'prd_demo_loom',
+    name: '6× Schuko + DMX 20 m',
+    manufacturerName: 'Generisch',
+    category: Category(
+      id: 'catg_demo_light',
+      name: 'Licht',
+      color: '#facc15',
+      sortOrder: 1,
+    ),
+    cable: CableSpec(
+      type: null,
+      connectorA: null,
+      connectorB: null,
+      lengthCm: 2000,
+      ways: [
+        CableWay(
+          count: 6,
+          type: '2,5mm²',
+          connectorA: 'Schuko M',
+          connectorB: 'Schuko F',
+        ),
+        CableWay(
+          count: 1,
+          type: 'DMX',
+          connectorA: 'XLR3 M',
+          connectorB: 'XLR3 F',
+        ),
+      ],
     ),
   );
 
@@ -246,6 +282,7 @@ class DemoData {
     // Cables carry no serial number — nobody stamps one on a 10 m XLR.
     _asset('40000013', _xlrCable, 0, AssetStatus.available, null),
     _asset('40000014', _xlrCable, 0, AssetStatus.available, null),
+    _asset('40000015', _loom, 0, AssetStatus.available, null),
   ];
 
   static Asset _asset(

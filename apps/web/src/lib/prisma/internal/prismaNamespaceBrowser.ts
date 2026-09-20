@@ -63,6 +63,7 @@ export const ModelName = {
   Manufacturer: 'Manufacturer',
   Connector: 'Connector',
   ProductPort: 'ProductPort',
+  CableWay: 'CableWay',
   Category: 'Category',
   Product: 'Product',
   OrgProductPrice: 'OrgProductPrice',
@@ -285,6 +286,19 @@ export const ProductPortScalarFieldEnum = {
 } as const
 
 export type ProductPortScalarFieldEnum = (typeof ProductPortScalarFieldEnum)[keyof typeof ProductPortScalarFieldEnum]
+
+
+export const CableWayScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  count: 'count',
+  connectorA: 'connectorA',
+  connectorB: 'connectorB',
+  cableType: 'cableType',
+  sortOrder: 'sortOrder'
+} as const
+
+export type CableWayScalarFieldEnum = (typeof CableWayScalarFieldEnum)[keyof typeof CableWayScalarFieldEnum]
 
 
 export const CategoryScalarFieldEnum = {

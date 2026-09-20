@@ -1,7 +1,15 @@
 <script lang="ts">
 	import { categoryLabel } from '$lib/category';
 	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
-	import { CABLE_END_LABEL, connectorRole, formatLength, connectorLabel } from '$lib/cable';
+	import {
+		CABLE_END_LABEL,
+		connectorRole,
+		formatLength,
+		connectorLabel,
+		isCable,
+		isLoom,
+		loomSummary
+	} from '$lib/cable';
 	import { getConnectors } from '$lib/remote/connectors.remote';
 	import { imageSrc } from '$lib/images';
 	import * as Card from '$lib/components/ui/card';
@@ -464,7 +472,7 @@
 
 	// Only fetched for a cable: an asset page for a moving head has no use for
 	// the connector catalogue, and every asset page would otherwise pay for it.
-	let connectors = $derived(asset.product.cableType ? await getConnectors() : []);
+	let connectors = $derived(isCable(asset.product) ? await getConnectors() : []);
 	let cableInputGender = $derived(asset.product.category.cableInputGender ?? null);
 
 	/** The catalogue row behind a name on this product, for its picture and end. */
@@ -563,10 +571,12 @@
 						{asset.product.manufacturer.name}
 					</p>
 					<h1 class="text-3xl font-bold tracking-tight">{asset.product.name}</h1>
-					{#if asset.product.cableType}
+					{#if isCable(asset.product)}
 						<p class="text-sm text-muted-foreground">
 							{[
-								connectorLabel(asset.product),
+								isLoom(asset.product)
+									? loomSummary(asset.product.ways, connectors)
+									: connectorLabel(asset.product),
 								asset.product.lengthCm ? formatLength(asset.product.lengthCm) : ''
 							]
 								.filter(Boolean)
@@ -804,7 +814,42 @@
 					{/if}
 				</dl>
 
-				{#if asset.product.cableType}
+				{#if isLoom(asset.product)}
+					<!-- A loom is not one cable drawn end to end but several, so it is a
+					     list: how many of each way, and what is on its ends. -->
+					<div class="space-y-3 rounded-lg border bg-muted/20 p-4">
+						<p class="text-xs text-muted-foreground">
+							{['Ways', asset.product.lengthCm ? formatLength(asset.product.lengthCm) : '']
+								.filter(Boolean)
+								.join(' · ')}
+						</p>
+						<ul class="space-y-2">
+							{#each asset.product.ways as way (way.id)}
+								<li class="flex flex-wrap items-center gap-2 text-sm">
+									<span class="w-8 shrink-0 font-mono">{way.count}×</span>
+									<ProductThumb
+										path={connectorInfo(way.connectorA).imagePath}
+										alt=""
+										size={28}
+										class="bg-background"
+									/>
+									<span class="font-medium">{way.connectorA ?? '—'}</span>
+									<span class="text-muted-foreground">→</span>
+									<ProductThumb
+										path={connectorInfo(way.connectorB).imagePath}
+										alt=""
+										size={28}
+										class="bg-background"
+									/>
+									<span class="font-medium">{way.connectorB ?? '—'}</span>
+									{#if way.cableType}
+										<span class="text-xs text-muted-foreground">{way.cableType}</span>
+									{/if}
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{:else if asset.product.cableType}
 					<!-- The cable drawn end to end: what plugs in where, and how far apart. -->
 					<div class="rounded-lg border bg-muted/20 p-4">
 						<div class="flex items-center gap-3">
@@ -832,7 +877,7 @@
 					</div>
 				{/if}
 
-				{#if !asset.product.cableType && !asset.product.isLicense}
+				{#if !isCable(asset.product) && !asset.product.isLicense}
 					<!-- What the device's panel has. Edited on the product's own page,
 					     where it belongs to every unit at once. -->
 					<div class="space-y-2">
@@ -1419,7 +1464,7 @@
 	{/snippet}
 </NewAssetModal>
 
-<Modal bind:open={productModalOpen} title="Edit Product" dismissible={!savingProduct}>
+<Modal bind:open={productModalOpen} title="Edit Product" size="xl" dismissible={!savingProduct}>
 	{#snippet description()}
 		Changes apply to all assets of this product type.
 	{/snippet}

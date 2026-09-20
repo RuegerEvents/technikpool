@@ -524,7 +524,7 @@
 	</Card.Root>
 </div>
 
-<Modal bind:open={newProductOpen} title="Create New Product" onclose={cancelNewProduct}>
+<Modal bind:open={newProductOpen} title="Create New Product" size="xl" onclose={cancelNewProduct}>
 	{#snippet description()}
 		Fill in the details for the new product model.
 	{/snippet}

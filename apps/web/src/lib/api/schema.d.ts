@@ -420,10 +420,30 @@ export interface components {
              *     completely by its connectors and its length.
              */
             type: string | null;
+            /**
+             * @description The single pair of an ordinary lead. Null on a loom, which carries
+             *     its ends in `ways` instead — a cable is one or the other, never both.
+             */
             connectorA: string | null;
             connectorB: string | null;
             /** @description Whole centimetres. */
             lengthCm: number | null;
+            /**
+             * @description A loom's ways: two or more pairs of ends running the length of one
+             *     cable. Empty on an ordinary lead.
+             */
+            ways: components["schemas"]["CableWay"][];
+        };
+        /**
+         * @description One way of a loom. Identical ways are one entry with a count — "6× Schuko
+         *     M→F" is a number, not six entries.
+         */
+        CableWay: {
+            count: number;
+            /** @description This way's wire, where a loom's ways differ — `2,5 mm²`, `CAT7`. */
+            type: string | null;
+            connectorA: string | null;
+            connectorB: string | null;
         };
         Category: {
             id: string;
