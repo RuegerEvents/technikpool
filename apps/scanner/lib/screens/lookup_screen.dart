@@ -52,6 +52,16 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
     final api = ref.read(apiClientProvider);
     if (api == null) return;
 
+    // A scan never touches the field, so it would otherwise go on showing
+    // whatever was typed before it — beside the result for a different unit.
+    // The box reads what was looked up, whichever way the code arrived.
+    if (_controller.text != tag) {
+      _controller.value = TextEditingValue(
+        text: tag,
+        selection: TextSelection.collapsed(offset: tag.length),
+      );
+    }
+
     final l10n = S.of(context);
 
     setState(() {
