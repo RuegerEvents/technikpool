@@ -1,1 +1,3 @@
-Zurückgehaltene Geräte zeigen Nachschlagen und Bestand jetzt als nicht verfügbar an, und ein Scan darauf sagt, warum das Gerät nicht mitgenommen werden kann.
+Looms: Kabel mit mehreren Wegen zeigen beim Nachschlagen, was durch sie läuft — wie viele Wege welcher Art und was an ihren Enden sitzt.
+
+Ein gescannter Code, den kein Inventaraufkleber trägt, wird jetzt auch über die Seriennummer gefunden, solange sie eindeutig ist, und steht sichtbar im Suchfeld. Jede Buchung im Verlauf hat wieder ihre eigene Beschriftung.

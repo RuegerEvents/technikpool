@@ -1,1 +1,3 @@
-Look up and Inventory now show held-back units as unavailable, and scanning one says why it can't be taken out.
+Looms: a cable with several ways now shows what runs through it on the lookup screen — how many ways of each kind, and what is on their ends.
+
+A scanned code that is nobody's asset tag is now matched against serial numbers as well, as long as it is unique, and stays visible in the search field. Every booking in the history is labelled again.
