@@ -43,7 +43,7 @@ abstract class InventoryClient {
   ///
   /// [locationId] - Only assets currently at this location.
   ///
-  /// [productionId] - Only assets booked to this production.
+  /// [productionId] - Only assets booked to this production. Listing a production's kit is a read of that production, so a caller who may not open it is refused (`403`) rather than handed an empty page, and an id that names nothing answers `404 production_not_found`.
   ///
   /// [categoryId] - Only assets whose product is in this category.
   ///

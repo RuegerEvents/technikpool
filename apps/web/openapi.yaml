@@ -257,7 +257,11 @@ paths:
             type: string
         - name: productionId
           in: query
-          description: Only assets booked to this production.
+          description: >-
+            Only assets booked to this production. Listing a production's kit is
+            a read of that production, so a caller who may not open it is
+            refused (`403`) rather than handed an empty page, and an id that
+            names nothing answers `404 production_not_found`.
           schema:
             type: string
         - name: categoryId
@@ -293,6 +297,10 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   /api/v1/assets/by-tag/{tag}:
     get:
@@ -407,7 +415,9 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
     NotFound:
-      description: No such record.
+      description: >-
+        No such record — or, for a filter that names one, no such record the
+        caller could have named (`production_not_found`).
       content:
         application/json:
           schema:
@@ -575,7 +585,42 @@ components:
         organizations:
           type: array
           items:
-            $ref: '#/components/schemas/Organization'
+            $ref: '#/components/schemas/MemberOrganization'
+
+    MemberOrganization:
+      type: object
+      description: >-
+        An organization the caller belongs to, and the rung they stand on in it.
+        Spelled out rather than composed from Organization because only this
+        response carries a role: an organization named by an asset or a
+        production is a label, not a statement about the caller.
+      required: [id, name, color, avatarLabel]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        shortName:
+          type: [string, 'null']
+          description: Abbreviation to prefer wherever space is tight.
+        color:
+          type: string
+          description: Hex colour for the org badge.
+        avatarLabel:
+          type: string
+        role:
+          type: string
+          enum: [DEVICE_VIEWER, VIEWER, MEMBER, ADMIN, OWNER]
+          description: >-
+            What the caller may do here, as a ladder: each rung can do
+            everything below it. DEVICE_VIEWER sees the equipment only —
+            booking or returning anything needs MEMBER or above, so a client
+            can stop offering a scan that the server will refuse.
+
+            Absent where there is no membership at all, which only happens for
+            a system admin: `isAdmin` is what grants them that organization.
+            Omitted rather than null so the value stays a plain enum — a null
+            member generates an unusable identifier in the Dart client.
 
     Address:
       type: object

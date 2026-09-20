@@ -10,7 +10,7 @@ CurrentUser _$CurrentUserFromJson(Map<String, dynamic> json) => CurrentUser(
   user: User.fromJson(json['user'] as Map<String, dynamic>),
   isAdmin: json['isAdmin'] as bool,
   organizations: (json['organizations'] as List<dynamic>)
-      .map((e) => Organization.fromJson(e as Map<String, dynamic>))
+      .map((e) => MemberOrganization.fromJson(e as Map<String, dynamic>))
       .toList(),
 );
 

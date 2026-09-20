@@ -326,7 +326,23 @@ export interface components {
             user: components["schemas"]["User"];
             /** @description System-level admin, sees every organization. */
             isAdmin: boolean;
-            organizations: components["schemas"]["Organization"][];
+            organizations: components["schemas"]["MemberOrganization"][];
+        };
+        /** @description An organization the caller belongs to, and the rung they stand on in it. Spelled out rather than composed from Organization because only this response carries a role: an organization named by an asset or a production is a label, not a statement about the caller. */
+        MemberOrganization: {
+            id: string;
+            name: string;
+            /** @description Abbreviation to prefer wherever space is tight. */
+            shortName?: string | null;
+            /** @description Hex colour for the org badge. */
+            color: string;
+            avatarLabel: string;
+            /**
+             * @description What the caller may do here, as a ladder: each rung can do everything below it. DEVICE_VIEWER sees the equipment only — booking or returning anything needs MEMBER or above, so a client can stop offering a scan that the server will refuse.
+             *     Absent where there is no membership at all, which only happens for a system admin: `isAdmin` is what grants them that organization. Omitted rather than null so the value stays a plain enum — a null member generates an unusable identifier in the Dart client.
+             * @enum {string}
+             */
+            role?: "DEVICE_VIEWER" | "VIEWER" | "MEMBER" | "ADMIN" | "OWNER";
         };
         Address: {
             id: string;
@@ -518,7 +534,7 @@ export interface components {
                 "application/json": components["schemas"]["Error"];
             };
         };
-        /** @description No such record. */
+        /** @description No such record — or, for a filter that names one, no such record the caller could have named (`production_not_found`). */
         NotFound: {
             headers: {
                 [name: string]: unknown;
@@ -744,7 +760,7 @@ export interface operations {
             query?: {
                 /** @description Only assets currently at this location. */
                 locationId?: string;
-                /** @description Only assets booked to this production. */
+                /** @description Only assets booked to this production. Listing a production's kit is a read of that production, so a caller who may not open it is refused (`403`) rather than handed an empty page, and an id that names nothing answers `404 production_not_found`. */
                 productionId?: string;
                 /** @description Only assets whose product is in this category. */
                 categoryId?: string;
@@ -771,6 +787,8 @@ export interface operations {
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
         };
     };
     getAssetByTag: {

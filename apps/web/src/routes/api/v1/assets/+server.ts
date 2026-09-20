@@ -1,7 +1,7 @@
 import type { RequestHandler } from './$types';
 import { prisma } from '$lib/server/auth';
 import { apiError, apiJson, handleApi, requireApiUser, type Schemas } from '$lib/server/api';
-import { isSystemAdmin, userOrgIds } from '$lib/server/services/access';
+import { isSystemAdmin, productionVisibility, userOrgIds } from '$lib/server/services/access';
 import { toAsset } from '$lib/server/services/api-mappers';
 import { ApiResponse } from '$lib/server/api';
 import type { Prisma } from '$lib/prisma/client';
@@ -35,6 +35,32 @@ export const GET: RequestHandler = ({ locals, url }) =>
 		const categoryId = url.searchParams.get('categoryId');
 		const q = url.searchParams.get('q')?.trim();
 		const cursor = url.searchParams.get('cursor');
+
+		// Filtering by production is a read *of* that production — the same read
+		// the web gates with `requireProductionRead` before it will list a
+		// production's kit. Without this the org scope below still holds, so only
+		// the caller's own units come back, but a DEVICE_VIEWER could take the
+		// production id out of an asset's `currentProduction` (masked by name,
+		// not by id) and get the kit list for a production they may not open.
+		//
+		// Refused rather than quietly emptied, the way `scopedOrgIds` refuses a
+		// filter for an org the caller doesn't belong to: a filter narrows a
+		// result, it never silently answers a different question.
+		if (productionId) {
+			const production = await prisma.production.findUnique({
+				where: { id: productionId },
+				select: { id: true, organizationId: true }
+			});
+			if (!production) {
+				throw new ApiResponse(
+					apiError(404, 'production_not_found', `Production "${productionId}" not found`)
+				);
+			}
+			const canSee = await productionVisibility(user.id);
+			if (!canSee(production)) {
+				throw new ApiResponse(apiError(403, 'forbidden', 'No access to this production'));
+			}
+		}
 
 		const where: Prisma.AssetWhereInput = {
 			...(admin ? {} : { organizationId: { in: orgIds } }),

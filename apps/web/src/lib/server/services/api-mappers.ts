@@ -1,4 +1,5 @@
 import type { Schemas } from '$lib/server/api';
+import type { OrgRole } from '$lib/roles';
 import { imageSrc } from '$lib/images';
 import { isCable } from '$lib/cable';
 
@@ -23,6 +24,23 @@ export function toOrganization(org: OrgRow): Schemas['Organization'] {
 		color: org.color,
 		avatarLabel: org.avatarLabel
 	};
+}
+
+/**
+ * The same organization, plus the rung the caller stands on in it. Only `/me`
+ * answers with these: an organization named by an asset or a production is a
+ * label, and attaching a role there would invite a client to read one unit's
+ * badge as permission over another org's.
+ *
+ * `role` is left out only for a system admin's view of an organization they
+ * have no membership in — `isAdmin` is what grants them that one. Omitted
+ * rather than null so the wire value stays a plain enum; see openapi.yaml.
+ */
+export function toMemberOrganization(
+	org: OrgRow,
+	role: OrgRole | undefined
+): Schemas['MemberOrganization'] {
+	return { ...toOrganization(org), ...(role ? { role } : {}) };
 }
 
 type AddressRow = {

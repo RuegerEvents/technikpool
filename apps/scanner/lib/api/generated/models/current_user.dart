@@ -4,7 +4,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
-import 'organization.dart';
+import 'member_organization.dart';
 import 'user.dart';
 
 part 'current_user.g.dart';
@@ -23,7 +23,7 @@ class CurrentUser {
 
   /// System-level admin, sees every organization.
   final bool isAdmin;
-  final List<Organization> organizations;
+  final List<MemberOrganization> organizations;
 
   Map<String, Object?> toJson() => _$CurrentUserToJson(this);
 }

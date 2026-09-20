@@ -37,10 +37,25 @@ class DemoData {
     emailVerified: true,
   );
 
-  static const currentUser = CurrentUser(
+  /// What `/api/v1/me` answers with: the same organizations, carrying the rung
+  /// the demo account stands on in each. MEMBER is the warehouse floor — the
+  /// lowest rung that may scan, which is the whole point of the demo. A
+  /// DEVICE_VIEWER would be shown the kit and refused every booking.
+  static final currentUser = CurrentUser(
     user: user,
     isAdmin: false,
-    organizations: [nordlicht, buehnenwerk],
+    organizations: [nordlicht, buehnenwerk]
+        .map(
+          (org) => MemberOrganization(
+            id: org.id,
+            name: org.name,
+            shortName: org.shortName,
+            color: org.color,
+            avatarLabel: org.avatarLabel,
+            role: MemberOrganizationRole.member,
+          ),
+        )
+        .toList(growable: false),
   );
 
   static const categories = <Category>[

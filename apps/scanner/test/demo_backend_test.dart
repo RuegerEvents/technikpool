@@ -12,7 +12,14 @@ void main() {
   setUp(() => api = demoApiClient(DemoBackend()));
 
   test('serves the fixture warehouse', () async {
-    expect((await api.identity.getCurrentUser()).organizations, hasLength(2));
+    final me = await api.identity.getCurrentUser();
+    expect(me.organizations, hasLength(2));
+    // The rung travels with the organization, so a client can tell in advance
+    // which actions the server will refuse — see MemberOrganization.
+    expect(
+      me.organizations.every((o) => o.role == MemberOrganizationRole.member),
+      isTrue,
+    );
     expect(await api.inventory.listLocations(), hasLength(3));
     expect(await api.inventory.listProductions(), hasLength(2));
     expect(await api.inventory.listCategories(), hasLength(3));
@@ -34,6 +41,26 @@ void main() {
       lights.items.every((a) => a.product.category.id == 'catg_demo_light'),
       isTrue,
     );
+  });
+
+  test('a productionId naming nothing is refused, not silently emptied', () async {
+    // Listing a production's kit is a read of that production, so the server
+    // refuses rather than answering an empty page — a filter narrows a result,
+    // it never quietly answers a different question.
+    await expectLater(
+      api.inventory.listAssets(productionId: 'prdn_does_not_exist'),
+      throwsA(
+        isA<Object>().having(
+          (e) => (unwrapError(e) as ApiException).code,
+          'code',
+          'production_not_found',
+        ),
+      ),
+    );
+
+    final real = DemoData.productions.first;
+    final page = await api.inventory.listAssets(productionId: real.id);
+    expect(page.items, isNotNull);
   });
 
   test('a cable carries its structured half', () async {

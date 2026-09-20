@@ -79,6 +79,8 @@ class DemoBackend {
       return _ok(options, DemoData.categories);
     }
     if (method == 'GET' && path == '/api/v1/assets') {
+      final unknownProduction = _rejectUnknownProduction(options);
+      if (unknownProduction != null) return unknownProduction;
       return _ok(options, _listAssets(options));
     }
     if (method == 'GET' && path.startsWith('/api/v1/assets/by-tag/')) {
@@ -89,6 +91,22 @@ class DemoBackend {
     }
 
     return _error(options, 404, 'not_found', 'Not available in the demo');
+  }
+
+  /// The server refuses a `productionId` naming nothing rather than answering
+  /// an empty page, because listing a production's kit is a read of it. The
+  /// demo user is a MEMBER of both fixture orgs, so the *forbidden* half of
+  /// that rule can never fire here — only the 404 is reachable.
+  Response<dynamic>? _rejectUnknownProduction(RequestOptions options) {
+    final productionId = options.queryParameters['productionId'] as String?;
+    if (productionId == null) return null;
+    if (DemoData.productions.any((p) => p.id == productionId)) return null;
+    return _error(
+      options,
+      404,
+      'production_not_found',
+      'Production "$productionId" not found',
+    );
   }
 
   AssetPage _listAssets(RequestOptions options) {
@@ -153,7 +171,12 @@ class DemoBackend {
     // round-tripping through `fromJson`, which assumes the wire form.
     final body = options.data;
     if (body is! Map) {
-      return _error(options, 400, 'invalid_request', 'assetTag and target are required');
+      return _error(
+        options,
+        400,
+        'invalid_request',
+        'assetTag and target are required',
+      );
     }
     final assetTag = '${body['assetTag'] ?? ''}'.trim();
     final targetId = '${body['targetId'] ?? ''}';
@@ -163,7 +186,12 @@ class DemoBackend {
         : targetType == 'production';
 
     if (assetTag.isEmpty || targetId.isEmpty) {
-      return _error(options, 400, 'invalid_request', 'assetTag and target are required');
+      return _error(
+        options,
+        400,
+        'invalid_request',
+        'assetTag and target are required',
+      );
     }
 
     final match = _resolve(assetTag);
@@ -177,7 +205,12 @@ class DemoBackend {
     }
     final asset = match.asset;
     if (asset == null) {
-      return _error(options, 404, 'asset_not_found', 'Tag "$assetTag" not found');
+      return _error(
+        options,
+        404,
+        'asset_not_found',
+        'Tag "$assetTag" not found',
+      );
     }
 
     final scanned = ScannedAsset(
