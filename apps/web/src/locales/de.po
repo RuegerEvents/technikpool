@@ -1012,6 +1012,7 @@ msgstr "Gerät aus Bundle entfernt"
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/invitations/invitation-link.svelte
 #: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
+#: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Close"
 msgstr "Schließen"
@@ -2440,18 +2441,17 @@ msgstr "Stickerbogen erzeugt"
 
 #: src/routes/stickers/+page.svelte
 msgid "Sticker Sheets | Technikpool"
-msgstr "Stickerbögen | Technikpool"
+msgstr "Stickerbogen | Technikpool"
 
 #~ msgid "<0/> Print-ready PDF generator"
 #~ msgstr "<0/> Druckfertiger PDF-Generator"
 
 #: src/routes/stickers/+page.svelte
 msgid "Sticker sheets"
-msgstr "Stickerbögen"
+msgstr "Stickerbogen"
 
-#: src/routes/stickers/+page.svelte
-msgid "Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for wir-machen-druck.de square stickers and flag labels."
-msgstr "Erzeuge Data-Matrix-Stickerbögen für Technikpool-Inventarnummern, mit Presets für quadratische Sticker und Fähnchen-Etiketten von wir-machen-druck.de."
+#~ msgid "Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for wir-machen-druck.de square stickers and flag labels."
+#~ msgstr "Erzeuge Data-Matrix-Stickerbogen für Technikpool-Inventarnummern, mit Presets für quadratische Sticker und Fähnchen-Etiketten von wir-machen-druck.de."
 
 #~ msgid "Labels"
 #~ msgstr "Etiketten"
@@ -2481,7 +2481,7 @@ msgstr "Quadratische Sticker"
 
 #: src/routes/stickers/+page.svelte
 msgid "Dense 15 × 10 sheets for compact asset labels."
-msgstr "Dichte 15 × 10 Bögen für kompakte Inventaraufkleber."
+msgstr "Dichte 15 × 10 Bogen für kompakte Inventaraufkleber."
 
 #: src/routes/stickers/+page.svelte
 msgid "Flag labels"
@@ -8446,3 +8446,95 @@ msgstr "Diese Seriennummer ist bereits auf {0} vergeben. Ein Scan findet damit k
 #: src/routes/checkout/+page.svelte
 msgid "Type or scan asset tag or serial number…"
 msgstr "Asset-Tag oder Seriennummer eingeben oder scannen…"
+
+#: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
+msgid "Ordering printed sheets"
+msgstr "Bogen drucken lassen"
+
+#~ msgid "Ask for a quote by email instead of ordering through the shop's configurator."
+#~ msgstr "Per E-Mail ein Angebot anfragen, statt über den Konfigurator der Druckerei zu bestellen."
+
+#~ msgid "Every sheet carries different numbers, so an online order looks like one job per sheet and the machine setup is charged for each of them. The cut contour is identical on all sheets — only the printed numbers change — so the contour is set up once and every sheet runs off it. A print shop will do that as a custom item, but only if you ask before ordering."
+#~ msgstr "Jeder Bogen trägt andere Nummern, deshalb sieht eine Online-Bestellung aus wie ein Auftrag pro Bogen und die Maschineneinrichtung wird für jeden einzeln berechnet. Die Schnittkontur ist auf allen Bogen identisch – nur die gedruckten Nummern ändern sich – die Kontur wird also einmal eingerichtet und jeder Bogen läuft darüber. Eine Druckerei macht das als Sonderanfertigung, aber nur, wenn man vor der Bestellung danach fragt."
+
+#~ msgid "Kiss-cut stickers on a sheet: cut through the vinyl only, the backing sheet stays whole."
+#~ msgstr "Kiss-Cut-Aufkleber auf Bogen: nur die Folie wird durchgeschnitten, das Trägerpapier bleibt ganz."
+
+#~ msgid "Sheet size {0} × {1} mm, printed on one side."
+#~ msgstr "Bogenformat {0} × {1} mm, einseitig bedruckt."
+
+#~ msgid "The cut contour is in the PDF as a spot color named <0/> at 100% magenta."
+#~ msgstr "Die Schnittkontur liegt im PDF als Sonderfarbe <0/> mit 100 % Magenta."
+
+#~ msgid "Every sticker bleeds {0} mm past its contour, so a slightly off cut shows no white edge."
+#~ msgstr "Jeder Aufkleber hat {0} mm Beschnittzugabe über die Kontur hinaus, damit ein leicht versetzter Schnitt keine weiße Kante zeigt."
+
+#~ msgid "All {0} sheets share one and the same contour and differ only in the printed numbers, so the setup should be charged once rather than per sheet. Ask for the same to apply to reorders."
+#~ msgstr "Alle {0} Bogen haben ein und dieselbe Kontur und unterscheiden sich nur in den gedruckten Nummern; die Einrichtung sollte deshalb einmal berechnet werden und nicht pro Bogen. Das Gleiche für Nachbestellungen gleich mit anfragen."
+
+#~ msgid "Material, and how hard a life the labels have: white adhesive vinyl, permanent, weatherproof if the gear goes outdoors."
+#~ msgstr "Material und wie hart die Etiketten rangenommen werden: weiße Klebefolie, permanent haftend, wetterfest, wenn das Material nach draußen geht."
+
+#~ msgid "What to put in the email"
+#~ msgstr "Was in die E-Mail gehört"
+
+#~ msgid "Attach the generated PDF. It is the print file, not a preview: no crop marks and no scaling are needed."
+#~ msgstr "Das erzeugte PDF anhängen. Es ist die Druckdatei, keine Vorschau: Beschnittmarken und Skalierung sind nicht nötig."
+
+#~ msgid "Finding the product"
+#~ msgstr "Das passende Produkt finden"
+
+#~ msgid "The presets on this page were measured against a sheet product at wir-machen-druck.de, where this kind of job sits under custom-shape stickers with a contour cut. Other printers carry the same thing under their own names. Technikpool is not affiliated with any of them, and the file works at any shop that cuts contours."
+#~ msgstr "Die Voreinstellungen auf dieser Seite sind an einem Bogenprodukt bei wir-machen-druck.de ausgemessen, wo so ein Auftrag unter Aufklebern in Sonderform mit Konturschnitt läuft. Andere Druckereien führen dasselbe unter eigenen Namen. Technikpool steht mit keiner von ihnen in Verbindung, und die Datei funktioniert bei jeder Druckerei, die Konturen schneidet."
+
+#~ msgid "The download is a finished print file. This is what a print shop needs from you, and the one thing worth settling before you order."
+#~ msgstr "Der Download ist eine fertige Druckdatei. Das hier braucht eine Druckerei von dir – und das eine, was vor der Bestellung geklärt sein sollte."
+
+#: src/routes/stickers/+page.svelte
+msgid "How to order these"
+msgstr "Infos zur Bestellung"
+
+#~ msgid "Every sheet in the file shares one and the same contour and differs only in the printed numbers, so the setup should be charged once rather than per sheet. Ask for the same to apply to reorders."
+#~ msgstr "Alle Bogen in der Datei haben ein und dieselbe Kontur und unterscheiden sich nur in den gedruckten Nummern; die Einrichtung sollte deshalb einmal berechnet werden und nicht pro Bogen. Das Gleiche für Nachbestellungen gleich mit anfragen."
+
+#~ msgid "Ask by email instead of ordering straight from the configurator."
+#~ msgstr "Per E-Mail anfragen, statt direkt über den Konfigurator zu bestellen."
+
+#~ msgid "Every page carries different numbers but the exact same cut contour. Unasked, the machine setup is charged for each page."
+#~ msgstr "Jede Seite trägt andere Nummern, aber exakt dieselbe Schnittkontur. Ungefragt wird die Maschineneinrichtung für jede Seite berechnet."
+
+#~ msgid "Attach the PDF and ask roughly this:"
+#~ msgstr "Das PDF anhängen und ungefähr so fragen:"
+
+#~ msgid "I have a custom request about this product. The attached print data has several pages with different artwork but one and the same cut contour. Is that possible without the machine setup being charged for every page?"
+#~ msgstr "Ich habe eine individuelle Anfrage zu diesem Produkt. In meinen Druckdaten im Anhang sehen Sie mehrere Seiten mit unterschiedlichen Motiven, aber mit der gleichen Schnittkontur. Ist das möglich, sodass es nicht für jede Seite extra die Maschineneinrichtung kostet?"
+
+#~ msgid "The PDF fits this sheet product as it is, for example at <0>Stickerbogen extrem stark haftend, 4/0, freie Größe (rechteckig)</0>."
+#~ msgstr "Die Druckdatei passt so, wie sie ist, zu diesem Bogenprodukt, zum Beispiel <0>Stickerbogen extrem stark haftend, 4/0, freie Größe (rechteckig)</0>."
+
+#: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
+msgid "Recommended product"
+msgstr "Produktempfehlung"
+
+#~ msgid "Stickerbogen extrem stark haftend, for example from <0>Wir machen Druck</0>. The PDF fits it as it is."
+#~ msgstr "Stickerbogen extrem stark haftend, zum Beispiel von <0>Wir machen Druck</0>. Die Druckdatei passt so, wie sie ist."
+
+#: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
+msgid "Tip: ask for it as a custom product"
+msgstr "Tipp: Produkt individuell anfragen"
+
+#: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
+msgid "Ordered through the form, every page counts as a job of its own and the machine setup is charged for each one. All pages share the exact same cut contour, so ask by email before you order:"
+msgstr "Über den Konfigurator bestellt zählt jede Seite als eigener Auftrag und die Maschineneinrichtung wird für jede einzeln berechnet. Alle Seiten haben exakt dieselbe Schnittkontur, also vor der Bestellung per E-Mail fragen:"
+
+#: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
+msgid "Please set this up as a custom product with a different design per page and an identical cut contour."
+msgstr "Bitte als individuelles Produkt mit unterschiedlichem Motiv pro Seite und identischer Schnittkontur anlegen."
+
+#: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
+msgid "Stickerbogen extrem stark haftend, for example from <0>WIRmachenDRUCK.de</0>. The PDF fits it as it is."
+msgstr "Stickerbogen extrem stark haftend, zum Beispiel von <0>WIRmachenDRUCK.de</0>. Die Druckdatei passt so, wie sie ist."
+
+#: src/routes/stickers/+page.svelte
+msgid "Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for WIRmachenDRUCK.de square stickers and flag labels."
+msgstr "Erzeuge Data-Matrix-Stickerbogen für Technikpool-Inventarnummern, mit Presets für quadratische Sticker und Fähnchen-Etiketten von WIRmachenDRUCK.de."

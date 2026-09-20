@@ -1012,6 +1012,7 @@ msgstr "Asset removed from bundle"
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/invitations/invitation-link.svelte
 #: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
+#: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Close"
 msgstr "Close"
@@ -2449,9 +2450,8 @@ msgstr "Sticker Sheets | Technikpool"
 msgid "Sticker sheets"
 msgstr "Sticker sheets"
 
-#: src/routes/stickers/+page.svelte
-msgid "Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for wir-machen-druck.de square stickers and flag labels."
-msgstr "Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for wir-machen-druck.de square stickers and flag labels."
+#~ msgid "Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for wir-machen-druck.de square stickers and flag labels."
+#~ msgstr "Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for wir-machen-druck.de square stickers and flag labels."
 
 #~ msgid "Labels"
 #~ msgstr "Labels"
@@ -8446,3 +8446,95 @@ msgstr "This serial number is already on {0}. Scanning it will no longer find a 
 #: src/routes/checkout/+page.svelte
 msgid "Type or scan asset tag or serial number…"
 msgstr "Type or scan asset tag or serial number…"
+
+#: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
+msgid "Ordering printed sheets"
+msgstr "Ordering printed sheets"
+
+#~ msgid "Ask for a quote by email instead of ordering through the shop's configurator."
+#~ msgstr "Ask for a quote by email instead of ordering through the shop's configurator."
+
+#~ msgid "Every sheet carries different numbers, so an online order looks like one job per sheet and the machine setup is charged for each of them. The cut contour is identical on all sheets — only the printed numbers change — so the contour is set up once and every sheet runs off it. A print shop will do that as a custom item, but only if you ask before ordering."
+#~ msgstr "Every sheet carries different numbers, so an online order looks like one job per sheet and the machine setup is charged for each of them. The cut contour is identical on all sheets — only the printed numbers change — so the contour is set up once and every sheet runs off it. A print shop will do that as a custom item, but only if you ask before ordering."
+
+#~ msgid "Kiss-cut stickers on a sheet: cut through the vinyl only, the backing sheet stays whole."
+#~ msgstr "Kiss-cut stickers on a sheet: cut through the vinyl only, the backing sheet stays whole."
+
+#~ msgid "Sheet size {0} × {1} mm, printed on one side."
+#~ msgstr "Sheet size {0} × {1} mm, printed on one side."
+
+#~ msgid "The cut contour is in the PDF as a spot color named <0/> at 100% magenta."
+#~ msgstr "The cut contour is in the PDF as a spot color named <0/> at 100% magenta."
+
+#~ msgid "Every sticker bleeds {0} mm past its contour, so a slightly off cut shows no white edge."
+#~ msgstr "Every sticker bleeds {0} mm past its contour, so a slightly off cut shows no white edge."
+
+#~ msgid "All {0} sheets share one and the same contour and differ only in the printed numbers, so the setup should be charged once rather than per sheet. Ask for the same to apply to reorders."
+#~ msgstr "All {0} sheets share one and the same contour and differ only in the printed numbers, so the setup should be charged once rather than per sheet. Ask for the same to apply to reorders."
+
+#~ msgid "Material, and how hard a life the labels have: white adhesive vinyl, permanent, weatherproof if the gear goes outdoors."
+#~ msgstr "Material, and how hard a life the labels have: white adhesive vinyl, permanent, weatherproof if the gear goes outdoors."
+
+#~ msgid "What to put in the email"
+#~ msgstr "What to put in the email"
+
+#~ msgid "Attach the generated PDF. It is the print file, not a preview: no crop marks and no scaling are needed."
+#~ msgstr "Attach the generated PDF. It is the print file, not a preview: no crop marks and no scaling are needed."
+
+#~ msgid "Finding the product"
+#~ msgstr "Finding the product"
+
+#~ msgid "The presets on this page were measured against a sheet product at wir-machen-druck.de, where this kind of job sits under custom-shape stickers with a contour cut. Other printers carry the same thing under their own names. Technikpool is not affiliated with any of them, and the file works at any shop that cuts contours."
+#~ msgstr "The presets on this page were measured against a sheet product at wir-machen-druck.de, where this kind of job sits under custom-shape stickers with a contour cut. Other printers carry the same thing under their own names. Technikpool is not affiliated with any of them, and the file works at any shop that cuts contours."
+
+#~ msgid "The download is a finished print file. This is what a print shop needs from you, and the one thing worth settling before you order."
+#~ msgstr "The download is a finished print file. This is what a print shop needs from you, and the one thing worth settling before you order."
+
+#: src/routes/stickers/+page.svelte
+msgid "How to order these"
+msgstr "How to order these"
+
+#~ msgid "Every sheet in the file shares one and the same contour and differs only in the printed numbers, so the setup should be charged once rather than per sheet. Ask for the same to apply to reorders."
+#~ msgstr "Every sheet in the file shares one and the same contour and differs only in the printed numbers, so the setup should be charged once rather than per sheet. Ask for the same to apply to reorders."
+
+#~ msgid "Ask by email instead of ordering straight from the configurator."
+#~ msgstr "Ask by email instead of ordering straight from the configurator."
+
+#~ msgid "Every page carries different numbers but the exact same cut contour. Unasked, the machine setup is charged for each page."
+#~ msgstr "Every page carries different numbers but the exact same cut contour. Unasked, the machine setup is charged for each page."
+
+#~ msgid "Attach the PDF and ask roughly this:"
+#~ msgstr "Attach the PDF and ask roughly this:"
+
+#~ msgid "I have a custom request about this product. The attached print data has several pages with different artwork but one and the same cut contour. Is that possible without the machine setup being charged for every page?"
+#~ msgstr "I have a custom request about this product. The attached print data has several pages with different artwork but one and the same cut contour. Is that possible without the machine setup being charged for every page?"
+
+#~ msgid "The PDF fits this sheet product as it is, for example at <0>Stickerbogen extrem stark haftend, 4/0, freie Größe (rechteckig)</0>."
+#~ msgstr "The PDF fits this sheet product as it is, for example at <0>Stickerbogen extrem stark haftend, 4/0, freie Größe (rechteckig)</0>."
+
+#: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
+msgid "Recommended product"
+msgstr "Recommended product"
+
+#~ msgid "Stickerbogen extrem stark haftend, for example from <0>Wir machen Druck</0>. The PDF fits it as it is."
+#~ msgstr "Stickerbogen extrem stark haftend, for example from <0>Wir machen Druck</0>. The PDF fits it as it is."
+
+#: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
+msgid "Tip: ask for it as a custom product"
+msgstr "Tip: ask for it as a custom product"
+
+#: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
+msgid "Ordered through the form, every page counts as a job of its own and the machine setup is charged for each one. All pages share the exact same cut contour, so ask by email before you order:"
+msgstr "Ordered through the form, every page counts as a job of its own and the machine setup is charged for each one. All pages share the exact same cut contour, so ask by email before you order:"
+
+#: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
+msgid "Please set this up as a custom product with a different design per page and an identical cut contour."
+msgstr "Please set this up as a custom product with a different design per page and an identical cut contour."
+
+#: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
+msgid "Stickerbogen extrem stark haftend, for example from <0>WIRmachenDRUCK.de</0>. The PDF fits it as it is."
+msgstr "Stickerbogen extrem stark haftend, for example from <0>WIRmachenDRUCK.de</0>. The PDF fits it as it is."
+
+#: src/routes/stickers/+page.svelte
+msgid "Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for WIRmachenDRUCK.de square stickers and flag labels."
+msgstr "Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for WIRmachenDRUCK.de square stickers and flag labels."

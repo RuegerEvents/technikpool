@@ -4,6 +4,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { StickerOrderInfo } from '$lib/components/ui/sticker-order-info';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { DEFAULT_ORG_NAME, DEFAULT_STICKER_COLOR, stickerOrgName } from '$lib/stickers';
 	import { toast } from 'svelte-sonner';
@@ -74,6 +75,7 @@
 	const payloadPlaceholder = 'https://technik.example/assets/{label}';
 	const matrixPreviewCells = Array.from({ length: 25 }, (_value, index) => index);
 	let generating = $state(false);
+	let orderInfoOpen = $state(false);
 
 	let pageWidthMm = $state(saved.pageWidthMm ?? 303);
 	let pageHeightMm = $state(saved.pageHeightMm ?? 216);
@@ -269,12 +271,17 @@
 <svelte:head><title>Sticker Sheets | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
-	<div>
-		<h1 class="text-2xl font-semibold tracking-tight">Sticker sheets</h1>
-		<p class="text-sm text-muted-foreground">
-			Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for
-			wir-machen-druck.de square stickers and flag labels.
-		</p>
+	<div class="flex flex-wrap items-start justify-between gap-3">
+		<div>
+			<h1 class="text-2xl font-semibold tracking-tight">Sticker sheets</h1>
+			<p class="text-sm text-muted-foreground">
+				Generate Data Matrix sticker sheets for Technikpool asset tags, with presets for
+				WIRmachenDRUCK.de square stickers and flag labels.
+			</p>
+		</div>
+		<Button type="button" variant="outline" onclick={() => (orderInfoOpen = true)}
+			>How to order these</Button
+		>
 	</div>
 
 	<div class="grid gap-6 lg:grid-cols-[1fr_360px]">
@@ -655,3 +662,5 @@
 		</aside>
 	</div>
 </div>
+
+<StickerOrderInfo bind:open={orderInfoOpen} />
