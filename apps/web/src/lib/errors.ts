@@ -116,6 +116,13 @@ export type AppErrorCode =
 	| 'bundle_all_in_production'
 	| 'bundle_all_booked'
 	| 'bundle_copy_tag_single'
+	| 'bundle_delete_booked'
+	| 'bundle_member_booked'
+	| 'bundle_member_history'
+	| 'bundle_member_inspected'
+	| 'bundle_member_billed'
+	| 'bundle_member_has_accessories'
+	| 'bundle_template_in_use'
 	// Productions
 	| 'dates_end_before_start'
 	| 'show_end_before_show_start'

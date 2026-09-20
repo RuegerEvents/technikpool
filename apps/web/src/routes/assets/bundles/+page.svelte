@@ -1,17 +1,37 @@
 <script lang="ts">
 	import { categoryLabel } from '$lib/category';
-	import { orgLabel } from '$lib/utils';
+	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
-	import { getBundleTemplates } from '$lib/remote/assets.remote';
+	import { getBundleTemplates, deleteBundleTemplate } from '$lib/remote/assets.remote';
+	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 	import { Layers } from '@lucide/svelte';
 	import { imageSrc } from '$lib/images';
+	import { BundleVsAccessoryInfo } from '$lib/components/ui/bundle-vs-accessory-info';
 
 	let templatesQuery = $derived(getBundleTemplates());
 	let templates = $derived(templatesQuery.current ?? []);
+
+	let differenceOpen = $state(false);
+
+	// No confirmation: there is nothing behind an empty bundle type to lose, and
+	// the command refuses it the moment a case turns up under it.
+	let deletingTemplateId = $state<string | null>(null);
+
+	async function handleDeleteTemplate(templateId: string, name: string) {
+		deletingTemplateId = templateId;
+		try {
+			await deleteBundleTemplate(templateId);
+			toast.success(`Bundle type "${name}" deleted`);
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			deletingTemplateId = null;
+		}
+	}
 </script>
 
 <svelte:head><title>Asset Bundles | Technikpool</title></svelte:head>
@@ -20,7 +40,14 @@
 	<div class="flex flex-wrap items-center justify-between gap-4">
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">Asset Bundles</h1>
-			<p class="text-muted-foreground">Groups of assets that travel together.</p>
+			<p class="text-muted-foreground">
+				Groups of assets that travel together.
+				<button
+					type="button"
+					class="text-primary underline underline-offset-4"
+					onclick={() => (differenceOpen = true)}>How is this different from accessories?</button
+				>
+			</p>
 		</div>
 		<Button icon="add" href={resolve('/assets/bundles/new')}>New Bundle</Button>
 	</div>
@@ -88,6 +115,21 @@
 									</a>
 								{/each}
 							</div>
+						{:else}
+							<!-- Deleting the last case takes its type with it, so an entry with
+							     no cases is one that was described and never built. Nothing else
+							     can clear it, and it would sit in this list for ever. -->
+							<div class="mt-3">
+								<Button
+									size="sm"
+									variant="outline"
+									disabled={deletingTemplateId === template.id}
+									onclick={() => handleDeleteTemplate(template.id, template.name)}
+									>{deletingTemplateId === template.id
+										? 'Deleting…'
+										: 'Delete this empty bundle type'}</Button
+								>
+							</div>
 						{/if}
 					</Card.Content>
 				</Card.Root>
@@ -95,3 +137,5 @@
 		</div>
 	{/if}
 </div>
+
+<BundleVsAccessoryInfo bind:open={differenceOpen} />

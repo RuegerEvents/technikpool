@@ -147,8 +147,13 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'A location is required.';
 		case 'location_used_by_other_org':
 			return 'Another organization has a unit at one of these locations; move it first.';
+		// Every message here starts with a word, never with an interpolated value
+		// or the quote around one: wuchale extracts a string in a function only
+		// when it begins with an uppercase letter, so one opening on `"${p0}"`
+		// compiles in, renders in English, and looks translated until someone
+		// hits it.
 		case 'cable_row_incomplete':
-			return `"${p0}" says nothing about the cable — add ends, a length or a type.`;
+			return `The row "${p0}" says nothing about the cable — add ends, a length or a type.`;
 
 		// Licences
 		case 'license_not_a_license':
@@ -215,6 +220,20 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'All units of this bundle are already booked during this production.';
 		case 'bundle_copy_tag_single':
 			return 'A tag names one case — leave it empty when copying a bundle more than once.';
+		case 'bundle_delete_booked':
+			return `This bundle is booked for "${p0}" — remove it there first.`;
+		case 'bundle_member_booked':
+			return `The unit "${p0}" has been booked for "${p1}" — keep the units instead of deleting them.`;
+		case 'bundle_member_history':
+			return `The unit "${p0}" has been scanned or checked out — keep the units instead of deleting them.`;
+		case 'bundle_member_inspected':
+			return `The unit "${p0}" has an inspection on record — keep the units instead of deleting them.`;
+		case 'bundle_member_billed':
+			return `The unit "${p0}" appears on an offer or invoice — keep the units instead of deleting them.`;
+		case 'bundle_member_has_accessories':
+			return `The unit "${p0}" carries accessories that are not in this bundle — detach them first.`;
+		case 'bundle_template_in_use':
+			return 'This bundle type still has cases in the pool — delete those first.';
 
 		// Productions
 		case 'dates_end_before_start':

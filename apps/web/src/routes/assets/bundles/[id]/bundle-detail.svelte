@@ -13,7 +13,17 @@
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
 	import { OrgBadge } from '$lib/components/ui/org-badge';
 	import { Fact } from '$lib/components/ui/fact';
-	import { Boxes, CircleAlert, CircleCheck, Euro, Layers, MapPin, Star, Tag } from '@lucide/svelte';
+	import {
+		Boxes,
+		CircleAlert,
+		CircleCheck,
+		Euro,
+		Layers,
+		MapPin,
+		Star,
+		Tag,
+		Trash2
+	} from '@lucide/svelte';
 	import {
 		getBundle,
 		getBundleTypeSpec,
@@ -28,6 +38,7 @@
 		regenerateBundleImage,
 		setBundleFeaturedProducts,
 		convertBundleToAccessories,
+		deleteBundle,
 		duplicateBundle,
 		getBundleCopyPlan
 	} from '$lib/remote/assets.remote';
@@ -204,6 +215,40 @@
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			converting = false;
+		}
+	}
+
+	// ── Deleting the case ────────────────────────────────────────────────────
+	// Two acts behind one button, so the choice is made in the dialog rather
+	// than assumed: freeing the units back into the pool, or striking them off
+	// it. Freeing is the default because it is the one that can be undone by
+	// hand, and because a case is far more often wrong than its contents are.
+	let deleteOpen = $state(false);
+	let deleting = $state(false);
+	let deleteAssets = $state<'keep' | 'delete'>('keep');
+
+	function openDelete() {
+		deleteAssets = 'keep';
+		deleteOpen = true;
+	}
+
+	async function handleDelete() {
+		deleting = true;
+		try {
+			const result = await deleteBundle({ bundleId, assets: deleteAssets });
+			// An empty case has no tally worth reporting — "0 units are back in the
+			// pool" is a sentence about nothing.
+			toast.success(
+				result.deletedAssets > 0
+					? `Bundle deleted — ${plural(result.deletedAssets, ['1 unit deleted', '# units deleted'])}`
+					: result.freedAssets > 0
+						? `Bundle deleted — ${plural(result.freedAssets, ['1 unit is back in the pool', '# units are back in the pool'])}`
+						: 'Bundle deleted'
+			);
+			await goto(resolve('/assets/bundles'));
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+			deleting = false;
 		}
 	}
 
@@ -501,6 +546,14 @@
 									class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-accent"
 								>
 									Convert to device
+								</DropdownMenu.Item>
+								<DropdownMenu.Separator class="my-1 h-px bg-border" />
+								<DropdownMenu.Item
+									onSelect={openDelete}
+									class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-destructive transition-colors outline-none hover:bg-destructive/10 data-[highlighted]:bg-destructive/10"
+								>
+									<Trash2 class="size-4" />
+									Delete bundle
 								</DropdownMenu.Item>
 							</DropdownMenu.Content>
 						</DropdownMenu.Portal>
@@ -1161,6 +1214,75 @@
 			disabled={savingBundle || !bundleDraft.name.trim()}
 		>
 			{savingBundle ? 'Saving…' : 'Save'}
+		</Button>
+	{/snippet}
+</Modal>
+
+<Modal bind:open={deleteOpen} title="Delete this bundle?" dismissible={!deleting}>
+	{#snippet description()}
+		{bundle.template.name}{bundle.tag ? ` · ${bundle.tag}` : ''}
+	{/snippet}
+	{#snippet children()}
+		<div class="space-y-4 text-sm">
+			<!-- An empty case has nothing to decide about: keeping and deleting its
+			     contents are the same act on nothing, and offering the choice would
+			     only ask someone to think about it. -->
+			{#if bundle.assets.length === 0}
+				<p class="text-muted-foreground">
+					This cannot be undone. The case is empty, so nothing but the case itself is removed.
+				</p>
+			{:else}
+				<!-- No `plural` on "units" here: the count would have to carry a German
+				     article with it, and the sentence reads the same either way. -->
+				<p class="text-muted-foreground">
+					This cannot be undone. The case stops existing; what happens to the units inside is up to
+					you.
+				</p>
+
+				<div class="space-y-2">
+					<label class="flex cursor-pointer gap-3 rounded-md border p-3 has-checked:border-primary">
+						<input type="radio" class="mt-0.5" value="keep" bind:group={deleteAssets} />
+						<span>
+							<span class="font-medium">Keep the units</span>
+							<span class="mt-1 block text-xs text-muted-foreground">
+								They stay in the pool and go back to being loose equipment, with their tags, history
+								and inspections untouched.
+							</span>
+						</span>
+					</label>
+					<label class="flex cursor-pointer gap-3 rounded-md border p-3 has-checked:border-primary">
+						<input type="radio" class="mt-0.5" value="delete" bind:group={deleteAssets} />
+						<span>
+							<span class="font-medium">Delete the units as well</span>
+							<span class="mt-1 block text-xs text-muted-foreground">
+								For a case that was registered by mistake. Refused if any unit inside has been
+								booked, scanned, inspected or billed — one that has been in use is decommissioned
+								instead, so its history survives.
+							</span>
+						</span>
+					</label>
+				</div>
+			{/if}
+		</div>
+	{/snippet}
+
+	{#snippet footer()}
+		<Button
+			icon="close"
+			type="button"
+			variant="outline"
+			onclick={() => (deleteOpen = false)}
+			disabled={deleting}
+		>
+			Cancel
+		</Button>
+		<Button
+			type="button"
+			class="bg-destructive text-white hover:bg-destructive/90"
+			onclick={handleDelete}
+			disabled={deleting}
+		>
+			{deleting ? 'Deleting…' : 'Delete bundle'}
 		</Button>
 	{/snippet}
 </Modal>

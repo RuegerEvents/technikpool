@@ -193,6 +193,7 @@ msgstr "Crew"
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
@@ -1010,6 +1011,7 @@ msgstr "Gerät aus Bundle entfernt"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
 #: src/lib/components/ui/invitations/invitation-link.svelte
 #: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
 #: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
@@ -2391,9 +2393,8 @@ msgstr[1] "# Geräte erstellt!"
 #~ msgid "Serial / Tag"
 #~ msgstr ""
 
-#: src/routes/assets/bundles/+page.svelte
-msgid "Groups of assets that travel together."
-msgstr "Gerätegruppen, die zusammen verwaltet werden."
+#~ msgid "Groups of assets that travel together."
+#~ msgstr "Gerätegruppen, die zusammen verwaltet werden."
 
 #: src/routes/assets/bundles/+page.svelte
 msgid "No bundles yet. <0>Create your first bundle →</0>"
@@ -4249,6 +4250,8 @@ msgstr "Löschen"
 #: src/routes/admin/connectors/+page.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/assets/bundles/+page.svelte
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/orgs/[id]/+page.svelte
@@ -5173,9 +5176,8 @@ msgstr "Hauptgerät auswählen"
 msgid "Product deleted"
 msgstr "Produkt gelöscht"
 
-#: src/lib/components/ui/product-editor/product-editor.svelte
-msgid "Delete unused"
-msgstr "Ungenutztes löschen"
+#~ msgid "Delete unused"
+#~ msgstr "Ungenutztes löschen"
 
 #: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Delete unused product"
@@ -5191,6 +5193,7 @@ msgstr "Dadurch wird der Katalogeintrag dauerhaft gelöscht. Produkte mit Einhei
 msgid "Delete <0/>?"
 msgstr "<0/> löschen?"
 
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Delete product"
 msgstr "Produkt löschen"
@@ -8578,3 +8581,219 @@ msgstr "Wie viele von jeder Sorte, und was an ihren Enden sitzt. Gleiche Wege si
 #: src/lib/components/ui/product-fields/product-fields.svelte
 msgid "<0/> This is a loom — several cables in one"
 msgstr "<0/> Das ist ein Loom — mehrere Kabel in einem"
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "This bundle is booked for \"{0}\" — remove it there first."
+msgstr "Dieses Bundle ist für „{0}“ gebucht — bitte dort zuerst entfernen."
+
+#~ msgid "This bundle type still has {0} case(s) — delete those first."
+#~ msgstr ""
+
+#: src/lib/error-messages.svelte.ts
+msgid "This bundle type still has cases in the pool — delete those first."
+msgstr "Zu diesem Bundle-Typ gibt es noch Cases im Pool — bitte diese zuerst löschen."
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "1 unit deleted"
+msgid_plural "# units deleted"
+msgstr[0] "1 Einheit gelöscht"
+msgstr[1] "# Einheiten gelöscht"
+
+#. 0: plural(result.deletedAssets, ['1 unit deleted', '# units deleted'])
+#. 0: plural(result.freedAssets, ['1 unit is back in the pool', '# units are back in the pool'])
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Bundle deleted — {0}"
+msgstr "Bundle gelöscht — {0}"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "1 unit is back in the pool"
+msgid_plural "# units are back in the pool"
+msgstr[0] "1 Einheit ist wieder im Pool"
+msgstr[1] "# Einheiten sind wieder im Pool"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "<0/> Delete bundle"
+msgstr "<0/> Bundle löschen"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Delete this bundle?"
+msgstr "Dieses Bundle löschen?"
+
+#~ msgid "unit"
+#~ msgid_plural "units"
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Keep the units"
+msgstr "Einheiten behalten"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "They stay in the pool and go back to being loose equipment, with their tags, history and inspections untouched."
+msgstr "Sie bleiben im Pool und sind wieder loses Equipment — Tags, Historie und Prüfungen bleiben unangetastet."
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Delete the units as well"
+msgstr "Einheiten mit löschen"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "For a case that was registered by mistake. Refused if any unit inside has been booked, scanned, inspected or billed — one that has been in use is decommissioned instead, so its history survives."
+msgstr "Für ein Case, das versehentlich angelegt wurde. Wird abgelehnt, sobald eine Einheit darin gebucht, gescannt, geprüft oder abgerechnet wurde — eine Einheit, die im Einsatz war, wird stattdessen ausgemustert, damit ihre Historie erhalten bleibt."
+
+#~ msgid "This cannot be undone. The case stops existing; what happens to the {0} inside is up to you."
+#~ msgstr ""
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Delete bundle"
+msgstr "Bundle löschen"
+
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
+msgid "Bundle or accessory?"
+msgstr "Bundle oder Zubehör?"
+
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
+msgid "Has its own tag, location, price and photo"
+msgstr "Hat eigenen Tag, eigenen Standort, eigenen Preis und eigenes Foto"
+
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
+msgid "Bills as a single line, without pricing every unit inside it"
+msgstr "Wird als eine Position abgerechnet, ohne jede Einheit darin zu bepreisen"
+
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
+msgid "Units go in and come out again; the case outlives any of them"
+msgstr "Einheiten kommen hinein und wieder heraus; das Case überdauert jede einzelne"
+
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
+msgid "Can be copied to build the next identical case"
+msgstr "Lässt sich kopieren, um das nächste baugleiche Case aufzubauen"
+
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
+msgid "<0/> Bundle"
+msgstr "<0/> Bundle"
+
+#~ msgid "A kit that is packed, booked and billed as one thing — a lighting case, a power case. It is a catalogue entry of its own, so several cases can be built to the same spec and told apart by their tags."
+#~ msgstr "Ein Kit, das als eine Einheit gepackt, gebucht und abgerechnet wird — ein Lichtcase, ein Stromcase. Es ist ein eigener Katalogeintrag, deshalb lassen sich mehrere Cases nach derselben Spezifikation bauen und über ihre Tags auseinanderhalten."
+
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
+msgid "Attached to exactly one unit, one level deep"
+msgstr "Hängt an genau einer Einheit, genau eine Ebene tief"
+
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
+msgid "Booked, moved, scanned and returned with that unit automatically"
+msgstr "Wird mit dieser Einheit automatisch gebucht, bewegt, gescannt und zurückgenommen"
+
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
+msgid "Never separately bookable — asking for the device asks for them"
+msgstr "Nie einzeln buchbar — wer das Gerät anfordert, fordert das Zubehör mit an"
+
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
+msgid "Follows its device into a bundle, if the device is in one"
+msgstr "Folgt seinem Gerät in ein Bundle, wenn das Gerät in einem steckt"
+
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
+msgid "<0/> Device with accessories"
+msgstr "<0/> Gerät mit Zubehör"
+
+#~ msgid "Parts that belong to one particular unit and never go anywhere without it — its flightcase, its power supply, its omega brackets. Each is a full unit with its own history and its own inspection; only where it is and where it is going follow the device."
+#~ msgstr "Teile, die zu genau einer Einheit gehören und ohne sie nirgendwohin gehen — ihr Flightcase, ihr Netzteil, ihre Omega-Bügel. Jedes davon ist eine vollwertige Einheit mit eigener Historie und eigener Prüfung; nur wo es steht und wohin es geht, folgt dem Gerät."
+
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
+msgid "Which one do I want?"
+msgstr "Was brauche ich?"
+
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
+msgid "Ask what happens when the case is emptied. If the parts then belong to nothing in particular and could be packed differently tomorrow, it is a bundle. If a part would still be that one device's power supply lying on the shelf, it is an accessory."
+msgstr "Frag dich, was passiert, wenn das Case leer geräumt wird. Gehören die Teile danach zu nichts Bestimmtem und könnten morgen anders gepackt werden, ist es ein Bundle. Wäre ein Teil auch im Regal noch das Netzteil genau dieses Geräts, ist es Zubehör."
+
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
+msgid "Both put several units together, and they are not interchangeable. The question that separates them is whether the parts belong to one particular device, or whether the case is the thing being kept."
+msgstr "Beides fasst mehrere Einheiten zusammen, und austauschbar sind die beiden nicht. Die Frage, die sie trennt: Gehören die Teile zu einem bestimmten Gerät, oder ist das Case selbst das, was zusammengehalten wird?"
+
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
+msgid "The two are not exclusive: a device inside a bundle can carry its own accessories, and they are pulled into the case along with it."
+msgstr "Beides schließt sich nicht aus: Ein Gerät in einem Bundle kann eigenes Zubehör tragen, und das wandert mit ihm ins Case."
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "How is this different from a bundle?"
+msgstr "Worin unterscheidet sich das von einem Bundle?"
+
+#. 0: name
+#: src/routes/assets/bundles/+page.svelte
+msgid "Bundle type \"{0}\" deleted"
+msgstr "Bundle-Typ „{0}“ gelöscht"
+
+#: src/routes/assets/bundles/+page.svelte
+msgid "Groups of assets that travel together. <0>How is this different from accessories?</0>"
+msgstr "Gerätegruppen, die zusammen verwaltet werden. <0>Worin unterscheidet sich das von Zubehör?</0>"
+
+#: src/routes/assets/bundles/+page.svelte
+msgid "Delete this empty bundle type"
+msgstr "Diesen leeren Bundle-Typ löschen"
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Only a product nobody holds units of can be deleted. Delete or decommission its units first, or merge it into the product it duplicates."
+msgstr "Löschen lässt sich nur ein Produkt, von dem niemand Einheiten hält. Lösche oder mustere zuerst seine Einheiten aus, oder führe es mit dem Produkt zusammen, das es doppelt."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Only whoever added this product, an admin of every organization holding units of it, or a system admin can delete it."
+msgstr "Löschen kann dieses Produkt nur, wer es angelegt hat, ein Admin jeder Organisation mit Einheiten davon, oder ein Systemadmin."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Delete this product from the catalog."
+msgstr "Dieses Produkt aus dem Katalog löschen."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "The row \"{0}\" says nothing about the cable — add ends, a length or a type."
+msgstr "Die Zeile „{0}“ sagt nichts über das Kabel aus — bitte Enden, Länge oder Zusatzinfo ergänzen."
+
+#. 0: p0; 1: p1
+#: src/lib/error-messages.svelte.ts
+msgid "The unit \"{0}\" has been booked for \"{1}\" — keep the units instead of deleting them."
+msgstr "Die Einheit „{0}“ war für „{1}“ gebucht — bitte die Einheiten behalten statt sie zu löschen."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "The unit \"{0}\" has been scanned or checked out — keep the units instead of deleting them."
+msgstr "Die Einheit „{0}“ wurde gescannt oder ausgegeben — bitte die Einheiten behalten statt sie zu löschen."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "The unit \"{0}\" has an inspection on record — keep the units instead of deleting them."
+msgstr "Für die Einheit „{0}“ ist eine Prüfung hinterlegt — bitte die Einheiten behalten statt sie zu löschen."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "The unit \"{0}\" appears on an offer or invoice — keep the units instead of deleting them."
+msgstr "Die Einheit „{0}“ steht auf einem Angebot oder einer Rechnung — bitte die Einheiten behalten statt sie zu löschen."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "The unit \"{0}\" carries accessories that are not in this bundle — detach them first."
+msgstr "An der Einheit „{0}“ hängt Zubehör, das nicht in diesem Bundle ist — bitte zuerst abhängen."
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "This cannot be undone. The case stops existing; what happens to the units inside is up to you."
+msgstr "Das lässt sich nicht rückgängig machen. Das Case hört auf zu existieren; was mit den Einheiten darin passiert, entscheidest du."
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "This cannot be undone. The case is empty, so nothing but the case itself is removed."
+msgstr "Das lässt sich nicht rückgängig machen. Das Case ist leer, es wird also nichts außer dem Case selbst entfernt."
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Bundle deleted"
+msgstr "Bundle gelöscht"
+
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "A kit that is packed, booked and billed as one thing. <0>Is this a bundle, or accessories?</0>"
+msgstr "Ein Kit, das als eine Einheit gepackt, gebucht und abgerechnet wird. <0>Bundle oder Zubehör?</0>"
+
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
+msgid "Accessories that always come with the device and are not rented out separately. For example a power supply, a connecting cable, a case or a bag."
+msgstr "Zubehör, das immer beim Gerät dabei ist und nicht einzeln vermietet wird. Z.B. ein Netzteil, ein Anschlusskabel, ein Case oder eine Tasche."
+
+#: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
+msgid "A set of devices that is physically packed together and usually rented that way (for example 4 fixtures in one shared case). A single fixture can still be rented on its own. Its connecting cable would come along anyway, so that cable is an accessory."
+msgstr "Eine Zusammenstellung von Geräten, die physisch zusammen gepackt ist und meistens so vermietet wird (z.B. 4 Scheinwerfer in einem gemeinsamen Case). Es kann aber auch nur ein einzelner Scheinwerfer vermietet werden. Das Anschlusskabel dieses Scheinwerfers wäre aber trotzdem dabei, also ist es Zubehör."

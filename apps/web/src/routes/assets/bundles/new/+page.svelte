@@ -8,6 +8,7 @@
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { CategorySelect } from '$lib/components/ui/category-select';
 	import { NewAssetModal } from '$lib/components/ui/new-asset-modal';
+	import { BundleVsAccessoryInfo } from '$lib/components/ui/bundle-vs-accessory-info';
 	import {
 		getAssets,
 		getCategories,
@@ -32,6 +33,7 @@
 	let selectedOrgId = $state('');
 	let bundleCategoryId = $state('');
 	let saving = $state(false);
+	let differenceOpen = $state(false);
 
 	// Asset picker
 	let assetSearch = $state('');
@@ -177,6 +179,17 @@
 			← Back to Inventory
 		</Button>
 		<h1 class="text-3xl font-bold tracking-tight">Create Bundle</h1>
+		<!-- The one place the wrong choice is actually made: someone with a case
+		     of gear in front of them is here, and a device with its accessories
+		     would have been the right answer about half the time. -->
+		<p class="text-muted-foreground">
+			A kit that is packed, booked and billed as one thing.
+			<button
+				type="button"
+				class="text-primary underline underline-offset-4"
+				onclick={() => (differenceOpen = true)}>Is this a bundle, or accessories?</button
+			>
+		</p>
 	</div>
 
 	<form onsubmit={handleSubmit} class="space-y-6">
@@ -423,3 +436,5 @@
 		Registered and added to this bundle. It joins the bundle when you create it.
 	{/snippet}
 </NewAssetModal>
+
+<BundleVsAccessoryInfo bind:open={differenceOpen} />

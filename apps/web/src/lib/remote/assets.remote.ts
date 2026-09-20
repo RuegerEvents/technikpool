@@ -3177,6 +3177,207 @@ export const removeAssetFromBundle = command(bundleAssetSchema, async ({ bundleI
 	return { bundleId, assetId };
 });
 
+// ── Deleting a bundle ────────────────────────────────────────────────────────
+// A case that was built by mistake, or one whose contents were never really in
+// the pool. Distinct from `convertBundleToAccessories`, which keeps everything
+// and only rearranges it: here the case stops existing, and the question is
+// whether its contents outlive it.
+
+/**
+ * A booking that is still owed something — the three statuses the rest of this
+ * file already reads as "spoken for" (see the retire guard in `updateAsset`).
+ * RETURNED, DECLINED and CANCELLED are history and hold nothing back.
+ */
+const OPEN_BOOKING_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT'];
+
+const deleteBundleSchema = v.object({
+	bundleId: v.string(),
+	// What becomes of the units inside. No default on purpose: "delete the case"
+	// is two different acts — putting twelve lamps back on the shelf, or striking
+	// them off the inventory — and neither one is safe to guess at.
+	assets: v.picklist(['keep', 'delete'])
+});
+
+/**
+ * The same questions `deleteAsset` asks of one unit, asked of a whole case at
+ * once and before anything is written. Half a case deleted is worse than none
+ * of it, and whoever has to choose between keeping and deleting the units
+ * should hear the reason on the first attempt rather than the fourth.
+ */
+async function assertMembersDeletable(
+	userId: string,
+	members: {
+		id: string;
+		assetTag: string | null;
+		product: { name: string; manufacturer: { name: string } };
+	}[]
+) {
+	const memberIds = members.map((m) => m.id);
+	const [booked, moved, inspected, attached, offerLine, invoiceLine] = await Promise.all([
+		prisma.productionItem.findFirst({
+			where: { assetId: { in: memberIds } },
+			include: { production: { select: PRODUCTION_NAME_SELECT } }
+		}),
+		prisma.assetTransaction.findFirst({
+			where: { assetId: { in: memberIds }, action: { notIn: UNUSED_ASSET_ACTIONS } }
+		}),
+		prisma.inspection.findFirst({ where: { assetId: { in: memberIds } } }),
+		// Only accessories that are *not* in the case. One hanging off another
+		// member goes in the same breath and is no reason to refuse — which is the
+		// one place this is laxer than `deleteAsset`, and deliberately so.
+		prisma.asset.findFirst({
+			where: { parentAssetId: { in: memberIds }, id: { notIn: memberIds } }
+		}),
+		prisma.offerItem.findFirst({ where: { assetId: { in: memberIds } } }),
+		prisma.invoiceItem.findFirst({ where: { assetId: { in: memberIds } } })
+	]);
+
+	const label = (assetId: string | null) => {
+		const member = members.find((m) => m.id === assetId);
+		return member ? assetLabel(member) : (assetId ?? '');
+	};
+
+	if (booked) {
+		const canSee = await productionVisibility(userId);
+		appError(409, 'bundle_member_booked', [
+			label(booked.assetId),
+			visibleProductionName(booked.production, canSee)
+		]);
+	}
+	if (moved) appError(409, 'bundle_member_history', [label(moved.assetId)]);
+	if (inspected) appError(409, 'bundle_member_inspected', [label(inspected.assetId)]);
+	if (offerLine || invoiceLine) {
+		appError(409, 'bundle_member_billed', [label((offerLine ?? invoiceLine)!.assetId)]);
+	}
+	if (attached) {
+		appError(409, 'bundle_member_has_accessories', [label(attached.parentAssetId)]);
+	}
+}
+
+export const deleteBundle = command(deleteBundleSchema, async ({ bundleId, assets }) => {
+	const bundle = await prisma.assetBundle.findUniqueOrThrow({
+		where: { id: bundleId },
+		include: {
+			template: true,
+			productionItems: { include: { production: { select: PRODUCTION_NAME_SELECT } } },
+			assets: {
+				select: {
+					id: true,
+					assetTag: true,
+					product: { select: { name: true, manufacturer: { select: { name: true } } } }
+				}
+			}
+		}
+	});
+	const user = await requireOrgInventory(bundle.template.organizationId);
+
+	// A case somebody is counting on is not this org's to dissolve out from under
+	// them, whichever answer was given about the units. The FK is SET NULL, so
+	// nothing at the database level would have stopped it.
+	//
+	// Open bookings only — the same three statuses the rest of the app reads as
+	// "still spoken for". A case that went out once in 2024 is booked *history*,
+	// and refusing on that would mean no kit in an established pool could ever be
+	// deleted; `convertBundleToAccessories` treats a past booking the same way.
+	const booked = bundle.productionItems.find((item) => OPEN_BOOKING_STATUSES.includes(item.status));
+	if (booked) {
+		const canSee = await productionVisibility(user.id);
+		appError(409, 'bundle_delete_booked', [visibleProductionName(booked.production, canSee)]);
+	}
+
+	if (assets === 'delete' && bundle.assets.length > 0) {
+		await assertMembersDeletable(user.id, bundle.assets);
+	}
+
+	const organizationId = bundle.template.organizationId;
+	const templateId = bundle.templateId;
+	const memberIds = bundle.assets.map((a) => a.id);
+
+	// The finished productions whose items are about to lose their bundle
+	// snapshot. Filtered to the ones this user may open, because refreshing a
+	// production they cannot read would be refused and fail a command whose
+	// write has already gone through — the same reason `convertBundleToAccessories`
+	// goes through `visibleProductionIds`.
+	const productionIds = await visibleProductionIds(user.id, [
+		...new Set(bundle.productionItems.map((item) => item.productionId))
+	]);
+
+	const templateGone = await prisma.$transaction(async (tx) => {
+		if (assets === 'delete') {
+			// Accessories in the case are members like any other, so a parent and
+			// its cables go together; the FK between them is SET NULL and does not
+			// care which row is removed first.
+			await tx.asset.deleteMany({ where: { id: { in: memberIds } } });
+		} else {
+			// Every member's `bundleId` is nulled, accessories included, which is
+			// what `syncAccessories` would have done one parent at a time.
+			await tx.asset.updateMany({ where: { bundleId }, data: { bundleId: null } });
+		}
+		// The bookings that are left are finished ones. They keep their items and
+		// lose only the "this came out of case X" snapshot, which is what the FK
+		// would have nulled anyway — done here so it is a stated act rather than
+		// a side effect nobody wrote down.
+		await tx.productionItem.updateMany({
+			where: { sourceBundleId: bundleId },
+			data: { sourceBundleId: null }
+		});
+		await tx.assetBundle.delete({ where: { id: bundleId } });
+		// A type exists to tell two cases of one kit apart. With no case left
+		// there is nothing to tell apart, and an entry nobody can reach would sit
+		// in the list for ever — `convertBundleToAccessories` clears it on exactly
+		// the same grounds.
+		const remaining = await tx.assetBundle.count({ where: { templateId } });
+		if (remaining > 0) return false;
+		await tx.bundleTemplate.delete({ where: { id: templateId } });
+		return true;
+	});
+
+	// Deliberately no `getBundle(bundleId).refresh()`: that query throws on a row
+	// that is gone, and it would fail the command after the write went through.
+	await Promise.all([
+		getBundles(organizationId).refresh(),
+		getBundles().refresh(),
+		getBundleTemplates(organizationId).refresh(),
+		getBundleTemplates().refresh(),
+		...(templateGone ? [] : [getBundleTypeSpec(templateId).refresh()]),
+		getAssets(organizationId).refresh(),
+		getAssets().refresh(),
+		getRetiredAssets(organizationId).refresh(),
+		getRetiredAssets().refresh(),
+		getInventorySummary(organizationId).refresh(),
+		getInventorySummary().refresh(),
+		getLocations(organizationId).refresh(),
+		...productionIds.map((productionId) => getProduction(productionId).refresh())
+	]);
+
+	return {
+		templateId: templateGone ? null : templateId,
+		deletedAssets: assets === 'delete' ? memberIds.length : 0,
+		freedAssets: assets === 'keep' ? memberIds.length : 0
+	};
+});
+
+export const deleteBundleTemplate = command(v.string(), async (templateId: string) => {
+	const template = await prisma.bundleTemplate.findUniqueOrThrow({
+		where: { id: templateId },
+		include: { _count: { select: { instances: true } } }
+	});
+	await requireOrgInventory(template.organizationId);
+	// Deleting the last case already takes its type with it, so what reaches
+	// here is the leftover: a kit that was described and never built, or one
+	// whose cases predate that rule.
+	if (template._count.instances > 0) appError(409, 'bundle_template_in_use');
+
+	await prisma.bundleTemplate.delete({ where: { id: templateId } });
+	await Promise.all([
+		getBundleTemplates(template.organizationId).refresh(),
+		getBundleTemplates().refresh(),
+		getBundles(template.organizationId).refresh(),
+		getBundles().refresh()
+	]);
+	return { id: templateId };
+});
+
 // ── Duplicating a bundle ─────────────────────────────────────────────────────
 // A second identical case is an ordinary thing to need, and building it by hand
 // means registering every unit and adding it one at a time. What a copy copies

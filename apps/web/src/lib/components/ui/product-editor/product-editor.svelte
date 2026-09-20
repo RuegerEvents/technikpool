@@ -416,11 +416,26 @@
 			</div>
 			<div class="flex flex-wrap items-center gap-3">
 				{#if canEdit}
-					{#if !product.hasAssets && !identityLocked}
-						<Button variant="destructive" size="sm" onclick={() => (deleteOpen = true)}
-							>Delete unused</Button
+					<!-- Shown disabled rather than hidden: a button that is simply not
+					     there reads as "this app cannot delete products", and the reason
+					     it is refused is the one thing worth saying.
+					     The title sits on the wrapper, not the button: a disabled button
+					     fires no mouse events, so its own tooltip never opens — which
+					     would hide the explanation exactly when it is needed. -->
+					<span
+						title={product.hasAssets
+							? 'Only a product nobody holds units of can be deleted. Delete or decommission its units first, or merge it into the product it duplicates.'
+							: identityLocked
+								? 'Only whoever added this product, an admin of every organization holding units of it, or a system admin can delete it.'
+								: 'Delete this product from the catalog.'}
+					>
+						<Button
+							variant="destructive"
+							size="sm"
+							disabled={product.hasAssets || identityLocked}
+							onclick={() => (deleteOpen = true)}>Delete product</Button
 						>
-					{/if}
+					</span>
 					<Button icon="merge" variant="outline" size="sm" onclick={() => openMerge()}
 						>Merge duplicate…</Button
 					>

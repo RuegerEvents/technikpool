@@ -15,6 +15,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Modal } from '$lib/components/ui/modal';
+	import { BundleVsAccessoryInfo } from '$lib/components/ui/bundle-vs-accessory-info';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
@@ -377,6 +378,10 @@
 
 	let confirmingDelete = $state(false);
 	let deleting = $state(false);
+
+	// Asked from the accessories card, because that is where the two
+	// arrangements get confused with one another.
+	let differenceOpen = $state(false);
 
 	async function handleDelete() {
 		deleting = true;
@@ -930,6 +935,11 @@
 							own, and each one can be copied to the rest.
 						{/if}
 					{/if}
+					<button
+						type="button"
+						class="text-primary underline underline-offset-4"
+						onclick={() => (differenceOpen = true)}>How is this different from a bundle?</button
+					>
 				</Card.Description>
 			</Card.Header>
 			<Card.Content class="space-y-4">
@@ -1502,3 +1512,5 @@
 		</Button>
 	{/snippet}
 </Modal>
+
+<BundleVsAccessoryInfo bind:open={differenceOpen} />
