@@ -16,6 +16,7 @@
 	import { plural, orgLabel } from '$lib/utils';
 	import { canManageInventory } from '$lib/roles';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { formatReleaseDate, notesFor, releases } from '$lib/changelog';
 	import {
 		Package,
 		Layers,
@@ -30,6 +31,10 @@
 	} from '@lucide/svelte';
 
 	let { data } = $props();
+
+	// Compiled in, so unlike everything else on this page it needs no query and
+	// never suspends — the card is there in the first frame.
+	const latestRelease = releases[0];
 
 	// Read through the queries rather than awaited: an `await` in a `$derived`
 	// holds the whole page back until it answers, so the dashboard would show
@@ -611,6 +616,35 @@
 					{/each}
 				</div>
 			{/if}
+		</div>
+
+		<!-- What's new. Last on the page on purpose: it is the one section nobody
+		     has to act on, and a release someone already read should not push the
+		     approvals queue further down every time. -->
+		<div>
+			<div class="mb-4 flex items-center justify-between">
+				<h2 class="text-xl font-semibold">What's new</h2>
+				<Button variant="ghost" size="sm" href={resolve('/whats-new')}>
+					All versions
+					<ArrowRight class="ml-1 h-4 w-4" />
+				</Button>
+			</div>
+			<Card.Root>
+				<Card.Header class="pb-3">
+					<Card.Title class="text-base">Version {latestRelease.version}</Card.Title>
+					<Card.Description>{formatReleaseDate(latestRelease, data.locale)}</Card.Description>
+				</Card.Header>
+				<Card.Content class="pt-0">
+					<ul class="space-y-2">
+						{#each notesFor(latestRelease, data.locale) as note, i (i)}
+							<li class="flex gap-2 text-sm">
+								<span aria-hidden="true" class="text-muted-foreground">&bull;</span>
+								<span>{note}</span>
+							</li>
+						{/each}
+					</ul>
+				</Card.Content>
+			</Card.Root>
 		</div>
 	</div>
 {/if}

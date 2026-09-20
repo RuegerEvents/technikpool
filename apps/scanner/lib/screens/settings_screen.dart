@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../changelog.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../scan/scan_channel.dart';
 import '../scan/scan_settings.dart';
 import '../state/providers.dart';
 import 'diagnostics_screen.dart';
+import 'whats_new_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -17,6 +19,7 @@ class SettingsScreen extends ConsumerWidget {
     final user = ref.watch(currentUserProvider);
     final config = ref.watch(scannerConfigProvider).value;
     final settings = ref.watch(scanSettingsProvider);
+    final latest = ref.watch(changelogProvider).value?.firstOrNull;
 
     return Scaffold(
       // HomeScreen's Scaffold owns the keyboard inset for every tab.
@@ -134,6 +137,25 @@ class SettingsScreen extends ConsumerWidget {
                   .push(MaterialPageRoute<void>(builder: (_) => const DiagnosticsScreen())),
             ),
           ],
+          const Divider(),
+          ListTile(
+            title: Text(l10n.whatsNew),
+            // The newest entry names the version this build is: the release
+            // script refuses to cut one the changelog has no entry for, so
+            // there is no second place for the number to be wrong in.
+            subtitle: Text(latest == null ? '…' : l10n.versionLabel(latest.version)),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              // Reading it here counts as reading it, same as tapping the
+              // banner — otherwise the banner would still be waiting on the
+              // home screen for a release already seen.
+              if (latest != null) {
+                ref.read(seenVersionProvider.notifier).save(latest.version);
+              }
+              Navigator.of(context)
+                  .push(MaterialPageRoute<void>(builder: (_) => const WhatsNewScreen()));
+            },
+          ),
           const Divider(),
           Padding(
             padding: const EdgeInsets.all(16),

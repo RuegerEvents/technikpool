@@ -427,6 +427,30 @@ abstract class S {
   /// **'Nothing received yet.'**
   String get diagnosticsEmpty;
 
+  /// No description provided for @whatsNew.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s new'**
+  String get whatsNew;
+
+  /// Heads a changelog entry, and names the running version under Settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String versionLabel(String version);
+
+  /// The banner on the home screen after an update, tapped to open the changelog.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s new in {version}'**
+  String whatsNewIn(String version);
+
+  /// No description provided for @dismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get dismiss;
+
   /// No description provided for @useThisPair.
   ///
   /// In en, this message translates to:

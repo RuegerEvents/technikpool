@@ -74,6 +74,19 @@ if (arg === 'patch' || arg === 'minor' || arg === 'major') {
 	}
 }
 
+// What's new is the only place a user finds out a release happened, so a
+// release with nothing under it is a release nobody sees. The newest entry is
+// also the version the app displays, which is why it has to be the *first*
+// one rather than merely present.
+const changelogPath = path.join(repoRoot, 'apps', 'web', 'src', 'lib', 'changelog.json');
+const changelog = JSON.parse(fs.readFileSync(changelogPath, 'utf8'));
+if (changelog[0]?.version !== nextVersion) {
+	fail(
+		`apps/web/src/lib/changelog.json starts with ${changelog[0]?.version ?? 'nothing'}, not ${nextVersion}.\n` +
+			`Add an entry for ${nextVersion} at the top, in English and German, then release again.`
+	);
+}
+
 const tag = `v${nextVersion}`;
 
 console.log(`Releasing ${tag} (from ${currentVersion})`);

@@ -612,6 +612,49 @@ class="px-3 py-1.5 {tab === 'assets'
 
 ---
 
+# What's new (the changelog)
+
+Both apps tell their users what changed, and **both refuse to release without being told**.
+The web's list is at `/whats-new` (linked from the user menu, with a dot until this browser
+has seen the newest version) and its newest entry is repeated on the dashboard. The scanner's
+is under Settings › What's new, with a dismissible banner on the home screen after an update.
+
+| App     | File                                 | Read by                                                           |
+| ------- | ------------------------------------ | ----------------------------------------------------------------- |
+| Web     | `apps/web/src/lib/changelog.json`    | `src/lib/changelog.ts`, `scripts/release.mjs`                     |
+| Scanner | `apps/scanner/assets/changelog.json` | `lib/changelog.dart` (a bundled asset), `scripts/release-app.mjs` |
+
+```json
+{ "version": "0.14.0", "date": "2026-09-27", "en": ["…", "…"], "de": ["…", "…"] }
+```
+
+**MANDATORY: a release needs its entry first.** `pnpm release` and `pnpm release:app` both
+refuse to run unless the changelog's **first** entry is the version being cut — newest first,
+so the top entry is also the version the app displays. Write the entry, commit it, then
+release. There is no "add it afterwards": the tag is what builds the image and the store
+binary, and a user reading What's new is reading whatever shipped in it.
+
+**Both languages, in one file, every time.** The entries are content, not interface copy, so
+they deliberately skip wuchale and the ARB catalogues: a release's English and German sit next
+to each other where they can be written and reviewed in one pass, instead of one release being
+scattered across `en.po`/`de.po` or numbered into `app_en.arb`/`app_de.arb`. The surrounding
+chrome ("What's new", "Version {0}") is translated the ordinary way.
+
+**The scanner's entry is also its store text.** `pnpm release:app` writes the newest entry into
+`apps/scanner/ios/fastlane/metadata/{de-DE,en-US}/release_notes.txt` as `• ` bullets and commits
+them with the version bump — so the App Store's What's New and the app's own cannot drift.
+Don't hand-edit those files. (Play gets no release notes: its lanes pass
+`skip_upload_metadata: true`.)
+
+**Write what a user would notice**, not what the commit did — the entries read like the commit
+subjects in this repo, which are already written that way. The date is the day you tag; nothing
+stamps it for you.
+
+`apps/scanner/test/whats_new_test.dart` guards the scanner's file, since a bundled asset that
+stops parsing or loses a language fails on the device rather than in the build.
+
+---
+
 # Brand
 
 `brand/mark.svg` is the **single master** for every icon in the repo — corner brackets
@@ -805,7 +848,8 @@ separate places, and a fix to one is no reason to move the other's number.
 | `pnpm release <patch\|minor\|major\|x.y.z>`            | root `package.json`         | `v1.2.3`         |
 | `pnpm release:app <patch\|minor\|major\|build\|x.y.z>` | `apps/scanner/pubspec.yaml` | `scanner-v1.2.3` |
 
-Both refuse to run on a dirty tree, then commit, tag and push.
+Both refuse to run on a dirty tree, and both refuse to run without a changelog entry for the
+version being cut (see "What's new"), then commit, tag and push.
 
 `pubspec.yaml`'s `version: x.y.z+n` is the only place a store build's version is decided: it
 drives versionName/versionCode on Android and MARKETING_VERSION/CURRENT_PROJECT_VERSION on iOS.
@@ -918,7 +962,9 @@ Two consequences worth keeping in mind:
 - **The App Store version has to be ready before the tag, except What's New.**
   `ios/fastlane/metadata/<locale>/release_notes.txt` is the only metadata file that exists on
   disk, so deliver uploads just that field per locale and leaves title, description, keywords
-  and screenshots alone — update those two files before tagging. Everything else in the listing
+  and screenshots alone. **Those two files are generated** — `pnpm release:app` writes them
+  from the newest changelog entry, so don't edit them by hand; write the changelog entry
+  instead (see "What's new"). Everything else in the listing
   still has to already exist in App Store Connect (screenshots, description, ...), or the
   submission is rejected for incomplete metadata; the workflow log is where that shows up. On
   the very first App Store Connect version for the app there's nothing yet to attach release
@@ -933,9 +979,10 @@ For a build that should _not_ go straight out, use `fastlane internal` / `fastla
 hand instead of tagging.
 
 Neither platform's lanes push store metadata: the listings are edited in the consoles, and a lane
-that also wrote them would silently revert whatever was changed there.
-`ios/fastlane/review_information/` is the exception kept in the repo — it tells a reviewer how to
-reach demo mode, and it is pasted in by hand.
+that also wrote them would silently revert whatever was changed there. Two exceptions are kept in
+the repo: `ios/fastlane/metadata/<locale>/release_notes.txt`, which `pnpm release:app` generates
+from the changelog, and `ios/fastlane/review_information/`, which tells a reviewer how to reach
+demo mode and is pasted in by hand.
 
 **Secrets, none of which are in the repo** (all gitignored):
 

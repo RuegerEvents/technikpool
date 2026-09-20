@@ -181,6 +181,22 @@ class SEn extends S {
   String get diagnosticsEmpty => 'Nothing received yet.';
 
   @override
+  String get whatsNew => 'What\'s new';
+
+  @override
+  String versionLabel(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String whatsNewIn(String version) {
+    return 'What\'s new in $version';
+  }
+
+  @override
+  String get dismiss => 'Dismiss';
+
+  @override
   String get useThisPair => 'Use these values';
 
   @override

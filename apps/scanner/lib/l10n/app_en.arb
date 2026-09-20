@@ -79,6 +79,22 @@
   "diagnostics": "Diagnostics",
   "diagnosticsHint": "Pull the trigger. Every broadcast received shows up here with all its extras.",
   "diagnosticsEmpty": "Nothing received yet.",
+  "whatsNew": "What's new",
+  "versionLabel": "Version {version}",
+  "@versionLabel": {
+    "description": "Heads a changelog entry, and names the running version under Settings.",
+    "placeholders": {
+      "version": { "type": "String", "example": "1.3.0" }
+    }
+  },
+  "whatsNewIn": "What's new in {version}",
+  "@whatsNewIn": {
+    "description": "The banner on the home screen after an update, tapped to open the changelog.",
+    "placeholders": {
+      "version": { "type": "String", "example": "1.3.0" }
+    }
+  },
+  "dismiss": "Dismiss",
   "useThisPair": "Use these values",
   "language": "Language",
   "languageSystem": "System language",

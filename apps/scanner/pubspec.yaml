@@ -86,6 +86,13 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # The release history behind Settings › What's new, and the source the App
+  # Store's "What's New" text is generated from — see scripts/release-app.mjs.
+  # An asset rather than a Dart file so the release script can read and check it
+  # without parsing Dart, the same way the web app's changelog is plain JSON.
+  assets:
+    - assets/changelog.json
+
   # The web app's typeface, bundled rather than fetched: these devices work in
   # a warehouse and cannot rely on a network at launch. Static instances, not
   # the variable font — Flutter does not map `fontWeight` onto a variable axis

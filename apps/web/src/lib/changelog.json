@@ -1,0 +1,140 @@
+[
+	{
+		"version": "0.14.0",
+		"date": "2026-09-20",
+		"en": [
+			"What's new: this page. Every release is listed here, the newest one is repeated on the dashboard, and a dot on the user menu marks a version you have not read yet."
+		],
+		"de": [
+			"Was ist neu: diese Seite. Jede Version steht hier, die neueste steht zusätzlich auf dem Dashboard, und ein Punkt am Benutzermenü markiert eine noch ungelesene Version."
+		]
+	},
+	{
+		"version": "0.13.1",
+		"date": "2026-09-20",
+		"en": [
+			"System admins can filter the device list by any organization.",
+			"The calendar opens on today, and colours each bar by the organization that owns it."
+		],
+		"de": [
+			"System-Admins können die Geräteliste nach jeder Organisation filtern.",
+			"Der Kalender öffnet auf dem heutigen Tag und färbt jeden Balken nach der Organisation, der er gehört."
+		]
+	},
+	{
+		"version": "0.13.0",
+		"date": "2026-09-19",
+		"en": [
+			"Star a home organization — the device list opens on it.",
+			"Offer and customer pickers list only the organizations you may work in.",
+			"The viewer role is split in two: a device viewer sees the equipment and nothing else."
+		],
+		"de": [
+			"Markiere eine Heim-Organisation — die Geräteliste öffnet auf ihr.",
+			"Angebots- und Kundenauswahl zeigen nur noch die eigenen Organisationen.",
+			"Die Betrachter-Rolle ist geteilt: Ein Geräte-Betrachter sieht nur die Technik, sonst nichts."
+		]
+	},
+	{
+		"version": "0.12.0",
+		"date": "2026-09-19",
+		"en": [
+			"Device and bundle pages lead with a picture and the facts instead of a form full of disabled fields.",
+			"Cancel a production with a reason, and reopen it later.",
+			"Record the connectors built into a device, on a product page of its own.",
+			"Checking a device out to a location updates the bundle view without a reload."
+		],
+		"de": [
+			"Geräte- und Bundle-Seiten beginnen mit Bild und Eckdaten statt mit einem Formular voller gesperrter Felder.",
+			"Produktionen lassen sich mit Begründung absagen und später wieder öffnen.",
+			"Die fest verbauten Stecker eines Geräts stehen auf einer eigenen Produktseite.",
+			"Ein Checkout an einen Standort aktualisiert die Bundle-Ansicht ohne Neuladen."
+		]
+	},
+	{
+		"version": "0.11.1",
+		"date": "2026-09-19",
+		"en": [
+			"An unsaved pasted photo no longer follows you to the next product.",
+			"Kit badges render again in the delivery note.",
+			"A production that ends today no longer counts as past."
+		],
+		"de": [
+			"Ein eingefügtes, ungespeichertes Foto wandert nicht mehr zum nächsten Produkt mit.",
+			"Kit-Badges erscheinen wieder im Lieferschein.",
+			"Eine Produktion, die heute endet, gilt nicht mehr als vergangen."
+		]
+	},
+	{
+		"version": "0.11.0",
+		"date": "2026-09-19",
+		"en": [
+			"An account without an organization lands on an explanation, and can create one.",
+			"Adding a cable warns you when the catalog already holds the same one."
+		],
+		"de": [
+			"Ein Konto ohne Organisation landet auf einer Erklärung und kann selbst eine anlegen.",
+			"Beim Anlegen eines Kabels wird gewarnt, wenn der Katalog dasselbe bereits führt."
+		]
+	},
+	{
+		"version": "0.10.0",
+		"date": "2026-09-18",
+		"en": [
+			"Software licenses: units are booked and checked out like any other asset, and carry sealed credentials that are revealed only on request.",
+			"The delivery note is a PDF, with pictures.",
+			"Take over equipment from another production.",
+			"Step through the products that still lack a price.",
+			"Pick an existing address instead of retyping it.",
+			"Expanded rows in the device list keep the table's columns, and say where each unit is.",
+			"Sign-up is invitation-only, products have an owner, and catalog changes can be reverted.",
+			"Offers, invoices and productions are scoped to the roles allowed to see them."
+		],
+		"de": [
+			"Software-Lizenzen: Einheiten werden gebucht und ausgegeben wie jedes andere Gerät und tragen versiegelte Zugangsdaten, die nur auf Anfrage sichtbar werden.",
+			"Der Lieferschein ist ein PDF, mit Bildern.",
+			"Technik von einer anderen Produktion übernehmen.",
+			"Der Reihe nach durch die Produkte gehen, denen noch ein Preis fehlt.",
+			"Eine vorhandene Adresse auswählen, statt sie erneut zu tippen.",
+			"Aufgeklappte Zeilen der Geräteliste behalten die Spalten der Tabelle und nennen den Standort jeder Einheit.",
+			"Registrierung nur noch auf Einladung, Produkte haben einen Besitzer, und Katalogänderungen lassen sich zurücknehmen.",
+			"Angebote, Rechnungen und Produktionen sehen nur noch die Rollen, die sie sehen dürfen."
+		]
+	},
+	{
+		"version": "0.9.0",
+		"date": "2026-09-17",
+		"en": [
+			"Every page is on screen before its data arrives.",
+			"Every case of a type is held to the same contents.",
+			"Duplicate a bundle, from stock or newly built.",
+			"Change your name, email and password from your profile.",
+			"The four org roles are a ladder with one gate.",
+			"Units held back from planning can be marked unavailable.",
+			"Every server failure carries a code the client translates, so errors read in your language."
+		],
+		"de": [
+			"Jede Seite steht auf dem Bildschirm, bevor ihre Daten da sind.",
+			"Jedes Case einer Bauart wird auf denselben Inhalt verpflichtet.",
+			"Ein Bundle duplizieren — aus dem Bestand oder neu gebaut.",
+			"Name, E-Mail und Passwort lassen sich im Profil ändern.",
+			"Die vier Organisationsrollen sind eine Leiter mit einer einzigen Schranke.",
+			"Einheiten, die nicht verplant werden sollen, lassen sich als nicht verfügbar kennzeichnen.",
+			"Jeder Serverfehler trägt einen Code, den der Client übersetzt — Fehler erscheinen in der eingestellten Sprache."
+		]
+	},
+	{
+		"version": "0.8.0",
+		"date": "2026-09-16",
+		"en": [
+			"Every page is usable on a phone.",
+			"Readable event labels and true month boundaries in the calendar's day and week views.",
+			"Line breaks are kept in the PDF intro and closing text."
+		],
+		"de": [
+			"Jede Seite ist auf dem Telefon bedienbar.",
+			"Lesbare Termintitel und echte Monatsgrenzen in der Tages- und Wochenansicht des Kalenders.",
+			"Zeilenumbrüche bleiben im Einleitungs- und Schlusstext des PDFs erhalten."
+		]
+	}
+]

@@ -18,6 +18,7 @@ const _kScannerConfig = 'scanner_config';
 const _kScanMode = 'scan_mode';
 const _kHardwareSeen = 'hardware_seen';
 const _kLocale = 'locale';
+const _kSeenVersion = 'seen_version';
 
 final storageProvider = Provider((_) => const FlutterSecureStorage());
 
@@ -213,6 +214,29 @@ class LocaleNotifier extends AsyncNotifier<Locale?> {
 }
 
 final localeProvider = AsyncNotifierProvider<LocaleNotifier, Locale?>(LocaleNotifier.new);
+
+/// The newest changelog version this device has already been shown, or null on
+/// an install that has never seen the banner.
+///
+/// A version string rather than a flag: the point is not "has it been
+/// dismissed" but "which release was it dismissed for", so the next update
+/// announces itself without anything having to reset this.
+class SeenVersionNotifier extends AsyncNotifier<String?> {
+  FlutterSecureStorage get _storage => ref.read(storageProvider);
+
+  @override
+  Future<String?> build() => _storage.read(key: _kSeenVersion);
+
+  Future<void> save(String version) async {
+    if (state.value == version) return;
+    state = AsyncData(version);
+    await _storage.write(key: _kSeenVersion, value: version);
+  }
+}
+
+final seenVersionProvider = AsyncNotifierProvider<SeenVersionNotifier, String?>(
+  SeenVersionNotifier.new,
+);
 
 /// What this device calls itself, so a known PDA model can be trigger-first
 /// from first launch instead of from first scan.

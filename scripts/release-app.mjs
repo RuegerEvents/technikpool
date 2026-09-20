@@ -69,6 +69,54 @@ if (arg === 'build') {
 	}
 }
 
+// The changelog is the single source for both "What's new" in the app and the
+// store's own release notes, so it is checked before anything is written. The
+// newest entry is also the version the app shows under Settings, which is why
+// it has to be the *first* one rather than merely present.
+const changelogPath = path.join(repoRoot, 'apps', 'scanner', 'assets', 'changelog.json');
+const changelog = JSON.parse(fs.readFileSync(changelogPath, 'utf8'));
+const latest = changelog[0];
+if (latest?.version !== nextVersion) {
+	fail(
+		`apps/scanner/assets/changelog.json starts with ${latest?.version ?? 'nothing'}, not ${nextVersion}.\n` +
+			`Add an entry for ${nextVersion} at the top, in English and German, then release again.`
+	);
+}
+
+// deliver uploads whatever it finds in metadata/<locale>/release_notes.txt, and
+// those used to be written by hand — two places saying what changed, drifting
+// the moment one of them was forgotten. They are generated from the changelog
+// now, so the App Store and the app cannot disagree. Rendered here but written
+// further down: every check runs before the first file is touched, so a refusal
+// leaves the tree as clean as it found it.
+const STORE_LOCALES = { 'en-US': 'en', 'de-DE': 'de' };
+const releaseNotes = Object.entries(STORE_LOCALES).map(([storeLocale, language]) => {
+	const notes = latest[language];
+	if (!Array.isArray(notes) || notes.length === 0) {
+		fail(`Changelog entry ${nextVersion} has no "${language}" notes.`);
+	}
+	const text = notes.map((note) => `• ${note}`).join('\n') + '\n';
+	// App Store Connect caps What's New at 4000 characters and rejects the
+	// submission rather than truncating.
+	if (text.length > 4000) {
+		fail(`Release notes for ${storeLocale} are ${text.length} characters; the limit is 4000.`);
+	}
+	const file = path.join(
+		repoRoot,
+		'apps',
+		'scanner',
+		'ios',
+		'fastlane',
+		'metadata',
+		storeLocale,
+		'release_notes.txt'
+	);
+	if (!fs.existsSync(path.dirname(file))) {
+		fail(`No metadata directory for ${storeLocale} at ${path.relative(repoRoot, file)}`);
+	}
+	return { file, text };
+});
+
 const nextBuild = currentBuild + 1;
 const tag = `scanner-v${nextVersion}`;
 
@@ -79,8 +127,9 @@ if (arg !== 'build' && runCapture(`git tag --list ${tag}`).length > 0) {
 console.log(`Releasing ${tag} (${currentVersion}+${currentBuild} → ${nextVersion}+${nextBuild})`);
 
 fs.writeFileSync(pubspecPath, pubspec.replace(match[0], `version: ${nextVersion}+${nextBuild}`));
+for (const { file, text } of releaseNotes) fs.writeFileSync(file, text);
 
-run('git add apps/scanner/pubspec.yaml');
+run('git add apps/scanner/pubspec.yaml apps/scanner/ios/fastlane/metadata');
 run(`git commit -m "chore(release): ${tag} (build ${nextBuild})"`);
 // A re-cut of the same version would collide with the existing tag, so move it.
 run(arg === 'build' ? `git tag -f ${tag}` : `git tag ${tag}`);

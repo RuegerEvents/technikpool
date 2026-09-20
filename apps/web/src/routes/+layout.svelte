@@ -29,6 +29,7 @@
 		Tags,
 		Wrench
 	} from '@lucide/svelte';
+	import { currentVersion } from '$lib/changelog';
 
 	let { data, children } = $props();
 
@@ -59,6 +60,20 @@
 	}
 
 	let locale = $derived(data.locale ?? 'de');
+
+	// A dot on the user menu until this browser has opened /whats-new for the
+	// version it is running. Per-browser like the theme and the language, because
+	// there is nothing here worth a column on the user: the worst a cleared
+	// localStorage can do is show one release twice.
+	const SEEN_VERSION_KEY = 'whats-new-seen';
+	let seenVersion = $state(browser ? localStorage.getItem(SEEN_VERSION_KEY) : currentVersion);
+	let hasUnseenRelease = $derived(seenVersion !== currentVersion);
+
+	$effect(() => {
+		if (page.url.pathname !== '/whats-new') return;
+		localStorage.setItem(SEEN_VERSION_KEY, currentVersion);
+		seenVersion = currentVersion;
+	});
 
 	function switchLocale(newLocale: string) {
 		document.cookie = `locale=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
@@ -623,6 +638,30 @@
 											/>
 										</svg>
 										Organizations
+									</DropdownMenu.Item>
+									<DropdownMenu.Item
+										onSelect={() => goto(resolve('/whats-new'))}
+										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="14"
+											height="14"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2"
+											stroke-linecap="round"
+											stroke-linejoin="round"
+										>
+											<path
+												d="M11.5 3.2a.5.5 0 0 1 1 0l1.6 5.3a2 2 0 0 0 1.4 1.4l5.3 1.6a.5.5 0 0 1 0 1l-5.3 1.6a2 2 0 0 0-1.4 1.4l-1.6 5.3a.5.5 0 0 1-1 0l-1.6-5.3a2 2 0 0 0-1.4-1.4l-5.3-1.6a.5.5 0 0 1 0-1l5.3-1.6a2 2 0 0 0 1.4-1.4z"
+											/>
+										</svg>
+										<span class="flex-1">What's new</span>
+										{#if hasUnseenRelease}
+											<span class="h-1.5 w-1.5 shrink-0 rounded-full bg-primary"></span>
+										{/if}
 									</DropdownMenu.Item>
 									<DropdownMenu.Separator class="my-1 h-px bg-border" />
 									<DropdownMenu.Item

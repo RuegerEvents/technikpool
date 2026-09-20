@@ -1,0 +1,58 @@
+[
+  {
+    "version": "1.3.0",
+    "date": "2026-09-20",
+    "en": [
+      "Looms: a cable with several ways shows what runs through it on the lookup screen — how many ways of each kind, and what is on their ends.",
+      "A scanned code that is nobody's asset tag is matched against serial numbers as well, as long as it is unique, and stays visible in the search field.",
+      "Every booking in the history is labelled again.",
+      "What's new: Settings now lists what each version brought, and the home screen says so after an update."
+    ],
+    "de": [
+      "Looms: Kabel mit mehreren Wegen zeigen beim Nachschlagen, was durch sie läuft — wie viele Wege welcher Art und was an ihren Enden sitzt.",
+      "Ein gescannter Code, den kein Inventaraufkleber trägt, wird jetzt auch über die Seriennummer gefunden, solange sie eindeutig ist, und steht sichtbar im Suchfeld.",
+      "Jede Buchung im Verlauf hat wieder ihre eigene Beschriftung.",
+      "Was ist neu: Die Einstellungen listen jetzt auf, was jede Version gebracht hat, und der Startbildschirm weist nach einem Update darauf hin."
+    ]
+  },
+  {
+    "version": "1.2.1",
+    "date": "2026-09-17",
+    "en": ["Units held back from planning show as unavailable."],
+    "de": ["Einheiten, die nicht verplant werden sollen, erscheinen als nicht verfügbar."]
+  },
+  {
+    "version": "1.2.0",
+    "date": "2026-09-08",
+    "en": [
+      "Scanning an asset tag on the pairing screen says so, instead of failing without a reason.",
+      "The demo can be paired into by QR code."
+    ],
+    "de": [
+      "Wird beim Verbinden ein Inventaraufkleber gescannt, wird das gesagt, statt ohne Begründung zu scheitern.",
+      "Die Demo lässt sich per QR-Code betreten."
+    ]
+  },
+  {
+    "version": "1.1.0",
+    "date": "2026-09-04",
+    "en": [
+      "Cables are structured products, with a catalogue of connectors behind them.",
+      "Accessories can hang off a unit and travel with it."
+    ],
+    "de": [
+      "Kabel sind strukturierte Produkte, mit einem Steckerkatalog dahinter.",
+      "Zubehör kann an einer Einheit hängen und reist mit ihr mit."
+    ]
+  },
+  {
+    "version": "1.0.0",
+    "date": "2026-08-29",
+    "en": [
+      "The first release: pair with a server, scan with the trigger or the camera, look units up, check them out and take inventory."
+    ],
+    "de": [
+      "Die erste Version: mit einem Server verbinden, mit Auslöser oder Kamera scannen, Einheiten nachschlagen, ausgeben und Inventur machen."
+    ]
+  }
+]

@@ -1,3 +1,4 @@
-Looms: Kabel mit mehreren Wegen zeigen beim Nachschlagen, was durch sie läuft — wie viele Wege welcher Art und was an ihren Enden sitzt.
-
-Ein gescannter Code, den kein Inventaraufkleber trägt, wird jetzt auch über die Seriennummer gefunden, solange sie eindeutig ist, und steht sichtbar im Suchfeld. Jede Buchung im Verlauf hat wieder ihre eigene Beschriftung.
+• Looms: Kabel mit mehreren Wegen zeigen beim Nachschlagen, was durch sie läuft — wie viele Wege welcher Art und was an ihren Enden sitzt.
+• Ein gescannter Code, den kein Inventaraufkleber trägt, wird jetzt auch über die Seriennummer gefunden, solange sie eindeutig ist, und steht sichtbar im Suchfeld.
+• Jede Buchung im Verlauf hat wieder ihre eigene Beschriftung.
+• Was ist neu: Die Einstellungen listen jetzt auf, was jede Version gebracht hat, und der Startbildschirm weist nach einem Update darauf hin.

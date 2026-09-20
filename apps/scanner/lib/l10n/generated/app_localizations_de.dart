@@ -181,6 +181,22 @@ class SDe extends S {
   String get diagnosticsEmpty => 'Noch nichts empfangen.';
 
   @override
+  String get whatsNew => 'Was ist neu';
+
+  @override
+  String versionLabel(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String whatsNewIn(String version) {
+    return 'Was ist neu in $version';
+  }
+
+  @override
+  String get dismiss => 'Ausblenden';
+
+  @override
   String get useThisPair => 'Diese Werte übernehmen';
 
   @override

@@ -8797,3 +8797,33 @@ msgstr "Accessories that always come with the device and are not rented out sepa
 #: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
 msgid "A set of devices that is physically packed together and usually rented that way (for example 4 fixtures in one shared case). A single fixture can still be rented on its own. Its connecting cable would come along anyway, so that cable is an accessory."
 msgstr "A set of devices that is physically packed together and usually rented that way (for example 4 fixtures in one shared case). A single fixture can still be rented on its own. Its connecting cable would come along anyway, so that cable is an accessory."
+
+#: src/routes/+layout.svelte
+#: src/routes/+page.svelte
+#: src/routes/whats-new/+page.svelte
+msgid "What's new"
+msgstr "What's new"
+
+#: src/routes/whats-new/+page.svelte
+msgid "What's new | Technikpool"
+msgstr "What's new | Technikpool"
+
+#. 0: currentVersion
+#: src/routes/whats-new/+page.svelte
+msgid "Everything that changed in Technikpool. You are running version {0}."
+msgstr "Everything that changed in Technikpool. You are running version {0}."
+
+#. 0: latestRelease.version
+#. 0: release.version
+#: src/routes/+page.svelte
+#: src/routes/whats-new/+page.svelte
+msgid "Version {0}"
+msgstr "Version {0}"
+
+#: src/routes/whats-new/+page.svelte
+msgid "The scanner app keeps its own list, under Settings."
+msgstr "The scanner app keeps its own list, under Settings."
+
+#: src/routes/+page.svelte
+msgid "All versions <0/>"
+msgstr "All versions <0/>"
