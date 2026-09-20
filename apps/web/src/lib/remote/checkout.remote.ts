@@ -71,6 +71,7 @@ async function refreshAffected(userId: string, affected: AffectedRecords) {
  */
 const ERROR_CODES: Record<CheckoutError['code'], AppErrorCode> = {
 	asset_not_found: 'asset_not_found',
+	serial_ambiguous: 'asset_serial_ambiguous',
 	forbidden: 'unauthorized',
 	wrong_organization: 'asset_wrong_organization',
 	asset_retired: 'asset_retired_no_booking',
@@ -80,6 +81,7 @@ const ERROR_CODES: Record<CheckoutError['code'], AppErrorCode> = {
 
 const STATUS_BY_CODE: Record<CheckoutError['code'], number> = {
 	asset_not_found: 404,
+	serial_ambiguous: 409,
 	forbidden: 403,
 	wrong_organization: 403,
 	asset_retired: 409,

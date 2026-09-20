@@ -8,6 +8,7 @@ const TARGET_TYPES = ['location', 'production'] as const;
 /** HTTP status per service-level failure. Anything else stays a 500. */
 const STATUS_BY_CODE: Record<CheckoutError['code'], number> = {
 	asset_not_found: 404,
+	serial_ambiguous: 409,
 	forbidden: 403,
 	wrong_organization: 403,
 	asset_retired: 409,

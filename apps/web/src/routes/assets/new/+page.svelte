@@ -3,6 +3,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Modal } from '$lib/components/ui/modal';
 	import { Input } from '$lib/components/ui/input';
+	import SerialNumberWarning from '$lib/components/SerialNumberWarning.svelte';
 	import { Label } from '$lib/components/ui/label';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { ImageUpload } from '$lib/components/ui/image-upload';
@@ -470,6 +471,7 @@
 														placeholder="S/N 123456"
 														class="h-8 text-sm"
 													/>
+													<SerialNumberWarning serialNumber={item.serialNumber} />
 												</td>
 											</tr>
 										{/each}
@@ -493,6 +495,7 @@
 							<div class="col-span-2 space-y-2">
 								<Label for="serial-0">Serial Number</Label>
 								<Input id="serial-0" bind:value={items[0].serialNumber} placeholder="S/N 123456" />
+								<SerialNumberWarning serialNumber={items[0].serialNumber} />
 							</div>
 						</div>
 					{/if}

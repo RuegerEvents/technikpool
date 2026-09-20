@@ -302,7 +302,7 @@ class SEn extends S {
   String get retry => 'Try again';
 
   @override
-  String get manualEntry => 'Enter label by hand';
+  String get manualEntry => 'Enter label or serial number by hand';
 
   @override
   String get reset => 'Reset';
@@ -314,6 +314,10 @@ class SEn extends S {
 
   @override
   String get errorAssetNotFound => 'This label is unknown.';
+
+  @override
+  String get errorSerialAmbiguous =>
+      'Several devices share this serial number. Scan the asset tag instead.';
 
   @override
   String get errorForbidden => 'No access to this item.';

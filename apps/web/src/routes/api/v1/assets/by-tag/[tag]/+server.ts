@@ -9,6 +9,7 @@ import {
 	visibleProductionName
 } from '$lib/server/services/access';
 import { toAsset, toAssetTransaction, toProduction } from '$lib/server/services/api-mappers';
+import { resolveScannedCode } from '$lib/server/services/asset-lookup';
 
 const HISTORY_LIMIT = 20;
 
@@ -16,18 +17,31 @@ export const GET: RequestHandler = ({ locals, params }) =>
 	handleApi(async () => {
 		const user = requireApiUser(locals);
 
-		const asset = await prisma.asset.findFirst({
-			where: { assetTag: params.tag },
+		// An asset tag, or a serial number that picks out exactly one unit —
+		// see `resolveScannedCode` for why the two are not treated alike.
+		const match = await resolveScannedCode(user.id, params.tag);
+
+		if (match.kind === 'ambiguous') {
+			throw new ApiResponse(
+				apiError(
+					409,
+					'serial_ambiguous',
+					`Serial number "${params.tag}" is on more than one unit — scan the asset tag instead`
+				)
+			);
+		}
+		if (match.kind === 'not_found') {
+			throw new ApiResponse(apiError(404, 'asset_not_found', `Tag "${params.tag}" not found`));
+		}
+
+		const asset = await prisma.asset.findUniqueOrThrow({
+			where: { id: match.assetId },
 			include: {
 				product: { include: { manufacturer: true, category: true } },
 				location: { include: { address: true, organization: true } },
 				organization: true
 			}
 		});
-
-		if (!asset) {
-			throw new ApiResponse(apiError(404, 'asset_not_found', `Tag "${params.tag}" not found`));
-		}
 
 		const admin = await isSystemAdmin(user.id);
 		const orgIds = await userOrgIds(user.id);

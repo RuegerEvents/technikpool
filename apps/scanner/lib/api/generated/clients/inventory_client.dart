@@ -60,9 +60,16 @@ abstract class InventoryClient {
     @Query('cursor') String? cursor,
   });
 
-  /// Look up one asset by its printed tag.
+  /// Look up one asset by its printed tag or serial number.
   ///
-  /// [tag] - The asset tag as encoded in the sticker's barcode.
+  /// The asset tag is unique and always wins. Failing that the code is.
+  /// matched, case-insensitively, against serial numbers among the assets.
+  /// the caller can already see — and only resolves when exactly one unit.
+  /// carries it. Two units sharing a serial answer `409 serial_ambiguous`.
+  /// rather than guessing between them.
+  ///
+  /// [tag] - The asset tag as encoded in the sticker's barcode, or a serial.
+  /// number that belongs to exactly one unit.
   @GET('/api/v1/assets/by-tag/{tag}')
   Future<AssetDetail> getAssetByTag({
     @Path('tag') required String tag,

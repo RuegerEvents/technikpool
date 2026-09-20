@@ -7,6 +7,7 @@ import {
 } from './access';
 import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '$lib/asset-status';
 import { withAccessories } from './accessories';
+import { resolveScannedCode } from './asset-lookup';
 
 // Scan/checkout behaviour lives here rather than in checkout.remote.ts so the
 // /api/v1 endpoints and the web UI share one implementation. These functions
@@ -71,6 +72,7 @@ export class CheckoutError extends Error {
 	constructor(
 		readonly code:
 			| 'asset_not_found'
+			| 'serial_ambiguous'
 			| 'forbidden'
 			| 'wrong_organization'
 			| 'asset_retired'
@@ -160,17 +162,26 @@ export async function performScan(
 	userId: string,
 	input: ScanInput
 ): Promise<{ result: ScanResult; affected: AffectedRecords }> {
-	const asset = await prisma.asset.findFirst({
-		where: { assetTag: input.assetTag },
+	const match = await resolveScannedCode(userId, input.assetTag);
+
+	if (match.kind === 'ambiguous') {
+		throw new CheckoutError(
+			'serial_ambiguous',
+			`Serial number "${input.assetTag}" is on more than one unit — scan the asset tag instead`,
+			input.assetTag
+		);
+	}
+	if (match.kind === 'not_found') {
+		throw new CheckoutError('asset_not_found', `Tag "${input.assetTag}" not found`, input.assetTag);
+	}
+
+	const asset = await prisma.asset.findUniqueOrThrow({
+		where: { id: match.assetId },
 		include: {
 			product: { include: { manufacturer: true } },
 			location: true
 		}
 	});
-
-	if (!asset) {
-		throw new CheckoutError('asset_not_found', `Tag "${input.assetTag}" not found`, input.assetTag);
-	}
 
 	const systemAdmin = await assertAssetAccess(userId, asset.organizationId);
 

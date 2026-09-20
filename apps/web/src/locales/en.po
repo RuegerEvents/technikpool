@@ -1737,9 +1737,8 @@ msgstr "End Session"
 msgid "Processing…"
 msgstr "Processing…"
 
-#: src/routes/checkout/+page.svelte
-msgid "Type or scan asset tag…"
-msgstr "Type or scan asset tag…"
+#~ msgid "Type or scan asset tag…"
+#~ msgstr "Type or scan asset tag…"
 
 #: src/routes/checkout/+page.svelte
 msgid "Submit"
@@ -8433,3 +8432,17 @@ msgstr "Make home organization — lists open on it"
 #: src/routes/assets/+page.svelte
 msgid "Other Organizations"
 msgstr "Other Organizations"
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "Serial number \"{0}\" is on more than one unit. Scan the asset tag instead."
+msgstr "Serial number \"{0}\" is on more than one unit. Scan the asset tag instead."
+
+#. 0: names
+#: src/lib/components/SerialNumberWarning.svelte
+msgid "This serial number is already on {0}. Scanning it will no longer find a single unit."
+msgstr "This serial number is already on {0}. Scanning it will no longer find a single unit."
+
+#: src/routes/checkout/+page.svelte
+msgid "Type or scan asset tag or serial number…"
+msgstr "Type or scan asset tag or serial number…"

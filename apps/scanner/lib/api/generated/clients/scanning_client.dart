@@ -19,6 +19,10 @@ abstract class ScanningClient {
   /// Assigning an asset to a location also returns it from any production it.
   /// is currently checked out to — putting kit back on the shelf is what.
   /// "returned" means in practice.
+  ///
+  /// `assetTag` also accepts a serial number, on the same terms as.
+  /// `getAssetByTag`: the printed tag wins, and a serial resolves only when.
+  /// exactly one visible unit carries it.
   @POST('/api/v1/scans')
   Future<ScanResult> createScan({
     @Body() required ScanRequest body,

@@ -105,4 +105,63 @@ void main() {
     expect(detail.currentProduction, isNull);
     expect(detail.location.id, shelf.id);
   });
+
+  // A serial number is a fallback for a sticker that has worn off, and it holds
+  // only while it picks out one unit — see `resolveScannedCode` on the server.
+  test('a serial number resolves when exactly one unit carries it', () async {
+    final detail = await api.inventory.getAssetByTag(tag: 'MAC-0041');
+    expect(detail.assetTag, '40000001');
+
+    // Case and stray whitespace come off a worn label either way.
+    expect(
+      (await api.inventory.getAssetByTag(tag: '  mac-0041 ')).assetTag,
+      '40000001',
+    );
+  });
+
+  test('a serial number books the unit it identifies', () async {
+    final shelf = (await api.inventory.listLocations()).first;
+    final result = await api.scanning.createScan(
+      body: ScanRequest(
+        assetTag: 'MAC-0043',
+        targetType: ScanRequestTargetType.location,
+        targetId: shelf.id,
+      ),
+    );
+    expect(result.asset.assetTag, '40000003');
+  });
+
+  test('a serial number on two units resolves to neither', () async {
+    final assets = DemoData.assets();
+    final twins = [
+      assets[0],
+      Asset(
+        id: 'asset_demo_twin',
+        assetTag: '40000099',
+        serialNumber: assets[0].serialNumber,
+        status: assets[0].status,
+        product: assets[0].product,
+        location: assets[0].location,
+        organization: assets[0].organization,
+      ),
+    ];
+    final ambiguous = demoApiClient(DemoBackend(assets: twins));
+
+    await expectLater(
+      ambiguous.inventory.getAssetByTag(tag: assets[0].serialNumber!),
+      throwsA(
+        isA<Object>().having(
+          (e) => (unwrapError(e) as ApiException).code,
+          'code',
+          'serial_ambiguous',
+        ),
+      ),
+    );
+
+    // The printed tag still resolves — it is what disambiguates them.
+    expect(
+      (await ambiguous.inventory.getAssetByTag(tag: '40000099')).id,
+      'asset_demo_twin',
+    );
+  });
 }

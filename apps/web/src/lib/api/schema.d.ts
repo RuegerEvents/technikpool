@@ -196,7 +196,14 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Look up one asset by its printed tag */
+        /**
+         * Look up one asset by its printed tag or serial number
+         * @description The asset tag is unique and always wins. Failing that the code is
+         *     matched, case-insensitively, against serial numbers among the assets
+         *     the caller can already see — and only resolves when exactly one unit
+         *     carries it. Two units sharing a serial answer `409 serial_ambiguous`
+         *     rather than guessing between them.
+         */
         get: operations["getAssetByTag"];
         put?: never;
         post?: never;
@@ -220,6 +227,10 @@ export interface paths {
          * @description Assigning an asset to a location also returns it from any production it
          *     is currently checked out to — putting kit back on the shelf is what
          *     "returned" means in practice.
+         *
+         *     `assetTag` also accepts a serial number, on the same terms as
+         *     `getAssetByTag`: the printed tag wins, and a serial resolves only when
+         *     exactly one visible unit carries it.
          */
         post: operations["createScan"];
         delete?: never;
@@ -437,7 +448,10 @@ export interface components {
             nextCursor: string | null;
         };
         ScanRequest: {
-            /** @description Exactly what the barcode decoded to. */
+            /**
+             * @description Exactly what the barcode decoded to — an asset tag, or a serial
+             *     number that belongs to exactly one unit.
+             */
             assetTag: string;
             /** @enum {string} */
             targetType: "location" | "production";
@@ -492,7 +506,9 @@ export interface components {
          *     decommissioned asset can no longer be booked (`asset_retired`), and a
          *     unit held back as unavailable cannot be checked out
          *     (`asset_unavailable`), and nothing is checked out to a production that
-         *     has been cancelled (`production_cancelled`).
+         *     has been cancelled (`production_cancelled`). A code that matched more
+         *     than one unit's serial number identifies nothing in particular
+         *     (`serial_ambiguous`) — the asset tag is what disambiguates it.
          */
         Conflict: {
             headers: {
@@ -762,7 +778,10 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description The asset tag as encoded in the sticker's barcode. */
+                /**
+                 * @description The asset tag as encoded in the sticker's barcode, or a serial
+                 *     number that belongs to exactly one unit.
+                 */
                 tag: string;
             };
             cookie?: never;
@@ -781,6 +800,7 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
         };
     };
     createScan: {

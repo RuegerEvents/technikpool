@@ -658,7 +658,7 @@ abstract class S {
   /// No description provided for @manualEntry.
   ///
   /// In en, this message translates to:
-  /// **'Enter label by hand'**
+  /// **'Enter label or serial number by hand'**
   String get manualEntry;
 
   /// No description provided for @reset.
@@ -678,6 +678,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'This label is unknown.'**
   String get errorAssetNotFound;
+
+  /// No description provided for @errorSerialAmbiguous.
+  ///
+  /// In en, this message translates to:
+  /// **'Several devices share this serial number. Scan the asset tag instead.'**
+  String get errorSerialAmbiguous;
 
   /// No description provided for @errorForbidden.
   ///

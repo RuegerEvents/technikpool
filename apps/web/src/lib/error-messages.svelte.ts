@@ -97,6 +97,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 		// Assets
 		case 'asset_not_found':
 			return `Tag "${p0}" not found.`;
+		case 'asset_serial_ambiguous':
+			return `Serial number "${p0}" is on more than one unit. Scan the asset tag instead.`;
 		case 'assets_not_found':
 			return 'No assets found.';
 		case 'asset_tag_prefix_mismatch':

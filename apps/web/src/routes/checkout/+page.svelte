@@ -379,7 +379,7 @@
 					<form class="flex gap-2" onsubmit={handleTextSubmit}>
 						<Input
 							type="text"
-							placeholder="Type or scan asset tag…"
+							placeholder="Type or scan asset tag or serial number…"
 							bind:value={textInput}
 							disabled={processing}
 							autofocus

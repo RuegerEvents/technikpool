@@ -128,7 +128,7 @@
   "actionDeleted": "Deleted",
   "actionInspected": "Inspected",
   "retry": "Try again",
-  "manualEntry": "Enter label by hand",
+  "manualEntry": "Enter label or serial number by hand",
   "reset": "Reset",
   "returnedFrom": "returned from {names}",
   "@returnedFrom": {
@@ -141,6 +141,7 @@
     }
   },
   "errorAssetNotFound": "This label is unknown.",
+  "errorSerialAmbiguous": "Several devices share this serial number. Scan the asset tag instead.",
   "errorForbidden": "No access to this item.",
   "errorWrongOrganization": "That location belongs to a different organisation.",
   "errorAssetRetired": "This device has been sold or decommissioned and can no longer be booked.",

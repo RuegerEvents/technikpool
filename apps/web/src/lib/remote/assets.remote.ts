@@ -20,6 +20,7 @@ import {
 	writableOrgIds
 } from '$lib/server/services/access';
 import { productControl } from '$lib/server/services/product-control';
+import { assetsWithSerial } from '$lib/server/services/asset-lookup';
 import { fieldChanges, logCatalogChange } from '$lib/server/services/catalog-log';
 import {
 	ACTIVE_ASSET_WHERE,
@@ -4617,5 +4618,25 @@ export const regenerateGeneratedPreview = command(
 			include: { product: true, accessories: { include: { product: true } } }
 		});
 		await ensureAssetImage(asset, true);
+	}
+);
+
+/**
+ * Which other units already carry this serial number, for the warning the asset
+ * forms show while it is being typed. Scanning resolves a serial only when it
+ * belongs to exactly one unit (see `resolveScannedCode`), so a duplicate is
+ * worth saying out loud — but it is a warning, not a refusal: two devices
+ * really do sometimes arrive with the same number on the label, and the asset
+ * tag is what the system identifies a unit by regardless.
+ */
+export const getSerialNumberUse = query(
+	v.object({
+		serialNumber: v.string(),
+		/** The unit being edited, which is not a duplicate of itself. */
+		excludeAssetId: v.optional(v.string())
+	}),
+	async ({ serialNumber, excludeAssetId }) => {
+		const user = await requireAuth();
+		return await assetsWithSerial(user.id, serialNumber, { excludeAssetId, take: 5 });
 	}
 );

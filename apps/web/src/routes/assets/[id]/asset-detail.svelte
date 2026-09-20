@@ -12,6 +12,7 @@
 	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import { OrgBadge } from '$lib/components/ui/org-badge';
 	import { Fact } from '$lib/components/ui/fact';
+	import SerialNumberWarning from '$lib/components/SerialNumberWarning.svelte';
 	import {
 		Activity,
 		Building2,
@@ -1195,6 +1196,7 @@
 			<div class="space-y-2">
 				<Label for="serial">Serial Number</Label>
 				<Input id="serial" bind:value={assetDraft.serialNumber} disabled={retired} />
+				<SerialNumberWarning serialNumber={assetDraft.serialNumber} excludeAssetId={asset.id} />
 			</div>
 			<div class="space-y-2">
 				<Label for="tag">Asset Tag</Label>

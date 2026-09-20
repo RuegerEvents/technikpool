@@ -57,6 +57,7 @@ export type AppErrorCode =
 	| 'connector_not_found'
 	// Assets
 	| 'asset_not_found'
+	| 'asset_serial_ambiguous'
 	| 'assets_not_found'
 	| 'asset_tag_prefix_mismatch'
 	| 'asset_retired_status_only'

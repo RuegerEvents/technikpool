@@ -144,6 +144,7 @@ String describeError(S l10n, Object error) {
 
   return switch (err.code) {
     'asset_not_found' => l10n.errorAssetNotFound,
+    'serial_ambiguous' => l10n.errorSerialAmbiguous,
     'forbidden' => l10n.errorForbidden,
     'wrong_organization' => l10n.errorWrongOrganization,
     'asset_retired' => l10n.errorAssetRetired,

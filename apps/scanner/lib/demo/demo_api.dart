@@ -30,7 +30,9 @@ bool isDemo(String? baseUrl) => baseUrl == demoBaseUrl;
 /// `toJson`, so a change to `openapi.yaml` breaks this at compile time instead
 /// of at review time.
 class DemoBackend {
-  DemoBackend() : _assets = DemoData.assets();
+  /// [assets] overrides the fixture warehouse, so a test can build a case the
+  /// demo itself shouldn't contain — two units sharing a serial number, say.
+  DemoBackend({List<Asset>? assets}) : _assets = assets ?? DemoData.assets();
 
   final List<Asset> _assets;
 
@@ -115,7 +117,16 @@ class DemoBackend {
   }
 
   Response<dynamic> _byTag(RequestOptions options, String tag) {
-    final asset = _find(tag);
+    final match = _resolve(tag);
+    if (match.ambiguous) {
+      return _error(
+        options,
+        409,
+        'serial_ambiguous',
+        'Serial number "$tag" is on more than one unit — scan the asset tag instead',
+      );
+    }
+    final asset = match.asset;
     if (asset == null) {
       return _error(options, 404, 'asset_not_found', 'Tag "$tag" not found');
     }
@@ -155,7 +166,16 @@ class DemoBackend {
       return _error(options, 400, 'invalid_request', 'assetTag and target are required');
     }
 
-    final asset = _find(assetTag);
+    final match = _resolve(assetTag);
+    if (match.ambiguous) {
+      return _error(
+        options,
+        409,
+        'serial_ambiguous',
+        'Serial number "$assetTag" is on more than one unit — scan the asset tag instead',
+      );
+    }
+    final asset = match.asset;
     if (asset == null) {
       return _error(options, 404, 'asset_not_found', 'Tag "$assetTag" not found');
     }
@@ -206,12 +226,24 @@ class DemoBackend {
     );
   }
 
-  Asset? _find(String tag) {
-    final wanted = tag.trim();
+  /// Mirrors `resolveScannedCode` on the server: the printed tag wins outright,
+  /// and a serial number resolves only when exactly one unit carries it. Kept in
+  /// step deliberately — a demo that resolved codes differently would be
+  /// demonstrating an app that doesn't exist.
+  ({Asset? asset, bool ambiguous}) _resolve(String code) {
+    final wanted = code.trim();
+    if (wanted.isEmpty) return (asset: null, ambiguous: false);
+
     for (final asset in _assets) {
-      if (asset.assetTag == wanted) return asset;
+      if (asset.assetTag == wanted) return (asset: asset, ambiguous: false);
     }
-    return null;
+
+    final lower = wanted.toLowerCase();
+    final bySerial = _assets
+        .where((a) => (a.serialNumber ?? '').toLowerCase() == lower)
+        .toList();
+    if (bySerial.length == 1) return (asset: bySerial.first, ambiguous: false);
+    return (asset: null, ambiguous: bySerial.length > 1);
   }
 
   void _moveTo(Asset asset, Location location) {
@@ -250,17 +282,23 @@ class DemoBackend {
   Response<dynamic> _ok(RequestOptions options, Object model) => Response(
     requestOptions: options,
     statusCode: 200,
-    data: jsonDecode(jsonEncode(model, toEncodable: (value) => (value as dynamic).toJson())),
+    data: jsonDecode(
+      jsonEncode(model, toEncodable: (value) => (value as dynamic).toJson()),
+    ),
   );
 
-  Response<dynamic> _error(RequestOptions options, int status, String code, String message) =>
-      Response(
-        requestOptions: options,
-        statusCode: status,
-        data: {
-          'error': {'code': code, 'message': message},
-        },
-      );
+  Response<dynamic> _error(
+    RequestOptions options,
+    int status,
+    String code,
+    String message,
+  ) => Response(
+    requestOptions: options,
+    statusCode: status,
+    data: {
+      'error': {'code': code, 'message': message},
+    },
+  );
 }
 
 /// An [ApiClient] wired to a [DemoBackend] instead of the network.

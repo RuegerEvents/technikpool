@@ -303,7 +303,7 @@ class SDe extends S {
   String get retry => 'Erneut versuchen';
 
   @override
-  String get manualEntry => 'Etikett manuell eingeben';
+  String get manualEntry => 'Etikett oder Seriennummer eingeben';
 
   @override
   String get reset => 'Zurücksetzen';
@@ -315,6 +315,10 @@ class SDe extends S {
 
   @override
   String get errorAssetNotFound => 'Dieses Etikett ist unbekannt.';
+
+  @override
+  String get errorSerialAmbiguous =>
+      'Mehrere Geräte haben diese Seriennummer. Bitte das Etikett scannen.';
 
   @override
   String get errorForbidden => 'Kein Zugriff auf diesen Artikel.';

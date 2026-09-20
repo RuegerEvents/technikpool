@@ -18,7 +18,9 @@ class ScanRequest {
   
   factory ScanRequest.fromJson(Map<String, Object?> json) => _$ScanRequestFromJson(json);
   
-  /// Exactly what the barcode decoded to.
+  /// Exactly what the barcode decoded to — an asset tag, or a serial.
+  /// number that belongs to exactly one unit.
+  ///
   final String assetTag;
   final ScanRequestTargetType targetType;
   final String targetId;

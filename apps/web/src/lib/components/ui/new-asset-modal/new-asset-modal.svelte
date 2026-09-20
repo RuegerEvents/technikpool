@@ -35,6 +35,7 @@
 	import { Modal } from '$lib/components/ui/modal';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import SerialNumberWarning from '$lib/components/SerialNumberWarning.svelte';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { CategorySelect } from '$lib/components/ui/category-select';
 	import { ImageUpload } from '$lib/components/ui/image-upload';
@@ -457,6 +458,7 @@
 					<div class="space-y-2">
 						<Label for="newAssetSerial">Serial number</Label>
 						<Input id="newAssetSerial" bind:value={serial} disabled={saving} />
+						<SerialNumberWarning serialNumber={serial} />
 					</div>
 				{/if}
 				{#if !noTag}
