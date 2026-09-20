@@ -245,6 +245,11 @@ export function connectorRole(
  *   is simply what an NL4 speaker cable or a USB-C lead *is*. Type and length
  *   are what anyone calls those.
  *
+ * The additional info follows the ends in the first two cases — "Schuko → C13
+ * 2,5 mm² 3 m" — because there the ends alone do not separate two leads that
+ * are genuinely different cable. In the third it already *is* the head, so
+ * saying it twice would be the only thing appending it achieved.
+ *
  * `connectors` is the catalogue, and it is what makes the middle case possible:
  * "is there another member of this family?" is a question about the pool's
  * vocabulary, not about the string. Without it the gender heuristic in
@@ -332,6 +337,13 @@ function pairHead(
 	const stated = a.cableType?.trim() ?? '';
 	const fromEnds = nameA ? connectorBase(nameA) : nameB ? connectorBase(nameB) : '';
 
+	// Where the ends are the name, the wire is still worth saying: two Schuko →
+	// C13 leads differ by nothing else, and "Schuko → C13" twice over is how a
+	// catalogue stops being able to tell them apart. It goes after the ends and
+	// before the length, so the line still reads left to right as what the cable
+	// is and then how long it is.
+	const withType = (ends: string) => (stated ? `${ends} ${stated}` : ends);
+
 	// Both ends have to be known before they can be compared at all — one end
 	// alone is no evidence of anything.
 	if (!nameA || !nameB) return stated || fromEnds;
@@ -339,10 +351,10 @@ function pairHead(
 		// Compared by family, but labelled by the name with its gender dropped.
 		// A family is a *group* name and reads like one — C13's family is
 		// "Kaltgeräte", which nobody calls a cable end. "Schuko → C13" is the cable.
-		return `${connectorBase(nameA)} → ${connectorBase(nameB)}`;
+		return withType(`${connectorBase(nameA)} → ${connectorBase(nameB)}`);
 	}
 	if (nameA.toLowerCase() === nameB.toLowerCase() && familyHasAlternatives(familyA, nameA)) {
-		return `${nameA} → ${nameB}`;
+		return withType(`${nameA} → ${nameB}`);
 	}
 	return stated || fromEnds;
 }
