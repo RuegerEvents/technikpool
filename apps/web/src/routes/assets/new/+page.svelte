@@ -86,15 +86,25 @@
 	// New product modal state. The draft is a bare ProductDraft so ProductFields
 	// can bind to it — whether the modal is open is this page's business, not
 	// the product's.
+	//
+	// A fresh object every time, and every field of it: the modal's contents live
+	// out here rather than in the Modal, so `{#if open}` tearing the form down
+	// leaves this untouched. Carrying the last product's photo, price or category
+	// into the next one is how registering two devices in a row used to put the
+	// first one's picture on the second.
+	function emptyProductDraft(): ProductDraft {
+		return {
+			name: '',
+			categoryId: '',
+			imagePath: '',
+			netPurchasePrice: undefined,
+			cable: null,
+			isLicense: false
+		};
+	}
+
 	let newProductOpen = $state(false);
-	let newProductDraft = $state<ProductDraft>({
-		name: '',
-		categoryId: '',
-		imagePath: '',
-		netPurchasePrice: undefined,
-		cable: null,
-		isLicense: false
-	});
+	let newProductDraft = $state<ProductDraft>(emptyProductDraft());
 
 	$effect(() => {
 		if (newProductDraft.categoryId) return;
@@ -115,8 +125,9 @@
 
 	function handleProductCreate(name: string) {
 		// A fresh object, not a mutation: ProductFields keys its "is the name still
-		// the derived one?" bookkeeping to the draft it was handed.
-		newProductDraft = { ...newProductDraft, name, cable: null, isLicense: false };
+		// the derived one?" bookkeeping to the draft it was handed. Only the typed
+		// name comes across; the category is filled back in by the effect above.
+		newProductDraft = { ...emptyProductDraft(), name };
 		newProductOpen = true;
 	}
 
@@ -194,6 +205,14 @@
 		reuseAccessories = false;
 		product = null;
 		pendingProduct = null;
+		// "Create another" never navigates, so nothing here is torn down and
+		// remounted the way a fresh page load would do it — every field the form
+		// owns has to be put back by hand. The draft and the untagged tick are the
+		// two that outlived it: a cable turns `noAssetTag` on for itself, and the
+		// next device would have registered without a sticker for no stated reason.
+		newProductOpen = false;
+		newProductDraft = emptyProductDraft();
+		noAssetTag = false;
 		manufacturerKey++;
 		items = Array.from({ length: quantity }, () => ({ serialNumber: '', assetTag: '' }));
 	}
