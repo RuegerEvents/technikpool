@@ -20,12 +20,30 @@ class Labels {
   /// AssetTransaction.action is free text on the server, so an unknown value
   /// falls through to the raw string rather than being hidden. An action we
   /// have no translation for is still worth showing.
+  ///
+  /// The cases below are every `type` in the web's `TransactionData` union
+  /// (apps/web/src/lib/types/asset-transaction.ts). That union is the list to
+  /// check against when one is added there — a missing case is not an error on
+  /// either side, it just surfaces as a raw `ADDED_TO_PRODUCTION` in the
+  /// history, which is how this drifted in the first place.
   static String transactionAction(S l10n, String action) => switch (action) {
     'CREATED' => l10n.actionCreated,
     'CHECKED_OUT' => l10n.actionCheckedOut,
     'RETURNED' => l10n.actionReturned,
     'LOCATION_ASSIGNED' => l10n.actionLocationAssigned,
     'UPDATED' => l10n.actionUpdated,
+    'REQUESTED' => l10n.actionRequested,
+    'ADDED_TO_PRODUCTION' => l10n.actionAddedToProduction,
+    'APPROVED' => l10n.actionApproved,
+    'DECLINED' => l10n.actionDeclined,
+    'BOOKING_CANCELLED' => l10n.actionBookingCancelled,
+    'ACCESSORY_ATTACHED' => l10n.actionAccessoryAttached,
+    'ACCESSORY_DETACHED' => l10n.actionAccessoryDetached,
+    'CREDENTIALS_SET' => l10n.actionCredentialsSet,
+    'CREDENTIALS_REMOVED' => l10n.actionCredentialsRemoved,
+    'CREDENTIALS_REVEALED' => l10n.actionCredentialsRevealed,
+    // Not in that union today; kept because the server owns the vocabulary
+    // and these cost nothing until it writes them.
     'DELETED' => l10n.actionDeleted,
     'INSPECTED' => l10n.actionInspected,
     _ => action,

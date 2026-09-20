@@ -294,6 +294,36 @@ class SDe extends S {
   String get actionUpdated => 'Geändert';
 
   @override
+  String get actionRequested => 'Angefragt';
+
+  @override
+  String get actionAddedToProduction => 'Zur Produktion hinzugefügt';
+
+  @override
+  String get actionApproved => 'Genehmigt';
+
+  @override
+  String get actionDeclined => 'Abgelehnt';
+
+  @override
+  String get actionBookingCancelled => 'Freigegeben';
+
+  @override
+  String get actionAccessoryAttached => 'Zubehör angehängt';
+
+  @override
+  String get actionAccessoryDetached => 'Zubehör abgehängt';
+
+  @override
+  String get actionCredentialsSet => 'Zugangsdaten gespeichert';
+
+  @override
+  String get actionCredentialsRemoved => 'Zugangsdaten entfernt';
+
+  @override
+  String get actionCredentialsRevealed => 'Zugangsdaten angezeigt';
+
+  @override
   String get actionDeleted => 'Gelöscht';
 
   @override

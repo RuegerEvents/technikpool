@@ -637,6 +637,66 @@ abstract class S {
   /// **'Updated'**
   String get actionUpdated;
 
+  /// No description provided for @actionRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested'**
+  String get actionRequested;
+
+  /// No description provided for @actionAddedToProduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to production'**
+  String get actionAddedToProduction;
+
+  /// No description provided for @actionApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get actionApproved;
+
+  /// No description provided for @actionDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get actionDeclined;
+
+  /// No description provided for @actionBookingCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Released'**
+  String get actionBookingCancelled;
+
+  /// No description provided for @actionAccessoryAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'Accessory attached'**
+  String get actionAccessoryAttached;
+
+  /// No description provided for @actionAccessoryDetached.
+  ///
+  /// In en, this message translates to:
+  /// **'Accessory detached'**
+  String get actionAccessoryDetached;
+
+  /// No description provided for @actionCredentialsSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Credentials saved'**
+  String get actionCredentialsSet;
+
+  /// No description provided for @actionCredentialsRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Credentials removed'**
+  String get actionCredentialsRemoved;
+
+  /// No description provided for @actionCredentialsRevealed.
+  ///
+  /// In en, this message translates to:
+  /// **'Credentials viewed'**
+  String get actionCredentialsRevealed;
+
   /// No description provided for @actionDeleted.
   ///
   /// In en, this message translates to:

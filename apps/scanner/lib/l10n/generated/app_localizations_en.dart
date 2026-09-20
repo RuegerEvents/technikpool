@@ -293,6 +293,36 @@ class SEn extends S {
   String get actionUpdated => 'Updated';
 
   @override
+  String get actionRequested => 'Requested';
+
+  @override
+  String get actionAddedToProduction => 'Added to production';
+
+  @override
+  String get actionApproved => 'Approved';
+
+  @override
+  String get actionDeclined => 'Declined';
+
+  @override
+  String get actionBookingCancelled => 'Released';
+
+  @override
+  String get actionAccessoryAttached => 'Accessory attached';
+
+  @override
+  String get actionAccessoryDetached => 'Accessory detached';
+
+  @override
+  String get actionCredentialsSet => 'Credentials saved';
+
+  @override
+  String get actionCredentialsRemoved => 'Credentials removed';
+
+  @override
+  String get actionCredentialsRevealed => 'Credentials viewed';
+
+  @override
   String get actionDeleted => 'Deleted';
 
   @override
