@@ -3,10 +3,30 @@
 		"version": "0.14.0",
 		"date": "2026-09-20",
 		"en": [
-			"What's new: this page. Every release is listed here, the newest one is repeated on the dashboard, and a dot on the user menu marks a version you have not read yet."
+			"What's new: this page. Every release is listed here, the newest one is repeated on the dashboard, and a dot on the user menu marks a version you have not read yet.",
+			"Delete a case: whether its contents go back on the shelf or off the inventory is asked, not assumed, and a case with an open booking is refused. A kit that was described and never built can be removed from the list.",
+			"The delete button on a product is always there now — disabled with the reason on it, instead of hidden whenever it would not work.",
+			"Case or accessory? An explainer reached from the bundle list, a unit's accessories and the bundle form says which is which, and why the choice is expensive to change later.",
+			"Looms: a cable with several ways records each one — how many of a kind, what is on their ends and which wire — and the connector filter matches it on any of them.",
+			"Where two leads differ only by their wire, the name says so: „Schuko → C13 2,5 mm² 3 m“.",
+			"Registering two devices in a row no longer carries the first one's photo, purchase price and category over to the second, and a cable no longer leaves the next device without a sticker.",
+			"A scanned code that is nobody's asset tag is now matched against serial numbers as well, as long as exactly one unit carries it. The asset forms warn while a serial is typed that another unit already has.",
+			"Pairing a scanner waits for all eight characters of the code, and a pasted code is sent exactly as shown.",
+			"The sticker sheets say how to have them printed: which product the presets were drawn for, and what to ask the shop for so every page isn't charged as its own job.",
+			"The API answers a denial with its reason rather than „internal error“, refuses a production's kit list to anyone who may not open that production, and reports your role per organization."
 		],
 		"de": [
-			"Was ist neu: diese Seite. Jede Version steht hier, die neueste steht zusätzlich auf dem Dashboard, und ein Punkt am Benutzermenü markiert eine noch ungelesene Version."
+			"Was ist neu: diese Seite. Jede Version steht hier, die neueste steht zusätzlich auf dem Dashboard, und ein Punkt am Benutzermenü markiert eine noch ungelesene Version.",
+			"Cases löschen: Ob der Inhalt zurück ins Regal geht oder aus dem Bestand verschwindet, wird gefragt und nicht geraten — ein Case mit offener Buchung wird abgelehnt. Ein Kit, das nur beschrieben und nie gebaut wurde, lässt sich aus der Liste entfernen.",
+			"Der Löschen-Knopf an einem Produkt ist jetzt immer da — deaktiviert und mit der Begründung daran, statt versteckt, sobald er nicht funktionieren würde.",
+			"Case oder Zubehör? Eine Erklärung aus der Case-Liste, dem Zubehör einer Einheit und dem Case-Formular sagt, was was ist — und warum die Entscheidung später teuer zu ändern ist.",
+			"Looms: Ein Kabel mit mehreren Wegen hält jeden davon fest — wie viele einer Art, was an ihren Enden sitzt und welche Ader — und der Steckerfilter findet es über jeden Weg.",
+			"Wo sich zwei Leitungen nur in der Ader unterscheiden, sagt es der Name: „Schuko → C13 2,5 mm² 3 m“.",
+			"Zwei Geräte nacheinander anzulegen übernimmt nicht mehr Foto, Einkaufspreis und Kategorie des ersten auf das zweite — und nach einem Kabel bleibt das nächste Gerät nicht mehr ohne Aufkleber.",
+			"Ein gescannter Code, den kein Inventaraufkleber trägt, wird jetzt auch über die Seriennummer gefunden, solange genau eine Einheit sie trägt. Die Geräteformulare warnen beim Tippen, wenn eine Seriennummer schon vergeben ist.",
+			"Die Scanner-Kopplung wartet auf alle acht Zeichen des Codes, und ein eingefügter Code wird genau so gesendet, wie er dasteht.",
+			"Die Aufkleberbogen sagen, wie man sie drucken lässt: für welches Produkt die Vorlagen gezeichnet sind und was man bei der Druckerei angeben muss, damit nicht jede Seite als eigener Auftrag berechnet wird.",
+			"Die API antwortet auf eine Ablehnung mit ihrem Grund statt mit „Interner Fehler“, verweigert die Geräteliste einer Produktion, die man nicht öffnen darf, und meldet die eigene Rolle je Organisation."
 		]
 	},
 	{
