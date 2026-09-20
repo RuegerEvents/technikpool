@@ -15,6 +15,7 @@
 	import { toast } from 'svelte-sonner';
 	import { getErrorMessage } from '$lib/utils';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { USER_CODE_LENGTH, formatUserCode, normalizeUserCode } from '$lib/device-code';
 
 	let pairing = $derived(getPairingInfo().current ?? { baseUrl: '' });
 	let devicesQuery = $derived(getConnectedDevices());
@@ -41,17 +42,24 @@
 
 	// The device flow can link straight here with the code pre-filled
 	// (verification_uri_complete), so accept it from the query string.
-	let userCode = $state(page.url.searchParams.get('user_code') ?? '');
+	// Held bare, exactly as it goes to the server.
+	let userCode = $state(normalizeUserCode(page.url.searchParams.get('user_code') ?? ''));
 	let submitting = $state(false);
 	let outcome = $state<'approved' | 'denied' | null>(null);
 
 	// Displayed in two groups of four — much easier to read off a small screen.
-	let formatted = $derived(
-		(() => {
-			const bare = userCode.replace(/[\s-]/g, '').toUpperCase();
-			return bare.length > 4 ? `${bare.slice(0, 4)}-${bare.slice(4, 8)}` : bare;
-		})()
-	);
+	let formatted = $derived(formatUserCode(userCode));
+	// A code is eight characters. Anything shorter is half-typed, and sending it
+	// only produces a refusal the scanner is still waiting through.
+	let complete = $derived(userCode.length === USER_CODE_LENGTH);
+
+	function typeCode(input: HTMLInputElement) {
+		userCode = normalizeUserCode(input.value);
+		// The field is the only place the code is held, so it has to show what
+		// will be sent: the grouping dash appears and anything stray is dropped
+		// as they type.
+		input.value = formatted;
+	}
 
 	async function approve() {
 		submitting = true;
@@ -150,7 +158,7 @@
 					<Input
 						id="user-code"
 						value={formatted}
-						oninput={(e) => (userCode = e.currentTarget.value)}
+						oninput={(e) => typeCode(e.currentTarget)}
 						placeholder="ABCD-EFGH"
 						autocomplete="off"
 						spellcheck="false"
@@ -163,16 +171,10 @@
 				</p>
 			</Card.Content>
 			<Card.Footer class="gap-2">
-				<Button onclick={approve} disabled={submitting || userCode.trim().length < 4}>
+				<Button onclick={approve} disabled={submitting || !complete}>
 					{submitting ? 'Connecting…' : 'Connect device'}
 				</Button>
-				<Button
-					variant="outline"
-					onclick={deny}
-					disabled={submitting || userCode.trim().length < 4}
-				>
-					Reject
-				</Button>
+				<Button variant="outline" onclick={deny} disabled={submitting || !complete}>Reject</Button>
 			</Card.Footer>
 		{/if}
 	</Card.Root>

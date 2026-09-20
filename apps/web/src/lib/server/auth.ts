@@ -14,6 +14,7 @@ import { passwordChangedEmail } from './emails/password-changed';
 import { emailVerificationEmail } from './emails/email-verification';
 import { emailChangeConfirmationEmail } from './emails/email-change-confirmation';
 import { completeSignUp, decideSignUp, signUpRefusalMessages } from './signup-gate';
+import { USER_CODE_LENGTH } from '$lib/device-code';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -159,6 +160,9 @@ const createAuth = () =>
 			deviceAuthorization({
 				expiresIn: '15m',
 				interval: '5s',
+				// Stated rather than left to the plugin's default, because /devices
+				// refuses anything of another length.
+				userCodeLength: USER_CODE_LENGTH,
 				// Where the plugin tells devices to send their user. Must match the
 				// route below; it also ends up in verification_uri_complete.
 				verificationUri: '/devices'

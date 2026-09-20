@@ -4,6 +4,7 @@ import { auth, prisma } from '$lib/server/auth';
 import { appBaseUrl } from '$lib/server/app-url';
 import { requireAuth } from '$lib/server/services/access';
 import { appError } from '$lib/errors';
+import { USER_CODE_LENGTH, normalizeUserCode } from '$lib/device-code';
 
 export const getPairingInfo = query(async () => {
 	await requireAuth();
@@ -12,10 +13,11 @@ export const getPairingInfo = query(async () => {
 
 const userCodeSchema = v.object({
 	// Displayed grouped as ABCD-EFGH; the server matches on the bare characters.
+	// A shorter string cannot be a code, so it is refused rather than looked up.
 	userCode: v.pipe(
 		v.string(),
-		v.transform((s) => s.replace(/[\s-]/g, '').toUpperCase()),
-		v.minLength(4, 'Enter the code shown on the device')
+		v.transform(normalizeUserCode),
+		v.length(USER_CODE_LENGTH, 'Enter the code shown on the device')
 	)
 });
 
