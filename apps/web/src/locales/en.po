@@ -12,14 +12,17 @@ msgstr ""
 msgid "Technikpool"
 msgstr "Technikpool"
 
-#~ msgid "Inventory"
-#~ msgstr "Inventory"
+#: src/routes/+page.svelte
+msgid "Inventory"
+msgstr "Inventory"
 
+#: src/routes/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/calendar/+page.svelte
 msgid "Assets"
 msgstr "Assets"
 
+#: src/routes/+page.svelte
 #: src/routes/calendar/+page.svelte
 #: src/routes/productions/+page.svelte
 msgid "Productions"
@@ -38,7 +41,6 @@ msgid "Toggle theme"
 msgstr "Toggle theme"
 
 #: src/routes/+layout.svelte
-#: src/routes/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 msgid "<0/> Organizations"
 msgstr "<0/> Organizations"
@@ -169,6 +171,7 @@ msgid "No equipment booked yet."
 msgstr "No equipment booked yet."
 
 #: src/lib/components/ui/production-hover-card/production-hover-card.svelte
+#: src/routes/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Crew"
 msgstr "Crew"
@@ -362,17 +365,14 @@ msgstr "Welcome back, {0}."
 #~ msgid "My Organizations"
 #~ msgstr "My Organizations"
 
-#: src/routes/+page.svelte
-msgid "Pending Approvals"
-msgstr "Pending Approvals"
+#~ msgid "Pending Approvals"
+#~ msgstr "Pending Approvals"
 
-#: src/routes/+page.svelte
-msgid "Action Required"
-msgstr "Action Required"
+#~ msgid "Action Required"
+#~ msgstr "Action Required"
 
-#: src/routes/+page.svelte
-msgid "No pending approvals at this time."
-msgstr "No pending approvals at this time."
+#~ msgid "No pending approvals at this time."
+#~ msgstr "No pending approvals at this time."
 
 #~ msgid "Requested by <0/> · {0} {1}"
 #~ msgstr "Requested by <0/> · {0} {1}"
@@ -746,7 +746,6 @@ msgstr "Add {0} Assets"
 msgid "Bundle created!"
 msgstr "Bundle created!"
 
-#: src/routes/+page.svelte
 #: src/routes/assets/bundles/+page.svelte
 msgid "Asset Bundles"
 msgstr "Asset Bundles"
@@ -1599,6 +1598,7 @@ msgstr "Nov"
 msgid "Dec"
 msgstr "Dec"
 
+#: src/routes/+page.svelte
 #: src/routes/calendar/+page.svelte
 msgid "Today"
 msgstr "Today"
@@ -2251,38 +2251,26 @@ msgstr "<0/> No asset tag (e.g. cables, consumables)"
 #~ msgid "No date set"
 #~ msgstr "No date set"
 
-#: src/routes/+page.svelte
-msgid "Total Assets"
-msgstr "Total Assets"
+#~ msgid "Total Assets"
+#~ msgstr "Total Assets"
 
-#. 0: stats.assetsByStatus.available
-#: src/routes/+page.svelte
-msgid "<0/> {0} available"
-msgstr "<0/> {0} available"
+#~ msgid "<0/> {0} available"
+#~ msgstr "<0/> {0} available"
 
-#. 0: stats.assetsByStatus.maintenance
-#: src/routes/+page.svelte
-msgid "<0/> {0} maintenance"
-msgstr "<0/> {0} maintenance"
+#~ msgid "<0/> {0} maintenance"
+#~ msgstr "<0/> {0} maintenance"
 
-#. 0: stats.assetsByStatus.broken
-#: src/routes/+page.svelte
-msgid "<0/> {0} broken"
-msgstr "<0/> {0} broken"
+#~ msgid "<0/> {0} broken"
+#~ msgstr "<0/> {0} broken"
 
-#: src/routes/+page.svelte
-#: src/routes/+page.svelte
-msgid "Upcoming Productions"
-msgstr "Upcoming Productions"
+#~ msgid "Upcoming Productions"
+#~ msgstr "Upcoming Productions"
 
-#. 0: stats.upcomingProductions[0].name
-#: src/routes/+page.svelte
-msgid "Next: {0}"
-msgstr "Next: {0}"
+#~ msgid "Next: {0}"
+#~ msgstr "Next: {0}"
 
-#: src/routes/+page.svelte
-msgid "No upcoming productions"
-msgstr "No upcoming productions"
+#~ msgid "No upcoming productions"
+#~ msgstr "No upcoming productions"
 
 #~ msgid "Across {0} {1}"
 #~ msgstr "Across {0} {1}"
@@ -2296,21 +2284,17 @@ msgstr "No upcoming productions"
 #~ msgid "{0} your attention"
 #~ msgstr "{0} your attention"
 
-#: src/routes/+page.svelte
-msgid "<0/> New"
-msgstr "<0/> New"
+#~ msgid "<0/> New"
+#~ msgstr "<0/> New"
 
-#: src/routes/+page.svelte
-msgid "No upcoming productions scheduled. <0/> <1>Create your first production →</1>"
-msgstr "No upcoming productions scheduled. <0/> <1>Create your first production →</1>"
+#~ msgid "No upcoming productions scheduled. <0/> <1>Create your first production →</1>"
+#~ msgstr "No upcoming productions scheduled. <0/> <1>Create your first production →</1>"
 
-#: src/routes/+page.svelte
-msgid "View all productions <0/>"
-msgstr "View all productions <0/>"
+#~ msgid "View all productions <0/>"
+#~ msgstr "View all productions <0/>"
 
-#: src/routes/+page.svelte
-msgid "Quick Links"
-msgstr "Quick Links"
+#~ msgid "Quick Links"
+#~ msgstr "Quick Links"
 
 #: src/routes/+page.svelte
 msgid "<0/> Add Assets"
@@ -2320,9 +2304,8 @@ msgstr "<0/> Add Assets"
 msgid "<0/> New Production"
 msgstr "<0/> New Production"
 
-#: src/routes/+page.svelte
-msgid "<0/> Asset Calendar"
-msgstr "<0/> Asset Calendar"
+#~ msgid "<0/> Asset Calendar"
+#~ msgstr "<0/> Asset Calendar"
 
 #~ msgid "<0/> Inventory"
 #~ msgstr "<0/> Inventory"
@@ -2339,17 +2322,15 @@ msgid_plural "# assets declined."
 msgstr[0] "# asset declined."
 msgstr[1] "# assets declined."
 
-#: src/routes/+page.svelte
-msgid "Across # organization"
-msgid_plural "Across # organizations"
-msgstr[0] "Across # organization"
-msgstr[1] "Across # organizations"
+#~ msgid "Across # organization"
+#~ msgid_plural "Across # organizations"
+#~ msgstr[0] "Across # organization"
+#~ msgstr[1] "Across # organizations"
 
-#: src/routes/+page.svelte
-msgid "Request needs your attention"
-msgid_plural "Requests need your attention"
-msgstr[0] "Request needs your attention"
-msgstr[1] "Requests need your attention"
+#~ msgid "Request needs your attention"
+#~ msgid_plural "Requests need your attention"
+#~ msgstr[0] "Request needs your attention"
+#~ msgstr[1] "Requests need your attention"
 
 #: src/routes/+page.svelte
 #: src/routes/+page.svelte
@@ -2417,7 +2398,6 @@ msgid "Devices"
 msgstr "Devices"
 
 #: src/routes/+layout.svelte
-#: src/routes/+page.svelte
 msgid "<0/> Devices"
 msgstr "<0/> Devices"
 
@@ -2734,17 +2714,15 @@ msgstr "Offers"
 msgid "Invoices"
 msgstr "Invoices"
 
-#: src/routes/+page.svelte
-msgid "Overdue Inspections"
-msgstr "Overdue Inspections"
+#~ msgid "Overdue Inspections"
+#~ msgstr "Overdue Inspections"
 
 #: src/routes/+page.svelte
 msgid "DGUV inspection due"
 msgstr "DGUV inspection due"
 
-#: src/routes/+page.svelte
-msgid "All up to date"
-msgstr "All up to date"
+#~ msgid "All up to date"
+#~ msgstr "All up to date"
 
 #: src/routes/calendar/+page.svelte
 msgid "Orgs <0/>"
@@ -8803,9 +8781,7 @@ msgstr "What's new | Technikpool"
 msgid "Everything that changed in Technikpool. You are running version {0}."
 msgstr "Everything that changed in Technikpool. You are running version {0}."
 
-#. 0: latestRelease.version
 #. 0: release.version
-#: src/routes/+page.svelte
 #: src/routes/whats-new/+page.svelte
 msgid "Version {0}"
 msgstr "Version {0}"
@@ -8818,10 +8794,8 @@ msgstr "The scanner app keeps its own list, under Settings."
 msgid "All versions <0/>"
 msgstr "All versions <0/>"
 
-#. 0: plural(req.count, ['# asset', '# assets'])
-#: src/routes/+page.svelte
-msgid "{0} from <0/>"
-msgstr "{0} from <0/>"
+#~ msgid "{0} from <0/>"
+#~ msgstr "{0} from <0/>"
 
 #: src/routes/+page.svelte
 msgid "Waiting for Approval"
@@ -8904,3 +8878,140 @@ msgstr "Connector family"
 #: src/lib/components/ui/connector-fields/connector-fields.svelte
 msgid "The connector system, without which end it is: TRUE1 M and TRUE1 F are both <0>TRUE1</0>, not each other. Filled in from the first word of the name."
 msgstr "The connector system, without which end it is: TRUE1 M and TRUE1 F are both <0>TRUE1</0>, not each other. Filled in from the first word of the name."
+
+#: src/routes/+page.svelte
+msgid "Request to approve"
+msgid_plural "Requests to approve"
+msgstr[0] "Request to approve"
+msgstr[1] "Requests to approve"
+
+#: src/routes/+page.svelte
+msgid "Other organizations want your equipment"
+msgstr "Other organizations want your equipment"
+
+#: src/routes/+page.svelte
+msgid "Broken device"
+msgid_plural "Broken devices"
+msgstr[0] "Broken device"
+msgstr[1] "Broken devices"
+
+#: src/routes/+page.svelte
+msgid "Needs repair"
+msgstr "Needs repair"
+
+#: src/routes/+page.svelte
+msgid "Overdue inspection"
+msgid_plural "Overdue inspections"
+msgstr[0] "Overdue inspection"
+msgstr[1] "Overdue inspections"
+
+#: src/routes/+page.svelte
+msgid "In maintenance"
+msgstr "In maintenance"
+
+#: src/routes/+page.svelte
+msgid "Back in the pool once repaired"
+msgstr "Back in the pool once repaired"
+
+#: src/routes/+page.svelte
+msgid "Awaiting approval"
+msgstr "Awaiting approval"
+
+#: src/routes/+page.svelte
+msgid "Requested from other organizations"
+msgstr "Requested from other organizations"
+
+#: src/routes/+page.svelte
+msgid "All clear."
+msgstr "All clear."
+
+#: src/routes/+page.svelte
+msgid "Nothing needs your attention right now."
+msgstr "Nothing needs your attention right now."
+
+#: src/routes/+page.svelte
+msgid "<0/> Action Required"
+msgstr "<0/> Action Required"
+
+#: src/routes/+page.svelte
+msgid "View all <0/>"
+msgstr "View all <0/>"
+
+#: src/routes/+page.svelte
+msgid "No upcoming productions scheduled. <0/> <1>Create a production →</1>"
+msgstr "No upcoming productions scheduled. <0/> <1>Create a production →</1>"
+
+#. 0: formatDate(prod.endDate)
+#: src/routes/+page.svelte
+msgid "· until {0}"
+msgstr "· until {0}"
+
+#: src/routes/+page.svelte
+msgid "Running now"
+msgstr "Running now"
+
+#: src/routes/+page.svelte
+msgid "Tomorrow"
+msgstr "Tomorrow"
+
+#: src/routes/+page.svelte
+msgid "In # day"
+msgid_plural "In # days"
+msgstr[0] "In # day"
+msgstr[1] "In # days"
+
+#: src/routes/+page.svelte
+msgid "# more production planned"
+msgid_plural "# more productions planned"
+msgstr[0] "# more production planned"
+msgstr[1] "# more productions planned"
+
+#: src/routes/+page.svelte
+msgid "Devices →"
+msgstr "Devices →"
+
+#: src/routes/+page.svelte
+msgid "<0/>Available"
+msgstr "<0/>Available"
+
+#: src/routes/+page.svelte
+msgid "<0/>Maintenance"
+msgstr "<0/>Maintenance"
+
+#: src/routes/+page.svelte
+msgid "<0/>Broken"
+msgstr "<0/>Broken"
+
+#: src/routes/+page.svelte
+msgid "# bundle"
+msgid_plural "# bundles"
+msgstr[0] "# bundle"
+msgstr[1] "# bundles"
+
+#: src/routes/+page.svelte
+msgid "# organization"
+msgid_plural "# organizations"
+msgstr[0] "# organization"
+msgstr[1] "# organizations"
+
+#. 0: plural(req.count, ['# asset', '# assets']); 1: req.lenderOrg
+#: src/routes/+page.svelte
+msgid "{0} from {1}"
+msgstr "{0} from {1}"
+
+#. 0: latestRelease.version
+#: src/routes/+page.svelte
+msgid "<0/> Version {0}"
+msgstr "<0/> Version {0}"
+
+#: src/routes/+page.svelte
+msgid "and # more change"
+msgid_plural "and # more changes"
+msgstr[0] "and # more change"
+msgstr[1] "and # more changes"
+
+#~ msgid "Requests to approve"
+#~ msgstr "Requests to approve"
+
+#~ msgid "Broken devices"
+#~ msgstr "Broken devices"

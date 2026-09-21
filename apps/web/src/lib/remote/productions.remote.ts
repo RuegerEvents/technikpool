@@ -1,5 +1,6 @@
 import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
+import type { Prisma } from '$lib/prisma/client';
 import { sendMail } from '$lib/server/mail';
 import { appBaseUrl } from '$lib/server/app-url';
 import { bookingReviewedEmail } from '$lib/server/emails/booking-reviewed';
@@ -1460,6 +1461,12 @@ export const getDashboardStats = query(async () => {
 	const orgIds = memberships.map((m) => m.organizationId);
 	const productionScope = await productionReadWhere(user.id);
 	const now = new Date();
+	const currentOrUpcoming: Prisma.ProductionWhereInput = {
+		...productionScope,
+		cancelledAt: null,
+		startDate: { not: null },
+		OR: [{ startDate: { gte: now } }, { endDate: { gte: now } }]
+	};
 
 	const [
 		totalAssets,
@@ -1467,6 +1474,7 @@ export const getDashboardStats = query(async () => {
 		maintenanceAssets,
 		brokenAssets,
 		upcomingProductions,
+		upcomingCount,
 		bundleCount,
 		overdueInspections
 	] = await Promise.all([
@@ -1474,10 +1482,12 @@ export const getDashboardStats = query(async () => {
 		prisma.asset.count({ where: { organizationId: { in: orgIds }, status: 'AVAILABLE' } }),
 		prisma.asset.count({ where: { organizationId: { in: orgIds }, status: 'MAINTENANCE' } }),
 		prisma.asset.count({ where: { organizationId: { in: orgIds }, status: 'BROKEN' } }),
+		// Running ones too: a production that started yesterday is the one
+		// people are working on right now, not one to drop off the list.
 		prisma.production.findMany({
-			where: { ...productionScope, cancelledAt: null, startDate: { gte: now } },
+			where: currentOrUpcoming,
 			orderBy: { startDate: 'asc' },
-			take: 5,
+			take: 6,
 			select: {
 				id: true,
 				name: true,
@@ -1487,6 +1497,7 @@ export const getDashboardStats = query(async () => {
 				_count: { select: { items: true, crew: true } }
 			}
 		}),
+		prisma.production.count({ where: currentOrUpcoming }),
 		prisma.assetBundle.count({ where: { template: { organizationId: { in: orgIds } } } }),
 		prisma.asset.count({
 			where: {
@@ -1504,7 +1515,12 @@ export const getDashboardStats = query(async () => {
 			maintenance: maintenanceAssets,
 			broken: brokenAssets
 		},
-		upcomingProductions,
+		// The where clause already rules out a missing start date; this tells
+		// the type so.
+		upcomingProductions: upcomingProductions.flatMap((p) =>
+			p.startDate ? [{ ...p, startDate: p.startDate }] : []
+		),
+		upcomingCount,
 		bundleCount,
 		overdueInspections
 	};
