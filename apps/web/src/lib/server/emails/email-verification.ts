@@ -12,7 +12,7 @@ export function emailVerificationEmail(opts: { name?: string | null; url: string
 				zu aktivieren.
 			</p>
 			${renderButton('E-Mail-Adresse bestätigen', opts.url)}
-			<p style="margin:0;color:#71717a">
+			<p class="tp-muted" style="margin:0;color:#71717a">
 				Falls du kein Konto bei Technikpool erstellt hast, kannst du diese E-Mail
 				ignorieren.
 			</p>

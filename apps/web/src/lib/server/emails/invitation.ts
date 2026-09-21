@@ -35,7 +35,7 @@ export function invitationEmail(opts: {
 				dein Konto an.
 			</p>
 			${renderButton('Konto anlegen', opts.url)}
-			<p style="margin:0;color:#71717a">
+			<p class="tp-muted" style="margin:0;color:#71717a">
 				Der Link gilt bis zum ${expires} und nur für diese E-Mail-Adresse. Falls du die
 				Einladung nicht erwartet hast, kannst du diese E-Mail ignorieren.
 			</p>

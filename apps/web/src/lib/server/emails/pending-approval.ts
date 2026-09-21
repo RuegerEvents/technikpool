@@ -24,7 +24,7 @@ export function pendingApprovalEmail(opts: {
 				<strong>${opts.productionName}</strong> ausleihen. ${itemText} auf deine Freigabe.
 			</p>
 			${renderButton('Anfrage ansehen', opts.url)}
-			<p style="margin:0;color:#71717a">
+			<p class="tp-muted" style="margin:0;color:#71717a">
 				Du erhältst erst dann wieder eine Benachrichtigung, wenn alle offenen Anfragen
 				für diese Produktion bearbeitet wurden und eine neue hinzukommt.
 			</p>

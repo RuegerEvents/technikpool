@@ -23,7 +23,7 @@ export function emailChangeConfirmationEmail(opts: {
 				sie hier bestätigst.
 			</p>
 			${renderButton('Neue E-Mail-Adresse bestätigen', opts.url)}
-			<p style="margin:0;color:#71717a">
+			<p class="tp-muted" style="margin:0;color:#71717a">
 				Warst du das nicht, ignoriere diese E-Mail — deine Adresse bleibt dann
 				unverändert. Ändere in dem Fall sicherheitshalber dein Passwort.
 			</p>

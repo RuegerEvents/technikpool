@@ -13,7 +13,7 @@ export function passwordResetEmail(opts: { name?: string | null; url: string }) 
 				eine Stunde lang gültig.
 			</p>
 			${renderButton('Passwort zurücksetzen', opts.url)}
-			<p style="margin:0;color:#71717a">
+			<p class="tp-muted" style="margin:0;color:#71717a">
 				Falls du das nicht angefordert hast, kannst du diese E-Mail ignorieren — es
 				wurde nichts an deinem Konto geändert.
 			</p>
