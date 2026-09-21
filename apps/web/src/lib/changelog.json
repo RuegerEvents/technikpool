@@ -1,5 +1,23 @@
 [
 	{
+		"version": "0.16.0",
+		"date": "2026-09-21",
+		"en": [
+			"The dashboard puts what needs doing first: requests to approve, broken devices and overdue inspections appear at the top only when there are any, and \"All clear\" when there are none. Productions show their date at a glance and stay on the list while they are running; inventory and What's new move to the side.",
+			"A product can have no manufacturer. A Schuko lead or a no-name laptop is called by its name alone, so a delivery note says \"Kaltgerätekabel\" instead of \"Generisch Kaltgerätekabel\".",
+			"Duplicate a product to make the next variant or the next cable length: the copy takes manufacturer, category, picture, connectors and cable details, but no prices or units. Merge and Delete moved into a menu next to it at the top of the page, and Delete says why when it can't be used.",
+			"In the cable table, typing picks what already exists — \"schu\" is Schuko — and a new connector is only created by clicking \"Create\". Every row says whether saving adds to an entry already in the catalog or creates a new one.",
+			"Adding a connector under a name that already exists no longer changes the existing one, and renaming a connector now reaches every cable that uses it. \"Mates with\" is now \"Connector family\"."
+		],
+		"de": [
+			"Das Dashboard zeigt zuerst, was zu tun ist: Anfragen zur Freigabe, defekte Geräte und überfällige Prüfungen stehen oben, aber nur, wenn es welche gibt — sonst steht dort „Alles erledigt“. Produktionen zeigen ihr Datum auf einen Blick und bleiben auf der Liste, solange sie laufen; Inventar und Neuigkeiten rücken an die Seite.",
+			"Ein Produkt kann ohne Hersteller sein. Eine Schuko-Leitung oder ein No-Name-Laptop heißt nur noch bei seinem Namen, und auf dem Lieferschein steht „Kaltgerätekabel“ statt „Generisch Kaltgerätekabel“.",
+			"Produkte lassen sich duplizieren, für die nächste Variante oder die nächste Kabellänge: Die Kopie übernimmt Hersteller, Kategorie, Bild, Anschlüsse und Kabelangaben, aber keine Preise und keine Einheiten. Zusammenführen und Löschen stehen jetzt in einem Menü daneben oben auf der Seite, und Löschen sagt, warum es gerade nicht geht.",
+			"In der Kabeltabelle wählt Tippen aus, was es schon gibt — „schu“ ist Schuko —, und ein neuer Stecker entsteht nur per Klick auf „Erstellen“. Jede Zeile sagt, ob das Speichern zu einem vorhandenen Katalogeintrag hinzufügt oder einen neuen anlegt.",
+			"Einen Stecker unter einem schon vergebenen Namen anzulegen ändert den vorhandenen nicht mehr, und das Umbenennen eines Steckers erreicht jetzt jedes Kabel, das ihn verwendet. „Passt zu“ heißt jetzt „Steckerfamilie“."
+		]
+	},
+	{
 		"version": "0.15.0",
 		"date": "2026-09-21",
 		"en": [
