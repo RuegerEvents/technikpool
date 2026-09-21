@@ -76,14 +76,22 @@
 	// The connector list arranged for the slot it fills — see ProductFields for
 	// the reasoning. Per row, because each row carries its own department.
 	function connectorOptions(categoryId: string, slot: CableEndRole) {
-		const inputGender = categories.find((c) => c.id === categoryId)?.cableInputGender ?? null;
+		const genderOf = (id: string | null | undefined) =>
+			categories.find((c) => c.id === id)?.cableInputGender ?? null;
+		const inputGender = genderOf(categoryId);
 		const ranked = connectors.map((c) => {
 			const role = connectorRole(c, connectors, inputGender);
+			// Before the row has a department, the connector's own one still says
+			// which end usually comes first — so typing "schu" into A lands on
+			// Schuko M. Only for the order: an XLR is Audio, but a DMX cable in
+			// Light runs the other way round, so nothing is disabled on a guess.
+			const likely =
+				role ?? (inputGender ? null : connectorRole(c, connectors, genderOf(c.categoryId)));
 			return {
 				...c,
 				hint: role ? CABLE_END_LABEL[role] : null,
 				disabled: !!role && role !== slot,
-				rank: role === slot ? 0 : role ? 2 : 1
+				rank: likely === slot ? 0 : likely ? 2 : 1
 			};
 		});
 		return ranked.sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name, 'de'));
@@ -196,8 +204,8 @@
 	// entry only under the same manufacturer, so the same lead typed here without
 	// one and filed there under a brand becomes a second product — which is
 	// the one case worth interrupting for. Under the same manufacturer there is
-	// nothing to warn about, only to say: the units join the entry that exists,
-	// and the name typed in this row is not used.
+	// nothing to warn about, only to say: the units join the entry that exists
+	// (and the name typed in this row is not used, where it differs).
 	let catalog = $derived(getProducts().current ?? []);
 
 	function rowTwin(row: Row) {
@@ -216,6 +224,17 @@
 		const manufacturerId = row.manufacturerId || null;
 		const same = twins.find((p) => p.manufacturerId === manufacturerId);
 		return same ? { product: same, reused: true } : { product: twins[0], reused: false };
+	}
+
+	/** Whether the row says enough about a cable to be saved — the submit's test. */
+	function rowFilled(row: Row) {
+		return isCable({
+			cableType: row.cableType.trim() || null,
+			connectorA: row.connectorA.trim() || null,
+			connectorB: row.connectorB.trim() || null,
+			lengthCm: parseLengthMeters(row.lengthM),
+			ways: []
+		});
 	}
 
 	function useTwin(row: Row, twin: { manufacturerId: string | null }) {
@@ -337,15 +356,7 @@
 		}
 		// A row counts when it says *something* about the cable. The type is only
 		// the wire spec now, and most cables have nothing to put there.
-		const filled = rows.filter((r) =>
-			isCable({
-				cableType: r.cableType.trim() || null,
-				connectorA: r.connectorA.trim() || null,
-				connectorB: r.connectorB.trim() || null,
-				lengthCm: parseLengthMeters(r.lengthM),
-				ways: []
-			})
-		);
+		const filled = rows.filter(rowFilled);
 		if (filled.length === 0) {
 			toast.error('Add at least one cable');
 			return;
@@ -552,6 +563,7 @@
 										onchange={(sel) => setConnector(row, 'connectorA', sel?.name ?? '')}
 										oncreate={(name) => openConnectorModal(i, 'connectorA', name)}
 										showImages
+										preferExisting
 										placeholder="A…"
 									/>
 								</div>
@@ -565,6 +577,7 @@
 										onchange={(sel) => setConnector(row, 'connectorB', sel?.name ?? '')}
 										oncreate={(name) => openConnectorModal(i, 'connectorB', name)}
 										showImages
+										preferExisting
 										placeholder="B…"
 									/>
 								</div>
@@ -579,6 +592,7 @@
 										value={row.cableType ? { id: row.cableType, name: row.cableType } : null}
 										onchange={(sel) => applyTypeDefaults(row, sel?.name ?? '')}
 										oncreate={(name) => applyTypeDefaults(row, name)}
+										preferExisting
 										placeholder="CAT7, 2.5mm²…"
 									/>
 								</div>
@@ -664,7 +678,23 @@
 											<span class="font-medium">{twin.product.name}</span> — the units are added there,
 											under that name.
 										</p>
+									{:else}
+										<!-- Said even when nothing differs: "these join what is there" is
+										     the answer to "will this make a second entry?", and silence
+										     reads as not knowing. -->
+										<p class="col-span-2 text-xs text-muted-foreground sm:col-span-4 xl:col-span-9">
+											Already in the catalog — the units are added to that entry.
+										</p>
 									{/if}
+								{:else if rowFilled(row) && row.categoryId}
+									<!-- The other half of the same answer: every filled row says which
+									     of the two happens on save. Not before the category is in —
+									     the match above needs it, and a row without one saves as
+									     neither. -->
+									<p class="col-span-2 text-xs text-muted-foreground sm:col-span-4 xl:col-span-9">
+										New cable — saving adds
+										<span class="font-medium">{row.name.trim() || row.lastDerived}</span> to the catalog.
+									</p>
 								{/if}
 							</div>
 						{/each}

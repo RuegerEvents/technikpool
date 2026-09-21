@@ -5927,9 +5927,8 @@ msgstr "Type it the way you'd say it and press Enter. Everything it fills in is 
 #~ msgid "Type…"
 #~ msgstr "Type…"
 
-#: src/routes/assets/new/cables/+page.svelte
-msgid "Generic (created on save)"
-msgstr "Generic (created on save)"
+#~ msgid "Generic (created on save)"
+#~ msgstr "Generic (created on save)"
 
 #: src/routes/assets/new/cables/+page.svelte
 msgid "Schuko 10 m"
@@ -8856,6 +8855,7 @@ msgid "Pick a manufacturer from the list, or Generic / unknown manufacturer"
 msgstr "Pick a manufacturer from the list, or Generic / unknown manufacturer"
 
 #: src/lib/no-manufacturer.svelte.ts
+#: src/routes/assets/new/cables/+page.svelte
 msgid "Generic / unknown manufacturer"
 msgstr "Generic / unknown manufacturer"
 
@@ -9048,3 +9048,11 @@ msgstr "Only whoever added it, an admin of every organization holding it, or a s
 #: src/lib/components/ui/product-editor/product-actions.svelte
 msgid "<0/> Merge duplicate…"
 msgstr "<0/> Merge duplicate…"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Already in the catalog — the units are added to that entry."
+msgstr "Already in the catalog — the units are added to that entry."
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "New cable — saving adds <0/> to the catalog."
+msgstr "New cable — saving adds <0/> to the catalog."

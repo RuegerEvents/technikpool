@@ -49,6 +49,18 @@
 		 * far quicker to recognise than to read.
 		 */
 		showImages?: boolean;
+		/**
+		 * Typing lands on what exists: the best match is highlighted as you type,
+		 * and Enter, Tab or leaving the field picks it. Creating takes a click on
+		 * "Create" (or arrowing down to it) — except when nothing matches, where
+		 * there is nothing else Enter could mean.
+		 *
+		 * For a closed vocabulary that is nearly always the answer — a connector,
+		 * a cable spec — where "schu" is Schuko and not a new connector called
+		 * "schu". Off by default: in an open list such as manufacturers, a new
+		 * name that merely contains an old one must not be swallowed by it.
+		 */
+		preferExisting?: boolean;
 		class?: string;
 	};
 
@@ -64,6 +76,7 @@
 		disabled = false,
 		allowCreate = true,
 		showImages = false,
+		preferExisting = false,
 		class: className
 	}: Props = $props();
 
@@ -110,6 +123,19 @@
 		...filteredSuggestions.map((item) => ({ type: 'suggestion' as const, item })),
 		...(showCreate ? [{ type: 'create' as const, name: inputValue.trim() }] : [])
 	]);
+
+	// The option Enter picks when nothing has been arrowed to: under
+	// `preferExisting`, the first enabled item whose name starts with what was
+	// typed, else the first that contains it.
+	let bestIndex = $derived.by(() => {
+		if (!preferExisting || !query) return -1;
+		const enabledItem = (o: Option) => o.type === 'item' && !o.item.disabled;
+		const prefix = options.findIndex(
+			(o) => enabledItem(o) && (o as { item: Item }).item.name.toLowerCase().startsWith(query)
+		);
+		return prefix >= 0 ? prefix : options.findIndex(enabledItem);
+	});
+	let activeIndex = $derived(highlightedIndex >= 0 ? highlightedIndex : bestIndex);
 
 	/** Where the suggestion heading goes — the divider is drawn before this row. */
 	let firstSuggestionIndex = $derived(options.findIndex((o) => o.type === 'suggestion'));
@@ -170,10 +196,15 @@
 		} else if (e.key === 'ArrowUp') {
 			e.preventDefault();
 			highlightedIndex = nextEnabled(highlightedIndex, -1);
+		} else if (e.key.toLowerCase() === 'tab' && preferExisting) {
+			// Tab moves on as usual, taking the match along. Never a create.
+			if (activeIndex >= 0 && options[activeIndex]?.type === 'item') {
+				selectOption(options[activeIndex]);
+			}
 		} else if (e.key === 'Enter' || (e.key.toLowerCase() === 'tab' && showCreate && oncreate)) {
 			e.preventDefault();
-			if (highlightedIndex >= 0 && options[highlightedIndex]) {
-				selectOption(options[highlightedIndex]);
+			if (activeIndex >= 0 && options[activeIndex]) {
+				selectOption(options[activeIndex]);
 			} else if (showCreate) {
 				selectOption({ type: 'create', name: inputValue.trim() });
 			} else if (selectableFiltered.length === 1) {
@@ -245,6 +276,18 @@
 	function handleBlur(e: FocusEvent) {
 		// Close if focus moves outside the container
 		if (!containerEl?.contains(e.relatedTarget as Node)) {
+			// Leaving a half-typed name behind picks what it matches, the same as
+			// Enter would.
+			const typed = inputValue.trim();
+			if (
+				preferExisting &&
+				typed &&
+				typed !== (value?.name ?? '') &&
+				options[activeIndex]?.type === 'item'
+			) {
+				selectOption(options[activeIndex]);
+				return;
+			}
 			open = false;
 			highlightedIndex = -1;
 			// Reset input to last confirmed value name
@@ -310,7 +353,7 @@
 						<!-- svelte-ignore a11y_interactive_supports_focus -->
 						<div
 							role="option"
-							aria-selected={highlightedIndex === i}
+							aria-selected={activeIndex === i}
 							aria-disabled={disabled}
 							onmousedown={(e) => {
 								e.preventDefault();
@@ -323,9 +366,7 @@
 								? 'cursor-not-allowed opacity-45'
 								: 'cursor-pointer'} {opt.type === 'item' && opt.item.muted && !disabled
 								? 'text-muted-foreground opacity-70'
-								: ''} {highlightedIndex === i && !disabled
-								? 'bg-accent text-accent-foreground'
-								: ''}"
+								: ''} {activeIndex === i && !disabled ? 'bg-accent text-accent-foreground' : ''}"
 						>
 							{#if opt.type === 'item' || opt.type === 'suggestion'}
 								<span class="flex items-center gap-2">
