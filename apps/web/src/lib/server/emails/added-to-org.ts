@@ -1,4 +1,4 @@
-import { renderButton, renderEmailLayout } from './layout';
+import { escapeHtml, renderButton, renderEmailLayout } from './layout';
 
 const roleLabels: Record<string, string> = {
 	OWNER: 'Inhaber',
@@ -20,10 +20,10 @@ export function addedToOrgEmail(opts: {
 	const html = renderEmailLayout({
 		preheader: `Du wurdest zu ${opts.orgName} auf Technikpool hinzugefügt.`,
 		bodyHtml: `
-			<p style="margin:0 0 16px">${greeting}</p>
+			<p style="margin:0 0 16px">${escapeHtml(greeting)}</p>
 			<p style="margin:0 0 16px">
-				du wurdest der Organisation <strong>${opts.orgName}</strong> auf Technikpool als
-				<strong>${roleLabel}</strong> hinzugefügt.
+				du wurdest der Organisation <strong>${escapeHtml(opts.orgName)}</strong> auf Technikpool als
+				<strong>${escapeHtml(roleLabel)}</strong> hinzugefügt.
 			</p>
 			${renderButton('Zu Technikpool', opts.url)}
 		`

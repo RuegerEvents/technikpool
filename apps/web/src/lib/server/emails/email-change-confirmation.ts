@@ -1,4 +1,4 @@
-import { renderButton, renderEmailLayout } from './layout';
+import { escapeHtml, renderButton, renderEmailLayout } from './layout';
 
 /**
  * Goes to the address currently on the account, not the new one — confirming a
@@ -16,10 +16,10 @@ export function emailChangeConfirmationEmail(opts: {
 	const html = renderEmailLayout({
 		preheader: 'Bestätige die Änderung deiner E-Mail-Adresse.',
 		bodyHtml: `
-			<p style="margin:0 0 16px">${greeting}</p>
+			<p style="margin:0 0 16px">${escapeHtml(greeting)}</p>
 			<p style="margin:0 0 16px">
 				für dein Technikpool-Konto wurde eine neue E-Mail-Adresse angefragt:
-				<strong>${opts.newEmail}</strong>. Die Änderung wird erst wirksam, wenn du
+				<strong>${escapeHtml(opts.newEmail)}</strong>. Die Änderung wird erst wirksam, wenn du
 				sie hier bestätigst.
 			</p>
 			${renderButton('Neue E-Mail-Adresse bestätigen', opts.url)}

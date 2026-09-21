@@ -1,4 +1,4 @@
-import { renderButton, renderEmailLayout } from './layout';
+import { escapeHtml, renderButton, renderEmailLayout } from './layout';
 
 export function passwordResetEmail(opts: { name?: string | null; url: string }) {
 	const greeting = opts.name ? `Hallo ${opts.name},` : 'Hallo,';
@@ -6,7 +6,7 @@ export function passwordResetEmail(opts: { name?: string | null; url: string }) 
 	const html = renderEmailLayout({
 		preheader: 'Setze dein Technikpool-Passwort zurück.',
 		bodyHtml: `
-			<p style="margin:0 0 16px">${greeting}</p>
+			<p style="margin:0 0 16px">${escapeHtml(greeting)}</p>
 			<p style="margin:0 0 16px">
 				wir haben eine Anfrage erhalten, dein Passwort für Technikpool zurückzusetzen.
 				Klicke auf den Button unten, um ein neues Passwort zu vergeben. Der Link ist

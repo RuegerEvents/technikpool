@@ -10,7 +10,7 @@ export function escapeHtml(value: string) {
 }
 
 export function renderButton(label: string, url: string) {
-	return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0"><tr><td class="tp-button" bgcolor="#18181b" style="border-radius:6px;background-color:#18181b"><a class="tp-button" href="${url}" style="display:inline-block;padding:12px 24px;font-family:sans-serif;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;border:1px solid #71717a;border-radius:6px">${escapeHtml(label)}</a></td></tr></table>`;
+	return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0"><tr><td class="tp-button" bgcolor="#18181b" style="border-radius:6px;background-color:#18181b"><a class="tp-button" href="${escapeHtml(url)}" style="display:inline-block;padding:12px 24px;font-family:sans-serif;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;border:1px solid #71717a;border-radius:6px">${escapeHtml(label)}</a></td></tr></table>`;
 }
 
 // Mail clients with a dark mode either honour a dark scheme the mail declares

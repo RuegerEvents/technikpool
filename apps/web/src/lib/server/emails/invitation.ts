@@ -1,4 +1,4 @@
-import { renderButton, renderEmailLayout } from './layout';
+import { escapeHtml, renderButton, renderEmailLayout } from './layout';
 
 const roleLabels: Record<string, string> = {
 	OWNER: 'Inhaber',
@@ -20,7 +20,7 @@ export function invitationEmail(opts: {
 	const expires = opts.expiresAt.toLocaleDateString('de-DE');
 
 	const intoHtml = opts.orgName
-		? ` in die Organisation <strong>${opts.orgName}</strong>${roleLabel ? ` als <strong>${roleLabel}</strong>` : ''}`
+		? ` in die Organisation <strong>${escapeHtml(opts.orgName)}</strong>${roleLabel ? ` als <strong>${escapeHtml(roleLabel)}</strong>` : ''}`
 		: '';
 	const intoText = opts.orgName
 		? ` in die Organisation "${opts.orgName}"${roleLabel ? ` als ${roleLabel}` : ''}`
@@ -31,7 +31,7 @@ export function invitationEmail(opts: {
 		bodyHtml: `
 			<p style="margin:0 0 16px">Hallo,</p>
 			<p style="margin:0 0 16px">
-				${inviter} zu Technikpool${intoHtml} eingeladen. Über den folgenden Link legst du
+				${escapeHtml(inviter)} zu Technikpool${intoHtml} eingeladen. Über den folgenden Link legst du
 				dein Konto an.
 			</p>
 			${renderButton('Konto anlegen', opts.url)}

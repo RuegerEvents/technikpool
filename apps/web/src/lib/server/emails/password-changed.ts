@@ -1,4 +1,4 @@
-import { renderEmailLayout } from './layout';
+import { escapeHtml, renderEmailLayout } from './layout';
 
 export function passwordChangedEmail(opts: { name?: string | null }) {
 	const greeting = opts.name ? `Hallo ${opts.name},` : 'Hallo,';
@@ -6,7 +6,7 @@ export function passwordChangedEmail(opts: { name?: string | null }) {
 	const html = renderEmailLayout({
 		preheader: 'Dein Technikpool-Passwort wurde geändert.',
 		bodyHtml: `
-			<p style="margin:0 0 16px">${greeting}</p>
+			<p style="margin:0 0 16px">${escapeHtml(greeting)}</p>
 			<p style="margin:0">
 				dein Passwort für Technikpool wurde soeben geändert. Falls du das nicht warst,
 				melde dich bitte umgehend bei uns.

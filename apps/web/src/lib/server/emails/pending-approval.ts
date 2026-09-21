@@ -1,4 +1,4 @@
-import { renderButton, renderEmailLayout } from './layout';
+import { escapeHtml, renderButton, renderEmailLayout } from './layout';
 
 export function pendingApprovalEmail(opts: {
 	name?: string | null;
@@ -17,11 +17,11 @@ export function pendingApprovalEmail(opts: {
 	const html = renderEmailLayout({
 		preheader: `${opts.requestingOrgName} möchte Ausrüstung von ${opts.ownerOrgName} ausleihen.`,
 		bodyHtml: `
-			<p style="margin:0 0 16px">${greeting}</p>
+			<p style="margin:0 0 16px">${escapeHtml(greeting)}</p>
 			<p style="margin:0 0 16px">
-				<strong>${opts.requestingOrgName}</strong> möchte Ausrüstung von
-				<strong>${opts.ownerOrgName}</strong> für die Produktion
-				<strong>${opts.productionName}</strong> ausleihen. ${itemText} auf deine Freigabe.
+				<strong>${escapeHtml(opts.requestingOrgName)}</strong> möchte Ausrüstung von
+				<strong>${escapeHtml(opts.ownerOrgName)}</strong> für die Produktion
+				<strong>${escapeHtml(opts.productionName)}</strong> ausleihen. ${itemText} auf deine Freigabe.
 			</p>
 			${renderButton('Anfrage ansehen', opts.url)}
 			<p class="tp-muted" style="margin:0;color:#71717a">

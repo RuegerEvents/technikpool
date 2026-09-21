@@ -1,4 +1,4 @@
-import { renderButton, renderEmailLayout } from './layout';
+import { escapeHtml, renderButton, renderEmailLayout } from './layout';
 
 export function emailVerificationEmail(opts: { name?: string | null; url: string }) {
 	const greeting = opts.name ? `Hallo ${opts.name},` : 'Hallo,';
@@ -6,7 +6,7 @@ export function emailVerificationEmail(opts: { name?: string | null; url: string
 	const html = renderEmailLayout({
 		preheader: 'Bestätige deine E-Mail-Adresse für Technikpool.',
 		bodyHtml: `
-			<p style="margin:0 0 16px">${greeting}</p>
+			<p style="margin:0 0 16px">${escapeHtml(greeting)}</p>
 			<p style="margin:0 0 16px">
 				bitte bestätige deine E-Mail-Adresse, um dein Technikpool-Konto vollständig
 				zu aktivieren.

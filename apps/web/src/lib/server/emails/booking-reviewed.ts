@@ -1,4 +1,4 @@
-import { renderButton, renderEmailLayout } from './layout';
+import { escapeHtml, renderButton, renderEmailLayout } from './layout';
 
 export function bookingReviewedEmail(opts: {
 	name?: string | null;
@@ -11,10 +11,10 @@ export function bookingReviewedEmail(opts: {
 	const html = renderEmailLayout({
 		preheader: `${opts.ownerOrgName} hat eure Anfragen für "${opts.productionName}" bearbeitet.`,
 		bodyHtml: `
-			<p style="margin:0 0 16px">${greeting}</p>
+			<p style="margin:0 0 16px">${escapeHtml(greeting)}</p>
 			<p style="margin:0 0 16px">
-				<strong>${opts.ownerOrgName}</strong> hat alle offenen Ausleihanfragen für die
-				Produktion <strong>${opts.productionName}</strong> bearbeitet.
+				<strong>${escapeHtml(opts.ownerOrgName)}</strong> hat alle offenen Ausleihanfragen für die
+				Produktion <strong>${escapeHtml(opts.productionName)}</strong> bearbeitet.
 			</p>
 			${renderButton('Produktion ansehen', opts.url)}
 		`

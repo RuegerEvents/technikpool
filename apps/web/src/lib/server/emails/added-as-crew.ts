@@ -1,4 +1,4 @@
-import { renderButton, renderEmailLayout } from './layout';
+import { escapeHtml, renderButton, renderEmailLayout } from './layout';
 
 const dateFormatter = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium' });
 
@@ -21,10 +21,10 @@ export function addedAsCrewEmail(opts: {
 	const html = renderEmailLayout({
 		preheader: `Du wurdest der Produktion "${opts.productionName}" als Crew hinzugefügt.`,
 		bodyHtml: `
-			<p style="margin:0 0 16px">${greeting}</p>
+			<p style="margin:0 0 16px">${escapeHtml(greeting)}</p>
 			<p style="margin:0 0 16px">
-				du wurdest der Produktion <strong>${opts.productionName}</strong>
-				${opts.role ? `als <strong>${opts.role}</strong>` : ''} hinzugefügt.
+				du wurdest der Produktion <strong>${escapeHtml(opts.productionName)}</strong>
+				${opts.role ? `als <strong>${escapeHtml(opts.role)}</strong>` : ''} hinzugefügt.
 				${dateRange ? `Zeitraum: ${dateRange}.` : ''}
 			</p>
 			${renderButton('Produktion ansehen', opts.url)}
