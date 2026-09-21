@@ -8,7 +8,11 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { ProductEditor } from '$lib/components/ui/product-editor';
+	import {
+		ProductActions,
+		ProductEditor,
+		type ProductEditorActions
+	} from '$lib/components/ui/product-editor';
 	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
 	import {
 		getAssets,
@@ -37,6 +41,12 @@
 	let unitCounts = $derived(new Map(catalog.map((p) => [p.id, p.assetCount])));
 	let units = $derived(allAssets.filter((a) => a.productId === productId));
 	let severalOrgs = $derived(new Set(units.map((a) => a.organizationId)).size > 1);
+
+	// What happens to the product as a whole sits up by its name; the card below
+	// is for its fields. The dialogs stay in the editor, which saves pending
+	// edits before a merge or a copy.
+	let editor = $state<ReturnType<typeof ProductEditor>>();
+	let actions = $state<ProductEditorActions>();
 </script>
 
 <svelte:head><title>{product?.name ?? 'Product'} | Technikpool</title></svelte:head>
@@ -59,11 +69,24 @@
 					{/if}
 				</div>
 			</div>
-			<Button icon="back" variant="outline" href={resolve('/products')}>Back to Products</Button>
+			<div class="flex flex-wrap items-center gap-2">
+				<Button icon="back" variant="ghost" href={resolve('/products')}>Back to Products</Button>
+				{#if actions}
+					<ProductActions
+						{actions}
+						onDuplicate={() => editor?.openDuplicate()}
+						onMerge={() => editor?.openMerge()}
+						onDelete={() => editor?.openDelete()}
+					/>
+				{/if}
+			</div>
 		</div>
 
 		<div class="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
 			<ProductEditor
+				bind:this={editor}
+				bind:actions
+				showActions={false}
 				{product}
 				{orgs}
 				{categories}

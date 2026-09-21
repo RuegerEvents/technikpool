@@ -188,6 +188,7 @@ msgstr "Crew"
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 #: src/routes/+page.svelte
 #: src/routes/admin/connectors/+page.svelte
@@ -3462,8 +3463,10 @@ msgstr "Save new password"
 msgid "Duplicating <0/> — organization, location, manufacturer and product are prefilled. Serial number and asset tag are left blank."
 msgstr "Duplicating <0/> — organization, location, manufacturer and product are prefilled. Serial number and asset tag are left blank."
 
-#~ msgid "Duplicate"
-#~ msgstr "Duplicate"
+#: src/lib/components/ui/product-editor/product-actions.svelte
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Duplicate"
+msgstr "Duplicate"
 
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/new/+page.svelte
@@ -4986,9 +4989,8 @@ msgid_plural "Merged — # units moved"
 msgstr[0] "Merged — # unit moved"
 msgstr[1] "Merged — # units moved"
 
-#: src/lib/components/ui/product-editor/product-editor.svelte
-msgid "Merge duplicate…"
-msgstr "Merge duplicate…"
+#~ msgid "Merge duplicate…"
+#~ msgstr "Merge duplicate…"
 
 #: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Merge duplicate product"
@@ -5127,6 +5129,7 @@ msgstr "Convert bundle"
 msgid "Bundle converted — {0} attached"
 msgstr "Bundle converted — {0} attached"
 
+#: src/lib/components/ui/product-editor/product-actions.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
@@ -5168,7 +5171,7 @@ msgstr "This permanently removes the catalogue entry. Products with any units, i
 msgid "Delete <0/>?"
 msgstr "Delete <0/>?"
 
-#: src/lib/components/ui/product-editor/product-editor.svelte
+#: src/lib/components/ui/product-editor/product-actions.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Delete product"
 msgstr "Delete product"
@@ -7261,6 +7264,7 @@ msgstr "Optional, and how two kits of one type are told apart."
 msgid "Every unit in the copy is moved here. Leave it empty to keep each where it is."
 msgstr "Every unit in the copy is moved here. Leave it empty to keep each where it is."
 
+#: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Duplicating…"
 msgstr "Duplicating…"
@@ -8700,17 +8704,14 @@ msgstr "Groups of assets that travel together. <0>How is this different from acc
 msgid "Delete this empty bundle type"
 msgstr "Delete this empty bundle type"
 
-#: src/lib/components/ui/product-editor/product-editor.svelte
-msgid "Only a product nobody holds units of can be deleted. Delete or decommission its units first, or merge it into the product it duplicates."
-msgstr "Only a product nobody holds units of can be deleted. Delete or decommission its units first, or merge it into the product it duplicates."
+#~ msgid "Only a product nobody holds units of can be deleted. Delete or decommission its units first, or merge it into the product it duplicates."
+#~ msgstr "Only a product nobody holds units of can be deleted. Delete or decommission its units first, or merge it into the product it duplicates."
 
-#: src/lib/components/ui/product-editor/product-editor.svelte
-msgid "Only whoever added this product, an admin of every organization holding units of it, or a system admin can delete it."
-msgstr "Only whoever added this product, an admin of every organization holding units of it, or a system admin can delete it."
+#~ msgid "Only whoever added this product, an admin of every organization holding units of it, or a system admin can delete it."
+#~ msgstr "Only whoever added this product, an admin of every organization holding units of it, or a system admin can delete it."
 
-#: src/lib/components/ui/product-editor/product-editor.svelte
-msgid "Delete this product from the catalog."
-msgstr "Delete this product from the catalog."
+#~ msgid "Delete this product from the catalog."
+#~ msgstr "Delete this product from the catalog."
 
 #. 0: p0
 #: src/lib/error-messages.svelte.ts
@@ -9015,3 +9016,35 @@ msgstr[1] "and # more changes"
 
 #~ msgid "Broken devices"
 #~ msgstr "Broken devices"
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Product duplicated"
+msgstr "Product duplicated"
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Duplicate product"
+msgstr "Duplicate product"
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Name of the copy"
+msgstr "Name of the copy"
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Manufacturer, category, picture, connectors and cable details are copied. Prices and units are not. Everything else can be changed on the new product's page."
+msgstr "Manufacturer, category, picture, connectors and cable details are copied. Prices and units are not. Everything else can be changed on the new product's page."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "A new catalogue entry that starts as a copy of <0/>."
+msgstr "A new catalogue entry that starts as a copy of <0/>."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Still has units. Retire them, or merge it into the product it duplicates."
+msgstr "Still has units. Retire them, or merge it into the product it duplicates."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Only whoever added it, an admin of every organization holding it, or a system admin."
+msgstr "Only whoever added it, an admin of every organization holding it, or a system admin."
+
+#: src/lib/components/ui/product-editor/product-actions.svelte
+msgid "<0/> Merge duplicate…"
+msgstr "<0/> Merge duplicate…"

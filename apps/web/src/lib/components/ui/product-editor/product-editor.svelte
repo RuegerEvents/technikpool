@@ -1,3 +1,13 @@
+<script module lang="ts">
+	/** What the editor's own action buttons would show — for a page that puts them elsewhere. */
+	export type ProductEditorActions = {
+		canEdit: boolean;
+		canDuplicate: boolean;
+		/** Why Delete is refused, or null when it isn't. */
+		deleteBlockedReason: string | null;
+	};
+</script>
+
 <script lang="ts">
 	// Everything about one catalog product that can be changed, as one card with
 	// one Save: name, manufacturer, category, cable or license, picture, the
@@ -10,11 +20,13 @@
 	import type { Snippet } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
+	import { goto } from '$app/navigation';
 	import { categoryLabel } from '$lib/category';
 	import { canWrite } from '$lib/roles';
 	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
 	import {
 		deleteProduct,
+		duplicateProduct,
 		getCategories,
 		getManufacturers,
 		getProductCatalog,
@@ -31,6 +43,7 @@
 	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { Modal } from '$lib/components/ui/modal';
+	import ProductActions from './product-actions.svelte';
 	import { productLabel } from '$lib/product-label';
 	import {
 		manufacturerIdOf,
@@ -84,6 +97,13 @@
 		headerExtra?: Snippet;
 		/** The footer's contents. Without them, the footer is a Save button. */
 		footerActions?: Snippet;
+		/**
+		 * Whether Duplicate, Merge and Delete sit in the card's header. A page
+		 * that shows them itself turns this off, reads `actions` and calls
+		 * `openDuplicate` / `openMerge` / `openDelete`.
+		 */
+		showActions?: boolean;
+		actions?: ProductEditorActions;
 		/** Link to the product's own page — pointless on that page itself. */
 		showProductLink?: boolean;
 		idPrefix?: string;
@@ -110,6 +130,8 @@
 		modalOpen = $bindable(false),
 		headerExtra,
 		footerActions,
+		showActions = true,
+		actions = $bindable(),
 		showProductLink = false,
 		idPrefix = 'product-editor',
 		onSaved,
@@ -347,7 +369,7 @@
 	let keepsOwnCable = $derived(!!survivor && !!absorbed && isCable(survivor) && isCable(absorbed));
 
 	/** With a pick where the duplicate is already known — the cable warning hands one over. */
-	function openMerge(pick: { id: string; name: string } | null = null) {
+	export function openMerge(pick: { id: string; name: string } | null = null) {
 		mergePick = pick;
 		keepCurrent = true;
 		mergeOpen = true;
@@ -379,6 +401,28 @@
 	let deleteOpen = $state(false);
 	let deleting = $state(false);
 
+	export function openDelete() {
+		deleteOpen = true;
+	}
+
+	let deleteBlockedReason = $derived(
+		product.hasAssets
+			? 'Still has units. Retire them, or merge it into the product it duplicates.'
+			: identityLocked
+				? 'Only whoever added it, an admin of every organization holding it, or a system admin.'
+				: null
+	);
+
+	$effect(() => {
+		const next = { canEdit, canDuplicate: canContribute, deleteBlockedReason };
+		if (
+			actions?.canEdit !== next.canEdit ||
+			actions.canDuplicate !== next.canDuplicate ||
+			actions.deleteBlockedReason !== next.deleteBlockedReason
+		)
+			actions = next;
+	});
+
 	async function doDelete() {
 		if (product.hasAssets || deleting) return;
 		const deletedId = product.id;
@@ -398,8 +442,38 @@
 		}
 	}
 
+	// ── Duplicating ───────────────────────────────────────────────────────────
+	// The next length of a lead, the variant of a fixture: a new row that starts
+	// with everything this one already says, and a name that says what differs.
+
+	let duplicateOpen = $state(false);
+	let duplicateName = $state('');
+	let duplicating = $state(false);
+
+	export function openDuplicate() {
+		duplicateName = product.name;
+		duplicateOpen = true;
+	}
+
+	async function doDuplicate() {
+		if (!duplicateName.trim() || duplicating) return;
+		// The copy is made from what is stored, so edits in the form go first.
+		if (isDirty && !(await save())) return;
+		duplicating = true;
+		try {
+			const { id } = await duplicateProduct({ productId: product.id, name: duplicateName });
+			duplicateOpen = false;
+			toast.success('Product duplicated');
+			await goto(resolve(`/products/${id}`));
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			duplicating = false;
+		}
+	}
+
 	$effect(() => {
-		const open = mergeOpen || deleteOpen;
+		const open = mergeOpen || deleteOpen || duplicateOpen;
 		if (modalOpen !== open) modalOpen = open;
 	});
 </script>
@@ -434,30 +508,14 @@
 				</Card.Description>
 			</div>
 			<div class="flex flex-wrap items-center gap-3">
-				{#if canEdit}
-					<!-- Shown disabled rather than hidden: a button that is simply not
-					     there reads as "this app cannot delete products", and the reason
-					     it is refused is the one thing worth saying.
-					     The title sits on the wrapper, not the button: a disabled button
-					     fires no mouse events, so its own tooltip never opens — which
-					     would hide the explanation exactly when it is needed. -->
-					<span
-						title={product.hasAssets
-							? 'Only a product nobody holds units of can be deleted. Delete or decommission its units first, or merge it into the product it duplicates.'
-							: identityLocked
-								? 'Only whoever added this product, an admin of every organization holding units of it, or a system admin can delete it.'
-								: 'Delete this product from the catalog.'}
-					>
-						<Button
-							variant="destructive"
-							size="sm"
-							disabled={product.hasAssets || identityLocked}
-							onclick={() => (deleteOpen = true)}>Delete product</Button
-						>
-					</span>
-					<Button icon="merge" variant="outline" size="sm" onclick={() => openMerge()}
-						>Merge duplicate…</Button
-					>
+				{#if showActions && actions}
+					<ProductActions
+						{actions}
+						size="sm"
+						onDuplicate={openDuplicate}
+						onMerge={() => openMerge()}
+						onDelete={openDelete}
+					/>
 				{/if}
 				{@render headerExtra?.()}
 			</div>
@@ -676,6 +734,48 @@
 			disabled={product.hasAssets || deleting}
 		>
 			{deleting ? 'Deleting…' : 'Delete product'}
+		</Button>
+	{/snippet}
+</Modal>
+
+<Modal bind:open={duplicateOpen} title="Duplicate product" dismissible={!duplicating}>
+	<!-- Body first, snippets after: see CLAUDE.md, wuchale. -->
+	{#snippet children()}
+		<form
+			class="space-y-2"
+			onsubmit={(e) => {
+				e.preventDefault();
+				doDuplicate();
+			}}
+		>
+			<label for="{idPrefix}-duplicateName" class="text-sm font-medium">Name of the copy</label>
+			<input
+				id="{idPrefix}-duplicateName"
+				bind:value={duplicateName}
+				disabled={duplicating}
+				class="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+			/>
+			<p class="text-sm text-muted-foreground">
+				Manufacturer, category, picture, connectors and cable details are copied. Prices and units
+				are not. Everything else can be changed on the new product's page.
+			</p>
+		</form>
+	{/snippet}
+
+	{#snippet description()}
+		A new catalogue entry that starts as a copy of
+		<span class="font-medium">{productLabel(product)}</span>.
+	{/snippet}
+
+	{#snippet footer()}
+		<Button
+			icon="close"
+			variant="outline"
+			onclick={() => (duplicateOpen = false)}
+			disabled={duplicating}>Cancel</Button
+		>
+		<Button icon="copy" onclick={doDuplicate} disabled={!duplicateName.trim() || duplicating}>
+			{duplicating ? 'Duplicating…' : 'Duplicate'}
 		</Button>
 	{/snippet}
 </Modal>

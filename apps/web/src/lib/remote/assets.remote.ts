@@ -2247,6 +2247,81 @@ export const deleteProduct = command(v.string(), async (productId: string) => {
 	return { id: product.id };
 });
 
+const duplicateProductSchema = v.object({
+	productId: v.string(),
+	name: v.pipe(v.string(), v.trim(), v.minLength(1))
+});
+
+/**
+ * A new catalogue row that starts as a copy of another: for the variant of a
+ * device or the next length of a lead, where everything but one detail is
+ * already typed in. Adding a product is open to anyone who works in an org,
+ * and so is this — the copy is theirs, created by them.
+ *
+ * Prices are not copied: they are each org's own, and a variant is exactly the
+ * thing whose price differs.
+ */
+export const duplicateProduct = command(duplicateProductSchema, async (input) => {
+	const user = await requireAuth();
+	if (!(await isSystemAdmin(user.id)) && (await writableOrgIds(user.id)).length === 0) {
+		appError(403, 'product_edit_forbidden');
+	}
+
+	const source = await prisma.product.findUniqueOrThrow({
+		where: { id: input.productId },
+		include: {
+			ways: { orderBy: { sortOrder: 'asc' } },
+			ports: { orderBy: { sortOrder: 'asc' } }
+		}
+	});
+
+	const copy = await prisma.product.create({
+		data: {
+			name: input.name,
+			manufacturerId: source.manufacturerId,
+			categoryId: source.categoryId,
+			// Stored objects are never deleted, so two rows can share one picture.
+			imagePath: source.imagePath,
+			cableType: source.cableType,
+			connectorAId: source.connectorAId,
+			connectorBId: source.connectorBId,
+			lengthCm: source.lengthCm,
+			isLicense: source.isLicense,
+			createdById: user.id,
+			ways: {
+				create: source.ways.map((w) => ({
+					count: w.count,
+					connectorAId: w.connectorAId,
+					connectorBId: w.connectorBId,
+					cableType: w.cableType,
+					sortOrder: w.sortOrder
+				}))
+			},
+			ports: {
+				create: source.ports.map((port) => ({
+					connectorId: port.connectorId,
+					count: port.count,
+					label: port.label,
+					sortOrder: port.sortOrder
+				}))
+			}
+		},
+		select: { id: true }
+	});
+
+	const orgIds = await userOrgIds(user.id);
+	await Promise.all([
+		getProducts().refresh(),
+		getProducts(source.manufacturerId).refresh(),
+		getProductCatalog().refresh(),
+		getCableVocabulary().refresh(),
+		getConnectorUsage().refresh(),
+		...orgIds.map((id) => getProductCatalog(id).refresh())
+	]);
+
+	return { id: copy.id };
+});
+
 // ── Merging duplicate products ───────────────────────────────────────────────
 // Nothing stops two rows describing the same device: there is no unique
 // constraint on (manufacturer, name), and the create-a-product path is a free
