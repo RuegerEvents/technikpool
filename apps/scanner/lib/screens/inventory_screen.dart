@@ -5,6 +5,7 @@ import '../api/client.dart';
 import '../api/generated/export.dart';
 import '../cable_format.dart';
 import '../l10n/generated/app_localizations.dart';
+import '../product_label.dart';
 import '../state/providers.dart';
 import '../widgets/category_pill.dart';
 
@@ -194,7 +195,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   final asset = _assets[i];
                   return ListTile(
                     title: Text(
-                      '${asset.product.manufacturerName} ${asset.product.name}',
+                      productLabel(
+                        asset.product.manufacturerName,
+                        asset.product.name,
+                      ),
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     subtitle: Padding(

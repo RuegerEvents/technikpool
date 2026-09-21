@@ -193,11 +193,11 @@ class DemoData {
 
   /// A cable, so the structured half of a product is visible somewhere: the
   /// name says "XLR 10 m" and `cable` says the same thing in a form a filter
-  /// can read. Filed under the generic manufacturer, like every cable is.
+  /// can read. No manufacturer, like most cables: the name is the whole label.
   static const _xlrCable = Product(
     id: 'prd_demo_xlr',
     name: 'XLR 10 m',
-    manufacturerName: 'Generisch',
+    manufacturerName: null,
     category: Category(
       id: 'catg_demo_sound',
       name: 'Ton',
@@ -219,7 +219,7 @@ class DemoData {
   static const _loom = Product(
     id: 'prd_demo_loom',
     name: '6× Schuko + DMX 20 m',
-    manufacturerName: 'Generisch',
+    manufacturerName: null,
     category: Category(
       id: 'catg_demo_light',
       name: 'Licht',

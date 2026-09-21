@@ -8,6 +8,7 @@ import '../api/client.dart';
 import '../api/generated/export.dart';
 import '../l10n/labels.dart';
 import '../l10n/generated/app_localizations.dart';
+import '../product_label.dart';
 import '../scan/camera_scan_screen.dart';
 import '../state/providers.dart';
 import '../theme.dart';
@@ -102,7 +103,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
         _Entry(
           tag: tag,
           ok: true,
-          title: '${result.asset.manufacturerName} ${result.asset.productName}',
+          title: productLabel(result.asset.manufacturerName, result.asset.productName),
           detail: returned.isEmpty
               ? Labels.scanAction(l10n, result.action)
               : '${Labels.scanAction(l10n, result.action)} · '

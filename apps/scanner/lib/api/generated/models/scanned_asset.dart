@@ -20,7 +20,9 @@ class ScannedAsset {
   final String id;
   final String assetTag;
   final String productName;
-  final String manufacturerName;
+
+  /// Null when the product has no maker; see Product.manufacturerName.
+  final String? manufacturerName;
 
   Map<String, Object?> toJson() => _$ScannedAssetToJson(this);
 }

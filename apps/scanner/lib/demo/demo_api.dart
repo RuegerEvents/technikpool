@@ -121,7 +121,7 @@ class DemoBackend {
       if (locationId != null && asset.location.id != locationId) return false;
       if (productionId != null && _checkedOutTo[asset.id]?.id != productionId) return false;
       if (search == null || search.isEmpty) return true;
-      return '${asset.product.manufacturerName} ${asset.product.name} '
+      return '${asset.product.manufacturerName ?? ''} ${asset.product.name} '
               '${asset.assetTag ?? ''} ${asset.serialNumber ?? ''}'
           .toLowerCase()
           .contains(search);

@@ -8,6 +8,7 @@ import '../api/generated/export.dart';
 import '../cable_format.dart';
 import '../l10n/labels.dart';
 import '../l10n/generated/app_localizations.dart';
+import '../product_label.dart';
 import '../scan/camera_scan_screen.dart';
 import '../demo/demo_data.dart';
 import '../state/providers.dart';
@@ -149,7 +150,7 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
       padding: const EdgeInsets.all(16),
       children: [
         Text(
-          '${asset.product.manufacturerName} ${asset.product.name}',
+          productLabel(asset.product.manufacturerName, asset.product.name),
           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),

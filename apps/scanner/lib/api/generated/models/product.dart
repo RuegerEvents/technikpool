@@ -24,7 +24,11 @@ class Product {
   
   final String id;
   final String name;
-  final String manufacturerName;
+
+  /// Null for a product nobody makes in particular — a Schuko lead, a.
+  /// generic laptop. Show the product name alone then, not a placeholder.
+  ///
+  final String? manufacturerName;
   final Category category;
   final String? imageUrl;
 
