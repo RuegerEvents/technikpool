@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.3.1",
+    "date": "2026-09-21",
+    "en": [
+      "Equipment without a particular manufacturer — a Schuko lead, a no-name laptop — is shown by its name alone, with no \"Generisch\" in front of it."
+    ],
+    "de": [
+      "Geräte ohne bestimmten Hersteller — ein Schukokabel, ein No-Name-Laptop — erscheinen nur mit ihrem Namen, ohne vorangestelltes „Generisch“."
+    ]
+  },
+  {
     "version": "1.3.0",
     "date": "2026-09-20",
     "en": [
