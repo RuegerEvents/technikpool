@@ -799,6 +799,7 @@ export const approveProductionItem = command(v.string(), async (itemId: string) 
 		await getProduction(item.productionId).refresh();
 	}
 	await getPendingApprovals(item.asset.organizationId).refresh();
+	await getAwaitingApprovals().refresh();
 	return updated;
 });
 
@@ -846,6 +847,7 @@ export const declineProductionItem = command(v.string(), async (itemId: string) 
 		await getProduction(item.productionId).refresh();
 	}
 	await getPendingApprovals(item.asset.organizationId).refresh();
+	await getAwaitingApprovals().refresh();
 	return updated;
 });
 
@@ -870,6 +872,50 @@ export const getPendingApprovals = query(v.string(), async (organizationId: stri
 		...item,
 		productionVisible: canSee(item.production)
 	}));
+});
+
+// The other side of `getPendingApprovals`: requests our productions made that
+// another org has not answered yet, one row per production and lender.
+export const getAwaitingApprovals = query(async () => {
+	const user = await requireAuth();
+	const items = await prisma.productionItem.findMany({
+		where: {
+			status: 'PENDING',
+			production: { ...(await productionReadWhere(user.id)), cancelledAt: null }
+		},
+		select: {
+			productionId: true,
+			production: { select: { name: true, startDate: true } },
+			asset: { select: { organization: { select: { id: true, name: true, shortName: true } } } }
+		},
+		orderBy: { production: { startDate: 'asc' } }
+	});
+
+	const groups = new Map<
+		string,
+		{
+			productionId: string;
+			productionName: string;
+			startDate: Date | null;
+			lenderOrg: string;
+			count: number;
+		}
+	>();
+	for (const item of items) {
+		const lender = item.asset.organization;
+		const key = `${item.productionId}:${lender.id}`;
+		const group = groups.get(key);
+		if (group) group.count++;
+		else
+			groups.set(key, {
+				productionId: item.productionId,
+				productionName: item.production.name,
+				startDate: item.production.startDate,
+				lenderOrg: orgLabel(lender),
+				count: 1
+			});
+	}
+	return [...groups.values()];
 });
 
 // ── Bundles in productions ────────────────────────────────────────────────────

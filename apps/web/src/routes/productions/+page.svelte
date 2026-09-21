@@ -12,6 +12,7 @@
 	import { plural, orgLabel } from '$lib/utils';
 	import { browser } from '$app/environment';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { Hourglass } from '@lucide/svelte';
 
 	const ORG_FILTER_STORAGE_KEY = 'productions.selectedOrgIds';
 	const urlOrgId = page.url.searchParams.get('org');
@@ -135,6 +136,12 @@
 		return 'upcoming';
 	}
 
+	// Requests to other orgs nobody has answered yet — the flip side of the
+	// dashboard's approvals queue, flagged so they are not forgotten.
+	function pendingCount(p: Production): number {
+		return p.items?.filter((i) => i.status === 'PENDING').length ?? 0;
+	}
+
 	function prodRowClass(p: Production): string {
 		const s = prodStatus(p);
 		if (s === 'past' || s === 'cancelled') return 'opacity-40';
@@ -192,6 +199,9 @@
 					<Card.Header>
 						<Card.Title class="flex flex-wrap items-center gap-2 text-lg">
 							<span class={prod.cancelledAt ? 'line-through' : ''}>{prod.name}</span>
+							{#if !prod.cancelledAt && pendingCount(prod) > 0}
+								{@render awaitingBadge(pendingCount(prod))}
+							{/if}
 							{#if prod.cancelledAt}
 								<span
 									class="rounded bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive"
@@ -222,6 +232,9 @@
 			{#snippet cell(prod, key)}
 				{#if key === 'name'}
 					<span class="font-medium {prod.cancelledAt ? 'line-through' : ''}">{prod.name}</span>
+					{#if !prod.cancelledAt && pendingCount(prod) > 0}
+						<span class="ml-2">{@render awaitingBadge(pendingCount(prod))}</span>
+					{/if}
 					{#if prod.cancelledAt}
 						<span
 							class="ml-2 rounded bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive"
@@ -251,3 +264,16 @@
 		{/if}
 	{/if}
 </div>
+
+{#snippet awaitingBadge(count: number)}
+	<span
+		class="inline-flex items-center gap-1 rounded bg-amber-500/15 px-1.5 py-0.5 align-middle text-xs font-medium text-amber-700 dark:text-amber-400"
+		title={plural(count, [
+			'# asset is waiting for approval by another organization',
+			'# assets are waiting for approval by another organization'
+		])}
+	>
+		<Hourglass aria-hidden="true" class="size-3" />
+		{count}
+	</span>
+{/snippet}

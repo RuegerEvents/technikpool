@@ -8,6 +8,7 @@
 		getPendingApprovals,
 		approveProductionItem,
 		declineProductionItem,
+		getAwaitingApprovals,
 		getDashboardStats
 	} from '$lib/remote/productions.remote';
 	import { toast } from 'svelte-sonner';
@@ -27,7 +28,8 @@
 		Users,
 		Building2,
 		Plus,
-		ClipboardCheck
+		ClipboardCheck,
+		Hourglass
 	} from '@lucide/svelte';
 
 	let { data } = $props();
@@ -49,6 +51,8 @@
 	let pendingQueries = $derived(active ? adminOrgs.map((o) => getPendingApprovals(o.id)) : []);
 	let pendingReady = $derived(pendingQueries.every((q) => q.ready));
 	let pending = $derived(pendingQueries.flatMap((q) => q.current ?? []));
+	let awaitingQuery = $derived(active ? getAwaitingApprovals() : null);
+	let awaiting = $derived(awaitingQuery?.current ?? []);
 	let statsQuery = $derived(active ? getDashboardStats() : null);
 	let stats = $derived(statsQuery?.current ?? null);
 
@@ -617,6 +621,40 @@
 				</div>
 			{/if}
 		</div>
+
+		<!-- The other side of Action Required: what our own productions asked
+		     other orgs for and are still waiting to hear about. Only shown when
+		     there is something, since nobody can act on it from here. -->
+		{#if awaiting.length > 0}
+			<div>
+				<h2 class="mb-4 text-xl font-semibold">Waiting for Approval</h2>
+				<Card.Root>
+					<div class="divide-y">
+						{#each awaiting as req (`${req.productionId}:${req.lenderOrg}`)}
+							<a
+								href={resolve(`/productions/${req.productionId}`)}
+								class="flex items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-muted/40"
+							>
+								<div class="flex min-w-0 items-center gap-3">
+									<Hourglass aria-hidden="true" class="size-4 shrink-0 text-amber-500" />
+									<div class="min-w-0">
+										<p class="truncate font-medium">{req.productionName}</p>
+										<p class="text-xs text-muted-foreground">
+											{plural(req.count, ['# asset', '# assets'])} from
+											<span class="font-medium text-foreground">{req.lenderOrg}</span>
+										</p>
+									</div>
+								</div>
+								<div class="flex shrink-0 items-center gap-4">
+									<span class="text-sm font-medium">{formatDate(req.startDate)}</span>
+									<ArrowRight class="size-4 text-muted-foreground" />
+								</div>
+							</a>
+						{/each}
+					</div>
+				</Card.Root>
+			</div>
+		{/if}
 
 		<!-- What's new. Last on the page on purpose: it is the one section nobody
 		     has to act on, and a release someone already read should not push the

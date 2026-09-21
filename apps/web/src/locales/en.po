@@ -2347,6 +2347,7 @@ msgstr[0] "Request needs your attention"
 msgstr[1] "Requests need your attention"
 
 #: src/routes/+page.svelte
+#: src/routes/+page.svelte
 msgid "# asset"
 msgid_plural "# assets"
 msgstr[0] "# asset"
@@ -8827,3 +8828,18 @@ msgstr "The scanner app keeps its own list, under Settings."
 #: src/routes/+page.svelte
 msgid "All versions <0/>"
 msgstr "All versions <0/>"
+
+#. 0: plural(req.count, ['# asset', '# assets'])
+#: src/routes/+page.svelte
+msgid "{0} from <0/>"
+msgstr "{0} from <0/>"
+
+#: src/routes/+page.svelte
+msgid "Waiting for Approval"
+msgstr "Waiting for Approval"
+
+#: src/routes/productions/+page.svelte
+msgid "# asset is waiting for approval by another organization"
+msgid_plural "# assets are waiting for approval by another organization"
+msgstr[0] "# asset is waiting for approval by another organization"
+msgstr[1] "# assets are waiting for approval by another organization"

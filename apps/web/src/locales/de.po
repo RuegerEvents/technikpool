@@ -2347,6 +2347,7 @@ msgstr[0] "Anfrage erfordert Aufmerksamkeit"
 msgstr[1] "Anfragen erfordern Aufmerksamkeit"
 
 #: src/routes/+page.svelte
+#: src/routes/+page.svelte
 msgid "# asset"
 msgid_plural "# assets"
 msgstr[0] "# Gerät"
@@ -8827,3 +8828,18 @@ msgstr "Die Scanner-App führt ihre eigene Liste, unter Einstellungen."
 #: src/routes/+page.svelte
 msgid "All versions <0/>"
 msgstr "Alle Versionen <0/>"
+
+#. 0: plural(req.count, ['# asset', '# assets'])
+#: src/routes/+page.svelte
+msgid "{0} from <0/>"
+msgstr "{0} von <0/>"
+
+#: src/routes/+page.svelte
+msgid "Waiting for Approval"
+msgstr "Warten auf Freigabe"
+
+#: src/routes/productions/+page.svelte
+msgid "# asset is waiting for approval by another organization"
+msgid_plural "# assets are waiting for approval by another organization"
+msgstr[0] "# Gerät wartet auf Freigabe durch eine andere Organisation"
+msgstr[1] "# Geräte warten auf Freigabe durch eine andere Organisation"
