@@ -8853,3 +8853,15 @@ msgstr "Case"
 #: src/routes/products/[id]/product-detail.svelte
 msgid "↳ Accessory of {0} {1}"
 msgstr "↳ Zubehör von {0} {1}"
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "The cable details come along — type, ends, length and ways — since this entry has none."
+msgstr "Die Kabeldaten kommen mit — Typ, Enden, Länge und Wege —, da dieser Eintrag keine hat."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Both are cables: the surviving entry keeps its own type, ends, length and ways."
+msgstr "Beide sind Kabel: Der verbleibende Eintrag behält seinen eigenen Typ, seine Enden, Länge und Wege."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "It stays a software license, so the units' credentials remain available."
+msgstr "Es bleibt eine Softwarelizenz, die Zugangsdaten der Einheiten bleiben also verfügbar."

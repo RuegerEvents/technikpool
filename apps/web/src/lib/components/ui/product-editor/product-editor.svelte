@@ -27,7 +27,7 @@
 	import type { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import { sameWays } from '$lib/cable';
+	import { isCable, sameWays } from '$lib/cable';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { Modal } from '$lib/components/ui/modal';
@@ -162,10 +162,16 @@
 	let pricesFor = $state('');
 
 	// The draft follows whatever product is in front — an effect rather than a
-	// derived, because from there on it is the user's own state to edit.
+	// derived, because from there on it is the user's own state to edit. Keyed
+	// on the stored version as well as the id: a merge rewrites the survivor on
+	// the server (a picture, a cable taken over from the duplicate), and the
+	// refreshed catalog arrives after the command returns. Keyed on the id alone,
+	// the draft was seeded from the stale row, showed a change nobody made, and
+	// a Save wrote the old values back over what the merge had just brought in.
+	let productKey = $derived(`${product.id}@${new Date(product.updatedAt).getTime()}`);
 	$effect(() => {
-		if (product.id === draftFor) return;
-		draftFor = product.id;
+		if (productKey === draftFor) return;
+		draftFor = productKey;
 		manufacturer = { id: product.manufacturerId, name: product.manufacturer.name };
 		draft = {
 			name: product.name,
@@ -188,7 +194,7 @@
 		priceDrafts = Object.fromEntries(priceOrgs.map((org) => [org.id, storedPrice(org.id)]));
 	});
 
-	let seeded = $derived(draftFor === product.id);
+	let seeded = $derived(draftFor === productKey);
 
 	// What a cable is counts as identity here for the same reason the server
 	// treats it as such: it decides which product a unit belongs to.
@@ -325,6 +331,14 @@
 	let inheritsImage = $derived(
 		!!survivor && !!absorbed && !survivor.imagePath && !!absorbed.imagePath
 	);
+	// The same rule for what a cable is and for being a license — see
+	// `mergeProducts`. Said here for the case it guards against: picking the
+	// plain entry as the one to keep used to drop the cable altogether.
+	let inheritsCable = $derived(!!survivor && !!absorbed && !isCable(survivor) && isCable(absorbed));
+	let inheritsLicense = $derived(
+		!!survivor && !!absorbed && !survivor.isLicense && absorbed.isLicense
+	);
+	let keepsOwnCable = $derived(!!survivor && !!absorbed && isCable(survivor) && isCable(absorbed));
 
 	/** With a pick where the duplicate is already known — the cable warning hands one over. */
 	function openMerge(pick: { id: string; name: string } | null = null) {
@@ -588,6 +602,21 @@
 					</p>
 					{#if inheritsImage}
 						<p class="text-muted-foreground">The image comes along — this entry has none.</p>
+					{/if}
+					{#if inheritsCable}
+						<p class="text-muted-foreground">
+							The cable details come along — type, ends, length and ways — since this entry has
+							none.
+						</p>
+					{:else if keepsOwnCable}
+						<p class="text-muted-foreground">
+							Both are cables: the surviving entry keeps its own type, ends, length and ways.
+						</p>
+					{/if}
+					{#if inheritsLicense}
+						<p class="text-muted-foreground">
+							It stays a software license, so the units' credentials remain available.
+						</p>
 					{/if}
 					<p class="text-muted-foreground">
 						Purchase prices are each organization's own and move over with the merge — an

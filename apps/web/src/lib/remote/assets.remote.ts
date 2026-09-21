@@ -2244,11 +2244,11 @@ export const mergeProducts = command(
 		const [target, source] = await Promise.all([
 			prisma.product.findUniqueOrThrow({
 				where: { id: targetProductId },
-				include: { manufacturer: true }
+				include: { manufacturer: true, ways: { select: { id: true } } }
 			}),
 			prisma.product.findUniqueOrThrow({
 				where: { id: sourceProductId },
-				include: { manufacturer: true }
+				include: { manufacturer: true, ways: { select: { id: true } } }
 			})
 		]);
 
@@ -2292,8 +2292,25 @@ export const mergeProducts = command(
 		// which card the merge happened to be started from. Per-org prices are
 		// each org's own work for the same reason: a source row moves to the
 		// target unless that org already priced the target itself.
+		//
+		// What a cable is (type, ends, length, a loom's ways) goes the same way as
+		// the panel below: a target that is no cable takes the source's whole, one
+		// that is keeps its own, and two are never mixed. Otherwise merging a
+		// cable into a plain entry silently turned every unit into a non-cable
+		// and deleted the loom's ways with the source row. A license is a license
+		// whichever side said so — its units' credentials only show on one.
+		const inheritsCable = !isCable(target) && isCable(source);
 		const inherited = {
-			...(!target.imagePath && source.imagePath ? { imagePath: source.imagePath } : {})
+			...(!target.imagePath && source.imagePath ? { imagePath: source.imagePath } : {}),
+			...(inheritsCable
+				? {
+						cableType: source.cableType,
+						connectorA: source.connectorA,
+						connectorB: source.connectorB,
+						lengthCm: source.lengthCm
+					}
+				: {}),
+			...(source.isLicense && !target.isLicense ? { isLicense: true } : {})
 		};
 
 		const label = (p: { name: string; manufacturer: { name: string } }) =>
@@ -2321,6 +2338,12 @@ export const mergeProducts = command(
 			});
 			if (Object.keys(inherited).length > 0) {
 				await tx.product.update({ where: { id: targetProductId }, data: inherited });
+			}
+			if (inheritsCable) {
+				await tx.cableWay.updateMany({
+					where: { productId: sourceProductId },
+					data: { productId: targetProductId }
+				});
 			}
 			// A device's panel is the same kind of work as its picture: the target
 			// takes the source's where it has none of its own, and keeps its own
@@ -2407,7 +2430,9 @@ export const mergeProducts = command(
 
 		return {
 			movedAssets: moving.length,
-			inheritedImage: 'imagePath' in inherited
+			inheritedImage: 'imagePath' in inherited,
+			inheritedCable: inheritsCable,
+			inheritedLicense: 'isLicense' in inherited
 		};
 	}
 );
