@@ -1,5 +1,6 @@
 import type { RequestHandler } from './$types';
 import { prisma } from '$lib/server/auth';
+import { CABLE_ENDS } from '$lib/server/services/cable-ends';
 import { apiError, apiJson, handleApi, requireApiUser, type Schemas } from '$lib/server/api';
 import { isSystemAdmin, productionVisibility, userOrgIds } from '$lib/server/services/access';
 import { toAsset } from '$lib/server/services/api-mappers';
@@ -12,7 +13,7 @@ const MAX_LIMIT = 200;
 
 const ASSET_INCLUDE = {
 	product: {
-		include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+		include: { manufacturer: true, category: true, ...CABLE_ENDS }
 	},
 	location: { include: { address: true, organization: true } },
 	organization: true

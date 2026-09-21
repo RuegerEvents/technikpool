@@ -18,11 +18,10 @@ import type * as Prisma from "../internal/prismaNamespace.ts"
  * TRUE1 M, Power in". Per product, not per unit — every unit of a mixer has
  * the same panel.
  * 
- * Unlike `Product.connectorA/B` this is a foreign key. A cable end is part of
- * what the cable *is* and stays free text so registering one never stalls on
- * the catalogue; a device's panel is a description added afterwards, and a
- * real reference is what lets a connector rename reach it and lets the admin
- * page refuse to delete a row a device still uses.
+ * A foreign key like `Product.connectorAId`, and for the same reason: a real
+ * reference is what lets a connector rename reach it and lets the admin page
+ * refuse to delete a row a device still uses. Unlike a cable end it carries no
+ * name beside it — the panel is always read with its connector.
  */
 export type ProductPortModel = runtime.Types.Result.DefaultSelection<Prisma.$ProductPortPayload>
 

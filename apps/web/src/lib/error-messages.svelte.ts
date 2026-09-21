@@ -87,6 +87,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'This organization has no units of that product.';
 		case 'connector_exists':
 			return `A connector called "${p0}" already exists.`;
+		case 'connector_exists_different':
+			return `A connector called "${p0}" already exists and is described differently. Give the new connector its own name, or ask a system admin to change the existing one.`;
 		case 'connector_in_use':
 			return `${p0} product(s) still use this connector. Rename it instead of deleting it.`;
 		case 'connector_not_found':

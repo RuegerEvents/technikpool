@@ -5996,9 +5996,8 @@ msgstr "Neuer Stecker"
 msgid "A picture is worth more than the name here — a connector is quicker to recognise than to read."
 msgstr "Ein Bild sagt hier mehr als der Name — einen Stecker erkennt man schneller, als man ihn liest."
 
-#: src/lib/components/ui/connector-fields/connector-fields.svelte
-msgid "Schuko M"
-msgstr "Schuko M"
+#~ msgid "Schuko M"
+#~ msgstr "Schuko M"
 
 #: src/lib/components/ui/connector-fields/connector-fields.svelte
 msgid "Connector photo"
@@ -6009,21 +6008,18 @@ msgstr "Steckerfoto"
 msgid "Add connector"
 msgstr "Stecker hinzufügen"
 
-#: src/lib/components/ui/connector-fields/connector-fields.svelte
-msgid "Schuko"
-msgstr "Schuko"
+#~ msgid "Schuko"
+#~ msgstr "Schuko"
 
 #: src/lib/components/ui/connector-fields/connector-fields.svelte
 msgid "Connector name"
 msgstr "Steckername"
 
-#: src/lib/components/ui/connector-fields/connector-fields.svelte
-msgid "Mates with"
-msgstr "Passt zu"
+#~ msgid "Mates with"
+#~ msgstr "Passt zu"
 
-#: src/lib/components/ui/connector-fields/connector-fields.svelte
-msgid "The other half of the pair, named as a group: Schuko M and Schuko F are both <0>Schuko</0>. Leave it blank for a connector that only ever meets its own kind."
-msgstr "Die andere Hälfte des Paares, als Gruppe benannt: Schuko M und Schuko F sind beide <0>Schuko</0>. Leer lassen bei einem Stecker, der nur auf seinesgleichen trifft."
+#~ msgid "The other half of the pair, named as a group: Schuko M and Schuko F are both <0>Schuko</0>. Leave it blank for a connector that only ever meets its own kind."
+#~ msgstr "Die andere Hälfte des Paares, als Gruppe benannt: Schuko M und Schuko F sind beide <0>Schuko</0>. Leer lassen bei einem Stecker, der nur auf seinesgleichen trifft."
 
 #: src/lib/components/ui/connector-fields/connector-fields.svelte
 #: src/lib/components/ui/connector-fields/connector-fields.svelte
@@ -8895,3 +8891,16 @@ msgstr "Unterschiedliche Hersteller: Die Einheiten landen unter „Generisch / U
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 msgid "No manufacturer to pick: a cable is filed as Generic / unknown manufacturer, and a cable with the same ends and length already in the catalogue is reused rather than added twice."
 msgstr "Kein Hersteller nötig: Kabel werden als „Generisch / Unbekannter Hersteller“ abgelegt, und ein Kabel mit denselben Steckern und derselben Länge, das schon im Katalog ist, wird wiederverwendet statt doppelt angelegt."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "A connector called \"{0}\" already exists and is described differently. Give the new connector its own name, or ask a system admin to change the existing one."
+msgstr "Ein Stecker namens „{0}“ existiert bereits und ist anders beschrieben. Geben Sie dem neuen Stecker einen eigenen Namen oder bitten Sie einen Systemadmin, den bestehenden zu ändern."
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+msgid "Connector family"
+msgstr "Steckerfamilie"
+
+#: src/lib/components/ui/connector-fields/connector-fields.svelte
+msgid "The connector system, without which end it is: TRUE1 M and TRUE1 F are both <0>TRUE1</0>, not each other. Filled in from the first word of the name."
+msgstr "Das Stecksystem, ohne das Ende: TRUE1 M und TRUE1 F sind beide <0>TRUE1</0>, nicht das jeweils andere. Wird aus dem ersten Wort des Namens vorausgefüllt."

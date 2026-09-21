@@ -1,5 +1,6 @@
 import type { RequestHandler } from './$types';
 import { prisma } from '$lib/server/auth';
+import { CABLE_ENDS } from '$lib/server/services/cable-ends';
 import { apiError, apiJson, handleApi, requireApiUser, type Schemas } from '$lib/server/api';
 import { ApiResponse } from '$lib/server/api';
 import {
@@ -38,7 +39,7 @@ export const GET: RequestHandler = ({ locals, params }) =>
 			where: { id: match.assetId },
 			include: {
 				product: {
-					include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+					include: { manufacturer: true, category: true, ...CABLE_ENDS }
 				},
 				location: { include: { address: true, organization: true } },
 				organization: true

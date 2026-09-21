@@ -97,11 +97,12 @@ export type Manufacturer = Prisma.ManufacturerModel
 /**
  * Model Connector
  * A cable end as a row of its own, so it can carry a picture and so the pool
- * spells it one way. The product fields stay free text — `Product.connectorA`
- * is still a string, and a name nobody has used before is accepted and gets a
- * row on save. This table is what that name accumulates against, not a gate in
- * front of it: a warehouse at 22:00 with an unlisted connector must never be
- * stuck.
+ * spells it one way. Forms still send names — a name nobody has used before is
+ * accepted and gets a row on save (`ensureConnectors`), so this table is never
+ * a gate: a warehouse at 22:00 with an unlisted connector must never be stuck.
+ * But what a cable stores is the row: `Product.connectorAId/BId` and
+ * `CableWay.connectorAId/BId` are foreign keys, which is what lets a rename
+ * reach every cable and a delete see every use.
  */
 export type Connector = Prisma.ConnectorModel
 /**
@@ -110,11 +111,10 @@ export type Connector = Prisma.ConnectorModel
  * TRUE1 M, Power in". Per product, not per unit — every unit of a mixer has
  * the same panel.
  * 
- * Unlike `Product.connectorA/B` this is a foreign key. A cable end is part of
- * what the cable *is* and stays free text so registering one never stalls on
- * the catalogue; a device's panel is a description added afterwards, and a
- * real reference is what lets a connector rename reach it and lets the admin
- * page refuse to delete a row a device still uses.
+ * A foreign key like `Product.connectorAId`, and for the same reason: a real
+ * reference is what lets a connector rename reach it and lets the admin page
+ * refuse to delete a row a device still uses. Unlike a cable end it carries no
+ * name beside it — the panel is always read with its connector.
  */
 export type ProductPort = Prisma.ProductPortModel
 /**
@@ -123,9 +123,8 @@ export type ProductPort = Prisma.ProductPortModel
  * two or more of them — "6× Schuko M→F", "1× DMX XLR3 M→F". A plain lead has
  * none of these; its single pair is on the Product itself.
  * 
- * The ends are free text like `Product.connectorA/B`, and for the same reason
- * the comment on ProductPort gives: a cable end is part of what the cable *is*,
- * so registering one must never stall on the connector catalogue.
+ * The ends work like the product's: `connectorAId/BId`, foreign keys to the
+ * connector.
  */
 export type CableWay = Prisma.CableWayModel
 /**

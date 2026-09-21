@@ -2,6 +2,7 @@ import type { Schemas } from '$lib/server/api';
 import type { OrgRole } from '$lib/roles';
 import { imageSrc } from '$lib/images';
 import { isCable } from '$lib/cable';
+import { withCableNames } from '$lib/server/services/cable-ends';
 
 // Prisma payloads are deliberately not returned straight to clients: they carry
 // fields the API doesn't promise, and adding a column to the schema would
@@ -111,25 +112,25 @@ export function toCategory(category: CategoryRow): Schemas['Category'] {
 	};
 }
 
-type ProductRow = {
+type EndRefs = {
+	connectorARef: { name: string } | null;
+	connectorBRef: { name: string } | null;
+};
+
+/** A product as the handlers load it: `include: { manufacturer, category, ...CABLE_ENDS }`. */
+type ProductRow = EndRefs & {
 	id: string;
 	name: string;
 	imagePath: string | null;
 	cableType: string | null;
-	connectorA: string | null;
-	connectorB: string | null;
 	lengthCm: number | null;
-	ways: {
-		count: number;
-		cableType: string | null;
-		connectorA: string | null;
-		connectorB: string | null;
-	}[];
+	ways: (EndRefs & { count: number; cableType: string | null })[];
 	manufacturer: { name: string } | null;
 	category: CategoryRow;
 };
 
-export function toProduct(product: ProductRow): Schemas['Product'] {
+export function toProduct(row: ProductRow): Schemas['Product'] {
+	const product = withCableNames(row);
 	return {
 		id: product.id,
 		name: product.name,

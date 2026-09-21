@@ -54,7 +54,7 @@ export function isLoom(p: { ways: readonly unknown[] }): boolean {
  * made people invent a word for a lead that is fully described by "Schuko M to
  * Schuko F, 10 m".
  */
-export function isCable(p: Partial<CableAttrs> & { ways: readonly unknown[] }): boolean {
+export function isCable(p: CableAttrs & { ways: readonly unknown[] }): boolean {
 	return !!(p.cableType || p.connectorA || p.connectorB || p.lengthCm || p.ways.length);
 }
 
@@ -128,6 +128,16 @@ export function splitConnector(connector: string | null | undefined): {
 /** Just the connector, without which end of the pair it is. */
 export function connectorBase(connector: string | null | undefined): string {
 	return splitConnector(connector).base;
+}
+
+/**
+ * The family a connector is filed under until someone says otherwise: the
+ * first word of its name. "TRUE1 M" → "TRUE1", "XLR3 F" → "XLR3", "NL4" →
+ * "NL4". Only a prefill — "powerCON TRUE1" would come out as "powerCON", and the
+ * connector form is where that gets corrected.
+ */
+export function connectorFamily(name: string): string {
+	return name.trim().split(/\s+/)[0] ?? '';
 }
 
 /** What the naming and direction helpers need from the Connector table. */
@@ -439,7 +449,7 @@ export function waysKey(ways: readonly CableWayAttrs[]): string {
  * backwards is that warning's business, not a second product.
  */
 export function cableTwinKey(
-	p: Partial<CableAttrs> & WithWays & { categoryId?: string | null }
+	p: CableAttrs & WithWays & { categoryId?: string | null }
 ): string | null {
 	const cable = normalizeCable(p);
 	const ways = normalizeWays(p.ways);
@@ -455,9 +465,9 @@ export function cableTwinKey(
 }
 
 /** Every product sharing a `cableTwinKey` with at least one other, by key. */
-export function cableTwinGroups<
-	T extends Partial<CableAttrs> & WithWays & { categoryId?: string | null }
->(products: readonly T[]): Map<string, T[]> {
+export function cableTwinGroups<T extends CableAttrs & WithWays & { categoryId?: string | null }>(
+	products: readonly T[]
+): Map<string, T[]> {
 	const groups = new Map<string, T[]>();
 	for (const product of products) {
 		const key = cableTwinKey(product);

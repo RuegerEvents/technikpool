@@ -49,8 +49,16 @@ import {
 	type CableInput,
 	type CableWayAttrs
 } from '$lib/cable';
-import { ensureConnectors } from '$lib/server/services/connectors';
+import { connectorSlug, ensureConnectors } from '$lib/server/services/connectors';
 import { waySnapshot, writeWays, type WayInput } from '$lib/server/services/cable-ways';
+import {
+	CABLE_ENDS,
+	CABLE_WAYS,
+	assetWithCableNames,
+	withCableNames,
+	withEndNames,
+	withProductCableNames
+} from '$lib/server/services/cable-ends';
 import {
 	normalizePorts,
 	portSnapshot,
@@ -120,7 +128,7 @@ const ACCESSORIES_INCLUDE = {
 	where: ACTIVE_ASSET_WHERE,
 	include: {
 		product: {
-			include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+			include: { manufacturer: true, category: true, ...CABLE_ENDS }
 		}
 	},
 	orderBy: ASSET_ORDER_BY
@@ -153,7 +161,7 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 		where: { organizationId: { in: queryOrgIds }, ...ACTIVE_ASSET_WHERE },
 		include: {
 			product: {
-				include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+				include: { manufacturer: true, category: true, ...CABLE_ENDS }
 			},
 			location: true,
 			organization: true,
@@ -164,7 +172,7 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 		orderBy: ASSET_ORDER_BY
 	});
 	await Promise.all(assets.map((asset) => ensureAssetImageWithoutBreakingRead(asset)));
-	return assets;
+	return assets.map(assetWithCableNames);
 });
 
 /**
@@ -176,11 +184,11 @@ export const getRetiredAssets = query(v.optional(v.string()), async (organizatio
 	const user = await requireAuth();
 	const queryOrgIds = await scopedOrgIds(user.id, organizationId);
 
-	return await prisma.asset.findMany({
+	const assets = await prisma.asset.findMany({
 		where: { organizationId: { in: queryOrgIds }, ...RETIRED_ASSET_WHERE },
 		include: {
 			product: {
-				include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+				include: { manufacturer: true, category: true, ...CABLE_ENDS }
 			},
 			location: true,
 			organization: true,
@@ -193,6 +201,7 @@ export const getRetiredAssets = query(v.optional(v.string()), async (organizatio
 		},
 		orderBy: ASSET_ORDER_BY
 	});
+	return assets.map(assetWithCableNames);
 });
 
 export const getAsset = query(v.string(), async (assetId: string) => {
@@ -207,7 +216,7 @@ export const getAsset = query(v.string(), async (assetId: string) => {
 				include: {
 					manufacturer: true,
 					category: true,
-					ways: { orderBy: { sortOrder: 'asc' } },
+					...CABLE_ENDS,
 					ports: { include: { connector: true }, orderBy: { sortOrder: 'asc' } }
 				}
 			},
@@ -224,7 +233,7 @@ export const getAsset = query(v.string(), async (assetId: string) => {
 	}
 
 	await ensureAssetImageWithoutBreakingRead(asset);
-	return asset;
+	return assetWithCableNames(asset);
 });
 
 export const getInventorySummary = query(
@@ -535,11 +544,12 @@ export const getProducts = query(
 	v.optional(v.nullable(v.string())),
 	async (manufacturerId?: string | null) => {
 		await requireAuth();
-		return await prisma.product.findMany({
+		const products = await prisma.product.findMany({
 			where: manufacturerId === undefined ? undefined : { manufacturerId },
 			orderBy: { name: 'asc' },
-			include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+			include: { manufacturer: true, category: true, ...CABLE_ENDS }
 		});
+		return products.map((p) => withCableNames(p));
 	}
 );
 
@@ -561,12 +571,17 @@ export const getCableVocabulary = query(async () => {
 		where: {
 			OR: [
 				{ cableType: { not: null } },
-				{ connectorA: { not: null } },
-				{ connectorB: { not: null } },
+				{ connectorAId: { not: null } },
+				{ connectorBId: { not: null } },
 				{ lengthCm: { not: null } }
 			]
 		},
-		select: { cableType: true, connectorA: true, connectorB: true, categoryId: true },
+		select: {
+			cableType: true,
+			categoryId: true,
+			connectorARef: { select: { name: true } },
+			connectorBRef: { select: { name: true } }
+		},
 		orderBy: { createdAt: 'desc' }
 	});
 
@@ -592,8 +607,8 @@ export const getCableVocabulary = query(async () => {
 		// Newest first, so the first row of a type is the precedent.
 		if (!type || byType[type]) continue;
 		byType[type] = {
-			connectorA: row.connectorA,
-			connectorB: row.connectorB,
+			connectorA: row.connectorARef?.name ?? null,
+			connectorB: row.connectorBRef?.name ?? null,
 			categoryId: row.categoryId
 		};
 	}
@@ -646,7 +661,7 @@ export const getProductCatalog = query(v.optional(v.string()), async (organizati
 			// A loom's ways, and the device's panel. Carried here because the
 			// product editor is built on this row, on /products and on a product's
 			// own page alike.
-			ways: { orderBy: { sortOrder: 'asc' } },
+			...CABLE_ENDS,
 			ports: { include: { connector: true }, orderBy: { sortOrder: 'asc' } }
 		},
 		orderBy: [{ manufacturer: { name: 'asc' } }, { name: 'asc' }]
@@ -664,7 +679,7 @@ export const getProductCatalog = query(v.optional(v.string()), async (organizati
 	const accessoryCountOf = new Map(accessoryCounts.map((r) => [r.productId, r._count._all]));
 
 	return products.map(({ _count, assets, orgPrices, ...product }) => ({
-		...product,
+		...withCableNames(product),
 		assetCount: _count.assets,
 		accessoryCount: accessoryCountOf.get(product.id) ?? 0,
 		hasAssets: assets.length > 0,
@@ -697,19 +712,30 @@ const cableAttrsSchema = v.object({
 });
 
 /**
+ * Whether two connector names are the same connector — the way its slug files
+ * it. "schuko m" typed into a form is the "Schuko M" already stored, and is
+ * stored as that; it is no edit, and needs no right to make one.
+ */
+function sameConnectorName(a: string | null, b: string | null): boolean {
+	return (a ? connectorSlug(a) : null) === (b ? connectorSlug(b) : null);
+}
+
+/**
  * "The same cable" as a Prisma filter. The three text columns are free text, so
  * they are compared without case — "schuko m" typed by hand is the "Schuko M"
  * the picker wrote, and the forms' duplicate warning (`cableTwinKey`) already
- * reads them that way. A null stays a plain `null`, which Prisma reads as IS
+ * reads them that way. The ends are matched by their connector's slug, which is
+ * that same comparison. A null stays a plain `null`, which Prisma reads as IS
  * NULL: a blank end only ever matches a blank end.
  */
 function sameCableWhere(cable: CableInput): Prisma.ProductWhereInput {
 	const text = (value: string | null) =>
 		value === null ? null : { equals: value, mode: 'insensitive' as const };
+	const end = (name: string | null) => (name ? { is: { slug: connectorSlug(name) } } : null);
 	return {
 		cableType: text(cable.cableType),
-		connectorA: text(cable.connectorA),
-		connectorB: text(cable.connectorB),
+		connectorARef: end(cable.connectorA),
+		connectorBRef: end(cable.connectorB),
 		lengthCm: cable.lengthCm
 	};
 }
@@ -737,10 +763,10 @@ async function findSameCable(
 	}
 	const candidates = await prisma.product.findMany({
 		where: { manufacturerId, ...sameCableWhere(cable), ways: { some: {} } },
-		select: { id: true, ways: { orderBy: { sortOrder: 'asc' } } }
+		select: { id: true, ways: CABLE_WAYS }
 	});
 	const key = waysKey(ways);
-	return candidates.find((p) => waysKey(p.ways) === key) ?? null;
+	return candidates.find((p) => waysKey(p.ways.map((w) => withEndNames(w))) === key) ?? null;
 }
 
 /** The manufacturer/product half of a create form, which two commands now ask for. */
@@ -823,19 +849,26 @@ async function resolveProductRef(
 	if (data.newProductName && !productId) {
 		if (!data.categoryId) appError(400, 'category_required');
 		await prisma.category.findUniqueOrThrow({ where: { id: data.categoryId } });
+		// A loom's ends are ends like any other: they belong in the connector
+		// catalogue, where a picture and a department can be hung on them.
+		const connectors = await ensureConnectors([
+			cable?.connectorA,
+			cable?.connectorB,
+			...ways.flatMap((w) => [w.connectorA, w.connectorB])
+		]);
 		const p = await prisma.product.create({
 			data: {
 				name: data.newProductName,
 				manufacturerId,
 				categoryId: data.categoryId,
 				imagePath: data.newProductImagePath?.trim() || null,
-				...(cable ?? {}),
+				...(cable ? connectors.ends(cable) : {}),
 				// A cable is a physical thing; a product can't be both.
 				isLicense: !cable && !!data.newProductIsLicense,
 				createdById: userId,
 				ways:
 					ways.length > 0
-						? { create: ways.map((w, sortOrder) => ({ ...w, sortOrder })) }
+						? { create: ways.map((w, sortOrder) => ({ ...connectors.ends(w), sortOrder })) }
 						: undefined
 			}
 		});
@@ -852,16 +885,10 @@ async function resolveProductRef(
 		}
 		productId = p.id;
 		await getProducts(manufacturerId).refresh();
+		if (connectors.created.length > 0) await getConnectors().refresh();
 		if (data.newProductCable) {
-			const added = await ensureConnectors([
-				data.newProductCable.connectorA,
-				data.newProductCable.connectorB,
-				// A loom's ends are ends like any other: they belong in the connector
-				// catalogue, where a picture and a department can be hung on them.
-				...ways.flatMap((w) => [w.connectorA, w.connectorB])
-			]);
-			if (added.length > 0) await getConnectors().refresh();
 			await getCableVocabulary().refresh();
+			await getConnectorUsage().refresh();
 		}
 	}
 
@@ -1010,7 +1037,7 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 				},
 				include: {
 					product: {
-						include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+						include: { manufacturer: true, category: true, ...CABLE_ENDS }
 					},
 					location: true
 				}
@@ -1239,7 +1266,7 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 		await getBundleTemplates().refresh();
 	}
 
-	return assets;
+	return assets.map(withProductCableNames);
 });
 
 // ── Cables, by the box ───────────────────────────────────────────────────────
@@ -1286,8 +1313,20 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 	const resolved: { productId: string; name: string; productCreated: boolean; quantity: number }[] =
 		[];
 
+	// Resolved up front so every row compares and stores the catalogue's
+	// spelling: "schuko m" typed on one row and "Schuko M" picked on another are
+	// the same cable, and share one product.
+	const connectors = await ensureConnectors(
+		data.rows.flatMap((row) => [row.connectorA, row.connectorB])
+	);
+
 	for (const row of data.rows) {
-		const cable = normalizeCable(row);
+		const typed = normalizeCable(row);
+		const cable = {
+			...typed,
+			connectorA: connectors.name(typed.connectorA),
+			connectorB: connectors.name(typed.connectorB)
+		};
 		const manufacturerId = row.manufacturerId;
 
 		// The batch grid is for ordinary leads: one pair of ends per row. A loom is
@@ -1318,7 +1357,7 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 						name: row.name.trim(),
 						manufacturerId,
 						categoryId: row.categoryId,
-						...cable,
+						...connectors.ends(cable),
 						createdById: user.id
 					},
 					select: { id: true }
@@ -1355,10 +1394,6 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 		})
 	);
 
-	const addedConnectors = await ensureConnectors(
-		data.rows.flatMap((row) => [row.connectorA, row.connectorB])
-	);
-
 	const manufacturerIds = new Set(data.rows.map((row) => row.manufacturerId));
 	await refreshAfterUnitsCreated(
 		data.organizationId,
@@ -1370,7 +1405,8 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 		getProductCatalog().refresh(),
 		getProductCatalog(data.organizationId).refresh(),
 		getCableVocabulary().refresh(),
-		...(addedConnectors.length > 0 ? [getConnectors().refresh()] : [])
+		getConnectorUsage().refresh(),
+		...(connectors.created.length > 0 ? [getConnectors().refresh()] : [])
 	]);
 
 	return { created: created.length, rows: resolved };
@@ -1913,21 +1949,23 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 	const systemAdmin = await isSystemAdmin(user.id);
 	const managed = systemAdmin ? [] : await managedOrgIds(user.id);
 
-	const previousProduct = await prisma.product.findUniqueOrThrow({
-		where: { id: input.productId },
-		select: {
-			createdById: true,
-			name: true,
-			manufacturerId: true,
-			categoryId: true,
-			imagePath: true,
-			cableType: true,
-			connectorA: true,
-			connectorB: true,
-			lengthCm: true,
-			isLicense: true
-		}
-	});
+	const previousProduct = withEndNames(
+		await prisma.product.findUniqueOrThrow({
+			where: { id: input.productId },
+			select: {
+				createdById: true,
+				name: true,
+				manufacturerId: true,
+				categoryId: true,
+				imagePath: true,
+				cableType: true,
+				connectorARef: { select: { name: true } },
+				connectorBRef: { select: { name: true } },
+				lengthCm: true,
+				isLicense: true
+			}
+		})
+	);
 
 	// What a cable *is* — its type, its ends or its ways, its length — is identity
 	// in exactly the way a name is: it decides which product a unit belongs to,
@@ -1953,8 +1991,8 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		waysChanged ||
 		(nextCable !== undefined &&
 			(nextCable.cableType !== previousProduct.cableType ||
-				nextCable.connectorA !== previousProduct.connectorA ||
-				nextCable.connectorB !== previousProduct.connectorB ||
+				!sameConnectorName(nextCable.connectorA, previousProduct.connectorA) ||
+				!sameConnectorName(nextCable.connectorB, previousProduct.connectorB) ||
 				nextCable.lengthCm !== previousProduct.lengthCm));
 
 	// Identity (name, manufacturer, category) follows the same rule as
@@ -1997,8 +2035,16 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		appError(403, 'product_edit_forbidden');
 	}
 
+	// Only now, past the rights check: resolving a name nobody has used before
+	// creates its connector row. Stored and logged in the catalogue's spelling.
+	const connectors =
+		nextCable === undefined
+			? null
+			: await ensureConnectors([nextCable.connectorA, nextCable.connectorB]);
+	const storedCable = nextCable && connectors ? connectors.ends(nextCable) : undefined;
+
 	// Before the row, so the product that comes back already carries them.
-	if (waysChanged && nextWays) await writeWays(input.productId, nextWays);
+	const createdForWays = waysChanged && nextWays ? await writeWays(input.productId, nextWays) : [];
 
 	const product = await prisma.product.update({
 		where: { id: input.productId },
@@ -2007,10 +2053,10 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 			...(input.manufacturerId !== undefined ? { manufacturerId: input.manufacturerId } : {}),
 			...(input.categoryId ? { categoryId: input.categoryId } : {}),
 			imagePath: nextImagePath,
-			...(nextCable ?? {}),
+			...(storedCable ?? {}),
 			...(nextIsLicense !== undefined ? { isLicense: nextIsLicense } : {})
 		},
-		include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+		include: { manufacturer: true, category: true, ...CABLE_ENDS }
 	});
 
 	const changes = fieldChanges(previousProduct, {
@@ -2018,7 +2064,16 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		...(input.manufacturerId !== undefined ? { manufacturerId: input.manufacturerId } : {}),
 		...(input.categoryId ? { categoryId: input.categoryId } : {}),
 		...(nextImagePath !== undefined ? { imagePath: nextImagePath } : {}),
-		...(nextCable ?? {}),
+		// Names, not ids: the log is read by people, and a revert resolves the
+		// name again in case the row it once pointed at is gone.
+		...(nextCable && connectors
+			? {
+					cableType: nextCable.cableType,
+					connectorA: connectors.name(nextCable.connectorA),
+					connectorB: connectors.name(nextCable.connectorB),
+					lengthCm: nextCable.lengthCm
+				}
+			: {}),
 		...(nextIsLicense !== undefined ? { isLicense: nextIsLicense } : {})
 	});
 	// The loom is logged as the whole list on both sides, like a device's panel:
@@ -2037,16 +2092,11 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 	}
 
 	await refreshProductViews(product, previousProduct.manufacturerId, {
-		cable: cableChanged
-			? [
-					nextCable?.connectorA,
-					nextCable?.connectorB,
-					...(nextWays ?? []).flatMap((w) => [w.connectorA, w.connectorB])
-				]
-			: null
+		cable: cableChanged,
+		connectorsCreated: (connectors?.created.length ?? 0) + createdForWays.length > 0
 	});
 
-	return product;
+	return withCableNames(product);
 });
 
 const setProductPortsSchema = v.object({
@@ -2109,7 +2159,10 @@ export const setProductPorts = command(setProductPortsSchema, async (input) => {
 		data: { changes: [{ field: 'ports', from: before, to: await portSnapshot(product.id) }] }
 	});
 
-	await refreshProductViews(product, product.manufacturerId, { cable: null });
+	await refreshProductViews(product, product.manufacturerId, {
+		cable: false,
+		connectorsCreated: false
+	});
 	await getConnectorUsage().refresh();
 });
 
@@ -2121,17 +2174,17 @@ export const setProductPorts = command(setProductPortsSchema, async (input) => {
 async function refreshProductViews(
 	product: { id: string; manufacturerId: string | null },
 	previousManufacturerId: string | null,
-	changed: { cable: (string | null | undefined)[] | null }
+	changed: { cable: boolean; connectorsCreated: boolean }
 ) {
 	await getProducts(product.manufacturerId).refresh();
 	if (previousManufacturerId !== product.manufacturerId) {
 		await getProducts(previousManufacturerId).refresh();
 	}
 	await getProducts().refresh();
+	if (changed.connectorsCreated) await getConnectors().refresh();
 	if (changed.cable) {
-		const added = await ensureConnectors(changed.cable);
-		if (added.length > 0) await getConnectors().refresh();
 		await getCableVocabulary().refresh();
+		await getConnectorUsage().refresh();
 	}
 
 	const affectedAssets = await prisma.asset.findMany({
@@ -2187,6 +2240,7 @@ export const deleteProduct = command(v.string(), async (productId: string) => {
 		getProducts(product.manufacturerId).refresh(),
 		getProductCatalog().refresh(),
 		getCableVocabulary().refresh(),
+		getConnectorUsage().refresh(),
 		...orgIds.map((id) => getProductCatalog(id).refresh())
 	]);
 
@@ -2224,11 +2278,21 @@ export const mergeProducts = command(
 		const [target, source] = await Promise.all([
 			prisma.product.findUniqueOrThrow({
 				where: { id: targetProductId },
-				include: { manufacturer: true, ways: { select: { id: true } } }
+				include: {
+					manufacturer: true,
+					ways: { select: { id: true } },
+					connectorARef: { select: { name: true } },
+					connectorBRef: { select: { name: true } }
+				}
 			}),
 			prisma.product.findUniqueOrThrow({
 				where: { id: sourceProductId },
-				include: { manufacturer: true, ways: { select: { id: true } } }
+				include: {
+					manufacturer: true,
+					ways: { select: { id: true } },
+					connectorARef: { select: { name: true } },
+					connectorBRef: { select: { name: true } }
+				}
 			})
 		]);
 
@@ -2279,14 +2343,14 @@ export const mergeProducts = command(
 		// cable into a plain entry silently turned every unit into a non-cable
 		// and deleted the loom's ways with the source row. A license is a license
 		// whichever side said so — its units' credentials only show on one.
-		const inheritsCable = !isCable(target) && isCable(source);
+		const inheritsCable = !isCable(withEndNames(target)) && isCable(withEndNames(source));
 		const inherited = {
 			...(!target.imagePath && source.imagePath ? { imagePath: source.imagePath } : {}),
 			...(inheritsCable
 				? {
 						cableType: source.cableType,
-						connectorA: source.connectorA,
-						connectorB: source.connectorB,
+						connectorAId: source.connectorAId,
+						connectorBId: source.connectorBId,
 						lengthCm: source.lengthCm
 					}
 				: {}),
@@ -2387,6 +2451,7 @@ export const mergeProducts = command(
 			getProducts(source.manufacturerId).refresh(),
 			getProductCatalog().refresh(),
 			getCableVocabulary().refresh(),
+			getConnectorUsage().refresh(),
 			getAssets().refresh(),
 			getRetiredAssets().refresh(),
 			getInventorySummary().refresh(),
@@ -2564,14 +2629,27 @@ export const revertCatalogChange = command(v.string(), async (entryId: string) =
 		appError(409, 'catalog_revert_unavailable');
 	}
 
-	const product = await prisma.product.findUnique({ where: { id: entry.productId } });
-	if (!product) appError(409, 'catalog_revert_unavailable');
+	const found = await prisma.product.findUnique({
+		where: { id: entry.productId },
+		include: {
+			connectorARef: { select: { name: true } },
+			connectorBRef: { select: { name: true } }
+		}
+	});
+	if (!found) appError(409, 'catalog_revert_unavailable');
+	const product = withEndNames(found);
 
 	const data: Partial<Record<RevertibleProductField, string | number | boolean | null>> = {};
 	for (const change of logged) {
 		const field = REVERTIBLE_PRODUCT_FIELDS.find((f) => f === change.field);
 		if (!field) continue;
-		if (String(product[field] ?? null) !== String(change.to ?? null)) continue;
+		const stillHolds =
+			field === 'connectorA' || field === 'connectorB'
+				? // An entry older than the connector ids may spell the end differently
+					// from the row the migration settled on.
+					sameConnectorName(product[field], (change.to ?? null) as string | null)
+				: String(product[field] ?? null) === String(change.to ?? null);
+		if (!stillHolds) continue;
 		data[field] = (change.from ?? null) as string | number | boolean | null;
 	}
 
@@ -2626,16 +2704,43 @@ export const revertCatalogChange = command(v.string(), async (entryId: string) =
 		appError(409, 'catalog_revert_stale');
 	}
 
+	// The logged ends are names, so they are resolved like a form's — and a
+	// connector deleted since the entry was written simply comes back.
+	const endsReverted = 'connectorA' in data || 'connectorB' in data;
+	const connectors = endsReverted
+		? await ensureConnectors([data.connectorA as string | null, data.connectorB as string | null])
+		: null;
+	// What is written: the ids in place of the names. `data` itself keeps the
+	// names, because it is also what the revert logs.
+	const write: Record<string, unknown> = Object.fromEntries(
+		Object.entries(data).filter(([field]) => field !== 'connectorA' && field !== 'connectorB')
+	);
+	if (connectors) {
+		const ends = connectors.ends({
+			connectorA: (data.connectorA ?? null) as string | null,
+			connectorB: (data.connectorB ?? null) as string | null
+		});
+		if ('connectorA' in data) {
+			data.connectorA = connectors.name(data.connectorA as string | null);
+			write.connectorAId = ends.connectorAId;
+		}
+		if ('connectorB' in data) {
+			data.connectorB = connectors.name(data.connectorB as string | null);
+			write.connectorBId = ends.connectorBId;
+		}
+	}
+
 	const updated =
-		Object.keys(data).length > 0
+		Object.keys(write).length > 0
 			? await prisma.product.update({
 					where: { id: product.id },
-					data: data as Prisma.ProductUncheckedUpdateInput
+					data: write as Prisma.ProductUncheckedUpdateInput
 				})
 			: product;
 	const changes = fieldChanges(product, data);
+	let createdForWays: string[] = [];
 	if (waysRevert) {
-		await writeWays(product.id, waysRevert);
+		createdForWays = await writeWays(product.id, waysRevert);
 		changes.push({ field: 'ways', from: waysBefore, to: await waySnapshot(product.id) });
 	}
 	if (portsRevert) {
@@ -2654,13 +2759,8 @@ export const revertCatalogChange = command(v.string(), async (entryId: string) =
 		!!waysRevert ||
 		(['cableType', 'connectorA', 'connectorB', 'lengthCm'] as const).some((field) => field in data);
 	await refreshProductViews(updated, product.manufacturerId, {
-		cable: cableTouched
-			? [
-					updated.connectorA,
-					updated.connectorB,
-					...(waysRevert ?? []).flatMap((w) => [w.connectorA, w.connectorB])
-				]
-			: null
+		cable: cableTouched,
+		connectorsCreated: (connectors?.created.length ?? 0) + createdForWays.length > 0
 	});
 	if (portsRevert) await getConnectorUsage().refresh();
 	await getCatalogTransactions().refresh();
@@ -2687,7 +2787,7 @@ export const getBundleTemplates = query(v.optional(v.string()), async (organizat
 								include: {
 									manufacturer: true,
 									category: true,
-									ways: { orderBy: { sortOrder: 'asc' } }
+									...CABLE_ENDS
 								}
 							},
 							location: true
@@ -2714,9 +2814,10 @@ export const getBundleTemplates = query(v.optional(v.string()), async (organizat
 	const priceOrgIds = await priceVisibleOrgIds(user.id, queryOrgIds);
 	return templates.map((template) => ({
 		...template,
-		instances: template.instances.map((bundle) =>
-			maskBundlePrice(bundle, template.organizationId, priceOrgIds)
-		)
+		instances: template.instances.map((bundle) => ({
+			...maskBundlePrice(bundle, template.organizationId, priceOrgIds),
+			assets: bundle.assets.map(withProductCableNames)
+		}))
 	}));
 });
 
@@ -2756,7 +2857,7 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 			assets: {
 				include: {
 					product: {
-						include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+						include: { manufacturer: true, category: true, ...CABLE_ENDS }
 					},
 					location: true
 				},
@@ -2767,9 +2868,10 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 	});
 	await Promise.all(bundles.map((bundle) => ensureBundleImageWithoutBreakingRead(bundle)));
 	const priceOrgIds = await priceVisibleOrgIds(user.id, queryOrgIds);
-	return bundles.map((bundle) =>
-		maskBundlePrice(bundle, bundle.template.organizationId, priceOrgIds)
-	);
+	return bundles.map((bundle) => ({
+		...maskBundlePrice(bundle, bundle.template.organizationId, priceOrgIds),
+		assets: bundle.assets.map(withProductCableNames)
+	}));
 });
 
 export const getBundle = query(v.string(), async (id: string) => {
@@ -2784,7 +2886,7 @@ export const getBundle = query(v.string(), async (id: string) => {
 			assets: {
 				include: {
 					product: {
-						include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+						include: { manufacturer: true, category: true, ...CABLE_ENDS }
 					},
 					organization: true,
 					location: true
@@ -2803,7 +2905,11 @@ export const getBundle = query(v.string(), async (id: string) => {
 	// The page says "Not set" for a bundle without a price, so it has to be told
 	// apart from one whose price this user may not see.
 	const pricesVisible = await readsOrgRecords(user.id, bundle.template.organizationId);
-	return { ...(pricesVisible ? bundle : { ...bundle, netPurchasePrice: null }), pricesVisible };
+	return {
+		...(pricesVisible ? bundle : { ...bundle, netPurchasePrice: null }),
+		assets: bundle.assets.map(withProductCableNames),
+		pricesVisible
+	};
 });
 
 export const regenerateBundleImage = command(v.string(), async (bundleId) => {

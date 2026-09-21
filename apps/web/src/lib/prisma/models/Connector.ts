@@ -15,11 +15,12 @@ import type * as Prisma from "../internal/prismaNamespace.ts"
 /**
  * Model Connector
  * A cable end as a row of its own, so it can carry a picture and so the pool
- * spells it one way. The product fields stay free text — `Product.connectorA`
- * is still a string, and a name nobody has used before is accepted and gets a
- * row on save. This table is what that name accumulates against, not a gate in
- * front of it: a warehouse at 22:00 with an unlisted connector must never be
- * stuck.
+ * spells it one way. Forms still send names — a name nobody has used before is
+ * accepted and gets a row on save (`ensureConnectors`), so this table is never
+ * a gate: a warehouse at 22:00 with an unlisted connector must never be stuck.
+ * But what a cable stores is the row: `Product.connectorAId/BId` and
+ * `CableWay.connectorAId/BId` are foreign keys, which is what lets a rename
+ * reach every cable and a delete see every use.
  */
 export type ConnectorModel = runtime.Types.Result.DefaultSelection<Prisma.$ConnectorPayload>
 
@@ -229,6 +230,10 @@ export type ConnectorWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Connector"> | Date | string
   category?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
   ports?: Prisma.ProductPortListRelationFilter
+  productEndsA?: Prisma.ProductListRelationFilter
+  productEndsB?: Prisma.ProductListRelationFilter
+  wayEndsA?: Prisma.CableWayListRelationFilter
+  wayEndsB?: Prisma.CableWayListRelationFilter
 }
 
 export type ConnectorOrderByWithRelationInput = {
@@ -244,6 +249,10 @@ export type ConnectorOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   category?: Prisma.CategoryOrderByWithRelationInput
   ports?: Prisma.ProductPortOrderByRelationAggregateInput
+  productEndsA?: Prisma.ProductOrderByRelationAggregateInput
+  productEndsB?: Prisma.ProductOrderByRelationAggregateInput
+  wayEndsA?: Prisma.CableWayOrderByRelationAggregateInput
+  wayEndsB?: Prisma.CableWayOrderByRelationAggregateInput
 }
 
 export type ConnectorWhereUniqueInput = Prisma.AtLeast<{
@@ -262,6 +271,10 @@ export type ConnectorWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Connector"> | Date | string
   category?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
   ports?: Prisma.ProductPortListRelationFilter
+  productEndsA?: Prisma.ProductListRelationFilter
+  productEndsB?: Prisma.ProductListRelationFilter
+  wayEndsA?: Prisma.CableWayListRelationFilter
+  wayEndsB?: Prisma.CableWayListRelationFilter
 }, "id" | "slug">
 
 export type ConnectorOrderByWithAggregationInput = {
@@ -308,6 +321,10 @@ export type ConnectorCreateInput = {
   updatedAt?: Date | string
   category?: Prisma.CategoryCreateNestedOneWithoutConnectorsInput
   ports?: Prisma.ProductPortCreateNestedManyWithoutConnectorInput
+  productEndsA?: Prisma.ProductCreateNestedManyWithoutConnectorARefInput
+  productEndsB?: Prisma.ProductCreateNestedManyWithoutConnectorBRefInput
+  wayEndsA?: Prisma.CableWayCreateNestedManyWithoutConnectorARefInput
+  wayEndsB?: Prisma.CableWayCreateNestedManyWithoutConnectorBRefInput
 }
 
 export type ConnectorUncheckedCreateInput = {
@@ -322,6 +339,10 @@ export type ConnectorUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutConnectorInput
+  productEndsA?: Prisma.ProductUncheckedCreateNestedManyWithoutConnectorARefInput
+  productEndsB?: Prisma.ProductUncheckedCreateNestedManyWithoutConnectorBRefInput
+  wayEndsA?: Prisma.CableWayUncheckedCreateNestedManyWithoutConnectorARefInput
+  wayEndsB?: Prisma.CableWayUncheckedCreateNestedManyWithoutConnectorBRefInput
 }
 
 export type ConnectorUpdateInput = {
@@ -336,6 +357,10 @@ export type ConnectorUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.CategoryUpdateOneWithoutConnectorsNestedInput
   ports?: Prisma.ProductPortUpdateManyWithoutConnectorNestedInput
+  productEndsA?: Prisma.ProductUpdateManyWithoutConnectorARefNestedInput
+  productEndsB?: Prisma.ProductUpdateManyWithoutConnectorBRefNestedInput
+  wayEndsA?: Prisma.CableWayUpdateManyWithoutConnectorARefNestedInput
+  wayEndsB?: Prisma.CableWayUpdateManyWithoutConnectorBRefNestedInput
 }
 
 export type ConnectorUncheckedUpdateInput = {
@@ -350,6 +375,10 @@ export type ConnectorUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutConnectorNestedInput
+  productEndsA?: Prisma.ProductUncheckedUpdateManyWithoutConnectorARefNestedInput
+  productEndsB?: Prisma.ProductUncheckedUpdateManyWithoutConnectorBRefNestedInput
+  wayEndsA?: Prisma.CableWayUncheckedUpdateManyWithoutConnectorARefNestedInput
+  wayEndsB?: Prisma.CableWayUncheckedUpdateManyWithoutConnectorBRefNestedInput
 }
 
 export type ConnectorCreateManyInput = {
@@ -434,6 +463,11 @@ export type ConnectorScalarRelationFilter = {
   isNot?: Prisma.ConnectorWhereInput
 }
 
+export type ConnectorNullableScalarRelationFilter = {
+  is?: Prisma.ConnectorWhereInput | null
+  isNot?: Prisma.ConnectorWhereInput | null
+}
+
 export type ConnectorListRelationFilter = {
   every?: Prisma.ConnectorWhereInput
   some?: Prisma.ConnectorWhereInput
@@ -456,6 +490,38 @@ export type ConnectorUpdateOneRequiredWithoutPortsNestedInput = {
   upsert?: Prisma.ConnectorUpsertWithoutPortsInput
   connect?: Prisma.ConnectorWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.ConnectorUpdateToOneWithWhereWithoutPortsInput, Prisma.ConnectorUpdateWithoutPortsInput>, Prisma.ConnectorUncheckedUpdateWithoutPortsInput>
+}
+
+export type ConnectorCreateNestedOneWithoutWayEndsAInput = {
+  create?: Prisma.XOR<Prisma.ConnectorCreateWithoutWayEndsAInput, Prisma.ConnectorUncheckedCreateWithoutWayEndsAInput>
+  connectOrCreate?: Prisma.ConnectorCreateOrConnectWithoutWayEndsAInput
+  connect?: Prisma.ConnectorWhereUniqueInput
+}
+
+export type ConnectorCreateNestedOneWithoutWayEndsBInput = {
+  create?: Prisma.XOR<Prisma.ConnectorCreateWithoutWayEndsBInput, Prisma.ConnectorUncheckedCreateWithoutWayEndsBInput>
+  connectOrCreate?: Prisma.ConnectorCreateOrConnectWithoutWayEndsBInput
+  connect?: Prisma.ConnectorWhereUniqueInput
+}
+
+export type ConnectorUpdateOneWithoutWayEndsANestedInput = {
+  create?: Prisma.XOR<Prisma.ConnectorCreateWithoutWayEndsAInput, Prisma.ConnectorUncheckedCreateWithoutWayEndsAInput>
+  connectOrCreate?: Prisma.ConnectorCreateOrConnectWithoutWayEndsAInput
+  upsert?: Prisma.ConnectorUpsertWithoutWayEndsAInput
+  disconnect?: Prisma.ConnectorWhereInput | boolean
+  delete?: Prisma.ConnectorWhereInput | boolean
+  connect?: Prisma.ConnectorWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ConnectorUpdateToOneWithWhereWithoutWayEndsAInput, Prisma.ConnectorUpdateWithoutWayEndsAInput>, Prisma.ConnectorUncheckedUpdateWithoutWayEndsAInput>
+}
+
+export type ConnectorUpdateOneWithoutWayEndsBNestedInput = {
+  create?: Prisma.XOR<Prisma.ConnectorCreateWithoutWayEndsBInput, Prisma.ConnectorUncheckedCreateWithoutWayEndsBInput>
+  connectOrCreate?: Prisma.ConnectorCreateOrConnectWithoutWayEndsBInput
+  upsert?: Prisma.ConnectorUpsertWithoutWayEndsBInput
+  disconnect?: Prisma.ConnectorWhereInput | boolean
+  delete?: Prisma.ConnectorWhereInput | boolean
+  connect?: Prisma.ConnectorWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ConnectorUpdateToOneWithWhereWithoutWayEndsBInput, Prisma.ConnectorUpdateWithoutWayEndsBInput>, Prisma.ConnectorUncheckedUpdateWithoutWayEndsBInput>
 }
 
 export type ConnectorCreateNestedManyWithoutCategoryInput = {
@@ -500,6 +566,38 @@ export type ConnectorUncheckedUpdateManyWithoutCategoryNestedInput = {
   deleteMany?: Prisma.ConnectorScalarWhereInput | Prisma.ConnectorScalarWhereInput[]
 }
 
+export type ConnectorCreateNestedOneWithoutProductEndsAInput = {
+  create?: Prisma.XOR<Prisma.ConnectorCreateWithoutProductEndsAInput, Prisma.ConnectorUncheckedCreateWithoutProductEndsAInput>
+  connectOrCreate?: Prisma.ConnectorCreateOrConnectWithoutProductEndsAInput
+  connect?: Prisma.ConnectorWhereUniqueInput
+}
+
+export type ConnectorCreateNestedOneWithoutProductEndsBInput = {
+  create?: Prisma.XOR<Prisma.ConnectorCreateWithoutProductEndsBInput, Prisma.ConnectorUncheckedCreateWithoutProductEndsBInput>
+  connectOrCreate?: Prisma.ConnectorCreateOrConnectWithoutProductEndsBInput
+  connect?: Prisma.ConnectorWhereUniqueInput
+}
+
+export type ConnectorUpdateOneWithoutProductEndsANestedInput = {
+  create?: Prisma.XOR<Prisma.ConnectorCreateWithoutProductEndsAInput, Prisma.ConnectorUncheckedCreateWithoutProductEndsAInput>
+  connectOrCreate?: Prisma.ConnectorCreateOrConnectWithoutProductEndsAInput
+  upsert?: Prisma.ConnectorUpsertWithoutProductEndsAInput
+  disconnect?: Prisma.ConnectorWhereInput | boolean
+  delete?: Prisma.ConnectorWhereInput | boolean
+  connect?: Prisma.ConnectorWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ConnectorUpdateToOneWithWhereWithoutProductEndsAInput, Prisma.ConnectorUpdateWithoutProductEndsAInput>, Prisma.ConnectorUncheckedUpdateWithoutProductEndsAInput>
+}
+
+export type ConnectorUpdateOneWithoutProductEndsBNestedInput = {
+  create?: Prisma.XOR<Prisma.ConnectorCreateWithoutProductEndsBInput, Prisma.ConnectorUncheckedCreateWithoutProductEndsBInput>
+  connectOrCreate?: Prisma.ConnectorCreateOrConnectWithoutProductEndsBInput
+  upsert?: Prisma.ConnectorUpsertWithoutProductEndsBInput
+  disconnect?: Prisma.ConnectorWhereInput | boolean
+  delete?: Prisma.ConnectorWhereInput | boolean
+  connect?: Prisma.ConnectorWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ConnectorUpdateToOneWithWhereWithoutProductEndsBInput, Prisma.ConnectorUpdateWithoutProductEndsBInput>, Prisma.ConnectorUncheckedUpdateWithoutProductEndsBInput>
+}
+
 export type ConnectorCreateWithoutPortsInput = {
   id?: string
   name: string
@@ -511,6 +609,10 @@ export type ConnectorCreateWithoutPortsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   category?: Prisma.CategoryCreateNestedOneWithoutConnectorsInput
+  productEndsA?: Prisma.ProductCreateNestedManyWithoutConnectorARefInput
+  productEndsB?: Prisma.ProductCreateNestedManyWithoutConnectorBRefInput
+  wayEndsA?: Prisma.CableWayCreateNestedManyWithoutConnectorARefInput
+  wayEndsB?: Prisma.CableWayCreateNestedManyWithoutConnectorBRefInput
 }
 
 export type ConnectorUncheckedCreateWithoutPortsInput = {
@@ -524,6 +626,10 @@ export type ConnectorUncheckedCreateWithoutPortsInput = {
   imagePath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  productEndsA?: Prisma.ProductUncheckedCreateNestedManyWithoutConnectorARefInput
+  productEndsB?: Prisma.ProductUncheckedCreateNestedManyWithoutConnectorBRefInput
+  wayEndsA?: Prisma.CableWayUncheckedCreateNestedManyWithoutConnectorARefInput
+  wayEndsB?: Prisma.CableWayUncheckedCreateNestedManyWithoutConnectorBRefInput
 }
 
 export type ConnectorCreateOrConnectWithoutPortsInput = {
@@ -553,6 +659,10 @@ export type ConnectorUpdateWithoutPortsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.CategoryUpdateOneWithoutConnectorsNestedInput
+  productEndsA?: Prisma.ProductUpdateManyWithoutConnectorARefNestedInput
+  productEndsB?: Prisma.ProductUpdateManyWithoutConnectorBRefNestedInput
+  wayEndsA?: Prisma.CableWayUpdateManyWithoutConnectorARefNestedInput
+  wayEndsB?: Prisma.CableWayUpdateManyWithoutConnectorBRefNestedInput
 }
 
 export type ConnectorUncheckedUpdateWithoutPortsInput = {
@@ -566,6 +676,178 @@ export type ConnectorUncheckedUpdateWithoutPortsInput = {
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  productEndsA?: Prisma.ProductUncheckedUpdateManyWithoutConnectorARefNestedInput
+  productEndsB?: Prisma.ProductUncheckedUpdateManyWithoutConnectorBRefNestedInput
+  wayEndsA?: Prisma.CableWayUncheckedUpdateManyWithoutConnectorARefNestedInput
+  wayEndsB?: Prisma.CableWayUncheckedUpdateManyWithoutConnectorBRefNestedInput
+}
+
+export type ConnectorCreateWithoutWayEndsAInput = {
+  id?: string
+  name: string
+  slug: string
+  family?: string | null
+  form?: string | null
+  gender?: string | null
+  imagePath?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  category?: Prisma.CategoryCreateNestedOneWithoutConnectorsInput
+  ports?: Prisma.ProductPortCreateNestedManyWithoutConnectorInput
+  productEndsA?: Prisma.ProductCreateNestedManyWithoutConnectorARefInput
+  productEndsB?: Prisma.ProductCreateNestedManyWithoutConnectorBRefInput
+  wayEndsB?: Prisma.CableWayCreateNestedManyWithoutConnectorBRefInput
+}
+
+export type ConnectorUncheckedCreateWithoutWayEndsAInput = {
+  id?: string
+  name: string
+  slug: string
+  family?: string | null
+  form?: string | null
+  gender?: string | null
+  categoryId?: string | null
+  imagePath?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutConnectorInput
+  productEndsA?: Prisma.ProductUncheckedCreateNestedManyWithoutConnectorARefInput
+  productEndsB?: Prisma.ProductUncheckedCreateNestedManyWithoutConnectorBRefInput
+  wayEndsB?: Prisma.CableWayUncheckedCreateNestedManyWithoutConnectorBRefInput
+}
+
+export type ConnectorCreateOrConnectWithoutWayEndsAInput = {
+  where: Prisma.ConnectorWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConnectorCreateWithoutWayEndsAInput, Prisma.ConnectorUncheckedCreateWithoutWayEndsAInput>
+}
+
+export type ConnectorCreateWithoutWayEndsBInput = {
+  id?: string
+  name: string
+  slug: string
+  family?: string | null
+  form?: string | null
+  gender?: string | null
+  imagePath?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  category?: Prisma.CategoryCreateNestedOneWithoutConnectorsInput
+  ports?: Prisma.ProductPortCreateNestedManyWithoutConnectorInput
+  productEndsA?: Prisma.ProductCreateNestedManyWithoutConnectorARefInput
+  productEndsB?: Prisma.ProductCreateNestedManyWithoutConnectorBRefInput
+  wayEndsA?: Prisma.CableWayCreateNestedManyWithoutConnectorARefInput
+}
+
+export type ConnectorUncheckedCreateWithoutWayEndsBInput = {
+  id?: string
+  name: string
+  slug: string
+  family?: string | null
+  form?: string | null
+  gender?: string | null
+  categoryId?: string | null
+  imagePath?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutConnectorInput
+  productEndsA?: Prisma.ProductUncheckedCreateNestedManyWithoutConnectorARefInput
+  productEndsB?: Prisma.ProductUncheckedCreateNestedManyWithoutConnectorBRefInput
+  wayEndsA?: Prisma.CableWayUncheckedCreateNestedManyWithoutConnectorARefInput
+}
+
+export type ConnectorCreateOrConnectWithoutWayEndsBInput = {
+  where: Prisma.ConnectorWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConnectorCreateWithoutWayEndsBInput, Prisma.ConnectorUncheckedCreateWithoutWayEndsBInput>
+}
+
+export type ConnectorUpsertWithoutWayEndsAInput = {
+  update: Prisma.XOR<Prisma.ConnectorUpdateWithoutWayEndsAInput, Prisma.ConnectorUncheckedUpdateWithoutWayEndsAInput>
+  create: Prisma.XOR<Prisma.ConnectorCreateWithoutWayEndsAInput, Prisma.ConnectorUncheckedCreateWithoutWayEndsAInput>
+  where?: Prisma.ConnectorWhereInput
+}
+
+export type ConnectorUpdateToOneWithWhereWithoutWayEndsAInput = {
+  where?: Prisma.ConnectorWhereInput
+  data: Prisma.XOR<Prisma.ConnectorUpdateWithoutWayEndsAInput, Prisma.ConnectorUncheckedUpdateWithoutWayEndsAInput>
+}
+
+export type ConnectorUpdateWithoutWayEndsAInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  family?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  category?: Prisma.CategoryUpdateOneWithoutConnectorsNestedInput
+  ports?: Prisma.ProductPortUpdateManyWithoutConnectorNestedInput
+  productEndsA?: Prisma.ProductUpdateManyWithoutConnectorARefNestedInput
+  productEndsB?: Prisma.ProductUpdateManyWithoutConnectorBRefNestedInput
+  wayEndsB?: Prisma.CableWayUpdateManyWithoutConnectorBRefNestedInput
+}
+
+export type ConnectorUncheckedUpdateWithoutWayEndsAInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  family?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ports?: Prisma.ProductPortUncheckedUpdateManyWithoutConnectorNestedInput
+  productEndsA?: Prisma.ProductUncheckedUpdateManyWithoutConnectorARefNestedInput
+  productEndsB?: Prisma.ProductUncheckedUpdateManyWithoutConnectorBRefNestedInput
+  wayEndsB?: Prisma.CableWayUncheckedUpdateManyWithoutConnectorBRefNestedInput
+}
+
+export type ConnectorUpsertWithoutWayEndsBInput = {
+  update: Prisma.XOR<Prisma.ConnectorUpdateWithoutWayEndsBInput, Prisma.ConnectorUncheckedUpdateWithoutWayEndsBInput>
+  create: Prisma.XOR<Prisma.ConnectorCreateWithoutWayEndsBInput, Prisma.ConnectorUncheckedCreateWithoutWayEndsBInput>
+  where?: Prisma.ConnectorWhereInput
+}
+
+export type ConnectorUpdateToOneWithWhereWithoutWayEndsBInput = {
+  where?: Prisma.ConnectorWhereInput
+  data: Prisma.XOR<Prisma.ConnectorUpdateWithoutWayEndsBInput, Prisma.ConnectorUncheckedUpdateWithoutWayEndsBInput>
+}
+
+export type ConnectorUpdateWithoutWayEndsBInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  family?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  category?: Prisma.CategoryUpdateOneWithoutConnectorsNestedInput
+  ports?: Prisma.ProductPortUpdateManyWithoutConnectorNestedInput
+  productEndsA?: Prisma.ProductUpdateManyWithoutConnectorARefNestedInput
+  productEndsB?: Prisma.ProductUpdateManyWithoutConnectorBRefNestedInput
+  wayEndsA?: Prisma.CableWayUpdateManyWithoutConnectorARefNestedInput
+}
+
+export type ConnectorUncheckedUpdateWithoutWayEndsBInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  family?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ports?: Prisma.ProductPortUncheckedUpdateManyWithoutConnectorNestedInput
+  productEndsA?: Prisma.ProductUncheckedUpdateManyWithoutConnectorARefNestedInput
+  productEndsB?: Prisma.ProductUncheckedUpdateManyWithoutConnectorBRefNestedInput
+  wayEndsA?: Prisma.CableWayUncheckedUpdateManyWithoutConnectorARefNestedInput
 }
 
 export type ConnectorCreateWithoutCategoryInput = {
@@ -579,6 +861,10 @@ export type ConnectorCreateWithoutCategoryInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   ports?: Prisma.ProductPortCreateNestedManyWithoutConnectorInput
+  productEndsA?: Prisma.ProductCreateNestedManyWithoutConnectorARefInput
+  productEndsB?: Prisma.ProductCreateNestedManyWithoutConnectorBRefInput
+  wayEndsA?: Prisma.CableWayCreateNestedManyWithoutConnectorARefInput
+  wayEndsB?: Prisma.CableWayCreateNestedManyWithoutConnectorBRefInput
 }
 
 export type ConnectorUncheckedCreateWithoutCategoryInput = {
@@ -592,6 +878,10 @@ export type ConnectorUncheckedCreateWithoutCategoryInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutConnectorInput
+  productEndsA?: Prisma.ProductUncheckedCreateNestedManyWithoutConnectorARefInput
+  productEndsB?: Prisma.ProductUncheckedCreateNestedManyWithoutConnectorBRefInput
+  wayEndsA?: Prisma.CableWayUncheckedCreateNestedManyWithoutConnectorARefInput
+  wayEndsB?: Prisma.CableWayUncheckedCreateNestedManyWithoutConnectorBRefInput
 }
 
 export type ConnectorCreateOrConnectWithoutCategoryInput = {
@@ -636,6 +926,174 @@ export type ConnectorScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Connector"> | Date | string
 }
 
+export type ConnectorCreateWithoutProductEndsAInput = {
+  id?: string
+  name: string
+  slug: string
+  family?: string | null
+  form?: string | null
+  gender?: string | null
+  imagePath?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  category?: Prisma.CategoryCreateNestedOneWithoutConnectorsInput
+  ports?: Prisma.ProductPortCreateNestedManyWithoutConnectorInput
+  productEndsB?: Prisma.ProductCreateNestedManyWithoutConnectorBRefInput
+  wayEndsA?: Prisma.CableWayCreateNestedManyWithoutConnectorARefInput
+  wayEndsB?: Prisma.CableWayCreateNestedManyWithoutConnectorBRefInput
+}
+
+export type ConnectorUncheckedCreateWithoutProductEndsAInput = {
+  id?: string
+  name: string
+  slug: string
+  family?: string | null
+  form?: string | null
+  gender?: string | null
+  categoryId?: string | null
+  imagePath?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutConnectorInput
+  productEndsB?: Prisma.ProductUncheckedCreateNestedManyWithoutConnectorBRefInput
+  wayEndsA?: Prisma.CableWayUncheckedCreateNestedManyWithoutConnectorARefInput
+  wayEndsB?: Prisma.CableWayUncheckedCreateNestedManyWithoutConnectorBRefInput
+}
+
+export type ConnectorCreateOrConnectWithoutProductEndsAInput = {
+  where: Prisma.ConnectorWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConnectorCreateWithoutProductEndsAInput, Prisma.ConnectorUncheckedCreateWithoutProductEndsAInput>
+}
+
+export type ConnectorCreateWithoutProductEndsBInput = {
+  id?: string
+  name: string
+  slug: string
+  family?: string | null
+  form?: string | null
+  gender?: string | null
+  imagePath?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  category?: Prisma.CategoryCreateNestedOneWithoutConnectorsInput
+  ports?: Prisma.ProductPortCreateNestedManyWithoutConnectorInput
+  productEndsA?: Prisma.ProductCreateNestedManyWithoutConnectorARefInput
+  wayEndsA?: Prisma.CableWayCreateNestedManyWithoutConnectorARefInput
+  wayEndsB?: Prisma.CableWayCreateNestedManyWithoutConnectorBRefInput
+}
+
+export type ConnectorUncheckedCreateWithoutProductEndsBInput = {
+  id?: string
+  name: string
+  slug: string
+  family?: string | null
+  form?: string | null
+  gender?: string | null
+  categoryId?: string | null
+  imagePath?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutConnectorInput
+  productEndsA?: Prisma.ProductUncheckedCreateNestedManyWithoutConnectorARefInput
+  wayEndsA?: Prisma.CableWayUncheckedCreateNestedManyWithoutConnectorARefInput
+  wayEndsB?: Prisma.CableWayUncheckedCreateNestedManyWithoutConnectorBRefInput
+}
+
+export type ConnectorCreateOrConnectWithoutProductEndsBInput = {
+  where: Prisma.ConnectorWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConnectorCreateWithoutProductEndsBInput, Prisma.ConnectorUncheckedCreateWithoutProductEndsBInput>
+}
+
+export type ConnectorUpsertWithoutProductEndsAInput = {
+  update: Prisma.XOR<Prisma.ConnectorUpdateWithoutProductEndsAInput, Prisma.ConnectorUncheckedUpdateWithoutProductEndsAInput>
+  create: Prisma.XOR<Prisma.ConnectorCreateWithoutProductEndsAInput, Prisma.ConnectorUncheckedCreateWithoutProductEndsAInput>
+  where?: Prisma.ConnectorWhereInput
+}
+
+export type ConnectorUpdateToOneWithWhereWithoutProductEndsAInput = {
+  where?: Prisma.ConnectorWhereInput
+  data: Prisma.XOR<Prisma.ConnectorUpdateWithoutProductEndsAInput, Prisma.ConnectorUncheckedUpdateWithoutProductEndsAInput>
+}
+
+export type ConnectorUpdateWithoutProductEndsAInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  family?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  category?: Prisma.CategoryUpdateOneWithoutConnectorsNestedInput
+  ports?: Prisma.ProductPortUpdateManyWithoutConnectorNestedInput
+  productEndsB?: Prisma.ProductUpdateManyWithoutConnectorBRefNestedInput
+  wayEndsA?: Prisma.CableWayUpdateManyWithoutConnectorARefNestedInput
+  wayEndsB?: Prisma.CableWayUpdateManyWithoutConnectorBRefNestedInput
+}
+
+export type ConnectorUncheckedUpdateWithoutProductEndsAInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  family?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ports?: Prisma.ProductPortUncheckedUpdateManyWithoutConnectorNestedInput
+  productEndsB?: Prisma.ProductUncheckedUpdateManyWithoutConnectorBRefNestedInput
+  wayEndsA?: Prisma.CableWayUncheckedUpdateManyWithoutConnectorARefNestedInput
+  wayEndsB?: Prisma.CableWayUncheckedUpdateManyWithoutConnectorBRefNestedInput
+}
+
+export type ConnectorUpsertWithoutProductEndsBInput = {
+  update: Prisma.XOR<Prisma.ConnectorUpdateWithoutProductEndsBInput, Prisma.ConnectorUncheckedUpdateWithoutProductEndsBInput>
+  create: Prisma.XOR<Prisma.ConnectorCreateWithoutProductEndsBInput, Prisma.ConnectorUncheckedCreateWithoutProductEndsBInput>
+  where?: Prisma.ConnectorWhereInput
+}
+
+export type ConnectorUpdateToOneWithWhereWithoutProductEndsBInput = {
+  where?: Prisma.ConnectorWhereInput
+  data: Prisma.XOR<Prisma.ConnectorUpdateWithoutProductEndsBInput, Prisma.ConnectorUncheckedUpdateWithoutProductEndsBInput>
+}
+
+export type ConnectorUpdateWithoutProductEndsBInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  family?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  category?: Prisma.CategoryUpdateOneWithoutConnectorsNestedInput
+  ports?: Prisma.ProductPortUpdateManyWithoutConnectorNestedInput
+  productEndsA?: Prisma.ProductUpdateManyWithoutConnectorARefNestedInput
+  wayEndsA?: Prisma.CableWayUpdateManyWithoutConnectorARefNestedInput
+  wayEndsB?: Prisma.CableWayUpdateManyWithoutConnectorBRefNestedInput
+}
+
+export type ConnectorUncheckedUpdateWithoutProductEndsBInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  family?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ports?: Prisma.ProductPortUncheckedUpdateManyWithoutConnectorNestedInput
+  productEndsA?: Prisma.ProductUncheckedUpdateManyWithoutConnectorARefNestedInput
+  wayEndsA?: Prisma.CableWayUncheckedUpdateManyWithoutConnectorARefNestedInput
+  wayEndsB?: Prisma.CableWayUncheckedUpdateManyWithoutConnectorBRefNestedInput
+}
+
 export type ConnectorCreateManyCategoryInput = {
   id?: string
   name: string
@@ -659,6 +1117,10 @@ export type ConnectorUpdateWithoutCategoryInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ports?: Prisma.ProductPortUpdateManyWithoutConnectorNestedInput
+  productEndsA?: Prisma.ProductUpdateManyWithoutConnectorARefNestedInput
+  productEndsB?: Prisma.ProductUpdateManyWithoutConnectorBRefNestedInput
+  wayEndsA?: Prisma.CableWayUpdateManyWithoutConnectorARefNestedInput
+  wayEndsB?: Prisma.CableWayUpdateManyWithoutConnectorBRefNestedInput
 }
 
 export type ConnectorUncheckedUpdateWithoutCategoryInput = {
@@ -672,6 +1134,10 @@ export type ConnectorUncheckedUpdateWithoutCategoryInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutConnectorNestedInput
+  productEndsA?: Prisma.ProductUncheckedUpdateManyWithoutConnectorARefNestedInput
+  productEndsB?: Prisma.ProductUncheckedUpdateManyWithoutConnectorBRefNestedInput
+  wayEndsA?: Prisma.CableWayUncheckedUpdateManyWithoutConnectorARefNestedInput
+  wayEndsB?: Prisma.CableWayUncheckedUpdateManyWithoutConnectorBRefNestedInput
 }
 
 export type ConnectorUncheckedUpdateManyWithoutCategoryInput = {
@@ -693,10 +1159,18 @@ export type ConnectorUncheckedUpdateManyWithoutCategoryInput = {
 
 export type ConnectorCountOutputType = {
   ports: number
+  productEndsA: number
+  productEndsB: number
+  wayEndsA: number
+  wayEndsB: number
 }
 
 export type ConnectorCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ports?: boolean | ConnectorCountOutputTypeCountPortsArgs
+  productEndsA?: boolean | ConnectorCountOutputTypeCountProductEndsAArgs
+  productEndsB?: boolean | ConnectorCountOutputTypeCountProductEndsBArgs
+  wayEndsA?: boolean | ConnectorCountOutputTypeCountWayEndsAArgs
+  wayEndsB?: boolean | ConnectorCountOutputTypeCountWayEndsBArgs
 }
 
 /**
@@ -716,6 +1190,34 @@ export type ConnectorCountOutputTypeCountPortsArgs<ExtArgs extends runtime.Types
   where?: Prisma.ProductPortWhereInput
 }
 
+/**
+ * ConnectorCountOutputType without action
+ */
+export type ConnectorCountOutputTypeCountProductEndsAArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProductWhereInput
+}
+
+/**
+ * ConnectorCountOutputType without action
+ */
+export type ConnectorCountOutputTypeCountProductEndsBArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProductWhereInput
+}
+
+/**
+ * ConnectorCountOutputType without action
+ */
+export type ConnectorCountOutputTypeCountWayEndsAArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CableWayWhereInput
+}
+
+/**
+ * ConnectorCountOutputType without action
+ */
+export type ConnectorCountOutputTypeCountWayEndsBArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CableWayWhereInput
+}
+
 
 export type ConnectorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -730,6 +1232,10 @@ export type ConnectorSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   updatedAt?: boolean
   category?: boolean | Prisma.Connector$categoryArgs<ExtArgs>
   ports?: boolean | Prisma.Connector$portsArgs<ExtArgs>
+  productEndsA?: boolean | Prisma.Connector$productEndsAArgs<ExtArgs>
+  productEndsB?: boolean | Prisma.Connector$productEndsBArgs<ExtArgs>
+  wayEndsA?: boolean | Prisma.Connector$wayEndsAArgs<ExtArgs>
+  wayEndsB?: boolean | Prisma.Connector$wayEndsBArgs<ExtArgs>
   _count?: boolean | Prisma.ConnectorCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["connector"]>
 
@@ -778,6 +1284,10 @@ export type ConnectorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 export type ConnectorInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   category?: boolean | Prisma.Connector$categoryArgs<ExtArgs>
   ports?: boolean | Prisma.Connector$portsArgs<ExtArgs>
+  productEndsA?: boolean | Prisma.Connector$productEndsAArgs<ExtArgs>
+  productEndsB?: boolean | Prisma.Connector$productEndsBArgs<ExtArgs>
+  wayEndsA?: boolean | Prisma.Connector$wayEndsAArgs<ExtArgs>
+  wayEndsB?: boolean | Prisma.Connector$wayEndsBArgs<ExtArgs>
   _count?: boolean | Prisma.ConnectorCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ConnectorIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -792,6 +1302,10 @@ export type $ConnectorPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   objects: {
     category: Prisma.$CategoryPayload<ExtArgs> | null
     ports: Prisma.$ProductPortPayload<ExtArgs>[]
+    productEndsA: Prisma.$ProductPayload<ExtArgs>[]
+    productEndsB: Prisma.$ProductPayload<ExtArgs>[]
+    wayEndsA: Prisma.$CableWayPayload<ExtArgs>[]
+    wayEndsB: Prisma.$CableWayPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1238,6 +1752,10 @@ export interface Prisma__ConnectorClient<T, Null = never, ExtArgs extends runtim
   readonly [Symbol.toStringTag]: "PrismaPromise"
   category<T extends Prisma.Connector$categoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Connector$categoryArgs<ExtArgs>>): Prisma.Prisma__CategoryClient<runtime.Types.Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   ports<T extends Prisma.Connector$portsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Connector$portsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPortPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  productEndsA<T extends Prisma.Connector$productEndsAArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Connector$productEndsAArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  productEndsB<T extends Prisma.Connector$productEndsBArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Connector$productEndsBArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  wayEndsA<T extends Prisma.Connector$wayEndsAArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Connector$wayEndsAArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CableWayPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  wayEndsB<T extends Prisma.Connector$wayEndsBArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Connector$wayEndsBArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CableWayPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1718,6 +2236,102 @@ export type Connector$portsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.ProductPortScalarFieldEnum | Prisma.ProductPortScalarFieldEnum[]
+}
+
+/**
+ * Connector.productEndsA
+ */
+export type Connector$productEndsAArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Product
+   */
+  select?: Prisma.ProductSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Product
+   */
+  omit?: Prisma.ProductOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProductInclude<ExtArgs> | null
+  where?: Prisma.ProductWhereInput
+  orderBy?: Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[]
+  cursor?: Prisma.ProductWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProductScalarFieldEnum | Prisma.ProductScalarFieldEnum[]
+}
+
+/**
+ * Connector.productEndsB
+ */
+export type Connector$productEndsBArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Product
+   */
+  select?: Prisma.ProductSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Product
+   */
+  omit?: Prisma.ProductOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProductInclude<ExtArgs> | null
+  where?: Prisma.ProductWhereInput
+  orderBy?: Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[]
+  cursor?: Prisma.ProductWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProductScalarFieldEnum | Prisma.ProductScalarFieldEnum[]
+}
+
+/**
+ * Connector.wayEndsA
+ */
+export type Connector$wayEndsAArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CableWay
+   */
+  select?: Prisma.CableWaySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CableWay
+   */
+  omit?: Prisma.CableWayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CableWayInclude<ExtArgs> | null
+  where?: Prisma.CableWayWhereInput
+  orderBy?: Prisma.CableWayOrderByWithRelationInput | Prisma.CableWayOrderByWithRelationInput[]
+  cursor?: Prisma.CableWayWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CableWayScalarFieldEnum | Prisma.CableWayScalarFieldEnum[]
+}
+
+/**
+ * Connector.wayEndsB
+ */
+export type Connector$wayEndsBArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CableWay
+   */
+  select?: Prisma.CableWaySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CableWay
+   */
+  omit?: Prisma.CableWayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CableWayInclude<ExtArgs> | null
+  where?: Prisma.CableWayWhereInput
+  orderBy?: Prisma.CableWayOrderByWithRelationInput | Prisma.CableWayOrderByWithRelationInput[]
+  cursor?: Prisma.CableWayWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CableWayScalarFieldEnum | Prisma.CableWayScalarFieldEnum[]
 }
 
 /**

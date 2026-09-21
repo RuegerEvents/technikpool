@@ -18,9 +18,8 @@ import type * as Prisma from "../internal/prismaNamespace.ts"
  * two or more of them — "6× Schuko M→F", "1× DMX XLR3 M→F". A plain lead has
  * none of these; its single pair is on the Product itself.
  * 
- * The ends are free text like `Product.connectorA/B`, and for the same reason
- * the comment on ProductPort gives: a cable end is part of what the cable *is*,
- * so registering one must never stall on the connector catalogue.
+ * The ends work like the product's: `connectorAId/BId`, foreign keys to the
+ * connector.
  */
 export type CableWayModel = runtime.Types.Result.DefaultSelection<Prisma.$CableWayPayload>
 
@@ -46,8 +45,8 @@ export type CableWayMinAggregateOutputType = {
   id: string | null
   productId: string | null
   count: number | null
-  connectorA: string | null
-  connectorB: string | null
+  connectorAId: string | null
+  connectorBId: string | null
   cableType: string | null
   sortOrder: number | null
 }
@@ -56,8 +55,8 @@ export type CableWayMaxAggregateOutputType = {
   id: string | null
   productId: string | null
   count: number | null
-  connectorA: string | null
-  connectorB: string | null
+  connectorAId: string | null
+  connectorBId: string | null
   cableType: string | null
   sortOrder: number | null
 }
@@ -66,8 +65,8 @@ export type CableWayCountAggregateOutputType = {
   id: number
   productId: number
   count: number
-  connectorA: number
-  connectorB: number
+  connectorAId: number
+  connectorBId: number
   cableType: number
   sortOrder: number
   _all: number
@@ -88,8 +87,8 @@ export type CableWayMinAggregateInputType = {
   id?: true
   productId?: true
   count?: true
-  connectorA?: true
-  connectorB?: true
+  connectorAId?: true
+  connectorBId?: true
   cableType?: true
   sortOrder?: true
 }
@@ -98,8 +97,8 @@ export type CableWayMaxAggregateInputType = {
   id?: true
   productId?: true
   count?: true
-  connectorA?: true
-  connectorB?: true
+  connectorAId?: true
+  connectorBId?: true
   cableType?: true
   sortOrder?: true
 }
@@ -108,8 +107,8 @@ export type CableWayCountAggregateInputType = {
   id?: true
   productId?: true
   count?: true
-  connectorA?: true
-  connectorB?: true
+  connectorAId?: true
+  connectorBId?: true
   cableType?: true
   sortOrder?: true
   _all?: true
@@ -205,8 +204,8 @@ export type CableWayGroupByOutputType = {
   id: string
   productId: string
   count: number
-  connectorA: string | null
-  connectorB: string | null
+  connectorAId: string | null
+  connectorBId: string | null
   cableType: string | null
   sortOrder: number
   _count: CableWayCountAggregateOutputType | null
@@ -238,22 +237,26 @@ export type CableWayWhereInput = {
   id?: Prisma.StringFilter<"CableWay"> | string
   productId?: Prisma.StringFilter<"CableWay"> | string
   count?: Prisma.IntFilter<"CableWay"> | number
-  connectorA?: Prisma.StringNullableFilter<"CableWay"> | string | null
-  connectorB?: Prisma.StringNullableFilter<"CableWay"> | string | null
+  connectorAId?: Prisma.StringNullableFilter<"CableWay"> | string | null
+  connectorBId?: Prisma.StringNullableFilter<"CableWay"> | string | null
   cableType?: Prisma.StringNullableFilter<"CableWay"> | string | null
   sortOrder?: Prisma.IntFilter<"CableWay"> | number
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
+  connectorARef?: Prisma.XOR<Prisma.ConnectorNullableScalarRelationFilter, Prisma.ConnectorWhereInput> | null
+  connectorBRef?: Prisma.XOR<Prisma.ConnectorNullableScalarRelationFilter, Prisma.ConnectorWhereInput> | null
 }
 
 export type CableWayOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   productId?: Prisma.SortOrder
   count?: Prisma.SortOrder
-  connectorA?: Prisma.SortOrderInput | Prisma.SortOrder
-  connectorB?: Prisma.SortOrderInput | Prisma.SortOrder
+  connectorAId?: Prisma.SortOrderInput | Prisma.SortOrder
+  connectorBId?: Prisma.SortOrderInput | Prisma.SortOrder
   cableType?: Prisma.SortOrderInput | Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   product?: Prisma.ProductOrderByWithRelationInput
+  connectorARef?: Prisma.ConnectorOrderByWithRelationInput
+  connectorBRef?: Prisma.ConnectorOrderByWithRelationInput
 }
 
 export type CableWayWhereUniqueInput = Prisma.AtLeast<{
@@ -263,19 +266,21 @@ export type CableWayWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.CableWayWhereInput | Prisma.CableWayWhereInput[]
   productId?: Prisma.StringFilter<"CableWay"> | string
   count?: Prisma.IntFilter<"CableWay"> | number
-  connectorA?: Prisma.StringNullableFilter<"CableWay"> | string | null
-  connectorB?: Prisma.StringNullableFilter<"CableWay"> | string | null
+  connectorAId?: Prisma.StringNullableFilter<"CableWay"> | string | null
+  connectorBId?: Prisma.StringNullableFilter<"CableWay"> | string | null
   cableType?: Prisma.StringNullableFilter<"CableWay"> | string | null
   sortOrder?: Prisma.IntFilter<"CableWay"> | number
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
+  connectorARef?: Prisma.XOR<Prisma.ConnectorNullableScalarRelationFilter, Prisma.ConnectorWhereInput> | null
+  connectorBRef?: Prisma.XOR<Prisma.ConnectorNullableScalarRelationFilter, Prisma.ConnectorWhereInput> | null
 }, "id">
 
 export type CableWayOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   productId?: Prisma.SortOrder
   count?: Prisma.SortOrder
-  connectorA?: Prisma.SortOrderInput | Prisma.SortOrder
-  connectorB?: Prisma.SortOrderInput | Prisma.SortOrder
+  connectorAId?: Prisma.SortOrderInput | Prisma.SortOrder
+  connectorBId?: Prisma.SortOrderInput | Prisma.SortOrder
   cableType?: Prisma.SortOrderInput | Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   _count?: Prisma.CableWayCountOrderByAggregateInput
@@ -292,8 +297,8 @@ export type CableWayScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"CableWay"> | string
   productId?: Prisma.StringWithAggregatesFilter<"CableWay"> | string
   count?: Prisma.IntWithAggregatesFilter<"CableWay"> | number
-  connectorA?: Prisma.StringNullableWithAggregatesFilter<"CableWay"> | string | null
-  connectorB?: Prisma.StringNullableWithAggregatesFilter<"CableWay"> | string | null
+  connectorAId?: Prisma.StringNullableWithAggregatesFilter<"CableWay"> | string | null
+  connectorBId?: Prisma.StringNullableWithAggregatesFilter<"CableWay"> | string | null
   cableType?: Prisma.StringNullableWithAggregatesFilter<"CableWay"> | string | null
   sortOrder?: Prisma.IntWithAggregatesFilter<"CableWay"> | number
 }
@@ -301,19 +306,19 @@ export type CableWayScalarWhereWithAggregatesInput = {
 export type CableWayCreateInput = {
   id?: string
   count?: number
-  connectorA?: string | null
-  connectorB?: string | null
   cableType?: string | null
   sortOrder?: number
   product: Prisma.ProductCreateNestedOneWithoutWaysInput
+  connectorARef?: Prisma.ConnectorCreateNestedOneWithoutWayEndsAInput
+  connectorBRef?: Prisma.ConnectorCreateNestedOneWithoutWayEndsBInput
 }
 
 export type CableWayUncheckedCreateInput = {
   id?: string
   productId: string
   count?: number
-  connectorA?: string | null
-  connectorB?: string | null
+  connectorAId?: string | null
+  connectorBId?: string | null
   cableType?: string | null
   sortOrder?: number
 }
@@ -321,19 +326,19 @@ export type CableWayUncheckedCreateInput = {
 export type CableWayUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
-  connectorA?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  connectorB?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   product?: Prisma.ProductUpdateOneRequiredWithoutWaysNestedInput
+  connectorARef?: Prisma.ConnectorUpdateOneWithoutWayEndsANestedInput
+  connectorBRef?: Prisma.ConnectorUpdateOneWithoutWayEndsBNestedInput
 }
 
 export type CableWayUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
-  connectorA?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  connectorB?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
@@ -342,8 +347,8 @@ export type CableWayCreateManyInput = {
   id?: string
   productId: string
   count?: number
-  connectorA?: string | null
-  connectorB?: string | null
+  connectorAId?: string | null
+  connectorBId?: string | null
   cableType?: string | null
   sortOrder?: number
 }
@@ -351,8 +356,6 @@ export type CableWayCreateManyInput = {
 export type CableWayUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
-  connectorA?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  connectorB?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
@@ -361,18 +364,28 @@ export type CableWayUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
-  connectorA?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  connectorB?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+}
+
+export type CableWayListRelationFilter = {
+  every?: Prisma.CableWayWhereInput
+  some?: Prisma.CableWayWhereInput
+  none?: Prisma.CableWayWhereInput
+}
+
+export type CableWayOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type CableWayCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   productId?: Prisma.SortOrder
   count?: Prisma.SortOrder
-  connectorA?: Prisma.SortOrder
-  connectorB?: Prisma.SortOrder
+  connectorAId?: Prisma.SortOrder
+  connectorBId?: Prisma.SortOrder
   cableType?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
 }
@@ -386,8 +399,8 @@ export type CableWayMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   productId?: Prisma.SortOrder
   count?: Prisma.SortOrder
-  connectorA?: Prisma.SortOrder
-  connectorB?: Prisma.SortOrder
+  connectorAId?: Prisma.SortOrder
+  connectorBId?: Prisma.SortOrder
   cableType?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
 }
@@ -396,8 +409,8 @@ export type CableWayMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   productId?: Prisma.SortOrder
   count?: Prisma.SortOrder
-  connectorA?: Prisma.SortOrder
-  connectorB?: Prisma.SortOrder
+  connectorAId?: Prisma.SortOrder
+  connectorBId?: Prisma.SortOrder
   cableType?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
 }
@@ -407,14 +420,88 @@ export type CableWaySumOrderByAggregateInput = {
   sortOrder?: Prisma.SortOrder
 }
 
-export type CableWayListRelationFilter = {
-  every?: Prisma.CableWayWhereInput
-  some?: Prisma.CableWayWhereInput
-  none?: Prisma.CableWayWhereInput
+export type CableWayCreateNestedManyWithoutConnectorARefInput = {
+  create?: Prisma.XOR<Prisma.CableWayCreateWithoutConnectorARefInput, Prisma.CableWayUncheckedCreateWithoutConnectorARefInput> | Prisma.CableWayCreateWithoutConnectorARefInput[] | Prisma.CableWayUncheckedCreateWithoutConnectorARefInput[]
+  connectOrCreate?: Prisma.CableWayCreateOrConnectWithoutConnectorARefInput | Prisma.CableWayCreateOrConnectWithoutConnectorARefInput[]
+  createMany?: Prisma.CableWayCreateManyConnectorARefInputEnvelope
+  connect?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
 }
 
-export type CableWayOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
+export type CableWayCreateNestedManyWithoutConnectorBRefInput = {
+  create?: Prisma.XOR<Prisma.CableWayCreateWithoutConnectorBRefInput, Prisma.CableWayUncheckedCreateWithoutConnectorBRefInput> | Prisma.CableWayCreateWithoutConnectorBRefInput[] | Prisma.CableWayUncheckedCreateWithoutConnectorBRefInput[]
+  connectOrCreate?: Prisma.CableWayCreateOrConnectWithoutConnectorBRefInput | Prisma.CableWayCreateOrConnectWithoutConnectorBRefInput[]
+  createMany?: Prisma.CableWayCreateManyConnectorBRefInputEnvelope
+  connect?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+}
+
+export type CableWayUncheckedCreateNestedManyWithoutConnectorARefInput = {
+  create?: Prisma.XOR<Prisma.CableWayCreateWithoutConnectorARefInput, Prisma.CableWayUncheckedCreateWithoutConnectorARefInput> | Prisma.CableWayCreateWithoutConnectorARefInput[] | Prisma.CableWayUncheckedCreateWithoutConnectorARefInput[]
+  connectOrCreate?: Prisma.CableWayCreateOrConnectWithoutConnectorARefInput | Prisma.CableWayCreateOrConnectWithoutConnectorARefInput[]
+  createMany?: Prisma.CableWayCreateManyConnectorARefInputEnvelope
+  connect?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+}
+
+export type CableWayUncheckedCreateNestedManyWithoutConnectorBRefInput = {
+  create?: Prisma.XOR<Prisma.CableWayCreateWithoutConnectorBRefInput, Prisma.CableWayUncheckedCreateWithoutConnectorBRefInput> | Prisma.CableWayCreateWithoutConnectorBRefInput[] | Prisma.CableWayUncheckedCreateWithoutConnectorBRefInput[]
+  connectOrCreate?: Prisma.CableWayCreateOrConnectWithoutConnectorBRefInput | Prisma.CableWayCreateOrConnectWithoutConnectorBRefInput[]
+  createMany?: Prisma.CableWayCreateManyConnectorBRefInputEnvelope
+  connect?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+}
+
+export type CableWayUpdateManyWithoutConnectorARefNestedInput = {
+  create?: Prisma.XOR<Prisma.CableWayCreateWithoutConnectorARefInput, Prisma.CableWayUncheckedCreateWithoutConnectorARefInput> | Prisma.CableWayCreateWithoutConnectorARefInput[] | Prisma.CableWayUncheckedCreateWithoutConnectorARefInput[]
+  connectOrCreate?: Prisma.CableWayCreateOrConnectWithoutConnectorARefInput | Prisma.CableWayCreateOrConnectWithoutConnectorARefInput[]
+  upsert?: Prisma.CableWayUpsertWithWhereUniqueWithoutConnectorARefInput | Prisma.CableWayUpsertWithWhereUniqueWithoutConnectorARefInput[]
+  createMany?: Prisma.CableWayCreateManyConnectorARefInputEnvelope
+  set?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+  disconnect?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+  delete?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+  connect?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+  update?: Prisma.CableWayUpdateWithWhereUniqueWithoutConnectorARefInput | Prisma.CableWayUpdateWithWhereUniqueWithoutConnectorARefInput[]
+  updateMany?: Prisma.CableWayUpdateManyWithWhereWithoutConnectorARefInput | Prisma.CableWayUpdateManyWithWhereWithoutConnectorARefInput[]
+  deleteMany?: Prisma.CableWayScalarWhereInput | Prisma.CableWayScalarWhereInput[]
+}
+
+export type CableWayUpdateManyWithoutConnectorBRefNestedInput = {
+  create?: Prisma.XOR<Prisma.CableWayCreateWithoutConnectorBRefInput, Prisma.CableWayUncheckedCreateWithoutConnectorBRefInput> | Prisma.CableWayCreateWithoutConnectorBRefInput[] | Prisma.CableWayUncheckedCreateWithoutConnectorBRefInput[]
+  connectOrCreate?: Prisma.CableWayCreateOrConnectWithoutConnectorBRefInput | Prisma.CableWayCreateOrConnectWithoutConnectorBRefInput[]
+  upsert?: Prisma.CableWayUpsertWithWhereUniqueWithoutConnectorBRefInput | Prisma.CableWayUpsertWithWhereUniqueWithoutConnectorBRefInput[]
+  createMany?: Prisma.CableWayCreateManyConnectorBRefInputEnvelope
+  set?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+  disconnect?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+  delete?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+  connect?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+  update?: Prisma.CableWayUpdateWithWhereUniqueWithoutConnectorBRefInput | Prisma.CableWayUpdateWithWhereUniqueWithoutConnectorBRefInput[]
+  updateMany?: Prisma.CableWayUpdateManyWithWhereWithoutConnectorBRefInput | Prisma.CableWayUpdateManyWithWhereWithoutConnectorBRefInput[]
+  deleteMany?: Prisma.CableWayScalarWhereInput | Prisma.CableWayScalarWhereInput[]
+}
+
+export type CableWayUncheckedUpdateManyWithoutConnectorARefNestedInput = {
+  create?: Prisma.XOR<Prisma.CableWayCreateWithoutConnectorARefInput, Prisma.CableWayUncheckedCreateWithoutConnectorARefInput> | Prisma.CableWayCreateWithoutConnectorARefInput[] | Prisma.CableWayUncheckedCreateWithoutConnectorARefInput[]
+  connectOrCreate?: Prisma.CableWayCreateOrConnectWithoutConnectorARefInput | Prisma.CableWayCreateOrConnectWithoutConnectorARefInput[]
+  upsert?: Prisma.CableWayUpsertWithWhereUniqueWithoutConnectorARefInput | Prisma.CableWayUpsertWithWhereUniqueWithoutConnectorARefInput[]
+  createMany?: Prisma.CableWayCreateManyConnectorARefInputEnvelope
+  set?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+  disconnect?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+  delete?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+  connect?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+  update?: Prisma.CableWayUpdateWithWhereUniqueWithoutConnectorARefInput | Prisma.CableWayUpdateWithWhereUniqueWithoutConnectorARefInput[]
+  updateMany?: Prisma.CableWayUpdateManyWithWhereWithoutConnectorARefInput | Prisma.CableWayUpdateManyWithWhereWithoutConnectorARefInput[]
+  deleteMany?: Prisma.CableWayScalarWhereInput | Prisma.CableWayScalarWhereInput[]
+}
+
+export type CableWayUncheckedUpdateManyWithoutConnectorBRefNestedInput = {
+  create?: Prisma.XOR<Prisma.CableWayCreateWithoutConnectorBRefInput, Prisma.CableWayUncheckedCreateWithoutConnectorBRefInput> | Prisma.CableWayCreateWithoutConnectorBRefInput[] | Prisma.CableWayUncheckedCreateWithoutConnectorBRefInput[]
+  connectOrCreate?: Prisma.CableWayCreateOrConnectWithoutConnectorBRefInput | Prisma.CableWayCreateOrConnectWithoutConnectorBRefInput[]
+  upsert?: Prisma.CableWayUpsertWithWhereUniqueWithoutConnectorBRefInput | Prisma.CableWayUpsertWithWhereUniqueWithoutConnectorBRefInput[]
+  createMany?: Prisma.CableWayCreateManyConnectorBRefInputEnvelope
+  set?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+  disconnect?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+  delete?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+  connect?: Prisma.CableWayWhereUniqueInput | Prisma.CableWayWhereUniqueInput[]
+  update?: Prisma.CableWayUpdateWithWhereUniqueWithoutConnectorBRefInput | Prisma.CableWayUpdateWithWhereUniqueWithoutConnectorBRefInput[]
+  updateMany?: Prisma.CableWayUpdateManyWithWhereWithoutConnectorBRefInput | Prisma.CableWayUpdateManyWithWhereWithoutConnectorBRefInput[]
+  deleteMany?: Prisma.CableWayScalarWhereInput | Prisma.CableWayScalarWhereInput[]
 }
 
 export type CableWayCreateNestedManyWithoutProductInput = {
@@ -459,20 +546,121 @@ export type CableWayUncheckedUpdateManyWithoutProductNestedInput = {
   deleteMany?: Prisma.CableWayScalarWhereInput | Prisma.CableWayScalarWhereInput[]
 }
 
+export type CableWayCreateWithoutConnectorARefInput = {
+  id?: string
+  count?: number
+  cableType?: string | null
+  sortOrder?: number
+  product: Prisma.ProductCreateNestedOneWithoutWaysInput
+  connectorBRef?: Prisma.ConnectorCreateNestedOneWithoutWayEndsBInput
+}
+
+export type CableWayUncheckedCreateWithoutConnectorARefInput = {
+  id?: string
+  productId: string
+  count?: number
+  connectorBId?: string | null
+  cableType?: string | null
+  sortOrder?: number
+}
+
+export type CableWayCreateOrConnectWithoutConnectorARefInput = {
+  where: Prisma.CableWayWhereUniqueInput
+  create: Prisma.XOR<Prisma.CableWayCreateWithoutConnectorARefInput, Prisma.CableWayUncheckedCreateWithoutConnectorARefInput>
+}
+
+export type CableWayCreateManyConnectorARefInputEnvelope = {
+  data: Prisma.CableWayCreateManyConnectorARefInput | Prisma.CableWayCreateManyConnectorARefInput[]
+  skipDuplicates?: boolean
+}
+
+export type CableWayCreateWithoutConnectorBRefInput = {
+  id?: string
+  count?: number
+  cableType?: string | null
+  sortOrder?: number
+  product: Prisma.ProductCreateNestedOneWithoutWaysInput
+  connectorARef?: Prisma.ConnectorCreateNestedOneWithoutWayEndsAInput
+}
+
+export type CableWayUncheckedCreateWithoutConnectorBRefInput = {
+  id?: string
+  productId: string
+  count?: number
+  connectorAId?: string | null
+  cableType?: string | null
+  sortOrder?: number
+}
+
+export type CableWayCreateOrConnectWithoutConnectorBRefInput = {
+  where: Prisma.CableWayWhereUniqueInput
+  create: Prisma.XOR<Prisma.CableWayCreateWithoutConnectorBRefInput, Prisma.CableWayUncheckedCreateWithoutConnectorBRefInput>
+}
+
+export type CableWayCreateManyConnectorBRefInputEnvelope = {
+  data: Prisma.CableWayCreateManyConnectorBRefInput | Prisma.CableWayCreateManyConnectorBRefInput[]
+  skipDuplicates?: boolean
+}
+
+export type CableWayUpsertWithWhereUniqueWithoutConnectorARefInput = {
+  where: Prisma.CableWayWhereUniqueInput
+  update: Prisma.XOR<Prisma.CableWayUpdateWithoutConnectorARefInput, Prisma.CableWayUncheckedUpdateWithoutConnectorARefInput>
+  create: Prisma.XOR<Prisma.CableWayCreateWithoutConnectorARefInput, Prisma.CableWayUncheckedCreateWithoutConnectorARefInput>
+}
+
+export type CableWayUpdateWithWhereUniqueWithoutConnectorARefInput = {
+  where: Prisma.CableWayWhereUniqueInput
+  data: Prisma.XOR<Prisma.CableWayUpdateWithoutConnectorARefInput, Prisma.CableWayUncheckedUpdateWithoutConnectorARefInput>
+}
+
+export type CableWayUpdateManyWithWhereWithoutConnectorARefInput = {
+  where: Prisma.CableWayScalarWhereInput
+  data: Prisma.XOR<Prisma.CableWayUpdateManyMutationInput, Prisma.CableWayUncheckedUpdateManyWithoutConnectorARefInput>
+}
+
+export type CableWayScalarWhereInput = {
+  AND?: Prisma.CableWayScalarWhereInput | Prisma.CableWayScalarWhereInput[]
+  OR?: Prisma.CableWayScalarWhereInput[]
+  NOT?: Prisma.CableWayScalarWhereInput | Prisma.CableWayScalarWhereInput[]
+  id?: Prisma.StringFilter<"CableWay"> | string
+  productId?: Prisma.StringFilter<"CableWay"> | string
+  count?: Prisma.IntFilter<"CableWay"> | number
+  connectorAId?: Prisma.StringNullableFilter<"CableWay"> | string | null
+  connectorBId?: Prisma.StringNullableFilter<"CableWay"> | string | null
+  cableType?: Prisma.StringNullableFilter<"CableWay"> | string | null
+  sortOrder?: Prisma.IntFilter<"CableWay"> | number
+}
+
+export type CableWayUpsertWithWhereUniqueWithoutConnectorBRefInput = {
+  where: Prisma.CableWayWhereUniqueInput
+  update: Prisma.XOR<Prisma.CableWayUpdateWithoutConnectorBRefInput, Prisma.CableWayUncheckedUpdateWithoutConnectorBRefInput>
+  create: Prisma.XOR<Prisma.CableWayCreateWithoutConnectorBRefInput, Prisma.CableWayUncheckedCreateWithoutConnectorBRefInput>
+}
+
+export type CableWayUpdateWithWhereUniqueWithoutConnectorBRefInput = {
+  where: Prisma.CableWayWhereUniqueInput
+  data: Prisma.XOR<Prisma.CableWayUpdateWithoutConnectorBRefInput, Prisma.CableWayUncheckedUpdateWithoutConnectorBRefInput>
+}
+
+export type CableWayUpdateManyWithWhereWithoutConnectorBRefInput = {
+  where: Prisma.CableWayScalarWhereInput
+  data: Prisma.XOR<Prisma.CableWayUpdateManyMutationInput, Prisma.CableWayUncheckedUpdateManyWithoutConnectorBRefInput>
+}
+
 export type CableWayCreateWithoutProductInput = {
   id?: string
   count?: number
-  connectorA?: string | null
-  connectorB?: string | null
   cableType?: string | null
   sortOrder?: number
+  connectorARef?: Prisma.ConnectorCreateNestedOneWithoutWayEndsAInput
+  connectorBRef?: Prisma.ConnectorCreateNestedOneWithoutWayEndsBInput
 }
 
 export type CableWayUncheckedCreateWithoutProductInput = {
   id?: string
   count?: number
-  connectorA?: string | null
-  connectorB?: string | null
+  connectorAId?: string | null
+  connectorBId?: string | null
   cableType?: string | null
   sortOrder?: number
 }
@@ -503,24 +691,83 @@ export type CableWayUpdateManyWithWhereWithoutProductInput = {
   data: Prisma.XOR<Prisma.CableWayUpdateManyMutationInput, Prisma.CableWayUncheckedUpdateManyWithoutProductInput>
 }
 
-export type CableWayScalarWhereInput = {
-  AND?: Prisma.CableWayScalarWhereInput | Prisma.CableWayScalarWhereInput[]
-  OR?: Prisma.CableWayScalarWhereInput[]
-  NOT?: Prisma.CableWayScalarWhereInput | Prisma.CableWayScalarWhereInput[]
-  id?: Prisma.StringFilter<"CableWay"> | string
-  productId?: Prisma.StringFilter<"CableWay"> | string
-  count?: Prisma.IntFilter<"CableWay"> | number
-  connectorA?: Prisma.StringNullableFilter<"CableWay"> | string | null
-  connectorB?: Prisma.StringNullableFilter<"CableWay"> | string | null
-  cableType?: Prisma.StringNullableFilter<"CableWay"> | string | null
-  sortOrder?: Prisma.IntFilter<"CableWay"> | number
+export type CableWayCreateManyConnectorARefInput = {
+  id?: string
+  productId: string
+  count?: number
+  connectorBId?: string | null
+  cableType?: string | null
+  sortOrder?: number
+}
+
+export type CableWayCreateManyConnectorBRefInput = {
+  id?: string
+  productId: string
+  count?: number
+  connectorAId?: string | null
+  cableType?: string | null
+  sortOrder?: number
+}
+
+export type CableWayUpdateWithoutConnectorARefInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  count?: Prisma.IntFieldUpdateOperationsInput | number
+  cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  product?: Prisma.ProductUpdateOneRequiredWithoutWaysNestedInput
+  connectorBRef?: Prisma.ConnectorUpdateOneWithoutWayEndsBNestedInput
+}
+
+export type CableWayUncheckedUpdateWithoutConnectorARefInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  productId?: Prisma.StringFieldUpdateOperationsInput | string
+  count?: Prisma.IntFieldUpdateOperationsInput | number
+  connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+}
+
+export type CableWayUncheckedUpdateManyWithoutConnectorARefInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  productId?: Prisma.StringFieldUpdateOperationsInput | string
+  count?: Prisma.IntFieldUpdateOperationsInput | number
+  connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+}
+
+export type CableWayUpdateWithoutConnectorBRefInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  count?: Prisma.IntFieldUpdateOperationsInput | number
+  cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  product?: Prisma.ProductUpdateOneRequiredWithoutWaysNestedInput
+  connectorARef?: Prisma.ConnectorUpdateOneWithoutWayEndsANestedInput
+}
+
+export type CableWayUncheckedUpdateWithoutConnectorBRefInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  productId?: Prisma.StringFieldUpdateOperationsInput | string
+  count?: Prisma.IntFieldUpdateOperationsInput | number
+  connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+}
+
+export type CableWayUncheckedUpdateManyWithoutConnectorBRefInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  productId?: Prisma.StringFieldUpdateOperationsInput | string
+  count?: Prisma.IntFieldUpdateOperationsInput | number
+  connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type CableWayCreateManyProductInput = {
   id?: string
   count?: number
-  connectorA?: string | null
-  connectorB?: string | null
+  connectorAId?: string | null
+  connectorBId?: string | null
   cableType?: string | null
   sortOrder?: number
 }
@@ -528,17 +775,17 @@ export type CableWayCreateManyProductInput = {
 export type CableWayUpdateWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
-  connectorA?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  connectorB?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  connectorARef?: Prisma.ConnectorUpdateOneWithoutWayEndsANestedInput
+  connectorBRef?: Prisma.ConnectorUpdateOneWithoutWayEndsBNestedInput
 }
 
 export type CableWayUncheckedUpdateWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
-  connectorA?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  connectorB?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
@@ -546,8 +793,8 @@ export type CableWayUncheckedUpdateWithoutProductInput = {
 export type CableWayUncheckedUpdateManyWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
-  connectorA?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  connectorB?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
@@ -558,60 +805,74 @@ export type CableWaySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   id?: boolean
   productId?: boolean
   count?: boolean
-  connectorA?: boolean
-  connectorB?: boolean
+  connectorAId?: boolean
+  connectorBId?: boolean
   cableType?: boolean
   sortOrder?: boolean
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  connectorARef?: boolean | Prisma.CableWay$connectorARefArgs<ExtArgs>
+  connectorBRef?: boolean | Prisma.CableWay$connectorBRefArgs<ExtArgs>
 }, ExtArgs["result"]["cableWay"]>
 
 export type CableWaySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   productId?: boolean
   count?: boolean
-  connectorA?: boolean
-  connectorB?: boolean
+  connectorAId?: boolean
+  connectorBId?: boolean
   cableType?: boolean
   sortOrder?: boolean
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  connectorARef?: boolean | Prisma.CableWay$connectorARefArgs<ExtArgs>
+  connectorBRef?: boolean | Prisma.CableWay$connectorBRefArgs<ExtArgs>
 }, ExtArgs["result"]["cableWay"]>
 
 export type CableWaySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   productId?: boolean
   count?: boolean
-  connectorA?: boolean
-  connectorB?: boolean
+  connectorAId?: boolean
+  connectorBId?: boolean
   cableType?: boolean
   sortOrder?: boolean
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  connectorARef?: boolean | Prisma.CableWay$connectorARefArgs<ExtArgs>
+  connectorBRef?: boolean | Prisma.CableWay$connectorBRefArgs<ExtArgs>
 }, ExtArgs["result"]["cableWay"]>
 
 export type CableWaySelectScalar = {
   id?: boolean
   productId?: boolean
   count?: boolean
-  connectorA?: boolean
-  connectorB?: boolean
+  connectorAId?: boolean
+  connectorBId?: boolean
   cableType?: boolean
   sortOrder?: boolean
 }
 
-export type CableWayOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productId" | "count" | "connectorA" | "connectorB" | "cableType" | "sortOrder", ExtArgs["result"]["cableWay"]>
+export type CableWayOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productId" | "count" | "connectorAId" | "connectorBId" | "cableType" | "sortOrder", ExtArgs["result"]["cableWay"]>
 export type CableWayInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  connectorARef?: boolean | Prisma.CableWay$connectorARefArgs<ExtArgs>
+  connectorBRef?: boolean | Prisma.CableWay$connectorBRefArgs<ExtArgs>
 }
 export type CableWayIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  connectorARef?: boolean | Prisma.CableWay$connectorARefArgs<ExtArgs>
+  connectorBRef?: boolean | Prisma.CableWay$connectorBRefArgs<ExtArgs>
 }
 export type CableWayIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  connectorARef?: boolean | Prisma.CableWay$connectorARefArgs<ExtArgs>
+  connectorBRef?: boolean | Prisma.CableWay$connectorBRefArgs<ExtArgs>
 }
 
 export type $CableWayPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CableWay"
   objects: {
     product: Prisma.$ProductPayload<ExtArgs>
+    connectorARef: Prisma.$ConnectorPayload<ExtArgs> | null
+    connectorBRef: Prisma.$ConnectorPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -620,8 +881,8 @@ export type $CableWayPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
      * Identical ways are one row: "6× Schuko M→F" is a count, not six rows.
      */
     count: number
-    connectorA: string | null
-    connectorB: string | null
+    connectorAId: string | null
+    connectorBId: string | null
     /**
      * This way's wire, where the ways differ — a hybrid's power way is 2,5 mm²
      * and its data way is CAT7, which no single field on the product could say.
@@ -1026,6 +1287,8 @@ readonly fields: CableWayFieldRefs;
 export interface Prisma__CableWayClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   product<T extends Prisma.ProductDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductDefaultArgs<ExtArgs>>): Prisma.Prisma__ProductClient<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  connectorARef<T extends Prisma.CableWay$connectorARefArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CableWay$connectorARefArgs<ExtArgs>>): Prisma.Prisma__ConnectorClient<runtime.Types.Result.GetResult<Prisma.$ConnectorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  connectorBRef<T extends Prisma.CableWay$connectorBRefArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CableWay$connectorBRefArgs<ExtArgs>>): Prisma.Prisma__ConnectorClient<runtime.Types.Result.GetResult<Prisma.$ConnectorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1058,8 +1321,8 @@ export interface CableWayFieldRefs {
   readonly id: Prisma.FieldRef<"CableWay", 'String'>
   readonly productId: Prisma.FieldRef<"CableWay", 'String'>
   readonly count: Prisma.FieldRef<"CableWay", 'Int'>
-  readonly connectorA: Prisma.FieldRef<"CableWay", 'String'>
-  readonly connectorB: Prisma.FieldRef<"CableWay", 'String'>
+  readonly connectorAId: Prisma.FieldRef<"CableWay", 'String'>
+  readonly connectorBId: Prisma.FieldRef<"CableWay", 'String'>
   readonly cableType: Prisma.FieldRef<"CableWay", 'String'>
   readonly sortOrder: Prisma.FieldRef<"CableWay", 'Int'>
 }
@@ -1460,6 +1723,44 @@ export type CableWayDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many CableWays to delete.
    */
   limit?: number
+}
+
+/**
+ * CableWay.connectorARef
+ */
+export type CableWay$connectorARefArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Connector
+   */
+  select?: Prisma.ConnectorSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Connector
+   */
+  omit?: Prisma.ConnectorOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConnectorInclude<ExtArgs> | null
+  where?: Prisma.ConnectorWhereInput
+}
+
+/**
+ * CableWay.connectorBRef
+ */
+export type CableWay$connectorBRefArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Connector
+   */
+  select?: Prisma.ConnectorSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Connector
+   */
+  omit?: Prisma.ConnectorOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConnectorInclude<ExtArgs> | null
+  where?: Prisma.ConnectorWhereInput
 }
 
 /**

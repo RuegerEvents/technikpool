@@ -1,7 +1,7 @@
 <script lang="ts" module>
 	export type ConnectorDraft = {
 		name: string;
-		/** What it mates with. Blank means a family of one. */
+		/** The connector system without the end: TRUE1 for TRUE1 M. Blank = first word of the name. */
 		family: string;
 		/** Stecker or Buchse — the part that goes in, or the part that receives. */
 		form: '' | 'plug' | 'socket';
@@ -22,7 +22,10 @@
 	import { Label } from '$lib/components/ui/label';
 	import { ImageUpload } from '$lib/components/ui/image-upload';
 	import { CategorySelect } from '$lib/components/ui/category-select';
+	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { getCategories } from '$lib/remote/assets.remote';
+	import { getConnectors } from '$lib/remote/connectors.remote';
+	import { connectorFamily } from '$lib/cable';
 
 	type Props = {
 		value?: ConnectorDraft;
@@ -33,26 +36,58 @@
 	let { value = $bindable(emptyConnectorDraft()), idPrefix = 'connector' }: Props = $props();
 
 	let categories = $derived(getCategories().current ?? []);
+
+	// Every family the catalogue already uses, once each, so "TRUE1" is picked
+	// rather than typed a second time as "True1".
+	let families = $derived.by(() => {
+		const seen: Record<string, string> = {};
+		for (const c of getConnectors().current ?? []) {
+			const family = c.family?.trim();
+			if (family) seen[family.toLowerCase()] ??= family;
+		}
+		return Object.values(seen)
+			.sort((a, b) => a.localeCompare(b))
+			.map((family) => ({ id: family, name: family }));
+	});
+
+	// The family follows the name — its first word — until someone picks or types
+	// one. Remembering what was filled in, rather than a "touched" flag, is what
+	// lets clearing the field hand it back to the name.
+	let autoFamily = '';
+	function nameChanged() {
+		if (value.family && value.family !== autoFamily) return;
+		autoFamily = connectorFamily(value.name);
+		value.family = autoFamily;
+	}
 </script>
 
 <div class="space-y-4">
 	<div class="space-y-2">
 		<Label for="{idPrefix}-name">Connector name</Label>
-		<Input id="{idPrefix}-name" bind:value={value.name} placeholder="Schuko M" required />
+		<Input
+			id="{idPrefix}-name"
+			bind:value={value.name}
+			oninput={nameChanged}
+			placeholder="TRUE1 M"
+			required
+		/>
 	</div>
 
 	<div class="grid gap-4 sm:grid-cols-2">
 		<div class="space-y-2">
-			<Label for="{idPrefix}-family">Mates with</Label>
-			<Input
+			<Label for="{idPrefix}-family">Connector family</Label>
+			<CreatableSelect
 				id="{idPrefix}-family"
-				bind:value={value.family}
-				placeholder={value.name || 'Schuko'}
+				items={families}
+				value={value.family ? { id: value.family, name: value.family } : null}
+				onchange={(sel) => (value.family = sel?.name.trim() ?? '')}
+				oncreate={(name) => (value.family = name.trim())}
+				placeholder={connectorFamily(value.name) || 'TRUE1'}
 			/>
 			<p class="text-xs text-muted-foreground">
-				The other half of the pair, named as a group: Schuko M and Schuko F are both
-				<span class="font-medium">Schuko</span>. Leave it blank for a connector that only ever meets
-				its own kind.
+				The connector system, without which end it is: TRUE1 M and TRUE1 F are both
+				<span class="font-medium">TRUE1</span>, not each other. Filled in from the first word of the
+				name.
 			</p>
 		</div>
 
