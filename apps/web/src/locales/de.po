@@ -128,6 +128,7 @@ msgstr "Produkt"
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
+#: src/routes/products/[id]/product-detail.svelte
 msgid "S/N"
 msgstr "S/N"
 
@@ -149,6 +150,7 @@ msgstr "Org"
 #: src/routes/checkout/+page.svelte
 #: src/routes/invoices/+page.svelte
 #: src/routes/offers/+page.svelte
+#: src/routes/products/[id]/product-detail.svelte
 msgid "Status"
 msgstr "Status"
 
@@ -442,6 +444,7 @@ msgstr "Bundle"
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/offers/new/+page.svelte
 #: src/routes/productions/+page.svelte
+#: src/routes/products/[id]/product-detail.svelte
 #: src/routes/stickers/+page.svelte
 #: src/routes/stickers/+page.svelte
 msgid "Organization"
@@ -474,6 +477,7 @@ msgstr "Gerät hinzufügen"
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/checkout/+page.svelte
+#: src/routes/products/[id]/product-detail.svelte
 msgid "Tag"
 msgstr "Tag"
 
@@ -1313,6 +1317,7 @@ msgstr "Bearbeiten"
 #: src/routes/checkout/+page.svelte
 #: src/routes/inspections/+page.svelte
 #: src/routes/inspections/+page.svelte
+#: src/routes/products/[id]/product-detail.svelte
 msgid "Location"
 msgstr "Standort"
 
@@ -8839,3 +8844,12 @@ msgid "# asset is waiting for approval by another organization"
 msgid_plural "# assets are waiting for approval by another organization"
 msgstr[0] "# Gerät wartet auf Freigabe durch eine andere Organisation"
 msgstr[1] "# Geräte warten auf Freigabe durch eine andere Organisation"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Case"
+msgstr "Case"
+
+#. 0: unit.parent.product.name; 1: unit.parent.assetTag ?? ''
+#: src/routes/products/[id]/product-detail.svelte
+msgid "↳ Accessory of {0} {1}"
+msgstr "↳ Zubehör von {0} {1}"

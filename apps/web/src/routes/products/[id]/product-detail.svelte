@@ -90,29 +90,64 @@
 							None of your organizations holds a unit of this product.
 						</p>
 					{:else}
-						<ul class="divide-y border-t">
-							{#each units as unit (unit.id)}
-								<li>
-									<a
-										href={resolve(`/assets/${unit.id}`)}
-										class="flex items-center gap-3 px-6 py-2.5 text-sm transition-colors hover:bg-muted/40"
-									>
-										<span class="w-24 shrink-0 truncate font-mono">{unit.assetTag ?? '—'}</span>
-										<span class="min-w-0 flex-1 truncate text-muted-foreground">
-											{[
-												severalOrgs ? orgLabel(unit.organization) : '',
-												unit.bundle?.template.name ?? '',
-												unit.location?.name ?? '',
-												unit.serialNumber ? `SN ${unit.serialNumber}` : ''
-											]
-												.filter(Boolean)
-												.join(' · ')}
-										</span>
-										<AssetStatusBadge status={unit.status} class="shrink-0" />
-									</a>
-								</li>
-							{/each}
-						</ul>
+						<!-- Half the page wide at most, so it scrolls sideways rather than squeezing
+						     six columns into wrapped fragments. -->
+						<div class="overflow-x-auto border-t">
+							<table class="w-full text-sm">
+								<thead>
+									<tr class="border-b bg-muted/30 text-left text-xs text-muted-foreground">
+										<th class="px-4 py-2 font-medium">Tag</th>
+										{#if severalOrgs}
+											<th class="px-4 py-2 font-medium">Organization</th>
+										{/if}
+										<th class="px-4 py-2 font-medium">Case</th>
+										<th class="px-4 py-2 font-medium">Location</th>
+										<th class="px-4 py-2 font-medium">S/N</th>
+										<th class="px-4 py-2 font-medium">Status</th>
+									</tr>
+								</thead>
+								<tbody>
+									{#each units as unit (unit.id)}
+										<tr
+											class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
+											onclick={() => goto(resolve(`/assets/${unit.id}`))}
+										>
+											<td class="px-4 py-2">
+												<a
+													href={resolve(`/assets/${unit.id}`)}
+													class="font-mono whitespace-nowrap hover:underline"
+													onclick={(e) => e.stopPropagation()}>{unit.assetTag ?? '—'}</a
+												>
+												{#if unit.parent}
+													<a
+														href={resolve(`/assets/${unit.parent.id}`)}
+														class="block text-xs whitespace-nowrap text-muted-foreground hover:underline"
+														onclick={(e) => e.stopPropagation()}
+													>
+														↳ Accessory of {unit.parent.product.name}
+														{unit.parent.assetTag ?? ''}
+													</a>
+												{/if}
+											</td>
+											{#if severalOrgs}
+												<td class="px-4 py-2 whitespace-nowrap text-muted-foreground"
+													>{orgLabel(unit.organization)}</td
+												>
+											{/if}
+											<td class="px-4 py-2 text-muted-foreground"
+												>{unit.bundle?.template.name ?? '—'}</td
+											>
+											<td class="px-4 py-2 text-muted-foreground">{unit.location?.name ?? '—'}</td>
+											<td
+												class="px-4 py-2 font-mono text-xs whitespace-nowrap text-muted-foreground"
+												>{unit.serialNumber ?? '—'}</td
+											>
+											<td class="px-4 py-2"><AssetStatusBadge status={unit.status} /></td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
 					{/if}
 				</Card.Content>
 			</Card.Root>
