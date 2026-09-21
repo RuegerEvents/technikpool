@@ -1,4 +1,1 @@
-• Looms: a cable with several ways shows what runs through it on the lookup screen — how many ways of each kind, and what is on their ends.
-• A scanned code that is nobody's asset tag is matched against serial numbers as well, as long as it is unique, and stays visible in the search field.
-• Every booking in the history is labelled again.
-• What's new: Settings now lists what each version brought, and the home screen says so after an update.
+• Equipment without a particular manufacturer — a Schuko lead, a no-name laptop — is shown by its name alone, with no "Generisch" in front of it.
