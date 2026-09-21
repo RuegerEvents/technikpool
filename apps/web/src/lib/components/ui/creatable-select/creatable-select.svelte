@@ -197,6 +197,47 @@
 		}
 	}
 
+	// The list is `fixed`, placed from the field's position on screen, rather
+	// than `absolute` under it: inside a Modal the field sits in a scrolling
+	// body, and an absolute list was clipped by it — the body scrolled instead,
+	// through a window as tall as the field. Fixed escapes any scroll container
+	// (none of the ancestors this is used in carries a transform, which would
+	// capture it again). It opens upwards when the room below is short.
+	const LIST_MAX = 240;
+	let placement = $state({ top: 0, left: 0, width: 0, up: false, maxHeight: LIST_MAX });
+
+	function place() {
+		if (!inputEl) return;
+		const rect = inputEl.getBoundingClientRect();
+		const below = window.innerHeight - rect.bottom - 12;
+		const above = rect.top - 12;
+		const up = below < LIST_MAX && above > below;
+		placement = {
+			top: up ? rect.top - 4 : rect.bottom + 4,
+			left: rect.left,
+			width: rect.width,
+			up,
+			maxHeight: Math.max(96, Math.min(LIST_MAX, up ? above : below))
+		};
+	}
+
+	$effect(() => {
+		if (!open) return;
+		place();
+		// Capture: a scroll inside any container moves the field too.
+		window.addEventListener('scroll', place, true);
+		window.addEventListener('resize', place);
+		return () => {
+			window.removeEventListener('scroll', place, true);
+			window.removeEventListener('resize', place);
+		};
+	});
+
+	let listStyle = $derived(
+		`left:${placement.left}px;width:${placement.width}px;top:${placement.top}px;` +
+			(placement.up ? 'transform:translateY(-100%);' : '')
+	);
+
 	function handleFocus() {
 		open = true;
 	}
@@ -241,9 +282,10 @@
 
 	{#if open && options.length > 0}
 		<div
-			class="absolute z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md"
+			class="fixed z-50 rounded-md border bg-popover text-popover-foreground shadow-md"
+			style={listStyle}
 		>
-			<ul class="max-h-60 overflow-y-auto py-1">
+			<ul class="overflow-y-auto py-1" style="max-height:{placement.maxHeight}px">
 				{#each options as opt, i (opt.type === 'create' ? `create-${opt.name}` : `${opt.type}-${opt.item.id}`)}
 					{@const disabled = opt.type !== 'create' && !!opt.item.disabled}
 					{#if opt.type === 'item' && opt.item.group && (i === 0 || options[i - 1].type !== 'item' || (options[i - 1] as { item: Item }).item.group !== opt.item.group)}
@@ -312,7 +354,8 @@
 
 	{#if open && options.length === 0}
 		<div
-			class="absolute z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md"
+			class="fixed z-50 rounded-md border bg-popover text-popover-foreground shadow-md"
+			style={listStyle}
 		>
 			<div class="px-3 py-4 text-center text-sm text-muted-foreground">No results</div>
 		</div>
