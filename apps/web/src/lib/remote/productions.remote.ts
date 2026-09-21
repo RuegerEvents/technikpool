@@ -32,21 +32,16 @@ import type {
 	RequestedData
 } from '$lib/types/asset-transaction';
 
-// Called after an item is approved/declined. Once the (production, ownerOrg)
-// PENDING queue is fully cleared, tells the requesting org's OWNER/ADMIN
-// members that their requests were reviewed — a single email regardless of
-// how many items were resolved in this batch (e.g. via "approve all").
-async function notifyRequesterIfQueueCleared(
+// Tells the requesting org's OWNER/ADMIN members that the owner org has
+// answered every request it had for this production. The caller decides that
+// the queue was cleared — see `reviewProductionItems`, which is the only place
+// that can tell without a race.
+async function notifyRequesterQueueCleared(
 	productionId: string,
 	requestingOrgId: string,
 	ownerOrgId: string
 ) {
 	try {
-		const remainingPending = await prisma.productionItem.count({
-			where: { productionId, status: 'PENDING', asset: { organizationId: ownerOrgId } }
-		});
-		if (remainingPending > 0) return;
-
 		const [production, ownerOrg, recipients] = await Promise.all([
 			prisma.production.findUniqueOrThrow({ where: { id: productionId }, select: { name: true } }),
 			prisma.organization.findUniqueOrThrow({ where: { id: ownerOrgId }, select: { name: true } }),
@@ -755,101 +750,111 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 	return item;
 });
 
-export const approveProductionItem = command(v.string(), async (itemId: string) => {
+// Approving and declining answer a whole selection in one call. They used to
+// go one unit per request, fired in parallel by "Approve all": every request
+// found the queue empty once it had written its own unit, and the borrower got
+// one "all reviewed" mail per unit. Now the productions involved are locked
+// for the length of the transaction, so exactly one batch sees a queue go from
+// open to empty — and only that batch reports it.
+async function reviewProductionItems(itemIds: string[], decision: 'APPROVED' | 'DECLINED') {
 	const user = await requireAuth();
 
-	const item = await prisma.productionItem.findUniqueOrThrow({
-		where: { id: itemId },
-		include: { asset: true, production: true }
+	const requested = await prisma.productionItem.findMany({
+		where: { id: { in: itemIds } },
+		select: { productionId: true, asset: { select: { organizationId: true } } }
 	});
+	for (const orgId of new Set(requested.map((item) => item.asset.organizationId))) {
+		await requireOrgInventory(
+			orgId,
+			decision === 'APPROVED' ? 'approval_forbidden' : 'decline_forbidden'
+		);
+	}
+	const productionIds = [...new Set(requested.map((item) => item.productionId))].sort();
 
-	await requireOrgInventory(item.asset.organizationId, 'approval_forbidden');
-	// A request withdrawn by the production's cancellation is gone, whatever
-	// the lender's page still showed.
-	if (item.status !== 'PENDING') appError(409, 'booking_not_pending');
-
-	const updated = await prisma.productionItem.update({
-		where: { id: itemId },
-		data: { status: 'APPROVED' }
-	});
-
-	await prisma.assetTransaction.create({
-		data: {
-			assetId: item.assetId,
-			userId: user.id,
-			productionId: item.productionId,
-			action: 'APPROVED',
-			data: {
-				type: 'APPROVED',
-				productionId: item.productionId,
-				productionName: item.production.name
-			}
+	const { reviewed, cleared } = await prisma.$transaction(async (tx) => {
+		for (const id of productionIds) {
+			await tx.$queryRaw`SELECT 1 FROM "Production" WHERE id = ${id} FOR UPDATE`;
 		}
+		// Read again under the lock: a request withdrawn by the production's
+		// cancellation, or answered by someone else meanwhile, is not ours to
+		// answer, whatever the lender's page still showed.
+		const reviewed = await tx.productionItem.findMany({
+			where: { id: { in: itemIds }, status: 'PENDING' },
+			include: {
+				asset: { select: { organizationId: true } },
+				production: { select: { name: true, organizationId: true } }
+			}
+		});
+		if (reviewed.length === 0) return { reviewed, cleared: [] };
+
+		await tx.productionItem.updateMany({
+			where: { id: { in: reviewed.map((item) => item.id) } },
+			data: { status: decision }
+		});
+		await tx.assetTransaction.createMany({
+			data: reviewed.map((item) => ({
+				assetId: item.assetId,
+				userId: user.id,
+				productionId: item.productionId,
+				action: decision,
+				data: {
+					type: decision,
+					productionId: item.productionId,
+					productionName: item.production.name
+				}
+			}))
+		});
+
+		const queues = new Map(
+			reviewed.map((item) => [
+				`${item.productionId}:${item.asset.organizationId}`,
+				{
+					productionId: item.productionId,
+					requestingOrgId: item.production.organizationId,
+					ownerOrgId: item.asset.organizationId
+				}
+			])
+		);
+		const cleared = [];
+		for (const queue of queues.values()) {
+			const remaining = await tx.productionItem.count({
+				where: {
+					productionId: queue.productionId,
+					status: 'PENDING',
+					asset: { organizationId: queue.ownerOrgId }
+				}
+			});
+			if (remaining === 0) cleared.push(queue);
+		}
+		return { reviewed, cleared };
 	});
 
-	await notifyRequesterIfQueueCleared(
-		item.productionId,
-		item.production.organizationId,
-		item.asset.organizationId
-	);
+	if (reviewed.length === 0) appError(409, 'booking_not_pending');
+
+	for (const queue of cleared) {
+		await notifyRequesterQueueCleared(queue.productionId, queue.requestingOrgId, queue.ownerOrgId);
+	}
 
 	// The approver answers for the unit, not for the production that asked for
 	// it, and may not be allowed to open that — see `visibleProductionIds`.
-	if ((await visibleProductionIds(user.id, [item.productionId])).length > 0) {
-		await getProduction(item.productionId).refresh();
+	const reviewedProductionIds = [...new Set(reviewed.map((item) => item.productionId))];
+	for (const id of await visibleProductionIds(user.id, reviewedProductionIds)) {
+		await getProduction(id).refresh();
 	}
-	await getPendingApprovals(item.asset.organizationId).refresh();
-	await getAwaitingApprovals().refresh();
-	return updated;
-});
-
-export const declineProductionItem = command(v.string(), async (itemId: string) => {
-	const user = await requireAuth();
-
-	const item = await prisma.productionItem.findUniqueOrThrow({
-		where: { id: itemId },
-		include: { asset: true, production: true }
-	});
-
-	await requireOrgInventory(item.asset.organizationId, 'decline_forbidden');
-	// A request withdrawn by the production's cancellation is gone, whatever
-	// the lender's page still showed.
-	if (item.status !== 'PENDING') appError(409, 'booking_not_pending');
-
-	const updated = await prisma.productionItem.update({
-		where: { id: itemId },
-		data: { status: 'DECLINED' }
-	});
-
-	await prisma.assetTransaction.create({
-		data: {
-			assetId: item.assetId,
-			userId: user.id,
-			productionId: item.productionId,
-			action: 'DECLINED',
-			data: {
-				type: 'DECLINED',
-				productionId: item.productionId,
-				productionName: item.production.name
-			}
-		}
-	});
-
-	await notifyRequesterIfQueueCleared(
-		item.productionId,
-		item.production.organizationId,
-		item.asset.organizationId
-	);
-
-	// The approver answers for the unit, not for the production that asked for
-	// it, and may not be allowed to open that — see `visibleProductionIds`.
-	if ((await visibleProductionIds(user.id, [item.productionId])).length > 0) {
-		await getProduction(item.productionId).refresh();
+	for (const orgId of new Set(reviewed.map((item) => item.asset.organizationId))) {
+		await getPendingApprovals(orgId).refresh();
 	}
-	await getPendingApprovals(item.asset.organizationId).refresh();
 	await getAwaitingApprovals().refresh();
-	return updated;
-});
+	return { reviewed: reviewed.length };
+}
+
+export const approveProductionItems = command(v.array(v.string()), (itemIds: string[]) =>
+	reviewProductionItems(itemIds, 'APPROVED')
+);
+
+export const declineProductionItems = command(v.array(v.string()), (itemIds: string[]) =>
+	reviewProductionItems(itemIds, 'DECLINED')
+);
 
 export const getPendingApprovals = query(v.string(), async (organizationId: string) => {
 	const user = await requireOrgInventory(organizationId);

@@ -3836,15 +3836,11 @@ msgstr "Gesamtanzahl: {0}"
 msgid "Date:"
 msgstr "Datum:"
 
-#. 0: failed; 1: items.length
-#: src/routes/+page.svelte
-msgid "{0} of {1} approvals failed."
-msgstr "{0} von {1} Genehmigungen fehlgeschlagen."
+#~ msgid "{0} of {1} approvals failed."
+#~ msgstr "{0} von {1} Genehmigungen fehlgeschlagen."
 
-#. 0: failed; 1: items.length
-#: src/routes/+page.svelte
-msgid "{0} of {1} declines failed."
-msgstr "{0} von {1} Ablehnungen fehlgeschlagen."
+#~ msgid "{0} of {1} declines failed."
+#~ msgstr "{0} von {1} Ablehnungen fehlgeschlagen."
 
 #. 0: name; 1: !currentIsAdmin ? 'granted' \\: 'revoked'
 #: src/routes/admin/users/+page.svelte

@@ -68,14 +68,14 @@ async function requireAuth() {
 
 ## Remote Files
 
-| File                                   | Exports                                                                                                                                                                                                        |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/lib/remote/orgs.remote.ts`        | `getMyOrgs`, `getOrg`, `getOrgUsers`, `getOrgWithMembers`, `createOrg`, `addUserToOrg`, `removeUserFromOrg`, `updateMemberRole`, `getAllUsers`, `setUserAdmin`                                                 |
-| `src/lib/remote/assets.remote.ts`      | `getAssets`, `getInventorySummary`, `getManufacturers`, `getProducts`, `createAssets`, `getAssetHistory`, `getBundles`, `getBundle`, `createBundle`, `addAssetToBundle`, `removeAssetFromBundle`               |
-| `src/lib/remote/productions.remote.ts` | `getProductions`, `getProduction`, `createProduction`, `addAssetToProduction`, `approveProductionItem`, `getPendingApprovals`, `addBundleToProduction`, `addCrewMember`, `removeCrewMember`, `getCalendarData` |
-| `src/lib/remote/licenses.remote.ts`    | `getLicenses`, `getLicenseStatus`, `revealLicenseCredentials`, `setLicenseCredentials`, `clearLicenseCredentials`                                                                                              |
-| `src/lib/remote/invitations.remote.ts` | `getSignUpStatus`, `getInvitationPreview`, `getSignUpSettings`, `setSignUpEnabled`, `getInvitations`, `inviteUser`, `resendInvitation`, `revokeInvitation`                                                     |
-| `src/lib/remote/addresses.remote.ts`   | `getKnownAddresses` — feeds the picker in `AddressInput`; a pick copies the values, owners never share an `Address` row                                                                                        |
+| File                                   | Exports                                                                                                                                                                                                                                   |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/lib/remote/orgs.remote.ts`        | `getMyOrgs`, `getOrg`, `getOrgUsers`, `getOrgWithMembers`, `createOrg`, `addUserToOrg`, `removeUserFromOrg`, `updateMemberRole`, `getAllUsers`, `setUserAdmin`                                                                            |
+| `src/lib/remote/assets.remote.ts`      | `getAssets`, `getInventorySummary`, `getManufacturers`, `getProducts`, `createAssets`, `getAssetHistory`, `getBundles`, `getBundle`, `createBundle`, `addAssetToBundle`, `removeAssetFromBundle`                                          |
+| `src/lib/remote/productions.remote.ts` | `getProductions`, `getProduction`, `createProduction`, `addAssetToProduction`, `approveProductionItems`, `declineProductionItems`, `getPendingApprovals`, `addBundleToProduction`, `addCrewMember`, `removeCrewMember`, `getCalendarData` |
+| `src/lib/remote/licenses.remote.ts`    | `getLicenses`, `getLicenseStatus`, `revealLicenseCredentials`, `setLicenseCredentials`, `clearLicenseCredentials`                                                                                                                         |
+| `src/lib/remote/invitations.remote.ts` | `getSignUpStatus`, `getInvitationPreview`, `getSignUpSettings`, `setSignUpEnabled`, `getInvitations`, `inviteUser`, `resendInvitation`, `revokeInvitation`                                                                                |
+| `src/lib/remote/addresses.remote.ts`   | `getKnownAddresses` — feeds the picker in `AddressInput`; a pick copies the values, owners never share an `Address` row                                                                                                                   |
 
 ## External API (`/api/v1`)
 

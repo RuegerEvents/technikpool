@@ -6,15 +6,15 @@
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import {
 		getPendingApprovals,
-		approveProductionItem,
-		declineProductionItem,
+		approveProductionItems,
+		declineProductionItems,
 		getAwaitingApprovals,
 		getDashboardStats
 	} from '$lib/remote/productions.remote';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
 	import { invalidateAll } from '$app/navigation';
-	import { plural, orgLabel } from '$lib/utils';
+	import { plural, orgLabel, getErrorMessage } from '$lib/utils';
 	import { canManageInventory } from '$lib/roles';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 	import { formatReleaseDate, notesFor, releases } from '$lib/changelog';
@@ -120,20 +120,25 @@
 		else await handleDeclineAll(items);
 	}
 
+	// One call per selection, not per unit: the server tells the borrower once
+	// their queue is empty, and it can only tell which call emptied it when the
+	// whole selection arrives together.
 	async function handleApproveAll(items: PendingItem[]) {
-		const results = await Promise.allSettled(items.map((i) => approveProductionItem(i.id)));
-		const failed = results.filter((r) => r.status === 'rejected').length;
-		if (failed === 0)
-			toast.success(plural(items.length, ['# asset approved.', '# assets approved.']));
-		else toast.error(`${failed} of ${items.length} approvals failed.`);
+		try {
+			const { reviewed } = await approveProductionItems(items.map((i) => i.id));
+			toast.success(plural(reviewed, ['# asset approved.', '# assets approved.']));
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		}
 	}
 
 	async function handleDeclineAll(items: PendingItem[]) {
-		const results = await Promise.allSettled(items.map((i) => declineProductionItem(i.id)));
-		const failed = results.filter((r) => r.status === 'rejected').length;
-		if (failed === 0)
-			toast.success(plural(items.length, ['# asset declined.', '# assets declined.']));
-		else toast.error(`${failed} of ${items.length} declines failed.`);
+		try {
+			const { reviewed } = await declineProductionItems(items.map((i) => i.id));
+			toast.success(plural(reviewed, ['# asset declined.', '# assets declined.']));
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		}
 	}
 
 	function formatDate(d: Date | null | undefined) {
