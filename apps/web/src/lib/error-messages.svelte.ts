@@ -65,8 +65,6 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'Nothing left to revert: every field of this change has been edited again since.';
 		case 'manufacturer_name_required':
 			return 'A manufacturer needs a name.';
-		case 'manufacturer_required':
-			return 'Manufacturer is required';
 		case 'manufacturer_exists':
 			return 'A manufacturer with this name already exists. Merge them instead.';
 		case 'manufacturer_merge_self':

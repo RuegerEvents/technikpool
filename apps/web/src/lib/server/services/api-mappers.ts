@@ -125,7 +125,7 @@ type ProductRow = {
 		connectorA: string | null;
 		connectorB: string | null;
 	}[];
-	manufacturer: { name: string };
+	manufacturer: { name: string } | null;
 	category: CategoryRow;
 };
 
@@ -133,7 +133,7 @@ export function toProduct(product: ProductRow): Schemas['Product'] {
 	return {
 		id: product.id,
 		name: product.name,
-		manufacturerName: product.manufacturer.name,
+		manufacturerName: product.manufacturer?.name ?? null,
 		category: toCategory(product.category),
 		// The API keeps promising an address, because the scanner has nowhere to
 		// resolve a key against. What changed is where it comes from: it is built

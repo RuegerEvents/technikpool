@@ -42,7 +42,7 @@
 			if (!term) return true;
 			return [
 				l.product.name,
-				l.product.manufacturer.name,
+				l.product.manufacturer?.name,
 				l.assetTag,
 				l.serialNumber,
 				orgLabel(l.organization),
@@ -172,7 +172,7 @@
 											/>
 										</div>
 										<p class="text-xs text-muted-foreground">
-											{[license.product.manufacturer.name, license.assetTag, license.serialNumber]
+											{[license.product.manufacturer?.name, license.assetTag, license.serialNumber]
 												.filter(Boolean)
 												.join(' · ')}
 										</p>

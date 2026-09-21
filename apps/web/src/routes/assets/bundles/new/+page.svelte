@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { makerAndName } from '$lib/product-label';
 	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
 	import { canManageInventory } from '$lib/roles';
 	import * as Card from '$lib/components/ui/card';
@@ -42,7 +43,7 @@
 		id: string;
 		productId: string;
 		productName: string;
-		manufacturerName: string;
+		manufacturerName: string | null;
 		serialNumber: string | null;
 		assetTag: string | null;
 		status: string;
@@ -106,7 +107,7 @@
 			const q = assetSearch.toLowerCase();
 			return (
 				a.product.name.toLowerCase().includes(q) ||
-				a.product.manufacturer.name.toLowerCase().includes(q) ||
+				(a.product.manufacturer?.name.toLowerCase().includes(q) ?? false) ||
 				(a.serialNumber?.toLowerCase().includes(q) ?? false) ||
 				(a.assetTag?.toLowerCase().includes(q) ?? false)
 			);
@@ -120,7 +121,7 @@
 				id: a.id,
 				productId: a.productId,
 				productName: a.product.name,
-				manufacturerName: a.product.manufacturer.name,
+				manufacturerName: a.product.manufacturer?.name ?? null,
 				serialNumber: a.serialNumber,
 				assetTag: a.assetTag,
 				status: a.status
@@ -281,8 +282,7 @@
 							{#each shortfall as { line, have, missing } (line.productId)}
 								<li class={missing > 0 ? 'text-muted-foreground' : ''}>
 									<span class="font-mono text-xs">{have}/{line.quantity}</span>
-									{line.manufacturerName}
-									{line.name}
+									{makerAndName(line.manufacturerName, line.name)}
 								</li>
 							{/each}
 						</ul>
@@ -354,7 +354,7 @@
 											<td class="px-3 py-2">
 												<p class="font-medium">{asset.product.name}</p>
 												<p class="text-xs text-muted-foreground">
-													{asset.product.manufacturer.name}
+													{asset.product.manufacturer?.name}
 												</p>
 											</td>
 											<td class="px-3 py-2 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
@@ -418,7 +418,7 @@
 				id: a.id,
 				productId: a.productId,
 				productName: a.product.name,
-				manufacturerName: a.product.manufacturer.name,
+				manufacturerName: a.product.manufacturer?.name ?? null,
 				serialNumber: a.serialNumber,
 				assetTag: a.assetTag,
 				status: a.status

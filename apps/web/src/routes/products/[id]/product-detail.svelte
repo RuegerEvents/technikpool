@@ -54,7 +54,9 @@
 				<ProductThumb path={product.imagePath} alt={product.name} size={56} />
 				<div class="min-w-0">
 					<h1 class="text-3xl font-bold tracking-tight">{product.name}</h1>
-					<p class="text-muted-foreground">{product.manufacturer.name}</p>
+					{#if product.manufacturer}
+						<p class="text-muted-foreground">{product.manufacturer.name}</p>
+					{/if}
 				</div>
 			</div>
 			<Button icon="back" variant="outline" href={resolve('/products')}>Back to Products</Button>

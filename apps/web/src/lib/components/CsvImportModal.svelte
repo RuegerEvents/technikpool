@@ -244,7 +244,6 @@
 	let canImport = $derived(
 		!!selectedOrgId &&
 			!!selectedLocationId &&
-			columnMapping.includes('manufacturer' as FieldType) &&
 			columnMapping.includes('product' as FieldType) &&
 			csvRows.length > 0
 	);
@@ -266,9 +265,10 @@
 			const catIdx = categoryColIdx;
 
 			const rows = csvRows.flatMap((row) => {
-				const mf = mfIdx >= 0 ? row[mfIdx]?.trim() : '';
+				// A blank manufacturer is a product with no maker, like a Schuko lead.
+				const mf = (mfIdx >= 0 ? row[mfIdx]?.trim() : '') ?? '';
 				const pr = prIdx >= 0 ? row[prIdx]?.trim() : '';
-				if (!mf || !pr) return [];
+				if (!pr) return [];
 				const csvCat = catIdx >= 0 ? row[catIdx]?.trim() : '';
 				return [
 					{

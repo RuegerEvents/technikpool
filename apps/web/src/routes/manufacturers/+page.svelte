@@ -26,19 +26,15 @@
 		)
 	);
 
-	let drafts = $state<Record<string, { name: string; generic: boolean }>>({});
+	let drafts = $state<Record<string, { name: string }>>({});
 	function draftFor(manufacturer: (typeof manufacturers)[number]) {
-		return drafts[manufacturer.id] ?? { name: manufacturer.name, generic: manufacturer.generic };
+		return drafts[manufacturer.id] ?? { name: manufacturer.name };
 	}
 	function changeName(manufacturer: (typeof manufacturers)[number], name: string) {
 		drafts[manufacturer.id] = { ...draftFor(manufacturer), name };
 	}
-	function changeGeneric(manufacturer: (typeof manufacturers)[number], generic: boolean) {
-		drafts[manufacturer.id] = { ...draftFor(manufacturer), generic };
-	}
 	function dirty(manufacturer: (typeof manufacturers)[number]) {
-		const draft = draftFor(manufacturer);
-		return draft.name.trim() !== manufacturer.name || draft.generic !== manufacturer.generic;
+		return draftFor(manufacturer).name.trim() !== manufacturer.name;
 	}
 
 	let saving = $state<string | null>(null);
@@ -48,8 +44,7 @@
 			const draft = draftFor(manufacturer);
 			await updateManufacturer({
 				manufacturerId: manufacturer.id,
-				name: draft.name,
-				generic: draft.generic
+				name: draft.name
 			});
 			delete drafts[manufacturer.id];
 			await getManufacturers().refresh();
@@ -91,9 +86,7 @@
 <div class="space-y-6">
 	<div>
 		<h1 class="text-3xl font-bold tracking-tight">Manufacturers</h1>
-		<p class="text-muted-foreground">
-			Manage catalog names, mark generic placeholders, and merge duplicate manufacturers.
-		</p>
+		<p class="text-muted-foreground">Manage catalog names and merge duplicate manufacturers.</p>
 	</div>
 
 	<Input type="search" bind:value={search} placeholder="Search manufacturers…" class="max-w-sm" />
@@ -112,7 +105,7 @@
 			{/if}
 			{#each visible as manufacturer (manufacturer.id)}
 				<div
-					class="grid gap-3 border-b p-4 last:border-0 md:grid-cols-[1fr_auto_auto_auto] md:items-center"
+					class="grid gap-3 border-b p-4 last:border-0 md:grid-cols-[1fr_auto_auto] md:items-center"
 				>
 					<Input
 						value={draftFor(manufacturer).name}
@@ -120,16 +113,6 @@
 						oninput={(event) =>
 							changeName(manufacturer, (event.currentTarget as HTMLInputElement).value)}
 					/>
-					<label class="flex items-center gap-2 text-sm">
-						<input
-							type="checkbox"
-							checked={draftFor(manufacturer).generic}
-							disabled={!canEdit}
-							onchange={(event) => changeGeneric(manufacturer, event.currentTarget.checked)}
-							class="h-4 w-4 rounded border-input"
-						/>
-						Generic
-					</label>
 					<span class="text-sm text-muted-foreground">
 						{plural(manufacturer._count.products, ['# product', '# products'])}
 					</span>

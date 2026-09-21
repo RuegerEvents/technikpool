@@ -521,7 +521,7 @@
 				if (!byProduct.has(pid))
 					byProduct.set(pid, {
 						name: a.product.name,
-						mfr: a.product.manufacturer.name,
+						mfr: a.product.manufacturer?.name ?? '',
 						assets: []
 					});
 				byProduct.get(pid)!.assets.push(a);

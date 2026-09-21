@@ -21,7 +21,7 @@
 export type BundleSpecLine = {
 	productId: string;
 	name: string;
-	manufacturerName: string;
+	manufacturerName: string | null;
 	quantity: number;
 };
 

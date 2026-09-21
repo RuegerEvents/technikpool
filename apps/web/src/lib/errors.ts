@@ -41,7 +41,6 @@ export type AppErrorCode =
 	| 'catalog_revert_unavailable'
 	| 'catalog_revert_stale'
 	| 'manufacturer_name_required'
-	| 'manufacturer_required'
 	| 'manufacturer_exists'
 	| 'manufacturer_merge_self'
 	| 'category_name_required'

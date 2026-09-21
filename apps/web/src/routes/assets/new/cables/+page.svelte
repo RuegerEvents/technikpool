@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { productLabel } from '$lib/product-label';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -69,12 +70,6 @@
 	};
 	let vocab = $derived(getCableVocabulary().current ?? EMPTY_VOCABULARY);
 
-	// Cables belong to nobody in particular, so the generic manufacturer is the
-	// default. Before any exists there is nothing to name it with, and the server
-	// creates it on the first save.
-	let genericManufacturer = $derived(manufacturers.find((m) => m.generic) ?? null);
-	let realManufacturers = $derived(manufacturers.filter((m) => !m.generic));
-
 	let connectors = $derived(getConnectors().current ?? []);
 	let typeItems = $derived(vocab.types.map((name) => ({ id: name, name })));
 
@@ -112,7 +107,7 @@
 		connectorA: string;
 		connectorB: string;
 		lengthM: string;
-		/** '' means the generic manufacturer — the server resolves it. */
+		/** '' means no manufacturer — a Schuko lead has no brand worth filing. */
 		manufacturerId: string;
 		categoryId: string;
 		quantity: number;
@@ -198,8 +193,8 @@
 	}
 
 	// A row describing a cable the catalogue already has. The server reuses an
-	// entry only under the same manufacturer, so the same lead typed here as
-	// generic and filed there under a brand becomes a second product — which is
+	// entry only under the same manufacturer, so the same lead typed here without
+	// one and filed there under a brand becomes a second product — which is
 	// the one case worth interrupting for. Under the same manufacturer there is
 	// nothing to warn about, only to say: the units join the entry that exists,
 	// and the name typed in this row is not used.
@@ -218,13 +213,13 @@
 		if (!key) return null;
 		const twins = catalog.filter((p) => cableTwinKey(p) === key);
 		if (twins.length === 0) return null;
-		const manufacturerId = row.manufacturerId || genericManufacturer?.id;
+		const manufacturerId = row.manufacturerId || null;
 		const same = twins.find((p) => p.manufacturerId === manufacturerId);
 		return same ? { product: same, reused: true } : { product: twins[0], reused: false };
 	}
 
-	function useTwin(row: Row, twin: { manufacturerId: string }) {
-		row.manufacturerId = twin.manufacturerId === genericManufacturer?.id ? '' : twin.manufacturerId;
+	function useTwin(row: Row, twin: { manufacturerId: string | null }) {
+		row.manufacturerId = twin.manufacturerId ?? '';
 	}
 
 	function swapEnds(row: Row) {
@@ -593,11 +588,8 @@
 										bind:value={row.manufacturerId}
 										class="h-10 w-full rounded-md border border-input bg-background px-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
 									>
-										<option value=""
-											>{genericManufacturer?.name ?? 'Generic (created on save)'}</option
-										>
-										{#each realManufacturers as m (m.id)}<option value={m.id}>{m.name}</option
-											>{/each}
+										<option value="">Generic / unknown manufacturer</option>
+										{#each manufacturers as m (m.id)}<option value={m.id}>{m.name}</option>{/each}
 									</select>
 								</div>
 								<div class="space-y-1">
@@ -656,9 +648,8 @@
 										>
 											<span
 												>The catalog already has this cable as
-												<span class="font-medium"
-													>{twin.product.manufacturer.name} {twin.product.name}</span
-												>. Saved like this, it becomes a second entry.</span
+												<span class="font-medium">{productLabel(twin.product)}</span>. Saved like
+												this, it becomes a second entry.</span
 											>
 											<button
 												type="button"

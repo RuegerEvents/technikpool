@@ -52,7 +52,7 @@
 			} else {
 				g.productCounts.push({
 					name: item.asset.product.name,
-					mfr: item.asset.product.manufacturer.name,
+					mfr: item.asset.product.manufacturer?.name ?? '',
 					count: 1
 				});
 			}
@@ -134,7 +134,7 @@
 							</p>
 						{/if}
 					</td>
-					<td class="py-3">{item.asset.product.manufacturer.name}</td>
+					<td class="py-3">{item.asset.product.manufacturer?.name}</td>
 					<td class="py-3 font-mono text-sm">{item.asset.serialNumber || 'N/A'}</td>
 					<td class="py-3 text-right">{orgLabel(item.asset.organization)}</td>
 				</tr>

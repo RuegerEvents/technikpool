@@ -237,7 +237,6 @@ model Invitation {
 model Manufacturer {
   id        String    @id @default(cuid())
   name      String
-  generic   Boolean   @default(false)
   // The object key in the S3-compatible store, not an address: see
   // src/lib/images.ts. A stored URL would pin the row to whichever host the
   // store was on when it was uploaded.
@@ -384,8 +383,11 @@ model Category {
 model Product {
   id             String       @id @default(cuid())
   name           String
-  manufacturerId String
-  manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
+  /// Null for a product nobody makes in particular — a Schuko lead, a generic
+  /// laptop. Such a product is called by its name alone everywhere, so there is
+  /// no placeholder maker for a delivery note to print ("Generisch Kaltgeräte").
+  manufacturerId String?
+  manufacturer   Manufacturer? @relation(fields: [manufacturerId], references: [id])
   categoryId     String
   category       Category     @relation(fields: [categoryId], references: [id])
   /// Object key, like Manufacturer.logoPath.

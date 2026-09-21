@@ -128,6 +128,7 @@
 </script>
 
 <script lang="ts">
+	import { productLabel } from '$lib/product-label';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -648,12 +649,11 @@
 					<ul class="space-y-0.5">
 						{#each twins as twin (twin.id)}
 							<li class="flex flex-wrap items-center gap-x-2">
-								<span class="font-medium">{twin.manufacturer.name} {twin.name}</span>
+								<span class="font-medium">{productLabel(twin)}</span>
 								{#if onMergeTwin}
 									<button
 										type="button"
-										onclick={() =>
-											onMergeTwin({ id: twin.id, name: `${twin.manufacturer.name} ${twin.name}` })}
+										onclick={() => onMergeTwin({ id: twin.id, name: productLabel(twin) })}
 										class="font-medium underline underline-offset-2"
 									>
 										Merge…

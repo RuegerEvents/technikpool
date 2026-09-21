@@ -96,7 +96,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 	const fileKeys = new Set<string>();
 	for (const product of products) {
 		if (product.imagePath) fileKeys.add(product.imagePath);
-		if (product.manufacturer.logoPath) fileKeys.add(product.manufacturer.logoPath);
+		if (product.manufacturer?.logoPath) fileKeys.add(product.manufacturer.logoPath);
 	}
 	for (const asset of assets) if (asset.generatedImagePath) fileKeys.add(asset.generatedImagePath);
 	for (const bundle of bundles) if (bundle.imagePath) fileKeys.add(bundle.imagePath);

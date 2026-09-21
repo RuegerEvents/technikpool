@@ -260,7 +260,7 @@
 		productId: string;
 		productName: string;
 		imagePath: string | null;
-		manufacturerName: string;
+		manufacturerName: string | null;
 		total: number;
 		pending: number;
 		approved: number;
@@ -307,7 +307,7 @@
 						productId: pid,
 						productName: item.asset.product.name,
 						imagePath: item.asset.product.imagePath,
-						manufacturerName: item.asset.product.manufacturer.name,
+						manufacturerName: item.asset.product.manufacturer?.name ?? null,
 						total: 0,
 						pending: 0,
 						approved: 0,

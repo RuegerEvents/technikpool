@@ -184,7 +184,7 @@ export async function planEquipmentCopy(sourceId: string, targetId: string): Pro
 				key,
 				kind: 'product',
 				name: asset.product.name,
-				manufacturerName: asset.product.manufacturer.name,
+				manufacturerName: asset.product.manufacturer?.name ?? null,
 				imagePath: asset.product.imagePath,
 				...lineMeta(asset.product.category, asset.organization),
 				tags: [],

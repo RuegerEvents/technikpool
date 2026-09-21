@@ -174,7 +174,10 @@
 		const q = search.toLowerCase().trim();
 		if (
 			q &&
-			!(g.productName.toLowerCase().includes(q) || g.manufacturerName.toLowerCase().includes(q))
+			!(
+				g.productName.toLowerCase().includes(q) ||
+				(g.manufacturerName?.toLowerCase().includes(q) ?? false)
+			)
 		)
 			return false;
 		if (selectedOrgs.size > 0 && !selectedOrgs.has(g.organizationId)) return false;
@@ -845,7 +848,9 @@
 									{g.productName}
 								</p>
 								<p class="truncate text-xs text-muted-foreground">
-									{g.manufacturerName} · {g.organizationName} · {g.locationName}
+									{[g.manufacturerName, g.organizationName, g.locationName]
+										.filter(Boolean)
+										.join(' · ')}
 								</p>
 							</div>
 							{@render stepper(g)}
@@ -922,7 +927,7 @@
 									<div class="min-w-0 flex-1">
 										<p class="truncate text-sm font-medium">{g.productName}</p>
 										<p class="truncate text-xs text-muted-foreground">
-											{g.manufacturerName} · {g.organizationName}
+											{[g.manufacturerName, g.organizationName].filter(Boolean).join(' · ')}
 										</p>
 									</div>
 									{@render stepper(g)}

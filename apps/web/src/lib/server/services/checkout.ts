@@ -28,7 +28,7 @@ export interface ScannedAsset {
 	id: string;
 	assetTag: string;
 	productName: string;
-	manufacturerName: string;
+	manufacturerName: string | null;
 }
 
 export interface ScanResult {
@@ -196,7 +196,7 @@ export async function performScan(
 		id: asset.id,
 		assetTag: asset.assetTag ?? input.assetTag,
 		productName: asset.product.name,
-		manufacturerName: asset.product.manufacturer.name
+		manufacturerName: asset.product.manufacturer?.name ?? null
 	};
 
 	// Scanning a unit does the same thing to whatever is attached to it: the

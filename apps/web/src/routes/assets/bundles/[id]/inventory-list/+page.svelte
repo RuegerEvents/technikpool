@@ -73,7 +73,7 @@
 						<div class="inline-block h-5 w-5 border-2 border-black"></div>
 					</td>
 					<td class="py-3 font-medium">{asset.product.name}</td>
-					<td class="py-3">{asset.product.manufacturer.name}</td>
+					<td class="py-3">{asset.product.manufacturer?.name}</td>
 					<td class="py-3 font-mono text-sm">{asset.serialNumber || 'N/A'}</td>
 					<td class="py-3 text-right font-mono text-sm">{asset.assetTag || 'N/A'}</td>
 				</tr>

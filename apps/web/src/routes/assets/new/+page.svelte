@@ -1,4 +1,10 @@
 <script lang="ts">
+	import {
+		manufacturerIdOf,
+		manufacturerSelection,
+		withNoManufacturer
+	} from '$lib/no-manufacturer.svelte';
+	import { productLabel } from '$lib/product-label';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Modal } from '$lib/components/ui/modal';
@@ -75,10 +81,7 @@
 		if (orgs.some((o) => o.id === duplicateSource.organizationId)) {
 			selectedOrgId = duplicateSource.organizationId;
 		}
-		manufacturer = {
-			id: duplicateSource.product.manufacturerId,
-			name: duplicateSource.product.manufacturer.name
-		};
+		manufacturer = manufacturerSelection(duplicateSource.product.manufacturer);
 		product = { id: duplicateSource.productId, name: duplicateSource.product.name };
 		duplicatePrefilled = true;
 	});
@@ -241,7 +244,7 @@
 			const created = await createAssets({
 				organizationId: selectedOrgId,
 				locationId,
-				manufacturerId: manufacturer.id ?? undefined,
+				manufacturerId: manufacturerIdOf(manufacturer) ?? undefined,
 				newManufacturerName: manufacturer.id ? undefined : manufacturer.name,
 				newManufacturerLogoPath: manufacturer.id ? undefined : newManufacturerLogoPath || undefined,
 				productId: product.id ?? undefined,
@@ -293,9 +296,7 @@
 
 	{#if duplicateSource}
 		<div class="max-w-3xl rounded-md border bg-muted/40 px-4 py-3 text-sm">
-			Duplicating <span class="font-medium"
-				>{duplicateSource.product.manufacturer.name} {duplicateSource.product.name}</span
-			>
+			Duplicating <span class="font-medium">{productLabel(duplicateSource.product)}</span>
 			— organization, location, manufacturer and product are prefilled. Serial number and asset tag are
 			left blank.
 		</div>
@@ -363,7 +364,7 @@
 						<div class="space-y-2">
 							<Label>Manufacturer</Label>
 							<CreatableSelect
-								items={manufacturers}
+								items={withNoManufacturer(manufacturers)}
 								value={manufacturer}
 								onchange={handleManufacturerChange}
 								placeholder="Search or create manufacturer…"
@@ -378,9 +379,12 @@
 						</div>
 					{/if}
 
+					<!-- A manufacturer typed in just now has no products yet. -->
 					{#if manufacturer}
 						{#key manufacturerKey}
-							{@const products = getProducts(manufacturer.id ?? undefined).current ?? []}
+							{@const manufacturerId = manufacturerIdOf(manufacturer)}
+							{@const products =
+								manufacturerId === undefined ? [] : (getProducts(manufacturerId).current ?? [])}
 							<div class="space-y-2">
 								<Label>Product Model</Label>
 								<CreatableSelect

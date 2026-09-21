@@ -4827,10 +4827,8 @@ msgstr "<0/> Keine Inventarnummer"
 msgid "New accessory"
 msgstr "Neues Zubehör"
 
-#. 0: asset.product.manufacturer.name; 1: asset.product.name; 2: asset.assetTag ? ` (${asset.assetTag})` \\: ''; 3: asset.bundle ? ' and bundle' \\: ''
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Registered and attached to {0} {1}{2} in one step. It inherits that unit's location{3}."
-msgstr "Wird in einem Schritt angelegt und an {0} {1}{2} angehängt. Es übernimmt den Standort{3} dieser Einheit."
+#~ msgid "Registered and attached to {0} {1}{2} in one step. It inherits that unit's location{3}."
+#~ msgstr "Wird in einem Schritt angelegt und an {0} {1}{2} angehängt. Es übernimmt den Standort{3} dieser Einheit."
 
 #~ msgid "Most accessories carry no sticker, so this starts ticked. Untick it to give this one a number — that is what an inspection record hangs off, so anything DGUV-relevant wants one."
 #~ msgstr "Die meisten Zubehörteile tragen keinen Aufkleber, deshalb ist das hier vorausgewählt. Abwählen, um diesem Teil eine Nummer zu geben — daran hängt der Prüfnachweis, alles DGUV-Relevante braucht also eine."
@@ -5111,11 +5109,8 @@ msgstr "Bild neu erstellen"
 msgid "Select all units in bundle"
 msgstr "Alle Einheiten im Bundle auswählen"
 
-#: src/lib/components/ui/product-editor/product-editor.svelte
-#: src/lib/error-messages.svelte.ts
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Manufacturer is required"
-msgstr "Hersteller ist erforderlich"
+#~ msgid "Manufacturer is required"
+#~ msgstr "Hersteller ist erforderlich"
 
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -5324,9 +5319,8 @@ msgstr "Hersteller | Technikpool"
 msgid "Manufacturers"
 msgstr "Hersteller"
 
-#: src/routes/manufacturers/+page.svelte
-msgid "Manage catalog names, mark generic placeholders, and merge duplicate manufacturers."
-msgstr "Katalognamen verwalten, generische Platzhalter kennzeichnen und doppelte Hersteller zusammenführen."
+#~ msgid "Manage catalog names, mark generic placeholders, and merge duplicate manufacturers."
+#~ msgstr "Katalognamen verwalten, generische Platzhalter kennzeichnen und doppelte Hersteller zusammenführen."
 
 #~ msgid "Editing manufacturers requires admin or owner rights in one of your organizations."
 #~ msgstr "Zum Bearbeiten von Herstellern sind Admin- oder Inhaberrechte in einer deiner Organisationen erforderlich."
@@ -5343,9 +5337,8 @@ msgstr[1] "# Produkte"
 msgid "Merge…"
 msgstr "Zusammenführen…"
 
-#: src/routes/manufacturers/+page.svelte
-msgid "<0/> Generic"
-msgstr "<0/> Generisch"
+#~ msgid "<0/> Generic"
+#~ msgstr "<0/> Generisch"
 
 #: src/routes/manufacturers/+page.svelte
 msgid "Merge manufacturer"
@@ -6350,9 +6343,8 @@ msgstr "Gerät"
 msgid "Cable"
 msgstr "Kabel"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-msgid "No manufacturer to pick: a cable is filed under the generic one, and a cable with the same ends and length already in the catalogue is reused rather than added twice."
-msgstr "Kein Hersteller nötig: Kabel werden unter dem generischen Hersteller abgelegt, und ein Kabel mit denselben Steckern und derselben Länge, das schon im Katalog ist, wird wiederverwendet statt doppelt angelegt."
+#~ msgid "No manufacturer to pick: a cable is filed under the generic one, and a cable with the same ends and length already in the catalogue is reused rather than added twice."
+#~ msgstr "Kein Hersteller nötig: Kabel werden unter dem generischen Hersteller abgelegt, und ein Kabel mit denselben Steckern und derselben Länge, das schon im Katalog ist, wird wiederverwendet statt doppelt angelegt."
 
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 msgid "This replaces the current line items with what's booked on the production now. Rates you set on a line are kept for every unit that is still booked."
@@ -7420,7 +7412,7 @@ msgstr[1] "Es fehlen noch # Geräte zum kompletten Kit."
 msgid "This case holds the kit, so only a change to the bundle type itself adds anything further."
 msgstr "Diese Instanz enthält das komplette Kit — weiteres kommt nur hinzu, wenn sich der Bundle-Typ selbst ändert."
 
-#. 0: shortfall .filter((line) => line.missing > 0) .map((line) => `${line.missing}× ${line.line.manufacturerName} ${line.line.name}`) .join(', ')
+#. 0: shortfall .filter((line) => line.missing > 0) .map( (line) => `${line.missing}× ${makerAndName(line.line.manufacturerName, line.line.name)}` ) .join(', ')
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Offered here is what this case is short of: {0}."
 msgstr "Angeboten wird hier, was dieser Instanz noch fehlt: {0}."
@@ -8394,7 +8386,7 @@ msgid_plural "Incomplete — # units short of the kit"
 msgstr[0] "Unvollständig — eine Einheit fehlt zum Kit"
 msgstr[1] "Unvollständig — # Einheiten fehlen zum Kit"
 
-#. 0: shortfall .filter((line) => line.missing > 0) .map((line) => `${line.missing}× ${line.line.manufacturerName} ${line.line.name}`) .join(', ')
+#. 0: shortfall .filter((line) => line.missing > 0) .map( (line) => `${line.missing}× ${makerAndName(line.line.manufacturerName, line.line.name)}` ) .join(', ')
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Missing: {0}"
 msgstr "Fehlt: {0}"
@@ -8865,3 +8857,41 @@ msgstr "Beide sind Kabel: Der verbleibende Eintrag behält seinen eigenen Typ, s
 #: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "It stays a software license, so the units' credentials remain available."
 msgstr "Es bleibt eine Softwarelizenz, die Zugangsdaten der Einheiten bleiben also verfügbar."
+
+#~ msgid "Pick a manufacturer from the list, or No manufacturer"
+#~ msgstr "Wähle einen Hersteller aus der Liste oder „Kein Hersteller“"
+
+#~ msgid "Different manufacturers: the units end up with no manufacturer."
+#~ msgstr "Unterschiedliche Hersteller: Die Einheiten haben danach keinen Hersteller."
+
+#~ msgid "No manufacturer"
+#~ msgstr "Kein Hersteller"
+
+#. 0: productLabel(asset.product); 1: asset.assetTag ? ` (${asset.assetTag})` \\: ''; 2: asset.bundle ? ' and bundle' \\: ''
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Registered and attached to {0}{1} in one step. It inherits that unit's location{2}."
+msgstr "Wird in einem Schritt angelegt und an {0}{1} angehängt. Es übernimmt den Standort{2} dieser Einheit."
+
+#~ msgid "No manufacturer to pick: a cable is filed without one, and a cable with the same ends and length already in the catalogue is reused rather than added twice."
+#~ msgstr "Kein Hersteller nötig: Kabel werden ohne Hersteller abgelegt, und ein Kabel mit denselben Steckern und derselben Länge, das schon im Katalog ist, wird wiederverwendet statt doppelt angelegt."
+
+#: src/routes/manufacturers/+page.svelte
+msgid "Manage catalog names and merge duplicate manufacturers."
+msgstr "Katalognamen verwalten und doppelte Hersteller zusammenführen."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Pick a manufacturer from the list, or Generic / unknown manufacturer"
+msgstr "Wähle einen Hersteller aus der Liste oder „Generisch / Unbekannter Hersteller“"
+
+#: src/lib/no-manufacturer.svelte.ts
+msgid "Generic / unknown manufacturer"
+msgstr "Generisch / Unbekannter Hersteller"
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Different manufacturers: the units end up under Generic / unknown manufacturer."
+msgstr "Unterschiedliche Hersteller: Die Einheiten landen unter „Generisch / Unbekannter Hersteller“."
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "No manufacturer to pick: a cable is filed as Generic / unknown manufacturer, and a cable with the same ends and length already in the catalogue is reused rather than added twice."
+msgstr "Kein Hersteller nötig: Kabel werden als „Generisch / Unbekannter Hersteller“ abgelegt, und ein Kabel mit denselben Steckern und derselben Länge, das schon im Katalog ist, wird wiederverwendet statt doppelt angelegt."

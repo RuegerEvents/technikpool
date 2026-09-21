@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { productLabel } from '$lib/product-label';
 	import { categoryLabel } from '$lib/category';
 	import { cableTwinGroups, cableTwinKey } from '$lib/cable';
 	import { getErrorMessage, orgLabel } from '$lib/utils';
@@ -105,7 +106,7 @@
 		for (const asset of bundle.assets) {
 			lines[asset.productId] ??= {
 				productId: asset.productId,
-				label: `${asset.product.manufacturer.name} ${asset.product.name}`,
+				label: productLabel(asset.product),
 				count: 0
 			};
 			lines[asset.productId].count++;
@@ -139,7 +140,7 @@
 		if (!searchTrimmed) return true;
 		return (
 			product.name.toLowerCase().includes(searchTrimmed) ||
-			product.manufacturer.name.toLowerCase().includes(searchTrimmed) ||
+			(product.manufacturer?.name.toLowerCase().includes(searchTrimmed) ?? false) ||
 			categoryLabel(product.category).toLowerCase().includes(searchTrimmed) ||
 			// "everything with a TRUE1 end" is a question the name can't answer.
 			[product.cableType, product.connectorA, product.connectorB].some((v) =>
@@ -455,7 +456,7 @@
 								<span class="min-w-0 flex-1">
 									<span class="block truncate text-sm font-medium">{product.name}</span>
 									<span class="block truncate text-xs text-muted-foreground"
-										>{product.manufacturer.name}</span
+										>{product.manufacturer?.name}</span
 									>
 								</span>
 								{#if hasTwin(product)}

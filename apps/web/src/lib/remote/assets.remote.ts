@@ -61,6 +61,7 @@ import {
 import { getConnectors, getConnectorUsage } from '$lib/remote/connectors.remote';
 import { getKnownAddresses } from '$lib/remote/addresses.remote';
 import { appError } from '$lib/errors';
+import { productLabel } from '$lib/product-label';
 
 async function ensureBundleImageWithoutBreakingRead(
 	bundle: Parameters<typeof ensureBundleImage>[0]
@@ -268,8 +269,7 @@ export const getManufacturers = query(async () => {
 
 const updateManufacturerSchema = v.object({
 	manufacturerId: v.string(),
-	name: v.string(),
-	generic: v.boolean()
+	name: v.string()
 });
 
 // Manufacturers are global rows shared by every org, and editing or merging
@@ -287,13 +287,13 @@ export const updateManufacturer = command(updateManufacturerSchema, async (input
 	if (clash) appError(409, 'manufacturer_exists');
 	const previous = await prisma.manufacturer.findUniqueOrThrow({
 		where: { id: input.manufacturerId },
-		select: { name: true, generic: true }
+		select: { name: true }
 	});
 	const manufacturer = await prisma.manufacturer.update({
 		where: { id: input.manufacturerId },
-		data: { name, generic: input.generic }
+		data: { name }
 	});
-	const changes = fieldChanges(previous, { name, generic: input.generic });
+	const changes = fieldChanges(previous, { name });
 	if (changes.length > 0) {
 		await logCatalogChange({
 			userId: user.id,
@@ -527,14 +527,21 @@ export const updateLocation = command(updateLocationSchema, async (input) => {
 	return updated;
 });
 
-export const getProducts = query(v.optional(v.string()), async (manufacturerId?: string) => {
-	await requireAuth();
-	return await prisma.product.findMany({
-		where: manufacturerId ? { manufacturerId } : undefined,
-		orderBy: { name: 'asc' },
-		include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
-	});
-});
+/**
+ * Every product, or one maker's. `null` asks for the products with no maker at
+ * all, which the wizard lists under "No manufacturer" like any other.
+ */
+export const getProducts = query(
+	v.optional(v.nullable(v.string())),
+	async (manufacturerId?: string | null) => {
+		await requireAuth();
+		return await prisma.product.findMany({
+			where: manufacturerId === undefined ? undefined : { manufacturerId },
+			orderBy: { name: 'asc' },
+			include: { manufacturer: true, category: true, ways: { orderBy: { sortOrder: 'asc' } } }
+		});
+	}
+);
 
 /**
  * The vocabulary the cable forms offer: what this pool already calls its
@@ -718,7 +725,7 @@ function sameCableWhere(cable: CableInput): Prisma.ProductWhereInput {
  * ways at all.
  */
 async function findSameCable(
-	manufacturerId: string,
+	manufacturerId: string | null,
 	cable: CableInput,
 	ways: readonly CableWayAttrs[]
 ): Promise<{ id: string } | null> {
@@ -766,7 +773,9 @@ async function resolveProductRef(
 	organizationId: string,
 	userId: string
 ): Promise<string> {
-	let manufacturerId = data.manufacturerId;
+	// No manufacturer is an answer, not a gap: a product nobody makes in
+	// particular — a Schuko lead, a generic laptop — is filed without one.
+	let manufacturerId = data.manufacturerId ?? null;
 	if (data.newManufacturerName && !manufacturerId) {
 		const m = await prisma.manufacturer.create({
 			data: {
@@ -779,17 +788,12 @@ async function resolveProductRef(
 		await getProducts().refresh();
 	}
 
-	// A cable can arrive with no manufacturer at all — "New accessory" describes
-	// one by its ends — and is then filed where `createCableBatch` files it.
 	const cable = data.newProductCable ? normalizeCable(data.newProductCable) : null;
 	const ways = normalizeWays(data.newProductCable?.ways);
 	const newCable = cable && isCable({ ...cable, ways }) ? cable : null;
-	if (!manufacturerId && !data.productId && data.newProductName && newCable) {
-		manufacturerId = await resolveGenericManufacturer();
-	}
 
 	let productId = data.productId;
-	if (data.newProductName && !productId && manufacturerId && newCable) {
+	if (data.newProductName && !productId && newCable) {
 		// The same lead described twice is one product, as in `createCableBatch`:
 		// a second "Schuko 10 m" is a row the device list can never merge back.
 		// Nulls stay null, so a blank end only matches a blank end.
@@ -816,7 +820,7 @@ async function resolveProductRef(
 		}
 	}
 
-	if (data.newProductName && !productId && manufacturerId) {
+	if (data.newProductName && !productId) {
 		if (!data.categoryId) appError(400, 'category_required');
 		await prisma.category.findUniqueOrThrow({ where: { id: data.categoryId } });
 		const p = await prisma.product.create({
@@ -1247,7 +1251,7 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 
 const cableBatchRowSchema = v.object({
 	...cableAttrsSchema.entries,
-	/** null means the generic manufacturer — a Schuko lead has no brand worth filing. */
+	/** null means no manufacturer — a Schuko lead has no brand worth filing. */
 	manufacturerId: v.nullable(v.string()),
 	categoryId: v.string(),
 	name: v.pipe(v.string(), v.trim(), v.minLength(1)),
@@ -1261,34 +1265,12 @@ const createCableBatchSchema = v.object({
 	rows: v.pipe(v.array(cableBatchRowSchema), v.minLength(1))
 });
 
-/**
- * The org's stand-in manufacturer, created on demand. Cables are filed under it
- * because "Generisch" is the honest answer for a Schuko lead, and because
- * `productBillingLabel` prints the product name alone for a generic maker.
- */
-async function resolveGenericManufacturer(): Promise<string> {
-	const existing = await prisma.manufacturer.findFirst({
-		where: { generic: true },
-		orderBy: { name: 'asc' }
-	});
-	if (existing) return existing.id;
-	const created = await prisma.manufacturer.create({ data: { name: 'Generisch', generic: true } });
-	await getManufacturers().refresh();
-	await getProducts().refresh();
-	return created.id;
-}
-
 export const createCableBatch = command(createCableBatchSchema, async (data) => {
 	const user = await requireAuth();
 	await requireOrgInventory(data.organizationId, 'asset_create_forbidden');
 
 	const location = await prisma.location.findUniqueOrThrow({ where: { id: data.locationId } });
 	if (location.organizationId !== data.organizationId) appError(400, 'location_invalid');
-
-	let genericManufacturerId: string | null = null;
-	if (data.rows.some((row) => row.manufacturerId === null)) {
-		genericManufacturerId = await resolveGenericManufacturer();
-	}
 
 	const seenCategories = new Set<string>();
 	for (const row of data.rows) {
@@ -1306,8 +1288,7 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 
 	for (const row of data.rows) {
 		const cable = normalizeCable(row);
-		const manufacturerId = row.manufacturerId ?? genericManufacturerId;
-		if (!manufacturerId) appError(400, 'manufacturer_required');
+		const manufacturerId = row.manufacturerId;
 
 		// The batch grid is for ordinary leads: one pair of ends per row. A loom is
 		// made up in the product form, where its ways have somewhere to go.
@@ -1316,7 +1297,7 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 		}
 
 		const key = [
-			manufacturerId,
+			manufacturerId ?? '',
 			cable.cableType?.toLowerCase() ?? '',
 			cable.connectorA?.toLowerCase() ?? '',
 			cable.connectorB?.toLowerCase() ?? '',
@@ -1378,9 +1359,7 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 		data.rows.flatMap((row) => [row.connectorA, row.connectorB])
 	);
 
-	const manufacturerIds = new Set(
-		data.rows.map((row) => row.manufacturerId ?? genericManufacturerId!)
-	);
+	const manufacturerIds = new Set(data.rows.map((row) => row.manufacturerId));
 	await refreshAfterUnitsCreated(
 		data.organizationId,
 		resolved.map((r) => r.productId)
@@ -1914,7 +1893,8 @@ export const deleteAsset = command(v.string(), async (assetId: string) => {
 const updateProductSchema = v.object({
 	productId: v.string(),
 	name: v.optional(v.string()),
-	manufacturerId: v.optional(v.string()),
+	/** `undefined` leaves the maker alone; `null` says the product has none. */
+	manufacturerId: v.optional(v.nullable(v.string())),
 	categoryId: v.optional(v.string()),
 	imagePath: v.optional(v.string()),
 	/**
@@ -2024,7 +2004,7 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		where: { id: input.productId },
 		data: {
 			...(input.name ? { name: input.name.trim() } : {}),
-			...(input.manufacturerId ? { manufacturerId: input.manufacturerId } : {}),
+			...(input.manufacturerId !== undefined ? { manufacturerId: input.manufacturerId } : {}),
 			...(input.categoryId ? { categoryId: input.categoryId } : {}),
 			imagePath: nextImagePath,
 			...(nextCable ?? {}),
@@ -2035,7 +2015,7 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 
 	const changes = fieldChanges(previousProduct, {
 		...(input.name ? { name: input.name.trim() } : {}),
-		...(input.manufacturerId ? { manufacturerId: input.manufacturerId } : {}),
+		...(input.manufacturerId !== undefined ? { manufacturerId: input.manufacturerId } : {}),
 		...(input.categoryId ? { categoryId: input.categoryId } : {}),
 		...(nextImagePath !== undefined ? { imagePath: nextImagePath } : {}),
 		...(nextCable ?? {}),
@@ -2139,8 +2119,8 @@ export const setProductPorts = command(setProductPortsSchema, async (input) => {
  * opposite directions.
  */
 async function refreshProductViews(
-	product: { id: string; manufacturerId: string },
-	previousManufacturerId: string,
+	product: { id: string; manufacturerId: string | null },
+	previousManufacturerId: string | null,
 	changed: { cable: (string | null | undefined)[] | null }
 ) {
 	await getProducts(product.manufacturerId).refresh();
@@ -2199,7 +2179,7 @@ export const deleteProduct = command(v.string(), async (productId: string) => {
 		action: 'PRODUCT_DELETED',
 		productId: product.id,
 		manufacturerId: product.manufacturerId,
-		data: { name: product.name, manufacturerName: product.manufacturer.name }
+		data: { name: product.name, manufacturerName: product.manufacturer?.name ?? null }
 	});
 	const orgIds = await userOrgIds(user.id);
 	await Promise.all([
@@ -2313,8 +2293,7 @@ export const mergeProducts = command(
 			...(source.isLicense && !target.isLicense ? { isLicense: true } : {})
 		};
 
-		const label = (p: { name: string; manufacturer: { name: string } }) =>
-			`${p.manufacturer.name} ${p.name}`;
+		const label = productLabel;
 
 		await prisma.$transaction(async (tx) => {
 			await tx.asset.updateMany({
@@ -2545,9 +2524,7 @@ export const getCatalogTransactions = query(async () => {
 	]);
 	return {
 		entries,
-		products: Object.fromEntries(
-			products.map((p) => [p.id, `${p.manufacturer.name} ${p.name}`] as const)
-		),
+		products: Object.fromEntries(products.map((p) => [p.id, productLabel(p)] as const)),
 		manufacturers: Object.fromEntries(manufacturers.map((m) => [m.id, m.name] as const)),
 		categories: Object.fromEntries(categories.map((c) => [c.id, c.nameDe || c.name] as const)),
 		organizations: Object.fromEntries(
@@ -3234,7 +3211,7 @@ async function assertMembersDeletable(
 	members: {
 		id: string;
 		assetTag: string | null;
-		product: { name: string; manufacturer: { name: string } };
+		product: { name: string; manufacturer: { name: string } | null };
 	}[]
 ) {
 	const memberIds = members.map((m) => m.id);
@@ -3427,7 +3404,7 @@ type BundleCopyAsset = Prisma.AssetGetPayload<{ select: typeof BUNDLE_COPY_ASSET
 type BundleCopySlot = {
 	productId: string;
 	name: string;
-	manufacturerName: string;
+	manufacturerName: string | null;
 	/** A tagged original begets a tagged copy. */
 	tagged: boolean;
 };
@@ -3456,7 +3433,7 @@ function bundleCopyMembers(assets: BundleCopyAsset[]): BundleCopyMember[] {
 	const slotOf = (asset: BundleCopyAsset): BundleCopySlot => ({
 		productId: asset.productId,
 		name: asset.product.name,
-		manufacturerName: asset.product.manufacturer.name,
+		manufacturerName: asset.product.manufacturer?.name ?? null,
 		tagged: asset.assetTag !== null
 	});
 
@@ -3577,7 +3554,13 @@ async function allocateBundleCopy(
 function bundleCopySummary(allocations: BundleCopyAllocation[]) {
 	const lines = new Map<
 		string,
-		{ productId: string; name: string; manufacturerName: string; needed: number; fromStock: number }
+		{
+			productId: string;
+			name: string;
+			manufacturerName: string | null;
+			needed: number;
+			fromStock: number;
+		}
 	>();
 	const count = (slot: BundleCopySlot, fromStock: boolean) => {
 		const line = lines.get(slot.productId) ?? {
@@ -4024,9 +4007,9 @@ async function refreshAccessoryPair(
 
 function assetLabel(asset: {
 	assetTag: string | null;
-	product: { name: string; manufacturer: { name: string } };
+	product: { name: string; manufacturer: { name: string } | null };
 }) {
-	const name = `${asset.product.manufacturer.name} ${asset.product.name}`;
+	const name = productLabel(asset.product);
 	return asset.assetTag ? `${name} (${asset.assetTag})` : name;
 }
 
@@ -4059,7 +4042,7 @@ async function productAccessoryProfile(productId: string, organizationId: string
 	type Tally = {
 		productId: string;
 		name: string;
-		manufacturerName: string;
+		manufacturerName: string | null;
 		unitsWith: number;
 		tagged: number;
 		total: number;
@@ -4077,7 +4060,7 @@ async function productAccessoryProfile(productId: string, organizationId: string
 				tally = {
 					productId: acc.productId,
 					name: acc.product.name,
-					manufacturerName: acc.product.manufacturer.name,
+					manufacturerName: acc.product.manufacturer?.name ?? null,
 					unitsWith: 0,
 					tagged: 0,
 					total: 0,
@@ -4170,7 +4153,7 @@ type AccessoryParent = {
 	locationId: string;
 	bundleId: string | null;
 	assetTag: string | null;
-	product: { name: string; manufacturer: { name: string } };
+	product: { name: string; manufacturer: { name: string } | null };
 };
 
 /**
@@ -4812,15 +4795,19 @@ export const importAssets = command(importAssetsSchema, async (data): Promise<Im
 		if (!m) m = await prisma.manufacturer.create({ data: { name: row.manufacturerName.trim() } });
 		manufacturerCache.set(key, m.id);
 	}
+	// A blank manufacturer column is a product with no maker, not a missing one.
+	const manufacturerOf = (row: { manufacturerName: string }) => {
+		const key = row.manufacturerName.trim().toLowerCase();
+		return key ? manufacturerCache.get(key) : null;
+	};
 
 	// Upsert products (case-insensitive, keyed by name+manufacturerId)
 	const productCache = new Map<string, string>();
 	const seenProducts = new Set<string>();
 	for (const row of data.rows) {
-		const mfKey = row.manufacturerName.trim().toLowerCase();
-		const manufacturerId = manufacturerCache.get(mfKey);
-		if (!manufacturerId) continue;
-		const prodKey = `${row.productName.trim().toLowerCase()}::${manufacturerId}`;
+		const manufacturerId = manufacturerOf(row);
+		if (manufacturerId === undefined) continue;
+		const prodKey = `${row.productName.trim().toLowerCase()}::${manufacturerId ?? ''}`;
 		if (seenProducts.has(prodKey)) continue;
 		seenProducts.add(prodKey);
 		let p = await prisma.product.findFirst({
@@ -4847,13 +4834,12 @@ export const importAssets = command(importAssetsSchema, async (data): Promise<Im
 	for (let i = 0; i < data.rows.length; i++) {
 		const row = data.rows[i];
 		try {
-			const mfKey = row.manufacturerName.trim().toLowerCase();
-			const manufacturerId = manufacturerCache.get(mfKey);
-			if (!manufacturerId) {
+			const manufacturerId = manufacturerOf(row);
+			if (manufacturerId === undefined) {
 				errors.push({ rowIndex: i, message: `Manufacturer "${row.manufacturerName}" not found` });
 				continue;
 			}
-			const prodKey = `${row.productName.trim().toLowerCase()}::${manufacturerId}`;
+			const prodKey = `${row.productName.trim().toLowerCase()}::${manufacturerId ?? ''}`;
 			const productId = productCache.get(prodKey);
 			if (!productId) {
 				errors.push({

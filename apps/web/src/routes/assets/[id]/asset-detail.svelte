@@ -1,4 +1,10 @@
 <script lang="ts">
+	import {
+		manufacturerIdOf,
+		manufacturerSelection,
+		withNoManufacturer
+	} from '$lib/no-manufacturer.svelte';
+	import { productLabel } from '$lib/product-label';
 	import { categoryLabel } from '$lib/category';
 	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
 	import {
@@ -142,7 +148,7 @@
 			)
 			.map((a) => ({
 				id: a.id,
-				name: `${a.product.manufacturer.name} ${a.product.name}${a.assetTag ? ` (${a.assetTag})` : ''}`
+				name: `${productLabel(a.product)}${a.assetTag ? ` (${a.assetTag})` : ''}`
 			}))
 	);
 
@@ -163,9 +169,7 @@
 	// product, register one of it". Picking one drops straight into the create
 	// dialog with both pickers filled.
 	let catalogue = $derived(await getProducts());
-	let productSuggestions = $derived(
-		catalogue.map((p) => ({ id: p.id, name: `${p.manufacturer.name} ${p.name}` }))
-	);
+	let productSuggestions = $derived(catalogue.map((p) => ({ id: p.id, name: productLabel(p) })));
 
 	let attachSelection = $state<{ id: string | null; name: string } | null>(null);
 	let attaching = $state(false);
@@ -300,7 +304,10 @@
 	}
 
 	function startCopy(
-		accessory: { productId: string; product: { name: string; manufacturer: { name: string } } },
+		accessory: {
+			productId: string;
+			product: { name: string; manufacturer: { name: string } | null };
+		},
 		standing: { count: number; tagged: boolean }
 	) {
 		if (looseStockOf(accessory.productId) === 0) {
@@ -310,7 +317,7 @@
 		}
 		fanout = {
 			productId: accessory.productId,
-			name: `${accessory.product.manufacturer.name} ${accessory.product.name}`,
+			name: productLabel(accessory.product),
 			count: standing.count,
 			tagged: standing.tagged
 		};
@@ -366,7 +373,7 @@
 		const p = catalogue.find((c) => c.id === suggestion.id);
 		if (!p) return;
 		newAssetModal?.reset({
-			manufacturer: { id: p.manufacturerId, name: p.manufacturer.name },
+			manufacturer: manufacturerSelection(p.manufacturer),
 			product: { id: p.id, name: p.name }
 		});
 		newOpen = true;
@@ -489,10 +496,7 @@
 	let savingProduct = $state(false);
 
 	function openProductModal() {
-		productManufacturer = {
-			id: asset.product.manufacturerId,
-			name: asset.product.manufacturer.name
-		};
+		productManufacturer = manufacturerSelection(asset.product.manufacturer);
 		productDraft = {
 			name: asset.product.name,
 			categoryId: asset.product.categoryId,
@@ -506,15 +510,17 @@
 	}
 
 	async function handleProductSave() {
-		if (!productManufacturer?.id) {
-			toast.error('Manufacturer is required');
+		// A cleared field means no manufacturer, the same as picking that entry.
+		const manufacturerId = productManufacturer ? manufacturerIdOf(productManufacturer) : null;
+		if (manufacturerId === undefined) {
+			toast.error('Pick a manufacturer from the list, or Generic / unknown manufacturer');
 			return;
 		}
 		savingProduct = true;
 		try {
 			await updateProduct({
 				productId: asset.product.id,
-				manufacturerId: productManufacturer.id,
+				manufacturerId,
 				name: productDraft.name,
 				categoryId: productDraft.categoryId,
 				imagePath: productDraft.imagePath,
@@ -572,9 +578,11 @@
 		<div class="flex min-w-0 flex-1 flex-col gap-4">
 			<div class="flex flex-wrap items-start justify-between gap-4">
 				<div class="min-w-0 space-y-1">
-					<p class="text-sm font-medium text-muted-foreground">
-						{asset.product.manufacturer.name}
-					</p>
+					{#if asset.product.manufacturer}
+						<p class="text-sm font-medium text-muted-foreground">
+							{asset.product.manufacturer.name}
+						</p>
+					{/if}
 					<h1 class="text-3xl font-bold tracking-tight">{asset.product.name}</h1>
 					{#if isCable(asset.product)}
 						<p class="text-sm text-muted-foreground">
@@ -794,7 +802,7 @@
 			</Card.Header>
 			<Card.Content class="space-y-6">
 				<dl class="grid gap-x-6 gap-y-5 sm:grid-cols-2">
-					<Fact icon={Factory} label="Manufacturer">{asset.product.manufacturer.name}</Fact>
+					<Fact icon={Factory} label="Manufacturer">{asset.product.manufacturer?.name ?? '—'}</Fact>
 					<Fact icon={Shapes} label="Category">
 						<CategoryPill
 							name={categoryLabel(asset.product.category)}
@@ -951,8 +959,7 @@
 								href={resolve(`/assets/${asset.parent.id}`)}
 								class="font-medium underline underline-offset-2"
 							>
-								{asset.parent.product.manufacturer.name}
-								{asset.parent.product.name}{asset.parent.assetTag
+								{productLabel(asset.parent.product)}{asset.parent.assetTag
 									? ` (${asset.parent.assetTag})`
 									: ''}
 							</a>
@@ -987,9 +994,9 @@
 												{accessory.product.name}
 											</a>
 											<p class="text-xs text-muted-foreground">
-												{accessory.product.manufacturer.name}{accessory.assetTag
-													? ` · ${accessory.assetTag}`
-													: ''}
+												{[accessory.product.manufacturer?.name, accessory.assetTag]
+													.filter(Boolean)
+													.join(' · ')}
 												{#if accessory.nextInspectionDue}
 													· Next due: {new Date(accessory.nextInspectionDue).toLocaleDateString(
 														'de-DE'
@@ -1322,8 +1329,7 @@
 
 <Modal bind:open={confirmingDelete} title="Delete this asset?" dismissible={!deleting}>
 	{#snippet description()}
-		{asset.product.manufacturer.name}
-		{asset.product.name}{asset.assetTag ? ` · ${asset.assetTag}` : ''}{asset.serialNumber
+		{productLabel(asset.product)}{asset.assetTag ? ` · ${asset.assetTag}` : ''}{asset.serialNumber
 			? ` · ${asset.serialNumber}`
 			: ''}
 	{/snippet}
@@ -1468,9 +1474,9 @@
 	}}
 >
 	{#snippet description()}
-		Registered and attached to {asset.product.manufacturer.name}
-		{asset.product.name}{asset.assetTag ? ` (${asset.assetTag})` : ''} in one step. It inherits that unit's
-		location{asset.bundle ? ' and bundle' : ''}.
+		Registered and attached to {productLabel(asset.product)}{asset.assetTag
+			? ` (${asset.assetTag})`
+			: ''} in one step. It inherits that unit's location{asset.bundle ? ' and bundle' : ''}.
 	{/snippet}
 </NewAssetModal>
 
@@ -1482,7 +1488,7 @@
 		<div class="space-y-2">
 			<p class="text-sm font-medium">Manufacturer</p>
 			<CreatableSelect
-				items={manufacturers}
+				items={withNoManufacturer(manufacturers)}
 				bind:value={productManufacturer}
 				allowCreate={false}
 				disabled={savingProduct}

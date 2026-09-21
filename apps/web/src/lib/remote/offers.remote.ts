@@ -19,7 +19,8 @@ import {
 import { generateBillingPdf, organizationFromSnapshot } from '$lib/server/billing-pdf';
 import { putObject } from '$lib/server/storage';
 import { orgSnapshotColumns } from '$lib/org-snapshot';
-import { productBillingLabel, summarizeContents } from '$lib/billing-lines';
+import { summarizeContents } from '$lib/billing-lines';
+import { productLabel } from '$lib/product-label';
 import { appError, type AppErrorCode, type ErrorParams } from '$lib/errors';
 
 /**
@@ -349,7 +350,7 @@ async function computeProductionBilling(
 				group = {
 					key,
 					productId: asset.productId,
-					label: `${asset.product.manufacturer.name} ${asset.product.name}`,
+					label: productLabel(asset.product),
 					categoryName: asset.product.category.name,
 					categoryNameDe: asset.product.category.nameDe,
 					categoryColor: asset.product.category.color,
@@ -376,16 +377,14 @@ async function computeProductionBilling(
 		if (ratePercent == null) continue;
 
 		const netPrice = priceByProduct.get(asset.productId)!;
-		const productLabel = productBillingLabel(asset.product);
-		const accessoryLabels = asset.accessories.map((accessory) =>
-			productBillingLabel(accessory.product)
-		);
-		const baseDescription = `${productLabel}${asset.assetTag ? ` (${asset.assetTag})` : ''}`;
+		const label = productLabel(asset.product);
+		const accessoryLabels = asset.accessories.map((accessory) => productLabel(accessory.product));
+		const baseDescription = `${label}${asset.assetTag ? ` (${asset.assetTag})` : ''}`;
 		individualLines.push({
 			assetId: asset.id,
 			bundleId: null,
 			productId: asset.productId,
-			productLabel,
+			productLabel: label,
 			categoryId: asset.product.categoryId,
 			categoryName: asset.product.category.name,
 			categoryNameDe: asset.product.category.nameDe,
@@ -421,8 +420,8 @@ async function computeProductionBilling(
 		}
 		const netPrice = Number(bundle.netPurchasePrice);
 		const contentLabels = items.flatMap((item) => [
-			productBillingLabel(item.asset.product),
-			...item.asset.accessories.map((accessory) => productBillingLabel(accessory.product))
+			productLabel(item.asset.product),
+			...item.asset.accessories.map((accessory) => productLabel(accessory.product))
 		]);
 		bundleLines.push({
 			assetId: null,

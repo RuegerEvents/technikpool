@@ -20,6 +20,7 @@ import {
 import { requireOpenProduction } from '$lib/server/services/production-state';
 import { copyEquipment, planEquipmentCopy } from '$lib/server/services/equipment-copy';
 import type { AddedToProductionData, RequestedData } from '$lib/types/asset-transaction';
+import { productLabel } from '$lib/product-label';
 
 const ACTIVE_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT', 'RETURNED'] as const;
 const CONFLICT_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT'] as const;
@@ -82,7 +83,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 		productId: string;
 		productName: string;
 		imagePath: string | null;
-		manufacturerName: string;
+		manufacturerName: string | null;
 		categoryId: string;
 		categoryName: string;
 		categoryNameDe: string | null;
@@ -121,7 +122,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 				productId: a.productId,
 				productName: a.product.name,
 				imagePath: a.generatedImagePath ?? a.product.imagePath,
-				manufacturerName: a.product.manufacturer.name,
+				manufacturerName: a.product.manufacturer?.name ?? null,
 				categoryId: a.product.categoryId,
 				categoryName: a.product.category.name,
 				categoryNameDe: a.product.category.nameDe,
@@ -220,7 +221,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 				bookedHere,
 				availableCount,
 				memberSearchText: b.assets
-					.map((a) => `${a.product.manufacturer.name} ${a.product.name}`)
+					.map((a) => productLabel(a.product))
 					.join(' ')
 					.toLowerCase()
 			};

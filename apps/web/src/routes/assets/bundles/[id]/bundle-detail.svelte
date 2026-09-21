@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { makerAndName } from '$lib/product-label';
+	import { manufacturerSelection } from '$lib/no-manufacturer.svelte';
+	import { productLabel } from '$lib/product-label';
 	import { categoryLabel } from '$lib/category';
 	import { imageSrc } from '$lib/images';
 	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
@@ -351,7 +354,7 @@
 			if (!q) return true;
 			return (
 				a.product.name.toLowerCase().includes(q) ||
-				a.product.manufacturer.name.toLowerCase().includes(q) ||
+				(a.product.manufacturer?.name.toLowerCase().includes(q) ?? false) ||
 				(a.serialNumber?.toLowerCase().includes(q) ?? false)
 			);
 		});
@@ -380,7 +383,7 @@
 		const q = searchQuery.toLowerCase().trim();
 		return (
 			catalogue
-				.map((p) => ({ ...p, label: `${p.manufacturer.name} ${p.name}` }))
+				.map((p) => ({ ...p, label: productLabel(p) }))
 				.filter((p) => !q || p.label.toLowerCase().includes(q))
 				// Registering a unit straight into the kit answers to the type like
 				// every other way in, so the catalogue is cut to the same list.
@@ -392,7 +395,7 @@
 
 	function openNewAssetOfProduct(p: (typeof productMatches)[number]) {
 		newAssetModal?.reset({
-			manufacturer: { id: p.manufacturerId, name: p.manufacturer.name },
+			manufacturer: manufacturerSelection(p.manufacturer),
 			product: { id: p.id, name: p.name }
 		});
 		newOpen = true;
@@ -599,7 +602,10 @@
 						<p class="text-xs text-muted-foreground">
 							Missing: {shortfall
 								.filter((line) => line.missing > 0)
-								.map((line) => `${line.missing}× ${line.line.manufacturerName} ${line.line.name}`)
+								.map(
+									(line) =>
+										`${line.missing}× ${makerAndName(line.line.manufacturerName, line.line.name)}`
+								)
 								.join(', ')}
 						</p>
 					{/if}
@@ -713,7 +719,7 @@
 													onclick={(e) => e.stopPropagation()}>{asset.product.name}</a
 												>
 												<p class="text-xs text-muted-foreground">
-													{asset.product.manufacturer.name}
+													{asset.product.manufacturer?.name}
 												</p>
 											</div>
 										</div>
@@ -802,8 +808,7 @@
 						<ul class="space-y-1 text-sm text-muted-foreground">
 							{#each copyPlan.lines as line (line.productId)}
 								<li>
-									{line.needed}× {line.manufacturerName}
-									{line.name}
+									{line.needed}× {makerAndName(line.manufacturerName, line.name)}
 									{#if line.fromStock > 0}
 										<span class="text-xs">— {line.fromStock} free in the pool</span>
 									{/if}
@@ -960,9 +965,9 @@
 						<span class="min-w-0">
 							<span class="block truncate font-medium">{asset.product.name}</span>
 							<span class="block text-xs text-muted-foreground">
-								{asset.product.manufacturer.name}{asset.assetTag
-									? ` · ${asset.assetTag}`
-									: ''}{#if asset.parentAssetId}
+								{[asset.product.manufacturer?.name, asset.assetTag]
+									.filter(Boolean)
+									.join(' · ')}{#if asset.parentAssetId}
 									· already an accessory
 								{/if}
 							</span>
@@ -1015,7 +1020,10 @@
 						Offered here is what this case is short of:
 						{shortfall
 							.filter((line) => line.missing > 0)
-							.map((line) => `${line.missing}× ${line.line.manufacturerName} ${line.line.name}`)
+							.map(
+								(line) =>
+									`${line.missing}× ${makerAndName(line.line.manufacturerName, line.line.name)}`
+							)
 							.join(', ')}.
 					{/if}
 				</p>
@@ -1058,7 +1066,7 @@
 										<div>
 											<p class="font-medium">{asset.product.name}</p>
 											<p class="text-xs text-muted-foreground">
-												{asset.product.manufacturer.name}
+												{asset.product.manufacturer?.name}
 											</p>
 										</div>
 									</div>
@@ -1100,7 +1108,7 @@
 						<ProductThumb path={p.imagePath} alt={p.name} />
 						<div class="min-w-0 flex-1">
 							<p class="truncate text-sm font-medium">{p.name}</p>
-							<p class="text-xs text-muted-foreground">{p.manufacturer.name}</p>
+							<p class="text-xs text-muted-foreground">{p.manufacturer?.name}</p>
 						</div>
 						<Button
 							size="sm"

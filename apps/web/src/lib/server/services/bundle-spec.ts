@@ -1,3 +1,4 @@
+import { makerAndName } from '$lib/product-label';
 import { prisma } from '$lib/server/auth';
 import { appError } from '$lib/errors';
 import {
@@ -39,14 +40,14 @@ export async function bundleTypeSpec(templateId: string): Promise<BundleTypeSpec
 	if (instanceCount === 0) return { templateId, instanceCount, lines: [] };
 
 	const perInstance = new Map<string, Map<string, number>>();
-	const labels = new Map<string, { name: string; manufacturerName: string }>();
+	const labels = new Map<string, { name: string; manufacturerName: string | null }>();
 	for (const member of members) {
 		const counts = perInstance.get(member.bundleId!) ?? new Map<string, number>();
 		counts.set(member.productId, (counts.get(member.productId) ?? 0) + 1);
 		perInstance.set(member.bundleId!, counts);
 		labels.set(member.productId, {
 			name: member.product.name,
-			manufacturerName: member.product.manufacturer.name
+			manufacturerName: member.product.manufacturer?.name ?? null
 		});
 	}
 	const quantities = new Map<string, number>();
@@ -63,7 +64,9 @@ export async function bundleTypeSpec(templateId: string): Promise<BundleTypeSpec
 			manufacturerName: labels.get(productId)!.manufacturerName
 		}))
 		.sort((a, b) =>
-			`${a.manufacturerName} ${a.name}`.localeCompare(`${b.manufacturerName} ${b.name}`)
+			makerAndName(a.manufacturerName, a.name).localeCompare(
+				makerAndName(b.manufacturerName, b.name)
+			)
 		);
 	return { templateId, instanceCount, lines };
 }
@@ -79,7 +82,7 @@ async function currentCounts(bundleId: string) {
 
 function describe(spec: BundleTypeSpec, productId: string) {
 	const line = spec.lines.find((l) => l.productId === productId);
-	return line ? `${line.manufacturerName} ${line.name}` : '';
+	return line ? makerAndName(line.manufacturerName, line.name) : '';
 }
 
 /**
@@ -137,7 +140,7 @@ export async function assertNewInstanceMatchesType(templateId: string, productId
 		const [{ line, missing }] = short;
 		appError(409, 'bundle_composition_incomplete', [
 			missing,
-			`${line.manufacturerName} ${line.name}`
+			makerAndName(line.manufacturerName, line.name)
 		]);
 	}
 	const [first] = specSurplus(spec.lines, counts);

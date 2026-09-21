@@ -170,7 +170,7 @@
 		productId: string;
 		name: string;
 		imagePath: string | null;
-		manufacturerName: string;
+		manufacturerName: string | null;
 		categoryId: string;
 		categoryName: string;
 		categoryColor: string;
@@ -300,7 +300,7 @@
 							bundleGrouping && asset.accessories.length > 0
 								? (asset.generatedImagePath ?? asset.product.imagePath)
 								: asset.product.imagePath,
-						manufacturerName: asset.product.manufacturer.name,
+						manufacturerName: asset.product.manufacturer?.name ?? null,
 						categoryId: asset.product.categoryId,
 						categoryName: categoryLabel(asset.product.category),
 						categoryColor: asset.product.category.color,
@@ -348,7 +348,7 @@
 		if (!searchTrimmed) return true;
 		return [
 			a.product.name,
-			a.product.manufacturer.name,
+			a.product.manufacturer?.name,
 			categoryLabel(a.product.category),
 			a.product.cableType,
 			a.product.connectorA,
@@ -408,7 +408,7 @@
 	const deviceColumns: SortColumns<Asset> = {
 		tag: (a) => a.assetTag,
 		product: (a) => a.product.name,
-		manufacturer: (a) => a.product.manufacturer.name,
+		manufacturer: (a) => a.product.manufacturer?.name ?? null,
 		serial: (a) => a.serialNumber,
 		category: (a) => categoryLabel(a.product.category),
 		// By what the badge says, so the order matches what is on screen.
@@ -537,7 +537,7 @@
 								.some(
 									(a) =>
 										a.product.name.toLowerCase().includes(searchTrimmed) ||
-										a.product.manufacturer.name.toLowerCase().includes(searchTrimmed) ||
+										(a.product.manufacturer?.name.toLowerCase().includes(searchTrimmed) ?? false) ||
 										(a.serialNumber?.toLowerCase().includes(searchTrimmed) ?? false) ||
 										(a.assetTag?.toLowerCase().includes(searchTrimmed) ?? false)
 								)
@@ -936,7 +936,7 @@
 									</div>
 								</div>
 							</td>
-							<td class="px-4 py-2 text-muted-foreground">{asset.product.manufacturer.name}</td>
+							<td class="px-4 py-2 text-muted-foreground">{asset.product.manufacturer?.name}</td>
 							<td class="px-4 py-2 font-mono text-xs text-muted-foreground"
 								>{asset.serialNumber ?? '—'}</td
 							>
@@ -1468,7 +1468,7 @@
 													</div>
 												</td>
 												<td class="px-4 py-2 text-xs text-muted-foreground">
-													{asset.product.manufacturer.name}
+													{asset.product.manufacturer?.name}
 												</td>
 												<td class="px-4 py-2 text-xs text-muted-foreground">
 													{asset.location?.name ?? '—'}

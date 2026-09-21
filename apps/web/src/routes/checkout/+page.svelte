@@ -53,7 +53,7 @@
 		id: string;
 		assetTag: string;
 		productName: string;
-		manufacturerName: string;
+		manufacturerName: string | null;
 		action: string;
 		targetName: string;
 		status: 'success' | 'error';

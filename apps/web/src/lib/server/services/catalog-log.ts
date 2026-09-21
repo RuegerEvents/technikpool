@@ -19,7 +19,7 @@ export async function logCatalogChange(entry: {
 	userId: string;
 	action: CatalogAction;
 	productId?: string;
-	manufacturerId?: string;
+	manufacturerId?: string | null;
 	categoryId?: string;
 	organizationId?: string;
 	data?: Prisma.InputJsonValue;

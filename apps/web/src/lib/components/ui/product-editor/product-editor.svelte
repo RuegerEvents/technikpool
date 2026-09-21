@@ -31,6 +31,12 @@
 	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { Modal } from '$lib/components/ui/modal';
+	import { productLabel } from '$lib/product-label';
+	import {
+		manufacturerIdOf,
+		manufacturerSelection,
+		withNoManufacturer
+	} from '$lib/no-manufacturer.svelte';
 	import {
 		ProductFields,
 		cableDraftFrom,
@@ -154,6 +160,8 @@
 		isLicense: false
 	});
 	let manufacturer = $state<{ id: string | null; name: string } | null>(null);
+	// A cleared field means no manufacturer, the same as picking that entry.
+	let chosenManufacturerId = $derived(manufacturer ? manufacturerIdOf(manufacturer) : null);
 	let portRows = $state<PortDraft[]>([]);
 	// One price per org the user manages — prices are per-org, and undefined
 	// means "no price set for this org".
@@ -172,7 +180,7 @@
 	$effect(() => {
 		if (productKey === draftFor) return;
 		draftFor = productKey;
-		manufacturer = { id: product.manufacturerId, name: product.manufacturer.name };
+		manufacturer = manufacturerSelection(product.manufacturer);
 		draft = {
 			name: product.name,
 			categoryId: product.categoryId,
@@ -212,7 +220,7 @@
 	let identityDirty = $derived(
 		seeded &&
 			(draft.name.trim() !== product.name ||
-				manufacturer?.id !== product.manufacturerId ||
+				chosenManufacturerId !== product.manufacturerId ||
 				draft.categoryId !== product.categoryId ||
 				draft.isLicense !== product.isLicense ||
 				cableDirty)
@@ -243,8 +251,8 @@
 			toast.error('Product name is required');
 			return false;
 		}
-		if (!manufacturer?.id) {
-			toast.error('Manufacturer is required');
+		if (chosenManufacturerId === undefined) {
+			toast.error('Pick a manufacturer from the list, or Generic / unknown manufacturer');
 			return false;
 		}
 		saving = true;
@@ -259,7 +267,7 @@
 						? {}
 						: {
 								name: draft.name,
-								manufacturerId: manufacturer.id,
+								manufacturerId: chosenManufacturerId,
 								categoryId: draft.categoryId,
 								cable: cableDraftInput,
 								isLicense: draft.isLicense
@@ -310,9 +318,7 @@
 	let merging = $state(false);
 
 	let mergeOptions = $derived(
-		allProducts
-			.filter((p) => p.id !== product.id)
-			.map((p) => ({ id: p.id, name: `${p.manufacturer.name} ${p.name}` }))
+		allProducts.filter((p) => p.id !== product.id).map((p) => ({ id: p.id, name: productLabel(p) }))
 	);
 	let picked = $derived<GlobalProduct | null>(
 		allProducts.find((p) => p.id === mergePick?.id) ?? null
@@ -405,8 +411,7 @@
 		<div class="flex flex-wrap items-start justify-between gap-3">
 			<div class="min-w-0">
 				<Card.Title class="flex items-center gap-2">
-					{product.manufacturer.name}
-					{product.name}
+					{productLabel(product)}
 					{#if isDirty}
 						<span class="h-2 w-2 shrink-0 rounded-full bg-yellow-500" title="Unsaved changes"
 						></span>
@@ -478,7 +483,7 @@
 		<div class="mb-4 space-y-2">
 			<p class="text-sm font-medium">Manufacturer</p>
 			<CreatableSelect
-				items={manufacturers}
+				items={withNoManufacturer(manufacturers)}
 				bind:value={manufacturer}
 				allowCreate={false}
 				disabled={identityLocked}
@@ -578,10 +583,7 @@
 									class="mt-0.5 h-4 w-4"
 								/>
 								<span class="min-w-0 flex-1">
-									<span class="block font-medium"
-										>{option.choice.manufacturer.name}
-										{option.choice.name}</span
-									>
+									<span class="block font-medium">{productLabel(option.choice)}</span>
 									<span class="block text-xs text-muted-foreground">
 										{categoryLabel(option.choice.category)} ·
 										{plural(unitCounts.get(option.choice.id) ?? 0, ['# unit here', '# units here'])}
@@ -594,11 +596,10 @@
 
 				<div class="space-y-1.5 rounded-md bg-muted/50 p-3 text-sm">
 					<p>
-						<span class="font-medium">{absorbed.manufacturer.name} {absorbed.name}</span> is
-						deleted.
+						<span class="font-medium">{productLabel(absorbed)}</span> is deleted.
 						{plural(movingCount, ['Its # unit becomes', 'Its # units become'])}
-						<span class="font-medium">{survivor.manufacturer.name} {survivor.name}</span> — same tags,
-						same history, same accessories.
+						<span class="font-medium">{productLabel(survivor)}</span> — same tags, same history, same
+						accessories.
 					</p>
 					{#if inheritsImage}
 						<p class="text-muted-foreground">The image comes along — this entry has none.</p>
@@ -624,8 +625,12 @@
 					</p>
 					{#if survivor.manufacturerId !== absorbed.manufacturerId}
 						<p class="text-muted-foreground">
-							Different manufacturers: the units end up under
-							<span class="font-medium">{survivor.manufacturer.name}</span>.
+							{#if survivor.manufacturer}
+								Different manufacturers: the units end up under
+								<span class="font-medium">{survivor.manufacturer.name}</span>.
+							{:else}
+								Different manufacturers: the units end up under Generic / unknown manufacturer.
+							{/if}
 						</p>
 					{/if}
 					<p class="text-muted-foreground">
@@ -656,7 +661,7 @@
 	     snippet is dropped from extraction. See CLAUDE.md, wuchale. -->
 	{#snippet children()}
 		<p class="text-sm">
-			Delete <span class="font-medium">{product.manufacturer.name} {product.name}</span>?
+			Delete <span class="font-medium">{productLabel(product)}</span>?
 		</p>
 	{/snippet}
 

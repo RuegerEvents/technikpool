@@ -28,9 +28,10 @@
 	// A cable is the common case here and is described rather than picked: its
 	// ends and its length are what make it that product. So the cable tab skips
 	// the manufacturer and product pickers for the same fields the product form
-	// has, and the server files it under the generic manufacturer — reusing an
+	// has, and the server files it with no manufacturer — reusing an
 	// identical cable product where the catalogue already has one.
 	import type { Snippet } from 'svelte';
+	import { manufacturerIdOf, withNoManufacturer } from '$lib/no-manufacturer.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Modal } from '$lib/components/ui/modal';
 	import { Input } from '$lib/components/ui/input';
@@ -116,8 +117,10 @@
 	// both a wasted round trip and the await_waterfall warning.
 	let categories = $derived(open ? (getCategories().current ?? []) : []);
 	let manufacturers = $derived(open ? (getManufacturers().current ?? []) : []);
+	// undefined while the manufacturer is one being typed in: it has no products yet.
+	let chosenManufacturerId = $derived(manufacturer ? manufacturerIdOf(manufacturer) : undefined);
 	let productsForManufacturer = $derived(
-		open && manufacturer?.id ? await getProducts(manufacturer.id) : []
+		open && chosenManufacturerId !== undefined ? await getProducts(chosenManufacturerId) : []
 	);
 	// A brand-new product needs a category and is the only case where a photo can
 	// be set: the image belongs to the product, and an existing one already has
@@ -254,7 +257,7 @@
 							categoryId: cableDraft.categoryId
 						}
 					: {
-							manufacturerId: manufacturer?.id ?? undefined,
+							manufacturerId: chosenManufacturerId ?? undefined,
 							newManufacturerName: manufacturer?.id ? undefined : manufacturer?.name.trim(),
 							productId: product?.id ?? undefined,
 							newProductName: product?.id ? undefined : product?.name.trim(),
@@ -322,7 +325,7 @@
 				<div class="space-y-2">
 					<Label>Manufacturer</Label>
 					<CreatableSelect
-						items={manufacturers}
+						items={withNoManufacturer(manufacturers)}
 						value={manufacturer}
 						onchange={handleManufacturer}
 						oncreate={(name) => handleManufacturer({ id: null, name })}
@@ -336,7 +339,7 @@
 						<div class="space-y-2">
 							<Label>Product</Label>
 							<CreatableSelect
-								items={manufacturer.id ? productsForManufacturer : []}
+								items={productsForManufacturer}
 								bind:value={product}
 								placeholder="Search or type a new one…"
 								disabled={saving}
@@ -397,8 +400,8 @@
 				{/if}
 			{:else}
 				<p class="text-xs text-muted-foreground">
-					No manufacturer to pick: a cable is filed under the generic one, and a cable with the same
-					ends and length already in the catalogue is reused rather than added twice.
+					No manufacturer to pick: a cable is filed as Generic / unknown manufacturer, and a cable
+					with the same ends and length already in the catalogue is reused rather than added twice.
 				</p>
 				<ProductFields
 					{categories}

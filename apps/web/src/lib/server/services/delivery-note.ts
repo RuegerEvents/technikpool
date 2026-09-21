@@ -1,5 +1,6 @@
 import { prisma } from '$lib/server/auth';
-import { productBillingLabel, summarizeContents } from '$lib/billing-lines';
+import { summarizeContents } from '$lib/billing-lines';
+import { productLabel } from '$lib/product-label';
 import { ensureAssetImage, ensureBundleImage } from '$lib/server/services/bundle-image';
 import type { DeliveryNoteData, DeliveryNoteGroup, DeliveryNoteLine } from '../delivery-note-pdf';
 
@@ -104,8 +105,8 @@ export async function deliveryNoteData(productionId: string) {
 		(item) => !item.asset.parentAssetId || !bookedIds.has(item.asset.parentAssetId)
 	);
 	const contentsOf = (item: Item) => [
-		productBillingLabel(item.asset.product),
-		...(accessoriesOf.get(item.assetId) ?? []).map((a) => productBillingLabel(a.asset.product))
+		productLabel(item.asset.product),
+		...(accessoriesOf.get(item.assetId) ?? []).map((a) => productLabel(a.asset.product))
 	];
 
 	const lines = new Map<string, PendingLine>();
@@ -134,14 +135,14 @@ export async function deliveryNoteData(productionId: string) {
 		const asset = item.asset;
 		const accessories = accessoriesOf.get(asset.id) ?? [];
 		const inkl = accessories.length
-			? `inkl. ${summarizeContents(accessories.map((a) => productBillingLabel(a.asset.product)))}`
+			? `inkl. ${summarizeContents(accessories.map((a) => productLabel(a.asset.product)))}`
 			: null;
 		add(
 			`product:${asset.productId}|${inkl ?? ''}`,
 			() => ({
 				key: `product:${asset.productId}|${inkl ?? ''}`,
 				category: categoryName(asset.product.category),
-				label: productBillingLabel(asset.product),
+				label: productLabel(asset.product),
 				subtitle: inkl,
 				identifiers: [],
 				quantity: 0,
