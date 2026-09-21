@@ -33,23 +33,49 @@ import type {
 } from '$lib/types/asset-transaction';
 
 // Tells the requesting org's OWNER/ADMIN members that the owner org has
-// answered every request it had for this production. The caller decides that
-// the queue was cleared — see `reviewProductionItems`, which is the only place
-// that can tell without a race.
+// answered every request it had for this production, and what it answered.
+// The caller decides that the queue was cleared — see `reviewProductionItems`,
+// which is the only place that can tell without a race.
 async function notifyRequesterQueueCleared(
 	productionId: string,
 	requestingOrgId: string,
 	ownerOrgId: string
 ) {
 	try {
-		const [production, ownerOrg, recipients] = await Promise.all([
+		const [production, ownerOrg, recipients, answered] = await Promise.all([
 			prisma.production.findUniqueOrThrow({ where: { id: productionId }, select: { name: true } }),
 			prisma.organization.findUniqueOrThrow({ where: { id: ownerOrgId }, select: { name: true } }),
 			prisma.orgMembership.findMany({
 				where: { organizationId: requestingOrgId, role: { in: ['OWNER', 'ADMIN'] } },
 				include: { user: { select: { email: true, name: true } } }
+			}),
+			// Everything this lender has answered for the production, not only the
+			// last batch: the borrower wants to know where they stand. Accessories
+			// are left out — they follow their unit and would only repeat it.
+			prisma.productionItem.findMany({
+				where: {
+					productionId,
+					status: { in: ['APPROVED', 'DECLINED'] },
+					sourceParentAssetId: null,
+					asset: { organizationId: ownerOrgId }
+				},
+				select: { status: true, asset: { select: { product: { select: { name: true } } } } }
 			})
 		]);
+
+		const summarize = (status: 'APPROVED' | 'DECLINED') => {
+			const counts = new Map<string, number>();
+			for (const item of answered) {
+				if (item.status !== status) continue;
+				const name = item.asset.product.name;
+				counts.set(name, (counts.get(name) ?? 0) + 1);
+			}
+			return [...counts]
+				.map(([productName, count]) => ({ productName, count }))
+				.sort((a, b) => a.productName.localeCompare(b.productName, 'de'));
+		};
+		const approved = summarize('APPROVED');
+		const declined = summarize('DECLINED');
 
 		await Promise.all(
 			recipients.map((membership) => {
@@ -57,6 +83,8 @@ async function notifyRequesterQueueCleared(
 					name: membership.user.name,
 					ownerOrgName: ownerOrg.name,
 					productionName: production.name,
+					approved,
+					declined,
 					url: `${appBaseUrl}/productions/${productionId}`
 				});
 				return sendMail({ to: membership.user.email, subject, html, text });
