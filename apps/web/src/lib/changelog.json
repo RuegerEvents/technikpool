@@ -1,5 +1,27 @@
 [
 	{
+		"version": "0.15.0",
+		"date": "2026-09-21",
+		"en": [
+			"Waiting for approval: the dashboard lists the equipment your productions have asked other organizations for and are still waiting to hear about, and the production list marks every production with open requests.",
+			"Requesting equipment through a production's equipment planner now emails the lending organization, as every other way of booking already did.",
+			"The mail that says a lender has answered your requests arrives once instead of once per unit, and lists what was approved and what was declined.",
+			"A product's units are a table with headings — tag, case, location, serial number, status — and an accessory names the unit it belongs to.",
+			"Merging a duplicate product keeps the cable: an entry that is no cable takes the duplicate's type, ends, length and ways, and a software license stays one. The form shows the result right away instead of the state before the merge.",
+			"A search list inside a dialog opens over it instead of scrolling in a strip the height of the field.",
+			"The mails stay readable in dark mode, Thunderbird included, and names in them are shown as written instead of being read as markup."
+		],
+		"de": [
+			"Warten auf Freigabe: Das Dashboard zeigt, welche Geräte eure Produktionen bei anderen Organisationen angefragt haben und worauf ihr noch wartet, und die Produktionsliste markiert jede Produktion mit offenen Anfragen.",
+			"Geräte über den Geräteplaner einer Produktion anzufragen schickt der verleihenden Organisation jetzt eine Mail, wie es jeder andere Weg schon tat.",
+			"Die Mail, dass ein Verleiher eure Anfragen bearbeitet hat, kommt einmal statt einmal pro Einheit und sagt, was zugesagt und was abgelehnt wurde.",
+			"Die Einheiten eines Produkts sind eine Tabelle mit Überschriften — Tag, Case, Standort, Seriennummer, Status — und ein Zubehörteil nennt die Einheit, zu der es gehört.",
+			"Beim Zusammenführen doppelter Produkte bleibt das Kabel erhalten: Ein Eintrag, der kein Kabel ist, übernimmt Typ, Enden, Länge und Wege des Duplikats, und eine Softwarelizenz bleibt eine. Das Formular zeigt das Ergebnis sofort statt des Stands vor dem Zusammenführen.",
+			"Eine Suchliste in einem Dialog öffnet sich über ihm, statt in einem Streifen von der Höhe des Feldes zu scrollen.",
+			"Die Mails bleiben im Dunkelmodus lesbar, auch in Thunderbird, und Namen darin erscheinen so, wie sie geschrieben wurden, statt als Formatierung gelesen zu werden."
+		]
+	},
+	{
 		"version": "0.14.0",
 		"date": "2026-09-20",
 		"en": [
