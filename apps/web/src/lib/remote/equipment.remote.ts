@@ -2,7 +2,7 @@ import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import { orgLabel } from '$lib/utils';
-import { getProduction } from './productions.remote';
+import { getAwaitingApprovals, getProduction } from './productions.remote';
 import {
 	productionReadWhere,
 	requireAuth,
@@ -13,6 +13,10 @@ import {
 import { BOOKABLE_ASSET_WHERE } from '$lib/asset-status';
 import { accessoryIdsOf } from '$lib/server/services/accessories';
 import { appError } from '$lib/errors';
+import {
+	getOrgIdsNeedingApprovalNotification,
+	notifyPendingApproval
+} from '$lib/server/services/approval-notifications';
 import { requireOpenProduction } from '$lib/server/services/production-state';
 import { copyEquipment, planEquipmentCopy } from '$lib/server/services/equipment-copy';
 import type { AddedToProductionData, RequestedData } from '$lib/types/asset-transaction';
@@ -331,6 +335,11 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 		const accessoriesByParent = await accessoryIdsOf(toAdd.map((a) => a.id));
 		const accessoryIds = [...accessoriesByParent.values()].flat();
 
+		// Asked before booking: only an org with no open request here yet is told.
+		const orgsToNotify = isCrossOrg
+			? await getOrgIdsNeedingApprovalNotification(data.productionId, [data.organizationId])
+			: [];
+
 		await prisma.$transaction([
 			...toAdd.map((asset) =>
 				prisma.productionItem.create({
@@ -374,6 +383,15 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 				}))
 			})
 		]);
+
+		if (orgsToNotify.length > 0) {
+			await notifyPendingApproval(
+				data.productionId,
+				production.name,
+				production.organization.name,
+				orgsToNotify
+			);
+		}
 	} else {
 		const toRemove = currentItems.slice(0, -delta);
 		const removedAssetIds = toRemove.map((i) => i.assetId);
@@ -391,6 +409,7 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 
 	await getEquipmentEditorData(data.productionId).refresh();
 	await getProduction(data.productionId).refresh();
+	if (production.organizationId !== data.organizationId) await getAwaitingApprovals().refresh();
 	return { changed: delta };
 });
 
