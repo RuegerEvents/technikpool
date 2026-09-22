@@ -7,6 +7,8 @@ export type BillingItem = {
 	productId?: string | null;
 	productLabel?: string | null;
 	bundleId?: string | null;
+	/** Object key of the product photo or bundle preview, resolved by ProductThumb. */
+	imagePath?: string | null;
 	description: string;
 	netPurchasePrice: unknown;
 	ratePercent: unknown;

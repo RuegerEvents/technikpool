@@ -10,7 +10,6 @@ import {
 	type PDFPage,
 	type PDFRef
 } from 'pdf-lib';
-import fontkit from '@pdf-lib/fontkit';
 import { normalizeOptions, parseHexColor, type RawGeneratorOptions } from './config';
 import { createDataMatrixPng } from './datamatrix';
 import {
@@ -26,7 +25,7 @@ import { fillPathRgb, registerKissCutColorSpace, strokeKissCutPath } from './kis
 import { paginateStickers } from './items';
 import type { GeneratorOptions, GridPosition, SheetPage, StickerItem } from './types';
 import { mm, ptToMm } from './units';
-import { loadSheetFont } from './font';
+import { embedInterRegular } from '../fonts';
 
 const KISS_CUT_LINE_WIDTH_PT = 0.5;
 /** How far beyond the bleed the group box sits, so it never overlaps the bleed fill. */
@@ -59,12 +58,7 @@ export async function generateStickerSheet(rawOptions: RawGeneratorOptions): Pro
 	pdfDoc.setProducer('stickerbogen-generator');
 
 	const kissCutRef = registerKissCutColorSpace(pdfDoc.context);
-	// A real TrueType face, embedded and subset — not one of pdf-lib's
-	// "standard 14" fonts. Those are only ever *referenced* by name and left
-	// for the viewer to supply, which a print shop's preflight rejects as
-	// "Schriften nicht eingebettet".
-	pdfDoc.registerFontkit(fontkit);
-	const font = await pdfDoc.embedFont(loadSheetFont(), { subset: true });
+	const font = await embedInterRegular(pdfDoc);
 	const pages = paginateStickers(options);
 
 	for (const sheetPage of pages) {

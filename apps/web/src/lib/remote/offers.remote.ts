@@ -115,6 +115,39 @@ export const getOffers = query(v.optional(v.string()), async (organizationId?: s
 	});
 });
 
+// Items keep only soft references to what they bill, so the thumbnail is
+// looked up at read time: the product's photo, or a bundle's generated preview.
+// A product or bundle deleted since leaves the line without one.
+async function withItemImages<T extends { productId: string | null; bundleId: string | null }>(
+	items: T[]
+): Promise<(T & { imagePath: string | null })[]> {
+	const productIds = [...new Set(items.map((i) => i.productId).filter((id) => id !== null))];
+	const bundleIds = [...new Set(items.map((i) => i.bundleId).filter((id) => id !== null))];
+	const [products, bundles] = await Promise.all([
+		productIds.length
+			? prisma.product.findMany({
+					where: { id: { in: productIds } },
+					select: { id: true, imagePath: true }
+				})
+			: [],
+		bundleIds.length
+			? prisma.assetBundle.findMany({
+					where: { id: { in: bundleIds } },
+					select: { id: true, imagePath: true }
+				})
+			: []
+	]);
+	const productImage = new Map(products.map((p) => [p.id, p.imagePath]));
+	const bundleImage = new Map(bundles.map((b) => [b.id, b.imagePath]));
+	return items.map((item) => ({
+		...item,
+		imagePath:
+			(item.bundleId ? bundleImage.get(item.bundleId) : null) ??
+			(item.productId ? productImage.get(item.productId) : null) ??
+			null
+	}));
+}
+
 export const getOffer = query(v.string(), async (id: string) => {
 	await requireAuth();
 	const offer = await prisma.offer.findUniqueOrThrow({
@@ -136,7 +169,7 @@ export const getOffer = query(v.string(), async (id: string) => {
 		}
 	});
 	await requireOrgBilling(offer.organizationId);
-	return offer;
+	return { ...offer, items: await withItemImages(offer.items) };
 });
 
 // What the offer page needs to place an offer among its revisions: the version
@@ -1451,7 +1484,7 @@ export const getInvoice = query(v.string(), async (id: string) => {
 		}
 	});
 	await requireOrgBilling(invoice.organizationId);
-	return invoice;
+	return { ...invoice, items: await withItemImages(invoice.items) };
 });
 
 export const getInvoicesForProduction = query(v.string(), async (productionId: string) => {

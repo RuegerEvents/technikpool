@@ -9,6 +9,7 @@
 	import { formatQuantity, serviceUnitShort } from '$lib/service-lines.svelte';
 	import { deleteServiceLine, moveServiceLine } from '$lib/remote/offers.remote';
 	import { ChevronDown, ChevronUp } from '@lucide/svelte';
+	import { ProductThumb } from '$lib/components/ui/product-thumb';
 	import ServiceLineModal from './service-line-modal.svelte';
 	import type { BillingItem, DurationInfo, EditedServiceLine, ServiceLineTarget } from './types';
 
@@ -396,7 +397,10 @@
 								{:else}
 									<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
 										<td class="px-4 py-3">
-											{line.label}
+											<div class="flex items-center gap-2">
+												<ProductThumb path={line.items[0].imagePath} alt={line.label} />
+												<span>{line.label}</span>
+											</div>
 										</td>
 										<td class="px-4 py-3 text-right tabular-nums">{line.quantity}×</td>
 										<td class="px-4 py-3 text-right tabular-nums"

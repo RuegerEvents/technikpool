@@ -1,13 +1,7 @@
 import sharp from 'sharp';
-import {
-	PDFDocument,
-	StandardFonts,
-	rgb,
-	type PDFFont,
-	type PDFImage,
-	type PDFPage
-} from 'pdf-lib';
+import { PDFDocument, rgb, type PDFFont, type PDFImage, type PDFPage } from 'pdf-lib';
 import { getObject } from '$lib/server/storage';
+import { embedInter } from './fonts';
 import { fmtDate, safe, wrap } from './pdf-text.ts';
 
 export type DeliveryNoteLine = {
@@ -110,8 +104,7 @@ async function thumbnail(path: string): Promise<Uint8Array | null> {
 
 export async function generateDeliveryNotePdf(data: DeliveryNoteData, issuedAt = new Date()) {
 	const pdf = await PDFDocument.create();
-	const regular = await pdf.embedFont(StandardFonts.Helvetica);
-	const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+	const { regular, bold } = await embedInter(pdf);
 
 	const paths = [
 		...new Set(
@@ -140,7 +133,7 @@ export async function generateDeliveryNotePdf(data: DeliveryNoteData, issuedAt =
 		font = regular,
 		color = black
 	) => {
-		page.drawText(safe(value), { x, y: atY, size, font, color });
+		page.drawText(safe(value, font), { x, y: atY, size, font, color });
 	};
 	const right = (
 		value: string,
@@ -150,7 +143,7 @@ export async function generateDeliveryNotePdf(data: DeliveryNoteData, issuedAt =
 		font = regular,
 		color = black
 	) => {
-		const clean = safe(value);
+		const clean = safe(value, font);
 		draw(clean, rightX - font.widthOfTextAtSize(clean, size), atY, size, font, color);
 	};
 	const newPage = () => {
@@ -423,7 +416,7 @@ export async function generateDeliveryNotePdf(data: DeliveryNoteData, issuedAt =
 		});
 	});
 
-	pdf.setTitle(`${title} - ${safe(data.productionName)}`);
+	pdf.setTitle(`${title} - ${data.productionName}`);
 	pdf.setProducer('Technikpool');
 	return pdf.save();
 }

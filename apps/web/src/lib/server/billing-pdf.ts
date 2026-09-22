@@ -1,8 +1,9 @@
-import { PDFDocument, StandardFonts, degrees, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
+import { PDFDocument, degrees, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import { groupBillingItems, lineSubtitle, type GroupableItem } from '../billing-lines.ts';
 import { appError } from '$lib/errors';
 import { billingDocumentIssues } from '../billing-document-check.svelte.ts';
 import type { SnapshotOrganization } from '../org-snapshot.ts';
+import { embedInter } from './fonts';
 import { fmtDate, safe, wrap } from './pdf-text.ts';
 import { formatQuantity } from '../service-lines.svelte.ts';
 
@@ -71,8 +72,7 @@ export async function generateBillingPdf(
 ) {
 	validateDocument(kind, data);
 	const pdf = await PDFDocument.create();
-	const regular = await pdf.embedFont(StandardFonts.Helvetica);
-	const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+	const { regular, bold } = await embedInter(pdf);
 	const groups = groupBillingItems(
 		data.items,
 		(item) => item.categoryNameDe || item.categoryName || 'Ohne Kategorie'
@@ -94,7 +94,7 @@ export async function generateBillingPdf(
 		font = regular,
 		color = black
 	) => {
-		page.drawText(safe(value), { x, y: atY, size, font, color });
+		page.drawText(safe(value, font), { x, y: atY, size, font, color });
 	};
 	const right = (
 		value: string,
@@ -104,7 +104,7 @@ export async function generateBillingPdf(
 		font = regular,
 		color = black
 	) => {
-		const clean = safe(value);
+		const clean = safe(value, font);
 		draw(clean, rightX - font.widthOfTextAtSize(clean, size), atY, size, font, color);
 	};
 	const pageTitle = () => {
