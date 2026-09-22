@@ -57,7 +57,9 @@ export function billingDocumentIssues(
 	need('organization', org.bic, 'BIC');
 
 	need('customer', data.customerName, 'Customer name');
-	need('customer', data.customerAddress, 'Customer address');
+	// §14 Abs. 4 Nr. 1 UStG asks it of an invoice; an offer is not a tax document
+	// and often goes out before anyone has the customer's billing address.
+	if (kind === 'invoice') need('customer', data.customerAddress, 'Customer address');
 
 	need('document', data.serviceStartDate, 'Service start date');
 	need('document', data.serviceEndDate, 'Service end date');
