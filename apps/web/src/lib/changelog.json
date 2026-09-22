@@ -1,5 +1,21 @@
 [
 	{
+		"version": "0.19.0",
+		"date": "2026-09-22",
+		"en": [
+			"When your organization lends equipment to another organization's production, you can now open that production: dates, venue, customer, crew and the full equipment list, but not its offers and invoices. It shows up in your productions list marked \"On loan\" and in the calendar. A declined request no longer counts.",
+			"A production's page now shows who outside your organization can see it and why: crew, or an organization lending equipment to it.",
+			"The production page is laid out in two columns. Equipment is on the left, and details, crew, offers and invoices are on the right, so the crew is visible without scrolling past the equipment. Packing list, delivery note and crew passes are under one Print button.",
+			"Once a production has an offer, its header opens the current offer instead of creating a new one. A separate new offer is still in the ⋯ menu."
+		],
+		"de": [
+			"Verleiht deine Organisation Geräte an die Produktion einer anderen Organisation, kannst du diese Produktion jetzt öffnen: Termine, Ort, Kunde, Crew und die ganze Geräteliste, aber nicht ihre Angebote und Rechnungen. Sie erscheint in deiner Produktionsliste als „Leihgabe“ und im Kalender. Eine abgelehnte Anfrage zählt nicht mehr.",
+			"Die Seite einer Produktion zeigt jetzt, wer außerhalb deiner Organisation sie sehen kann und warum: als Crew oder als Organisation, die Geräte verleiht.",
+			"Die Produktionsseite ist zweispaltig. Links stehen die Geräte, rechts Details, Crew, Angebote und Rechnungen, damit die Crew sichtbar ist, ohne an allen Geräten vorbeizuscrollen. Packliste, Lieferschein und Crew-Ausweise liegen unter einem Drucken-Button.",
+			"Hat eine Produktion schon ein Angebot, öffnet der Button oben das aktuelle Angebot, statt ein neues anzulegen. Ein separates neues Angebot gibt es weiter im ⋯-Menü."
+		]
+	},
+	{
 		"version": "0.18.1",
 		"date": "2026-09-22",
 		"en": [
