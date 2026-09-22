@@ -1362,6 +1362,7 @@ msgstr "Please select a location"
 msgid "No locations yet. Create one in <0>Locations</0>."
 msgstr "No locations yet. Create one in <0>Locations</0>."
 
+#: src/lib/billing-setup.svelte.ts
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
@@ -3361,6 +3362,7 @@ msgstr "Bank name"
 msgid "Tax ID"
 msgstr "Tax ID"
 
+#: src/lib/billing-setup.svelte.ts
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Bank account"
 msgstr "Bank account"
@@ -5484,6 +5486,7 @@ msgstr "<0/> Customers"
 msgid "Copied from the organization preset and frozen when the invoice is marked as sent."
 msgstr "Copied from the organization preset and frozen when the invoice is marked as sent."
 
+#: src/lib/billing-setup.svelte.ts
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Billing email"
 msgstr "Billing email"
@@ -9060,3 +9063,29 @@ msgstr "New cable — saving adds <0/> to the catalog."
 #: src/routes/offers/new/+page.svelte
 msgid "In bundle <0/>, which has no price of its own and is billed as one line at the sum of its units' prices. A price on the bundle itself covers this unit instead."
 msgstr "In bundle <0/>, which has no price of its own and is billed as one line at the sum of its units' prices. A price on the bundle itself covers this unit instead."
+
+#~ msgid "<0/> Finish the billing details of {0}"
+#~ msgstr "<0/> Finish the billing details of {0}"
+
+#~ msgid "Offers and invoices can only be generated once these are filled in."
+#~ msgstr "Offers and invoices can only be generated once these are filled in."
+
+#~ msgid "Fill in billing details <0/>"
+#~ msgstr "Fill in billing details <0/>"
+
+#: src/lib/billing-setup.svelte.ts
+msgid "Tax number or VAT ID"
+msgstr "Tax number or VAT ID"
+
+#~ msgid "Bank account (holder, IBAN, BIC, bank name)"
+#~ msgstr "Bank account (holder, IBAN, BIC, bank name)"
+
+#. 0: orgLabel(homeOrg)
+#: src/routes/+page.svelte
+msgid "Billing details of {0} are incomplete"
+msgstr "Billing details of {0} are incomplete"
+
+#. 0: billingMissing
+#: src/routes/+page.svelte
+msgid "Missing: {0}. Offers and invoices can only be generated once these are filled in."
+msgstr "Missing: {0}. Offers and invoices can only be generated once these are filled in."

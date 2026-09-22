@@ -209,6 +209,19 @@
 		}
 	});
 
+	// The dashboard's billing to-do links here with `#billing`: open the form
+	// straight away rather than leave them looking for the Edit button. Once per
+	// visit, so saving doesn't reopen it.
+	let billingHashHandled = false;
+	$effect(() => {
+		if (billingHashHandled || !org || !canManage || page.url.hash !== '#billing') return;
+		billingHashHandled = true;
+		editingBilling = true;
+		requestAnimationFrame(() =>
+			document.getElementById('billing')?.scrollIntoView({ block: 'start' })
+		);
+	});
+
 	async function handleBillingSave(e: Event) {
 		e.preventDefault();
 		if (!org) return;
@@ -443,7 +456,7 @@
 						</Card.Content>
 					</Card.Root>
 
-					<Card.Root>
+					<Card.Root id="billing" class="scroll-mt-20">
 						<Card.Header>
 							<Card.Title>Billing Details</Card.Title>
 							<Card.Description

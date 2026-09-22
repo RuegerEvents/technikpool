@@ -1362,6 +1362,7 @@ msgstr "Bitte einen Standort auswählen"
 msgid "No locations yet. Create one in <0>Locations</0>."
 msgstr "Noch keine Standorte. Erstelle einen unter <0>Standorte</0>."
 
+#: src/lib/billing-setup.svelte.ts
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
@@ -3361,6 +3362,7 @@ msgstr "Bankname"
 msgid "Tax ID"
 msgstr "Steuer-ID"
 
+#: src/lib/billing-setup.svelte.ts
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Bank account"
 msgstr "Bankverbindung"
@@ -5484,6 +5486,7 @@ msgstr "<0/> Kunden"
 msgid "Copied from the organization preset and frozen when the invoice is marked as sent."
 msgstr "Aus der Organisationsvorlage übernommen und beim Markieren als versendet festgeschrieben."
 
+#: src/lib/billing-setup.svelte.ts
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Billing email"
 msgstr "E-Mail für Rechnungen"
@@ -9060,3 +9063,29 @@ msgstr "Neues Kabel — beim Speichern kommt <0/> neu in den Katalog."
 #: src/routes/offers/new/+page.svelte
 msgid "In bundle <0/>, which has no price of its own and is billed as one line at the sum of its units' prices. A price on the bundle itself covers this unit instead."
 msgstr "Im Bundle <0/>, das selbst keinen Preis hat und als eine Position zur Summe der Einzelpreise abgerechnet wird. Ein Preis am Bundle selbst deckt dieses Gerät stattdessen ab."
+
+#~ msgid "<0/> Finish the billing details of {0}"
+#~ msgstr "<0/> Rechnungsdaten von {0} vervollständigen"
+
+#~ msgid "Offers and invoices can only be generated once these are filled in."
+#~ msgstr "Angebote und Rechnungen lassen sich erst erstellen, wenn diese Angaben vollständig sind."
+
+#~ msgid "Fill in billing details <0/>"
+#~ msgstr "Rechnungsdaten ausfüllen <0/>"
+
+#: src/lib/billing-setup.svelte.ts
+msgid "Tax number or VAT ID"
+msgstr "Steuernummer oder USt-IdNr."
+
+#~ msgid "Bank account (holder, IBAN, BIC, bank name)"
+#~ msgstr "Bankverbindung (Inhaber, IBAN, BIC, Bank)"
+
+#. 0: orgLabel(homeOrg)
+#: src/routes/+page.svelte
+msgid "Billing details of {0} are incomplete"
+msgstr "Rechnungsdaten von {0} sind unvollständig"
+
+#. 0: billingMissing
+#: src/routes/+page.svelte
+msgid "Missing: {0}. Offers and invoices can only be generated once these are filled in."
+msgstr "Es fehlt: {0}. Angebote und Rechnungen lassen sich erst erstellen, wenn diese Angaben vollständig sind."

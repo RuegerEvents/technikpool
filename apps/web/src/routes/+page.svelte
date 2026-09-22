@@ -15,7 +15,8 @@
 	import { resolve } from '$app/paths';
 	import { invalidateAll } from '$app/navigation';
 	import { plural, orgLabel, getErrorMessage } from '$lib/utils';
-	import { canManageInventory } from '$lib/roles';
+	import { canManageInventory, roleAtLeast, ROLE_FOR } from '$lib/roles';
+	import { billingSetupSteps } from '$lib/billing-setup.svelte';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 	import { formatReleaseDate, notesFor, releases } from '$lib/changelog';
 	import {
@@ -29,7 +30,8 @@
 		Plus,
 		Hourglass,
 		EllipsisVertical,
-		Sparkles
+		Sparkles,
+		ReceiptText
 	} from '@lucide/svelte';
 
 	let { data } = $props();
@@ -50,6 +52,22 @@
 	let orgsQuery = $derived(active ? getMyOrgs() : null);
 	let orgs = $derived(orgsQuery?.current ?? []);
 	let adminOrgs = $derived(orgs.filter(canManageInventory));
+	// Billing setup of the home org, for whoever can change it. Only the home org:
+	// someone who owns several would otherwise get a card per org they never
+	// bill from.
+	let homeOrg = $derived(orgs.find((o) => o.id === data.homeOrgId));
+	let billingSteps = $derived(
+		homeOrg && (data.isAdmin || roleAtLeast(homeOrg.role, ROLE_FOR.organization))
+			? billingSetupSteps(homeOrg)
+			: []
+	);
+	let billingMissing = $derived(
+		billingSteps
+			.filter((step) => !step.done)
+			.map((step) => step.label)
+			.join(', ')
+	);
+	let billingIncomplete = $derived(billingMissing !== '');
 	let pendingQueries = $derived(active ? adminOrgs.map((o) => getPendingApprovals(o.id)) : []);
 	let pendingReady = $derived(pendingQueries.every((q) => q.ready));
 	let pending = $derived(pendingQueries.flatMap((q) => q.current ?? []));
@@ -377,19 +395,48 @@
 
 		<!-- Needs attention: only what someone can act on, and only when it is not
 		     zero. A row of calm zeros next to one amber number is exactly how the
-		     number gets missed. -->
+		     number gets missed. The billing to-do is a strip of its own because it
+		     has nothing to count, and it keeps "All clear" from being said over it. -->
+		{#if homeOrg && billingIncomplete}
+			<!-- eslint-disable svelte/no-navigation-without-resolve -- resolved, plus a hash -->
+			<a
+				href={resolve(`/orgs/${homeOrg.id}`) + '#billing'}
+				class="group flex items-center gap-3 rounded-lg border border-amber-500/40 bg-amber-50/60 px-4 py-3 text-sm transition-colors hover:bg-amber-50 dark:bg-amber-950/20 dark:hover:bg-amber-950/40"
+			>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
+				<ReceiptText
+					aria-hidden="true"
+					class="size-5 shrink-0 text-amber-600 dark:text-amber-400"
+				/>
+				<span class="min-w-0 flex-1 leading-tight">
+					<span class="block font-medium"
+						>Billing details of {orgLabel(homeOrg)} are incomplete</span
+					>
+					<span class="block text-xs text-muted-foreground"
+						>Missing: {billingMissing}. Offers and invoices can only be generated once these are
+						filled in.</span
+					>
+				</span>
+				<ArrowRight
+					aria-hidden="true"
+					class="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+				/>
+			</a>
+		{/if}
 		{#if !attentionReady}
 			<ContentSkeleton shape="block" class="h-16" error={statsQuery?.error} />
 		{:else if attention.length === 0}
-			<div
-				class="flex items-center gap-3 rounded-lg border border-emerald-500/30 bg-emerald-50/60 px-4 py-3 text-sm dark:bg-emerald-950/20"
-			>
-				<CircleCheck aria-hidden="true" class="size-5 shrink-0 text-emerald-600" />
-				<span>
-					<span class="font-medium">All clear.</span>
-					<span class="text-muted-foreground">Nothing needs your attention right now.</span>
-				</span>
-			</div>
+			{#if !billingIncomplete}
+				<div
+					class="flex items-center gap-3 rounded-lg border border-emerald-500/30 bg-emerald-50/60 px-4 py-3 text-sm dark:bg-emerald-950/20"
+				>
+					<CircleCheck aria-hidden="true" class="size-5 shrink-0 text-emerald-600" />
+					<span>
+						<span class="font-medium">All clear.</span>
+						<span class="text-muted-foreground">Nothing needs your attention right now.</span>
+					</span>
+				</div>
+			{/if}
 		{:else}
 			<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
 				{#each attention as item (item.key)}
