@@ -4538,9 +4538,8 @@ msgstr "€ netto"
 #~ msgid "Owned by {0}. Ask them to price it, or set \"Assets to include\" to this organization's own assets only."
 #~ msgstr "Gehört {0}. Der Preis muss dort gesetzt werden — oder \"Einzubeziehende Geräte\" auf \"Nur eigene Geräte dieser Organisation\" stellen."
 
-#: src/routes/offers/new/+page.svelte
-msgid "In bundle <0/>, which has no price of its own. Pricing that bundle bills it as one line instead."
-msgstr "Im Bundle <0/>, das selbst keinen Preis hat. Mit einem Preis am Bundle wird es als eine einzige Position abgerechnet."
+#~ msgid "In bundle <0/>, which has no price of its own. Pricing that bundle bills it as one line instead."
+#~ msgstr "Im Bundle <0/>, das selbst keinen Preis hat. Mit einem Preis am Bundle wird es als eine einzige Position abgerechnet."
 
 #~ msgid "Added {0} asset{1}"
 #~ msgstr "{0} Gerät{1} hinzugefügt"
@@ -9056,3 +9055,7 @@ msgstr "Schon im Katalog — die Einheiten kommen zu diesem Eintrag dazu."
 #: src/routes/assets/new/cables/+page.svelte
 msgid "New cable — saving adds <0/> to the catalog."
 msgstr "Neues Kabel — beim Speichern kommt <0/> neu in den Katalog."
+
+#: src/routes/offers/new/+page.svelte
+msgid "In bundle <0/>, which has no price of its own and is billed as one line at the sum of its units' prices. A price on the bundle itself covers this unit instead."
+msgstr "Im Bundle <0/>, das selbst keinen Preis hat und als eine Position zur Summe der Einzelpreise abgerechnet wird. Ein Preis am Bundle selbst deckt dieses Gerät stattdessen ab."

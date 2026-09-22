@@ -524,8 +524,8 @@
 														href={resolve(`/assets/bundles/${hint.bundleId}`)}
 														target="_blank"
 														class="underline underline-offset-2">{hint.bundleName}</a
-													>, which has no price of its own. Pricing that bundle bills it as one line
-													instead.
+													>, which has no price of its own and is billed as one line at the sum of
+													its units' prices. A price on the bundle itself covers this unit instead.
 												</p>
 											{/each}
 										</div>

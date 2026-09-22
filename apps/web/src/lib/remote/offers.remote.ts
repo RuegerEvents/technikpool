@@ -208,8 +208,8 @@ type MissingPrice = {
 		id: string;
 		assetTag: string | null;
 		label: string;
-		// Set when the unit sits in a bundle that has no price of its own —
-		// pricing that bundle is the other way to resolve the same blocker.
+		// Set when the unit was booked through a bundle that has no price of its
+		// own — pricing that bundle is the other way to resolve the same blocker.
 		bundleId: string | null;
 		bundleName: string | null;
 	}[];
@@ -307,20 +307,20 @@ async function computeProductionBilling(
 	const missingPrices: MissingPrice[] = [];
 	const missingRates = new Map<string, MissingRate>();
 
-	// Assets booked *through* a bundle that has its own net purchase price are
-	// billed as a single bundle line — the individual assets don't need their
-	// own price. Booking source, not bundle membership: a unit picked
-	// individually bills as itself, because a kit price can't be charged for a
-	// kit that didn't ship. A unit that has left its bundle since it was booked
-	// bills individually for the same reason.
+	// Assets booked *through* a bundle are billed as a single bundle line. Its
+	// price is the bundle's own net purchase price if it has one — then the
+	// units need none — and otherwise the sum of its units' prices, so a kit
+	// nobody priced still reads as one kit on the offer rather than falling
+	// apart into its contents. Booking source, not bundle membership: a unit
+	// picked individually bills as itself, because a kit price can't be charged
+	// for a kit that didn't ship. A unit that has left its bundle since it was
+	// booked bills individually for the same reason.
 	const billedAsBundle = (item: (typeof scopedItems)[number]) =>
-		item.sourceBundleId !== null &&
-		item.asset.bundleId === item.sourceBundleId &&
-		item.asset.bundle?.netPurchasePrice != null
+		item.sourceBundleId !== null && item.asset.bundleId === item.sourceBundleId
 			? item.asset.bundle
 			: null;
 
-	const priceByBundleId = new Map(
+	const bundleById = new Map(
 		scopedItems
 			.map(billedAsBundle)
 			.filter((bundle) => bundle != null)
@@ -333,6 +333,43 @@ async function computeProductionBilling(
 	const individualLines: BillingLine[] = [];
 	const unpricedByProduct = new Map<string, MissingPrice>();
 
+	// `viaBundle` is the unpriced bundle the unit was booked through, if any —
+	// pricing that bundle is then the other way to resolve the blocker. A unit
+	// booked on its own gets no such hint, since a bundle price wouldn't cover it.
+	function noteMissingPrice(
+		asset: (typeof scopedItems)[number]['asset'],
+		viaBundle: (typeof scopedItems)[number]['asset']['bundle'] = null
+	) {
+		const key = `product:${asset.productId}`;
+		let group = unpricedByProduct.get(key);
+		if (!group) {
+			group = {
+				key,
+				productId: asset.productId,
+				label: productLabel(asset.product),
+				categoryName: asset.product.category.name,
+				categoryNameDe: asset.product.category.nameDe,
+				categoryColor: asset.product.category.color,
+				organizationNames: [],
+				assets: []
+			};
+			unpricedByProduct.set(key, group);
+			missingPrices.push(group);
+		}
+		if (!group.organizationNames.includes(asset.organization.name)) {
+			group.organizationNames.push(asset.organization.name);
+		}
+		group.assets.push({
+			id: asset.id,
+			assetTag: asset.assetTag,
+			label: assetLabel(asset),
+			bundleId: viaBundle?.id ?? null,
+			bundleName: viaBundle
+				? `${viaBundle.template.name}${viaBundle.tag ? ` (${viaBundle.tag})` : ''}`
+				: null
+		});
+	}
+
 	for (const item of individualItems) {
 		const asset = item.asset;
 		const ratePercent = rateByCategory.get(asset.product.categoryId);
@@ -344,34 +381,7 @@ async function computeProductionBilling(
 			});
 		}
 		if (priceByProduct.get(asset.productId) == null) {
-			const key = `product:${asset.productId}`;
-			let group = unpricedByProduct.get(key);
-			if (!group) {
-				group = {
-					key,
-					productId: asset.productId,
-					label: productLabel(asset.product),
-					categoryName: asset.product.category.name,
-					categoryNameDe: asset.product.category.nameDe,
-					categoryColor: asset.product.category.color,
-					organizationNames: [],
-					assets: []
-				};
-				unpricedByProduct.set(key, group);
-				missingPrices.push(group);
-			}
-			if (!group.organizationNames.includes(asset.organization.name)) {
-				group.organizationNames.push(asset.organization.name);
-			}
-			group.assets.push({
-				id: asset.id,
-				assetTag: asset.assetTag,
-				label: assetLabel(asset),
-				bundleId: asset.bundle?.id ?? null,
-				bundleName: asset.bundle
-					? `${asset.bundle.template.name}${asset.bundle.tag ? ` (${asset.bundle.tag})` : ''}`
-					: null
-			});
+			noteMissingPrice(asset);
 			continue;
 		}
 		if (ratePercent == null) continue;
@@ -408,7 +418,7 @@ async function computeProductionBilling(
 	}
 	const bundleLines: BillingLine[] = [];
 	for (const [bundleId, items] of itemsByBundleId) {
-		const bundle = priceByBundleId.get(bundleId)!;
+		const bundle = bundleById.get(bundleId)!;
 		const ratePercent = rateByCategory.get(bundle.template.categoryId);
 		if (ratePercent == null) {
 			missingRates.set(bundle.template.categoryId, {
@@ -416,9 +426,19 @@ async function computeProductionBilling(
 				categoryName: bundle.template.category.name,
 				categoryNameDe: bundle.template.category.nameDe
 			});
-			continue;
 		}
-		const netPrice = Number(bundle.netPurchasePrice);
+		// Unpriced bundle: every unit needs its product price for the sum, and
+		// one missing is a blocker like any other unpriced unit.
+		let netPrice: number;
+		if (bundle.netPurchasePrice != null) {
+			netPrice = Number(bundle.netPurchasePrice);
+		} else {
+			const unpriced = items.filter((item) => priceByProduct.get(item.asset.productId) == null);
+			for (const item of unpriced) noteMissingPrice(item.asset, bundle);
+			if (unpriced.length > 0) continue;
+			netPrice = items.reduce((sum, item) => sum + priceByProduct.get(item.asset.productId)!, 0);
+		}
+		if (ratePercent == null) continue;
 		const contentLabels = items.flatMap((item) => [
 			productLabel(item.asset.product),
 			...item.asset.accessories.map((accessory) => productLabel(accessory.product))
