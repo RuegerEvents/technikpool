@@ -1,5 +1,17 @@
 [
 	{
+		"version": "0.18.1",
+		"date": "2026-09-22",
+		"en": [
+			"Offers and invoices show each product's picture next to its line.",
+			"Offer, invoice and delivery note PDFs now print arrows, German quotation marks and dashes as written. \"Schuko → powerCON\" used to come out as \"Schuko ? powerCON\". The documents are now set in Inter, the same typeface as the app."
+		],
+		"de": [
+			"Angebote und Rechnungen zeigen neben jeder Position das Bild des Produkts.",
+			"PDFs von Angeboten, Rechnungen und Lieferscheinen drucken Pfeile, deutsche Anführungszeichen und Gedankenstriche jetzt so, wie sie eingegeben wurden. Aus „Schuko → powerCON“ wurde bisher „Schuko ? powerCON“. Die Dokumente sind jetzt in Inter gesetzt, derselben Schrift wie die App."
+		]
+	},
+	{
 		"version": "0.18.0",
 		"date": "2026-09-22",
 		"en": [
