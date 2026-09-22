@@ -1,5 +1,27 @@
 [
 	{
+		"version": "0.17.0",
+		"date": "2026-09-22",
+		"en": [
+			"Offers and invoices say what they are missing. Instead of a PDF link that failed with an error, the document lists what still has to be filled in — organization, customer, document text or line items — with a link to the billing details, and Preview and Finalize wait until it is there.",
+			"Tax number and VAT ID are two fields. An invoice shows whichever are set, both if both are, each under its own label — the single field used to print everything as \"USt-IdNr.\". Existing entries were sorted by their shape.",
+			"The dashboard reminds owners when their home organization's billing details are incomplete, and the link opens the form directly. \"All clear\" waits until they are done.",
+			"The user menu shows your home organization and takes you to it.",
+			"A kit booked as a bundle stays one line on the offer even when the bundle has no price of its own: it is billed at the sum of its units.",
+			"A change saved on a form shows right away instead of after a reload, and the dashboard's links point out the section they lead to.",
+			"\"Awaiting approval\" counts devices, not the accessories that come with them."
+		],
+		"de": [
+			"Angebote und Rechnungen sagen, was ihnen fehlt. Statt eines PDF-Links, der mit einem Fehler endete, listet das Dokument auf, was noch auszufüllen ist — Organisation, Kunde, Dokumenttext oder Positionen — mit einem Link zu den Rechnungsdaten, und Vorschau und Finalisieren warten, bis alles da ist.",
+			"Steuernummer und USt-IdNr. sind zwei Felder. Die Rechnung zeigt, was eingetragen ist, bei beiden auch beide, jeweils mit eigener Bezeichnung — das eine Feld stand bisher immer als „USt-IdNr.“ darauf. Vorhandene Einträge wurden nach ihrer Form zugeordnet.",
+			"Das Dashboard erinnert Inhaber daran, wenn die Rechnungsdaten ihrer Heim-Organisation unvollständig sind, und der Link öffnet direkt das Formular. „Alles erledigt“ erscheint erst, wenn sie vollständig sind.",
+			"Das Benutzermenü zeigt deine Heim-Organisation und führt zu ihr.",
+			"Ein als Bundle gebuchtes Set bleibt eine Position im Angebot, auch wenn das Bundle keinen eigenen Preis hat: Es wird zur Summe seiner Einheiten berechnet.",
+			"Eine gespeicherte Änderung erscheint sofort statt erst nach dem Neuladen, und die Links im Dashboard heben den Abschnitt hervor, zu dem sie führen.",
+			"„Wartet auf Freigabe“ zählt Geräte, nicht das Zubehör, das mit ihnen kommt."
+		]
+	},
+	{
 		"version": "0.16.0",
 		"date": "2026-09-21",
 		"en": [
