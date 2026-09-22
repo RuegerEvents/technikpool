@@ -1,66 +1,11 @@
 import { PDFDocument, StandardFonts, degrees, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import { groupBillingItems, lineSubtitle, type GroupableItem } from '../billing-lines.ts';
 import { appError } from '$lib/errors';
+import { billingDocumentIssues } from '../billing-document-check.svelte.ts';
+import type { SnapshotOrganization } from '../org-snapshot.ts';
 import { fmtDate, safe, wrap } from './pdf-text.ts';
 
-type PdfOrganization = {
-	name: string;
-	address: { line1: string; line2: string | null; postalCode: string; city: string } | null;
-	taxNumber: string | null;
-	vatId: string | null;
-	billingEmail: string | null;
-	billingWebsite: string | null;
-	bankAccountHolder: string | null;
-	iban: string | null;
-	bic: string | null;
-	bankName: string | null;
-	isKleinunternehmer?: boolean;
-};
-/**
- * The issuing-org columns snapshotted onto Offer and Invoice rows. Documents
- * render from these, never from the live Organization — an org moving offices
- * must not rewrite an already-issued document.
- */
-export type OrgSnapshot = {
-	orgName: string;
-	orgAddressLine1: string | null;
-	orgAddressLine2: string | null;
-	orgPostalCode: string | null;
-	orgCity: string | null;
-	orgTaxNumber: string | null;
-	orgVatId: string | null;
-	orgBillingEmail: string | null;
-	orgBillingWebsite: string | null;
-	orgBankAccountHolder: string | null;
-	orgBankName: string | null;
-	orgIban: string | null;
-	orgBic: string | null;
-	isKleinunternehmerSnapshot: boolean;
-};
-
-export function organizationFromSnapshot(doc: OrgSnapshot): PdfOrganization {
-	return {
-		name: doc.orgName,
-		address:
-			doc.orgAddressLine1 && doc.orgPostalCode && doc.orgCity
-				? {
-						line1: doc.orgAddressLine1,
-						line2: doc.orgAddressLine2,
-						postalCode: doc.orgPostalCode,
-						city: doc.orgCity
-					}
-				: null,
-		taxNumber: doc.orgTaxNumber,
-		vatId: doc.orgVatId,
-		billingEmail: doc.orgBillingEmail,
-		billingWebsite: doc.orgBillingWebsite,
-		bankAccountHolder: doc.orgBankAccountHolder,
-		iban: doc.orgIban,
-		bic: doc.orgBic,
-		bankName: doc.orgBankName,
-		isKleinunternehmer: doc.isKleinunternehmerSnapshot
-	};
-}
+type PdfOrganization = SnapshotOrganization;
 
 type PdfDocumentData = {
 	number?: string;
@@ -94,40 +39,9 @@ const muted = rgb(0.35, 0.35, 0.35);
 const light = rgb(0.93, 0.93, 0.93);
 
 function validateDocument(kind: 'offer' | 'invoice', data: PdfDocumentData) {
-	const missing: string[] = [];
-	const required = (value: unknown, label: string) => {
-		if (typeof value === 'string' ? !value.trim() : value === null || value === undefined)
-			missing.push(label);
-	};
-	required(data.organization.name, 'organization name');
-	required(data.organization.address?.line1, 'organization street address');
-	required(data.organization.address?.postalCode, 'organization postal code');
-	required(data.organization.address?.city, 'organization city');
-	required(data.organization.billingEmail, 'organization billing email');
-	// §14 Abs. 4 Nr. 2 UStG: one of the two, from a Kleinunternehmer as well.
-	if (!data.organization.taxNumber?.trim() && !data.organization.vatId?.trim())
-		missing.push('organization tax number or VAT ID');
-	required(data.organization.bankAccountHolder, 'bank account holder');
-	required(data.organization.bankName, 'bank name');
-	required(data.organization.iban, 'IBAN');
-	required(data.organization.bic, 'BIC');
-	required(data.customerName, 'customer name');
-	required(data.customerAddress, 'customer address');
-	required(data.serviceStartDate, 'service start date');
-	required(data.serviceEndDate, 'service end date');
-	required(data.introText, 'introduction text');
-	required(data.closingText, 'closing text');
-	required(data.issueDate ?? data.createdAt, 'document date');
-	required(data.number, kind === 'invoice' ? 'invoice number' : 'offer number');
-	if (!Number.isInteger(data.paymentTermsDays) || data.paymentTermsDays < 0)
-		missing.push('valid payment terms');
-	if (data.items.length === 0) missing.push('at least one line item');
-	data.items.forEach((item, index) => {
-		if (!item.description.trim()) missing.push(`description for line ${index + 1}`);
-		if (!item.categoryName && !item.categoryNameDe) missing.push(`category for line ${index + 1}`);
-		if (!Number.isFinite(Number(item.lineTotal))) missing.push(`valid total for line ${index + 1}`);
-	});
-	if (missing.length) appError(400, 'billing_pdf_data_missing', [[...new Set(missing)].join(', ')]);
+	const issues = billingDocumentIssues(kind, data);
+	if (issues.length)
+		appError(400, 'billing_pdf_data_missing', [issues.map((issue) => issue.label).join(', ')]);
 }
 
 function money(value: number) {

@@ -112,7 +112,12 @@
 	<a
 		bind:this={ref}
 		data-slot="button"
-		class={cn(buttonVariants({ variant, size }), className)}
+		class={cn(
+			buttonVariants({ variant, size }),
+			// `disabled:` never matches a link, so a disabled one has to be dimmed by hand.
+			disabled && 'pointer-events-none opacity-50',
+			className
+		)}
 		href={disabled ? undefined : href}
 		aria-disabled={disabled}
 		role={disabled ? 'link' : undefined}

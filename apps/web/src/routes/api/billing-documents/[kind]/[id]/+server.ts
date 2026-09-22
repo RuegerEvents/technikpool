@@ -1,9 +1,10 @@
 import type { RequestHandler } from './$types';
-import { error } from '@sveltejs/kit';
+import { error, isHttpError } from '@sveltejs/kit';
 import { prisma } from '$lib/server/auth';
 import { getObject } from '$lib/server/storage';
 import { requireOrgInventory } from '$lib/server/services/access';
-import { generateBillingPdf, organizationFromSnapshot } from '$lib/server/billing-pdf';
+import { generateBillingPdf } from '$lib/server/billing-pdf';
+import { organizationFromSnapshot } from '$lib/org-snapshot';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
 	if (!locals.user) error(401, 'Unauthorized');
@@ -34,7 +35,11 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 				{ draft: true }
 			);
 		} catch (cause) {
-			error(422, cause instanceof Error ? cause.message : 'PDF cannot be generated');
+			// The document pages list what is missing before linking here, so this
+			// is the backstop: pass the renderer's own answer through (a 400 naming
+			// the missing fields) rather than flattening it to an anonymous 422.
+			if (isHttpError(cause)) throw cause;
+			error(500, cause instanceof Error ? cause.message : 'PDF cannot be generated');
 		}
 	}
 	const filename =

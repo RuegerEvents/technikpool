@@ -34,6 +34,9 @@
 	import { getCustomers } from '$lib/remote/customers.remote';
 	import { StalenessBanner } from '$lib/components/ui/staleness-banner';
 	import { OrgSnapshotBanner } from '$lib/components/ui/org-snapshot-banner';
+	import { BillingIssues } from '$lib/components/ui/billing-issues';
+	import { billingDocumentIssues } from '$lib/billing-document-check.svelte';
+	import { organizationFromSnapshot } from '$lib/org-snapshot';
 	import { BillingDocument } from '$lib/components/ui/billing-document';
 	import { Modal } from '$lib/components/ui/modal';
 	import { CustomerSelect } from '$lib/components/ui/customer-select';
@@ -41,6 +44,15 @@
 
 	let { offerId }: { offerId: string } = $props();
 	let offer = $derived(await getOffer(offerId));
+	// An archived PDF is served as it is; only a render can come up short.
+	let pdfIssues = $derived(
+		offer.pdfPath
+			? []
+			: billingDocumentIssues('offer', {
+					...offer,
+					organization: organizationFromSnapshot(offer)
+				})
+	);
 	let staleness = $derived(await getOfferStaleness(offerId));
 	let versions = $derived(await getOfferVersions(offerId));
 	// Only the newest version of an offer moves on — to an invoice or to another
@@ -304,11 +316,12 @@
 					icon="print"
 					variant="outline"
 					href={`/api/billing-documents/offers/${offerId}`}
+					disabled={pdfIssues.length > 0}
 					target="_blank">Preview PDF</Button
 				>
 			{/if}
 			{#if !offer.finalizedAt}
-				<Button disabled={finalizing} onclick={handleFinalize}
+				<Button disabled={finalizing || pdfIssues.length > 0} onclick={handleFinalize}
 					>{finalizing ? 'Finalizing…' : 'Finalize offer'}</Button
 				>
 			{/if}
@@ -425,6 +438,11 @@
 		onUpdate={async () => {
 			await updateDocumentOrgSnapshot({ id: offerId, kind: 'offer' });
 		}}
+	/>
+	<BillingIssues
+		issues={pdfIssues}
+		organizationId={offer.organizationId}
+		editable={!offer.finalizedAt}
 	/>
 
 	<BillingDocument

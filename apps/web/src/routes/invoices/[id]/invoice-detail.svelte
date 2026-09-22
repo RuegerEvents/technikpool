@@ -31,6 +31,9 @@
 	import { StalenessBanner } from '$lib/components/ui/staleness-banner';
 	import type { Staleness } from '$lib/components/ui/staleness-banner';
 	import { OrgSnapshotBanner } from '$lib/components/ui/org-snapshot-banner';
+	import { BillingIssues } from '$lib/components/ui/billing-issues';
+	import { billingDocumentIssues } from '$lib/billing-document-check.svelte';
+	import { organizationFromSnapshot } from '$lib/org-snapshot';
 	import { BillingDocument } from '$lib/components/ui/billing-document';
 	import { Modal } from '$lib/components/ui/modal';
 	import { CustomerSelect } from '$lib/components/ui/customer-select';
@@ -38,6 +41,15 @@
 
 	let { invoiceId }: { invoiceId: string } = $props();
 	let invoice = $derived(await getInvoice(invoiceId));
+	// An archived PDF is served as it is; only a render can come up short.
+	let pdfIssues = $derived(
+		invoice.pdfPath
+			? []
+			: billingDocumentIssues('invoice', {
+					...invoice,
+					organization: organizationFromSnapshot(invoice)
+				})
+	);
 	let introTextDraft = $state('');
 	let closingTextDraft = $state('');
 	let paymentTermsDraft = $state('14');
@@ -242,6 +254,7 @@
 					icon="print"
 					variant="outline"
 					href={`/api/billing-documents/invoices/${invoiceId}`}
+					disabled={pdfIssues.length > 0}
 					target="_blank">Preview PDF</Button
 				>{/if}
 			{#if !invoice.sentAt}
@@ -249,11 +262,11 @@
 				<Button variant="destructive" disabled={deleting} onclick={handleDelete}
 					>{deleting ? 'Deleting…' : 'Delete invoice'}</Button
 				>
-				<Button disabled={finalizing} onclick={handleFinalize}
+				<Button disabled={finalizing || pdfIssues.length > 0} onclick={handleFinalize}
 					>{finalizing ? 'Finalizing…' : 'Finalize invoice'}</Button
 				>
 			{:else if !invoice.pdfPath}
-				<Button disabled={finalizing} onclick={handleFinalize}
+				<Button disabled={finalizing || pdfIssues.length > 0} onclick={handleFinalize}
 					>{finalizing ? 'Archiving…' : 'Archive PDF'}</Button
 				>
 			{/if}
@@ -322,6 +335,11 @@
 		onUpdate={async () => {
 			await updateDocumentOrgSnapshot({ id: invoiceId, kind: 'invoice' });
 		}}
+	/>
+	<BillingIssues
+		issues={pdfIssues}
+		organizationId={invoice.organizationId}
+		editable={!invoice.sentAt}
 	/>
 	<Card.Root
 		><Card.Header

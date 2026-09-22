@@ -436,6 +436,7 @@ msgstr "Bundle"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/address-input/address-input.svelte
+#: src/lib/components/ui/billing-issues/billing-issues.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -2823,6 +2824,7 @@ msgid "No offers yet."
 msgstr "Noch keine Angebote."
 
 #: src/lib/components/ui/address-input/address-input.svelte
+#: src/lib/components/ui/billing-issues/billing-issues.svelte
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/lib/components/ui/production-hover-card/production-hover-card.svelte
 #: src/routes/invoices/+page.svelte
@@ -2982,11 +2984,13 @@ msgstr "Produktion auswählen"
 msgid "{0} ({1} items)"
 msgstr "{0} ({1} Positionen)"
 
-#~ msgid "Customer name"
-#~ msgstr "Kundenname"
+#: src/lib/billing-document-check.svelte.ts
+msgid "Customer name"
+msgstr "Kundenname"
 
-#~ msgid "Customer address"
-#~ msgstr "Kundenadresse"
+#: src/lib/billing-document-check.svelte.ts
+msgid "Customer address"
+msgstr "Kundenadresse"
 
 #: src/routes/offers/new/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -3340,6 +3344,7 @@ msgstr "Rechnungsdaten"
 #~ msgid "Tax ID (Steuernummer / USt-IdNr.)"
 #~ msgstr "Steuer-ID (Steuernummer / USt-IdNr.)"
 
+#: src/lib/billing-document-check.svelte.ts
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Bank account holder"
 msgstr "Kontoinhaber"
@@ -3352,6 +3357,7 @@ msgstr "IBAN"
 msgid "BIC"
 msgstr "BIC"
 
+#: src/lib/billing-document-check.svelte.ts
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Bank name"
 msgstr "Bankname"
@@ -5374,6 +5380,7 @@ msgstr "{0} bis {1}"
 msgid "Introduction"
 msgstr "Einleitung"
 
+#: src/lib/billing-document-check.svelte.ts
 #: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/offers/new/+page.svelte
@@ -5484,6 +5491,7 @@ msgstr "<0/> Kunden"
 msgid "Copied from the organization preset and frozen when the invoice is marked as sent."
 msgstr "Aus der Organisationsvorlage übernommen und beim Markieren als versendet festgeschrieben."
 
+#: src/lib/billing-document-check.svelte.ts
 #: src/lib/billing-setup.svelte.ts
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Billing email"
@@ -6202,6 +6210,7 @@ msgstr "CAT7, 2,5mm²…"
 msgid "Additional info"
 msgstr "Zusatzinfo"
 
+#: src/lib/billing-document-check.svelte.ts
 #: src/routes/stickers/+page.svelte
 msgid "Organization name"
 msgstr "Name der Organisation"
@@ -6331,8 +6340,9 @@ msgstr "Dies ersetzt die aktuellen Positionen durch das, was gerade auf der Prod
 msgid "Customer no. {0}"
 msgstr "Kundennr. {0}"
 
-#~ msgid "Document"
-#~ msgstr "Dokument"
+#: src/lib/components/ui/billing-issues/billing-issues.svelte
+msgid "Document"
+msgstr "Dokument"
 
 #~ msgid "A draft until it is finalized — then the PDF is archived and nothing can change."
 #~ msgstr "Entwurf bis zum Finalisieren – danach wird das PDF archiviert und nichts lässt sich mehr ändern."
@@ -6503,6 +6513,7 @@ msgstr "Das Inventar-ID-Präfix {0} ist bereits vergeben. Bitte ein anderes wäh
 msgid "Delete <0/> and all of its data?"
 msgstr "<0/> und alle zugehörigen Daten löschen?"
 
+#: src/lib/billing-document-check.svelte.ts
 #: src/routes/offers/[id]/offer-detail.svelte
 msgid "Invoice number"
 msgstr "Rechnungsnummer"
@@ -9071,6 +9082,7 @@ msgstr "Im Bundle <0/>, das selbst keinen Preis hat und als eine Position zur Su
 #~ msgid "Fill in billing details <0/>"
 #~ msgstr "Rechnungsdaten ausfüllen <0/>"
 
+#: src/lib/billing-document-check.svelte.ts
 #: src/lib/billing-setup.svelte.ts
 msgid "Tax number or VAT ID"
 msgstr "Steuernummer oder USt-IdNr."
@@ -9111,3 +9123,76 @@ msgstr "Steuernummer / USt-IdNr."
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Address, tax numbers, and bank account — used on generated offers/invoices."
 msgstr "Adresse, Steuernummern und Bankverbindung – für erstellte Angebote und Rechnungen."
+
+#: src/lib/billing-document-check.svelte.ts
+msgid "Organization address"
+msgstr "Adresse der Organisation"
+
+#: src/lib/billing-document-check.svelte.ts
+msgid "Service start date"
+msgstr "Beginn des Leistungszeitraums"
+
+#: src/lib/billing-document-check.svelte.ts
+msgid "Service end date"
+msgstr "Ende des Leistungszeitraums"
+
+#: src/lib/billing-document-check.svelte.ts
+msgid "Introduction text"
+msgstr "Einleitungstext"
+
+#: src/lib/billing-document-check.svelte.ts
+msgid "Document date"
+msgstr "Belegdatum"
+
+#: src/lib/billing-document-check.svelte.ts
+msgid "Offer number"
+msgstr "Angebotsnummer"
+
+#: src/lib/billing-document-check.svelte.ts
+msgid "Valid payment term"
+msgstr "Gültiges Zahlungsziel"
+
+#: src/lib/billing-document-check.svelte.ts
+msgid "At least one line item"
+msgstr "Mindestens eine Position"
+
+#. 0: line
+#: src/lib/billing-document-check.svelte.ts
+msgid "Description for line {0}"
+msgstr "Beschreibung für Position {0}"
+
+#. 0: line
+#: src/lib/billing-document-check.svelte.ts
+msgid "Category for line {0}"
+msgstr "Kategorie für Position {0}"
+
+#. 0: line
+#: src/lib/billing-document-check.svelte.ts
+msgid "Valid total for line {0}"
+msgstr "Gültige Summe für Position {0}"
+
+#: src/lib/components/ui/billing-issues/billing-issues.svelte
+msgid "Line items"
+msgstr "Positionen"
+
+#: src/lib/components/ui/billing-issues/billing-issues.svelte
+msgid "The PDF cannot be generated yet"
+msgstr "Das PDF kann noch nicht erstellt werden"
+
+#: src/lib/components/ui/billing-issues/billing-issues.svelte
+msgid "An offer or invoice has to carry all of this. Fill in what is missing and the PDF is available again."
+msgstr "Ein Angebot oder eine Rechnung braucht all diese Angaben. Sobald das Fehlende ergänzt ist, steht das PDF wieder bereit."
+
+#~ msgid ", then take them onto this document with “Use current details”."
+#~ msgstr ""
+
+#~ msgid "Open the billing details"
+#~ msgstr ""
+
+#: src/lib/components/ui/billing-issues/billing-issues.svelte
+msgid "Fill them in under <0>billing details</0>, then take them onto this document with “Use current details”."
+msgstr "Unter <0>Rechnungsdaten</0> ergänzen und dann mit „Aktuelle Daten übernehmen“ in dieses Dokument übernehmen."
+
+#: src/lib/components/ui/billing-issues/billing-issues.svelte
+msgid "Fill them in under <0>billing details</0>."
+msgstr "Unter <0>Rechnungsdaten</0> ergänzen."

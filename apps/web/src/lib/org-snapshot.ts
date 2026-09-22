@@ -74,3 +74,47 @@ export function orgSnapshotDiff(
 	if (doc.isKleinunternehmerSnapshot !== live.isKleinunternehmerSnapshot) diff.push('vatStatus');
 	return diff;
 }
+
+/** The issuing org as a document renders it: from its snapshot, never live. */
+export type SnapshotOrganization = {
+	name: string;
+	address: { line1: string; line2: string | null; postalCode: string; city: string } | null;
+	taxNumber: string | null;
+	vatId: string | null;
+	billingEmail: string | null;
+	billingWebsite: string | null;
+	bankAccountHolder: string | null;
+	iban: string | null;
+	bic: string | null;
+	bankName: string | null;
+	isKleinunternehmer?: boolean;
+};
+
+/**
+ * Documents render from the snapshot columns, never from the live
+ * Organization — an org moving offices must not rewrite an already-issued
+ * document.
+ */
+export function organizationFromSnapshot(doc: OrgSnapshotColumns): SnapshotOrganization {
+	return {
+		name: doc.orgName,
+		address:
+			doc.orgAddressLine1 && doc.orgPostalCode && doc.orgCity
+				? {
+						line1: doc.orgAddressLine1,
+						line2: doc.orgAddressLine2,
+						postalCode: doc.orgPostalCode,
+						city: doc.orgCity
+					}
+				: null,
+		taxNumber: doc.orgTaxNumber,
+		vatId: doc.orgVatId,
+		billingEmail: doc.orgBillingEmail,
+		billingWebsite: doc.orgBillingWebsite,
+		bankAccountHolder: doc.orgBankAccountHolder,
+		iban: doc.orgIban,
+		bic: doc.orgBic,
+		bankName: doc.orgBankName,
+		isKleinunternehmer: doc.isKleinunternehmerSnapshot
+	};
+}
