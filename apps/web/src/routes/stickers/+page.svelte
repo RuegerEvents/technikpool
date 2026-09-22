@@ -14,7 +14,8 @@
 
 	// Read through the query instead of awaited: an `await` here would hold the
 	// whole page back, heading and all, until the answer came.
-	let orgs = $derived(getMyOrgs().current ?? []);
+	let orgsQuery = $derived(getMyOrgs());
+	let orgs = $derived(orgsQuery.current ?? []);
 
 	// v2: the square preset moved to the print shop's own 15 x 10 sheet, so any
 	// v1 settings would fight the new defaults rather than refine them.

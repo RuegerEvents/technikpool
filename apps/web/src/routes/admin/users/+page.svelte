@@ -28,7 +28,8 @@
 
 	let settingsQuery = $derived(getSignUpSettings());
 	let signUpEnabled = $derived(settingsQuery.current?.signUpEnabled ?? false);
-	let orgs = $derived(getAllOrgs().current ?? []);
+	let orgsQuery = $derived(getAllOrgs());
+	let orgs = $derived(orgsQuery.current ?? []);
 
 	let inviteEmail = $state('');
 	let inviteOrgId = $state('');

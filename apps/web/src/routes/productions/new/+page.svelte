@@ -65,7 +65,8 @@
 	<Card.Root class="max-w-2xl">
 		<Card.Content class="pt-6">
 			<!-- An org the user only reads in would reject the production. -->
-			{@const orgs = (getMyOrgs().current ?? []).filter(canWrite)}
+			{@const orgsQuery = getMyOrgs()}
+			{@const orgs = (orgsQuery.current ?? []).filter(canWrite)}
 			{#if !organizationId && orgs[0]}
 				{((organizationId = orgs[0].id), '')}
 			{/if}

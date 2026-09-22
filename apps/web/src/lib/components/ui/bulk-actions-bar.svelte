@@ -31,14 +31,17 @@
 	// Read through the queries rather than awaited: this bar sits on the Devices
 	// page, and an `await` here would hold that whole page back until these three
 	// answered. See CLAUDE.md, "Loading states".
+	let orgsQuery = $derived(getMyOrgs());
+	let locationsQuery = $derived(getLocations());
+	let productionsQuery = $derived(getAllProductions());
 	let writableOrgIds = $derived(
-		new Set((getMyOrgs().current ?? []).filter(canWrite).map((org) => org.id))
+		new Set((orgsQuery.current ?? []).filter(canWrite).map((org) => org.id))
 	);
 	let locations = $derived(
-		(getLocations().current ?? []).filter((loc) => writableOrgIds.has(loc.organizationId))
+		(locationsQuery.current ?? []).filter((loc) => writableOrgIds.has(loc.organizationId))
 	);
 	let productions = $derived(
-		(getAllProductions().current ?? []).filter((prod) => writableOrgIds.has(prod.organizationId))
+		(productionsQuery.current ?? []).filter((prod) => writableOrgIds.has(prod.organizationId))
 	);
 
 	let targets = $derived(

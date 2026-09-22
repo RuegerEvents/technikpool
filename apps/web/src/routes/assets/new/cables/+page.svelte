@@ -45,10 +45,12 @@
 	let saving = $state(false);
 	// Same rule as /assets/new: an org the user can only read is not an org
 	// they can add cables to.
-	let orgs = $derived((getMyOrgs().current ?? []).filter(canManageInventory));
+	let orgsQuery = $derived(getMyOrgs());
+	let orgs = $derived((orgsQuery.current ?? []).filter(canManageInventory));
 	let selectedOrgId = $state('');
 	let locationId = $state('');
-	let locations = $derived(selectedOrgId ? (getLocations(selectedOrgId).current ?? []) : []);
+	let locationsQuery = $derived(selectedOrgId ? getLocations(selectedOrgId) : null);
+	let locations = $derived(locationsQuery?.current ?? []);
 
 	$effect(() => {
 		if (!selectedOrgId || locations.length === 0) {
@@ -58,8 +60,10 @@
 		if (!locationId || !locations.some((l) => l.id === locationId)) locationId = locations[0].id;
 	});
 
-	let categories = $derived(getCategories().current ?? []);
-	let manufacturers = $derived(getManufacturers().current ?? []);
+	let categoriesQuery = $derived(getCategories());
+	let categories = $derived(categoriesQuery.current ?? []);
+	let manufacturersQuery = $derived(getManufacturers());
+	let manufacturers = $derived(manufacturersQuery.current ?? []);
 	// An empty vocabulary until it arrives: everything that reads it is a
 	// suggestion — the precedents a cable type fills in — and a suggestion that
 	// isn't here yet is simply no suggestion.
@@ -68,9 +72,11 @@
 		types: [],
 		byType: {}
 	};
-	let vocab = $derived(getCableVocabulary().current ?? EMPTY_VOCABULARY);
+	let vocabQuery = $derived(getCableVocabulary());
+	let vocab = $derived(vocabQuery.current ?? EMPTY_VOCABULARY);
 
-	let connectors = $derived(getConnectors().current ?? []);
+	let connectorsQuery = $derived(getConnectors());
+	let connectors = $derived(connectorsQuery.current ?? []);
 	let typeItems = $derived(vocab.types.map((name) => ({ id: name, name })));
 
 	// The connector list arranged for the slot it fills — see ProductFields for
@@ -206,7 +212,8 @@
 	// the one case worth interrupting for. Under the same manufacturer there is
 	// nothing to warn about, only to say: the units join the entry that exists
 	// (and the name typed in this row is not used, where it differs).
-	let catalog = $derived(getProducts().current ?? []);
+	let catalogQuery = $derived(getProducts());
+	let catalog = $derived(catalogQuery.current ?? []);
 
 	function rowTwin(row: Row) {
 		const key = cableTwinKey({

@@ -47,7 +47,8 @@
 	// None of them is asked without an org: every answer would be a zero, and the
 	// page says what to do about that instead.
 	let active = $derived(!!data.user && data.hasOrg);
-	let orgs = $derived(active ? (getMyOrgs().current ?? []) : []);
+	let orgsQuery = $derived(active ? getMyOrgs() : null);
+	let orgs = $derived(orgsQuery?.current ?? []);
 	let adminOrgs = $derived(orgs.filter(canManageInventory));
 	let pendingQueries = $derived(active ? adminOrgs.map((o) => getPendingApprovals(o.id)) : []);
 	let pendingReady = $derived(pendingQueries.every((q) => q.ready));
@@ -120,6 +121,31 @@
 			});
 		return items;
 	});
+
+	// An in-page link to a section that is already on screen — the side column
+	// on a desktop — scrolls nowhere, so the click looked like it did nothing.
+	// Scroll if there is somewhere to go, and flash the section's cards either
+	// way so the eye lands on what the link meant. Done by hand rather than via
+	// `:target`, which fires once and not again for a second click on the
+	// same hash.
+	function jumpTo(event: MouseEvent, href: string) {
+		if (!href.startsWith('#')) return;
+		const section = document.getElementById(href.slice(1));
+		if (!section) return;
+		event.preventDefault();
+		const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		section.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'nearest' });
+		for (const card of section.querySelectorAll<HTMLElement>('[data-slot="card"]')) {
+			card.animate(
+				[
+					{ boxShadow: '0 0 0 0 transparent' },
+					{ boxShadow: '0 0 0 3px var(--ring)' },
+					{ boxShadow: '0 0 0 0 transparent' }
+				],
+				{ duration: 1200, easing: 'ease-in-out' }
+			);
+		}
+	}
 
 	type PendingItem = (typeof pending)[number];
 
@@ -370,6 +396,7 @@
 					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={item.href}
+						onclick={(event) => jumpTo(event, item.href)}
 						class="group flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors {item.tone ===
 						'red'
 							? 'border-red-500/40 bg-red-50/60 hover:bg-red-50 dark:bg-red-950/20 dark:hover:bg-red-950/40'

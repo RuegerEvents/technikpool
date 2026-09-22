@@ -35,13 +35,15 @@
 
 	let { value = $bindable(emptyConnectorDraft()), idPrefix = 'connector' }: Props = $props();
 
-	let categories = $derived(getCategories().current ?? []);
+	let categoriesQuery = $derived(getCategories());
+	let categories = $derived(categoriesQuery.current ?? []);
+	let connectorsQuery = $derived(getConnectors());
 
 	// Every family the catalogue already uses, once each, so "TRUE1" is picked
 	// rather than typed a second time as "True1".
 	let families = $derived.by(() => {
 		const seen: Record<string, string> = {};
-		for (const c of getConnectors().current ?? []) {
+		for (const c of connectorsQuery.current ?? []) {
 			const family = c.family?.trim();
 			if (family) seen[family.toLowerCase()] ??= family;
 		}

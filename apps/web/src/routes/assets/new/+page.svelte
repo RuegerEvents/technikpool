@@ -40,15 +40,16 @@
 	// Only the orgs this user may actually register equipment in — being a
 	// MEMBER or VIEWER somewhere is no reason to be offered it here, since the
 	// server would reject the form on submit.
-	let orgs = $derived((getMyOrgs().current ?? []).filter(canManageInventory));
+	let orgsQuery = $derived(getMyOrgs());
+	let orgs = $derived((orgsQuery.current ?? []).filter(canManageInventory));
 	let selectedOrgId = $state('');
 	let locationId = $state('');
-	let locations = $derived(selectedOrgId ? (getLocations(selectedOrgId).current ?? []) : []);
+	let locationsQuery = $derived(selectedOrgId ? getLocations(selectedOrgId) : null);
+	let locations = $derived(locationsQuery?.current ?? []);
 
 	let duplicateFromId = $derived(page.url.searchParams.get('duplicateFrom'));
-	let duplicateSource = $derived(
-		duplicateFromId ? (getAsset(duplicateFromId).current ?? null) : null
-	);
+	let duplicateSourceQuery = $derived(duplicateFromId ? getAsset(duplicateFromId) : null);
+	let duplicateSource = $derived(duplicateSourceQuery?.current ?? null);
 
 	$effect(() => {
 		if (!selectedOrgId) {
@@ -71,7 +72,8 @@
 	let manufacturer = $state<SelectionOrNew>(null);
 	let newManufacturerLogoPath = $state('');
 	let product = $state<SelectionOrNew>(null);
-	let categories = $derived(getCategories().current ?? []);
+	let categoriesQuery = $derived(getCategories());
+	let categories = $derived(categoriesQuery.current ?? []);
 
 	let duplicatePrefilled = $state(false);
 	$effect(() => {
@@ -360,7 +362,8 @@
 					{/if}
 
 					{#if true}
-						{@const manufacturers = getManufacturers().current ?? []}
+						{@const manufacturersQuery = getManufacturers()}
+						{@const manufacturers = manufacturersQuery.current ?? []}
 						<div class="space-y-2">
 							<Label>Manufacturer</Label>
 							<CreatableSelect
@@ -383,8 +386,9 @@
 					{#if manufacturer}
 						{#key manufacturerKey}
 							{@const manufacturerId = manufacturerIdOf(manufacturer)}
-							{@const products =
-								manufacturerId === undefined ? [] : (getProducts(manufacturerId).current ?? [])}
+							{@const productsQuery =
+								manufacturerId === undefined ? null : getProducts(manufacturerId)}
+							{@const products = productsQuery?.current ?? []}
 							<div class="space-y-2">
 								<Label>Product Model</Label>
 								<CreatableSelect

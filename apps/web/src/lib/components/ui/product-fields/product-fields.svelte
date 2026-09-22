@@ -195,8 +195,10 @@
 
 	// Only loaded once the box is ticked: a form for a moving head has no use for
 	// the cable vocabulary, and every page carrying ProductFields would pay for it.
-	let vocab = $derived(value.cable ? (getCableVocabulary().current ?? null) : null);
-	let connectors = $derived(value.cable ? (getConnectors().current ?? []) : []);
+	let vocabQuery = $derived(value.cable ? getCableVocabulary() : null);
+	let vocab = $derived(vocabQuery?.current ?? null);
+	let connectorsQuery = $derived(value.cable ? getConnectors() : null);
+	let connectors = $derived(connectorsQuery?.current ?? []);
 
 	let typeItems = $derived((vocab?.types ?? []).map((name) => ({ id: name, name })));
 
@@ -217,9 +219,10 @@
 				})
 			: null
 	);
+	let productsQuery = $derived(twinKey ? getProducts() : null);
 	let twins = $derived(
 		twinKey
-			? (getProducts().current ?? []).filter(
+			? (productsQuery?.current ?? []).filter(
 					(p) => p.id !== productId && cableTwinKey(p) === twinKey
 				)
 			: []

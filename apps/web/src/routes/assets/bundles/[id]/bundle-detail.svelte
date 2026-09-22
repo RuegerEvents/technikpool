@@ -279,7 +279,8 @@
 	// Same line `regenerateBundleImage` draws: anyone who may write to the org.
 	// Read without awaiting, so the page doesn't wait on it — the button just
 	// turns up once the answer is in.
-	let myOrgs = $derived(getMyOrgs().current ?? []);
+	let myOrgsQuery = $derived(getMyOrgs());
+	let myOrgs = $derived(myOrgsQuery.current ?? []);
 	let canRegenerateImage = $derived(
 		page.data.isAdmin || myOrgs.some((o) => o.id === bundle.template.organizationId && canWrite(o))
 	);

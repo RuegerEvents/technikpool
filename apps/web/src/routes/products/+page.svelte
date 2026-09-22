@@ -42,9 +42,12 @@
 
 	// Read through the queries rather than awaited, so the page is on screen
 	// while the catalogue is on its way. See CLAUDE.md, "Loading states".
-	let orgs = $derived(getMyOrgs().current ?? []);
-	let categories = $derived(getCategories().current ?? []);
-	let manufacturers = $derived(getManufacturers().current ?? []);
+	let orgsQuery = $derived(getMyOrgs());
+	let orgs = $derived(orgsQuery.current ?? []);
+	let categoriesQuery = $derived(getCategories());
+	let categories = $derived(categoriesQuery.current ?? []);
+	let manufacturersQuery = $derived(getManufacturers());
+	let manufacturers = $derived(manufacturersQuery.current ?? []);
 	let productsQuery = $derived(getProductCatalog(filterOrgId || undefined));
 	let products = $derived(productsQuery.current ?? []);
 
@@ -270,7 +273,8 @@
 	// Two rows for one device is the failure mode this catalogue has, and the
 	// wizard is where they are noticed. Merging one away is the editor's job;
 	// finding them is this list's.
-	let allProducts = $derived(getProducts().current ?? []);
+	let allProductsQuery = $derived(getProducts());
+	let allProducts = $derived(allProductsQuery.current ?? []);
 
 	// Cables are where duplicates can be *found* rather than stumbled over: the
 	// name is free text, but what the cable is sits in columns. Grouped over the

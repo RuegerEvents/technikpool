@@ -29,7 +29,8 @@
 
 	// Not awaited: the form must not wait for this. While it is on its way the
 	// link stays hidden, which is also the right answer when sign-up is closed.
-	let signUpOpen = $derived(getSignUpStatus().current?.open ?? false);
+	let signUpStatusQuery = $derived(getSignUpStatus());
+	let signUpOpen = $derived(signUpStatusQuery.current?.open ?? false);
 
 	async function handleLogin(e: Event) {
 		e.preventDefault();

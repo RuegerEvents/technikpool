@@ -448,6 +448,15 @@ So a page reads its queries **without awaiting them**:
 let assetsQuery = $derived(getAssets(orgId)); let assets = $derived(assetsQuery.current ?? []);
 ```
 
+**Hold the query, not just its `.current`** — two `$derived`s, never
+`$derived(getAssets(orgId).current ?? [])`. SvelteKit keeps a query's cache entry alive only
+while some proxy for it is (a `FinalizationRegistry`), and a `.current` read inline leaves no
+proxy behind. After the next GC the entry is evicted, and every refresh — a command's
+server-side `.refresh()` as much as a handler's — lands on a new instance while the page keeps
+reading the old one: the save succeeds and nothing on screen moves until a reload. Same in a
+template: `{@const q = getX()}` then `{@const x = q.current}`. An `await`ed query is pinned by
+the component and is safe.
+
 `current` is the answer once it is here and `undefined` until then, `ready` says which, and
 `error` carries a failure. Nothing suspends, so the page is on screen immediately and only the
 part that is actually waiting shows a skeleton:

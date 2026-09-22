@@ -17,7 +17,8 @@
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 	import { USER_CODE_LENGTH, formatUserCode, normalizeUserCode } from '$lib/device-code';
 
-	let pairing = $derived(getPairingInfo().current ?? { baseUrl: '' });
+	let pairingQuery = $derived(getPairingInfo());
+	let pairing = $derived(pairingQuery.current ?? { baseUrl: '' });
 	let devicesQuery = $derived(getConnectedDevices());
 	let devices = $derived(devicesQuery.current ?? []);
 

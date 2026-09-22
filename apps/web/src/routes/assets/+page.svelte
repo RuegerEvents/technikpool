@@ -134,19 +134,22 @@
 	// Read through the queries rather than awaited: an `await` in a `$derived`
 	// suspends the whole page until it answers — heading, filters and all — and
 	// this one asks for every unit in the pool. See CLAUDE.md, "Loading states".
-	let orgs = $derived(getMyOrgs().current ?? []);
+	let orgsQuery = $derived(getMyOrgs());
+	let orgs = $derived(orgsQuery.current ?? []);
 	// A system admin may scope any read to any org — `scopedOrgIds` lets them
 	// through whether or not they are a member — so the orgs they do not belong
 	// to are offered too, in a group of their own rather than mixed in with the
 	// memberships.
+	let allOrgsQuery = $derived(page.data.isAdmin ? getAllOrgs() : null);
 	let otherOrgs = $derived(
 		page.data.isAdmin
-			? (getAllOrgs().current ?? []).filter((org) => !orgs.some((mine) => mine.id === org.id))
+			? (allOrgsQuery?.current ?? []).filter((org) => !orgs.some((mine) => mine.id === org.id))
 			: []
 	);
 	let assetsQuery = $derived(showingRetired ? getRetiredAssets(queryOrgId) : getAssets(queryOrgId));
 	let assets = $derived(assetsQuery.current ?? []);
-	let categories = $derived(getCategories().current ?? []);
+	let categoriesQuery = $derived(getCategories());
+	let categories = $derived(categoriesQuery.current ?? []);
 
 	type Asset = Awaited<ReturnType<typeof getAssets>>[number];
 	type TemplateData = Awaited<ReturnType<typeof getBundleTemplates>>[number];
@@ -160,11 +163,8 @@
 	// going back to the table lands on the flat list again.
 	let showingDevices = $derived(grouping === 'devices' && layout === 'list');
 
-	let templates = $derived(
-		bundleGrouping
-			? (getBundleTemplates(queryOrgId).current ?? ([] as TemplateData[]))
-			: ([] as TemplateData[])
-	);
+	let templatesQuery = $derived(bundleGrouping ? getBundleTemplates(queryOrgId) : null);
+	let templates = $derived(templatesQuery?.current ?? ([] as TemplateData[]));
 
 	type Group = {
 		productId: string;
@@ -217,7 +217,8 @@
 	// From the license list itself rather than from `assets`: it also holds the
 	// licenses another org lent to a production this user crews, which is how
 	// they find the key without belonging to the org that keeps it.
-	let hasLicenses = $derived((getLicenses(queryOrgId).current?.length ?? 0) > 0);
+	let licensesQuery = $derived(getLicenses(queryOrgId));
+	let hasLicenses = $derived((licensesQuery.current?.length ?? 0) > 0);
 
 	// The select's value: a kind, or `ctype:<type>` for one cable type.
 	let kindValue = $derived(cableTypeFilter ? `ctype:${cableTypeFilter}` : kindFilter);

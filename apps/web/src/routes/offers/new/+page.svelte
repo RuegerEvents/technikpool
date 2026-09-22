@@ -31,11 +31,13 @@
 
 	// Only orgs whose offers this user writes: the server refuses the rest
 	// (`requireOrgBilling`), and it would do so only after a production was picked.
+	let orgsQuery = $derived(getMyOrgs());
 	let orgs = $derived(
-		(getMyOrgs().current ?? []).filter((org) => page.data.isAdmin || canManageInventory(org))
+		(orgsQuery.current ?? []).filter((org) => page.data.isAdmin || canManageInventory(org))
 	);
 	let selectedOrgId = $state('');
-	let productions = $derived(selectedOrgId ? (getProductions(selectedOrgId).current ?? []) : []);
+	let productionsQuery = $derived(selectedOrgId ? getProductions(selectedOrgId) : null);
+	let productions = $derived(productionsQuery?.current ?? []);
 
 	let productionId = $state('');
 	let customerId = $state('');
@@ -103,9 +105,13 @@
 	// input next to it.
 	let effectiveScope = $derived<'ALL' | 'OWN_ORG_ONLY'>(hasCrossOrgItems ? assetScope : 'ALL');
 	let readinessArgs = $derived({ productionId, assetScope: effectiveScope });
-	let readiness = $derived(
-		productionId ? (getProductionBillingReadiness(readinessArgs).current ?? null) : null
-	);
+	// The query itself is held, not just its `.current`: SvelteKit keeps a cache
+	// entry alive only while some proxy for it is, so a handler calling
+	// `getProductionBillingReadiness(args).refresh()` could refresh a brand-new
+	// instance while this page kept reading the old one — the saved price never
+	// left the list until a reload.
+	let readinessQuery = $derived(productionId ? getProductionBillingReadiness(readinessArgs) : null);
+	let readiness = $derived(readinessQuery?.current ?? null);
 	let blockers = $derived(
 		readiness ? readiness.missingPrices.length + readiness.missingRates.length : 0
 	);
@@ -159,7 +165,7 @@
 		}
 		pending.add(group.key);
 		try {
-			const args = readinessArgs;
+			const query = readinessQuery;
 			// The billing org's own price — pricing here binds no other org.
 			await setOrgProductPrice({
 				organizationId: readiness?.organizationId ?? selectedOrgId,
@@ -167,7 +173,7 @@
 				netPurchasePrice
 			});
 			priceDrafts.delete(group.key);
-			await getProductionBillingReadiness(args).refresh();
+			await query?.refresh();
 			toast.success(`Price saved on ${group.label}`);
 		} catch (err) {
 			toast.error(getErrorMessage(err));
@@ -189,10 +195,10 @@
 		}
 		pending.add(categoryId);
 		try {
-			const args = readinessArgs;
+			const query = readinessQuery;
 			await setOrgCategoryRate({ orgId, categoryId, percentage });
 			rateDrafts.delete(categoryId);
-			await getProductionBillingReadiness(args).refresh();
+			await query?.refresh();
 			toast.success('Rate saved');
 		} catch (err) {
 			toast.error(getErrorMessage(err));

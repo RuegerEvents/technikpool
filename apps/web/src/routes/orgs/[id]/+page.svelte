@@ -43,7 +43,8 @@
 	let org = $derived(orgQuery.current);
 
 	// Colour, label and prefix are unique across every org — this org's own values don't count.
-	let identityInUse = $derived((getOrgIdentityInUse().current ?? []).filter((o) => o.id !== orgId));
+	let identityInUseQuery = $derived(getOrgIdentityInUse());
+	let identityInUse = $derived((identityInUseQuery.current ?? []).filter((o) => o.id !== orgId));
 
 	let myMembership = $derived(org?.members.find((m) => m.userId === data.user?.id));
 	let canManage = $derived(myMembership?.role === 'OWNER' || data.isAdmin);

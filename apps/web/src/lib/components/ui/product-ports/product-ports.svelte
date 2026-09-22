@@ -91,7 +91,8 @@
 		idPrefix = 'ports'
 	}: Props = $props();
 
-	let connectors = $derived(getConnectors().current ?? []);
+	let connectorsQuery = $derived(getConnectors());
+	let connectors = $derived(connectorsQuery.current ?? []);
 
 	// A device usually has each connector once — a DMX In and a DMX Out are two
 	// different connectors. So what the other lines already use moves to the
