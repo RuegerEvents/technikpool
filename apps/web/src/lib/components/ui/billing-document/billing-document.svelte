@@ -5,8 +5,12 @@
 	import { Input } from '$lib/components/ui/input';
 	import { getErrorMessage } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
-	import { groupBillingItems } from '$lib/billing-lines';
-	import type { BillingItem, DurationInfo } from './types';
+	import { groupBillingItems, type LineGroup } from '$lib/billing-lines';
+	import { formatQuantity, serviceUnitShort } from '$lib/service-lines.svelte';
+	import { deleteServiceLine, moveServiceLine } from '$lib/remote/offers.remote';
+	import { ChevronDown, ChevronUp } from '@lucide/svelte';
+	import ServiceLineModal from './service-line-modal.svelte';
+	import type { BillingItem, DurationInfo, EditedServiceLine, ServiceLineTarget } from './types';
 
 	let {
 		items,
@@ -23,9 +27,12 @@
 		onSaveDiscount,
 		onSaveItemRate,
 		categoryRates = [],
+		serviceTarget,
 		afterItems,
 		asideTop
 	}: {
+		/** Where service lines are added; without it the document takes none. */
+		serviceTarget?: ServiceLineTarget;
 		/** Rendered under the line items, in the wide column. */
 		afterItems?: Snippet;
 		/** Rendered above the day count, at the top of the side column. */
@@ -197,6 +204,60 @@
 		}
 	}
 
+	// ── Service lines ──
+	let serviceModalOpen = $state(false);
+	let editedService = $state<EditedServiceLine | null>(null);
+	let busyServiceLine = $state<string | null>(null);
+
+	function openAddService() {
+		editedService = null;
+		serviceModalOpen = true;
+	}
+
+	function openEditService(line: LineGroup<BillingItem>) {
+		const item = line.items[0];
+		editedService = {
+			id: item.id,
+			serviceId: item.serviceId ?? null,
+			name: item.description,
+			note: item.note ?? null,
+			categoryId: item.categoryId,
+			quantity: Number(item.quantity),
+			unit: item.unit ?? null,
+			unitPrice: Number(item.unitPrice),
+			perDay: item.perDay ?? false
+		};
+		serviceModalOpen = true;
+	}
+
+	async function serviceAction(lineId: string, action: () => Promise<void>) {
+		busyServiceLine = lineId;
+		try {
+			await action();
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			busyServiceLine = null;
+		}
+	}
+
+	function removeService(line: LineGroup<BillingItem>) {
+		if (!serviceTarget || !confirm(`Remove "${line.label}" from this document?`)) return;
+		const kind = serviceTarget.kind;
+		const lineId = line.items[0].id;
+		return serviceAction(lineId, async () => {
+			await deleteServiceLine({ kind, lineId });
+			toast.success('Service removed');
+		});
+	}
+
+	function moveService(line: LineGroup<BillingItem>, direction: 'up' | 'down') {
+		if (!serviceTarget) return;
+		const kind = serviceTarget.kind;
+		const lineId = line.items[0].id;
+		return serviceAction(lineId, () => moveServiceLine({ kind, lineId, direction }));
+	}
+
 	async function applyCategoryRate(categoryId: string, itemIds: string[], ratePercent: number) {
 		savingCategory = categoryId;
 		try {
@@ -267,47 +328,115 @@
 									</div>
 								</td>
 							</tr>
-							{#each group.lines as line (line.key)}
-								<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
-									<td class="px-4 py-3">
-										{line.label}
-									</td>
-									<td class="px-4 py-3 text-right tabular-nums">{line.quantity}×</td>
-									<td class="px-4 py-3 text-right tabular-nums">{fmtEUR(line.netPurchasePrice)}</td>
-									<td class="px-4 py-3 text-right">
-										{#if editable}
-											<div class="flex items-center justify-end gap-1">
-												<Input
-													type="number"
-													min="0"
-													step="0.01"
-													value={rateEdits[line.key] ?? String(line.ratePercent)}
-													oninput={(e) => {
-														rateEdits[line.key] = (e.target as HTMLInputElement).value;
-													}}
-													class="w-20 text-right"
-												/>
-												{#if rateEdits[line.key] !== undefined}
-													<Button
-														size="sm"
-														variant="outline"
-														onclick={() =>
-															saveRate(
-																line.key,
-																line.items.map((i) => i.id)
-															)}>Save</Button
-													>
+							{#each group.lines as line, lineIndex (line.key)}
+								{#if line.service}
+									{@const service = line.service}
+									{@const busy = busyServiceLine === line.items[0].id}
+									<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
+										<td class="px-4 py-3">
+											<div class="flex items-start justify-between gap-2">
+												<div class="min-w-0">
+													<p>{line.label}</p>
+													{#if service.note}
+														<p class="text-xs whitespace-pre-line text-muted-foreground">
+															{service.note}
+														</p>
+													{/if}
+												</div>
+												{#if editable && serviceTarget}
+													<div class="flex shrink-0 items-center">
+														<Button
+															size="icon-xs"
+															variant="ghost"
+															title="Move up"
+															disabled={busy || lineIndex === 0}
+															onclick={() => moveService(line, 'up')}><ChevronUp /></Button
+														>
+														<Button
+															size="icon-xs"
+															variant="ghost"
+															title="Move down"
+															disabled={busy || lineIndex === group.lines.length - 1}
+															onclick={() => moveService(line, 'down')}><ChevronDown /></Button
+														>
+														<Button
+															size="icon-xs"
+															variant="ghost"
+															icon="edit"
+															title="Edit service"
+															disabled={busy}
+															onclick={() => openEditService(line)}
+														/>
+														<Button
+															size="icon-xs"
+															variant="ghost"
+															icon="delete"
+															title="Remove service"
+															disabled={busy}
+															onclick={() => removeService(line)}
+														/>
+													</div>
 												{/if}
 											</div>
-										{:else}
-											{line.ratePercent}%
-										{/if}
-									</td>
-									<td class="px-4 py-3 text-right tabular-nums">{fmtEUR(line.dailyRate)}</td>
-									<td class="px-4 py-3 text-right font-medium tabular-nums"
-										>{fmtEUR(line.lineTotal)}</td
-									>
-								</tr>
+										</td>
+										<td class="px-4 py-3 text-right whitespace-nowrap tabular-nums">
+											{formatQuantity(line.quantity)}
+											{serviceUnitShort(service.unit)}
+										</td>
+										<td colspan="3" class="px-4 py-3 text-right text-muted-foreground tabular-nums">
+											× {fmtEUR(service.unitPrice)}
+											{#if service.perDay}
+												<span class="whitespace-nowrap">× {dayCount} d</span>
+											{/if}
+										</td>
+										<td class="px-4 py-3 text-right font-medium tabular-nums"
+											>{fmtEUR(line.lineTotal)}</td
+										>
+									</tr>
+								{:else}
+									<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
+										<td class="px-4 py-3">
+											{line.label}
+										</td>
+										<td class="px-4 py-3 text-right tabular-nums">{line.quantity}×</td>
+										<td class="px-4 py-3 text-right tabular-nums"
+											>{fmtEUR(line.netPurchasePrice)}</td
+										>
+										<td class="px-4 py-3 text-right">
+											{#if editable}
+												<div class="flex items-center justify-end gap-1">
+													<Input
+														type="number"
+														min="0"
+														step="0.01"
+														value={rateEdits[line.key] ?? String(line.ratePercent)}
+														oninput={(e) => {
+															rateEdits[line.key] = (e.target as HTMLInputElement).value;
+														}}
+														class="w-20 text-right"
+													/>
+													{#if rateEdits[line.key] !== undefined}
+														<Button
+															size="sm"
+															variant="outline"
+															onclick={() =>
+																saveRate(
+																	line.key,
+																	line.items.map((i) => i.id)
+																)}>Save</Button
+														>
+													{/if}
+												</div>
+											{:else}
+												{line.ratePercent}%
+											{/if}
+										</td>
+										<td class="px-4 py-3 text-right tabular-nums">{fmtEUR(line.dailyRate)}</td>
+										<td class="px-4 py-3 text-right font-medium tabular-nums"
+											>{fmtEUR(line.lineTotal)}</td
+										>
+									</tr>
+								{/if}
 							{/each}
 							<tr class="border-b bg-muted/10 last:border-0">
 								<td colspan="5" class="px-4 py-2 text-right text-xs text-muted-foreground">
@@ -320,6 +449,11 @@
 						{/each}
 					</tbody>
 				</table>
+			</div>
+		{/if}
+		{#if editable && serviceTarget}
+			<div class="mt-3">
+				<Button icon="add" variant="outline" size="sm" onclick={openAddService}>Add service</Button>
 			</div>
 		{/if}
 		{#if afterItems}
@@ -491,3 +625,12 @@
 		</Card.Root>
 	</div>
 </div>
+
+{#if serviceTarget}
+	<ServiceLineModal
+		bind:open={serviceModalOpen}
+		target={serviceTarget}
+		{dayCount}
+		line={editedService}
+	/>
+{/if}

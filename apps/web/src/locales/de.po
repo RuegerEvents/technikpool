@@ -178,6 +178,7 @@ msgstr "Crew"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/address-input/address-input.svelte
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
@@ -215,6 +216,8 @@ msgstr "Crew"
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/productions/[id]/copy-equipment-modal.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -265,6 +268,7 @@ msgstr "Hinzufügen"
 msgid "No crew members added yet."
 msgstr "Noch keine Crewmitglieder hinzugefügt."
 
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
 #: src/routes/admin/connectors/+page.svelte
 #: src/routes/admin/users/+page.svelte
@@ -273,6 +277,8 @@ msgstr "Noch keine Crewmitglieder hinzugefügt."
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/auth/register/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/productions/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/profile/+page.svelte
@@ -703,6 +709,7 @@ msgstr "Produktmodell"
 msgid "Search or create product…"
 msgstr "Produkt suchen oder erstellen…"
 
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
 msgid "Quantity"
@@ -712,6 +719,7 @@ msgstr "Menge"
 msgid "<0/> Create another after saving"
 msgstr "<0/> Nach dem Speichern weiteres erstellen"
 
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
@@ -1328,6 +1336,7 @@ msgstr "Standort"
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
@@ -1345,6 +1354,8 @@ msgstr "Standort"
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/orgs/[id]/rates/+page.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -1606,6 +1617,7 @@ msgstr "Dez"
 msgid "Today"
 msgstr "Heute"
 
+#: src/lib/service-lines.svelte.ts
 #: src/routes/calendar/+page.svelte
 msgid "Day"
 msgstr "Tag"
@@ -1869,6 +1881,8 @@ msgstr "Alle Kategorien"
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
 msgid "Category"
 msgstr "Kategorie"
 
@@ -2937,8 +2951,9 @@ msgstr "Position"
 msgid "Rate %/day"
 msgstr "Satz %/Tag"
 
-#~ msgid "Days"
-#~ msgstr "Tage"
+#: src/lib/service-lines.svelte.ts
+msgid "Days"
+msgstr "Tage"
 
 #: src/lib/components/ui/billing-document/billing-document.svelte
 msgid "Subtotal"
@@ -3100,7 +3115,6 @@ msgstr "Betrag (€)"
 msgid "Organization settings updated"
 msgstr "Organisationseinstellungen aktualisiert"
 
-#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/rates/+page.svelte
 msgid "Rental Rates"
 msgstr "Mietpreise"
@@ -3288,14 +3302,11 @@ msgstr "Noch nichts gebucht."
 #~ msgid "Gemäß § 19 UStG wird keine Umsatzsteuer berechnet."
 #~ msgstr "Gemäß § 19 UStG wird keine Umsatzsteuer berechnet."
 
-#. 0: org?.name ?? ''
-#: src/routes/orgs/[id]/rates/+page.svelte
-msgid "Rental Rates | {0} | Technikpool"
-msgstr "Mietpreise | {0} | Technikpool"
+#~ msgid "Rental Rates | {0} | Technikpool"
+#~ msgstr "Mietpreise | {0} | Technikpool"
 
-#: src/routes/orgs/[id]/rates/+page.svelte
-msgid "Default daily rental rate per category, as a percentage of an asset's net purchase price. Feeds offer/invoice pricing."
-msgstr "Standard-Tagesmietsatz pro Kategorie, als Prozentsatz des Netto-Einkaufspreises eines Geräts. Fließt in die Angebots-/Rechnungspreisberechnung ein."
+#~ msgid "Default daily rental rate per category, as a percentage of an asset's net purchase price. Feeds offer/invoice pricing."
+#~ msgstr "Standard-Tagesmietsatz pro Kategorie, als Prozentsatz des Netto-Einkaufspreises eines Geräts. Fließt in die Angebots-/Rechnungspreisberechnung ein."
 
 #: src/routes/offers/new/+page.svelte
 #: src/routes/orgs/[id]/rates/+page.svelte
@@ -4588,6 +4599,7 @@ msgid "Categories are shared by every organization. The English name is the sour
 msgstr "Kategorien gelten für alle Organisationen. Der englische Name ist die Quelle — ihn liefert die API und ihn hält eine Abrechnungsposition fest; der deutsche Name erscheint in der deutschen Oberfläche und auf einem deutschen Angebot oder einer Rechnung."
 
 #: src/routes/admin/categories/+page.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
 msgid "Colour"
 msgstr "Farbe"
 
@@ -5777,6 +5789,7 @@ msgid "Manufacturers merged"
 msgstr "Hersteller zusammengeführt"
 
 #: src/routes/admin/catalog-log/+page.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
 msgid "Category updated"
 msgstr "Kategorie aktualisiert"
 
@@ -7482,6 +7495,7 @@ msgstr "Lizenzschlüssel"
 msgid "Username"
 msgstr "Benutzername"
 
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
 msgid "Note"
@@ -9196,3 +9210,236 @@ msgstr "Unter <0>Rechnungsdaten</0> ergänzen und dann mit „Aktuelle Daten üb
 #: src/lib/components/ui/billing-issues/billing-issues.svelte
 msgid "Fill them in under <0>billing details</0>."
 msgstr "Unter <0>Rechnungsdaten</0> ergänzen."
+
+#. 0: line.label
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Remove \"{0}\" from this document?"
+msgstr "„{0}“ aus diesem Dokument entfernen?"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Service removed"
+msgstr "Leistung entfernt"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Move up"
+msgstr "Nach oben"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Move down"
+msgstr "Nach unten"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Edit service"
+msgstr "Leistung bearbeiten"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Remove service"
+msgstr "Leistung entfernen"
+
+#. 0: dayCount
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "× {0} d"
+msgstr "× {0} T"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Add service"
+msgstr "Leistung hinzufügen"
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Service updated"
+msgstr "Leistung aktualisiert"
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Service added"
+msgstr "Leistung hinzugefügt"
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+msgid "A service goes into one of your organization's service categories, such as Personal or Transport. Set them up under <0>Rates & services</0> first."
+msgstr "Eine Leistung gehört in eine der Leistungskategorien deiner Organisation, etwa Personal oder Transport. Lege sie zuerst unter <0>Preise & Leistungen</0> an."
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+msgid "Custom"
+msgstr "Eigene Position"
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+msgid "From the price list"
+msgstr "Aus der Preisliste"
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+msgid "(deleted section)"
+msgstr "(gelöschter Abschnitt)"
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+msgid "Section"
+msgstr "Abschnitt"
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+msgid "Optional, printed under the name"
+msgstr "Optional, wird unter dem Namen gedruckt"
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Unit"
+msgstr "Einheit"
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Unit price (€, net)"
+msgstr "Einzelpreis (€, netto)"
+
+#. 0.0: dayCount
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+msgid "Per day <0>Multiplied by the document's day count ({0}) as well, and follows it when it changes.</0>"
+msgstr "Pro Tag <0>Wird zusätzlich mit der Tagesanzahl des Dokuments ({0}) multipliziert und folgt ihr, wenn sie sich ändert.</0>"
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+msgid "Line total: <0/>"
+msgstr "Positionssumme: <0/>"
+
+#: src/lib/service-lines.svelte.ts
+msgid "Hour"
+msgstr "Stunde"
+
+#: src/lib/service-lines.svelte.ts
+msgid "Flat rate"
+msgstr "Pauschal"
+
+#: src/lib/service-lines.svelte.ts
+msgid "Kilometre"
+msgstr "Kilometer"
+
+#: src/lib/service-lines.svelte.ts
+msgid "Piece"
+msgstr "Stück"
+
+#: src/lib/service-lines.svelte.ts
+msgid "Hrs."
+msgstr "Std."
+
+#: src/lib/service-lines.svelte.ts
+msgid "Flat"
+msgstr "pauschal"
+
+#: src/lib/service-lines.svelte.ts
+msgid "Pcs."
+msgstr "Stk."
+
+#: src/lib/error-messages.svelte.ts
+msgid "That service line no longer exists."
+msgstr "Diese Leistungsposition gibt es nicht mehr."
+
+#: src/lib/error-messages.svelte.ts
+msgid "That service category no longer exists."
+msgstr "Diese Leistungskategorie gibt es nicht mehr."
+
+#: src/lib/error-messages.svelte.ts
+msgid "That service no longer exists."
+msgstr "Diese Leistung gibt es nicht mehr."
+
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/rates/+page.svelte
+msgid "Rates & services"
+msgstr "Preise & Leistungen"
+
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Category added"
+msgstr "Kategorie hinzugefügt"
+
+#. 0: category.name; 1: category.services.length
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Delete \"{0}\" and its {1} service(s)? Offers and invoices keep their lines."
+msgstr "„{0}“ und die {1} Leistung(en) darin löschen? Angebote und Rechnungen behalten ihre Positionen."
+
+#. 0: category.name
+#. 0: service.name
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Delete \"{0}\"? Offers and invoices keep their lines."
+msgstr "„{0}“ löschen? Angebote und Rechnungen behalten ihre Positionen."
+
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Category deleted"
+msgstr "Kategorie gelöscht"
+
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Service deleted"
+msgstr "Leistung gelöscht"
+
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Services"
+msgstr "Leistungen"
+
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "What you bill besides equipment, such as crew, transport or programming. Each category is a section on offers and invoices, in this order. A line picked from here copies the price, so changing it later does not touch documents that already exist."
+msgstr "Was du neben der Technik abrechnest, etwa Personal, Transport oder Vorprogrammierung. Jede Kategorie ist ein Abschnitt auf Angeboten und Rechnungen, in dieser Reihenfolge. Eine Position übernimmt den Preis von hier, spätere Änderungen berühren bestehende Dokumente also nicht."
+
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "No service categories yet. Add one, for example Personal or Transport."
+msgstr "Noch keine Leistungskategorien. Lege eine an, zum Beispiel Personal oder Transport."
+
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Edit category"
+msgstr "Kategorie bearbeiten"
+
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Delete category"
+msgstr "Kategorie löschen"
+
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "· per day"
+msgstr "· pro Tag"
+
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Delete service"
+msgstr "Leistung löschen"
+
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Service"
+msgstr "Leistung"
+
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Add category"
+msgstr "Kategorie hinzufügen"
+
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Personal"
+msgstr "Personal"
+
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Printed as the section heading on documents."
+msgstr "Wird auf Dokumenten als Abschnittsüberschrift gedruckt."
+
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Techniker"
+msgstr "Techniker"
+
+#: src/routes/orgs/[id]/rates/service-catalog.svelte
+msgid "Per day <0>Also multiplied by the document's day count, e.g. a technician's day rate.</0>"
+msgstr "Pro Tag <0>Wird zusätzlich mit der Tagesanzahl des Dokuments multipliziert, z. B. ein Tagessatz für Techniker.</0>"
+
+#. 0: org?.name ?? ''
+#: src/routes/orgs/[id]/rates/+page.svelte
+msgid "Rates & services | {0} | Technikpool"
+msgstr "Preise & Leistungen | {0} | Technikpool"
+
+#: src/routes/orgs/[id]/rates/+page.svelte
+msgid "What offers and invoices are priced from."
+msgstr "Die Grundlage für die Preise auf Angeboten und Rechnungen."
+
+#: src/routes/orgs/[id]/rates/+page.svelte
+msgid "Default daily rental rate per category, as a percentage of an asset's net purchase price."
+msgstr "Standard-Tagesmietsatz pro Kategorie, als Prozentsatz des Netto-Einkaufspreises eines Geräts."
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+msgid "Save to price list <0>Keeps name, section, unit and price as a service to pick next time. The quantity and note stay on this line only.</0>"
+msgstr "In die Preisliste übernehmen <0>Speichert Name, Abschnitt, Einheit und Preis als Leistung zur späteren Auswahl. Menge und Notiz bleiben nur an dieser Position.</0>"

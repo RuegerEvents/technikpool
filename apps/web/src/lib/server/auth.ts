@@ -49,6 +49,8 @@ const prefixes: Partial<Record<ModelName, string>> = {
 	Location: 'loc',
 	Inspection: 'insp',
 	OrgCategoryRate: 'ocr',
+	ServiceCategory: 'svcc',
+	OrgService: 'osvc',
 	Offer: 'ofr',
 	OfferItem: 'ofi',
 	OfferSequence: 'ofsq',

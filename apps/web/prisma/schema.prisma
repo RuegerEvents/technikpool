@@ -165,16 +165,18 @@ model Organization {
   members     OrgMembership[]
   invitations Invitation[]
 
-  locations       Location[]
-  assets          Asset[]
-  bundleTemplates BundleTemplate[]
-  productions     Production[]
-  categoryRates   OrgCategoryRate[]
-  productPrices   OrgProductPrice[]
-  offerSequences  OfferSequence[]
-  offers          Offer[]
-  invoices        Invoice[]
-  customers       Customer[]
+  locations         Location[]
+  assets            Asset[]
+  bundleTemplates   BundleTemplate[]
+  productions       Production[]
+  categoryRates     OrgCategoryRate[]
+  serviceCategories ServiceCategory[]
+  services          OrgService[]
+  productPrices     OrgProductPrice[]
+  offerSequences    OfferSequence[]
+  offers            Offer[]
+  invoices          Invoice[]
+  customers         Customer[]
 }
 
 // Declared highest first, so `orderBy: { role: 'asc' }` lists owners at the
@@ -802,6 +804,42 @@ model OrgCategoryRate {
   @@unique([organizationId, categoryId])
 }
 
+// The org's own price list for what it bills besides equipment — Personal,
+// Transport, Vorprogrammierung, Beratung. Per org and named by the org in its
+// own words, so unlike Category there is no second language: the name is
+// printed as it was typed. A document line copies from these and never points
+// back, so editing or deleting an entry leaves every offer untouched.
+model ServiceCategory {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  color          String       @default("#a1a1aa")
+  // Where the section sits among the others on a document, which is why the
+  // lines snapshot it too.
+  sortOrder      Int          @default(0)
+  services       OrgService[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrgService {
+  id             String          @id @default(cuid())
+  organizationId String
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  categoryId     String
+  category       ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name           String
+  unit           String // see SERVICE_UNITS in $lib/service-lines
+  unitPrice      Decimal         @db.Decimal(10, 2)
+  // Multiplied by the document's day count as well as the quantity.
+  perDay         Boolean         @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // One counter row per org and year — offers are numbered automatically
 // (unlike invoices, whose numbers are assigned by hand), and per org so one
 // tenant's activity never shows up as gaps in another's sequence.
@@ -931,10 +969,27 @@ model OfferItem {
   productLabel String?
 
   description      String
-  netPurchasePrice Decimal @db.Decimal(10, 2)
-  ratePercent      Decimal @db.Decimal(5, 2)
-  dailyRate        Decimal @db.Decimal(10, 2)
-  lineTotal        Decimal @db.Decimal(10, 2)
+  // Equipment lines only — a service line is not priced from a purchase price.
+  netPurchasePrice Decimal? @db.Decimal(10, 2)
+  ratePercent      Decimal? @db.Decimal(5, 2)
+  dailyRate        Decimal? @db.Decimal(10, 2)
+  lineTotal        Decimal  @db.Decimal(10, 2)
+
+  // "EQUIPMENT" comes from the production and is rebuilt by every update from
+  // it; "SERVICE" is typed in on the document (Personal, Transport, …) and is
+  // never touched by an update. Its category* columns snapshot a
+  // ServiceCategory, not a Category.
+  kind              String   @default("EQUIPMENT")
+  // Soft reference to the OrgService it was picked from, if any.
+  serviceId         String?
+  quantity          Decimal? @db.Decimal(10, 2)
+  unit              String?
+  unitPrice         Decimal? @db.Decimal(10, 2)
+  perDay            Boolean  @default(false)
+  note              String?  @db.Text
+  // Order within its section, set by hand.
+  position          Int      @default(0)
+  categorySortOrder Int?
 
   createdAt DateTime @default(now())
 }
@@ -1058,10 +1113,23 @@ model InvoiceItem {
   productLabel String?
 
   description      String
-  netPurchasePrice Decimal @db.Decimal(10, 2)
-  ratePercent      Decimal @db.Decimal(5, 2)
-  dailyRate        Decimal @db.Decimal(10, 2)
-  lineTotal        Decimal @db.Decimal(10, 2)
+  netPurchasePrice Decimal? @db.Decimal(10, 2)
+  ratePercent      Decimal? @db.Decimal(5, 2)
+  dailyRate        Decimal? @db.Decimal(10, 2)
+  lineTotal        Decimal  @db.Decimal(10, 2)
+
+  // See the same block on OfferItem.
+  kind              String   @default("EQUIPMENT")
+  // Soft reference to the OrgService it was picked from, if any.
+  serviceId         String?
+  quantity          Decimal? @db.Decimal(10, 2)
+  unit              String?
+  unitPrice         Decimal? @db.Decimal(10, 2)
+  perDay            Boolean  @default(false)
+  note              String?  @db.Text
+  // Order within its section, set by hand.
+  position          Int      @default(0)
+  categorySortOrder Int?
 
   createdAt DateTime @default(now())
 }

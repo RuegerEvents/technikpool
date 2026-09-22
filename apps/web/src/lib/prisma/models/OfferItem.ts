@@ -31,6 +31,10 @@ export type OfferItemAvgAggregateOutputType = {
   ratePercent: runtime.Decimal | null
   dailyRate: runtime.Decimal | null
   lineTotal: runtime.Decimal | null
+  quantity: runtime.Decimal | null
+  unitPrice: runtime.Decimal | null
+  position: number | null
+  categorySortOrder: number | null
 }
 
 export type OfferItemSumAggregateOutputType = {
@@ -38,6 +42,10 @@ export type OfferItemSumAggregateOutputType = {
   ratePercent: runtime.Decimal | null
   dailyRate: runtime.Decimal | null
   lineTotal: runtime.Decimal | null
+  quantity: runtime.Decimal | null
+  unitPrice: runtime.Decimal | null
+  position: number | null
+  categorySortOrder: number | null
 }
 
 export type OfferItemMinAggregateOutputType = {
@@ -56,6 +64,15 @@ export type OfferItemMinAggregateOutputType = {
   ratePercent: runtime.Decimal | null
   dailyRate: runtime.Decimal | null
   lineTotal: runtime.Decimal | null
+  kind: string | null
+  serviceId: string | null
+  quantity: runtime.Decimal | null
+  unit: string | null
+  unitPrice: runtime.Decimal | null
+  perDay: boolean | null
+  note: string | null
+  position: number | null
+  categorySortOrder: number | null
   createdAt: Date | null
 }
 
@@ -75,6 +92,15 @@ export type OfferItemMaxAggregateOutputType = {
   ratePercent: runtime.Decimal | null
   dailyRate: runtime.Decimal | null
   lineTotal: runtime.Decimal | null
+  kind: string | null
+  serviceId: string | null
+  quantity: runtime.Decimal | null
+  unit: string | null
+  unitPrice: runtime.Decimal | null
+  perDay: boolean | null
+  note: string | null
+  position: number | null
+  categorySortOrder: number | null
   createdAt: Date | null
 }
 
@@ -94,6 +120,15 @@ export type OfferItemCountAggregateOutputType = {
   ratePercent: number
   dailyRate: number
   lineTotal: number
+  kind: number
+  serviceId: number
+  quantity: number
+  unit: number
+  unitPrice: number
+  perDay: number
+  note: number
+  position: number
+  categorySortOrder: number
   createdAt: number
   _all: number
 }
@@ -104,6 +139,10 @@ export type OfferItemAvgAggregateInputType = {
   ratePercent?: true
   dailyRate?: true
   lineTotal?: true
+  quantity?: true
+  unitPrice?: true
+  position?: true
+  categorySortOrder?: true
 }
 
 export type OfferItemSumAggregateInputType = {
@@ -111,6 +150,10 @@ export type OfferItemSumAggregateInputType = {
   ratePercent?: true
   dailyRate?: true
   lineTotal?: true
+  quantity?: true
+  unitPrice?: true
+  position?: true
+  categorySortOrder?: true
 }
 
 export type OfferItemMinAggregateInputType = {
@@ -129,6 +172,15 @@ export type OfferItemMinAggregateInputType = {
   ratePercent?: true
   dailyRate?: true
   lineTotal?: true
+  kind?: true
+  serviceId?: true
+  quantity?: true
+  unit?: true
+  unitPrice?: true
+  perDay?: true
+  note?: true
+  position?: true
+  categorySortOrder?: true
   createdAt?: true
 }
 
@@ -148,6 +200,15 @@ export type OfferItemMaxAggregateInputType = {
   ratePercent?: true
   dailyRate?: true
   lineTotal?: true
+  kind?: true
+  serviceId?: true
+  quantity?: true
+  unit?: true
+  unitPrice?: true
+  perDay?: true
+  note?: true
+  position?: true
+  categorySortOrder?: true
   createdAt?: true
 }
 
@@ -167,6 +228,15 @@ export type OfferItemCountAggregateInputType = {
   ratePercent?: true
   dailyRate?: true
   lineTotal?: true
+  kind?: true
+  serviceId?: true
+  quantity?: true
+  unit?: true
+  unitPrice?: true
+  perDay?: true
+  note?: true
+  position?: true
+  categorySortOrder?: true
   createdAt?: true
   _all?: true
 }
@@ -269,10 +339,19 @@ export type OfferItemGroupByOutputType = {
   productId: string | null
   productLabel: string | null
   description: string
-  netPurchasePrice: runtime.Decimal
-  ratePercent: runtime.Decimal
-  dailyRate: runtime.Decimal
+  netPurchasePrice: runtime.Decimal | null
+  ratePercent: runtime.Decimal | null
+  dailyRate: runtime.Decimal | null
   lineTotal: runtime.Decimal
+  kind: string
+  serviceId: string | null
+  quantity: runtime.Decimal | null
+  unit: string | null
+  unitPrice: runtime.Decimal | null
+  perDay: boolean
+  note: string | null
+  position: number
+  categorySortOrder: number | null
   createdAt: Date
   _count: OfferItemCountAggregateOutputType | null
   _avg: OfferItemAvgAggregateOutputType | null
@@ -311,10 +390,19 @@ export type OfferItemWhereInput = {
   productId?: Prisma.StringNullableFilter<"OfferItem"> | string | null
   productLabel?: Prisma.StringNullableFilter<"OfferItem"> | string | null
   description?: Prisma.StringFilter<"OfferItem"> | string
-  netPurchasePrice?: Prisma.DecimalFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.DecimalNullableFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.DecimalNullableFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.DecimalNullableFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFilter<"OfferItem"> | string
+  serviceId?: Prisma.StringNullableFilter<"OfferItem"> | string | null
+  quantity?: Prisma.DecimalNullableFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.StringNullableFilter<"OfferItem"> | string | null
+  unitPrice?: Prisma.DecimalNullableFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFilter<"OfferItem"> | boolean
+  note?: Prisma.StringNullableFilter<"OfferItem"> | string | null
+  position?: Prisma.IntFilter<"OfferItem"> | number
+  categorySortOrder?: Prisma.IntNullableFilter<"OfferItem"> | number | null
   createdAt?: Prisma.DateTimeFilter<"OfferItem"> | Date | string
   offer?: Prisma.XOR<Prisma.OfferScalarRelationFilter, Prisma.OfferWhereInput>
 }
@@ -331,10 +419,19 @@ export type OfferItemOrderByWithRelationInput = {
   productId?: Prisma.SortOrderInput | Prisma.SortOrder
   productLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrder
-  netPurchasePrice?: Prisma.SortOrder
-  ratePercent?: Prisma.SortOrder
-  dailyRate?: Prisma.SortOrder
+  netPurchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  ratePercent?: Prisma.SortOrderInput | Prisma.SortOrder
+  dailyRate?: Prisma.SortOrderInput | Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
+  serviceId?: Prisma.SortOrderInput | Prisma.SortOrder
+  quantity?: Prisma.SortOrderInput | Prisma.SortOrder
+  unit?: Prisma.SortOrderInput | Prisma.SortOrder
+  unitPrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  perDay?: Prisma.SortOrder
+  note?: Prisma.SortOrderInput | Prisma.SortOrder
+  position?: Prisma.SortOrder
+  categorySortOrder?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   offer?: Prisma.OfferOrderByWithRelationInput
 }
@@ -354,10 +451,19 @@ export type OfferItemWhereUniqueInput = Prisma.AtLeast<{
   productId?: Prisma.StringNullableFilter<"OfferItem"> | string | null
   productLabel?: Prisma.StringNullableFilter<"OfferItem"> | string | null
   description?: Prisma.StringFilter<"OfferItem"> | string
-  netPurchasePrice?: Prisma.DecimalFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.DecimalNullableFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.DecimalNullableFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.DecimalNullableFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFilter<"OfferItem"> | string
+  serviceId?: Prisma.StringNullableFilter<"OfferItem"> | string | null
+  quantity?: Prisma.DecimalNullableFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.StringNullableFilter<"OfferItem"> | string | null
+  unitPrice?: Prisma.DecimalNullableFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFilter<"OfferItem"> | boolean
+  note?: Prisma.StringNullableFilter<"OfferItem"> | string | null
+  position?: Prisma.IntFilter<"OfferItem"> | number
+  categorySortOrder?: Prisma.IntNullableFilter<"OfferItem"> | number | null
   createdAt?: Prisma.DateTimeFilter<"OfferItem"> | Date | string
   offer?: Prisma.XOR<Prisma.OfferScalarRelationFilter, Prisma.OfferWhereInput>
 }, "id">
@@ -374,10 +480,19 @@ export type OfferItemOrderByWithAggregationInput = {
   productId?: Prisma.SortOrderInput | Prisma.SortOrder
   productLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrder
-  netPurchasePrice?: Prisma.SortOrder
-  ratePercent?: Prisma.SortOrder
-  dailyRate?: Prisma.SortOrder
+  netPurchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  ratePercent?: Prisma.SortOrderInput | Prisma.SortOrder
+  dailyRate?: Prisma.SortOrderInput | Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
+  serviceId?: Prisma.SortOrderInput | Prisma.SortOrder
+  quantity?: Prisma.SortOrderInput | Prisma.SortOrder
+  unit?: Prisma.SortOrderInput | Prisma.SortOrder
+  unitPrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  perDay?: Prisma.SortOrder
+  note?: Prisma.SortOrderInput | Prisma.SortOrder
+  position?: Prisma.SortOrder
+  categorySortOrder?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.OfferItemCountOrderByAggregateInput
   _avg?: Prisma.OfferItemAvgOrderByAggregateInput
@@ -401,10 +516,19 @@ export type OfferItemScalarWhereWithAggregatesInput = {
   productId?: Prisma.StringNullableWithAggregatesFilter<"OfferItem"> | string | null
   productLabel?: Prisma.StringNullableWithAggregatesFilter<"OfferItem"> | string | null
   description?: Prisma.StringWithAggregatesFilter<"OfferItem"> | string
-  netPurchasePrice?: Prisma.DecimalWithAggregatesFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalWithAggregatesFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalWithAggregatesFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.DecimalNullableWithAggregatesFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.DecimalNullableWithAggregatesFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.DecimalNullableWithAggregatesFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalWithAggregatesFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringWithAggregatesFilter<"OfferItem"> | string
+  serviceId?: Prisma.StringNullableWithAggregatesFilter<"OfferItem"> | string | null
+  quantity?: Prisma.DecimalNullableWithAggregatesFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.StringNullableWithAggregatesFilter<"OfferItem"> | string | null
+  unitPrice?: Prisma.DecimalNullableWithAggregatesFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolWithAggregatesFilter<"OfferItem"> | boolean
+  note?: Prisma.StringNullableWithAggregatesFilter<"OfferItem"> | string | null
+  position?: Prisma.IntWithAggregatesFilter<"OfferItem"> | number
+  categorySortOrder?: Prisma.IntNullableWithAggregatesFilter<"OfferItem"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"OfferItem"> | Date | string
 }
 
@@ -419,10 +543,19 @@ export type OfferItemCreateInput = {
   productId?: string | null
   productLabel?: string | null
   description: string
-  netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: string
+  serviceId?: string | null
+  quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: string | null
+  unitPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: boolean
+  note?: string | null
+  position?: number
+  categorySortOrder?: number | null
   createdAt?: Date | string
   offer: Prisma.OfferCreateNestedOneWithoutItemsInput
 }
@@ -439,10 +572,19 @@ export type OfferItemUncheckedCreateInput = {
   productId?: string | null
   productLabel?: string | null
   description: string
-  netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: string
+  serviceId?: string | null
+  quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: string | null
+  unitPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: boolean
+  note?: string | null
+  position?: number
+  categorySortOrder?: number | null
   createdAt?: Date | string
 }
 
@@ -457,10 +599,19 @@ export type OfferItemUpdateInput = {
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  serviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  categorySortOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   offer?: Prisma.OfferUpdateOneRequiredWithoutItemsNestedInput
 }
@@ -477,10 +628,19 @@ export type OfferItemUncheckedUpdateInput = {
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  serviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  categorySortOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -496,10 +656,19 @@ export type OfferItemCreateManyInput = {
   productId?: string | null
   productLabel?: string | null
   description: string
-  netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: string
+  serviceId?: string | null
+  quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: string | null
+  unitPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: boolean
+  note?: string | null
+  position?: number
+  categorySortOrder?: number | null
   createdAt?: Date | string
 }
 
@@ -514,10 +683,19 @@ export type OfferItemUpdateManyMutationInput = {
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  serviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  categorySortOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -533,10 +711,19 @@ export type OfferItemUncheckedUpdateManyInput = {
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  serviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  categorySortOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -566,6 +753,15 @@ export type OfferItemCountOrderByAggregateInput = {
   ratePercent?: Prisma.SortOrder
   dailyRate?: Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
+  serviceId?: Prisma.SortOrder
+  quantity?: Prisma.SortOrder
+  unit?: Prisma.SortOrder
+  unitPrice?: Prisma.SortOrder
+  perDay?: Prisma.SortOrder
+  note?: Prisma.SortOrder
+  position?: Prisma.SortOrder
+  categorySortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -574,6 +770,10 @@ export type OfferItemAvgOrderByAggregateInput = {
   ratePercent?: Prisma.SortOrder
   dailyRate?: Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
+  quantity?: Prisma.SortOrder
+  unitPrice?: Prisma.SortOrder
+  position?: Prisma.SortOrder
+  categorySortOrder?: Prisma.SortOrder
 }
 
 export type OfferItemMaxOrderByAggregateInput = {
@@ -592,6 +792,15 @@ export type OfferItemMaxOrderByAggregateInput = {
   ratePercent?: Prisma.SortOrder
   dailyRate?: Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
+  serviceId?: Prisma.SortOrder
+  quantity?: Prisma.SortOrder
+  unit?: Prisma.SortOrder
+  unitPrice?: Prisma.SortOrder
+  perDay?: Prisma.SortOrder
+  note?: Prisma.SortOrder
+  position?: Prisma.SortOrder
+  categorySortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -611,6 +820,15 @@ export type OfferItemMinOrderByAggregateInput = {
   ratePercent?: Prisma.SortOrder
   dailyRate?: Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
+  serviceId?: Prisma.SortOrder
+  quantity?: Prisma.SortOrder
+  unit?: Prisma.SortOrder
+  unitPrice?: Prisma.SortOrder
+  perDay?: Prisma.SortOrder
+  note?: Prisma.SortOrder
+  position?: Prisma.SortOrder
+  categorySortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -619,6 +837,10 @@ export type OfferItemSumOrderByAggregateInput = {
   ratePercent?: Prisma.SortOrder
   dailyRate?: Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
+  quantity?: Prisma.SortOrder
+  unitPrice?: Prisma.SortOrder
+  position?: Prisma.SortOrder
+  categorySortOrder?: Prisma.SortOrder
 }
 
 export type OfferItemCreateNestedManyWithoutOfferInput = {
@@ -674,10 +896,19 @@ export type OfferItemCreateWithoutOfferInput = {
   productId?: string | null
   productLabel?: string | null
   description: string
-  netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: string
+  serviceId?: string | null
+  quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: string | null
+  unitPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: boolean
+  note?: string | null
+  position?: number
+  categorySortOrder?: number | null
   createdAt?: Date | string
 }
 
@@ -692,10 +923,19 @@ export type OfferItemUncheckedCreateWithoutOfferInput = {
   productId?: string | null
   productLabel?: string | null
   description: string
-  netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: string
+  serviceId?: string | null
+  quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: string | null
+  unitPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: boolean
+  note?: string | null
+  position?: number
+  categorySortOrder?: number | null
   createdAt?: Date | string
 }
 
@@ -740,10 +980,19 @@ export type OfferItemScalarWhereInput = {
   productId?: Prisma.StringNullableFilter<"OfferItem"> | string | null
   productLabel?: Prisma.StringNullableFilter<"OfferItem"> | string | null
   description?: Prisma.StringFilter<"OfferItem"> | string
-  netPurchasePrice?: Prisma.DecimalFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.DecimalNullableFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.DecimalNullableFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.DecimalNullableFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFilter<"OfferItem"> | string
+  serviceId?: Prisma.StringNullableFilter<"OfferItem"> | string | null
+  quantity?: Prisma.DecimalNullableFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.StringNullableFilter<"OfferItem"> | string | null
+  unitPrice?: Prisma.DecimalNullableFilter<"OfferItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFilter<"OfferItem"> | boolean
+  note?: Prisma.StringNullableFilter<"OfferItem"> | string | null
+  position?: Prisma.IntFilter<"OfferItem"> | number
+  categorySortOrder?: Prisma.IntNullableFilter<"OfferItem"> | number | null
   createdAt?: Prisma.DateTimeFilter<"OfferItem"> | Date | string
 }
 
@@ -758,10 +1007,19 @@ export type OfferItemCreateManyOfferInput = {
   productId?: string | null
   productLabel?: string | null
   description: string
-  netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: string
+  serviceId?: string | null
+  quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: string | null
+  unitPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: boolean
+  note?: string | null
+  position?: number
+  categorySortOrder?: number | null
   createdAt?: Date | string
 }
 
@@ -776,10 +1034,19 @@ export type OfferItemUpdateWithoutOfferInput = {
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  serviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  categorySortOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -794,10 +1061,19 @@ export type OfferItemUncheckedUpdateWithoutOfferInput = {
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  serviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  categorySortOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -812,10 +1088,19 @@ export type OfferItemUncheckedUpdateManyWithoutOfferInput = {
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  serviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  categorySortOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -837,6 +1122,15 @@ export type OfferItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   ratePercent?: boolean
   dailyRate?: boolean
   lineTotal?: boolean
+  kind?: boolean
+  serviceId?: boolean
+  quantity?: boolean
+  unit?: boolean
+  unitPrice?: boolean
+  perDay?: boolean
+  note?: boolean
+  position?: boolean
+  categorySortOrder?: boolean
   createdAt?: boolean
   offer?: boolean | Prisma.OfferDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["offerItem"]>
@@ -857,6 +1151,15 @@ export type OfferItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   ratePercent?: boolean
   dailyRate?: boolean
   lineTotal?: boolean
+  kind?: boolean
+  serviceId?: boolean
+  quantity?: boolean
+  unit?: boolean
+  unitPrice?: boolean
+  perDay?: boolean
+  note?: boolean
+  position?: boolean
+  categorySortOrder?: boolean
   createdAt?: boolean
   offer?: boolean | Prisma.OfferDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["offerItem"]>
@@ -877,6 +1180,15 @@ export type OfferItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   ratePercent?: boolean
   dailyRate?: boolean
   lineTotal?: boolean
+  kind?: boolean
+  serviceId?: boolean
+  quantity?: boolean
+  unit?: boolean
+  unitPrice?: boolean
+  perDay?: boolean
+  note?: boolean
+  position?: boolean
+  categorySortOrder?: boolean
   createdAt?: boolean
   offer?: boolean | Prisma.OfferDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["offerItem"]>
@@ -897,10 +1209,19 @@ export type OfferItemSelectScalar = {
   ratePercent?: boolean
   dailyRate?: boolean
   lineTotal?: boolean
+  kind?: boolean
+  serviceId?: boolean
+  quantity?: boolean
+  unit?: boolean
+  unitPrice?: boolean
+  perDay?: boolean
+  note?: boolean
+  position?: boolean
+  categorySortOrder?: boolean
   createdAt?: boolean
 }
 
-export type OfferItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "offerId" | "assetId" | "bundleId" | "categoryId" | "categoryName" | "categoryNameDe" | "categoryColor" | "productId" | "productLabel" | "description" | "netPurchasePrice" | "ratePercent" | "dailyRate" | "lineTotal" | "createdAt", ExtArgs["result"]["offerItem"]>
+export type OfferItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "offerId" | "assetId" | "bundleId" | "categoryId" | "categoryName" | "categoryNameDe" | "categoryColor" | "productId" | "productLabel" | "description" | "netPurchasePrice" | "ratePercent" | "dailyRate" | "lineTotal" | "kind" | "serviceId" | "quantity" | "unit" | "unitPrice" | "perDay" | "note" | "position" | "categorySortOrder" | "createdAt", ExtArgs["result"]["offerItem"]>
 export type OfferItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   offer?: boolean | Prisma.OfferDefaultArgs<ExtArgs>
 }
@@ -928,10 +1249,19 @@ export type $OfferItemPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     productId: string | null
     productLabel: string | null
     description: string
-    netPurchasePrice: runtime.Decimal
-    ratePercent: runtime.Decimal
-    dailyRate: runtime.Decimal
+    netPurchasePrice: runtime.Decimal | null
+    ratePercent: runtime.Decimal | null
+    dailyRate: runtime.Decimal | null
     lineTotal: runtime.Decimal
+    kind: string
+    serviceId: string | null
+    quantity: runtime.Decimal | null
+    unit: string | null
+    unitPrice: runtime.Decimal | null
+    perDay: boolean
+    note: string | null
+    position: number
+    categorySortOrder: number | null
     createdAt: Date
   }, ExtArgs["result"]["offerItem"]>
   composites: {}
@@ -1372,6 +1702,15 @@ export interface OfferItemFieldRefs {
   readonly ratePercent: Prisma.FieldRef<"OfferItem", 'Decimal'>
   readonly dailyRate: Prisma.FieldRef<"OfferItem", 'Decimal'>
   readonly lineTotal: Prisma.FieldRef<"OfferItem", 'Decimal'>
+  readonly kind: Prisma.FieldRef<"OfferItem", 'String'>
+  readonly serviceId: Prisma.FieldRef<"OfferItem", 'String'>
+  readonly quantity: Prisma.FieldRef<"OfferItem", 'Decimal'>
+  readonly unit: Prisma.FieldRef<"OfferItem", 'String'>
+  readonly unitPrice: Prisma.FieldRef<"OfferItem", 'Decimal'>
+  readonly perDay: Prisma.FieldRef<"OfferItem", 'Boolean'>
+  readonly note: Prisma.FieldRef<"OfferItem", 'String'>
+  readonly position: Prisma.FieldRef<"OfferItem", 'Int'>
+  readonly categorySortOrder: Prisma.FieldRef<"OfferItem", 'Int'>
   readonly createdAt: Prisma.FieldRef<"OfferItem", 'DateTime'>
 }
     

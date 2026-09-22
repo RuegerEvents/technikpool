@@ -31,6 +31,10 @@ export type InvoiceItemAvgAggregateOutputType = {
   ratePercent: runtime.Decimal | null
   dailyRate: runtime.Decimal | null
   lineTotal: runtime.Decimal | null
+  quantity: runtime.Decimal | null
+  unitPrice: runtime.Decimal | null
+  position: number | null
+  categorySortOrder: number | null
 }
 
 export type InvoiceItemSumAggregateOutputType = {
@@ -38,6 +42,10 @@ export type InvoiceItemSumAggregateOutputType = {
   ratePercent: runtime.Decimal | null
   dailyRate: runtime.Decimal | null
   lineTotal: runtime.Decimal | null
+  quantity: runtime.Decimal | null
+  unitPrice: runtime.Decimal | null
+  position: number | null
+  categorySortOrder: number | null
 }
 
 export type InvoiceItemMinAggregateOutputType = {
@@ -56,6 +64,15 @@ export type InvoiceItemMinAggregateOutputType = {
   ratePercent: runtime.Decimal | null
   dailyRate: runtime.Decimal | null
   lineTotal: runtime.Decimal | null
+  kind: string | null
+  serviceId: string | null
+  quantity: runtime.Decimal | null
+  unit: string | null
+  unitPrice: runtime.Decimal | null
+  perDay: boolean | null
+  note: string | null
+  position: number | null
+  categorySortOrder: number | null
   createdAt: Date | null
 }
 
@@ -75,6 +92,15 @@ export type InvoiceItemMaxAggregateOutputType = {
   ratePercent: runtime.Decimal | null
   dailyRate: runtime.Decimal | null
   lineTotal: runtime.Decimal | null
+  kind: string | null
+  serviceId: string | null
+  quantity: runtime.Decimal | null
+  unit: string | null
+  unitPrice: runtime.Decimal | null
+  perDay: boolean | null
+  note: string | null
+  position: number | null
+  categorySortOrder: number | null
   createdAt: Date | null
 }
 
@@ -94,6 +120,15 @@ export type InvoiceItemCountAggregateOutputType = {
   ratePercent: number
   dailyRate: number
   lineTotal: number
+  kind: number
+  serviceId: number
+  quantity: number
+  unit: number
+  unitPrice: number
+  perDay: number
+  note: number
+  position: number
+  categorySortOrder: number
   createdAt: number
   _all: number
 }
@@ -104,6 +139,10 @@ export type InvoiceItemAvgAggregateInputType = {
   ratePercent?: true
   dailyRate?: true
   lineTotal?: true
+  quantity?: true
+  unitPrice?: true
+  position?: true
+  categorySortOrder?: true
 }
 
 export type InvoiceItemSumAggregateInputType = {
@@ -111,6 +150,10 @@ export type InvoiceItemSumAggregateInputType = {
   ratePercent?: true
   dailyRate?: true
   lineTotal?: true
+  quantity?: true
+  unitPrice?: true
+  position?: true
+  categorySortOrder?: true
 }
 
 export type InvoiceItemMinAggregateInputType = {
@@ -129,6 +172,15 @@ export type InvoiceItemMinAggregateInputType = {
   ratePercent?: true
   dailyRate?: true
   lineTotal?: true
+  kind?: true
+  serviceId?: true
+  quantity?: true
+  unit?: true
+  unitPrice?: true
+  perDay?: true
+  note?: true
+  position?: true
+  categorySortOrder?: true
   createdAt?: true
 }
 
@@ -148,6 +200,15 @@ export type InvoiceItemMaxAggregateInputType = {
   ratePercent?: true
   dailyRate?: true
   lineTotal?: true
+  kind?: true
+  serviceId?: true
+  quantity?: true
+  unit?: true
+  unitPrice?: true
+  perDay?: true
+  note?: true
+  position?: true
+  categorySortOrder?: true
   createdAt?: true
 }
 
@@ -167,6 +228,15 @@ export type InvoiceItemCountAggregateInputType = {
   ratePercent?: true
   dailyRate?: true
   lineTotal?: true
+  kind?: true
+  serviceId?: true
+  quantity?: true
+  unit?: true
+  unitPrice?: true
+  perDay?: true
+  note?: true
+  position?: true
+  categorySortOrder?: true
   createdAt?: true
   _all?: true
 }
@@ -269,10 +339,19 @@ export type InvoiceItemGroupByOutputType = {
   productId: string | null
   productLabel: string | null
   description: string
-  netPurchasePrice: runtime.Decimal
-  ratePercent: runtime.Decimal
-  dailyRate: runtime.Decimal
+  netPurchasePrice: runtime.Decimal | null
+  ratePercent: runtime.Decimal | null
+  dailyRate: runtime.Decimal | null
   lineTotal: runtime.Decimal
+  kind: string
+  serviceId: string | null
+  quantity: runtime.Decimal | null
+  unit: string | null
+  unitPrice: runtime.Decimal | null
+  perDay: boolean
+  note: string | null
+  position: number
+  categorySortOrder: number | null
   createdAt: Date
   _count: InvoiceItemCountAggregateOutputType | null
   _avg: InvoiceItemAvgAggregateOutputType | null
@@ -311,10 +390,19 @@ export type InvoiceItemWhereInput = {
   productId?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   productLabel?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   description?: Prisma.StringFilter<"InvoiceItem"> | string
-  netPurchasePrice?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.DecimalNullableFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.DecimalNullableFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.DecimalNullableFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFilter<"InvoiceItem"> | string
+  serviceId?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  quantity?: Prisma.DecimalNullableFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  unitPrice?: Prisma.DecimalNullableFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFilter<"InvoiceItem"> | boolean
+  note?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  position?: Prisma.IntFilter<"InvoiceItem"> | number
+  categorySortOrder?: Prisma.IntNullableFilter<"InvoiceItem"> | number | null
   createdAt?: Prisma.DateTimeFilter<"InvoiceItem"> | Date | string
   invoice?: Prisma.XOR<Prisma.InvoiceScalarRelationFilter, Prisma.InvoiceWhereInput>
 }
@@ -331,10 +419,19 @@ export type InvoiceItemOrderByWithRelationInput = {
   productId?: Prisma.SortOrderInput | Prisma.SortOrder
   productLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrder
-  netPurchasePrice?: Prisma.SortOrder
-  ratePercent?: Prisma.SortOrder
-  dailyRate?: Prisma.SortOrder
+  netPurchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  ratePercent?: Prisma.SortOrderInput | Prisma.SortOrder
+  dailyRate?: Prisma.SortOrderInput | Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
+  serviceId?: Prisma.SortOrderInput | Prisma.SortOrder
+  quantity?: Prisma.SortOrderInput | Prisma.SortOrder
+  unit?: Prisma.SortOrderInput | Prisma.SortOrder
+  unitPrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  perDay?: Prisma.SortOrder
+  note?: Prisma.SortOrderInput | Prisma.SortOrder
+  position?: Prisma.SortOrder
+  categorySortOrder?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   invoice?: Prisma.InvoiceOrderByWithRelationInput
 }
@@ -354,10 +451,19 @@ export type InvoiceItemWhereUniqueInput = Prisma.AtLeast<{
   productId?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   productLabel?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   description?: Prisma.StringFilter<"InvoiceItem"> | string
-  netPurchasePrice?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.DecimalNullableFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.DecimalNullableFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.DecimalNullableFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFilter<"InvoiceItem"> | string
+  serviceId?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  quantity?: Prisma.DecimalNullableFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  unitPrice?: Prisma.DecimalNullableFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFilter<"InvoiceItem"> | boolean
+  note?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  position?: Prisma.IntFilter<"InvoiceItem"> | number
+  categorySortOrder?: Prisma.IntNullableFilter<"InvoiceItem"> | number | null
   createdAt?: Prisma.DateTimeFilter<"InvoiceItem"> | Date | string
   invoice?: Prisma.XOR<Prisma.InvoiceScalarRelationFilter, Prisma.InvoiceWhereInput>
 }, "id">
@@ -374,10 +480,19 @@ export type InvoiceItemOrderByWithAggregationInput = {
   productId?: Prisma.SortOrderInput | Prisma.SortOrder
   productLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrder
-  netPurchasePrice?: Prisma.SortOrder
-  ratePercent?: Prisma.SortOrder
-  dailyRate?: Prisma.SortOrder
+  netPurchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  ratePercent?: Prisma.SortOrderInput | Prisma.SortOrder
+  dailyRate?: Prisma.SortOrderInput | Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
+  serviceId?: Prisma.SortOrderInput | Prisma.SortOrder
+  quantity?: Prisma.SortOrderInput | Prisma.SortOrder
+  unit?: Prisma.SortOrderInput | Prisma.SortOrder
+  unitPrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  perDay?: Prisma.SortOrder
+  note?: Prisma.SortOrderInput | Prisma.SortOrder
+  position?: Prisma.SortOrder
+  categorySortOrder?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.InvoiceItemCountOrderByAggregateInput
   _avg?: Prisma.InvoiceItemAvgOrderByAggregateInput
@@ -401,10 +516,19 @@ export type InvoiceItemScalarWhereWithAggregatesInput = {
   productId?: Prisma.StringNullableWithAggregatesFilter<"InvoiceItem"> | string | null
   productLabel?: Prisma.StringNullableWithAggregatesFilter<"InvoiceItem"> | string | null
   description?: Prisma.StringWithAggregatesFilter<"InvoiceItem"> | string
-  netPurchasePrice?: Prisma.DecimalWithAggregatesFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalWithAggregatesFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalWithAggregatesFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.DecimalNullableWithAggregatesFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.DecimalNullableWithAggregatesFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.DecimalNullableWithAggregatesFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalWithAggregatesFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringWithAggregatesFilter<"InvoiceItem"> | string
+  serviceId?: Prisma.StringNullableWithAggregatesFilter<"InvoiceItem"> | string | null
+  quantity?: Prisma.DecimalNullableWithAggregatesFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.StringNullableWithAggregatesFilter<"InvoiceItem"> | string | null
+  unitPrice?: Prisma.DecimalNullableWithAggregatesFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolWithAggregatesFilter<"InvoiceItem"> | boolean
+  note?: Prisma.StringNullableWithAggregatesFilter<"InvoiceItem"> | string | null
+  position?: Prisma.IntWithAggregatesFilter<"InvoiceItem"> | number
+  categorySortOrder?: Prisma.IntNullableWithAggregatesFilter<"InvoiceItem"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"InvoiceItem"> | Date | string
 }
 
@@ -419,10 +543,19 @@ export type InvoiceItemCreateInput = {
   productId?: string | null
   productLabel?: string | null
   description: string
-  netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: string
+  serviceId?: string | null
+  quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: string | null
+  unitPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: boolean
+  note?: string | null
+  position?: number
+  categorySortOrder?: number | null
   createdAt?: Date | string
   invoice: Prisma.InvoiceCreateNestedOneWithoutItemsInput
 }
@@ -439,10 +572,19 @@ export type InvoiceItemUncheckedCreateInput = {
   productId?: string | null
   productLabel?: string | null
   description: string
-  netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: string
+  serviceId?: string | null
+  quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: string | null
+  unitPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: boolean
+  note?: string | null
+  position?: number
+  categorySortOrder?: number | null
   createdAt?: Date | string
 }
 
@@ -457,10 +599,19 @@ export type InvoiceItemUpdateInput = {
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  serviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  categorySortOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   invoice?: Prisma.InvoiceUpdateOneRequiredWithoutItemsNestedInput
 }
@@ -477,10 +628,19 @@ export type InvoiceItemUncheckedUpdateInput = {
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  serviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  categorySortOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -496,10 +656,19 @@ export type InvoiceItemCreateManyInput = {
   productId?: string | null
   productLabel?: string | null
   description: string
-  netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: string
+  serviceId?: string | null
+  quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: string | null
+  unitPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: boolean
+  note?: string | null
+  position?: number
+  categorySortOrder?: number | null
   createdAt?: Date | string
 }
 
@@ -514,10 +683,19 @@ export type InvoiceItemUpdateManyMutationInput = {
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  serviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  categorySortOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -533,10 +711,19 @@ export type InvoiceItemUncheckedUpdateManyInput = {
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  serviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  categorySortOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -566,6 +753,15 @@ export type InvoiceItemCountOrderByAggregateInput = {
   ratePercent?: Prisma.SortOrder
   dailyRate?: Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
+  serviceId?: Prisma.SortOrder
+  quantity?: Prisma.SortOrder
+  unit?: Prisma.SortOrder
+  unitPrice?: Prisma.SortOrder
+  perDay?: Prisma.SortOrder
+  note?: Prisma.SortOrder
+  position?: Prisma.SortOrder
+  categorySortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -574,6 +770,10 @@ export type InvoiceItemAvgOrderByAggregateInput = {
   ratePercent?: Prisma.SortOrder
   dailyRate?: Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
+  quantity?: Prisma.SortOrder
+  unitPrice?: Prisma.SortOrder
+  position?: Prisma.SortOrder
+  categorySortOrder?: Prisma.SortOrder
 }
 
 export type InvoiceItemMaxOrderByAggregateInput = {
@@ -592,6 +792,15 @@ export type InvoiceItemMaxOrderByAggregateInput = {
   ratePercent?: Prisma.SortOrder
   dailyRate?: Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
+  serviceId?: Prisma.SortOrder
+  quantity?: Prisma.SortOrder
+  unit?: Prisma.SortOrder
+  unitPrice?: Prisma.SortOrder
+  perDay?: Prisma.SortOrder
+  note?: Prisma.SortOrder
+  position?: Prisma.SortOrder
+  categorySortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -611,6 +820,15 @@ export type InvoiceItemMinOrderByAggregateInput = {
   ratePercent?: Prisma.SortOrder
   dailyRate?: Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
+  serviceId?: Prisma.SortOrder
+  quantity?: Prisma.SortOrder
+  unit?: Prisma.SortOrder
+  unitPrice?: Prisma.SortOrder
+  perDay?: Prisma.SortOrder
+  note?: Prisma.SortOrder
+  position?: Prisma.SortOrder
+  categorySortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -619,6 +837,10 @@ export type InvoiceItemSumOrderByAggregateInput = {
   ratePercent?: Prisma.SortOrder
   dailyRate?: Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
+  quantity?: Prisma.SortOrder
+  unitPrice?: Prisma.SortOrder
+  position?: Prisma.SortOrder
+  categorySortOrder?: Prisma.SortOrder
 }
 
 export type InvoiceItemCreateNestedManyWithoutInvoiceInput = {
@@ -674,10 +896,19 @@ export type InvoiceItemCreateWithoutInvoiceInput = {
   productId?: string | null
   productLabel?: string | null
   description: string
-  netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: string
+  serviceId?: string | null
+  quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: string | null
+  unitPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: boolean
+  note?: string | null
+  position?: number
+  categorySortOrder?: number | null
   createdAt?: Date | string
 }
 
@@ -692,10 +923,19 @@ export type InvoiceItemUncheckedCreateWithoutInvoiceInput = {
   productId?: string | null
   productLabel?: string | null
   description: string
-  netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: string
+  serviceId?: string | null
+  quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: string | null
+  unitPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: boolean
+  note?: string | null
+  position?: number
+  categorySortOrder?: number | null
   createdAt?: Date | string
 }
 
@@ -740,10 +980,19 @@ export type InvoiceItemScalarWhereInput = {
   productId?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   productLabel?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
   description?: Prisma.StringFilter<"InvoiceItem"> | string
-  netPurchasePrice?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.DecimalNullableFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.DecimalNullableFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.DecimalNullableFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFilter<"InvoiceItem"> | string
+  serviceId?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  quantity?: Prisma.DecimalNullableFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  unitPrice?: Prisma.DecimalNullableFilter<"InvoiceItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFilter<"InvoiceItem"> | boolean
+  note?: Prisma.StringNullableFilter<"InvoiceItem"> | string | null
+  position?: Prisma.IntFilter<"InvoiceItem"> | number
+  categorySortOrder?: Prisma.IntNullableFilter<"InvoiceItem"> | number | null
   createdAt?: Prisma.DateTimeFilter<"InvoiceItem"> | Date | string
 }
 
@@ -758,10 +1007,19 @@ export type InvoiceItemCreateManyInvoiceInput = {
   productId?: string | null
   productLabel?: string | null
   description: string
-  netPurchasePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent: runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: string
+  serviceId?: string | null
+  quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: string | null
+  unitPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: boolean
+  note?: string | null
+  position?: number
+  categorySortOrder?: number | null
   createdAt?: Date | string
 }
 
@@ -776,10 +1034,19 @@ export type InvoiceItemUpdateWithoutInvoiceInput = {
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  serviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  categorySortOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -794,10 +1061,19 @@ export type InvoiceItemUncheckedUpdateWithoutInvoiceInput = {
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  serviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  categorySortOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -812,10 +1088,19 @@ export type InvoiceItemUncheckedUpdateManyWithoutInvoiceInput = {
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
-  netPurchasePrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  ratePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  dailyRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  netPurchasePrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  ratePercent?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  dailyRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  serviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  perDay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  categorySortOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -837,6 +1122,15 @@ export type InvoiceItemSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   ratePercent?: boolean
   dailyRate?: boolean
   lineTotal?: boolean
+  kind?: boolean
+  serviceId?: boolean
+  quantity?: boolean
+  unit?: boolean
+  unitPrice?: boolean
+  perDay?: boolean
+  note?: boolean
+  position?: boolean
+  categorySortOrder?: boolean
   createdAt?: boolean
   invoice?: boolean | Prisma.InvoiceDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["invoiceItem"]>
@@ -857,6 +1151,15 @@ export type InvoiceItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   ratePercent?: boolean
   dailyRate?: boolean
   lineTotal?: boolean
+  kind?: boolean
+  serviceId?: boolean
+  quantity?: boolean
+  unit?: boolean
+  unitPrice?: boolean
+  perDay?: boolean
+  note?: boolean
+  position?: boolean
+  categorySortOrder?: boolean
   createdAt?: boolean
   invoice?: boolean | Prisma.InvoiceDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["invoiceItem"]>
@@ -877,6 +1180,15 @@ export type InvoiceItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   ratePercent?: boolean
   dailyRate?: boolean
   lineTotal?: boolean
+  kind?: boolean
+  serviceId?: boolean
+  quantity?: boolean
+  unit?: boolean
+  unitPrice?: boolean
+  perDay?: boolean
+  note?: boolean
+  position?: boolean
+  categorySortOrder?: boolean
   createdAt?: boolean
   invoice?: boolean | Prisma.InvoiceDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["invoiceItem"]>
@@ -897,10 +1209,19 @@ export type InvoiceItemSelectScalar = {
   ratePercent?: boolean
   dailyRate?: boolean
   lineTotal?: boolean
+  kind?: boolean
+  serviceId?: boolean
+  quantity?: boolean
+  unit?: boolean
+  unitPrice?: boolean
+  perDay?: boolean
+  note?: boolean
+  position?: boolean
+  categorySortOrder?: boolean
   createdAt?: boolean
 }
 
-export type InvoiceItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "invoiceId" | "assetId" | "bundleId" | "categoryId" | "categoryName" | "categoryNameDe" | "categoryColor" | "productId" | "productLabel" | "description" | "netPurchasePrice" | "ratePercent" | "dailyRate" | "lineTotal" | "createdAt", ExtArgs["result"]["invoiceItem"]>
+export type InvoiceItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "invoiceId" | "assetId" | "bundleId" | "categoryId" | "categoryName" | "categoryNameDe" | "categoryColor" | "productId" | "productLabel" | "description" | "netPurchasePrice" | "ratePercent" | "dailyRate" | "lineTotal" | "kind" | "serviceId" | "quantity" | "unit" | "unitPrice" | "perDay" | "note" | "position" | "categorySortOrder" | "createdAt", ExtArgs["result"]["invoiceItem"]>
 export type InvoiceItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   invoice?: boolean | Prisma.InvoiceDefaultArgs<ExtArgs>
 }
@@ -928,10 +1249,19 @@ export type $InvoiceItemPayload<ExtArgs extends runtime.Types.Extensions.Interna
     productId: string | null
     productLabel: string | null
     description: string
-    netPurchasePrice: runtime.Decimal
-    ratePercent: runtime.Decimal
-    dailyRate: runtime.Decimal
+    netPurchasePrice: runtime.Decimal | null
+    ratePercent: runtime.Decimal | null
+    dailyRate: runtime.Decimal | null
     lineTotal: runtime.Decimal
+    kind: string
+    serviceId: string | null
+    quantity: runtime.Decimal | null
+    unit: string | null
+    unitPrice: runtime.Decimal | null
+    perDay: boolean
+    note: string | null
+    position: number
+    categorySortOrder: number | null
     createdAt: Date
   }, ExtArgs["result"]["invoiceItem"]>
   composites: {}
@@ -1372,6 +1702,15 @@ export interface InvoiceItemFieldRefs {
   readonly ratePercent: Prisma.FieldRef<"InvoiceItem", 'Decimal'>
   readonly dailyRate: Prisma.FieldRef<"InvoiceItem", 'Decimal'>
   readonly lineTotal: Prisma.FieldRef<"InvoiceItem", 'Decimal'>
+  readonly kind: Prisma.FieldRef<"InvoiceItem", 'String'>
+  readonly serviceId: Prisma.FieldRef<"InvoiceItem", 'String'>
+  readonly quantity: Prisma.FieldRef<"InvoiceItem", 'Decimal'>
+  readonly unit: Prisma.FieldRef<"InvoiceItem", 'String'>
+  readonly unitPrice: Prisma.FieldRef<"InvoiceItem", 'Decimal'>
+  readonly perDay: Prisma.FieldRef<"InvoiceItem", 'Boolean'>
+  readonly note: Prisma.FieldRef<"InvoiceItem", 'String'>
+  readonly position: Prisma.FieldRef<"InvoiceItem", 'Int'>
+  readonly categorySortOrder: Prisma.FieldRef<"InvoiceItem", 'Int'>
   readonly createdAt: Prisma.FieldRef<"InvoiceItem", 'DateTime'>
 }
     

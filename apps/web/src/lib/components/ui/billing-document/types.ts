@@ -12,6 +12,34 @@ export type BillingItem = {
 	ratePercent: unknown;
 	dailyRate: unknown;
 	lineTotal: unknown;
+	kind?: string;
+	quantity?: unknown;
+	unit?: string | null;
+	unitPrice?: unknown;
+	perDay?: boolean;
+	note?: string | null;
+	position?: number;
+	categorySortOrder?: number | null;
+	serviceId?: string | null;
+};
+
+/** The document service lines are added to, and the org whose price list they come from. */
+export type ServiceLineTarget = {
+	kind: 'offer' | 'invoice';
+	documentId: string;
+	organizationId: string;
+};
+
+export type EditedServiceLine = {
+	id: string;
+	serviceId: string | null;
+	name: string;
+	note: string | null;
+	categoryId: string | null;
+	quantity: number;
+	unit: string | null;
+	unitPrice: number;
+	perDay: boolean;
 };
 
 export type DurationInfo = {

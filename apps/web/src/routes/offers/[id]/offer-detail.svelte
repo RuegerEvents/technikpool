@@ -449,6 +449,7 @@
 		items={offer.items}
 		emptyMessage="No items on this offer yet."
 		editable={!offer.finalizedAt}
+		serviceTarget={{ kind: 'offer', documentId: offerId, organizationId: offer.organizationId }}
 		dayCount={offer.dayCount}
 		{fullDuration}
 		{showDuration}

@@ -208,6 +208,16 @@ export type Inspection = Prisma.InspectionModel
  */
 export type OrgCategoryRate = Prisma.OrgCategoryRateModel
 /**
+ * Model ServiceCategory
+ * 
+ */
+export type ServiceCategory = Prisma.ServiceCategoryModel
+/**
+ * Model OrgService
+ * 
+ */
+export type OrgService = Prisma.OrgServiceModel
+/**
  * Model OfferSequence
  * 
  */

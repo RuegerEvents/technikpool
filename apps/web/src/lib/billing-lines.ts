@@ -30,7 +30,18 @@ export type GroupableItem = {
 	ratePercent: unknown;
 	dailyRate: unknown;
 	lineTotal: unknown;
+	// Service lines only — see $lib/service-lines.
+	kind?: string;
+	quantity?: unknown;
+	unit?: string | null;
+	unitPrice?: unknown;
+	perDay?: boolean;
+	note?: string | null;
+	position?: number;
+	categorySortOrder?: number | null;
 };
+
+export const isServiceItem = (item: { kind?: string }) => item.kind === 'SERVICE';
 
 export type LineGroup<T extends GroupableItem> = {
 	key: string;
@@ -41,6 +52,14 @@ export type LineGroup<T extends GroupableItem> = {
 	dailyRate: number;
 	lineTotal: number;
 	items: T[];
+	/** Set on a service line, which is priced by unit rather than by rate. */
+	service: {
+		unit: string | null;
+		unitPrice: number;
+		perDay: boolean;
+		note: string | null;
+		position: number;
+	} | null;
 };
 
 export type CategoryGroup<T extends GroupableItem> = {
@@ -49,12 +68,17 @@ export type CategoryGroup<T extends GroupableItem> = {
 	color: string | null;
 	lines: LineGroup<T>[];
 	subtotal: number;
+	/** A section of service lines, which follows the equipment. */
+	isService: boolean;
+	sortOrder: number;
 };
 
 // Lines only merge when every number a reader could check would be identical:
 // same product, same purchase price, same rate. A unit priced differently keeps
 // its own line rather than disappearing into an average.
+// A service line is never merged: two "Techniker" lines were typed in as two.
 function lineKey(item: GroupableItem): string {
+	if (isServiceItem(item)) return `service:${item.id}`;
 	const identity = item.productId ?? (item.bundleId ? `bundle:${item.bundleId}` : item.description);
 	return `${identity}|${Number(item.netPurchasePrice)}|${Number(item.ratePercent)}`;
 }
@@ -68,7 +92,10 @@ export function groupBillingItems<T extends GroupableItem>(
 	const lines = new Map<string, LineGroup<T>>();
 
 	for (const item of items) {
-		const catKey = item.categoryId ?? '';
+		const service = isServiceItem(item);
+		// A service category and an equipment category never share a section,
+		// even if an id could ever collide.
+		const catKey = `${service ? 'service:' : ''}${item.categoryId ?? ''}`;
 		let category = categories.get(catKey);
 		if (!category) {
 			category = {
@@ -76,7 +103,9 @@ export function groupBillingItems<T extends GroupableItem>(
 				name: categoryLabel(item),
 				color: item.categoryColor ?? null,
 				lines: [],
-				subtotal: 0
+				subtotal: 0,
+				isService: service,
+				sortOrder: item.categorySortOrder ?? 0
 			};
 			categories.set(catKey, category);
 		}
@@ -96,29 +125,49 @@ export function groupBillingItems<T extends GroupableItem>(
 				ratePercent: Number(item.ratePercent),
 				dailyRate: Number(item.dailyRate),
 				lineTotal: 0,
-				items: []
+				items: [],
+				service: service
+					? {
+							unit: item.unit ?? null,
+							unitPrice: Number(item.unitPrice),
+							perDay: item.perDay ?? false,
+							note: item.note ?? null,
+							position: item.position ?? 0
+						}
+					: null
 			};
 			lines.set(key, line);
 			category.lines.push(line);
 		}
-		line.quantity++;
+		line.quantity = service ? Number(item.quantity) : line.quantity + 1;
 		line.items.push(item);
 		line.lineTotal += Number(item.lineTotal);
 	}
 
 	const collator = new Intl.Collator('de', { numeric: true, sensitivity: 'base' });
+	// Equipment reads alphabetically; services in the order they were arranged —
+	// sections by the catalog's order, lines by hand. Array sort is stable, so
+	// lines sharing a position stay in the order they were added.
 	return [...categories.values()]
 		.map((category) => ({
 			...category,
-			lines: category.lines.sort(
-				(a, b) =>
-					collator.compare(a.label, b.label) ||
-					a.netPurchasePrice - b.netPurchasePrice ||
-					a.ratePercent - b.ratePercent ||
-					collator.compare(a.key, b.key)
-			)
+			lines: category.isService
+				? category.lines.sort((a, b) => a.service!.position - b.service!.position)
+				: category.lines.sort(
+						(a, b) =>
+							collator.compare(a.label, b.label) ||
+							a.netPurchasePrice - b.netPurchasePrice ||
+							a.ratePercent - b.ratePercent ||
+							collator.compare(a.key, b.key)
+					)
 		}))
-		.sort((a, b) => collator.compare(a.name, b.name) || collator.compare(a.key, b.key));
+		.sort(
+			(a, b) =>
+				Number(a.isService) - Number(b.isService) ||
+				(a.isService ? a.sortOrder - b.sortOrder : 0) ||
+				collator.compare(a.name, b.name) ||
+				collator.compare(a.key, b.key)
+		);
 }
 
 /** The tags behind a collapsed line, for the views that show what's in it. */
@@ -126,8 +175,12 @@ export function lineUnitLabels<T extends GroupableItem>(line: LineGroup<T>): str
 	return line.items.map((i) => i.description);
 }
 
-/** Composition/accessory text stored after the first line of a description. */
+/**
+ * Composition/accessory text stored after the first line of a description, or
+ * a service line's note.
+ */
 export function lineSubtitle<T extends GroupableItem>(line: LineGroup<T>): string {
+	if (line.service) return line.service.note?.trim() ?? '';
 	return [
 		...new Set(
 			line.items

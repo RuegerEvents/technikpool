@@ -384,6 +384,11 @@
 		items={invoice.items}
 		emptyMessage="No items on this invoice yet."
 		editable={!invoice.sentAt}
+		serviceTarget={{
+			kind: 'invoice',
+			documentId: invoiceId,
+			organizationId: invoice.organizationId
+		}}
 		dayCount={invoice.dayCount}
 		{fullDuration}
 		{showDuration}

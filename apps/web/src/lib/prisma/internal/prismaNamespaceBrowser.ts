@@ -80,6 +80,8 @@ export const ModelName = {
   AssetTransaction: 'AssetTransaction',
   Inspection: 'Inspection',
   OrgCategoryRate: 'OrgCategoryRate',
+  ServiceCategory: 'ServiceCategory',
+  OrgService: 'OrgService',
   OfferSequence: 'OfferSequence',
   Offer: 'Offer',
   OfferItem: 'OfferItem',
@@ -533,6 +535,34 @@ export const OrgCategoryRateScalarFieldEnum = {
 export type OrgCategoryRateScalarFieldEnum = (typeof OrgCategoryRateScalarFieldEnum)[keyof typeof OrgCategoryRateScalarFieldEnum]
 
 
+export const ServiceCategoryScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  name: 'name',
+  color: 'color',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ServiceCategoryScalarFieldEnum = (typeof ServiceCategoryScalarFieldEnum)[keyof typeof ServiceCategoryScalarFieldEnum]
+
+
+export const OrgServiceScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  categoryId: 'categoryId',
+  name: 'name',
+  unit: 'unit',
+  unitPrice: 'unitPrice',
+  perDay: 'perDay',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrgServiceScalarFieldEnum = (typeof OrgServiceScalarFieldEnum)[keyof typeof OrgServiceScalarFieldEnum]
+
+
 export const OfferSequenceScalarFieldEnum = {
   id: 'id',
   organizationId: 'organizationId',
@@ -607,6 +637,15 @@ export const OfferItemScalarFieldEnum = {
   ratePercent: 'ratePercent',
   dailyRate: 'dailyRate',
   lineTotal: 'lineTotal',
+  kind: 'kind',
+  serviceId: 'serviceId',
+  quantity: 'quantity',
+  unit: 'unit',
+  unitPrice: 'unitPrice',
+  perDay: 'perDay',
+  note: 'note',
+  position: 'position',
+  categorySortOrder: 'categorySortOrder',
   createdAt: 'createdAt'
 } as const
 
@@ -692,6 +731,15 @@ export const InvoiceItemScalarFieldEnum = {
   ratePercent: 'ratePercent',
   dailyRate: 'dailyRate',
   lineTotal: 'lineTotal',
+  kind: 'kind',
+  serviceId: 'serviceId',
+  quantity: 'quantity',
+  unit: 'unit',
+  unitPrice: 'unitPrice',
+  perDay: 'perDay',
+  note: 'note',
+  position: 'position',
+  categorySortOrder: 'categorySortOrder',
   createdAt: 'createdAt'
 } as const
 

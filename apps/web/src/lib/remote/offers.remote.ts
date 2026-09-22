@@ -22,6 +22,9 @@ import { organizationFromSnapshot, orgSnapshotColumns } from '$lib/org-snapshot'
 import { summarizeContents } from '$lib/billing-lines';
 import { productLabel } from '$lib/product-label';
 import { appError, type AppErrorCode, type ErrorParams } from '$lib/errors';
+import type { Prisma } from '$lib/prisma/client';
+import { SERVICE_UNITS, serviceLineTotal } from '$lib/service-lines.svelte';
+import { getServiceCatalog } from './service-catalog.remote';
 
 /**
  * Offers and invoices are inventory-admin work, not org-owner work — deliberately
@@ -519,6 +522,59 @@ function priceLine(netPurchasePrice: number, ratePercent: number, dayCount: numb
 	return { ratePercent: rate, dailyRate: toCents(daily), lineTotal: toCents(daily * dayCount) };
 }
 
+// A line is equipment, rebuilt from the production by every update, or a
+// service typed in on the document, which no update touches — see OfferItem.kind.
+const EQUIPMENT = 'EQUIPMENT';
+const SERVICE = 'SERVICE';
+
+type StoredItem = Prisma.OfferItemGetPayload<object> | Prisma.InvoiceItemGetPayload<object>;
+
+/** A line priced for a new day count: equipment by its rate, a service by its unit. */
+function repriceForDays(item: StoredItem, dayCount: number) {
+	if (item.kind === SERVICE) {
+		return {
+			lineTotal: serviceLineTotal(
+				Number(item.quantity),
+				Number(item.unitPrice),
+				item.perDay,
+				dayCount
+			)
+		};
+	}
+	// From price and rate rather than the stored, already-rounded daily rate:
+	// multiplied by the days, that rounding grew into cents the staleness check
+	// then read as a change.
+	return priceLine(Number(item.netPurchasePrice), Number(item.ratePercent), dayCount);
+}
+
+/** Everything a line carries onto another document: a copy, a revision, an invoice. */
+function copyItem(item: StoredItem) {
+	return {
+		assetId: item.assetId,
+		bundleId: item.bundleId,
+		productId: item.productId,
+		productLabel: item.productLabel,
+		categoryId: item.categoryId,
+		categoryName: item.categoryName,
+		categoryNameDe: item.categoryNameDe,
+		categoryColor: item.categoryColor,
+		categorySortOrder: item.categorySortOrder,
+		description: item.description,
+		netPurchasePrice: item.netPurchasePrice,
+		ratePercent: item.ratePercent,
+		dailyRate: item.dailyRate,
+		lineTotal: item.lineTotal,
+		kind: item.kind,
+		serviceId: item.serviceId,
+		quantity: item.quantity,
+		unit: item.unit,
+		unitPrice: item.unitPrice,
+		perDay: item.perDay,
+		note: item.note,
+		position: item.position
+	};
+}
+
 /**
  * The production's current lines as document items, priced for `dayCount`.
  * A rate set on a line belongs to the document, so a unit that is still booked
@@ -839,7 +895,8 @@ export const getOfferStaleness = query(v.string(), async (offerId: string) => {
 	await requireAuth();
 	const offer = await prisma.offer.findUniqueOrThrow({
 		where: { id: offerId },
-		include: { items: true }
+		// Service lines are the document's own; the production has no say in them.
+		include: { items: { where: { kind: EQUIPMENT } } }
 	});
 	await requireOrgBilling(offer.organizationId);
 
@@ -921,7 +978,7 @@ export const getOfferStaleness = query(v.string(), async (offerId: string) => {
 export const updateOfferItemsFromProduction = command(v.string(), async (offerId: string) => {
 	const offer = await prisma.offer.findUniqueOrThrow({
 		where: { id: offerId },
-		include: { items: true }
+		include: { items: { where: { kind: EQUIPMENT } } }
 	});
 	await requireOrgBilling(offer.organizationId);
 	if (offer.finalizedAt) appError(409, 'offer_immutable');
@@ -935,7 +992,8 @@ export const updateOfferItemsFromProduction = command(v.string(), async (offerId
 	const itemsData = itemsFromProduction(lines, offer.items, offer.dayCount);
 
 	await prisma.$transaction([
-		prisma.offerItem.deleteMany({ where: { offerId } }),
+		// Only what came from the production goes back to it; service lines stay.
+		prisma.offerItem.deleteMany({ where: { offerId, kind: EQUIPMENT } }),
 		prisma.offer.update({ where: { id: offerId }, data: { items: { create: itemsData } } })
 	]);
 
@@ -962,10 +1020,7 @@ export const updateOfferDayCount = command(
 			...offer.items.map((item) =>
 				prisma.offerItem.update({
 					where: { id: item.id },
-					// From price and rate rather than the stored, already-rounded daily
-					// rate: multiplied by the days, that rounding grew into cents the
-					// staleness check then read as a change.
-					data: priceLine(Number(item.netPurchasePrice), Number(item.ratePercent), dayCount)
+					data: repriceForDays(item, dayCount)
 				})
 			)
 		]);
@@ -988,7 +1043,8 @@ export const updateOfferItemRate = command(
 	updateOfferItemRateSchema,
 	async ({ offerItemIds, ratePercent }) => {
 		const items = await prisma.offerItem.findMany({
-			where: { id: { in: offerItemIds } },
+			// A rate is an equipment line's; a service line has none to set.
+			where: { id: { in: offerItemIds }, kind: EQUIPMENT },
 			include: { offer: true }
 		});
 		if (items.length === 0) appError(404, 'offer_lines_not_found');
@@ -1124,23 +1180,7 @@ export const copyOfferToNewCustomer = command(copyOfferSchema, async ({ offerId,
 				discountValue: source.discountValue,
 				assetScope: source.assetScope,
 				vatRatePercent: source.vatRatePercent,
-				items: {
-					create: source.items.map((i) => ({
-						assetId: i.assetId,
-						bundleId: i.bundleId,
-						productId: i.productId,
-						productLabel: i.productLabel,
-						categoryId: i.categoryId,
-						categoryName: i.categoryName,
-						categoryNameDe: i.categoryNameDe,
-						categoryColor: i.categoryColor,
-						description: i.description,
-						netPurchasePrice: i.netPurchasePrice,
-						ratePercent: i.ratePercent,
-						dailyRate: i.dailyRate,
-						lineTotal: i.lineTotal
-					}))
-				}
+				items: { create: source.items.map(copyItem) }
 			}
 		});
 	});
@@ -1216,27 +1256,17 @@ export const createOfferRevision = command(v.string(), async (offerId: string) =
 	}
 
 	const items = source.productionId
-		? itemsFromProduction(
-				await computeProductionBillingLines(source.productionId, source.assetScope),
-				source.items,
-				source.dayCount
-			)
+		? [
+				...itemsFromProduction(
+					await computeProductionBillingLines(source.productionId, source.assetScope),
+					source.items.filter((item) => item.kind === EQUIPMENT),
+					source.dayCount
+				),
+				// Service lines are the document's own and carry over as they are.
+				...source.items.filter((item) => item.kind === SERVICE).map(copyItem)
+			]
 		: // Nothing to resync from: the revision starts as a copy to edit.
-			source.items.map((item) => ({
-				assetId: item.assetId,
-				bundleId: item.bundleId,
-				productId: item.productId,
-				productLabel: item.productLabel,
-				categoryId: item.categoryId,
-				categoryName: item.categoryName,
-				categoryNameDe: item.categoryNameDe,
-				categoryColor: item.categoryColor,
-				description: item.description,
-				netPurchasePrice: item.netPurchasePrice,
-				ratePercent: item.ratePercent,
-				dailyRate: item.dailyRate,
-				lineTotal: item.lineTotal
-			}));
+			source.items.map(copyItem);
 
 	const revision = family.latest.revision + 1;
 	const created = await prisma.offer.create({
@@ -1373,23 +1403,7 @@ export const convertOfferToInvoice = command(convertOfferSchema, async ({ offerI
 				assetScope: offer.assetScope,
 				isKleinunternehmerSnapshot: offer.organization.isKleinunternehmer,
 				vatRatePercent: offer.organization.isKleinunternehmer ? 0 : 19,
-				items: {
-					create: offer.items.map((i) => ({
-						assetId: i.assetId,
-						bundleId: i.bundleId,
-						productId: i.productId,
-						productLabel: i.productLabel,
-						categoryId: i.categoryId,
-						categoryName: i.categoryName,
-						categoryNameDe: i.categoryNameDe,
-						categoryColor: i.categoryColor,
-						description: i.description,
-						netPurchasePrice: i.netPurchasePrice,
-						ratePercent: i.ratePercent,
-						dailyRate: i.dailyRate,
-						lineTotal: i.lineTotal
-					}))
-				}
+				items: { create: offer.items.map(copyItem) }
 			},
 			include: { items: true }
 		});
@@ -1461,7 +1475,8 @@ export const getInvoiceStaleness = query(v.string(), async (invoiceId: string) =
 	await requireAuth();
 	const invoice = await prisma.invoice.findUniqueOrThrow({
 		where: { id: invoiceId },
-		include: { items: true }
+		// See getOfferStaleness.
+		include: { items: { where: { kind: EQUIPMENT } } }
 	});
 	await requireOrgBilling(invoice.organizationId);
 
@@ -1531,7 +1546,7 @@ export const getInvoiceStaleness = query(v.string(), async (invoiceId: string) =
 export const updateInvoiceItemsFromProduction = command(v.string(), async (invoiceId: string) => {
 	const invoice = await prisma.invoice.findUniqueOrThrow({
 		where: { id: invoiceId },
-		include: { items: true }
+		include: { items: { where: { kind: EQUIPMENT } } }
 	});
 	await requireOrgBilling(invoice.organizationId);
 
@@ -1547,7 +1562,7 @@ export const updateInvoiceItemsFromProduction = command(v.string(), async (invoi
 	const itemsData = itemsFromProduction(lines, invoice.items, invoice.dayCount);
 
 	await prisma.$transaction([
-		prisma.invoiceItem.deleteMany({ where: { invoiceId } }),
+		prisma.invoiceItem.deleteMany({ where: { invoiceId, kind: EQUIPMENT } }),
 		prisma.invoice.update({ where: { id: invoiceId }, data: { items: { create: itemsData } } })
 	]);
 
@@ -1684,8 +1699,7 @@ export const updateInvoiceDayCount = command(
 			...invoice.items.map((item) =>
 				prisma.invoiceItem.update({
 					where: { id: item.id },
-					// See updateOfferDayCount for why this isn't the stored daily rate.
-					data: priceLine(Number(item.netPurchasePrice), Number(item.ratePercent), dayCount)
+					data: repriceForDays(item, dayCount)
 				})
 			)
 		]);
@@ -1706,7 +1720,7 @@ export const updateInvoiceItemRate = command(
 	updateInvoiceItemRateSchema,
 	async ({ invoiceItemIds, ratePercent }) => {
 		const items = await prisma.invoiceItem.findMany({
-			where: { id: { in: invoiceItemIds } },
+			where: { id: { in: invoiceItemIds }, kind: EQUIPMENT },
 			include: { invoice: true }
 		});
 		if (items.length === 0) appError(404, 'invoice_lines_not_found');
@@ -1834,3 +1848,244 @@ export const updateDocumentText = command(updateDocumentTextSchema, async (data)
 		await getInvoice(data.id).refresh();
 	}
 });
+
+// ── Service lines ──────────────────────────────────────────────────────────
+// Personal, Transport, Beratung … typed in on a draft offer or invoice, usually
+// picked from the org's service catalog. The line copies what it was picked
+// from and never points back, so a catalog edit leaves every document alone.
+
+const documentKind = v.picklist(['offer', 'invoice']);
+type DocumentKind = v.InferOutput<typeof documentKind>;
+
+const serviceLineFields = {
+	/** The catalog entry it was picked from, if any. A soft reference only. */
+	serviceId: v.optional(v.string()),
+	name: v.pipe(v.string(), v.trim(), v.minLength(1)),
+	note: v.optional(v.string()),
+	/** A ServiceCategory of the document's org: the section it prints in. */
+	categoryId: v.string(),
+	quantity: v.pipe(v.number(), v.minValue(0.01)),
+	unit: v.picklist(SERVICE_UNITS),
+	unitPrice: v.pipe(v.number(), v.minValue(0)),
+	perDay: v.boolean(),
+	/** Also keep a line typed in by hand as a service in the org's price list. */
+	saveToCatalog: v.optional(v.boolean())
+};
+type ServiceLineInput = v.InferOutput<v.ObjectSchema<typeof serviceLineFields, undefined>>;
+
+/** A draft the caller may edit, or the reason it is not one. */
+async function requireDraftDocument(kind: DocumentKind, id: string) {
+	if (kind === 'offer') {
+		const offer = await prisma.offer.findUniqueOrThrow({
+			where: { id },
+			select: { organizationId: true, dayCount: true, finalizedAt: true }
+		});
+		await requireOrgBilling(offer.organizationId);
+		if (offer.finalizedAt) appError(409, 'offer_immutable');
+		return offer;
+	}
+	const invoice = await prisma.invoice.findUniqueOrThrow({
+		where: { id },
+		select: { organizationId: true, dayCount: true, sentAt: true }
+	});
+	await requireOrgBilling(invoice.organizationId);
+	if (invoice.sentAt) appError(409, 'invoice_immutable');
+	return invoice;
+}
+
+async function refreshDocument(kind: DocumentKind, id: string) {
+	if (kind === 'offer') {
+		await getOffer(id).refresh();
+		await getOffers().refresh();
+	} else {
+		await getInvoice(id).refresh();
+		await getInvoices().refresh();
+	}
+}
+
+async function findServiceLine(kind: DocumentKind, lineId: string) {
+	const line =
+		kind === 'offer'
+			? await prisma.offerItem
+					.findFirst({ where: { id: lineId, kind: SERVICE } })
+					.then((item) => item && { ...item, documentId: item.offerId })
+			: await prisma.invoiceItem
+					.findFirst({ where: { id: lineId, kind: SERVICE } })
+					.then((item) => item && { ...item, documentId: item.invoiceId });
+	if (!line) appError(404, 'service_line_not_found');
+	return line;
+}
+
+/**
+ * The columns a service line stores. The section is snapshotted from the org's
+ * service category; a line whose category has been deleted since keeps the
+ * snapshot it has, as long as it isn't being moved.
+ */
+async function serviceLineColumns(
+	organizationId: string,
+	dayCount: number,
+	input: ServiceLineInput,
+	existing?: { categoryId: string | null }
+) {
+	const category = await prisma.serviceCategory.findFirst({
+		where: { id: input.categoryId, organizationId }
+	});
+	if (!category && existing?.categoryId !== input.categoryId) {
+		appError(404, 'service_category_not_found');
+	}
+	const quantity = toCents(input.quantity);
+	const unitPrice = toCents(input.unitPrice);
+	let serviceId = input.serviceId || null;
+	// Only a line typed in by hand: one picked from the list is already on it.
+	if (input.saveToCatalog && !serviceId) {
+		if (!category) appError(404, 'service_category_not_found');
+		const service = await prisma.orgService.create({
+			data: {
+				organizationId,
+				categoryId: category.id,
+				name: input.name,
+				unit: input.unit,
+				unitPrice,
+				perDay: input.perDay
+			}
+		});
+		serviceId = service.id;
+		await getServiceCatalog(organizationId).refresh();
+	}
+	return {
+		kind: SERVICE,
+		serviceId,
+		description: input.name,
+		note: input.note?.trim() || null,
+		quantity,
+		unit: input.unit,
+		unitPrice,
+		perDay: input.perDay,
+		lineTotal: serviceLineTotal(quantity, unitPrice, input.perDay, dayCount),
+		...(category && {
+			categoryId: category.id,
+			categoryName: category.name,
+			categoryNameDe: null,
+			categoryColor: category.color,
+			categorySortOrder: category.sortOrder
+		})
+	};
+}
+
+/** One past the last service line in that section, so a new line lands at its end. */
+async function nextServicePosition(kind: DocumentKind, documentId: string, categoryId: string) {
+	const where = { kind: SERVICE, categoryId };
+	const last =
+		kind === 'offer'
+			? await prisma.offerItem.aggregate({
+					where: { ...where, offerId: documentId },
+					_max: { position: true }
+				})
+			: await prisma.invoiceItem.aggregate({
+					where: { ...where, invoiceId: documentId },
+					_max: { position: true }
+				});
+	return (last._max.position ?? -1) + 1;
+}
+
+const addServiceLineSchema = v.object({
+	kind: documentKind,
+	documentId: v.string(),
+	...serviceLineFields
+});
+
+export const addServiceLine = command(addServiceLineSchema, async (data) => {
+	const { kind, documentId, ...input } = data;
+	const document = await requireDraftDocument(kind, documentId);
+	const columns = await serviceLineColumns(document.organizationId, document.dayCount, input);
+	const position = await nextServicePosition(kind, documentId, input.categoryId);
+	if (kind === 'offer') {
+		await prisma.offerItem.create({ data: { ...columns, position, offerId: documentId } });
+	} else {
+		await prisma.invoiceItem.create({ data: { ...columns, position, invoiceId: documentId } });
+	}
+	await refreshDocument(kind, documentId);
+});
+
+const updateServiceLineSchema = v.object({
+	kind: documentKind,
+	lineId: v.string(),
+	...serviceLineFields
+});
+
+export const updateServiceLine = command(updateServiceLineSchema, async (data) => {
+	const { kind, lineId, ...input } = data;
+	const line = await findServiceLine(kind, lineId);
+	const document = await requireDraftDocument(kind, line.documentId);
+	const columns = await serviceLineColumns(document.organizationId, document.dayCount, input, line);
+	// Moved to another section: it joins that one at the end.
+	const position =
+		line.categoryId === input.categoryId
+			? line.position
+			: await nextServicePosition(kind, line.documentId, input.categoryId);
+	if (kind === 'offer') {
+		await prisma.offerItem.update({ where: { id: lineId }, data: { ...columns, position } });
+	} else {
+		await prisma.invoiceItem.update({ where: { id: lineId }, data: { ...columns, position } });
+	}
+	await refreshDocument(kind, line.documentId);
+});
+
+const serviceLineRefSchema = v.object({ kind: documentKind, lineId: v.string() });
+
+export const deleteServiceLine = command(serviceLineRefSchema, async ({ kind, lineId }) => {
+	const line = await findServiceLine(kind, lineId);
+	await requireDraftDocument(kind, line.documentId);
+	if (kind === 'offer') await prisma.offerItem.delete({ where: { id: lineId } });
+	else await prisma.invoiceItem.delete({ where: { id: lineId } });
+	await refreshDocument(kind, line.documentId);
+});
+
+const moveServiceLineSchema = v.object({
+	kind: documentKind,
+	lineId: v.string(),
+	direction: v.picklist(['up', 'down'])
+});
+
+/**
+ * Swaps a line with its neighbour in the same section. Every line of the
+ * section is renumbered on the way, so positions that collided (two lines
+ * added at once) or have gaps (one deleted) are straightened out by the first
+ * move rather than making it look like it did nothing.
+ */
+export const moveServiceLine = command(
+	moveServiceLineSchema,
+	async ({ kind, lineId, direction }) => {
+		const line = await findServiceLine(kind, lineId);
+		await requireDraftDocument(kind, line.documentId);
+		const where = { kind: SERVICE, categoryId: line.categoryId };
+		const orderBy = [{ position: 'asc' as const }, { createdAt: 'asc' as const }];
+		const siblings = (
+			kind === 'offer'
+				? await prisma.offerItem.findMany({
+						where: { ...where, offerId: line.documentId },
+						orderBy,
+						select: { id: true }
+					})
+				: await prisma.invoiceItem.findMany({
+						where: { ...where, invoiceId: line.documentId },
+						orderBy,
+						select: { id: true }
+					})
+		).map((sibling) => sibling.id);
+
+		const from = siblings.indexOf(lineId);
+		const to = direction === 'up' ? from - 1 : from + 1;
+		if (to < 0 || to >= siblings.length) return;
+		[siblings[from], siblings[to]] = [siblings[to], siblings[from]];
+
+		await prisma.$transaction(
+			siblings.map((id, position) =>
+				kind === 'offer'
+					? prisma.offerItem.update({ where: { id }, data: { position } })
+					: prisma.invoiceItem.update({ where: { id }, data: { position } })
+			)
+		);
+		await refreshDocument(kind, line.documentId);
+	}
+);

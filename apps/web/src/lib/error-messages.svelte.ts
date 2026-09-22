@@ -306,6 +306,12 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return `No net purchase price set for: ${p0}. No rental rate set for category: ${p1}`;
 		case 'billing_pdf_data_missing':
 			return `The PDF cannot be generated. Missing billing data: ${p0}`;
+		case 'service_line_not_found':
+			return 'That service line no longer exists.';
+		case 'service_category_not_found':
+			return 'That service category no longer exists.';
+		case 'service_not_found':
+			return 'That service no longer exists.';
 
 		// Organisations and users
 		case 'org_prefix_invalid':

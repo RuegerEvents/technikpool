@@ -159,6 +159,9 @@ export type AppErrorCode =
 	| 'billing_missing_rates'
 	| 'billing_missing_prices_and_rates'
 	| 'billing_pdf_data_missing'
+	| 'service_line_not_found'
+	| 'service_category_not_found'
+	| 'service_not_found'
 	// Organisations and users
 	| 'org_prefix_invalid'
 	| 'org_avatar_label_invalid'

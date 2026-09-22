@@ -305,7 +305,9 @@
 				{#if canManage}
 					<div class="flex flex-wrap items-center gap-2">
 						<Button variant="outline" href={resolve(`/orgs/${orgId}/locations`)}>Locations</Button>
-						<Button variant="outline" href={resolve(`/orgs/${orgId}/rates`)}>Rental Rates</Button>
+						<Button variant="outline" href={resolve(`/orgs/${orgId}/rates`)}
+							>Rates & services</Button
+						>
 						<Button variant="destructive" onclick={() => (deleteOpen = true)}>Delete</Button>
 					</div>
 				{/if}

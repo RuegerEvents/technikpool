@@ -1,5 +1,19 @@
 [
 	{
+		"version": "0.18.0",
+		"date": "2026-09-22",
+		"en": [
+			"Offers and invoices take services as well as equipment: crew, transport, programming, consulting. Each line is a quantity times a unit price — hours, days, kilometres, pieces or a flat rate — and a line billed per day follows the document's day count. Services print in their own sections after the equipment, and updating a document from its production leaves them alone.",
+			"Your organization keeps a price list for them under Rates & services, grouped into categories you name and order yourself. Picking a service copies its price onto the line, where it can still be changed, and a line typed in by hand can be saved to the list from the same dialog.",
+			"An offer no longer needs the customer's address before it can become a PDF. An invoice still does."
+		],
+		"de": [
+			"Angebote und Rechnungen nehmen neben der Technik auch Leistungen auf: Personal, Transport, Vorprogrammierung, Beratung. Jede Position ist Menge mal Einzelpreis — Stunden, Tage, Kilometer, Stück oder pauschal —, und eine Position pro Tag folgt der Tagesanzahl des Dokuments. Leistungen stehen in eigenen Abschnitten nach der Technik, und das Aktualisieren aus der Produktion lässt sie unberührt.",
+			"Deine Organisation führt dafür eine Preisliste unter Preise & Leistungen, in Kategorien, die du selbst benennst und ordnest. Eine gewählte Leistung übernimmt ihren Preis in die Position, wo er sich weiter ändern lässt, und eine frei eingegebene Position lässt sich im selben Dialog in die Preisliste übernehmen.",
+			"Ein Angebot braucht keine Kundenadresse mehr, bevor es zum PDF werden kann. Eine Rechnung schon."
+		]
+	},
+	{
 		"version": "0.17.0",
 		"date": "2026-09-22",
 		"en": [

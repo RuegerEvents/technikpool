@@ -4,6 +4,7 @@ import { appError } from '$lib/errors';
 import { billingDocumentIssues } from '../billing-document-check.svelte.ts';
 import type { SnapshotOrganization } from '../org-snapshot.ts';
 import { fmtDate, safe, wrap } from './pdf-text.ts';
+import { formatQuantity } from '../service-lines.svelte.ts';
 
 type PdfOrganization = SnapshotOrganization;
 
@@ -42,6 +43,22 @@ function validateDocument(kind: 'offer' | 'invoice', data: PdfDocumentData) {
 	const issues = billingDocumentIssues(kind, data);
 	if (issues.length)
 		appError(400, 'billing_pdf_data_missing', [issues.map((issue) => issue.label).join(', ')]);
+}
+
+// A document prints in German whatever language its issuer reads the app in.
+function unitLabel(unit: string | null, quantity: number) {
+	switch (unit) {
+		case 'hour':
+			return 'Std.';
+		case 'day':
+			return quantity === 1 ? 'Tag' : 'Tage';
+		case 'flat':
+			return 'pauschal';
+		case 'piece':
+			return 'Stk.';
+		default:
+			return unit ?? '';
+	}
 }
 
 function money(value: number) {
@@ -208,9 +225,21 @@ export async function generateBillingPdf(
 		y -= GROUP_H;
 		for (const [lineIndex, line] of group.lines.entries()) {
 			position++;
-			const subtitle = lineSubtitle(line);
-			const labelLines = wrap(line.label, bold, 9, 270);
-			const subtitleLines = subtitle ? wrap(subtitle, regular, 7.5, 270) : [];
+			const service = line.service;
+			const subtitle = service
+				? [
+						lineSubtitle(line),
+						service.unit === 'flat'
+							? ''
+							: `Einzelpreis ${money(service.unitPrice)} EUR / ${unitLabel(service.unit, 1)}`
+					]
+						.filter(Boolean)
+						.join('\n')
+				: lineSubtitle(line);
+			// A service's quantity carries its unit and needs the room.
+			const labelWidth = service ? 235 : 270;
+			const labelLines = wrap(line.label, bold, 9, labelWidth);
+			const subtitleLines = subtitle ? wrap(subtitle, regular, 7.5, labelWidth) : [];
 			// Offsets below the row's first baseline.
 			const subtitleOffset = (labelLines.length - 1) * 11 + 11;
 			const lastOffset = subtitleLines.length
@@ -227,8 +256,16 @@ export async function generateBillingPdf(
 			subtitleLines.forEach((value, i) =>
 				draw(value, LEFT + 40, baseline - subtitleOffset - i * 9, 7.5, regular, muted)
 			);
-			right(String(line.quantity), 400, baseline, 8.5);
-			right(String(data.dayCount), 446, baseline, 8.5);
+			right(
+				service
+					? `${formatQuantity(line.quantity)} ${unitLabel(service.unit, line.quantity)}`
+					: String(line.quantity),
+				400,
+				baseline,
+				8.5
+			);
+			// Only what is billed per day was multiplied by the days.
+			if (!service || service.perDay) right(String(data.dayCount), 446, baseline, 8.5);
 			right(money(line.lineTotal), W - RIGHT - 4, baseline, 8.5);
 			y -= rowHeight;
 			page.drawLine({

@@ -68,14 +68,15 @@ async function requireAuth() {
 
 ## Remote Files
 
-| File                                   | Exports                                                                                                                                                                                                                                   |
-| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/lib/remote/orgs.remote.ts`        | `getMyOrgs`, `getOrg`, `getOrgUsers`, `getOrgWithMembers`, `createOrg`, `addUserToOrg`, `removeUserFromOrg`, `updateMemberRole`, `getAllUsers`, `setUserAdmin`                                                                            |
-| `src/lib/remote/assets.remote.ts`      | `getAssets`, `getInventorySummary`, `getManufacturers`, `getProducts`, `createAssets`, `getAssetHistory`, `getBundles`, `getBundle`, `createBundle`, `addAssetToBundle`, `removeAssetFromBundle`                                          |
-| `src/lib/remote/productions.remote.ts` | `getProductions`, `getProduction`, `createProduction`, `addAssetToProduction`, `approveProductionItems`, `declineProductionItems`, `getPendingApprovals`, `addBundleToProduction`, `addCrewMember`, `removeCrewMember`, `getCalendarData` |
-| `src/lib/remote/licenses.remote.ts`    | `getLicenses`, `getLicenseStatus`, `revealLicenseCredentials`, `setLicenseCredentials`, `clearLicenseCredentials`                                                                                                                         |
-| `src/lib/remote/invitations.remote.ts` | `getSignUpStatus`, `getInvitationPreview`, `getSignUpSettings`, `setSignUpEnabled`, `getInvitations`, `inviteUser`, `resendInvitation`, `revokeInvitation`                                                                                |
-| `src/lib/remote/addresses.remote.ts`   | `getKnownAddresses` — feeds the picker in `AddressInput`; a pick copies the values, owners never share an `Address` row                                                                                                                   |
+| File                                       | Exports                                                                                                                                                                                                                                   |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/lib/remote/orgs.remote.ts`            | `getMyOrgs`, `getOrg`, `getOrgUsers`, `getOrgWithMembers`, `createOrg`, `addUserToOrg`, `removeUserFromOrg`, `updateMemberRole`, `getAllUsers`, `setUserAdmin`                                                                            |
+| `src/lib/remote/assets.remote.ts`          | `getAssets`, `getInventorySummary`, `getManufacturers`, `getProducts`, `createAssets`, `getAssetHistory`, `getBundles`, `getBundle`, `createBundle`, `addAssetToBundle`, `removeAssetFromBundle`                                          |
+| `src/lib/remote/productions.remote.ts`     | `getProductions`, `getProduction`, `createProduction`, `addAssetToProduction`, `approveProductionItems`, `declineProductionItems`, `getPendingApprovals`, `addBundleToProduction`, `addCrewMember`, `removeCrewMember`, `getCalendarData` |
+| `src/lib/remote/licenses.remote.ts`        | `getLicenses`, `getLicenseStatus`, `revealLicenseCredentials`, `setLicenseCredentials`, `clearLicenseCredentials`                                                                                                                         |
+| `src/lib/remote/invitations.remote.ts`     | `getSignUpStatus`, `getInvitationPreview`, `getSignUpSettings`, `setSignUpEnabled`, `getInvitations`, `inviteUser`, `resendInvitation`, `revokeInvitation`                                                                                |
+| `src/lib/remote/addresses.remote.ts`       | `getKnownAddresses` — feeds the picker in `AddressInput`; a pick copies the values, owners never share an `Address` row                                                                                                                   |
+| `src/lib/remote/service-catalog.remote.ts` | `getServiceCatalog` and CRUD for `ServiceCategory` / `OrgService` — the org's price list for service lines (Personal, Transport …); a line copies from it and never points back                                                           |
 
 ## External API (`/api/v1`)
 
@@ -215,6 +216,17 @@ page maps to translated text.
 `getSignUpStatus` and `getInvitationPreview` are the only remote functions meant to be called
 signed out. They work because a remote request carries the _calling page's_ path, and the
 guard in `hooks.server.ts` lets `/auth/*` through.
+
+## Service lines on offers and invoices
+
+`OfferItem`/`InvoiceItem.kind` is `EQUIPMENT` (built from the production, rebuilt by every
+"update from production") or `SERVICE` (typed in on the document, never touched by an update or
+counted by the staleness check). A service line is `quantity × unitPrice`, and × `dayCount` too
+when `perDay`, so `repriceForDays` in `offers.remote.ts` reprices both kinds on a day-count
+change. Its `category*` columns snapshot a per-org `ServiceCategory`, not a `Category`, and
+`categorySortOrder`/`position` decide where it prints: `groupBillingItems` puts service sections
+after the equipment and never merges two service lines. Every copy of a document (revision,
+copy to customer, invoice) goes through `copyItem`, so a new item column has to be added there.
 
 ## Who may change a product
 

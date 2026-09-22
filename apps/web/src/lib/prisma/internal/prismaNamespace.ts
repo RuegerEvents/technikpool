@@ -426,6 +426,8 @@ export const ModelName = {
   AssetTransaction: 'AssetTransaction',
   Inspection: 'Inspection',
   OrgCategoryRate: 'OrgCategoryRate',
+  ServiceCategory: 'ServiceCategory',
+  OrgService: 'OrgService',
   OfferSequence: 'OfferSequence',
   Offer: 'Offer',
   OfferItem: 'OfferItem',
@@ -447,7 +449,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "invitation" | "manufacturer" | "connector" | "productPort" | "cableWay" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem"
+    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "invitation" | "manufacturer" | "connector" | "productPort" | "cableWay" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "serviceCategory" | "orgService" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2597,6 +2599,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ServiceCategory: {
+      payload: Prisma.$ServiceCategoryPayload<ExtArgs>
+      fields: Prisma.ServiceCategoryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ServiceCategoryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCategoryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ServiceCategoryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCategoryPayload>
+        }
+        findFirst: {
+          args: Prisma.ServiceCategoryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCategoryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ServiceCategoryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCategoryPayload>
+        }
+        findMany: {
+          args: Prisma.ServiceCategoryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCategoryPayload>[]
+        }
+        create: {
+          args: Prisma.ServiceCategoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCategoryPayload>
+        }
+        createMany: {
+          args: Prisma.ServiceCategoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ServiceCategoryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCategoryPayload>[]
+        }
+        delete: {
+          args: Prisma.ServiceCategoryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCategoryPayload>
+        }
+        update: {
+          args: Prisma.ServiceCategoryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCategoryPayload>
+        }
+        deleteMany: {
+          args: Prisma.ServiceCategoryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ServiceCategoryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ServiceCategoryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCategoryPayload>[]
+        }
+        upsert: {
+          args: Prisma.ServiceCategoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServiceCategoryPayload>
+        }
+        aggregate: {
+          args: Prisma.ServiceCategoryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateServiceCategory>
+        }
+        groupBy: {
+          args: Prisma.ServiceCategoryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServiceCategoryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ServiceCategoryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServiceCategoryCountAggregateOutputType> | number
+        }
+      }
+    }
+    OrgService: {
+      payload: Prisma.$OrgServicePayload<ExtArgs>
+      fields: Prisma.OrgServiceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OrgServiceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrgServicePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OrgServiceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrgServicePayload>
+        }
+        findFirst: {
+          args: Prisma.OrgServiceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrgServicePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OrgServiceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrgServicePayload>
+        }
+        findMany: {
+          args: Prisma.OrgServiceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrgServicePayload>[]
+        }
+        create: {
+          args: Prisma.OrgServiceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrgServicePayload>
+        }
+        createMany: {
+          args: Prisma.OrgServiceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OrgServiceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrgServicePayload>[]
+        }
+        delete: {
+          args: Prisma.OrgServiceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrgServicePayload>
+        }
+        update: {
+          args: Prisma.OrgServiceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrgServicePayload>
+        }
+        deleteMany: {
+          args: Prisma.OrgServiceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OrgServiceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OrgServiceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrgServicePayload>[]
+        }
+        upsert: {
+          args: Prisma.OrgServiceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrgServicePayload>
+        }
+        aggregate: {
+          args: Prisma.OrgServiceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOrgService>
+        }
+        groupBy: {
+          args: Prisma.OrgServiceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrgServiceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OrgServiceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrgServiceCountAggregateOutputType> | number
+        }
+      }
+    }
     OfferSequence: {
       payload: Prisma.$OfferSequencePayload<ExtArgs>
       fields: Prisma.OfferSequenceFieldRefs
@@ -3509,6 +3659,34 @@ export const OrgCategoryRateScalarFieldEnum = {
 export type OrgCategoryRateScalarFieldEnum = (typeof OrgCategoryRateScalarFieldEnum)[keyof typeof OrgCategoryRateScalarFieldEnum]
 
 
+export const ServiceCategoryScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  name: 'name',
+  color: 'color',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ServiceCategoryScalarFieldEnum = (typeof ServiceCategoryScalarFieldEnum)[keyof typeof ServiceCategoryScalarFieldEnum]
+
+
+export const OrgServiceScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  categoryId: 'categoryId',
+  name: 'name',
+  unit: 'unit',
+  unitPrice: 'unitPrice',
+  perDay: 'perDay',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrgServiceScalarFieldEnum = (typeof OrgServiceScalarFieldEnum)[keyof typeof OrgServiceScalarFieldEnum]
+
+
 export const OfferSequenceScalarFieldEnum = {
   id: 'id',
   organizationId: 'organizationId',
@@ -3583,6 +3761,15 @@ export const OfferItemScalarFieldEnum = {
   ratePercent: 'ratePercent',
   dailyRate: 'dailyRate',
   lineTotal: 'lineTotal',
+  kind: 'kind',
+  serviceId: 'serviceId',
+  quantity: 'quantity',
+  unit: 'unit',
+  unitPrice: 'unitPrice',
+  perDay: 'perDay',
+  note: 'note',
+  position: 'position',
+  categorySortOrder: 'categorySortOrder',
   createdAt: 'createdAt'
 } as const
 
@@ -3668,6 +3855,15 @@ export const InvoiceItemScalarFieldEnum = {
   ratePercent: 'ratePercent',
   dailyRate: 'dailyRate',
   lineTotal: 'lineTotal',
+  kind: 'kind',
+  serviceId: 'serviceId',
+  quantity: 'quantity',
+  unit: 'unit',
+  unitPrice: 'unitPrice',
+  perDay: 'perDay',
+  note: 'note',
+  position: 'position',
+  categorySortOrder: 'categorySortOrder',
   createdAt: 'createdAt'
 } as const
 
@@ -4005,6 +4201,8 @@ export type GlobalOmitConfig = {
   assetTransaction?: Prisma.AssetTransactionOmit
   inspection?: Prisma.InspectionOmit
   orgCategoryRate?: Prisma.OrgCategoryRateOmit
+  serviceCategory?: Prisma.ServiceCategoryOmit
+  orgService?: Prisma.OrgServiceOmit
   offerSequence?: Prisma.OfferSequenceOmit
   offer?: Prisma.OfferOmit
   offerItem?: Prisma.OfferItemOmit

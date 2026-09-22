@@ -389,6 +389,8 @@ export type OrganizationWhereInput = {
   bundleTemplates?: Prisma.BundleTemplateListRelationFilter
   productions?: Prisma.ProductionListRelationFilter
   categoryRates?: Prisma.OrgCategoryRateListRelationFilter
+  serviceCategories?: Prisma.ServiceCategoryListRelationFilter
+  services?: Prisma.OrgServiceListRelationFilter
   productPrices?: Prisma.OrgProductPriceListRelationFilter
   offerSequences?: Prisma.OfferSequenceListRelationFilter
   offers?: Prisma.OfferListRelationFilter
@@ -431,6 +433,8 @@ export type OrganizationOrderByWithRelationInput = {
   bundleTemplates?: Prisma.BundleTemplateOrderByRelationAggregateInput
   productions?: Prisma.ProductionOrderByRelationAggregateInput
   categoryRates?: Prisma.OrgCategoryRateOrderByRelationAggregateInput
+  serviceCategories?: Prisma.ServiceCategoryOrderByRelationAggregateInput
+  services?: Prisma.OrgServiceOrderByRelationAggregateInput
   productPrices?: Prisma.OrgProductPriceOrderByRelationAggregateInput
   offerSequences?: Prisma.OfferSequenceOrderByRelationAggregateInput
   offers?: Prisma.OfferOrderByRelationAggregateInput
@@ -476,6 +480,8 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   bundleTemplates?: Prisma.BundleTemplateListRelationFilter
   productions?: Prisma.ProductionListRelationFilter
   categoryRates?: Prisma.OrgCategoryRateListRelationFilter
+  serviceCategories?: Prisma.ServiceCategoryListRelationFilter
+  services?: Prisma.OrgServiceListRelationFilter
   productPrices?: Prisma.OrgProductPriceListRelationFilter
   offerSequences?: Prisma.OfferSequenceListRelationFilter
   offers?: Prisma.OfferListRelationFilter
@@ -581,6 +587,8 @@ export type OrganizationCreateInput = {
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -622,6 +630,8 @@ export type OrganizationUncheckedCreateInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -663,6 +673,8 @@ export type OrganizationUpdateInput = {
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -704,6 +716,8 @@ export type OrganizationUncheckedUpdateInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1094,6 +1108,34 @@ export type OrganizationUpdateOneRequiredWithoutCategoryRatesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutCategoryRatesInput, Prisma.OrganizationUpdateWithoutCategoryRatesInput>, Prisma.OrganizationUncheckedUpdateWithoutCategoryRatesInput>
 }
 
+export type OrganizationCreateNestedOneWithoutServiceCategoriesInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutServiceCategoriesInput, Prisma.OrganizationUncheckedCreateWithoutServiceCategoriesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutServiceCategoriesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutServiceCategoriesNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutServiceCategoriesInput, Prisma.OrganizationUncheckedCreateWithoutServiceCategoriesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutServiceCategoriesInput
+  upsert?: Prisma.OrganizationUpsertWithoutServiceCategoriesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutServiceCategoriesInput, Prisma.OrganizationUpdateWithoutServiceCategoriesInput>, Prisma.OrganizationUncheckedUpdateWithoutServiceCategoriesInput>
+}
+
+export type OrganizationCreateNestedOneWithoutServicesInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutServicesInput, Prisma.OrganizationUncheckedCreateWithoutServicesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutServicesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutServicesNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutServicesInput, Prisma.OrganizationUncheckedCreateWithoutServicesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutServicesInput
+  upsert?: Prisma.OrganizationUpsertWithoutServicesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutServicesInput, Prisma.OrganizationUpdateWithoutServicesInput>, Prisma.OrganizationUncheckedUpdateWithoutServicesInput>
+}
+
 export type OrganizationCreateNestedOneWithoutOfferSequencesInput = {
   create?: Prisma.XOR<Prisma.OrganizationCreateWithoutOfferSequencesInput, Prisma.OrganizationUncheckedCreateWithoutOfferSequencesInput>
   connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutOfferSequencesInput
@@ -1169,6 +1211,8 @@ export type OrganizationCreateWithoutHomeUsersInput = {
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -1209,6 +1253,8 @@ export type OrganizationUncheckedCreateWithoutHomeUsersInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1265,6 +1311,8 @@ export type OrganizationUpdateWithoutHomeUsersInput = {
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -1305,6 +1353,8 @@ export type OrganizationUncheckedUpdateWithoutHomeUsersInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1345,6 +1395,8 @@ export type OrganizationCreateWithoutMembersInput = {
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -1385,6 +1437,8 @@ export type OrganizationUncheckedCreateWithoutMembersInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1441,6 +1495,8 @@ export type OrganizationUpdateWithoutMembersInput = {
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -1481,6 +1537,8 @@ export type OrganizationUncheckedUpdateWithoutMembersInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1521,6 +1579,8 @@ export type OrganizationCreateWithoutInvitationsInput = {
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -1561,6 +1621,8 @@ export type OrganizationUncheckedCreateWithoutInvitationsInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1617,6 +1679,8 @@ export type OrganizationUpdateWithoutInvitationsInput = {
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -1657,6 +1721,8 @@ export type OrganizationUncheckedUpdateWithoutInvitationsInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1698,6 +1764,8 @@ export type OrganizationCreateWithoutProductPricesInput = {
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOrganizationInput
@@ -1738,6 +1806,8 @@ export type OrganizationUncheckedCreateWithoutProductPricesInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1794,6 +1864,8 @@ export type OrganizationUpdateWithoutProductPricesInput = {
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutOrganizationNestedInput
@@ -1834,6 +1906,8 @@ export type OrganizationUncheckedUpdateWithoutProductPricesInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1873,6 +1947,8 @@ export type OrganizationCreateWithoutAddressInput = {
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -1913,6 +1989,8 @@ export type OrganizationUncheckedCreateWithoutAddressInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2010,6 +2088,8 @@ export type OrganizationCreateWithoutLocationsInput = {
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -2050,6 +2130,8 @@ export type OrganizationUncheckedCreateWithoutLocationsInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2106,6 +2188,8 @@ export type OrganizationUpdateWithoutLocationsInput = {
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -2146,6 +2230,8 @@ export type OrganizationUncheckedUpdateWithoutLocationsInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2186,6 +2272,8 @@ export type OrganizationCreateWithoutAssetsInput = {
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -2226,6 +2314,8 @@ export type OrganizationUncheckedCreateWithoutAssetsInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2282,6 +2372,8 @@ export type OrganizationUpdateWithoutAssetsInput = {
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -2322,6 +2414,8 @@ export type OrganizationUncheckedUpdateWithoutAssetsInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2362,6 +2456,8 @@ export type OrganizationCreateWithoutBundleTemplatesInput = {
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -2402,6 +2498,8 @@ export type OrganizationUncheckedCreateWithoutBundleTemplatesInput = {
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2458,6 +2556,8 @@ export type OrganizationUpdateWithoutBundleTemplatesInput = {
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -2498,6 +2598,8 @@ export type OrganizationUncheckedUpdateWithoutBundleTemplatesInput = {
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2538,6 +2640,8 @@ export type OrganizationCreateWithoutProductionsInput = {
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -2578,6 +2682,8 @@ export type OrganizationUncheckedCreateWithoutProductionsInput = {
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2634,6 +2740,8 @@ export type OrganizationUpdateWithoutProductionsInput = {
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -2674,6 +2782,8 @@ export type OrganizationUncheckedUpdateWithoutProductionsInput = {
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2715,6 +2825,8 @@ export type OrganizationCreateWithoutCustomersInput = {
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -2755,6 +2867,8 @@ export type OrganizationUncheckedCreateWithoutCustomersInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2811,6 +2925,8 @@ export type OrganizationUpdateWithoutCustomersInput = {
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -2851,6 +2967,8 @@ export type OrganizationUncheckedUpdateWithoutCustomersInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2890,6 +3008,8 @@ export type OrganizationCreateWithoutCategoryRatesInput = {
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -2930,6 +3050,8 @@ export type OrganizationUncheckedCreateWithoutCategoryRatesInput = {
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2986,6 +3108,8 @@ export type OrganizationUpdateWithoutCategoryRatesInput = {
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -3026,6 +3150,376 @@ export type OrganizationUncheckedUpdateWithoutCategoryRatesInput = {
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput
+  productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput
+  offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrganizationNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutServiceCategoriesInput = {
+  id?: string
+  name: string
+  shortName?: string | null
+  assetIdPrefix: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  defaultAssetVisibility?: string
+  color: string
+  avatarLabel: string
+  defaultInspectionIntervalMonths?: number | null
+  isKleinunternehmer?: boolean
+  taxNumber?: string | null
+  vatId?: string | null
+  bankAccountHolder?: string | null
+  iban?: string | null
+  bic?: string | null
+  bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
+  address?: Prisma.AddressCreateNestedOneWithoutOrganizationsInput
+  homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput
+  members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
+  productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
+  categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput
+  productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput
+  offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput
+  offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutOrganizationInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutServiceCategoriesInput = {
+  id?: string
+  name: string
+  shortName?: string | null
+  assetIdPrefix: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  defaultAssetVisibility?: string
+  color: string
+  avatarLabel: string
+  defaultInspectionIntervalMonths?: number | null
+  isKleinunternehmer?: boolean
+  addressId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
+  bankAccountHolder?: string | null
+  iban?: string | null
+  bic?: string | null
+  bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
+  homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput
+  members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
+  productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
+  categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput
+  productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput
+  offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrganizationInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutServiceCategoriesInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutServiceCategoriesInput, Prisma.OrganizationUncheckedCreateWithoutServiceCategoriesInput>
+}
+
+export type OrganizationUpsertWithoutServiceCategoriesInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutServiceCategoriesInput, Prisma.OrganizationUncheckedUpdateWithoutServiceCategoriesInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutServiceCategoriesInput, Prisma.OrganizationUncheckedCreateWithoutServiceCategoriesInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutServiceCategoriesInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutServiceCategoriesInput, Prisma.OrganizationUncheckedUpdateWithoutServiceCategoriesInput>
+}
+
+export type OrganizationUpdateWithoutServiceCategoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  shortName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.AddressUpdateOneWithoutOrganizationsNestedInput
+  homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput
+  members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
+  productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
+  categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput
+  productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput
+  offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutOrganizationNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutServiceCategoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  shortName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput
+  members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
+  productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
+  categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput
+  productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput
+  offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrganizationNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutServicesInput = {
+  id?: string
+  name: string
+  shortName?: string | null
+  assetIdPrefix: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  defaultAssetVisibility?: string
+  color: string
+  avatarLabel: string
+  defaultInspectionIntervalMonths?: number | null
+  isKleinunternehmer?: boolean
+  taxNumber?: string | null
+  vatId?: string | null
+  bankAccountHolder?: string | null
+  iban?: string | null
+  bic?: string | null
+  bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
+  address?: Prisma.AddressCreateNestedOneWithoutOrganizationsInput
+  homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput
+  members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
+  productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
+  categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput
+  productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput
+  offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput
+  offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutOrganizationInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutServicesInput = {
+  id?: string
+  name: string
+  shortName?: string | null
+  assetIdPrefix: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  defaultAssetVisibility?: string
+  color: string
+  avatarLabel: string
+  defaultInspectionIntervalMonths?: number | null
+  isKleinunternehmer?: boolean
+  addressId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
+  bankAccountHolder?: string | null
+  iban?: string | null
+  bic?: string | null
+  bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
+  homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput
+  members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
+  productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
+  categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput
+  offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrganizationInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutServicesInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutServicesInput, Prisma.OrganizationUncheckedCreateWithoutServicesInput>
+}
+
+export type OrganizationUpsertWithoutServicesInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutServicesInput, Prisma.OrganizationUncheckedUpdateWithoutServicesInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutServicesInput, Prisma.OrganizationUncheckedCreateWithoutServicesInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutServicesInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutServicesInput, Prisma.OrganizationUncheckedUpdateWithoutServicesInput>
+}
+
+export type OrganizationUpdateWithoutServicesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  shortName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.AddressUpdateOneWithoutOrganizationsNestedInput
+  homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput
+  members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
+  productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
+  categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput
+  productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput
+  offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutOrganizationNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutServicesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  shortName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput
+  members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
+  productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
+  categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3067,6 +3561,8 @@ export type OrganizationCreateWithoutOfferSequencesInput = {
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOrganizationInput
@@ -3107,6 +3603,8 @@ export type OrganizationUncheckedCreateWithoutOfferSequencesInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3163,6 +3661,8 @@ export type OrganizationUpdateWithoutOfferSequencesInput = {
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutOrganizationNestedInput
@@ -3203,6 +3703,8 @@ export type OrganizationUncheckedUpdateWithoutOfferSequencesInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3243,6 +3745,8 @@ export type OrganizationCreateWithoutOffersInput = {
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOrganizationInput
@@ -3283,6 +3787,8 @@ export type OrganizationUncheckedCreateWithoutOffersInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3339,6 +3845,8 @@ export type OrganizationUpdateWithoutOffersInput = {
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutOrganizationNestedInput
@@ -3379,6 +3887,8 @@ export type OrganizationUncheckedUpdateWithoutOffersInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3419,6 +3929,8 @@ export type OrganizationCreateWithoutInvoicesInput = {
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
@@ -3459,6 +3971,8 @@ export type OrganizationUncheckedCreateWithoutInvoicesInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput
   productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput
   offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3515,6 +4029,8 @@ export type OrganizationUpdateWithoutInvoicesInput = {
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -3555,6 +4071,8 @@ export type OrganizationUncheckedUpdateWithoutInvoicesInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3621,6 +4139,8 @@ export type OrganizationUpdateWithoutAddressInput = {
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
@@ -3661,6 +4181,8 @@ export type OrganizationUncheckedUpdateWithoutAddressInput = {
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput
   productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput
   offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3709,6 +4231,8 @@ export type OrganizationCountOutputType = {
   bundleTemplates: number
   productions: number
   categoryRates: number
+  serviceCategories: number
+  services: number
   productPrices: number
   offerSequences: number
   offers: number
@@ -3725,6 +4249,8 @@ export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   bundleTemplates?: boolean | OrganizationCountOutputTypeCountBundleTemplatesArgs
   productions?: boolean | OrganizationCountOutputTypeCountProductionsArgs
   categoryRates?: boolean | OrganizationCountOutputTypeCountCategoryRatesArgs
+  serviceCategories?: boolean | OrganizationCountOutputTypeCountServiceCategoriesArgs
+  services?: boolean | OrganizationCountOutputTypeCountServicesArgs
   productPrices?: boolean | OrganizationCountOutputTypeCountProductPricesArgs
   offerSequences?: boolean | OrganizationCountOutputTypeCountOfferSequencesArgs
   offers?: boolean | OrganizationCountOutputTypeCountOffersArgs
@@ -3801,6 +4327,20 @@ export type OrganizationCountOutputTypeCountCategoryRatesArgs<ExtArgs extends ru
 /**
  * OrganizationCountOutputType without action
  */
+export type OrganizationCountOutputTypeCountServiceCategoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ServiceCategoryWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountServicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrgServiceWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
 export type OrganizationCountOutputTypeCountProductPricesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.OrgProductPriceWhereInput
 }
@@ -3869,6 +4409,8 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   bundleTemplates?: boolean | Prisma.Organization$bundleTemplatesArgs<ExtArgs>
   productions?: boolean | Prisma.Organization$productionsArgs<ExtArgs>
   categoryRates?: boolean | Prisma.Organization$categoryRatesArgs<ExtArgs>
+  serviceCategories?: boolean | Prisma.Organization$serviceCategoriesArgs<ExtArgs>
+  services?: boolean | Prisma.Organization$servicesArgs<ExtArgs>
   productPrices?: boolean | Prisma.Organization$productPricesArgs<ExtArgs>
   offerSequences?: boolean | Prisma.Organization$offerSequencesArgs<ExtArgs>
   offers?: boolean | Prisma.Organization$offersArgs<ExtArgs>
@@ -3974,6 +4516,8 @@ export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.Interna
   bundleTemplates?: boolean | Prisma.Organization$bundleTemplatesArgs<ExtArgs>
   productions?: boolean | Prisma.Organization$productionsArgs<ExtArgs>
   categoryRates?: boolean | Prisma.Organization$categoryRatesArgs<ExtArgs>
+  serviceCategories?: boolean | Prisma.Organization$serviceCategoriesArgs<ExtArgs>
+  services?: boolean | Prisma.Organization$servicesArgs<ExtArgs>
   productPrices?: boolean | Prisma.Organization$productPricesArgs<ExtArgs>
   offerSequences?: boolean | Prisma.Organization$offerSequencesArgs<ExtArgs>
   offers?: boolean | Prisma.Organization$offersArgs<ExtArgs>
@@ -4000,6 +4544,8 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     bundleTemplates: Prisma.$BundleTemplatePayload<ExtArgs>[]
     productions: Prisma.$ProductionPayload<ExtArgs>[]
     categoryRates: Prisma.$OrgCategoryRatePayload<ExtArgs>[]
+    serviceCategories: Prisma.$ServiceCategoryPayload<ExtArgs>[]
+    services: Prisma.$OrgServicePayload<ExtArgs>[]
     productPrices: Prisma.$OrgProductPricePayload<ExtArgs>[]
     offerSequences: Prisma.$OfferSequencePayload<ExtArgs>[]
     offers: Prisma.$OfferPayload<ExtArgs>[]
@@ -4435,6 +4981,8 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
   bundleTemplates<T extends Prisma.Organization$bundleTemplatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$bundleTemplatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BundleTemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   productions<T extends Prisma.Organization$productionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$productionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   categoryRates<T extends Prisma.Organization$categoryRatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$categoryRatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrgCategoryRatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  serviceCategories<T extends Prisma.Organization$serviceCategoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$serviceCategoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServiceCategoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  services<T extends Prisma.Organization$servicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$servicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrgServicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   productPrices<T extends Prisma.Organization$productPricesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$productPricesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrgProductPricePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   offerSequences<T extends Prisma.Organization$offerSequencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$offerSequencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OfferSequencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   offers<T extends Prisma.Organization$offersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$offersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OfferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -5103,6 +5651,54 @@ export type Organization$categoryRatesArgs<ExtArgs extends runtime.Types.Extensi
   take?: number
   skip?: number
   distinct?: Prisma.OrgCategoryRateScalarFieldEnum | Prisma.OrgCategoryRateScalarFieldEnum[]
+}
+
+/**
+ * Organization.serviceCategories
+ */
+export type Organization$serviceCategoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ServiceCategory
+   */
+  select?: Prisma.ServiceCategorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ServiceCategory
+   */
+  omit?: Prisma.ServiceCategoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ServiceCategoryInclude<ExtArgs> | null
+  where?: Prisma.ServiceCategoryWhereInput
+  orderBy?: Prisma.ServiceCategoryOrderByWithRelationInput | Prisma.ServiceCategoryOrderByWithRelationInput[]
+  cursor?: Prisma.ServiceCategoryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ServiceCategoryScalarFieldEnum | Prisma.ServiceCategoryScalarFieldEnum[]
+}
+
+/**
+ * Organization.services
+ */
+export type Organization$servicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrgService
+   */
+  select?: Prisma.OrgServiceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrgService
+   */
+  omit?: Prisma.OrgServiceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrgServiceInclude<ExtArgs> | null
+  where?: Prisma.OrgServiceWhereInput
+  orderBy?: Prisma.OrgServiceOrderByWithRelationInput | Prisma.OrgServiceOrderByWithRelationInput[]
+  cursor?: Prisma.OrgServiceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrgServiceScalarFieldEnum | Prisma.OrgServiceScalarFieldEnum[]
 }
 
 /**

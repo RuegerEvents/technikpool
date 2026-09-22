@@ -14,6 +14,7 @@
 	import { toast } from 'svelte-sonner';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import ServiceCatalog from './service-catalog.svelte';
 
 	let { data } = $props();
 
@@ -25,6 +26,10 @@
 
 	let myMembership = $derived(org?.members.find((m) => m.userId === data.user?.id));
 	let canManage = $derived(myMembership?.role === 'OWNER' || data.isAdmin);
+	// The service price list belongs to billing, which admins run as well.
+	let canEditServices = $derived(
+		myMembership?.role === 'OWNER' || myMembership?.role === 'ADMIN' || data.isAdmin
+	);
 
 	let drafts = new SvelteMap<string, string>();
 	let saving = new SvelteSet<string>();
@@ -49,7 +54,7 @@
 	}
 </script>
 
-<svelte:head><title>Rental Rates | {org?.name ?? ''} | Technikpool</title></svelte:head>
+<svelte:head><title>Rates & services | {org?.name ?? ''} | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
 	<div class="flex items-center gap-4">
@@ -76,15 +81,18 @@
 	</div>
 
 	<div>
-		<h1 class="text-3xl font-bold tracking-tight">Rental Rates</h1>
-		<p class="text-muted-foreground">
-			Default daily rental rate per category, as a percentage of an asset's net purchase price.
-			Feeds offer/invoice pricing.
-		</p>
+		<h1 class="text-3xl font-bold tracking-tight">Rates & services</h1>
+		<p class="text-muted-foreground">What offers and invoices are priced from.</p>
 	</div>
 
 	<Card.Root class="max-w-2xl">
-		<Card.Content class="pt-6">
+		<Card.Header>
+			<Card.Title>Rental Rates</Card.Title>
+			<Card.Description>
+				Default daily rental rate per category, as a percentage of an asset's net purchase price.
+			</Card.Description>
+		</Card.Header>
+		<Card.Content>
 			<div class="space-y-3">
 				{#if !ratesQuery.ready}
 					<ContentSkeleton count={5} error={ratesQuery.error} />
@@ -133,4 +141,8 @@
 			</div>
 		</Card.Content>
 	</Card.Root>
+
+	{#if canEditServices}
+		<ServiceCatalog {orgId} />
+	{/if}
 </div>
