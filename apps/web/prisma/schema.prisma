@@ -142,7 +142,11 @@ model Organization {
   // Billing details for offer/invoice generation (issue #9 follow-up).
   addressId String?
   address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
-  taxId     String? // Steuernummer or USt-IdNr
+  // An invoice carries the Steuernummer or the USt-IdNr. (§14 Abs. 4 Nr. 2
+  // UStG) and may carry both. Never the personal Steuer-ID, which is not
+  // accepted there.
+  taxNumber String?
+  vatId     String?
 
   bankAccountHolder String?
   iban              String?
@@ -868,7 +872,8 @@ model Offer {
   orgAddressLine2      String?
   orgPostalCode        String?
   orgCity              String?
-  orgTaxId             String?
+  orgTaxNumber         String?
+  orgVatId             String?
   orgBillingEmail      String?
   orgBillingWebsite    String?
   orgBankAccountHolder String?
@@ -993,7 +998,8 @@ model Invoice {
   orgAddressLine2      String?
   orgPostalCode        String?
   orgCity              String?
-  orgTaxId             String?
+  orgTaxNumber         String?
+  orgVatId             String?
   orgBillingEmail      String?
   orgBillingWebsite    String?
   orgBankAccountHolder String?

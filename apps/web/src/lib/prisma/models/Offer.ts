@@ -73,7 +73,8 @@ export type OfferMinAggregateOutputType = {
   orgAddressLine2: string | null
   orgPostalCode: string | null
   orgCity: string | null
-  orgTaxId: string | null
+  orgTaxNumber: string | null
+  orgVatId: string | null
   orgBillingEmail: string | null
   orgBillingWebsite: string | null
   orgBankAccountHolder: string | null
@@ -117,7 +118,8 @@ export type OfferMaxAggregateOutputType = {
   orgAddressLine2: string | null
   orgPostalCode: string | null
   orgCity: string | null
-  orgTaxId: string | null
+  orgTaxNumber: string | null
+  orgVatId: string | null
   orgBillingEmail: string | null
   orgBillingWebsite: string | null
   orgBankAccountHolder: string | null
@@ -161,7 +163,8 @@ export type OfferCountAggregateOutputType = {
   orgAddressLine2: number
   orgPostalCode: number
   orgCity: number
-  orgTaxId: number
+  orgTaxNumber: number
+  orgVatId: number
   orgBillingEmail: number
   orgBillingWebsite: number
   orgBankAccountHolder: number
@@ -223,7 +226,8 @@ export type OfferMinAggregateInputType = {
   orgAddressLine2?: true
   orgPostalCode?: true
   orgCity?: true
-  orgTaxId?: true
+  orgTaxNumber?: true
+  orgVatId?: true
   orgBillingEmail?: true
   orgBillingWebsite?: true
   orgBankAccountHolder?: true
@@ -267,7 +271,8 @@ export type OfferMaxAggregateInputType = {
   orgAddressLine2?: true
   orgPostalCode?: true
   orgCity?: true
-  orgTaxId?: true
+  orgTaxNumber?: true
+  orgVatId?: true
   orgBillingEmail?: true
   orgBillingWebsite?: true
   orgBankAccountHolder?: true
@@ -311,7 +316,8 @@ export type OfferCountAggregateInputType = {
   orgAddressLine2?: true
   orgPostalCode?: true
   orgCity?: true
-  orgTaxId?: true
+  orgTaxNumber?: true
+  orgVatId?: true
   orgBillingEmail?: true
   orgBillingWebsite?: true
   orgBankAccountHolder?: true
@@ -442,7 +448,8 @@ export type OfferGroupByOutputType = {
   orgAddressLine2: string | null
   orgPostalCode: string | null
   orgCity: string | null
-  orgTaxId: string | null
+  orgTaxNumber: string | null
+  orgVatId: string | null
   orgBillingEmail: string | null
   orgBillingWebsite: string | null
   orgBankAccountHolder: string | null
@@ -509,7 +516,8 @@ export type OfferWhereInput = {
   orgAddressLine2?: Prisma.StringNullableFilter<"Offer"> | string | null
   orgPostalCode?: Prisma.StringNullableFilter<"Offer"> | string | null
   orgCity?: Prisma.StringNullableFilter<"Offer"> | string | null
-  orgTaxId?: Prisma.StringNullableFilter<"Offer"> | string | null
+  orgTaxNumber?: Prisma.StringNullableFilter<"Offer"> | string | null
+  orgVatId?: Prisma.StringNullableFilter<"Offer"> | string | null
   orgBillingEmail?: Prisma.StringNullableFilter<"Offer"> | string | null
   orgBillingWebsite?: Prisma.StringNullableFilter<"Offer"> | string | null
   orgBankAccountHolder?: Prisma.StringNullableFilter<"Offer"> | string | null
@@ -559,7 +567,8 @@ export type OfferOrderByWithRelationInput = {
   orgAddressLine2?: Prisma.SortOrderInput | Prisma.SortOrder
   orgPostalCode?: Prisma.SortOrderInput | Prisma.SortOrder
   orgCity?: Prisma.SortOrderInput | Prisma.SortOrder
-  orgTaxId?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgTaxNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgVatId?: Prisma.SortOrderInput | Prisma.SortOrder
   orgBillingEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   orgBillingWebsite?: Prisma.SortOrderInput | Prisma.SortOrder
   orgBankAccountHolder?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -614,7 +623,8 @@ export type OfferWhereUniqueInput = Prisma.AtLeast<{
   orgAddressLine2?: Prisma.StringNullableFilter<"Offer"> | string | null
   orgPostalCode?: Prisma.StringNullableFilter<"Offer"> | string | null
   orgCity?: Prisma.StringNullableFilter<"Offer"> | string | null
-  orgTaxId?: Prisma.StringNullableFilter<"Offer"> | string | null
+  orgTaxNumber?: Prisma.StringNullableFilter<"Offer"> | string | null
+  orgVatId?: Prisma.StringNullableFilter<"Offer"> | string | null
   orgBillingEmail?: Prisma.StringNullableFilter<"Offer"> | string | null
   orgBillingWebsite?: Prisma.StringNullableFilter<"Offer"> | string | null
   orgBankAccountHolder?: Prisma.StringNullableFilter<"Offer"> | string | null
@@ -664,7 +674,8 @@ export type OfferOrderByWithAggregationInput = {
   orgAddressLine2?: Prisma.SortOrderInput | Prisma.SortOrder
   orgPostalCode?: Prisma.SortOrderInput | Prisma.SortOrder
   orgCity?: Prisma.SortOrderInput | Prisma.SortOrder
-  orgTaxId?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgTaxNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgVatId?: Prisma.SortOrderInput | Prisma.SortOrder
   orgBillingEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   orgBillingWebsite?: Prisma.SortOrderInput | Prisma.SortOrder
   orgBankAccountHolder?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -716,7 +727,8 @@ export type OfferScalarWhereWithAggregatesInput = {
   orgAddressLine2?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
   orgPostalCode?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
   orgCity?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
-  orgTaxId?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
+  orgTaxNumber?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
+  orgVatId?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
   orgBillingEmail?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
   orgBillingWebsite?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
   orgBankAccountHolder?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
@@ -758,7 +770,8 @@ export type OfferCreateInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -807,7 +820,8 @@ export type OfferUncheckedCreateInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -852,7 +866,8 @@ export type OfferUpdateInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -901,7 +916,8 @@ export type OfferUncheckedUpdateInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -948,7 +964,8 @@ export type OfferCreateManyInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -990,7 +1007,8 @@ export type OfferUpdateManyMutationInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1033,7 +1051,8 @@ export type OfferUncheckedUpdateManyInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1102,7 +1121,8 @@ export type OfferCountOrderByAggregateInput = {
   orgAddressLine2?: Prisma.SortOrder
   orgPostalCode?: Prisma.SortOrder
   orgCity?: Prisma.SortOrder
-  orgTaxId?: Prisma.SortOrder
+  orgTaxNumber?: Prisma.SortOrder
+  orgVatId?: Prisma.SortOrder
   orgBillingEmail?: Prisma.SortOrder
   orgBillingWebsite?: Prisma.SortOrder
   orgBankAccountHolder?: Prisma.SortOrder
@@ -1154,7 +1174,8 @@ export type OfferMaxOrderByAggregateInput = {
   orgAddressLine2?: Prisma.SortOrder
   orgPostalCode?: Prisma.SortOrder
   orgCity?: Prisma.SortOrder
-  orgTaxId?: Prisma.SortOrder
+  orgTaxNumber?: Prisma.SortOrder
+  orgVatId?: Prisma.SortOrder
   orgBillingEmail?: Prisma.SortOrder
   orgBillingWebsite?: Prisma.SortOrder
   orgBankAccountHolder?: Prisma.SortOrder
@@ -1198,7 +1219,8 @@ export type OfferMinOrderByAggregateInput = {
   orgAddressLine2?: Prisma.SortOrder
   orgPostalCode?: Prisma.SortOrder
   orgCity?: Prisma.SortOrder
-  orgTaxId?: Prisma.SortOrder
+  orgTaxNumber?: Prisma.SortOrder
+  orgVatId?: Prisma.SortOrder
   orgBillingEmail?: Prisma.SortOrder
   orgBillingWebsite?: Prisma.SortOrder
   orgBankAccountHolder?: Prisma.SortOrder
@@ -1425,7 +1447,8 @@ export type OfferCreateWithoutOrganizationInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -1472,7 +1495,8 @@ export type OfferUncheckedCreateWithoutOrganizationInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -1548,7 +1572,8 @@ export type OfferScalarWhereInput = {
   orgAddressLine2?: Prisma.StringNullableFilter<"Offer"> | string | null
   orgPostalCode?: Prisma.StringNullableFilter<"Offer"> | string | null
   orgCity?: Prisma.StringNullableFilter<"Offer"> | string | null
-  orgTaxId?: Prisma.StringNullableFilter<"Offer"> | string | null
+  orgTaxNumber?: Prisma.StringNullableFilter<"Offer"> | string | null
+  orgVatId?: Prisma.StringNullableFilter<"Offer"> | string | null
   orgBillingEmail?: Prisma.StringNullableFilter<"Offer"> | string | null
   orgBillingWebsite?: Prisma.StringNullableFilter<"Offer"> | string | null
   orgBankAccountHolder?: Prisma.StringNullableFilter<"Offer"> | string | null
@@ -1590,7 +1615,8 @@ export type OfferCreateWithoutProductionInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -1637,7 +1663,8 @@ export type OfferUncheckedCreateWithoutProductionInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -1708,7 +1735,8 @@ export type OfferCreateWithoutRevisionsInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -1756,7 +1784,8 @@ export type OfferUncheckedCreateWithoutRevisionsInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -1805,7 +1834,8 @@ export type OfferCreateWithoutOriginalOfferInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -1853,7 +1883,8 @@ export type OfferUncheckedCreateWithoutOriginalOfferInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -1918,7 +1949,8 @@ export type OfferUpdateWithoutRevisionsInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1966,7 +1998,8 @@ export type OfferUncheckedUpdateWithoutRevisionsInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2026,7 +2059,8 @@ export type OfferCreateWithoutItemsInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -2074,7 +2108,8 @@ export type OfferUncheckedCreateWithoutItemsInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -2134,7 +2169,8 @@ export type OfferUpdateWithoutItemsInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2182,7 +2218,8 @@ export type OfferUncheckedUpdateWithoutItemsInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2226,7 +2263,8 @@ export type OfferCreateWithoutInvoicesInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -2274,7 +2312,8 @@ export type OfferUncheckedCreateWithoutInvoicesInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -2334,7 +2373,8 @@ export type OfferUpdateWithoutInvoicesInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2382,7 +2422,8 @@ export type OfferUncheckedUpdateWithoutInvoicesInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2427,7 +2468,8 @@ export type OfferCreateManyOrganizationInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -2469,7 +2511,8 @@ export type OfferUpdateWithoutOrganizationInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2516,7 +2559,8 @@ export type OfferUncheckedUpdateWithoutOrganizationInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2562,7 +2606,8 @@ export type OfferUncheckedUpdateManyWithoutOrganizationInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2605,7 +2650,8 @@ export type OfferCreateManyProductionInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -2647,7 +2693,8 @@ export type OfferUpdateWithoutProductionInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2694,7 +2741,8 @@ export type OfferUncheckedUpdateWithoutProductionInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2740,7 +2788,8 @@ export type OfferUncheckedUpdateManyWithoutProductionInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2784,7 +2833,8 @@ export type OfferCreateManyOriginalOfferInput = {
   orgAddressLine2?: string | null
   orgPostalCode?: string | null
   orgCity?: string | null
-  orgTaxId?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
   orgBillingEmail?: string | null
   orgBillingWebsite?: string | null
   orgBankAccountHolder?: string | null
@@ -2825,7 +2875,8 @@ export type OfferUpdateWithoutOriginalOfferInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2873,7 +2924,8 @@ export type OfferUncheckedUpdateWithoutOriginalOfferInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2919,7 +2971,8 @@ export type OfferUncheckedUpdateManyWithoutOriginalOfferInput = {
   orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  orgTaxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3011,7 +3064,8 @@ export type OfferSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   orgAddressLine2?: boolean
   orgPostalCode?: boolean
   orgCity?: boolean
-  orgTaxId?: boolean
+  orgTaxNumber?: boolean
+  orgVatId?: boolean
   orgBillingEmail?: boolean
   orgBillingWebsite?: boolean
   orgBankAccountHolder?: boolean
@@ -3062,7 +3116,8 @@ export type OfferSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   orgAddressLine2?: boolean
   orgPostalCode?: boolean
   orgCity?: boolean
-  orgTaxId?: boolean
+  orgTaxNumber?: boolean
+  orgVatId?: boolean
   orgBillingEmail?: boolean
   orgBillingWebsite?: boolean
   orgBankAccountHolder?: boolean
@@ -3109,7 +3164,8 @@ export type OfferSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   orgAddressLine2?: boolean
   orgPostalCode?: boolean
   orgCity?: boolean
-  orgTaxId?: boolean
+  orgTaxNumber?: boolean
+  orgVatId?: boolean
   orgBillingEmail?: boolean
   orgBillingWebsite?: boolean
   orgBankAccountHolder?: boolean
@@ -3156,7 +3212,8 @@ export type OfferSelectScalar = {
   orgAddressLine2?: boolean
   orgPostalCode?: boolean
   orgCity?: boolean
-  orgTaxId?: boolean
+  orgTaxNumber?: boolean
+  orgVatId?: boolean
   orgBillingEmail?: boolean
   orgBillingWebsite?: boolean
   orgBankAccountHolder?: boolean
@@ -3169,7 +3226,7 @@ export type OfferSelectScalar = {
   updatedAt?: boolean
 }
 
-export type OfferOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "organizationId" | "productionId" | "customerId" | "customerName" | "customerAddress" | "customerContactPerson" | "customerEmail" | "customerNumber" | "customerPhone" | "customerVatId" | "serviceStartDate" | "serviceEndDate" | "introText" | "closingText" | "paymentTermsDays" | "finalizedAt" | "pdfPath" | "dayCount" | "discountType" | "discountValue" | "assetScope" | "vatRatePercent" | "isKleinunternehmerSnapshot" | "orgName" | "orgAddressLine1" | "orgAddressLine2" | "orgPostalCode" | "orgCity" | "orgTaxId" | "orgBillingEmail" | "orgBillingWebsite" | "orgBankAccountHolder" | "orgBankName" | "orgIban" | "orgBic" | "originalOfferId" | "revision" | "createdAt" | "updatedAt", ExtArgs["result"]["offer"]>
+export type OfferOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "organizationId" | "productionId" | "customerId" | "customerName" | "customerAddress" | "customerContactPerson" | "customerEmail" | "customerNumber" | "customerPhone" | "customerVatId" | "serviceStartDate" | "serviceEndDate" | "introText" | "closingText" | "paymentTermsDays" | "finalizedAt" | "pdfPath" | "dayCount" | "discountType" | "discountValue" | "assetScope" | "vatRatePercent" | "isKleinunternehmerSnapshot" | "orgName" | "orgAddressLine1" | "orgAddressLine2" | "orgPostalCode" | "orgCity" | "orgTaxNumber" | "orgVatId" | "orgBillingEmail" | "orgBillingWebsite" | "orgBankAccountHolder" | "orgBankName" | "orgIban" | "orgBic" | "originalOfferId" | "revision" | "createdAt" | "updatedAt", ExtArgs["result"]["offer"]>
 export type OfferInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   production?: boolean | Prisma.Offer$productionArgs<ExtArgs>
@@ -3231,7 +3288,8 @@ export type $OfferPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     orgAddressLine2: string | null
     orgPostalCode: string | null
     orgCity: string | null
-    orgTaxId: string | null
+    orgTaxNumber: string | null
+    orgVatId: string | null
     orgBillingEmail: string | null
     orgBillingWebsite: string | null
     orgBankAccountHolder: string | null
@@ -3701,7 +3759,8 @@ export interface OfferFieldRefs {
   readonly orgAddressLine2: Prisma.FieldRef<"Offer", 'String'>
   readonly orgPostalCode: Prisma.FieldRef<"Offer", 'String'>
   readonly orgCity: Prisma.FieldRef<"Offer", 'String'>
-  readonly orgTaxId: Prisma.FieldRef<"Offer", 'String'>
+  readonly orgTaxNumber: Prisma.FieldRef<"Offer", 'String'>
+  readonly orgVatId: Prisma.FieldRef<"Offer", 'String'>
   readonly orgBillingEmail: Prisma.FieldRef<"Offer", 'String'>
   readonly orgBillingWebsite: Prisma.FieldRef<"Offer", 'String'>
   readonly orgBankAccountHolder: Prisma.FieldRef<"Offer", 'String'>

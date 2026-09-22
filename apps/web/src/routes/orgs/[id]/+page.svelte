@@ -170,7 +170,8 @@
 	let savingBilling = $state(false);
 	let billingAddress = $state<AddressValue>({ line1: '', line2: '', postalCode: '', city: '' });
 	let billingDraft = $state({
-		taxId: '',
+		taxNumber: '',
+		vatId: '',
 		bankAccountHolder: '',
 		iban: '',
 		bic: '',
@@ -193,7 +194,8 @@
 				city: org.address?.city ?? ''
 			};
 			billingDraft = {
-				taxId: org.taxId ?? '',
+				taxNumber: org.taxNumber ?? '',
+				vatId: org.vatId ?? '',
 				bankAccountHolder: org.bankAccountHolder ?? '',
 				iban: org.iban ?? '',
 				bic: org.bic ?? '',
@@ -241,7 +243,8 @@
 							city: billingAddress.city
 						}
 					: null,
-				taxId: billingDraft.taxId || null,
+				taxNumber: billingDraft.taxNumber || null,
+				vatId: billingDraft.vatId || null,
 				bankAccountHolder: billingDraft.bankAccountHolder || null,
 				iban: billingDraft.iban || null,
 				bic: billingDraft.bic || null,
@@ -460,16 +463,35 @@
 						<Card.Header>
 							<Card.Title>Billing Details</Card.Title>
 							<Card.Description
-								>Address, tax ID, and bank account — used on generated offers/invoices.</Card.Description
+								>Address, tax numbers, and bank account — used on generated offers/invoices.</Card.Description
 							>
 						</Card.Header>
 						<Card.Content>
 							{#if editingBilling}
 								<form onsubmit={handleBillingSave} class="space-y-4">
 									<AddressInput bind:value={billingAddress} idPrefix="billing" />
-									<div class="space-y-2">
-										<Label for="billingTaxId">Tax ID (Steuernummer / USt-IdNr.)</Label>
-										<Input id="billingTaxId" bind:value={billingDraft.taxId} />
+									<div class="grid gap-4 sm:grid-cols-2">
+										<div class="space-y-2">
+											<Label for="billingTaxNumber">Tax number (Steuernummer)</Label>
+											<Input
+												id="billingTaxNumber"
+												bind:value={billingDraft.taxNumber}
+												placeholder="12/345/67890"
+											/>
+										</div>
+										<div class="space-y-2">
+											<Label for="billingVatId">VAT ID (USt-IdNr.)</Label>
+											<Input
+												id="billingVatId"
+												bind:value={billingDraft.vatId}
+												placeholder="DE123456789"
+												class="font-mono"
+											/>
+										</div>
+										<p class="text-xs text-muted-foreground sm:col-span-2">
+											Invoices need at least one of the two and show both if both are set. Not your
+											personal tax ID (Steuer-ID) — that one does not belong on an invoice.
+										</p>
 									</div>
 									<div class="space-y-2">
 										<Label for="billingHolder">Bank account holder</Label>
@@ -578,8 +600,12 @@
 										</p>
 									</div>
 									<div>
-										<p class="text-muted-foreground">Tax ID</p>
-										<p>{org.taxId ?? 'Not set'}</p>
+										<p class="text-muted-foreground">Tax number</p>
+										<p>{org.taxNumber ?? 'Not set'}</p>
+									</div>
+									<div>
+										<p class="text-muted-foreground">VAT ID</p>
+										<p>{org.vatId ?? 'Not set'}</p>
 									</div>
 									<div>
 										<p class="text-muted-foreground">Bank account</p>

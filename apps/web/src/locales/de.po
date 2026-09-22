@@ -3303,6 +3303,7 @@ msgstr "% / Tag"
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/rates/+page.svelte
 msgid "Not set"
 msgstr "Nicht festgelegt"
@@ -3333,13 +3334,11 @@ msgstr "Rechnungsdaten aktualisiert"
 msgid "Billing Details"
 msgstr "Rechnungsdaten"
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Address, tax ID, and bank account — used on generated offers/invoices."
-msgstr "Adresse, Steuer-ID und Bankverbindung — werden auf erstellten Angeboten/Rechnungen verwendet."
+#~ msgid "Address, tax ID, and bank account — used on generated offers/invoices."
+#~ msgstr "Adresse, Steuer-ID und Bankverbindung — werden auf erstellten Angeboten/Rechnungen verwendet."
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Tax ID (Steuernummer / USt-IdNr.)"
-msgstr "Steuer-ID (Steuernummer / USt-IdNr.)"
+#~ msgid "Tax ID (Steuernummer / USt-IdNr.)"
+#~ msgstr "Steuer-ID (Steuernummer / USt-IdNr.)"
 
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Bank account holder"
@@ -3357,10 +3356,8 @@ msgstr "BIC"
 msgid "Bank name"
 msgstr "Bankname"
 
-#: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Tax ID"
-msgstr "Steuer-ID"
+#~ msgid "Tax ID"
+#~ msgstr "Steuer-ID"
 
 #: src/lib/billing-setup.svelte.ts
 #: src/routes/orgs/[id]/+page.svelte
@@ -5359,6 +5356,7 @@ msgid "Phone"
 msgstr "Telefon"
 
 #: src/lib/components/ui/customer-fields/customer-fields.svelte
+#: src/routes/orgs/[id]/+page.svelte
 msgid "VAT ID"
 msgstr "USt-IdNr."
 
@@ -9089,3 +9087,27 @@ msgstr "Rechnungsdaten von {0} sind unvollständig"
 #: src/routes/+page.svelte
 msgid "Missing: {0}. Offers and invoices can only be generated once these are filled in."
 msgstr "Es fehlt: {0}. Angebote und Rechnungen lassen sich erst erstellen, wenn diese Angaben vollständig sind."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Tax number (Steuernummer)"
+msgstr "Steuernummer"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "VAT ID (USt-IdNr.)"
+msgstr "Umsatzsteuer-ID (USt-IdNr.)"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Invoices need at least one of the two and show both if both are set. Not your personal tax ID (Steuer-ID) — that one does not belong on an invoice."
+msgstr "Rechnungen brauchen mindestens eine der beiden Nummern und zeigen beide, wenn beide eingetragen sind. Nicht die persönliche Steuer-ID – die gehört nicht auf eine Rechnung."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Tax number"
+msgstr "Steuernummer"
+
+#: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
+msgid "Tax number / VAT ID"
+msgstr "Steuernummer / USt-IdNr."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Address, tax numbers, and bank account — used on generated offers/invoices."
+msgstr "Adresse, Steuernummern und Bankverbindung – für erstellte Angebote und Rechnungen."

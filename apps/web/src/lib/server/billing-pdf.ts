@@ -6,7 +6,8 @@ import { fmtDate, safe, wrap } from './pdf-text.ts';
 type PdfOrganization = {
 	name: string;
 	address: { line1: string; line2: string | null; postalCode: string; city: string } | null;
-	taxId: string | null;
+	taxNumber: string | null;
+	vatId: string | null;
 	billingEmail: string | null;
 	billingWebsite: string | null;
 	bankAccountHolder: string | null;
@@ -26,7 +27,8 @@ export type OrgSnapshot = {
 	orgAddressLine2: string | null;
 	orgPostalCode: string | null;
 	orgCity: string | null;
-	orgTaxId: string | null;
+	orgTaxNumber: string | null;
+	orgVatId: string | null;
 	orgBillingEmail: string | null;
 	orgBillingWebsite: string | null;
 	orgBankAccountHolder: string | null;
@@ -48,7 +50,8 @@ export function organizationFromSnapshot(doc: OrgSnapshot): PdfOrganization {
 						city: doc.orgCity
 					}
 				: null,
-		taxId: doc.orgTaxId,
+		taxNumber: doc.orgTaxNumber,
+		vatId: doc.orgVatId,
 		billingEmail: doc.orgBillingEmail,
 		billingWebsite: doc.orgBillingWebsite,
 		bankAccountHolder: doc.orgBankAccountHolder,
@@ -101,8 +104,9 @@ function validateDocument(kind: 'offer' | 'invoice', data: PdfDocumentData) {
 	required(data.organization.address?.postalCode, 'organization postal code');
 	required(data.organization.address?.city, 'organization city');
 	required(data.organization.billingEmail, 'organization billing email');
-	if (!data.organization.isKleinunternehmer)
-		required(data.organization.taxId, 'organization tax ID');
+	// §14 Abs. 4 Nr. 2 UStG: one of the two, from a Kleinunternehmer as well.
+	if (!data.organization.taxNumber?.trim() && !data.organization.vatId?.trim())
+		missing.push('organization tax number or VAT ID');
 	required(data.organization.bankAccountHolder, 'bank account holder');
 	required(data.organization.bankName, 'bank name');
 	required(data.organization.iban, 'IBAN');
@@ -413,7 +417,10 @@ export async function generateBillingPdf(
 			150
 		);
 		footerColumn(
-			[data.organization.taxId ? `USt-IdNr.: ${data.organization.taxId}` : null],
+			[
+				data.organization.taxNumber ? `Steuernummer: ${data.organization.taxNumber}` : null,
+				data.organization.vatId ? `USt-IdNr.: ${data.organization.vatId}` : null
+			],
 			245,
 			125
 		);

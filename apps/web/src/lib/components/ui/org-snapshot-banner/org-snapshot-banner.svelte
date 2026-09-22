@@ -34,7 +34,7 @@
 	const labels: Record<OrgSnapshotDiffKey, string> = {
 		name: 'Name',
 		address: 'Address',
-		taxId: 'Tax ID',
+		tax: 'Tax number / VAT ID',
 		contact: 'Contact details',
 		bank: 'Bank details',
 		vatStatus: 'VAT status'

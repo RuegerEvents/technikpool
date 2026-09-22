@@ -5,7 +5,8 @@
 
 export type OrgSnapshotSource = {
 	name: string;
-	taxId: string | null;
+	taxNumber: string | null;
+	vatId: string | null;
 	billingEmail: string | null;
 	billingWebsite: string | null;
 	bankAccountHolder: string | null;
@@ -22,7 +23,8 @@ export type OrgSnapshotColumns = {
 	orgAddressLine2: string | null;
 	orgPostalCode: string | null;
 	orgCity: string | null;
-	orgTaxId: string | null;
+	orgTaxNumber: string | null;
+	orgVatId: string | null;
 	orgBillingEmail: string | null;
 	orgBillingWebsite: string | null;
 	orgBankAccountHolder: string | null;
@@ -39,7 +41,8 @@ export function orgSnapshotColumns(org: OrgSnapshotSource): OrgSnapshotColumns {
 		orgAddressLine2: org.address?.line2 ?? null,
 		orgPostalCode: org.address?.postalCode ?? null,
 		orgCity: org.address?.city ?? null,
-		orgTaxId: org.taxId,
+		orgTaxNumber: org.taxNumber,
+		orgVatId: org.vatId,
 		orgBillingEmail: org.billingEmail,
 		orgBillingWebsite: org.billingWebsite,
 		orgBankAccountHolder: org.bankAccountHolder,
@@ -51,7 +54,7 @@ export function orgSnapshotColumns(org: OrgSnapshotSource): OrgSnapshotColumns {
 }
 
 /** Grouped, user-meaningful keys — the banner maps these to labels. */
-export type OrgSnapshotDiffKey = 'name' | 'address' | 'taxId' | 'contact' | 'bank' | 'vatStatus';
+export type OrgSnapshotDiffKey = 'name' | 'address' | 'tax' | 'contact' | 'bank' | 'vatStatus';
 
 export function orgSnapshotDiff(
 	doc: OrgSnapshotColumns,
@@ -65,7 +68,7 @@ export function orgSnapshotDiff(
 	if (differs(['orgName'])) diff.push('name');
 	if (differs(['orgAddressLine1', 'orgAddressLine2', 'orgPostalCode', 'orgCity']))
 		diff.push('address');
-	if (differs(['orgTaxId'])) diff.push('taxId');
+	if (differs(['orgTaxNumber', 'orgVatId'])) diff.push('tax');
 	if (differs(['orgBillingEmail', 'orgBillingWebsite'])) diff.push('contact');
 	if (differs(['orgBankAccountHolder', 'orgBankName', 'orgIban', 'orgBic'])) diff.push('bank');
 	if (doc.isKleinunternehmerSnapshot !== live.isKleinunternehmerSnapshot) diff.push('vatStatus');

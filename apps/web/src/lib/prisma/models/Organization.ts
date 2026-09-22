@@ -49,7 +49,8 @@ export type OrganizationMinAggregateOutputType = {
   defaultInspectionIntervalMonths: number | null
   isKleinunternehmer: boolean | null
   addressId: string | null
-  taxId: string | null
+  taxNumber: string | null
+  vatId: string | null
   bankAccountHolder: string | null
   iban: string | null
   bic: string | null
@@ -76,7 +77,8 @@ export type OrganizationMaxAggregateOutputType = {
   defaultInspectionIntervalMonths: number | null
   isKleinunternehmer: boolean | null
   addressId: string | null
-  taxId: string | null
+  taxNumber: string | null
+  vatId: string | null
   bankAccountHolder: string | null
   iban: string | null
   bic: string | null
@@ -103,7 +105,8 @@ export type OrganizationCountAggregateOutputType = {
   defaultInspectionIntervalMonths: number
   isKleinunternehmer: number
   addressId: number
-  taxId: number
+  taxNumber: number
+  vatId: number
   bankAccountHolder: number
   iban: number
   bic: number
@@ -142,7 +145,8 @@ export type OrganizationMinAggregateInputType = {
   defaultInspectionIntervalMonths?: true
   isKleinunternehmer?: true
   addressId?: true
-  taxId?: true
+  taxNumber?: true
+  vatId?: true
   bankAccountHolder?: true
   iban?: true
   bic?: true
@@ -169,7 +173,8 @@ export type OrganizationMaxAggregateInputType = {
   defaultInspectionIntervalMonths?: true
   isKleinunternehmer?: true
   addressId?: true
-  taxId?: true
+  taxNumber?: true
+  vatId?: true
   bankAccountHolder?: true
   iban?: true
   bic?: true
@@ -196,7 +201,8 @@ export type OrganizationCountAggregateInputType = {
   defaultInspectionIntervalMonths?: true
   isKleinunternehmer?: true
   addressId?: true
-  taxId?: true
+  taxNumber?: true
+  vatId?: true
   bankAccountHolder?: true
   iban?: true
   bic?: true
@@ -310,7 +316,8 @@ export type OrganizationGroupByOutputType = {
   defaultInspectionIntervalMonths: number | null
   isKleinunternehmer: boolean
   addressId: string | null
-  taxId: string | null
+  taxNumber: string | null
+  vatId: string | null
   bankAccountHolder: string | null
   iban: string | null
   bic: string | null
@@ -360,7 +367,8 @@ export type OrganizationWhereInput = {
   defaultInspectionIntervalMonths?: Prisma.IntNullableFilter<"Organization"> | number | null
   isKleinunternehmer?: Prisma.BoolFilter<"Organization"> | boolean
   addressId?: Prisma.StringNullableFilter<"Organization"> | string | null
-  taxId?: Prisma.StringNullableFilter<"Organization"> | string | null
+  taxNumber?: Prisma.StringNullableFilter<"Organization"> | string | null
+  vatId?: Prisma.StringNullableFilter<"Organization"> | string | null
   bankAccountHolder?: Prisma.StringNullableFilter<"Organization"> | string | null
   iban?: Prisma.StringNullableFilter<"Organization"> | string | null
   bic?: Prisma.StringNullableFilter<"Organization"> | string | null
@@ -401,7 +409,8 @@ export type OrganizationOrderByWithRelationInput = {
   defaultInspectionIntervalMonths?: Prisma.SortOrderInput | Prisma.SortOrder
   isKleinunternehmer?: Prisma.SortOrder
   addressId?: Prisma.SortOrderInput | Prisma.SortOrder
-  taxId?: Prisma.SortOrderInput | Prisma.SortOrder
+  taxNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  vatId?: Prisma.SortOrderInput | Prisma.SortOrder
   bankAccountHolder?: Prisma.SortOrderInput | Prisma.SortOrder
   iban?: Prisma.SortOrderInput | Prisma.SortOrder
   bic?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -445,7 +454,8 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   defaultInspectionIntervalMonths?: Prisma.IntNullableFilter<"Organization"> | number | null
   isKleinunternehmer?: Prisma.BoolFilter<"Organization"> | boolean
   addressId?: Prisma.StringNullableFilter<"Organization"> | string | null
-  taxId?: Prisma.StringNullableFilter<"Organization"> | string | null
+  taxNumber?: Prisma.StringNullableFilter<"Organization"> | string | null
+  vatId?: Prisma.StringNullableFilter<"Organization"> | string | null
   bankAccountHolder?: Prisma.StringNullableFilter<"Organization"> | string | null
   iban?: Prisma.StringNullableFilter<"Organization"> | string | null
   bic?: Prisma.StringNullableFilter<"Organization"> | string | null
@@ -486,7 +496,8 @@ export type OrganizationOrderByWithAggregationInput = {
   defaultInspectionIntervalMonths?: Prisma.SortOrderInput | Prisma.SortOrder
   isKleinunternehmer?: Prisma.SortOrder
   addressId?: Prisma.SortOrderInput | Prisma.SortOrder
-  taxId?: Prisma.SortOrderInput | Prisma.SortOrder
+  taxNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  vatId?: Prisma.SortOrderInput | Prisma.SortOrder
   bankAccountHolder?: Prisma.SortOrderInput | Prisma.SortOrder
   iban?: Prisma.SortOrderInput | Prisma.SortOrder
   bic?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -521,7 +532,8 @@ export type OrganizationScalarWhereWithAggregatesInput = {
   defaultInspectionIntervalMonths?: Prisma.IntNullableWithAggregatesFilter<"Organization"> | number | null
   isKleinunternehmer?: Prisma.BoolWithAggregatesFilter<"Organization"> | boolean
   addressId?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
-  taxId?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  taxNumber?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  vatId?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
   bankAccountHolder?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
   iban?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
   bic?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
@@ -547,7 +559,8 @@ export type OrganizationCreateInput = {
   avatarLabel: string
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -588,7 +601,8 @@ export type OrganizationUncheckedCreateInput = {
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
   addressId?: string | null
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -627,7 +641,8 @@ export type OrganizationUpdateInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -668,7 +683,8 @@ export type OrganizationUncheckedUpdateInput = {
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -708,7 +724,8 @@ export type OrganizationCreateManyInput = {
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
   addressId?: string | null
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -734,7 +751,8 @@ export type OrganizationUpdateManyMutationInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -761,7 +779,8 @@ export type OrganizationUncheckedUpdateManyInput = {
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -793,7 +812,8 @@ export type OrganizationCountOrderByAggregateInput = {
   defaultInspectionIntervalMonths?: Prisma.SortOrder
   isKleinunternehmer?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
-  taxId?: Prisma.SortOrder
+  taxNumber?: Prisma.SortOrder
+  vatId?: Prisma.SortOrder
   bankAccountHolder?: Prisma.SortOrder
   iban?: Prisma.SortOrder
   bic?: Prisma.SortOrder
@@ -825,7 +845,8 @@ export type OrganizationMaxOrderByAggregateInput = {
   defaultInspectionIntervalMonths?: Prisma.SortOrder
   isKleinunternehmer?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
-  taxId?: Prisma.SortOrder
+  taxNumber?: Prisma.SortOrder
+  vatId?: Prisma.SortOrder
   bankAccountHolder?: Prisma.SortOrder
   iban?: Prisma.SortOrder
   bic?: Prisma.SortOrder
@@ -852,7 +873,8 @@ export type OrganizationMinOrderByAggregateInput = {
   defaultInspectionIntervalMonths?: Prisma.SortOrder
   isKleinunternehmer?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
-  taxId?: Prisma.SortOrder
+  taxNumber?: Prisma.SortOrder
+  vatId?: Prisma.SortOrder
   bankAccountHolder?: Prisma.SortOrder
   iban?: Prisma.SortOrder
   bic?: Prisma.SortOrder
@@ -1126,7 +1148,8 @@ export type OrganizationCreateWithoutHomeUsersInput = {
   avatarLabel: string
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -1166,7 +1189,8 @@ export type OrganizationUncheckedCreateWithoutHomeUsersInput = {
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
   addressId?: string | null
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -1220,7 +1244,8 @@ export type OrganizationUpdateWithoutHomeUsersInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1260,7 +1285,8 @@ export type OrganizationUncheckedUpdateWithoutHomeUsersInput = {
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1298,7 +1324,8 @@ export type OrganizationCreateWithoutMembersInput = {
   avatarLabel: string
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -1338,7 +1365,8 @@ export type OrganizationUncheckedCreateWithoutMembersInput = {
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
   addressId?: string | null
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -1392,7 +1420,8 @@ export type OrganizationUpdateWithoutMembersInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1432,7 +1461,8 @@ export type OrganizationUncheckedUpdateWithoutMembersInput = {
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1470,7 +1500,8 @@ export type OrganizationCreateWithoutInvitationsInput = {
   avatarLabel: string
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -1510,7 +1541,8 @@ export type OrganizationUncheckedCreateWithoutInvitationsInput = {
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
   addressId?: string | null
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -1564,7 +1596,8 @@ export type OrganizationUpdateWithoutInvitationsInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1604,7 +1637,8 @@ export type OrganizationUncheckedUpdateWithoutInvitationsInput = {
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1642,7 +1676,8 @@ export type OrganizationCreateWithoutProductPricesInput = {
   avatarLabel: string
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -1682,7 +1717,8 @@ export type OrganizationUncheckedCreateWithoutProductPricesInput = {
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
   addressId?: string | null
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -1736,7 +1772,8 @@ export type OrganizationUpdateWithoutProductPricesInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1776,7 +1813,8 @@ export type OrganizationUncheckedUpdateWithoutProductPricesInput = {
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1814,7 +1852,8 @@ export type OrganizationCreateWithoutAddressInput = {
   avatarLabel: string
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -1853,7 +1892,8 @@ export type OrganizationUncheckedCreateWithoutAddressInput = {
   avatarLabel: string
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -1922,7 +1962,8 @@ export type OrganizationScalarWhereInput = {
   defaultInspectionIntervalMonths?: Prisma.IntNullableFilter<"Organization"> | number | null
   isKleinunternehmer?: Prisma.BoolFilter<"Organization"> | boolean
   addressId?: Prisma.StringNullableFilter<"Organization"> | string | null
-  taxId?: Prisma.StringNullableFilter<"Organization"> | string | null
+  taxNumber?: Prisma.StringNullableFilter<"Organization"> | string | null
+  vatId?: Prisma.StringNullableFilter<"Organization"> | string | null
   bankAccountHolder?: Prisma.StringNullableFilter<"Organization"> | string | null
   iban?: Prisma.StringNullableFilter<"Organization"> | string | null
   bic?: Prisma.StringNullableFilter<"Organization"> | string | null
@@ -1948,7 +1989,8 @@ export type OrganizationCreateWithoutLocationsInput = {
   avatarLabel: string
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -1988,7 +2030,8 @@ export type OrganizationUncheckedCreateWithoutLocationsInput = {
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
   addressId?: string | null
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -2042,7 +2085,8 @@ export type OrganizationUpdateWithoutLocationsInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2082,7 +2126,8 @@ export type OrganizationUncheckedUpdateWithoutLocationsInput = {
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2120,7 +2165,8 @@ export type OrganizationCreateWithoutAssetsInput = {
   avatarLabel: string
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -2160,7 +2206,8 @@ export type OrganizationUncheckedCreateWithoutAssetsInput = {
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
   addressId?: string | null
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -2214,7 +2261,8 @@ export type OrganizationUpdateWithoutAssetsInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2254,7 +2302,8 @@ export type OrganizationUncheckedUpdateWithoutAssetsInput = {
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2292,7 +2341,8 @@ export type OrganizationCreateWithoutBundleTemplatesInput = {
   avatarLabel: string
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -2332,7 +2382,8 @@ export type OrganizationUncheckedCreateWithoutBundleTemplatesInput = {
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
   addressId?: string | null
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -2386,7 +2437,8 @@ export type OrganizationUpdateWithoutBundleTemplatesInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2426,7 +2478,8 @@ export type OrganizationUncheckedUpdateWithoutBundleTemplatesInput = {
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2464,7 +2517,8 @@ export type OrganizationCreateWithoutProductionsInput = {
   avatarLabel: string
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -2504,7 +2558,8 @@ export type OrganizationUncheckedCreateWithoutProductionsInput = {
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
   addressId?: string | null
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -2558,7 +2613,8 @@ export type OrganizationUpdateWithoutProductionsInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2598,7 +2654,8 @@ export type OrganizationUncheckedUpdateWithoutProductionsInput = {
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2636,7 +2693,8 @@ export type OrganizationCreateWithoutCustomersInput = {
   avatarLabel: string
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -2676,7 +2734,8 @@ export type OrganizationUncheckedCreateWithoutCustomersInput = {
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
   addressId?: string | null
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -2730,7 +2789,8 @@ export type OrganizationUpdateWithoutCustomersInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2770,7 +2830,8 @@ export type OrganizationUncheckedUpdateWithoutCustomersInput = {
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2808,7 +2869,8 @@ export type OrganizationCreateWithoutCategoryRatesInput = {
   avatarLabel: string
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -2848,7 +2910,8 @@ export type OrganizationUncheckedCreateWithoutCategoryRatesInput = {
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
   addressId?: string | null
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -2902,7 +2965,8 @@ export type OrganizationUpdateWithoutCategoryRatesInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2942,7 +3006,8 @@ export type OrganizationUncheckedUpdateWithoutCategoryRatesInput = {
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2980,7 +3045,8 @@ export type OrganizationCreateWithoutOfferSequencesInput = {
   avatarLabel: string
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -3020,7 +3086,8 @@ export type OrganizationUncheckedCreateWithoutOfferSequencesInput = {
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
   addressId?: string | null
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -3074,7 +3141,8 @@ export type OrganizationUpdateWithoutOfferSequencesInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3114,7 +3182,8 @@ export type OrganizationUncheckedUpdateWithoutOfferSequencesInput = {
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3152,7 +3221,8 @@ export type OrganizationCreateWithoutOffersInput = {
   avatarLabel: string
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -3192,7 +3262,8 @@ export type OrganizationUncheckedCreateWithoutOffersInput = {
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
   addressId?: string | null
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -3246,7 +3317,8 @@ export type OrganizationUpdateWithoutOffersInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3286,7 +3358,8 @@ export type OrganizationUncheckedUpdateWithoutOffersInput = {
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3324,7 +3397,8 @@ export type OrganizationCreateWithoutInvoicesInput = {
   avatarLabel: string
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -3364,7 +3438,8 @@ export type OrganizationUncheckedCreateWithoutInvoicesInput = {
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
   addressId?: string | null
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -3418,7 +3493,8 @@ export type OrganizationUpdateWithoutInvoicesInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3458,7 +3534,8 @@ export type OrganizationUncheckedUpdateWithoutInvoicesInput = {
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3496,7 +3573,8 @@ export type OrganizationCreateManyAddressInput = {
   avatarLabel: string
   defaultInspectionIntervalMonths?: number | null
   isKleinunternehmer?: boolean
-  taxId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
   bankAccountHolder?: string | null
   iban?: string | null
   bic?: string | null
@@ -3522,7 +3600,8 @@ export type OrganizationUpdateWithoutAddressInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3561,7 +3640,8 @@ export type OrganizationUncheckedUpdateWithoutAddressInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3600,7 +3680,8 @@ export type OrganizationUncheckedUpdateManyWithoutAddressInput = {
   avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
   defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3766,7 +3847,8 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   defaultInspectionIntervalMonths?: boolean
   isKleinunternehmer?: boolean
   addressId?: boolean
-  taxId?: boolean
+  taxNumber?: boolean
+  vatId?: boolean
   bankAccountHolder?: boolean
   iban?: boolean
   bic?: boolean
@@ -3808,7 +3890,8 @@ export type OrganizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   defaultInspectionIntervalMonths?: boolean
   isKleinunternehmer?: boolean
   addressId?: boolean
-  taxId?: boolean
+  taxNumber?: boolean
+  vatId?: boolean
   bankAccountHolder?: boolean
   iban?: boolean
   bic?: boolean
@@ -3836,7 +3919,8 @@ export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   defaultInspectionIntervalMonths?: boolean
   isKleinunternehmer?: boolean
   addressId?: boolean
-  taxId?: boolean
+  taxNumber?: boolean
+  vatId?: boolean
   bankAccountHolder?: boolean
   iban?: boolean
   bic?: boolean
@@ -3864,7 +3948,8 @@ export type OrganizationSelectScalar = {
   defaultInspectionIntervalMonths?: boolean
   isKleinunternehmer?: boolean
   addressId?: boolean
-  taxId?: boolean
+  taxNumber?: boolean
+  vatId?: boolean
   bankAccountHolder?: boolean
   iban?: boolean
   bic?: boolean
@@ -3878,7 +3963,7 @@ export type OrganizationSelectScalar = {
   invoiceClosingTemplate?: boolean
 }
 
-export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "shortName" | "assetIdPrefix" | "createdAt" | "updatedAt" | "defaultAssetVisibility" | "color" | "avatarLabel" | "defaultInspectionIntervalMonths" | "isKleinunternehmer" | "addressId" | "taxId" | "bankAccountHolder" | "iban" | "bic" | "bankName" | "billingEmail" | "billingWebsite" | "paymentTermsDays" | "offerIntroTemplate" | "offerClosingTemplate" | "invoiceIntroTemplate" | "invoiceClosingTemplate", ExtArgs["result"]["organization"]>
+export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "shortName" | "assetIdPrefix" | "createdAt" | "updatedAt" | "defaultAssetVisibility" | "color" | "avatarLabel" | "defaultInspectionIntervalMonths" | "isKleinunternehmer" | "addressId" | "taxNumber" | "vatId" | "bankAccountHolder" | "iban" | "bic" | "bankName" | "billingEmail" | "billingWebsite" | "paymentTermsDays" | "offerIntroTemplate" | "offerClosingTemplate" | "invoiceIntroTemplate" | "invoiceClosingTemplate", ExtArgs["result"]["organization"]>
 export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   address?: boolean | Prisma.Organization$addressArgs<ExtArgs>
   homeUsers?: boolean | Prisma.Organization$homeUsersArgs<ExtArgs>
@@ -3934,7 +4019,8 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     defaultInspectionIntervalMonths: number | null
     isKleinunternehmer: boolean
     addressId: string | null
-    taxId: string | null
+    taxNumber: string | null
+    vatId: string | null
     bankAccountHolder: string | null
     iban: string | null
     bic: string | null
@@ -4395,7 +4481,8 @@ export interface OrganizationFieldRefs {
   readonly defaultInspectionIntervalMonths: Prisma.FieldRef<"Organization", 'Int'>
   readonly isKleinunternehmer: Prisma.FieldRef<"Organization", 'Boolean'>
   readonly addressId: Prisma.FieldRef<"Organization", 'String'>
-  readonly taxId: Prisma.FieldRef<"Organization", 'String'>
+  readonly taxNumber: Prisma.FieldRef<"Organization", 'String'>
+  readonly vatId: Prisma.FieldRef<"Organization", 'String'>
   readonly bankAccountHolder: Prisma.FieldRef<"Organization", 'String'>
   readonly iban: Prisma.FieldRef<"Organization", 'String'>
   readonly bic: Prisma.FieldRef<"Organization", 'String'>

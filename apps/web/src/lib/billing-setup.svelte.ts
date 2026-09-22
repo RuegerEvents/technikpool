@@ -7,8 +7,8 @@
 
 export type BillingSetupOrg = {
 	addressId: string | null;
-	taxId: string | null;
-	isKleinunternehmer: boolean;
+	taxNumber: string | null;
+	vatId: string | null;
 	billingEmail: string | null;
 	bankAccountHolder: string | null;
 	bankName: string | null;
@@ -26,7 +26,7 @@ export function billingSetupSteps(org: BillingSetupOrg): BillingSetupStep[] {
 		{
 			key: 'tax',
 			label: 'Tax number or VAT ID',
-			done: org.isKleinunternehmer || filled(org.taxId)
+			done: filled(org.taxNumber) || filled(org.vatId)
 		},
 		{ key: 'email', label: 'Billing email', done: filled(org.billingEmail) },
 		{
