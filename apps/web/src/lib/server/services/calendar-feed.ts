@@ -46,7 +46,7 @@ const formatDay = (d: Date) =>
 export async function renderProductionsCalendar(userId: string): Promise<string> {
 	const productions = await prisma.production.findMany({
 		where: {
-			...(await productionReadWhere(userId)),
+			...(await productionReadWhere(userId, undefined, { lent: true })),
 			startDate: { not: null },
 			endDate: { not: null }
 		},

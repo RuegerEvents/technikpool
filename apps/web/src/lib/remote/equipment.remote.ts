@@ -2,7 +2,7 @@ import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import { orgLabel } from '$lib/utils';
-import { getAwaitingApprovals, getProduction } from './productions.remote';
+import { getAwaitingApprovals, getProduction, getProductionAudience } from './productions.remote';
 import {
 	productionReadWhere,
 	requireAuth,
@@ -409,7 +409,10 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 	}
 
 	await getEquipmentEditorData(data.productionId).refresh();
-	await getProduction(data.productionId).refresh();
+	await Promise.all([
+		getProduction(data.productionId).refresh(),
+		getProductionAudience(data.productionId).refresh()
+	]);
 	if (production.organizationId !== data.organizationId) await getAwaitingApprovals().refresh();
 	return { changed: delta };
 });
@@ -485,7 +488,10 @@ export const copyEquipmentFromProduction = command(
 		const user = await requireCopyAccess(sourceId, targetId);
 		const result = await copyEquipment(sourceId, targetId, keys, user.id);
 		await getEquipmentEditorData(targetId).refresh();
-		await getProduction(targetId).refresh();
+		await Promise.all([
+			getProduction(targetId).refresh(),
+			getProductionAudience(targetId).refresh()
+		]);
 		await getEquipmentCopyPlan({ sourceId, targetId }).refresh();
 		return result;
 	}

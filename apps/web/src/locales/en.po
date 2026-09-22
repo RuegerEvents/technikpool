@@ -92,9 +92,8 @@ msgstr "Delivery Note"
 msgid "Crew Passes"
 msgstr "Crew Passes"
 
-#: src/routes/productions/[id]/production-detail.svelte
-msgid "Booked Equipment"
-msgstr "Booked Equipment"
+#~ msgid "Booked Equipment"
+#~ msgstr "Booked Equipment"
 
 #: src/routes/assets/new/cables/+page.svelte
 msgid "Done"
@@ -172,7 +171,6 @@ msgstr "No equipment booked yet."
 
 #: src/lib/components/ui/production-hover-card/production-hover-card.svelte
 #: src/routes/+page.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 msgid "Crew"
 msgstr "Crew"
 
@@ -225,14 +223,12 @@ msgstr "Crew"
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/new/+page.svelte
 msgid "Cancel"
 msgstr "Cancel"
 
-#: src/routes/productions/[id]/production-detail.svelte
-msgid "Add Crew Member"
-msgstr "Add Crew Member"
+#~ msgid "Add Crew Member"
+#~ msgstr "Add Crew Member"
 
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "User *"
@@ -244,7 +240,6 @@ msgstr "Select a user…"
 
 #: src/routes/admin/users/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Role"
 msgstr "Role"
@@ -260,6 +255,7 @@ msgstr "Adding…"
 #: src/lib/components/ui/data-view/DataView.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Add"
 msgstr "Add"
@@ -280,7 +276,6 @@ msgstr "No crew members added yet."
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/productions/+page.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/profile/+page.svelte
 #: src/routes/profile/+page.svelte
 msgid "Name"
@@ -291,7 +286,6 @@ msgstr "Name"
 #: src/routes/auth/forgot-password/+page.svelte
 #: src/routes/auth/login/+page.svelte
 #: src/routes/auth/register/+page.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 msgid "Email"
 msgstr "Email"
 
@@ -319,7 +313,6 @@ msgstr "Remove"
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 msgid "Manufacturer"
 msgstr "Manufacturer"
 
@@ -1060,6 +1053,7 @@ msgstr "No assets in this bundle yet. Click \"Add Assets\" to get started."
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/productions/[id]/crew-passes/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 msgid "Print"
 msgstr "Print"
 
@@ -1302,9 +1296,6 @@ msgstr "Asset"
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/productions/[id]/production-detail.svelte
-#: src/routes/productions/[id]/production-detail.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 msgid "Edit"
 msgstr "Edit"
 
@@ -3511,13 +3502,11 @@ msgstr "Show End Date"
 msgid "Duration updated"
 msgstr "Duration updated"
 
-#: src/routes/productions/[id]/production-detail.svelte
-msgid "Production Info"
-msgstr "Production Info"
+#~ msgid "Production Info"
+#~ msgstr "Production Info"
 
-#: src/routes/productions/[id]/production-detail.svelte
-msgid "Duration and address for this production."
-msgstr "Duration and address for this production."
+#~ msgid "Duration and address for this production."
+#~ msgstr "Duration and address for this production."
 
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Total Duration"
@@ -3772,6 +3761,7 @@ msgstr "{0} d · {1}"
 #: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 msgid "Edit customer"
 msgstr "Edit customer"
 
@@ -4572,15 +4562,11 @@ msgstr "€ net"
 #~ msgid "{0} already-booked asset{1} moved into the bundle"
 #~ msgstr "{0} already-booked asset{1} moved into the bundle"
 
-#. 0: formatDateRange( production.showStartDate ?? production.startDate, production.showEndDate ?? production.endDate )
-#: src/routes/productions/[id]/production-detail.svelte
-msgid "· Show {0}"
-msgstr "· Show {0}"
+#~ msgid "· Show {0}"
+#~ msgstr "· Show {0}"
 
-#. 0: orgLabel(production.organization); 1: formatDateRange( production.startDate, production.endDate )
-#: src/routes/productions/[id]/production-detail.svelte
-msgid "Owned by {0} · {1} <0/>"
-msgstr "Owned by {0} · {1} <0/>"
+#~ msgid "Owned by {0} · {1} <0/>"
+#~ msgstr "Owned by {0} · {1} <0/>"
 
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "No invoices yet — an invoice is created from an offer."
@@ -5823,6 +5809,7 @@ msgid "Subject"
 msgstr "Subject"
 
 #: src/routes/admin/catalog-log/+page.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 msgid "Details"
 msgstr "Details"
 
@@ -9443,3 +9430,69 @@ msgstr "Default daily rental rate per category, as a percentage of an asset's ne
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
 msgid "Save to price list <0>Keeps name, section, unit and price as a service to pick next time. The quantity and note stay on this line only.</0>"
 msgstr "Save to price list <0>Keeps name, section, unit and price as a service to pick next time. The quantity and note stay on this line only.</0>"
+
+#: src/routes/productions/+page.svelte
+msgid "Another organization's production that yours lends equipment to"
+msgstr "Another organization's production that yours lends equipment to"
+
+#: src/routes/productions/+page.svelte
+msgid "On loan"
+msgstr "On loan"
+
+#. 0: orgLabel(production.organization); 1: formatDateRange( production.startDate, production.endDate )
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Owned by {0} · {1}"
+msgstr "Owned by {0} · {1}"
+
+#. 0: orgLabel( production.organization )
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Your organization lends equipment to this production, so you can see it. Only {0} can change it."
+msgstr "Your organization lends equipment to this production, so you can see it. Only {0} can change it."
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Edit duration"
+msgstr "Edit duration"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Edit address"
+msgstr "Edit address"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Crew <0/>"
+msgstr "Crew <0/>"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Booked Equipment <0/>"
+msgstr "Booked Equipment <0/>"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Who can see this"
+msgstr "Who can see this"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "# member of your organization (Viewer and up)"
+msgid_plural "# members of your organization (Viewer and up)"
+msgstr[0] "# member of your organization (Viewer and up)"
+msgstr[1] "# members of your organization (Viewer and up)"
+
+#. 0: reason.role ? ` · ${reason.role}` \\: ''
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Crew{0}"
+msgstr "Crew{0}"
+
+#. 0: reason.orgName
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Lends equipment · {0}"
+msgstr "Lends equipment · {0}"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Everyone from Viewer up in an organization whose equipment is booked or requested here can open this production, customer included — but not its offers and invoices. A declined request no longer counts."
+msgstr "Everyone from Viewer up in an organization whose equipment is booked or requested here can open this production, customer included — but not its offers and invoices. A declined request no longer counts."
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Open Offer"
+msgstr "Open Offer"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "New offer"
+msgstr "New offer"

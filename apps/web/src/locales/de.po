@@ -92,9 +92,8 @@ msgstr "Lieferschein"
 msgid "Crew Passes"
 msgstr "Crew-Ausweise"
 
-#: src/routes/productions/[id]/production-detail.svelte
-msgid "Booked Equipment"
-msgstr "Gebuchte Geräte"
+#~ msgid "Booked Equipment"
+#~ msgstr "Gebuchte Geräte"
 
 #: src/routes/assets/new/cables/+page.svelte
 msgid "Done"
@@ -172,7 +171,6 @@ msgstr "Noch keine Geräte gebucht."
 
 #: src/lib/components/ui/production-hover-card/production-hover-card.svelte
 #: src/routes/+page.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 msgid "Crew"
 msgstr "Crew"
 
@@ -225,14 +223,12 @@ msgstr "Crew"
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/new/+page.svelte
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: src/routes/productions/[id]/production-detail.svelte
-msgid "Add Crew Member"
-msgstr "Crewmitglied hinzufügen"
+#~ msgid "Add Crew Member"
+#~ msgstr "Crewmitglied hinzufügen"
 
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "User *"
@@ -244,7 +240,6 @@ msgstr "Person auswählen…"
 
 #: src/routes/admin/users/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Role"
 msgstr "Rolle"
@@ -260,6 +255,7 @@ msgstr "Wird hinzugefügt…"
 #: src/lib/components/ui/data-view/DataView.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Add"
 msgstr "Hinzufügen"
@@ -280,7 +276,6 @@ msgstr "Noch keine Crewmitglieder hinzugefügt."
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/productions/+page.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/profile/+page.svelte
 #: src/routes/profile/+page.svelte
 msgid "Name"
@@ -291,7 +286,6 @@ msgstr "Name"
 #: src/routes/auth/forgot-password/+page.svelte
 #: src/routes/auth/login/+page.svelte
 #: src/routes/auth/register/+page.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 msgid "Email"
 msgstr "E-Mail"
 
@@ -319,7 +313,6 @@ msgstr "Entfernen"
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 msgid "Manufacturer"
 msgstr "Hersteller"
 
@@ -1060,6 +1053,7 @@ msgstr "Noch keine Geräte in diesem Bundle. Klicken Sie auf „Geräte hinzufü
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/productions/[id]/crew-passes/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 msgid "Print"
 msgstr "Drucken"
 
@@ -1302,9 +1296,6 @@ msgstr "Gerät"
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/productions/[id]/production-detail.svelte
-#: src/routes/productions/[id]/production-detail.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 msgid "Edit"
 msgstr "Bearbeiten"
 
@@ -3511,13 +3502,11 @@ msgstr "Show-Enddatum"
 msgid "Duration updated"
 msgstr "Dauer aktualisiert"
 
-#: src/routes/productions/[id]/production-detail.svelte
-msgid "Production Info"
-msgstr "Produktionsinfo"
+#~ msgid "Production Info"
+#~ msgstr "Produktionsinfo"
 
-#: src/routes/productions/[id]/production-detail.svelte
-msgid "Duration and address for this production."
-msgstr "Dauer und Adresse für diese Produktion."
+#~ msgid "Duration and address for this production."
+#~ msgstr "Dauer und Adresse für diese Produktion."
 
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Total Duration"
@@ -3772,6 +3761,7 @@ msgstr "{0} Tage · {1}"
 #: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 msgid "Edit customer"
 msgstr "Kunde bearbeiten"
 
@@ -4572,15 +4562,11 @@ msgstr "€ netto"
 #~ msgid "{0} already-booked asset{1} moved into the bundle"
 #~ msgstr "{0} bereits gebuchte{1} Gerät{1} in das Bundle übernommen"
 
-#. 0: formatDateRange( production.showStartDate ?? production.startDate, production.showEndDate ?? production.endDate )
-#: src/routes/productions/[id]/production-detail.svelte
-msgid "· Show {0}"
-msgstr "· Show {0}"
+#~ msgid "· Show {0}"
+#~ msgstr "· Show {0}"
 
-#. 0: orgLabel(production.organization); 1: formatDateRange( production.startDate, production.endDate )
-#: src/routes/productions/[id]/production-detail.svelte
-msgid "Owned by {0} · {1} <0/>"
-msgstr "Von {0} · {1} <0/>"
+#~ msgid "Owned by {0} · {1} <0/>"
+#~ msgstr "Von {0} · {1} <0/>"
 
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "No invoices yet — an invoice is created from an offer."
@@ -5823,6 +5809,7 @@ msgid "Subject"
 msgstr "Betrifft"
 
 #: src/routes/admin/catalog-log/+page.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 msgid "Details"
 msgstr "Details"
 
@@ -9443,3 +9430,69 @@ msgstr "Standard-Tagesmietsatz pro Kategorie, als Prozentsatz des Netto-Einkaufs
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
 msgid "Save to price list <0>Keeps name, section, unit and price as a service to pick next time. The quantity and note stay on this line only.</0>"
 msgstr "In die Preisliste übernehmen <0>Speichert Name, Abschnitt, Einheit und Preis als Leistung zur späteren Auswahl. Menge und Notiz bleiben nur an dieser Position.</0>"
+
+#: src/routes/productions/+page.svelte
+msgid "Another organization's production that yours lends equipment to"
+msgstr "Produktion einer anderen Organisation, an die Ihre Geräte verleiht"
+
+#: src/routes/productions/+page.svelte
+msgid "On loan"
+msgstr "Leihgabe"
+
+#. 0: orgLabel(production.organization); 1: formatDateRange( production.startDate, production.endDate )
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Owned by {0} · {1}"
+msgstr "Von {0} · {1}"
+
+#. 0: orgLabel( production.organization )
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Your organization lends equipment to this production, so you can see it. Only {0} can change it."
+msgstr "Ihre Organisation verleiht Geräte an diese Produktion, deshalb können Sie sie sehen. Ändern kann sie nur {0}."
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Edit duration"
+msgstr "Zeitraum bearbeiten"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Edit address"
+msgstr "Adresse bearbeiten"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Crew <0/>"
+msgstr "Crew <0/>"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Booked Equipment <0/>"
+msgstr "Gebuchte Geräte <0/>"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Who can see this"
+msgstr "Wer das sehen kann"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "# member of your organization (Viewer and up)"
+msgid_plural "# members of your organization (Viewer and up)"
+msgstr[0] "# Mitglied Ihrer Organisation (ab Betrachter)"
+msgstr[1] "# Mitglieder Ihrer Organisation (ab Betrachter)"
+
+#. 0: reason.role ? ` · ${reason.role}` \\: ''
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Crew{0}"
+msgstr "Crew{0}"
+
+#. 0: reason.orgName
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Lends equipment · {0}"
+msgstr "Verleiht Geräte · {0}"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Everyone from Viewer up in an organization whose equipment is booked or requested here can open this production, customer included — but not its offers and invoices. A declined request no longer counts."
+msgstr "Wer in einer Organisation, deren Geräte hier gebucht oder angefragt sind, mindestens Betrachter ist, kann diese Produktion öffnen, samt Kunde, aber ohne Angebote und Rechnungen. Eine abgelehnte Anfrage zählt nicht mehr."
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Open Offer"
+msgstr "Angebot öffnen"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "New offer"
+msgstr "Neues Angebot"

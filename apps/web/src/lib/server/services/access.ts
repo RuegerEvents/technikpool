@@ -119,9 +119,13 @@ export function requireOrgOwner(
 /**
  * Whether a user may open a given production: a VIEWER or above of the org
  * that holds it, anyone of that org who is on its crew — which is how a
- * DEVICE_VIEWER gets to see the job they are working — or a system admin.
+ * DEVICE_VIEWER gets to see the job they are working — a VIEWER or above of an
+ * org that lends units to it (see `LENDING_ITEM_STATUS`), or a system admin.
  * Resolved once and handed back as a predicate, so a list that mixes
  * productions of several orgs is masked row by row without a query per row.
+ *
+ * Seeing a production is all a lender gets: every command that changes one asks
+ * for MEMBER of the org that runs it, and its billing asks for ADMIN of that org.
  *
  * What a list does with a production this says no to is the caller's business,
  * but it must never *drop* it: a unit booked by someone else's production is
@@ -134,10 +138,29 @@ export async function productionVisibility(userId: string) {
 		crewProductionIds(userId),
 		isSystemAdmin(userId)
 	]);
+	const lent = admin ? [] : await lentProductionIds(readable);
 	const orgs = new Set(readable);
-	const crew = new Set(crewOn);
+	const other = new Set([...crewOn, ...lent]);
 	return (production: ProductionRef) =>
-		admin || orgs.has(production.organizationId) || crew.has(production.id);
+		admin || orgs.has(production.organizationId) || other.has(production.id);
+}
+
+/**
+ * The items that let a lender's people into a production: a unit of theirs,
+ * requested, lent or already back — anything but a request they turned down,
+ * which is where their part in it ended. A cancelled production keeps its
+ * lenders, who were told about it and may want to look.
+ */
+export const LENDING_ITEM_STATUS = { not: 'DECLINED' } as const;
+
+async function lentProductionIds(lenderOrgIds: string[]) {
+	if (lenderOrgIds.length === 0) return [];
+	const rows = await prisma.productionItem.findMany({
+		where: { status: LENDING_ITEM_STATUS, asset: { organizationId: { in: lenderOrgIds } } },
+		select: { productionId: true },
+		distinct: ['productionId']
+	});
+	return rows.map((r) => r.productionId);
 }
 
 type ProductionRef = { id: string; organizationId: string };
@@ -172,10 +195,16 @@ export async function requireProductionRead(production: ProductionRef) {
  * optionally narrowed to one org — the list counterpart of
  * `productionVisibility`. Like `scopedOrgIds`, a filter for an org the user
  * doesn't belong to is refused rather than ignored.
+ *
+ * `lent` adds the productions the user's orgs lend units to, which with an org
+ * filter means the ones *that* org lends to. It is opt-in because most lists
+ * are of work the user's own org does — what can be checked out to, what is
+ * waiting on someone else's approval — and a lender can do none of that.
  */
 export async function productionReadWhere(
 	userId: string,
-	organizationId?: string
+	organizationId?: string,
+	{ lent = false }: { lent?: boolean } = {}
 ): Promise<Prisma.ProductionWhereInput> {
 	const memberOf = await scopedOrgIds(userId, organizationId);
 	const [readable, admin] = await Promise.all([readableOrgIds(userId), isSystemAdmin(userId)]);
@@ -185,7 +214,19 @@ export async function productionReadWhere(
 	return {
 		OR: [
 			{ organizationId: { in: fullOrgIds } },
-			{ organizationId: { in: crewOrgIds }, crew: { some: { userId } } }
+			{ organizationId: { in: crewOrgIds }, crew: { some: { userId } } },
+			...(lent
+				? [
+						{
+							items: {
+								some: {
+									status: LENDING_ITEM_STATUS,
+									asset: { organizationId: { in: fullOrgIds } }
+								}
+							}
+						}
+					]
+				: [])
 		]
 	};
 }

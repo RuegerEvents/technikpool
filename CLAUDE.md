@@ -340,7 +340,12 @@ leave the server's `error(4xx, …)` as the backstop it is.
   everything but billing. Offers and invoices are ADMIN+ for reading as well as writing.
 - Production reads go through `productionVisibility` / `productionReadWhere` /
   `requireProductionRead` in `access.ts` (VIEWER+ of the org, or its crew), never through
-  `userOrgIds`, which is every membership and scopes only the equipment. Prices go through
+  `userOrgIds`, which is every membership and scopes only the equipment. A VIEWER+ of an org
+  whose units are on a production (any status but `DECLINED`) may open it too: read-only,
+  customer included, no billing. `productionReadWhere(…, { lent: true })` adds those to a list
+  (productions list, calendars); leave it off wherever the list means "our own work" (checkout
+  targets, awaiting approvals). `getProductionAudience` shows the owning org who else can see
+  a production and why. Prices go through
   `readableOrgIds` / `readsOrgRecords`.
 - Org `OWNER` role = can manage that org's members
 - System admins bypass org membership checks

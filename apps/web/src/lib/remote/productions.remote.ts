@@ -8,15 +8,21 @@ import { addedAsCrewEmail } from '$lib/server/emails/added-as-crew';
 import { productionCancelledEmail } from '$lib/server/emails/production-cancelled';
 import * as v from 'valibot';
 import {
+	isSystemAdmin,
+	LENDING_ITEM_STATUS,
 	productionReadWhere,
 	productionVisibility,
+	readableOrgIds,
+	readsOrgRecords,
 	requireAuth,
 	requireOrgInventory,
 	requireOrgWrite,
 	requireProductionRead,
 	managedOrgIds,
+	userOrgIds,
 	visibleProductionIds
 } from '$lib/server/services/access';
+import { ROLE_FOR, rolesAtLeast } from '$lib/roles';
 import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '$lib/asset-status';
 import { accessoryIdsOf } from '$lib/server/services/accessories';
 import {
@@ -98,20 +104,41 @@ async function notifyRequesterQueueCleared(
 
 export const getProductions = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
-	return await prisma.production.findMany({
-		where: await productionReadWhere(user.id, organizationId),
-		include: {
-			organization: { select: { name: true, shortName: true } },
-			items: {
-				include: {
-					asset: {
-						include: { product: true }
+	const [productions, lenderOrgIds] = await Promise.all([
+		prisma.production.findMany({
+			where: await productionReadWhere(user.id, organizationId, { lent: true }),
+			include: {
+				organization: { select: { name: true, shortName: true } },
+				items: {
+					include: {
+						asset: {
+							include: { product: true }
+						}
 					}
 				}
-			}
-		},
-		orderBy: { startDate: 'asc' }
-	});
+			},
+			orderBy: { startDate: 'asc' }
+		}),
+		(await isSystemAdmin(user.id)) ? userOrgIds(user.id) : readableOrgIds(user.id)
+	]);
+	// Which of the user's orgs lend to each one: the list files a lent production
+	// under the lender's org filter as well as its owner's, and says why it is there.
+	const lenders = new Set(lenderOrgIds);
+	return productions.map((production) => ({
+		...production,
+		lentBy: [
+			...new Set(
+				production.items
+					.filter(
+						(item) =>
+							item.status !== 'DECLINED' &&
+							item.asset.organizationId !== production.organizationId &&
+							lenders.has(item.asset.organizationId)
+					)
+					.map((item) => item.asset.organizationId)
+			)
+		]
+	}));
 });
 
 export const getProduction = query(v.string(), async (id: string) => {
@@ -124,7 +151,7 @@ export const getProduction = query(v.string(), async (id: string) => {
 					asset: {
 						include: {
 							product: { include: { manufacturer: true } },
-							organization: true,
+							organization: { select: PRODUCTION_ORG_SELECT },
 							accessories: { select: { id: true } }
 						}
 					},
@@ -147,13 +174,122 @@ export const getProduction = query(v.string(), async (id: string) => {
 				include: { user: { select: { id: true, name: true, email: true } } }
 			},
 			cancelledBy: { select: { name: true, email: true } },
-			organization: true
+			organization: { select: PRODUCTION_ORG_SELECT }
 		}
 	});
-	// A VIEWER of the org reads it, and so does its crew whatever their rung;
-	// every command that changes it asks for MEMBER on its own.
+	// A VIEWER of the org reads it, so does its crew whatever their rung, and so
+	// does a VIEWER of an org lending to it; every command that changes it asks
+	// for MEMBER of the org on its own.
 	await requireProductionRead(production);
 	return production;
+});
+
+/**
+ * A production and the list of who may open it, which moves with its crew and
+ * its lenders — so every change to a production refreshes both.
+ */
+function refreshProduction(productionId: string) {
+	return Promise.all([
+		getProduction(productionId).refresh(),
+		getProductionAudience(productionId).refresh()
+	]);
+}
+
+/**
+ * An org as a production page names it. Not the whole row: that carries the
+ * org's bank account and billing templates, and a production is read by people
+ * outside the org — its lenders — who have no business with either.
+ */
+const PRODUCTION_ORG_SELECT = {
+	id: true,
+	name: true,
+	shortName: true,
+	color: true,
+	avatarLabel: true
+} as const;
+
+/**
+ * Who besides the org itself may open a production, and why — for the org that
+ * runs it, so sharing a production with a lender is never something that
+ * happens without anyone noticing. `null` for anyone else rather than a
+ * refusal: every command that changes a production refreshes this, lenders'
+ * approvals included, and a refresh that throws would fail a write that has
+ * already gone through.
+ *
+ * Mirrors `productionVisibility`: crew counts while they still belong to the
+ * org, a lender's people from VIEWER up for as long as `LENDING_ITEM_STATUS`
+ * keeps them in. System admins see everything and are not listed.
+ */
+export const getProductionAudience = query(v.string(), async (productionId: string) => {
+	const user = await requireAuth();
+	const production = await prisma.production.findUniqueOrThrow({
+		where: { id: productionId },
+		select: { id: true, organizationId: true }
+	});
+	if (!(await readsOrgRecords(user.id, production.organizationId))) return null;
+
+	const readerRoles = rolesAtLeast(ROLE_FOR.read);
+	const [crew, lenders, orgReaderCount] = await Promise.all([
+		prisma.productionCrew.findMany({
+			where: {
+				productionId,
+				user: { memberships: { some: { organizationId: production.organizationId } } }
+			},
+			orderBy: { createdAt: 'asc' },
+			select: { role: true, user: { select: { id: true, name: true, email: true } } }
+		}),
+		prisma.organization.findMany({
+			where: {
+				id: { not: production.organizationId },
+				assets: {
+					some: { productionItems: { some: { productionId, status: LENDING_ITEM_STATUS } } }
+				}
+			},
+			orderBy: { name: 'asc' },
+			select: {
+				id: true,
+				name: true,
+				shortName: true,
+				members: {
+					where: { role: { in: readerRoles } },
+					select: { role: true, user: { select: { id: true, name: true, email: true } } }
+				}
+			}
+		}),
+		prisma.orgMembership.count({
+			where: { organizationId: production.organizationId, role: { in: readerRoles } }
+		})
+	]);
+
+	type Reason =
+		| { kind: 'crew'; role: string | null }
+		| { kind: 'lender'; orgId: string; orgName: string; role: string };
+	const people = new Map<
+		string,
+		{ user: { id: string; name: string | null; email: string }; reasons: Reason[] }
+	>();
+	const add = (u: { id: string; name: string | null; email: string }, reason: Reason) => {
+		const entry = people.get(u.id) ?? { user: u, reasons: [] };
+		entry.reasons.push(reason);
+		people.set(u.id, entry);
+	};
+	for (const member of crew) add(member.user, { kind: 'crew', role: member.role });
+	for (const org of lenders) {
+		for (const member of org.members) {
+			add(member.user, {
+				kind: 'lender',
+				orgId: org.id,
+				orgName: orgLabel(org),
+				role: member.role
+			});
+		}
+	}
+
+	return {
+		people: [...people.values()],
+		lenderOrgCount: lenders.length,
+		orgReaderCount
+	};
 });
 
 const addressInputSchema = v.object({
@@ -345,7 +481,7 @@ export const cancelProduction = command(cancelProductionSchema, async (input) =>
 	const lenderOrgIds = new Set(released.map((i) => i.asset.organizationId));
 	const managed = (await managedOrgIds(user.id)).filter((id) => lenderOrgIds.has(id));
 	await Promise.all([
-		getProduction(production.id).refresh(),
+		refreshProduction(production.id),
 		getProductions(production.organizationId).refresh(),
 		getProductions().refresh(),
 		getProductionsCalendar().refresh(),
@@ -533,7 +669,7 @@ export const reopenProduction = command(v.string(), async (productionId: string)
 	}
 
 	await Promise.all([
-		getProduction(productionId).refresh(),
+		refreshProduction(productionId),
 		getProductions(production.organizationId).refresh(),
 		getProductions().refresh(),
 		getProductionsCalendar().refresh(),
@@ -605,7 +741,7 @@ export const updateProductionAddress = command(updateProductionAddressSchema, as
 		});
 	});
 
-	await getProduction(input.productionId).refresh();
+	await refreshProduction(input.productionId);
 	await getProductions(production.organizationId).refresh();
 	await getProductions().refresh();
 	await getKnownAddresses().refresh();
@@ -639,7 +775,7 @@ export const updateProductionDuration = command(updateProductionDurationSchema, 
 		data: { startDate, endDate, showStartDate, showEndDate }
 	});
 
-	await getProduction(input.productionId).refresh();
+	await refreshProduction(input.productionId);
 	await getProductions(production.organizationId).refresh();
 	await getProductions().refresh();
 	return updated;
@@ -664,7 +800,7 @@ export const updateProductionCustomer = command(updateProductionCustomerSchema, 
 		include: { customer: { include: { address: true } } }
 	});
 
-	await getProduction(input.productionId).refresh();
+	await refreshProduction(input.productionId);
 	return updated;
 });
 
@@ -775,7 +911,7 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 		);
 	}
 
-	await getProduction(data.productionId).refresh();
+	await refreshProduction(data.productionId);
 	return item;
 });
 
@@ -868,7 +1004,7 @@ async function reviewProductionItems(itemIds: string[], decision: 'APPROVED' | '
 	// it, and may not be allowed to open that — see `visibleProductionIds`.
 	const reviewedProductionIds = [...new Set(reviewed.map((item) => item.productionId))];
 	for (const id of await visibleProductionIds(user.id, reviewedProductionIds)) {
-		await getProduction(id).refresh();
+		await refreshProduction(id);
 	}
 	for (const orgId of new Set(reviewed.map((item) => item.asset.organizationId))) {
 		await getPendingApprovals(orgId).refresh();
@@ -1114,7 +1250,7 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 		);
 	}
 
-	await getProduction(data.productionId).refresh();
+	await refreshProduction(data.productionId);
 	return { added: newAssets.length, adopted: adoptable.length, skippedConflicts };
 });
 
@@ -1132,7 +1268,7 @@ export const removeProductionItem = command(v.string(), async (itemId: string) =
 	await prisma.productionItem.deleteMany({
 		where: { productionId: item.productionId, sourceParentAssetId: item.assetId }
 	});
-	await getProduction(item.productionId).refresh();
+	await refreshProduction(item.productionId);
 	return item;
 });
 
@@ -1179,7 +1315,7 @@ export const syncAssetAccessoriesInProduction = command(
 					]
 				: [])
 		]);
-		await getProduction(productionId).refresh();
+		await refreshProduction(productionId);
 		return { added: toAdd.length, removed: toRemove.length };
 	}
 );
@@ -1201,7 +1337,7 @@ export const removeBundleFromProduction = command(
 		await prisma.productionItem.deleteMany({
 			where: { productionId: data.productionId, sourceBundleId: data.bundleId }
 		});
-		await getProduction(data.productionId).refresh();
+		await refreshProduction(data.productionId);
 	}
 );
 
@@ -1333,7 +1469,7 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 		);
 	}
 
-	await getProduction(data.productionId).refresh();
+	await refreshProduction(data.productionId);
 	return {
 		removed: toRemove.length,
 		added: toAdd.length,
@@ -1377,7 +1513,7 @@ export const addCrewMember = command(addCrewSchema, async (data) => {
 		console.error(`Failed to send added-as-crew email for production ${data.productionId}:`, err);
 	}
 
-	await getProduction(data.productionId).refresh();
+	await refreshProduction(data.productionId);
 	return member;
 });
 
@@ -1389,7 +1525,7 @@ export const removeCrewMember = command(v.string(), async (id: string) => {
 	await requireOrgWrite(production.organizationId);
 
 	const member = await prisma.productionCrew.delete({ where: { id } });
-	await getProduction(member.productionId).refresh();
+	await refreshProduction(member.productionId);
 	return member;
 });
 
@@ -1468,7 +1604,7 @@ export const getProductionsCalendar = query(async () => {
 	const user = await requireAuth();
 	return await prisma.production.findMany({
 		where: {
-			...(await productionReadWhere(user.id)),
+			...(await productionReadWhere(user.id, undefined, { lent: true })),
 			cancelledAt: null,
 			startDate: { not: null },
 			endDate: { not: null }
@@ -1490,11 +1626,12 @@ export const getDashboardStats = query(async () => {
 	const orgIds = memberships.map((m) => m.organizationId);
 	const productionScope = await productionReadWhere(user.id);
 	const now = new Date();
+	// Both conditions are an OR, so they go under an AND: spread side by side,
+	// the second would replace the scope and count every production there is.
 	const currentOrUpcoming: Prisma.ProductionWhereInput = {
-		...productionScope,
+		AND: [productionScope, { OR: [{ startDate: { gte: now } }, { endDate: { gte: now } }] }],
 		cancelledAt: null,
-		startDate: { not: null },
-		OR: [{ startDate: { gte: now } }, { endDate: { gte: now } }]
+		startDate: { not: null }
 	};
 
 	const [

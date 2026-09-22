@@ -8,6 +8,7 @@
 	import { CustomerSelect } from '$lib/components/ui/customer-select';
 	import {
 		getProduction,
+		getProductionAudience,
 		removeBundleFromProduction,
 		syncBundleInProduction,
 		syncAssetAccessoriesInProduction,
@@ -34,6 +35,7 @@
 	import { resolve } from '$app/paths';
 	import BulkActionsBar from '$lib/components/ui/bulk-actions-bar.svelte';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
+	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 	import { Modal } from '$lib/components/ui/modal';
 	import { DropdownMenu } from 'bits-ui';
 	import { LicenseRevealModal } from '$lib/components/ui/license-credentials';
@@ -128,7 +130,18 @@
 	// else is shown the section or has the queries run on their behalf.
 	let canManage = $derived(!!role && roleAtLeast(role, ROLE_FOR.inventory));
 	let offers = $derived(canManage ? await getOffersForProduction(productionId) : []);
+	// Who else may open it, for the org that runs it — a lender is not told who
+	// else is looking. Not awaited: the page is whole without it.
+	let audienceQuery = $derived(
+		role && roleAtLeast(role, ROLE_FOR.read) ? getProductionAudience(productionId) : null
+	);
+	let audience = $derived(audienceQuery?.current);
 	let supersededOffers = $derived(supersededOfferIds(offers));
+	// Once there is an offer, the next step is on it — a revision, an update from
+	// the production, a copy for another customer, the invoice — so the header
+	// leads there. A second, unrelated offer is rare and moves to the menu.
+	// Newest first (see `getOffersForProduction`), so this is the latest current one.
+	let currentOffer = $derived(offers.find((offer) => !supersededOffers.has(offer.id)));
 	let invoices = $derived(canManage ? await getInvoicesForProduction(productionId) : []);
 
 	function fmtEUR(n: number): string {
@@ -235,7 +248,7 @@
 			asset: {
 				include: {
 					product: { include: { manufacturer: true } };
-					organization: true;
+					organization: { select: { name: true; shortName: true } };
 					accessories: { select: { id: true } };
 				};
 			};
@@ -327,6 +340,13 @@
 		}
 		return [...bundleMap.values(), ...productMap.values()];
 	});
+
+	// Units, not rows: an accessory travels with its unit and is counted with it.
+	let unitCount = $derived(displaySections.reduce((sum, s) => sum + s.total, 0));
+
+	function openPrint(route: 'packing-list' | 'delivery-note' | 'crew-passes') {
+		window.open(resolve(`/productions/${productionId}/${route}`), '_blank');
+	}
 
 	let expanded = new SvelteMap<string, boolean>();
 	let selectedItemAssetIds = new SvelteSet<string>();
@@ -564,10 +584,10 @@
 
 <svelte:head><title>{production.name} | Technikpool</title></svelte:head>
 
-<div class="space-y-8 {selectedItemAssetIds.size > 0 ? 'pb-20' : ''}">
+<div class="space-y-6 {selectedItemAssetIds.size > 0 ? 'pb-20' : ''}">
 	<!-- Header -->
-	<div class="flex flex-wrap items-center justify-between gap-4">
-		<div>
+	<div class="flex flex-wrap items-start justify-between gap-4">
+		<div class="min-w-0">
 			<div class="flex flex-wrap items-center gap-3">
 				<h1 class="text-3xl font-bold tracking-tight">{production.name}</h1>
 				{#if cancelled}
@@ -581,42 +601,58 @@
 					production.startDate,
 					production.endDate
 				)}
-				{#if production.showStartDate || production.showEndDate}
-					· Show {formatDateRange(
-						production.showStartDate ?? production.startDate,
-						production.showEndDate ?? production.endDate
-					)}
-				{/if}
 			</p>
 		</div>
 		<div class="flex flex-wrap gap-2">
 			<Button icon="back" variant="outline" href={resolve('/productions')}>Back</Button>
-			<Button
-				variant="secondary"
-				href={resolve(`/productions/${production.id}/packing-list`)}
-				target="_blank">Packing List</Button
-			>
-			<Button
-				variant="secondary"
-				href={resolve(`/productions/${production.id}/delivery-note`)}
-				target="_blank">Delivery Note</Button
-			>
-			<Button
-				variant="secondary"
-				href={resolve(`/productions/${production.id}/crew-passes`)}
-				target="_blank">Crew Passes</Button
-			>
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger>
+					{#snippet child({ props })}
+						<Button {...props} icon="print" variant="secondary">Print</Button>
+					{/snippet}
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Portal>
+					<DropdownMenu.Content
+						align="end"
+						sideOffset={4}
+						class="z-50 min-w-[190px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+					>
+						<DropdownMenu.Item
+							onSelect={() => openPrint('packing-list')}
+							class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+						>
+							Packing List
+						</DropdownMenu.Item>
+						<DropdownMenu.Item
+							onSelect={() => openPrint('delivery-note')}
+							class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+						>
+							Delivery Note
+						</DropdownMenu.Item>
+						<DropdownMenu.Item
+							onSelect={() => openPrint('crew-passes')}
+							class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+						>
+							Crew Passes
+						</DropdownMenu.Item>
+					</DropdownMenu.Content>
+				</DropdownMenu.Portal>
+			</DropdownMenu.Root>
 			{#if canManage}
-				<Button icon="add" href={resolve(`/offers/new?productionId=${production.id}`)}
-					>Create Offer</Button
-				>
+				{#if currentOffer}
+					<Button icon="forward" href={resolve(`/offers/${currentOffer.id}`)}>Open Offer</Button>
+				{:else}
+					<Button icon="add" href={resolve(`/offers/new?productionId=${production.id}`)}
+						>Create Offer</Button
+					>
+				{/if}
 				<DropdownMenu.Root>
 					<DropdownMenu.Trigger>
 						{#snippet child({ props })}
 							<button
 								{...props}
 								type="button"
-								class="flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+								class="flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 								aria-label="More actions"
 							>
 								<svg
@@ -639,6 +675,15 @@
 							sideOffset={4}
 							class="z-50 min-w-[190px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
 						>
+							{#if currentOffer}
+								<DropdownMenu.Item
+									onSelect={() => goto(resolve(`/offers/new?productionId=${production.id}`))}
+									class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+								>
+									New offer
+								</DropdownMenu.Item>
+								<DropdownMenu.Separator class="my-1 h-px bg-border" />
+							{/if}
 							{#if cancelled}
 								<DropdownMenu.Item
 									onSelect={() => (reopenOpen = true)}
@@ -693,531 +738,248 @@
 		</div>
 	{/if}
 
-	<!-- Offers & Invoices -->
-	{#if canManage}
-		<div class="grid gap-4 sm:grid-cols-2">
-			<Card.Root>
-				<Card.Header>
-					<Card.Title>Offers</Card.Title>
-				</Card.Header>
-				<Card.Content>
-					{#if offers.length === 0}
-						<p class="text-sm text-muted-foreground">No offers yet.</p>
-					{:else}
-						<div class="space-y-2">
-							{#each offers as offer (offer.id)}
-								<a
-									href={resolve(`/offers/${offer.id}`)}
-									class="flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
-								>
-									<div>
-										<p class="font-medium">{offer.number} — {offer.customerName}</p>
-										<p class="text-xs text-muted-foreground">
-											{offer.dayCount} d
-											{#if supersededOffers.has(offer.id)}
-												· Superseded
-											{/if}
-											{#if offer.invoices.length > 0}
-												· Invoiced ({offer.invoices[0].number})
-											{/if}
-										</p>
-									</div>
-									<span class="font-medium tabular-nums">{fmtEUR(offerTotal(offer))}</span>
-								</a>
-							{/each}
-						</div>
-					{/if}
-				</Card.Content>
-			</Card.Root>
-
-			<Card.Root>
-				<Card.Header>
-					<Card.Title>Invoices</Card.Title>
-				</Card.Header>
-				<Card.Content>
-					{#if invoices.length === 0}
-						<p class="text-sm text-muted-foreground">
-							No invoices yet — an invoice is created from an offer.
-						</p>
-					{:else}
-						<div class="space-y-2">
-							{#each invoices as invoice (invoice.id)}
-								<a
-									href={resolve(`/invoices/${invoice.id}`)}
-									class="flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
-								>
-									<div>
-										<p class="font-medium">{invoice.number}</p>
-										<p class="text-xs text-muted-foreground">
-											{invoice.dayCount} d · {invoice.sentAt ? 'Sent' : 'Draft'}
-										</p>
-									</div>
-									<span class="font-medium tabular-nums">{fmtEUR(invoiceTotal(invoice))}</span>
-								</a>
-							{/each}
-						</div>
-					{/if}
-				</Card.Content>
-			</Card.Root>
-		</div>
+	{#if !role}
+		<!-- Nobody outside the org reaches this page but a lender (or a system
+		     admin, who is given OWNER above) — see `productionVisibility`. -->
+		<p class="rounded-lg border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+			Your organization lends equipment to this production, so you can see it. Only {orgLabel(
+				production.organization
+			)} can change it.
+		</p>
 	{/if}
 
-	<!-- Main info -->
-	<Card.Root>
-		<Card.Header>
-			<Card.Title>Production Info</Card.Title>
-			<Card.Description>Duration and address for this production.</Card.Description>
-		</Card.Header>
-		<Card.Content class="space-y-6">
-			<!-- Duration -->
-			<div class="space-y-3">
-				<div class="flex items-start justify-between gap-4">
-					<div class="grid flex-1 gap-4 sm:grid-cols-2">
-						<div>
-							<h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-								Total Duration
-							</h3>
-							<p class="text-sm">{formatDateRange(production.startDate, production.endDate)}</p>
-						</div>
-						<div>
-							<h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-								Show Duration
-							</h3>
-							<p class="text-sm">
-								{formatDateRange(
-									production.showStartDate ?? production.startDate,
-									production.showEndDate ?? production.endDate
-								)}
-							</p>
-						</div>
-					</div>
-					{#if canEdit && !editingDuration}
-						<Button icon="edit" variant="outline" onclick={() => (editingDuration = true)}>
-							Edit
-						</Button>
-					{/if}
-				</div>
-
-				{#if editingDuration}
-					<form class="space-y-4" onsubmit={handleSaveDuration}>
-						<div class="grid grid-cols-2 gap-4">
-							<div class="space-y-2">
-								<Label for="dur-startDate">Start Date</Label>
-								<Input id="dur-startDate" type="date" bind:value={durationDraft.startDate} />
-							</div>
-							<div class="space-y-2">
-								<Label for="dur-endDate">End Date</Label>
-								<Input
-									id="dur-endDate"
-									type="date"
-									bind:value={durationDraft.endDate}
-									min={durationDraft.startDate}
-								/>
-							</div>
-						</div>
-
-						<label class="flex cursor-pointer items-center gap-2 text-sm select-none">
-							<input
-								type="checkbox"
-								bind:checked={durationDraft.sameAsTotalDuration}
-								class="h-4 w-4 rounded border-input"
-							/>
-							Show duration same as total duration
-						</label>
-
-						{#if !durationDraft.sameAsTotalDuration}
-							<div class="grid grid-cols-2 gap-4">
-								<div class="space-y-2">
-									<Label for="dur-showStartDate">Show Start Date</Label>
-									<Input
-										id="dur-showStartDate"
-										type="date"
-										bind:value={durationDraft.showStartDate}
-										min={durationDraft.startDate}
-										max={durationDraft.endDate}
-									/>
-								</div>
-								<div class="space-y-2">
-									<Label for="dur-showEndDate">Show End Date</Label>
-									<Input
-										id="dur-showEndDate"
-										type="date"
-										bind:value={durationDraft.showEndDate}
-										min={durationDraft.showStartDate || durationDraft.startDate}
-										max={durationDraft.endDate}
-									/>
-								</div>
-							</div>
-						{/if}
-
-						<div class="flex justify-end gap-2">
-							<Button
-								icon="close"
-								type="button"
-								variant="outline"
-								onclick={() => (editingDuration = false)}
-							>
-								Cancel
-							</Button>
-							<Button icon="save" type="submit" disabled={savingDuration}>
-								{savingDuration ? 'Saving…' : 'Save'}
-							</Button>
-						</div>
-					</form>
-				{/if}
-			</div>
-
-			<!-- Address -->
-			<div class="space-y-3 border-t pt-6">
-				<div class="flex items-start justify-between gap-4">
-					<div>
-						<h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-							Address
-						</h3>
-						<p class="text-sm">{formatAddress(production.venueName, production.address)}</p>
-					</div>
-					{#if canEdit && !editingAddress}
-						<Button icon="edit" variant="outline" onclick={() => (editingAddress = true)}>
-							Edit
-						</Button>
-					{/if}
-				</div>
-
-				{#if editingAddress}
-					<form class="space-y-4" onsubmit={handleSaveAddress}>
-						<AddressInput bind:value={addressDraft} idPrefix="addr" withName />
-
-						<div class="flex justify-end gap-2">
-							<Button
-								icon="close"
-								type="button"
-								variant="outline"
-								onclick={() => (editingAddress = false)}
-							>
-								Cancel
-							</Button>
-							<Button icon="save" type="submit" disabled={savingAddress}>
-								{savingAddress ? 'Saving…' : 'Save'}
-							</Button>
-						</div>
-					</form>
-				{/if}
-			</div>
-
-			<!-- Customer -->
-			<div class="space-y-3 border-t pt-6">
-				<div class="flex items-start justify-between gap-4">
-					<div>
-						<h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-							Customer
-						</h3>
-						<p class="text-sm">
-							{production.customer ? customerLabel(production.customer) : '—'}
-						</p>
-					</div>
-					{#if canEdit && !editingCustomer}
-						<Button icon="edit" variant="outline" onclick={() => (editingCustomer = true)}>
-							Edit
-						</Button>
-					{/if}
-				</div>
-
-				{#if editingCustomer}
-					<form class="space-y-4" onsubmit={handleSaveCustomer}>
-						<CustomerSelect
-							organizationId={production.organizationId}
-							bind:value={customerDraftId}
-							allowNone
-							id="production-customer"
-							idPrefix="prod-cust"
-						/>
-
-						<div class="flex justify-end gap-2">
-							<Button
-								icon="close"
-								type="button"
-								variant="outline"
-								onclick={() => (editingCustomer = false)}
-							>
-								Cancel
-							</Button>
-							<Button icon="save" type="submit" disabled={savingCustomer}>
-								{savingCustomer ? 'Saving…' : 'Save'}
-							</Button>
-						</div>
-					</form>
-				{/if}
-			</div>
-		</Card.Content>
-	</Card.Root>
-
-	<!-- Equipment section -->
-	<div>
-		<div class="mb-4 flex items-center justify-between">
-			<h2 class="text-xl font-semibold">Booked Equipment</h2>
-			{#if canPlan}
-				<div class="flex flex-wrap gap-2">
-					<Button variant="outline" onclick={() => (copyEquipmentOpen = true)}
-						>Copy equipment from…</Button
-					>
-					<Button href={resolve(`/productions/${productionId}/equipment`)}>Manage Equipment</Button>
-				</div>
-			{/if}
-		</div>
-
-		{#if production.items.length === 0}
+	<!--
+	  Two columns from lg up: the equipment on the left, everything about the job
+	  on the right — where the crew is in view without scrolling past the whole
+	  equipment list. Stacked on a phone, the facts and the crew come first and
+	  the rest of the sidebar after the equipment.
+	-->
+	<div
+		class="grid gap-6 [grid-template-areas:'facts'_'equipment'_'more'] lg:grid-cols-[minmax(0,1fr)_22rem] lg:grid-rows-[auto_1fr] lg:[grid-template-areas:'equipment_facts'_'equipment_more']"
+	>
+		<!-- Facts & crew -->
+		<div class="space-y-6 [grid-area:facts]">
 			<Card.Root>
-				<Card.Content class="py-12 text-center text-muted-foreground">
-					No equipment booked yet.
-				</Card.Content>
-			</Card.Root>
-		{:else}
-			<div class="overflow-x-auto rounded-md border">
-				<table class="w-full text-sm">
-					<thead>
-						<tr class="border-b bg-muted/30">
-							<th class="w-10 px-4 py-3">
-								<input
-									type="checkbox"
-									checked={allItemsSelected}
-									use:indeterminate={someItemsSelected && !allItemsSelected}
-									onclick={toggleSelectAllItems}
-									class="h-4 w-4 cursor-pointer rounded border-input"
+				<Card.Header>
+					<Card.Title>Details</Card.Title>
+				</Card.Header>
+				<Card.Content class="space-y-4">
+					<!-- Duration -->
+					<div class="space-y-3">
+						<div class="flex items-start justify-between gap-2">
+							<div class="space-y-2">
+								<div>
+									<h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+										Total Duration
+									</h3>
+									<p class="text-sm">{formatDateRange(production.startDate, production.endDate)}</p>
+								</div>
+								<div>
+									<h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+										Show Duration
+									</h3>
+									<p class="text-sm">
+										{formatDateRange(
+											production.showStartDate ?? production.startDate,
+											production.showEndDate ?? production.endDate
+										)}
+									</p>
+								</div>
+							</div>
+							{#if canEdit && !editingDuration}
+								<Button
+									icon="edit"
+									variant="ghost"
+									size="icon-sm"
+									aria-label="Edit duration"
+									onclick={() => (editingDuration = true)}
 								/>
-							</th>
-							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Product</th>
-							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Manufacturer</th>
-							<th class="px-4 py-3 text-right font-medium text-muted-foreground">Total</th>
-							<th class="px-4 py-3 text-right font-medium text-muted-foreground">Pending</th>
-							<th class="px-4 py-3 text-right font-medium text-muted-foreground">Approved</th>
-							<th class="px-4 py-3 text-right font-medium text-muted-foreground">Out</th>
-							<th class="px-4 py-3 text-right font-medium text-muted-foreground">Returned</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each displaySections as section (section.kind === 'bundle' ? section.bundleId : section.productId)}
-							{@const sectionId = section.kind === 'bundle' ? section.bundleId : section.productId}
-							{@const sectionAssetIds = section.items.map((i) => i.asset.id)}
-							{@const allInSectionSelected =
-								sectionAssetIds.length > 0 &&
-								sectionAssetIds.every((id) => selectedItemAssetIds.has(id))}
-							{@const divergence =
-								section.kind === 'bundle' ? bundleDivergence.get(section.bundleId) : null}
-							<tr
-								class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
-								onclick={() => toggleSection(sectionId)}
-							>
-								<td class="px-4 py-3">
+							{/if}
+						</div>
+
+						{#if editingDuration}
+							<form class="space-y-4" onsubmit={handleSaveDuration}>
+								<div class="grid grid-cols-2 gap-3">
+									<div class="space-y-2">
+										<Label for="dur-startDate">Start Date</Label>
+										<Input id="dur-startDate" type="date" bind:value={durationDraft.startDate} />
+									</div>
+									<div class="space-y-2">
+										<Label for="dur-endDate">End Date</Label>
+										<Input
+											id="dur-endDate"
+											type="date"
+											bind:value={durationDraft.endDate}
+											min={durationDraft.startDate}
+										/>
+									</div>
+								</div>
+
+								<label class="flex cursor-pointer items-center gap-2 text-sm select-none">
 									<input
 										type="checkbox"
-										checked={allInSectionSelected}
-										onclick={(e) => {
-											e.stopPropagation();
-											if (allInSectionSelected) {
-												sectionAssetIds.forEach((id) => selectedItemAssetIds.delete(id));
-											} else {
-												sectionAssetIds.forEach((id) => selectedItemAssetIds.add(id));
-											}
-										}}
-										class="h-4 w-4 cursor-pointer rounded border-input"
+										bind:checked={durationDraft.sameAsTotalDuration}
+										class="h-4 w-4 rounded border-input"
 									/>
-								</td>
-								<td class="px-4 py-3">
-									<div class="flex items-center gap-2">
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="14"
-											height="14"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="2"
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											class="shrink-0 text-muted-foreground transition-transform {expanded.get(
-												sectionId
-											)
-												? 'rotate-90'
-												: ''}"
-										>
-											<path d="m9 18 6-6-6-6" />
-										</svg>
-										{#if section.kind === 'bundle'}
-											<span
-												class="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground"
-												>Bundle</span
-											>
-											<span class="font-medium">{section.bundleName}</span>
-											{#if canPlan && divergence}
-												<span
-													class="rounded bg-yellow-100 px-1.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-													title="{divergence.addedCount > 0
-														? `${divergence.addedCount} new asset${divergence.addedCount !== 1 ? 's' : ''} in bundle`
-														: ''}{divergence.addedCount > 0 && divergence.removedCount > 0
-														? ', '
-														: ''}{divergence.removedCount > 0
-														? `${divergence.removedCount} asset${divergence.removedCount !== 1 ? 's' : ''} removed from bundle`
-														: ''}">Bundle changed</span
-												>
-												<button
-													type="button"
-													disabled={working}
-													onclick={(e) => {
-														e.stopPropagation();
-														handleSyncBundle(section.bundleId);
-													}}
-													class="rounded border border-yellow-400 px-2 py-0.5 text-xs text-yellow-800 transition-colors hover:bg-yellow-100 dark:border-yellow-600 dark:text-yellow-300 dark:hover:bg-yellow-900/40"
-												>
-													Update from bundle
-												</button>
-											{/if}
-											{#if canEdit}
-												<button
-													type="button"
-													onclick={(e) => {
-														e.stopPropagation();
-														handleRemoveBundle(section.bundleId);
-													}}
-													class="ml-auto text-xs text-muted-foreground transition-colors hover:text-destructive"
-												>
-													Remove
-												</button>
-											{/if}
-										{:else}
-											<ProductThumb path={section.imagePath} alt={section.productName} />
-											<span class="font-medium">{section.productName}</span>
-										{/if}
-									</div>
-								</td>
-								<td class="px-4 py-3 text-muted-foreground">
-									{section.kind === 'bundle' ? '—' : section.manufacturerName}
-								</td>
-								<td class="px-4 py-3 text-right font-mono tabular-nums">{section.total}</td>
-								<td
-									class="px-4 py-3 text-right font-mono tabular-nums {section.pending > 0
-										? 'text-yellow-600 dark:text-yellow-400'
-										: 'text-muted-foreground'}">{section.pending > 0 ? section.pending : '—'}</td
-								>
-								<td
-									class="px-4 py-3 text-right font-mono tabular-nums {section.approved > 0
-										? 'text-green-700 dark:text-green-400'
-										: 'text-muted-foreground'}">{section.approved > 0 ? section.approved : '—'}</td
-								>
-								<td
-									class="px-4 py-3 text-right font-mono tabular-nums {section.checkedOut > 0
-										? 'text-blue-600 dark:text-blue-400'
-										: 'text-muted-foreground'}"
-									>{section.checkedOut > 0 ? section.checkedOut : '—'}</td
-								>
-								<td class="px-4 py-3 text-right font-mono text-muted-foreground tabular-nums"
-									>{section.returned > 0 ? section.returned : '—'}</td
-								>
-							</tr>
-							{#if expanded.get(sectionId)}
-								{#each section.items as item (item.id)}
-									<tr class="border-b bg-muted/10 last:border-0">
-										<td class="px-4 py-2">
-											<input
-												type="checkbox"
-												checked={selectedItemAssetIds.has(item.asset.id)}
-												onclick={() => {
-													if (selectedItemAssetIds.has(item.asset.id)) {
-														selectedItemAssetIds.delete(item.asset.id);
-													} else {
-														selectedItemAssetIds.add(item.asset.id);
-													}
-												}}
-												class="h-4 w-4 cursor-pointer rounded border-input"
+									Show duration same as total duration
+								</label>
+
+								{#if !durationDraft.sameAsTotalDuration}
+									<div class="grid grid-cols-2 gap-3">
+										<div class="space-y-2">
+											<Label for="dur-showStartDate">Show Start Date</Label>
+											<Input
+												id="dur-showStartDate"
+												type="date"
+												bind:value={durationDraft.showStartDate}
+												min={durationDraft.startDate}
+												max={durationDraft.endDate}
 											/>
-										</td>
-										<td colspan="7" class="px-4 py-2">
-											<div class="flex items-center gap-4 text-sm">
-												{#if section.kind === 'bundle'}
-													<ProductThumb
-														path={item.asset.product.imagePath}
-														alt={item.asset.product.name}
-														size={22}
-													/>
-													<span class="font-medium">{item.asset.product.name}</span>
-												{/if}
-												<span class="w-36 font-mono text-xs text-muted-foreground">
-													{item.asset.serialNumber ? `S/N: ${item.asset.serialNumber}` : '—'}
-												</span>
-												<span class="text-xs text-muted-foreground"
-													>{orgLabel(item.asset.organization)}</span
-												>
-												<span
-													class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {statusClass[
-														item.status
-													] ?? ''}">{statusLabels[item.status] ?? item.status}</span
-												>
-												{#if item.asset.product.isLicense && item.status === 'CHECKED_OUT'}
-													<button
-														type="button"
-														onclick={() => openCredentials(item.asset)}
-														class="rounded border px-2 py-0.5 text-xs transition-colors hover:bg-muted"
-													>
-														Credentials
-													</button>
-												{/if}
-												{#if canPlan && accessoriesChanged(item)}
-													<span
-														class="rounded bg-yellow-100 px-1.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-														>Accessories changed</span
-													>
-													<button
-														type="button"
-														disabled={working}
-														onclick={() => handleSyncAccessories(item.assetId)}
-														class="rounded border border-yellow-400 px-2 py-0.5 text-xs text-yellow-800 transition-colors hover:bg-yellow-100 dark:border-yellow-600 dark:text-yellow-300 dark:hover:bg-yellow-900/40"
-													>
-														Update accessories
-													</button>
-												{/if}
-												{#if canEdit}
-													<button
-														type="button"
-														onclick={() => handleRemoveItem(item.id)}
-														class="ml-auto text-xs text-muted-foreground transition-colors hover:text-destructive"
-													>
-														Remove
-													</button>
-												{/if}
-											</div>
-											{#if item.accessories.length > 0}
-												<!-- Attached to this unit, so booked and removed with it —
-												     never a line of its own. -->
-												<p class="mt-1 pl-6 text-xs text-muted-foreground">
-													↳ {accessorySummary(item.accessories)}
-												</p>
-											{/if}
-										</td>
-									</tr>
-								{/each}
+										</div>
+										<div class="space-y-2">
+											<Label for="dur-showEndDate">Show End Date</Label>
+											<Input
+												id="dur-showEndDate"
+												type="date"
+												bind:value={durationDraft.showEndDate}
+												min={durationDraft.showStartDate || durationDraft.startDate}
+												max={durationDraft.endDate}
+											/>
+										</div>
+									</div>
+								{/if}
+
+								<div class="flex justify-end gap-2">
+									<Button
+										icon="close"
+										type="button"
+										variant="outline"
+										onclick={() => (editingDuration = false)}
+									>
+										Cancel
+									</Button>
+									<Button icon="save" type="submit" disabled={savingDuration}>
+										{savingDuration ? 'Saving…' : 'Save'}
+									</Button>
+								</div>
+							</form>
+						{/if}
+					</div>
+
+					<!-- Address -->
+					<div class="space-y-3 border-t pt-4">
+						<div class="flex items-start justify-between gap-2">
+							<div>
+								<h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+									Address
+								</h3>
+								<p class="text-sm">{formatAddress(production.venueName, production.address)}</p>
+							</div>
+							{#if canEdit && !editingAddress}
+								<Button
+									icon="edit"
+									variant="ghost"
+									size="icon-sm"
+									aria-label="Edit address"
+									onclick={() => (editingAddress = true)}
+								/>
 							{/if}
-						{/each}
-					</tbody>
-				</table>
-			</div>
-		{/if}
-	</div>
+						</div>
 
-	<!-- Crew section -->
-	<div>
-		<div class="mb-4 flex items-center justify-between">
-			<h2 class="text-xl font-semibold">Crew</h2>
-			{#if canPlan}
-				<Button variant="outline" onclick={() => (showCrewForm = !showCrewForm)}>
-					{showCrewForm ? 'Cancel' : 'Add Crew Member'}
-				</Button>
-			{/if}
-		</div>
+						{#if editingAddress}
+							<form class="space-y-4" onsubmit={handleSaveAddress}>
+								<AddressInput bind:value={addressDraft} idPrefix="addr" withName />
 
-		{#if showCrewForm}
-			<Card.Root class="mb-4 max-w-lg">
-				<Card.Content class="pt-6">
-					<form onsubmit={handleAddCrew} class="space-y-4">
-						<div class="grid grid-cols-2 gap-3">
+								<div class="flex justify-end gap-2">
+									<Button
+										icon="close"
+										type="button"
+										variant="outline"
+										onclick={() => (editingAddress = false)}
+									>
+										Cancel
+									</Button>
+									<Button icon="save" type="submit" disabled={savingAddress}>
+										{savingAddress ? 'Saving…' : 'Save'}
+									</Button>
+								</div>
+							</form>
+						{/if}
+					</div>
+
+					<!-- Customer -->
+					<div class="space-y-3 border-t pt-4">
+						<div class="flex items-start justify-between gap-2">
+							<div>
+								<h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+									Customer
+								</h3>
+								<p class="text-sm">
+									{production.customer ? customerLabel(production.customer) : '—'}
+								</p>
+							</div>
+							{#if canEdit && !editingCustomer}
+								<Button
+									icon="edit"
+									variant="ghost"
+									size="icon-sm"
+									aria-label="Edit customer"
+									onclick={() => (editingCustomer = true)}
+								/>
+							{/if}
+						</div>
+
+						{#if editingCustomer}
+							<form class="space-y-4" onsubmit={handleSaveCustomer}>
+								<CustomerSelect
+									organizationId={production.organizationId}
+									bind:value={customerDraftId}
+									allowNone
+									id="production-customer"
+									idPrefix="prod-cust"
+								/>
+
+								<div class="flex justify-end gap-2">
+									<Button
+										icon="close"
+										type="button"
+										variant="outline"
+										onclick={() => (editingCustomer = false)}
+									>
+										Cancel
+									</Button>
+									<Button icon="save" type="submit" disabled={savingCustomer}>
+										{savingCustomer ? 'Saving…' : 'Save'}
+									</Button>
+								</div>
+							</form>
+						{/if}
+					</div>
+				</Card.Content>
+			</Card.Root>
+
+			<!-- Crew -->
+			<Card.Root>
+				<Card.Header>
+					<Card.Title>
+						Crew
+						{#if production.crew.length > 0}
+							<span class="ml-1 text-sm font-normal text-muted-foreground"
+								>{production.crew.length}</span
+							>
+						{/if}
+					</Card.Title>
+					{#if canPlan && !showCrewForm}
+						<Card.Action>
+							<Button icon="add" variant="outline" size="sm" onclick={() => (showCrewForm = true)}
+								>Add</Button
+							>
+						</Card.Action>
+					{/if}
+				</Card.Header>
+				<Card.Content class="space-y-4">
+					{#if showCrewForm}
+						<form onsubmit={handleAddCrew} class="space-y-3 rounded-md border p-3">
 							<div class="space-y-2">
 								<Label for="crewUser">User *</Label>
 								<select
@@ -1228,7 +990,7 @@
 								>
 									<option value="" disabled> Select a user… </option>
 									{#each orgUsers as u (u.id)}
-										{@const alreadyAdded = production?.crew.some((c) => c.userId === u.id)}
+										{@const alreadyAdded = production.crew.some((c) => c.userId === u.id)}
 										<option value={u.id} disabled={alreadyAdded}>
 											{u.name || u.email}{alreadyAdded ? ' (already added)' : ''}
 										</option>
@@ -1239,60 +1001,437 @@
 								<Label for="crewRole">Role</Label>
 								<Input id="crewRole" bind:value={crewRole} placeholder="Camera Operator" />
 							</div>
-						</div>
-						<div class="flex justify-end gap-3">
-							<Button type="button" variant="outline" onclick={() => (showCrewForm = false)}
-								>Cancel</Button
-							>
-							<Button icon="add" type="submit" disabled={savingCrew}
-								>{savingCrew ? 'Adding…' : 'Add'}</Button
-							>
-						</div>
-					</form>
-				</Card.Content>
-			</Card.Root>
-		{/if}
+							<div class="flex justify-end gap-2">
+								<Button type="button" variant="outline" onclick={() => (showCrewForm = false)}
+									>Cancel</Button
+								>
+								<Button icon="add" type="submit" disabled={savingCrew}
+									>{savingCrew ? 'Adding…' : 'Add'}</Button
+								>
+							</div>
+						</form>
+					{/if}
 
-		{#if production.crew.length === 0}
-			<Card.Root>
-				<Card.Content class="py-8 text-center text-sm text-muted-foreground">
-					No crew members added yet.
-				</Card.Content>
-			</Card.Root>
-		{:else}
-			<div class="overflow-x-auto rounded-lg border bg-card">
-				<table class="w-full text-sm">
-					<thead>
-						<tr class="border-b bg-muted/30">
-							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Name</th>
-							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Role</th>
-							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Email</th>
-							<th class="px-4 py-3"></th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each production.crew as member (member.id)}
-							<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
-								<td class="px-4 py-3 font-medium">{member.user.name ?? '—'}</td>
-								<td class="px-4 py-3 text-muted-foreground">{member.role ?? '—'}</td>
-								<td class="px-4 py-3 text-muted-foreground">{member.user.email ?? '—'}</td>
-								<td class="px-4 py-3 text-right">
+					{#if production.crew.length === 0}
+						<p class="text-sm text-muted-foreground">No crew members added yet.</p>
+					{:else}
+						<ul class="divide-y">
+							{#each production.crew as member (member.id)}
+								<li class="flex items-center justify-between gap-2 py-2 first:pt-0 last:pb-0">
+									<div class="min-w-0">
+										<p class="truncate text-sm font-medium">
+											{member.user.name || member.user.email}
+											{#if member.role}
+												<span class="font-normal text-muted-foreground">· {member.role}</span>
+											{/if}
+										</p>
+										{#if member.user.name}
+											<p class="truncate text-xs text-muted-foreground">{member.user.email}</p>
+										{/if}
+									</div>
 									{#if canEdit}
 										<button
 											type="button"
 											onclick={() => handleRemoveCrew(member.id)}
-											class="text-xs text-muted-foreground transition-colors hover:text-destructive"
+											class="shrink-0 text-xs text-muted-foreground transition-colors hover:text-destructive"
 										>
 											Remove
 										</button>
 									{/if}
-								</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				</Card.Content>
+			</Card.Root>
+		</div>
+
+		<!-- Equipment -->
+		<div class="min-w-0 [grid-area:equipment]">
+			<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+				<h2 class="text-xl font-semibold">
+					Booked Equipment
+					{#if unitCount > 0}
+						<span class="ml-1 text-base font-normal text-muted-foreground">{unitCount}</span>
+					{/if}
+				</h2>
+				{#if canPlan}
+					<div class="flex flex-wrap gap-2">
+						<Button variant="outline" onclick={() => (copyEquipmentOpen = true)}
+							>Copy equipment from…</Button
+						>
+						<Button href={resolve(`/productions/${productionId}/equipment`)}
+							>Manage Equipment</Button
+						>
+					</div>
+				{/if}
 			</div>
-		{/if}
+
+			{#if production.items.length === 0}
+				<Card.Root>
+					<Card.Content class="py-12 text-center text-muted-foreground">
+						No equipment booked yet.
+					</Card.Content>
+				</Card.Root>
+			{:else}
+				<div class="overflow-x-auto rounded-md border">
+					<table class="w-full text-sm">
+						<thead>
+							<tr class="border-b bg-muted/30">
+								<th class="w-10 px-4 py-3">
+									<input
+										type="checkbox"
+										checked={allItemsSelected}
+										use:indeterminate={someItemsSelected && !allItemsSelected}
+										onclick={toggleSelectAllItems}
+										class="h-4 w-4 cursor-pointer rounded border-input"
+									/>
+								</th>
+								<th class="px-3 py-3 text-left font-medium text-muted-foreground">Product</th>
+								<th class="px-3 py-3 text-right font-medium text-muted-foreground">Total</th>
+								<th class="px-3 py-3 text-right font-medium text-muted-foreground">Pending</th>
+								<th class="px-3 py-3 text-right font-medium text-muted-foreground">Approved</th>
+								<th class="px-3 py-3 text-right font-medium text-muted-foreground">Out</th>
+								<th class="px-3 py-3 text-right font-medium text-muted-foreground">Returned</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each displaySections as section (section.kind === 'bundle' ? section.bundleId : section.productId)}
+								{@const sectionId =
+									section.kind === 'bundle' ? section.bundleId : section.productId}
+								{@const sectionAssetIds = section.items.map((i) => i.asset.id)}
+								{@const allInSectionSelected =
+									sectionAssetIds.length > 0 &&
+									sectionAssetIds.every((id) => selectedItemAssetIds.has(id))}
+								{@const divergence =
+									section.kind === 'bundle' ? bundleDivergence.get(section.bundleId) : null}
+								<tr
+									class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
+									onclick={() => toggleSection(sectionId)}
+								>
+									<td class="px-4 py-3">
+										<input
+											type="checkbox"
+											checked={allInSectionSelected}
+											onclick={(e) => {
+												e.stopPropagation();
+												if (allInSectionSelected) {
+													sectionAssetIds.forEach((id) => selectedItemAssetIds.delete(id));
+												} else {
+													sectionAssetIds.forEach((id) => selectedItemAssetIds.add(id));
+												}
+											}}
+											class="h-4 w-4 cursor-pointer rounded border-input"
+										/>
+									</td>
+									<td class="px-3 py-3">
+										<div class="flex items-center gap-2">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="14"
+												height="14"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="2"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												class="shrink-0 text-muted-foreground transition-transform {expanded.get(
+													sectionId
+												)
+													? 'rotate-90'
+													: ''}"
+											>
+												<path d="m9 18 6-6-6-6" />
+											</svg>
+											{#if section.kind === 'bundle'}
+												<span
+													class="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground"
+													>Bundle</span
+												>
+												<span class="font-medium">{section.bundleName}</span>
+												{#if canPlan && divergence}
+													<span
+														class="rounded bg-yellow-100 px-1.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+														title="{divergence.addedCount > 0
+															? `${divergence.addedCount} new asset${divergence.addedCount !== 1 ? 's' : ''} in bundle`
+															: ''}{divergence.addedCount > 0 && divergence.removedCount > 0
+															? ', '
+															: ''}{divergence.removedCount > 0
+															? `${divergence.removedCount} asset${divergence.removedCount !== 1 ? 's' : ''} removed from bundle`
+															: ''}">Bundle changed</span
+													>
+													<button
+														type="button"
+														disabled={working}
+														onclick={(e) => {
+															e.stopPropagation();
+															handleSyncBundle(section.bundleId);
+														}}
+														class="rounded border border-yellow-400 px-2 py-0.5 text-xs text-yellow-800 transition-colors hover:bg-yellow-100 dark:border-yellow-600 dark:text-yellow-300 dark:hover:bg-yellow-900/40"
+													>
+														Update from bundle
+													</button>
+												{/if}
+												{#if canEdit}
+													<button
+														type="button"
+														onclick={(e) => {
+															e.stopPropagation();
+															handleRemoveBundle(section.bundleId);
+														}}
+														class="ml-auto text-xs text-muted-foreground transition-colors hover:text-destructive"
+													>
+														Remove
+													</button>
+												{/if}
+											{:else}
+												<ProductThumb path={section.imagePath} alt={section.productName} />
+												<div class="min-w-0">
+													<p class="font-medium">{section.productName}</p>
+													{#if section.manufacturerName}
+														<p class="text-xs text-muted-foreground">{section.manufacturerName}</p>
+													{/if}
+												</div>
+											{/if}
+										</div>
+									</td>
+									<td class="px-3 py-3 text-right font-mono tabular-nums">{section.total}</td>
+									<td
+										class="px-3 py-3 text-right font-mono tabular-nums {section.pending > 0
+											? 'text-yellow-600 dark:text-yellow-400'
+											: 'text-muted-foreground'}">{section.pending > 0 ? section.pending : '—'}</td
+									>
+									<td
+										class="px-3 py-3 text-right font-mono tabular-nums {section.approved > 0
+											? 'text-green-700 dark:text-green-400'
+											: 'text-muted-foreground'}"
+										>{section.approved > 0 ? section.approved : '—'}</td
+									>
+									<td
+										class="px-3 py-3 text-right font-mono tabular-nums {section.checkedOut > 0
+											? 'text-blue-600 dark:text-blue-400'
+											: 'text-muted-foreground'}"
+										>{section.checkedOut > 0 ? section.checkedOut : '—'}</td
+									>
+									<td class="px-3 py-3 text-right font-mono text-muted-foreground tabular-nums"
+										>{section.returned > 0 ? section.returned : '—'}</td
+									>
+								</tr>
+								{#if expanded.get(sectionId)}
+									{#each section.items as item (item.id)}
+										<tr class="border-b bg-muted/10 last:border-0">
+											<td class="px-4 py-2">
+												<input
+													type="checkbox"
+													checked={selectedItemAssetIds.has(item.asset.id)}
+													onclick={() => {
+														if (selectedItemAssetIds.has(item.asset.id)) {
+															selectedItemAssetIds.delete(item.asset.id);
+														} else {
+															selectedItemAssetIds.add(item.asset.id);
+														}
+													}}
+													class="h-4 w-4 cursor-pointer rounded border-input"
+												/>
+											</td>
+											<td colspan="6" class="px-3 py-2">
+												<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+													{#if section.kind === 'bundle'}
+														<ProductThumb
+															path={item.asset.product.imagePath}
+															alt={item.asset.product.name}
+															size={22}
+														/>
+														<span class="font-medium">{item.asset.product.name}</span>
+													{/if}
+													<span class="w-36 font-mono text-xs text-muted-foreground">
+														{item.asset.serialNumber ? `S/N: ${item.asset.serialNumber}` : '—'}
+													</span>
+													<span class="text-xs text-muted-foreground"
+														>{orgLabel(item.asset.organization)}</span
+													>
+													<span
+														class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {statusClass[
+															item.status
+														] ?? ''}">{statusLabels[item.status] ?? item.status}</span
+													>
+													{#if item.asset.product.isLicense && item.status === 'CHECKED_OUT'}
+														<button
+															type="button"
+															onclick={() => openCredentials(item.asset)}
+															class="rounded border px-2 py-0.5 text-xs transition-colors hover:bg-muted"
+														>
+															Credentials
+														</button>
+													{/if}
+													{#if canPlan && accessoriesChanged(item)}
+														<span
+															class="rounded bg-yellow-100 px-1.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+															>Accessories changed</span
+														>
+														<button
+															type="button"
+															disabled={working}
+															onclick={() => handleSyncAccessories(item.assetId)}
+															class="rounded border border-yellow-400 px-2 py-0.5 text-xs text-yellow-800 transition-colors hover:bg-yellow-100 dark:border-yellow-600 dark:text-yellow-300 dark:hover:bg-yellow-900/40"
+														>
+															Update accessories
+														</button>
+													{/if}
+													{#if canEdit}
+														<button
+															type="button"
+															onclick={() => handleRemoveItem(item.id)}
+															class="ml-auto text-xs text-muted-foreground transition-colors hover:text-destructive"
+														>
+															Remove
+														</button>
+													{/if}
+												</div>
+												{#if item.accessories.length > 0}
+													<!-- Attached to this unit, so booked and removed with it —
+													     never a line of its own. -->
+													<p class="mt-1 pl-6 text-xs text-muted-foreground">
+														↳ {accessorySummary(item.accessories)}
+													</p>
+												{/if}
+											</td>
+										</tr>
+									{/each}
+								{/if}
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			{/if}
+		</div>
+
+		<!-- Billing & access -->
+		<div class="space-y-6 [grid-area:more]">
+			{#if canManage}
+				<Card.Root>
+					<Card.Header>
+						<Card.Title>Offers</Card.Title>
+					</Card.Header>
+					<Card.Content>
+						{#if offers.length === 0}
+							<p class="text-sm text-muted-foreground">No offers yet.</p>
+						{:else}
+							<div class="space-y-2">
+								{#each offers as offer (offer.id)}
+									<a
+										href={resolve(`/offers/${offer.id}`)}
+										class="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
+									>
+										<div class="min-w-0">
+											<p class="truncate font-medium">{offer.number} — {offer.customerName}</p>
+											<p class="text-xs text-muted-foreground">
+												{offer.dayCount} d
+												{#if supersededOffers.has(offer.id)}
+													· Superseded
+												{/if}
+												{#if offer.invoices.length > 0}
+													· Invoiced ({offer.invoices[0].number})
+												{/if}
+											</p>
+										</div>
+										<span class="shrink-0 font-medium tabular-nums"
+											>{fmtEUR(offerTotal(offer))}</span
+										>
+									</a>
+								{/each}
+							</div>
+						{/if}
+					</Card.Content>
+				</Card.Root>
+
+				<Card.Root>
+					<Card.Header>
+						<Card.Title>Invoices</Card.Title>
+					</Card.Header>
+					<Card.Content>
+						{#if invoices.length === 0}
+							<p class="text-sm text-muted-foreground">
+								No invoices yet — an invoice is created from an offer.
+							</p>
+						{:else}
+							<div class="space-y-2">
+								{#each invoices as invoice (invoice.id)}
+									<a
+										href={resolve(`/invoices/${invoice.id}`)}
+										class="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
+									>
+										<div>
+											<p class="font-medium">{invoice.number}</p>
+											<p class="text-xs text-muted-foreground">
+												{invoice.dayCount} d · {invoice.sentAt ? 'Sent' : 'Draft'}
+											</p>
+										</div>
+										<span class="shrink-0 font-medium tabular-nums"
+											>{fmtEUR(invoiceTotal(invoice))}</span
+										>
+									</a>
+								{/each}
+							</div>
+						{/if}
+					</Card.Content>
+				</Card.Root>
+			{/if}
+
+			{#if audienceQuery}
+				<Card.Root>
+					<Card.Header>
+						<Card.Title>Who can see this</Card.Title>
+					</Card.Header>
+					<Card.Content class="space-y-3">
+						{#if !audienceQuery.ready || !audience}
+							<ContentSkeleton shape="rows" count={3} error={audienceQuery.error} />
+						{:else}
+							<p class="text-sm text-muted-foreground">
+								{plural(audience.orgReaderCount, [
+									'# member of your organization (Viewer and up)',
+									'# members of your organization (Viewer and up)'
+								])}
+							</p>
+							{#if audience.people.length > 0}
+								<ul class="divide-y">
+									{#each audience.people as person (person.user.id)}
+										<li class="space-y-1 py-2 first:pt-0 last:pb-0">
+											<p class="truncate text-sm font-medium">
+												{person.user.name || person.user.email}
+											</p>
+											<div class="flex flex-wrap gap-1">
+												{#each person.reasons as reason, i (i)}
+													{#if reason.kind === 'crew'}
+														<span
+															class="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground"
+															>Crew{reason.role ? ` · ${reason.role}` : ''}</span
+														>
+													{:else}
+														<span
+															class="rounded bg-amber-500/15 px-1.5 py-0.5 text-xs text-amber-700 dark:text-amber-400"
+															>Lends equipment · {reason.orgName}</span
+														>
+													{/if}
+												{/each}
+											</div>
+										</li>
+									{/each}
+								</ul>
+							{/if}
+							{#if audience.lenderOrgCount > 0}
+								<p class="text-xs text-muted-foreground">
+									Everyone from Viewer up in an organization whose equipment is booked or requested
+									here can open this production, customer included — but not its offers and
+									invoices. A declined request no longer counts.
+								</p>
+							{/if}
+						{/if}
+					</Card.Content>
+				</Card.Root>
+			{/if}
+		</div>
 	</div>
 </div>
 

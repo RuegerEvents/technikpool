@@ -49,9 +49,19 @@
 			: orgs.map((o) => o.id)
 	);
 
+	// A production another org runs is here because one of ours lends to it, and
+	// it is filed under that org as well as its owner's.
 	let productions = $derived(
-		allProductions.filter((p) => selectedOrgIds.includes(p.organizationId))
+		allProductions.filter(
+			(p) =>
+				selectedOrgIds.includes(p.organizationId) ||
+				p.lentBy.some((id) => selectedOrgIds.includes(id))
+		)
 	);
+
+	function isLentTo(p: Production): boolean {
+		return p.lentBy.length > 0 && !orgs.some((o) => o.id === p.organizationId);
+	}
 
 	const columns: Column<Production>[] = [
 		{ key: 'name', label: 'Name', sortable: true, accessor: (r: Production) => r.name },
@@ -138,7 +148,10 @@
 
 	// Requests to other orgs nobody has answered yet — the flip side of the
 	// dashboard's approvals queue, flagged so they are not forgotten.
+	// Not on a production we only lend to: those are waiting on us, and the
+	// dashboard's approvals queue is where they are answered.
 	function pendingCount(p: Production): number {
+		if (isLentTo(p)) return 0;
 		return p.items?.filter((i) => i.status === 'PENDING').length ?? 0;
 	}
 
@@ -208,6 +221,9 @@
 									>Cancelled</span
 								>
 							{/if}
+							{#if isLentTo(prod)}
+								{@render lentBadge()}
+							{/if}
 						</Card.Title>
 						<Card.Description>
 							<span class="block">{orgLabel(prod.organization)}</span>
@@ -240,6 +256,9 @@
 							class="ml-2 rounded bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive"
 							>Cancelled</span
 						>
+					{/if}
+					{#if isLentTo(prod)}
+						<span class="ml-2">{@render lentBadge()}</span>
 					{/if}
 				{:else if key === 'org'}
 					{orgLabel(prod.organization)}
@@ -276,4 +295,11 @@
 		<Hourglass aria-hidden="true" class="size-3" />
 		{count}
 	</span>
+{/snippet}
+
+{#snippet lentBadge()}
+	<span
+		class="rounded bg-muted px-1.5 py-0.5 align-middle text-xs font-medium text-muted-foreground"
+		title="Another organization's production that yours lends equipment to">On loan</span
+	>
 {/snippet}
