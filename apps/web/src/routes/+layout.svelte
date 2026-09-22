@@ -30,6 +30,7 @@
 		Wrench
 	} from '@lucide/svelte';
 	import { currentVersion } from '$lib/changelog';
+	import { OrgBadge } from '$lib/components/ui/org-badge';
 
 	let { data, children } = $props();
 
@@ -598,6 +599,20 @@
 									<div class="truncate px-2 py-1.5 text-xs text-muted-foreground">
 										{data.user.email}
 									</div>
+									{#if data.homeOrg}
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve(`/orgs/${data.homeOrg?.id}`))}
+											title="Home organization"
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<OrgBadge
+												name={data.homeOrg.name}
+												color={data.homeOrg.color}
+												avatarLabel={data.homeOrg.avatarLabel}
+												class="min-w-0"
+											/>
+										</DropdownMenu.Item>
+									{/if}
 									<DropdownMenu.Separator class="my-1 h-px bg-border" />
 									<DropdownMenu.Item
 										onSelect={() => goto(resolve('/profile'))}

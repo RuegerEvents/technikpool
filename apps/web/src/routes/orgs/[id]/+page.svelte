@@ -21,7 +21,7 @@
 		getOrgIdentityInUse
 	} from '$lib/remote/orgs.remote';
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
 	import { OrgBadge } from '$lib/components/ui/org-badge';
@@ -157,6 +157,8 @@
 			});
 			toast.success('Organization settings updated');
 			editingSettings = false;
+			// The user menu shows the home org's label and colour from the layout.
+			if (orgId === data.homeOrgId) await invalidateAll();
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {

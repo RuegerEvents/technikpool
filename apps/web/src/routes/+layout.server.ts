@@ -1,5 +1,6 @@
 import type { LayoutServerLoad } from './$types';
 import { prisma } from '$lib/server/auth';
+import { orgLabel } from '$lib/utils';
 import { ROLE_FOR, roleAtLeast, roleRank } from '$lib/roles';
 
 export const load: LayoutServerLoad = async ({ locals, cookies }) => {
@@ -8,6 +9,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 	let canReadRecords = false;
 	let hasOrg = false;
 	let homeOrgId: string | null = null;
+	let homeOrg: { id: string; name: string; color: string; avatarLabel: string } | null = null;
 	if (locals.user?.id) {
 		const [dbUser, memberships] = await Promise.all([
 			prisma.user.findUnique({
@@ -39,6 +41,14 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 			memberships.find((m) => m.organizationId === dbUser?.homeOrgId)?.organizationId ??
 			memberships.toSorted((a, b) => roleRank(b.role) - roleRank(a.role))[0]?.organizationId ??
 			null;
+		// The user menu names it, so it has to be read here rather than by a query.
+		if (homeOrgId) {
+			const org = await prisma.organization.findUniqueOrThrow({
+				where: { id: homeOrgId },
+				select: { id: true, name: true, shortName: true, color: true, avatarLabel: true }
+			});
+			homeOrg = { id: org.id, name: orgLabel(org), color: org.color, avatarLabel: org.avatarLabel };
+		}
 	}
 	return {
 		user: locals.user,
@@ -47,6 +57,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 		canBill,
 		canReadRecords,
 		homeOrgId,
+		homeOrg,
 		hasOrg,
 		locale: cookies.get('locale') ?? 'de'
 	};

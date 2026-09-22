@@ -8387,6 +8387,7 @@ msgstr "Sieht die Geräte, aber keine Produktionen, Kunden oder Preise – auße
 msgid "Can see everything except offers and invoices, but change nothing."
 msgstr "Sieht alles außer Angeboten und Rechnungen, ändert nichts."
 
+#: src/routes/+layout.svelte
 #: src/routes/orgs/+page.svelte
 msgid "Home organization"
 msgstr "Home-Organisation"
