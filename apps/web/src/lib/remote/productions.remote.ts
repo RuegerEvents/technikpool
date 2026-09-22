@@ -919,11 +919,40 @@ export const getAwaitingApprovals = query(async () => {
 		},
 		select: {
 			productionId: true,
+			assetId: true,
+			sourceParentAssetId: true,
 			production: { select: { name: true, startDate: true } },
-			asset: { select: { organization: { select: { id: true, name: true, shortName: true } } } }
+			asset: {
+				select: {
+					parentAssetId: true,
+					organization: { select: { id: true, name: true, shortName: true } }
+				}
+			}
 		},
 		orderBy: { production: { startDate: 'asc' } }
 	});
+
+	// Counted the way the production page counts its "Pending" column: an
+	// accessory whose parent is booked on the same production travels with it
+	// and is not a unit of its own (see nestAccessories).
+	const parentOf = (item: (typeof items)[number]) =>
+		item.sourceParentAssetId ?? item.asset.parentAssetId;
+	const candidates = items.filter((item) => parentOf(item) !== null);
+	const bookedParents = candidates.length
+		? await prisma.productionItem.findMany({
+				where: {
+					OR: candidates.map((item) => ({
+						productionId: item.productionId,
+						assetId: parentOf(item)!
+					}))
+				},
+				select: { productionId: true, assetId: true }
+			})
+		: [];
+	const booked = new Set(bookedParents.map((p) => `${p.productionId}:${p.assetId}`));
+	const units = items.filter(
+		(item) => parentOf(item) === null || !booked.has(`${item.productionId}:${parentOf(item)}`)
+	);
 
 	const groups = new Map<
 		string,
@@ -935,7 +964,7 @@ export const getAwaitingApprovals = query(async () => {
 			count: number;
 		}
 	>();
-	for (const item of items) {
+	for (const item of units) {
 		const lender = item.asset.organization;
 		const key = `${item.productionId}:${lender.id}`;
 		const group = groups.get(key);
