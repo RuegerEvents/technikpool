@@ -77,6 +77,7 @@ class ApiClient {
     identity = IdentityClient(_dio);
     inventory = InventoryClient(_dio);
     scanning = ScanningClient(_dio);
+    stocktake = StocktakeClient(_dio);
     auth = AuthClient(_dio);
   }
 
@@ -86,6 +87,7 @@ class ApiClient {
   late final IdentityClient identity;
   late final InventoryClient inventory;
   late final ScanningClient scanning;
+  late final StocktakeClient stocktake;
   late final AuthClient auth;
 
   Dio get raw => _dio;
@@ -150,6 +152,14 @@ String describeError(S l10n, Object error) {
     'asset_retired' => l10n.errorAssetRetired,
     'asset_unavailable' => l10n.errorAssetUnavailable,
     'production_cancelled' => l10n.errorProductionCancelled,
+    'stocktake_not_found' => l10n.errorStocktakeNotFound,
+    'stocktake_closed' => l10n.errorStocktakeClosed,
+    'stocktake_not_closed' => l10n.errorStocktakeNotClosed,
+    'stocktake_empty' => l10n.errorStocktakeEmpty,
+    'stocktake_not_your_tick' => l10n.errorStocktakeNotYourTick,
+    'stocktake_not_found_yet' => l10n.errorStocktakeNotFoundYet,
+    'stocktake_product_not_counted' => l10n.errorStocktakeProductNotCounted,
+    'stocktake_action_applied' => l10n.errorStocktakeActionApplied,
     'unauthorized' => l10n.errorUnauthorized,
     'invalid_request' => l10n.errorInvalidRequest,
     'invalid_limit' => l10n.errorInvalidLimit,

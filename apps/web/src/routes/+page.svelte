@@ -18,6 +18,8 @@
 	import { canManageInventory, roleAtLeast, ROLE_FOR } from '$lib/roles';
 	import { billingSetupSteps } from '$lib/billing-setup.svelte';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { getStocktakes } from '$lib/remote/stocktakes.remote';
+	import StocktakeProgress from '$lib/components/stocktake-progress.svelte';
 	import { formatReleaseDate, notesFor, releases } from '$lib/changelog';
 	import {
 		Package,
@@ -74,6 +76,10 @@
 	let awaitingQuery = $derived(active ? getAwaitingApprovals() : null);
 	let awaiting = $derived(awaitingQuery?.current ?? []);
 	let statsQuery = $derived(active ? getDashboardStats() : null);
+	let stocktakesQuery = $derived(active ? getStocktakes() : null);
+	let openStocktakes = $derived(
+		(stocktakesQuery?.current ?? []).filter((s) => s.status === 'OPEN')
+	);
 	let stats = $derived(statsQuery?.current ?? null);
 
 	type AttentionItem = {
@@ -686,6 +692,32 @@
 
 			<!-- Side column: reference, not work. Quieter type, smaller cards. -->
 			<aside class="space-y-6">
+				<!-- Only while something is being counted: a finished stocktake is
+				     reference, and lives on its own page. -->
+				{#if openStocktakes.length > 0}
+					<section>
+						<div class="mb-3 flex items-center justify-between">
+							<h2 class="text-lg font-semibold">Stocktakes</h2>
+							<Button variant="ghost" size="sm" href={resolve('/stocktakes')}>
+								View all
+								<ArrowRight aria-hidden="true" class="ml-1 size-4" />
+							</Button>
+						</div>
+						<Card.Root class="gap-0 overflow-hidden py-0">
+							<div class="divide-y">
+								{#each openStocktakes as st (st.id)}
+									<a
+										href={resolve(`/stocktakes/${st.id}`)}
+										class="block space-y-2 px-4 py-3 transition-colors hover:bg-muted/40"
+									>
+										<p class="truncate text-sm font-medium">{st.name}</p>
+										<StocktakeProgress progress={st.progress} />
+									</a>
+								{/each}
+							</div>
+						</Card.Root>
+					</section>
+				{/if}
 				<section>
 					<h2 class="mb-3 text-lg font-semibold">Inventory</h2>
 					{#if !stats}

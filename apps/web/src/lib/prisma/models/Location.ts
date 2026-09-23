@@ -194,6 +194,10 @@ export type LocationWhereInput = {
   address?: Prisma.XOR<Prisma.AddressScalarRelationFilter, Prisma.AddressWhereInput>
   assets?: Prisma.AssetListRelationFilter
   assetBundles?: Prisma.AssetBundleListRelationFilter
+  stocktakeExpected?: Prisma.StocktakeItemListRelationFilter
+  stocktakeFound?: Prisma.StocktakeItemListRelationFilter
+  stocktakeLines?: Prisma.StocktakeLineListRelationFilter
+  stocktakeCounts?: Prisma.StocktakeCountListRelationFilter
 }
 
 export type LocationOrderByWithRelationInput = {
@@ -207,6 +211,10 @@ export type LocationOrderByWithRelationInput = {
   address?: Prisma.AddressOrderByWithRelationInput
   assets?: Prisma.AssetOrderByRelationAggregateInput
   assetBundles?: Prisma.AssetBundleOrderByRelationAggregateInput
+  stocktakeExpected?: Prisma.StocktakeItemOrderByRelationAggregateInput
+  stocktakeFound?: Prisma.StocktakeItemOrderByRelationAggregateInput
+  stocktakeLines?: Prisma.StocktakeLineOrderByRelationAggregateInput
+  stocktakeCounts?: Prisma.StocktakeCountOrderByRelationAggregateInput
 }
 
 export type LocationWhereUniqueInput = Prisma.AtLeast<{
@@ -223,6 +231,10 @@ export type LocationWhereUniqueInput = Prisma.AtLeast<{
   address?: Prisma.XOR<Prisma.AddressScalarRelationFilter, Prisma.AddressWhereInput>
   assets?: Prisma.AssetListRelationFilter
   assetBundles?: Prisma.AssetBundleListRelationFilter
+  stocktakeExpected?: Prisma.StocktakeItemListRelationFilter
+  stocktakeFound?: Prisma.StocktakeItemListRelationFilter
+  stocktakeLines?: Prisma.StocktakeLineListRelationFilter
+  stocktakeCounts?: Prisma.StocktakeCountListRelationFilter
 }, "id">
 
 export type LocationOrderByWithAggregationInput = {
@@ -258,6 +270,10 @@ export type LocationCreateInput = {
   address: Prisma.AddressCreateNestedOneWithoutLocationsInput
   assets?: Prisma.AssetCreateNestedManyWithoutLocationInput
   assetBundles?: Prisma.AssetBundleCreateNestedManyWithoutLocationInput
+  stocktakeExpected?: Prisma.StocktakeItemCreateNestedManyWithoutExpectedLocationInput
+  stocktakeFound?: Prisma.StocktakeItemCreateNestedManyWithoutFoundLocationInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutLocationInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutLocationInput
 }
 
 export type LocationUncheckedCreateInput = {
@@ -269,6 +285,10 @@ export type LocationUncheckedCreateInput = {
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutLocationInput
   assetBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutLocationInput
+  stocktakeExpected?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutExpectedLocationInput
+  stocktakeFound?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundLocationInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutLocationInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type LocationUpdateInput = {
@@ -280,6 +300,10 @@ export type LocationUpdateInput = {
   address?: Prisma.AddressUpdateOneRequiredWithoutLocationsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutLocationNestedInput
   assetBundles?: Prisma.AssetBundleUpdateManyWithoutLocationNestedInput
+  stocktakeExpected?: Prisma.StocktakeItemUpdateManyWithoutExpectedLocationNestedInput
+  stocktakeFound?: Prisma.StocktakeItemUpdateManyWithoutFoundLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutLocationNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationUncheckedUpdateInput = {
@@ -291,6 +315,10 @@ export type LocationUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutLocationNestedInput
   assetBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutLocationNestedInput
+  stocktakeExpected?: Prisma.StocktakeItemUncheckedUpdateManyWithoutExpectedLocationNestedInput
+  stocktakeFound?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutLocationNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationCreateManyInput = {
@@ -479,6 +507,66 @@ export type LocationUpdateOneWithoutAssetBundlesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.LocationUpdateToOneWithWhereWithoutAssetBundlesInput, Prisma.LocationUpdateWithoutAssetBundlesInput>, Prisma.LocationUncheckedUpdateWithoutAssetBundlesInput>
 }
 
+export type LocationCreateNestedOneWithoutStocktakeExpectedInput = {
+  create?: Prisma.XOR<Prisma.LocationCreateWithoutStocktakeExpectedInput, Prisma.LocationUncheckedCreateWithoutStocktakeExpectedInput>
+  connectOrCreate?: Prisma.LocationCreateOrConnectWithoutStocktakeExpectedInput
+  connect?: Prisma.LocationWhereUniqueInput
+}
+
+export type LocationCreateNestedOneWithoutStocktakeFoundInput = {
+  create?: Prisma.XOR<Prisma.LocationCreateWithoutStocktakeFoundInput, Prisma.LocationUncheckedCreateWithoutStocktakeFoundInput>
+  connectOrCreate?: Prisma.LocationCreateOrConnectWithoutStocktakeFoundInput
+  connect?: Prisma.LocationWhereUniqueInput
+}
+
+export type LocationUpdateOneWithoutStocktakeExpectedNestedInput = {
+  create?: Prisma.XOR<Prisma.LocationCreateWithoutStocktakeExpectedInput, Prisma.LocationUncheckedCreateWithoutStocktakeExpectedInput>
+  connectOrCreate?: Prisma.LocationCreateOrConnectWithoutStocktakeExpectedInput
+  upsert?: Prisma.LocationUpsertWithoutStocktakeExpectedInput
+  disconnect?: Prisma.LocationWhereInput | boolean
+  delete?: Prisma.LocationWhereInput | boolean
+  connect?: Prisma.LocationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LocationUpdateToOneWithWhereWithoutStocktakeExpectedInput, Prisma.LocationUpdateWithoutStocktakeExpectedInput>, Prisma.LocationUncheckedUpdateWithoutStocktakeExpectedInput>
+}
+
+export type LocationUpdateOneWithoutStocktakeFoundNestedInput = {
+  create?: Prisma.XOR<Prisma.LocationCreateWithoutStocktakeFoundInput, Prisma.LocationUncheckedCreateWithoutStocktakeFoundInput>
+  connectOrCreate?: Prisma.LocationCreateOrConnectWithoutStocktakeFoundInput
+  upsert?: Prisma.LocationUpsertWithoutStocktakeFoundInput
+  disconnect?: Prisma.LocationWhereInput | boolean
+  delete?: Prisma.LocationWhereInput | boolean
+  connect?: Prisma.LocationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LocationUpdateToOneWithWhereWithoutStocktakeFoundInput, Prisma.LocationUpdateWithoutStocktakeFoundInput>, Prisma.LocationUncheckedUpdateWithoutStocktakeFoundInput>
+}
+
+export type LocationCreateNestedOneWithoutStocktakeLinesInput = {
+  create?: Prisma.XOR<Prisma.LocationCreateWithoutStocktakeLinesInput, Prisma.LocationUncheckedCreateWithoutStocktakeLinesInput>
+  connectOrCreate?: Prisma.LocationCreateOrConnectWithoutStocktakeLinesInput
+  connect?: Prisma.LocationWhereUniqueInput
+}
+
+export type LocationUpdateOneRequiredWithoutStocktakeLinesNestedInput = {
+  create?: Prisma.XOR<Prisma.LocationCreateWithoutStocktakeLinesInput, Prisma.LocationUncheckedCreateWithoutStocktakeLinesInput>
+  connectOrCreate?: Prisma.LocationCreateOrConnectWithoutStocktakeLinesInput
+  upsert?: Prisma.LocationUpsertWithoutStocktakeLinesInput
+  connect?: Prisma.LocationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LocationUpdateToOneWithWhereWithoutStocktakeLinesInput, Prisma.LocationUpdateWithoutStocktakeLinesInput>, Prisma.LocationUncheckedUpdateWithoutStocktakeLinesInput>
+}
+
+export type LocationCreateNestedOneWithoutStocktakeCountsInput = {
+  create?: Prisma.XOR<Prisma.LocationCreateWithoutStocktakeCountsInput, Prisma.LocationUncheckedCreateWithoutStocktakeCountsInput>
+  connectOrCreate?: Prisma.LocationCreateOrConnectWithoutStocktakeCountsInput
+  connect?: Prisma.LocationWhereUniqueInput
+}
+
+export type LocationUpdateOneRequiredWithoutStocktakeCountsNestedInput = {
+  create?: Prisma.XOR<Prisma.LocationCreateWithoutStocktakeCountsInput, Prisma.LocationUncheckedCreateWithoutStocktakeCountsInput>
+  connectOrCreate?: Prisma.LocationCreateOrConnectWithoutStocktakeCountsInput
+  upsert?: Prisma.LocationUpsertWithoutStocktakeCountsInput
+  connect?: Prisma.LocationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LocationUpdateToOneWithWhereWithoutStocktakeCountsInput, Prisma.LocationUpdateWithoutStocktakeCountsInput>, Prisma.LocationUncheckedUpdateWithoutStocktakeCountsInput>
+}
+
 export type LocationCreateWithoutOrganizationInput = {
   id?: string
   name: string
@@ -487,6 +575,10 @@ export type LocationCreateWithoutOrganizationInput = {
   address: Prisma.AddressCreateNestedOneWithoutLocationsInput
   assets?: Prisma.AssetCreateNestedManyWithoutLocationInput
   assetBundles?: Prisma.AssetBundleCreateNestedManyWithoutLocationInput
+  stocktakeExpected?: Prisma.StocktakeItemCreateNestedManyWithoutExpectedLocationInput
+  stocktakeFound?: Prisma.StocktakeItemCreateNestedManyWithoutFoundLocationInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutLocationInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutLocationInput
 }
 
 export type LocationUncheckedCreateWithoutOrganizationInput = {
@@ -497,6 +589,10 @@ export type LocationUncheckedCreateWithoutOrganizationInput = {
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutLocationInput
   assetBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutLocationInput
+  stocktakeExpected?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutExpectedLocationInput
+  stocktakeFound?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundLocationInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutLocationInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type LocationCreateOrConnectWithoutOrganizationInput = {
@@ -545,6 +641,10 @@ export type LocationCreateWithoutAddressInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutLocationsInput
   assets?: Prisma.AssetCreateNestedManyWithoutLocationInput
   assetBundles?: Prisma.AssetBundleCreateNestedManyWithoutLocationInput
+  stocktakeExpected?: Prisma.StocktakeItemCreateNestedManyWithoutExpectedLocationInput
+  stocktakeFound?: Prisma.StocktakeItemCreateNestedManyWithoutFoundLocationInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutLocationInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutLocationInput
 }
 
 export type LocationUncheckedCreateWithoutAddressInput = {
@@ -555,6 +655,10 @@ export type LocationUncheckedCreateWithoutAddressInput = {
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutLocationInput
   assetBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutLocationInput
+  stocktakeExpected?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutExpectedLocationInput
+  stocktakeFound?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundLocationInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutLocationInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type LocationCreateOrConnectWithoutAddressInput = {
@@ -591,6 +695,10 @@ export type LocationCreateWithoutAssetsInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutLocationsInput
   address: Prisma.AddressCreateNestedOneWithoutLocationsInput
   assetBundles?: Prisma.AssetBundleCreateNestedManyWithoutLocationInput
+  stocktakeExpected?: Prisma.StocktakeItemCreateNestedManyWithoutExpectedLocationInput
+  stocktakeFound?: Prisma.StocktakeItemCreateNestedManyWithoutFoundLocationInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutLocationInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutLocationInput
 }
 
 export type LocationUncheckedCreateWithoutAssetsInput = {
@@ -601,6 +709,10 @@ export type LocationUncheckedCreateWithoutAssetsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   assetBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutLocationInput
+  stocktakeExpected?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutExpectedLocationInput
+  stocktakeFound?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundLocationInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutLocationInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type LocationCreateOrConnectWithoutAssetsInput = {
@@ -627,6 +739,10 @@ export type LocationUpdateWithoutAssetsInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutLocationsNestedInput
   address?: Prisma.AddressUpdateOneRequiredWithoutLocationsNestedInput
   assetBundles?: Prisma.AssetBundleUpdateManyWithoutLocationNestedInput
+  stocktakeExpected?: Prisma.StocktakeItemUpdateManyWithoutExpectedLocationNestedInput
+  stocktakeFound?: Prisma.StocktakeItemUpdateManyWithoutFoundLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutLocationNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationUncheckedUpdateWithoutAssetsInput = {
@@ -637,6 +753,10 @@ export type LocationUncheckedUpdateWithoutAssetsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assetBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutLocationNestedInput
+  stocktakeExpected?: Prisma.StocktakeItemUncheckedUpdateManyWithoutExpectedLocationNestedInput
+  stocktakeFound?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutLocationNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationCreateWithoutAssetBundlesInput = {
@@ -647,6 +767,10 @@ export type LocationCreateWithoutAssetBundlesInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutLocationsInput
   address: Prisma.AddressCreateNestedOneWithoutLocationsInput
   assets?: Prisma.AssetCreateNestedManyWithoutLocationInput
+  stocktakeExpected?: Prisma.StocktakeItemCreateNestedManyWithoutExpectedLocationInput
+  stocktakeFound?: Prisma.StocktakeItemCreateNestedManyWithoutFoundLocationInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutLocationInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutLocationInput
 }
 
 export type LocationUncheckedCreateWithoutAssetBundlesInput = {
@@ -657,6 +781,10 @@ export type LocationUncheckedCreateWithoutAssetBundlesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutLocationInput
+  stocktakeExpected?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutExpectedLocationInput
+  stocktakeFound?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundLocationInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutLocationInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type LocationCreateOrConnectWithoutAssetBundlesInput = {
@@ -683,6 +811,10 @@ export type LocationUpdateWithoutAssetBundlesInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutLocationsNestedInput
   address?: Prisma.AddressUpdateOneRequiredWithoutLocationsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutLocationNestedInput
+  stocktakeExpected?: Prisma.StocktakeItemUpdateManyWithoutExpectedLocationNestedInput
+  stocktakeFound?: Prisma.StocktakeItemUpdateManyWithoutFoundLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutLocationNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationUncheckedUpdateWithoutAssetBundlesInput = {
@@ -693,6 +825,298 @@ export type LocationUncheckedUpdateWithoutAssetBundlesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutLocationNestedInput
+  stocktakeExpected?: Prisma.StocktakeItemUncheckedUpdateManyWithoutExpectedLocationNestedInput
+  stocktakeFound?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutLocationNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutLocationNestedInput
+}
+
+export type LocationCreateWithoutStocktakeExpectedInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutLocationsInput
+  address: Prisma.AddressCreateNestedOneWithoutLocationsInput
+  assets?: Prisma.AssetCreateNestedManyWithoutLocationInput
+  assetBundles?: Prisma.AssetBundleCreateNestedManyWithoutLocationInput
+  stocktakeFound?: Prisma.StocktakeItemCreateNestedManyWithoutFoundLocationInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutLocationInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutLocationInput
+}
+
+export type LocationUncheckedCreateWithoutStocktakeExpectedInput = {
+  id?: string
+  name: string
+  organizationId: string
+  addressId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutLocationInput
+  assetBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutLocationInput
+  stocktakeFound?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundLocationInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutLocationInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutLocationInput
+}
+
+export type LocationCreateOrConnectWithoutStocktakeExpectedInput = {
+  where: Prisma.LocationWhereUniqueInput
+  create: Prisma.XOR<Prisma.LocationCreateWithoutStocktakeExpectedInput, Prisma.LocationUncheckedCreateWithoutStocktakeExpectedInput>
+}
+
+export type LocationCreateWithoutStocktakeFoundInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutLocationsInput
+  address: Prisma.AddressCreateNestedOneWithoutLocationsInput
+  assets?: Prisma.AssetCreateNestedManyWithoutLocationInput
+  assetBundles?: Prisma.AssetBundleCreateNestedManyWithoutLocationInput
+  stocktakeExpected?: Prisma.StocktakeItemCreateNestedManyWithoutExpectedLocationInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutLocationInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutLocationInput
+}
+
+export type LocationUncheckedCreateWithoutStocktakeFoundInput = {
+  id?: string
+  name: string
+  organizationId: string
+  addressId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutLocationInput
+  assetBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutLocationInput
+  stocktakeExpected?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutExpectedLocationInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutLocationInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutLocationInput
+}
+
+export type LocationCreateOrConnectWithoutStocktakeFoundInput = {
+  where: Prisma.LocationWhereUniqueInput
+  create: Prisma.XOR<Prisma.LocationCreateWithoutStocktakeFoundInput, Prisma.LocationUncheckedCreateWithoutStocktakeFoundInput>
+}
+
+export type LocationUpsertWithoutStocktakeExpectedInput = {
+  update: Prisma.XOR<Prisma.LocationUpdateWithoutStocktakeExpectedInput, Prisma.LocationUncheckedUpdateWithoutStocktakeExpectedInput>
+  create: Prisma.XOR<Prisma.LocationCreateWithoutStocktakeExpectedInput, Prisma.LocationUncheckedCreateWithoutStocktakeExpectedInput>
+  where?: Prisma.LocationWhereInput
+}
+
+export type LocationUpdateToOneWithWhereWithoutStocktakeExpectedInput = {
+  where?: Prisma.LocationWhereInput
+  data: Prisma.XOR<Prisma.LocationUpdateWithoutStocktakeExpectedInput, Prisma.LocationUncheckedUpdateWithoutStocktakeExpectedInput>
+}
+
+export type LocationUpdateWithoutStocktakeExpectedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutLocationsNestedInput
+  address?: Prisma.AddressUpdateOneRequiredWithoutLocationsNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutLocationNestedInput
+  assetBundles?: Prisma.AssetBundleUpdateManyWithoutLocationNestedInput
+  stocktakeFound?: Prisma.StocktakeItemUpdateManyWithoutFoundLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutLocationNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutLocationNestedInput
+}
+
+export type LocationUncheckedUpdateWithoutStocktakeExpectedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  addressId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutLocationNestedInput
+  assetBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutLocationNestedInput
+  stocktakeFound?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutLocationNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutLocationNestedInput
+}
+
+export type LocationUpsertWithoutStocktakeFoundInput = {
+  update: Prisma.XOR<Prisma.LocationUpdateWithoutStocktakeFoundInput, Prisma.LocationUncheckedUpdateWithoutStocktakeFoundInput>
+  create: Prisma.XOR<Prisma.LocationCreateWithoutStocktakeFoundInput, Prisma.LocationUncheckedCreateWithoutStocktakeFoundInput>
+  where?: Prisma.LocationWhereInput
+}
+
+export type LocationUpdateToOneWithWhereWithoutStocktakeFoundInput = {
+  where?: Prisma.LocationWhereInput
+  data: Prisma.XOR<Prisma.LocationUpdateWithoutStocktakeFoundInput, Prisma.LocationUncheckedUpdateWithoutStocktakeFoundInput>
+}
+
+export type LocationUpdateWithoutStocktakeFoundInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutLocationsNestedInput
+  address?: Prisma.AddressUpdateOneRequiredWithoutLocationsNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutLocationNestedInput
+  assetBundles?: Prisma.AssetBundleUpdateManyWithoutLocationNestedInput
+  stocktakeExpected?: Prisma.StocktakeItemUpdateManyWithoutExpectedLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutLocationNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutLocationNestedInput
+}
+
+export type LocationUncheckedUpdateWithoutStocktakeFoundInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  addressId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutLocationNestedInput
+  assetBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutLocationNestedInput
+  stocktakeExpected?: Prisma.StocktakeItemUncheckedUpdateManyWithoutExpectedLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutLocationNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutLocationNestedInput
+}
+
+export type LocationCreateWithoutStocktakeLinesInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutLocationsInput
+  address: Prisma.AddressCreateNestedOneWithoutLocationsInput
+  assets?: Prisma.AssetCreateNestedManyWithoutLocationInput
+  assetBundles?: Prisma.AssetBundleCreateNestedManyWithoutLocationInput
+  stocktakeExpected?: Prisma.StocktakeItemCreateNestedManyWithoutExpectedLocationInput
+  stocktakeFound?: Prisma.StocktakeItemCreateNestedManyWithoutFoundLocationInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutLocationInput
+}
+
+export type LocationUncheckedCreateWithoutStocktakeLinesInput = {
+  id?: string
+  name: string
+  organizationId: string
+  addressId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutLocationInput
+  assetBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutLocationInput
+  stocktakeExpected?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutExpectedLocationInput
+  stocktakeFound?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundLocationInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutLocationInput
+}
+
+export type LocationCreateOrConnectWithoutStocktakeLinesInput = {
+  where: Prisma.LocationWhereUniqueInput
+  create: Prisma.XOR<Prisma.LocationCreateWithoutStocktakeLinesInput, Prisma.LocationUncheckedCreateWithoutStocktakeLinesInput>
+}
+
+export type LocationUpsertWithoutStocktakeLinesInput = {
+  update: Prisma.XOR<Prisma.LocationUpdateWithoutStocktakeLinesInput, Prisma.LocationUncheckedUpdateWithoutStocktakeLinesInput>
+  create: Prisma.XOR<Prisma.LocationCreateWithoutStocktakeLinesInput, Prisma.LocationUncheckedCreateWithoutStocktakeLinesInput>
+  where?: Prisma.LocationWhereInput
+}
+
+export type LocationUpdateToOneWithWhereWithoutStocktakeLinesInput = {
+  where?: Prisma.LocationWhereInput
+  data: Prisma.XOR<Prisma.LocationUpdateWithoutStocktakeLinesInput, Prisma.LocationUncheckedUpdateWithoutStocktakeLinesInput>
+}
+
+export type LocationUpdateWithoutStocktakeLinesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutLocationsNestedInput
+  address?: Prisma.AddressUpdateOneRequiredWithoutLocationsNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutLocationNestedInput
+  assetBundles?: Prisma.AssetBundleUpdateManyWithoutLocationNestedInput
+  stocktakeExpected?: Prisma.StocktakeItemUpdateManyWithoutExpectedLocationNestedInput
+  stocktakeFound?: Prisma.StocktakeItemUpdateManyWithoutFoundLocationNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutLocationNestedInput
+}
+
+export type LocationUncheckedUpdateWithoutStocktakeLinesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  addressId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutLocationNestedInput
+  assetBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutLocationNestedInput
+  stocktakeExpected?: Prisma.StocktakeItemUncheckedUpdateManyWithoutExpectedLocationNestedInput
+  stocktakeFound?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundLocationNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutLocationNestedInput
+}
+
+export type LocationCreateWithoutStocktakeCountsInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutLocationsInput
+  address: Prisma.AddressCreateNestedOneWithoutLocationsInput
+  assets?: Prisma.AssetCreateNestedManyWithoutLocationInput
+  assetBundles?: Prisma.AssetBundleCreateNestedManyWithoutLocationInput
+  stocktakeExpected?: Prisma.StocktakeItemCreateNestedManyWithoutExpectedLocationInput
+  stocktakeFound?: Prisma.StocktakeItemCreateNestedManyWithoutFoundLocationInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutLocationInput
+}
+
+export type LocationUncheckedCreateWithoutStocktakeCountsInput = {
+  id?: string
+  name: string
+  organizationId: string
+  addressId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutLocationInput
+  assetBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutLocationInput
+  stocktakeExpected?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutExpectedLocationInput
+  stocktakeFound?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundLocationInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutLocationInput
+}
+
+export type LocationCreateOrConnectWithoutStocktakeCountsInput = {
+  where: Prisma.LocationWhereUniqueInput
+  create: Prisma.XOR<Prisma.LocationCreateWithoutStocktakeCountsInput, Prisma.LocationUncheckedCreateWithoutStocktakeCountsInput>
+}
+
+export type LocationUpsertWithoutStocktakeCountsInput = {
+  update: Prisma.XOR<Prisma.LocationUpdateWithoutStocktakeCountsInput, Prisma.LocationUncheckedUpdateWithoutStocktakeCountsInput>
+  create: Prisma.XOR<Prisma.LocationCreateWithoutStocktakeCountsInput, Prisma.LocationUncheckedCreateWithoutStocktakeCountsInput>
+  where?: Prisma.LocationWhereInput
+}
+
+export type LocationUpdateToOneWithWhereWithoutStocktakeCountsInput = {
+  where?: Prisma.LocationWhereInput
+  data: Prisma.XOR<Prisma.LocationUpdateWithoutStocktakeCountsInput, Prisma.LocationUncheckedUpdateWithoutStocktakeCountsInput>
+}
+
+export type LocationUpdateWithoutStocktakeCountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutLocationsNestedInput
+  address?: Prisma.AddressUpdateOneRequiredWithoutLocationsNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutLocationNestedInput
+  assetBundles?: Prisma.AssetBundleUpdateManyWithoutLocationNestedInput
+  stocktakeExpected?: Prisma.StocktakeItemUpdateManyWithoutExpectedLocationNestedInput
+  stocktakeFound?: Prisma.StocktakeItemUpdateManyWithoutFoundLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutLocationNestedInput
+}
+
+export type LocationUncheckedUpdateWithoutStocktakeCountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  addressId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutLocationNestedInput
+  assetBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutLocationNestedInput
+  stocktakeExpected?: Prisma.StocktakeItemUncheckedUpdateManyWithoutExpectedLocationNestedInput
+  stocktakeFound?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationCreateManyOrganizationInput = {
@@ -711,6 +1135,10 @@ export type LocationUpdateWithoutOrganizationInput = {
   address?: Prisma.AddressUpdateOneRequiredWithoutLocationsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutLocationNestedInput
   assetBundles?: Prisma.AssetBundleUpdateManyWithoutLocationNestedInput
+  stocktakeExpected?: Prisma.StocktakeItemUpdateManyWithoutExpectedLocationNestedInput
+  stocktakeFound?: Prisma.StocktakeItemUpdateManyWithoutFoundLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutLocationNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationUncheckedUpdateWithoutOrganizationInput = {
@@ -721,6 +1149,10 @@ export type LocationUncheckedUpdateWithoutOrganizationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutLocationNestedInput
   assetBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutLocationNestedInput
+  stocktakeExpected?: Prisma.StocktakeItemUncheckedUpdateManyWithoutExpectedLocationNestedInput
+  stocktakeFound?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutLocationNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationUncheckedUpdateManyWithoutOrganizationInput = {
@@ -747,6 +1179,10 @@ export type LocationUpdateWithoutAddressInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutLocationsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutLocationNestedInput
   assetBundles?: Prisma.AssetBundleUpdateManyWithoutLocationNestedInput
+  stocktakeExpected?: Prisma.StocktakeItemUpdateManyWithoutExpectedLocationNestedInput
+  stocktakeFound?: Prisma.StocktakeItemUpdateManyWithoutFoundLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutLocationNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationUncheckedUpdateWithoutAddressInput = {
@@ -757,6 +1193,10 @@ export type LocationUncheckedUpdateWithoutAddressInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutLocationNestedInput
   assetBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutLocationNestedInput
+  stocktakeExpected?: Prisma.StocktakeItemUncheckedUpdateManyWithoutExpectedLocationNestedInput
+  stocktakeFound?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutLocationNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type LocationUncheckedUpdateManyWithoutAddressInput = {
@@ -775,11 +1215,19 @@ export type LocationUncheckedUpdateManyWithoutAddressInput = {
 export type LocationCountOutputType = {
   assets: number
   assetBundles: number
+  stocktakeExpected: number
+  stocktakeFound: number
+  stocktakeLines: number
+  stocktakeCounts: number
 }
 
 export type LocationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assets?: boolean | LocationCountOutputTypeCountAssetsArgs
   assetBundles?: boolean | LocationCountOutputTypeCountAssetBundlesArgs
+  stocktakeExpected?: boolean | LocationCountOutputTypeCountStocktakeExpectedArgs
+  stocktakeFound?: boolean | LocationCountOutputTypeCountStocktakeFoundArgs
+  stocktakeLines?: boolean | LocationCountOutputTypeCountStocktakeLinesArgs
+  stocktakeCounts?: boolean | LocationCountOutputTypeCountStocktakeCountsArgs
 }
 
 /**
@@ -806,6 +1254,34 @@ export type LocationCountOutputTypeCountAssetBundlesArgs<ExtArgs extends runtime
   where?: Prisma.AssetBundleWhereInput
 }
 
+/**
+ * LocationCountOutputType without action
+ */
+export type LocationCountOutputTypeCountStocktakeExpectedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StocktakeItemWhereInput
+}
+
+/**
+ * LocationCountOutputType without action
+ */
+export type LocationCountOutputTypeCountStocktakeFoundArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StocktakeItemWhereInput
+}
+
+/**
+ * LocationCountOutputType without action
+ */
+export type LocationCountOutputTypeCountStocktakeLinesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StocktakeLineWhereInput
+}
+
+/**
+ * LocationCountOutputType without action
+ */
+export type LocationCountOutputTypeCountStocktakeCountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StocktakeCountWhereInput
+}
+
 
 export type LocationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -818,6 +1294,10 @@ export type LocationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   address?: boolean | Prisma.AddressDefaultArgs<ExtArgs>
   assets?: boolean | Prisma.Location$assetsArgs<ExtArgs>
   assetBundles?: boolean | Prisma.Location$assetBundlesArgs<ExtArgs>
+  stocktakeExpected?: boolean | Prisma.Location$stocktakeExpectedArgs<ExtArgs>
+  stocktakeFound?: boolean | Prisma.Location$stocktakeFoundArgs<ExtArgs>
+  stocktakeLines?: boolean | Prisma.Location$stocktakeLinesArgs<ExtArgs>
+  stocktakeCounts?: boolean | Prisma.Location$stocktakeCountsArgs<ExtArgs>
   _count?: boolean | Prisma.LocationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["location"]>
 
@@ -858,6 +1338,10 @@ export type LocationInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   address?: boolean | Prisma.AddressDefaultArgs<ExtArgs>
   assets?: boolean | Prisma.Location$assetsArgs<ExtArgs>
   assetBundles?: boolean | Prisma.Location$assetBundlesArgs<ExtArgs>
+  stocktakeExpected?: boolean | Prisma.Location$stocktakeExpectedArgs<ExtArgs>
+  stocktakeFound?: boolean | Prisma.Location$stocktakeFoundArgs<ExtArgs>
+  stocktakeLines?: boolean | Prisma.Location$stocktakeLinesArgs<ExtArgs>
+  stocktakeCounts?: boolean | Prisma.Location$stocktakeCountsArgs<ExtArgs>
   _count?: boolean | Prisma.LocationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type LocationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -876,6 +1360,10 @@ export type $LocationPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     address: Prisma.$AddressPayload<ExtArgs>
     assets: Prisma.$AssetPayload<ExtArgs>[]
     assetBundles: Prisma.$AssetBundlePayload<ExtArgs>[]
+    stocktakeExpected: Prisma.$StocktakeItemPayload<ExtArgs>[]
+    stocktakeFound: Prisma.$StocktakeItemPayload<ExtArgs>[]
+    stocktakeLines: Prisma.$StocktakeLinePayload<ExtArgs>[]
+    stocktakeCounts: Prisma.$StocktakeCountPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1282,6 +1770,10 @@ export interface Prisma__LocationClient<T, Null = never, ExtArgs extends runtime
   address<T extends Prisma.AddressDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AddressDefaultArgs<ExtArgs>>): Prisma.Prisma__AddressClient<runtime.Types.Result.GetResult<Prisma.$AddressPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   assets<T extends Prisma.Location$assetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Location$assetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assetBundles<T extends Prisma.Location$assetBundlesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Location$assetBundlesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetBundlePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stocktakeExpected<T extends Prisma.Location$stocktakeExpectedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Location$stocktakeExpectedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StocktakeItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stocktakeFound<T extends Prisma.Location$stocktakeFoundArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Location$stocktakeFoundArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StocktakeItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stocktakeLines<T extends Prisma.Location$stocktakeLinesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Location$stocktakeLinesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StocktakeLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stocktakeCounts<T extends Prisma.Location$stocktakeCountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Location$stocktakeCountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StocktakeCountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1763,6 +2255,102 @@ export type Location$assetBundlesArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.AssetBundleScalarFieldEnum | Prisma.AssetBundleScalarFieldEnum[]
+}
+
+/**
+ * Location.stocktakeExpected
+ */
+export type Location$stocktakeExpectedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StocktakeItem
+   */
+  select?: Prisma.StocktakeItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StocktakeItem
+   */
+  omit?: Prisma.StocktakeItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StocktakeItemInclude<ExtArgs> | null
+  where?: Prisma.StocktakeItemWhereInput
+  orderBy?: Prisma.StocktakeItemOrderByWithRelationInput | Prisma.StocktakeItemOrderByWithRelationInput[]
+  cursor?: Prisma.StocktakeItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StocktakeItemScalarFieldEnum | Prisma.StocktakeItemScalarFieldEnum[]
+}
+
+/**
+ * Location.stocktakeFound
+ */
+export type Location$stocktakeFoundArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StocktakeItem
+   */
+  select?: Prisma.StocktakeItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StocktakeItem
+   */
+  omit?: Prisma.StocktakeItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StocktakeItemInclude<ExtArgs> | null
+  where?: Prisma.StocktakeItemWhereInput
+  orderBy?: Prisma.StocktakeItemOrderByWithRelationInput | Prisma.StocktakeItemOrderByWithRelationInput[]
+  cursor?: Prisma.StocktakeItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StocktakeItemScalarFieldEnum | Prisma.StocktakeItemScalarFieldEnum[]
+}
+
+/**
+ * Location.stocktakeLines
+ */
+export type Location$stocktakeLinesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StocktakeLine
+   */
+  select?: Prisma.StocktakeLineSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StocktakeLine
+   */
+  omit?: Prisma.StocktakeLineOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StocktakeLineInclude<ExtArgs> | null
+  where?: Prisma.StocktakeLineWhereInput
+  orderBy?: Prisma.StocktakeLineOrderByWithRelationInput | Prisma.StocktakeLineOrderByWithRelationInput[]
+  cursor?: Prisma.StocktakeLineWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StocktakeLineScalarFieldEnum | Prisma.StocktakeLineScalarFieldEnum[]
+}
+
+/**
+ * Location.stocktakeCounts
+ */
+export type Location$stocktakeCountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StocktakeCount
+   */
+  select?: Prisma.StocktakeCountSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StocktakeCount
+   */
+  omit?: Prisma.StocktakeCountOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StocktakeCountInclude<ExtArgs> | null
+  where?: Prisma.StocktakeCountWhereInput
+  orderBy?: Prisma.StocktakeCountOrderByWithRelationInput | Prisma.StocktakeCountOrderByWithRelationInput[]
+  cursor?: Prisma.StocktakeCountWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StocktakeCountScalarFieldEnum | Prisma.StocktakeCountScalarFieldEnum[]
 }
 
 /**

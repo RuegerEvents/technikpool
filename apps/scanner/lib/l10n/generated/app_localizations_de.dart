@@ -407,4 +407,213 @@ class SDe extends S {
   @override
   String get errorNoToken =>
       'Der Server hat kein Sitzungs-Token zurückgegeben.';
+
+  @override
+  String get cancel => 'Abbrechen';
+
+  @override
+  String get stocktake => 'Inventur';
+
+  @override
+  String get stocktakeNew => 'Neue Inventur';
+
+  @override
+  String get stocktakeNone => 'Keine Inventur offen.';
+
+  @override
+  String stocktakeProgress(int found, int expected) {
+    return '$found von $expected gezählt';
+  }
+
+  @override
+  String stocktakeOutCount(int count) {
+    return '$count unterwegs';
+  }
+
+  @override
+  String stocktakeUnexpectedCount(int count) {
+    return '$count unerwartet';
+  }
+
+  @override
+  String get stocktakeWhereAreYou => 'Wo zählst du?';
+
+  @override
+  String get stocktakeOrganization => 'Organisation';
+
+  @override
+  String get stocktakeLocations => 'Lagerorte';
+
+  @override
+  String get stocktakeCategories => 'Kategorien';
+
+  @override
+  String get stocktakeNoneMeansAll => 'Keine Auswahl heißt alle.';
+
+  @override
+  String get stocktakeName => 'Name';
+
+  @override
+  String stocktakeDefaultName(String date) {
+    return 'Inventur $date';
+  }
+
+  @override
+  String stocktakePreview(int units, int loose, int out) {
+    return '$units Geräte zu scannen · $loose lose Stück zu zählen · $out unterwegs';
+  }
+
+  @override
+  String stocktakeOverlap(String name, int count) {
+    return 'Überschneidet sich mit der offenen Inventur $name ($count Stück)';
+  }
+
+  @override
+  String get stocktakeStart => 'Inventur starten';
+
+  @override
+  String get stocktakeNoOrgs =>
+      'Um eine Inventur zu starten, brauchst du mindestens die Rolle MEMBER in einer Organisation.';
+
+  @override
+  String get stocktakeTabOpen => 'Offen hier';
+
+  @override
+  String get stocktakeFound => 'Gezählt';
+
+  @override
+  String get stocktakeUnexpected => 'Nicht auf der Liste';
+
+  @override
+  String stocktakeAlready(String name) {
+    return 'Bereits gezählt von $name';
+  }
+
+  @override
+  String stocktakeWasOut(String name) {
+    return 'war ausgebucht auf $name';
+  }
+
+  @override
+  String stocktakeBundle(String name) {
+    return 'Bundle $name';
+  }
+
+  @override
+  String get stocktakeConfirmAccessories => 'Ist alles dabei?';
+
+  @override
+  String get stocktakeConfirmBundle => 'Ist alles drin?';
+
+  @override
+  String get stocktakeConfirmHint => 'Entferne den Haken bei allem, was fehlt.';
+
+  @override
+  String get stocktakeConfirm => 'Bestätigen';
+
+  @override
+  String stocktakeConfirmed(int count) {
+    return '$count bestätigt';
+  }
+
+  @override
+  String stocktakeCountedBy(String name) {
+    return 'gezählt von $name';
+  }
+
+  @override
+  String get stocktakeNothingOpenHere => 'Hier ist nichts mehr offen.';
+
+  @override
+  String get stocktakeLoose => 'Zählen statt scannen';
+
+  @override
+  String stocktakeLooseLine(int expected, int counted) {
+    return '$expected hier erwartet · $counted insgesamt gezählt';
+  }
+
+  @override
+  String get stocktakeYourCount => 'Deine Zählung hier';
+
+  @override
+  String get stocktakeTickHint => 'Tippen, um von Hand zu zählen';
+
+  @override
+  String get stocktakeManualTicked => 'Von Hand gezählt';
+
+  @override
+  String get stocktakeUndo => 'Zählung zurücknehmen';
+
+  @override
+  String get stocktakeUnticked => 'Zählung zurückgenommen';
+
+  @override
+  String get stocktakeNote => 'Notiz';
+
+  @override
+  String get stocktakeNeedsAttention => 'Muss geprüft werden';
+
+  @override
+  String get stocktakeEditNote => 'Notiz und Zustand';
+
+  @override
+  String get stocktakeClose => 'Inventur abschließen';
+
+  @override
+  String stocktakeCloseConfirm(int count) {
+    return '$count noch nicht gezählte Stück werden als fehlend markiert. Das lässt sich nicht rückgängig machen.';
+  }
+
+  @override
+  String get stocktakeClosed =>
+      'Inventur abgeschlossen. Korrekturen wie fehlende Geräte markieren oder gefundene umbuchen werden im Bericht in der Web-App vorgenommen.';
+
+  @override
+  String get stocktakeChangeLocation => 'Ort wechseln';
+
+  @override
+  String get reasonOtherOrg => 'Gehört einer anderen Organisation';
+
+  @override
+  String get reasonRetired => 'Verkauft oder ausgemustert';
+
+  @override
+  String get reasonAddedLater => 'Nach dem Start erfasst';
+
+  @override
+  String get reasonOtherLocation => 'Einem anderen Lagerort zugeordnet';
+
+  @override
+  String get reasonOutOfScope => 'Nicht Teil dieser Inventur';
+
+  @override
+  String get actionStocktakeCounted => 'Inventur';
+
+  @override
+  String get errorStocktakeNotFound => 'Diese Inventur gibt es nicht mehr.';
+
+  @override
+  String get errorStocktakeClosed => 'Diese Inventur ist abgeschlossen.';
+
+  @override
+  String get errorStocktakeNotClosed => 'Schließe die Inventur zuerst ab.';
+
+  @override
+  String get errorStocktakeEmpty => 'Zu dieser Auswahl gibt es keine Geräte.';
+
+  @override
+  String get errorStocktakeNotYourTick =>
+      'Nur wer ein Gerät gezählt hat, kann das ändern.';
+
+  @override
+  String get errorStocktakeNotFoundYet =>
+      'Dieses Gerät wurde noch nicht gezählt.';
+
+  @override
+  String get errorStocktakeProductNotCounted =>
+      'Dieses Produkt wird in dieser Inventur nicht gezählt.';
+
+  @override
+  String get errorStocktakeActionApplied =>
+      'Diese Korrektur wurde bereits angewendet.';
 }

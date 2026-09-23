@@ -1208,6 +1208,23 @@
 														>
 													</span>
 												{/if}
+											{:else if tx?.type === 'STOCKTAKE_COUNTED'}
+												{#if tx.result === 'found'}
+													Found in stocktake
+												{:else if tx.result === 'out'}
+													Out on a production during stocktake
+												{:else}
+													Missing in stocktake
+												{/if}
+												<a
+													href={resolve(`/stocktakes/${tx.stocktakeId}`)}
+													class="text-foreground underline underline-offset-2">{tx.stocktakeName}</a
+												>
+												{#if tx.locationName}
+													<span class="font-normal text-muted-foreground">
+														at <span class="font-medium text-foreground">{tx.locationName}</span>
+													</span>
+												{/if}
 											{:else if tx?.type === 'ACCESSORY_DETACHED'}
 												Detached from
 												<a

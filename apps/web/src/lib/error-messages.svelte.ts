@@ -339,6 +339,25 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 		case 'sticker_config_invalid':
 			return `The sticker sheet could not be generated: ${p0}`;
 
+		// Stocktakes
+		case 'stocktake_not_found':
+			return 'This stocktake does not exist, or it belongs to another organization.';
+		case 'stocktake_closed':
+			return `"${p0}" is closed and takes no more counting.`;
+		case 'stocktake_not_closed':
+			return 'Close the stocktake first.';
+		case 'stocktake_empty':
+			return 'Nothing matches this selection, so there is nothing to count.';
+		case 'stocktake_action_applied':
+			return 'This action has already been applied.';
+		case 'stocktake_not_your_tick':
+			return 'Only whoever counted a unit can change or take back that count.';
+		case 'stocktake_not_found_yet':
+			return 'This unit has not been counted yet.';
+		case 'stocktake_product_not_counted':
+			return 'This product is not counted in this stocktake.';
+		case 'stocktake_invalid_request':
+			return 'That location, count or selection is not valid for this stocktake.';
 		default: {
 			// Exhaustiveness guard — a new code without a message fails to compile here.
 			const unhandled: never = code;

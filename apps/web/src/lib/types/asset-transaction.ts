@@ -97,6 +97,16 @@ export type CredentialsRevealedData = {
 	productionName?: string;
 };
 
+/** Counted in a stocktake: written once per unit when the stocktake closes. */
+export type StocktakeCountedData = {
+	type: 'STOCKTAKE_COUNTED';
+	stocktakeId: string;
+	stocktakeName: string;
+	result: 'found' | 'missing' | 'out';
+	locationId: string | null;
+	locationName: string | null;
+};
+
 export type TransactionData =
 	| CreatedData
 	| UpdatedData
@@ -112,4 +122,5 @@ export type TransactionData =
 	| AccessoryDetachedData
 	| CredentialsSetData
 	| CredentialsRemovedData
-	| CredentialsRevealedData;
+	| CredentialsRevealedData
+	| StocktakeCountedData;

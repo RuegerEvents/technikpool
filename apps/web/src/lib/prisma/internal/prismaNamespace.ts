@@ -433,7 +433,12 @@ export const ModelName = {
   OfferItem: 'OfferItem',
   Invoice: 'Invoice',
   CatalogTransaction: 'CatalogTransaction',
-  InvoiceItem: 'InvoiceItem'
+  InvoiceItem: 'InvoiceItem',
+  Stocktake: 'Stocktake',
+  StocktakeItem: 'StocktakeItem',
+  StocktakeLine: 'StocktakeLine',
+  StocktakeCount: 'StocktakeCount',
+  StocktakeEvent: 'StocktakeEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -449,7 +454,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "invitation" | "manufacturer" | "connector" | "productPort" | "cableWay" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "serviceCategory" | "orgService" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem"
+    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "invitation" | "manufacturer" | "connector" | "productPort" | "cableWay" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "serviceCategory" | "orgService" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem" | "stocktake" | "stocktakeItem" | "stocktakeLine" | "stocktakeCount" | "stocktakeEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3191,6 +3196,376 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Stocktake: {
+      payload: Prisma.$StocktakePayload<ExtArgs>
+      fields: Prisma.StocktakeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StocktakeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StocktakeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakePayload>
+        }
+        findFirst: {
+          args: Prisma.StocktakeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StocktakeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakePayload>
+        }
+        findMany: {
+          args: Prisma.StocktakeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakePayload>[]
+        }
+        create: {
+          args: Prisma.StocktakeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakePayload>
+        }
+        createMany: {
+          args: Prisma.StocktakeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StocktakeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakePayload>[]
+        }
+        delete: {
+          args: Prisma.StocktakeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakePayload>
+        }
+        update: {
+          args: Prisma.StocktakeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakePayload>
+        }
+        deleteMany: {
+          args: Prisma.StocktakeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StocktakeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StocktakeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakePayload>[]
+        }
+        upsert: {
+          args: Prisma.StocktakeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakePayload>
+        }
+        aggregate: {
+          args: Prisma.StocktakeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStocktake>
+        }
+        groupBy: {
+          args: Prisma.StocktakeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StocktakeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StocktakeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StocktakeCountAggregateOutputType> | number
+        }
+      }
+    }
+    StocktakeItem: {
+      payload: Prisma.$StocktakeItemPayload<ExtArgs>
+      fields: Prisma.StocktakeItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StocktakeItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StocktakeItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeItemPayload>
+        }
+        findFirst: {
+          args: Prisma.StocktakeItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StocktakeItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeItemPayload>
+        }
+        findMany: {
+          args: Prisma.StocktakeItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeItemPayload>[]
+        }
+        create: {
+          args: Prisma.StocktakeItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeItemPayload>
+        }
+        createMany: {
+          args: Prisma.StocktakeItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StocktakeItemCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeItemPayload>[]
+        }
+        delete: {
+          args: Prisma.StocktakeItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeItemPayload>
+        }
+        update: {
+          args: Prisma.StocktakeItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.StocktakeItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StocktakeItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StocktakeItemUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeItemPayload>[]
+        }
+        upsert: {
+          args: Prisma.StocktakeItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeItemPayload>
+        }
+        aggregate: {
+          args: Prisma.StocktakeItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStocktakeItem>
+        }
+        groupBy: {
+          args: Prisma.StocktakeItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StocktakeItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StocktakeItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StocktakeItemCountAggregateOutputType> | number
+        }
+      }
+    }
+    StocktakeLine: {
+      payload: Prisma.$StocktakeLinePayload<ExtArgs>
+      fields: Prisma.StocktakeLineFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StocktakeLineFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeLinePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StocktakeLineFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeLinePayload>
+        }
+        findFirst: {
+          args: Prisma.StocktakeLineFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeLinePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StocktakeLineFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeLinePayload>
+        }
+        findMany: {
+          args: Prisma.StocktakeLineFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeLinePayload>[]
+        }
+        create: {
+          args: Prisma.StocktakeLineCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeLinePayload>
+        }
+        createMany: {
+          args: Prisma.StocktakeLineCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StocktakeLineCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeLinePayload>[]
+        }
+        delete: {
+          args: Prisma.StocktakeLineDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeLinePayload>
+        }
+        update: {
+          args: Prisma.StocktakeLineUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeLinePayload>
+        }
+        deleteMany: {
+          args: Prisma.StocktakeLineDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StocktakeLineUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StocktakeLineUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeLinePayload>[]
+        }
+        upsert: {
+          args: Prisma.StocktakeLineUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeLinePayload>
+        }
+        aggregate: {
+          args: Prisma.StocktakeLineAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStocktakeLine>
+        }
+        groupBy: {
+          args: Prisma.StocktakeLineGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StocktakeLineGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StocktakeLineCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StocktakeLineCountAggregateOutputType> | number
+        }
+      }
+    }
+    StocktakeCount: {
+      payload: Prisma.$StocktakeCountPayload<ExtArgs>
+      fields: Prisma.StocktakeCountFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StocktakeCountFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeCountPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StocktakeCountFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeCountPayload>
+        }
+        findFirst: {
+          args: Prisma.StocktakeCountFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeCountPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StocktakeCountFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeCountPayload>
+        }
+        findMany: {
+          args: Prisma.StocktakeCountFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeCountPayload>[]
+        }
+        create: {
+          args: Prisma.StocktakeCountCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeCountPayload>
+        }
+        createMany: {
+          args: Prisma.StocktakeCountCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StocktakeCountCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeCountPayload>[]
+        }
+        delete: {
+          args: Prisma.StocktakeCountDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeCountPayload>
+        }
+        update: {
+          args: Prisma.StocktakeCountUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeCountPayload>
+        }
+        deleteMany: {
+          args: Prisma.StocktakeCountDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StocktakeCountUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StocktakeCountUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeCountPayload>[]
+        }
+        upsert: {
+          args: Prisma.StocktakeCountUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeCountPayload>
+        }
+        aggregate: {
+          args: Prisma.StocktakeCountAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStocktakeCount>
+        }
+        groupBy: {
+          args: Prisma.StocktakeCountGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StocktakeCountGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StocktakeCountCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StocktakeCountCountAggregateOutputType> | number
+        }
+      }
+    }
+    StocktakeEvent: {
+      payload: Prisma.$StocktakeEventPayload<ExtArgs>
+      fields: Prisma.StocktakeEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StocktakeEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StocktakeEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeEventPayload>
+        }
+        findFirst: {
+          args: Prisma.StocktakeEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StocktakeEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeEventPayload>
+        }
+        findMany: {
+          args: Prisma.StocktakeEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeEventPayload>[]
+        }
+        create: {
+          args: Prisma.StocktakeEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeEventPayload>
+        }
+        createMany: {
+          args: Prisma.StocktakeEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StocktakeEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeEventPayload>[]
+        }
+        delete: {
+          args: Prisma.StocktakeEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeEventPayload>
+        }
+        update: {
+          args: Prisma.StocktakeEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.StocktakeEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StocktakeEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StocktakeEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.StocktakeEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StocktakeEventPayload>
+        }
+        aggregate: {
+          args: Prisma.StocktakeEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStocktakeEvent>
+        }
+        groupBy: {
+          args: Prisma.StocktakeEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StocktakeEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StocktakeEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StocktakeEventCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3870,6 +4245,84 @@ export const InvoiceItemScalarFieldEnum = {
 export type InvoiceItemScalarFieldEnum = (typeof InvoiceItemScalarFieldEnum)[keyof typeof InvoiceItemScalarFieldEnum]
 
 
+export const StocktakeScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  name: 'name',
+  status: 'status',
+  scope: 'scope',
+  recountOfId: 'recountOfId',
+  appliedActions: 'appliedActions',
+  createdById: 'createdById',
+  closedById: 'closedById',
+  closedAt: 'closedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StocktakeScalarFieldEnum = (typeof StocktakeScalarFieldEnum)[keyof typeof StocktakeScalarFieldEnum]
+
+
+export const StocktakeItemScalarFieldEnum = {
+  id: 'id',
+  stocktakeId: 'stocktakeId',
+  assetId: 'assetId',
+  expected: 'expected',
+  expectedLocationId: 'expectedLocationId',
+  outProductionId: 'outProductionId',
+  outProductionName: 'outProductionName',
+  unexpectedReason: 'unexpectedReason',
+  foundAt: 'foundAt',
+  foundById: 'foundById',
+  foundLocationId: 'foundLocationId',
+  foundVia: 'foundVia',
+  note: 'note',
+  needsAttention: 'needsAttention'
+} as const
+
+export type StocktakeItemScalarFieldEnum = (typeof StocktakeItemScalarFieldEnum)[keyof typeof StocktakeItemScalarFieldEnum]
+
+
+export const StocktakeLineScalarFieldEnum = {
+  id: 'id',
+  stocktakeId: 'stocktakeId',
+  productId: 'productId',
+  locationId: 'locationId',
+  expected: 'expected',
+  out: 'out'
+} as const
+
+export type StocktakeLineScalarFieldEnum = (typeof StocktakeLineScalarFieldEnum)[keyof typeof StocktakeLineScalarFieldEnum]
+
+
+export const StocktakeCountScalarFieldEnum = {
+  id: 'id',
+  stocktakeId: 'stocktakeId',
+  productId: 'productId',
+  locationId: 'locationId',
+  userId: 'userId',
+  count: 'count',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StocktakeCountScalarFieldEnum = (typeof StocktakeCountScalarFieldEnum)[keyof typeof StocktakeCountScalarFieldEnum]
+
+
+export const StocktakeEventScalarFieldEnum = {
+  id: 'id',
+  stocktakeId: 'stocktakeId',
+  userId: 'userId',
+  action: 'action',
+  assetId: 'assetId',
+  productId: 'productId',
+  locationId: 'locationId',
+  data: 'data',
+  createdAt: 'createdAt'
+} as const
+
+export type StocktakeEventScalarFieldEnum = (typeof StocktakeEventScalarFieldEnum)[keyof typeof StocktakeEventScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -3884,6 +4337,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -4209,6 +4669,11 @@ export type GlobalOmitConfig = {
   invoice?: Prisma.InvoiceOmit
   catalogTransaction?: Prisma.CatalogTransactionOmit
   invoiceItem?: Prisma.InvoiceItemOmit
+  stocktake?: Prisma.StocktakeOmit
+  stocktakeItem?: Prisma.StocktakeItemOmit
+  stocktakeLine?: Prisma.StocktakeLineOmit
+  stocktakeCount?: Prisma.StocktakeCountOmit
+  stocktakeEvent?: Prisma.StocktakeEventOmit
 }
 
 /* Types for Logging */

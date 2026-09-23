@@ -122,6 +122,7 @@ msgstr "Keine Geräte gefunden."
 #: src/routes/checkout/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/products/[id]/product-detail.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Product"
 msgstr "Produkt"
 
@@ -139,6 +140,7 @@ msgstr "S/N"
 #: src/routes/inspections/+page.svelte
 #: src/routes/invoices/+page.svelte
 #: src/routes/offers/+page.svelte
+#: src/routes/stocktakes/+page.svelte
 msgid "Org"
 msgstr "Org"
 
@@ -224,6 +226,9 @@ msgstr "Crew"
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/new/+page.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Cancel"
 msgstr "Abbrechen"
 
@@ -278,6 +283,8 @@ msgstr "Noch keine Crewmitglieder hinzugefügt."
 #: src/routes/productions/+page.svelte
 #: src/routes/profile/+page.svelte
 #: src/routes/profile/+page.svelte
+#: src/routes/stocktakes/+page.svelte
+#: src/routes/stocktakes/new/+page.svelte
 msgid "Name"
 msgstr "Name"
 
@@ -298,6 +305,7 @@ msgstr "E-Mail"
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/stocktakes/new/+page.svelte
 msgid "Remove"
 msgstr "Entfernen"
 
@@ -448,6 +456,7 @@ msgstr "Bundle"
 #: src/routes/products/[id]/product-detail.svelte
 #: src/routes/stickers/+page.svelte
 #: src/routes/stickers/+page.svelte
+#: src/routes/stocktakes/new/+page.svelte
 msgid "Organization"
 msgstr "Organisation"
 
@@ -521,8 +530,9 @@ msgstr "Defekt"
 #~ msgid "Product catalog — equipment models and their stock levels."
 #~ msgstr "Produktkatalog – Gerätemodelle und deren Lagerbestand."
 
-#~ msgid "Search products…"
-#~ msgstr "Produkte suchen…"
+#: src/routes/stocktakes/new/+page.svelte
+msgid "Search products…"
+msgstr "Produkte suchen…"
 
 #~ msgid "No products in inventory"
 #~ msgstr "Keine Produkte im Inventar"
@@ -737,6 +747,7 @@ msgstr "<0/> Nach dem Speichern weiteres erstellen"
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/products/+page.svelte
 #: src/routes/profile/+page.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Saving…"
 msgstr "Wird gespeichert…"
 
@@ -901,6 +912,7 @@ msgstr "Zugehörige Organisation"
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 #: src/lib/components/ui/data-view/DataView.svelte
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Search…"
 msgstr "Suchen…"
 
@@ -1054,6 +1066,7 @@ msgstr "Noch keine Geräte in diesem Bundle. Klicken Sie auf „Geräte hinzufü
 #: src/routes/productions/[id]/crew-passes/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Print"
 msgstr "Drucken"
 
@@ -1318,6 +1331,7 @@ msgstr "Bearbeiten"
 #: src/routes/inspections/+page.svelte
 #: src/routes/inspections/+page.svelte
 #: src/routes/products/[id]/product-detail.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Location"
 msgstr "Standort"
 
@@ -1351,6 +1365,7 @@ msgstr "Standort"
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/products/+page.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Save"
 msgstr "Speichern"
 
@@ -1422,6 +1437,7 @@ msgstr "Adresse aktualisiert"
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
+#: src/routes/stocktakes/new/+page.svelte
 msgid "Locations"
 msgstr "Standorte"
 
@@ -1509,11 +1525,13 @@ msgstr "Gerätebundles | Technikpool"
 #. 0: org?.name ?? ''
 #. 0: production.name
 #. 0: product?.name ?? 'Product'
+#. 0: stocktake.name
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/products/[id]/product-detail.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "{0} | Technikpool"
 msgstr "{0} | Technikpool"
 
@@ -1874,6 +1892,7 @@ msgstr "Alle Kategorien"
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Category"
 msgstr "Kategorie"
 
@@ -2058,6 +2077,7 @@ msgid "Please map all category values: {0}"
 msgstr "Bitte alle Kategoriewerte zuordnen: {0}"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Skip"
 msgstr "Überspringen"
 
@@ -3247,10 +3267,14 @@ msgstr "{0} Geräte gebucht"
 
 #: src/routes/admin/categories/+page.svelte
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
+#: src/routes/stocktakes/new/+page.svelte
 msgid "Categories"
 msgstr "Kategorien"
 
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
+#: src/routes/stocktakes/[id]/print/+page.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "All categories"
 msgstr "Alle Kategorien"
 
@@ -4155,8 +4179,9 @@ msgstr "Trennen"
 #~ msgid "Removing the background…"
 #~ msgstr "Hintergrund wird entfernt…"
 
-#~ msgid "Starting…"
-#~ msgstr "Wird gestartet…"
+#: src/routes/stocktakes/new/+page.svelte
+msgid "Starting…"
+msgstr "Wird gestartet…"
 
 #~ msgid "No image yet — add one with Edit."
 #~ msgstr "Noch kein Bild — über Bearbeiten hinzufügen."
@@ -4289,6 +4314,7 @@ msgid "Applying…"
 msgstr "Wird übernommen…"
 
 #: src/lib/components/ui/bulk-actions-bar.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Apply"
 msgstr "Übernehmen"
 
@@ -4307,6 +4333,7 @@ msgstr "Sie verlassen den Pool: nicht mehr buchbar, scanbar oder gelistet und au
 
 #: src/routes/admin/connectors/+page.svelte
 #: src/routes/products/+page.svelte
+#: src/routes/stocktakes/new/+page.svelte
 msgid "Products"
 msgstr "Produkte"
 
@@ -7485,6 +7512,9 @@ msgstr "Benutzername"
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Note"
 msgstr "Notiz"
 
@@ -8948,6 +8978,7 @@ msgid "<0/> Action Required"
 msgstr "<0/> Handlungsbedarf"
 
 #: src/routes/+page.svelte
+#: src/routes/+page.svelte
 msgid "View all <0/>"
 msgstr "Alle anzeigen <0/>"
 
@@ -9496,3 +9527,586 @@ msgstr "Angebot öffnen"
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "New offer"
 msgstr "Neues Angebot"
+
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+msgid "<0/> Stocktakes"
+msgstr "<0/> Inventuren"
+
+#: src/lib/error-messages.svelte.ts
+msgid "This stocktake does not exist, or it belongs to another organization."
+msgstr "Diese Inventur gibt es nicht, oder sie gehört zu einer anderen Organisation."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Close the stocktake first."
+msgstr "Schließe zuerst die Inventur ab."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Nothing matches this selection, so there is nothing to count."
+msgstr "Auf diese Auswahl passt nichts, es gibt also nichts zu zählen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This action has already been applied."
+msgstr "Diese Aktion wurde bereits ausgeführt."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Only whoever counted a unit can change or take back that count."
+msgstr "Nur wer ein Gerät gezählt hat, kann diese Zählung ändern oder zurücknehmen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This unit has not been counted yet."
+msgstr "Dieses Gerät wurde noch nicht gezählt."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This product is not counted in this stocktake."
+msgstr "Dieses Produkt wird in dieser Inventur nicht gezählt."
+
+#: src/lib/error-messages.svelte.ts
+msgid "That location, count or selection is not valid for this stocktake."
+msgstr "Dieser Standort, diese Anzahl oder diese Auswahl passt nicht zu dieser Inventur."
+
+#. 0: result.bundle.name
+#. 0: result.bundle.name
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Bundle {0}"
+msgstr "Bundle {0}"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "You counted this already"
+msgstr "Das hast du bereits gezählt"
+
+#. 0: result.foundByName
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Already counted by {0}"
+msgstr "Bereits gezählt von {0}"
+
+#. 0: name
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Unexpected: {0}"
+msgstr "Unerwartet: {0}"
+
+#. 0: name
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Found: {0}"
+msgstr "Gefunden: {0}"
+
+#. 0: result.wasOutAt
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Was checked out to {0}"
+msgstr "War ausgebucht auf {0}"
+
+#. 0: name
+#. 0: item.asset.product.name
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Accessories of {0}"
+msgstr "Zubehör von {0}"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Choose where you are counting first."
+msgstr "Wähle zuerst, wo du zählst."
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Stocktake closed"
+msgstr "Inventur abgeschlossen"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Mark missing units unavailable"
+msgstr "Fehlende Geräte als nicht verfügbar markieren"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "They stay in the pool but can no longer be booked until they turn up."
+msgstr "Sie bleiben im Bestand, können aber nicht mehr gebucht werden, bis sie wieder auftauchen."
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Make found units available again"
+msgstr "Gefundene Geräte wieder verfügbar machen"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Units marked unavailable that were counted after all."
+msgstr "Als nicht verfügbar markierte Geräte, die doch gezählt wurden."
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Move units to where they were found"
+msgstr "Geräte an den Fundort umbuchen"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Units counted at a different location than they are booked to."
+msgstr "Geräte, die an einem anderen Standort gezählt wurden, als sie gebucht sind."
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Set flagged units to maintenance"
+msgstr "Markierte Geräte auf Wartung setzen"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Units a counter marked as needing attention."
+msgstr "Geräte, die beim Zählen als prüfbedürftig markiert wurden."
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Set flagged units to broken"
+msgstr "Markierte Geräte auf defekt setzen"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "The same units, if they are beyond maintenance."
+msgstr "Dieselben Geräte, falls Wartung nicht mehr hilft."
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "# unit changed"
+msgid_plural "# units changed"
+msgstr[0] "# Gerät geändert"
+msgstr[1] "# Geräte geändert"
+
+#. 0: formatDateTime(stocktake.closedAt); 1: stocktake.closedBy?.name || stocktake.closedBy?.email
+#. 0: formatDateTime(stocktake.closedAt); 1: stocktake.closedBy?.name || stocktake.closedBy?.email
+#: src/routes/stocktakes/[id]/print/+page.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "· Closed {0} by {1}"
+msgstr "· Abgeschlossen {0} von {1}"
+
+#. 0: formatDate(s.createdAt); 1: s.createdBy.name || s.createdBy.email
+#. 0: formatDateTime(stocktake.createdAt); 1: stocktake.createdBy.name || stocktake.createdBy.email
+#: src/routes/stocktakes/+page.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Started {0} by {1}"
+msgstr "Gestartet {0} von {1}"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Recount of <0/>"
+msgstr "Nachzählung von <0/>"
+
+#: src/routes/stocktakes/[id]/print/+page.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "All locations"
+msgstr "Alle Standorte"
+
+#: src/routes/+page.svelte
+#: src/routes/stocktakes/+page.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+#: src/routes/stocktakes/new/+page.svelte
+msgid "Stocktakes"
+msgstr "Inventuren"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Close stocktake"
+msgstr "Inventur abschließen"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Recount missing"
+msgstr "Fehlende nachzählen"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "CSV"
+msgstr "CSV"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Recounted in <0/>"
+msgstr "Nachgezählt in <0/>"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Choose a location…"
+msgstr "Standort wählen…"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "I am counting at"
+msgstr "Ich zähle in"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Asset tag, bundle tag or serial number"
+msgstr "Asset-Tag, Bundle-Tag oder Seriennummer"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Scan or type a tag"
+msgstr "Tag scannen oder eintippen"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Corrections"
+msgstr "Korrekturen"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Each can be applied once. Worked out from the units as they are now, so anything that has moved or been retired since the count is left alone."
+msgstr "Jede lässt sich einmal ausführen. Maßgeblich ist der aktuelle Stand der Geräte – was seit der Zählung bewegt oder ausgemustert wurde, bleibt unberührt."
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Applied"
+msgstr "Ausgeführt"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Apply to # unit"
+msgid_plural "Apply to # units"
+msgstr[0] "Auf # Gerät anwenden"
+msgstr[1] "Auf # Geräte anwenden"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "State"
+msgstr "Stand"
+
+#. 0: counts.open
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Not counted yet ({0})"
+msgstr "Noch nicht gezählt ({0})"
+
+#. 0: counts.missing
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Missing ({0})"
+msgstr "Fehlend ({0})"
+
+#. 0: stocktake.items.length
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "All ({0})"
+msgstr "Alle ({0})"
+
+#. 0: counts.found
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Found ({0})"
+msgstr "Gefunden ({0})"
+
+#. 0: counts.out
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Out on a production ({0})"
+msgstr "Auf einer Produktion ({0})"
+
+#. 0: counts.unexpected
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Unexpected ({0})"
+msgstr "Unerwartet ({0})"
+
+#. 0: attentionCount
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Needs attention ({0})"
+msgstr "Prüfbedürftig ({0})"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "My count"
+msgstr "Meine Anzahl"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Where"
+msgstr "Wo"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Counted"
+msgstr "Gezählt"
+
+#. 0: l.out
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "· {0} out"
+msgstr "· {0} unterwegs"
+
+#: src/routes/stocktakes/[id]/print/+page.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Untagged units"
+msgstr "Geräte ohne Tag"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Counted per product. Everyone enters what they counted where they are; the counts add up."
+msgstr "Pro Produkt gezählt. Jede:r trägt ein, was er oder sie am eigenen Standort gezählt hat; die Zahlen werden addiert."
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Nothing matches these filters."
+msgstr "Nichts passt zu diesen Filtern."
+
+#. 0: counters.join(', ')
+#. 0: item.foundBy?.name || item.foundBy?.email
+#: src/routes/stocktakes/[id]/print/+page.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Counted by {0}"
+msgstr "Gezählt von {0}"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "No tag"
+msgstr "Kein Tag"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "· Accessory"
+msgstr "· Zubehör"
+
+#. 0: item.outProductionName
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "· Was checked out to {0}"
+msgstr "· War ausgebucht auf {0}"
+
+#. 0: item.expectedLocation?.name
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "<0/> Booked to {0}"
+msgstr "<0/> Gebucht auf {0}"
+
+#: src/routes/stocktakes/[id]/print/+page.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Needs attention"
+msgstr "Prüfbedürftig"
+
+#. 0: entry.foundByName
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "· Counted by {0}"
+msgstr "· Gezählt von {0}"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Uncheck anything that is not there."
+msgstr "Entferne den Haken bei allem, was nicht da ist."
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Count # unit"
+msgid_plural "Count # units"
+msgstr[0] "# Gerät zählen"
+msgstr[1] "# Geräte zählen"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "<0/> Needs attention"
+msgstr "<0/> Prüfbedürftig"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Close this stocktake?"
+msgstr "Diese Inventur abschließen?"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "# unit has not been counted and will be reported missing."
+msgid_plural "# units have not been counted and will be reported missing."
+msgstr[0] "# Gerät wurde nicht gezählt und wird als fehlend gemeldet."
+msgstr[1] "# Geräte wurden nicht gezählt und werden als fehlend gemeldet."
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Every unit has been counted."
+msgstr "Alle Geräte wurden gezählt."
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Closing is final: nobody can count into it any more. Corrections such as marking missing units unavailable are offered on the report afterwards."
+msgstr "Das Abschließen ist endgültig: Danach kann niemand mehr hineinzählen. Korrekturen wie das Markieren fehlender Geräte als nicht verfügbar werden anschließend im Bericht angeboten."
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Keep counting"
+msgstr "Weiterzählen"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Cancel this stocktake?"
+msgstr "Diese Inventur abbrechen?"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "It is deleted together with everything counted so far. Nothing is written into the history of any unit."
+msgstr "Sie wird mit allem bisher Gezählten gelöscht. In der Historie der Geräte wird nichts vermerkt."
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Keep it"
+msgstr "Behalten"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Delete stocktake"
+msgstr "Inventur löschen"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "This changes # unit."
+msgid_plural "This changes # units."
+msgstr[0] "Das ändert # Gerät."
+msgstr[1] "Das ändert # Geräte."
+
+#. 0: progress.out
+#: src/lib/components/stocktake-progress.svelte
+msgid "{0} out ·"
+msgstr "{0} unterwegs ·"
+
+#. 0: progress.unexpected
+#: src/lib/components/stocktake-progress.svelte
+msgid "{0} unexpected ·"
+msgstr "{0} unerwartet ·"
+
+#: src/lib/stocktake-labels.svelte.ts
+#: src/routes/stocktakes/[id]/print/+page.svelte
+msgid "Not counted yet"
+msgstr "Noch nicht gezählt"
+
+#: src/lib/stocktake-labels.svelte.ts
+#: src/routes/stocktakes/+page.svelte
+#: src/routes/stocktakes/[id]/print/+page.svelte
+msgid "Found"
+msgstr "Gefunden"
+
+#: src/lib/stocktake-labels.svelte.ts
+msgid "Out on a production"
+msgstr "Auf einer Produktion"
+
+#: src/lib/stocktake-labels.svelte.ts
+#: src/routes/stocktakes/+page.svelte
+#: src/routes/stocktakes/[id]/print/+page.svelte
+msgid "Missing"
+msgstr "Fehlt"
+
+#: src/lib/stocktake-labels.svelte.ts
+#: src/routes/stocktakes/[id]/print/+page.svelte
+msgid "Unexpected"
+msgstr "Unerwartet"
+
+#: src/lib/stocktake-labels.svelte.ts
+msgid "Belongs to another organization"
+msgstr "Gehört einer anderen Organisation"
+
+#: src/lib/stocktake-labels.svelte.ts
+msgid "Sold or decommissioned"
+msgstr "Verkauft oder ausgemustert"
+
+#: src/lib/stocktake-labels.svelte.ts
+msgid "Registered after the stocktake started"
+msgstr "Nach Beginn der Inventur angelegt"
+
+#: src/lib/stocktake-labels.svelte.ts
+msgid "Booked to a location outside this stocktake"
+msgstr "Auf einen Standort außerhalb dieser Inventur gebucht"
+
+#: src/lib/stocktake-labels.svelte.ts
+msgid "Not part of this stocktake"
+msgstr "Nicht Teil dieser Inventur"
+
+#: src/lib/stocktake-labels.svelte.ts
+msgid "Not on the list"
+msgstr "Nicht auf der Liste"
+
+#: src/lib/stocktake-labels.svelte.ts
+msgid "Scanned"
+msgstr "Gescannt"
+
+#: src/lib/stocktake-labels.svelte.ts
+msgid "Ticked by hand"
+msgstr "Von Hand abgehakt"
+
+#: src/lib/stocktake-labels.svelte.ts
+msgid "Confirmed with its parent unit"
+msgstr "Mit dem Hauptgerät bestätigt"
+
+#: src/lib/stocktake-labels.svelte.ts
+msgid "Confirmed with its bundle"
+msgstr "Mit dem Bundle bestätigt"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Found in stocktake"
+msgstr "Gefunden in Inventur"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Out on a production during stocktake"
+msgstr "Während der Inventur auf einer Produktion"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Missing in stocktake"
+msgstr "Fehlte in Inventur"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "at <0/>"
+msgstr "in <0/>"
+
+#: src/routes/stocktakes/+page.svelte
+msgid "Stocktakes | Technikpool"
+msgstr "Inventuren | Technikpool"
+
+#: src/routes/stocktakes/+page.svelte
+msgid "Count what is actually on the shelves — over several days and devices if need be."
+msgstr "Zählen, was wirklich im Lager ist – wenn nötig über mehrere Tage und Geräte hinweg."
+
+#: src/routes/stocktakes/+page.svelte
+#: src/routes/stocktakes/new/+page.svelte
+msgid "New stocktake"
+msgstr "Neue Inventur"
+
+#: src/routes/stocktakes/+page.svelte
+msgid "No stocktakes yet. Start one to count a location, a department or everything."
+msgstr "Noch keine Inventuren. Starte eine, um einen Standort, eine Abteilung oder alles zu zählen."
+
+#: src/routes/stocktakes/+page.svelte
+msgid "Nothing being counted right now."
+msgstr "Gerade wird nichts gezählt."
+
+#. 0: open.length
+#: src/routes/stocktakes/+page.svelte
+msgid "Open ({0})"
+msgstr "Offen ({0})"
+
+#: src/routes/stocktakes/+page.svelte
+msgid "Closed"
+msgstr "Abgeschlossen"
+
+#. 0: closed.length
+#: src/routes/stocktakes/+page.svelte
+msgid "Closed ({0})"
+msgstr "Abgeschlossen ({0})"
+
+#. 0: date; 1: places
+#: src/routes/stocktakes/new/+page.svelte
+msgid "Stocktake {0} – {1}"
+msgstr "Inventur {0} – {1}"
+
+#. 0: date
+#: src/routes/stocktakes/new/+page.svelte
+msgid "Stocktake {0}"
+msgstr "Inventur {0}"
+
+#: src/routes/stocktakes/new/+page.svelte
+msgid "New stocktake | Technikpool"
+msgstr "Neue Inventur | Technikpool"
+
+#: src/routes/stocktakes/new/+page.svelte
+msgid "Choose what to count. Everything that matches is noted down now, so the list stays the same however long the count takes."
+msgstr "Wähle, was gezählt wird. Alles Passende wird jetzt festgehalten – die Liste bleibt gleich, egal wie lange das Zählen dauert."
+
+#: src/routes/stocktakes/new/+page.svelte
+msgid "You need to be a member of an organization to count its equipment."
+msgstr "Du musst Mitglied einer Organisation sein, um ihr Material zu zählen."
+
+#: src/routes/stocktakes/new/+page.svelte
+msgid "None selected counts every location."
+msgstr "Ohne Auswahl werden alle Standorte gezählt."
+
+#: src/routes/stocktakes/new/+page.svelte
+msgid "None selected counts every category."
+msgstr "Ohne Auswahl werden alle Kategorien gezählt."
+
+#: src/routes/stocktakes/new/+page.svelte
+msgid "Optional: only these products. None selected counts every product."
+msgstr "Optional: nur diese Produkte. Ohne Auswahl werden alle Produkte gezählt."
+
+#: src/routes/stocktakes/new/+page.svelte
+msgid "units to scan or tick"
+msgstr "Geräte zum Scannen oder Abhaken"
+
+#: src/routes/stocktakes/new/+page.svelte
+msgid "untagged units to count"
+msgstr "Geräte ohne Tag zum Zählen"
+
+#: src/routes/stocktakes/new/+page.svelte
+msgid "out on productions"
+msgstr "auf Produktionen unterwegs"
+
+#. 0: overlap.sharedUnits
+#: src/routes/stocktakes/new/+page.svelte
+msgid "Overlaps with the open stocktake <0/> ({0} units). A scan only counts in the stocktake it is made in."
+msgstr "Überschneidet sich mit der offenen Inventur <0/> ({0} Geräte). Ein Scan zählt nur in der Inventur, in der er gemacht wird."
+
+#: src/routes/stocktakes/new/+page.svelte
+msgid "Start stocktake"
+msgstr "Inventur starten"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Count it"
+msgstr "Zählen"
+
+#: src/routes/stocktakes/[id]/print/+page.svelte
+msgid "· Still open"
+msgstr "· Noch offen"
+
+#. 0: formatDateTime(stocktake.createdAt); 1: stocktake.createdBy.name || stocktake.createdBy.email
+#: src/routes/stocktakes/[id]/print/+page.svelte
+msgid "Started {0} by {1} <0/>"
+msgstr "Gestartet {0} von {1} <0/>"
+
+#: src/routes/stocktakes/[id]/print/+page.svelte
+msgid "Out on productions"
+msgstr "Auf Produktionen unterwegs"
+
+#: src/routes/stocktakes/[id]/print/+page.svelte
+#: src/routes/stocktakes/[id]/print/+page.svelte
+msgid "Date, signature"
+msgstr "Datum, Unterschrift"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Case cracked, cable frayed…"
+msgstr "Case gerissen, Kabel ausgefranst…"

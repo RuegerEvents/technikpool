@@ -28,6 +28,9 @@ abstract final class _N {
 /// Material's ColorScheme carries `error` but has nothing meaning "this went
 /// through", and a scan session is mostly a list of exactly that. The values
 /// are the Tailwind greens the web uses for the same job.
+///
+/// [warning] is the one other status: "went through, but not as expected" — a
+/// stocktake scan of a unit that is not on the list. Amber, like the web.
 @immutable
 class StatusColors extends ThemeExtension<StatusColors> {
   const StatusColors({
@@ -35,18 +38,21 @@ class StatusColors extends ThemeExtension<StatusColors> {
     required this.onSuccess,
     required this.successContainer,
     required this.onSuccessContainer,
+    required this.warning,
   });
 
   final Color success;
   final Color onSuccess;
   final Color successContainer;
   final Color onSuccessContainer;
+  final Color warning;
 
   static const light = StatusColors(
     success: Color(0xFF15803D), // green-700
     onSuccess: Color(0xFFFFFFFF),
     successContainer: Color(0xFFDCFCE7), // green-100
     onSuccessContainer: Color(0xFF14532D), // green-900
+    warning: Color(0xFFB45309), // amber-700
   );
 
   static const dark = StatusColors(
@@ -54,6 +60,7 @@ class StatusColors extends ThemeExtension<StatusColors> {
     onSuccess: Color(0xFF052E16), // green-950
     successContainer: Color(0xFF14532D), // green-900
     onSuccessContainer: Color(0xFFDCFCE7), // green-100
+    warning: Color(0xFFFBBF24), // amber-400
   );
 
   static StatusColors of(BuildContext context) =>
@@ -65,11 +72,13 @@ class StatusColors extends ThemeExtension<StatusColors> {
     Color? onSuccess,
     Color? successContainer,
     Color? onSuccessContainer,
+    Color? warning,
   }) => StatusColors(
     success: success ?? this.success,
     onSuccess: onSuccess ?? this.onSuccess,
     successContainer: successContainer ?? this.successContainer,
     onSuccessContainer: onSuccessContainer ?? this.onSuccessContainer,
+    warning: warning ?? this.warning,
   );
 
   @override
@@ -80,6 +89,7 @@ class StatusColors extends ThemeExtension<StatusColors> {
       onSuccess: Color.lerp(onSuccess, other.onSuccess, t)!,
       successContainer: Color.lerp(successContainer, other.successContainer, t)!,
       onSuccessContainer: Color.lerp(onSuccessContainer, other.onSuccessContainer, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
     );
   }
 }

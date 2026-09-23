@@ -207,4 +207,166 @@ void main() {
       'asset_demo_twin',
     );
   });
+
+  group('stocktake', () {
+    const warehouse = 'loc_demo_warehouse';
+
+    Matcher failsWith(String code) => throwsA(
+      isA<Object>().having(
+        (e) => (unwrapError(e) as ApiException).code,
+        'code',
+        code,
+      ),
+    );
+
+    test('a seeded stocktake is open and counts scans', () async {
+      final open = await api.stocktake.listStocktakes(status: StocktakeStatus.open);
+      expect(open, hasLength(1));
+      final id = open.single.id;
+      expect(open.single.countingLocations.single.id, warehouse);
+
+      final before = await api.stocktake.getStocktake(stocktakeId: id);
+      expect(before.progress.found, 0);
+
+      final found = await api.stocktake.scanIntoStocktake(
+        stocktakeId: id,
+        body: const StocktakeScanRequest(
+          code: '40000001',
+          locationId: warehouse,
+        ),
+      );
+      expect(found.outcome, StocktakeScanResultOutcome.found);
+      expect(found.item!.foundByMe, isTrue);
+
+      // A second scan changes nothing and says who got there first.
+      final again = await api.stocktake.scanIntoStocktake(
+        stocktakeId: id,
+        body: const StocktakeScanRequest(
+          code: '40000001',
+          locationId: warehouse,
+        ),
+      );
+      expect(again.outcome, StocktakeScanResultOutcome.already);
+
+      // 40000003 is in the truck, outside this stocktake's scope.
+      final elsewhere = await api.stocktake.scanIntoStocktake(
+        stocktakeId: id,
+        body: const StocktakeScanRequest(
+          code: '40000003',
+          locationId: warehouse,
+        ),
+      );
+      expect(elsewhere.outcome, StocktakeScanResultOutcome.unexpected);
+      expect(elsewhere.item!.unexpectedReason, 'other_location');
+
+      await expectLater(
+        api.stocktake.scanIntoStocktake(
+          stocktakeId: id,
+          body: const StocktakeScanRequest(code: 'nope', locationId: warehouse),
+        ),
+        failsWith('asset_not_found'),
+      );
+
+      final after = await api.stocktake.getStocktake(stocktakeId: id);
+      expect(after.progress.found, 1);
+      expect(after.progress.unexpected, 1);
+    });
+
+    test('ticks by hand, unticks and counts loose products', () async {
+      final id = (await api.stocktake.listStocktakes()).single.id;
+
+      final ticked = await api.stocktake.tickStocktakeItems(
+        stocktakeId: id,
+        body: const StocktakeTickRequest(
+          assetIds: ['asset_demo_40000002', 'asset_demo_40000004'],
+          locationId: warehouse,
+          via: StocktakeTickRequestVia.manual,
+        ),
+      );
+      expect(ticked.ticked, 2);
+
+      await api.stocktake.untickStocktakeItem(
+        stocktakeId: id,
+        assetId: 'asset_demo_40000004',
+      );
+      await expectLater(
+        api.stocktake.untickStocktakeItem(
+          stocktakeId: id,
+          assetId: 'asset_demo_40000004',
+        ),
+        failsWith('stocktake_not_found_yet'),
+      );
+
+      final detail = await api.stocktake.getStocktake(stocktakeId: id);
+      final cable = detail.products.single;
+      await api.stocktake.setStocktakeCount(
+        stocktakeId: id,
+        body: StocktakeCountRequest(
+          productId: cable.productId,
+          locationId: warehouse,
+          count: 18,
+        ),
+      );
+
+      final counted = await api.stocktake.getStocktake(stocktakeId: id);
+      expect(counted.products.single.counted, 18);
+      expect(
+        counted.products.single.locations
+            .firstWhere((l) => l.location.id == warehouse)
+            .myCount,
+        18,
+      );
+      // One unit ticked, eighteen cables counted.
+      expect(counted.progress.found, 19);
+    });
+
+    test('closing freezes it', () async {
+      final id = (await api.stocktake.listStocktakes()).single.id;
+      final closed = await api.stocktake.closeStocktake(stocktakeId: id);
+      expect(closed.status, StocktakeStatus.closed);
+      expect(await api.stocktake.listStocktakes(status: StocktakeStatus.open), isEmpty);
+
+      final detail = await api.stocktake.getStocktake(stocktakeId: id);
+      expect(
+        detail.items.every((i) => i.state == StocktakeItemState.missing),
+        isTrue,
+      );
+      await expectLater(
+        api.stocktake.scanIntoStocktake(
+          stocktakeId: id,
+          body: const StocktakeScanRequest(
+            code: '40000001',
+            locationId: warehouse,
+          ),
+        ),
+        failsWith('stocktake_closed'),
+      );
+    });
+
+    test('previews and starts a new one', () async {
+      final preview = await api.stocktake.previewStocktake(
+        body: const StocktakeScopeRequest(
+          organizationId: 'org_demo_nordlicht',
+          categoryIds: ['catg_demo_light'],
+        ),
+      );
+      expect(preview.units, greaterThan(0));
+      // The seeded stocktake already counts the warehouse's lights.
+      expect(preview.overlaps, isNotEmpty);
+
+      final created = await api.stocktake.createStocktake(
+        body: const StocktakeCreateRequest(
+          organizationId: 'org_demo_nordlicht',
+          name: 'Licht',
+          categoryIds: ['catg_demo_light'],
+        ),
+      );
+      expect(created.status, StocktakeStatus.open);
+      expect(created.progress.expected, preview.units);
+      expect(
+        await api.stocktake.listStocktakes(status: StocktakeStatus.open),
+        hasLength(2),
+      );
+    });
+  });
 }

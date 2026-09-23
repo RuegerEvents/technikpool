@@ -44,6 +44,12 @@ tags:
     description: Reading locations, productions and assets.
   - name: scanning
     description: Booking scanned assets in and out.
+  - name: stocktake
+    description: |
+      Counting what an organization actually has (Inventur). A stocktake
+      snapshots the units its scope matches when it starts; counters then scan
+      or tick them, and enter counts for loose untagged units. Nothing about an
+      asset changes while a stocktake is open.
 
 paths:
   /api/auth/device/code:
@@ -375,12 +381,309 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /api/v1/stocktakes:
+    get:
+      operationId: listStocktakes
+      tags: [stocktake]
+      summary: Stocktakes of the caller's organizations
+      parameters:
+        - name: status
+          in: query
+          description: Only open or only closed ones. Both when omitted.
+          schema:
+            $ref: '#/components/schemas/StocktakeStatus'
+      responses:
+        '200':
+          description: Newest first, open ones before closed ones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StocktakeSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      operationId: createStocktake
+      tags: [stocktake]
+      summary: Start a stocktake
+      description: |
+        Takes the snapshot straight away. Needs MEMBER of the organization.
+        A scope that matches nothing is refused with `409 stocktake_empty`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StocktakeCreateRequest'
+      responses:
+        '200':
+          description: The new stocktake
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StocktakeSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/stocktakes/preview:
+    post:
+      operationId: previewStocktake
+      tags: [stocktake]
+      summary: What a stocktake with this scope would contain
+      description: |
+        Nothing is stored. `overlaps` lists open stocktakes that already count
+        some of the same units — allowed, but worth a warning before starting.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StocktakeScopeRequest'
+      responses:
+        '200':
+          description: The would-be snapshot's size
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StocktakePreview'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/stocktakes/{stocktakeId}:
+    get:
+      operationId: getStocktake
+      tags: [stocktake]
+      summary: A stocktake with every unit and product count
+      parameters:
+        - $ref: '#/components/parameters/StocktakeId'
+      responses:
+        '200':
+          description: The stocktake
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StocktakeDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/stocktakes/{stocktakeId}/scans:
+    post:
+      operationId: scanIntoStocktake
+      tags: [stocktake]
+      summary: Count one scanned code
+      parameters:
+        - $ref: '#/components/parameters/StocktakeId'
+      description: |
+        An asset tag — or a serial number that belongs to exactly one unit —
+        ticks that unit (`found`, or `unexpected` when it is not on the list)
+        and returns its accessories in `confirm`, for the operator to confirm
+        or uncheck; confirming goes through `tickStocktakeItems` with
+        `via: parent`. A unit someone already counted answers `already` and
+        changes nothing.
+
+        A bundle tag ticks nothing and answers `bundle` with the members in
+        `confirm` (`via: bundle` to tick them): opening the case is the point
+        of a stocktake.
+
+        `confirm` entries with a `foundByName` were counted already and should
+        be shown as such rather than offered.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StocktakeScanRequest'
+      responses:
+        '200':
+          description: What the code turned out to be
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StocktakeScanResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/stocktakes/{stocktakeId}/ticks:
+    post:
+      operationId: tickStocktakeItems
+      tags: [stocktake]
+      summary: Tick units by hand, or confirm accessories / bundle members
+      parameters:
+        - $ref: '#/components/parameters/StocktakeId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StocktakeTickRequest'
+      responses:
+        '200':
+          description: How many were ticked, and how many someone had counted already
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StocktakeTickResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/stocktakes/{stocktakeId}/items/{assetId}:
+    delete:
+      operationId: untickStocktakeItem
+      tags: [stocktake]
+      summary: Take back one's own tick
+      parameters:
+        - $ref: '#/components/parameters/StocktakeId'
+        - name: assetId
+          in: path
+          required: true
+          schema:
+            type: string
+      description: |
+        Only whoever counted a unit can untick it (`403 stocktake_not_your_tick`).
+        An unexpected unit leaves the list altogether.
+      responses:
+        '204':
+          description: Unticked
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+    put:
+      operationId: setStocktakeItemNote
+      tags: [stocktake]
+      summary: Note on a unit one counted, and whether it needs attention
+      parameters:
+        - $ref: '#/components/parameters/StocktakeId'
+        - name: assetId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StocktakeNoteRequest'
+      responses:
+        '204':
+          description: Saved
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/stocktakes/{stocktakeId}/counts:
+    put:
+      operationId: setStocktakeCount
+      tags: [stocktake]
+      summary: The caller's count of a loose product at a location
+      parameters:
+        - $ref: '#/components/parameters/StocktakeId'
+      description: |
+        Counts are kept per counter and location and summed, so two people
+        counting in two rooms add up. Setting one replaces the caller's own
+        previous count there; zero is a count.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StocktakeCountRequest'
+      responses:
+        '204':
+          description: Saved
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/stocktakes/{stocktakeId}/close:
+    post:
+      operationId: closeStocktake
+      tags: [stocktake]
+      summary: Close a stocktake
+      parameters:
+        - $ref: '#/components/parameters/StocktakeId'
+      description: |
+        Final: units still open become missing, and each unit's history gets an
+        entry. Corrections (marking missing units unavailable, moving found
+        ones) are applied afterwards on the web report.
+      responses:
+        '200':
+          description: The closed stocktake
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StocktakeSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       description: A better-auth session token.
+
+  parameters:
+    StocktakeId:
+      name: stocktakeId
+      in: path
+      required: true
+      schema:
+        type: string
 
   responses:
     BadRequest:
@@ -410,6 +713,12 @@ components:
         has been cancelled (`production_cancelled`). A code that matched more
         than one unit's serial number identifies nothing in particular
         (`serial_ambiguous`) — the asset tag is what disambiguates it.
+
+        Stocktakes: a closed one takes no more counting (`stocktake_closed`),
+        a scope that matches nothing starts nothing (`stocktake_empty`), and
+        a note or untick needs a unit that was counted (`stocktake_not_found_yet`).
+        A count is only taken for a product the stocktake counts loose
+        (`stocktake_product_not_counted`).
       content:
         application/json:
           schema:
@@ -448,7 +757,8 @@ components:
                   forbidden,
                   asset_retired,
                   asset_unavailable,
-                  production_cancelled
+                  production_cancelled,
+                  stocktake_closed
                 ]
             message:
               type: string
@@ -904,3 +1214,354 @@ components:
         manufacturerName:
           type: [string, 'null']
           description: Null when the product has no maker; see Product.manufacturerName.
+
+    StocktakeScopeRequest:
+      type: object
+      required: [organizationId]
+      properties:
+        organizationId:
+          type: string
+        locationIds:
+          type: array
+          description: Only units at these locations. All of the org's when empty or absent.
+          items:
+            type: string
+        categoryIds:
+          type: array
+          description: Only units whose product is in these categories. All when empty or absent.
+          items:
+            type: string
+
+    StocktakeCreateRequest:
+      allOf:
+        - $ref: '#/components/schemas/StocktakeScopeRequest'
+        - type: object
+          properties:
+            name:
+              type: string
+              description: Defaults to the date and the scope's locations.
+
+    StocktakePreview:
+      type: object
+      required: [units, looseUnits, out, overlaps]
+      properties:
+        units:
+          type: integer
+          description: Units to find one by one — tagged, accessories, bundle members.
+        looseUnits:
+          type: integer
+          description: Untagged units, counted per product rather than ticked.
+        out:
+          type: integer
+          description: Checked out on a production, so accounted for rather than expected.
+        overlaps:
+          type: array
+          items:
+            $ref: '#/components/schemas/StocktakeOverlap'
+
+    StocktakeOverlap:
+      type: object
+      required: [id, name, sharedUnits]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        sharedUnits:
+          type: integer
+
+    StocktakeStatus:
+      type: string
+      enum: [OPEN, CLOSED]
+
+    StocktakeProgress:
+      type: object
+      required: [expected, found, out, unexpected]
+      properties:
+        expected:
+          type: integer
+          description: Units to find, loose ones included. Excludes units checked out at the start.
+        found:
+          type: integer
+          description: >-
+            Of `expected`, how many were counted. A surplus of one loose product
+            does not make up for a shortfall of another.
+        out:
+          type: integer
+          description: Checked out at the start and not scanned since.
+        unexpected:
+          type: integer
+          description: Scanned although not on the list.
+
+    StocktakeLocation:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    StocktakeSummary:
+      type: object
+      required:
+        [id, name, status, organization, createdAt, createdByName, progress, countingLocations]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          $ref: '#/components/schemas/StocktakeStatus'
+        organization:
+          $ref: '#/components/schemas/Organization'
+        createdAt:
+          type: string
+          format: date-time
+        createdByName:
+          type: string
+        closedAt:
+          type: [string, 'null']
+          format: date-time
+        progress:
+          $ref: '#/components/schemas/StocktakeProgress'
+        countingLocations:
+          type: array
+          description: >-
+            Where a counter can say they are counting: the scope's locations, or
+            all of the organization's when the scope names none.
+          items:
+            $ref: '#/components/schemas/StocktakeLocation'
+
+    StocktakeDetail:
+      allOf:
+        - $ref: '#/components/schemas/StocktakeSummary'
+        - type: object
+          required: [items, products]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/StocktakeItem'
+            products:
+              type: array
+              description: Loose untagged units, one entry per product.
+              items:
+                $ref: '#/components/schemas/StocktakeProductCount'
+
+    StocktakeItem:
+      type: object
+      required:
+        - assetId
+        - assetTag
+        - productName
+        - manufacturerName
+        - category
+        - parentAssetId
+        - state
+        - expectedLocation
+        - foundLocation
+        - foundByName
+        - foundByMe
+        - needsAttention
+      properties:
+        assetId:
+          type: string
+        assetTag:
+          type: [string, 'null']
+        serialNumber:
+          type: [string, 'null']
+        productName:
+          type: string
+        manufacturerName:
+          type: [string, 'null']
+        category:
+          $ref: '#/components/schemas/Category'
+        parentAssetId:
+          type: [string, 'null']
+          description: Set on an accessory; it is confirmed when its parent is scanned.
+        bundleName:
+          type: [string, 'null']
+          description: The bundle it belongs to, with its tag where it has one.
+        state:
+          type: string
+          enum: [open, found, out, missing, unexpected]
+          description: |
+            `open` is not counted yet; it turns into `missing` when the
+            stocktake closes. `out` was checked out on a production at the
+            start and is accounted for. `unexpected` was scanned although it
+            is not on the list — see `unexpectedReason`.
+        expectedLocation:
+          oneOf:
+            - $ref: '#/components/schemas/StocktakeLocation'
+            - type: 'null'
+        foundLocation:
+          oneOf:
+            - $ref: '#/components/schemas/StocktakeLocation'
+            - type: 'null'
+        outAt:
+          type: [string, 'null']
+          description: The production it was checked out to at the start.
+        unexpectedReason:
+          type: [string, 'null']
+          description: One of `other_org`, `retired`, `added_later`, `other_location`, `out_of_scope`.
+        foundByName:
+          type: [string, 'null']
+        foundByMe:
+          type: boolean
+          description: Only these can be unticked or annotated by the caller.
+        note:
+          type: [string, 'null']
+        needsAttention:
+          type: boolean
+
+    StocktakeProductCount:
+      type: object
+      required:
+        [productId, productName, manufacturerName, category, expected, out, counted, locations]
+      properties:
+        productId:
+          type: string
+        productName:
+          type: string
+        manufacturerName:
+          type: [string, 'null']
+        category:
+          $ref: '#/components/schemas/Category'
+        expected:
+          type: integer
+        out:
+          type: integer
+        counted:
+          type: integer
+          description: Every counter's counts added up.
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/StocktakeLocationCount'
+
+    StocktakeLocationCount:
+      type: object
+      required: [location, expected, counted, myCount]
+      properties:
+        location:
+          $ref: '#/components/schemas/StocktakeLocation'
+        expected:
+          type: integer
+        counted:
+          type: integer
+        myCount:
+          type: [integer, 'null']
+          description: The caller's own count here, if they entered one.
+
+    StocktakeScanRequest:
+      type: object
+      required: [code, locationId]
+      properties:
+        code:
+          type: string
+          description: Exactly what the barcode decoded to.
+        locationId:
+          type: string
+          description: Where the counter is. One of the stocktake's `countingLocations`.
+
+    StocktakeScanResult:
+      type: object
+      required: [outcome, confirm]
+      properties:
+        outcome:
+          type: string
+          enum: [found, unexpected, already, bundle]
+        item:
+          description: The scanned unit. Absent for a bundle.
+          oneOf:
+            - $ref: '#/components/schemas/StocktakeItem'
+            - type: 'null'
+        wasOutAt:
+          type: [string, 'null']
+          description: It was checked out to this production at the start, and is here after all.
+        alreadyFoundByName:
+          type: [string, 'null']
+          description: For `already`, who counted it.
+        bundle:
+          oneOf:
+            - $ref: '#/components/schemas/StocktakeBundle'
+            - type: 'null'
+        confirm:
+          type: array
+          description: Accessories of the scanned unit, or the bundle's members.
+          items:
+            $ref: '#/components/schemas/StocktakeConfirmEntry'
+
+    StocktakeBundle:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        tag:
+          type: [string, 'null']
+        name:
+          type: string
+
+    StocktakeConfirmEntry:
+      type: object
+      required: [assetId, assetTag, productName, manufacturerName, foundByName]
+      properties:
+        assetId:
+          type: string
+        assetTag:
+          type: [string, 'null']
+        productName:
+          type: string
+        manufacturerName:
+          type: [string, 'null']
+        foundByName:
+          type: [string, 'null']
+          description: Counted already, by this person. Null when still to confirm.
+
+    StocktakeTickRequest:
+      type: object
+      required: [assetIds, locationId, via]
+      properties:
+        assetIds:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        locationId:
+          type: string
+        via:
+          type: string
+          enum: [manual, parent, bundle]
+          description: Why they are ticked without a scan of their own — for the report.
+
+    StocktakeTickResult:
+      type: object
+      required: [ticked, alreadyFound]
+      properties:
+        ticked:
+          type: integer
+        alreadyFound:
+          type: integer
+
+    StocktakeNoteRequest:
+      type: object
+      required: [needsAttention]
+      properties:
+        note:
+          type: [string, 'null']
+        needsAttention:
+          type: boolean
+
+    StocktakeCountRequest:
+      type: object
+      required: [productId, locationId, count]
+      properties:
+        productId:
+          type: string
+        locationId:
+          type: string
+        count:
+          type: integer
+          minimum: 0

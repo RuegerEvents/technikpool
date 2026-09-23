@@ -266,6 +266,11 @@ export type UserWhereInput = {
   transactions?: Prisma.AssetTransactionListRelationFilter
   crewAssignments?: Prisma.ProductionCrewListRelationFilter
   cancelledProductions?: Prisma.ProductionListRelationFilter
+  stocktakesStarted?: Prisma.StocktakeListRelationFilter
+  stocktakesClosed?: Prisma.StocktakeListRelationFilter
+  stocktakeFinds?: Prisma.StocktakeItemListRelationFilter
+  stocktakeCounts?: Prisma.StocktakeCountListRelationFilter
+  stocktakeEvents?: Prisma.StocktakeEventListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -289,6 +294,11 @@ export type UserOrderByWithRelationInput = {
   transactions?: Prisma.AssetTransactionOrderByRelationAggregateInput
   crewAssignments?: Prisma.ProductionCrewOrderByRelationAggregateInput
   cancelledProductions?: Prisma.ProductionOrderByRelationAggregateInput
+  stocktakesStarted?: Prisma.StocktakeOrderByRelationAggregateInput
+  stocktakesClosed?: Prisma.StocktakeOrderByRelationAggregateInput
+  stocktakeFinds?: Prisma.StocktakeItemOrderByRelationAggregateInput
+  stocktakeCounts?: Prisma.StocktakeCountOrderByRelationAggregateInput
+  stocktakeEvents?: Prisma.StocktakeEventOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -315,6 +325,11 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   transactions?: Prisma.AssetTransactionListRelationFilter
   crewAssignments?: Prisma.ProductionCrewListRelationFilter
   cancelledProductions?: Prisma.ProductionListRelationFilter
+  stocktakesStarted?: Prisma.StocktakeListRelationFilter
+  stocktakesClosed?: Prisma.StocktakeListRelationFilter
+  stocktakeFinds?: Prisma.StocktakeItemListRelationFilter
+  stocktakeCounts?: Prisma.StocktakeCountListRelationFilter
+  stocktakeEvents?: Prisma.StocktakeEventListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -371,6 +386,11 @@ export type UserCreateInput = {
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -393,6 +413,11 @@ export type UserUncheckedCreateInput = {
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -415,6 +440,11 @@ export type UserUpdateInput = {
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -437,6 +467,11 @@ export type UserUncheckedUpdateInput = {
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -740,6 +775,80 @@ export type UserUpdateOneRequiredWithoutCatalogTransactionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCatalogTransactionsInput, Prisma.UserUpdateWithoutCatalogTransactionsInput>, Prisma.UserUncheckedUpdateWithoutCatalogTransactionsInput>
 }
 
+export type UserCreateNestedOneWithoutStocktakesStartedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStocktakesStartedInput, Prisma.UserUncheckedCreateWithoutStocktakesStartedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStocktakesStartedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutStocktakesClosedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStocktakesClosedInput, Prisma.UserUncheckedCreateWithoutStocktakesClosedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStocktakesClosedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutStocktakesStartedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStocktakesStartedInput, Prisma.UserUncheckedCreateWithoutStocktakesStartedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStocktakesStartedInput
+  upsert?: Prisma.UserUpsertWithoutStocktakesStartedInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStocktakesStartedInput, Prisma.UserUpdateWithoutStocktakesStartedInput>, Prisma.UserUncheckedUpdateWithoutStocktakesStartedInput>
+}
+
+export type UserUpdateOneWithoutStocktakesClosedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStocktakesClosedInput, Prisma.UserUncheckedCreateWithoutStocktakesClosedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStocktakesClosedInput
+  upsert?: Prisma.UserUpsertWithoutStocktakesClosedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStocktakesClosedInput, Prisma.UserUpdateWithoutStocktakesClosedInput>, Prisma.UserUncheckedUpdateWithoutStocktakesClosedInput>
+}
+
+export type UserCreateNestedOneWithoutStocktakeFindsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStocktakeFindsInput, Prisma.UserUncheckedCreateWithoutStocktakeFindsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStocktakeFindsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutStocktakeFindsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStocktakeFindsInput, Prisma.UserUncheckedCreateWithoutStocktakeFindsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStocktakeFindsInput
+  upsert?: Prisma.UserUpsertWithoutStocktakeFindsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStocktakeFindsInput, Prisma.UserUpdateWithoutStocktakeFindsInput>, Prisma.UserUncheckedUpdateWithoutStocktakeFindsInput>
+}
+
+export type UserCreateNestedOneWithoutStocktakeCountsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStocktakeCountsInput, Prisma.UserUncheckedCreateWithoutStocktakeCountsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStocktakeCountsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutStocktakeCountsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStocktakeCountsInput, Prisma.UserUncheckedCreateWithoutStocktakeCountsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStocktakeCountsInput
+  upsert?: Prisma.UserUpsertWithoutStocktakeCountsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStocktakeCountsInput, Prisma.UserUpdateWithoutStocktakeCountsInput>, Prisma.UserUncheckedUpdateWithoutStocktakeCountsInput>
+}
+
+export type UserCreateNestedOneWithoutStocktakeEventsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStocktakeEventsInput, Prisma.UserUncheckedCreateWithoutStocktakeEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStocktakeEventsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutStocktakeEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStocktakeEventsInput, Prisma.UserUncheckedCreateWithoutStocktakeEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStocktakeEventsInput
+  upsert?: Prisma.UserUpsertWithoutStocktakeEventsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStocktakeEventsInput, Prisma.UserUpdateWithoutStocktakeEventsInput>, Prisma.UserUncheckedUpdateWithoutStocktakeEventsInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   id?: string
   email: string
@@ -759,6 +868,11 @@ export type UserCreateWithoutSessionsInput = {
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -780,6 +894,11 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -817,6 +936,11 @@ export type UserUpdateWithoutSessionsInput = {
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -838,6 +962,11 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -859,6 +988,11 @@ export type UserCreateWithoutAccountsInput = {
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -880,6 +1014,11 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -917,6 +1056,11 @@ export type UserUpdateWithoutAccountsInput = {
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -938,6 +1082,11 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutHomeOrgInput = {
@@ -959,6 +1108,11 @@ export type UserCreateWithoutHomeOrgInput = {
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutHomeOrgInput = {
@@ -980,6 +1134,11 @@ export type UserUncheckedCreateWithoutHomeOrgInput = {
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutHomeOrgInput = {
@@ -1043,6 +1202,11 @@ export type UserCreateWithoutMembershipsInput = {
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -1064,6 +1228,11 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -1101,6 +1270,11 @@ export type UserUpdateWithoutMembershipsInput = {
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -1122,6 +1296,11 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSentInvitationsInput = {
@@ -1143,6 +1322,11 @@ export type UserCreateWithoutSentInvitationsInput = {
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSentInvitationsInput = {
@@ -1164,6 +1348,11 @@ export type UserUncheckedCreateWithoutSentInvitationsInput = {
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSentInvitationsInput = {
@@ -1201,6 +1390,11 @@ export type UserUpdateWithoutSentInvitationsInput = {
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSentInvitationsInput = {
@@ -1222,6 +1416,11 @@ export type UserUncheckedUpdateWithoutSentInvitationsInput = {
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCreatedProductsInput = {
@@ -1243,6 +1442,11 @@ export type UserCreateWithoutCreatedProductsInput = {
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedProductsInput = {
@@ -1264,6 +1468,11 @@ export type UserUncheckedCreateWithoutCreatedProductsInput = {
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedProductsInput = {
@@ -1301,6 +1510,11 @@ export type UserUpdateWithoutCreatedProductsInput = {
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedProductsInput = {
@@ -1322,6 +1536,11 @@ export type UserUncheckedUpdateWithoutCreatedProductsInput = {
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCancelledProductionsInput = {
@@ -1343,6 +1562,11 @@ export type UserCreateWithoutCancelledProductionsInput = {
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCancelledProductionsInput = {
@@ -1364,6 +1588,11 @@ export type UserUncheckedCreateWithoutCancelledProductionsInput = {
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCancelledProductionsInput = {
@@ -1401,6 +1630,11 @@ export type UserUpdateWithoutCancelledProductionsInput = {
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCancelledProductionsInput = {
@@ -1422,6 +1656,11 @@ export type UserUncheckedUpdateWithoutCancelledProductionsInput = {
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCrewAssignmentsInput = {
@@ -1443,6 +1682,11 @@ export type UserCreateWithoutCrewAssignmentsInput = {
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCrewAssignmentsInput = {
@@ -1464,6 +1708,11 @@ export type UserUncheckedCreateWithoutCrewAssignmentsInput = {
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCrewAssignmentsInput = {
@@ -1501,6 +1750,11 @@ export type UserUpdateWithoutCrewAssignmentsInput = {
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCrewAssignmentsInput = {
@@ -1522,6 +1776,11 @@ export type UserUncheckedUpdateWithoutCrewAssignmentsInput = {
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTransactionsInput = {
@@ -1543,6 +1802,11 @@ export type UserCreateWithoutTransactionsInput = {
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTransactionsInput = {
@@ -1564,6 +1828,11 @@ export type UserUncheckedCreateWithoutTransactionsInput = {
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTransactionsInput = {
@@ -1601,6 +1870,11 @@ export type UserUpdateWithoutTransactionsInput = {
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTransactionsInput = {
@@ -1622,6 +1896,11 @@ export type UserUncheckedUpdateWithoutTransactionsInput = {
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCatalogTransactionsInput = {
@@ -1643,6 +1922,11 @@ export type UserCreateWithoutCatalogTransactionsInput = {
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCatalogTransactionsInput = {
@@ -1664,6 +1948,11 @@ export type UserUncheckedCreateWithoutCatalogTransactionsInput = {
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
   cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCatalogTransactionsInput = {
@@ -1701,6 +1990,11 @@ export type UserUpdateWithoutCatalogTransactionsInput = {
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCatalogTransactionsInput = {
@@ -1722,6 +2016,611 @@ export type UserUncheckedUpdateWithoutCatalogTransactionsInput = {
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutStocktakesStartedInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
+  homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
+  memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutStocktakesStartedInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  homeOrgId?: string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutStocktakesStartedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutStocktakesStartedInput, Prisma.UserUncheckedCreateWithoutStocktakesStartedInput>
+}
+
+export type UserCreateWithoutStocktakesClosedInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
+  homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
+  memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutStocktakesClosedInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  homeOrgId?: string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutStocktakesClosedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutStocktakesClosedInput, Prisma.UserUncheckedCreateWithoutStocktakesClosedInput>
+}
+
+export type UserUpsertWithoutStocktakesStartedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutStocktakesStartedInput, Prisma.UserUncheckedUpdateWithoutStocktakesStartedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutStocktakesStartedInput, Prisma.UserUncheckedCreateWithoutStocktakesStartedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutStocktakesStartedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutStocktakesStartedInput, Prisma.UserUncheckedUpdateWithoutStocktakesStartedInput>
+}
+
+export type UserUpdateWithoutStocktakesStartedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
+  homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
+  memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutStocktakesStartedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  homeOrgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserUpsertWithoutStocktakesClosedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutStocktakesClosedInput, Prisma.UserUncheckedUpdateWithoutStocktakesClosedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutStocktakesClosedInput, Prisma.UserUncheckedCreateWithoutStocktakesClosedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutStocktakesClosedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutStocktakesClosedInput, Prisma.UserUncheckedUpdateWithoutStocktakesClosedInput>
+}
+
+export type UserUpdateWithoutStocktakesClosedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
+  homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
+  memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutStocktakesClosedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  homeOrgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutStocktakeFindsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
+  homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
+  memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutStocktakeFindsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  homeOrgId?: string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutStocktakeFindsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutStocktakeFindsInput, Prisma.UserUncheckedCreateWithoutStocktakeFindsInput>
+}
+
+export type UserUpsertWithoutStocktakeFindsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutStocktakeFindsInput, Prisma.UserUncheckedUpdateWithoutStocktakeFindsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutStocktakeFindsInput, Prisma.UserUncheckedCreateWithoutStocktakeFindsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutStocktakeFindsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutStocktakeFindsInput, Prisma.UserUncheckedUpdateWithoutStocktakeFindsInput>
+}
+
+export type UserUpdateWithoutStocktakeFindsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
+  homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
+  memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutStocktakeFindsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  homeOrgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutStocktakeCountsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
+  homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
+  memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutStocktakeCountsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  homeOrgId?: string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutStocktakeCountsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutStocktakeCountsInput, Prisma.UserUncheckedCreateWithoutStocktakeCountsInput>
+}
+
+export type UserUpsertWithoutStocktakeCountsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutStocktakeCountsInput, Prisma.UserUncheckedUpdateWithoutStocktakeCountsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutStocktakeCountsInput, Prisma.UserUncheckedCreateWithoutStocktakeCountsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutStocktakeCountsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutStocktakeCountsInput, Prisma.UserUncheckedUpdateWithoutStocktakeCountsInput>
+}
+
+export type UserUpdateWithoutStocktakeCountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
+  homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
+  memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutStocktakeCountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  homeOrgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutStocktakeEventsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
+  homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
+  memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutStocktakeEventsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  homeOrgId?: string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutStocktakeEventsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutStocktakeEventsInput, Prisma.UserUncheckedCreateWithoutStocktakeEventsInput>
+}
+
+export type UserUpsertWithoutStocktakeEventsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutStocktakeEventsInput, Prisma.UserUncheckedUpdateWithoutStocktakeEventsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutStocktakeEventsInput, Prisma.UserUncheckedCreateWithoutStocktakeEventsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutStocktakeEventsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutStocktakeEventsInput, Prisma.UserUncheckedUpdateWithoutStocktakeEventsInput>
+}
+
+export type UserUpdateWithoutStocktakeEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
+  homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
+  memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutStocktakeEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  homeOrgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyHomeOrgInput = {
@@ -1755,6 +2654,11 @@ export type UserUpdateWithoutHomeOrgInput = {
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutHomeOrgInput = {
@@ -1776,6 +2680,11 @@ export type UserUncheckedUpdateWithoutHomeOrgInput = {
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
   cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutHomeOrgInput = {
@@ -1805,6 +2714,11 @@ export type UserCountOutputType = {
   transactions: number
   crewAssignments: number
   cancelledProductions: number
+  stocktakesStarted: number
+  stocktakesClosed: number
+  stocktakeFinds: number
+  stocktakeCounts: number
+  stocktakeEvents: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1817,6 +2731,11 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   transactions?: boolean | UserCountOutputTypeCountTransactionsArgs
   crewAssignments?: boolean | UserCountOutputTypeCountCrewAssignmentsArgs
   cancelledProductions?: boolean | UserCountOutputTypeCountCancelledProductionsArgs
+  stocktakesStarted?: boolean | UserCountOutputTypeCountStocktakesStartedArgs
+  stocktakesClosed?: boolean | UserCountOutputTypeCountStocktakesClosedArgs
+  stocktakeFinds?: boolean | UserCountOutputTypeCountStocktakeFindsArgs
+  stocktakeCounts?: boolean | UserCountOutputTypeCountStocktakeCountsArgs
+  stocktakeEvents?: boolean | UserCountOutputTypeCountStocktakeEventsArgs
 }
 
 /**
@@ -1892,6 +2811,41 @@ export type UserCountOutputTypeCountCancelledProductionsArgs<ExtArgs extends run
   where?: Prisma.ProductionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountStocktakesStartedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StocktakeWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountStocktakesClosedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StocktakeWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountStocktakeFindsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StocktakeItemWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountStocktakeCountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StocktakeCountWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountStocktakeEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StocktakeEventWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1914,6 +2868,11 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   transactions?: boolean | Prisma.User$transactionsArgs<ExtArgs>
   crewAssignments?: boolean | Prisma.User$crewAssignmentsArgs<ExtArgs>
   cancelledProductions?: boolean | Prisma.User$cancelledProductionsArgs<ExtArgs>
+  stocktakesStarted?: boolean | Prisma.User$stocktakesStartedArgs<ExtArgs>
+  stocktakesClosed?: boolean | Prisma.User$stocktakesClosedArgs<ExtArgs>
+  stocktakeFinds?: boolean | Prisma.User$stocktakeFindsArgs<ExtArgs>
+  stocktakeCounts?: boolean | Prisma.User$stocktakeCountsArgs<ExtArgs>
+  stocktakeEvents?: boolean | Prisma.User$stocktakeEventsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1970,6 +2929,11 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   transactions?: boolean | Prisma.User$transactionsArgs<ExtArgs>
   crewAssignments?: boolean | Prisma.User$crewAssignmentsArgs<ExtArgs>
   cancelledProductions?: boolean | Prisma.User$cancelledProductionsArgs<ExtArgs>
+  stocktakesStarted?: boolean | Prisma.User$stocktakesStartedArgs<ExtArgs>
+  stocktakesClosed?: boolean | Prisma.User$stocktakesClosedArgs<ExtArgs>
+  stocktakeFinds?: boolean | Prisma.User$stocktakeFindsArgs<ExtArgs>
+  stocktakeCounts?: boolean | Prisma.User$stocktakeCountsArgs<ExtArgs>
+  stocktakeEvents?: boolean | Prisma.User$stocktakeEventsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1992,6 +2956,11 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     transactions: Prisma.$AssetTransactionPayload<ExtArgs>[]
     crewAssignments: Prisma.$ProductionCrewPayload<ExtArgs>[]
     cancelledProductions: Prisma.$ProductionPayload<ExtArgs>[]
+    stocktakesStarted: Prisma.$StocktakePayload<ExtArgs>[]
+    stocktakesClosed: Prisma.$StocktakePayload<ExtArgs>[]
+    stocktakeFinds: Prisma.$StocktakeItemPayload<ExtArgs>[]
+    stocktakeCounts: Prisma.$StocktakeCountPayload<ExtArgs>[]
+    stocktakeEvents: Prisma.$StocktakeEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2408,6 +3377,11 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   transactions<T extends Prisma.User$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   crewAssignments<T extends Prisma.User$crewAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$crewAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionCrewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   cancelledProductions<T extends Prisma.User$cancelledProductionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$cancelledProductionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stocktakesStarted<T extends Prisma.User$stocktakesStartedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$stocktakesStartedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StocktakePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stocktakesClosed<T extends Prisma.User$stocktakesClosedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$stocktakesClosedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StocktakePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stocktakeFinds<T extends Prisma.User$stocktakeFindsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$stocktakeFindsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StocktakeItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stocktakeCounts<T extends Prisma.User$stocktakeCountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$stocktakeCountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StocktakeCountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stocktakeEvents<T extends Prisma.User$stocktakeEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$stocktakeEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StocktakeEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3080,6 +4054,126 @@ export type User$cancelledProductionsArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.ProductionScalarFieldEnum | Prisma.ProductionScalarFieldEnum[]
+}
+
+/**
+ * User.stocktakesStarted
+ */
+export type User$stocktakesStartedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Stocktake
+   */
+  select?: Prisma.StocktakeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Stocktake
+   */
+  omit?: Prisma.StocktakeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StocktakeInclude<ExtArgs> | null
+  where?: Prisma.StocktakeWhereInput
+  orderBy?: Prisma.StocktakeOrderByWithRelationInput | Prisma.StocktakeOrderByWithRelationInput[]
+  cursor?: Prisma.StocktakeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StocktakeScalarFieldEnum | Prisma.StocktakeScalarFieldEnum[]
+}
+
+/**
+ * User.stocktakesClosed
+ */
+export type User$stocktakesClosedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Stocktake
+   */
+  select?: Prisma.StocktakeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Stocktake
+   */
+  omit?: Prisma.StocktakeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StocktakeInclude<ExtArgs> | null
+  where?: Prisma.StocktakeWhereInput
+  orderBy?: Prisma.StocktakeOrderByWithRelationInput | Prisma.StocktakeOrderByWithRelationInput[]
+  cursor?: Prisma.StocktakeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StocktakeScalarFieldEnum | Prisma.StocktakeScalarFieldEnum[]
+}
+
+/**
+ * User.stocktakeFinds
+ */
+export type User$stocktakeFindsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StocktakeItem
+   */
+  select?: Prisma.StocktakeItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StocktakeItem
+   */
+  omit?: Prisma.StocktakeItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StocktakeItemInclude<ExtArgs> | null
+  where?: Prisma.StocktakeItemWhereInput
+  orderBy?: Prisma.StocktakeItemOrderByWithRelationInput | Prisma.StocktakeItemOrderByWithRelationInput[]
+  cursor?: Prisma.StocktakeItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StocktakeItemScalarFieldEnum | Prisma.StocktakeItemScalarFieldEnum[]
+}
+
+/**
+ * User.stocktakeCounts
+ */
+export type User$stocktakeCountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StocktakeCount
+   */
+  select?: Prisma.StocktakeCountSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StocktakeCount
+   */
+  omit?: Prisma.StocktakeCountOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StocktakeCountInclude<ExtArgs> | null
+  where?: Prisma.StocktakeCountWhereInput
+  orderBy?: Prisma.StocktakeCountOrderByWithRelationInput | Prisma.StocktakeCountOrderByWithRelationInput[]
+  cursor?: Prisma.StocktakeCountWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StocktakeCountScalarFieldEnum | Prisma.StocktakeCountScalarFieldEnum[]
+}
+
+/**
+ * User.stocktakeEvents
+ */
+export type User$stocktakeEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StocktakeEvent
+   */
+  select?: Prisma.StocktakeEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StocktakeEvent
+   */
+  omit?: Prisma.StocktakeEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StocktakeEventInclude<ExtArgs> | null
+  where?: Prisma.StocktakeEventWhereInput
+  orderBy?: Prisma.StocktakeEventOrderByWithRelationInput | Prisma.StocktakeEventOrderByWithRelationInput[]
+  cursor?: Prisma.StocktakeEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StocktakeEventScalarFieldEnum | Prisma.StocktakeEventScalarFieldEnum[]
 }
 
 /**

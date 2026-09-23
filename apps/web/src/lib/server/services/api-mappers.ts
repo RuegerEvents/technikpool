@@ -3,6 +3,14 @@ import type { OrgRole } from '$lib/roles';
 import { imageSrc } from '$lib/images';
 import { isCable } from '$lib/cable';
 import { withCableNames } from '$lib/server/services/cable-ends';
+import {
+	itemState,
+	productCounts,
+	type StocktakeDetail,
+	type StocktakeItemRow,
+	type StocktakeScanOutcome,
+	type StocktakeSummary
+} from '$lib/server/services/stocktake';
 
 // Prisma payloads are deliberately not returned straight to clients: they carry
 // fields the API doesn't promise, and adding a column to the schema would
@@ -204,5 +212,116 @@ export function toAssetTransaction(tx: TransactionRow): Schemas['AssetTransactio
 		createdAt: tx.createdAt.toISOString(),
 		userName: tx.user?.name ?? tx.user?.email ?? null,
 		productionName: tx.production?.name ?? null
+	};
+}
+
+// ---------------------------------------------------------------------------
+// Stocktakes
+
+type StocktakeSummaryRow = Pick<
+	StocktakeSummary,
+	| 'id'
+	| 'name'
+	| 'status'
+	| 'organization'
+	| 'createdAt'
+	| 'createdBy'
+	| 'closedAt'
+	| 'progress'
+	| 'countingLocations'
+>;
+
+export function toStocktakeSummary(s: StocktakeSummaryRow): Schemas['StocktakeSummary'] {
+	return {
+		id: s.id,
+		name: s.name,
+		status: s.status === 'CLOSED' ? 'CLOSED' : 'OPEN',
+		organization: toOrganization(s.organization),
+		createdAt: s.createdAt.toISOString(),
+		createdByName: s.createdBy.name || s.createdBy.email,
+		closedAt: s.closedAt?.toISOString() ?? null,
+		progress: s.progress,
+		countingLocations: s.countingLocations
+	};
+}
+
+export function toStocktakeItem(
+	item: StocktakeItemRow,
+	closed: boolean,
+	userId: string
+): Schemas['StocktakeItem'] {
+	const bundle = item.asset.bundle;
+	return {
+		assetId: item.assetId,
+		assetTag: item.asset.assetTag,
+		serialNumber: item.asset.serialNumber,
+		productName: item.asset.product.name,
+		manufacturerName: item.asset.product.manufacturer?.name ?? null,
+		category: toCategory(item.asset.product.category),
+		parentAssetId: item.asset.parentAssetId,
+		bundleName: bundle
+			? bundle.tag
+				? `${bundle.template.name} (${bundle.tag})`
+				: bundle.template.name
+			: null,
+		state: itemState(item, closed),
+		expectedLocation: item.expectedLocation,
+		foundLocation: item.foundLocation,
+		outAt: item.outProductionName,
+		unexpectedReason: item.unexpectedReason,
+		foundByName: item.foundBy ? item.foundBy.name || item.foundBy.email : null,
+		foundByMe: !!item.foundAt && item.foundById === userId,
+		note: item.note,
+		needsAttention: item.needsAttention
+	};
+}
+
+export function toStocktakeDetail(
+	detail: StocktakeDetail,
+	userId: string
+): Schemas['StocktakeDetail'] {
+	const closed = detail.status === 'CLOSED';
+	return {
+		...toStocktakeSummary(detail),
+		items: detail.items.map((i) => toStocktakeItem(i, closed, userId)),
+		products: productCounts(detail, userId).map((p) => ({
+			productId: p.product.id,
+			productName: p.product.name,
+			manufacturerName: p.product.manufacturer?.name ?? null,
+			category: toCategory(p.product.category),
+			expected: p.expected,
+			out: p.out,
+			counted: p.counted,
+			locations: p.locations.map((l) => ({
+				location: l.location,
+				expected: l.expected,
+				counted: l.counted,
+				myCount: l.myCount
+			}))
+		}))
+	};
+}
+
+export function toStocktakeScanResult(
+	result: StocktakeScanOutcome,
+	closed: boolean,
+	userId: string
+): Schemas['StocktakeScanResult'] {
+	if (result.outcome === 'bundle') {
+		return { outcome: 'bundle', item: null, bundle: result.bundle, confirm: result.confirm };
+	}
+	if (result.outcome === 'already') {
+		return {
+			outcome: 'already',
+			item: toStocktakeItem(result.item, closed, userId),
+			alreadyFoundByName: result.foundByName,
+			confirm: []
+		};
+	}
+	return {
+		outcome: result.outcome,
+		item: toStocktakeItem(result.item, closed, userId),
+		wasOutAt: result.wasOutAt,
+		confirm: result.confirm
 	};
 }

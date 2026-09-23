@@ -42,6 +42,7 @@ class Labels {
     'CREDENTIALS_SET' => l10n.actionCredentialsSet,
     'CREDENTIALS_REMOVED' => l10n.actionCredentialsRemoved,
     'CREDENTIALS_REVEALED' => l10n.actionCredentialsRevealed,
+    'STOCKTAKE_COUNTED' => l10n.actionStocktakeCounted,
     // Not in that union today; kept because the server owns the vocabulary
     // and these cost nothing until it writes them.
     'DELETED' => l10n.actionDeleted,
@@ -53,5 +54,17 @@ class Labels {
     ScanResultAction.locationAssigned => l10n.actionLocationAssigned,
     ScanResultAction.checkedOut => l10n.actionCheckedOut,
     _ => action.name,
+  };
+
+  /// Why a stocktake scan was not on the list. A plain string on the wire (see
+  /// StocktakeItem.unexpectedReason), so an unknown one falls through as-is.
+  static String unexpectedReason(S l10n, String? reason) => switch (reason) {
+    'other_org' => l10n.reasonOtherOrg,
+    'retired' => l10n.reasonRetired,
+    'added_later' => l10n.reasonAddedLater,
+    'other_location' => l10n.reasonOtherLocation,
+    'out_of_scope' => l10n.reasonOutOfScope,
+    null => l10n.stocktakeUnexpected,
+    _ => reason,
   };
 }

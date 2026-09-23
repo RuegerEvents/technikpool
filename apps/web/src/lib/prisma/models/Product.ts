@@ -288,6 +288,8 @@ export type ProductWhereInput = {
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   assets?: Prisma.AssetListRelationFilter
   orgPrices?: Prisma.OrgProductPriceListRelationFilter
+  stocktakeLines?: Prisma.StocktakeLineListRelationFilter
+  stocktakeCounts?: Prisma.StocktakeCountListRelationFilter
   ports?: Prisma.ProductPortListRelationFilter
   featuredInBundleTemplates?: Prisma.BundleTemplateListRelationFilter
 }
@@ -314,6 +316,8 @@ export type ProductOrderByWithRelationInput = {
   createdBy?: Prisma.UserOrderByWithRelationInput
   assets?: Prisma.AssetOrderByRelationAggregateInput
   orgPrices?: Prisma.OrgProductPriceOrderByRelationAggregateInput
+  stocktakeLines?: Prisma.StocktakeLineOrderByRelationAggregateInput
+  stocktakeCounts?: Prisma.StocktakeCountOrderByRelationAggregateInput
   ports?: Prisma.ProductPortOrderByRelationAggregateInput
   featuredInBundleTemplates?: Prisma.BundleTemplateOrderByRelationAggregateInput
 }
@@ -343,6 +347,8 @@ export type ProductWhereUniqueInput = Prisma.AtLeast<{
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   assets?: Prisma.AssetListRelationFilter
   orgPrices?: Prisma.OrgProductPriceListRelationFilter
+  stocktakeLines?: Prisma.StocktakeLineListRelationFilter
+  stocktakeCounts?: Prisma.StocktakeCountListRelationFilter
   ports?: Prisma.ProductPortListRelationFilter
   featuredInBundleTemplates?: Prisma.BundleTemplateListRelationFilter
 }, "id">
@@ -404,6 +410,8 @@ export type ProductCreateInput = {
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedProductsInput
   assets?: Prisma.AssetCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -425,6 +433,8 @@ export type ProductUncheckedCreateInput = {
   ways?: Prisma.CableWayUncheckedCreateNestedManyWithoutProductInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -446,6 +456,8 @@ export type ProductUpdateInput = {
   createdBy?: Prisma.UserUpdateOneWithoutCreatedProductsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -467,6 +479,8 @@ export type ProductUncheckedUpdateInput = {
   ways?: Prisma.CableWayUncheckedUpdateManyWithoutProductNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -889,6 +903,34 @@ export type ProductUncheckedUpdateManyWithoutFeaturedInBundleTemplatesNestedInpu
   deleteMany?: Prisma.ProductScalarWhereInput | Prisma.ProductScalarWhereInput[]
 }
 
+export type ProductCreateNestedOneWithoutStocktakeLinesInput = {
+  create?: Prisma.XOR<Prisma.ProductCreateWithoutStocktakeLinesInput, Prisma.ProductUncheckedCreateWithoutStocktakeLinesInput>
+  connectOrCreate?: Prisma.ProductCreateOrConnectWithoutStocktakeLinesInput
+  connect?: Prisma.ProductWhereUniqueInput
+}
+
+export type ProductUpdateOneRequiredWithoutStocktakeLinesNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductCreateWithoutStocktakeLinesInput, Prisma.ProductUncheckedCreateWithoutStocktakeLinesInput>
+  connectOrCreate?: Prisma.ProductCreateOrConnectWithoutStocktakeLinesInput
+  upsert?: Prisma.ProductUpsertWithoutStocktakeLinesInput
+  connect?: Prisma.ProductWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProductUpdateToOneWithWhereWithoutStocktakeLinesInput, Prisma.ProductUpdateWithoutStocktakeLinesInput>, Prisma.ProductUncheckedUpdateWithoutStocktakeLinesInput>
+}
+
+export type ProductCreateNestedOneWithoutStocktakeCountsInput = {
+  create?: Prisma.XOR<Prisma.ProductCreateWithoutStocktakeCountsInput, Prisma.ProductUncheckedCreateWithoutStocktakeCountsInput>
+  connectOrCreate?: Prisma.ProductCreateOrConnectWithoutStocktakeCountsInput
+  connect?: Prisma.ProductWhereUniqueInput
+}
+
+export type ProductUpdateOneRequiredWithoutStocktakeCountsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductCreateWithoutStocktakeCountsInput, Prisma.ProductUncheckedCreateWithoutStocktakeCountsInput>
+  connectOrCreate?: Prisma.ProductCreateOrConnectWithoutStocktakeCountsInput
+  upsert?: Prisma.ProductUpsertWithoutStocktakeCountsInput
+  connect?: Prisma.ProductWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProductUpdateToOneWithWhereWithoutStocktakeCountsInput, Prisma.ProductUpdateWithoutStocktakeCountsInput>, Prisma.ProductUncheckedUpdateWithoutStocktakeCountsInput>
+}
+
 export type ProductCreateWithoutCreatedByInput = {
   id?: string
   name: string
@@ -905,6 +947,8 @@ export type ProductCreateWithoutCreatedByInput = {
   ways?: Prisma.CableWayCreateNestedManyWithoutProductInput
   assets?: Prisma.AssetCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -925,6 +969,8 @@ export type ProductUncheckedCreateWithoutCreatedByInput = {
   ways?: Prisma.CableWayUncheckedCreateNestedManyWithoutProductInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -990,6 +1036,8 @@ export type ProductCreateWithoutManufacturerInput = {
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedProductsInput
   assets?: Prisma.AssetCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -1010,6 +1058,8 @@ export type ProductUncheckedCreateWithoutManufacturerInput = {
   ways?: Prisma.CableWayUncheckedCreateNestedManyWithoutProductInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -1056,6 +1106,8 @@ export type ProductCreateWithoutConnectorARefInput = {
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedProductsInput
   assets?: Prisma.AssetCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -1076,6 +1128,8 @@ export type ProductUncheckedCreateWithoutConnectorARefInput = {
   ways?: Prisma.CableWayUncheckedCreateNestedManyWithoutProductInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -1106,6 +1160,8 @@ export type ProductCreateWithoutConnectorBRefInput = {
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedProductsInput
   assets?: Prisma.AssetCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -1126,6 +1182,8 @@ export type ProductUncheckedCreateWithoutConnectorBRefInput = {
   ways?: Prisma.CableWayUncheckedCreateNestedManyWithoutProductInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -1189,6 +1247,8 @@ export type ProductCreateWithoutPortsInput = {
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedProductsInput
   assets?: Prisma.AssetCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutFeaturedProductsInput
 }
 
@@ -1209,6 +1269,8 @@ export type ProductUncheckedCreateWithoutPortsInput = {
   ways?: Prisma.CableWayUncheckedCreateNestedManyWithoutProductInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutFeaturedProductsInput
 }
 
@@ -1245,6 +1307,8 @@ export type ProductUpdateWithoutPortsInput = {
   createdBy?: Prisma.UserUpdateOneWithoutCreatedProductsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutFeaturedProductsNestedInput
 }
 
@@ -1265,6 +1329,8 @@ export type ProductUncheckedUpdateWithoutPortsInput = {
   ways?: Prisma.CableWayUncheckedUpdateManyWithoutProductNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutFeaturedProductsNestedInput
 }
 
@@ -1284,6 +1350,8 @@ export type ProductCreateWithoutWaysInput = {
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedProductsInput
   assets?: Prisma.AssetCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -1304,6 +1372,8 @@ export type ProductUncheckedCreateWithoutWaysInput = {
   updatedAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -1340,6 +1410,8 @@ export type ProductUpdateWithoutWaysInput = {
   createdBy?: Prisma.UserUpdateOneWithoutCreatedProductsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -1360,6 +1432,8 @@ export type ProductUncheckedUpdateWithoutWaysInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -1380,6 +1454,8 @@ export type ProductCreateWithoutCategoryInput = {
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedProductsInput
   assets?: Prisma.AssetCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -1400,6 +1476,8 @@ export type ProductUncheckedCreateWithoutCategoryInput = {
   ways?: Prisma.CableWayUncheckedCreateNestedManyWithoutProductInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -1446,6 +1524,8 @@ export type ProductCreateWithoutOrgPricesInput = {
   ways?: Prisma.CableWayCreateNestedManyWithoutProductInput
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedProductsInput
   assets?: Prisma.AssetCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -1466,6 +1546,8 @@ export type ProductUncheckedCreateWithoutOrgPricesInput = {
   updatedAt?: Date | string
   ways?: Prisma.CableWayUncheckedCreateNestedManyWithoutProductInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -1502,6 +1584,8 @@ export type ProductUpdateWithoutOrgPricesInput = {
   ways?: Prisma.CableWayUpdateManyWithoutProductNestedInput
   createdBy?: Prisma.UserUpdateOneWithoutCreatedProductsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -1522,6 +1606,8 @@ export type ProductUncheckedUpdateWithoutOrgPricesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ways?: Prisma.CableWayUncheckedUpdateManyWithoutProductNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -1542,6 +1628,8 @@ export type ProductCreateWithoutAssetsInput = {
   ways?: Prisma.CableWayCreateNestedManyWithoutProductInput
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedProductsInput
   orgPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -1562,6 +1650,8 @@ export type ProductUncheckedCreateWithoutAssetsInput = {
   updatedAt?: Date | string
   ways?: Prisma.CableWayUncheckedCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutProductInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutFeaturedProductsInput
 }
@@ -1598,6 +1688,8 @@ export type ProductUpdateWithoutAssetsInput = {
   ways?: Prisma.CableWayUpdateManyWithoutProductNestedInput
   createdBy?: Prisma.UserUpdateOneWithoutCreatedProductsNestedInput
   orgPrices?: Prisma.OrgProductPriceUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -1618,6 +1710,8 @@ export type ProductUncheckedUpdateWithoutAssetsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ways?: Prisma.CableWayUncheckedUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -1639,6 +1733,8 @@ export type ProductCreateWithoutFeaturedInBundleTemplatesInput = {
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedProductsInput
   assets?: Prisma.AssetCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortCreateNestedManyWithoutProductInput
 }
 
@@ -1659,6 +1755,8 @@ export type ProductUncheckedCreateWithoutFeaturedInBundleTemplatesInput = {
   ways?: Prisma.CableWayUncheckedCreateNestedManyWithoutProductInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProductInput
   orgPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutProductInput
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutProductInput
 }
 
@@ -1681,6 +1779,214 @@ export type ProductUpdateWithWhereUniqueWithoutFeaturedInBundleTemplatesInput = 
 export type ProductUpdateManyWithWhereWithoutFeaturedInBundleTemplatesInput = {
   where: Prisma.ProductScalarWhereInput
   data: Prisma.XOR<Prisma.ProductUpdateManyMutationInput, Prisma.ProductUncheckedUpdateManyWithoutFeaturedInBundleTemplatesInput>
+}
+
+export type ProductCreateWithoutStocktakeLinesInput = {
+  id?: string
+  name: string
+  imagePath?: string | null
+  cableType?: string | null
+  lengthCm?: number | null
+  isLicense?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput
+  category: Prisma.CategoryCreateNestedOneWithoutProductsInput
+  connectorARef?: Prisma.ConnectorCreateNestedOneWithoutProductEndsAInput
+  connectorBRef?: Prisma.ConnectorCreateNestedOneWithoutProductEndsBInput
+  ways?: Prisma.CableWayCreateNestedManyWithoutProductInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedProductsInput
+  assets?: Prisma.AssetCreateNestedManyWithoutProductInput
+  orgPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutProductInput
+  ports?: Prisma.ProductPortCreateNestedManyWithoutProductInput
+  featuredInBundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutFeaturedProductsInput
+}
+
+export type ProductUncheckedCreateWithoutStocktakeLinesInput = {
+  id?: string
+  name: string
+  manufacturerId?: string | null
+  categoryId: string
+  imagePath?: string | null
+  cableType?: string | null
+  connectorAId?: string | null
+  connectorBId?: string | null
+  lengthCm?: number | null
+  isLicense?: boolean
+  createdById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  ways?: Prisma.CableWayUncheckedCreateNestedManyWithoutProductInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProductInput
+  orgPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutProductInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutProductInput
+  ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutProductInput
+  featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutFeaturedProductsInput
+}
+
+export type ProductCreateOrConnectWithoutStocktakeLinesInput = {
+  where: Prisma.ProductWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductCreateWithoutStocktakeLinesInput, Prisma.ProductUncheckedCreateWithoutStocktakeLinesInput>
+}
+
+export type ProductUpsertWithoutStocktakeLinesInput = {
+  update: Prisma.XOR<Prisma.ProductUpdateWithoutStocktakeLinesInput, Prisma.ProductUncheckedUpdateWithoutStocktakeLinesInput>
+  create: Prisma.XOR<Prisma.ProductCreateWithoutStocktakeLinesInput, Prisma.ProductUncheckedCreateWithoutStocktakeLinesInput>
+  where?: Prisma.ProductWhereInput
+}
+
+export type ProductUpdateToOneWithWhereWithoutStocktakeLinesInput = {
+  where?: Prisma.ProductWhereInput
+  data: Prisma.XOR<Prisma.ProductUpdateWithoutStocktakeLinesInput, Prisma.ProductUncheckedUpdateWithoutStocktakeLinesInput>
+}
+
+export type ProductUpdateWithoutStocktakeLinesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput
+  category?: Prisma.CategoryUpdateOneRequiredWithoutProductsNestedInput
+  connectorARef?: Prisma.ConnectorUpdateOneWithoutProductEndsANestedInput
+  connectorBRef?: Prisma.ConnectorUpdateOneWithoutProductEndsBNestedInput
+  ways?: Prisma.CableWayUpdateManyWithoutProductNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedProductsNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutProductNestedInput
+  orgPrices?: Prisma.OrgProductPriceUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutProductNestedInput
+  ports?: Prisma.ProductPortUpdateManyWithoutProductNestedInput
+  featuredInBundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutFeaturedProductsNestedInput
+}
+
+export type ProductUncheckedUpdateWithoutStocktakeLinesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ways?: Prisma.CableWayUncheckedUpdateManyWithoutProductNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutProductNestedInput
+  orgPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutProductNestedInput
+  ports?: Prisma.ProductPortUncheckedUpdateManyWithoutProductNestedInput
+  featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutFeaturedProductsNestedInput
+}
+
+export type ProductCreateWithoutStocktakeCountsInput = {
+  id?: string
+  name: string
+  imagePath?: string | null
+  cableType?: string | null
+  lengthCm?: number | null
+  isLicense?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput
+  category: Prisma.CategoryCreateNestedOneWithoutProductsInput
+  connectorARef?: Prisma.ConnectorCreateNestedOneWithoutProductEndsAInput
+  connectorBRef?: Prisma.ConnectorCreateNestedOneWithoutProductEndsBInput
+  ways?: Prisma.CableWayCreateNestedManyWithoutProductInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedProductsInput
+  assets?: Prisma.AssetCreateNestedManyWithoutProductInput
+  orgPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutProductInput
+  ports?: Prisma.ProductPortCreateNestedManyWithoutProductInput
+  featuredInBundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutFeaturedProductsInput
+}
+
+export type ProductUncheckedCreateWithoutStocktakeCountsInput = {
+  id?: string
+  name: string
+  manufacturerId?: string | null
+  categoryId: string
+  imagePath?: string | null
+  cableType?: string | null
+  connectorAId?: string | null
+  connectorBId?: string | null
+  lengthCm?: number | null
+  isLicense?: boolean
+  createdById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  ways?: Prisma.CableWayUncheckedCreateNestedManyWithoutProductInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProductInput
+  orgPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutProductInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutProductInput
+  ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutProductInput
+  featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutFeaturedProductsInput
+}
+
+export type ProductCreateOrConnectWithoutStocktakeCountsInput = {
+  where: Prisma.ProductWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductCreateWithoutStocktakeCountsInput, Prisma.ProductUncheckedCreateWithoutStocktakeCountsInput>
+}
+
+export type ProductUpsertWithoutStocktakeCountsInput = {
+  update: Prisma.XOR<Prisma.ProductUpdateWithoutStocktakeCountsInput, Prisma.ProductUncheckedUpdateWithoutStocktakeCountsInput>
+  create: Prisma.XOR<Prisma.ProductCreateWithoutStocktakeCountsInput, Prisma.ProductUncheckedCreateWithoutStocktakeCountsInput>
+  where?: Prisma.ProductWhereInput
+}
+
+export type ProductUpdateToOneWithWhereWithoutStocktakeCountsInput = {
+  where?: Prisma.ProductWhereInput
+  data: Prisma.XOR<Prisma.ProductUpdateWithoutStocktakeCountsInput, Prisma.ProductUncheckedUpdateWithoutStocktakeCountsInput>
+}
+
+export type ProductUpdateWithoutStocktakeCountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput
+  category?: Prisma.CategoryUpdateOneRequiredWithoutProductsNestedInput
+  connectorARef?: Prisma.ConnectorUpdateOneWithoutProductEndsANestedInput
+  connectorBRef?: Prisma.ConnectorUpdateOneWithoutProductEndsBNestedInput
+  ways?: Prisma.CableWayUpdateManyWithoutProductNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedProductsNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutProductNestedInput
+  orgPrices?: Prisma.OrgProductPriceUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutProductNestedInput
+  ports?: Prisma.ProductPortUpdateManyWithoutProductNestedInput
+  featuredInBundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutFeaturedProductsNestedInput
+}
+
+export type ProductUncheckedUpdateWithoutStocktakeCountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ways?: Prisma.CableWayUncheckedUpdateManyWithoutProductNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutProductNestedInput
+  orgPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutProductNestedInput
+  ports?: Prisma.ProductPortUncheckedUpdateManyWithoutProductNestedInput
+  featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutFeaturedProductsNestedInput
 }
 
 export type ProductCreateManyCreatedByInput = {
@@ -1714,6 +2020,8 @@ export type ProductUpdateWithoutCreatedByInput = {
   ways?: Prisma.CableWayUpdateManyWithoutProductNestedInput
   assets?: Prisma.AssetUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -1734,6 +2042,8 @@ export type ProductUncheckedUpdateWithoutCreatedByInput = {
   ways?: Prisma.CableWayUncheckedUpdateManyWithoutProductNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -1784,6 +2094,8 @@ export type ProductUpdateWithoutManufacturerInput = {
   createdBy?: Prisma.UserUpdateOneWithoutCreatedProductsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -1804,6 +2116,8 @@ export type ProductUncheckedUpdateWithoutManufacturerInput = {
   ways?: Prisma.CableWayUncheckedUpdateManyWithoutProductNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -1869,6 +2183,8 @@ export type ProductUpdateWithoutConnectorARefInput = {
   createdBy?: Prisma.UserUpdateOneWithoutCreatedProductsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -1889,6 +2205,8 @@ export type ProductUncheckedUpdateWithoutConnectorARefInput = {
   ways?: Prisma.CableWayUncheckedUpdateManyWithoutProductNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -1924,6 +2242,8 @@ export type ProductUpdateWithoutConnectorBRefInput = {
   createdBy?: Prisma.UserUpdateOneWithoutCreatedProductsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -1944,6 +2264,8 @@ export type ProductUncheckedUpdateWithoutConnectorBRefInput = {
   ways?: Prisma.CableWayUncheckedUpdateManyWithoutProductNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -1994,6 +2316,8 @@ export type ProductUpdateWithoutCategoryInput = {
   createdBy?: Prisma.UserUpdateOneWithoutCreatedProductsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -2014,6 +2338,8 @@ export type ProductUncheckedUpdateWithoutCategoryInput = {
   ways?: Prisma.CableWayUncheckedUpdateManyWithoutProductNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutProductNestedInput
   featuredInBundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutFeaturedProductsNestedInput
 }
@@ -2050,6 +2376,8 @@ export type ProductUpdateWithoutFeaturedInBundleTemplatesInput = {
   createdBy?: Prisma.UserUpdateOneWithoutCreatedProductsNestedInput
   assets?: Prisma.AssetUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUpdateManyWithoutProductNestedInput
 }
 
@@ -2070,6 +2398,8 @@ export type ProductUncheckedUpdateWithoutFeaturedInBundleTemplatesInput = {
   ways?: Prisma.CableWayUncheckedUpdateManyWithoutProductNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProductNestedInput
   orgPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutProductNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutProductNestedInput
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutProductNestedInput
 }
 
@@ -2098,6 +2428,8 @@ export type ProductCountOutputType = {
   ways: number
   assets: number
   orgPrices: number
+  stocktakeLines: number
+  stocktakeCounts: number
   ports: number
   featuredInBundleTemplates: number
 }
@@ -2106,6 +2438,8 @@ export type ProductCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   ways?: boolean | ProductCountOutputTypeCountWaysArgs
   assets?: boolean | ProductCountOutputTypeCountAssetsArgs
   orgPrices?: boolean | ProductCountOutputTypeCountOrgPricesArgs
+  stocktakeLines?: boolean | ProductCountOutputTypeCountStocktakeLinesArgs
+  stocktakeCounts?: boolean | ProductCountOutputTypeCountStocktakeCountsArgs
   ports?: boolean | ProductCountOutputTypeCountPortsArgs
   featuredInBundleTemplates?: boolean | ProductCountOutputTypeCountFeaturedInBundleTemplatesArgs
 }
@@ -2139,6 +2473,20 @@ export type ProductCountOutputTypeCountAssetsArgs<ExtArgs extends runtime.Types.
  */
 export type ProductCountOutputTypeCountOrgPricesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.OrgProductPriceWhereInput
+}
+
+/**
+ * ProductCountOutputType without action
+ */
+export type ProductCountOutputTypeCountStocktakeLinesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StocktakeLineWhereInput
+}
+
+/**
+ * ProductCountOutputType without action
+ */
+export type ProductCountOutputTypeCountStocktakeCountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StocktakeCountWhereInput
 }
 
 /**
@@ -2178,6 +2526,8 @@ export type ProductSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   createdBy?: boolean | Prisma.Product$createdByArgs<ExtArgs>
   assets?: boolean | Prisma.Product$assetsArgs<ExtArgs>
   orgPrices?: boolean | Prisma.Product$orgPricesArgs<ExtArgs>
+  stocktakeLines?: boolean | Prisma.Product$stocktakeLinesArgs<ExtArgs>
+  stocktakeCounts?: boolean | Prisma.Product$stocktakeCountsArgs<ExtArgs>
   ports?: boolean | Prisma.Product$portsArgs<ExtArgs>
   featuredInBundleTemplates?: boolean | Prisma.Product$featuredInBundleTemplatesArgs<ExtArgs>
   _count?: boolean | Prisma.ProductCountOutputTypeDefaultArgs<ExtArgs>
@@ -2251,6 +2601,8 @@ export type ProductInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   createdBy?: boolean | Prisma.Product$createdByArgs<ExtArgs>
   assets?: boolean | Prisma.Product$assetsArgs<ExtArgs>
   orgPrices?: boolean | Prisma.Product$orgPricesArgs<ExtArgs>
+  stocktakeLines?: boolean | Prisma.Product$stocktakeLinesArgs<ExtArgs>
+  stocktakeCounts?: boolean | Prisma.Product$stocktakeCountsArgs<ExtArgs>
   ports?: boolean | Prisma.Product$portsArgs<ExtArgs>
   featuredInBundleTemplates?: boolean | Prisma.Product$featuredInBundleTemplatesArgs<ExtArgs>
   _count?: boolean | Prisma.ProductCountOutputTypeDefaultArgs<ExtArgs>
@@ -2281,6 +2633,8 @@ export type $ProductPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     createdBy: Prisma.$UserPayload<ExtArgs> | null
     assets: Prisma.$AssetPayload<ExtArgs>[]
     orgPrices: Prisma.$OrgProductPricePayload<ExtArgs>[]
+    stocktakeLines: Prisma.$StocktakeLinePayload<ExtArgs>[]
+    stocktakeCounts: Prisma.$StocktakeCountPayload<ExtArgs>[]
     /**
      * The connectors built into this device. Empty on cables, whose ends are
      * `connectorAId/BId`, and on licences.
@@ -2745,6 +3099,8 @@ export interface Prisma__ProductClient<T, Null = never, ExtArgs extends runtime.
   createdBy<T extends Prisma.Product$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Product$createdByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   assets<T extends Prisma.Product$assetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Product$assetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orgPrices<T extends Prisma.Product$orgPricesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Product$orgPricesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrgProductPricePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stocktakeLines<T extends Prisma.Product$stocktakeLinesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Product$stocktakeLinesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StocktakeLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stocktakeCounts<T extends Prisma.Product$stocktakeCountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Product$stocktakeCountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StocktakeCountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ports<T extends Prisma.Product$portsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Product$portsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPortPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   featuredInBundleTemplates<T extends Prisma.Product$featuredInBundleTemplatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Product$featuredInBundleTemplatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BundleTemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -3335,6 +3691,54 @@ export type Product$orgPricesArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.OrgProductPriceScalarFieldEnum | Prisma.OrgProductPriceScalarFieldEnum[]
+}
+
+/**
+ * Product.stocktakeLines
+ */
+export type Product$stocktakeLinesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StocktakeLine
+   */
+  select?: Prisma.StocktakeLineSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StocktakeLine
+   */
+  omit?: Prisma.StocktakeLineOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StocktakeLineInclude<ExtArgs> | null
+  where?: Prisma.StocktakeLineWhereInput
+  orderBy?: Prisma.StocktakeLineOrderByWithRelationInput | Prisma.StocktakeLineOrderByWithRelationInput[]
+  cursor?: Prisma.StocktakeLineWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StocktakeLineScalarFieldEnum | Prisma.StocktakeLineScalarFieldEnum[]
+}
+
+/**
+ * Product.stocktakeCounts
+ */
+export type Product$stocktakeCountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StocktakeCount
+   */
+  select?: Prisma.StocktakeCountSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StocktakeCount
+   */
+  omit?: Prisma.StocktakeCountOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StocktakeCountInclude<ExtArgs> | null
+  where?: Prisma.StocktakeCountWhereInput
+  orderBy?: Prisma.StocktakeCountOrderByWithRelationInput | Prisma.StocktakeCountOrderByWithRelationInput[]
+  cursor?: Prisma.StocktakeCountWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StocktakeCountScalarFieldEnum | Prisma.StocktakeCountScalarFieldEnum[]
 }
 
 /**

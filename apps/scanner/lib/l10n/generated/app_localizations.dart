@@ -840,6 +840,360 @@ abstract class S {
   /// In en, this message translates to:
   /// **'The server returned no session token.'**
   String get errorNoToken;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// Counting what an organization actually has. German: Inventur.
+  ///
+  /// In en, this message translates to:
+  /// **'Stocktake'**
+  String get stocktake;
+
+  /// No description provided for @stocktakeNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New stocktake'**
+  String get stocktakeNew;
+
+  /// No description provided for @stocktakeNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No stocktake is open.'**
+  String get stocktakeNone;
+
+  /// No description provided for @stocktakeProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{found} of {expected} counted'**
+  String stocktakeProgress(int found, int expected);
+
+  /// Units checked out on a production when the stocktake started.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} out on jobs'**
+  String stocktakeOutCount(int count);
+
+  /// No description provided for @stocktakeUnexpectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} unexpected'**
+  String stocktakeUnexpectedCount(int count);
+
+  /// No description provided for @stocktakeWhereAreYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Where are you counting?'**
+  String get stocktakeWhereAreYou;
+
+  /// No description provided for @stocktakeOrganization.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization'**
+  String get stocktakeOrganization;
+
+  /// No description provided for @stocktakeLocations.
+  ///
+  /// In en, this message translates to:
+  /// **'Locations'**
+  String get stocktakeLocations;
+
+  /// No description provided for @stocktakeCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get stocktakeCategories;
+
+  /// No description provided for @stocktakeNoneMeansAll.
+  ///
+  /// In en, this message translates to:
+  /// **'None selected means all.'**
+  String get stocktakeNoneMeansAll;
+
+  /// No description provided for @stocktakeName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get stocktakeName;
+
+  /// No description provided for @stocktakeDefaultName.
+  ///
+  /// In en, this message translates to:
+  /// **'Stocktake {date}'**
+  String stocktakeDefaultName(String date);
+
+  /// No description provided for @stocktakePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'{units} units to scan · {loose} loose units to count · {out} out on jobs'**
+  String stocktakePreview(int units, int loose, int out);
+
+  /// No description provided for @stocktakeOverlap.
+  ///
+  /// In en, this message translates to:
+  /// **'Overlaps with open stocktake {name} ({count} units)'**
+  String stocktakeOverlap(String name, int count);
+
+  /// No description provided for @stocktakeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start stocktake'**
+  String get stocktakeStart;
+
+  /// No description provided for @stocktakeNoOrgs.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting a stocktake needs at least the MEMBER role in an organization.'**
+  String get stocktakeNoOrgs;
+
+  /// Tab listing the units still to be found at the counter's location.
+  ///
+  /// In en, this message translates to:
+  /// **'Open here'**
+  String get stocktakeTabOpen;
+
+  /// No description provided for @stocktakeFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Counted'**
+  String get stocktakeFound;
+
+  /// No description provided for @stocktakeUnexpected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not on the list'**
+  String get stocktakeUnexpected;
+
+  /// No description provided for @stocktakeAlready.
+  ///
+  /// In en, this message translates to:
+  /// **'Already counted by {name}'**
+  String stocktakeAlready(String name);
+
+  /// No description provided for @stocktakeWasOut.
+  ///
+  /// In en, this message translates to:
+  /// **'was checked out to {name}'**
+  String stocktakeWasOut(String name);
+
+  /// No description provided for @stocktakeBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bundle {name}'**
+  String stocktakeBundle(String name);
+
+  /// Sheet after scanning a unit with accessories.
+  ///
+  /// In en, this message translates to:
+  /// **'Is everything with it?'**
+  String get stocktakeConfirmAccessories;
+
+  /// Sheet after scanning a bundle's tag.
+  ///
+  /// In en, this message translates to:
+  /// **'Is everything in it?'**
+  String get stocktakeConfirmBundle;
+
+  /// No description provided for @stocktakeConfirmHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncheck whatever is missing.'**
+  String get stocktakeConfirmHint;
+
+  /// No description provided for @stocktakeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get stocktakeConfirm;
+
+  /// No description provided for @stocktakeConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} confirmed'**
+  String stocktakeConfirmed(int count);
+
+  /// No description provided for @stocktakeCountedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'counted by {name}'**
+  String stocktakeCountedBy(String name);
+
+  /// No description provided for @stocktakeNothingOpenHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing left to find here.'**
+  String get stocktakeNothingOpenHere;
+
+  /// Heading for untagged products, which are counted as a number.
+  ///
+  /// In en, this message translates to:
+  /// **'Count instead of scan'**
+  String get stocktakeLoose;
+
+  /// No description provided for @stocktakeLooseLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{expected} expected here · {counted} counted in total'**
+  String stocktakeLooseLine(int expected, int counted);
+
+  /// No description provided for @stocktakeYourCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Your count here'**
+  String get stocktakeYourCount;
+
+  /// No description provided for @stocktakeTickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to count by hand'**
+  String get stocktakeTickHint;
+
+  /// No description provided for @stocktakeManualTicked.
+  ///
+  /// In en, this message translates to:
+  /// **'Counted by hand'**
+  String get stocktakeManualTicked;
+
+  /// No description provided for @stocktakeUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Take back count'**
+  String get stocktakeUndo;
+
+  /// No description provided for @stocktakeUnticked.
+  ///
+  /// In en, this message translates to:
+  /// **'Count taken back'**
+  String get stocktakeUnticked;
+
+  /// No description provided for @stocktakeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get stocktakeNote;
+
+  /// Flag on a counted unit that is damaged or dirty.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get stocktakeNeedsAttention;
+
+  /// No description provided for @stocktakeEditNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note and condition'**
+  String get stocktakeEditNote;
+
+  /// No description provided for @stocktakeClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close stocktake'**
+  String get stocktakeClose;
+
+  /// No description provided for @stocktakeCloseConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} units not counted yet will be marked missing. This cannot be undone.'**
+  String stocktakeCloseConfirm(int count);
+
+  /// No description provided for @stocktakeClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Stocktake closed. Corrections, such as marking missing units or moving found ones, are applied on the report in the web app.'**
+  String get stocktakeClosed;
+
+  /// No description provided for @stocktakeChangeLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Change location'**
+  String get stocktakeChangeLocation;
+
+  /// No description provided for @reasonOtherOrg.
+  ///
+  /// In en, this message translates to:
+  /// **'Belongs to another organization'**
+  String get reasonOtherOrg;
+
+  /// No description provided for @reasonRetired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sold or decommissioned'**
+  String get reasonRetired;
+
+  /// No description provided for @reasonAddedLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered after the start'**
+  String get reasonAddedLater;
+
+  /// No description provided for @reasonOtherLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned to another location'**
+  String get reasonOtherLocation;
+
+  /// No description provided for @reasonOutOfScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Not part of this stocktake'**
+  String get reasonOutOfScope;
+
+  /// The STOCKTAKE_COUNTED history entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Stocktake'**
+  String get actionStocktakeCounted;
+
+  /// No description provided for @errorStocktakeNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This stocktake no longer exists.'**
+  String get errorStocktakeNotFound;
+
+  /// No description provided for @errorStocktakeClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'This stocktake is closed.'**
+  String get errorStocktakeClosed;
+
+  /// No description provided for @errorStocktakeNotClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Close the stocktake first.'**
+  String get errorStocktakeNotClosed;
+
+  /// No description provided for @errorStocktakeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches this selection.'**
+  String get errorStocktakeEmpty;
+
+  /// No description provided for @errorStocktakeNotYourTick.
+  ///
+  /// In en, this message translates to:
+  /// **'Only whoever counted a unit can change it.'**
+  String get errorStocktakeNotYourTick;
+
+  /// No description provided for @errorStocktakeNotFoundYet.
+  ///
+  /// In en, this message translates to:
+  /// **'This unit has not been counted yet.'**
+  String get errorStocktakeNotFoundYet;
+
+  /// No description provided for @errorStocktakeProductNotCounted.
+  ///
+  /// In en, this message translates to:
+  /// **'This product is not counted in this stocktake.'**
+  String get errorStocktakeProductNotCounted;
+
+  /// No description provided for @errorStocktakeActionApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'This correction has already been applied.'**
+  String get errorStocktakeActionApplied;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

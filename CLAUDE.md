@@ -77,6 +77,7 @@ async function requireAuth() {
 | `src/lib/remote/invitations.remote.ts`     | `getSignUpStatus`, `getInvitationPreview`, `getSignUpSettings`, `setSignUpEnabled`, `getInvitations`, `inviteUser`, `resendInvitation`, `revokeInvitation`                                                                                |
 | `src/lib/remote/addresses.remote.ts`       | `getKnownAddresses` — feeds the picker in `AddressInput`; a pick copies the values, owners never share an `Address` row                                                                                                                   |
 | `src/lib/remote/service-catalog.remote.ts` | `getServiceCatalog` and CRUD for `ServiceCategory` / `OrgService` — the org's price list for service lines (Personal, Transport …); a line copies from it and never points back                                                           |
+| `src/lib/remote/stocktakes.remote.ts`      | `getStocktakes`, `getStocktake`, `getStocktakePreview`, `createStocktake`, `scanStocktakeCode`, `tickStocktake`, `setStocktakeCount`, `closeStocktake`, `applyStocktakeAction`, `recountStocktake` …                                      |
 
 ## External API (`/api/v1`)
 
@@ -227,6 +228,29 @@ change. Its `category*` columns snapshot a per-org `ServiceCategory`, not a `Cat
 `categorySortOrder`/`position` decide where it prints: `groupBillingItems` puts service sections
 after the equipment and never merges two service lines. Every copy of a document (revision,
 copy to customer, invoice) goes through `copyItem`, so a new item column has to be added there.
+
+## Stocktakes (Inventur)
+
+"Inventory" is taken (the catalogue, the scanner's Inventory tab), so counting stock is a
+**stocktake** in code and English UI, **Inventur** in German. Rules live in
+`src/lib/server/services/stocktake.ts`, shared by `stocktakes.remote.ts` and `/api/v1/stocktakes`.
+
+- **Starting snapshots.** The scope (org + optional locations/categories/products) is resolved
+  once into `StocktakeItem` rows — a unit with a tag, an accessory, a bundle member or a unit
+  with accessories — and `StocktakeLine` rows, a number per product and location for loose
+  untagged units. The expected list never moves afterwards. Units `CHECKED_OUT` at the snapshot
+  are accounted for (`out`), not missing. Accessories come along regardless of the filter.
+- **Counting changes no asset.** A scan ticks a unit (or records it as `unexpected`, with a
+  reason); a bundle tag ticks nothing and returns the members to confirm, a unit with
+  accessories returns those. Whoever ticked a unit owns the tick — only they can untick or
+  annotate it. Loose counts are per counter + location (`StocktakeCount`) and summed.
+- **Closing is final** and writes one `STOCKTAKE_COUNTED` entry per unit of the org into its
+  history; ticks and counts stay in `StocktakeEvent`. The corrections (mark missing
+  unavailable, restore found, move to where found, flag maintenance/broken) are separate
+  actions on the closed report, each applied once (`appliedActions`), computed against the
+  assets as they are _now_ (`actionCandidates`). Cancelling an open one deletes it.
+- MEMBER+ of the org may do all of it. Print at `/stocktakes/[id]/print`, CSV at
+  `/stocktakes/[id]/export.csv`.
 
 ## Who may change a product
 

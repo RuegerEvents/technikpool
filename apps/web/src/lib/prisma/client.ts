@@ -247,3 +247,28 @@ export type CatalogTransaction = Prisma.CatalogTransactionModel
  * 
  */
 export type InvoiceItem = Prisma.InvoiceItemModel
+/**
+ * Model Stocktake
+ * 
+ */
+export type Stocktake = Prisma.StocktakeModel
+/**
+ * Model StocktakeItem
+ * 
+ */
+export type StocktakeItem = Prisma.StocktakeItemModel
+/**
+ * Model StocktakeLine
+ * 
+ */
+export type StocktakeLine = Prisma.StocktakeLineModel
+/**
+ * Model StocktakeCount
+ * 
+ */
+export type StocktakeCount = Prisma.StocktakeCountModel
+/**
+ * Model StocktakeEvent
+ * 
+ */
+export type StocktakeEvent = Prisma.StocktakeEventModel

@@ -87,7 +87,12 @@ export const ModelName = {
   OfferItem: 'OfferItem',
   Invoice: 'Invoice',
   CatalogTransaction: 'CatalogTransaction',
-  InvoiceItem: 'InvoiceItem'
+  InvoiceItem: 'InvoiceItem',
+  Stocktake: 'Stocktake',
+  StocktakeItem: 'StocktakeItem',
+  StocktakeLine: 'StocktakeLine',
+  StocktakeCount: 'StocktakeCount',
+  StocktakeEvent: 'StocktakeEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -746,6 +751,84 @@ export const InvoiceItemScalarFieldEnum = {
 export type InvoiceItemScalarFieldEnum = (typeof InvoiceItemScalarFieldEnum)[keyof typeof InvoiceItemScalarFieldEnum]
 
 
+export const StocktakeScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  name: 'name',
+  status: 'status',
+  scope: 'scope',
+  recountOfId: 'recountOfId',
+  appliedActions: 'appliedActions',
+  createdById: 'createdById',
+  closedById: 'closedById',
+  closedAt: 'closedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StocktakeScalarFieldEnum = (typeof StocktakeScalarFieldEnum)[keyof typeof StocktakeScalarFieldEnum]
+
+
+export const StocktakeItemScalarFieldEnum = {
+  id: 'id',
+  stocktakeId: 'stocktakeId',
+  assetId: 'assetId',
+  expected: 'expected',
+  expectedLocationId: 'expectedLocationId',
+  outProductionId: 'outProductionId',
+  outProductionName: 'outProductionName',
+  unexpectedReason: 'unexpectedReason',
+  foundAt: 'foundAt',
+  foundById: 'foundById',
+  foundLocationId: 'foundLocationId',
+  foundVia: 'foundVia',
+  note: 'note',
+  needsAttention: 'needsAttention'
+} as const
+
+export type StocktakeItemScalarFieldEnum = (typeof StocktakeItemScalarFieldEnum)[keyof typeof StocktakeItemScalarFieldEnum]
+
+
+export const StocktakeLineScalarFieldEnum = {
+  id: 'id',
+  stocktakeId: 'stocktakeId',
+  productId: 'productId',
+  locationId: 'locationId',
+  expected: 'expected',
+  out: 'out'
+} as const
+
+export type StocktakeLineScalarFieldEnum = (typeof StocktakeLineScalarFieldEnum)[keyof typeof StocktakeLineScalarFieldEnum]
+
+
+export const StocktakeCountScalarFieldEnum = {
+  id: 'id',
+  stocktakeId: 'stocktakeId',
+  productId: 'productId',
+  locationId: 'locationId',
+  userId: 'userId',
+  count: 'count',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StocktakeCountScalarFieldEnum = (typeof StocktakeCountScalarFieldEnum)[keyof typeof StocktakeCountScalarFieldEnum]
+
+
+export const StocktakeEventScalarFieldEnum = {
+  id: 'id',
+  stocktakeId: 'stocktakeId',
+  userId: 'userId',
+  action: 'action',
+  assetId: 'assetId',
+  productId: 'productId',
+  locationId: 'locationId',
+  data: 'data',
+  createdAt: 'createdAt'
+} as const
+
+export type StocktakeEventScalarFieldEnum = (typeof StocktakeEventScalarFieldEnum)[keyof typeof StocktakeEventScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -760,6 +843,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

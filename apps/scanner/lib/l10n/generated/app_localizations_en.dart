@@ -405,4 +405,212 @@ class SEn extends S {
 
   @override
   String get errorNoToken => 'The server returned no session token.';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get stocktake => 'Stocktake';
+
+  @override
+  String get stocktakeNew => 'New stocktake';
+
+  @override
+  String get stocktakeNone => 'No stocktake is open.';
+
+  @override
+  String stocktakeProgress(int found, int expected) {
+    return '$found of $expected counted';
+  }
+
+  @override
+  String stocktakeOutCount(int count) {
+    return '$count out on jobs';
+  }
+
+  @override
+  String stocktakeUnexpectedCount(int count) {
+    return '$count unexpected';
+  }
+
+  @override
+  String get stocktakeWhereAreYou => 'Where are you counting?';
+
+  @override
+  String get stocktakeOrganization => 'Organization';
+
+  @override
+  String get stocktakeLocations => 'Locations';
+
+  @override
+  String get stocktakeCategories => 'Categories';
+
+  @override
+  String get stocktakeNoneMeansAll => 'None selected means all.';
+
+  @override
+  String get stocktakeName => 'Name';
+
+  @override
+  String stocktakeDefaultName(String date) {
+    return 'Stocktake $date';
+  }
+
+  @override
+  String stocktakePreview(int units, int loose, int out) {
+    return '$units units to scan · $loose loose units to count · $out out on jobs';
+  }
+
+  @override
+  String stocktakeOverlap(String name, int count) {
+    return 'Overlaps with open stocktake $name ($count units)';
+  }
+
+  @override
+  String get stocktakeStart => 'Start stocktake';
+
+  @override
+  String get stocktakeNoOrgs =>
+      'Starting a stocktake needs at least the MEMBER role in an organization.';
+
+  @override
+  String get stocktakeTabOpen => 'Open here';
+
+  @override
+  String get stocktakeFound => 'Counted';
+
+  @override
+  String get stocktakeUnexpected => 'Not on the list';
+
+  @override
+  String stocktakeAlready(String name) {
+    return 'Already counted by $name';
+  }
+
+  @override
+  String stocktakeWasOut(String name) {
+    return 'was checked out to $name';
+  }
+
+  @override
+  String stocktakeBundle(String name) {
+    return 'Bundle $name';
+  }
+
+  @override
+  String get stocktakeConfirmAccessories => 'Is everything with it?';
+
+  @override
+  String get stocktakeConfirmBundle => 'Is everything in it?';
+
+  @override
+  String get stocktakeConfirmHint => 'Uncheck whatever is missing.';
+
+  @override
+  String get stocktakeConfirm => 'Confirm';
+
+  @override
+  String stocktakeConfirmed(int count) {
+    return '$count confirmed';
+  }
+
+  @override
+  String stocktakeCountedBy(String name) {
+    return 'counted by $name';
+  }
+
+  @override
+  String get stocktakeNothingOpenHere => 'Nothing left to find here.';
+
+  @override
+  String get stocktakeLoose => 'Count instead of scan';
+
+  @override
+  String stocktakeLooseLine(int expected, int counted) {
+    return '$expected expected here · $counted counted in total';
+  }
+
+  @override
+  String get stocktakeYourCount => 'Your count here';
+
+  @override
+  String get stocktakeTickHint => 'Tap to count by hand';
+
+  @override
+  String get stocktakeManualTicked => 'Counted by hand';
+
+  @override
+  String get stocktakeUndo => 'Take back count';
+
+  @override
+  String get stocktakeUnticked => 'Count taken back';
+
+  @override
+  String get stocktakeNote => 'Note';
+
+  @override
+  String get stocktakeNeedsAttention => 'Needs attention';
+
+  @override
+  String get stocktakeEditNote => 'Note and condition';
+
+  @override
+  String get stocktakeClose => 'Close stocktake';
+
+  @override
+  String stocktakeCloseConfirm(int count) {
+    return '$count units not counted yet will be marked missing. This cannot be undone.';
+  }
+
+  @override
+  String get stocktakeClosed =>
+      'Stocktake closed. Corrections, such as marking missing units or moving found ones, are applied on the report in the web app.';
+
+  @override
+  String get stocktakeChangeLocation => 'Change location';
+
+  @override
+  String get reasonOtherOrg => 'Belongs to another organization';
+
+  @override
+  String get reasonRetired => 'Sold or decommissioned';
+
+  @override
+  String get reasonAddedLater => 'Registered after the start';
+
+  @override
+  String get reasonOtherLocation => 'Assigned to another location';
+
+  @override
+  String get reasonOutOfScope => 'Not part of this stocktake';
+
+  @override
+  String get actionStocktakeCounted => 'Stocktake';
+
+  @override
+  String get errorStocktakeNotFound => 'This stocktake no longer exists.';
+
+  @override
+  String get errorStocktakeClosed => 'This stocktake is closed.';
+
+  @override
+  String get errorStocktakeNotClosed => 'Close the stocktake first.';
+
+  @override
+  String get errorStocktakeEmpty => 'Nothing matches this selection.';
+
+  @override
+  String get errorStocktakeNotYourTick =>
+      'Only whoever counted a unit can change it.';
+
+  @override
+  String get errorStocktakeNotFoundYet => 'This unit has not been counted yet.';
+
+  @override
+  String get errorStocktakeProductNotCounted =>
+      'This product is not counted in this stocktake.';
+
+  @override
+  String get errorStocktakeActionApplied =>
+      'This correction has already been applied.';
 }

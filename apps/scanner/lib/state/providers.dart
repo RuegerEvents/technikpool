@@ -318,3 +318,28 @@ final productionsProvider = FutureProvider<List<Production>>(
 final categoriesProvider = FutureProvider<List<Category>>(
   (ref) => _requireApi(ref).inventory.listCategories(),
 );
+
+/// The stocktakes still being counted, for the session setup's third option.
+final openStocktakesProvider = FutureProvider<List<StocktakeSummary>>(
+  (ref) => _requireApi(ref).stocktake.listStocktakes(status: StocktakeStatus.open),
+);
+
+/// One stocktake with every unit and count. Invalidated after each action, so
+/// progress and the open list follow what this and every other counter did.
+final stocktakeProvider = FutureProvider.family<StocktakeDetail, String>(
+  (ref, id) => _requireApi(ref).stocktake.getStocktake(stocktakeId: id),
+);
+
+/// The location a counter last said they were at, per stocktake. In memory
+/// only: picking it again after a restart is one tap, and a stale choice
+/// carried across days would book finds to the wrong room.
+class StocktakeLocations extends Notifier<Map<String, String>> {
+  @override
+  Map<String, String> build() => const {};
+
+  void remember(String stocktakeId, String locationId) =>
+      state = {...state, stocktakeId: locationId};
+}
+
+final stocktakeLocationProvider =
+    NotifierProvider<StocktakeLocations, Map<String, String>>(StocktakeLocations.new);

@@ -4,881 +4,1497 @@
  */
 
 export interface paths {
-	'/api/auth/device/code': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get?: never;
-		put?: never;
-		/** Start the device authorization flow */
-		post: operations['requestDeviceCode'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/api/auth/device/token': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get?: never;
-		put?: never;
-		/**
-		 * Exchange an approved device code for a session token
-		 * @description Poll no faster than the `interval` from the code response. Until the
-		 *     user approves, this answers 400 with `error: authorization_pending`;
-		 *     polling too fast answers `slow_down`; an expired code answers
-		 *     `expired_token`; a denied one `access_denied`.
-		 */
-		post: operations['pollDeviceToken'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/api/auth/device/approve': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get?: never;
-		put?: never;
-		/**
-		 * Approve a pending device code (browser, signed in)
-		 * @description Requires a signed-in session cookie, and the session must already have
-		 *     claimed the code via `GET /api/auth/device?user_code=...`. Used by the
-		 *     web UI, not by the device.
-		 */
-		post: operations['approveDeviceCode'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/api/auth/sign-in/email': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get?: never;
-		put?: never;
-		/**
-		 * Sign in with email and password
-		 * @description The session token is returned in the `set-auth-token` response header.
-		 *     Native clients must read it from there.
-		 */
-		post: operations['signInWithEmail'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/api/v1/me': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		/**
-		 * The authenticated user and their organizations
-		 * @description Also the cheapest way for a client to check whether its stored token is
-		 *     still valid — a 401 here means unpair and sign in again.
-		 */
-		get: operations['getCurrentUser'];
-		put?: never;
-		post?: never;
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/api/v1/locations': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		/** Locations across the user's organizations */
-		get: operations['listLocations'];
-		put?: never;
-		post?: never;
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/api/v1/productions': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		/**
-		 * Productions across the user's organizations
-		 * @description Cancelled productions are left out: nothing can be checked out to one,
-		 *     so it is never a scan target. Units still out on a cancelled production
-		 *     come back by scanning them onto a location, as always.
-		 */
-		get: operations['listProductions'];
-		put?: never;
-		post?: never;
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/api/v1/categories': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		/**
-		 * Product categories
-		 * @description Global rather than per-organization: a category is a kind of equipment,
-		 *     and two orgs lending each other a moving light agree on what it is.
-		 */
-		get: operations['listCategories'];
-		put?: never;
-		post?: never;
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/api/v1/assets': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		/**
-		 * Browse assets
-		 * @description Sold and decommissioned assets are left out — this is the pool that can
-		 *     still be worked with. Look one up by tag to see a retired unit.
-		 */
-		get: operations['listAssets'];
-		put?: never;
-		post?: never;
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/api/v1/assets/by-tag/{tag}': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		/**
-		 * Look up one asset by its printed tag or serial number
-		 * @description The asset tag is unique and always wins. Failing that the code is
-		 *     matched, case-insensitively, against serial numbers among the assets
-		 *     the caller can already see — and only resolves when exactly one unit
-		 *     carries it. Two units sharing a serial answer `409 serial_ambiguous`
-		 *     rather than guessing between them.
-		 */
-		get: operations['getAssetByTag'];
-		put?: never;
-		post?: never;
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/api/v1/scans': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get?: never;
-		put?: never;
-		/**
-		 * Book a scanned asset to a location or production
-		 * @description Assigning an asset to a location also returns it from any production it
-		 *     is currently checked out to — putting kit back on the shelf is what
-		 *     "returned" means in practice.
-		 *
-		 *     `assetTag` also accepts a serial number, on the same terms as
-		 *     `getAssetByTag`: the printed tag wins, and a serial resolves only when
-		 *     exactly one visible unit carries it.
-		 */
-		post: operations['createScan'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
+    "/api/auth/device/code": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start the device authorization flow */
+        post: operations["requestDeviceCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/device/token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Exchange an approved device code for a session token
+         * @description Poll no faster than the `interval` from the code response. Until the
+         *     user approves, this answers 400 with `error: authorization_pending`;
+         *     polling too fast answers `slow_down`; an expired code answers
+         *     `expired_token`; a denied one `access_denied`.
+         */
+        post: operations["pollDeviceToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/device/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve a pending device code (browser, signed in)
+         * @description Requires a signed-in session cookie, and the session must already have
+         *     claimed the code via `GET /api/auth/device?user_code=...`. Used by the
+         *     web UI, not by the device.
+         */
+        post: operations["approveDeviceCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/sign-in/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sign in with email and password
+         * @description The session token is returned in the `set-auth-token` response header.
+         *     Native clients must read it from there.
+         */
+        post: operations["signInWithEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The authenticated user and their organizations
+         * @description Also the cheapest way for a client to check whether its stored token is
+         *     still valid — a 401 here means unpair and sign in again.
+         */
+        get: operations["getCurrentUser"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/locations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Locations across the user's organizations */
+        get: operations["listLocations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/productions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Productions across the user's organizations
+         * @description Cancelled productions are left out: nothing can be checked out to one,
+         *     so it is never a scan target. Units still out on a cancelled production
+         *     come back by scanning them onto a location, as always.
+         */
+        get: operations["listProductions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Product categories
+         * @description Global rather than per-organization: a category is a kind of equipment,
+         *     and two orgs lending each other a moving light agree on what it is.
+         */
+        get: operations["listCategories"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Browse assets
+         * @description Sold and decommissioned assets are left out — this is the pool that can
+         *     still be worked with. Look one up by tag to see a retired unit.
+         */
+        get: operations["listAssets"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assets/by-tag/{tag}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Look up one asset by its printed tag or serial number
+         * @description The asset tag is unique and always wins. Failing that the code is
+         *     matched, case-insensitively, against serial numbers among the assets
+         *     the caller can already see — and only resolves when exactly one unit
+         *     carries it. Two units sharing a serial answer `409 serial_ambiguous`
+         *     rather than guessing between them.
+         */
+        get: operations["getAssetByTag"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Book a scanned asset to a location or production
+         * @description Assigning an asset to a location also returns it from any production it
+         *     is currently checked out to — putting kit back on the shelf is what
+         *     "returned" means in practice.
+         *
+         *     `assetTag` also accepts a serial number, on the same terms as
+         *     `getAssetByTag`: the printed tag wins, and a serial resolves only when
+         *     exactly one visible unit carries it.
+         */
+        post: operations["createScan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stocktakes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stocktakes of the caller's organizations */
+        get: operations["listStocktakes"];
+        put?: never;
+        /**
+         * Start a stocktake
+         * @description Takes the snapshot straight away. Needs MEMBER of the organization.
+         *     A scope that matches nothing is refused with `409 stocktake_empty`.
+         */
+        post: operations["createStocktake"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stocktakes/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * What a stocktake with this scope would contain
+         * @description Nothing is stored. `overlaps` lists open stocktakes that already count
+         *     some of the same units — allowed, but worth a warning before starting.
+         */
+        post: operations["previewStocktake"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stocktakes/{stocktakeId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A stocktake with every unit and product count */
+        get: operations["getStocktake"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stocktakes/{stocktakeId}/scans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Count one scanned code
+         * @description An asset tag — or a serial number that belongs to exactly one unit —
+         *     ticks that unit (`found`, or `unexpected` when it is not on the list)
+         *     and returns its accessories in `confirm`, for the operator to confirm
+         *     or uncheck; confirming goes through `tickStocktakeItems` with
+         *     `via: parent`. A unit someone already counted answers `already` and
+         *     changes nothing.
+         *
+         *     A bundle tag ticks nothing and answers `bundle` with the members in
+         *     `confirm` (`via: bundle` to tick them): opening the case is the point
+         *     of a stocktake.
+         *
+         *     `confirm` entries with a `foundByName` were counted already and should
+         *     be shown as such rather than offered.
+         */
+        post: operations["scanIntoStocktake"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stocktakes/{stocktakeId}/ticks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Tick units by hand, or confirm accessories / bundle members */
+        post: operations["tickStocktakeItems"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stocktakes/{stocktakeId}/items/{assetId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Note on a unit one counted, and whether it needs attention */
+        put: operations["setStocktakeItemNote"];
+        post?: never;
+        /**
+         * Take back one's own tick
+         * @description Only whoever counted a unit can untick it (`403 stocktake_not_your_tick`).
+         *     An unexpected unit leaves the list altogether.
+         */
+        delete: operations["untickStocktakeItem"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stocktakes/{stocktakeId}/counts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * The caller's count of a loose product at a location
+         * @description Counts are kept per counter and location and summed, so two people
+         *     counting in two rooms add up. Setting one replaces the caller's own
+         *     previous count there; zero is a count.
+         */
+        put: operations["setStocktakeCount"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stocktakes/{stocktakeId}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Close a stocktake
+         * @description Final: units still open become missing, and each unit's history gets an
+         *     entry. Corrections (marking missing units unavailable, moving found
+         *     ones) are applied afterwards on the web report.
+         */
+        post: operations["closeStocktake"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-	schemas: {
-		Error: {
-			error: {
-				/**
-				 * @description Stable machine-readable identifier.
-				 * @example unauthorized
-				 * @example asset_not_found
-				 * @example forbidden
-				 * @example asset_retired
-				 * @example asset_unavailable
-				 * @example production_cancelled
-				 */
-				code: string;
-				/** @description Human-readable text, safe to show to the operator. */
-				message: string;
-			};
-		};
-		OAuthError: {
-			/** @enum {string} */
-			error:
-				| 'authorization_pending'
-				| 'slow_down'
-				| 'access_denied'
-				| 'expired_token'
-				| 'invalid_request'
-				| 'invalid_grant';
-			error_description?: string;
-		};
-		DeviceCodeRequest: {
-			/** @example technikpool-scanner */
-			client_id: string;
-			scope?: string;
-		};
-		DeviceCodeResponse: {
-			/** @description Secret. Sent when polling; never shown to the user. */
-			device_code: string;
-			/**
-			 * @description Short code shown on the device for a human to type.
-			 * @example W8CSZRHS
-			 */
-			user_code: string;
-			verification_uri: string;
-			/** @description verification_uri with the user code pre-filled. */
-			verification_uri_complete?: string;
-			/** @description Seconds until the device code expires. */
-			expires_in: number;
-			/** @description Minimum seconds between polls. */
-			interval: number;
-		};
-		DeviceTokenRequest: {
-			/**
-			 * @description Always `urn:ietf:params:oauth:grant-type:device_code`.
-			 * @example urn:ietf:params:oauth:grant-type:device_code
-			 */
-			grant_type: string;
-			device_code: string;
-			client_id: string;
-		};
-		DeviceTokenResponse: {
-			/** @description A better-auth session token. Use as the bearer credential. */
-			access_token: string;
-			/** @example Bearer */
-			token_type: string;
-			expires_in?: number;
-			scope?: string;
-		};
-		SignInResponse: {
-			user?: components['schemas']['User'];
-			redirect?: boolean;
-		};
-		User: {
-			id: string;
-			email: string;
-			name?: string | null;
-			emailVerified: boolean;
-			image?: string | null;
-		};
-		Organization: {
-			id: string;
-			name: string;
-			/** @description Abbreviation to prefer wherever space is tight. */
-			shortName?: string | null;
-			/** @description Hex colour for the org badge. */
-			color: string;
-			avatarLabel: string;
-		};
-		CurrentUser: {
-			user: components['schemas']['User'];
-			/** @description System-level admin, sees every organization. */
-			isAdmin: boolean;
-			organizations: components['schemas']['MemberOrganization'][];
-		};
-		/** @description An organization the caller belongs to, and the rung they stand on in it. Spelled out rather than composed from Organization because only this response carries a role: an organization named by an asset or a production is a label, not a statement about the caller. */
-		MemberOrganization: {
-			id: string;
-			name: string;
-			/** @description Abbreviation to prefer wherever space is tight. */
-			shortName?: string | null;
-			/** @description Hex colour for the org badge. */
-			color: string;
-			avatarLabel: string;
-			/**
-			 * @description What the caller may do here, as a ladder: each rung can do everything below it. DEVICE_VIEWER sees the equipment only — booking or returning anything needs MEMBER or above, so a client can stop offering a scan that the server will refuse.
-			 *     Absent where there is no membership at all, which only happens for a system admin: `isAdmin` is what grants them that organization. Omitted rather than null so the value stays a plain enum — a null member generates an unusable identifier in the Dart client.
-			 * @enum {string}
-			 */
-			role?: 'DEVICE_VIEWER' | 'VIEWER' | 'MEMBER' | 'ADMIN' | 'OWNER';
-		};
-		Address: {
-			id: string;
-			line1: string;
-			line2?: string | null;
-			postalCode: string;
-			city: string;
-		};
-		Location: {
-			id: string;
-			name: string;
-			organization: components['schemas']['Organization'];
-			address?: components['schemas']['Address'] | null;
-		};
-		Production: {
-			id: string;
-			name: string;
-			/** Format: date-time */
-			startDate?: string | null;
-			/** Format: date-time */
-			endDate?: string | null;
-			organization: components['schemas']['Organization'];
-		};
-		Asset: {
-			id: string;
-			/** @description The printed tag. Null for assets that have never been labelled. */
-			assetTag?: string | null;
-			serialNumber?: string | null;
-			/**
-			 * @description `SOLD` and `DECOMMISSIONED` are end of life: the unit has left the
-			 *     pool, cannot be booked or scanned onto anything, and is omitted from
-			 *     listAssets. getAssetByTag still returns it, so a scan of a retired
-			 *     sticker explains itself instead of reading as an unknown tag. Such a
-			 *     unit is no longer *at* its `location` — that is where it stood when
-			 *     it went.
-			 *
-			 *     `UNAVAILABLE` is held back rather than gone: still in the pool, still
-			 *     listed, still scannable onto a location, but a scan that would check
-			 *     it out to a production is refused with `asset_unavailable`.
-			 *     `MAINTENANCE` and `BROKEN` describe condition only and do not stop a
-			 *     checkout.
-			 * @enum {string}
-			 */
-			status: 'AVAILABLE' | 'UNAVAILABLE' | 'MAINTENANCE' | 'BROKEN' | 'SOLD' | 'DECOMMISSIONED';
-			product: components['schemas']['Product'];
-			location: components['schemas']['Location'];
-			organization: components['schemas']['Organization'];
-			bundleId?: string | null;
-			/**
-			 * @description Set when this unit is an accessory of another — its case, its power
-			 *     supply, its brackets. An accessory travels with its parent: it is
-			 *     booked, moved and returned whenever the parent is, and is never
-			 *     picked on its own. Scanning it alone still moves only itself.
-			 */
-			parentAssetId?: string | null;
-		};
-		Product: {
-			id: string;
-			name: string;
-			/**
-			 * @description Null for a product nobody makes in particular — a Schuko lead, a
-			 *     generic laptop. Show the product name alone then, not a placeholder.
-			 */
-			manufacturerName: string | null;
-			category: components['schemas']['Category'];
-			imageUrl?: string | null;
-			/**
-			 * @description Present only for cables. The name already carries type and length;
-			 *     this is the structured form, for filtering and for showing the ends
-			 *     without parsing a label. Deliberately not required, like
-			 *     Location.address: a client that predates it keeps compiling.
-			 */
-			cable?: components['schemas']['CableSpec'] | null;
-		};
-		CableSpec: {
-			/**
-			 * @description The wire rather than the ends — `CAT7`, `2,5 mm²`, `DMX`. Free text,
-			 *     not an enum, and null on most cables: what a lead is, is usually said
-			 *     completely by its connectors and its length.
-			 */
-			type: string | null;
-			/**
-			 * @description The single pair of an ordinary lead. Null on a loom, which carries
-			 *     its ends in `ways` instead — a cable is one or the other, never both.
-			 */
-			connectorA: string | null;
-			connectorB: string | null;
-			/** @description Whole centimetres. */
-			lengthCm: number | null;
-			/**
-			 * @description A loom's ways: two or more pairs of ends running the length of one
-			 *     cable. Empty on an ordinary lead.
-			 */
-			ways: components['schemas']['CableWay'][];
-		};
-		/**
-		 * @description One way of a loom. Identical ways are one entry with a count — "6× Schuko
-		 *     M→F" is a number, not six entries.
-		 */
-		CableWay: {
-			count: number;
-			/** @description This way's wire, where a loom's ways differ — `2,5 mm²`, `CAT7`. */
-			type: string | null;
-			connectorA: string | null;
-			connectorB: string | null;
-		};
-		Category: {
-			id: string;
-			name: string;
-			/**
-			 * @description Hex, `#rrggbb`. User-chosen and unconstrained, so it runs from white
-			 *     to near-black — derive the text colour from its luminance rather
-			 *     than assuming a dark background.
-			 */
-			color: string;
-			/** @description Ascending, ties broken by name. listCategories applies both. */
-			sortOrder: number;
-		};
-		AssetDetail: components['schemas']['Asset'] & {
-			/** @description The production this asset is currently checked out to, if any. A production of an organization the caller is not a member of is still reported — the unit is not free — but its `name` is that organization's name, since the caller may not see the production itself. */
-			currentProduction: components['schemas']['Production'] | null;
-			/** @description Most recent transactions first. */
-			history: components['schemas']['AssetTransaction'][];
-		};
-		AssetTransaction: {
-			id: string;
-			/**
-			 * @example CHECKED_OUT
-			 * @example RETURNED
-			 * @example LOCATION_ASSIGNED
-			 */
-			action: string;
-			/** Format: date-time */
-			createdAt: string;
-			/** @description Who performed it. Null if the account has since been removed. */
-			userName?: string | null;
-			/** @description The production involved, if any. For a production of an organization the caller is not a member of, that organization's name instead. */
-			productionName?: string | null;
-		};
-		AssetPage: {
-			items: components['schemas']['Asset'][];
-			/** @description Pass as `cursor` for the next page. Null on the last page. */
-			nextCursor: string | null;
-		};
-		ScanRequest: {
-			/**
-			 * @description Exactly what the barcode decoded to — an asset tag, or a serial
-			 *     number that belongs to exactly one unit.
-			 */
-			assetTag: string;
-			/** @enum {string} */
-			targetType: 'location' | 'production';
-			targetId: string;
-		};
-		ScanResult: {
-			asset: components['schemas']['ScannedAsset'];
-			/** @enum {string} */
-			action: 'LOCATION_ASSIGNED' | 'CHECKED_OUT';
-			/** @description Name of the location or production, for the session log. */
-			targetName: string;
-			/** @description Productions the asset was automatically returned from. */
-			returnedFrom: string[];
-		};
-		ScannedAsset: {
-			id: string;
-			assetTag: string;
-			productName: string;
-			/** @description Null when the product has no maker; see Product.manufacturerName. */
-			manufacturerName: string | null;
-		};
-	};
-	responses: {
-		/** @description The request was malformed. */
-		BadRequest: {
-			headers: {
-				[name: string]: unknown;
-			};
-			content: {
-				'application/json': components['schemas']['Error'];
-			};
-		};
-		/** @description Missing, expired or invalid token. */
-		Unauthorized: {
-			headers: {
-				[name: string]: unknown;
-			};
-			content: {
-				'application/json': components['schemas']['Error'];
-			};
-		};
-		/** @description The record exists but belongs to another organization. */
-		Forbidden: {
-			headers: {
-				[name: string]: unknown;
-			};
-			content: {
-				'application/json': components['schemas']['Error'];
-			};
-		};
-		/**
-		 * @description The record exists but its state forbids the operation — a sold or
-		 *     decommissioned asset can no longer be booked (`asset_retired`), and a
-		 *     unit held back as unavailable cannot be checked out
-		 *     (`asset_unavailable`), and nothing is checked out to a production that
-		 *     has been cancelled (`production_cancelled`). A code that matched more
-		 *     than one unit's serial number identifies nothing in particular
-		 *     (`serial_ambiguous`) — the asset tag is what disambiguates it.
-		 */
-		Conflict: {
-			headers: {
-				[name: string]: unknown;
-			};
-			content: {
-				'application/json': components['schemas']['Error'];
-			};
-		};
-		/** @description No such record — or, for a filter that names one, no such record the caller could have named (`production_not_found`). */
-		NotFound: {
-			headers: {
-				[name: string]: unknown;
-			};
-			content: {
-				'application/json': components['schemas']['Error'];
-			};
-		};
-		/** @description An RFC 8628 error response. */
-		OAuthError: {
-			headers: {
-				[name: string]: unknown;
-			};
-			content: {
-				'application/json': components['schemas']['OAuthError'];
-			};
-		};
-	};
-	parameters: never;
-	requestBodies: never;
-	headers: never;
-	pathItems: never;
+    schemas: {
+        Error: {
+            error: {
+                /**
+                 * @description Stable machine-readable identifier.
+                 * @example unauthorized
+                 * @example asset_not_found
+                 * @example forbidden
+                 * @example asset_retired
+                 * @example asset_unavailable
+                 * @example production_cancelled
+                 * @example stocktake_closed
+                 */
+                code: string;
+                /** @description Human-readable text, safe to show to the operator. */
+                message: string;
+            };
+        };
+        OAuthError: {
+            /** @enum {string} */
+            error: "authorization_pending" | "slow_down" | "access_denied" | "expired_token" | "invalid_request" | "invalid_grant";
+            error_description?: string;
+        };
+        DeviceCodeRequest: {
+            /** @example technikpool-scanner */
+            client_id: string;
+            scope?: string;
+        };
+        DeviceCodeResponse: {
+            /** @description Secret. Sent when polling; never shown to the user. */
+            device_code: string;
+            /**
+             * @description Short code shown on the device for a human to type.
+             * @example W8CSZRHS
+             */
+            user_code: string;
+            verification_uri: string;
+            /** @description verification_uri with the user code pre-filled. */
+            verification_uri_complete?: string;
+            /** @description Seconds until the device code expires. */
+            expires_in: number;
+            /** @description Minimum seconds between polls. */
+            interval: number;
+        };
+        DeviceTokenRequest: {
+            /**
+             * @description Always `urn:ietf:params:oauth:grant-type:device_code`.
+             * @example urn:ietf:params:oauth:grant-type:device_code
+             */
+            grant_type: string;
+            device_code: string;
+            client_id: string;
+        };
+        DeviceTokenResponse: {
+            /** @description A better-auth session token. Use as the bearer credential. */
+            access_token: string;
+            /** @example Bearer */
+            token_type: string;
+            expires_in?: number;
+            scope?: string;
+        };
+        SignInResponse: {
+            user?: components["schemas"]["User"];
+            redirect?: boolean;
+        };
+        User: {
+            id: string;
+            email: string;
+            name?: string | null;
+            emailVerified: boolean;
+            image?: string | null;
+        };
+        Organization: {
+            id: string;
+            name: string;
+            /** @description Abbreviation to prefer wherever space is tight. */
+            shortName?: string | null;
+            /** @description Hex colour for the org badge. */
+            color: string;
+            avatarLabel: string;
+        };
+        CurrentUser: {
+            user: components["schemas"]["User"];
+            /** @description System-level admin, sees every organization. */
+            isAdmin: boolean;
+            organizations: components["schemas"]["MemberOrganization"][];
+        };
+        /** @description An organization the caller belongs to, and the rung they stand on in it. Spelled out rather than composed from Organization because only this response carries a role: an organization named by an asset or a production is a label, not a statement about the caller. */
+        MemberOrganization: {
+            id: string;
+            name: string;
+            /** @description Abbreviation to prefer wherever space is tight. */
+            shortName?: string | null;
+            /** @description Hex colour for the org badge. */
+            color: string;
+            avatarLabel: string;
+            /**
+             * @description What the caller may do here, as a ladder: each rung can do everything below it. DEVICE_VIEWER sees the equipment only — booking or returning anything needs MEMBER or above, so a client can stop offering a scan that the server will refuse.
+             *     Absent where there is no membership at all, which only happens for a system admin: `isAdmin` is what grants them that organization. Omitted rather than null so the value stays a plain enum — a null member generates an unusable identifier in the Dart client.
+             * @enum {string}
+             */
+            role?: "DEVICE_VIEWER" | "VIEWER" | "MEMBER" | "ADMIN" | "OWNER";
+        };
+        Address: {
+            id: string;
+            line1: string;
+            line2?: string | null;
+            postalCode: string;
+            city: string;
+        };
+        Location: {
+            id: string;
+            name: string;
+            organization: components["schemas"]["Organization"];
+            address?: components["schemas"]["Address"] | null;
+        };
+        Production: {
+            id: string;
+            name: string;
+            /** Format: date-time */
+            startDate?: string | null;
+            /** Format: date-time */
+            endDate?: string | null;
+            organization: components["schemas"]["Organization"];
+        };
+        Asset: {
+            id: string;
+            /** @description The printed tag. Null for assets that have never been labelled. */
+            assetTag?: string | null;
+            serialNumber?: string | null;
+            /**
+             * @description `SOLD` and `DECOMMISSIONED` are end of life: the unit has left the
+             *     pool, cannot be booked or scanned onto anything, and is omitted from
+             *     listAssets. getAssetByTag still returns it, so a scan of a retired
+             *     sticker explains itself instead of reading as an unknown tag. Such a
+             *     unit is no longer *at* its `location` — that is where it stood when
+             *     it went.
+             *
+             *     `UNAVAILABLE` is held back rather than gone: still in the pool, still
+             *     listed, still scannable onto a location, but a scan that would check
+             *     it out to a production is refused with `asset_unavailable`.
+             *     `MAINTENANCE` and `BROKEN` describe condition only and do not stop a
+             *     checkout.
+             * @enum {string}
+             */
+            status: "AVAILABLE" | "UNAVAILABLE" | "MAINTENANCE" | "BROKEN" | "SOLD" | "DECOMMISSIONED";
+            product: components["schemas"]["Product"];
+            location: components["schemas"]["Location"];
+            organization: components["schemas"]["Organization"];
+            bundleId?: string | null;
+            /**
+             * @description Set when this unit is an accessory of another — its case, its power
+             *     supply, its brackets. An accessory travels with its parent: it is
+             *     booked, moved and returned whenever the parent is, and is never
+             *     picked on its own. Scanning it alone still moves only itself.
+             */
+            parentAssetId?: string | null;
+        };
+        Product: {
+            id: string;
+            name: string;
+            /**
+             * @description Null for a product nobody makes in particular — a Schuko lead, a
+             *     generic laptop. Show the product name alone then, not a placeholder.
+             */
+            manufacturerName: string | null;
+            category: components["schemas"]["Category"];
+            imageUrl?: string | null;
+            /**
+             * @description Present only for cables. The name already carries type and length;
+             *     this is the structured form, for filtering and for showing the ends
+             *     without parsing a label. Deliberately not required, like
+             *     Location.address: a client that predates it keeps compiling.
+             */
+            cable?: components["schemas"]["CableSpec"] | null;
+        };
+        CableSpec: {
+            /**
+             * @description The wire rather than the ends — `CAT7`, `2,5 mm²`, `DMX`. Free text,
+             *     not an enum, and null on most cables: what a lead is, is usually said
+             *     completely by its connectors and its length.
+             */
+            type: string | null;
+            /**
+             * @description The single pair of an ordinary lead. Null on a loom, which carries
+             *     its ends in `ways` instead — a cable is one or the other, never both.
+             */
+            connectorA: string | null;
+            connectorB: string | null;
+            /** @description Whole centimetres. */
+            lengthCm: number | null;
+            /**
+             * @description A loom's ways: two or more pairs of ends running the length of one
+             *     cable. Empty on an ordinary lead.
+             */
+            ways: components["schemas"]["CableWay"][];
+        };
+        /**
+         * @description One way of a loom. Identical ways are one entry with a count — "6× Schuko
+         *     M→F" is a number, not six entries.
+         */
+        CableWay: {
+            count: number;
+            /** @description This way's wire, where a loom's ways differ — `2,5 mm²`, `CAT7`. */
+            type: string | null;
+            connectorA: string | null;
+            connectorB: string | null;
+        };
+        Category: {
+            id: string;
+            name: string;
+            /**
+             * @description Hex, `#rrggbb`. User-chosen and unconstrained, so it runs from white
+             *     to near-black — derive the text colour from its luminance rather
+             *     than assuming a dark background.
+             */
+            color: string;
+            /** @description Ascending, ties broken by name. listCategories applies both. */
+            sortOrder: number;
+        };
+        AssetDetail: components["schemas"]["Asset"] & {
+            /** @description The production this asset is currently checked out to, if any. A production of an organization the caller is not a member of is still reported — the unit is not free — but its `name` is that organization's name, since the caller may not see the production itself. */
+            currentProduction: components["schemas"]["Production"] | null;
+            /** @description Most recent transactions first. */
+            history: components["schemas"]["AssetTransaction"][];
+        };
+        AssetTransaction: {
+            id: string;
+            /**
+             * @example CHECKED_OUT
+             * @example RETURNED
+             * @example LOCATION_ASSIGNED
+             */
+            action: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** @description Who performed it. Null if the account has since been removed. */
+            userName?: string | null;
+            /** @description The production involved, if any. For a production of an organization the caller is not a member of, that organization's name instead. */
+            productionName?: string | null;
+        };
+        AssetPage: {
+            items: components["schemas"]["Asset"][];
+            /** @description Pass as `cursor` for the next page. Null on the last page. */
+            nextCursor: string | null;
+        };
+        ScanRequest: {
+            /**
+             * @description Exactly what the barcode decoded to — an asset tag, or a serial
+             *     number that belongs to exactly one unit.
+             */
+            assetTag: string;
+            /** @enum {string} */
+            targetType: "location" | "production";
+            targetId: string;
+        };
+        ScanResult: {
+            asset: components["schemas"]["ScannedAsset"];
+            /** @enum {string} */
+            action: "LOCATION_ASSIGNED" | "CHECKED_OUT";
+            /** @description Name of the location or production, for the session log. */
+            targetName: string;
+            /** @description Productions the asset was automatically returned from. */
+            returnedFrom: string[];
+        };
+        ScannedAsset: {
+            id: string;
+            assetTag: string;
+            productName: string;
+            /** @description Null when the product has no maker; see Product.manufacturerName. */
+            manufacturerName: string | null;
+        };
+        StocktakeScopeRequest: {
+            organizationId: string;
+            /** @description Only units at these locations. All of the org's when empty or absent. */
+            locationIds?: string[];
+            /** @description Only units whose product is in these categories. All when empty or absent. */
+            categoryIds?: string[];
+        };
+        StocktakeCreateRequest: components["schemas"]["StocktakeScopeRequest"] & {
+            /** @description Defaults to the date and the scope's locations. */
+            name?: string;
+        };
+        StocktakePreview: {
+            /** @description Units to find one by one — tagged, accessories, bundle members. */
+            units: number;
+            /** @description Untagged units, counted per product rather than ticked. */
+            looseUnits: number;
+            /** @description Checked out on a production, so accounted for rather than expected. */
+            out: number;
+            overlaps: components["schemas"]["StocktakeOverlap"][];
+        };
+        StocktakeOverlap: {
+            id: string;
+            name: string;
+            sharedUnits: number;
+        };
+        /** @enum {string} */
+        StocktakeStatus: "OPEN" | "CLOSED";
+        StocktakeProgress: {
+            /** @description Units to find, loose ones included. Excludes units checked out at the start. */
+            expected: number;
+            /** @description Of `expected`, how many were counted. A surplus of one loose product does not make up for a shortfall of another. */
+            found: number;
+            /** @description Checked out at the start and not scanned since. */
+            out: number;
+            /** @description Scanned although not on the list. */
+            unexpected: number;
+        };
+        StocktakeLocation: {
+            id: string;
+            name: string;
+        };
+        StocktakeSummary: {
+            id: string;
+            name: string;
+            status: components["schemas"]["StocktakeStatus"];
+            organization: components["schemas"]["Organization"];
+            /** Format: date-time */
+            createdAt: string;
+            createdByName: string;
+            /** Format: date-time */
+            closedAt?: string | null;
+            progress: components["schemas"]["StocktakeProgress"];
+            /** @description Where a counter can say they are counting: the scope's locations, or all of the organization's when the scope names none. */
+            countingLocations: components["schemas"]["StocktakeLocation"][];
+        };
+        StocktakeDetail: components["schemas"]["StocktakeSummary"] & {
+            items: components["schemas"]["StocktakeItem"][];
+            /** @description Loose untagged units, one entry per product. */
+            products: components["schemas"]["StocktakeProductCount"][];
+        };
+        StocktakeItem: {
+            assetId: string;
+            assetTag: string | null;
+            serialNumber?: string | null;
+            productName: string;
+            manufacturerName: string | null;
+            category: components["schemas"]["Category"];
+            /** @description Set on an accessory; it is confirmed when its parent is scanned. */
+            parentAssetId: string | null;
+            /** @description The bundle it belongs to, with its tag where it has one. */
+            bundleName?: string | null;
+            /**
+             * @description `open` is not counted yet; it turns into `missing` when the
+             *     stocktake closes. `out` was checked out on a production at the
+             *     start and is accounted for. `unexpected` was scanned although it
+             *     is not on the list — see `unexpectedReason`.
+             * @enum {string}
+             */
+            state: "open" | "found" | "out" | "missing" | "unexpected";
+            expectedLocation: components["schemas"]["StocktakeLocation"] | null;
+            foundLocation: components["schemas"]["StocktakeLocation"] | null;
+            /** @description The production it was checked out to at the start. */
+            outAt?: string | null;
+            /** @description One of `other_org`, `retired`, `added_later`, `other_location`, `out_of_scope`. */
+            unexpectedReason?: string | null;
+            foundByName: string | null;
+            /** @description Only these can be unticked or annotated by the caller. */
+            foundByMe: boolean;
+            note?: string | null;
+            needsAttention: boolean;
+        };
+        StocktakeProductCount: {
+            productId: string;
+            productName: string;
+            manufacturerName: string | null;
+            category: components["schemas"]["Category"];
+            expected: number;
+            out: number;
+            /** @description Every counter's counts added up. */
+            counted: number;
+            locations: components["schemas"]["StocktakeLocationCount"][];
+        };
+        StocktakeLocationCount: {
+            location: components["schemas"]["StocktakeLocation"];
+            expected: number;
+            counted: number;
+            /** @description The caller's own count here, if they entered one. */
+            myCount: number | null;
+        };
+        StocktakeScanRequest: {
+            /** @description Exactly what the barcode decoded to. */
+            code: string;
+            /** @description Where the counter is. One of the stocktake's `countingLocations`. */
+            locationId: string;
+        };
+        StocktakeScanResult: {
+            /** @enum {string} */
+            outcome: "found" | "unexpected" | "already" | "bundle";
+            /** @description The scanned unit. Absent for a bundle. */
+            item?: components["schemas"]["StocktakeItem"] | null;
+            /** @description It was checked out to this production at the start, and is here after all. */
+            wasOutAt?: string | null;
+            /** @description For `already`, who counted it. */
+            alreadyFoundByName?: string | null;
+            bundle?: components["schemas"]["StocktakeBundle"] | null;
+            /** @description Accessories of the scanned unit, or the bundle's members. */
+            confirm: components["schemas"]["StocktakeConfirmEntry"][];
+        };
+        StocktakeBundle: {
+            id: string;
+            tag?: string | null;
+            name: string;
+        };
+        StocktakeConfirmEntry: {
+            assetId: string;
+            assetTag: string | null;
+            productName: string;
+            manufacturerName: string | null;
+            /** @description Counted already, by this person. Null when still to confirm. */
+            foundByName: string | null;
+        };
+        StocktakeTickRequest: {
+            assetIds: string[];
+            locationId: string;
+            /**
+             * @description Why they are ticked without a scan of their own — for the report.
+             * @enum {string}
+             */
+            via: "manual" | "parent" | "bundle";
+        };
+        StocktakeTickResult: {
+            ticked: number;
+            alreadyFound: number;
+        };
+        StocktakeNoteRequest: {
+            note?: string | null;
+            needsAttention: boolean;
+        };
+        StocktakeCountRequest: {
+            productId: string;
+            locationId: string;
+            count: number;
+        };
+    };
+    responses: {
+        /** @description The request was malformed. */
+        BadRequest: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Error"];
+            };
+        };
+        /** @description Missing, expired or invalid token. */
+        Unauthorized: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Error"];
+            };
+        };
+        /** @description The record exists but belongs to another organization. */
+        Forbidden: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Error"];
+            };
+        };
+        /**
+         * @description The record exists but its state forbids the operation — a sold or
+         *     decommissioned asset can no longer be booked (`asset_retired`), and a
+         *     unit held back as unavailable cannot be checked out
+         *     (`asset_unavailable`), and nothing is checked out to a production that
+         *     has been cancelled (`production_cancelled`). A code that matched more
+         *     than one unit's serial number identifies nothing in particular
+         *     (`serial_ambiguous`) — the asset tag is what disambiguates it.
+         *
+         *     Stocktakes: a closed one takes no more counting (`stocktake_closed`),
+         *     a scope that matches nothing starts nothing (`stocktake_empty`), and
+         *     a note or untick needs a unit that was counted (`stocktake_not_found_yet`).
+         *     A count is only taken for a product the stocktake counts loose
+         *     (`stocktake_product_not_counted`).
+         */
+        Conflict: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Error"];
+            };
+        };
+        /** @description No such record — or, for a filter that names one, no such record the caller could have named (`production_not_found`). */
+        NotFound: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Error"];
+            };
+        };
+        /** @description An RFC 8628 error response. */
+        OAuthError: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["OAuthError"];
+            };
+        };
+    };
+    parameters: {
+        StocktakeId: string;
+    };
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-	requestDeviceCode: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['DeviceCodeRequest'];
-			};
-		};
-		responses: {
-			/** @description Device and user codes issued */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['DeviceCodeResponse'];
-				};
-			};
-			400: components['responses']['OAuthError'];
-		};
-	};
-	pollDeviceToken: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['DeviceTokenRequest'];
-			};
-		};
-		responses: {
-			/** @description Session token issued */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['DeviceTokenResponse'];
-				};
-			};
-			400: components['responses']['OAuthError'];
-		};
-	};
-	approveDeviceCode: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': {
-					userCode: string;
-				};
-			};
-		};
-		responses: {
-			/** @description Approved */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': {
-						success?: boolean;
-					};
-				};
-			};
-			400: components['responses']['OAuthError'];
-		};
-	};
-	signInWithEmail: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': {
-					/** Format: email */
-					email: string;
-					/** Format: password */
-					password: string;
-				};
-			};
-		};
-		responses: {
-			/** @description Signed in */
-			200: {
-				headers: {
-					/** @description The session token to use as a bearer credential. */
-					'set-auth-token'?: string;
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['SignInResponse'];
-				};
-			};
-			401: components['responses']['Unauthorized'];
-		};
-	};
-	getCurrentUser: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description Current user */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['CurrentUser'];
-				};
-			};
-			401: components['responses']['Unauthorized'];
-		};
-	};
-	listLocations: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description Locations */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['Location'][];
-				};
-			};
-			401: components['responses']['Unauthorized'];
-		};
-	};
-	listProductions: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description Productions */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['Production'][];
-				};
-			};
-			401: components['responses']['Unauthorized'];
-		};
-	};
-	listCategories: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description Categories, already in display order */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['Category'][];
-				};
-			};
-			401: components['responses']['Unauthorized'];
-		};
-	};
-	listAssets: {
-		parameters: {
-			query?: {
-				/** @description Only assets currently at this location. */
-				locationId?: string;
-				/** @description Only assets booked to this production. Listing a production's kit is a read of that production, so a caller who may not open it is refused (`403`) rather than handed an empty page, and an id that names nothing answers `404 production_not_found`. */
-				productionId?: string;
-				/** @description Only assets whose product is in this category. */
-				categoryId?: string;
-				/** @description Case-insensitive match on asset tag, serial number, product or manufacturer name. */
-				q?: string;
-				limit?: number;
-				/** @description The `nextCursor` from a previous page. */
-				cursor?: string;
-			};
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description A page of assets */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['AssetPage'];
-				};
-			};
-			400: components['responses']['BadRequest'];
-			401: components['responses']['Unauthorized'];
-			403: components['responses']['Forbidden'];
-			404: components['responses']['NotFound'];
-		};
-	};
-	getAssetByTag: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path: {
-				/**
-				 * @description The asset tag as encoded in the sticker's barcode, or a serial
-				 *     number that belongs to exactly one unit.
-				 */
-				tag: string;
-			};
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			/** @description The asset, with recent history */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['AssetDetail'];
-				};
-			};
-			401: components['responses']['Unauthorized'];
-			403: components['responses']['Forbidden'];
-			404: components['responses']['NotFound'];
-			409: components['responses']['Conflict'];
-		};
-	};
-	createScan: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['ScanRequest'];
-			};
-		};
-		responses: {
-			/** @description The asset was booked */
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content: {
-					'application/json': components['schemas']['ScanResult'];
-				};
-			};
-			400: components['responses']['BadRequest'];
-			401: components['responses']['Unauthorized'];
-			403: components['responses']['Forbidden'];
-			404: components['responses']['NotFound'];
-			409: components['responses']['Conflict'];
-		};
-	};
+    requestDeviceCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeviceCodeRequest"];
+            };
+        };
+        responses: {
+            /** @description Device and user codes issued */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceCodeResponse"];
+                };
+            };
+            400: components["responses"]["OAuthError"];
+        };
+    };
+    pollDeviceToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeviceTokenRequest"];
+            };
+        };
+        responses: {
+            /** @description Session token issued */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceTokenResponse"];
+                };
+            };
+            400: components["responses"]["OAuthError"];
+        };
+    };
+    approveDeviceCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    userCode: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Approved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        success?: boolean;
+                    };
+                };
+            };
+            400: components["responses"]["OAuthError"];
+        };
+    };
+    signInWithEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: email */
+                    email: string;
+                    /** Format: password */
+                    password: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Signed in */
+            200: {
+                headers: {
+                    /** @description The session token to use as a bearer credential. */
+                    "set-auth-token"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignInResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    getCurrentUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current user */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CurrentUser"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    listLocations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Locations */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Location"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    listProductions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Productions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Production"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    listCategories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Categories, already in display order */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Category"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    listAssets: {
+        parameters: {
+            query?: {
+                /** @description Only assets currently at this location. */
+                locationId?: string;
+                /** @description Only assets booked to this production. Listing a production's kit is a read of that production, so a caller who may not open it is refused (`403`) rather than handed an empty page, and an id that names nothing answers `404 production_not_found`. */
+                productionId?: string;
+                /** @description Only assets whose product is in this category. */
+                categoryId?: string;
+                /** @description Case-insensitive match on asset tag, serial number, product or manufacturer name. */
+                q?: string;
+                limit?: number;
+                /** @description The `nextCursor` from a previous page. */
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of assets */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getAssetByTag: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The asset tag as encoded in the sticker's barcode, or a serial
+                 *     number that belongs to exactly one unit.
+                 */
+                tag: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The asset, with recent history */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetDetail"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    createScan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScanRequest"];
+            };
+        };
+        responses: {
+            /** @description The asset was booked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    listStocktakes: {
+        parameters: {
+            query?: {
+                /** @description Only open or only closed ones. Both when omitted. */
+                status?: components["schemas"]["StocktakeStatus"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Newest first, open ones before closed ones */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StocktakeSummary"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    createStocktake: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StocktakeCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description The new stocktake */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StocktakeSummary"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    previewStocktake: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StocktakeScopeRequest"];
+            };
+        };
+        responses: {
+            /** @description The would-be snapshot's size */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StocktakePreview"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getStocktake: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stocktakeId: components["parameters"]["StocktakeId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The stocktake */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StocktakeDetail"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    scanIntoStocktake: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stocktakeId: components["parameters"]["StocktakeId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StocktakeScanRequest"];
+            };
+        };
+        responses: {
+            /** @description What the code turned out to be */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StocktakeScanResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    tickStocktakeItems: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stocktakeId: components["parameters"]["StocktakeId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StocktakeTickRequest"];
+            };
+        };
+        responses: {
+            /** @description How many were ticked, and how many someone had counted already */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StocktakeTickResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    setStocktakeItemNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stocktakeId: components["parameters"]["StocktakeId"];
+                assetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StocktakeNoteRequest"];
+            };
+        };
+        responses: {
+            /** @description Saved */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    untickStocktakeItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stocktakeId: components["parameters"]["StocktakeId"];
+                assetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unticked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    setStocktakeCount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stocktakeId: components["parameters"]["StocktakeId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StocktakeCountRequest"];
+            };
+        };
+        responses: {
+            /** @description Saved */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    closeStocktake: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stocktakeId: components["parameters"]["StocktakeId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The closed stocktake */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StocktakeSummary"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
 }

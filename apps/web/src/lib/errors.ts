@@ -173,6 +173,16 @@ export type AppErrorCode =
 	| 'cannot_remove_self'
 	| 'cannot_change_own_admin'
 	| 'cannot_delete_own_account'
+	// Stocktakes
+	| 'stocktake_not_found'
+	| 'stocktake_closed'
+	| 'stocktake_not_closed'
+	| 'stocktake_empty'
+	| 'stocktake_action_applied'
+	| 'stocktake_not_your_tick'
+	| 'stocktake_not_found_yet'
+	| 'stocktake_product_not_counted'
+	| 'stocktake_invalid_request'
 	// Sticker sheets (their own endpoint, not a remote function)
 	| 'sticker_config_invalid';
 

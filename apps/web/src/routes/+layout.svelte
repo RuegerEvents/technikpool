@@ -12,6 +12,7 @@
 		Boxes,
 		CalendarDays,
 		ClipboardCheck,
+		ListChecks,
 		Clapperboard,
 		FileText,
 		Factory,
@@ -206,6 +207,13 @@
 											Inspections
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/stocktakes'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<ListChecks aria-hidden="true" />
+											Stocktakes
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
 											onSelect={() => goto(resolve('/devices'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
@@ -330,6 +338,7 @@
 												page.url.pathname.startsWith('/manufacturers') ||
 												page.url.pathname.startsWith('/devices') ||
 												page.url.pathname.startsWith('/inspections') ||
+												page.url.pathname.startsWith('/stocktakes') ||
 												page.url.pathname.startsWith('/customers') ||
 												page.url.pathname.startsWith('/admin/categories') ||
 												page.url.pathname.startsWith('/admin/connectors')
@@ -396,6 +405,13 @@
 											>
 												<ClipboardCheck aria-hidden="true" />
 												Inspections
+											</DropdownMenu.Item>
+											<DropdownMenu.Item
+												onSelect={() => goto(resolve('/stocktakes'))}
+												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+											>
+												<ListChecks aria-hidden="true" />
+												Stocktakes
 											</DropdownMenu.Item>
 											{#if data.isAdmin}
 												<DropdownMenu.Item
