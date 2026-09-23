@@ -405,9 +405,18 @@
 		deleteOpen = true;
 	}
 
+	// The header's count is scoped to the orgs in view and leaves retired units
+	// out, but a unit of any status anywhere still blocks a delete — so the
+	// reason names whichever of those is in the way.
 	let deleteBlockedReason = $derived(
 		product.hasAssets
-			? 'Still has units. Retire them, or merge it into the product it duplicates.'
+			? product.assetCount > 0
+				? 'Still has units. Delete the unused ones, or merge it into the product it duplicates.'
+				: product.retiredCount > 0 && product.elsewhereCount > 0
+					? 'Retired units and units in other organizations still refer to it.'
+					: product.retiredCount > 0
+						? 'Retired units still count. Delete the unused ones, or merge it into the product it duplicates.'
+						: 'Organizations not shown here still hold units of it.'
 			: identityLocked
 				? 'Only whoever added it, an admin of every organization holding it, or a system admin.'
 				: null
@@ -494,6 +503,17 @@
 				<Card.Description class="flex flex-wrap items-center gap-2 pt-1">
 					<CategoryPill name={categoryLabel(product.category)} color={product.category.color} />
 					<span>{product.assetCount} units</span>
+					{#if product.retiredCount > 0}
+						<span>· {plural(product.retiredCount, ['# retired', '# retired'])}</span>
+					{/if}
+					{#if product.elsewhereCount > 0}
+						<span
+							>· {plural(product.elsewhereCount, [
+								'# in other organizations',
+								'# in other organizations'
+							])}</span
+						>
+					{/if}
 					{#if showProductLink}
 						<a
 							href={resolve(`/products/${product.id}`)}

@@ -678,10 +678,33 @@ export const getProductCatalog = query(v.optional(v.string()), async (organizati
 	});
 	const accessoryCountOf = new Map(accessoryCounts.map((r) => [r.productId, r._count._all]));
 
+	// The units `assetCount` leaves out but a delete still has to answer to:
+	// retired ones in scope, and any unit of an org outside it. Without these
+	// the editor showed "0 units" beside a Delete it refused.
+	const [retiredCounts, elsewhereCounts] = await Promise.all([
+		prisma.asset.groupBy({
+			by: ['productId'],
+			where: {
+				organizationId: { in: queryOrgIds },
+				...RETIRED_ASSET_WHERE
+			},
+			_count: { _all: true }
+		}),
+		prisma.asset.groupBy({
+			by: ['productId'],
+			where: { organizationId: { notIn: queryOrgIds } },
+			_count: { _all: true }
+		})
+	]);
+	const retiredCountOf = new Map(retiredCounts.map((r) => [r.productId, r._count._all]));
+	const elsewhereCountOf = new Map(elsewhereCounts.map((r) => [r.productId, r._count._all]));
+
 	return products.map(({ _count, assets, orgPrices, ...product }) => ({
 		...withCableNames(product),
 		assetCount: _count.assets,
 		accessoryCount: accessoryCountOf.get(product.id) ?? 0,
+		retiredCount: retiredCountOf.get(product.id) ?? 0,
+		elsewhereCount: elsewhereCountOf.get(product.id) ?? 0,
 		hasAssets: assets.length > 0,
 		owningOrgIds: assets.map((a) => a.organizationId),
 		prices: orgPrices

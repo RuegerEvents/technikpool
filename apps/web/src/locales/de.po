@@ -9081,9 +9081,8 @@ msgstr "Hersteller, Kategorie, Bild, Anschlüsse und Kabelangaben werden überno
 msgid "A new catalogue entry that starts as a copy of <0/>."
 msgstr "Ein neuer Katalogeintrag als Kopie von <0/>."
 
-#: src/lib/components/ui/product-editor/product-editor.svelte
-msgid "Still has units. Retire them, or merge it into the product it duplicates."
-msgstr "Hat noch Einheiten. Mustere sie aus oder führe das Produkt mit seinem Original zusammen."
+#~ msgid "Still has units. Retire them, or merge it into the product it duplicates."
+#~ msgstr "Hat noch Einheiten. Mustere sie aus oder führe das Produkt mit seinem Original zusammen."
 
 #: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Only whoever added it, an admin of every organization holding it, or a system admin."
@@ -10110,3 +10109,31 @@ msgstr "Datum, Unterschrift"
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Case cracked, cable frayed…"
 msgstr "Case gerissen, Kabel ausgefranst…"
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Still has units. Delete the unused ones, or merge it into the product it duplicates."
+msgstr "Hat noch Einheiten. Lösche die unbenutzten oder führe das Produkt mit seinem Original zusammen."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Retired units and units in other organizations still refer to it."
+msgstr "Ausgemusterte Einheiten und Einheiten anderer Organisationen verweisen noch darauf."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Retired units still count. Delete the unused ones, or merge it into the product it duplicates."
+msgstr "Ausgemusterte Einheiten zählen mit. Lösche die unbenutzten oder führe das Produkt mit seinem Original zusammen."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Organizations not shown here still hold units of it."
+msgstr "Organisationen, die hier nicht angezeigt werden, haben noch Einheiten davon."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "# retired"
+msgid_plural "# retired"
+msgstr[0] "# ausgemustert"
+msgstr[1] "# ausgemustert"
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "# in other organizations"
+msgid_plural "# in other organizations"
+msgstr[0] "# in anderen Organisationen"
+msgstr[1] "# in anderen Organisationen"
