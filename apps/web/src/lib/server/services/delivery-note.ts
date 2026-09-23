@@ -212,7 +212,8 @@ export async function deliveryNoteData(productionId: string) {
 			name: organization.name,
 			address: organization.address,
 			email: organization.billingEmail,
-			website: organization.billingWebsite
+			website: organization.billingWebsite,
+			logoPath: organization.logoPath
 		},
 		// Without a customer the goods go to the venue, and the venue is who the
 		// note is addressed to.

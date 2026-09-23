@@ -5,6 +5,7 @@ import { billingDocumentIssues } from '../billing-document-check.svelte.ts';
 import type { SnapshotOrganization } from '../org-snapshot.ts';
 import { embedInter } from './fonts';
 import { fmtDate, safe, wrap } from './pdf-text.ts';
+import { drawLogo, embedLogo } from './pdf-logo.ts';
 import { formatQuantity } from '../service-lines.svelte.ts';
 
 type PdfOrganization = SnapshotOrganization;
@@ -73,6 +74,7 @@ export async function generateBillingPdf(
 	validateDocument(kind, data);
 	const pdf = await PDFDocument.create();
 	const { regular, bold } = await embedInter(pdf);
+	const logo = await embedLogo(pdf, data.organization.logoPath);
 	const groups = groupBillingItems(
 		data.items,
 		(item) => item.categoryNameDe || item.categoryName || 'Ohne Kategorie'
@@ -191,7 +193,8 @@ export async function generateBillingPdf(
 			y -= 13;
 		}
 
-	let metaY = H - 58;
+	// Logo top right, the metadata below it.
+	let metaY = logo ? drawLogo(page, logo, W - RIGHT) - 22 : H - 58;
 	const meta = (label: string, value: string) => {
 		draw(label, 360, metaY, 8.5, bold);
 		right(value, W - RIGHT, metaY, 8.5);
@@ -205,7 +208,7 @@ export async function generateBillingPdf(
 		meta('', `bis ${fmtDate(data.serviceEndDate ?? data.serviceStartDate)}`);
 	}
 
-	y = Math.min(y, H - 190);
+	y = Math.min(y, metaY - 20, H - 190);
 	draw(title, LEFT, y, 19, regular);
 	y -= 30;
 	// paragraph() leaves `y` at the next baseline; the table starts from there.

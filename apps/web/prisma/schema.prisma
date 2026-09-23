@@ -160,6 +160,9 @@ model Organization {
 
   billingEmail           String?
   billingWebsite         String?
+  // Object key of the letterhead logo, drawn on offers, invoices and delivery
+  // notes. Normalised to a trimmed PNG on upload; see /api/orgs/[id]/logo.
+  logoPath               String?
   paymentTermsDays       Int     @default(14)
   offerIntroTemplate     String? @db.Text
   offerClosingTemplate   String? @db.Text
@@ -933,6 +936,9 @@ model Offer {
   orgBankName          String?
   orgIban              String?
   orgBic               String?
+  // Replacing the org's logo writes a new object and never deletes the old one,
+  // so a draft keeps rendering the logo it snapshotted.
+  orgLogoPath          String?
 
   // Revisions. A finalized offer is an issued document and is never rewritten;
   // one that has to change is re-issued as a new offer. V2, V3… point at the
@@ -1076,6 +1082,9 @@ model Invoice {
   orgBankName          String?
   orgIban              String?
   orgBic               String?
+  // Replacing the org's logo writes a new object and never deletes the old one,
+  // so a draft keeps rendering the logo it snapshotted.
+  orgLogoPath          String?
 
   items InvoiceItem[]
 

@@ -184,7 +184,12 @@ export type AppErrorCode =
 	| 'stocktake_product_not_counted'
 	| 'stocktake_invalid_request'
 	// Sticker sheets (their own endpoint, not a remote function)
-	| 'sticker_config_invalid';
+	| 'sticker_config_invalid'
+	// Org logo upload (its own endpoint: a command takes no file)
+	| 'org_logo_missing'
+	| 'org_logo_unsupported'
+	| 'org_logo_too_large'
+	| 'org_logo_unreadable';
 
 /** Values interpolated into a message — an asset tag, a production name, a count. */
 export type ErrorParams = (string | number)[];

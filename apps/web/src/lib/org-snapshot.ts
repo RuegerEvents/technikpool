@@ -14,6 +14,7 @@ export type OrgSnapshotSource = {
 	iban: string | null;
 	bic: string | null;
 	isKleinunternehmer: boolean;
+	logoPath: string | null;
 	address: { line1: string; line2: string | null; postalCode: string; city: string } | null;
 };
 
@@ -31,6 +32,7 @@ export type OrgSnapshotColumns = {
 	orgBankName: string | null;
 	orgIban: string | null;
 	orgBic: string | null;
+	orgLogoPath: string | null;
 	isKleinunternehmerSnapshot: boolean;
 };
 
@@ -49,12 +51,14 @@ export function orgSnapshotColumns(org: OrgSnapshotSource): OrgSnapshotColumns {
 		orgBankName: org.bankName,
 		orgIban: org.iban,
 		orgBic: org.bic,
+		orgLogoPath: org.logoPath,
 		isKleinunternehmerSnapshot: org.isKleinunternehmer
 	};
 }
 
 /** Grouped, user-meaningful keys — the banner maps these to labels. */
-export type OrgSnapshotDiffKey = 'name' | 'address' | 'tax' | 'contact' | 'bank' | 'vatStatus';
+export type OrgSnapshotDiffKey =
+	'name' | 'address' | 'tax' | 'contact' | 'bank' | 'logo' | 'vatStatus';
 
 export function orgSnapshotDiff(
 	doc: OrgSnapshotColumns,
@@ -71,6 +75,7 @@ export function orgSnapshotDiff(
 	if (differs(['orgTaxNumber', 'orgVatId'])) diff.push('tax');
 	if (differs(['orgBillingEmail', 'orgBillingWebsite'])) diff.push('contact');
 	if (differs(['orgBankAccountHolder', 'orgBankName', 'orgIban', 'orgBic'])) diff.push('bank');
+	if (differs(['orgLogoPath'])) diff.push('logo');
 	if (doc.isKleinunternehmerSnapshot !== live.isKleinunternehmerSnapshot) diff.push('vatStatus');
 	return diff;
 }
@@ -87,6 +92,8 @@ export type SnapshotOrganization = {
 	iban: string | null;
 	bic: string | null;
 	bankName: string | null;
+	/** Object key of the letterhead logo. */
+	logoPath?: string | null;
 	isKleinunternehmer?: boolean;
 };
 
@@ -115,6 +122,7 @@ export function organizationFromSnapshot(doc: OrgSnapshotColumns): SnapshotOrgan
 		iban: doc.orgIban,
 		bic: doc.orgBic,
 		bankName: doc.orgBankName,
+		logoPath: doc.orgLogoPath,
 		isKleinunternehmer: doc.isKleinunternehmerSnapshot
 	};
 }

@@ -94,14 +94,17 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 	]);
 
 	const fileKeys = new Set<string>();
+	if (organization.logoPath) fileKeys.add(organization.logoPath);
 	for (const product of products) {
 		if (product.imagePath) fileKeys.add(product.imagePath);
 		if (product.manufacturer?.logoPath) fileKeys.add(product.manufacturer.logoPath);
 	}
 	for (const asset of assets) if (asset.generatedImagePath) fileKeys.add(asset.generatedImagePath);
 	for (const bundle of bundles) if (bundle.imagePath) fileKeys.add(bundle.imagePath);
-	for (const document of [...offers, ...invoices])
+	for (const document of [...offers, ...invoices]) {
 		if (document.pdfPath) fileKeys.add(document.pdfPath);
+		if (document.orgLogoPath) fileKeys.add(document.orgLogoPath);
+	}
 
 	const files: Record<string, { contentType: string; base64: string }> = {};
 	for (const key of fileKeys) {

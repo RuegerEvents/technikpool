@@ -339,6 +339,16 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 		case 'sticker_config_invalid':
 			return `The sticker sheet could not be generated: ${p0}`;
 
+		// Org logo
+		case 'org_logo_missing':
+			return 'No logo file was sent.';
+		case 'org_logo_unsupported':
+			return 'A logo has to be a PNG, JPEG, WebP or SVG file.';
+		case 'org_logo_too_large':
+			return `The logo file is too large (at most ${p0} MB).`;
+		case 'org_logo_unreadable':
+			return 'The logo file could not be read as an image.';
+
 		// Stocktakes
 		case 'stocktake_not_found':
 			return 'This stocktake does not exist, or it belongs to another organization.';

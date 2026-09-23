@@ -29,6 +29,7 @@
 	import { AddressInput, type AddressValue } from '$lib/components/ui/address-input';
 	import { orgIdentityProblem } from '$lib/org-identity.svelte';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import OrgLogoCard from './org-logo-card.svelte';
 	import {
 		DEFAULT_INVOICE_CLOSING,
 		DEFAULT_INVOICE_INTRO,
@@ -460,6 +461,8 @@
 							{/if}
 						</Card.Content>
 					</Card.Root>
+
+					<OrgLogoCard {orgId} logoPath={org.logoPath} />
 
 					<Card.Root id="billing" class="scroll-mt-20">
 						<Card.Header>

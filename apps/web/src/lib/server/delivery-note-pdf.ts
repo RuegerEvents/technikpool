@@ -3,6 +3,7 @@ import { PDFDocument, rgb, type PDFFont, type PDFImage, type PDFPage } from 'pdf
 import { getObject } from '$lib/server/storage';
 import { embedInter } from './fonts';
 import { fmtDate, safe, wrap } from './pdf-text.ts';
+import { drawLogo, embedLogo } from './pdf-logo.ts';
 
 export type DeliveryNoteLine = {
 	label: string;
@@ -22,6 +23,8 @@ export type DeliveryNoteData = {
 		address: { line1: string; line2: string | null; postalCode: string; city: string } | null;
 		email: string | null;
 		website: string | null;
+		/** Object key of the letterhead logo. */
+		logoPath: string | null;
 	};
 	recipient: { name: string; contactPerson: string | null; address: string[] };
 	customerNumber: string | null;
@@ -105,6 +108,7 @@ async function thumbnail(path: string): Promise<Uint8Array | null> {
 export async function generateDeliveryNotePdf(data: DeliveryNoteData, issuedAt = new Date()) {
 	const pdf = await PDFDocument.create();
 	const { regular, bold } = await embedInter(pdf);
+	const logo = await embedLogo(pdf, data.organization.logoPath);
 
 	const paths = [
 		...new Set(
@@ -218,7 +222,8 @@ export async function generateDeliveryNotePdf(data: DeliveryNoteData, issuedAt =
 		y -= 13;
 	}
 
-	let metaY = H - 58;
+	// Logo top right, the metadata below it — as on offers and invoices.
+	let metaY = logo ? drawLogo(page, logo, W - RIGHT) - 22 : H - 58;
 	const META_VALUE_W = 110;
 	const meta = (label: string, value: string | string[]) => {
 		draw(label, 360, metaY, 8.5, bold);

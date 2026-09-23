@@ -81,6 +81,7 @@ export type InvoiceMinAggregateOutputType = {
   orgBankName: string | null
   orgIban: string | null
   orgBic: string | null
+  orgLogoPath: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -126,6 +127,7 @@ export type InvoiceMaxAggregateOutputType = {
   orgBankName: string | null
   orgIban: string | null
   orgBic: string | null
+  orgLogoPath: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -171,6 +173,7 @@ export type InvoiceCountAggregateOutputType = {
   orgBankName: number
   orgIban: number
   orgBic: number
+  orgLogoPath: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -232,6 +235,7 @@ export type InvoiceMinAggregateInputType = {
   orgBankName?: true
   orgIban?: true
   orgBic?: true
+  orgLogoPath?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -277,6 +281,7 @@ export type InvoiceMaxAggregateInputType = {
   orgBankName?: true
   orgIban?: true
   orgBic?: true
+  orgLogoPath?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -322,6 +327,7 @@ export type InvoiceCountAggregateInputType = {
   orgBankName?: true
   orgIban?: true
   orgBic?: true
+  orgLogoPath?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -454,6 +460,7 @@ export type InvoiceGroupByOutputType = {
   orgBankName: string | null
   orgIban: string | null
   orgBic: string | null
+  orgLogoPath: string | null
   createdAt: Date
   updatedAt: Date
   _count: InvoiceCountAggregateOutputType | null
@@ -522,6 +529,7 @@ export type InvoiceWhereInput = {
   orgBankName?: Prisma.StringNullableFilter<"Invoice"> | string | null
   orgIban?: Prisma.StringNullableFilter<"Invoice"> | string | null
   orgBic?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgLogoPath?: Prisma.StringNullableFilter<"Invoice"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -571,6 +579,7 @@ export type InvoiceOrderByWithRelationInput = {
   orgBankName?: Prisma.SortOrderInput | Prisma.SortOrder
   orgIban?: Prisma.SortOrderInput | Prisma.SortOrder
   orgBic?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgLogoPath?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
@@ -624,6 +633,7 @@ export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
   orgBankName?: Prisma.StringNullableFilter<"Invoice"> | string | null
   orgIban?: Prisma.StringNullableFilter<"Invoice"> | string | null
   orgBic?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgLogoPath?: Prisma.StringNullableFilter<"Invoice"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -673,6 +683,7 @@ export type InvoiceOrderByWithAggregationInput = {
   orgBankName?: Prisma.SortOrderInput | Prisma.SortOrder
   orgIban?: Prisma.SortOrderInput | Prisma.SortOrder
   orgBic?: Prisma.SortOrderInput | Prisma.SortOrder
+  orgLogoPath?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.InvoiceCountOrderByAggregateInput
@@ -726,6 +737,7 @@ export type InvoiceScalarWhereWithAggregatesInput = {
   orgBankName?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
   orgIban?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
   orgBic?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  orgLogoPath?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Invoice"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Invoice"> | Date | string
 }
@@ -768,6 +780,7 @@ export type InvoiceCreateInput = {
   orgBankName?: string | null
   orgIban?: string | null
   orgBic?: string | null
+  orgLogoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutInvoicesInput
@@ -817,6 +830,7 @@ export type InvoiceUncheckedCreateInput = {
   orgBankName?: string | null
   orgIban?: string | null
   orgBic?: string | null
+  orgLogoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.InvoiceItemUncheckedCreateNestedManyWithoutInvoiceInput
@@ -860,6 +874,7 @@ export type InvoiceUpdateInput = {
   orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutInvoicesNestedInput
@@ -909,6 +924,7 @@ export type InvoiceUncheckedUpdateInput = {
   orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.InvoiceItemUncheckedUpdateManyWithoutInvoiceNestedInput
@@ -955,6 +971,7 @@ export type InvoiceCreateManyInput = {
   orgBankName?: string | null
   orgIban?: string | null
   orgBic?: string | null
+  orgLogoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -997,6 +1014,7 @@ export type InvoiceUpdateManyMutationInput = {
   orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1042,6 +1060,7 @@ export type InvoiceUncheckedUpdateManyInput = {
   orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1102,6 +1121,7 @@ export type InvoiceCountOrderByAggregateInput = {
   orgBankName?: Prisma.SortOrder
   orgIban?: Prisma.SortOrder
   orgBic?: Prisma.SortOrder
+  orgLogoPath?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1154,6 +1174,7 @@ export type InvoiceMaxOrderByAggregateInput = {
   orgBankName?: Prisma.SortOrder
   orgIban?: Prisma.SortOrder
   orgBic?: Prisma.SortOrder
+  orgLogoPath?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1199,6 +1220,7 @@ export type InvoiceMinOrderByAggregateInput = {
   orgBankName?: Prisma.SortOrder
   orgIban?: Prisma.SortOrder
   orgBic?: Prisma.SortOrder
+  orgLogoPath?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1393,6 +1415,7 @@ export type InvoiceCreateWithoutOrganizationInput = {
   orgBankName?: string | null
   orgIban?: string | null
   orgBic?: string | null
+  orgLogoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   production?: Prisma.ProductionCreateNestedOneWithoutInvoicesInput
@@ -1440,6 +1463,7 @@ export type InvoiceUncheckedCreateWithoutOrganizationInput = {
   orgBankName?: string | null
   orgIban?: string | null
   orgBic?: string | null
+  orgLogoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.InvoiceItemUncheckedCreateNestedManyWithoutInvoiceInput
@@ -1515,6 +1539,7 @@ export type InvoiceScalarWhereInput = {
   orgBankName?: Prisma.StringNullableFilter<"Invoice"> | string | null
   orgIban?: Prisma.StringNullableFilter<"Invoice"> | string | null
   orgBic?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  orgLogoPath?: Prisma.StringNullableFilter<"Invoice"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
 }
@@ -1557,6 +1582,7 @@ export type InvoiceCreateWithoutProductionInput = {
   orgBankName?: string | null
   orgIban?: string | null
   orgBic?: string | null
+  orgLogoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutInvoicesInput
@@ -1604,6 +1630,7 @@ export type InvoiceUncheckedCreateWithoutProductionInput = {
   orgBankName?: string | null
   orgIban?: string | null
   orgBic?: string | null
+  orgLogoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.InvoiceItemUncheckedCreateNestedManyWithoutInvoiceInput
@@ -1673,6 +1700,7 @@ export type InvoiceCreateWithoutOfferInput = {
   orgBankName?: string | null
   orgIban?: string | null
   orgBic?: string | null
+  orgLogoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutInvoicesInput
@@ -1720,6 +1748,7 @@ export type InvoiceUncheckedCreateWithoutOfferInput = {
   orgBankName?: string | null
   orgIban?: string | null
   orgBic?: string | null
+  orgLogoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.InvoiceItemUncheckedCreateNestedManyWithoutInvoiceInput
@@ -1789,6 +1818,7 @@ export type InvoiceCreateWithoutItemsInput = {
   orgBankName?: string | null
   orgIban?: string | null
   orgBic?: string | null
+  orgLogoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutInvoicesInput
@@ -1837,6 +1867,7 @@ export type InvoiceUncheckedCreateWithoutItemsInput = {
   orgBankName?: string | null
   orgIban?: string | null
   orgBic?: string | null
+  orgLogoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1895,6 +1926,7 @@ export type InvoiceUpdateWithoutItemsInput = {
   orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutInvoicesNestedInput
@@ -1943,6 +1975,7 @@ export type InvoiceUncheckedUpdateWithoutItemsInput = {
   orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1987,6 +2020,7 @@ export type InvoiceCreateManyOrganizationInput = {
   orgBankName?: string | null
   orgIban?: string | null
   orgBic?: string | null
+  orgLogoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -2029,6 +2063,7 @@ export type InvoiceUpdateWithoutOrganizationInput = {
   orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   production?: Prisma.ProductionUpdateOneWithoutInvoicesNestedInput
@@ -2076,6 +2111,7 @@ export type InvoiceUncheckedUpdateWithoutOrganizationInput = {
   orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.InvoiceItemUncheckedUpdateManyWithoutInvoiceNestedInput
@@ -2121,6 +2157,7 @@ export type InvoiceUncheckedUpdateManyWithoutOrganizationInput = {
   orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -2165,6 +2202,7 @@ export type InvoiceCreateManyProductionInput = {
   orgBankName?: string | null
   orgIban?: string | null
   orgBic?: string | null
+  orgLogoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -2207,6 +2245,7 @@ export type InvoiceUpdateWithoutProductionInput = {
   orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutInvoicesNestedInput
@@ -2254,6 +2293,7 @@ export type InvoiceUncheckedUpdateWithoutProductionInput = {
   orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.InvoiceItemUncheckedUpdateManyWithoutInvoiceNestedInput
@@ -2299,6 +2339,7 @@ export type InvoiceUncheckedUpdateManyWithoutProductionInput = {
   orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -2343,6 +2384,7 @@ export type InvoiceCreateManyOfferInput = {
   orgBankName?: string | null
   orgIban?: string | null
   orgBic?: string | null
+  orgLogoPath?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -2385,6 +2427,7 @@ export type InvoiceUpdateWithoutOfferInput = {
   orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutInvoicesNestedInput
@@ -2432,6 +2475,7 @@ export type InvoiceUncheckedUpdateWithoutOfferInput = {
   orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.InvoiceItemUncheckedUpdateManyWithoutInvoiceNestedInput
@@ -2477,6 +2521,7 @@ export type InvoiceUncheckedUpdateManyWithoutOfferInput = {
   orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -2553,6 +2598,7 @@ export type InvoiceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   orgBankName?: boolean
   orgIban?: boolean
   orgBic?: boolean
+  orgLogoPath?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -2603,6 +2649,7 @@ export type InvoiceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   orgBankName?: boolean
   orgIban?: boolean
   orgBic?: boolean
+  orgLogoPath?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -2651,6 +2698,7 @@ export type InvoiceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   orgBankName?: boolean
   orgIban?: boolean
   orgBic?: boolean
+  orgLogoPath?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -2699,11 +2747,12 @@ export type InvoiceSelectScalar = {
   orgBankName?: boolean
   orgIban?: boolean
   orgBic?: boolean
+  orgLogoPath?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type InvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "organizationId" | "productionId" | "offerId" | "customerId" | "customerName" | "customerAddress" | "customerContactPerson" | "customerEmail" | "customerNumber" | "customerPhone" | "customerVatId" | "serviceStartDate" | "serviceEndDate" | "introText" | "closingText" | "paymentTermsDays" | "issueDate" | "dayCount" | "discountType" | "discountValue" | "assetScope" | "sentAt" | "pdfPath" | "isKleinunternehmerSnapshot" | "vatRatePercent" | "orgName" | "orgAddressLine1" | "orgAddressLine2" | "orgPostalCode" | "orgCity" | "orgTaxNumber" | "orgVatId" | "orgBillingEmail" | "orgBillingWebsite" | "orgBankAccountHolder" | "orgBankName" | "orgIban" | "orgBic" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
+export type InvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "organizationId" | "productionId" | "offerId" | "customerId" | "customerName" | "customerAddress" | "customerContactPerson" | "customerEmail" | "customerNumber" | "customerPhone" | "customerVatId" | "serviceStartDate" | "serviceEndDate" | "introText" | "closingText" | "paymentTermsDays" | "issueDate" | "dayCount" | "discountType" | "discountValue" | "assetScope" | "sentAt" | "pdfPath" | "isKleinunternehmerSnapshot" | "vatRatePercent" | "orgName" | "orgAddressLine1" | "orgAddressLine2" | "orgPostalCode" | "orgCity" | "orgTaxNumber" | "orgVatId" | "orgBillingEmail" | "orgBillingWebsite" | "orgBankAccountHolder" | "orgBankName" | "orgIban" | "orgBic" | "orgLogoPath" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
 export type InvoiceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   production?: boolean | Prisma.Invoice$productionArgs<ExtArgs>
@@ -2771,6 +2820,7 @@ export type $InvoicePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     orgBankName: string | null
     orgIban: string | null
     orgBic: string | null
+    orgLogoPath: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["invoice"]>
@@ -3240,6 +3290,7 @@ export interface InvoiceFieldRefs {
   readonly orgBankName: Prisma.FieldRef<"Invoice", 'String'>
   readonly orgIban: Prisma.FieldRef<"Invoice", 'String'>
   readonly orgBic: Prisma.FieldRef<"Invoice", 'String'>
+  readonly orgLogoPath: Prisma.FieldRef<"Invoice", 'String'>
   readonly createdAt: Prisma.FieldRef<"Invoice", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Invoice", 'DateTime'>
 }

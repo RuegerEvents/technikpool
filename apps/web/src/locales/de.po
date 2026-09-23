@@ -302,6 +302,7 @@ msgstr "E-Mail"
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/org-logo-card.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -3231,6 +3232,7 @@ msgstr "Wird entfernt…"
 
 #: src/lib/components/ui/image-upload/image-upload.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
+#: src/routes/orgs/[id]/org-logo-card.svelte
 msgid "Uploading…"
 msgstr "Wird hochgeladen…"
 
@@ -3238,6 +3240,7 @@ msgstr "Wird hochgeladen…"
 #~ msgstr "Dieses Bild verwenden"
 
 #: src/lib/components/ui/image-upload/image-upload.svelte
+#: src/routes/orgs/[id]/org-logo-card.svelte
 msgid "Replace"
 msgstr "Ersetzen"
 
@@ -10137,3 +10140,53 @@ msgid "# in other organizations"
 msgid_plural "# in other organizations"
 msgstr[0] "# in anderen Organisationen"
 msgstr[1] "# in anderen Organisationen"
+
+#: src/lib/error-messages.svelte.ts
+msgid "No logo file was sent."
+msgstr "Es wurde keine Logo-Datei gesendet."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A logo has to be a PNG, JPEG, WebP or SVG file."
+msgstr "Ein Logo muss eine PNG-, JPEG-, WebP- oder SVG-Datei sein."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "The logo file is too large (at most {0} MB)."
+msgstr "Die Logo-Datei ist zu groß (höchstens {0} MB)."
+
+#: src/lib/error-messages.svelte.ts
+msgid "The logo file could not be read as an image."
+msgstr "Die Logo-Datei konnte nicht als Bild gelesen werden."
+
+#: src/routes/orgs/[id]/org-logo-card.svelte
+msgid "Logo uploaded"
+msgstr "Logo hochgeladen"
+
+#: src/routes/orgs/[id]/org-logo-card.svelte
+msgid "Logo removed"
+msgstr "Logo entfernt"
+
+#: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
+#: src/routes/orgs/[id]/org-logo-card.svelte
+msgid "Logo"
+msgstr "Logo"
+
+#: src/routes/orgs/[id]/org-logo-card.svelte
+msgid "Printed at the top of offers, invoices and delivery notes."
+msgstr "Steht oben auf Angeboten, Rechnungen und Lieferscheinen."
+
+#: src/routes/orgs/[id]/org-logo-card.svelte
+msgid "Organization logo"
+msgstr "Logo der Organisation"
+
+#: src/routes/orgs/[id]/org-logo-card.svelte
+msgid "No logo yet. PNG, JPEG, WebP or SVG — a transparent background works best."
+msgstr "Noch kein Logo. PNG, JPEG, WebP oder SVG – am besten mit transparentem Hintergrund."
+
+#: src/routes/orgs/[id]/org-logo-card.svelte
+msgid "Upload logo"
+msgstr "Logo hochladen"
+
+#: src/routes/orgs/[id]/org-logo-card.svelte
+msgid "Drafts keep the logo they were created with until you use \"Use current details\" on them. Finalized documents never change."
+msgstr "Entwürfe behalten das Logo, mit dem sie erstellt wurden, bis Sie dort „Aktuelle Daten übernehmen“ wählen. Abgeschlossene Dokumente ändern sich nie."

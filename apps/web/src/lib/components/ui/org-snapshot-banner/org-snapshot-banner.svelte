@@ -37,6 +37,7 @@
 		tax: 'Tax number / VAT ID',
 		contact: 'Contact details',
 		bank: 'Bank details',
+		logo: 'Logo',
 		vatStatus: 'VAT status'
 	};
 

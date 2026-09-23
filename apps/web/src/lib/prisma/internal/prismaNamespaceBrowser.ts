@@ -210,6 +210,7 @@ export const OrganizationScalarFieldEnum = {
   bankName: 'bankName',
   billingEmail: 'billingEmail',
   billingWebsite: 'billingWebsite',
+  logoPath: 'logoPath',
   paymentTermsDays: 'paymentTermsDays',
   offerIntroTemplate: 'offerIntroTemplate',
   offerClosingTemplate: 'offerClosingTemplate',
@@ -617,6 +618,7 @@ export const OfferScalarFieldEnum = {
   orgBankName: 'orgBankName',
   orgIban: 'orgIban',
   orgBic: 'orgBic',
+  orgLogoPath: 'orgLogoPath',
   originalOfferId: 'originalOfferId',
   revision: 'revision',
   createdAt: 'createdAt',
@@ -698,6 +700,7 @@ export const InvoiceScalarFieldEnum = {
   orgBankName: 'orgBankName',
   orgIban: 'orgIban',
   orgBic: 'orgBic',
+  orgLogoPath: 'orgLogoPath',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

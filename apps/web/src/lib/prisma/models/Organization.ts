@@ -57,6 +57,7 @@ export type OrganizationMinAggregateOutputType = {
   bankName: string | null
   billingEmail: string | null
   billingWebsite: string | null
+  logoPath: string | null
   paymentTermsDays: number | null
   offerIntroTemplate: string | null
   offerClosingTemplate: string | null
@@ -85,6 +86,7 @@ export type OrganizationMaxAggregateOutputType = {
   bankName: string | null
   billingEmail: string | null
   billingWebsite: string | null
+  logoPath: string | null
   paymentTermsDays: number | null
   offerIntroTemplate: string | null
   offerClosingTemplate: string | null
@@ -113,6 +115,7 @@ export type OrganizationCountAggregateOutputType = {
   bankName: number
   billingEmail: number
   billingWebsite: number
+  logoPath: number
   paymentTermsDays: number
   offerIntroTemplate: number
   offerClosingTemplate: number
@@ -153,6 +156,7 @@ export type OrganizationMinAggregateInputType = {
   bankName?: true
   billingEmail?: true
   billingWebsite?: true
+  logoPath?: true
   paymentTermsDays?: true
   offerIntroTemplate?: true
   offerClosingTemplate?: true
@@ -181,6 +185,7 @@ export type OrganizationMaxAggregateInputType = {
   bankName?: true
   billingEmail?: true
   billingWebsite?: true
+  logoPath?: true
   paymentTermsDays?: true
   offerIntroTemplate?: true
   offerClosingTemplate?: true
@@ -209,6 +214,7 @@ export type OrganizationCountAggregateInputType = {
   bankName?: true
   billingEmail?: true
   billingWebsite?: true
+  logoPath?: true
   paymentTermsDays?: true
   offerIntroTemplate?: true
   offerClosingTemplate?: true
@@ -324,6 +330,7 @@ export type OrganizationGroupByOutputType = {
   bankName: string | null
   billingEmail: string | null
   billingWebsite: string | null
+  logoPath: string | null
   paymentTermsDays: number
   offerIntroTemplate: string | null
   offerClosingTemplate: string | null
@@ -375,6 +382,7 @@ export type OrganizationWhereInput = {
   bankName?: Prisma.StringNullableFilter<"Organization"> | string | null
   billingEmail?: Prisma.StringNullableFilter<"Organization"> | string | null
   billingWebsite?: Prisma.StringNullableFilter<"Organization"> | string | null
+  logoPath?: Prisma.StringNullableFilter<"Organization"> | string | null
   paymentTermsDays?: Prisma.IntFilter<"Organization"> | number
   offerIntroTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
   offerClosingTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
@@ -420,6 +428,7 @@ export type OrganizationOrderByWithRelationInput = {
   bankName?: Prisma.SortOrderInput | Prisma.SortOrder
   billingEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   billingWebsite?: Prisma.SortOrderInput | Prisma.SortOrder
+  logoPath?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentTermsDays?: Prisma.SortOrder
   offerIntroTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
   offerClosingTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -468,6 +477,7 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   bankName?: Prisma.StringNullableFilter<"Organization"> | string | null
   billingEmail?: Prisma.StringNullableFilter<"Organization"> | string | null
   billingWebsite?: Prisma.StringNullableFilter<"Organization"> | string | null
+  logoPath?: Prisma.StringNullableFilter<"Organization"> | string | null
   paymentTermsDays?: Prisma.IntFilter<"Organization"> | number
   offerIntroTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
   offerClosingTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
@@ -513,6 +523,7 @@ export type OrganizationOrderByWithAggregationInput = {
   bankName?: Prisma.SortOrderInput | Prisma.SortOrder
   billingEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   billingWebsite?: Prisma.SortOrderInput | Prisma.SortOrder
+  logoPath?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentTermsDays?: Prisma.SortOrder
   offerIntroTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
   offerClosingTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -549,6 +560,7 @@ export type OrganizationScalarWhereWithAggregatesInput = {
   bankName?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
   billingEmail?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
   billingWebsite?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  logoPath?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
   paymentTermsDays?: Prisma.IntWithAggregatesFilter<"Organization"> | number
   offerIntroTemplate?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
   offerClosingTemplate?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
@@ -576,6 +588,7 @@ export type OrganizationCreateInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -621,6 +634,7 @@ export type OrganizationUncheckedCreateInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -664,6 +678,7 @@ export type OrganizationUpdateInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -709,6 +724,7 @@ export type OrganizationUncheckedUpdateInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -753,6 +769,7 @@ export type OrganizationCreateManyInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -780,6 +797,7 @@ export type OrganizationUpdateManyMutationInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -808,6 +826,7 @@ export type OrganizationUncheckedUpdateManyInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -841,6 +860,7 @@ export type OrganizationCountOrderByAggregateInput = {
   bankName?: Prisma.SortOrder
   billingEmail?: Prisma.SortOrder
   billingWebsite?: Prisma.SortOrder
+  logoPath?: Prisma.SortOrder
   paymentTermsDays?: Prisma.SortOrder
   offerIntroTemplate?: Prisma.SortOrder
   offerClosingTemplate?: Prisma.SortOrder
@@ -874,6 +894,7 @@ export type OrganizationMaxOrderByAggregateInput = {
   bankName?: Prisma.SortOrder
   billingEmail?: Prisma.SortOrder
   billingWebsite?: Prisma.SortOrder
+  logoPath?: Prisma.SortOrder
   paymentTermsDays?: Prisma.SortOrder
   offerIntroTemplate?: Prisma.SortOrder
   offerClosingTemplate?: Prisma.SortOrder
@@ -902,6 +923,7 @@ export type OrganizationMinOrderByAggregateInput = {
   bankName?: Prisma.SortOrder
   billingEmail?: Prisma.SortOrder
   billingWebsite?: Prisma.SortOrder
+  logoPath?: Prisma.SortOrder
   paymentTermsDays?: Prisma.SortOrder
   offerIntroTemplate?: Prisma.SortOrder
   offerClosingTemplate?: Prisma.SortOrder
@@ -1219,6 +1241,7 @@ export type OrganizationCreateWithoutHomeUsersInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -1263,6 +1286,7 @@ export type OrganizationUncheckedCreateWithoutHomeUsersInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -1321,6 +1345,7 @@ export type OrganizationUpdateWithoutHomeUsersInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1365,6 +1390,7 @@ export type OrganizationUncheckedUpdateWithoutHomeUsersInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1407,6 +1433,7 @@ export type OrganizationCreateWithoutMembersInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -1451,6 +1478,7 @@ export type OrganizationUncheckedCreateWithoutMembersInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -1509,6 +1537,7 @@ export type OrganizationUpdateWithoutMembersInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1553,6 +1582,7 @@ export type OrganizationUncheckedUpdateWithoutMembersInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1595,6 +1625,7 @@ export type OrganizationCreateWithoutInvitationsInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -1639,6 +1670,7 @@ export type OrganizationUncheckedCreateWithoutInvitationsInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -1697,6 +1729,7 @@ export type OrganizationUpdateWithoutInvitationsInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1741,6 +1774,7 @@ export type OrganizationUncheckedUpdateWithoutInvitationsInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1783,6 +1817,7 @@ export type OrganizationCreateWithoutProductPricesInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -1827,6 +1862,7 @@ export type OrganizationUncheckedCreateWithoutProductPricesInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -1885,6 +1921,7 @@ export type OrganizationUpdateWithoutProductPricesInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1929,6 +1966,7 @@ export type OrganizationUncheckedUpdateWithoutProductPricesInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1971,6 +2009,7 @@ export type OrganizationCreateWithoutAddressInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -2014,6 +2053,7 @@ export type OrganizationUncheckedCreateWithoutAddressInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -2087,6 +2127,7 @@ export type OrganizationScalarWhereInput = {
   bankName?: Prisma.StringNullableFilter<"Organization"> | string | null
   billingEmail?: Prisma.StringNullableFilter<"Organization"> | string | null
   billingWebsite?: Prisma.StringNullableFilter<"Organization"> | string | null
+  logoPath?: Prisma.StringNullableFilter<"Organization"> | string | null
   paymentTermsDays?: Prisma.IntFilter<"Organization"> | number
   offerIntroTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
   offerClosingTemplate?: Prisma.StringNullableFilter<"Organization"> | string | null
@@ -2114,6 +2155,7 @@ export type OrganizationCreateWithoutLocationsInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -2158,6 +2200,7 @@ export type OrganizationUncheckedCreateWithoutLocationsInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -2216,6 +2259,7 @@ export type OrganizationUpdateWithoutLocationsInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2260,6 +2304,7 @@ export type OrganizationUncheckedUpdateWithoutLocationsInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2302,6 +2347,7 @@ export type OrganizationCreateWithoutAssetsInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -2346,6 +2392,7 @@ export type OrganizationUncheckedCreateWithoutAssetsInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -2404,6 +2451,7 @@ export type OrganizationUpdateWithoutAssetsInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2448,6 +2496,7 @@ export type OrganizationUncheckedUpdateWithoutAssetsInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2490,6 +2539,7 @@ export type OrganizationCreateWithoutBundleTemplatesInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -2534,6 +2584,7 @@ export type OrganizationUncheckedCreateWithoutBundleTemplatesInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -2592,6 +2643,7 @@ export type OrganizationUpdateWithoutBundleTemplatesInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2636,6 +2688,7 @@ export type OrganizationUncheckedUpdateWithoutBundleTemplatesInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2678,6 +2731,7 @@ export type OrganizationCreateWithoutProductionsInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -2722,6 +2776,7 @@ export type OrganizationUncheckedCreateWithoutProductionsInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -2780,6 +2835,7 @@ export type OrganizationUpdateWithoutProductionsInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2824,6 +2880,7 @@ export type OrganizationUncheckedUpdateWithoutProductionsInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2866,6 +2923,7 @@ export type OrganizationCreateWithoutCustomersInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -2910,6 +2968,7 @@ export type OrganizationUncheckedCreateWithoutCustomersInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -2968,6 +3027,7 @@ export type OrganizationUpdateWithoutCustomersInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3012,6 +3072,7 @@ export type OrganizationUncheckedUpdateWithoutCustomersInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3054,6 +3115,7 @@ export type OrganizationCreateWithoutCategoryRatesInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -3098,6 +3160,7 @@ export type OrganizationUncheckedCreateWithoutCategoryRatesInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -3156,6 +3219,7 @@ export type OrganizationUpdateWithoutCategoryRatesInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3200,6 +3264,7 @@ export type OrganizationUncheckedUpdateWithoutCategoryRatesInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3242,6 +3307,7 @@ export type OrganizationCreateWithoutServiceCategoriesInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -3286,6 +3352,7 @@ export type OrganizationUncheckedCreateWithoutServiceCategoriesInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -3344,6 +3411,7 @@ export type OrganizationUpdateWithoutServiceCategoriesInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3388,6 +3456,7 @@ export type OrganizationUncheckedUpdateWithoutServiceCategoriesInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3430,6 +3499,7 @@ export type OrganizationCreateWithoutServicesInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -3474,6 +3544,7 @@ export type OrganizationUncheckedCreateWithoutServicesInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -3532,6 +3603,7 @@ export type OrganizationUpdateWithoutServicesInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3576,6 +3648,7 @@ export type OrganizationUncheckedUpdateWithoutServicesInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3618,6 +3691,7 @@ export type OrganizationCreateWithoutOfferSequencesInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -3662,6 +3736,7 @@ export type OrganizationUncheckedCreateWithoutOfferSequencesInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -3720,6 +3795,7 @@ export type OrganizationUpdateWithoutOfferSequencesInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3764,6 +3840,7 @@ export type OrganizationUncheckedUpdateWithoutOfferSequencesInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3806,6 +3883,7 @@ export type OrganizationCreateWithoutOffersInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -3850,6 +3928,7 @@ export type OrganizationUncheckedCreateWithoutOffersInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -3908,6 +3987,7 @@ export type OrganizationUpdateWithoutOffersInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3952,6 +4032,7 @@ export type OrganizationUncheckedUpdateWithoutOffersInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3994,6 +4075,7 @@ export type OrganizationCreateWithoutInvoicesInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -4038,6 +4120,7 @@ export type OrganizationUncheckedCreateWithoutInvoicesInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -4096,6 +4179,7 @@ export type OrganizationUpdateWithoutInvoicesInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4140,6 +4224,7 @@ export type OrganizationUncheckedUpdateWithoutInvoicesInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4182,6 +4267,7 @@ export type OrganizationCreateWithoutStocktakesInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -4226,6 +4312,7 @@ export type OrganizationUncheckedCreateWithoutStocktakesInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -4284,6 +4371,7 @@ export type OrganizationUpdateWithoutStocktakesInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4328,6 +4416,7 @@ export type OrganizationUncheckedUpdateWithoutStocktakesInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4370,6 +4459,7 @@ export type OrganizationCreateManyAddressInput = {
   bankName?: string | null
   billingEmail?: string | null
   billingWebsite?: string | null
+  logoPath?: string | null
   paymentTermsDays?: number
   offerIntroTemplate?: string | null
   offerClosingTemplate?: string | null
@@ -4397,6 +4487,7 @@ export type OrganizationUpdateWithoutAddressInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4440,6 +4531,7 @@ export type OrganizationUncheckedUpdateWithoutAddressInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4483,6 +4575,7 @@ export type OrganizationUncheckedUpdateManyWithoutAddressInput = {
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4677,6 +4770,7 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   bankName?: boolean
   billingEmail?: boolean
   billingWebsite?: boolean
+  logoPath?: boolean
   paymentTermsDays?: boolean
   offerIntroTemplate?: boolean
   offerClosingTemplate?: boolean
@@ -4723,6 +4817,7 @@ export type OrganizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   bankName?: boolean
   billingEmail?: boolean
   billingWebsite?: boolean
+  logoPath?: boolean
   paymentTermsDays?: boolean
   offerIntroTemplate?: boolean
   offerClosingTemplate?: boolean
@@ -4752,6 +4847,7 @@ export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   bankName?: boolean
   billingEmail?: boolean
   billingWebsite?: boolean
+  logoPath?: boolean
   paymentTermsDays?: boolean
   offerIntroTemplate?: boolean
   offerClosingTemplate?: boolean
@@ -4781,6 +4877,7 @@ export type OrganizationSelectScalar = {
   bankName?: boolean
   billingEmail?: boolean
   billingWebsite?: boolean
+  logoPath?: boolean
   paymentTermsDays?: boolean
   offerIntroTemplate?: boolean
   offerClosingTemplate?: boolean
@@ -4788,7 +4885,7 @@ export type OrganizationSelectScalar = {
   invoiceClosingTemplate?: boolean
 }
 
-export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "shortName" | "assetIdPrefix" | "createdAt" | "updatedAt" | "defaultAssetVisibility" | "color" | "avatarLabel" | "defaultInspectionIntervalMonths" | "isKleinunternehmer" | "addressId" | "taxNumber" | "vatId" | "bankAccountHolder" | "iban" | "bic" | "bankName" | "billingEmail" | "billingWebsite" | "paymentTermsDays" | "offerIntroTemplate" | "offerClosingTemplate" | "invoiceIntroTemplate" | "invoiceClosingTemplate", ExtArgs["result"]["organization"]>
+export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "shortName" | "assetIdPrefix" | "createdAt" | "updatedAt" | "defaultAssetVisibility" | "color" | "avatarLabel" | "defaultInspectionIntervalMonths" | "isKleinunternehmer" | "addressId" | "taxNumber" | "vatId" | "bankAccountHolder" | "iban" | "bic" | "bankName" | "billingEmail" | "billingWebsite" | "logoPath" | "paymentTermsDays" | "offerIntroTemplate" | "offerClosingTemplate" | "invoiceIntroTemplate" | "invoiceClosingTemplate", ExtArgs["result"]["organization"]>
 export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   address?: boolean | Prisma.Organization$addressArgs<ExtArgs>
   homeUsers?: boolean | Prisma.Organization$homeUsersArgs<ExtArgs>
@@ -4858,6 +4955,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     bankName: string | null
     billingEmail: string | null
     billingWebsite: string | null
+    logoPath: string | null
     paymentTermsDays: number
     offerIntroTemplate: string | null
     offerClosingTemplate: string | null
@@ -5323,6 +5421,7 @@ export interface OrganizationFieldRefs {
   readonly bankName: Prisma.FieldRef<"Organization", 'String'>
   readonly billingEmail: Prisma.FieldRef<"Organization", 'String'>
   readonly billingWebsite: Prisma.FieldRef<"Organization", 'String'>
+  readonly logoPath: Prisma.FieldRef<"Organization", 'String'>
   readonly paymentTermsDays: Prisma.FieldRef<"Organization", 'Int'>
   readonly offerIntroTemplate: Prisma.FieldRef<"Organization", 'String'>
   readonly offerClosingTemplate: Prisma.FieldRef<"Organization", 'String'>
