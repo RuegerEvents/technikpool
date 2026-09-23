@@ -1,5 +1,23 @@
 [
 	{
+		"version": "0.20.0",
+		"date": "2026-09-23",
+		"en": [
+			"Stocktakes: count what is actually on the shelves. Pick an organization and, if you like, locations, categories or products, and the list of what should be there is fixed when you start. Several people can count at once, in the browser or on a scanner, over as many days as it takes. Tagged units are ticked one by one and untagged ones are counted per product and location. Units out on a production count as accounted for, not missing.",
+			"Scanning a unit with accessories, or a bundle tag, lists what belongs with it, already ticked, so you only untick what is missing. Something that isn't on the list is recorded as unexpected, with a reason.",
+			"Closing a stocktake is final and adds it to every unit's history. The report then offers corrections, each applied once: mark missing units unavailable, make found ones available again, move units to where they were found, and send flagged ones to maintenance. It can be printed, exported as CSV, or recounted for just the gaps.",
+			"Organizations can upload a logo. It is printed at the top of offers, invoices and delivery notes. Drafts keep the logo they were created with until you choose \"Use current details\".",
+			"A product that shows \"0 units\" but can't be deleted now says why: next to the unit count, it lists retired units and units of other organizations, and the error names what is in the way."
+		],
+		"de": [
+			"Inventur: Zähle, was wirklich im Regal steht. Du wählst eine Organisation und bei Bedarf Lagerorte, Kategorien oder Produkte, und die Liste dessen, was da sein sollte, steht mit dem Start fest. Mehrere Leute können gleichzeitig zählen, im Browser oder am Scanner, über so viele Tage wie nötig. Geräte mit Aufkleber werden einzeln abgehakt, solche ohne pro Produkt und Lagerort gezählt. Geräte, die auf einer Produktion sind, gelten als erfasst, nicht als fehlend.",
+			"Scannst du ein Gerät mit Zubehör oder den Aufkleber eines Sets, erscheint alles, was dazugehört, bereits abgehakt, und du nimmst nur den Haken bei dem heraus, was fehlt. Was nicht auf der Liste steht, wird mit Begründung als unerwartet erfasst.",
+			"Der Abschluss einer Inventur ist endgültig und steht danach im Verlauf jedes Geräts. Der Bericht bietet dann Korrekturen an, jede einmal anwendbar: fehlende Geräte als nicht verfügbar markieren, gefundene wieder freigeben, Geräte an den Ort verschieben, an dem sie gefunden wurden, und markierte in die Wartung schicken. Er lässt sich drucken, als CSV exportieren oder nur für die Lücken neu zählen.",
+			"Organisationen können ein Logo hochladen. Es steht oben auf Angeboten, Rechnungen und Lieferscheinen. Entwürfe behalten das Logo, mit dem sie erstellt wurden, bis du „Aktuelle Daten übernehmen“ wählst.",
+			"Ein Produkt, das „0 Geräte“ anzeigt, sich aber nicht löschen lässt, sagt jetzt warum: Neben der Anzahl stehen ausgemusterte Geräte und Geräte anderer Organisationen, und die Fehlermeldung nennt, was im Weg ist."
+		]
+	},
+	{
 		"version": "0.19.0",
 		"date": "2026-09-22",
 		"en": [
