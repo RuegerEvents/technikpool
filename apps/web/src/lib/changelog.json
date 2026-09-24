@@ -1,5 +1,17 @@
 [
 	{
+		"version": "0.21.0",
+		"date": "2026-09-24",
+		"en": [
+			"Stocktakes now count against the live inventory. While a stocktake is open, the list follows the equipment: a unit registered or moved into the selection appears on it, one retired or moved out disappears, and \"out on a production\" is the status of the moment, so a unit returned mid-count has to be counted. Closing fixes the report, which never changes afterwards.",
+			"Quick-add mode for asset tags: a \"…\" menu on the assets page turns every empty tag cell into a button that opens a one-field dialog, Enter saves and moves on. Works in device and product tables and under expanded bundles. A tag already on another unit is refused with that unit's name."
+		],
+		"de": [
+			"Die Inventur zählt jetzt gegen den aktuellen Bestand. Solange sie offen ist, folgt die Liste den Geräten: Ein Gerät, das neu angelegt oder in die Auswahl verschoben wird, erscheint darauf, ein ausgemustertes oder verschobenes verschwindet, und „auf einer Produktion“ ist der Stand von jetzt, sodass ein zwischendurch zurückgebrachtes Gerät gezählt werden muss. Der Abschluss schreibt den Bericht fest, danach ändert er sich nicht mehr.",
+			"Schnellerfassung für Aufkleber: Ein „…“-Menü auf der Geräteseite macht jede leere Aufkleber-Zelle zu einem Knopf, der einen Dialog mit nur einem Feld öffnet, Enter speichert und weiter geht es. Funktioniert in der Geräte- und Produkttabelle und unter aufgeklappten Sets. Ein Aufkleber, der schon auf einem anderen Gerät klebt, wird mit dessen Namen abgelehnt."
+		]
+	},
+	{
 		"version": "0.20.0",
 		"date": "2026-09-23",
 		"en": [

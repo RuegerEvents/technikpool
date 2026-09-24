@@ -1,5 +1,19 @@
 [
   {
+    "version": "1.5.0",
+    "date": "2026-09-24",
+    "en": [
+      "Counting a stocktake: the \"Open here\" tab gets a search field, every word you type has to appear somewhere in the row, so \"schuko 5\" finds the 5 m cables. Category chips and rows carry their category's colour.",
+      "Loose products get a + button that counts one more without a dialog, and the count dialog gets − / + steppers.",
+      "The stocktake list follows the live inventory: a unit registered or moved into the selection appears, one that leaves it disappears, and a unit returned from a production mid-count has to be counted."
+    ],
+    "de": [
+      "Beim Zählen einer Inventur hat der Tab „Offen hier“ ein Suchfeld: Jedes eingetippte Wort muss irgendwo in der Zeile vorkommen, „schuko 5“ findet also die 5-m-Kabel. Kategorie-Chips und Zeilen tragen die Farbe ihrer Kategorie.",
+      "Lose Produkte bekommen einen +-Knopf, der ohne Dialog eins mehr zählt, und der Zähldialog bekommt − / + Schritte.",
+      "Die Inventurliste folgt dem aktuellen Bestand: Ein Gerät, das neu angelegt oder in die Auswahl verschoben wird, erscheint, eines, das sie verlässt, verschwindet, und ein zwischendurch von einer Produktion zurückgebrachtes Gerät muss gezählt werden."
+    ]
+  },
+  {
     "version": "1.4.0",
     "date": "2026-09-23",
     "en": [
