@@ -46,10 +46,13 @@ tags:
     description: Booking scanned assets in and out.
   - name: stocktake
     description: |
-      Counting what an organization actually has (Inventur). A stocktake
-      snapshots the units its scope matches when it starts; counters then scan
-      or tick them, and enter counts for loose untagged units. Nothing about an
-      asset changes while a stocktake is open.
+      Counting what an organization actually has (Inventur). An open stocktake
+      lists whatever its scope matches *right now* — a unit registered or moved
+      into it appears, one retired or moved out disappears, and "checked out"
+      is the status of the moment. Counters scan or tick units and enter counts
+      for loose untagged ones; only those are stored. Closing freezes the list
+      of that moment into the report. Nothing about an asset changes while a
+      stocktake is open.
 
 paths:
   /api/auth/device/code:
@@ -408,7 +411,7 @@ paths:
       tags: [stocktake]
       summary: Start a stocktake
       description: |
-        Takes the snapshot straight away. Needs MEMBER of the organization.
+        Stores the scope; the list is resolved whenever it is read. Needs MEMBER of the organization.
         A scope that matches nothing is refused with `409 stocktake_empty`.
       requestBody:
         required: true
@@ -448,7 +451,7 @@ paths:
               $ref: '#/components/schemas/StocktakeScopeRequest'
       responses:
         '200':
-          description: The would-be snapshot's size
+          description: The size of the list right now
           content:
             application/json:
               schema:
@@ -1280,7 +1283,7 @@ components:
       properties:
         expected:
           type: integer
-          description: Units to find, loose ones included. Excludes units checked out at the start.
+          description: Units to find, loose ones included. Excludes units checked out right now.
         found:
           type: integer
           description: >-
@@ -1288,7 +1291,7 @@ components:
             does not make up for a shortfall of another.
         out:
           type: integer
-          description: Checked out at the start and not scanned since.
+          description: Checked out on a production and not scanned.
         unexpected:
           type: integer
           description: Scanned although not on the list.
@@ -1388,9 +1391,10 @@ components:
           enum: [open, found, out, missing, unexpected]
           description: |
             `open` is not counted yet; it turns into `missing` when the
-            stocktake closes. `out` was checked out on a production at the
-            start and is accounted for. `unexpected` was scanned although it
-            is not on the list — see `unexpectedReason`.
+            stocktake closes. `out` is checked out on a production (right now
+            while open, at closing time once closed) and is accounted for.
+            `unexpected` was scanned although it is not on the list — see
+            `unexpectedReason`.
         expectedLocation:
           oneOf:
             - $ref: '#/components/schemas/StocktakeLocation'
@@ -1401,10 +1405,10 @@ components:
             - type: 'null'
         outAt:
           type: [string, 'null']
-          description: The production it was checked out to at the start.
+          description: The production it is checked out to.
         unexpectedReason:
           type: [string, 'null']
-          description: One of `other_org`, `retired`, `added_later`, `other_location`, `out_of_scope`.
+          description: One of `other_org`, `retired`, `other_location`, `out_of_scope`.
         foundByName:
           type: [string, 'null']
         foundByMe:
@@ -1479,7 +1483,7 @@ components:
             - type: 'null'
         wasOutAt:
           type: [string, 'null']
-          description: It was checked out to this production at the start, and is here after all.
+          description: It is checked out to this production, and is here after all.
         alreadyFoundByName:
           type: [string, 'null']
           description: For `already`, who counted it.

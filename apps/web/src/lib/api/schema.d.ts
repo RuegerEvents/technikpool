@@ -251,7 +251,7 @@ export interface paths {
         put?: never;
         /**
          * Start a stocktake
-         * @description Takes the snapshot straight away. Needs MEMBER of the organization.
+         * @description Stores the scope; the list is resolved whenever it is read. Needs MEMBER of the organization.
          *     A scope that matches nothing is refused with `409 stocktake_empty`.
          */
         post: operations["createStocktake"];
@@ -717,11 +717,11 @@ export interface components {
         /** @enum {string} */
         StocktakeStatus: "OPEN" | "CLOSED";
         StocktakeProgress: {
-            /** @description Units to find, loose ones included. Excludes units checked out at the start. */
+            /** @description Units to find, loose ones included. Excludes units checked out right now. */
             expected: number;
             /** @description Of `expected`, how many were counted. A surplus of one loose product does not make up for a shortfall of another. */
             found: number;
-            /** @description Checked out at the start and not scanned since. */
+            /** @description Checked out on a production and not scanned. */
             out: number;
             /** @description Scanned although not on the list. */
             unexpected: number;
@@ -762,17 +762,18 @@ export interface components {
             bundleName?: string | null;
             /**
              * @description `open` is not counted yet; it turns into `missing` when the
-             *     stocktake closes. `out` was checked out on a production at the
-             *     start and is accounted for. `unexpected` was scanned although it
-             *     is not on the list — see `unexpectedReason`.
+             *     stocktake closes. `out` is checked out on a production (right now
+             *     while open, at closing time once closed) and is accounted for.
+             *     `unexpected` was scanned although it is not on the list — see
+             *     `unexpectedReason`.
              * @enum {string}
              */
             state: "open" | "found" | "out" | "missing" | "unexpected";
             expectedLocation: components["schemas"]["StocktakeLocation"] | null;
             foundLocation: components["schemas"]["StocktakeLocation"] | null;
-            /** @description The production it was checked out to at the start. */
+            /** @description The production it is checked out to. */
             outAt?: string | null;
-            /** @description One of `other_org`, `retired`, `added_later`, `other_location`, `out_of_scope`. */
+            /** @description One of `other_org`, `retired`, `other_location`, `out_of_scope`. */
             unexpectedReason?: string | null;
             foundByName: string | null;
             /** @description Only these can be unticked or annotated by the caller. */
@@ -809,7 +810,7 @@ export interface components {
             outcome: "found" | "unexpected" | "already" | "bundle";
             /** @description The scanned unit. Absent for a bundle. */
             item?: components["schemas"]["StocktakeItem"] | null;
-            /** @description It was checked out to this production at the start, and is here after all. */
+            /** @description It is checked out to this production, and is here after all. */
             wasOutAt?: string | null;
             /** @description For `already`, who counted it. */
             alreadyFoundByName?: string | null;
@@ -1287,7 +1288,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The would-be snapshot's size */
+            /** @description The size of the list right now */
             200: {
                 headers: {
                     [name: string]: unknown;

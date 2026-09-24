@@ -112,8 +112,9 @@
 		<Button variant="ghost" size="sm" icon="back" href={resolve('/stocktakes')}>Stocktakes</Button>
 		<h1 class="mt-2 text-3xl font-bold tracking-tight">New stocktake</h1>
 		<p class="text-muted-foreground">
-			Choose what to count. Everything that matches is noted down now, so the list stays the same
-			however long the count takes.
+			Choose what to count. The list follows the equipment while you count: a unit registered or
+			moved into the selection appears on it, one that leaves it disappears. Closing fixes the
+			report.
 		</p>
 	</div>
 

@@ -29,7 +29,7 @@ class StocktakeScanResult {
   /// The scanned unit. Absent for a bundle.
   final StocktakeItem? item;
 
-  /// It was checked out to this production at the start, and is here after all.
+  /// It is checked out to this production, and is here after all.
   final String? wasOutAt;
 
   /// For `already`, who counted it.

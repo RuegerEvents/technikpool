@@ -17,13 +17,13 @@ class StocktakeProgress {
   
   factory StocktakeProgress.fromJson(Map<String, Object?> json) => _$StocktakeProgressFromJson(json);
   
-  /// Units to find, loose ones included. Excludes units checked out at the start.
+  /// Units to find, loose ones included. Excludes units checked out right now.
   final int expected;
 
   /// Of `expected`, how many were counted. A surplus of one loose product does not make up for a shortfall of another.
   final int found;
 
-  /// Checked out at the start and not scanned since.
+  /// Checked out on a production and not scanned.
   final int out;
 
   /// Scanned although not on the list.

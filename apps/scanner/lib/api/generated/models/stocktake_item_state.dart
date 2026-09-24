@@ -5,9 +5,10 @@
 import 'package:json_annotation/json_annotation.dart';
 
 /// `open` is not counted yet; it turns into `missing` when the.
-/// stocktake closes. `out` was checked out on a production at the.
-/// start and is accounted for. `unexpected` was scanned although it.
-/// is not on the list — see `unexpectedReason`.
+/// stocktake closes. `out` is checked out on a production (right now.
+/// while open, at closing time once closed) and is accounted for.
+/// `unexpected` was scanned although it is not on the list — see.
+/// `unexpectedReason`.
 ///
 @JsonEnum()
 enum StocktakeItemState {

@@ -9598,10 +9598,8 @@ msgstr "Unerwartet: {0}"
 msgid "Found: {0}"
 msgstr "Gefunden: {0}"
 
-#. 0: result.wasOutAt
-#: src/routes/stocktakes/[id]/stocktake-detail.svelte
-msgid "Was checked out to {0}"
-msgstr "War ausgebucht auf {0}"
+#~ msgid "Was checked out to {0}"
+#~ msgstr "War ausgebucht auf {0}"
 
 #. 0: name
 #. 0: item.asset.product.name
@@ -9832,10 +9830,8 @@ msgstr "Kein Tag"
 msgid "· Accessory"
 msgstr "· Zubehör"
 
-#. 0: item.outProductionName
-#: src/routes/stocktakes/[id]/stocktake-detail.svelte
-msgid "· Was checked out to {0}"
-msgstr "· War ausgebucht auf {0}"
+#~ msgid "· Was checked out to {0}"
+#~ msgstr "· War ausgebucht auf {0}"
 
 #. 0: item.expectedLocation?.name
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
@@ -9954,9 +9950,8 @@ msgstr "Gehört einer anderen Organisation"
 msgid "Sold or decommissioned"
 msgstr "Verkauft oder ausgemustert"
 
-#: src/lib/stocktake-labels.svelte.ts
-msgid "Registered after the stocktake started"
-msgstr "Nach Beginn der Inventur angelegt"
+#~ msgid "Registered after the stocktake started"
+#~ msgstr "Nach Beginn der Inventur angelegt"
 
 #: src/lib/stocktake-labels.svelte.ts
 msgid "Booked to a location outside this stocktake"
@@ -10051,9 +10046,8 @@ msgstr "Inventur {0}"
 msgid "New stocktake | Technikpool"
 msgstr "Neue Inventur | Technikpool"
 
-#: src/routes/stocktakes/new/+page.svelte
-msgid "Choose what to count. Everything that matches is noted down now, so the list stays the same however long the count takes."
-msgstr "Wähle, was gezählt wird. Alles Passende wird jetzt festgehalten – die Liste bleibt gleich, egal wie lange das Zählen dauert."
+#~ msgid "Choose what to count. Everything that matches is noted down now, so the list stays the same however long the count takes."
+#~ msgstr "Wähle, was gezählt wird. Alles Passende wird jetzt festgehalten – die Liste bleibt gleich, egal wie lange das Zählen dauert."
 
 #: src/routes/stocktakes/new/+page.svelte
 msgid "You need to be a member of an organization to count its equipment."
@@ -10223,3 +10217,20 @@ msgstr "Asset-Tag nachtragen"
 #: src/routes/assets/+page.svelte
 msgid "Enter saves and closes."
 msgstr "Enter speichert und schließt."
+
+#~ msgid "In the device, product and bundle tables an empty tag cell opens a dialog; Enter saves it."
+#~ msgstr "In der Geräte-, Produkt- und Bundle-Tabelle öffnet eine leere Tag-Zelle einen Dialog; Enter speichert."
+
+#: src/routes/stocktakes/new/+page.svelte
+msgid "Choose what to count. The list follows the equipment while you count: a unit registered or moved into the selection appears on it, one that leaves it disappears. Closing fixes the report."
+msgstr "Wähle aus, was gezählt wird. Die Liste folgt während der Zählung dem Bestand: Ein Gerät, das neu angelegt oder in die Auswahl verschoben wird, erscheint darauf, eines, das sie verlässt, verschwindet. Mit dem Abschließen wird der Bericht festgeschrieben."
+
+#. 0: result.wasOutAt
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Checked out to {0}"
+msgstr "Ausgebucht auf {0}"
+
+#. 0: item.outProductionName
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "· Checked out to {0}"
+msgstr "· Ausgebucht auf {0}"

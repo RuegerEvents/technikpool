@@ -235,17 +235,23 @@ copy to customer, invoice) goes through `copyItem`, so a new item column has to 
 **stocktake** in code and English UI, **Inventur** in German. Rules live in
 `src/lib/server/services/stocktake.ts`, shared by `stocktakes.remote.ts` and `/api/v1/stocktakes`.
 
-- **Starting snapshots.** The scope (org + optional locations/categories/products) is resolved
-  once into `StocktakeItem` rows — a unit with a tag, an accessory, a bundle member or a unit
-  with accessories — and `StocktakeLine` rows, a number per product and location for loose
-  untagged units. The expected list never moves afterwards. Units `CHECKED_OUT` at the snapshot
-  are accounted for (`out`), not missing. Accessories come along regardless of the filter.
+- **The list is live while open.** A stocktake stores only its scope (org + optional
+  locations/categories/products, plus `assetIds` on a recount). Every read resolves it against
+  the assets _as they are now_ (`resolveScope`): a unit with a tag, an accessory, a bundle member
+  or a unit with accessories is an individual item, loose untagged units are a number per product
+  and location, and a unit `CHECKED_OUT` right now is accounted for (`out`), not missing. So a
+  unit registered or moved into the scope during the count appears, one retired or moved out
+  disappears, and there is no "added later". Accessories come along regardless of the filter.
+  Only ticks are stored (`StocktakeItem` rows with `foundAt`) and `overlay` lays them over the
+  resolved list; `expected` on a stored row is provisional until closing.
 - **Counting changes no asset.** A scan ticks a unit (or records it as `unexpected`, with a
   reason); a bundle tag ticks nothing and returns the members to confirm, a unit with
   accessories returns those. Whoever ticked a unit owns the tick — only they can untick or
   annotate it. Loose counts are per counter + location (`StocktakeCount`) and summed.
-- **Closing is final** and writes one `STOCKTAKE_COUNTED` entry per unit of the org into its
-  history; ticks and counts stay in `StocktakeEvent`. The corrections (mark missing
+- **Closing is final**: it writes the list of that moment into `StocktakeItem`/`StocktakeLine`
+  (the snapshot is taken at the end, not the start), so a closed report never moves again, and
+  writes one `STOCKTAKE_COUNTED` entry per unit of the org into its history; ticks and counts
+  stay in `StocktakeEvent`. The corrections (mark missing
   unavailable, restore found, move to where found, flag maintenance/broken) are separate
   actions on the closed report, each applied once (`appliedActions`), computed against the
   assets as they are _now_ (`actionCandidates`). Cancelling an open one deletes it.

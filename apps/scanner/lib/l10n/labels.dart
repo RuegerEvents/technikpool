@@ -61,7 +61,6 @@ class Labels {
   static String unexpectedReason(S l10n, String? reason) => switch (reason) {
     'other_org' => l10n.reasonOtherOrg,
     'retired' => l10n.reasonRetired,
-    'added_later' => l10n.reasonAddedLater,
     'other_location' => l10n.reasonOtherLocation,
     'out_of_scope' => l10n.reasonOutOfScope,
     null => l10n.stocktakeUnexpected,

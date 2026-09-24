@@ -41,8 +41,6 @@ export function unexpectedReasonLabel(reason: string | null): string {
 			return 'Belongs to another organization';
 		case 'retired':
 			return 'Sold or decommissioned';
-		case 'added_later':
-			return 'Registered after the stocktake started';
 		case 'other_location':
 			return 'Booked to a location outside this stocktake';
 		case 'out_of_scope':

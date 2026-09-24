@@ -48,18 +48,19 @@ class StocktakeItem {
   final String? bundleName;
 
   /// `open` is not counted yet; it turns into `missing` when the.
-  /// stocktake closes. `out` was checked out on a production at the.
-  /// start and is accounted for. `unexpected` was scanned although it.
-  /// is not on the list — see `unexpectedReason`.
+  /// stocktake closes. `out` is checked out on a production (right now.
+  /// while open, at closing time once closed) and is accounted for.
+  /// `unexpected` was scanned although it is not on the list — see.
+  /// `unexpectedReason`.
   ///
   final StocktakeItemState state;
   final StocktakeLocation? expectedLocation;
   final StocktakeLocation? foundLocation;
 
-  /// The production it was checked out to at the start.
+  /// The production it is checked out to.
   final String? outAt;
 
-  /// One of `other_org`, `retired`, `added_later`, `other_location`, `out_of_scope`.
+  /// One of `other_org`, `retired`, `other_location`, `out_of_scope`.
   final String? unexpectedReason;
   final String? foundByName;
 

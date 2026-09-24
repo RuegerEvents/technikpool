@@ -125,9 +125,7 @@
 					feedback = {
 						tone: 'good',
 						title: `Found: ${name}`,
-						detail: result.wasOutAt
-							? `Was checked out to ${result.wasOutAt}`
-							: (a.assetTag ?? value)
+						detail: result.wasOutAt ? `Checked out to ${result.wasOutAt}` : (a.assetTag ?? value)
 					};
 				}
 				if (result.outcome !== 'already' && result.confirm.length > 0) {
@@ -889,7 +887,7 @@
 											· {foundViaLabel(item.foundVia)}
 										{/if}
 										{#if item.foundAt && item.outProductionName}
-											· Was checked out to {item.outProductionName}
+											· Checked out to {item.outProductionName}
 										{/if}
 									</p>
 									{#if elsewhere}

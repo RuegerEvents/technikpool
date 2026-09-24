@@ -18,21 +18,35 @@ import { syncAccessories } from './accessories';
 //
 // The shape of it:
 //
-// - Starting one takes a *snapshot* of the units its scope matches. A unit is
-//   a StocktakeItem of its own when it can be told apart from its siblings —
-//   it has a tag, or is an accessory, a bundle member or has accessories — and
-//   is otherwise part of a StocktakeLine, a number per product and location.
-//   Units checked out at the snapshot are accounted for, not missing.
-// - Counting ticks items and enters per-counter counts. Nothing about an asset
-//   changes while a stocktake is open; each counter may only undo their own.
-// - Closing freezes it and writes one STOCKTAKE_COUNTED entry per unit into
-//   the asset history. The status/location corrections are separate actions
-//   on the closed report, each applied at most once.
+// - An open stocktake keeps no list of its own. What it expects is worked out
+//   from its scope against the assets *as they are now*, every time it is
+//   read: a unit registered or moved into the scope appears on the list, one
+//   retired or moved out leaves it, and "checked out" is the status of the
+//   moment. A unit is individual when it can be told apart from its siblings
+//   — it has a tag, or is an accessory, a bundle member or has accessories —
+//   and is otherwise part of a line, a number per product and location.
+//   Units checked out right now are accounted for, not missing.
+// - Only the counting is stored: a StocktakeItem per ticked unit (with the
+//   note on it), a StocktakeCount per counter, product and location. Nothing
+//   about an asset changes while a stocktake is open; each counter may only
+//   undo their own.
+// - Closing freezes it. The list of that moment is written into
+//   StocktakeItem/StocktakeLine, open units become missing, and each unit gets
+//   one STOCKTAKE_COUNTED entry in the asset history. From then on the stored
+//   rows are the report, and it never moves again. The status/location
+//   corrections are separate actions on the closed report, each applied at
+//   most once.
 
 export type StocktakeScope = {
 	locationIds: string[];
 	categoryIds: string[];
 	productIds: string[];
+	/**
+	 * Explicit units, set on a recount. When there are any, the individual
+	 * units on the list are exactly these and the filters above only add loose
+	 * lines; when empty, the filters decide both.
+	 */
+	assetIds: string[];
 };
 
 export const STOCKTAKE_ACTIONS = [
@@ -48,12 +62,12 @@ export type StocktakeAction = (typeof STOCKTAKE_ACTIONS)[number];
 export type FoundVia = 'scan' | 'manual' | 'parent' | 'bundle';
 
 /**
- * Why a unit that was scanned is not on the expected list. `added_later` is a
- * unit registered after the snapshot; `out_of_scope` is anything the filter
- * did not ask for (another category, or not among a recount's gaps).
+ * Why a ticked unit is not on the list. Worked out against the scope as the
+ * unit is now, so a unit moved into the scope after being scanned stops being
+ * unexpected. `out_of_scope` is anything the filter did not ask for (another
+ * category, or not among a recount's units).
  */
-export type UnexpectedReason =
-	'other_org' | 'retired' | 'added_later' | 'other_location' | 'out_of_scope';
+export type UnexpectedReason = 'other_org' | 'retired' | 'other_location' | 'out_of_scope';
 
 export class StocktakeError extends Error {
 	constructor(
@@ -104,6 +118,14 @@ async function canWrite(userId: string, organizationId: string) {
 	return (await writableOrgIds(userId)).includes(organizationId);
 }
 
+/** What every question about a stocktake needs of it. */
+type StocktakeHead = {
+	id: string;
+	organizationId: string;
+	status: string;
+	scope: Prisma.JsonValue;
+};
+
 /** Every stocktake question starts here: it exists, and the caller belongs to its org. */
 async function loadForRead(userId: string, stocktakeId: string) {
 	const stocktake = await prisma.stocktake.findUnique({ where: { id: stocktakeId } });
@@ -152,7 +174,7 @@ async function assertCountingLocation(organizationId: string, locationId: string
 }
 
 // ---------------------------------------------------------------------------
-// Snapshot
+// What a scope expects, right now
 
 export function parseScope(value: unknown): StocktakeScope {
 	const v = (value ?? {}) as Partial<Record<keyof StocktakeScope, unknown>>;
@@ -161,27 +183,29 @@ export function parseScope(value: unknown): StocktakeScope {
 	return {
 		locationIds: list(v.locationIds),
 		categoryIds: list(v.categoryIds),
-		productIds: list(v.productIds)
+		productIds: list(v.productIds),
+		assetIds: list(v.assetIds)
 	};
 }
 
-type SnapshotItem = {
+type ExpectedItem = {
 	assetId: string;
 	expectedLocationId: string;
 	outProductionId: string | null;
 	outProductionName: string | null;
 };
 
-type SnapshotLine = { productId: string; locationId: string; expected: number; out: number };
+type ExpectedLine = { productId: string; locationId: string; expected: number; out: number };
 
-type Snapshot = { items: SnapshotItem[]; lines: SnapshotLine[] };
+/** The list a scope resolves to: individual units, and a number per product and location. */
+type Expected = { items: ExpectedItem[]; lines: ExpectedLine[] };
 
 /**
- * Turns a set of units into the snapshot rows. Accessories come along with the
- * units they hang off regardless of the filter — they live wherever their
+ * Turns a set of units into the expected rows. Accessories come along with
+ * the units they hang off regardless of the filter — they live wherever their
  * parent is, and a case filed under "Cases" is still part of the fixture.
  */
-async function snapshotOf(userId: string, where: Prisma.AssetWhereInput): Promise<Snapshot> {
+async function unitsOf(userId: string, where: Prisma.AssetWhereInput): Promise<Expected> {
 	const top = await prisma.asset.findMany({
 		where: { ...where, ...ACTIVE_ASSET_WHERE },
 		select: {
@@ -230,8 +254,8 @@ async function snapshotOf(userId: string, where: Prisma.AssetWhereInput): Promis
 		])
 	);
 
-	const items: SnapshotItem[] = [];
-	const lines = new Map<string, SnapshotLine>();
+	const items: ExpectedItem[] = [];
+	const lines = new Map<string, ExpectedLine>();
 	for (const a of all) {
 		const out = outOf.get(a.id);
 		const individual =
@@ -259,7 +283,7 @@ async function snapshotOf(userId: string, where: Prisma.AssetWhereInput): Promis
 	return { items, lines: [...lines.values()] };
 }
 
-function scopeWhere(organizationId: string, scope: StocktakeScope): Prisma.AssetWhereInput {
+function filterWhere(organizationId: string, scope: StocktakeScope): Prisma.AssetWhereInput {
 	return {
 		organizationId,
 		parentAssetId: null,
@@ -269,56 +293,129 @@ function scopeWhere(organizationId: string, scope: StocktakeScope): Prisma.Asset
 	};
 }
 
-/** The open stocktakes of an org that share units or counted products with a snapshot. */
-async function overlapsWith(organizationId: string, snapshot: Snapshot, excludeId?: string) {
-	const open = await prisma.stocktake.findMany({
-		where: { organizationId, status: 'OPEN', ...(excludeId ? { id: { not: excludeId } } : {}) },
-		select: { id: true, name: true }
+/**
+ * What a scope expects at this moment. `among` narrows the answer to those
+ * units — what a scan needs — keeping their parents in, so an accessory of a
+ * unit in the scope still comes along.
+ */
+async function resolveScope(
+	userId: string,
+	organizationId: string,
+	scope: StocktakeScope,
+	among?: string[]
+): Promise<Expected> {
+	const narrow: Prisma.AssetWhereInput = among
+		? { OR: [{ id: { in: among } }, { accessories: { some: { id: { in: among } } } }] }
+		: {};
+	if (scope.assetIds.length === 0) {
+		return await unitsOf(userId, { ...filterWhere(organizationId, scope), ...narrow });
+	}
+	const listed = new Set(scope.assetIds);
+	const byId = await unitsOf(userId, {
+		organizationId,
+		id: { in: among ? scope.assetIds.filter((id) => among.includes(id)) : scope.assetIds }
 	});
-	if (open.length === 0) return [];
-
-	const assetIds = snapshot.items.map((i) => i.assetId);
-	const shared = await prisma.stocktakeItem.groupBy({
-		by: ['stocktakeId'],
-		where: {
-			stocktakeId: { in: open.map((s) => s.id) },
-			expected: true,
-			assetId: { in: assetIds }
-		},
-		_count: { _all: true }
-	});
-	const sharedLines = await prisma.stocktakeLine.findMany({
-		where: {
-			stocktakeId: { in: open.map((s) => s.id) },
-			OR: snapshot.lines.map((l) => ({ productId: l.productId, locationId: l.locationId }))
-		},
-		select: { stocktakeId: true, expected: true }
-	});
-
-	return open
-		.map((s) => ({
-			id: s.id,
-			name: s.name,
-			sharedUnits:
-				(shared.find((g) => g.stocktakeId === s.id)?._count._all ?? 0) +
-				sharedLines.filter((l) => l.stocktakeId === s.id).reduce((n, l) => n + l.expected, 0)
-		}))
-		.filter((s) => s.sharedUnits > 0);
-}
-
-function snapshotTotals(snapshot: Snapshot) {
+	const loose =
+		scope.productIds.length > 0 || scope.categoryIds.length > 0
+			? await unitsOf(userId, { ...filterWhere(organizationId, scope), ...narrow })
+			: { items: [], lines: [] };
 	return {
-		units: snapshot.items.filter((i) => !i.outProductionId).length,
-		looseUnits: snapshot.lines.reduce((n, l) => n + l.expected, 0),
-		out:
-			snapshot.items.filter((i) => i.outProductionId).length +
-			snapshot.lines.reduce((n, l) => n + l.out, 0)
+		// A listed parent pulls its accessories in, but they are not listed
+		// themselves: they were found last time, or are missing and listed too.
+		items: byId.items.filter((i) => listed.has(i.assetId)),
+		lines: loose.lines
 	};
 }
 
+function unexpectedReasonFor(
+	organizationId: string,
+	scope: StocktakeScope,
+	asset: { organizationId: string; status: string; locationId: string }
+): UnexpectedReason {
+	if (asset.organizationId !== organizationId) return 'other_org';
+	if (isRetiredStatus(asset.status)) return 'retired';
+	if (scope.locationIds.length > 0 && !scope.locationIds.includes(asset.locationId)) {
+		return 'other_location';
+	}
+	return 'out_of_scope';
+}
+
+type TickedRow = {
+	assetId: string;
+	asset: { organizationId: string; status: string; locationId: string };
+};
+
+/**
+ * Lays the stored ticks over what the scope expects right now: a ticked unit
+ * on the list is found (with today's location and checkout), one off the list
+ * is unexpected, and whatever is on the list and not ticked is still open.
+ */
+function overlay<T extends TickedRow>(
+	organizationId: string,
+	scope: StocktakeScope,
+	expected: Expected,
+	ticked: T[]
+) {
+	const byAsset = new Map(expected.items.map((i) => [i.assetId, i]));
+	const rows = ticked.map((t) => {
+		const e = byAsset.get(t.assetId);
+		return {
+			...t,
+			expected: !!e,
+			expectedLocationId: e?.expectedLocationId ?? null,
+			outProductionId: e?.outProductionId ?? null,
+			outProductionName: e?.outProductionName ?? null,
+			unexpectedReason: e ? null : unexpectedReasonFor(organizationId, scope, t.asset)
+		};
+	});
+	const tickedIds = new Set(ticked.map((t) => t.assetId));
+	return { rows, open: expected.items.filter((i) => !tickedIds.has(i.assetId)) };
+}
+
+/** The open stocktakes of an org that expect units or counted products this list does. */
+async function overlapsWith(
+	userId: string,
+	organizationId: string,
+	expected: Expected,
+	excludeId?: string
+) {
+	const open = await prisma.stocktake.findMany({
+		where: { organizationId, status: 'OPEN', ...(excludeId ? { id: { not: excludeId } } : {}) },
+		select: { id: true, name: true, scope: true }
+	});
+	if (open.length === 0) return [];
+
+	const units = new Set(expected.items.map((i) => i.assetId));
+	const lineKeys = new Set(expected.lines.map((l) => `${l.productId}|${l.locationId}`));
+	const overlaps: { id: string; name: string; sharedUnits: number }[] = [];
+	for (const s of open) {
+		const theirs = await resolveScope(userId, organizationId, parseScope(s.scope));
+		const sharedUnits =
+			theirs.items.filter((i) => units.has(i.assetId)).length +
+			theirs.lines
+				.filter((l) => lineKeys.has(`${l.productId}|${l.locationId}`))
+				.reduce((n, l) => n + l.expected, 0);
+		if (sharedUnits > 0) overlaps.push({ id: s.id, name: s.name, sharedUnits });
+	}
+	return overlaps;
+}
+
+function expectedTotals(expected: Expected) {
+	return {
+		units: expected.items.filter((i) => !i.outProductionId).length,
+		looseUnits: expected.lines.reduce((n, l) => n + l.expected, 0),
+		out:
+			expected.items.filter((i) => i.outProductionId).length +
+			expected.lines.reduce((n, l) => n + l.out, 0)
+	};
+}
+
+/** What a caller may narrow a stocktake to. Explicit units are a recount's to set. */
+export type StocktakeFilter = Omit<StocktakeScope, 'assetIds'>;
+
 export async function previewStocktake(
 	userId: string,
-	input: { organizationId: string; scope: StocktakeScope }
+	input: { organizationId: string; scope: StocktakeFilter }
 ) {
 	if (!(await canWrite(userId, input.organizationId))) {
 		throw new StocktakeError(
@@ -326,10 +423,13 @@ export async function previewStocktake(
 			'Only members of this organization can start a stocktake'
 		);
 	}
-	const snapshot = await snapshotOf(userId, scopeWhere(input.organizationId, input.scope));
+	const expected = await resolveScope(userId, input.organizationId, {
+		...input.scope,
+		assetIds: []
+	});
 	return {
-		...snapshotTotals(snapshot),
-		overlaps: await overlapsWith(input.organizationId, snapshot)
+		...expectedTotals(expected),
+		overlaps: await overlapsWith(userId, input.organizationId, expected)
 	};
 }
 
@@ -348,6 +448,7 @@ async function defaultName(organizationId: string, scope: StocktakeScope, prefix
 	return `${prefix} ${date} – ${locations.map((l) => l.name).join(', ')}`;
 }
 
+/** Starts one. Only the header is stored; the list is the scope, resolved whenever it is read. */
 async function persist(
 	userId: string,
 	data: {
@@ -355,35 +456,26 @@ async function persist(
 		name: string;
 		scope: StocktakeScope;
 		recountOfId?: string;
-	},
-	snapshot: Snapshot
+	}
 ) {
-	if (snapshot.items.length === 0 && snapshot.lines.length === 0) {
+	const expected = await resolveScope(userId, data.organizationId, data.scope);
+	if (expected.items.length === 0 && expected.lines.length === 0) {
 		throw new StocktakeError('stocktake_empty', 'Nothing matches this selection');
 	}
-	return await prisma.$transaction(async (tx) => {
-		const stocktake = await tx.stocktake.create({
-			data: {
-				organizationId: data.organizationId,
-				name: data.name,
-				scope: data.scope,
-				recountOfId: data.recountOfId,
-				createdById: userId
-			}
-		});
-		await tx.stocktakeItem.createMany({
-			data: snapshot.items.map((i) => ({ ...i, stocktakeId: stocktake.id, expected: true }))
-		});
-		await tx.stocktakeLine.createMany({
-			data: snapshot.lines.map((l) => ({ ...l, stocktakeId: stocktake.id }))
-		});
-		return stocktake;
+	return await prisma.stocktake.create({
+		data: {
+			organizationId: data.organizationId,
+			name: data.name,
+			scope: data.scope,
+			recountOfId: data.recountOfId,
+			createdById: userId
+		}
 	});
 }
 
 export async function createStocktake(
 	userId: string,
-	input: { organizationId: string; name?: string | null; scope: StocktakeScope }
+	input: { organizationId: string; name?: string | null; scope: StocktakeFilter }
 ) {
 	if (!(await canWrite(userId, input.organizationId))) {
 		throw new StocktakeError(
@@ -393,17 +485,18 @@ export async function createStocktake(
 	}
 	// Scope ids from another org would only ever match nothing, but they would
 	// also be shown back as the stocktake's filter.
+	const scope: StocktakeScope = { ...input.scope, assetIds: [] };
 	const [locations, categories, products] = await Promise.all([
 		prisma.location.count({
-			where: { id: { in: input.scope.locationIds }, organizationId: input.organizationId }
+			where: { id: { in: scope.locationIds }, organizationId: input.organizationId }
 		}),
-		prisma.category.count({ where: { id: { in: input.scope.categoryIds } } }),
-		prisma.product.count({ where: { id: { in: input.scope.productIds } } })
+		prisma.category.count({ where: { id: { in: scope.categoryIds } } }),
+		prisma.product.count({ where: { id: { in: scope.productIds } } })
 	]);
 	if (
-		locations !== input.scope.locationIds.length ||
-		categories !== input.scope.categoryIds.length ||
-		products !== input.scope.productIds.length
+		locations !== scope.locationIds.length ||
+		categories !== scope.categoryIds.length ||
+		products !== scope.productIds.length
 	) {
 		throw new StocktakeError(
 			'invalid_request',
@@ -411,21 +504,15 @@ export async function createStocktake(
 		);
 	}
 
-	const snapshot = await snapshotOf(userId, scopeWhere(input.organizationId, input.scope));
-	const name =
-		input.name?.trim() || (await defaultName(input.organizationId, input.scope, 'Inventur'));
-	return await persist(
-		userId,
-		{ organizationId: input.organizationId, name, scope: input.scope },
-		snapshot
-	);
+	const name = input.name?.trim() || (await defaultName(input.organizationId, scope, 'Inventur'));
+	return await persist(userId, { organizationId: input.organizationId, name, scope });
 }
 
 /**
- * A new stocktake of a closed one's gaps: its missing units as they are now
- * (they may have been moved since), and every product whose count came up
- * short, recounted from scratch — loose units have no identity to recount
- * one by one.
+ * A new stocktake of a closed one's gaps: its missing units, and every
+ * product whose count came up short, recounted from scratch — loose units
+ * have no identity to recount one by one. Both are resolved live like any
+ * scope, so a missing unit moved since the count is expected where it is now.
  */
 export async function createRecount(userId: string, stocktakeId: string, name?: string | null) {
 	const original = await loadForWrite(userId, stocktakeId);
@@ -451,43 +538,24 @@ export async function createRecount(userId: string, stocktakeId: string, name?: 
 			.reduce((n, c) => n + c.count, 0);
 		if (counted < expected) shortProducts.add(productId);
 	}
-	const lineLocations = lines.filter((l) => shortProducts.has(l.productId));
 
-	const byId = await snapshotOf(userId, {
-		id: { in: missing.map((m) => m.assetId) },
-		organizationId: original.organizationId
-	});
-	const loose = lineLocations.length
-		? await snapshotOf(userId, {
-				organizationId: original.organizationId,
-				OR: lineLocations.map((l) => ({ productId: l.productId, locationId: l.locationId })),
-				parentAssetId: null
-			})
-		: { items: [], lines: [] };
-
-	// snapshotOf by id pulls in accessories of the missing units too, which were
-	// either found (and don't need recounting) or are missing and in the list.
-	const missingIds = new Set(missing.map((m) => m.assetId));
-	const snapshot: Snapshot = {
-		items: byId.items.filter((i) => missingIds.has(i.assetId)),
-		lines: loose.lines.filter((l) => shortProducts.has(l.productId))
-	};
-
+	const originalScope = parseScope(original.scope);
 	const date = new Date().toLocaleDateString('de-DE', {
 		day: '2-digit',
 		month: '2-digit',
 		year: 'numeric'
 	});
-	return await persist(
-		userId,
-		{
-			organizationId: original.organizationId,
-			name: name?.trim() || `${original.name} – Nachzählung ${date}`,
-			scope: parseScope(original.scope),
-			recountOfId: original.id
+	return await persist(userId, {
+		organizationId: original.organizationId,
+		name: name?.trim() || `${original.name} – Nachzählung ${date}`,
+		scope: {
+			locationIds: originalScope.locationIds,
+			categoryIds: [],
+			productIds: [...shortProducts],
+			assetIds: missing.map((m) => m.assetId)
 		},
-		snapshot
-	);
+		recountOfId: original.id
+	});
 }
 
 // ---------------------------------------------------------------------------
@@ -524,7 +592,34 @@ const ITEM_INCLUDE = {
 	foundBy: { select: { id: true, name: true, email: true } }
 } satisfies Prisma.StocktakeItemInclude;
 
-export type StocktakeItemRow = Prisma.StocktakeItemGetPayload<{ include: typeof ITEM_INCLUDE }>;
+const LINE_INCLUDE = {
+	location: { select: { id: true, name: true } },
+	product: {
+		select: {
+			id: true,
+			name: true,
+			imagePath: true,
+			manufacturer: { select: { name: true } },
+			category: {
+				select: { id: true, name: true, nameDe: true, color: true, sortOrder: true }
+			}
+		}
+	}
+} satisfies Prisma.StocktakeLineInclude;
+
+/**
+ * One unit on the list. On an open stocktake most of these are not stored
+ * anywhere — they are the scope, resolved — so there is no row id to carry.
+ */
+export type StocktakeItemRow = Omit<
+	Prisma.StocktakeItemGetPayload<{ include: typeof ITEM_INCLUDE }>,
+	'id' | 'stocktakeId'
+>;
+
+export type StocktakeLineRow = Omit<
+	Prisma.StocktakeLineGetPayload<{ include: typeof LINE_INCLUDE }>,
+	'id' | 'stocktakeId'
+>;
 
 export type ItemState = 'open' | 'found' | 'out' | 'missing' | 'unexpected';
 
@@ -546,7 +641,7 @@ function progressOf(
 ) {
 	const expectedItems = items.filter((i) => i.expected && !i.outProductionId);
 	const foundItems = expectedItems.filter((i) => i.foundAt).length;
-	// A found unit that was out still counts as found, not as out.
+	// A found unit that is out still counts as found, not as out.
 	const out =
 		items.filter((i) => i.expected && i.outProductionId && !i.foundAt).length +
 		lines.reduce((n, l) => n + l.out, 0);
@@ -573,6 +668,139 @@ function progressOf(
 	};
 }
 
+/**
+ * The list as it stands: the stored rows of a closed stocktake, or the scope
+ * resolved now with the ticks laid over it. `among` narrows it to those units.
+ */
+async function itemRows(
+	userId: string,
+	stocktake: StocktakeHead,
+	among?: string[]
+): Promise<StocktakeItemRow[]> {
+	const narrow = among ? { assetId: { in: among } } : {};
+	if (stocktake.status !== 'OPEN') {
+		return await prisma.stocktakeItem.findMany({
+			where: { stocktakeId: stocktake.id, ...narrow },
+			include: ITEM_INCLUDE
+		});
+	}
+	const scope = parseScope(stocktake.scope);
+	const [expected, ticked] = await Promise.all([
+		resolveScope(userId, stocktake.organizationId, scope, among),
+		prisma.stocktakeItem.findMany({
+			where: { stocktakeId: stocktake.id, foundAt: { not: null }, ...narrow },
+			include: ITEM_INCLUDE
+		})
+	]);
+	const { rows, open } = overlay(stocktake.organizationId, scope, expected, ticked);
+	const [assets, locations] = await Promise.all([
+		prisma.asset.findMany({
+			where: { id: { in: open.map((i) => i.assetId) } },
+			select: ITEM_INCLUDE.asset.select
+		}),
+		prisma.location.findMany({
+			where: { organizationId: stocktake.organizationId },
+			select: { id: true, name: true }
+		})
+	]);
+	const assetOf = new Map(assets.map((a) => [a.id, a]));
+	const locationOf = new Map(locations.map((l) => [l.id, l]));
+	return [
+		...rows.map((r) => ({
+			...r,
+			expectedLocation: r.expectedLocationId ? (locationOf.get(r.expectedLocationId) ?? null) : null
+		})),
+		...open.flatMap((i) => {
+			const asset = assetOf.get(i.assetId);
+			if (!asset) return [];
+			return [
+				{
+					assetId: i.assetId,
+					asset,
+					expected: true,
+					expectedLocationId: i.expectedLocationId,
+					expectedLocation: locationOf.get(i.expectedLocationId) ?? null,
+					outProductionId: i.outProductionId,
+					outProductionName: i.outProductionName,
+					unexpectedReason: null,
+					foundAt: null,
+					foundById: null,
+					foundBy: null,
+					foundLocationId: null,
+					foundLocation: null,
+					foundVia: null,
+					note: null,
+					needsAttention: false
+				}
+			];
+		})
+	];
+}
+
+/** The loose lines: stored once closed, the scope's while open. */
+async function lineRows(userId: string, stocktake: StocktakeHead): Promise<StocktakeLineRow[]> {
+	if (stocktake.status !== 'OPEN') {
+		return await prisma.stocktakeLine.findMany({
+			where: { stocktakeId: stocktake.id },
+			include: LINE_INCLUDE
+		});
+	}
+	const { lines } = await resolveScope(
+		userId,
+		stocktake.organizationId,
+		parseScope(stocktake.scope)
+	);
+	const [products, locations] = await Promise.all([
+		prisma.product.findMany({
+			where: { id: { in: [...new Set(lines.map((l) => l.productId))] } },
+			select: LINE_INCLUDE.product.select
+		}),
+		prisma.location.findMany({
+			where: { id: { in: [...new Set(lines.map((l) => l.locationId))] } },
+			select: LINE_INCLUDE.location.select
+		})
+	]);
+	const productOf = new Map(products.map((p) => [p.id, p]));
+	const locationOf = new Map(locations.map((l) => [l.id, l]));
+	return lines.flatMap((l) => {
+		const product = productOf.get(l.productId);
+		const location = locationOf.get(l.locationId);
+		return product && location ? [{ ...l, product, location }] : [];
+	});
+}
+
+/** A stocktake's progress: from its stored rows once closed, from the live list while open. */
+async function progressOfStocktake(
+	userId: string,
+	s: StocktakeHead & {
+		items: (TickedRow & {
+			expected: boolean;
+			foundAt: Date | null;
+			outProductionId: string | null;
+		})[];
+		lines: { productId: string; expected: number; out: number }[];
+		counts: { productId: string; count: number }[];
+	}
+) {
+	if (s.status !== 'OPEN') return progressOf(s.items, s.lines, s.counts);
+	const scope = parseScope(s.scope);
+	const expected = await resolveScope(userId, s.organizationId, scope);
+	const { rows, open } = overlay(
+		s.organizationId,
+		scope,
+		expected,
+		s.items.filter((i) => i.foundAt)
+	);
+	return progressOf(
+		[
+			...rows,
+			...open.map((i) => ({ expected: true, foundAt: null, outProductionId: i.outProductionId }))
+		],
+		expected.lines,
+		s.counts
+	);
+}
+
 export async function listStocktakes(
 	userId: string,
 	filter: { status?: 'OPEN' | 'CLOSED'; id?: string } = {}
@@ -590,7 +818,15 @@ export async function listStocktakes(
 			},
 			createdBy: { select: { name: true, email: true } },
 			closedBy: { select: { name: true, email: true } },
-			items: { select: { expected: true, foundAt: true, outProductionId: true } },
+			items: {
+				select: {
+					assetId: true,
+					expected: true,
+					foundAt: true,
+					outProductionId: true,
+					asset: { select: { organizationId: true, status: true, locationId: true } }
+				}
+			},
 			lines: { select: { productId: true, expected: true, out: true } },
 			counts: { select: { productId: true, count: true } }
 		},
@@ -601,15 +837,20 @@ export async function listStocktakes(
 		select: { id: true, name: true, organizationId: true },
 		orderBy: { name: 'asc' }
 	});
-	return stocktakes.map(({ items, lines, counts, ...s }) => {
+	const summaries = [];
+	for (const s of stocktakes) {
+		const progress = await progressOfStocktake(userId, s);
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- the rows are the progress
+		const { items, lines, counts, ...rest } = s;
 		const scope = parseScope(s.scope);
-		return {
-			...s,
+		summaries.push({
+			...rest,
 			scope,
 			countingLocations: countingLocationsOf(s.organizationId, scope, locations),
-			progress: progressOf(items, lines, counts)
-		};
-	});
+			progress
+		});
+	}
+	return summaries;
 }
 
 /** Where a counter can say they are: the scope's locations, or all of the org's when it names none. */
@@ -647,23 +888,6 @@ export async function getStocktake(userId: string, stocktakeId: string) {
 			closedBy: { select: { name: true, email: true } },
 			recountOf: { select: { id: true, name: true } },
 			recounts: { select: { id: true, name: true, status: true } },
-			items: { include: ITEM_INCLUDE },
-			lines: {
-				include: {
-					location: { select: { id: true, name: true } },
-					product: {
-						select: {
-							id: true,
-							name: true,
-							imagePath: true,
-							manufacturer: { select: { name: true } },
-							category: {
-								select: { id: true, name: true, nameDe: true, color: true, sortOrder: true }
-							}
-						}
-					}
-				}
-			},
 			counts: {
 				include: {
 					location: { select: { id: true, name: true } },
@@ -673,7 +897,9 @@ export async function getStocktake(userId: string, stocktakeId: string) {
 		}
 	});
 	const scope = parseScope(stocktake.scope);
-	const [locations, categories, products] = await Promise.all([
+	const [items, lines, locations, categories, products] = await Promise.all([
+		itemRows(userId, stocktake),
+		lineRows(userId, stocktake),
 		// The locations a counter can say they are at: the scope's, or every one
 		// of the org's when the scope names none.
 		prisma.location.findMany({
@@ -698,7 +924,9 @@ export async function getStocktake(userId: string, stocktakeId: string) {
 		scope,
 		scopeNames: { categories, products },
 		countingLocations: locations,
-		progress: progressOf(stocktake.items, stocktake.lines, stocktake.counts)
+		items,
+		lines,
+		progress: progressOf(items, lines, stocktake.counts)
 	};
 }
 
@@ -781,20 +1009,6 @@ export type ProductCount = ReturnType<typeof productCounts>[number];
 // ---------------------------------------------------------------------------
 // Counting
 
-async function unexpectedReason(
-	stocktake: { organizationId: string; createdAt: Date; scope: Prisma.JsonValue },
-	asset: { organizationId: string; status: string; createdAt: Date; locationId: string }
-): Promise<UnexpectedReason> {
-	if (asset.organizationId !== stocktake.organizationId) return 'other_org';
-	if (isRetiredStatus(asset.status)) return 'retired';
-	if (asset.createdAt > stocktake.createdAt) return 'added_later';
-	const scope = parseScope(stocktake.scope);
-	if (scope.locationIds.length > 0 && !scope.locationIds.includes(asset.locationId)) {
-		return 'other_location';
-	}
-	return 'out_of_scope';
-}
-
 /**
  * Tick units as found. Already found ones are left alone — whoever found a
  * unit first owns that tick — and a unit not on the list comes in as
@@ -802,7 +1016,7 @@ async function unexpectedReason(
  */
 async function tick(
 	userId: string,
-	stocktake: { id: string; organizationId: string; createdAt: Date; scope: Prisma.JsonValue },
+	stocktake: StocktakeHead,
 	assetIds: string[],
 	locationId: string,
 	via: FoundVia
@@ -813,10 +1027,17 @@ async function tick(
 	});
 	const byAsset = new Map(existing.map((i) => [i.assetId, i]));
 	const newIds = assetIds.filter((id) => !byAsset.has(id));
-	const newAssets = await prisma.asset.findMany({
-		where: { id: { in: newIds } },
-		select: { id: true, organizationId: true, status: true, createdAt: true, locationId: true }
-	});
+	const scope = parseScope(stocktake.scope);
+	const [newAssets, expected] = await Promise.all([
+		prisma.asset.findMany({
+			where: { id: { in: newIds } },
+			select: { id: true, organizationId: true, status: true, locationId: true }
+		}),
+		newIds.length > 0
+			? resolveScope(userId, stocktake.organizationId, scope, newIds)
+			: Promise.resolve<Expected>({ items: [], lines: [] })
+	]);
+	const expectedIds = new Set(expected.items.map((i) => i.assetId));
 
 	const now = new Date();
 	const ticked: string[] = [];
@@ -834,12 +1055,17 @@ async function tick(
 			} else {
 				const asset = newAssets.find((a) => a.id === assetId);
 				if (!asset) continue;
+				// Whether it is on the list is read live as long as the stocktake
+				// is open; this is the answer of the moment, and closing rewrites it.
+				const onList = expectedIds.has(assetId);
 				await tx.stocktakeItem.create({
 					data: {
 						stocktakeId: stocktake.id,
 						assetId,
-						expected: false,
-						unexpectedReason: await unexpectedReason(stocktake, asset),
+						expected: onList,
+						unexpectedReason: onList
+							? null
+							: unexpectedReasonFor(stocktake.organizationId, scope, asset),
 						...found
 					}
 				});
@@ -903,7 +1129,7 @@ export type StocktakeScanOutcome =
 	| {
 			outcome: 'found' | 'unexpected';
 			item: StocktakeItemRow;
-			/** The unit was checked out at the snapshot and is here after all. */
+			/** The unit is checked out to this production right now, and is here after all. */
 			wasOutAt: string | null;
 			/** Its accessories, to confirm in one go. */
 			confirm: ConfirmEntry[];
@@ -959,14 +1185,11 @@ export async function scanIntoStocktake(
 		};
 	}
 
-	const itemOf = () =>
-		prisma.stocktakeItem.findUniqueOrThrow({
-			where: { stocktakeId_assetId: { stocktakeId, assetId: match.assetId } },
-			include: ITEM_INCLUDE
-		});
-
 	const { already } = await tick(userId, stocktake, [match.assetId], input.locationId, 'scan');
-	const item = await itemOf();
+	const item = (await itemRows(userId, stocktake, [match.assetId])).find(
+		(i) => i.assetId === match.assetId
+	);
+	if (!item) throw new StocktakeError('asset_not_found', `Tag "${code}" not found`, code);
 	if (already.length > 0) {
 		return {
 			outcome: 'already',
@@ -1024,32 +1247,18 @@ async function ownFoundItem(userId: string, stocktakeId: string, assetId: string
 }
 
 /**
- * Takes back one's own tick. An unexpected unit leaves the list with it: it
- * was only ever on it because someone scanned it.
+ * Takes back one's own tick. The row goes with it: a unit is only ever stored
+ * because someone ticked it, and the list knows it from the scope.
  */
 export async function untickStocktakeItem(userId: string, stocktakeId: string, assetId: string) {
 	await loadOpenForWrite(userId, stocktakeId);
 	const item = await ownFoundItem(userId, stocktakeId, assetId);
-	await prisma.$transaction(async (tx) => {
-		if (item.expected) {
-			await tx.stocktakeItem.update({
-				where: { id: item.id },
-				data: {
-					foundAt: null,
-					foundById: null,
-					foundLocationId: null,
-					foundVia: null,
-					note: null,
-					needsAttention: false
-				}
-			});
-		} else {
-			await tx.stocktakeItem.delete({ where: { id: item.id } });
-		}
-		await tx.stocktakeEvent.create({
+	await prisma.$transaction([
+		prisma.stocktakeItem.delete({ where: { id: item.id } }),
+		prisma.stocktakeEvent.create({
 			data: { stocktakeId, userId, action: 'UNFOUND', assetId, locationId: item.foundLocationId }
-		});
-	});
+		})
+	]);
 }
 
 export async function setStocktakeItemNote(
@@ -1088,10 +1297,12 @@ export async function setStocktakeCount(
 	if (!Number.isInteger(input.count) || input.count < 0) {
 		throw new StocktakeError('invalid_request', 'A count is a whole number of zero or more');
 	}
-	const counted = await prisma.stocktakeLine.count({
-		where: { stocktakeId, productId: input.productId }
-	});
-	if (counted === 0) {
+	const { lines } = await resolveScope(
+		userId,
+		stocktake.organizationId,
+		parseScope(stocktake.scope)
+	);
+	if (!lines.some((l) => l.productId === input.productId)) {
 		throw new StocktakeError(
 			'stocktake_product_not_counted',
 			'This product is not counted in this stocktake'
@@ -1126,37 +1337,83 @@ export async function setStocktakeCount(
 // Closing
 
 /**
- * Freezes the report. Open items become missing, and each of the org's units
- * on it gets one entry in its history.
+ * Freezes the report: the list of this moment is written down, open units
+ * become missing, and each of the org's units on it gets one entry in its
+ * history.
  */
 export async function closeStocktake(userId: string, stocktakeId: string) {
 	const stocktake = await loadOpenForWrite(userId, stocktakeId);
-	const items = await prisma.stocktakeItem.findMany({
-		where: { stocktakeId, asset: { organizationId: stocktake.organizationId } },
-		include: { foundLocation: { select: { id: true, name: true } } }
-	});
+	const scope = parseScope(stocktake.scope);
+	const [expected, ticked] = await Promise.all([
+		resolveScope(userId, stocktake.organizationId, scope),
+		prisma.stocktakeItem.findMany({
+			where: { stocktakeId, foundAt: { not: null } },
+			select: {
+				id: true,
+				assetId: true,
+				foundAt: true,
+				foundLocation: { select: { id: true, name: true } },
+				asset: { select: { organizationId: true, status: true, locationId: true } }
+			}
+		})
+	]);
+	const { rows, open } = overlay(stocktake.organizationId, scope, expected, ticked);
+	const closedAt = new Date();
+
 	await prisma.$transaction(async (tx) => {
+		// Whatever an older version stored at the start makes way for the list
+		// of now; the ticks are the only rows that carry anything of their own.
+		await tx.stocktakeItem.deleteMany({ where: { stocktakeId, foundAt: null } });
+		await tx.stocktakeLine.deleteMany({ where: { stocktakeId } });
+		for (const r of rows) {
+			await tx.stocktakeItem.update({
+				where: { id: r.id },
+				data: {
+					expected: r.expected,
+					expectedLocationId: r.expectedLocationId,
+					outProductionId: r.outProductionId,
+					outProductionName: r.outProductionName,
+					unexpectedReason: r.unexpectedReason
+				}
+			});
+		}
+		await tx.stocktakeItem.createMany({
+			data: open.map((i) => ({ ...i, stocktakeId, expected: true }))
+		});
+		await tx.stocktakeLine.createMany({
+			data: expected.lines.map((l) => ({ ...l, stocktakeId }))
+		});
 		await tx.stocktake.update({
 			where: { id: stocktakeId },
-			data: { status: 'CLOSED', closedAt: new Date(), closedById: userId }
+			data: { status: 'CLOSED', closedAt, closedById: userId }
+		});
+
+		const entry = (
+			assetId: string,
+			state: ItemState,
+			location: { id: string; name: string } | null
+		) => ({
+			assetId,
+			userId,
+			action: 'STOCKTAKE_COUNTED',
+			data: {
+				type: 'STOCKTAKE_COUNTED',
+				stocktakeId,
+				stocktakeName: stocktake.name,
+				result: state === 'unexpected' ? 'found' : state,
+				locationId: location?.id ?? null,
+				locationName: location?.name ?? null
+			}
 		});
 		await tx.assetTransaction.createMany({
-			data: items.map((item) => {
-				const state = itemState(item, true);
-				return {
-					assetId: item.assetId,
-					userId,
-					action: 'STOCKTAKE_COUNTED',
-					data: {
-						type: 'STOCKTAKE_COUNTED',
-						stocktakeId,
-						stocktakeName: stocktake.name,
-						result: state === 'unexpected' ? 'found' : state,
-						locationId: item.foundLocation?.id ?? null,
-						locationName: item.foundLocation?.name ?? null
-					}
-				};
-			})
+			data: [
+				...rows
+					.filter((r) => r.asset.organizationId === stocktake.organizationId)
+					.map((r) => entry(r.assetId, itemState(r, true), r.foundLocation)),
+				...open.map((i) =>
+					entry(i.assetId, itemState({ ...i, expected: true, foundAt: null }, true), null)
+				)
+			]
 		});
 	});
 }
@@ -1195,7 +1452,7 @@ export async function actionCandidates(userId: string, stocktakeId: string) {
 	});
 	const live = items.filter((i) => !isRetiredStatus(i.asset.status));
 	return {
-		// Missing, and not out on a job now either — it may have left after the snapshot.
+		// Missing, and not out on a job now either — it may have left since the count.
 		mark_missing_unavailable: live
 			.filter(
 				(i) =>

@@ -34,7 +34,7 @@ abstract class StocktakeClient {
 
   /// Start a stocktake.
   ///
-  /// Takes the snapshot straight away. Needs MEMBER of the organization.
+  /// Stores the scope; the list is resolved whenever it is read. Needs MEMBER of the organization.
   /// A scope that matches nothing is refused with `409 stocktake_empty`.
   @POST('/api/v1/stocktakes')
   Future<StocktakeSummary> createStocktake({

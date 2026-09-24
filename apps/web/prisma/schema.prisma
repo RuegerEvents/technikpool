@@ -1162,11 +1162,12 @@ model InvoiceItem {
 // Stocktake (Inventur)
 // ----------------------------------------------------
 
-// A count of what an org actually has. Starting one snapshots every unit its
-// scope matches — tagged units, accessories and bundle members one row each in
+// A count of what an org actually has. While it is open, the list is its
+// scope resolved against the assets as they are now, and only the ticks are
+// stored (StocktakeItem rows with foundAt). Closing writes the list of that
+// moment down — tagged units, accessories and bundle members one row each in
 // StocktakeItem, loose untagged units one row per product and location in
-// StocktakeLine — so the expected list never moves under a count that runs
-// over days, and a closed report stays what it was. The rules live in
+// StocktakeLine — so a closed report stays what it was. The rules live in
 // src/lib/server/services/stocktake.ts.
 model Stocktake {
   id             String       @id @default(cuid())
@@ -1177,11 +1178,12 @@ model Stocktake {
   // OPEN or CLOSED. A cancelled stocktake is deleted, not kept as a third state.
   status String @default("OPEN")
 
-  // The filter it was started with — { locationIds, categoryIds, productIds },
-  // each empty for "all". Only read back for display: the snapshot is the truth.
+  // What it counts — { locationIds, categoryIds, productIds, assetIds }, each
+  // empty for "all" (assetIds names a recount's units). Resolved live while
+  // open; once closed the stored rows are the truth.
   scope Json
 
-  // Set on a "recount the missing" session: its snapshot is that report's gaps.
+  // Set on a "recount the missing" session: its scope is that report's gaps.
   recountOfId String?
   recountOf   Stocktake?  @relation("StocktakeRecount", fields: [recountOfId], references: [id], onDelete: SetNull)
   recounts    Stocktake[] @relation("StocktakeRecount")
@@ -1206,9 +1208,10 @@ model Stocktake {
   @@index([organizationId, status])
 }
 
-// One unit: expected (in the snapshot) or not (scanned although outside it).
-// The found* columns are the unit's current state; how it got there is in
-// StocktakeEvent.
+// One unit. While the stocktake is open only ticked units have a row, and
+// expected/expectedLocation/out* are provisional — the list is read live.
+// Closing writes a row for every unit on the list and fixes those columns.
+// How a unit got ticked is in StocktakeEvent.
 model StocktakeItem {
   id          String    @id @default(cuid())
   stocktakeId String
@@ -1220,8 +1223,8 @@ model StocktakeItem {
   expectedLocationId String?
   expectedLocation   Location? @relation("StocktakeExpectedAt", fields: [expectedLocationId], references: [id], onDelete: SetNull)
 
-  // Checked out when the snapshot was taken: accounted for, not missing.
-  // The name is a snapshot, like everything else here.
+  // Checked out when the stocktake closed: accounted for, not missing.
+  // The name is kept because the production may not be visible later.
   outProductionId   String?
   outProductionName String?
 
@@ -1244,7 +1247,8 @@ model StocktakeItem {
 }
 
 // Loose untagged units of one product at one location — indistinguishable, so
-// they are a number rather than rows. `out` were checked out at the snapshot.
+// they are a number rather than rows. Written at closing; `out` were checked
+// out then.
 model StocktakeLine {
   id          String    @id @default(cuid())
   stocktakeId String
