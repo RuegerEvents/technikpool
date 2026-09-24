@@ -33,6 +33,10 @@ jobs:
   android:
     if: vars.RELEASE_ANDROID == 'true'
     runs-on: ubuntu-latest
+    # Only this job writes anything back: the APK goes on the GitHub release
+    # for devices that can't reach Play, so it needs to create that release.
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -86,10 +90,55 @@ jobs:
         working-directory: apps/scanner/android
         run: bundle exec fastlane production
 
+      # The same build also goes on the GitHub release as a plain APK, for a
+      # handheld with no Play Store (most warehouse PDAs) or an install without
+      # a Google account. It is signed with the upload key, so it updates
+      # itself release over release — but not a copy installed from Play,
+      # which Google re-signs with its own key. Pick one channel per device.
+      - name: Build the APK
+        working-directory: apps/scanner/android
+        run: bundle exec fastlane apk
+
       - name: Shred credentials
         if: always()
         working-directory: apps/scanner/android
         run: rm -f upload.jks play-store-key.json key.properties
+
+      # A dispatch from a branch has no tag to hang a release on, so it stops
+      # here with the APK in the log; a dispatch that names a scanner-v* tag
+      # re-uploads, replacing the asset — the `build` re-cut moves the tag
+      # and this is what puts the new binary on it.
+      - name: Publish the APK on the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REF: ${{ inputs.ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+          tag="${REF#refs/tags/}"
+          case "$tag" in
+            scanner-v[0-9]*) ;;
+            *) echo "::notice::$tag is not a scanner-v* tag, so no release is published"; exit 0 ;;
+          esac
+          version="${tag#scanner-v}"
+          apk="apps/scanner/build/app/outputs/flutter-apk/app-release.apk"
+          asset="technikpool-scanner-$version.apk"
+          cp "$apk" "$asset"
+
+          # The release notes are the changelog entry, which pnpm release:app
+          # has already checked is the first one and is this version.
+          jq -r --arg v "$version" '
+            .[0] | if .version != $v then error("changelog starts with \(.version), not \($v)") else . end
+            | "## What'"'"'s new\n\n" + (.en | map("- " + .) | join("\n"))
+            + "\n\n## Was ist neu\n\n" + (.de | map("- " + .) | join("\n"))
+            + "\n\nSideload build for devices without Google Play. A copy installed from Play cannot update to this one, or the other way round; keep each device on one channel."
+          ' apps/scanner/assets/changelog.json > release-notes.md
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" "$asset" --clobber
+            gh release edit "$tag" --notes-file release-notes.md
+          else
+            gh release create "$tag" "$asset" --title "Scanner $version" --notes-file release-notes.md
+          fi
 
   ios:
     if: vars.RELEASE_IOS == 'true'

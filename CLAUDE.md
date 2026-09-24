@@ -913,10 +913,10 @@ script any more.
 
 ### What the tags trigger
 
-| Tag pattern       | Workflow                               | Result                                        |
-| ----------------- | -------------------------------------- | --------------------------------------------- |
-| `v[0-9]*`         | `.github/workflows/docker-publish.yml` | Docker image to Docker Hub                    |
-| `scanner-v[0-9]*` | `.github/workflows/app-release.yml`    | `.aab` to Play internal, `.ipa` to TestFlight |
+| Tag pattern       | Workflow                               | Result                                                                   |
+| ----------------- | -------------------------------------- | ------------------------------------------------------------------------ |
+| `v[0-9]*`         | `.github/workflows/docker-publish.yml` | Docker image to Docker Hub                                               |
+| `scanner-v[0-9]*` | `.github/workflows/app-release.yml`    | `.aab` to Play, `.ipa` to App Store review, `.apk` on the GitHub release |
 
 The globs are mutually exclusive by design — `v*` would have been enough today, but only because
 no other component has a tag yet. Any new component gets its own prefix, and both workflows are
@@ -989,23 +989,46 @@ secret. That is less alarming than it sounds — Play signs the app itself, so t
 _upload_ key, and Play support can reset it if it is lost. The app signing key is the one that
 can't be.
 
+### The APK on the GitHub release
+
+Most warehouse PDAs ship without Play, and a phone without a Google account cannot install
+from it either, so the Android job also puts a plain `.apk` on a GitHub release of the tag
+(`technikpool-scanner-1.2.3.apk`, one universal build for every ABI). The `apk` lane builds it
+after the Play upload, with the same `key.properties`, and refuses to run without one — an APK
+signed with the debug key installs just fine, and only fails on the _next_ update, on the device.
+The release's notes are the changelog entry in both languages, so `pnpm release:app`'s check
+that the entry exists covers this too.
+
+**Two channels, two signatures.** Play re-signs what it distributes with the app signing key,
+while the GitHub APK carries the upload key, so a device updates within its channel and never
+across: a Play install cannot take the GitHub APK, or the other way round, until the app is
+uninstalled. Keep each device on one channel. (If the app signing key was ever set to the upload
+key in the Play Console, the two are the same and this does not apply.)
+
+A `workflow_dispatch` that names a `scanner-v*` tag replaces the asset on that tag's release
+(`--clobber`), which is what a `build` re-cut needs. A dispatch from a branch builds the APK and
+publishes nothing, since there is no tag to hang a release on.
+
 fastlane lives next to each platform, not at the repo root, because that is where its tooling
 expects to be:
 
-| Lane                                           | Does                                                                |
-| ---------------------------------------------- | ------------------------------------------------------------------- |
-| `cd apps/scanner/android && fastlane validate` | Checks the upload key and Play credentials, uploads nothing         |
-| `… fastlane production`                        | **What CI runs.** Builds and publishes to production, full rollout  |
-| `… fastlane internal`                          | Builds a signed `.aab` and puts it on the internal track as a draft |
-| `… fastlane promote`                           | Promotes internal → production at 20%, without rebuilding           |
-| `cd apps/scanner/ios && fastlane validate`     | Checks the App Store Connect key and the signing identity           |
-| `… fastlane release`                           | **What CI runs.** Uploads, submits for review, releases on approval |
-| `… fastlane beta`                              | Uploads to TestFlight only, submitting nothing                      |
+| Lane                                           | Does                                                                  |
+| ---------------------------------------------- | --------------------------------------------------------------------- |
+| `cd apps/scanner/android && fastlane validate` | Checks the upload key and Play credentials, uploads nothing           |
+| `… fastlane production`                        | **What CI runs.** Builds and publishes to production, full rollout    |
+| `… fastlane internal`                          | Builds a signed `.aab` and puts it on the internal track as a draft   |
+| `… fastlane promote`                           | Promotes internal → production at 20%, without rebuilding             |
+| `… fastlane apk`                               | Builds the signed universal `.apk` that CI puts on the GitHub release |
+| `cd apps/scanner/ios && fastlane validate`     | Checks the App Store Connect key and the signing identity             |
+| `… fastlane release`                           | **What CI runs.** Uploads, submits for review, releases on approval   |
+| `… fastlane beta`                              | Uploads to TestFlight only, submitting nothing                        |
 
-**A tagged release goes all the way.** `scanner-v*` publishes to Play production at 100% and
-submits to App Store review with automatic release on approval — there is no staging step and
-no console click between a green build and every device. Both stores still review, so
-"published" means queued, not live; and neither review is something CI can shorten.
+**A tagged release goes all the way.** `scanner-v*` publishes to Play production at 100%,
+submits to App Store review with automatic release on approval, and puts the APK on a GitHub
+release — there is no staging step and no console click between a green build and every
+device. Both stores still review, so "published" means queued, not live; and neither review is
+something CI can shorten. The GitHub release is the one place it is live the moment the job is
+green.
 
 Two consequences worth keeping in mind:
 

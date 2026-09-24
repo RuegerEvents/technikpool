@@ -1,4 +1,5 @@
-# Uploading the scanner to Google Play.
+# Uploading the scanner to Google Play, and building the APK that goes on the
+# GitHub release next to it.
 #
 # Version and build number come from apps/scanner/pubspec.yaml, set by
 # `pnpm release:app` — so these lanes never invent one. The app versions
@@ -18,6 +19,7 @@ default_platform(:android)
 # root, which is where flutter must run and where it writes build/.
 FLUTTER_PROJECT = File.expand_path('../..', __dir__)
 AAB = File.join(FLUTTER_PROJECT, 'build/app/outputs/bundle/release/app-release.aab')
+APK = File.join(FLUTTER_PROJECT, 'build/app/outputs/flutter-apk/app-release.apk')
 
 platform :android do
   desc 'Build a signed release app bundle'
@@ -29,6 +31,24 @@ platform :android do
     end
     UI.user_error!("No bundle at #{AAB}") unless File.exist?(AAB)
     UI.success("Built #{AAB}")
+  end
+
+  desc 'Build a signed universal APK for sideloading — what goes on the GitHub release'
+  lane :apk do
+    # A missing key.properties does not fail the build; Gradle falls back to
+    # the debug key and the APK installs fine. It just cannot update a copy
+    # signed with the real key, which nobody notices until a device refuses
+    # the next version.
+    UI.user_error!('android/key.properties is missing — the APK would be signed with the debug key') unless
+      File.exist?(File.join(FLUTTER_PROJECT, 'android/key.properties'))
+    Dir.chdir(FLUTTER_PROJECT) do
+      sh('flutter', 'pub', 'get')
+      # One fat APK for every ABI rather than --split-per-abi: whoever downloads
+      # it from a release page should not have to know their device's CPU.
+      sh('flutter', 'build', 'apk', '--release')
+    end
+    UI.user_error!("No APK at #{APK}") unless File.exist?(APK)
+    UI.success("Built #{APK}")
   end
 
   desc 'Check the credentials without uploading anything'
