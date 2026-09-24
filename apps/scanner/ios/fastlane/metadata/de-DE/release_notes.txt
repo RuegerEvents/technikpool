@@ -1,3 +1,3 @@
-• Inventur: Tritt einer laufenden Inventur bei oder starte eine neue, direkt in der Sitzungsauswahl neben Lagerort und Produktion. Scanne, um Geräte abzuhaken, zähle solche ohne Aufkleber pro Produkt und sieh, was noch fehlt.
-• Scannst du ein Gerät mit Zubehör oder den Aufkleber eines Sets, erscheint alles, was dazugehört, bereits abgehakt, und du nimmst nur den Haken bei dem heraus, was fehlt. Was nicht auf der Liste steht, wird mit Begründung als unerwartet erfasst.
-• Die Demo enthält eine Inventur zum Ausprobieren.
+• Beim Zählen einer Inventur hat der Tab „Offen hier“ ein Suchfeld: Jedes eingetippte Wort muss irgendwo in der Zeile vorkommen, „schuko 5“ findet also die 5-m-Kabel. Kategorie-Chips und Zeilen tragen die Farbe ihrer Kategorie.
+• Lose Produkte bekommen einen +-Knopf, der ohne Dialog eins mehr zählt, und der Zähldialog bekommt − / + Schritte.
+• Die Inventurliste folgt dem aktuellen Bestand: Ein Gerät, das neu angelegt oder in die Auswahl verschoben wird, erscheint, eines, das sie verlässt, verschwindet, und ein zwischendurch von einer Produktion zurückgebrachtes Gerät muss gezählt werden.
