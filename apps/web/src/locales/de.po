@@ -193,6 +193,7 @@ msgstr "Crew"
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 #: src/routes/+page.svelte
 #: src/routes/admin/connectors/+page.svelte
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -425,6 +426,7 @@ msgid "Serial Number"
 msgstr "Seriennummer"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -728,6 +730,7 @@ msgstr "<0/> Nach dem Speichern weiteres erstellen"
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
@@ -1347,6 +1350,7 @@ msgstr "Standort"
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/admin/categories/+page.svelte
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
@@ -5162,6 +5166,7 @@ msgid "Bundle converted — {0} attached"
 msgstr "Bundle umgewandelt — {0} angehängt"
 
 #: src/lib/components/ui/product-editor/product-actions.svelte
+#: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
@@ -10190,3 +10195,32 @@ msgstr "Logo hochladen"
 #: src/routes/orgs/[id]/org-logo-card.svelte
 msgid "Drafts keep the logo they were created with until you use \"Use current details\" on them. Finalized documents never change."
 msgstr "Entwürfe behalten das Logo, mit dem sie erstellt wurden, bis Sie dort „Aktuelle Daten übernehmen“ wählen. Abgeschlossene Dokumente ändern sich nie."
+
+#. 0: p0; 1: p1
+#: src/lib/error-messages.svelte.ts
+msgid "Asset tag \"{0}\" is already on {1}."
+msgstr "Der Asset-Tag „{0}“ ist bereits an {1} vergeben."
+
+#: src/routes/assets/+page.svelte
+msgid "Asset tag saved"
+msgstr "Asset-Tag gespeichert"
+
+#: src/routes/assets/+page.svelte
+msgid "Quick-add asset tags"
+msgstr "Asset-Tags schnell nachtragen"
+
+#: src/routes/assets/+page.svelte
+msgid "In the device and product tables an empty tag cell opens a dialog; Enter saves it."
+msgstr "In der Geräte- und Produkttabelle öffnet eine leere Tag-Zelle einen Dialog; Enter speichert."
+
+#: src/routes/assets/+page.svelte
+msgid "<0/> Add tag"
+msgstr "<0/> Tag nachtragen"
+
+#: src/routes/assets/+page.svelte
+msgid "Add asset tag"
+msgstr "Asset-Tag nachtragen"
+
+#: src/routes/assets/+page.svelte
+msgid "Enter saves and closes."
+msgstr "Enter speichert und schließt."

@@ -1586,6 +1586,21 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 	}
 	if ('assetTag' in input) {
 		const assetTag = input.assetTag?.trim() || null;
+		if (assetTag && assetTag !== asset.assetTag) {
+			// The column is unique, but a constraint violation would surface as a
+			// bare 500. Say which unit has the tag instead — the one typing it is
+			// the one who can tell whether it was a typo or a duplicate sticker.
+			const holder = await prisma.asset.findUnique({
+				where: { assetTag },
+				select: { product: { select: { name: true } }, serialNumber: true }
+			});
+			if (holder) {
+				const label = holder.serialNumber
+					? `${holder.product.name} (S/N ${holder.serialNumber})`
+					: holder.product.name;
+				appError(409, 'asset_tag_in_use', [assetTag, label]);
+			}
+		}
 		updateData.assetTag = assetTag;
 		if (assetTag !== asset.assetTag)
 			changes.push({ field: 'assetTag', from: asset.assetTag, to: assetTag });

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { categoryLabel } from '$lib/category';
-	import { orgLabel } from '$lib/utils';
+	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import {
 		connectorLabel,
 		formatLength,
@@ -14,7 +14,8 @@
 		getAssets,
 		getCategories,
 		getBundleTemplates,
-		getRetiredAssets
+		getRetiredAssets,
+		updateAsset
 	} from '$lib/remote/assets.remote';
 	import { getAllOrgs, getMyOrgs } from '$lib/remote/orgs.remote';
 	import { getLicenses } from '$lib/remote/licenses.remote';
@@ -32,8 +33,86 @@
 	import { SortableHeader } from '$lib/components/ui/sortable-header';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 	import LicenseList from './license-list.svelte';
+	import { Modal } from '$lib/components/ui/modal';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import { DropdownMenu } from 'bits-ui';
+	import { Check, Ellipsis, Tag } from '@lucide/svelte';
+	import { toast } from 'svelte-sonner';
+	import { browser } from '$app/environment';
+	import { tick } from 'svelte';
 
 	let showImportModal = $state(false);
+
+	// Quick-add mode for tags. Units are often registered before their stickers
+	// are on them, and then somebody walks the shelf with a stack of labels and
+	// a list. In this mode an empty tag cell is a button, and the dialog it
+	// opens is one field that Enter saves and closes — a tag per two keystrokes
+	// and a click, instead of a detail page each. Remembered per browser, since
+	// whoever is labelling stays at it for a while.
+	const QUICK_TAG_KEY = 'assets.quickTagMode';
+	function loadQuickTagMode() {
+		if (!browser) return false;
+		try {
+			return localStorage.getItem(QUICK_TAG_KEY) === '1';
+		} catch {
+			return false;
+		}
+	}
+	let quickTagMode = $state(loadQuickTagMode());
+	$effect(() => {
+		if (!browser) return;
+		try {
+			localStorage.setItem(QUICK_TAG_KEY, quickTagMode ? '1' : '0');
+		} catch {
+			// A browser that refuses storage still gets the mode for this visit.
+		}
+	});
+	type QuickTagTarget = {
+		id: string;
+		assetTag: string | null;
+		serialNumber: string | null;
+		product: { name: string };
+	};
+	let quickTagOpen = $state(false);
+	let quickTagTarget = $state<QuickTagTarget | null>(null);
+	let quickTagValue = $state('');
+	let quickTagInput = $state<HTMLInputElement | null>(null);
+	let savingQuickTag = $state(false);
+
+	function openQuickTag(asset: QuickTagTarget) {
+		quickTagTarget = asset;
+		quickTagValue = '';
+		quickTagOpen = true;
+	}
+
+	// The modal moves focus to its panel one tick after opening; the field
+	// takes it from there, so typing can start without a click. Two ticks, not
+	// one: whichever of the two effects ran first, this lands after the panel.
+	$effect(() => {
+		if (!quickTagOpen || !quickTagInput) return;
+		const input = quickTagInput;
+		tick()
+			.then(() => tick())
+			.then(() => input.focus());
+	});
+
+	async function saveQuickTag(e: Event) {
+		e.preventDefault();
+		if (!quickTagTarget) return;
+		const assetTag = quickTagValue.trim();
+		if (!assetTag) return;
+		savingQuickTag = true;
+		try {
+			await updateAsset({ assetId: quickTagTarget.id, assetTag });
+			toast.success('Asset tag saved');
+			quickTagOpen = false;
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			savingQuickTag = false;
+		}
+	}
 
 	// Sold and decommissioned units are out of the pool, so they get their own
 	// filter rather than a share of the normal list.
@@ -648,6 +727,49 @@
 			<Button icon="add" variant="outline" href={resolve('/assets/bundles/new')}>Add Bundle</Button>
 			<Button icon="add" variant="outline" href={resolve('/assets/new/cables')}>Add Cables</Button>
 			<Button icon="add" href={resolve('/assets/new')}>Add Asset</Button>
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger>
+					{#snippet child({ props })}
+						<button
+							{...props}
+							type="button"
+							class="flex size-9 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+							aria-label="More actions"
+						>
+							<Ellipsis aria-hidden="true" class="size-4" />
+						</button>
+					{/snippet}
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Portal>
+					<DropdownMenu.Content
+						align="end"
+						sideOffset={4}
+						class="z-50 w-72 overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+					>
+						<DropdownMenu.CheckboxItem
+							bind:checked={quickTagMode}
+							class="flex cursor-pointer items-start gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+						>
+							{#snippet children({ checked })}
+								<span
+									class="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded border border-input {checked
+										? 'bg-primary text-primary-foreground'
+										: ''}"
+								>
+									<Check aria-hidden="true" class="size-3 {checked ? '' : 'invisible'}" />
+								</span>
+								<span class="min-w-0">
+									<span class="block">Quick-add asset tags</span>
+									<span class="block text-xs text-muted-foreground"
+										>In the device and product tables an empty tag cell opens a dialog; Enter saves
+										it.</span
+									>
+								</span>
+							{/snippet}
+						</DropdownMenu.CheckboxItem>
+					</DropdownMenu.Content>
+				</DropdownMenu.Portal>
+			</DropdownMenu.Root>
 		</div>
 	</div>
 
@@ -812,6 +934,28 @@
 		{/if}
 	{/snippet}
 
+	<!-- The tag, or — in quick-add mode — the button that gives it one. The
+	     row behind it opens the unit, so the click must not get through. -->
+	{#snippet tagCell(asset: QuickTagTarget)}
+		{#if asset.assetTag}
+			{asset.assetTag}
+		{:else if quickTagMode}
+			<button
+				type="button"
+				onclick={(e) => {
+					e.stopPropagation();
+					openQuickTag(asset);
+				}}
+				class="inline-flex items-center gap-1 rounded-md border border-dashed border-input px-2 py-0.5 font-sans text-xs text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+			>
+				<Tag aria-hidden="true" class="size-3" />
+				Add tag
+			</button>
+		{:else}
+			—
+		{/if}
+	{/snippet}
+
 	{#snippet cableChips(cable: (CableAttrs & WithWays) | null)}
 		{#if cable}
 			{@const ends = cable.ways.length ? loomSummary(cable.ways) : connectorLabel(cable)}
@@ -916,7 +1060,7 @@
 									class="h-4 w-4 cursor-pointer rounded border-input"
 								/>
 							</td>
-							<td class="px-4 py-2 font-mono whitespace-nowrap">{asset.assetTag ?? '—'}</td>
+							<td class="px-4 py-2 font-mono whitespace-nowrap">{@render tagCell(asset)}</td>
 							<td class="px-4 py-2">
 								<div class="flex items-center gap-2">
 									<ProductThumb path={asset.product.imagePath} alt={asset.product.name} size={24} />
@@ -1621,7 +1765,7 @@
 										<td colspan="2" class="py-2 pr-4 pl-10">
 											<div class="flex items-center gap-4 text-xs">
 												<span class="font-mono font-medium whitespace-nowrap">
-													{asset.assetTag ?? '—'}
+													{@render tagCell(asset)}
 												</span>
 												{#if asset.serialNumber}
 													<span class="truncate font-mono text-muted-foreground">
@@ -1691,3 +1835,46 @@
 {#if showImportModal}
 	<CsvImportModal onClose={() => (showImportModal = false)} />
 {/if}
+
+<Modal bind:open={quickTagOpen} title="Add asset tag" dismissible={!savingQuickTag}>
+	{#snippet description()}
+		{#if quickTagTarget}
+			{quickTagTarget.product.name}{quickTagTarget.serialNumber
+				? ` · S/N ${quickTagTarget.serialNumber}`
+				: ''}
+		{/if}
+	{/snippet}
+	{#snippet children()}
+		<form id="quick-tag-form" class="space-y-2" onsubmit={saveQuickTag}>
+			<Label for="quick-tag">Asset Tag</Label>
+			<Input
+				id="quick-tag"
+				bind:ref={quickTagInput}
+				bind:value={quickTagValue}
+				autocomplete="off"
+				spellcheck={false}
+				class="font-mono"
+			/>
+			<p class="text-xs text-muted-foreground">Enter saves and closes.</p>
+		</form>
+	{/snippet}
+	{#snippet footer()}
+		<Button
+			icon="close"
+			type="button"
+			variant="outline"
+			onclick={() => (quickTagOpen = false)}
+			disabled={savingQuickTag}
+		>
+			Cancel
+		</Button>
+		<Button
+			icon="save"
+			type="submit"
+			form="quick-tag-form"
+			disabled={savingQuickTag || !quickTagValue.trim()}
+		>
+			{savingQuickTag ? 'Saving…' : 'Save'}
+		</Button>
+	{/snippet}
+</Modal>
