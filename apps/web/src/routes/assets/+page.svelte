@@ -758,13 +758,7 @@
 								>
 									<Check aria-hidden="true" class="size-3 {checked ? '' : 'invisible'}" />
 								</span>
-								<span class="min-w-0">
-									<span class="block">Quick-add asset tags</span>
-									<span class="block text-xs text-muted-foreground"
-										>In the device and product tables an empty tag cell opens a dialog; Enter saves
-										it.</span
-									>
-								</span>
+								<span class="min-w-0">Quick-add asset tags</span>
 							{/snippet}
 						</DropdownMenu.CheckboxItem>
 					</DropdownMenu.Content>
@@ -1603,11 +1597,13 @@
 														<span class="truncate text-xs font-medium">
 															{asset.product.name}
 														</span>
-														{#if asset.assetTag}
+														<!-- A unit without a tag shows nothing here, unless quick-add
+														     mode is on and the gap is what somebody is here to fill. -->
+														{#if asset.assetTag || quickTagMode}
 															<span
 																class="font-mono text-xs whitespace-nowrap text-muted-foreground"
 															>
-																{asset.assetTag}
+																{@render tagCell(asset)}
 															</span>
 														{/if}
 													</div>

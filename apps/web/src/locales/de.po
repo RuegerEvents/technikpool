@@ -10209,9 +10209,8 @@ msgstr "Asset-Tag gespeichert"
 msgid "Quick-add asset tags"
 msgstr "Asset-Tags schnell nachtragen"
 
-#: src/routes/assets/+page.svelte
-msgid "In the device and product tables an empty tag cell opens a dialog; Enter saves it."
-msgstr "In der Geräte- und Produkttabelle öffnet eine leere Tag-Zelle einen Dialog; Enter speichert."
+#~ msgid "In the device and product tables an empty tag cell opens a dialog; Enter saves it."
+#~ msgstr "In der Geräte- und Produkttabelle öffnet eine leere Tag-Zelle einen Dialog; Enter speichert."
 
 #: src/routes/assets/+page.svelte
 msgid "<0/> Add tag"
