@@ -489,7 +489,7 @@ class SEn extends S {
 
   @override
   String stocktakeWasOut(String name) {
-    return 'was checked out to $name';
+    return 'checked out to $name';
   }
 
   @override
@@ -534,6 +534,15 @@ class SEn extends S {
   String get stocktakeYourCount => 'Your count here';
 
   @override
+  String get stocktakePlusOne => 'One more';
+
+  @override
+  String get stocktakeMinusOne => 'One less';
+
+  @override
+  String get stocktakeNoMatch => 'Nothing open here matches.';
+
+  @override
   String get stocktakeTickHint => 'Tap to count by hand';
 
   @override
@@ -574,9 +583,6 @@ class SEn extends S {
 
   @override
   String get reasonRetired => 'Sold or decommissioned';
-
-  @override
-  String get reasonAddedLater => 'Registered after the start';
 
   @override
   String get reasonOtherLocation => 'Assigned to another location';

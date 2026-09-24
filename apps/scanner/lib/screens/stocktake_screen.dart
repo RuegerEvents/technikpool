@@ -12,6 +12,7 @@ import '../product_label.dart';
 import '../scan/camera_scan_screen.dart';
 import '../state/providers.dart';
 import '../theme.dart';
+import '../widgets/category_pill.dart';
 
 /// Ask where the counter is. A stocktake over one location needs no asking; a
 /// wider one offers its `countingLocations`, with the last pick for this
@@ -45,9 +46,7 @@ Future<StocktakeLocation?> _locationSheet(
     isScrollControlled: true,
     builder: (sheetContext) => SafeArea(
       child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(sheetContext).size.height * 0.7,
-        ),
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(sheetContext).size.height * 0.7),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -137,6 +136,17 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
   /// confirm sheet holds the queue, so scans made meanwhile wait their turn.
   Future<void> _queue = Future<void>.value();
   bool _busy = false;
+
+  /// Counts written but not yet read back, by product id, so a row shows the
+  /// number just entered while the reload is on its way — and a second tap on
+  /// `+` counts from it rather than from the stale one. Cleared once the
+  /// reload carries the write; a newer write on the same product keeps it.
+  final _pendingCounts = <String, int>{};
+  final _countSeq = <String, int>{};
+
+  /// Writes are sent one after another: two `+` taps in a row must arrive as
+  /// 1 then 2, and HTTP alone does not promise that.
+  Future<void> _countQueue = Future<void>.value();
 
   @override
   void initState() {
@@ -234,12 +244,7 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
       }
     } catch (error) {
       _push(
-        _Entry(
-          code: code,
-          kind: _Kind.error,
-          title: code,
-          detail: describeError(l10n, error),
-        ),
+        _Entry(code: code, kind: _Kind.error, title: code, detail: describeError(l10n, error)),
       );
       unawaited(HapticFeedback.heavyImpact());
     } finally {
@@ -336,11 +341,8 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
 
   Future<void> _openCamera() => Navigator.of(context).push<void>(
     MaterialPageRoute(
-      builder: (_) => CameraScanScreen(
-        title: _location.name,
-        continuous: true,
-        feedback: _feedback.stream,
-      ),
+      builder: (_) =>
+          CameraScanScreen(title: _location.name, continuous: true, feedback: _feedback.stream),
     ),
   );
 
@@ -476,10 +478,6 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
   }
 
   Future<void> _count(StocktakeProductCount product, int? current) async {
-    final l10n = S.of(context);
-    final api = ref.read(apiClientProvider);
-    if (api == null) return;
-    final messenger = ScaffoldMessenger.of(context);
     final count = await showDialog<int>(
       context: context,
       builder: (_) => _CountDialog(
@@ -487,21 +485,42 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
         initial: current,
       ),
     );
-    if (count == null) return;
-    try {
-      await api.stocktake.setStocktakeCount(
-        stocktakeId: widget.stocktakeId,
-        body: StocktakeCountRequest(
-          productId: product.productId,
-          locationId: _location.id,
-          count: count,
-        ),
-      );
-    } catch (error) {
-      messenger.showSnackBar(SnackBar(content: Text(describeError(l10n, error))));
-    } finally {
-      _refresh();
-    }
+    if (count == null || !mounted) return;
+    _writeCount(product, count);
+  }
+
+  /// One more of a loose product, without the dialog — a shelf of cables is
+  /// counted by pressing `+` for each one taken down.
+  void _bump(StocktakeProductCount product, int? current) =>
+      _writeCount(product, (_pendingCounts[product.productId] ?? current ?? 0) + 1);
+
+  void _writeCount(StocktakeProductCount product, int count) {
+    final id = product.productId;
+    final seq = (_countSeq[id] ?? 0) + 1;
+    _countSeq[id] = seq;
+    setState(() => _pendingCounts[id] = count);
+    _countQueue = _countQueue.then((_) async {
+      final api = ref.read(apiClientProvider);
+      if (api == null || !mounted) return;
+      final l10n = S.of(context);
+      final messenger = ScaffoldMessenger.of(context);
+      try {
+        await api.stocktake.setStocktakeCount(
+          stocktakeId: widget.stocktakeId,
+          body: StocktakeCountRequest(productId: id, locationId: _location.id, count: count),
+        );
+      } catch (error) {
+        messenger.showSnackBar(SnackBar(content: Text(describeError(l10n, error))));
+      } finally {
+        _refresh();
+        // Wait for the reload before letting the server's number show again,
+        // or the row would flick back to the old count for a moment.
+        try {
+          await ref.read(stocktakeProvider(widget.stocktakeId).future);
+        } catch (_) {}
+        if (mounted && _countSeq[id] == seq) setState(() => _pendingCounts.remove(id));
+      }
+    });
   }
 
   @override
@@ -540,10 +559,7 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
                 onSelected: (v) => v == 'close' ? _close(detail) : _changeLocation(detail),
                 itemBuilder: (_) => [
                   if (detail.countingLocations.length > 1)
-                    PopupMenuItem(
-                      value: 'location',
-                      child: Text(l10n.stocktakeChangeLocation),
-                    ),
+                    PopupMenuItem(value: 'location', child: Text(l10n.stocktakeChangeLocation)),
                   PopupMenuItem(value: 'close', child: Text(l10n.stocktakeClose)),
                 ],
               ),
@@ -646,10 +662,7 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      IconButton.filled(
-                        onPressed: _submitManual,
-                        icon: const Icon(Icons.send),
-                      ),
+                      IconButton.filled(onPressed: _submitManual, icon: const Icon(Icons.send)),
                     ],
                   ),
                 ),
@@ -665,7 +678,9 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
                       titles: {item.assetId: _itemLabel(item)},
                       codes: {item.assetId: item.assetTag ?? ''},
                     ),
+                    pendingCounts: _pendingCounts,
                     onCount: _count,
+                    onBump: _bump,
                   )
                 : async.hasError
                 ? Center(child: Text(describeError(l10n, async.error!)))
@@ -762,8 +777,7 @@ class _ConfirmSheetState extends State<_ConfirmSheet> {
                       subtitle: Text(
                         [
                           ?e.assetTag,
-                          if (e.foundByName != null)
-                            l10n.stocktakeCountedBy(e.foundByName!),
+                          if (e.foundByName != null) l10n.stocktakeCountedBy(e.foundByName!),
                         ].join(' · '),
                       ),
                     ),
@@ -803,14 +817,18 @@ class _OpenHere extends StatefulWidget {
   const _OpenHere({
     required this.detail,
     required this.locationId,
+    required this.pendingCounts,
     required this.onTick,
     required this.onCount,
+    required this.onBump,
   });
 
   final StocktakeDetail detail;
   final String locationId;
+  final Map<String, int> pendingCounts;
   final ValueChanged<StocktakeItem> onTick;
   final void Function(StocktakeProductCount product, int? current) onCount;
+  final void Function(StocktakeProductCount product, int? current) onBump;
 
   @override
   State<_OpenHere> createState() => _OpenHereState();
@@ -818,6 +836,21 @@ class _OpenHere extends StatefulWidget {
 
 class _OpenHereState extends State<_OpenHere> {
   String? _categoryId;
+  final _search = TextEditingController();
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  /// Every word typed has to appear somewhere in the row: "xlr 5m" finds the
+  /// 5 m XLR cables, whatever the pool calls them.
+  bool _matches(Iterable<String?> fields) {
+    final words = _search.text.toLowerCase().split(RegExp(r'\s+')).where((w) => w.isNotEmpty);
+    final haystack = fields.whereType<String>().join(' ').toLowerCase();
+    return words.every(haystack.contains);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -827,8 +860,7 @@ class _OpenHereState extends State<_OpenHere> {
     final open = widget.detail.items
         .where(
           (i) =>
-              i.state == StocktakeItemState.open &&
-              i.expectedLocation?.id == widget.locationId,
+              i.state == StocktakeItemState.open && i.expectedLocation?.id == widget.locationId,
         )
         .toList();
     final products = widget.detail.products;
@@ -839,9 +871,30 @@ class _OpenHereState extends State<_OpenHere> {
     }.values.toList()..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
 
     bool inFilter(Category c) => _categoryId == null || c.id == _categoryId;
-    final shownItems = open.where((i) => inFilter(i.category)).toList()
-      ..sort((a, b) => _itemSort(a).compareTo(_itemSort(b)));
-    final shownProducts = products.where((p) => inFilter(p.category)).toList();
+    final shownItems =
+        open
+            .where(
+              (i) =>
+                  inFilter(i.category) &&
+                  _matches([
+                    i.productName,
+                    i.manufacturerName,
+                    i.assetTag,
+                    i.serialNumber,
+                    i.bundleName,
+                    i.category.name,
+                  ]),
+            )
+            .toList()
+          ..sort((a, b) => _itemSort(a).compareTo(_itemSort(b)));
+    final shownProducts = products
+        .where(
+          (p) =>
+              inFilter(p.category) &&
+              _matches([p.productName, p.manufacturerName, p.category.name]),
+        )
+        .toList();
+    final searching = _search.text.trim().isNotEmpty;
 
     StocktakeLocationCount? here(StocktakeProductCount p) {
       for (final l in p.locations) {
@@ -852,6 +905,25 @@ class _OpenHereState extends State<_OpenHere> {
 
     return ListView(
       children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+          child: TextField(
+            controller: _search,
+            decoration: InputDecoration(
+              labelText: l10n.search,
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: searching
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () => setState(_search.clear),
+                    )
+                  : null,
+              isDense: true,
+            ),
+            textInputAction: TextInputAction.search,
+            onChanged: (_) => setState(() {}),
+          ),
+        ),
         if (categories.length > 1)
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -865,10 +937,10 @@ class _OpenHereState extends State<_OpenHere> {
                 ),
                 for (final c in categories) ...[
                   const SizedBox(width: 8),
-                  ChoiceChip(
-                    label: Text(c.name),
+                  _CategoryChip(
+                    category: c,
                     selected: _categoryId == c.id,
-                    onSelected: (_) => setState(() => _categoryId = c.id),
+                    onSelected: () => setState(() => _categoryId = c.id),
                   ),
                 ],
               ],
@@ -877,7 +949,13 @@ class _OpenHereState extends State<_OpenHere> {
         if (shownItems.isEmpty)
           Padding(
             padding: const EdgeInsets.all(24),
-            child: Center(child: Text(l10n.stocktakeNothingOpenHere)),
+            child: Center(
+              child: Text(
+                searching || _categoryId != null
+                    ? l10n.stocktakeNoMatch
+                    : l10n.stocktakeNothingOpenHere,
+              ),
+            ),
           )
         else ...[
           Padding(
@@ -893,8 +971,9 @@ class _OpenHereState extends State<_OpenHere> {
             ListTile(
               leading: const Icon(Icons.check_box_outline_blank),
               title: Text(productLabel(item.manufacturerName, item.productName)),
-              subtitle: Text(
-                [?item.assetTag ?? item.serialNumber, ?item.bundleName].join(' · '),
+              subtitle: _Subtitle(
+                category: item.category,
+                text: [?item.assetTag ?? item.serialNumber, ?item.bundleName].join(' · '),
               ),
               onTap: () => widget.onTick(item),
             ),
@@ -909,14 +988,29 @@ class _OpenHereState extends State<_OpenHere> {
             Builder(
               builder: (_) {
                 final at = here(p);
+                final mine = widget.pendingCounts[p.productId] ?? at?.myCount;
                 return ListTile(
                   title: Text(productLabel(p.manufacturerName, p.productName)),
-                  subtitle: Text(l10n.stocktakeLooseLine(at?.expected ?? 0, p.counted)),
-                  trailing: Text(
-                    at?.myCount?.toString() ?? '–',
-                    style: theme.textTheme.titleLarge,
+                  subtitle: _Subtitle(
+                    category: p.category,
+                    text: l10n.stocktakeLooseLine(at?.expected ?? 0, p.counted),
                   ),
-                  onTap: () => widget.onCount(p, at?.myCount),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(mine?.toString() ?? '–', style: theme.textTheme.titleLarge),
+                      const SizedBox(width: 4),
+                      // Big enough for a gloved thumb, and filled so it reads
+                      // as the thing to press rather than as decoration.
+                      IconButton.filledTonal(
+                        tooltip: l10n.stocktakePlusOne,
+                        iconSize: 28,
+                        onPressed: () => widget.onBump(p, mine),
+                        icon: const Icon(Icons.add),
+                      ),
+                    ],
+                  ),
+                  onTap: () => widget.onCount(p, mine),
                 );
               },
             ),
@@ -928,6 +1022,72 @@ class _OpenHereState extends State<_OpenHere> {
 
   static String _itemSort(StocktakeItem i) =>
       '${i.category.sortOrder.toString().padLeft(4, '0')} ${i.productName} ${i.assetTag ?? ''}';
+}
+
+/// A category filter in the category's own colour: a dot while it is one of
+/// the choices, the whole chip once it is the choice, so the list below and
+/// the chip that narrowed it share a colour.
+class _CategoryChip extends StatelessWidget {
+  const _CategoryChip({
+    required this.category,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final Category category;
+  final bool selected;
+  final VoidCallback onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final color = parseHexColor(category.color) ?? scheme.surfaceContainerHighest;
+    final foreground = contrastingTextColor(color);
+    return ChoiceChip(
+      avatar: selected
+          ? null
+          : Container(
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+                border: Border.all(color: scheme.outlineVariant),
+              ),
+            ),
+      label: Text(category.name),
+      labelStyle: selected ? TextStyle(color: foreground) : null,
+      selected: selected,
+      selectedColor: color,
+      showCheckmark: false,
+      // The default category colour is white — see CategoryPill.
+      side: selected ? BorderSide(color: foreground.withValues(alpha: 0.16)) : null,
+      onSelected: (_) => onSelected(),
+    );
+  }
+}
+
+/// A row's second line, led by its category so a mixed list can be read by
+/// colour before it is read by name.
+class _Subtitle extends StatelessWidget {
+  const _Subtitle({required this.category, required this.text});
+
+  final Category category;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 2),
+      child: Row(
+        children: [
+          CategoryPill(category, dense: true),
+          if (text.isNotEmpty) ...[
+            const SizedBox(width: 6),
+            Flexible(child: Text(text, overflow: TextOverflow.ellipsis)),
+          ],
+        ],
+      ),
+    );
+  }
 }
 
 class _CountDialog extends StatefulWidget {
@@ -949,6 +1109,15 @@ class _CountDialogState extends State<_CountDialog> {
     super.dispose();
   }
 
+  int get _value => int.tryParse(_controller.text.trim()) ?? 0;
+
+  void _step(int by) {
+    final next = _value + by;
+    if (next < 0) return;
+    _controller.text = next.toString();
+    _controller.selection = TextSelection.collapsed(offset: _controller.text.length);
+  }
+
   void _save() {
     final value = int.tryParse(_controller.text.trim());
     if (value == null || value < 0) return;
@@ -960,13 +1129,40 @@ class _CountDialogState extends State<_CountDialog> {
     final l10n = S.of(context);
     return AlertDialog(
       title: Text(widget.title),
-      content: TextField(
-        controller: _controller,
-        autofocus: true,
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: InputDecoration(labelText: l10n.stocktakeYourCount),
-        onSubmitted: (_) => _save(),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.stocktakeYourCount, style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              IconButton.filledTonal(
+                tooltip: l10n.stocktakeMinusOne,
+                onPressed: () => _step(-1),
+                icon: const Icon(Icons.remove),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  autofocus: true,
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: const InputDecoration(hintText: '0'),
+                  onSubmitted: (_) => _save(),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton.filledTonal(
+                tooltip: l10n.stocktakePlusOne,
+                onPressed: () => _step(1),
+                icon: const Icon(Icons.add),
+              ),
+            ],
+          ),
+        ],
       ),
       actions: [
         TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.cancel)),
@@ -977,11 +1173,7 @@ class _CountDialogState extends State<_CountDialog> {
 }
 
 class _NoteDialog extends StatefulWidget {
-  const _NoteDialog({
-    required this.title,
-    required this.note,
-    required this.needsAttention,
-  });
+  const _NoteDialog({required this.title, required this.note, required this.needsAttention});
 
   final String title;
   final String? note;

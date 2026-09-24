@@ -871,7 +871,7 @@ abstract class S {
   /// **'{found} of {expected} counted'**
   String stocktakeProgress(int found, int expected);
 
-  /// Units checked out on a production when the stocktake started.
+  /// Units checked out on a production right now.
   ///
   /// In en, this message translates to:
   /// **'{count} out on jobs'**
@@ -976,7 +976,7 @@ abstract class S {
   /// No description provided for @stocktakeWasOut.
   ///
   /// In en, this message translates to:
-  /// **'was checked out to {name}'**
+  /// **'checked out to {name}'**
   String stocktakeWasOut(String name);
 
   /// No description provided for @stocktakeBundle.
@@ -1044,6 +1044,24 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Your count here'**
   String get stocktakeYourCount;
+
+  /// Tooltip of the + button that raises a loose count by one.
+  ///
+  /// In en, this message translates to:
+  /// **'One more'**
+  String get stocktakePlusOne;
+
+  /// No description provided for @stocktakeMinusOne.
+  ///
+  /// In en, this message translates to:
+  /// **'One less'**
+  String get stocktakeMinusOne;
+
+  /// Shown when a search or category filter leaves the open list empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing open here matches.'**
+  String get stocktakeNoMatch;
 
   /// No description provided for @stocktakeTickHint.
   ///
@@ -1122,12 +1140,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Sold or decommissioned'**
   String get reasonRetired;
-
-  /// No description provided for @reasonAddedLater.
-  ///
-  /// In en, this message translates to:
-  /// **'Registered after the start'**
-  String get reasonAddedLater;
 
   /// No description provided for @reasonOtherLocation.
   ///

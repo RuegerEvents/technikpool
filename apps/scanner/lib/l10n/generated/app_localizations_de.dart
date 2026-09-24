@@ -491,7 +491,7 @@ class SDe extends S {
 
   @override
   String stocktakeWasOut(String name) {
-    return 'war ausgebucht auf $name';
+    return 'ausgebucht auf $name';
   }
 
   @override
@@ -536,6 +536,15 @@ class SDe extends S {
   String get stocktakeYourCount => 'Deine Zählung hier';
 
   @override
+  String get stocktakePlusOne => 'Eins mehr';
+
+  @override
+  String get stocktakeMinusOne => 'Eins weniger';
+
+  @override
+  String get stocktakeNoMatch => 'Nichts Offenes passt dazu.';
+
+  @override
   String get stocktakeTickHint => 'Tippen, um von Hand zu zählen';
 
   @override
@@ -576,9 +585,6 @@ class SDe extends S {
 
   @override
   String get reasonRetired => 'Verkauft oder ausgemustert';
-
-  @override
-  String get reasonAddedLater => 'Nach dem Start erfasst';
 
   @override
   String get reasonOtherLocation => 'Einem anderen Lagerort zugeordnet';

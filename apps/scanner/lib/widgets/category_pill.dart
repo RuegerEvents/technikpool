@@ -53,7 +53,6 @@ class CategoryPill extends StatelessWidget {
 
 /// `#rgb` or `#rrggbb`, matching the web's parser — anything else is null
 /// rather than a guess.
-@visibleForTesting
 Color? parseHexColor(String input) {
   final value = input.trim();
   if (!value.startsWith('#')) return null;
@@ -70,7 +69,6 @@ Color? parseHexColor(String input) {
 /// WCAG relative luminance, with the web's 0.3 threshold rather than the
 /// textbook 0.5 — it favours black text, which is what the pastel-ish palette
 /// people actually pick needs.
-@visibleForTesting
 Color contrastingTextColor(Color background) {
   double channel(double c) =>
       c <= 0.03928 ? c / 12.92 : math.pow((c + 0.055) / 1.055, 2.4).toDouble();
