@@ -140,15 +140,9 @@
 	{/snippet}
 
 	{#snippet footer()}
-		{#if allowDelete && customer && !readonly}
-			<Button
-				icon="delete"
-				variant="destructive"
-				class="mr-auto"
-				disabled={saving || deleting}
-				onclick={remove}
-			>
-				{deleting ? 'Deleting…' : 'Delete'}
+		{#if !readonly}
+			<Button icon="save" disabled={saving || deleting} onclick={save}>
+				{saving ? 'Saving…' : customer ? 'Save customer' : 'Create customer'}
 			</Button>
 		{/if}
 		<Button
@@ -159,9 +153,15 @@
 		>
 			Cancel
 		</Button>
-		{#if !readonly}
-			<Button icon="save" disabled={saving || deleting} onclick={save}>
-				{saving ? 'Saving…' : customer ? 'Save customer' : 'Create customer'}
+		{#if allowDelete && customer && !readonly}
+			<Button
+				icon="delete"
+				variant="destructive"
+				class="mr-auto"
+				disabled={saving || deleting}
+				onclick={remove}
+			>
+				{deleting ? 'Deleting…' : 'Delete'}
 			</Button>
 		{/if}
 	{/snippet}

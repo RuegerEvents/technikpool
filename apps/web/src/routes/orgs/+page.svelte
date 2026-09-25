@@ -302,6 +302,9 @@
 		Create a new organization to manage assets and productions.
 	{/snippet}
 	{#snippet footer()}
+		<Button icon="add" type="submit" form="create-org-form" disabled={creating}>
+			{creating ? 'Creating...' : 'Create Organization'}
+		</Button>
 		<Button
 			icon="close"
 			type="button"
@@ -310,9 +313,6 @@
 			disabled={creating}
 		>
 			Cancel
-		</Button>
-		<Button icon="add" type="submit" form="create-org-form" disabled={creating}>
-			{creating ? 'Creating...' : 'Create Organization'}
 		</Button>
 	{/snippet}
 </Modal>

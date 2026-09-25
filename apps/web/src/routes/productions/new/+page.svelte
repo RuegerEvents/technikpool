@@ -167,13 +167,13 @@
 					/>
 				</div>
 
-				<div class="flex justify-end gap-4 pt-4">
-					<Button icon="close" type="button" variant="outline" href={resolve('/productions')}
-						>Cancel</Button
-					>
+				<div class="flex flex-row-reverse justify-start gap-4 pt-4">
 					<Button icon="add" type="submit" disabled={saving}>
 						{saving ? 'Creating...' : 'Create Production'}
 					</Button>
+					<Button icon="close" type="button" variant="outline" href={resolve('/productions')}
+						>Cancel</Button
+					>
 				</div>
 			</form>
 		</Card.Content>

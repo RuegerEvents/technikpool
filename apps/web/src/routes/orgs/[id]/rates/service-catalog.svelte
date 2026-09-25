@@ -278,16 +278,16 @@
 
 	{#snippet footer()}
 		<Button
-			icon="close"
-			variant="outline"
-			disabled={busy === 'category'}
-			onclick={() => (categoryOpen = false)}>Cancel</Button
-		>
-		<Button
 			icon="save"
 			type="submit"
 			form="service-category-form"
 			disabled={busy === 'category' || !categoryName.trim()}>Save</Button
+		>
+		<Button
+			icon="close"
+			variant="outline"
+			disabled={busy === 'category'}
+			onclick={() => (categoryOpen = false)}>Cancel</Button
 		>
 	{/snippet}
 </Modal>
@@ -346,16 +346,16 @@
 
 	{#snippet footer()}
 		<Button
-			icon="close"
-			variant="outline"
-			disabled={busy === 'service'}
-			onclick={() => (serviceOpen = false)}>Cancel</Button
-		>
-		<Button
 			icon="save"
 			type="submit"
 			form="org-service-form"
 			disabled={busy === 'service' || !serviceValid}>Save</Button
+		>
+		<Button
+			icon="close"
+			variant="outline"
+			disabled={busy === 'service'}
+			onclick={() => (serviceOpen = false)}>Cancel</Button
 		>
 	{/snippet}
 </Modal>

@@ -163,9 +163,9 @@
 		</div>
 	{/snippet}
 	{#snippet footer()}
-		<Button variant="outline" disabled={merging} onclick={() => (mergeOpen = false)}>Cancel</Button>
 		<Button icon="merge" disabled={!mergeTargetId || merging} onclick={merge}>
 			{merging ? 'Merging…' : 'Merge'}
 		</Button>
+		<Button variant="outline" disabled={merging} onclick={() => (mergeOpen = false)}>Cancel</Button>
 	{/snippet}
 </Modal>

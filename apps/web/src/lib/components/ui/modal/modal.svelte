@@ -135,8 +135,13 @@
 				<div class="pb-6"></div>
 			{/if}
 
+			<!-- Drawn in reverse, so a footer lists its primary button first: Tab from
+			     the last field reaches Create/Save before Cancel, while Cancel still
+			     sits on the left. A footer written Cancel-first gets it backwards. -->
 			{#if footer}
-				<div class="flex justify-end gap-3 border-t px-6 py-4">{@render footer()}</div>
+				<div class="flex flex-row-reverse justify-start gap-3 border-t px-6 py-4">
+					{@render footer()}
+				</div>
 			{/if}
 		</div>
 	</div>

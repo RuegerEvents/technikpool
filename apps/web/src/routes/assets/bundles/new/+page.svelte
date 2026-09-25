@@ -386,7 +386,15 @@
 			</Card.Content>
 		</Card.Root>
 
-		<div class="flex flex-wrap items-center justify-end gap-3">
+		<div class="flex flex-row-reverse flex-wrap items-center justify-start gap-3">
+			<Button
+				icon="add"
+				type="submit"
+				disabled={saving || !bundleType?.name.trim() || !selectedOrgId || !fitsType}
+			>
+				{saving ? 'Creating…' : 'Create Bundle'}
+			</Button>
+			<Button icon="close" type="button" variant="outline" href={resolve('/assets')}>Cancel</Button>
 			{#if specLines.length > 0 && stillMissing > 0}
 				<p class="mr-auto text-sm text-muted-foreground">
 					{plural(stillMissing, [
@@ -395,14 +403,6 @@
 					])}
 				</p>
 			{/if}
-			<Button icon="close" type="button" variant="outline" href={resolve('/assets')}>Cancel</Button>
-			<Button
-				icon="add"
-				type="submit"
-				disabled={saving || !bundleType?.name.trim() || !selectedOrgId || !fitsType}
-			>
-				{saving ? 'Creating…' : 'Create Bundle'}
-			</Button>
 		</div>
 	</form>
 </div>

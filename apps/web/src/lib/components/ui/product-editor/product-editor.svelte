@@ -720,11 +720,11 @@
 	{/snippet}
 
 	{#snippet footer()}
-		<Button icon="close" variant="outline" onclick={() => (mergeOpen = false)} disabled={merging}>
-			Cancel
-		</Button>
 		<Button icon="merge" onclick={doMerge} disabled={!picked || merging}>
 			{merging ? 'Merging…' : 'Merge'}
+		</Button>
+		<Button icon="close" variant="outline" onclick={() => (mergeOpen = false)} disabled={merging}>
+			Cancel
 		</Button>
 	{/snippet}
 </Modal>
@@ -744,9 +744,6 @@
 	{/snippet}
 
 	{#snippet footer()}
-		<Button icon="close" variant="outline" onclick={() => (deleteOpen = false)} disabled={deleting}
-			>Cancel</Button
-		>
 		<Button
 			icon="delete"
 			variant="destructive"
@@ -755,6 +752,9 @@
 		>
 			{deleting ? 'Deleting…' : 'Delete product'}
 		</Button>
+		<Button icon="close" variant="outline" onclick={() => (deleteOpen = false)} disabled={deleting}
+			>Cancel</Button
+		>
 	{/snippet}
 </Modal>
 
@@ -788,14 +788,14 @@
 	{/snippet}
 
 	{#snippet footer()}
+		<Button icon="copy" onclick={doDuplicate} disabled={!duplicateName.trim() || duplicating}>
+			{duplicating ? 'Duplicating…' : 'Duplicate'}
+		</Button>
 		<Button
 			icon="close"
 			variant="outline"
 			onclick={() => (duplicateOpen = false)}
 			disabled={duplicating}>Cancel</Button
 		>
-		<Button icon="copy" onclick={doDuplicate} disabled={!duplicateName.trim() || duplicating}>
-			{duplicating ? 'Duplicating…' : 'Duplicate'}
-		</Button>
 	{/snippet}
 </Modal>

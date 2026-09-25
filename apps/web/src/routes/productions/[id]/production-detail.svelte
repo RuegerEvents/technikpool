@@ -849,7 +849,10 @@
 									</div>
 								{/if}
 
-								<div class="flex justify-end gap-2">
+								<div class="flex flex-row-reverse justify-start gap-2">
+									<Button icon="save" type="submit" disabled={savingDuration}>
+										{savingDuration ? 'Saving…' : 'Save'}
+									</Button>
 									<Button
 										icon="close"
 										type="button"
@@ -857,9 +860,6 @@
 										onclick={() => (editingDuration = false)}
 									>
 										Cancel
-									</Button>
-									<Button icon="save" type="submit" disabled={savingDuration}>
-										{savingDuration ? 'Saving…' : 'Save'}
 									</Button>
 								</div>
 							</form>
@@ -890,7 +890,10 @@
 							<form class="space-y-4" onsubmit={handleSaveAddress}>
 								<AddressInput bind:value={addressDraft} idPrefix="addr" withName />
 
-								<div class="flex justify-end gap-2">
+								<div class="flex flex-row-reverse justify-start gap-2">
+									<Button icon="save" type="submit" disabled={savingAddress}>
+										{savingAddress ? 'Saving…' : 'Save'}
+									</Button>
 									<Button
 										icon="close"
 										type="button"
@@ -898,9 +901,6 @@
 										onclick={() => (editingAddress = false)}
 									>
 										Cancel
-									</Button>
-									<Button icon="save" type="submit" disabled={savingAddress}>
-										{savingAddress ? 'Saving…' : 'Save'}
 									</Button>
 								</div>
 							</form>
@@ -939,7 +939,10 @@
 									idPrefix="prod-cust"
 								/>
 
-								<div class="flex justify-end gap-2">
+								<div class="flex flex-row-reverse justify-start gap-2">
+									<Button icon="save" type="submit" disabled={savingCustomer}>
+										{savingCustomer ? 'Saving…' : 'Save'}
+									</Button>
 									<Button
 										icon="close"
 										type="button"
@@ -947,9 +950,6 @@
 										onclick={() => (editingCustomer = false)}
 									>
 										Cancel
-									</Button>
-									<Button icon="save" type="submit" disabled={savingCustomer}>
-										{savingCustomer ? 'Saving…' : 'Save'}
 									</Button>
 								</div>
 							</form>
@@ -1001,12 +1001,12 @@
 								<Label for="crewRole">Role</Label>
 								<Input id="crewRole" bind:value={crewRole} placeholder="Camera Operator" />
 							</div>
-							<div class="flex justify-end gap-2">
-								<Button type="button" variant="outline" onclick={() => (showCrewForm = false)}
-									>Cancel</Button
-								>
+							<div class="flex flex-row-reverse justify-start gap-2">
 								<Button icon="add" type="submit" disabled={savingCrew}
 									>{savingCrew ? 'Adding…' : 'Add'}</Button
+								>
+								<Button type="button" variant="outline" onclick={() => (showCrewForm = false)}
+									>Cancel</Button
 								>
 							</div>
 						</form>
@@ -1448,12 +1448,12 @@
 		</p>
 	{/snippet}
 	{#snippet footer()}
-		<Button variant="outline" disabled={deleting} onclick={() => (deleteOpen = false)}
-			>Cancel</Button
-		>
 		<Button variant="destructive" disabled={deleting} onclick={handleDeleteProduction}>
 			{deleting ? 'Deleting…' : 'Delete production'}
 		</Button>
+		<Button variant="outline" disabled={deleting} onclick={() => (deleteOpen = false)}
+			>Cancel</Button
+		>
 	{/snippet}
 </Modal>
 
@@ -1493,9 +1493,6 @@
 		</div>
 	{/snippet}
 	{#snippet footer()}
-		<Button variant="outline" disabled={cancelling} onclick={() => (cancelOpen = false)}
-			>Keep production</Button
-		>
 		<Button
 			variant="destructive"
 			disabled={cancelling || !cancelReason.trim()}
@@ -1503,6 +1500,9 @@
 		>
 			{cancelling ? 'Cancelling…' : 'Cancel production'}
 		</Button>
+		<Button variant="outline" disabled={cancelling} onclick={() => (cancelOpen = false)}
+			>Keep production</Button
+		>
 	{/snippet}
 </Modal>
 
@@ -1522,12 +1522,12 @@
 		</div>
 	{/snippet}
 	{#snippet footer()}
-		<Button variant="outline" disabled={reopening} onclick={() => (reopenOpen = false)}
-			>Cancel</Button
-		>
 		<Button disabled={reopening} onclick={handleReopenProduction}>
 			{reopening ? 'Reopening…' : 'Reopen production'}
 		</Button>
+		<Button variant="outline" disabled={reopening} onclick={() => (reopenOpen = false)}
+			>Cancel</Button
+		>
 	{/snippet}
 </Modal>
 

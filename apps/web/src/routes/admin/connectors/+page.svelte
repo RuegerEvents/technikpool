@@ -240,9 +240,9 @@
 		with it.
 	{/snippet}
 	{#snippet footer()}
-		<Button variant="outline" onclick={() => (deleteTarget = null)}>Cancel</Button>
 		<Button variant="destructive" disabled={deleting} onclick={confirmDelete}>
 			{deleting ? 'Deleting…' : 'Delete'}
 		</Button>
+		<Button variant="outline" onclick={() => (deleteTarget = null)}>Cancel</Button>
 	{/snippet}
 </Modal>

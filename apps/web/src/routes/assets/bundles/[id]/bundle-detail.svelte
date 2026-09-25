@@ -925,6 +925,9 @@
 	{/snippet}
 
 	{#snippet footer()}
+		<Button type="button" disabled={copying || copyPlan === null} onclick={handleCopy}>
+			{copying ? 'Duplicating…' : plural(copies, ['Create the copy', 'Create # copies'])}
+		</Button>
 		<Button
 			icon="close"
 			type="button"
@@ -933,9 +936,6 @@
 			disabled={copying}
 		>
 			Cancel
-		</Button>
-		<Button type="button" disabled={copying || copyPlan === null} onclick={handleCopy}>
-			{copying ? 'Duplicating…' : plural(copies, ['Create the copy', 'Create # copies'])}
 		</Button>
 	{/snippet}
 </Modal>
@@ -979,6 +979,9 @@
 		</div>
 	{/snippet}
 	{#snippet footer()}
+		<Button disabled={converting || !mainAssetId} onclick={handleConvert}>
+			{converting ? 'Converting…' : 'Convert bundle'}
+		</Button>
 		<Button
 			icon="close"
 			variant="outline"
@@ -986,9 +989,6 @@
 			onclick={() => (convertOpen = false)}
 		>
 			Cancel
-		</Button>
-		<Button disabled={converting || !mainAssetId} onclick={handleConvert}>
-			{converting ? 'Converting…' : 'Convert bundle'}
 		</Button>
 	{/snippet}
 </Modal>
@@ -1209,6 +1209,13 @@
 	{/snippet}
 	{#snippet footer()}
 		<Button
+			type="submit"
+			form="edit-bundle-form"
+			disabled={savingBundle || !bundleDraft.name.trim()}
+		>
+			{savingBundle ? 'Saving…' : 'Save'}
+		</Button>
+		<Button
 			icon="close"
 			type="button"
 			variant="outline"
@@ -1216,13 +1223,6 @@
 			disabled={savingBundle}
 		>
 			Cancel
-		</Button>
-		<Button
-			type="submit"
-			form="edit-bundle-form"
-			disabled={savingBundle || !bundleDraft.name.trim()}
-		>
-			{savingBundle ? 'Saving…' : 'Save'}
 		</Button>
 	{/snippet}
 </Modal>
@@ -1277,6 +1277,14 @@
 
 	{#snippet footer()}
 		<Button
+			type="button"
+			class="bg-destructive text-white hover:bg-destructive/90"
+			onclick={handleDelete}
+			disabled={deleting}
+		>
+			{deleting ? 'Deleting…' : 'Delete bundle'}
+		</Button>
+		<Button
 			icon="close"
 			type="button"
 			variant="outline"
@@ -1284,14 +1292,6 @@
 			disabled={deleting}
 		>
 			Cancel
-		</Button>
-		<Button
-			type="button"
-			class="bg-destructive text-white hover:bg-destructive/90"
-			onclick={handleDelete}
-			disabled={deleting}
-		>
-			{deleting ? 'Deleting…' : 'Delete bundle'}
 		</Button>
 	{/snippet}
 </Modal>

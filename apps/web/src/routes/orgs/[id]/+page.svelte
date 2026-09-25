@@ -797,11 +797,11 @@
 		</p>
 	{/snippet}
 	{#snippet footer()}
-		<Button icon="close" variant="outline" onclick={() => (deleteOpen = false)} disabled={deleting}
-			>Cancel</Button
-		>
 		<Button icon="delete" variant="destructive" onclick={handleDeleteOrg} disabled={deleting}>
 			{deleting ? 'Deleting…' : 'Delete organization'}
 		</Button>
+		<Button icon="close" variant="outline" onclick={() => (deleteOpen = false)} disabled={deleting}
+			>Cancel</Button
+		>
 	{/snippet}
 </Modal>

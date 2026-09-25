@@ -563,6 +563,9 @@
 	{/snippet}
 
 	{#snippet footer()}
+		<Button icon="save" disabled={savingCustomer || !editCustomerId} onclick={handleSaveCustomer}>
+			{savingCustomer ? 'Saving…' : 'Save'}
+		</Button>
 		<Button
 			icon="close"
 			variant="outline"
@@ -570,9 +573,6 @@
 			onclick={() => (editCustomerOpen = false)}
 		>
 			Cancel
-		</Button>
-		<Button icon="save" disabled={savingCustomer || !editCustomerId} onclick={handleSaveCustomer}>
-			{savingCustomer ? 'Saving…' : 'Save'}
 		</Button>
 	{/snippet}
 </Modal>
@@ -594,11 +594,11 @@
 	{/snippet}
 
 	{#snippet footer()}
-		<Button icon="close" variant="outline" disabled={copying} onclick={() => (copyOpen = false)}>
-			Cancel
-		</Button>
 		<Button icon="copy" disabled={copying || !copyCustomerId} onclick={handleCopy}>
 			{copying ? 'Copying…' : 'Copy'}
+		</Button>
+		<Button icon="close" variant="outline" disabled={copying} onclick={() => (copyOpen = false)}>
+			Cancel
 		</Button>
 	{/snippet}
 </Modal>
@@ -619,6 +619,9 @@
 	{/snippet}
 
 	{#snippet footer()}
+		<Button onclick={handleConvert} disabled={converting || !invoiceNumber.trim()}>
+			{converting ? 'Converting…' : 'Create invoice'}
+		</Button>
 		<Button
 			icon="close"
 			variant="outline"
@@ -626,9 +629,6 @@
 			disabled={converting}
 		>
 			Cancel
-		</Button>
-		<Button onclick={handleConvert} disabled={converting || !invoiceNumber.trim()}>
-			{converting ? 'Converting…' : 'Create invoice'}
 		</Button>
 	{/snippet}
 </Modal>

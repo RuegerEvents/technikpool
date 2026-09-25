@@ -338,11 +338,11 @@
 			</div>
 		{/snippet}
 		{#snippet footer()}
-			<Button icon="close" variant="outline" onclick={() => (modal = null)}>Cancel</Button>
 			<Button variant={m.action === 'approve' ? 'default' : 'destructive'} onclick={confirmModal}>
 				{m.action === 'approve' ? 'Approve' : 'Decline'}
 				{m.count}
 			</Button>
+			<Button icon="close" variant="outline" onclick={() => (modal = null)}>Cancel</Button>
 		{/snippet}
 	</Modal>
 {/if}

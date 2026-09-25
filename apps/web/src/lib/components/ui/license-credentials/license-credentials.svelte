@@ -238,6 +238,9 @@
 		</form>
 	{/snippet}
 	{#snippet footer()}
+		<Button icon="save" type="submit" form="license-credentials-form-{assetId}" disabled={saving}>
+			{saving ? 'Saving…' : 'Save'}
+		</Button>
 		<Button
 			icon="close"
 			type="button"
@@ -246,9 +249,6 @@
 			disabled={saving}
 		>
 			Cancel
-		</Button>
-		<Button icon="save" type="submit" form="license-credentials-form-{assetId}" disabled={saving}>
-			{saving ? 'Saving…' : 'Save'}
 		</Button>
 	{/snippet}
 </Modal>
@@ -261,6 +261,14 @@
 	{/snippet}
 	{#snippet footer()}
 		<Button
+			type="button"
+			class="bg-destructive text-white hover:bg-destructive/90"
+			onclick={remove}
+			disabled={removing}
+		>
+			{removing ? 'Removing…' : 'Remove credentials'}
+		</Button>
+		<Button
 			icon="close"
 			type="button"
 			variant="outline"
@@ -268,14 +276,6 @@
 			disabled={removing}
 		>
 			Cancel
-		</Button>
-		<Button
-			type="button"
-			class="bg-destructive text-white hover:bg-destructive/90"
-			onclick={remove}
-			disabled={removing}
-		>
-			{removing ? 'Removing…' : 'Remove credentials'}
 		</Button>
 	{/snippet}
 </Modal>

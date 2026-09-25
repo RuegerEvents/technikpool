@@ -964,15 +964,15 @@
 		Uncheck anything that is not there.
 	{/snippet}
 	{#snippet footer()}
+		<Button icon="confirm" onclick={submitConfirm} disabled={confirming}>
+			{plural(confirmChecked.size, ['Count # unit', 'Count # units'])}
+		</Button>
 		<Button
 			variant="outline"
 			icon="close"
 			onclick={() => (confirmOpen = false)}
 			disabled={confirming}>Skip</Button
 		>
-		<Button icon="confirm" onclick={submitConfirm} disabled={confirming}>
-			{plural(confirmChecked.size, ['Count # unit', 'Count # units'])}
-		</Button>
 	{/snippet}
 </Modal>
 
@@ -1011,11 +1011,11 @@
 			{target.asset.assetTag ?? target.asset.serialNumber ?? ''}
 		{/snippet}
 		{#snippet footer()}
-			<Button variant="outline" icon="close" onclick={() => (noteItem = null)} disabled={savingNote}
-				>Cancel</Button
-			>
 			<Button icon="save" type="submit" form="stocktake-note-form" disabled={savingNote}
 				>{savingNote ? 'Saving…' : 'Save'}</Button
+			>
+			<Button variant="outline" icon="close" onclick={() => (noteItem = null)} disabled={savingNote}
+				>Cancel</Button
 			>
 		{/snippet}
 	</Modal>
@@ -1039,10 +1039,10 @@
 		</p>
 	{/snippet}
 	{#snippet footer()}
+		<Button icon="confirm" onclick={handleClose} disabled={working}>Close stocktake</Button>
 		<Button variant="outline" icon="close" onclick={() => (closeOpen = false)} disabled={working}
 			>Keep counting</Button
 		>
-		<Button icon="confirm" onclick={handleClose} disabled={working}>Close stocktake</Button>
 	{/snippet}
 </Modal>
 
@@ -1054,11 +1054,11 @@
 		</p>
 	{/snippet}
 	{#snippet footer()}
-		<Button variant="outline" icon="close" onclick={() => (cancelOpen = false)} disabled={working}
-			>Keep it</Button
-		>
 		<Button variant="destructive" icon="delete" onclick={handleCancel} disabled={working}
 			>Delete stocktake</Button
+		>
+		<Button variant="outline" icon="close" onclick={() => (cancelOpen = false)} disabled={working}
+			>Keep it</Button
 		>
 	{/snippet}
 </Modal>
@@ -1078,13 +1078,13 @@
 			</p>
 		{/snippet}
 		{#snippet footer()}
+			<Button icon="confirm" onclick={handleAction} disabled={working}>Apply</Button>
 			<Button
 				variant="outline"
 				icon="close"
 				onclick={() => (pendingAction = null)}
 				disabled={working}>Cancel</Button
 			>
-			<Button icon="confirm" onclick={handleAction} disabled={working}>Apply</Button>
 		{/snippet}
 	</Modal>
 {/if}

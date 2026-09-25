@@ -99,11 +99,11 @@
 	{/snippet}
 
 	{#snippet footer()}
-		<Button icon="close" type="button" variant="outline" onclick={() => (open = false)}
-			>Cancel</Button
-		>
 		<Button icon="add" type="button" disabled={saving} onclick={save}>
 			{saving ? 'Saving…' : connector ? 'Save' : 'Add connector'}
 		</Button>
+		<Button icon="close" type="button" variant="outline" onclick={() => (open = false)}
+			>Cancel</Button
+		>
 	{/snippet}
 </Modal>

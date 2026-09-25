@@ -285,11 +285,11 @@
 		</p>
 	{/if}
 	{#snippet footer()}
-		<Button icon="close" variant="outline" onclick={() => (deleteTarget = null)} disabled={deleting}
-			>Cancel</Button
-		>
 		<Button icon="delete" variant="destructive" onclick={handleDeleteUser} disabled={deleting}>
 			{deleting ? 'Deleting…' : 'Delete user'}
 		</Button>
+		<Button icon="close" variant="outline" onclick={() => (deleteTarget = null)} disabled={deleting}
+			>Cancel</Button
+		>
 	{/snippet}
 </Modal>

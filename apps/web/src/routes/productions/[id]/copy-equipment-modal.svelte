@@ -259,7 +259,6 @@
 	{/snippet}
 
 	{#snippet footer()}
-		<Button variant="outline" disabled={copying} onclick={close}>Cancel</Button>
 		<Button disabled={copying || chosen.length === 0} onclick={handleCopy}>
 			{copying
 				? 'Copying…'
@@ -267,5 +266,6 @@
 					? plural(chosen.length, ['Book # item', 'Book # items'])
 					: 'Book items'}
 		</Button>
+		<Button variant="outline" disabled={copying} onclick={close}>Cancel</Button>
 	{/snippet}
 </Modal>

@@ -1856,6 +1856,14 @@
 	{/snippet}
 	{#snippet footer()}
 		<Button
+			icon="save"
+			type="submit"
+			form="quick-tag-form"
+			disabled={savingQuickTag || !quickTagValue.trim()}
+		>
+			{savingQuickTag ? 'Saving…' : 'Save'}
+		</Button>
+		<Button
 			icon="close"
 			type="button"
 			variant="outline"
@@ -1863,14 +1871,6 @@
 			disabled={savingQuickTag}
 		>
 			Cancel
-		</Button>
-		<Button
-			icon="save"
-			type="submit"
-			form="quick-tag-form"
-			disabled={savingQuickTag || !quickTagValue.trim()}
-		>
-			{savingQuickTag ? 'Saving…' : 'Save'}
 		</Button>
 	{/snippet}
 </Modal>

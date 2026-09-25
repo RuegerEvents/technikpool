@@ -536,13 +536,13 @@
 							/>
 							Create another after saving
 						</label>
-						<div class="flex justify-end gap-4">
-							<Button icon="close" type="button" variant="outline" href={resolve('/assets')}
-								>Cancel</Button
-							>
+						<div class="flex flex-row-reverse justify-start gap-4">
 							<Button icon="add" type="submit" disabled={saving}>
 								{saving ? 'Saving…' : quantity > 1 ? `Add ${quantity} Assets` : 'Add Asset'}
 							</Button>
+							<Button icon="close" type="button" variant="outline" href={resolve('/assets')}
+								>Cancel</Button
+							>
 						</div>
 					</div>
 				</form>
@@ -562,7 +562,7 @@
 	{/snippet}
 
 	{#snippet footer()}
-		<Button icon="close" type="button" variant="outline" onclick={cancelNewProduct}>Cancel</Button>
 		<Button icon="add" type="button" onclick={confirmNewProduct}>Add Product</Button>
+		<Button icon="close" type="button" variant="outline" onclick={cancelNewProduct}>Cancel</Button>
 	{/snippet}
 </Modal>

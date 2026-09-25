@@ -86,13 +86,12 @@
 
 	{#snippet footer()}
 		{#if confirmingReset}
-			<Button variant="ghost" onclick={() => (confirmingReset = false)}>Cancel</Button>
 			<Button variant="destructive" onclick={reset} disabled={resetting}>
 				<RotateCcw aria-hidden="true" />
 				Reset link
 			</Button>
+			<Button variant="ghost" onclick={() => (confirmingReset = false)}>Cancel</Button>
 		{:else}
-			<Button variant="ghost" onclick={() => (confirmingReset = true)}>Reset link…</Button>
 			{#if webcalUrl}
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<Button href={webcalUrl}>
@@ -101,6 +100,7 @@
 				</Button>
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{/if}
+			<Button variant="ghost" onclick={() => (confirmingReset = true)}>Reset link…</Button>
 		{/if}
 	{/snippet}
 </Modal>

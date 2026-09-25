@@ -111,6 +111,9 @@
 		{/snippet}
 
 		{#snippet footer()}
+			<Button icon="save" type="submit" form="log-inspection-form" disabled={saving}>
+				{saving ? 'Saving…' : 'Log inspection'}
+			</Button>
 			<Button
 				icon="close"
 				type="button"
@@ -119,9 +122,6 @@
 				disabled={saving}
 			>
 				Cancel
-			</Button>
-			<Button icon="save" type="submit" form="log-inspection-form" disabled={saving}>
-				{saving ? 'Saving…' : 'Log inspection'}
 			</Button>
 		{/snippet}
 	</Modal>

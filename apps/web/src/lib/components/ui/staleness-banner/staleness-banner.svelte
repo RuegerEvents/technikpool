@@ -165,6 +165,13 @@
 	{/snippet}
 
 	{#snippet footer()}
+		<Button type="button" onclick={handleUpdate} disabled={working}>
+			{#if mode === 'revise'}
+				{working ? 'Creating…' : 'Create draft'}
+			{:else}
+				{working ? 'Updating…' : 'Update Items'}
+			{/if}
+		</Button>
 		<Button
 			icon="close"
 			type="button"
@@ -173,13 +180,6 @@
 			disabled={working}
 		>
 			Cancel
-		</Button>
-		<Button type="button" onclick={handleUpdate} disabled={working}>
-			{#if mode === 'revise'}
-				{working ? 'Creating…' : 'Create draft'}
-			{:else}
-				{working ? 'Updating…' : 'Update Items'}
-			{/if}
 		</Button>
 	{/snippet}
 </Modal>

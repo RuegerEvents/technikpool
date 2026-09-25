@@ -176,6 +176,9 @@
 		</form>
 	{/snippet}
 	{#snippet footer()}
+		<Button icon="save" type="submit" form="location-form" disabled={saving}>
+			{saving ? 'Saving…' : editingId ? 'Save' : 'Create Location'}
+		</Button>
 		<Button
 			icon="close"
 			type="button"
@@ -184,9 +187,6 @@
 			disabled={saving}
 		>
 			Cancel
-		</Button>
-		<Button icon="save" type="submit" form="location-form" disabled={saving}>
-			{saving ? 'Saving…' : editingId ? 'Save' : 'Create Location'}
 		</Button>
 	{/snippet}
 </Modal>

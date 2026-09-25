@@ -264,11 +264,11 @@
 	{/snippet}
 
 	{#snippet footer()}
-		<Button icon="close" variant="outline" disabled={saving} onclick={() => (open = false)}>
-			Cancel
-		</Button>
 		<Button icon="save" type="submit" form="service-line-form" disabled={saving || !valid}>
 			{saving ? 'Saving…' : 'Save'}
+		</Button>
+		<Button icon="close" variant="outline" disabled={saving} onclick={() => (open = false)}>
+			Cancel
 		</Button>
 	{/snippet}
 </Modal>

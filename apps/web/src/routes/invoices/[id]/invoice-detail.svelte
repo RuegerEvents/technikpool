@@ -308,6 +308,9 @@
 		{/snippet}
 
 		{#snippet footer()}
+			<Button icon="save" disabled={savingCustomer || !editCustomerId} onclick={handleSaveCustomer}>
+				{savingCustomer ? 'Saving…' : 'Save'}
+			</Button>
 			<Button
 				icon="close"
 				variant="outline"
@@ -315,9 +318,6 @@
 				onclick={() => (editCustomerOpen = false)}
 			>
 				Cancel
-			</Button>
-			<Button icon="save" disabled={savingCustomer || !editCustomerId} onclick={handleSaveCustomer}>
-				{savingCustomer ? 'Saving…' : 'Save'}
 			</Button>
 		{/snippet}
 	</Modal>

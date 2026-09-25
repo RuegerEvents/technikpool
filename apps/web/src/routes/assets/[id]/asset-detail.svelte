@@ -1333,6 +1333,9 @@
 		</form>
 	{/snippet}
 	{#snippet footer()}
+		<Button icon="save" type="submit" form="edit-asset-form" disabled={savingAsset}>
+			{savingAsset ? 'Saving…' : 'Save'}
+		</Button>
 		<Button
 			icon="close"
 			type="button"
@@ -1341,9 +1344,6 @@
 			disabled={savingAsset}
 		>
 			Cancel
-		</Button>
-		<Button icon="save" type="submit" form="edit-asset-form" disabled={savingAsset}>
-			{savingAsset ? 'Saving…' : 'Save'}
 		</Button>
 	{/snippet}
 </Modal>
@@ -1366,6 +1366,14 @@
 
 	{#snippet footer()}
 		<Button
+			type="button"
+			class="bg-destructive text-white hover:bg-destructive/90"
+			onclick={handleDelete}
+			disabled={deleting}
+		>
+			{deleting ? 'Deleting…' : 'Delete asset'}
+		</Button>
+		<Button
 			icon="close"
 			type="button"
 			variant="outline"
@@ -1373,14 +1381,6 @@
 			disabled={deleting}
 		>
 			Cancel
-		</Button>
-		<Button
-			type="button"
-			class="bg-destructive text-white hover:bg-destructive/90"
-			onclick={handleDelete}
-			disabled={deleting}
-		>
-			{deleting ? 'Deleting…' : 'Delete asset'}
 		</Button>
 	{/snippet}
 </Modal>
@@ -1454,15 +1454,6 @@
 
 	{#snippet footer()}
 		<Button
-			icon="close"
-			type="button"
-			variant="outline"
-			onclick={closeFanout}
-			disabled={copyingProductId !== null}
-		>
-			Cancel
-		</Button>
-		<Button
 			type="button"
 			disabled={copyingProductId !== null || fanoutPlan === null}
 			onclick={() =>
@@ -1474,6 +1465,15 @@
 				)}
 		>
 			{copyingProductId !== null ? 'Copying…' : 'Copy to the others'}
+		</Button>
+		<Button
+			icon="close"
+			type="button"
+			variant="outline"
+			onclick={closeFanout}
+			disabled={copyingProductId !== null}
+		>
+			Cancel
 		</Button>
 	{/snippet}
 </Modal>
@@ -1525,6 +1525,9 @@
 	{/snippet}
 
 	{#snippet footer()}
+		<Button icon="save" type="button" onclick={handleProductSave} disabled={savingProduct}>
+			{savingProduct ? 'Saving…' : 'Save'}
+		</Button>
 		<Button
 			icon="close"
 			type="button"
@@ -1533,9 +1536,6 @@
 			disabled={savingProduct}
 		>
 			Cancel
-		</Button>
-		<Button icon="save" type="button" onclick={handleProductSave} disabled={savingProduct}>
-			{savingProduct ? 'Saving…' : 'Save'}
 		</Button>
 	{/snippet}
 </Modal>

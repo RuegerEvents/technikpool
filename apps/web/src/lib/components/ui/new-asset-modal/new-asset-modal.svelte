@@ -482,6 +482,12 @@
 	{/snippet}
 
 	{#snippet footer()}
+		<!-- The submit lives in the footer, outside the <form> it submits — that is
+		     what `form=` is for, and it keeps the buttons pinned while the fields
+		     scroll. -->
+		<Button icon="add" type="submit" form="new-asset-form" disabled={saving}>
+			{saving ? 'Creating…' : 'Create'}
+		</Button>
 		<Button
 			icon="close"
 			type="button"
@@ -490,12 +496,6 @@
 			disabled={saving}
 		>
 			Cancel
-		</Button>
-		<!-- The submit lives in the footer, outside the <form> it submits — that is
-		     what `form=` is for, and it keeps the buttons pinned while the fields
-		     scroll. -->
-		<Button icon="add" type="submit" form="new-asset-form" disabled={saving}>
-			{saving ? 'Creating…' : 'Create'}
 		</Button>
 	{/snippet}
 </Modal>
