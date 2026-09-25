@@ -3870,10 +3870,8 @@ msgstr "Date:"
 msgid "{0} {1} admin access"
 msgstr "{0} {1} admin access"
 
-#. 0: orgPrefix
-#: src/routes/assets/new/+page.svelte
-msgid "{0}00001 (leave blank to auto-generate)"
-msgstr "{0}00001 (leave blank to auto-generate)"
+#~ msgid "{0}00001 (leave blank to auto-generate)"
+#~ msgstr "{0}00001 (leave blank to auto-generate)"
 
 #. 0: result.count; 1: result.count !== 1 ? 's' \\: ''; 2: result.targetName
 #: src/lib/components/ui/bulk-actions-bar.svelte
@@ -4822,9 +4820,8 @@ msgstr "How many"
 msgid "Serial number"
 msgstr "Serial number"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-msgid "Leave blank for the next free number"
-msgstr "Leave blank for the next free number"
+#~ msgid "Leave blank for the next free number"
+#~ msgstr "Leave blank for the next free number"
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 msgid "Asset tag"
@@ -10240,3 +10237,25 @@ msgid "Count # accessory"
 msgid_plural "Count # accessories"
 msgstr[0] "Count # accessory"
 msgstr[1] "Count # accessories"
+
+#: src/lib/error-messages.svelte.ts
+msgid "Enter the asset tag, or tick \"No asset tag\"."
+msgstr "Enter the asset tag, or tick \"No asset tag\"."
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Asset tags"
+msgstr "Asset tags"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/routes/assets/new/+page.svelte
+msgid "Scan or type the sticker"
+msgstr "Scan or type the sticker"
+
+#. 0: i + 1
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "Unit {0}"
+msgstr "Unit {0}"
+
+#: src/routes/assets/new/+page.svelte
+msgid "Scan or type"
+msgstr "Scan or type"

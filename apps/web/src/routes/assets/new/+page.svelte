@@ -33,6 +33,7 @@
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
 	import { plural, getErrorMessage, orgLabel } from '$lib/utils';
+	import { messageForErrorCode } from '$lib/error-messages.svelte';
 	import { canManageInventory } from '$lib/roles';
 	import { browser } from '$app/environment';
 
@@ -240,6 +241,12 @@
 			toast.error('Please complete the new product details');
 			return;
 		}
+		// Nothing is numbered on the server: a tag is what is printed on the
+		// sticker, so a blank one is a unit someone forgot, not one to invent.
+		if (!noAssetTag && items.some((item) => !item.assetTag.trim())) {
+			toast.error(messageForErrorCode('asset_tag_required'));
+			return;
+		}
 
 		saving = true;
 		try {
@@ -262,7 +269,7 @@
 					copyAccessories && reuseAccessories && reusableSummary ? true : undefined,
 				items: items.map((item) => ({
 					serialNumber: item.serialNumber || undefined,
-					assetTag: noAssetTag ? undefined : item.assetTag || undefined,
+					assetTag: noAssetTag ? undefined : item.assetTag.trim(),
 					noAssetTag: noAssetTag || undefined
 				}))
 			});
@@ -486,9 +493,7 @@
 												<td class="px-3 py-2">
 													<Input
 														bind:value={item.assetTag}
-														placeholder={orgPrefix
-															? `${orgPrefix}${String(i + 1).padStart(5, '0')}`
-															: 'TAG-001'}
+														placeholder={orgPrefix ? `${orgPrefix}…` : 'Scan or type'}
 														class="h-8 font-mono text-sm"
 													/>
 												</td>
@@ -513,9 +518,7 @@
 								<Input
 									id="tag-0"
 									bind:value={items[0].assetTag}
-									placeholder={orgPrefix
-										? `${orgPrefix}00001 (leave blank to auto-generate)`
-										: 'TAG-001'}
+									placeholder={orgPrefix ? `${orgPrefix}…` : 'Scan or type the sticker'}
 									class="font-mono"
 								/>
 							</div>

@@ -130,16 +130,6 @@
 		lastDerived: string;
 	};
 
-	// Untagged is the default: a sticker on a 1.5 m Schuko lead costs more to
-	// maintain than the unit is worth. Remembered, because a pool that does tag
-	// its cables tags all of them.
-	let assignTags = $state(
-		browser ? localStorage.getItem('cable_batch_assign_tags') === 'true' : false
-	);
-	$effect(() => {
-		if (browser) localStorage.setItem('cable_batch_assign_tags', String(assignTags));
-	});
-
 	function newRow(from?: Row): Row {
 		return {
 			cableType: '',
@@ -378,7 +368,6 @@
 			const result = await createCableBatch({
 				organizationId: selectedOrgId,
 				locationId,
-				assignAssetTags: assignTags,
 				rows: filled.map((r) => ({
 					cableType: r.cableType.trim() || null,
 					connectorA: r.connectorA.trim() || null,
@@ -709,24 +698,16 @@
 
 					<Button icon="add" type="button" variant="outline" onclick={addRow}>Add row</Button>
 
-					<div class="flex flex-col gap-4 pt-2">
-						<label class="flex cursor-pointer items-center gap-2 text-sm select-none">
-							<input
-								type="checkbox"
-								bind:checked={assignTags}
-								class="h-4 w-4 rounded border-input"
-							/>
-							Assign asset tags
-						</label>
-						<div class="flex items-center justify-end gap-4">
-							<span class="mr-auto text-xs text-muted-foreground">{modLabel} + Enter saves</span>
-							<Button icon="close" type="button" variant="outline" href={resolve('/assets')}
-								>Done</Button
-							>
-							<Button icon="add" type="submit" disabled={saving}>
-								{saving ? 'Saving…' : 'Add Cables'}
-							</Button>
-						</div>
+					<!-- Cables are registered untagged; one that carries a sticker gets its
+					     tag by being scanned. -->
+					<div class="flex flex-row-reverse items-center justify-start gap-4 pt-2">
+						<Button icon="add" type="submit" disabled={saving}>
+							{saving ? 'Saving…' : 'Add Cables'}
+						</Button>
+						<Button icon="close" type="button" variant="outline" href={resolve('/assets')}
+							>Done</Button
+						>
+						<span class="mr-auto text-xs text-muted-foreground">{modLabel} + Enter saves</span>
 					</div>
 				</form>
 			{/if}

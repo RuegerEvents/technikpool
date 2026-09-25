@@ -243,13 +243,7 @@
 
 			return {
 				accessory,
-				standing: {
-					count,
-					matching,
-					// The copies follow *this* unit, since it is this unit's setup being
-					// handed to the others: a tagged cable begets tagged cables.
-					tagged: accessory.assetTag !== null
-				}
+				standing: { count, matching }
 			};
 		});
 	});
@@ -264,7 +258,6 @@
 		productId: string;
 		name: string;
 		count: number;
-		tagged: boolean;
 	} | null>(null);
 	let fanoutOpen = $state(false);
 	let fanoutReuse = $state(true);
@@ -308,7 +301,7 @@
 			productId: string;
 			product: { name: string; manufacturer: { name: string } | null };
 		},
-		standing: { count: number; tagged: boolean }
+		standing: { count: number }
 	) {
 		if (looseStockOf(accessory.productId) === 0) {
 			// Nothing on the shelf, so there is only one way to do this.
@@ -318,8 +311,7 @@
 		fanout = {
 			productId: accessory.productId,
 			name: productLabel(accessory.product),
-			count: standing.count,
-			tagged: standing.tagged
+			count: standing.count
 		};
 		fanoutReuse = true;
 		fanoutOpen = true;
@@ -332,7 +324,7 @@
 
 	async function copyAccessoryToOtherUnits(
 		productId: string,
-		standing: { count: number; tagged: boolean },
+		standing: { count: number },
 		reuseExisting: boolean
 	) {
 		copyingProductId = productId;
@@ -342,7 +334,6 @@
 				parentProductId: asset.productId,
 				productId,
 				perUnit: standing.count,
-				noAssetTag: standing.tagged ? undefined : true,
 				reuseExisting
 			});
 			closeFanout();
@@ -1457,12 +1448,7 @@
 			type="button"
 			disabled={copyingProductId !== null || fanoutPlan === null}
 			onclick={() =>
-				fanout &&
-				copyAccessoryToOtherUnits(
-					fanout.productId,
-					{ count: fanout.count, tagged: fanout.tagged },
-					reuseChoice
-				)}
+				fanout && copyAccessoryToOtherUnits(fanout.productId, { count: fanout.count }, reuseChoice)}
 		>
 			{copyingProductId !== null ? 'Copying…' : 'Copy to the others'}
 		</Button>

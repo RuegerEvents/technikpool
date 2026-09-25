@@ -46,6 +46,7 @@
 		type ProductDraft
 	} from '$lib/components/ui/product-fields';
 	import { getErrorMessage } from '$lib/utils';
+	import { messageForErrorCode } from '$lib/error-messages.svelte';
 	import { toast } from 'svelte-sonner';
 	import {
 		createAssets,
@@ -99,7 +100,9 @@
 	let categoryId = $state('');
 	let cableDraft = $state<ProductDraft>(emptyCableDraft());
 	let quantity = $state(1);
-	let tag = $state('');
+	// One per unit, the length of `quantity`: a tag is what is printed on a
+	// sticker, so each unit brings its own and nothing is numbered for it.
+	let tags = $state<string[]>(['']);
 	let serial = $state('');
 	// Set from `defaultNoTag` by reset(), which every caller runs before opening —
 	// reading the prop here would capture only its first value.
@@ -196,7 +199,7 @@
 		categoryId = '';
 		cableDraft = emptyCableDraft();
 		quantity = 1;
-		tag = '';
+		tags = [''];
 		serial = '';
 		noTag = defaultNoTag;
 		imagePath = '';
@@ -205,6 +208,12 @@
 		chosenLocationId = locationId ?? locations?.[0]?.id ?? '';
 		manufacturerKey++;
 		seed = typeof seedValue === 'string' ? seedValue.trim() : '';
+	}
+
+	function setQuantity(next: number) {
+		quantity = Math.max(1, Math.min(20, next));
+		// Keeps what was already typed; a shorter list drops the tail.
+		tags = Array.from({ length: quantity }, (_, i) => tags[i] ?? '');
 	}
 
 	function handleManufacturer(sel: Selection) {
@@ -247,6 +256,10 @@
 			toast.error('Please select a location');
 			return;
 		}
+		if (!noTag && tags.some((t) => !t.trim())) {
+			toast.error(messageForErrorCode('asset_tag_required'));
+			return;
+		}
 		saving = true;
 		try {
 			const productRef =
@@ -278,12 +291,13 @@
 				parentAssetId,
 				bundleId,
 				...productRef,
-				items: Array.from({ length: quantity }, () => ({
-					// A serial number and a typed tag identify one physical unit, so
-					// they are only offered when exactly one is being created.
+				items: tags.map((tag) => ({
+					// A serial number is only asked for when exactly one unit is
+					// being created; several at once are usually a delivery of
+					// identical things, and the serials can go on afterwards.
 					serialNumber:
 						quantity === 1 && kind === 'device' ? serial.trim() || undefined : undefined,
-					assetTag: quantity === 1 && !noTag ? tag.trim() || undefined : undefined,
+					assetTag: noTag ? undefined : tag.trim(),
 					noAssetTag: noTag || undefined
 				}))
 			});
@@ -438,8 +452,7 @@
 					min="1"
 					max="20"
 					value={quantity}
-					oninput={(e) =>
-						(quantity = Math.max(1, Math.min(20, Number(e.currentTarget.value) || 1)))}
+					oninput={(e) => setQuantity(Number(e.currentTarget.value) || 1)}
 					disabled={saving}
 				/>
 			</div>
@@ -458,25 +471,25 @@
 				so anything DGUV-relevant wants one.
 			</p>
 
-			{#if quantity === 1}
-				{#if kind === 'device'}
-					<div class="space-y-2">
-						<Label for="newAssetSerial">Serial number</Label>
-						<Input id="newAssetSerial" bind:value={serial} disabled={saving} />
-						<SerialNumberWarning serialNumber={serial} paused={saving} />
-					</div>
-				{/if}
-				{#if !noTag}
-					<div class="space-y-2">
-						<Label for="newAssetTag">Asset tag</Label>
+			{#if quantity === 1 && kind === 'device'}
+				<div class="space-y-2">
+					<Label for="newAssetSerial">Serial number</Label>
+					<Input id="newAssetSerial" bind:value={serial} disabled={saving} />
+					<SerialNumberWarning serialNumber={serial} paused={saving} />
+				</div>
+			{/if}
+			{#if !noTag}
+				<div class="space-y-2">
+					<Label for="newAssetTag-0">{quantity === 1 ? 'Asset tag' : 'Asset tags'}</Label>
+					{#each tags, i (i)}
 						<Input
-							id="newAssetTag"
-							bind:value={tag}
+							id="newAssetTag-{i}"
+							bind:value={tags[i]}
 							disabled={saving}
-							placeholder="Leave blank for the next free number"
+							placeholder={quantity === 1 ? 'Scan or type the sticker' : `Unit ${i + 1}`}
 						/>
-					</div>
-				{/if}
+					{/each}
+				</div>
 			{/if}
 		</form>
 	{/snippet}

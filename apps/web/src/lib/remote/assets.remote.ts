@@ -923,26 +923,10 @@ async function resolveProductRef(
 type AssetTx = Pick<typeof prisma, 'asset' | 'organization' | 'assetTransaction' | 'product'>;
 
 /**
- * Hands out an org's next free asset tags, in order, for the length of one
- * transaction. Everything created in a batch draws from the same counter — the
- * units that were asked for and the accessories copied onto them alike — so a
- * batch can't hand the same number to two of them.
+ * One unit as a caller asks for it: the tag on its sticker, or explicitly none.
+ * Nothing is numbered for it — a tag is what is printed on the unit, so only
+ * the person holding it can say what it is.
  */
-async function tagAllocator(tx: AssetTx, prefix: string): Promise<() => string> {
-	const last = await tx.asset.findFirst({
-		where: { assetTag: { startsWith: prefix } },
-		orderBy: { assetTag: 'desc' },
-		select: { assetTag: true }
-	});
-	let next = 1;
-	if (last?.assetTag) {
-		const parsed = parseInt(last.assetTag.slice(prefix.length), 10);
-		if (!isNaN(parsed)) next = parsed + 1;
-	}
-	return () => `${prefix}${String(next++).padStart(5, '0')}`;
-}
-
-/** One unit as a caller asks for it — a tag it brought, one to allocate, or none. */
 type UnitSpec = {
 	productId: string;
 	serialNumber?: string | null;
@@ -971,12 +955,11 @@ type CreateUnitsArgs = {
 
 /**
  * Creates units, in one transaction, with everything that has to happen at the
- * same moment: the org's inspection interval snapshotted onto each one, tags
- * drawn in row order from a single allocator, the CREATED (and, for an
- * accessory, ACCESSORY_ATTACHED) transactions, and the accessory fan-out.
+ * same moment: the org's inspection interval snapshotted onto each one, the
+ * CREATED (and, for an accessory, ACCESSORY_ATTACHED) transactions, and the
+ * accessory fan-out.
  *
- * Extracted because the cable batch is the third caller. Two copies of tag
- * allocation is how one batch hands the same number to two units.
+ * Extracted because the cable batch is the third caller.
  */
 async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 	const { assetIdPrefix: prefix, defaultInspectionIntervalMonths } =
@@ -994,7 +977,6 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 			)
 		: null;
 
-	const nextTag = await tagAllocator(tx, prefix);
 	const parent = args.parent ?? null;
 
 	// A licence has no wiring to test, so it never gets a DGUV interval.
@@ -1008,8 +990,6 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 	);
 
 	const created = await Promise.all(
-		// `nextTag()` is called synchronously inside the map, before anything is
-		// awaited, so the tags land in row order rather than completion order.
 		args.units.map((unit) => {
 			let resolvedTag: string | null;
 			if (unit.noAssetTag) {
@@ -1019,7 +999,7 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 				if (!tag.startsWith(prefix)) appError(400, 'asset_tag_prefix_mismatch', [tag, prefix]);
 				resolvedTag = tag;
 			} else {
-				resolvedTag = nextTag();
+				appError(400, 'asset_tag_required');
 			}
 
 			return tx.asset.create({
@@ -1102,7 +1082,9 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 						userId: args.userId,
 						organizationId: args.organizationId,
 						productId: acc.productId,
-						assetTag: acc.tagged ? nextTag() : null,
+						// Untagged: a copy has no sticker yet, and a number made up here
+						// would be printed on nothing. It gets one when it is scanned.
+						assetTag: null,
 						inspectionIntervalMonths: defaultInspectionIntervalMonths,
 						nextInspectionDue,
 						parent: parentRecord
@@ -1311,7 +1293,6 @@ const cableBatchRowSchema = v.object({
 const createCableBatchSchema = v.object({
 	organizationId: v.string(),
 	locationId: v.string(),
-	assignAssetTags: v.boolean(),
 	rows: v.pipe(v.array(cableBatchRowSchema), v.minLength(1))
 });
 
@@ -1401,10 +1382,9 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 	const units = resolved.flatMap((row) =>
 		Array.from({ length: row.quantity }, () => ({
 			productId: row.productId,
-			// Cables are untagged by default: a sticker on a 1.5 m Schuko lead
-			// costs more to maintain than the unit is worth. The form remembers
-			// the choice for pools that do tag them.
-			noAssetTag: !data.assignAssetTags
+			// Untagged: a batch is counted, not labelled, and a cable that does
+			// carry a sticker gets its tag by being scanned (quick-tag).
+			noAssetTag: true
 		}))
 	);
 
@@ -3624,8 +3604,6 @@ type BundleCopySlot = {
 	productId: string;
 	name: string;
 	manufacturerName: string | null;
-	/** A tagged original begets a tagged copy. */
-	tagged: boolean;
 };
 
 type BundleCopyMember = BundleCopySlot & {
@@ -3652,8 +3630,7 @@ function bundleCopyMembers(assets: BundleCopyAsset[]): BundleCopyMember[] {
 	const slotOf = (asset: BundleCopyAsset): BundleCopySlot => ({
 		productId: asset.productId,
 		name: asset.product.name,
-		manufacturerName: asset.product.manufacturer?.name ?? null,
-		tagged: asset.assetTag !== null
+		manufacturerName: asset.product.manufacturer?.name ?? null
 	});
 
 	return assets
@@ -3664,9 +3641,6 @@ function bundleCopyMembers(assets: BundleCopyAsset[]): BundleCopyMember[] {
 				const line = tally.get(accessory.productId);
 				if (line) {
 					line.count++;
-					// Tagged if any of the originals is: a fleet whose cables carry
-					// tags is one where somebody decided they should.
-					line.tagged = line.tagged || accessory.assetTag !== null;
 				} else {
 					tally.set(accessory.productId, { ...slotOf(accessory), count: 1 });
 				}
@@ -3813,8 +3787,7 @@ function bundleCopySummary(allocations: BundleCopyAllocation[]) {
 
 /**
  * At most this many copies in one go. The ceiling is the transaction: every
- * unit is its own insert, because an accessory needs its parent's id and a tag
- * comes from a running allocator, so twenty copies of a thirty-piece kit is six
+ * unit is its own insert, because an accessory needs its parent's id, so twenty copies of a thirty-piece kit is six
  * hundred round trips holding one transaction open. That is what
  * `BUNDLE_COPY_TIMEOUT_MS` is for, and this is what keeps it reachable.
  */
@@ -3953,11 +3926,10 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 
 	const result = await prisma.$transaction(
 		async (tx) => {
-			const { assetIdPrefix: prefix, defaultInspectionIntervalMonths } =
-				await tx.organization.findUniqueOrThrow({
-					where: { id: organizationId },
-					select: { assetIdPrefix: true, defaultInspectionIntervalMonths: true }
-				});
+			const { defaultInspectionIntervalMonths } = await tx.organization.findUniqueOrThrow({
+				where: { id: organizationId },
+				select: { defaultInspectionIntervalMonths: true }
+			});
 			const now = new Date();
 			const nextInspectionDue = defaultInspectionIntervalMonths
 				? new Date(
@@ -3966,7 +3938,6 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 						now.getDate()
 					)
 				: null;
-			const nextTag = await tagAllocator(tx, prefix);
 
 			// Every copy is allocated before any of it is written, so the shelf is
 			// divided up once rather than raided copy by copy.
@@ -4010,7 +3981,8 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 								organizationId,
 								productId: entry.member.productId,
 								locationId,
-								assetTag: entry.member.tagged ? nextTag() : null,
+								// A copy is new hardware without a sticker yet.
+								assetTag: null,
 								status: 'AVAILABLE',
 								bundleId: copy.id,
 								inspectionIntervalMonths: defaultInspectionIntervalMonths,
@@ -4039,7 +4011,7 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 							userId: user.id,
 							organizationId,
 							productId: slot.productId,
-							assetTag: slot.tagged ? nextTag() : null,
+							assetTag: null,
 							inspectionIntervalMonths: defaultInspectionIntervalMonths,
 							nextInspectionDue,
 							parent
@@ -4263,8 +4235,6 @@ async function productAccessoryProfile(productId: string, organizationId: string
 		name: string;
 		manufacturerName: string | null;
 		unitsWith: number;
-		tagged: number;
-		total: number;
 		/** How many units carry exactly N of this accessory. */
 		countsPerUnit: Map<number, number>;
 	};
@@ -4281,14 +4251,10 @@ async function productAccessoryProfile(productId: string, organizationId: string
 					name: acc.product.name,
 					manufacturerName: acc.product.manufacturer?.name ?? null,
 					unitsWith: 0,
-					tagged: 0,
-					total: 0,
 					countsPerUnit: new Map()
 				};
 				byProduct.set(acc.productId, tally);
 			}
-			tally.total++;
-			if (acc.assetTag) tally.tagged++;
 		}
 		for (const [accProductId, n] of here) {
 			const tally = byProduct.get(accProductId)!;
@@ -4343,10 +4309,7 @@ async function productAccessoryProfile(productId: string, organizationId: string
 				// user can see out of the corner of their eye.
 				distribution: [...tally.countsPerUnit.entries()]
 					.map(([perUnit, units]) => ({ perUnit, units }))
-					.sort((a, b) => a.perUnit - b.perUnit),
-				// A copy is tagged if the ones already out there are. A fleet whose
-				// cables carry tags is one where somebody decided they should.
-				tagged: tally.tagged * 2 >= tally.total
+					.sort((a, b) => a.perUnit - b.perUnit)
 			}))
 			.sort((a, b) => b.unitsWith - a.unitsWith || a.name.localeCompare(b.name))
 	};
@@ -4693,7 +4656,6 @@ const addProductAccessoriesSchema = v.object({
 	parentProductId: v.string(),
 	...productRefSchema,
 	perUnit: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(20)),
-	noAssetTag: v.optional(v.boolean()),
 	/**
 	 * Attach free units the pool already holds before registering any new ones.
 	 * Off by default, and asked rather than assumed: whether the brackets on the
@@ -4732,17 +4694,15 @@ export const addProductAccessories = command(addProductAccessoriesSchema, async 
 	const pool = data.reuseExisting ? [...plan.pool] : [];
 
 	const { createdIds, reusedIds } = await prisma.$transaction(async (tx) => {
-		const { assetIdPrefix: prefix, defaultInspectionIntervalMonths } =
-			await tx.organization.findUniqueOrThrow({
-				where: { id: data.organizationId },
-				select: { assetIdPrefix: true, defaultInspectionIntervalMonths: true }
-			});
+		const { defaultInspectionIntervalMonths } = await tx.organization.findUniqueOrThrow({
+			where: { id: data.organizationId },
+			select: { defaultInspectionIntervalMonths: true }
+		});
 
 		const now = new Date();
 		const nextInspectionDue = defaultInspectionIntervalMonths
 			? new Date(now.getFullYear(), now.getMonth() + defaultInspectionIntervalMonths, now.getDate())
 			: null;
-		const nextTag = await tagAllocator(tx, prefix);
 
 		const created: string[] = [];
 		const reused: string[] = [];
@@ -4757,7 +4717,7 @@ export const addProductAccessories = command(addProductAccessoriesSchema, async 
 					userId: user.id,
 					organizationId: data.organizationId,
 					productId: accessoryProductId,
-					assetTag: data.noAssetTag ? null : nextTag(),
+					assetTag: null,
 					inspectionIntervalMonths: defaultInspectionIntervalMonths,
 					nextInspectionDue,
 					parent: unit
@@ -4991,18 +4951,6 @@ export const importAssets = command(importAssetsSchema, async (data): Promise<Im
 	});
 	const prefix = org.assetIdPrefix;
 
-	// Determine next auto-tag number for this org's prefix
-	const lastByPrefix = await prisma.asset.findFirst({
-		where: { assetTag: { startsWith: prefix } },
-		orderBy: { assetTag: 'desc' },
-		select: { assetTag: true }
-	});
-	let nextIdNum = 1;
-	if (lastByPrefix?.assetTag) {
-		const parsed = parseInt(lastByPrefix.assetTag.slice(prefix.length), 10);
-		if (!isNaN(parsed)) nextIdNum = parsed + 1;
-	}
-
 	// Upsert manufacturers (case-insensitive)
 	const manufacturerCache = new Map<string, string>();
 	for (const row of data.rows) {
@@ -5070,9 +5018,11 @@ export const importAssets = command(importAssetsSchema, async (data): Promise<Im
 				continue;
 			}
 
-			// Resolve asset tag (serves as unique ID)
+			// A blank cell is a unit without a sticker — a spreadsheet has no "no
+			// asset tag" tick, and that is how an untagged cable looks in one.
+			// Nothing is numbered for it: it gets its tag by being scanned.
 			const rowTag = row.assetTag?.trim() || null;
-			let resolvedTag: string;
+			let resolvedTag: string | null = null;
 			if (rowTag) {
 				if (!rowTag.startsWith(prefix)) {
 					errors.push({
@@ -5087,8 +5037,6 @@ export const importAssets = command(importAssetsSchema, async (data): Promise<Im
 					continue;
 				}
 				resolvedTag = rowTag;
-			} else {
-				resolvedTag = `${prefix}${String(nextIdNum++).padStart(5, '0')}`;
 			}
 			await prisma.asset.create({
 				data: {

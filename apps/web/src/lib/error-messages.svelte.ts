@@ -103,6 +103,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'No assets found.';
 		case 'asset_tag_prefix_mismatch':
 			return `Asset tag "${p0}" has to start with the org prefix "${p1}".`;
+		case 'asset_tag_required':
+			return 'Enter the asset tag, or tick "No asset tag".';
 		case 'asset_tag_in_use':
 			return `Asset tag "${p0}" is already on ${p1}.`;
 		case 'asset_retired_status_only':
