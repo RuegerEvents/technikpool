@@ -1,5 +1,17 @@
 [
 	{
+		"version": "0.22.2",
+		"date": "2026-09-25",
+		"en": [
+			"Saving a product is much faster: the answer carries only what the page shows instead of every device list, and it arrives compressed.",
+			"System admins see on a product's page every unit of it in every organization, not just in their own."
+		],
+		"de": [
+			"Ein Produkt speichert deutlich schneller: Die Antwort enthält nur noch, was die Seite zeigt, statt jeder Geräteliste, und kommt komprimiert an.",
+			"System-Admins sehen auf der Seite eines Produkts jede Einheit davon in allen Organisationen, nicht nur in ihren eigenen."
+		]
+	},
+	{
 		"version": "0.22.1",
 		"date": "2026-09-25",
 		"en": [
