@@ -239,6 +239,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/scans/batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Book several units to a location or production at once
+         * @description What follows a scan's `group`: the units picked from it, booked to the
+         *     same target the scan went to. Each unit takes its accessories along, as
+         *     a scan does. A kit's own location only moves when all of it is in the
+         *     batch.
+         */
+        post: operations["createScanBatch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/stocktakes": {
         parameters: {
             query?: never;
@@ -681,6 +704,44 @@ export interface components {
             targetName: string;
             /** @description Productions the asset was automatically returned from. */
             returnedFrom: string[];
+            /**
+             * @description Set when the scanned unit belongs with others — the rest of its kit,
+             *     or the unit it hangs off and that unit's other accessories. Only the
+             *     scanned unit was booked; offer these, and book the ones picked with
+             *     `createScanBatch`. Not required, so an older client keeps working.
+             */
+            group?: components["schemas"]["ScanGroup"] | null;
+        };
+        ScanGroup: {
+            /**
+             * @description `bundle`: the scanned unit is in a kit, and `units` is the rest of it.
+             *     `parent`: the scanned unit is an accessory, and `units` is the unit it
+             *     hangs off (first) and that unit's other accessories.
+             * @enum {string}
+             */
+            kind: "bundle" | "parent";
+            /** @description The kit's or the parent unit's name, with its tag where it has one. */
+            name: string;
+            units: components["schemas"]["ScanGroupUnit"][];
+        };
+        ScanGroupUnit: {
+            id: string;
+            assetTag: string | null;
+            productName: string;
+            manufacturerName: string | null;
+            /** @description Already at the scan's target; nothing to book. */
+            done: boolean;
+        };
+        ScanBatchRequest: {
+            assetIds: string[];
+            /** @enum {string} */
+            targetType: "location" | "production";
+            targetId: string;
+        };
+        ScanBatchResult: {
+            /** @description Units booked, accessories taken along included. */
+            count: number;
+            targetName: string;
         };
         ScannedAsset: {
             id: string;
@@ -827,8 +888,25 @@ export interface components {
             /** @description For `already`, who counted it. */
             alreadyFoundByName?: string | null;
             bundle?: components["schemas"]["StocktakeBundle"] | null;
-            /** @description Accessories of the scanned unit, or the bundle's members. */
+            /**
+             * @description Accessories of the scanned unit, or the bundle's members — or, when
+             *     `confirmGroup` is set, what the scanned unit belongs with.
+             */
             confirm: components["schemas"]["StocktakeConfirmEntry"][];
+            /**
+             * @description Set when a found unit belongs with others, and `confirm` lists them:
+             *     `bundle` is the rest of its kit (its own accessories first), tick
+             *     them with `via: bundle`; `parent` is the unit an accessory hangs off
+             *     and that unit's other accessories, tick them with `via: parent`.
+             *     Not required, so an older client keeps working.
+             */
+            confirmGroup?: components["schemas"]["StocktakeConfirmGroup"] | null;
+        };
+        StocktakeConfirmGroup: {
+            /** @enum {string} */
+            kind: "bundle" | "parent";
+            /** @description The kit's or the parent unit's name, with its tag where it has one. */
+            name: string;
         };
         StocktakeBundle: {
             id: string;
@@ -1237,6 +1315,35 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ScanResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    createScanBatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScanBatchRequest"];
+            };
+        };
+        responses: {
+            /** @description The units were booked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanBatchResult"];
                 };
             };
             400: components["responses"]["BadRequest"];

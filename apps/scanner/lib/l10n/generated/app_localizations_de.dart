@@ -506,6 +506,35 @@ class SDe extends S {
   String get stocktakeConfirmBundle => 'Ist alles drin?';
 
   @override
+  String groupBelongsWith(String name) {
+    return 'Gehört zu $name';
+  }
+
+  @override
+  String get groupOnlyThis => 'Nur dieses';
+
+  @override
+  String get groupBookHint =>
+      'Nur das gescannte Gerät wurde gebucht. Den Rest mitbuchen?';
+
+  @override
+  String groupBook(int count) {
+    return '$count mitbuchen';
+  }
+
+  @override
+  String groupBooked(int count) {
+    return '$count mitgebucht';
+  }
+
+  @override
+  String get groupAlreadyThere => 'schon dort';
+
+  @override
+  String get stocktakeGroupHint =>
+      'Das gescannte Gerät ist gezählt. Den Rest mitzählen? Entferne den Haken bei allem, was fehlt.';
+
+  @override
   String get stocktakeConfirmHint => 'Entferne den Haken bei allem, was fehlt.';
 
   @override

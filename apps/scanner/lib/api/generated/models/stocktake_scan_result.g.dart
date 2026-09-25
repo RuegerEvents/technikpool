@@ -20,6 +20,11 @@ StocktakeScanResult _$StocktakeScanResultFromJson(Map<String, dynamic> json) =>
       bundle: json['bundle'] == null
           ? null
           : StocktakeBundle.fromJson(json['bundle'] as Map<String, dynamic>),
+      confirmGroup: json['confirmGroup'] == null
+          ? null
+          : StocktakeConfirmGroup.fromJson(
+              json['confirmGroup'] as Map<String, dynamic>,
+            ),
     );
 
 Map<String, dynamic> _$StocktakeScanResultToJson(
@@ -31,4 +36,5 @@ Map<String, dynamic> _$StocktakeScanResultToJson(
   'alreadyFoundByName': ?instance.alreadyFoundByName,
   'bundle': ?instance.bundle,
   'confirm': instance.confirm,
+  'confirmGroup': ?instance.confirmGroup,
 };

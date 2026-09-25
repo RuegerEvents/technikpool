@@ -147,7 +147,16 @@
 					};
 				}
 				if (result.outcome !== 'already' && result.confirm.length > 0) {
-					openConfirm(`Accessories of ${name}`, result.confirm, 'parent');
+					// A unit found on its own is offered what it belongs with: the
+					// rest of its kit, or the unit it hangs off.
+					const group = result.confirmGroup;
+					if (group?.kind === 'bundle') {
+						openConfirm(`Bundle ${group.name}`, result.confirm, 'bundle', 'group');
+					} else if (group?.kind === 'parent') {
+						openConfirm(`Belongs with ${group.name}`, result.confirm, 'parent', 'group');
+					} else {
+						openConfirm(`Accessories of ${name}`, result.confirm, 'parent');
+					}
 				}
 			}
 		} catch (err) {
@@ -167,13 +176,24 @@
 	let confirmTitle = $state('');
 	let confirmEntries = $state<Confirm[]>([]);
 	let confirmVia = $state<'parent' | 'bundle'>('parent');
+	/**
+	 * `accessories`: the scanned unit's own. `group`: what a unit found on its
+	 * own belongs with — asked as "this one only, or the rest too".
+	 */
+	let confirmKind = $state<'accessories' | 'members' | 'group'>('accessories');
 	let confirmChecked = new SvelteSet<string>();
 	let confirming = $state(false);
 
-	function openConfirm(title: string, entries: Confirm[], via: 'parent' | 'bundle') {
+	function openConfirm(
+		title: string,
+		entries: Confirm[],
+		via: 'parent' | 'bundle',
+		kind: 'accessories' | 'members' | 'group' = via === 'parent' ? 'accessories' : 'members'
+	) {
 		confirmTitle = title;
 		confirmEntries = entries;
 		confirmVia = via;
+		confirmKind = kind;
 		confirmChecked.clear();
 		// Pre-checked: the operator unchecks what is not there, which is the rare case.
 		for (const entry of entries) if (!entry.foundByName) confirmChecked.add(entry.assetId);
@@ -988,7 +1008,7 @@
 	{/snippet}
 	{#snippet footer()}
 		<Button icon="confirm" onclick={submitConfirm} disabled={confirming}>
-			{confirmVia === 'parent'
+			{confirmKind === 'accessories'
 				? plural(confirmChecked.size, ['Count # accessory', 'Count # accessories'])
 				: plural(confirmChecked.size, ['Count # unit', 'Count # units'])}
 		</Button>
@@ -996,8 +1016,10 @@
 			variant="outline"
 			icon="close"
 			onclick={() => (confirmOpen = false)}
-			disabled={confirming}>Skip</Button
+			disabled={confirming}
 		>
+			{confirmKind === 'group' ? 'Only this one' : 'Skip'}
+		</Button>
 	{/snippet}
 </Modal>
 

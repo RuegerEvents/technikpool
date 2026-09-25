@@ -4,6 +4,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import 'scan_group.dart';
 import 'scan_result_action.dart';
 import 'scanned_asset.dart';
 
@@ -16,6 +17,7 @@ class ScanResult {
     required this.action,
     required this.targetName,
     required this.returnedFrom,
+    this.group,
   });
   
   factory ScanResult.fromJson(Map<String, Object?> json) => _$ScanResultFromJson(json);
@@ -28,6 +30,13 @@ class ScanResult {
 
   /// Productions the asset was automatically returned from.
   final List<String> returnedFrom;
+
+  /// Set when the scanned unit belongs with others — the rest of its kit,.
+  /// or the unit it hangs off and that unit's other accessories. Only the.
+  /// scanned unit was booked; offer these, and book the ones picked with.
+  /// `createScanBatch`. Not required, so an older client keeps working.
+  ///
+  final ScanGroup? group;
 
   Map<String, Object?> toJson() => _$ScanResultToJson(this);
 }

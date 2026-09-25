@@ -504,6 +504,35 @@ class SEn extends S {
   String get stocktakeConfirmBundle => 'Is everything in it?';
 
   @override
+  String groupBelongsWith(String name) {
+    return 'Belongs with $name';
+  }
+
+  @override
+  String get groupOnlyThis => 'Only this one';
+
+  @override
+  String get groupBookHint =>
+      'Only the scanned unit was booked. Book the rest along?';
+
+  @override
+  String groupBook(int count) {
+    return 'Book $count more';
+  }
+
+  @override
+  String groupBooked(int count) {
+    return '$count more booked';
+  }
+
+  @override
+  String get groupAlreadyThere => 'already there';
+
+  @override
+  String get stocktakeGroupHint =>
+      'The scanned unit is counted. Count the rest too? Uncheck whatever is missing.';
+
+  @override
   String get stocktakeConfirmHint => 'Uncheck whatever is missing.';
 
   @override

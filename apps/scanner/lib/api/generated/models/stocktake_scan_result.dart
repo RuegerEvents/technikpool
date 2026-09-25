@@ -6,6 +6,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 import 'stocktake_bundle.dart';
 import 'stocktake_confirm_entry.dart';
+import 'stocktake_confirm_group.dart';
 import 'stocktake_item.dart';
 import 'stocktake_scan_result_outcome.dart';
 
@@ -20,6 +21,7 @@ class StocktakeScanResult {
     this.wasOutAt,
     this.alreadyFoundByName,
     this.bundle,
+    this.confirmGroup,
   });
   
   factory StocktakeScanResult.fromJson(Map<String, Object?> json) => _$StocktakeScanResultFromJson(json);
@@ -36,8 +38,18 @@ class StocktakeScanResult {
   final String? alreadyFoundByName;
   final StocktakeBundle? bundle;
 
-  /// Accessories of the scanned unit, or the bundle's members.
+  /// Accessories of the scanned unit, or the bundle's members — or, when.
+  /// `confirmGroup` is set, what the scanned unit belongs with.
+  ///
   final List<StocktakeConfirmEntry> confirm;
+
+  /// Set when a found unit belongs with others, and `confirm` lists them:.
+  /// `bundle` is the rest of its kit (its own accessories first), tick.
+  /// them with `via: bundle`; `parent` is the unit an accessory hangs off.
+  /// and that unit's other accessories, tick them with `via: parent`.
+  /// Not required, so an older client keeps working.
+  ///
+  final StocktakeConfirmGroup? confirmGroup;
 
   Map<String, Object?> toJson() => _$StocktakeScanResultToJson(this);
 }

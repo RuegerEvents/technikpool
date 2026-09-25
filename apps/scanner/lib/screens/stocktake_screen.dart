@@ -296,7 +296,10 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
       if (confirmable && result.confirm.any((e) => e.foundByName == null)) {
         await _confirm(
           result.confirm,
-          bundle: result.outcome == StocktakeScanResultOutcome.bundle,
+          bundle:
+              result.outcome == StocktakeScanResultOutcome.bundle ||
+              result.confirmGroup?.kind == StocktakeConfirmGroupKind.bundle,
+          group: result.confirmGroup,
         );
       }
     } catch (error) {
@@ -314,8 +317,14 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
       item == null ? '—' : productLabel(item.manufacturerName, item.productName);
 
   /// The accessories that came with a scanned unit, or a bundle's members,
-  /// pre-checked: the operator unchecks what is missing.
-  Future<void> _confirm(List<StocktakeConfirmEntry> entries, {required bool bundle}) async {
+  /// pre-checked: the operator unchecks what is missing. With a [group], what
+  /// a unit found on its own belongs with — the rest of its kit, or the unit it
+  /// hangs off — asked as "only this one, or the rest too".
+  Future<void> _confirm(
+    List<StocktakeConfirmEntry> entries, {
+    required bool bundle,
+    StocktakeConfirmGroup? group,
+  }) async {
     // Runs after the scan's round trip, so the screen may be gone by now.
     if (!mounted) return;
     final l10n = S.of(context);
@@ -325,7 +334,13 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
       showDragHandle: true,
       isDismissible: false,
       builder: (_) => _ConfirmSheet(
-        title: bundle ? l10n.stocktakeConfirmBundle : l10n.stocktakeConfirmAccessories,
+        title: switch (group?.kind) {
+          StocktakeConfirmGroupKind.bundle => l10n.stocktakeBundle(group!.name),
+          StocktakeConfirmGroupKind.parent => l10n.groupBelongsWith(group!.name),
+          _ => bundle ? l10n.stocktakeConfirmBundle : l10n.stocktakeConfirmAccessories,
+        },
+        hint: group == null ? l10n.stocktakeConfirmHint : l10n.stocktakeGroupHint,
+        dismissLabel: group == null ? l10n.cancel : l10n.groupOnlyThis,
         entries: entries,
       ),
     );
@@ -825,9 +840,16 @@ class _EntryTile extends StatelessWidget {
 }
 
 class _ConfirmSheet extends StatefulWidget {
-  const _ConfirmSheet({required this.title, required this.entries});
+  const _ConfirmSheet({
+    required this.title,
+    required this.hint,
+    required this.dismissLabel,
+    required this.entries,
+  });
 
   final String title;
+  final String hint;
+  final String dismissLabel;
   final List<StocktakeConfirmEntry> entries;
 
   @override
@@ -858,7 +880,7 @@ class _ConfirmSheetState extends State<_ConfirmSheet> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Text(
-                l10n.stocktakeConfirmHint,
+                widget.hint,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -896,7 +918,7 @@ class _ConfirmSheetState extends State<_ConfirmSheet> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(<String>{}),
-                      child: Text(l10n.cancel),
+                      child: Text(widget.dismissLabel),
                     ),
                   ),
                   const SizedBox(width: 12),

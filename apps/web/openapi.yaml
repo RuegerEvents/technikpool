@@ -384,6 +384,40 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /api/v1/scans/batch:
+    post:
+      operationId: createScanBatch
+      tags: [scanning]
+      summary: Book several units to a location or production at once
+      description: |
+        What follows a scan's `group`: the units picked from it, booked to the
+        same target the scan went to. Each unit takes its accessories along, as
+        a scan does. A kit's own location only moves when all of it is in the
+        batch.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanBatchRequest'
+      responses:
+        '200':
+          description: The units were booked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanBatchResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
   /api/v1/stocktakes:
     get:
       operationId: listStocktakes
@@ -1205,6 +1239,75 @@ components:
           description: Productions the asset was automatically returned from.
           items:
             type: string
+        group:
+          description: |
+            Set when the scanned unit belongs with others — the rest of its kit,
+            or the unit it hangs off and that unit's other accessories. Only the
+            scanned unit was booked; offer these, and book the ones picked with
+            `createScanBatch`. Not required, so an older client keeps working.
+          oneOf:
+            - $ref: '#/components/schemas/ScanGroup'
+            - type: 'null'
+
+    ScanGroup:
+      type: object
+      required: [kind, name, units]
+      properties:
+        kind:
+          type: string
+          enum: [bundle, parent]
+          description: |
+            `bundle`: the scanned unit is in a kit, and `units` is the rest of it.
+            `parent`: the scanned unit is an accessory, and `units` is the unit it
+            hangs off (first) and that unit's other accessories.
+        name:
+          type: string
+          description: The kit's or the parent unit's name, with its tag where it has one.
+        units:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScanGroupUnit'
+
+    ScanGroupUnit:
+      type: object
+      required: [id, assetTag, productName, manufacturerName, done]
+      properties:
+        id:
+          type: string
+        assetTag:
+          type: [string, 'null']
+        productName:
+          type: string
+        manufacturerName:
+          type: [string, 'null']
+        done:
+          type: boolean
+          description: Already at the scan's target; nothing to book.
+
+    ScanBatchRequest:
+      type: object
+      required: [assetIds, targetType, targetId]
+      properties:
+        assetIds:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        targetType:
+          type: string
+          enum: [location, production]
+        targetId:
+          type: string
+
+    ScanBatchResult:
+      type: object
+      required: [count, targetName]
+      properties:
+        count:
+          type: integer
+          description: Units booked, accessories taken along included.
+        targetName:
+          type: string
 
     ScannedAsset:
       type: object
@@ -1511,9 +1614,32 @@ components:
             - type: 'null'
         confirm:
           type: array
-          description: Accessories of the scanned unit, or the bundle's members.
+          description: |
+            Accessories of the scanned unit, or the bundle's members — or, when
+            `confirmGroup` is set, what the scanned unit belongs with.
           items:
             $ref: '#/components/schemas/StocktakeConfirmEntry'
+        confirmGroup:
+          description: |
+            Set when a found unit belongs with others, and `confirm` lists them:
+            `bundle` is the rest of its kit (its own accessories first), tick
+            them with `via: bundle`; `parent` is the unit an accessory hangs off
+            and that unit's other accessories, tick them with `via: parent`.
+            Not required, so an older client keeps working.
+          oneOf:
+            - $ref: '#/components/schemas/StocktakeConfirmGroup'
+            - type: 'null'
+
+    StocktakeConfirmGroup:
+      type: object
+      required: [kind, name]
+      properties:
+        kind:
+          type: string
+          enum: [bundle, parent]
+        name:
+          type: string
+          description: The kit's or the parent unit's name, with its tag where it has one.
 
     StocktakeBundle:
       type: object

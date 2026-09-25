@@ -114,11 +114,54 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
       // be audible and physical, not just visual.
       unawaited(SystemSound.play(SystemSoundType.click));
       unawaited(HapticFeedback.lightImpact());
+
+      // A unit taken out of its kit, or off the unit it hangs off, was booked
+      // on its own; what it belongs with is offered now. The sheet holds the
+      // queue, so scans made meanwhile wait their turn rather than vanish.
+      final group = result.group;
+      if (group != null && group.units.any((u) => !u.done)) await _offerGroup(group);
     } catch (error) {
       _push(_Entry(tag: tag, ok: false, title: tag, detail: describeError(l10n, error)));
       unawaited(HapticFeedback.heavyImpact());
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _offerGroup(ScanGroup group) async {
+    if (!mounted) return;
+    final l10n = S.of(context);
+    final picked = await showModalBottomSheet<Set<String>>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      isDismissible: false,
+      builder: (_) => _GroupSheet(group: group),
+    );
+    final api = ref.read(apiClientProvider);
+    if (picked == null || picked.isEmpty || api == null) return;
+    try {
+      final booked = await api.scanning.createScanBatch(
+        body: ScanBatchRequest(
+          assetIds: picked.toList(),
+          targetType: ScanBatchRequestTargetType.fromJson(widget.targetType.toJson()),
+          targetId: widget.targetId,
+        ),
+      );
+      _push(
+        _Entry(
+          tag: '',
+          ok: true,
+          title: group.kind == ScanGroupKind.bundle
+              ? l10n.stocktakeBundle(group.name)
+              : l10n.groupBelongsWith(group.name),
+          detail: l10n.groupBooked(booked.count),
+        ),
+      );
+      unawaited(HapticFeedback.lightImpact());
+    } catch (error) {
+      _push(_Entry(tag: '', ok: false, title: group.name, detail: describeError(l10n, error)));
+      unawaited(HapticFeedback.heavyImpact());
     }
   }
 
@@ -252,6 +295,103 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// The rest of a scanned unit's kit, or the unit it hangs off and that unit's
+/// other accessories — everything not already there checked, since "the rest
+/// too" is the usual answer and leaving one out is the deliberate act.
+class _GroupSheet extends StatefulWidget {
+  const _GroupSheet({required this.group});
+
+  final ScanGroup group;
+
+  @override
+  State<_GroupSheet> createState() => _GroupSheetState();
+}
+
+class _GroupSheetState extends State<_GroupSheet> {
+  late final _checked = {
+    for (final u in widget.group.units)
+      if (!u.done) u.id,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    final theme = Theme.of(context);
+    final group = widget.group;
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child: Text(
+                group.kind == ScanGroupKind.bundle
+                    ? l10n.stocktakeBundle(group.name)
+                    : l10n.groupBelongsWith(group.name),
+                style: theme.textTheme.titleMedium,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(
+                l10n.groupBookHint,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  for (final u in group.units)
+                    CheckboxListTile(
+                      value: u.done || _checked.contains(u.id),
+                      onChanged: u.done
+                          ? null
+                          : (on) => setState(
+                              () => on == true ? _checked.add(u.id) : _checked.remove(u.id),
+                            ),
+                      title: Text(productLabel(u.manufacturerName, u.productName)),
+                      subtitle: Text(
+                        [?u.assetTag, if (u.done) l10n.groupAlreadyThere].join(' · '),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(<String>{}),
+                      child: Text(l10n.groupOnlyThis),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: _checked.isEmpty
+                          ? null
+                          : () => Navigator.of(context).pop(_checked),
+                      child: Text(l10n.groupBook(_checked.length)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -40,6 +40,24 @@ export interface ScanResult {
 	 * one of an org the user doesn't belong to, that org's name.
 	 */
 	returnedFrom: string[];
+	/** What the scanned unit belongs with, offered to book along — see `scanGroup`. */
+	group: ScanGroup | null;
+}
+
+export interface ScanGroupUnit {
+	id: string;
+	assetTag: string | null;
+	productName: string;
+	manufacturerName: string | null;
+	/** Already where the scan put the unit: nothing to book, shown for completeness. */
+	done: boolean;
+}
+
+export interface ScanGroup {
+	/** `bundle`: the rest of its kit. `parent`: the unit it hangs off, and that unit's other accessories. */
+	kind: 'bundle' | 'parent';
+	name: string;
+	units: ScanGroupUnit[];
 }
 
 /** Records touched by an operation, so callers can invalidate their own caches. */
@@ -86,6 +104,17 @@ export class CheckoutError extends Error {
 		this.name = 'CheckoutError';
 	}
 }
+
+/** HTTP status per failure, for /api/v1. */
+export const CHECKOUT_ERROR_STATUS: Record<CheckoutError['code'], number> = {
+	asset_not_found: 404,
+	serial_ambiguous: 409,
+	forbidden: 403,
+	wrong_organization: 403,
+	asset_retired: 409,
+	asset_unavailable: 409,
+	production_cancelled: 409
+};
 
 const RETURNED_FROM_SELECT = {
 	id: true,
@@ -280,7 +309,8 @@ export async function performScan(
 				asset: scannedAsset,
 				action: 'LOCATION_ASSIGNED',
 				targetName: location.name,
-				returnedFrom: await returnedFromNames(userId, checkedOutItems)
+				returnedFrom: await returnedFromNames(userId, checkedOutItems),
+				group: await scanGroup(asset, input)
 			},
 			affected
 		};
@@ -343,10 +373,96 @@ export async function performScan(
 			asset: scannedAsset,
 			action: 'CHECKED_OUT',
 			targetName: production.name,
-			returnedFrom: []
+			returnedFrom: [],
+			group: await scanGroup(asset, input)
 		},
 		affected
 	};
+}
+
+const GROUP_UNIT_SELECT = {
+	id: true,
+	assetTag: true,
+	status: true,
+	locationId: true,
+	parentAssetId: true,
+	product: { select: { name: true, manufacturer: { select: { name: true } } } },
+	productionItems: { where: { status: 'CHECKED_OUT' }, select: { productionId: true } }
+} as const;
+
+/**
+ * What a scanned unit belongs with, asked about after it is booked rather than
+ * before, so a scan never waits on a tap. A kit member brings the rest of its
+ * kit; an accessory brings the unit it hangs off and that unit's other
+ * accessories. The other members' own accessories are not listed: booking a
+ * unit takes them along anyway. Null when there is nothing to ask about.
+ */
+async function scanGroup(
+	asset: { id: string; bundleId: string | null; parentAssetId: string | null },
+	target: { targetType: ScanTargetType; targetId: string }
+): Promise<ScanGroup | null> {
+	let kind: ScanGroup['kind'];
+	let name: string;
+	let rows;
+	if (asset.parentAssetId) {
+		const parent = await prisma.asset.findUniqueOrThrow({
+			where: { id: asset.parentAssetId },
+			select: { assetTag: true, product: { select: { name: true } } }
+		});
+		kind = 'parent';
+		name = parent.assetTag ? `${parent.product.name} (${parent.assetTag})` : parent.product.name;
+		rows = await prisma.asset.findMany({
+			where: {
+				OR: [
+					{ id: asset.parentAssetId },
+					{ parentAssetId: asset.parentAssetId, id: { not: asset.id } }
+				],
+				...ACTIVE_ASSET_WHERE
+			},
+			select: GROUP_UNIT_SELECT
+		});
+	} else if (asset.bundleId) {
+		const bundle = await prisma.assetBundle.findUniqueOrThrow({
+			where: { id: asset.bundleId },
+			select: { tag: true, template: { select: { name: true } } }
+		});
+		kind = 'bundle';
+		name = bundle.tag ? `${bundle.template.name} (${bundle.tag})` : bundle.template.name;
+		rows = await prisma.asset.findMany({
+			where: {
+				bundleId: asset.bundleId,
+				parentAssetId: null,
+				id: { not: asset.id },
+				...ACTIVE_ASSET_WHERE
+			},
+			select: GROUP_UNIT_SELECT
+		});
+	} else {
+		return null;
+	}
+
+	const toProduction = target.targetType === 'production';
+	const units = rows
+		// A unit held back as unavailable can't be checked out, so offering it
+		// would only lead to a refusal.
+		.filter((row) => !toProduction || isBookableStatus(row.status))
+		.map((row) => ({
+			id: row.id,
+			assetTag: row.assetTag,
+			productName: row.product.name,
+			manufacturerName: row.product.manufacturer?.name ?? null,
+			done: toProduction
+				? row.productionItems.some((item) => item.productionId === target.targetId)
+				: row.locationId === target.targetId && row.productionItems.length === 0
+		}))
+		// The parent first, then by name.
+		.sort(
+			(a, b) =>
+				Number(rows.find((r) => r.id === a.id)?.parentAssetId !== null) -
+					Number(rows.find((r) => r.id === b.id)?.parentAssetId !== null) ||
+				a.productName.localeCompare(b.productName)
+		);
+	return units.length > 0 ? { kind, name, units } : null;
 }
 
 export interface BulkCheckoutInput {

@@ -331,6 +331,7 @@ export function toStocktakeScanResult(
 		outcome: result.outcome,
 		item: toStocktakeItem(result.item, closed, userId),
 		wasOutAt: result.wasOutAt,
-		confirm: result.confirm
+		confirm: result.confirm,
+		confirmGroup: result.confirmGroup
 	};
 }

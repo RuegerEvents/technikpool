@@ -431,6 +431,7 @@ msgstr "Seriennummer"
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Asset Tag"
@@ -5981,9 +5982,8 @@ msgstr "Zeile entfernen"
 msgid "{0} + Enter saves"
 msgstr "{0} + Enter speichert"
 
-#: src/routes/assets/new/cables/+page.svelte
-msgid "<0/> Assign asset tags"
-msgstr "<0/> Asset-Tags vergeben"
+#~ msgid "<0/> Assign asset tags"
+#~ msgstr "<0/> Asset-Tags vergeben"
 
 #: src/routes/assets/new/cables/+page.svelte
 msgid "Add row"
@@ -9567,8 +9567,12 @@ msgstr "Dieses Produkt wird in dieser Inventur nicht gezählt."
 msgid "That location, count or selection is not valid for this stocktake."
 msgstr "Dieser Standort, diese Anzahl oder diese Auswahl passt nicht zu dieser Inventur."
 
+#. 0: offer.name
 #. 0: result.bundle.name
 #. 0: result.bundle.name
+#. 0: group.name
+#: src/routes/checkout/+page.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Bundle {0}"
@@ -9816,6 +9820,7 @@ msgstr "Nichts passt zu diesen Filtern."
 msgid "Counted by {0}"
 msgstr "Gezählt von {0}"
 
+#: src/routes/checkout/+page.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "No tag"
@@ -10270,3 +10275,35 @@ msgstr "Neues Produkt · {0} <0>Details bearbeiten</0>"
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 msgid "New product"
 msgstr "Neues Produkt"
+
+#. 0: offer.name
+#. 0: group.name
+#: src/routes/checkout/+page.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Belongs with {0}"
+msgstr "Gehört zu {0}"
+
+#: src/routes/checkout/+page.svelte
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Only this one"
+msgstr "Nur dieses"
+
+#: src/routes/checkout/+page.svelte
+msgid "1 more booked"
+msgid_plural "# more booked"
+msgstr[0] "1 mitgebucht"
+msgstr[1] "# mitgebucht"
+
+#: src/routes/checkout/+page.svelte
+msgid "· already there"
+msgstr "· schon dort"
+
+#: src/routes/checkout/+page.svelte
+msgid "Only the scanned unit is booked. Book the rest along?"
+msgstr "Nur das gescannte Gerät ist gebucht. Den Rest mitbuchen?"
+
+#: src/routes/checkout/+page.svelte
+msgid "Book # more"
+msgid_plural "Book # more"
+msgstr[0] "# mitbuchen"
+msgstr[1] "# mitbuchen"

@@ -997,6 +997,48 @@ abstract class S {
   /// **'Is everything in it?'**
   String get stocktakeConfirmBundle;
 
+  /// Sheet title after scanning an accessory on its own: its parent and the parent's other accessories.
+  ///
+  /// In en, this message translates to:
+  /// **'Belongs with {name}'**
+  String groupBelongsWith(String name);
+
+  /// No description provided for @groupOnlyThis.
+  ///
+  /// In en, this message translates to:
+  /// **'Only this one'**
+  String get groupOnlyThis;
+
+  /// No description provided for @groupBookHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the scanned unit was booked. Book the rest along?'**
+  String get groupBookHint;
+
+  /// No description provided for @groupBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Book {count} more'**
+  String groupBook(int count);
+
+  /// No description provided for @groupBooked.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} more booked'**
+  String groupBooked(int count);
+
+  /// No description provided for @groupAlreadyThere.
+  ///
+  /// In en, this message translates to:
+  /// **'already there'**
+  String get groupAlreadyThere;
+
+  /// No description provided for @stocktakeGroupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The scanned unit is counted. Count the rest too? Uncheck whatever is missing.'**
+  String get stocktakeGroupHint;
+
   /// No description provided for @stocktakeConfirmHint.
   ///
   /// In en, this message translates to:

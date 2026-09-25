@@ -1,20 +1,9 @@
 import type { RequestHandler } from './$types';
 import { apiError, apiJson, handleApi, requireApiUser, type Schemas } from '$lib/server/api';
 import { ApiResponse } from '$lib/server/api';
-import { CheckoutError, performScan } from '$lib/server/services/checkout';
+import { CHECKOUT_ERROR_STATUS, CheckoutError, performScan } from '$lib/server/services/checkout';
 
 const TARGET_TYPES = ['location', 'production'] as const;
-
-/** HTTP status per service-level failure. Anything else stays a 500. */
-const STATUS_BY_CODE: Record<CheckoutError['code'], number> = {
-	asset_not_found: 404,
-	serial_ambiguous: 409,
-	forbidden: 403,
-	wrong_organization: 403,
-	asset_retired: 409,
-	asset_unavailable: 409,
-	production_cancelled: 409
-};
 
 export const POST: RequestHandler = ({ locals, request }) =>
 	handleApi(async () => {
@@ -40,7 +29,7 @@ export const POST: RequestHandler = ({ locals, request }) =>
 			return apiJson('ScanResult', result);
 		} catch (err) {
 			if (err instanceof CheckoutError) {
-				return apiError(STATUS_BY_CODE[err.code], err.code, err.message);
+				return apiError(CHECKOUT_ERROR_STATUS[err.code], err.code, err.message);
 			}
 			throw err;
 		}

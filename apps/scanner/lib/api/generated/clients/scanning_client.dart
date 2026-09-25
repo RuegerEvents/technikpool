@@ -5,6 +5,8 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
+import '../models/scan_batch_request.dart';
+import '../models/scan_batch_result.dart';
 import '../models/scan_request.dart';
 import '../models/scan_result.dart';
 
@@ -26,5 +28,16 @@ abstract class ScanningClient {
   @POST('/api/v1/scans')
   Future<ScanResult> createScan({
     @Body() required ScanRequest body,
+  });
+
+  /// Book several units to a location or production at once.
+  ///
+  /// What follows a scan's `group`: the units picked from it, booked to the.
+  /// same target the scan went to. Each unit takes its accessories along, as.
+  /// a scan does. A kit's own location only moves when all of it is in the.
+  /// batch.
+  @POST('/api/v1/scans/batch')
+  Future<ScanBatchResult> createScanBatch({
+    @Body() required ScanBatchRequest body,
   });
 }

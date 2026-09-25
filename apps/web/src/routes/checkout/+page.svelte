@@ -1,12 +1,15 @@
 <script lang="ts">
-	import { getErrorMessage, orgLabel } from '$lib/utils';
+	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
 	import { canWrite } from '$lib/roles';
 	import { getLocations } from '$lib/remote/assets.remote';
-	import { getAllProductions, scanAsset } from '$lib/remote/checkout.remote';
+	import { checkoutAssets, getAllProductions, scanAsset } from '$lib/remote/checkout.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { Modal } from '$lib/components/ui/modal';
+	import { SvelteSet } from 'svelte/reactivity';
+	import type { ScanGroup } from '$lib/server/services/checkout';
 	import * as Card from '$lib/components/ui/card';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
 	import { toast } from 'svelte-sonner';
@@ -67,6 +70,57 @@
 	let sessionLog = $state<ScanEntry[]>([]);
 	let processing = $state(false);
 	let textInput = $state('');
+
+	// A unit scanned out of its kit, or off the unit it hangs off, is booked at
+	// once; what it belongs with is offered afterwards, so a scan never waits on
+	// a tap. Offers queue up — the camera keeps reading while one is open.
+	type GroupOffer = ScanGroup & { targetType: 'location' | 'production'; targetId: string };
+	let groupOffers = $state<GroupOffer[]>([]);
+	let offer = $derived(groupOffers[0] ?? null);
+	let offerChecked = new SvelteSet<string>();
+	let bookingGroup = $state(false);
+
+	$effect(() => {
+		// Everything not already there starts checked: "the rest too" is the
+		// usual answer, and leaving one out is the deliberate act.
+		offerChecked.clear();
+		for (const unit of offer?.units ?? []) if (!unit.done) offerChecked.add(unit.id);
+	});
+
+	function closeOffer() {
+		groupOffers = groupOffers.slice(1);
+	}
+
+	async function bookGroup() {
+		if (!offer || offerChecked.size === 0) return closeOffer();
+		bookingGroup = true;
+		try {
+			const result = await checkoutAssets({
+				assetIds: [...offerChecked],
+				targetType: offer.targetType,
+				targetId: offer.targetId
+			});
+			sessionLog = [
+				{
+					id: crypto.randomUUID(),
+					assetTag: '',
+					productName: offer.name,
+					manufacturerName: null,
+					action: '',
+					targetName: result.targetName,
+					status: 'success',
+					message: plural(result.count, ['1 more booked', '# more booked']),
+					timestamp: new Date()
+				},
+				...sessionLog
+			];
+			closeOffer();
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			bookingGroup = false;
+		}
+	}
 
 	let scanner: Html5Qrcode | null = null;
 	let lastCode = '';
@@ -166,6 +220,9 @@
 		processing = true;
 		try {
 			const result = await scanAsset({ assetTag: t, targetType, targetId });
+			if (result.group && result.group.units.some((u) => !u.done)) {
+				groupOffers = [...groupOffers, { ...result.group, targetType, targetId }];
+			}
 			let message = labelAction(result.action);
 			if (result.returnedFrom.length > 0) {
 				message += ` · returned from ${result.returnedFrom.join(', ')}`;
@@ -488,3 +545,56 @@
 		</div>
 	{/if}
 </div>
+
+{#if offer}
+	<Modal
+		open={true}
+		onclose={closeOffer}
+		title={offer.kind === 'bundle' ? `Bundle ${offer.name}` : `Belongs with ${offer.name}`}
+		size="md"
+		dismissible={!bookingGroup}
+	>
+		{#snippet children()}
+			<div class="space-y-1">
+				{#each offer.units as unit (unit.id)}
+					<label
+						class="flex items-center gap-3 rounded-md px-2 py-1.5 hover:bg-muted/50 {unit.done
+							? 'opacity-60'
+							: ''}"
+					>
+						<input
+							type="checkbox"
+							class="size-4 accent-emerald-600"
+							checked={unit.done || offerChecked.has(unit.id)}
+							disabled={unit.done}
+							onchange={(e) =>
+								e.currentTarget.checked ? offerChecked.add(unit.id) : offerChecked.delete(unit.id)}
+						/>
+						<span class="min-w-0 flex-1">
+							<span class="block text-sm font-medium">
+								{unit.manufacturerName
+									? `${unit.manufacturerName} ${unit.productName}`
+									: unit.productName}
+							</span>
+							<span class="block text-xs text-muted-foreground">
+								{unit.assetTag ?? 'No tag'}
+								{#if unit.done}· already there{/if}
+							</span>
+						</span>
+					</label>
+				{/each}
+			</div>
+		{/snippet}
+		{#snippet description()}
+			Only the scanned unit is booked. Book the rest along?
+		{/snippet}
+		{#snippet footer()}
+			<Button icon="confirm" onclick={bookGroup} disabled={bookingGroup || offerChecked.size === 0}>
+				{plural(offerChecked.size, ['Book # more', 'Book # more'])}
+			</Button>
+			<Button variant="outline" icon="close" onclick={closeOffer} disabled={bookingGroup}>
+				Only this one
+			</Button>
+		{/snippet}
+	</Modal>
+{/if}

@@ -1142,8 +1142,14 @@ export type StocktakeScanOutcome =
 			item: StocktakeItemRow;
 			/** The unit is checked out to this production right now, and is here after all. */
 			wasOutAt: string | null;
-			/** Its accessories, to confirm in one go. */
+			/** Its accessories, to confirm in one go — or what it belongs with, see `confirmGroup`. */
 			confirm: ConfirmEntry[];
+			/**
+			 * Set when `confirm` is more than the unit's own accessories: the rest
+			 * of its kit (and its own accessories), or — for an accessory — the
+			 * unit it hangs off and that unit's other accessories.
+			 */
+			confirmGroup: { kind: 'bundle' | 'parent'; name: string } | null;
 	  }
 	| { outcome: 'already'; item: StocktakeItemRow; foundByName: string; byMe: boolean }
 	| {
@@ -1210,16 +1216,62 @@ export async function scanIntoStocktake(
 		};
 	}
 
+	const byName = [{ product: { name: 'asc' } }, { assetTag: 'asc' }] as const;
 	const accessories = await prisma.asset.findMany({
 		where: { parentAssetId: match.assetId, ...ACTIVE_ASSET_WHERE },
 		select: CONFIRM_SELECT,
-		orderBy: [{ product: { name: 'asc' } }, { assetTag: 'asc' }]
+		orderBy: [...byName]
 	});
+
+	// A unit found on its own is rarely alone: a kit member was probably taken
+	// out of its case, an accessory off its unit. So what it belongs with is
+	// offered too — already ticked ones shown as such, like a bundle scan.
+	let confirmGroup: { kind: 'bundle' | 'parent'; name: string } | null = null;
+	let group: ConfirmAsset[] = [];
+	const { parentAssetId, bundleId } = item.asset;
+	if (parentAssetId) {
+		const parent = await prisma.asset.findUniqueOrThrow({
+			where: { id: parentAssetId },
+			select: CONFIRM_SELECT
+		});
+		const siblings = await prisma.asset.findMany({
+			where: { parentAssetId, id: { not: match.assetId }, ...ACTIVE_ASSET_WHERE },
+			select: CONFIRM_SELECT,
+			orderBy: [...byName]
+		});
+		confirmGroup = {
+			kind: 'parent',
+			name: parent.assetTag ? `${parent.product.name} (${parent.assetTag})` : parent.product.name
+		};
+		group = [parent, ...siblings];
+	} else if (bundleId) {
+		const [bundle, members] = await Promise.all([
+			prisma.assetBundle.findUniqueOrThrow({
+				where: { id: bundleId },
+				select: { tag: true, template: { select: { name: true } } }
+			}),
+			prisma.asset.findMany({
+				where: { bundleId, id: { not: match.assetId }, ...ACTIVE_ASSET_WHERE },
+				select: CONFIRM_SELECT,
+				orderBy: [...byName]
+			})
+		]);
+		confirmGroup = {
+			kind: 'bundle',
+			name: bundle.tag ? `${bundle.template.name} (${bundle.tag})` : bundle.template.name
+		};
+		// Its own accessories are in the kit too, so they come first rather than
+		// being asked about separately.
+		const own = new Set(accessories.map((a) => a.id));
+		group = [...accessories, ...members.filter((m) => !own.has(m.id))];
+	}
+
 	return {
 		outcome: item.expected ? 'found' : 'unexpected',
 		item,
 		wasOutAt: item.outProductionName,
-		confirm: await confirmEntries(stocktakeId, accessories)
+		confirm: await confirmEntries(stocktakeId, group.length > 0 ? group : accessories),
+		confirmGroup: group.length > 0 ? confirmGroup : null
 	};
 }
 
