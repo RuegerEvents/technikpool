@@ -1,5 +1,23 @@
 [
 	{
+		"version": "0.22.0",
+		"date": "2026-09-25",
+		"en": [
+			"No more automatic asset tags. A tag is what is printed on the sticker, so it is typed or scanned, or \"No asset tag\" is ticked — a blank one is refused. Registering several units at once asks for one tag per unit. Copies of a bundle, accessories copied onto units, cables added in a batch and blank cells in a CSV import are created without a tag; they get one by being scanned.",
+			"Stocktakes update by themselves: counts made on other scanners or in other tabs appear within seconds. Counting one product on two devices at once no longer overwrites a number you never saw — the second count is refused and the current number shown.",
+			"Scanning a unit that belongs to a bundle, or an accessory on its own, books or counts it and then offers the rest of the bundle, or the unit it belongs to and that unit's other accessories, all ticked. \"Only this one\" leaves it at the scan. On the checkout page and in stocktakes.",
+			"Adding a unit that isn't in the catalog yet to a bundle or as an accessory opens the full product dialog, so it can be a cable with its ends and length, or a license. Creating a bundle shows each unit's asset tag.",
+			"Smaller fixes: in every dialog, Tab reaches Create or Save before Cancel. Confirming a unit's accessories says \"Count 2 accessories\". Saving a new unit quickly no longer warns that its serial number is already taken — by itself."
+		],
+		"de": [
+			"Keine automatischen Aufkleber-Nummern mehr. Ein Aufkleber ist das, was auf dem Etikett steht, also wird er eingetippt oder gescannt, oder es wird angehakt, dass das Gerät keinen hat – ein leeres Feld wird abgelehnt. Wer mehrere Geräte auf einmal anlegt, gibt für jedes einen Aufkleber an. Kopien von Sets, auf Geräte kopiertes Zubehör, gesammelt angelegte Kabel und leere Zellen im CSV-Import werden ohne Aufkleber angelegt; sie bekommen ihn beim Scannen.",
+			"Inventuren aktualisieren sich von selbst: Was auf anderen Scannern oder in anderen Tabs gezählt wird, erscheint nach wenigen Sekunden. Zählst du ein Produkt gleichzeitig auf zwei Geräten, überschreibt das eine nicht mehr unbemerkt das andere – die zweite Zählung wird abgelehnt und die aktuelle Zahl angezeigt.",
+			"Scannst du ein Gerät aus einem Set oder ein einzelnes Zubehörteil, wird es gebucht oder gezählt, und danach wird der Rest des Sets angeboten, bzw. das Gerät, zu dem es gehört, samt dessen übrigem Zubehör, alles angehakt. „Nur dieses“ belässt es beim Scan. Auf der Checkout-Seite und in der Inventur.",
+			"Wer einem Set oder als Zubehör ein Gerät hinzufügt, das es im Katalog noch nicht gibt, bekommt den vollständigen Produktdialog – es kann also ein Kabel mit Steckern und Länge sein oder eine Lizenz. Beim Anlegen eines Sets steht bei jedem Gerät sein Aufkleber.",
+			"Kleinere Korrekturen: In jedem Dialog springt Tab erst zu Anlegen oder Speichern, dann zu Abbrechen. Das Bestätigen von Zubehör heißt jetzt „2 Zubehör zählen“. Wer ein neues Gerät schnell speichert, wird nicht mehr gewarnt, seine Seriennummer sei schon vergeben – von ihm selbst."
+		]
+	},
+	{
 		"version": "0.21.0",
 		"date": "2026-09-24",
 		"en": [
