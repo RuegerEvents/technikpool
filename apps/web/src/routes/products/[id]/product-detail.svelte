@@ -15,11 +15,11 @@
 	} from '$lib/components/ui/product-editor';
 	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
 	import {
-		getAssets,
 		getCategories,
 		getManufacturers,
 		getProductCatalog,
-		getProducts
+		getProducts,
+		getProductUnits
 	} from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { orgLabel } from '$lib/utils';
@@ -28,18 +28,19 @@
 
 	let { productId, isAdmin, userId }: Props = $props();
 
-	// The unfiltered catalog and asset list rather than queries of their own:
-	// both are what every product and asset mutation already refreshes, so this
-	// page stays current without a refresh call anywhere new.
+	// The unfiltered catalog rather than a query of its own: it is what every
+	// product mutation already refreshes, so this page stays current without a
+	// refresh call anywhere new. The units are the one exception — a system admin
+	// sees every org's here, which no shared list carries. Nothing on this page
+	// changes a unit, and the query is fetched afresh whenever the page opens.
 	let catalog = $derived(await getProductCatalog());
 	let product = $derived(catalog.find((p) => p.id === productId) ?? null);
-	let allAssets = $derived(await getAssets());
+	let units = $derived(await getProductUnits(productId));
 	let orgs = $derived(await getMyOrgs());
 	let categories = $derived(await getCategories());
 	let manufacturers = $derived(await getManufacturers());
 	let allProducts = $derived(await getProducts());
 	let unitCounts = $derived(new Map(catalog.map((p) => [p.id, p.assetCount])));
-	let units = $derived(allAssets.filter((a) => a.productId === productId));
 	let severalOrgs = $derived(new Set(units.map((a) => a.organizationId)).size > 1);
 
 	// What happens to the product as a whole sits up by its name; the card below
@@ -106,13 +107,21 @@
 				<Card.Header>
 					<Card.Title>Units</Card.Title>
 					<Card.Description>
-						Every unit of this product in your organizations. Retired units are not listed.
+						{#if isAdmin}
+							Every unit of this product in every organization. Retired units are not listed.
+						{:else}
+							Every unit of this product in your organizations. Retired units are not listed.
+						{/if}
 					</Card.Description>
 				</Card.Header>
 				<Card.Content class="p-0">
 					{#if units.length === 0}
 						<p class="px-6 pb-6 text-sm text-muted-foreground">
-							None of your organizations holds a unit of this product.
+							{#if isAdmin}
+								No organization holds a unit of this product.
+							{:else}
+								None of your organizations holds a unit of this product.
+							{/if}
 						</p>
 					{:else}
 						<!-- Half the page wide at most, so it scrolls sideways rather than squeezing

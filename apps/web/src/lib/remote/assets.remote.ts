@@ -172,6 +172,33 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 });
 
 /**
+ * The active units of one product, for its page. `getAssets` is scoped to the
+ * user's orgs even for a system admin, which is right for the Devices list and
+ * wrong here: an admin looking at a product is asking who holds it, across the
+ * whole install. Everyone else sees exactly what `getAssets` would give them.
+ */
+export const getProductUnits = query(v.string(), async (productId: string) => {
+	const user = await requireAuth();
+	const systemAdmin = await isSystemAdmin(user.id);
+
+	const assets = await prisma.asset.findMany({
+		where: {
+			productId,
+			...(systemAdmin ? {} : { organizationId: { in: await userOrgIds(user.id) } }),
+			...ACTIVE_ASSET_WHERE
+		},
+		include: {
+			organization: true,
+			location: true,
+			bundle: { select: { id: true, template: { select: { name: true } } } },
+			parent: PARENT_SELECT
+		},
+		orderBy: [{ organization: { name: 'asc' } }, ...ASSET_ORDER_BY]
+	});
+	return assets;
+});
+
+/**
  * Sold and decommissioned units, which `getAssets` deliberately leaves out.
  * Kept as its own query rather than a flag on `getAssets` so the two caches
  * stay separate — a refresh after a status change invalidates both.

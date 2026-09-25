@@ -10307,3 +10307,11 @@ msgid "Book # more"
 msgid_plural "Book # more"
 msgstr[0] "Book # more"
 msgstr[1] "Book # more"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Every unit of this product in every organization. Retired units are not listed."
+msgstr "Every unit of this product in every organization. Retired units are not listed."
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "No organization holds a unit of this product."
+msgstr "No organization holds a unit of this product."
