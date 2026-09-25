@@ -35,6 +35,8 @@ export 'models/scan_request.dart';
 export 'models/scan_result.dart';
 export 'models/scan_group.dart';
 export 'models/scan_group_unit.dart';
+export 'models/asset_create_request.dart';
+export 'models/asset_tag_request.dart';
 export 'models/scan_batch_request.dart';
 export 'models/scan_batch_result.dart';
 export 'models/scanned_asset.dart';

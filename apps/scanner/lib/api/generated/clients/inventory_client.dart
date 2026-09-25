@@ -5,8 +5,11 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
+import '../models/asset.dart';
+import '../models/asset_create_request.dart';
 import '../models/asset_detail.dart';
 import '../models/asset_page.dart';
+import '../models/asset_tag_request.dart';
 import '../models/category.dart';
 import '../models/location.dart';
 import '../models/production.dart';
@@ -47,6 +50,8 @@ abstract class InventoryClient {
   ///
   /// [categoryId] - Only assets whose product is in this category.
   ///
+  /// [productId] - Only units of this product.
+  ///
   /// [q] - Case-insensitive match on asset tag, serial number, product or manufacturer name.
   ///
   /// [cursor] - The `nextCursor` from a previous page.
@@ -56,8 +61,33 @@ abstract class InventoryClient {
     @Query('locationId') String? locationId,
     @Query('productionId') String? productionId,
     @Query('categoryId') String? categoryId,
+    @Query('productId') String? productId,
     @Query('q') String? q,
     @Query('cursor') String? cursor,
+  });
+
+  /// Register one unit of a product, with the tag just scanned.
+  ///
+  /// Takes ADMIN of the organization, like registering units on the web.
+  /// The tag is required and is used as given — nothing is numbered for it:.
+  /// it has to start with the org's prefix (`asset_tag_prefix_mismatch`).
+  /// and not be on another unit already (`asset_tag_in_use`).
+  @POST('/api/v1/assets')
+  Future<Asset> createAsset({
+    @Body() required AssetCreateRequest body,
+  });
+
+  /// Give an untagged unit the tag just scanned.
+  ///
+  /// Takes ADMIN of the unit's organization. Only for a unit without a tag:.
+  /// one that has one is refused (`asset_already_tagged`) — a second scan on.
+  /// the wrong row is likelier than a sticker that really changed, and the.
+  /// web is where a tag is corrected. Same checks on the tag as.
+  /// `createAsset`.
+  @PUT('/api/v1/assets/{assetId}/tag')
+  Future<Asset> setAssetTag({
+    @Path('assetId') required String assetId,
+    @Body() required AssetTagRequest body,
   });
 
   /// Look up one asset by its printed tag or serial number.

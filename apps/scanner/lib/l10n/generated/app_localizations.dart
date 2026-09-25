@@ -1201,6 +1201,96 @@ abstract class S {
   /// **'Stocktake'**
   String get actionStocktakeCounted;
 
+  /// No description provided for @productModeTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag units'**
+  String get productModeTag;
+
+  /// No description provided for @productModeRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Register new'**
+  String get productModeRegister;
+
+  /// No description provided for @productTagHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a sticker: it goes to the unit you tapped, or else to the next one without a tag.'**
+  String get productTagHint;
+
+  /// No description provided for @productRegisterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Every scanned sticker becomes a new unit here.'**
+  String get productRegisterHint;
+
+  /// No description provided for @productRegisterAt.
+  ///
+  /// In en, this message translates to:
+  /// **'New units go to'**
+  String get productRegisterAt;
+
+  /// No description provided for @productNoUntagged.
+  ///
+  /// In en, this message translates to:
+  /// **'Every unit already has a tag.'**
+  String get productNoUntagged;
+
+  /// No description provided for @productUntagged.
+  ///
+  /// In en, this message translates to:
+  /// **'No tag'**
+  String get productUntagged;
+
+  /// Marks the unit the next scanned sticker will be given to.
+  ///
+  /// In en, this message translates to:
+  /// **'next scan'**
+  String get productNextScan;
+
+  /// No description provided for @productTagged.
+  ///
+  /// In en, this message translates to:
+  /// **'{tag} given to {unit}'**
+  String productTagged(String tag, String unit);
+
+  /// No description provided for @productRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'{tag} registered'**
+  String productRegistered(String tag);
+
+  /// No description provided for @productNeedsAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Registering and tagging units takes ADMIN in {org}.'**
+  String productNeedsAdmin(String org);
+
+  /// No description provided for @productUnitCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} units · {untagged} without a tag'**
+  String productUnitCount(int total, int untagged);
+
+  /// No description provided for @errorAssetTagInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This sticker is already on another unit.'**
+  String get errorAssetTagInUse;
+
+  /// No description provided for @errorAssetTagPrefixMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'This sticker belongs to another organization — its prefix doesn\'t match.'**
+  String get errorAssetTagPrefixMismatch;
+
+  /// No description provided for @errorAssetAlreadyTagged.
+  ///
+  /// In en, this message translates to:
+  /// **'This unit already has a tag. Change it on the web.'**
+  String get errorAssetAlreadyTagged;
+
   /// No description provided for @errorStocktakeNotFound.
   ///
   /// In en, this message translates to:

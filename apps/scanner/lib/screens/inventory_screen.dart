@@ -6,6 +6,7 @@ import '../api/generated/export.dart';
 import '../cable_format.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../product_label.dart';
+import 'product_units_screen.dart';
 import '../state/providers.dart';
 import '../widgets/category_pill.dart';
 
@@ -194,6 +195,17 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   }
                   final asset = _assets[i];
                   return ListTile(
+                    // The product's units in this unit's org, where stickers
+                    // are given out and new units registered by scanning.
+                    onTap: () => Navigator.of(context).push<void>(
+                      MaterialPageRoute(
+                        builder: (_) => ProductUnitsScreen(
+                          product: asset.product,
+                          organization: asset.organization,
+                          locationId: asset.location.id,
+                        ),
+                      ),
+                    ),
                     title: Text(
                       productLabel(
                         asset.product.manufacturerName,

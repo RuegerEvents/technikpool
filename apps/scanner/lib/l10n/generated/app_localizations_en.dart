@@ -623,6 +623,63 @@ class SEn extends S {
   String get actionStocktakeCounted => 'Stocktake';
 
   @override
+  String get productModeTag => 'Tag units';
+
+  @override
+  String get productModeRegister => 'Register new';
+
+  @override
+  String get productTagHint =>
+      'Scan a sticker: it goes to the unit you tapped, or else to the next one without a tag.';
+
+  @override
+  String get productRegisterHint =>
+      'Every scanned sticker becomes a new unit here.';
+
+  @override
+  String get productRegisterAt => 'New units go to';
+
+  @override
+  String get productNoUntagged => 'Every unit already has a tag.';
+
+  @override
+  String get productUntagged => 'No tag';
+
+  @override
+  String get productNextScan => 'next scan';
+
+  @override
+  String productTagged(String tag, String unit) {
+    return '$tag given to $unit';
+  }
+
+  @override
+  String productRegistered(String tag) {
+    return '$tag registered';
+  }
+
+  @override
+  String productNeedsAdmin(String org) {
+    return 'Registering and tagging units takes ADMIN in $org.';
+  }
+
+  @override
+  String productUnitCount(int total, int untagged) {
+    return '$total units · $untagged without a tag';
+  }
+
+  @override
+  String get errorAssetTagInUse => 'This sticker is already on another unit.';
+
+  @override
+  String get errorAssetTagPrefixMismatch =>
+      'This sticker belongs to another organization — its prefix doesn\'t match.';
+
+  @override
+  String get errorAssetAlreadyTagged =>
+      'This unit already has a tag. Change it on the web.';
+
+  @override
   String get errorStocktakeNotFound => 'This stocktake no longer exists.';
 
   @override

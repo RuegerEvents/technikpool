@@ -1,7 +1,13 @@
 import type { RequestHandler } from './$types';
+import { json } from '@sveltejs/kit';
 import { prisma } from '$lib/server/auth';
-import { CABLE_ENDS } from '$lib/server/services/cable-ends';
 import { apiError, apiJson, handleApi, requireApiUser, type Schemas } from '$lib/server/api';
+import {
+	API_ASSET_INCLUDE,
+	ASSET_TAG_ERROR_STATUS,
+	AssetTagError,
+	registerTaggedUnit
+} from '$lib/server/services/asset-tags';
 import { isSystemAdmin, productionVisibility, userOrgIds } from '$lib/server/services/access';
 import { toAsset } from '$lib/server/services/api-mappers';
 import { ApiResponse } from '$lib/server/api';
@@ -11,13 +17,7 @@ import { ACTIVE_ASSET_WHERE } from '$lib/asset-status';
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 200;
 
-const ASSET_INCLUDE = {
-	product: {
-		include: { manufacturer: true, category: true, ...CABLE_ENDS }
-	},
-	location: { include: { address: true, organization: true } },
-	organization: true
-} satisfies Prisma.AssetInclude;
+const ASSET_INCLUDE = API_ASSET_INCLUDE;
 
 export const GET: RequestHandler = ({ locals, url }) =>
 	handleApi(async () => {
@@ -36,6 +36,7 @@ export const GET: RequestHandler = ({ locals, url }) =>
 		const locationId = url.searchParams.get('locationId');
 		const productionId = url.searchParams.get('productionId');
 		const categoryId = url.searchParams.get('categoryId');
+		const productId = url.searchParams.get('productId');
 		const q = url.searchParams.get('q')?.trim();
 		const cursor = url.searchParams.get('cursor');
 
@@ -79,6 +80,7 @@ export const GET: RequestHandler = ({ locals, url }) =>
 					}
 				: {}),
 			...(categoryId ? { product: { categoryId } } : {}),
+			...(productId ? { productId } : {}),
 			...(q
 				? {
 						OR: [
@@ -107,4 +109,38 @@ export const GET: RequestHandler = ({ locals, url }) =>
 			nextCursor: rows.length > limit ? (items.at(-1)?.id ?? null) : null
 		};
 		return apiJson('AssetPage', body);
+	});
+
+export const POST: RequestHandler = ({ locals, request }) =>
+	handleApi(async () => {
+		const user = requireApiUser(locals);
+		const body = (await request.json().catch(() => null)) as Partial<
+			Schemas['AssetCreateRequest']
+		> | null;
+		const field = (key: keyof Schemas['AssetCreateRequest']) =>
+			typeof body?.[key] === 'string' ? body[key].trim() : '';
+		const input = {
+			productId: field('productId'),
+			organizationId: field('organizationId'),
+			locationId: field('locationId'),
+			assetTag: field('assetTag')
+		};
+		if (Object.values(input).some((v) => !v)) {
+			throw new ApiResponse(
+				apiError(
+					400,
+					'invalid_request',
+					'productId, organizationId, locationId and assetTag are required.'
+				)
+			);
+		}
+		try {
+			const asset = await registerTaggedUnit(user.id, input);
+			return json(toAsset(asset) satisfies Schemas['Asset'], { status: 201 });
+		} catch (err) {
+			if (err instanceof AssetTagError) {
+				return apiError(ASSET_TAG_ERROR_STATUS[err.code], err.code, err.message);
+			}
+			throw err;
+		}
 	});

@@ -625,6 +625,64 @@ class SDe extends S {
   String get actionStocktakeCounted => 'Inventur';
 
   @override
+  String get productModeTag => 'Etiketten vergeben';
+
+  @override
+  String get productModeRegister => 'Neu anlegen';
+
+  @override
+  String get productTagHint =>
+      'Etikett scannen: es kommt an das angetippte Gerät, sonst an das nächste ohne Etikett.';
+
+  @override
+  String get productRegisterHint =>
+      'Jedes gescannte Etikett wird ein neues Gerät hier.';
+
+  @override
+  String get productRegisterAt => 'Neue Geräte nach';
+
+  @override
+  String get productNoUntagged => 'Alle Geräte haben schon ein Etikett.';
+
+  @override
+  String get productUntagged => 'Ohne Etikett';
+
+  @override
+  String get productNextScan => 'nächster Scan';
+
+  @override
+  String productTagged(String tag, String unit) {
+    return '$tag an $unit vergeben';
+  }
+
+  @override
+  String productRegistered(String tag) {
+    return '$tag angelegt';
+  }
+
+  @override
+  String productNeedsAdmin(String org) {
+    return 'Geräte anlegen und Etiketten vergeben braucht ADMIN in $org.';
+  }
+
+  @override
+  String productUnitCount(int total, int untagged) {
+    return '$total Geräte · $untagged ohne Etikett';
+  }
+
+  @override
+  String get errorAssetTagInUse =>
+      'Dieses Etikett klebt schon an einem anderen Gerät.';
+
+  @override
+  String get errorAssetTagPrefixMismatch =>
+      'Dieses Etikett gehört zu einer anderen Organisation – das Präfix passt nicht.';
+
+  @override
+  String get errorAssetAlreadyTagged =>
+      'Dieses Gerät hat schon ein Etikett. Ändern geht im Web.';
+
+  @override
   String get errorStocktakeNotFound => 'Diese Inventur gibt es nicht mehr.';
 
   @override

@@ -182,6 +182,37 @@ export interface paths {
          */
         get: operations["listAssets"];
         put?: never;
+        /**
+         * Register one unit of a product, with the tag just scanned
+         * @description Takes ADMIN of the organization, like registering units on the web.
+         *     The tag is required and is used as given — nothing is numbered for it:
+         *     it has to start with the org's prefix (`asset_tag_prefix_mismatch`)
+         *     and not be on another unit already (`asset_tag_in_use`).
+         */
+        post: operations["createAsset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assets/{assetId}/tag": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Give an untagged unit the tag just scanned
+         * @description Takes ADMIN of the unit's organization. Only for a unit without a tag:
+         *     one that has one is refused (`asset_already_tagged`) — a second scan on
+         *     the wrong row is likelier than a sticker that really changed, and the
+         *     web is where a tag is corrected. Same checks on the tag as
+         *     `createAsset`.
+         */
+        put: operations["setAssetTag"];
         post?: never;
         delete?: never;
         options?: never;
@@ -732,6 +763,16 @@ export interface components {
             /** @description Already at the scan's target; nothing to book. */
             done: boolean;
         };
+        AssetCreateRequest: {
+            productId: string;
+            organizationId: string;
+            /** @description One of the organization's locations. */
+            locationId: string;
+            assetTag: string;
+        };
+        AssetTagRequest: {
+            assetTag: string;
+        };
         ScanBatchRequest: {
             assetIds: string[];
             /** @enum {string} */
@@ -990,6 +1031,11 @@ export interface components {
          *     than one unit's serial number identifies nothing in particular
          *     (`serial_ambiguous`) — the asset tag is what disambiguates it.
          *
+         *     Tags: a tag has to start with the org's prefix
+         *     (`asset_tag_prefix_mismatch`), can be on one unit only
+         *     (`asset_tag_in_use`), and a unit that already carries one is not
+         *     retagged from a scanner (`asset_already_tagged`).
+         *
          *     Stocktakes: a closed one takes no more counting (`stocktake_closed`),
          *     a scope that matches nothing starts nothing (`stocktake_empty`), and
          *     a note or untick needs a unit that was counted (`stocktake_not_found_yet`).
@@ -1238,6 +1284,8 @@ export interface operations {
                 productionId?: string;
                 /** @description Only assets whose product is in this category. */
                 categoryId?: string;
+                /** @description Only units of this product. */
+                productId?: string;
                 /** @description Case-insensitive match on asset tag, serial number, product or manufacturer name. */
                 q?: string;
                 limit?: number;
@@ -1263,6 +1311,66 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+        };
+    };
+    createAsset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssetCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description The unit was registered */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Asset"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    setAssetTag: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssetTagRequest"];
+            };
+        };
+        responses: {
+            /** @description The unit now carries the tag */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Asset"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
         };
     };
     getAssetByTag: {

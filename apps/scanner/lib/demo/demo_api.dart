@@ -120,8 +120,10 @@ class DemoBackend {
     final categoryId = query['categoryId'] as String?;
     final locationId = query['locationId'] as String?;
     final productionId = query['productionId'] as String?;
+    final productId = query['productId'] as String?;
 
     var matches = _assets.where((asset) {
+      if (productId != null && asset.product.id != productId) return false;
       if (categoryId != null && asset.product.category.id != categoryId) return false;
       if (locationId != null && asset.location.id != locationId) return false;
       if (productionId != null && _checkedOutTo[asset.id]?.id != productionId) return false;

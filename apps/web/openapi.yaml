@@ -278,6 +278,11 @@ paths:
           description: Only assets whose product is in this category.
           schema:
             type: string
+        - name: productId
+          in: query
+          description: Only units of this product.
+          schema:
+            type: string
         - name: q
           in: query
           description: Case-insensitive match on asset tag, serial number, product or manufacturer name.
@@ -310,6 +315,79 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+    post:
+      operationId: createAsset
+      tags: [inventory]
+      summary: Register one unit of a product, with the tag just scanned
+      description: |
+        Takes ADMIN of the organization, like registering units on the web.
+        The tag is required and is used as given — nothing is numbered for it:
+        it has to start with the org's prefix (`asset_tag_prefix_mismatch`)
+        and not be on another unit already (`asset_tag_in_use`).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssetCreateRequest'
+      responses:
+        '201':
+          description: The unit was registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/assets/{assetId}/tag:
+    put:
+      operationId: setAssetTag
+      tags: [inventory]
+      summary: Give an untagged unit the tag just scanned
+      description: |
+        Takes ADMIN of the unit's organization. Only for a unit without a tag:
+        one that has one is refused (`asset_already_tagged`) — a second scan on
+        the wrong row is likelier than a sticker that really changed, and the
+        web is where a tag is corrected. Same checks on the tag as
+        `createAsset`.
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssetTagRequest'
+      responses:
+        '200':
+          description: The unit now carries the tag
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
 
   /api/v1/assets/by-tag/{tag}:
     get:
@@ -750,6 +828,11 @@ components:
         has been cancelled (`production_cancelled`). A code that matched more
         than one unit's serial number identifies nothing in particular
         (`serial_ambiguous`) — the asset tag is what disambiguates it.
+
+        Tags: a tag has to start with the org's prefix
+        (`asset_tag_prefix_mismatch`), can be on one unit only
+        (`asset_tag_in_use`), and a unit that already carries one is not
+        retagged from a scanner (`asset_already_tagged`).
 
         Stocktakes: a closed one takes no more counting (`stocktake_closed`),
         a scope that matches nothing starts nothing (`stocktake_empty`), and
@@ -1283,6 +1366,27 @@ components:
         done:
           type: boolean
           description: Already at the scan's target; nothing to book.
+
+    AssetCreateRequest:
+      type: object
+      required: [productId, organizationId, locationId, assetTag]
+      properties:
+        productId:
+          type: string
+        organizationId:
+          type: string
+        locationId:
+          type: string
+          description: One of the organization's locations.
+        assetTag:
+          type: string
+
+    AssetTagRequest:
+      type: object
+      required: [assetTag]
+      properties:
+        assetTag:
+          type: string
 
     ScanBatchRequest:
       type: object

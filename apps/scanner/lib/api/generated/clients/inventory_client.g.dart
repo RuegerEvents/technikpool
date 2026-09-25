@@ -112,6 +112,7 @@ class _InventoryClient implements InventoryClient {
     String? locationId,
     String? productionId,
     String? categoryId,
+    String? productId,
     String? q,
     String? cursor,
   }) async {
@@ -121,6 +122,7 @@ class _InventoryClient implements InventoryClient {
       r'locationId': locationId,
       r'productionId': productionId,
       r'categoryId': categoryId,
+      r'productId': productId,
       r'q': q,
       r'cursor': cursor,
     };
@@ -141,6 +143,65 @@ class _InventoryClient implements InventoryClient {
     late AssetPage _value;
     try {
       _value = AssetPage.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Asset> createAsset({required AssetCreateRequest body}) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body.toJson());
+    final _options = _setStreamType<Asset>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/assets',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, Object?>>(_options);
+    late Asset _value;
+    try {
+      _value = Asset.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Asset> setAssetTag({
+    required String assetId,
+    required AssetTagRequest body,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body.toJson());
+    final _options = _setStreamType<Asset>(
+      Options(method: 'PUT', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/assets/${assetId}/tag',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, Object?>>(_options);
+    late Asset _value;
+    try {
+      _value = Asset.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
