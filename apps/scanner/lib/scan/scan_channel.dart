@@ -24,6 +24,9 @@ class ScannerConfig {
       'android.intent.ACTION_DECODE_DATA',
       'com.rfid.SCAN',
       'nlscan.action.SCANNER_RESULT',
+      // Sunmi (L2H, L2s …): the scanner service's broadcast output, text in
+      // `data`. Read off ScannerHead v4.5.14 on an L2H.
+      'com.sunmi.scanner.ACTION_DATA_CODE_RECEIVED',
     ],
     extraKeys: ['data', 'barcode_string', 'barcode', 'SCAN_BARCODE1', 'value'],
   );
