@@ -500,6 +500,16 @@ class DemoBackend {
       if (count is! int || count < 0) {
         return _error(options, 400, 'invalid_request', 'Invalid count');
       }
+      final previous = body['previous'];
+      if (previous is int &&
+          (stocktake.counts['$productId|$locationId'] ?? 0) != previous) {
+        return _error(
+          options,
+          409,
+          'stocktake_count_changed',
+          'Your count here was changed elsewhere in the meantime',
+        );
+      }
       stocktake.counts['$productId|$locationId'] = count;
       return _noContent(options);
     }

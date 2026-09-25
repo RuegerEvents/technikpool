@@ -617,6 +617,10 @@ class SEn extends S {
       'This product is not counted in this stocktake.';
 
   @override
+  String get errorStocktakeCountChanged =>
+      'Your count here was changed on another device in the meantime. It shows the current number now — count on from there.';
+
+  @override
   String get errorStocktakeActionApplied =>
       'This correction has already been applied.';
 }

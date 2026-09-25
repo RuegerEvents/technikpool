@@ -10259,3 +10259,7 @@ msgstr "Gerät {0}"
 #: src/routes/assets/new/+page.svelte
 msgid "Scan or type"
 msgstr "Scannen oder tippen"
+
+#: src/lib/error-messages.svelte.ts
+msgid "Your count here was changed on another device in the meantime. It shows the current number now — count again from there."
+msgstr "Deine Zählung hier wurde inzwischen auf einem anderen Gerät geändert. Jetzt steht die aktuelle Zahl da – zähl von dort weiter."

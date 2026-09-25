@@ -184,6 +184,7 @@ export type AppErrorCode =
 	| 'stocktake_not_your_tick'
 	| 'stocktake_not_found_yet'
 	| 'stocktake_product_not_counted'
+	| 'stocktake_count_changed'
 	| 'stocktake_invalid_request'
 	// Sticker sheets (their own endpoint, not a remote function)
 	| 'sticker_config_invalid'

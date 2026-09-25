@@ -90,6 +90,10 @@ void main() {
     await tester.tap(find.byIcon(Icons.add));
     await tester.pumpAndSettle();
     expect(find.text('2'), findsOneWidget);
+    // Sent once the taps stop, as one write for both.
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+    expect(find.text('2'), findsOneWidget);
     expect(find.text('20 expected here · 2 counted in total'), findsOneWidget);
   });
 }

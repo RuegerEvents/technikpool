@@ -81,6 +81,7 @@ export class StocktakeError extends Error {
 			| 'stocktake_not_your_tick'
 			| 'stocktake_not_found_yet'
 			| 'stocktake_product_not_counted'
+			| 'stocktake_count_changed'
 			| 'asset_not_found'
 			| 'serial_ambiguous'
 			| 'forbidden'
@@ -104,6 +105,7 @@ export const STOCKTAKE_ERROR_STATUS: Record<StocktakeError['code'], number> = {
 	stocktake_not_your_tick: 403,
 	stocktake_not_found_yet: 409,
 	stocktake_product_not_counted: 409,
+	stocktake_count_changed: 409,
 	asset_not_found: 404,
 	serial_ambiguous: 409,
 	forbidden: 403,
@@ -1299,7 +1301,20 @@ export async function setStocktakeItemNote(
 export async function setStocktakeCount(
 	userId: string,
 	stocktakeId: string,
-	input: { productId: string; locationId: string; count: number }
+	input: {
+		productId: string;
+		locationId: string;
+		count: number;
+		/**
+		 * The caller's count this one was made from, where no count yet is 0 —
+		 * nothing counted and zero counted are the same starting point. When
+		 * given, the write only happens if the stored count still is that, so a
+		 * second device (or a tab left open) counting as the same person can't
+		 * silently overwrite a number it never saw. Omitted, the count simply
+		 * replaces whatever is there, as it always did.
+		 */
+		previous?: number;
+	}
 ) {
 	const stocktake = await loadOpenForWrite(userId, stocktakeId);
 	await assertCountingLocation(stocktake.organizationId, input.locationId);
@@ -1323,13 +1338,42 @@ export async function setStocktakeCount(
 		locationId: input.locationId,
 		userId
 	};
-	await prisma.$transaction([
-		prisma.stocktakeCount.upsert({
-			where: { stocktakeId_productId_locationId_userId: key },
-			create: { ...key, count: input.count },
-			update: { count: input.count }
-		}),
-		prisma.stocktakeEvent.create({
+	const changed = () =>
+		new StocktakeError(
+			'stocktake_count_changed',
+			'Your count here was changed elsewhere in the meantime'
+		);
+	await prisma.$transaction(async (tx) => {
+		// Compare-and-set in the write itself rather than a read before it, so
+		// two writes made from the same number cannot both pass the check.
+		const where = { stocktakeId_productId_locationId_userId: key };
+		if (input.previous === undefined) {
+			await tx.stocktakeCount.upsert({
+				where,
+				create: { ...key, count: input.count },
+				update: { count: input.count }
+			});
+		} else {
+			const { count: updated } = await tx.stocktakeCount.updateMany({
+				where: { ...key, count: input.previous },
+				data: { count: input.count }
+			});
+			if (updated === 0) {
+				// Either the stored count is a different number, or there is none
+				// yet — which only matches a count made from zero.
+				if (input.previous !== 0) throw changed();
+				const existing = await tx.stocktakeCount.findUnique({ where, select: { id: true } });
+				if (existing) throw changed();
+				try {
+					await tx.stocktakeCount.create({ data: { ...key, count: input.count } });
+				} catch (err) {
+					// Created by another request between the read and this write.
+					if ((err as { code?: string }).code === 'P2002') throw changed();
+					throw err;
+				}
+			}
+		}
+		await tx.stocktakeEvent.create({
 			data: {
 				stocktakeId,
 				userId,
@@ -1338,8 +1382,8 @@ export async function setStocktakeCount(
 				locationId: input.locationId,
 				data: { count: input.count }
 			}
-		})
-	]);
+		});
+	});
 }
 
 // ---------------------------------------------------------------------------

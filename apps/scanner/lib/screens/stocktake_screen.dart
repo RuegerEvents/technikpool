@@ -138,29 +138,85 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
   Future<void> _queue = Future<void>.value();
   bool _busy = false;
 
-  /// Counts written but not yet read back, by product id, so a row shows the
-  /// number just entered while the reload is on its way — and a second tap on
-  /// `+` counts from it rather than from the stale one. Cleared once the
-  /// reload carries the write; a newer write on the same product keeps it.
+  /// Counts entered but not yet read back, by product id, so a row shows the
+  /// number just entered while the write and the reload are on their way —
+  /// and a second tap on `+` counts from it rather than from the stale one.
+  /// Cleared once the reload carries the write; a newer entry keeps it.
   final _pendingCounts = <String, int>{};
   final _countSeq = <String, int>{};
 
-  /// Writes are sent one after another: two `+` taps in a row must arrive as
-  /// 1 then 2, and HTTP alone does not promise that.
+  /// The stored count each pending entry was made from (none yet is 0), sent
+  /// as `previous`: if the server holds something else by then — the
+  /// same person counting on a second device — the write is refused rather
+  /// than overwriting a number this device never showed.
+  final _countBase = <String, int>{};
+
+  /// `+` taps are gathered for a moment and sent as one write, so three taps
+  /// cost one request.
+  final _countTimers = <String, Timer>{};
+  static const _bumpDebounce = Duration(milliseconds: 800);
+
+  /// Writes are sent one after another: two writes for a product must arrive
+  /// in the order they were made, and HTTP alone does not promise that.
   Future<void> _countQueue = Future<void>.value();
+
+  /// Others count at the same time and nothing tells this device when, so an
+  /// open stocktake is reloaded every few seconds while this screen is in
+  /// front, and at once when the app comes back to the foreground.
+  Timer? _poll;
+  late final AppLifecycleListener _lifecycle;
+  static const _pollEvery = Duration(seconds: 10);
 
   @override
   void initState() {
     super.initState();
     _sub = ref.read(scanBusProvider).codes.listen(_enqueue);
+    _poll = Timer.periodic(_pollEvery, (_) => _pollNow());
+    _lifecycle = AppLifecycleListener(onResume: _pollNow);
   }
+
+  /// The client the last `+` was counted with, kept so taps still waiting
+  /// out the debounce can be sent on the way out — `ref` is gone by then.
+  ApiClient? _countApi;
 
   @override
   void dispose() {
+    _poll?.cancel();
+    _lifecycle.dispose();
+    // Leaving right after a few taps must not lose them. Fire and forget: no
+    // screen is left to report to, and the next open reads what landed.
+    for (final id in _countTimers.keys) {
+      final count = _pendingCounts[id];
+      if (count == null) continue;
+      _countApi?.stocktake
+          .setStocktakeCount(
+            stocktakeId: widget.stocktakeId,
+            body: StocktakeCountRequest(
+              productId: id,
+              locationId: _location.id,
+              count: count,
+              previous: _countBase[id] ?? 0,
+            ),
+          )
+          .ignore();
+    }
+    for (final timer in _countTimers.values) {
+      timer.cancel();
+    }
     _sub?.cancel();
     _manualController.dispose();
     _feedback.close();
     super.dispose();
+  }
+
+  void _pollNow() {
+    if (!mounted) return;
+    // Not while a sheet or dialog is on top, where a reload would only move
+    // things behind it, and not while the app is in the background.
+    final inFront = ModalRoute.of(context)?.isCurrent ?? true;
+    final resumed =
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+    if (inFront && resumed) _refresh();
   }
 
   void _refresh() => ref.invalidate(stocktakeProvider(widget.stocktakeId));
@@ -348,6 +404,7 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
   );
 
   Future<void> _changeLocation(StocktakeDetail detail) async {
+    _flushCounts();
     final picked = await _locationSheet(context, detail.countingLocations, _location.id);
     if (picked == null || !mounted) return;
     ref.read(stocktakeLocationProvider.notifier).remember(widget.stocktakeId, picked.id);
@@ -355,6 +412,7 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
   }
 
   Future<void> _close(StocktakeDetail detail) async {
+    _flushCounts();
     final l10n = S.of(context);
     final api = ref.read(apiClientProvider);
     if (api == null) return;
@@ -379,6 +437,9 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
     if (ok != true || !mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     try {
+      // The counts flushed above are still in flight; a closed stocktake
+      // would refuse them.
+      await _countQueue;
       await api.stocktake.closeStocktake(stocktakeId: widget.stocktakeId);
       ref.invalidate(openStocktakesProvider);
       if (!mounted) return;
@@ -487,30 +548,66 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
       ),
     );
     if (count == null || !mounted) return;
-    _writeCount(product, count);
+    _enterCount(product.productId, count, current);
+    _sendCount(product.productId);
   }
 
   /// One more of a loose product, without the dialog — a shelf of cables is
-  /// counted by pressing `+` for each one taken down.
-  void _bump(StocktakeProductCount product, int? current) =>
-      _writeCount(product, (_pendingCounts[product.productId] ?? current ?? 0) + 1);
-
-  void _writeCount(StocktakeProductCount product, int count) {
+  /// counted by pressing `+` for each one taken down. Sent once the taps stop.
+  void _bump(StocktakeProductCount product, int? current) {
     final id = product.productId;
-    final seq = (_countSeq[id] ?? 0) + 1;
-    _countSeq[id] = seq;
+    _countApi = ref.read(apiClientProvider);
+    _enterCount(id, (_pendingCounts[id] ?? current ?? 0) + 1, current);
+    _countTimers[id]?.cancel();
+    _countTimers[id] = Timer(_bumpDebounce, () => _sendCount(id));
+  }
+
+  /// Shows [count] at once. `current` is the stored count on screen, which is
+  /// what the first of a run of entries was made from.
+  void _enterCount(String id, int count, int? current) {
+    if (!_pendingCounts.containsKey(id)) _countBase[id] = current ?? 0;
+    _countSeq[id] = (_countSeq[id] ?? 0) + 1;
     setState(() => _pendingCounts[id] = count);
+  }
+
+  /// Sends every `+` still waiting out the debounce — before the location
+  /// changes under it, or the stocktake is closed.
+  void _flushCounts() {
+    for (final id in _countTimers.keys.toList()) {
+      _sendCount(id);
+    }
+  }
+
+  void _sendCount(String id) {
+    _countTimers.remove(id)?.cancel();
+    final count = _pendingCounts[id];
+    if (count == null) return;
+    final seq = _countSeq[id];
+    // Where it was counted, not where the counter is by the time it is sent.
+    final locationId = _location.id;
     _countQueue = _countQueue.then((_) async {
       final api = ref.read(apiClientProvider);
       if (api == null || !mounted) return;
       final l10n = S.of(context);
       final messenger = ScaffoldMessenger.of(context);
+      // Read when it is this write's turn: an earlier write in the queue has
+      // moved it on to what that one stored.
+      final previous = _countBase[id] ?? 0;
+      var refused = false;
       try {
         await api.stocktake.setStocktakeCount(
           stocktakeId: widget.stocktakeId,
-          body: StocktakeCountRequest(productId: id, locationId: _location.id, count: count),
+          body: StocktakeCountRequest(
+            productId: id,
+            locationId: locationId,
+            count: count,
+            previous: previous,
+          ),
         );
+        _countBase[id] = count;
       } catch (error) {
+        final err = unwrapError(error);
+        refused = err is ApiException && err.code == 'stocktake_count_changed';
         messenger.showSnackBar(SnackBar(content: Text(describeError(l10n, error))));
       } finally {
         _refresh();
@@ -519,7 +616,14 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
         try {
           await ref.read(stocktakeProvider(widget.stocktakeId).future);
         } catch (_) {}
-        if (mounted && _countSeq[id] == seq) setState(() => _pendingCounts.remove(id));
+        // A refused count is dropped along with anything tapped since: it was
+        // built on a number that no longer holds, and the row has to show
+        // what is stored before anyone counts on from it.
+        if (mounted && (refused || _countSeq[id] == seq)) {
+          _countTimers.remove(id)?.cancel();
+          setState(() => _pendingCounts.remove(id));
+          _countBase.remove(id);
+        }
       }
     });
   }

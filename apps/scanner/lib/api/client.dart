@@ -159,6 +159,7 @@ String describeError(S l10n, Object error) {
     'stocktake_not_your_tick' => l10n.errorStocktakeNotYourTick,
     'stocktake_not_found_yet' => l10n.errorStocktakeNotFoundYet,
     'stocktake_product_not_counted' => l10n.errorStocktakeProductNotCounted,
+    'stocktake_count_changed' => l10n.errorStocktakeCountChanged,
     'stocktake_action_applied' => l10n.errorStocktakeActionApplied,
     'unauthorized' => l10n.errorUnauthorized,
     'invalid_request' => l10n.errorInvalidRequest,

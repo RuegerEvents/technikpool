@@ -40,6 +40,7 @@ const ERROR_CODES: Record<StocktakeError['code'], AppErrorCode> = {
 	stocktake_not_your_tick: 'stocktake_not_your_tick',
 	stocktake_not_found_yet: 'stocktake_not_found_yet',
 	stocktake_product_not_counted: 'stocktake_product_not_counted',
+	stocktake_count_changed: 'stocktake_count_changed',
 	asset_not_found: 'asset_not_found',
 	serial_ambiguous: 'asset_serial_ambiguous',
 	forbidden: 'unauthorized',
@@ -214,7 +215,8 @@ export const setStocktakeCount = command(
 		stocktakeId: v.string(),
 		productId: v.string(),
 		locationId: v.string(),
-		count: v.pipe(v.number(), v.integer(), v.minValue(0))
+		count: v.pipe(v.number(), v.integer(), v.minValue(0)),
+		previous: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0)))
 	}),
 	async ({ stocktakeId, ...input }) => {
 		const user = await requireAuth();

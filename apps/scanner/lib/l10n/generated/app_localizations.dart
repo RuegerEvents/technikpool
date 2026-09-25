@@ -1201,6 +1201,12 @@ abstract class S {
   /// **'This product is not counted in this stocktake.'**
   String get errorStocktakeProductNotCounted;
 
+  /// No description provided for @errorStocktakeCountChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Your count here was changed on another device in the meantime. It shows the current number now — count on from there.'**
+  String get errorStocktakeCountChanged;
+
   /// No description provided for @errorStocktakeActionApplied.
   ///
   /// In en, this message translates to:

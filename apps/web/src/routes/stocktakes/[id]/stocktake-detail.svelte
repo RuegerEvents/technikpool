@@ -15,6 +15,7 @@
 	import StocktakeProgress from '$lib/components/stocktake-progress.svelte';
 	import { categoryLabel } from '$lib/category';
 	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
+	import { errorCodeOf } from '$lib/errors';
 	import {
 		foundViaLabel,
 		stocktakeStateClass,
@@ -40,6 +41,23 @@
 
 	let stocktake = $derived(await getStocktake(stocktakeId));
 	let isOpen = $derived(stocktake.status === 'OPEN');
+
+	// Others are counting at the same time, on handhelds and in other tabs, and
+	// nothing tells this page when they do. So an open stocktake is reloaded
+	// every few seconds while the tab is in front, and at once when it comes
+	// back to it. A refresh keeps the rows on screen until the new ones are in.
+	$effect(() => {
+		if (!isOpen) return;
+		const reload = () => {
+			if (document.visibilityState === 'visible') getStocktake(stocktakeId).refresh();
+		};
+		const timer = setInterval(reload, 10_000);
+		document.addEventListener('visibilitychange', reload);
+		return () => {
+			clearInterval(timer);
+			document.removeEventListener('visibilitychange', reload);
+		};
+	});
 	type Item = (typeof stocktake.items)[number];
 	type Confirm = {
 		assetId: string;
@@ -263,7 +281,8 @@
 	// -------------------------------------------------------------------------
 	// Loose counts
 
-	async function saveCount(productId: string, value: string) {
+	/** `previous` is the count the field showed — see `setStocktakeCount`. */
+	async function saveCount(productId: string, value: string, previous: number) {
 		if (!locationId) {
 			toast.error('Choose where you are counting first.');
 			return;
@@ -271,9 +290,12 @@
 		const count = Number(value);
 		if (value.trim() === '' || !Number.isInteger(count) || count < 0) return;
 		try {
-			await setStocktakeCount({ stocktakeId, productId, locationId, count });
+			await setStocktakeCount({ stocktakeId, productId, locationId, count, previous });
 		} catch (err) {
 			toast.error(getErrorMessage(err));
+			// The field has to show what is actually stored before anyone types
+			// into it again.
+			if (errorCodeOf(err) === 'stocktake_count_changed') getStocktake(stocktakeId).refresh();
 		}
 	}
 
@@ -791,7 +813,8 @@
 											class="ml-auto h-8 w-20 text-right"
 											value={here?.myCount ?? ''}
 											disabled={!locationId}
-											onchange={(e) => saveCount(p.product.id, e.currentTarget.value)}
+											onchange={(e) =>
+												saveCount(p.product.id, e.currentTarget.value, here?.myCount ?? 0)}
 										/>
 									</td>
 								{/if}

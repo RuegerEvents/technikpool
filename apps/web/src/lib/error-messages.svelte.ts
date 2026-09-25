@@ -370,6 +370,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'This unit has not been counted yet.';
 		case 'stocktake_product_not_counted':
 			return 'This product is not counted in this stocktake.';
+		case 'stocktake_count_changed':
+			return 'Your count here was changed on another device in the meantime. It shows the current number now — count again from there.';
 		case 'stocktake_invalid_request':
 			return 'That location, count or selection is not valid for this stocktake.';
 		default: {

@@ -320,6 +320,45 @@ void main() {
       expect(counted.progress.found, 19);
     });
 
+    test('a count made from a stale number is refused', () async {
+      final id = (await api.stocktake.listStocktakes()).single.id;
+      final cable = (await api.stocktake.getStocktake(stocktakeId: id))
+          .products
+          .single;
+      await api.stocktake.setStocktakeCount(
+        stocktakeId: id,
+        body: StocktakeCountRequest(
+          productId: cable.productId,
+          locationId: warehouse,
+          count: 18,
+        ),
+      );
+      // 18 is stored; this device still thinks 17.
+      await expectLater(
+        api.stocktake.setStocktakeCount(
+          stocktakeId: id,
+          body: StocktakeCountRequest(
+            productId: cable.productId,
+            locationId: warehouse,
+            count: 18,
+            previous: 17,
+          ),
+        ),
+        failsWith('stocktake_count_changed'),
+      );
+      await api.stocktake.setStocktakeCount(
+        stocktakeId: id,
+        body: StocktakeCountRequest(
+          productId: cable.productId,
+          locationId: warehouse,
+          count: 19,
+          previous: 18,
+        ),
+      );
+      final counted = await api.stocktake.getStocktake(stocktakeId: id);
+      expect(counted.products.single.counted, 19);
+    });
+
     test('closing freezes it', () async {
       final id = (await api.stocktake.listStocktakes()).single.id;
       final closed = await api.stocktake.closeStocktake(stocktakeId: id);

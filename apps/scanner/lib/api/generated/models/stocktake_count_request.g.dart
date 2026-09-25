@@ -12,6 +12,7 @@ StocktakeCountRequest _$StocktakeCountRequestFromJson(
   productId: json['productId'] as String,
   locationId: json['locationId'] as String,
   count: (json['count'] as num).toInt(),
+  previous: (json['previous'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$StocktakeCountRequestToJson(
@@ -20,4 +21,5 @@ Map<String, dynamic> _$StocktakeCountRequestToJson(
   'productId': instance.productId,
   'locationId': instance.locationId,
   'count': instance.count,
+  'previous': ?instance.previous,
 };

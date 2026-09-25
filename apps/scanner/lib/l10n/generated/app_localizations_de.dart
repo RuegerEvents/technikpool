@@ -620,6 +620,10 @@ class SDe extends S {
       'Dieses Produkt wird in dieser Inventur nicht gezählt.';
 
   @override
+  String get errorStocktakeCountChanged =>
+      'Deine Zählung hier wurde inzwischen auf einem anderen Gerät geändert. Jetzt steht die aktuelle Zahl da – zähl von dort weiter.';
+
+  @override
   String get errorStocktakeActionApplied =>
       'Diese Korrektur wurde bereits angewendet.';
 }

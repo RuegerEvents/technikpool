@@ -184,5 +184,6 @@
   "errorStocktakeNotYourTick": "Nur wer ein Gerät gezählt hat, kann das ändern.",
   "errorStocktakeNotFoundYet": "Dieses Gerät wurde noch nicht gezählt.",
   "errorStocktakeProductNotCounted": "Dieses Produkt wird in dieser Inventur nicht gezählt.",
+  "errorStocktakeCountChanged": "Deine Zählung hier wurde inzwischen auf einem anderen Gerät geändert. Jetzt steht die aktuelle Zahl da – zähl von dort weiter.",
   "errorStocktakeActionApplied": "Diese Korrektur wurde bereits angewendet."
 }
