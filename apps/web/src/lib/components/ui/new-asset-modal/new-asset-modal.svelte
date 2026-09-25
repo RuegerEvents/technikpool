@@ -463,7 +463,7 @@
 					<div class="space-y-2">
 						<Label for="newAssetSerial">Serial number</Label>
 						<Input id="newAssetSerial" bind:value={serial} disabled={saving} />
-						<SerialNumberWarning serialNumber={serial} />
+						<SerialNumberWarning serialNumber={serial} paused={saving} />
 					</div>
 				{/if}
 				{#if !noTag}

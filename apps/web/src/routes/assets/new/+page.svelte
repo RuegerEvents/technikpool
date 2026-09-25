@@ -498,7 +498,7 @@
 														placeholder="S/N 123456"
 														class="h-8 text-sm"
 													/>
-													<SerialNumberWarning serialNumber={item.serialNumber} />
+													<SerialNumberWarning serialNumber={item.serialNumber} paused={saving} />
 												</td>
 											</tr>
 										{/each}
@@ -522,7 +522,7 @@
 							<div class="col-span-2 space-y-2">
 								<Label for="serial-0">Serial Number</Label>
 								<Input id="serial-0" bind:value={items[0].serialNumber} placeholder="S/N 123456" />
-								<SerialNumberWarning serialNumber={items[0].serialNumber} />
+								<SerialNumberWarning serialNumber={items[0].serialNumber} paused={saving} />
 							</div>
 						</div>
 					{/if}

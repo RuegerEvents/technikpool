@@ -1275,7 +1275,11 @@
 			<div class="space-y-2">
 				<Label for="serial">Serial Number</Label>
 				<Input id="serial" bind:value={assetDraft.serialNumber} disabled={retired} />
-				<SerialNumberWarning serialNumber={assetDraft.serialNumber} excludeAssetId={asset.id} />
+				<SerialNumberWarning
+					serialNumber={assetDraft.serialNumber}
+					excludeAssetId={asset.id}
+					paused={savingAsset}
+				/>
 			</div>
 			<div class="space-y-2">
 				<Label for="tag">Asset Tag</Label>
