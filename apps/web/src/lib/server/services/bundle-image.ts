@@ -238,12 +238,46 @@ async function render(assets: ImageContents, featured: FeaturedProducts) {
 	return `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450">${tiles}${empty}</svg>`;
 }
 
+// One drawing per record at a time. A product edit refreshes the unfiltered
+// device list, the per-org one and every affected unit's own query in parallel,
+// and each of them used to find the same stale picture and draw it again —
+// an object-store fetch per photo, times three. Keyed on the fingerprint, so a
+// drawing of contents that have since changed never stands in for the new one.
+const inFlight = new Map<string, Promise<string | null>>();
+
+function once(key: string, draw: () => Promise<string | null>) {
+	const running = inFlight.get(key);
+	if (running) return running;
+	const promise = draw().finally(() => inFlight.delete(key));
+	inFlight.set(key, promise);
+	return promise;
+}
+
+function bundleIsCurrent(bundle: BundleForImage, currentFingerprint: string) {
+	return !!bundle.imagePath && bundle.imageFingerprint === currentFingerprint;
+}
+
 /** Generate only when contents changed; force creates a fresh URL to bust browser caches. */
 export async function ensureBundleImage(bundle: BundleForImage, force = false) {
 	const featured = featuredSet(bundle);
 	const currentFingerprint = fingerprint(bundle.assets, featured);
-	if (!force && bundle.imagePath && bundle.imageFingerprint === currentFingerprint)
-		return bundle.imagePath;
+	if (!force && bundleIsCurrent(bundle, currentFingerprint)) return bundle.imagePath;
+	if (force) return drawBundleImage(bundle, featured, currentFingerprint, true);
+	const path = await once(`bundle:${bundle.id}:${currentFingerprint}`, () =>
+		drawBundleImage(bundle, featured, currentFingerprint, false)
+	);
+	// Only the first caller's object was drawn from; the rest shared its result.
+	bundle.imagePath = path;
+	bundle.imageFingerprint = currentFingerprint;
+	return path;
+}
+
+async function drawBundleImage(
+	bundle: BundleForImage,
+	featured: FeaturedProducts,
+	currentFingerprint: string,
+	force: boolean
+) {
 	const svg = await render(bundle.assets, featured);
 	const suffix = force ? `${currentFingerprint}-${randomUUID()}` : currentFingerprint;
 	const path = `${PUBLIC_PREFIX}/bundles/${bundle.id}-${suffix}.svg`;
@@ -260,6 +294,18 @@ export async function ensureBundleImage(bundle: BundleForImage, force = false) {
 /** Generate a bundle-style preview for a unit that has attached accessories. */
 export async function ensureAssetImage(asset: AssetForImage, force = false) {
 	if (asset.accessories.length === 0) return null;
+	const { contents, featured, currentFingerprint } = assetContents(asset);
+	if (!force && assetIsCurrent(asset, currentFingerprint)) return asset.generatedImagePath;
+	if (force) return drawAssetImage(asset, contents, featured, currentFingerprint, true);
+	const path = await once(`asset:${asset.id}:${currentFingerprint}`, () =>
+		drawAssetImage(asset, contents, featured, currentFingerprint, false)
+	);
+	asset.generatedImagePath = path;
+	asset.generatedImageFingerprint = currentFingerprint;
+	return path;
+}
+
+function assetContents(asset: AssetForImage) {
 	const contents: ImageContents = [
 		{ parentAssetId: null, product: asset.product },
 		...asset.accessories.map((accessory) => ({
@@ -271,14 +317,20 @@ export async function ensureAssetImage(asset: AssetForImage, force = false) {
 	// device and everything else in the picture hangs off it, so it is drawn
 	// large and its accessories share the strip underneath however many there are.
 	const featured: FeaturedProducts = new Set([asset.product.id]);
-	const currentFingerprint = fingerprint(contents, featured);
-	if (
-		!force &&
-		asset.generatedImagePath &&
-		asset.generatedImageFingerprint === currentFingerprint
-	) {
-		return asset.generatedImagePath;
-	}
+	return { contents, featured, currentFingerprint: fingerprint(contents, featured) };
+}
+
+function assetIsCurrent(asset: AssetForImage, currentFingerprint: string) {
+	return !!asset.generatedImagePath && asset.generatedImageFingerprint === currentFingerprint;
+}
+
+async function drawAssetImage(
+	asset: AssetForImage,
+	contents: ImageContents,
+	featured: FeaturedProducts,
+	currentFingerprint: string,
+	force: boolean
+) {
 	const svg = await render(contents, featured);
 	const suffix = force ? `${currentFingerprint}-${randomUUID()}` : currentFingerprint;
 	const path = `${PUBLIC_PREFIX}/assets/${asset.id}-${suffix}.svg`;
@@ -293,4 +345,75 @@ export async function ensureAssetImage(asset: AssetForImage, force = false) {
 	asset.generatedImagePath = path;
 	asset.generatedImageFingerprint = currentFingerprint;
 	return path;
+}
+
+// ── Reads: never wait for a drawing ──────────────────────────────────────────
+//
+// A picture goes stale for reasons that have nothing to do with the page being
+// read: replacing one product photo stales every unit and kit it appears in,
+// and the command that saved the photo refreshes the device lists. Drawing them
+// inline made that save wait for every one of them — half a minute on a real
+// estate. A read therefore answers with the picture it has, even an outdated
+// one (or none, where callers fall back to the product photo), and the redraw
+// runs behind it; the next read picks it up.
+
+/** The stored preview as it is; redraws it in the background when it is stale. */
+export function bundleImageForRead(bundle: BundleForImage): string | null {
+	if (bundleIsCurrent(bundle, fingerprint(bundle.assets, featuredSet(bundle)))) {
+		return bundle.imagePath;
+	}
+	// A copy, because the drawing writes the new path back onto the object it
+	// was given, and this one may still be on its way to the client.
+	inBackground(`bundle "${bundle.id}"`, ensureBundleImage({ ...bundle }));
+	return bundle.imagePath;
+}
+
+/** The stored preview as it is; redraws it in the background when it is stale. */
+export function assetImageForRead(asset: AssetForImage): string | null {
+	if (asset.accessories.length === 0) return null;
+	if (assetIsCurrent(asset, assetContents(asset).currentFingerprint)) {
+		return asset.generatedImagePath;
+	}
+	inBackground(`asset "${asset.id}"`, ensureAssetImage({ ...asset }));
+	return asset.generatedImagePath;
+}
+
+function inBackground(what: string, drawing: Promise<unknown>) {
+	// A preview is an enhancement: storage trouble is logged, and since the
+	// fingerprint was not persisted, the next read tries again.
+	drawing.catch((cause) => console.error(`Could not refresh generated image for ${what}:`, cause));
+}
+
+/**
+ * Redraws every preview a product appears in, behind the command that changed
+ * it: a unit of it carrying accessories, a unit carrying it as an accessory,
+ * and every kit holding one. Reads would get there too, but only for the
+ * previews someone happens to open, and a kit nobody looks at would show the
+ * old photo on the next delivery note. Returns at once.
+ */
+export function redrawPreviewsOf(productId: string) {
+	inBackground(`previews of product "${productId}"`, redrawAll(productId));
+}
+
+async function redrawAll(productId: string) {
+	const [assets, bundles] = await Promise.all([
+		prisma.asset.findMany({
+			where: {
+				accessories: { some: {} },
+				OR: [{ productId }, { accessories: { some: { productId } } }]
+			},
+			include: { product: true, accessories: { include: { product: true } } }
+		}),
+		prisma.assetBundle.findMany({
+			where: { assets: { some: { productId } } },
+			include: {
+				template: { select: { featuredProducts: { select: { id: true } } } },
+				assets: { include: { product: true } }
+			}
+		})
+	]);
+	// One after the other: each drawing fetches every photo in it from the
+	// object store, and nobody is waiting on these.
+	for (const asset of assets) await ensureAssetImage(asset);
+	for (const bundle of bundles) await ensureBundleImage(bundle);
 }

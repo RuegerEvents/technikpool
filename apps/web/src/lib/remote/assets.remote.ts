@@ -31,7 +31,13 @@ import {
 	RETIRED_ASSET_WHERE
 } from '$lib/asset-status';
 import { syncAccessories } from '$lib/server/services/accessories';
-import { ensureAssetImage, ensureBundleImage } from '$lib/server/services/bundle-image';
+import {
+	assetImageForRead,
+	bundleImageForRead,
+	ensureAssetImage,
+	ensureBundleImage,
+	redrawPreviewsOf
+} from '$lib/server/services/bundle-image';
 import {
 	assertAdditionsFitType,
 	assertNewInstanceMatchesType,
@@ -81,17 +87,6 @@ async function ensureBundleImageWithoutBreakingRead(
 		// retries because the fingerprint was not persisted.
 		console.error(`Could not refresh generated image for bundle "${bundle.id}":`, cause);
 		return bundle.imagePath;
-	}
-}
-
-async function ensureAssetImageWithoutBreakingRead(asset: Parameters<typeof ensureAssetImage>[0]) {
-	try {
-		return await ensureAssetImage(asset);
-	} catch (cause) {
-		// A generated preview is an enhancement; storage trouble must not make
-		// inventory pages unavailable.
-		console.error(`Could not refresh generated image for asset "${asset.id}":`, cause);
-		return asset.generatedImagePath;
 	}
 }
 
@@ -171,7 +166,8 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 		},
 		orderBy: ASSET_ORDER_BY
 	});
-	await Promise.all(assets.map((asset) => ensureAssetImageWithoutBreakingRead(asset)));
+	// Stale previews are redrawn behind the read — see `assetImageForRead`.
+	for (const asset of assets) assetImageForRead(asset);
 	return assets.map(assetWithCableNames);
 });
 
@@ -232,7 +228,7 @@ export const getAsset = query(v.string(), async (assetId: string) => {
 		appError(403, 'unauthorized');
 	}
 
-	await ensureAssetImageWithoutBreakingRead(asset);
+	assetImageForRead(asset);
 	return assetWithCableNames(asset);
 });
 
@@ -2109,6 +2105,7 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		});
 	}
 
+	if (imageChanged) redrawPreviewsOf(product.id);
 	await refreshProductViews(product, previousProduct.manufacturerId, {
 		cable: cableChanged,
 		connectorsCreated: (connectors?.created.length ?? 0) + createdForWays.length > 0
@@ -2518,6 +2515,10 @@ export const mergeProducts = command(
 			}
 		});
 
+		// The moved units are a different product in every picture they are in,
+		// and the target may just have inherited the source's photo.
+		redrawPreviewsOf(targetProductId);
+
 		const orgIds = [...new Set(moving.map((a) => a.organizationId))];
 		// Both products' accessory profiles are derived from what units carry, so
 		// they move whichever side the units were on. The parents' too: a unit
@@ -2848,6 +2849,7 @@ export const revertCatalogChange = command(v.string(), async (entryId: string) =
 		data: { changes, revertOf: entry.id }
 	});
 
+	if ('imagePath' in data) redrawPreviewsOf(updated.id);
 	const cableTouched =
 		!!waysRevert ||
 		(['cableType', 'connectorA', 'connectorB', 'lengthCm'] as const).some((field) => field in data);
@@ -2895,15 +2897,13 @@ export const getBundleTemplates = query(v.optional(v.string()), async (organizat
 		},
 		orderBy: { name: 'asc' }
 	});
-	await Promise.all(
-		templates.flatMap((template) =>
-			template.instances.map(async (bundle) => {
-				// The instances are nested under their template here rather than
-				// carrying one, so the marked products are handed over explicitly.
-				bundle.imagePath = await ensureBundleImageWithoutBreakingRead({ ...bundle, template });
-			})
-		)
-	);
+	for (const template of templates) {
+		for (const bundle of template.instances) {
+			// The instances are nested under their template here rather than
+			// carrying one, so the marked products are handed over explicitly.
+			bundleImageForRead({ ...bundle, template });
+		}
+	}
 	const priceOrgIds = await priceVisibleOrgIds(user.id, queryOrgIds);
 	return templates.map((template) => ({
 		...template,
@@ -2959,7 +2959,7 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 		},
 		orderBy: [{ template: { name: 'asc' } }, { tag: { sort: 'asc', nulls: 'last' } }]
 	});
-	await Promise.all(bundles.map((bundle) => ensureBundleImageWithoutBreakingRead(bundle)));
+	for (const bundle of bundles) bundleImageForRead(bundle);
 	const priceOrgIds = await priceVisibleOrgIds(user.id, queryOrgIds);
 	return bundles.map((bundle) => ({
 		...maskBundlePrice(bundle, bundle.template.organizationId, priceOrgIds),
@@ -2994,7 +2994,7 @@ export const getBundle = query(v.string(), async (id: string) => {
 		appError(403, 'unauthorized');
 	}
 
-	await ensureBundleImageWithoutBreakingRead(bundle);
+	bundleImageForRead(bundle);
 	// The page says "Not set" for a bundle without a price, so it has to be told
 	// apart from one whose price this user may not see.
 	const pricesVisible = await readsOrgRecords(user.id, bundle.template.organizationId);
