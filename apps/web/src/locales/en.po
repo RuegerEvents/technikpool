@@ -10234,3 +10234,9 @@ msgstr "Checked out to {0}"
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "· Checked out to {0}"
 msgstr "· Checked out to {0}"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Count # accessory"
+msgid_plural "Count # accessories"
+msgstr[0] "Count # accessory"
+msgstr[1] "Count # accessories"

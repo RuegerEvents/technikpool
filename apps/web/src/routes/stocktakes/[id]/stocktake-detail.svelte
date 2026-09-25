@@ -965,7 +965,9 @@
 	{/snippet}
 	{#snippet footer()}
 		<Button icon="confirm" onclick={submitConfirm} disabled={confirming}>
-			{plural(confirmChecked.size, ['Count # unit', 'Count # units'])}
+			{confirmVia === 'parent'
+				? plural(confirmChecked.size, ['Count # accessory', 'Count # accessories'])
+				: plural(confirmChecked.size, ['Count # unit', 'Count # units'])}
 		</Button>
 		<Button
 			variant="outline"
