@@ -38,8 +38,6 @@
 	import { Label } from '$lib/components/ui/label';
 	import SerialNumberWarning from '$lib/components/SerialNumberWarning.svelte';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
-	import { CategorySelect } from '$lib/components/ui/category-select';
-	import { ImageUpload } from '$lib/components/ui/image-upload';
 	import {
 		ProductFields,
 		cableInputFrom,
@@ -97,7 +95,13 @@
 	let kind = $state<Kind>('device');
 	let manufacturer = $state<Selection>(null);
 	let product = $state<Selection>(null);
-	let categoryId = $state('');
+	// A product typed in rather than picked is described in the same product
+	// dialog /assets/new opens — category, photo, price, and whether it is a
+	// cable or a license — so one found missing while packing a case can be
+	// anything the catalogue holds. Null until that dialog is confirmed.
+	let pendingProduct = $state<ProductDraft | null>(null);
+	let productDraft = $state<ProductDraft>(emptyProductDraft());
+	let productDialogOpen = $state(false);
 	let cableDraft = $state<ProductDraft>(emptyCableDraft());
 	let quantity = $state(1);
 	// One per unit, the length of `quantity`: a tag is what is printed on a
@@ -107,7 +111,6 @@
 	// Set from `defaultNoTag` by reset(), which every caller runs before opening —
 	// reading the prop here would capture only its first value.
 	let noTag = $state(false);
-	let imagePath = $state('');
 	let chosenLocationId = $state('');
 	let saving = $state(false);
 	// Remounts the product picker when the manufacturer changes, so a stale
@@ -157,12 +160,57 @@
 	);
 
 	// Same defaulting the product wizard uses: an unclassified thing is
-	// Miscellaneous until someone says otherwise. Refills after every reset.
+	// Miscellaneous until someone says otherwise. Refills for every new draft.
 	$effect(() => {
-		if (categoryId) return;
+		if (productDraft.categoryId) return;
 		const misc = categories.find((c) => c.name.toLowerCase() === 'miscellaneous');
-		if (misc) categoryId = misc.id;
+		if (misc) productDraft.categoryId = misc.id;
 	});
+
+	function emptyProductDraft(): ProductDraft {
+		return {
+			name: '',
+			categoryId: '',
+			imagePath: '',
+			netPurchasePrice: undefined,
+			cable: null,
+			isLicense: false
+		};
+	}
+
+	/** Opens the product dialog for a name typed into the picker, or to edit it again. */
+	function describeProduct(name: string) {
+		// A fresh object unless it is the same product being reopened:
+		// ProductFields keys its bookkeeping to the draft it was handed.
+		productDraft =
+			pendingProduct && pendingProduct.name === name
+				? { ...pendingProduct }
+				: { ...emptyProductDraft(), name };
+		productDialogOpen = true;
+	}
+
+	function confirmProduct() {
+		if (!productDraft.name.trim()) {
+			toast.error('Please choose or name a product');
+			return;
+		}
+		if (!productDraft.categoryId) {
+			toast.error('A new product needs a category');
+			return;
+		}
+		pendingProduct = { ...productDraft, name: productDraft.name.trim() };
+		product = { id: null, name: pendingProduct.name };
+		// A cable or a license rarely carries a sticker — set on the way in only,
+		// so unticking it afterwards sticks.
+		if (cableInputFrom(pendingProduct.cable) || pendingProduct.isLicense) noTag = true;
+		productDialogOpen = false;
+	}
+
+	function cancelProduct() {
+		productDialogOpen = false;
+		// Typed and then abandoned: nothing to create it from.
+		if (!pendingProduct) product = null;
+	}
 
 	// A fresh object every time: ProductFields keys its "is the name still the
 	// derived one?" bookkeeping to the draft it was handed.
@@ -196,13 +244,14 @@
 		kind = 'device';
 		manufacturer = preselected?.manufacturer ?? null;
 		product = preselected?.product ?? null;
-		categoryId = '';
+		pendingProduct = null;
+		productDraft = emptyProductDraft();
+		productDialogOpen = false;
 		cableDraft = emptyCableDraft();
 		quantity = 1;
 		tags = [''];
 		serial = '';
 		noTag = defaultNoTag;
-		imagePath = '';
 		copyAccessories = true;
 		reuseAccessories = false;
 		chosenLocationId = locationId ?? locations?.[0]?.id ?? '';
@@ -218,8 +267,12 @@
 
 	function handleManufacturer(sel: Selection) {
 		manufacturer = sel;
-		product = seed ? { id: null, name: seed } : null;
+		product = null;
+		pendingProduct = null;
 		manufacturerKey++;
+		// What was typed in the picker that sent us here names a product nobody
+		// has registered yet, so it goes straight to being described.
+		if (seed) describeProduct(seed);
 	}
 
 	async function handleSubmit(e: Event) {
@@ -247,8 +300,8 @@
 				toast.error('Please choose or name a product');
 				return;
 			}
-			if (isNewProduct && !categoryId) {
-				toast.error('A new product needs a category');
+			if (isNewProduct && !pendingProduct) {
+				describeProduct(product.name);
 				return;
 			}
 		}
@@ -275,9 +328,16 @@
 							manufacturerId: chosenManufacturerId ?? undefined,
 							newManufacturerName: manufacturer?.id ? undefined : manufacturer?.name.trim(),
 							productId: product?.id ?? undefined,
-							newProductName: product?.id ? undefined : product?.name.trim(),
-							newProductImagePath: product?.id ? undefined : imagePath || undefined,
-							categoryId: product?.id ? undefined : categoryId,
+							...(product?.id || !pendingProduct
+								? {}
+								: {
+										newProductName: pendingProduct.name,
+										newProductImagePath: pendingProduct.imagePath || undefined,
+										newProductNetPurchasePrice: pendingProduct.netPurchasePrice,
+										newProductCable: cableInputFrom(pendingProduct.cable) ?? undefined,
+										newProductIsLicense: pendingProduct.isLicense || undefined,
+										categoryId: pendingProduct.categoryId
+									}),
 							copyProductAccessories:
 								copyAccessories && (copyable?.accessories.length ?? 0) > 0 ? true : undefined,
 							reuseExistingAccessories:
@@ -356,27 +416,29 @@
 							<Label>Product</Label>
 							<CreatableSelect
 								items={productsForManufacturer}
-								bind:value={product}
+								value={product}
+								onchange={(sel) => {
+									product = sel;
+									pendingProduct = null;
+								}}
+								oncreate={describeProduct}
 								placeholder="Search or type a new one…"
 								disabled={saving}
 							/>
+							{#if isNewProduct && pendingProduct}
+								{@const category = categories.find((c) => c.id === pendingProduct?.categoryId)}
+								<p class="text-xs text-muted-foreground">
+									New product · {category?.name ?? ''}
+									<button
+										type="button"
+										class="underline"
+										onclick={() => pendingProduct && describeProduct(pendingProduct.name)}
+										>Edit details</button
+									>
+								</p>
+							{/if}
 						</div>
 					{/key}
-				{/if}
-
-				{#if isNewProduct}
-					<div class="space-y-2">
-						<Label>Category</Label>
-						<CategorySelect {categories} bind:value={categoryId} disabled={saving} />
-						<p class="text-xs text-muted-foreground">
-							"{product?.name}" is new, so it needs a category. It becomes a product like any other
-							— the next unit of it is picked from the list.
-						</p>
-					</div>
-					<div class="space-y-2">
-						<Label>Product photo</Label>
-						<ImageUpload bind:value={imagePath} label="Product photo" />
-					</div>
 				{/if}
 
 				{#if copyable && copyable.accessories.length > 0}
@@ -510,5 +572,16 @@
 		>
 			Cancel
 		</Button>
+	{/snippet}
+</Modal>
+
+<!-- Stacked on top of the dialog above; the modal stack keeps Escape to the top one. -->
+<Modal bind:open={productDialogOpen} title="New product" size="xl" onclose={cancelProduct}>
+	{#snippet children()}
+		<ProductFields {categories} bind:value={productDraft} idPrefix="new-asset-product" />
+	{/snippet}
+	{#snippet footer()}
+		<Button icon="add" type="button" onclick={confirmProduct}>Add Product</Button>
+		<Button icon="close" type="button" variant="outline" onclick={cancelProduct}>Cancel</Button>
 	{/snippet}
 </Modal>

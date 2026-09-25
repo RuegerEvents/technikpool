@@ -306,6 +306,7 @@
 										<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
 											<td class="px-3 py-2 font-medium">{asset.productName}</td>
 											<td class="px-3 py-2 text-muted-foreground">{asset.manufacturerName}</td>
+											<td class="px-3 py-2 font-mono text-xs">{asset.assetTag ?? '—'}</td>
 											<td class="px-3 py-2 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
 											<td class="px-3 py-2">
 												<AssetStatusBadge status={asset.status} />
@@ -344,6 +345,9 @@
 											>Product</th
 										>
 										<th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground"
+											>Asset Tag</th
+										>
+										<th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground"
 											>S/N</th
 										>
 										<th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground"
@@ -361,6 +365,7 @@
 													{asset.product.manufacturer?.name}
 												</p>
 											</td>
+											<td class="px-3 py-2 font-mono text-xs">{asset.assetTag ?? '—'}</td>
 											<td class="px-3 py-2 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
 											<td class="px-3 py-2">
 												<AssetStatusBadge status={asset.status} />

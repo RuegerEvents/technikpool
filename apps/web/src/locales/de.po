@@ -187,6 +187,7 @@ msgstr "Crew"
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
@@ -1885,7 +1886,6 @@ msgid "All Categories"
 msgstr "Alle Kategorien"
 
 #: src/lib/components/CsvImportModal.svelte
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
@@ -2020,6 +2020,7 @@ msgstr "Neues Produkt erstellen"
 msgid "Fill in the details for the new product model."
 msgstr "Details für das neue Produktmodell eingeben."
 
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Add Product"
 msgstr "Produkt hinzufügen"
@@ -2914,8 +2915,6 @@ msgstr "Farbe und ein 2-Buchstaben-Kürzel identifizieren diese Organisation auf
 msgid "Manufacturer logo"
 msgstr "Herstellerlogo"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
 msgid "Product photo"
 msgstr "Produktfoto"
@@ -4770,6 +4769,7 @@ msgid "Please choose or name a manufacturer"
 msgstr "Bitte einen Hersteller wählen oder eingeben"
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 msgid "Please choose or name a product"
 msgstr "Bitte ein Produkt wählen oder eingeben"
 
@@ -4802,10 +4802,8 @@ msgstr "Neu"
 msgid "Search or type a new one…"
 msgstr "Suchen oder neu eingeben…"
 
-#. 0: product?.name
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-msgid "\"{0}\" is new, so it needs a category. It becomes a product like any other — the next unit of it is picked from the list."
-msgstr "\"{0}\" ist neu und braucht deshalb eine Kategorie. Es wird ein Produkt wie jedes andere — die nächste Einheit davon wird aus der Liste gewählt."
+#~ msgid "\"{0}\" is new, so it needs a category. It becomes a product like any other — the next unit of it is picked from the list."
+#~ msgstr "\"{0}\" ist neu und braucht deshalb eine Kategorie. Es wird ein Produkt wie jedes andere — die nächste Einheit davon wird aus der Liste gewählt."
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
@@ -10263,3 +10261,12 @@ msgstr "Scannen oder tippen"
 #: src/lib/error-messages.svelte.ts
 msgid "Your count here was changed on another device in the meantime. It shows the current number now — count again from there."
 msgstr "Deine Zählung hier wurde inzwischen auf einem anderen Gerät geändert. Jetzt steht die aktuelle Zahl da – zähl von dort weiter."
+
+#. 0: category?.name ?? ''
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "New product · {0} <0>Edit details</0>"
+msgstr "Neues Produkt · {0} <0>Details bearbeiten</0>"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "New product"
+msgstr "Neues Produkt"

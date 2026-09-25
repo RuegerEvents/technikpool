@@ -187,6 +187,7 @@ msgstr "Crew"
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
@@ -1885,7 +1886,6 @@ msgid "All Categories"
 msgstr "All Categories"
 
 #: src/lib/components/CsvImportModal.svelte
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
@@ -2020,6 +2020,7 @@ msgstr "Create New Product"
 msgid "Fill in the details for the new product model."
 msgstr "Fill in the details for the new product model."
 
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Add Product"
 msgstr "Add Product"
@@ -2914,8 +2915,6 @@ msgstr "Color and a 2-letter label identify this org at a glance in the calendar
 msgid "Manufacturer logo"
 msgstr "Manufacturer logo"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
 msgid "Product photo"
 msgstr "Product photo"
@@ -4770,6 +4769,7 @@ msgid "Please choose or name a manufacturer"
 msgstr "Please choose or name a manufacturer"
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 msgid "Please choose or name a product"
 msgstr "Please choose or name a product"
 
@@ -4802,10 +4802,8 @@ msgstr "New"
 msgid "Search or type a new one…"
 msgstr "Search or type a new one…"
 
-#. 0: product?.name
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-msgid "\"{0}\" is new, so it needs a category. It becomes a product like any other — the next unit of it is picked from the list."
-msgstr "\"{0}\" is new, so it needs a category. It becomes a product like any other — the next unit of it is picked from the list."
+#~ msgid "\"{0}\" is new, so it needs a category. It becomes a product like any other — the next unit of it is picked from the list."
+#~ msgstr "\"{0}\" is new, so it needs a category. It becomes a product like any other — the next unit of it is picked from the list."
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
@@ -10263,3 +10261,12 @@ msgstr "Scan or type"
 #: src/lib/error-messages.svelte.ts
 msgid "Your count here was changed on another device in the meantime. It shows the current number now — count again from there."
 msgstr "Your count here was changed on another device in the meantime. It shows the current number now — count again from there."
+
+#. 0: category?.name ?? ''
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "New product · {0} <0>Edit details</0>"
+msgstr "New product · {0} <0>Edit details</0>"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+msgid "New product"
+msgstr "New product"
