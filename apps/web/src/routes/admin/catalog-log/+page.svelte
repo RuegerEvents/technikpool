@@ -4,6 +4,7 @@
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 	import { Button } from '$lib/components/ui/button';
 	import { getErrorMessage } from '$lib/utils';
+	import { PRODUCT_VIEWS } from '$lib/product-views';
 	import { toast } from 'svelte-sonner';
 
 	// The empty log the page renders before the first answer arrives. Spelled out
@@ -82,7 +83,7 @@
 	async function revert(entry: Entry) {
 		revertingId = entry.id;
 		try {
-			await revertCatalogChange(entry.id);
+			await revertCatalogChange(entry.id).updates(...PRODUCT_VIEWS);
 			toast.success('Change reverted');
 		} catch (err) {
 			toast.error(getErrorMessage(err));

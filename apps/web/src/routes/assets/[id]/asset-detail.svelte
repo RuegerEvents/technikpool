@@ -86,6 +86,7 @@
 		assetStatusLabel
 	} from '$lib/components/ui/asset-status';
 	import type { TransactionData } from '$lib/types/asset-transaction';
+	import { PRODUCT_VIEWS } from '$lib/product-views';
 	import {
 		ASSET_STATUSES,
 		isBookableStatus,
@@ -517,7 +518,7 @@
 				imagePath: productDraft.imagePath,
 				cable: cableInputFrom(productDraft.cable),
 				isLicense: productDraft.isLicense
-			});
+			}).updates(...PRODUCT_VIEWS);
 			if ((productDraft.netPurchasePrice ?? null) !== (orgNetPurchasePrice ?? null)) {
 				await setOrgProductPrice({
 					organizationId: asset.organizationId,

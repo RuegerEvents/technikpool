@@ -244,10 +244,6 @@
 		return editor.save();
 	}
 
-	async function refreshCatalog() {
-		await getProductCatalog(filterOrgId || undefined).refresh();
-	}
-
 	async function saveAndStay() {
 		const wasBundle = !!currentBundle;
 		if (await save()) toast.success(wasBundle ? 'Bundle updated' : 'Product updated');
@@ -511,7 +507,6 @@
 					footerActions={wizardFooter}
 					showProductLink
 					idPrefix="wizard"
-					onSaved={refreshCatalog}
 					onMerged={(survivorId) => (currentId = survivorId)}
 					onBeforeDelete={() =>
 						(afterDelete = visible[index + 1]?.id ?? visible[index - 1]?.id ?? '')}

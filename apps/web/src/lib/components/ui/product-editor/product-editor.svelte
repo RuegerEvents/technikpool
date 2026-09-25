@@ -45,6 +45,7 @@
 	import { Modal } from '$lib/components/ui/modal';
 	import ProductActions from './product-actions.svelte';
 	import { productLabel } from '$lib/product-label';
+	import { PRODUCT_VIEWS } from '$lib/product-views';
 	import {
 		manufacturerIdOf,
 		manufacturerSelection,
@@ -295,13 +296,13 @@
 								isLicense: draft.isLicense
 							}),
 					imagePath: draft.imagePath
-				});
+				}).updates(...PRODUCT_VIEWS);
 			}
 			if (portsDirty) {
 				await setProductPorts({
 					productId: product.id,
 					ports: hasPanel ? portInputsFrom(portRows) : []
-				});
+				}).updates(...PRODUCT_VIEWS);
 			}
 			for (const orgId of dirtyPriceOrgIds) {
 				await setOrgProductPrice({

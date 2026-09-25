@@ -1,4 +1,4 @@
-import { query, command } from '$app/server';
+import { query, command, requested } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import type { Prisma } from '$lib/prisma/client';
 import * as v from 'valibot';
@@ -2133,7 +2133,7 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 	}
 
 	if (imageChanged) redrawPreviewsOf(product.id);
-	await refreshProductViews(product, previousProduct.manufacturerId, {
+	await refreshProductViews({
 		cable: cableChanged,
 		connectorsCreated: (connectors?.created.length ?? 0) + createdForWays.length > 0
 	});
@@ -2201,7 +2201,7 @@ export const setProductPorts = command(setProductPortsSchema, async (input) => {
 		data: { changes: [{ field: 'ports', from: before, to: await portSnapshot(product.id) }] }
 	});
 
-	await refreshProductViews(product, product.manufacturerId, {
+	await refreshProductViews({
 		cable: false,
 		connectorsCreated: false
 	});
@@ -2209,42 +2209,34 @@ export const setProductPorts = command(setProductPortsSchema, async (input) => {
 });
 
 /**
- * Everything that shows a product's name, picture or cable attributes. Shared
- * by `updateProduct` and `revertCatalogChange`, which move the same fields in
- * opposite directions.
+ * Everything that shows a product's name, picture or cable attributes — as far
+ * as the page that changed it holds it. Shared by `updateProduct`,
+ * `setProductPorts` and `revertCatalogChange`.
+ *
+ * Every device list and every unit shows its product, and refreshing all of
+ * them sent each one back in the response: 3.7 MB for one saved photo on an
+ * install of 700 units, over a line that moves 350 KB/s. So the caller names
+ * what it holds — `.updates(...PRODUCT_VIEWS)`, see `$lib/product-views` — and
+ * only that is refreshed. Naming the query functions rather than instances
+ * covers every instance the client has cached, including one a page left
+ * behind that has not been collected yet; one nobody holds is fetched afresh
+ * when a page opens it.
  */
-async function refreshProductViews(
-	product: { id: string; manufacturerId: string | null },
-	previousManufacturerId: string | null,
-	changed: { cable: boolean; connectorsCreated: boolean }
-) {
-	await getProducts(product.manufacturerId).refresh();
-	if (previousManufacturerId !== product.manufacturerId) {
-		await getProducts(previousManufacturerId).refresh();
-	}
-	await getProducts().refresh();
+async function refreshProductViews(changed: { cable: boolean; connectorsCreated: boolean }) {
+	// The limit is far above what one client caches: a request over it puts the
+	// query into an error state instead of refreshing it.
+	await Promise.all([
+		requested(getProducts, 100).refreshAll(),
+		requested(getProductCatalog, 100).refreshAll(),
+		requested(getAssets, 100).refreshAll(),
+		requested(getAsset, 100).refreshAll(),
+		requested(getInventorySummary, 100).refreshAll()
+	]);
 	if (changed.connectorsCreated) await getConnectors().refresh();
 	if (changed.cable) {
 		await getCableVocabulary().refresh();
 		await getConnectorUsage().refresh();
 	}
-
-	const affectedAssets = await prisma.asset.findMany({
-		where: { productId: product.id },
-		select: { id: true, organizationId: true }
-	});
-	const affectedOrgIds = [...new Set(affectedAssets.map((a) => a.organizationId))];
-	await Promise.all([
-		...affectedAssets.map((a) => getAsset(a.id).refresh()),
-		// The catalogue is cached per org filter, and the unfiltered entry is the
-		// one the wizard opens on.
-		getProductCatalog().refresh(),
-		...affectedOrgIds.map((id) => getProductCatalog(id).refresh()),
-		...affectedOrgIds.map((id) => getAssets(id).refresh()),
-		getAssets().refresh(),
-		...affectedOrgIds.map((id) => getInventorySummary(id).refresh()),
-		getInventorySummary().refresh()
-	]);
 }
 
 /** Delete a catalogue row only when no unit, including a retired one, refers to it. */
@@ -2880,7 +2872,7 @@ export const revertCatalogChange = command(v.string(), async (entryId: string) =
 	const cableTouched =
 		!!waysRevert ||
 		(['cableType', 'connectorA', 'connectorB', 'lengthCm'] as const).some((field) => field in data);
-	await refreshProductViews(updated, product.manufacturerId, {
+	await refreshProductViews({
 		cable: cableTouched,
 		connectorsCreated: (connectors?.created.length ?? 0) + createdForWays.length > 0
 	});
