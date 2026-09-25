@@ -1,5 +1,15 @@
 [
 	{
+		"version": "0.22.1",
+		"date": "2026-09-25",
+		"en": [
+			"Saving a new product photo is quick again. The previews of units and bundles that show the product are redrawn in the background instead of holding up the save."
+		],
+		"de": [
+			"Ein neues Produktbild speichert wieder sofort. Die Vorschaubilder der Geräte und Bundles, auf denen das Produkt zu sehen ist, werden im Hintergrund neu gezeichnet, statt das Speichern aufzuhalten."
+		]
+	},
+	{
 		"version": "0.22.0",
 		"date": "2026-09-25",
 		"en": [
