@@ -19,6 +19,9 @@ StocktakeProductCount _$StocktakeProductCountFromJson(
   locations: (json['locations'] as List<dynamic>)
       .map((e) => StocktakeLocationCount.fromJson(e as Map<String, dynamic>))
       .toList(),
+  cable: json['cable'] == null
+      ? null
+      : CableSpec.fromJson(json['cable'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$StocktakeProductCountToJson(
@@ -28,6 +31,7 @@ Map<String, dynamic> _$StocktakeProductCountToJson(
   'productName': instance.productName,
   'manufacturerName': ?instance.manufacturerName,
   'category': instance.category,
+  'cable': ?instance.cable,
   'expected': instance.expected,
   'out': instance.out,
   'counted': instance.counted,

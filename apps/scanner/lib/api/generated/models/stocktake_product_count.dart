@@ -4,6 +4,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import 'cable_spec.dart';
 import 'category.dart';
 import 'stocktake_location_count.dart';
 
@@ -20,6 +21,7 @@ class StocktakeProductCount {
     required this.out,
     required this.counted,
     required this.locations,
+    this.cable,
   });
   
   factory StocktakeProductCount.fromJson(Map<String, Object?> json) => _$StocktakeProductCountFromJson(json);
@@ -28,6 +30,12 @@ class StocktakeProductCount {
   final String productName;
   final String? manufacturerName;
   final Category category;
+
+  /// Present only for cables, as on Product: the name alone does not say.
+  /// which ends a lead has. Not required, so an older client keeps.
+  /// compiling.
+  ///
+  final CableSpec? cable;
   final int expected;
   final int out;
 

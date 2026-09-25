@@ -1380,6 +1380,14 @@ components:
           type: [string, 'null']
         category:
           $ref: '#/components/schemas/Category'
+        cable:
+          description: |
+            Present only for cables, as on Product: the name alone does not say
+            which ends a lead has. Not required, so an older client keeps
+            compiling.
+          oneOf:
+            - $ref: '#/components/schemas/CableSpec'
+            - type: 'null'
         parentAssetId:
           type: [string, 'null']
           description: Set on an accessory; it is confirmed when its parent is scanned.
@@ -1432,6 +1440,14 @@ components:
           type: [string, 'null']
         category:
           $ref: '#/components/schemas/Category'
+        cable:
+          description: |
+            Present only for cables, as on Product: the name alone does not say
+            which ends a lead has. Not required, so an older client keeps
+            compiling.
+          oneOf:
+            - $ref: '#/components/schemas/CableSpec'
+            - type: 'null'
         expected:
           type: integer
         out:

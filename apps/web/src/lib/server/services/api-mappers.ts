@@ -137,8 +137,31 @@ type ProductRow = EndRefs & {
 	category: CategoryRow;
 };
 
-export function toProduct(row: ProductRow): Schemas['Product'] {
+type CableRow = EndRefs & Pick<ProductRow, 'cableType' | 'lengthCm' | 'ways'>;
+
+/**
+ * Any of the four columns makes it a cable — see isCable. `type` is the wire
+ * (CAT7, 2,5 mm²) and is null on most of them. A loom carries its ends in
+ * `ways` and has none of its own.
+ */
+function toCableSpec(row: CableRow): Schemas['CableSpec'] | null {
 	const product = withCableNames(row);
+	if (!isCable(product)) return null;
+	return {
+		type: product.cableType,
+		connectorA: product.connectorA,
+		connectorB: product.connectorB,
+		lengthCm: product.lengthCm,
+		ways: product.ways.map((way) => ({
+			count: way.count,
+			type: way.cableType,
+			connectorA: way.connectorA,
+			connectorB: way.connectorB
+		}))
+	};
+}
+
+export function toProduct(product: ProductRow): Schemas['Product'] {
 	return {
 		id: product.id,
 		name: product.name,
@@ -149,23 +172,7 @@ export function toProduct(row: ProductRow): Schemas['Product'] {
 		// per response now, so a moved object store is picked up on the next
 		// request rather than needing every row rewritten.
 		imageUrl: imageSrc(product.imagePath),
-		// Any of the four columns makes it a cable — see isCable. `type` is the
-		// wire (CAT7, 2,5 mm²) and is null on most of them. A loom carries its
-		// ends in `ways` and has none of its own.
-		cable: isCable(product)
-			? {
-					type: product.cableType,
-					connectorA: product.connectorA,
-					connectorB: product.connectorB,
-					lengthCm: product.lengthCm,
-					ways: product.ways.map((way) => ({
-						count: way.count,
-						type: way.cableType,
-						connectorA: way.connectorA,
-						connectorB: way.connectorB
-					}))
-				}
-			: null
+		cable: toCableSpec(product)
 	};
 }
 
@@ -258,6 +265,7 @@ export function toStocktakeItem(
 		productName: item.asset.product.name,
 		manufacturerName: item.asset.product.manufacturer?.name ?? null,
 		category: toCategory(item.asset.product.category),
+		cable: toCableSpec(item.asset.product),
 		parentAssetId: item.asset.parentAssetId,
 		bundleName: bundle
 			? bundle.tag
@@ -289,6 +297,7 @@ export function toStocktakeDetail(
 			productName: p.product.name,
 			manufacturerName: p.product.manufacturer?.name ?? null,
 			category: toCategory(p.product.category),
+			cable: toCableSpec(p.product),
 			expected: p.expected,
 			out: p.out,
 			counted: p.counted,

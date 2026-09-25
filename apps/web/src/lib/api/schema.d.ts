@@ -756,6 +756,12 @@ export interface components {
             productName: string;
             manufacturerName: string | null;
             category: components["schemas"]["Category"];
+            /**
+             * @description Present only for cables, as on Product: the name alone does not say
+             *     which ends a lead has. Not required, so an older client keeps
+             *     compiling.
+             */
+            cable?: components["schemas"]["CableSpec"] | null;
             /** @description Set on an accessory; it is confirmed when its parent is scanned. */
             parentAssetId: string | null;
             /** @description The bundle it belongs to, with its tag where it has one. */
@@ -786,6 +792,12 @@ export interface components {
             productName: string;
             manufacturerName: string | null;
             category: components["schemas"]["Category"];
+            /**
+             * @description Present only for cables, as on Product: the name alone does not say
+             *     which ends a lead has. Not required, so an older client keeps
+             *     compiling.
+             */
+            cable?: components["schemas"]["CableSpec"] | null;
             expected: number;
             out: number;
             /** @description Every counter's counts added up. */

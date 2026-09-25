@@ -4,6 +4,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import 'cable_spec.dart';
 import 'category.dart';
 import 'stocktake_item_state.dart';
 import 'stocktake_location.dart';
@@ -26,6 +27,7 @@ class StocktakeItem {
     required this.foundByMe,
     required this.needsAttention,
     this.serialNumber,
+    this.cable,
     this.bundleName,
     this.outAt,
     this.unexpectedReason,
@@ -40,6 +42,12 @@ class StocktakeItem {
   final String productName;
   final String? manufacturerName;
   final Category category;
+
+  /// Present only for cables, as on Product: the name alone does not say.
+  /// which ends a lead has. Not required, so an older client keeps.
+  /// compiling.
+  ///
+  final CableSpec? cable;
 
   /// Set on an accessory; it is confirmed when its parent is scanned.
   final String? parentAssetId;

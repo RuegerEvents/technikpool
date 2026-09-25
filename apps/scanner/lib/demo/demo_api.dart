@@ -696,6 +696,7 @@ class DemoBackend {
       productName: asset.product.name,
       manufacturerName: asset.product.manufacturerName,
       category: asset.product.category,
+      cable: asset.product.cable,
       parentAssetId: asset.parentAssetId,
       state: StocktakeItemState.fromJson(_state(stocktake, item)),
       expectedLocation: item.expected ? _location(asset.location.id) : null,
@@ -721,6 +722,7 @@ class DemoBackend {
           productName: lines.first.product.name,
           manufacturerName: lines.first.product.manufacturerName,
           category: lines.first.product.category,
+          cable: lines.first.product.cable,
           expected: lines.fold(0, (n, l) => n + l.expected),
           out: 0,
           counted: stocktake.counts.entries

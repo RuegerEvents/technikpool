@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/client.dart';
 import '../api/generated/export.dart';
+import '../cable_format.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../l10n/labels.dart';
 import '../product_label.dart';
@@ -883,17 +884,30 @@ class _OpenHereState extends State<_OpenHere> {
                     i.serialNumber,
                     i.bundleName,
                     i.category.name,
+                    if (i.cable case final cable?) cableConnectors(cable),
                   ]),
             )
             .toList()
           ..sort((a, b) => _itemSort(a).compareTo(_itemSort(b)));
-    final shownProducts = products
-        .where(
-          (p) =>
-              inFilter(p.category) &&
-              _matches([p.productName, p.manufacturerName, p.category.name]),
-        )
-        .toList();
+    final shownProducts =
+        products
+            .where(
+              (p) =>
+                  inFilter(p.category) &&
+                  _matches([
+                    p.productName,
+                    p.manufacturerName,
+                    p.category.name,
+                    if (p.cable case final cable?) cableConnectors(cable),
+                  ]),
+            )
+            .toList()
+          ..sort(
+            (a, b) => _byLabel(
+              a.manufacturerName,
+              a.productName,
+            ).compareTo(_byLabel(b.manufacturerName, b.productName)),
+          );
     final searching = _search.text.trim().isNotEmpty;
 
     StocktakeLocationCount? here(StocktakeProductCount p) {
@@ -973,6 +987,7 @@ class _OpenHereState extends State<_OpenHere> {
               title: Text(productLabel(item.manufacturerName, item.productName)),
               subtitle: _Subtitle(
                 category: item.category,
+                cable: item.cable,
                 text: [?item.assetTag ?? item.serialNumber, ?item.bundleName].join(' · '),
               ),
               onTap: () => widget.onTick(item),
@@ -993,6 +1008,7 @@ class _OpenHereState extends State<_OpenHere> {
                   title: Text(productLabel(p.manufacturerName, p.productName)),
                   subtitle: _Subtitle(
                     category: p.category,
+                    cable: p.cable,
                     text: l10n.stocktakeLooseLine(at?.expected ?? 0, p.counted),
                   ),
                   trailing: Row(
@@ -1020,8 +1036,14 @@ class _OpenHereState extends State<_OpenHere> {
     );
   }
 
+  /// Alphabetical by what the row shows, not by category: someone reading
+  /// the list off a shelf looks a product up by name, and the chips above
+  /// already narrow it to one category.
+  static String _byLabel(String? manufacturer, String product) =>
+      productLabel(manufacturer, product).toLowerCase();
+
   static String _itemSort(StocktakeItem i) =>
-      '${i.category.sortOrder.toString().padLeft(4, '0')} ${i.productName} ${i.assetTag ?? ''}';
+      '${_byLabel(i.manufacturerName, i.productName)} ${i.assetTag ?? ''}';
 }
 
 /// A category filter in the category's own colour: a dot while it is one of
@@ -1068,24 +1090,36 @@ class _CategoryChip extends StatelessWidget {
 /// A row's second line, led by its category so a mixed list can be read by
 /// colour before it is read by name.
 class _Subtitle extends StatelessWidget {
-  const _Subtitle({required this.category, required this.text});
+  const _Subtitle({required this.category, required this.text, this.cable});
 
   final Category category;
   final String text;
 
+  /// A cable's ends, on a line of their own: two cables of one length differ
+  /// only by these, and cut short by an ellipsis they would say nothing.
+  final CableSpec? cable;
+
   @override
   Widget build(BuildContext context) {
+    final row = Row(
+      children: [
+        CategoryPill(category, dense: true),
+        if (text.isNotEmpty) ...[
+          const SizedBox(width: 6),
+          Flexible(child: Text(text, overflow: TextOverflow.ellipsis)),
+        ],
+      ],
+    );
     return Padding(
       padding: const EdgeInsets.only(top: 2),
-      child: Row(
-        children: [
-          CategoryPill(category, dense: true),
-          if (text.isNotEmpty) ...[
-            const SizedBox(width: 6),
-            Flexible(child: Text(text, overflow: TextOverflow.ellipsis)),
-          ],
-        ],
-      ),
+      child: switch (cable) {
+        final cable? => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 2,
+          children: [Text(cableConnectors(cable)), row],
+        ),
+        null => row,
+      },
     );
   }
 }

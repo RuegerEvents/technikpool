@@ -10,6 +10,7 @@ import {
 import { ACTIVE_ASSET_WHERE, isRetiredStatus, type AssetStatus } from '$lib/asset-status';
 import { resolveScannedCode } from './asset-lookup';
 import { syncAccessories } from './accessories';
+import { CABLE_ENDS } from './cable-ends';
 
 // Stocktakes (Inventur): counting what an org actually has against what it
 // should have. Framework-agnostic like checkout.ts, so the web's remote
@@ -579,6 +580,11 @@ const ITEM_INCLUDE = {
 					id: true,
 					name: true,
 					imagePath: true,
+					// So the scanner can show a cable's ends on the list it counts from:
+					// "Kabel 5 m" alone does not say which drawer.
+					cableType: true,
+					lengthCm: true,
+					...CABLE_ENDS,
 					manufacturer: { select: { name: true } },
 					category: {
 						select: { id: true, name: true, nameDe: true, color: true, sortOrder: true }
@@ -599,6 +605,9 @@ const LINE_INCLUDE = {
 			id: true,
 			name: true,
 			imagePath: true,
+			cableType: true,
+			lengthCm: true,
+			...CABLE_ENDS,
 			manufacturer: { select: { name: true } },
 			category: {
 				select: { id: true, name: true, nameDe: true, color: true, sortOrder: true }
