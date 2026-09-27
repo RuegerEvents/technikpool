@@ -4,6 +4,7 @@
 	// the first time a product names a connector nobody had catalogued. The
 	// second kind is why this page exists — those rows have a guessed family and
 	// no picture, and this is where they get put right.
+	import { naturalCompare } from '$lib/sort';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
@@ -46,7 +47,7 @@
 				(acc[key] ??= []).push(c);
 				return acc;
 			}, {})
-		).sort(([a], [b]) => a.localeCompare(b, 'de'))
+		).sort(([a], [b]) => naturalCompare(a, b))
 	);
 
 	let editing = $state<Row | null>(null);

@@ -1,3 +1,4 @@
+import { naturalCompare } from '$lib/sort';
 import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import type { Prisma } from '$lib/prisma/client';
@@ -79,7 +80,7 @@ async function notifyRequesterQueueCleared(
 			}
 			return [...counts]
 				.map(([productName, count]) => ({ productName, count }))
-				.sort((a, b) => a.productName.localeCompare(b.productName, 'de'));
+				.sort((a, b) => naturalCompare(a.productName, b.productName));
 		};
 		const approved = summarize('APPROVED');
 		const declined = summarize('DECLINED');

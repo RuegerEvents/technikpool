@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { naturalCompare } from '$lib/sort';
 	import { categoryLabel } from '$lib/category';
 	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import {
@@ -318,10 +319,9 @@
 		}
 		if (next === 'licenses' && showingRetired) statusFilter = '';
 	}
-	const collator = new Intl.Collator('de', { numeric: true });
 	let cableTypes = $derived(
 		[...new Set(assets.map((a) => a.product.cableType).filter((t): t is string => !!t))].sort(
-			collator.compare
+			naturalCompare
 		)
 	);
 	let connectors = $derived(
@@ -331,7 +331,7 @@
 					.flatMap((a) => [a.product.connectorA, a.product.connectorB])
 					.filter((c): c is string => !!c)
 			)
-		].sort(collator.compare)
+		].sort(naturalCompare)
 	);
 
 	let lengthMinCm = $derived(parseLengthMeters(lengthMin));
@@ -481,7 +481,7 @@
 			if (x === null || x === '') return y === null || y === '' ? 0 : 1;
 			if (y === null || y === '') return -1;
 			if (typeof x === 'number' && typeof y === 'number') return sign * (x - y);
-			return sign * collator.compare(String(x), String(y));
+			return sign * naturalCompare(String(x), String(y));
 		});
 	}
 
@@ -507,7 +507,7 @@
 			? []
 			: sortRows(
 					visibleAssets.filter(assetMatchesSearch).sort((a, b) => {
-						if (a.assetTag && b.assetTag) return collator.compare(a.assetTag, b.assetTag);
+						if (a.assetTag && b.assetTag) return naturalCompare(a.assetTag, b.assetTag);
 						if (a.assetTag || b.assetTag) return a.assetTag ? -1 : 1;
 						return 0;
 					}),

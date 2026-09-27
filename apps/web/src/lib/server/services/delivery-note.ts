@@ -1,3 +1,4 @@
+import { naturalCompare } from '$lib/sort';
 import { prisma } from '$lib/server/auth';
 import { summarizeContents } from '$lib/billing-lines';
 import { productLabel } from '$lib/product-label';
@@ -180,7 +181,6 @@ export async function deliveryNoteData(productionId: string) {
 		})
 	);
 
-	const collator = new Intl.Collator('de', { numeric: true, sensitivity: 'base' });
 	const groups = new Map<string, DeliveryNoteGroup>();
 	for (const { category, label, subtitle, identifiers, quantity, imagePath } of lines.values()) {
 		let group = groups.get(category);
@@ -193,7 +193,7 @@ export async function deliveryNoteData(productionId: string) {
 	for (const group of groups.values())
 		group.lines.sort(
 			(a, b) =>
-				collator.compare(a.label, b.label) || collator.compare(a.subtitle ?? '', b.subtitle ?? '')
+				naturalCompare(a.label, b.label) || naturalCompare(a.subtitle ?? '', b.subtitle ?? '')
 		);
 
 	const { organization, customer } = production;
@@ -229,7 +229,7 @@ export async function deliveryNoteData(productionId: string) {
 		venue: customer ? venue : [],
 		startDate: production.startDate,
 		endDate: production.endDate,
-		groups: [...groups.values()].sort((a, b) => collator.compare(a.name, b.name))
+		groups: [...groups.values()].sort((a, b) => naturalCompare(a.name, b.name))
 	};
 	return data;
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { naturalCompare } from '$lib/sort';
 	import { userLabel } from '$lib/user-label.svelte';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
@@ -20,10 +21,10 @@
 	function sorted(items: Item[]) {
 		return [...items].sort(
 			(a, b) =>
-				(a.expectedLocation?.name ?? '').localeCompare(b.expectedLocation?.name ?? '') ||
+				naturalCompare(a.expectedLocation?.name ?? '', b.expectedLocation?.name ?? '') ||
 				a.asset.product.category.sortOrder - b.asset.product.category.sortOrder ||
-				a.asset.product.name.localeCompare(b.asset.product.name) ||
-				(a.asset.assetTag ?? '').localeCompare(b.asset.assetTag ?? '')
+				naturalCompare(a.asset.product.name, b.asset.product.name) ||
+				naturalCompare(a.asset.assetTag ?? '', b.asset.assetTag ?? '')
 		);
 	}
 

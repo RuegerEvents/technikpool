@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { naturalCompare } from '$lib/sort';
 	import { productLabel } from '$lib/product-label';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -100,7 +101,7 @@
 				rank: likely === slot ? 0 : likely ? 2 : 1
 			};
 		});
-		return ranked.sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name, 'de'));
+		return ranked.sort((a, b) => a.rank - b.rank || naturalCompare(a.name, b.name));
 	}
 
 	// Which row and side the create modal was opened from, so its result lands

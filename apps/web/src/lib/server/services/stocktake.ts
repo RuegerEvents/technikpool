@@ -1,3 +1,4 @@
+import { naturalCompare } from '$lib/sort';
 import { prisma } from '$lib/server/auth';
 import type { Prisma } from '$lib/prisma/client';
 import {
@@ -1011,7 +1012,7 @@ export function productCounts(detail: StocktakeDetail, userId: string) {
 	return [...byProduct.values()].map((p) => ({
 		...p,
 		locations: [...p.locations.values()].sort((a, b) =>
-			a.location.name.localeCompare(b.location.name)
+			naturalCompare(a.location.name, b.location.name)
 		)
 	}));
 }

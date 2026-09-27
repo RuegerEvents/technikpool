@@ -9,6 +9,7 @@ import '../api/generated/export.dart';
 import '../cable_format.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../l10n/labels.dart';
+import '../natural_sort.dart';
 import '../product_label.dart';
 import '../scan/camera_scan_screen.dart';
 import '../state/providers.dart';
@@ -1014,7 +1015,7 @@ class _OpenHereState extends State<_OpenHere> {
                   ]),
             )
             .toList()
-          ..sort((a, b) => _itemSort(a).compareTo(_itemSort(b)));
+          ..sort(_itemOrder);
     final shownProducts =
         products
             .where(
@@ -1029,10 +1030,10 @@ class _OpenHereState extends State<_OpenHere> {
             )
             .toList()
           ..sort(
-            (a, b) => _byLabel(
-              a.manufacturerName,
-              a.productName,
-            ).compareTo(_byLabel(b.manufacturerName, b.productName)),
+            (a, b) => naturalCompare(
+              productLabel(a.manufacturerName, a.productName),
+              productLabel(b.manufacturerName, b.productName),
+            ),
           );
     final searching = _search.text.trim().isNotEmpty;
 
@@ -1165,11 +1166,13 @@ class _OpenHereState extends State<_OpenHere> {
   /// Alphabetical by what the row shows, not by category: someone reading
   /// the list off a shelf looks a product up by name, and the chips above
   /// already narrow it to one category.
-  static String _byLabel(String? manufacturer, String product) =>
-      productLabel(manufacturer, product).toLowerCase();
-
-  static String _itemSort(StocktakeItem i) =>
-      '${_byLabel(i.manufacturerName, i.productName)} ${i.assetTag ?? ''}';
+  static int _itemOrder(StocktakeItem a, StocktakeItem b) {
+    final byProduct = naturalCompare(
+      productLabel(a.manufacturerName, a.productName),
+      productLabel(b.manufacturerName, b.productName),
+    );
+    return byProduct != 0 ? byProduct : naturalCompare(a.assetTag ?? '', b.assetTag ?? '');
+  }
 }
 
 /// A category filter in the category's own colour: a dot while it is one of

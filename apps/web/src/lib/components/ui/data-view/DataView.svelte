@@ -1,5 +1,6 @@
 <!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
 <script lang="ts" generics="T extends Record<string, any>">
+	import { naturalCompare } from '$lib/sort';
 	import type { Snippet } from 'svelte';
 	import { browser } from '$app/environment';
 	import { untrack } from 'svelte';
@@ -97,7 +98,7 @@
 				if (av == null) return sortDir === 'asc' ? 1 : -1;
 				if (bv == null) return sortDir === 'asc' ? -1 : 1;
 				if (typeof av === 'string' && typeof bv === 'string') {
-					return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+					return sortDir === 'asc' ? naturalCompare(av, bv) : naturalCompare(bv, av);
 				}
 				return sortDir === 'asc'
 					? (av as number) - (bv as number)

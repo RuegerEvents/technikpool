@@ -1,3 +1,4 @@
+import { naturalCompare } from '$lib/sort';
 import { makerAndName } from '$lib/product-label';
 import { prisma } from '$lib/server/auth';
 import { appError } from '$lib/errors';
@@ -64,7 +65,8 @@ export async function bundleTypeSpec(templateId: string): Promise<BundleTypeSpec
 			manufacturerName: labels.get(productId)!.manufacturerName
 		}))
 		.sort((a, b) =>
-			makerAndName(a.manufacturerName, a.name).localeCompare(
+			naturalCompare(
+				makerAndName(a.manufacturerName, a.name),
 				makerAndName(b.manufacturerName, b.name)
 			)
 		);

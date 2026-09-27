@@ -18,6 +18,7 @@
 </script>
 
 <script lang="ts">
+	import { naturalCompare } from '$lib/sort';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { ImageUpload } from '$lib/components/ui/image-upload';
@@ -48,7 +49,7 @@
 			if (family) seen[family.toLowerCase()] ??= family;
 		}
 		return Object.values(seen)
-			.sort((a, b) => a.localeCompare(b))
+			.sort((a, b) => naturalCompare(a, b))
 			.map((family) => ({ id: family, name: family }));
 	});
 

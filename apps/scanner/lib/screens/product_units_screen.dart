@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../api/client.dart';
 import '../api/generated/export.dart';
 import '../l10n/generated/app_localizations.dart';
+import '../natural_sort.dart';
 import '../product_label.dart';
 import '../scan/camera_scan_screen.dart';
 import '../state/providers.dart';
@@ -100,7 +101,7 @@ class _ProductUnitsScreenState extends ConsumerState<ProductUnitsScreen> {
       int rank(Asset u) => (u.assetTag == null ? 0 : 2) + (u.location.id == _locationId ? 0 : 1);
       return rank(a).compareTo(rank(b)) != 0
           ? rank(a).compareTo(rank(b))
-          : (a.assetTag ?? '').compareTo(b.assetTag ?? '');
+          : naturalCompare(a.assetTag ?? '', b.assetTag ?? '');
     });
 
   /// Who the next scan goes to in tag mode: the tapped unit, or else the first

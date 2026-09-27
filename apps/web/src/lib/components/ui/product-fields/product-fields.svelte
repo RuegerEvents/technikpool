@@ -1,4 +1,5 @@
 <script module lang="ts">
+	import { naturalCompare } from '$lib/sort';
 	import {
 		cableDisplayName,
 		cableTwinKey,
@@ -243,7 +244,7 @@
 				rank: role === slot ? 0 : role ? 2 : 1
 			};
 		});
-		return ranked.sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name, 'de'));
+		return ranked.sort((a, b) => a.rank - b.rank || naturalCompare(a.name, b.name));
 	}
 
 	let connectorsIn = $derived(connectorOptions('in'));

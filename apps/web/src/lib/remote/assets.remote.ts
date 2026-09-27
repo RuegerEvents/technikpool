@@ -1,3 +1,4 @@
+import { naturalCompare } from '$lib/sort';
 import { query, command, requested } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import type { Prisma } from '$lib/prisma/client';
@@ -3795,7 +3796,7 @@ function bundleCopySummary(allocations: BundleCopyAllocation[]) {
 	}
 
 	const all = [...lines.values()].sort(
-		(a, b) => b.needed - a.needed || a.name.localeCompare(b.name)
+		(a, b) => b.needed - a.needed || naturalCompare(a.name, b.name)
 	);
 	return {
 		needed: all.reduce((sum, line) => sum + line.needed, 0),
@@ -4330,7 +4331,7 @@ async function productAccessoryProfile(productId: string, organizationId: string
 					.map(([perUnit, units]) => ({ perUnit, units }))
 					.sort((a, b) => a.perUnit - b.perUnit)
 			}))
-			.sort((a, b) => b.unitsWith - a.unitsWith || a.name.localeCompare(b.name))
+			.sort((a, b) => b.unitsWith - a.unitsWith || naturalCompare(a.name, b.name))
 	};
 }
 

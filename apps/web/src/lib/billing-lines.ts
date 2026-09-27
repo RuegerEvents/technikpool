@@ -1,3 +1,4 @@
+import { naturalCompare } from '$lib/sort';
 import { localizedName } from '$lib/category';
 
 // Units of the same product are separate rows in the database — each one is a
@@ -9,9 +10,8 @@ import { localizedName } from '$lib/category';
 export function summarizeContents(labels: string[]): string {
 	const counts = new Map<string, number>();
 	for (const label of labels) counts.set(label, (counts.get(label) ?? 0) + 1);
-	const collator = new Intl.Collator('de', { numeric: true, sensitivity: 'base' });
 	return [...counts]
-		.sort(([a], [b]) => collator.compare(a, b))
+		.sort(([a], [b]) => naturalCompare(a, b))
 		.map(([label, count]) => (count > 1 ? `${count}× ${label}` : label))
 		.join(', ');
 }
@@ -144,7 +144,6 @@ export function groupBillingItems<T extends GroupableItem>(
 		line.lineTotal += Number(item.lineTotal);
 	}
 
-	const collator = new Intl.Collator('de', { numeric: true, sensitivity: 'base' });
 	// Equipment reads alphabetically; services in the order they were arranged —
 	// sections by the catalog's order, lines by hand. Array sort is stable, so
 	// lines sharing a position stay in the order they were added.
@@ -155,18 +154,18 @@ export function groupBillingItems<T extends GroupableItem>(
 				? category.lines.sort((a, b) => a.service!.position - b.service!.position)
 				: category.lines.sort(
 						(a, b) =>
-							collator.compare(a.label, b.label) ||
+							naturalCompare(a.label, b.label) ||
 							a.netPurchasePrice - b.netPurchasePrice ||
 							a.ratePercent - b.ratePercent ||
-							collator.compare(a.key, b.key)
+							naturalCompare(a.key, b.key)
 					)
 		}))
 		.sort(
 			(a, b) =>
 				Number(a.isService) - Number(b.isService) ||
 				(a.isService ? a.sortOrder - b.sortOrder : 0) ||
-				collator.compare(a.name, b.name) ||
-				collator.compare(a.key, b.key)
+				naturalCompare(a.name, b.name) ||
+				naturalCompare(a.key, b.key)
 		);
 }
 

@@ -1,3 +1,4 @@
+import { naturalCompare } from '$lib/sort';
 import { query, command } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
@@ -230,8 +231,8 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 
 	return {
 		production,
-		groups: [...groups.values()].sort((a, b) => a.productName.localeCompare(b.productName)),
-		bundles: bundles.sort((a, b) => a.name.localeCompare(b.name))
+		groups: [...groups.values()].sort((a, b) => naturalCompare(a.productName, b.productName)),
+		bundles: bundles.sort((a, b) => naturalCompare(a.name, b.name))
 	};
 });
 

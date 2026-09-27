@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { naturalCompare } from '$lib/sort';
 	import { customerLabel, getContrastingTextColor, orgLabel } from '$lib/utils';
 	/* eslint-disable svelte/prefer-svelte-reactivity */
 	import { getCalendarData, getProductionsCalendar } from '$lib/remote/productions.remote';
@@ -98,7 +99,7 @@
 				});
 			}
 		}
-		return [...seen.values()].sort((a, b) => a.name.localeCompare(b.name));
+		return [...seen.values()].sort((a, b) => naturalCompare(a.name, b.name));
 	});
 	let filteredData = $derived(
 		selectedOrgIds.size === 0

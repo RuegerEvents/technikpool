@@ -1,3 +1,4 @@
+import { naturalCompare } from '$lib/sort';
 import { prisma } from '$lib/server/auth';
 import { BOOKABLE_ASSET_WHERE, isBookableStatus } from '$lib/asset-status';
 import { accessoryIdsOf } from '$lib/server/services/accessories';
@@ -346,13 +347,12 @@ export async function planEquipmentCopy(sourceId: string, targetId: string): Pro
 		lines.push(line);
 	}
 
-	const collator = new Intl.Collator('de', { numeric: true, sensitivity: 'base' });
 	lines.sort(
 		(a, b) =>
 			a.categorySortOrder - b.categorySortOrder ||
-			collator.compare(a.categoryName, b.categoryName) ||
-			collator.compare(a.name, b.name) ||
-			collator.compare(a.organizationName, b.organizationName)
+			naturalCompare(a.categoryName, b.categoryName) ||
+			naturalCompare(a.name, b.name) ||
+			naturalCompare(a.organizationName, b.organizationName)
 	);
 	return { lines, picks };
 }

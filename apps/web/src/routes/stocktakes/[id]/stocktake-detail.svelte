@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { naturalCompare } from '$lib/sort';
 	import { userLabel } from '$lib/user-label.svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -413,8 +414,8 @@
 			map.set(key, group);
 		}
 		return [...map.values()]
-			.map((g) => ({ ...g, items: g.items.sort((a, b) => sortKey(a).localeCompare(sortKey(b))) }))
-			.sort((a, b) => a.name.localeCompare(b.name));
+			.map((g) => ({ ...g, items: g.items.sort((a, b) => naturalCompare(sortKey(a), sortKey(b))) }))
+			.sort((a, b) => naturalCompare(a.name, b.name));
 	});
 
 	let visibleProducts = $derived.by(() => {
@@ -431,7 +432,7 @@
 			.sort(
 				(a, b) =>
 					a.product.category.sortOrder - b.product.category.sortOrder ||
-					a.product.name.localeCompare(b.product.name)
+					naturalCompare(a.product.name, b.product.name)
 			);
 	});
 

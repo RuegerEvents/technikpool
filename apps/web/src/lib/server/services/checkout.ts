@@ -1,3 +1,4 @@
+import { naturalCompare } from '$lib/sort';
 import { prisma } from '$lib/server/auth';
 import {
 	isSystemAdmin,
@@ -460,7 +461,7 @@ async function scanGroup(
 			(a, b) =>
 				Number(rows.find((r) => r.id === a.id)?.parentAssetId !== null) -
 					Number(rows.find((r) => r.id === b.id)?.parentAssetId !== null) ||
-				a.productName.localeCompare(b.productName)
+				naturalCompare(a.productName, b.productName)
 		);
 	return units.length > 0 ? { kind, name, units } : null;
 }

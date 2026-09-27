@@ -598,6 +598,15 @@ href={resolve(`/productions/${id}/packing-list`)}
 
 **DON'T** use bare string hrefs for internal routes: `href="/productions"`.
 
+## Sorting names
+
+Names sort naturally everywhere — "2m" before "10m". In the database the name columns carry the
+ICU collation `"natural"` (migration `20260927160000_natural_sort`), so `orderBy: { name }` is
+already right; in JS sort with `naturalCompare` from `$lib/sort`, never `localeCompare`; in the
+scanner with `naturalCompare` from `lib/natural_sort.dart`. **A new text column that lists get
+sorted by needs `ALTER COLUMN … TYPE TEXT COLLATE "natural"` in its migration** — Prisma's schema
+cannot express a collation and ignores it when diffing, so nothing will remind you.
+
 ## Prisma Queries
 
 **DO** use `findUniqueOrThrow` instead of `findUnique` when the record must exist — avoids null-check boilerplate downstream.

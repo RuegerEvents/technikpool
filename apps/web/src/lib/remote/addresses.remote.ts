@@ -1,3 +1,4 @@
+import { naturalCompare } from '$lib/sort';
 import { query } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import {
@@ -101,7 +102,6 @@ export const getKnownAddresses = query(async (): Promise<KnownAddress[]> => {
 
 	return unique.sort(
 		(a, b) =>
-			(a.label || a.line1).localeCompare(b.label || b.line1, 'de') ||
-			a.city.localeCompare(b.city, 'de')
+			naturalCompare(a.label || a.line1, b.label || b.line1) || naturalCompare(a.city, b.city)
 	);
 });

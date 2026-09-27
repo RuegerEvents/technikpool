@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { naturalCompare } from '$lib/sort';
 	import { categoryLabel } from '$lib/category';
 	import { getErrorMessage, plural, orgLabel } from '$lib/utils';
 	import { resolve } from '$app/paths';
@@ -103,7 +104,7 @@
 			}
 		}
 		return [...seen.values()].sort(
-			(a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name)
+			(a, b) => a.sortOrder - b.sortOrder || naturalCompare(a.name, b.name)
 		);
 	});
 
@@ -132,7 +133,7 @@
 				});
 			}
 		}
-		return [...seen.values()].sort((a, b) => a.name.localeCompare(b.name));
+		return [...seen.values()].sort((a, b) => naturalCompare(a.name, b.name));
 	});
 
 	let locations = $derived.by(() => {
@@ -147,7 +148,7 @@
 				seen.set(b.locationId, { id: b.locationId, name: b.locationName ?? '', city: b.city });
 			}
 		}
-		return [...seen.values()].sort((a, b) => a.name.localeCompare(b.name));
+		return [...seen.values()].sort((a, b) => naturalCompare(a.name, b.name));
 	});
 
 	let cities = $derived([...new SvelteSet(locations.map((l) => l.city))].sort());
@@ -228,7 +229,7 @@
 	});
 
 	let availableGroups = $derived(
-		groups.filter(matchesFilters).sort((a, b) => a.productName.localeCompare(b.productName))
+		groups.filter(matchesFilters).sort((a, b) => naturalCompare(a.productName, b.productName))
 	);
 	// Bundles are picked by type, not by physical kit: two instances of "Camera A
 	// Kit" read as "2 of 2 available", and +/− books or releases one whole kit.
@@ -255,7 +256,7 @@
 			if (b.bookedHere > 0) row.booked.push(b);
 			else if (b.availableCount > 0) row.addable.push(b);
 		}
-		return [...rows.values()].sort((a, b) => a.name.localeCompare(b.name));
+		return [...rows.values()].sort((a, b) => naturalCompare(a.name, b.name));
 	}
 
 	// Lays a pending kit count over the server's: kits are added from the front
