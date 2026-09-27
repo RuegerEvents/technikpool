@@ -1624,7 +1624,9 @@ export const getDashboardStats = query(async () => {
 	const user = await requireAuth();
 	const memberships = await prisma.orgMembership.findMany({ where: { userId: user.id } });
 	const orgIds = memberships.map((m) => m.organizationId);
-	const productionScope = await productionReadWhere(user.id);
+	// Lent ones too: a production another org runs with our equipment is one
+	// our people have to prepare for, even if they only pack the cases.
+	const productionScope = await productionReadWhere(user.id, undefined, { lent: true });
 	const now = new Date();
 	// Both conditions are an OR, so they go under an AND: spread side by side,
 	// the second would replace the scope and count every production there is.
@@ -1659,6 +1661,7 @@ export const getDashboardStats = query(async () => {
 				name: true,
 				startDate: true,
 				endDate: true,
+				organizationId: true,
 				organization: { select: { name: true, shortName: true } },
 				_count: { select: { items: true, crew: true } }
 			}
@@ -1683,8 +1686,12 @@ export const getDashboardStats = query(async () => {
 		},
 		// The where clause already rules out a missing start date; this tells
 		// the type so.
+		// A production of an org the user isn't in can only be here because one
+		// of theirs lends to it.
 		upcomingProductions: upcomingProductions.flatMap((p) =>
-			p.startDate ? [{ ...p, startDate: p.startDate }] : []
+			p.startDate
+				? [{ ...p, startDate: p.startDate, onLoan: !orgIds.includes(p.organizationId) }]
+				: []
 		),
 		upcomingCount,
 		bundleCount,

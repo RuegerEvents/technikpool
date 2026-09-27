@@ -9464,10 +9464,12 @@ msgstr "Default daily rental rate per category, as a percentage of an asset's ne
 msgid "Save to price list <0>Keeps name, section, unit and price as a service to pick next time. The quantity and note stay on this line only.</0>"
 msgstr "Save to price list <0>Keeps name, section, unit and price as a service to pick next time. The quantity and note stay on this line only.</0>"
 
+#: src/routes/+page.svelte
 #: src/routes/productions/+page.svelte
 msgid "Another organization's production that yours lends equipment to"
 msgstr "Another organization's production that yours lends equipment to"
 
+#: src/routes/+page.svelte
 #: src/routes/productions/+page.svelte
 msgid "On loan"
 msgstr "On loan"

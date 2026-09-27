@@ -637,7 +637,16 @@
 											>
 										</div>
 										<div class="min-w-0 flex-1">
-											<p class="truncate font-medium">{prod.name}</p>
+											<p class="flex items-center gap-2 font-medium">
+												<span class="truncate">{prod.name}</span>
+												{#if prod.onLoan}
+													<span
+														class="shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground"
+														title="Another organization's production that yours lends equipment to"
+														>On loan</span
+													>
+												{/if}
+											</p>
 											<p class="truncate text-xs text-muted-foreground">
 												{orgLabel(prod.organization)}
 												{#if prod.endDate}
