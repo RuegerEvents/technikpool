@@ -14,6 +14,7 @@
 		type ProductEditorActions
 	} from '$lib/components/ui/product-editor';
 	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
+	import { ProductDocuments } from '$lib/components/ui/product-documents';
 	import {
 		getCategories,
 		getManufacturers,
@@ -103,88 +104,103 @@
 				onDeleted={() => goto(resolve('/products'))}
 			/>
 
-			<Card.Root class="self-start">
-				<Card.Header>
-					<Card.Title>Units</Card.Title>
-					<Card.Description>
-						{#if isAdmin}
-							Every unit of this product in every organization. Retired units are not listed.
-						{:else}
-							Every unit of this product in your organizations. Retired units are not listed.
-						{/if}
-					</Card.Description>
-				</Card.Header>
-				<Card.Content class="p-0">
-					{#if units.length === 0}
-						<p class="px-6 pb-6 text-sm text-muted-foreground">
+			<div class="space-y-6 self-start">
+				<Card.Root>
+					<Card.Header>
+						<Card.Title>Units</Card.Title>
+						<Card.Description>
 							{#if isAdmin}
-								No organization holds a unit of this product.
+								Every unit of this product in every organization. Retired units are not listed.
 							{:else}
-								None of your organizations holds a unit of this product.
+								Every unit of this product in your organizations. Retired units are not listed.
 							{/if}
-						</p>
-					{:else}
-						<!-- Half the page wide at most, so it scrolls sideways rather than squeezing
+						</Card.Description>
+					</Card.Header>
+					<Card.Content class="p-0">
+						{#if units.length === 0}
+							<p class="px-6 pb-6 text-sm text-muted-foreground">
+								{#if isAdmin}
+									No organization holds a unit of this product.
+								{:else}
+									None of your organizations holds a unit of this product.
+								{/if}
+							</p>
+						{:else}
+							<!-- Half the page wide at most, so it scrolls sideways rather than squeezing
 						     six columns into wrapped fragments. -->
-						<div class="overflow-x-auto border-t">
-							<table class="w-full text-sm">
-								<thead>
-									<tr class="border-b bg-muted/30 text-left text-xs text-muted-foreground">
-										<th class="px-4 py-2 font-medium">Tag</th>
-										{#if severalOrgs}
-											<th class="px-4 py-2 font-medium">Organization</th>
-										{/if}
-										<th class="px-4 py-2 font-medium">Case</th>
-										<th class="px-4 py-2 font-medium">Location</th>
-										<th class="px-4 py-2 font-medium">S/N</th>
-										<th class="px-4 py-2 font-medium">Status</th>
-									</tr>
-								</thead>
-								<tbody>
-									{#each units as unit (unit.id)}
-										<tr
-											class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
-											onclick={() => goto(resolve(`/assets/${unit.id}`))}
-										>
-											<td class="px-4 py-2">
-												<a
-													href={resolve(`/assets/${unit.id}`)}
-													class="font-mono whitespace-nowrap hover:underline"
-													onclick={(e) => e.stopPropagation()}>{unit.assetTag ?? '—'}</a
-												>
-												{#if unit.parent}
-													<a
-														href={resolve(`/assets/${unit.parent.id}`)}
-														class="block text-xs whitespace-nowrap text-muted-foreground hover:underline"
-														onclick={(e) => e.stopPropagation()}
-													>
-														↳ Accessory of {unit.parent.product.name}
-														{unit.parent.assetTag ?? ''}
-													</a>
-												{/if}
-											</td>
+							<div class="overflow-x-auto border-t">
+								<table class="w-full text-sm">
+									<thead>
+										<tr class="border-b bg-muted/30 text-left text-xs text-muted-foreground">
+											<th class="px-4 py-2 font-medium">Tag</th>
 											{#if severalOrgs}
-												<td class="px-4 py-2 whitespace-nowrap text-muted-foreground"
-													>{orgLabel(unit.organization)}</td
-												>
+												<th class="px-4 py-2 font-medium">Organization</th>
 											{/if}
-											<td class="px-4 py-2 text-muted-foreground"
-												>{unit.bundle?.template.name ?? '—'}</td
-											>
-											<td class="px-4 py-2 text-muted-foreground">{unit.location?.name ?? '—'}</td>
-											<td
-												class="px-4 py-2 font-mono text-xs whitespace-nowrap text-muted-foreground"
-												>{unit.serialNumber ?? '—'}</td
-											>
-											<td class="px-4 py-2"><AssetStatusBadge status={unit.status} /></td>
+											<th class="px-4 py-2 font-medium">Case</th>
+											<th class="px-4 py-2 font-medium">Location</th>
+											<th class="px-4 py-2 font-medium">S/N</th>
+											<th class="px-4 py-2 font-medium">Status</th>
 										</tr>
-									{/each}
-								</tbody>
-							</table>
-						</div>
-					{/if}
-				</Card.Content>
-			</Card.Root>
+									</thead>
+									<tbody>
+										{#each units as unit (unit.id)}
+											<tr
+												class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
+												onclick={() => goto(resolve(`/assets/${unit.id}`))}
+											>
+												<td class="px-4 py-2">
+													<a
+														href={resolve(`/assets/${unit.id}`)}
+														class="font-mono whitespace-nowrap hover:underline"
+														onclick={(e) => e.stopPropagation()}>{unit.assetTag ?? '—'}</a
+													>
+													{#if unit.parent}
+														<a
+															href={resolve(`/assets/${unit.parent.id}`)}
+															class="block text-xs whitespace-nowrap text-muted-foreground hover:underline"
+															onclick={(e) => e.stopPropagation()}
+														>
+															↳ Accessory of {unit.parent.product.name}
+															{unit.parent.assetTag ?? ''}
+														</a>
+													{/if}
+												</td>
+												{#if severalOrgs}
+													<td class="px-4 py-2 whitespace-nowrap text-muted-foreground"
+														>{orgLabel(unit.organization)}</td
+													>
+												{/if}
+												<td class="px-4 py-2 text-muted-foreground"
+													>{unit.bundle?.template.name ?? '—'}</td
+												>
+												<td class="px-4 py-2 text-muted-foreground">{unit.location?.name ?? '—'}</td
+												>
+												<td
+													class="px-4 py-2 font-mono text-xs whitespace-nowrap text-muted-foreground"
+													>{unit.serialNumber ?? '—'}</td
+												>
+												<td class="px-4 py-2"><AssetStatusBadge status={unit.status} /></td>
+											</tr>
+										{/each}
+									</tbody>
+								</table>
+							</div>
+						{/if}
+					</Card.Content>
+				</Card.Root>
+
+				<Card.Root>
+					<Card.Header>
+						<Card.Title>PDFs</Card.Title>
+						<Card.Description
+							>Manuals, datasheets and the like, for every unit of it.</Card.Description
+						>
+					</Card.Header>
+					<Card.Content>
+						<ProductDocuments {productId} />
+					</Card.Content>
+				</Card.Root>
+			</div>
 		</div>
 	</div>
 {/if}

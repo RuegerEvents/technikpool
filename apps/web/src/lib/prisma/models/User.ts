@@ -260,6 +260,7 @@ export type UserWhereInput = {
   accounts?: Prisma.AccountListRelationFilter
   catalogTransactions?: Prisma.CatalogTransactionListRelationFilter
   createdProducts?: Prisma.ProductListRelationFilter
+  productDocuments?: Prisma.ProductDocumentListRelationFilter
   sentInvitations?: Prisma.InvitationListRelationFilter
   homeOrg?: Prisma.XOR<Prisma.OrganizationNullableScalarRelationFilter, Prisma.OrganizationWhereInput> | null
   memberships?: Prisma.OrgMembershipListRelationFilter
@@ -289,6 +290,7 @@ export type UserOrderByWithRelationInput = {
   accounts?: Prisma.AccountOrderByRelationAggregateInput
   catalogTransactions?: Prisma.CatalogTransactionOrderByRelationAggregateInput
   createdProducts?: Prisma.ProductOrderByRelationAggregateInput
+  productDocuments?: Prisma.ProductDocumentOrderByRelationAggregateInput
   sentInvitations?: Prisma.InvitationOrderByRelationAggregateInput
   homeOrg?: Prisma.OrganizationOrderByWithRelationInput
   memberships?: Prisma.OrgMembershipOrderByRelationAggregateInput
@@ -321,6 +323,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   accounts?: Prisma.AccountListRelationFilter
   catalogTransactions?: Prisma.CatalogTransactionListRelationFilter
   createdProducts?: Prisma.ProductListRelationFilter
+  productDocuments?: Prisma.ProductDocumentListRelationFilter
   sentInvitations?: Prisma.InvitationListRelationFilter
   homeOrg?: Prisma.XOR<Prisma.OrganizationNullableScalarRelationFilter, Prisma.OrganizationWhereInput> | null
   memberships?: Prisma.OrgMembershipListRelationFilter
@@ -383,6 +386,7 @@ export type UserCreateInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
@@ -412,6 +416,7 @@ export type UserUncheckedCreateInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -439,6 +444,7 @@ export type UserUpdateInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
@@ -468,6 +474,7 @@ export type UserUncheckedUpdateInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -882,6 +889,22 @@ export type UserUpdateOneWithoutStocktakeEventsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStocktakeEventsInput, Prisma.UserUpdateWithoutStocktakeEventsInput>, Prisma.UserUncheckedUpdateWithoutStocktakeEventsInput>
 }
 
+export type UserCreateNestedOneWithoutProductDocumentsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProductDocumentsInput, Prisma.UserUncheckedCreateWithoutProductDocumentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProductDocumentsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutProductDocumentsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProductDocumentsInput, Prisma.UserUncheckedCreateWithoutProductDocumentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProductDocumentsInput
+  upsert?: Prisma.UserUpsertWithoutProductDocumentsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProductDocumentsInput, Prisma.UserUpdateWithoutProductDocumentsInput>, Prisma.UserUncheckedUpdateWithoutProductDocumentsInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   id?: string
   email: string
@@ -895,6 +918,7 @@ export type UserCreateWithoutSessionsInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
@@ -923,6 +947,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -965,6 +990,7 @@ export type UserUpdateWithoutSessionsInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
@@ -993,6 +1019,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -1019,6 +1046,7 @@ export type UserCreateWithoutAccountsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
@@ -1047,6 +1075,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -1089,6 +1118,7 @@ export type UserUpdateWithoutAccountsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
@@ -1117,6 +1147,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -1144,6 +1175,7 @@ export type UserCreateWithoutHomeOrgInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
@@ -1171,6 +1203,7 @@ export type UserUncheckedCreateWithoutHomeOrgInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -1240,6 +1273,7 @@ export type UserCreateWithoutMembershipsInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
@@ -1268,6 +1302,7 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
@@ -1310,6 +1345,7 @@ export type UserUpdateWithoutMembershipsInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
@@ -1338,6 +1374,7 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
@@ -1364,6 +1401,7 @@ export type UserCreateWithoutDpaAcceptancesInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
@@ -1392,6 +1430,7 @@ export type UserUncheckedCreateWithoutDpaAcceptancesInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -1434,6 +1473,7 @@ export type UserUpdateWithoutDpaAcceptancesInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
@@ -1462,6 +1502,7 @@ export type UserUncheckedUpdateWithoutDpaAcceptancesInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -1488,6 +1529,7 @@ export type UserCreateWithoutSentInvitationsInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
@@ -1516,6 +1558,7 @@ export type UserUncheckedCreateWithoutSentInvitationsInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
@@ -1558,6 +1601,7 @@ export type UserUpdateWithoutSentInvitationsInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
@@ -1586,6 +1630,7 @@ export type UserUncheckedUpdateWithoutSentInvitationsInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
@@ -1611,6 +1656,7 @@ export type UserCreateWithoutCreatedProductsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
@@ -1639,6 +1685,7 @@ export type UserUncheckedCreateWithoutCreatedProductsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -1681,6 +1728,7 @@ export type UserUpdateWithoutCreatedProductsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
@@ -1709,6 +1757,7 @@ export type UserUncheckedUpdateWithoutCreatedProductsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -1736,6 +1785,7 @@ export type UserCreateWithoutCancelledProductionsInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
@@ -1764,6 +1814,7 @@ export type UserUncheckedCreateWithoutCancelledProductionsInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -1806,6 +1857,7 @@ export type UserUpdateWithoutCancelledProductionsInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
@@ -1834,6 +1886,7 @@ export type UserUncheckedUpdateWithoutCancelledProductionsInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -1860,6 +1913,7 @@ export type UserCreateWithoutCrewAssignmentsInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
@@ -1888,6 +1942,7 @@ export type UserUncheckedCreateWithoutCrewAssignmentsInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -1930,6 +1985,7 @@ export type UserUpdateWithoutCrewAssignmentsInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
@@ -1958,6 +2014,7 @@ export type UserUncheckedUpdateWithoutCrewAssignmentsInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -1984,6 +2041,7 @@ export type UserCreateWithoutTransactionsInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
@@ -2012,6 +2070,7 @@ export type UserUncheckedCreateWithoutTransactionsInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
@@ -2054,6 +2113,7 @@ export type UserUpdateWithoutTransactionsInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
@@ -2082,6 +2142,7 @@ export type UserUncheckedUpdateWithoutTransactionsInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
@@ -2107,6 +2168,7 @@ export type UserCreateWithoutCatalogTransactionsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
@@ -2135,6 +2197,7 @@ export type UserUncheckedCreateWithoutCatalogTransactionsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -2177,6 +2240,7 @@ export type UserUpdateWithoutCatalogTransactionsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
@@ -2205,6 +2269,7 @@ export type UserUncheckedUpdateWithoutCatalogTransactionsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -2232,6 +2297,7 @@ export type UserCreateWithoutStocktakesStartedInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
@@ -2260,6 +2326,7 @@ export type UserUncheckedCreateWithoutStocktakesStartedInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -2291,6 +2358,7 @@ export type UserCreateWithoutStocktakesClosedInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
@@ -2319,6 +2387,7 @@ export type UserUncheckedCreateWithoutStocktakesClosedInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -2361,6 +2430,7 @@ export type UserUpdateWithoutStocktakesStartedInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
@@ -2389,6 +2459,7 @@ export type UserUncheckedUpdateWithoutStocktakesStartedInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -2426,6 +2497,7 @@ export type UserUpdateWithoutStocktakesClosedInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
@@ -2454,6 +2526,7 @@ export type UserUncheckedUpdateWithoutStocktakesClosedInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -2480,6 +2553,7 @@ export type UserCreateWithoutStocktakeFindsInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
@@ -2508,6 +2582,7 @@ export type UserUncheckedCreateWithoutStocktakeFindsInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -2550,6 +2625,7 @@ export type UserUpdateWithoutStocktakeFindsInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
@@ -2578,6 +2654,7 @@ export type UserUncheckedUpdateWithoutStocktakeFindsInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -2604,6 +2681,7 @@ export type UserCreateWithoutStocktakeCountsInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
@@ -2632,6 +2710,7 @@ export type UserUncheckedCreateWithoutStocktakeCountsInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -2674,6 +2753,7 @@ export type UserUpdateWithoutStocktakeCountsInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
@@ -2702,6 +2782,7 @@ export type UserUncheckedUpdateWithoutStocktakeCountsInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -2728,6 +2809,7 @@ export type UserCreateWithoutStocktakeEventsInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
   homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
@@ -2756,6 +2838,7 @@ export type UserUncheckedCreateWithoutStocktakeEventsInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
   createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -2798,6 +2881,7 @@ export type UserUpdateWithoutStocktakeEventsInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
   homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
@@ -2826,6 +2910,7 @@ export type UserUncheckedUpdateWithoutStocktakeEventsInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -2835,6 +2920,134 @@ export type UserUncheckedUpdateWithoutStocktakeEventsInput = {
   stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
   stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
   stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutProductDocumentsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
+  homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
+  memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
+  dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutProductDocumentsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  homeOrgId?: string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
+  dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutProductDocumentsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutProductDocumentsInput, Prisma.UserUncheckedCreateWithoutProductDocumentsInput>
+}
+
+export type UserUpsertWithoutProductDocumentsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutProductDocumentsInput, Prisma.UserUncheckedUpdateWithoutProductDocumentsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutProductDocumentsInput, Prisma.UserUncheckedCreateWithoutProductDocumentsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutProductDocumentsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutProductDocumentsInput, Prisma.UserUncheckedUpdateWithoutProductDocumentsInput>
+}
+
+export type UserUpdateWithoutProductDocumentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
+  homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
+  memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
+  dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutProductDocumentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  homeOrgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -2864,6 +3077,7 @@ export type UserUpdateWithoutHomeOrgInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
@@ -2891,6 +3105,7 @@ export type UserUncheckedUpdateWithoutHomeOrgInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
   createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -2926,6 +3141,7 @@ export type UserCountOutputType = {
   accounts: number
   catalogTransactions: number
   createdProducts: number
+  productDocuments: number
   sentInvitations: number
   memberships: number
   transactions: number
@@ -2944,6 +3160,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   accounts?: boolean | UserCountOutputTypeCountAccountsArgs
   catalogTransactions?: boolean | UserCountOutputTypeCountCatalogTransactionsArgs
   createdProducts?: boolean | UserCountOutputTypeCountCreatedProductsArgs
+  productDocuments?: boolean | UserCountOutputTypeCountProductDocumentsArgs
   sentInvitations?: boolean | UserCountOutputTypeCountSentInvitationsArgs
   memberships?: boolean | UserCountOutputTypeCountMembershipsArgs
   transactions?: boolean | UserCountOutputTypeCountTransactionsArgs
@@ -2993,6 +3210,13 @@ export type UserCountOutputTypeCountCatalogTransactionsArgs<ExtArgs extends runt
  */
 export type UserCountOutputTypeCountCreatedProductsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ProductWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountProductDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProductDocumentWhereInput
 }
 
 /**
@@ -3088,6 +3312,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   catalogTransactions?: boolean | Prisma.User$catalogTransactionsArgs<ExtArgs>
   createdProducts?: boolean | Prisma.User$createdProductsArgs<ExtArgs>
+  productDocuments?: boolean | Prisma.User$productDocumentsArgs<ExtArgs>
   sentInvitations?: boolean | Prisma.User$sentInvitationsArgs<ExtArgs>
   homeOrg?: boolean | Prisma.User$homeOrgArgs<ExtArgs>
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
@@ -3150,6 +3375,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   catalogTransactions?: boolean | Prisma.User$catalogTransactionsArgs<ExtArgs>
   createdProducts?: boolean | Prisma.User$createdProductsArgs<ExtArgs>
+  productDocuments?: boolean | Prisma.User$productDocumentsArgs<ExtArgs>
   sentInvitations?: boolean | Prisma.User$sentInvitationsArgs<ExtArgs>
   homeOrg?: boolean | Prisma.User$homeOrgArgs<ExtArgs>
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
@@ -3178,6 +3404,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     accounts: Prisma.$AccountPayload<ExtArgs>[]
     catalogTransactions: Prisma.$CatalogTransactionPayload<ExtArgs>[]
     createdProducts: Prisma.$ProductPayload<ExtArgs>[]
+    productDocuments: Prisma.$ProductDocumentPayload<ExtArgs>[]
     sentInvitations: Prisma.$InvitationPayload<ExtArgs>[]
     homeOrg: Prisma.$OrganizationPayload<ExtArgs> | null
     memberships: Prisma.$OrgMembershipPayload<ExtArgs>[]
@@ -3600,6 +3827,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   accounts<T extends Prisma.User$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   catalogTransactions<T extends Prisma.User$catalogTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$catalogTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CatalogTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdProducts<T extends Prisma.User$createdProductsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdProductsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  productDocuments<T extends Prisma.User$productDocumentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$productDocumentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sentInvitations<T extends Prisma.User$sentInvitationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sentInvitationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvitationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   homeOrg<T extends Prisma.User$homeOrgArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$homeOrgArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   memberships<T extends Prisma.User$membershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrgMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4145,6 +4373,30 @@ export type User$createdProductsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.ProductScalarFieldEnum | Prisma.ProductScalarFieldEnum[]
+}
+
+/**
+ * User.productDocuments
+ */
+export type User$productDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProductDocument
+   */
+  select?: Prisma.ProductDocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProductDocument
+   */
+  omit?: Prisma.ProductDocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProductDocumentInclude<ExtArgs> | null
+  where?: Prisma.ProductDocumentWhereInput
+  orderBy?: Prisma.ProductDocumentOrderByWithRelationInput | Prisma.ProductDocumentOrderByWithRelationInput[]
+  cursor?: Prisma.ProductDocumentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProductDocumentScalarFieldEnum | Prisma.ProductDocumentScalarFieldEnum[]
 }
 
 /**

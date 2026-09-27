@@ -30,6 +30,7 @@ model User {
 
   catalogTransactions CatalogTransaction[]
   createdProducts     Product[]            @relation("ProductCreator")
+  productDocuments    ProductDocument[]
   sentInvitations     Invitation[]
 
   // App-specific relations
@@ -550,6 +551,7 @@ model Product {
   /// The connectors built into this device. Empty on cables, whose ends are
   /// `connectorAId/BId`, and on licences.
   ports           ProductPort[]
+  documents       ProductDocument[]
 
   featuredInBundleTemplates BundleTemplate[] @relation("BundleTemplateFeaturedProducts")
 
@@ -1391,4 +1393,33 @@ model StocktakeEvent {
   createdAt   DateTime  @default(now())
 
   @@index([stocktakeId, createdAt])
+}
+
+enum ProductDocumentKind {
+  MANUAL
+  DATASHEET
+  OTHER
+}
+
+/// A PDF that comes with a product — its manual, its datasheet. Like the
+/// product's picture it lives under the object store's public prefix and
+/// belongs to the shared catalogue, so every org and anyone with the link can
+/// read it: nothing private goes in one (see src/lib/server/services/product-documents.ts).
+model ProductDocument {
+  id        String              @id @default(cuid())
+  productId String
+  product   Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  kind      ProductDocumentKind @default(OTHER)
+  title     String
+  /// Object key under the public prefix, like Product.imagePath.
+  path      String
+  sizeBytes Int
+
+  // Whoever added it may take it away again; null once their account is gone.
+  uploadedById String?
+  uploadedBy   User?   @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([productId])
 }

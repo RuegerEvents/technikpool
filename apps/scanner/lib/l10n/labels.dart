@@ -50,6 +50,12 @@ class Labels {
     _ => action,
   };
 
+  static String documentKind(S l10n, ProductDocumentKind kind) => switch (kind) {
+    ProductDocumentKind.manual => l10n.documentManual,
+    ProductDocumentKind.datasheet => l10n.documentDatasheet,
+    _ => l10n.documentOther,
+  };
+
   static String scanAction(S l10n, ScanResultAction action) => switch (action) {
     ScanResultAction.locationAssigned => l10n.actionLocationAssigned,
     ScanResultAction.checkedOut => l10n.actionCheckedOut,

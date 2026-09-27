@@ -9,6 +9,7 @@ import 'asset_transaction.dart';
 import 'location.dart';
 import 'organization.dart';
 import 'product.dart';
+import 'product_document.dart';
 import 'production.dart';
 
 part 'asset_detail.g.dart';
@@ -27,6 +28,7 @@ class AssetDetail {
     this.serialNumber,
     this.bundleId,
     this.parentAssetId,
+    this.documents,
   });
   
   factory AssetDetail.fromJson(Map<String, Object?> json) => _$AssetDetailFromJson(json);
@@ -68,6 +70,11 @@ class AssetDetail {
 
   /// Most recent transactions first.
   final List<AssetTransaction> history;
+
+  /// The product's PDFs, manuals first. Not required, so an older.
+  /// client keeps compiling.
+  ///
+  final List<ProductDocument>? documents;
 
   Map<String, Object?> toJson() => _$AssetDetailToJson(this);
 }

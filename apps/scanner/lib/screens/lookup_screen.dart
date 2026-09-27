@@ -8,6 +8,7 @@ import '../api/generated/export.dart';
 import '../cable_format.dart';
 import '../l10n/labels.dart';
 import '../l10n/generated/app_localizations.dart';
+import '../legal.dart';
 import '../product_label.dart';
 import '../scan/camera_scan_screen.dart';
 import '../demo/demo_data.dart';
@@ -192,6 +193,27 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
             when details.isNotEmpty) ...[
           const SizedBox(height: 12),
           Text(details),
+        ],
+        // The product's manuals and datasheets. Public addresses, so they open
+        // in the device's own viewer without a session.
+        if (asset.documents case final documents?
+            when documents.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          Text(
+            l10n.documents,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          for (final document in documents)
+            ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.picture_as_pdf_outlined),
+              title: Text(document.title),
+              subtitle: Text(Labels.documentKind(l10n, document.kind)),
+              trailing: const Icon(Icons.open_in_new, size: 18),
+              onTap: () => openExternal(context, Uri.parse(document.url)),
+            ),
         ],
         const SizedBox(height: 24),
         Text(

@@ -409,6 +409,23 @@ export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
   _max?: Prisma.NestedJsonFilter<$PrismaModel>
 }
 
+export type EnumProductDocumentKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProductDocumentKind | Prisma.EnumProductDocumentKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ProductDocumentKind[] | Prisma.ListEnumProductDocumentKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ProductDocumentKind[] | Prisma.ListEnumProductDocumentKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumProductDocumentKindFilter<$PrismaModel> | $Enums.ProductDocumentKind
+}
+
+export type EnumProductDocumentKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProductDocumentKind | Prisma.EnumProductDocumentKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ProductDocumentKind[] | Prisma.ListEnumProductDocumentKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ProductDocumentKind[] | Prisma.ListEnumProductDocumentKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumProductDocumentKindWithAggregatesFilter<$PrismaModel> | $Enums.ProductDocumentKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumProductDocumentKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumProductDocumentKindFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -761,6 +778,23 @@ export type NestedJsonFilterBase<$PrismaModel = never> = {
   gt?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   gte?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
+}
+
+export type NestedEnumProductDocumentKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProductDocumentKind | Prisma.EnumProductDocumentKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ProductDocumentKind[] | Prisma.ListEnumProductDocumentKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ProductDocumentKind[] | Prisma.ListEnumProductDocumentKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumProductDocumentKindFilter<$PrismaModel> | $Enums.ProductDocumentKind
+}
+
+export type NestedEnumProductDocumentKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProductDocumentKind | Prisma.EnumProductDocumentKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ProductDocumentKind[] | Prisma.ListEnumProductDocumentKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ProductDocumentKind[] | Prisma.ListEnumProductDocumentKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumProductDocumentKindWithAggregatesFilter<$PrismaModel> | $Enums.ProductDocumentKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumProductDocumentKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumProductDocumentKindFilter<$PrismaModel>
 }
 
 

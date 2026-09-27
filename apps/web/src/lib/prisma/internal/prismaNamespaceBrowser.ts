@@ -94,7 +94,8 @@ export const ModelName = {
   StocktakeItem: 'StocktakeItem',
   StocktakeLine: 'StocktakeLine',
   StocktakeCount: 'StocktakeCount',
-  StocktakeEvent: 'StocktakeEvent'
+  StocktakeEvent: 'StocktakeEvent',
+  ProductDocument: 'ProductDocument'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -866,6 +867,20 @@ export const StocktakeEventScalarFieldEnum = {
 } as const
 
 export type StocktakeEventScalarFieldEnum = (typeof StocktakeEventScalarFieldEnum)[keyof typeof StocktakeEventScalarFieldEnum]
+
+
+export const ProductDocumentScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  kind: 'kind',
+  title: 'title',
+  path: 'path',
+  sizeBytes: 'sizeBytes',
+  uploadedById: 'uploadedById',
+  createdAt: 'createdAt'
+} as const
+
+export type ProductDocumentScalarFieldEnum = (typeof ProductDocumentScalarFieldEnum)[keyof typeof ProductDocumentScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -41,6 +41,7 @@ const prefixes: Partial<Record<ModelName, string>> = {
 	OrgMembership: 'orgm',
 	Product: 'prd',
 	ProductPort: 'prdp',
+	ProductDocument: 'pdoc',
 	Production: 'prdn',
 	ProductionCrew: 'prdc',
 	ProductionItem: 'prdi',

@@ -28,3 +28,12 @@ export const LegalDocumentKind = {
 } as const
 
 export type LegalDocumentKind = (typeof LegalDocumentKind)[keyof typeof LegalDocumentKind]
+
+
+export const ProductDocumentKind = {
+  MANUAL: 'MANUAL',
+  DATASHEET: 'DATASHEET',
+  OTHER: 'OTHER'
+} as const
+
+export type ProductDocumentKind = (typeof ProductDocumentKind)[keyof typeof ProductDocumentKind]

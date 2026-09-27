@@ -182,6 +182,23 @@ export function toProduct(product: ProductRow): Schemas['Product'] {
 	};
 }
 
+export function toProductDocument(document: {
+	id: string;
+	kind: 'MANUAL' | 'DATASHEET' | 'OTHER';
+	title: string;
+	path: string;
+	sizeBytes: number;
+}): Schemas['ProductDocument'] {
+	return {
+		id: document.id,
+		kind: document.kind,
+		title: document.title,
+		// Always a key under the public prefix, so always an address.
+		url: imageSrc(document.path)!,
+		sizeBytes: document.sizeBytes
+	};
+}
+
 type AssetRow = {
 	id: string;
 	assetTag: string | null;

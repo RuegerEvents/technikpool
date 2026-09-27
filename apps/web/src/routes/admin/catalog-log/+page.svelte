@@ -27,6 +27,8 @@
 		PRODUCT_DELETED: 'Product deleted',
 		PRODUCT_MERGED: 'Products merged',
 		PRODUCT_PRICE_SET: 'Price set',
+		PRODUCT_DOCUMENT_ADDED: 'PDF added',
+		PRODUCT_DOCUMENT_REMOVED: 'PDF removed',
 		MANUFACTURER_UPDATED: 'Manufacturer updated',
 		MANUFACTURER_MERGED: 'Manufacturers merged',
 		CATEGORY_UPDATED: 'Category updated'
@@ -127,8 +129,10 @@
 			target?: { name?: string };
 			movedAssets?: number;
 			movedProducts?: number;
+			document?: { title?: string };
 		} | null;
 		if (!payload) return '';
+		if (payload.document) return payload.document.title ?? '';
 		if (payload.changes) {
 			return payload.changes
 				.map((change) => `${change.field}: ${logValue(change.from)} → ${logValue(change.to)}`)

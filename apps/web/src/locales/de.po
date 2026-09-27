@@ -183,6 +183,7 @@ msgstr "Crew"
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/ui/product-documents/product-documents.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
@@ -297,6 +298,8 @@ msgstr "E-Mail"
 
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
+#: src/lib/components/ui/product-documents/product-documents.svelte
+#: src/lib/components/ui/product-documents/product-documents.svelte
 #: src/lib/components/ui/product-ports/product-ports.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
@@ -1338,6 +1341,7 @@ msgstr "Standort"
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
+#: src/lib/components/ui/product-documents/product-documents.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/admin/categories/+page.svelte
 #: src/routes/admin/legal/legal-editor.svelte
@@ -3227,6 +3231,7 @@ msgstr "Wird entfernt…"
 
 #: src/lib/components/ui/image-upload/image-upload.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
+#: src/lib/components/ui/product-documents/product-documents.svelte
 #: src/routes/orgs/[id]/org-logo-card.svelte
 msgid "Uploading…"
 msgstr "Wird hochgeladen…"
@@ -10687,3 +10692,71 @@ msgstr "<0/> Diese Kabel nummerieren (ab {0})"
 #: src/routes/assets/new/+page.svelte
 msgid "Blank: next number"
 msgstr "Leer: nächste Nummer"
+
+#: src/lib/error-messages.svelte.ts
+msgid "Only whoever added this PDF, or whoever may change the product, can change or remove it."
+msgstr "Nur wer dieses PDF hinzugefügt hat oder das Produkt ändern darf, kann es ändern oder entfernen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "That upload is not a PDF this product can use. Try uploading it again."
+msgstr "Dieser Upload ist kein PDF, das dieses Produkt verwenden kann. Lade es bitte erneut hoch."
+
+#: src/lib/components/ui/product-documents/product-documents.svelte
+#: src/lib/components/ui/product-documents/product-documents.svelte
+#: src/lib/components/ui/product-documents/product-documents.svelte
+msgid "Manual"
+msgstr "Handbuch"
+
+#: src/lib/components/ui/product-documents/product-documents.svelte
+#: src/lib/components/ui/product-documents/product-documents.svelte
+#: src/lib/components/ui/product-documents/product-documents.svelte
+msgid "Datasheet"
+msgstr "Datenblatt"
+
+#: src/lib/components/ui/product-documents/product-documents.svelte
+#: src/lib/components/ui/product-documents/product-documents.svelte
+#: src/lib/components/ui/product-documents/product-documents.svelte
+msgid "Other"
+msgstr "Sonstiges"
+
+#: src/lib/components/ui/product-documents/product-documents.svelte
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "PDF added"
+msgstr "PDF hinzugefügt"
+
+#: src/lib/components/ui/product-documents/product-documents.svelte
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "PDF removed"
+msgstr "PDF entfernt"
+
+#: src/lib/components/ui/product-documents/product-documents.svelte
+msgid "No PDFs yet."
+msgstr "Noch keine PDFs."
+
+#: src/lib/components/ui/product-documents/product-documents.svelte
+msgid "Keep"
+msgstr "Behalten"
+
+#: src/lib/components/ui/product-documents/product-documents.svelte
+msgid "Rename"
+msgstr "Umbenennen"
+
+#: src/lib/components/ui/product-documents/product-documents.svelte
+msgid "PDFs are public: every organization, and anyone with the link, can open them. Upload manuals and datasheets only — nothing private or internal."
+msgstr "PDFs sind öffentlich: Jede Organisation und jeder mit dem Link kann sie öffnen. Lade nur Handbücher und Datenblätter hoch – nichts Privates oder Internes."
+
+#: src/lib/components/ui/product-documents/product-documents.svelte
+msgid "Title"
+msgstr "Titel"
+
+#: src/lib/components/ui/product-documents/product-documents.svelte
+msgid "Add PDF"
+msgstr "PDF hinzufügen"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "PDFs"
+msgstr "PDFs"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Manuals, datasheets and the like, for every unit of it."
+msgstr "Handbücher, Datenblätter und Ähnliches, für alle Geräte dieses Produkts."

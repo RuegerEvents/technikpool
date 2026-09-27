@@ -319,6 +319,30 @@ abstract class S {
   /// **'History'**
   String get history;
 
+  /// Heading over a product's manuals and datasheets on the lookup screen.
+  ///
+  /// In en, this message translates to:
+  /// **'PDFs'**
+  String get documents;
+
+  /// No description provided for @documentManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get documentManual;
+
+  /// No description provided for @documentDatasheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Datasheet'**
+  String get documentDatasheet;
+
+  /// No description provided for @documentOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Document'**
+  String get documentOther;
+
   /// No description provided for @inventory.
   ///
   /// In en, this message translates to:

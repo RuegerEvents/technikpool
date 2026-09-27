@@ -24,6 +24,9 @@ AssetDetail _$AssetDetailFromJson(Map<String, dynamic> json) => AssetDetail(
   serialNumber: json['serialNumber'] as String?,
   bundleId: json['bundleId'] as String?,
   parentAssetId: json['parentAssetId'] as String?,
+  documents: (json['documents'] as List<dynamic>?)
+      ?.map((e) => ProductDocument.fromJson(e as Map<String, dynamic>))
+      .toList(),
 );
 
 Map<String, dynamic> _$AssetDetailToJson(AssetDetail instance) =>
@@ -39,4 +42,5 @@ Map<String, dynamic> _$AssetDetailToJson(AssetDetail instance) =>
       'parentAssetId': ?instance.parentAssetId,
       'currentProduction': ?instance.currentProduction,
       'history': instance.history,
+      'documents': ?instance.documents,
     };

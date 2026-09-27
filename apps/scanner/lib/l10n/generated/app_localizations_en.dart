@@ -125,6 +125,18 @@ class SEn extends S {
   String get history => 'History';
 
   @override
+  String get documents => 'PDFs';
+
+  @override
+  String get documentManual => 'Manual';
+
+  @override
+  String get documentDatasheet => 'Datasheet';
+
+  @override
+  String get documentOther => 'Document';
+
+  @override
   String get inventory => 'Inventory';
 
   @override

@@ -27,6 +27,8 @@ export type AppErrorCode =
 	| 'approval_forbidden'
 	| 'decline_forbidden'
 	| 'product_edit_forbidden'
+	| 'product_document_forbidden'
+	| 'product_document_invalid'
 	| 'product_delete_forbidden'
 	| 'product_merge_forbidden'
 	| 'product_units_other_orgs'

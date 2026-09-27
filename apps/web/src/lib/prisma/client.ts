@@ -291,3 +291,11 @@ export type StocktakeCount = Prisma.StocktakeCountModel
  * 
  */
 export type StocktakeEvent = Prisma.StocktakeEventModel
+/**
+ * Model ProductDocument
+ * A PDF that comes with a product — its manual, its datasheet. Like the
+ * product's picture it lives under the object store's public prefix and
+ * belongs to the shared catalogue, so every org and anyone with the link can
+ * read it: nothing private goes in one (see src/lib/server/services/product-documents.ts).
+ */
+export type ProductDocument = Prisma.ProductDocumentModel

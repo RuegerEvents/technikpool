@@ -125,6 +125,18 @@ class SDe extends S {
   String get history => 'Verlauf';
 
   @override
+  String get documents => 'PDFs';
+
+  @override
+  String get documentManual => 'Handbuch';
+
+  @override
+  String get documentDatasheet => 'Datenblatt';
+
+  @override
+  String get documentOther => 'Dokument';
+
+  @override
   String get inventory => 'Bestand';
 
   @override

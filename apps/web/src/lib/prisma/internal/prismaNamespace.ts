@@ -440,7 +440,8 @@ export const ModelName = {
   StocktakeItem: 'StocktakeItem',
   StocktakeLine: 'StocktakeLine',
   StocktakeCount: 'StocktakeCount',
-  StocktakeEvent: 'StocktakeEvent'
+  StocktakeEvent: 'StocktakeEvent',
+  ProductDocument: 'ProductDocument'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -456,7 +457,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "legalDocument" | "dpaAcceptance" | "invitation" | "manufacturer" | "connector" | "productPort" | "cableWay" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "serviceCategory" | "orgService" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem" | "stocktake" | "stocktakeItem" | "stocktakeLine" | "stocktakeCount" | "stocktakeEvent"
+    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "legalDocument" | "dpaAcceptance" | "invitation" | "manufacturer" | "connector" | "productPort" | "cableWay" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "serviceCategory" | "orgService" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem" | "stocktake" | "stocktakeItem" | "stocktakeLine" | "stocktakeCount" | "stocktakeEvent" | "productDocument"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3716,6 +3717,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ProductDocument: {
+      payload: Prisma.$ProductDocumentPayload<ExtArgs>
+      fields: Prisma.ProductDocumentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ProductDocumentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductDocumentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ProductDocumentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductDocumentPayload>
+        }
+        findFirst: {
+          args: Prisma.ProductDocumentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductDocumentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ProductDocumentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductDocumentPayload>
+        }
+        findMany: {
+          args: Prisma.ProductDocumentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductDocumentPayload>[]
+        }
+        create: {
+          args: Prisma.ProductDocumentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductDocumentPayload>
+        }
+        createMany: {
+          args: Prisma.ProductDocumentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ProductDocumentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductDocumentPayload>[]
+        }
+        delete: {
+          args: Prisma.ProductDocumentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductDocumentPayload>
+        }
+        update: {
+          args: Prisma.ProductDocumentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductDocumentPayload>
+        }
+        deleteMany: {
+          args: Prisma.ProductDocumentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ProductDocumentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ProductDocumentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductDocumentPayload>[]
+        }
+        upsert: {
+          args: Prisma.ProductDocumentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductDocumentPayload>
+        }
+        aggregate: {
+          args: Prisma.ProductDocumentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProductDocument>
+        }
+        groupBy: {
+          args: Prisma.ProductDocumentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProductDocumentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ProductDocumentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProductDocumentCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -4510,6 +4585,20 @@ export const StocktakeEventScalarFieldEnum = {
 export type StocktakeEventScalarFieldEnum = (typeof StocktakeEventScalarFieldEnum)[keyof typeof StocktakeEventScalarFieldEnum]
 
 
+export const ProductDocumentScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  kind: 'kind',
+  title: 'title',
+  path: 'path',
+  sizeBytes: 'sizeBytes',
+  uploadedById: 'uploadedById',
+  createdAt: 'createdAt'
+} as const
+
+export type ProductDocumentScalarFieldEnum = (typeof ProductDocumentScalarFieldEnum)[keyof typeof ProductDocumentScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -4666,6 +4755,20 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'ProductDocumentKind'
+ */
+export type EnumProductDocumentKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProductDocumentKind'>
+    
+
+
+/**
+ * Reference to a field of type 'ProductDocumentKind[]'
+ */
+export type ListEnumProductDocumentKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProductDocumentKind[]'>
     
 
 
@@ -4877,6 +4980,7 @@ export type GlobalOmitConfig = {
   stocktakeLine?: Prisma.StocktakeLineOmit
   stocktakeCount?: Prisma.StocktakeCountOmit
   stocktakeEvent?: Prisma.StocktakeEventOmit
+  productDocument?: Prisma.ProductDocumentOmit
 }
 
 /* Types for Logging */

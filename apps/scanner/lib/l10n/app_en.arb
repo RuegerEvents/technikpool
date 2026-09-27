@@ -55,6 +55,13 @@
   "cableLength": "Length",
   "checkedOutTo": "Checked out to",
   "history": "History",
+  "documents": "PDFs",
+  "@documents": {
+    "description": "Heading over a product's manuals and datasheets on the lookup screen."
+  },
+  "documentManual": "Manual",
+  "documentDatasheet": "Datasheet",
+  "documentOther": "Document",
   "inventory": "Inventory",
   "filterByLocation": "Location",
   "@filterByLocation": {

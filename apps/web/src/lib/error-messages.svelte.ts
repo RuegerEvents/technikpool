@@ -37,6 +37,10 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'You are not allowed to decline assets from this organization.';
 		case 'product_edit_forbidden':
 			return 'You need admin rights in one of your organizations to edit products.';
+		case 'product_document_forbidden':
+			return 'Only whoever added this PDF, or whoever may change the product, can change or remove it.';
+		case 'product_document_invalid':
+			return 'That upload is not a PDF this product can use. Try uploading it again.';
 		case 'product_delete_forbidden':
 			return 'You need admin rights in one of your organizations to delete products.';
 		case 'product_merge_forbidden':

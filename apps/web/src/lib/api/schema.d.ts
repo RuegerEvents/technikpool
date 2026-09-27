@@ -739,6 +739,23 @@ export interface components {
             currentProduction: components["schemas"]["Production"] | null;
             /** @description Most recent transactions first. */
             history: components["schemas"]["AssetTransaction"][];
+            /**
+             * @description The product's PDFs, manuals first. Not required, so an older
+             *     client keeps compiling.
+             */
+            documents?: components["schemas"]["ProductDocument"][];
+        };
+        ProductDocument: {
+            id: string;
+            /** @enum {string} */
+            kind: "MANUAL" | "DATASHEET" | "OTHER";
+            title: string;
+            /**
+             * @description Absolute address of the PDF. Public, like Product.imageUrl — it
+             *     opens without a session, so hand it straight to a viewer.
+             */
+            url: string;
+            sizeBytes: number;
         };
         AssetTransaction: {
             id: string;

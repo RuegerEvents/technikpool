@@ -1300,6 +1300,32 @@ components:
               description: Most recent transactions first.
               items:
                 $ref: '#/components/schemas/AssetTransaction'
+            documents:
+              type: array
+              description: |
+                The product's PDFs, manuals first. Not required, so an older
+                client keeps compiling.
+              items:
+                $ref: '#/components/schemas/ProductDocument'
+
+    ProductDocument:
+      type: object
+      required: [id, kind, title, url, sizeBytes]
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+          enum: [MANUAL, DATASHEET, OTHER]
+        title:
+          type: string
+        url:
+          type: string
+          description: |
+            Absolute address of the PDF. Public, like Product.imageUrl — it
+            opens without a session, so hand it straight to a viewer.
+        sizeBytes:
+          type: integer
 
     AssetTransaction:
       type: object

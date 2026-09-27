@@ -9,7 +9,13 @@ import {
 	userOrgIds,
 	visibleProductionName
 } from '$lib/server/services/access';
-import { toAsset, toAssetTransaction, toProduction } from '$lib/server/services/api-mappers';
+import {
+	toAsset,
+	toAssetTransaction,
+	toProductDocument,
+	toProduction
+} from '$lib/server/services/api-mappers';
+import { productDocuments } from '$lib/server/services/product-documents';
 import { resolveScannedCode } from '$lib/server/services/asset-lookup';
 
 const HISTORY_LIMIT = 20;
@@ -81,6 +87,7 @@ export const GET: RequestHandler = ({ locals, params }) =>
 		const canSee = await productionVisibility(user.id);
 		const body: Schemas['AssetDetail'] = {
 			...toAsset(asset),
+			documents: (await productDocuments(asset.productId)).map(toProductDocument),
 			currentProduction: openItem
 				? toProduction({
 						...openItem.production,

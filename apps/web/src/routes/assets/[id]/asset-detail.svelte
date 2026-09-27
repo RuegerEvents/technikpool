@@ -28,6 +28,7 @@
 	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import { OrgBadge } from '$lib/components/ui/org-badge';
 	import { Fact } from '$lib/components/ui/fact';
+	import { ProductDocuments } from '$lib/components/ui/product-documents';
 	import SerialNumberWarning from '$lib/components/SerialNumberWarning.svelte';
 	import {
 		Activity,
@@ -810,6 +811,8 @@
 				{#if asset.product.details}
 					<p class="text-sm whitespace-pre-line">{asset.product.details}</p>
 				{/if}
+				<!-- Read-only here; they are added on the product's own page. -->
+				<ProductDocuments productId={asset.product.id} editable={false} />
 				<dl class="grid gap-x-6 gap-y-5 sm:grid-cols-2">
 					<Fact icon={Factory} label="Manufacturer">{asset.product.manufacturer?.name ?? '—'}</Fact>
 					<Fact icon={Shapes} label="Category">
