@@ -117,8 +117,6 @@ msgstr "No assets found."
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/products/[id]/product-detail.svelte
@@ -126,16 +124,13 @@ msgstr "No assets found."
 msgid "Product"
 msgstr "Product"
 
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/productions/[id]/packing-list/+page.svelte
 #: src/routes/products/[id]/product-detail.svelte
 msgid "S/N"
 msgstr "S/N"
 
 #: src/routes/admin/catalog-log/+page.svelte
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/inspections/+page.svelte
 #: src/routes/inspections/+page.svelte
 #: src/routes/invoices/+page.svelte
@@ -149,7 +144,6 @@ msgstr "Org"
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/license-list.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/invoices/+page.svelte
@@ -201,6 +195,7 @@ msgstr "Crew"
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
@@ -264,7 +259,6 @@ msgstr "Adding…"
 
 #: src/lib/components/ui/data-view/DataView.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Add"
@@ -348,10 +342,10 @@ msgstr "Decline"
 msgid "How many of the {0} units do you want to {1}?"
 msgstr "How many of the {0} units do you want to {1}?"
 
-#. 0: m.pg.items.length
 #. 0: shownMax
+#. 0: m.pg.items.length
+#: src/lib/components/ui/count-stepper/count-stepper.svelte
 #: src/routes/+page.svelte
-#: src/routes/productions/[id]/equipment/equipment-planner.svelte
 msgid "of {0}"
 msgstr "of {0}"
 
@@ -434,7 +428,6 @@ msgstr "Serial Number"
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 msgid "Asset Tag"
@@ -722,8 +715,8 @@ msgid "Search or create product…"
 msgstr "Search or create product…"
 
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
+#: src/lib/components/ui/count-stepper/count-stepper.svelte
 #: src/routes/assets/new/+page.svelte
-#: src/routes/productions/[id]/equipment/equipment-planner.svelte
 msgid "Quantity"
 msgstr "Quantity"
 
@@ -932,12 +925,12 @@ msgid "ArrowDown"
 msgstr "ArrowDown"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/ui/count-stepper/count-stepper.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
-#: src/routes/productions/[id]/equipment/equipment-planner.svelte
 msgid "Enter"
 msgstr "Enter"
 
@@ -1026,9 +1019,8 @@ msgstr "Members ({0})"
 msgid "System Admin"
 msgstr "System Admin"
 
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
-msgid "Asset added to bundle"
-msgstr "Asset added to bundle"
+#~ msgid "Asset added to bundle"
+#~ msgstr "Asset added to bundle"
 
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Asset removed from bundle"
@@ -1043,7 +1035,6 @@ msgstr "Asset removed from bundle"
 #: src/lib/components/ui/invitations/invitation-link.svelte
 #: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
 #: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Close"
 msgstr "Close"
 
@@ -1055,18 +1046,16 @@ msgstr "Add Assets"
 msgid "Add Assets to Bundle"
 msgstr "Add Assets to Bundle"
 
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
-msgid "Search assets…"
-msgstr "Search assets…"
+#~ msgid "Search assets…"
+#~ msgstr "Search assets…"
 
 #: src/lib/components/ui/skeleton/content-skeleton.svelte
 #: src/routes/productions/[id]/copy-equipment-modal.svelte
 msgid "Loading…"
 msgstr "Loading…"
 
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
-msgid "No assets available to add."
-msgstr "No assets available to add."
+#~ msgid "No assets available to add."
+#~ msgstr "No assets available to add."
 
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "No assets in this bundle yet. Click \"Add Assets\" to get started."
@@ -1243,17 +1232,14 @@ msgstr "+ New Asset"
 msgid "Selected <0/>"
 msgstr "Selected <0/>"
 
-#: src/routes/assets/bundles/new/+page.svelte
-msgid "Search existing assets…"
-msgstr "Search existing assets…"
+#~ msgid "Search existing assets…"
+#~ msgstr "Search existing assets…"
 
-#: src/routes/assets/bundles/new/+page.svelte
-msgid "No assets match your search."
-msgstr "No assets match your search."
+#~ msgid "No assets match your search."
+#~ msgstr "No assets match your search."
 
-#: src/routes/assets/bundles/new/+page.svelte
-msgid "No assets in this organization yet. Use \"+ New Asset\" to create one."
-msgstr "No assets in this organization yet. Use \"+ New Asset\" to create one."
+#~ msgid "No assets in this organization yet. Use \"+ New Asset\" to create one."
+#~ msgstr "No assets in this organization yet. Use \"+ New Asset\" to create one."
 
 #~ msgid "New Asset"
 #~ msgstr "New Asset"
@@ -3682,9 +3668,8 @@ msgstr "Devices that belong to this bundle."
 msgid "Serial"
 msgstr "Serial"
 
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
-msgid "Only devices without a bundle can be added."
-msgstr "Only devices without a bundle can be added."
+#~ msgid "Only devices without a bundle can be added."
+#~ msgstr "Only devices without a bundle can be added."
 
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 msgid "Items updated"
@@ -4862,8 +4847,8 @@ msgstr "Without a tag the unit can't be scanned, and an inspection record has no
 msgid "New device"
 msgstr "New device"
 
-#. 0: searchQuery.trim()
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#. 0: search.trim()
+#: src/lib/components/ui/unit-picker/unit-picker.svelte
 msgid "Nothing here matches \"{0}\"."
 msgstr "Nothing here matches \"{0}\"."
 
@@ -7704,15 +7689,15 @@ msgstr "Cables"
 msgid "By cable type"
 msgstr "By cable type"
 
-#: src/routes/productions/[id]/equipment/equipment-planner.svelte
+#: src/lib/components/ui/count-stepper/count-stepper.svelte
 msgid "Add all available"
 msgstr "Add all available"
 
-#: src/routes/productions/[id]/equipment/equipment-planner.svelte
+#: src/lib/components/ui/count-stepper/count-stepper.svelte
 msgid "Remove all"
 msgstr "Remove all"
 
-#: src/routes/productions/[id]/equipment/equipment-planner.svelte
+#: src/lib/components/ui/count-stepper/count-stepper.svelte
 msgid "None"
 msgstr "None"
 
@@ -7725,7 +7710,7 @@ msgid "<0/> All changes saved"
 msgstr "<0/> All changes saved"
 
 #. 0: limit
-#: src/routes/productions/[id]/equipment/equipment-planner.svelte
+#: src/lib/components/ui/count-stepper/count-stepper.svelte
 msgid "All {0}"
 msgstr "All {0}"
 
@@ -10601,8 +10586,6 @@ msgstr "Caption <0>(optional)</0>"
 msgid "Details <0>(optional)</0>"
 msgstr "Details <0>(optional)</0>"
 
-
-
 #: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Units of this product belong to organizations you don't administer, so its name, manufacturer, category, caption and details are locked here."
 msgstr "Units of this product belong to organizations you don't administer, so its name, manufacturer, category, caption and details are locked here."
@@ -10634,3 +10617,27 @@ msgstr "What the team calls it. Shared with every instance, and shown next to th
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "What's in it, how it's packed. Shared with every instance, shown on this page only."
 msgstr "What's in it, how it's packed. Shared with every instance, shown on this page only."
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Device added to bundle"
+msgid_plural "# devices added to bundle"
+msgstr[0] "Device added to bundle"
+msgstr[1] "# devices added to bundle"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Only devices without a bundle can be added. Pick how many of each, or open a row to choose by asset tag."
+msgstr "Only devices without a bundle can be added. Pick how many of each, or open a row to choose by asset tag."
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Add 1 device"
+msgid_plural "Add # devices"
+msgstr[0] "Add 1 device"
+msgstr[1] "Add # devices"
+
+#: src/lib/components/ui/unit-picker/unit-picker.svelte
+msgid "Search by product, asset tag or serial number…"
+msgstr "Search by product, asset tag or serial number…"
+
+#: src/lib/components/ui/unit-picker/unit-picker.svelte
+msgid "No loose units to add."
+msgstr "No loose units to add."

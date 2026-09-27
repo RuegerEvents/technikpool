@@ -3318,9 +3318,11 @@ export const updateBundle = command(updateBundleSchema, async (input) => {
 
 const bundleAssetSchema = v.object({ bundleId: v.string(), assetId: v.string() });
 
-const addAssetToBundleSchema = v.object({
+const addAssetsToBundleSchema = v.object({
 	bundleId: v.string(),
-	assetId: v.string(),
+	// Several at once, in one transaction: "all 4" either lands in the case or
+	// leaves it as it was, never three of them.
+	assetIds: v.pipe(v.array(v.string()), v.minLength(1)),
 	// Set only after the user has been told what it means: the unit does not fit
 	// what this bundle type holds, and putting it in changes the type for every
 	// case of it. See `assertAdditionsFitType`.
@@ -3366,25 +3368,28 @@ async function moveAssetIntoBundle(
 	await syncAccessories(tx, assetId, updateData);
 }
 
-export const addAssetToBundle = command(
-	addAssetToBundleSchema,
-	async ({ bundleId, assetId, allowTypeChange }) => {
+export const addAssetsToBundle = command(
+	addAssetsToBundleSchema,
+	async ({ bundleId, assetIds, allowTypeChange }) => {
 		const bundle = await prisma.assetBundle.findUniqueOrThrow({
 			where: { id: bundleId },
 			include: { template: true }
 		});
 		await requireOrgInventory(bundle.template.organizationId);
-		const { productId } = await prisma.asset.findUniqueOrThrow({
-			where: { id: assetId },
+		const picked = await prisma.asset.findMany({
+			where: { id: { in: assetIds } },
 			select: { productId: true }
 		});
+		if (picked.length !== assetIds.length) appError(404, 'assets_not_found');
 		await assertAdditionsFitType({
 			templateId: bundle.templateId,
 			bundleId,
-			productIds: [productId],
+			productIds: picked.map((asset) => asset.productId),
 			allowTypeChange
 		});
-		await prisma.$transaction((tx) => moveAssetIntoBundle(tx, bundle, assetId));
+		await prisma.$transaction(async (tx) => {
+			for (const assetId of assetIds) await moveAssetIntoBundle(tx, bundle, assetId);
+		});
 		await getBundleTypeSpec(bundle.templateId).refresh();
 		await getBundleTemplates(bundle.template.organizationId).refresh();
 		await getBundleTemplates().refresh();
@@ -3395,7 +3400,7 @@ export const addAssetToBundle = command(
 		// argument-less one, and it stayed stale after a bundle was put together.
 		await getAssets(bundle.template.organizationId).refresh();
 		await getAssets().refresh();
-		return { bundleId, assetId };
+		return { bundleId, assetIds };
 	}
 );
 

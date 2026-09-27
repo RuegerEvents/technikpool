@@ -34,7 +34,7 @@
 		getAssets,
 		getLocations,
 		getProducts,
-		addAssetToBundle,
+		addAssetsToBundle,
 		removeAssetFromBundle,
 		updateBundleTemplate,
 		updateBundle,
@@ -53,6 +53,8 @@
 	import { toast } from 'svelte-sonner';
 	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
 	import { NewAssetModal, type NewAssetModalHandle } from '$lib/components/ui/new-asset-modal';
+	import { UnitPicker, type PickerUnit } from '$lib/components/ui/unit-picker';
+	import { isBookableStatus } from '$lib/asset-status';
 	import { countProducts, roomFor, specShortfall } from '$lib/bundle-spec';
 
 	// Mirrors MAX_BUNDLE_COPIES on the command, which refuses anything above it.
@@ -343,7 +345,6 @@
 
 	let availableToAdd = $derived.by(() => {
 		const bundleAssetIds = new Set(bundle.assets.map((a) => a.id));
-		const q = searchQuery.toLowerCase().trim();
 		return allAssets.filter((a) => {
 			if (bundleAssetIds.has(a.id)) return false;
 			if (
@@ -356,13 +357,36 @@
 			// An accessory is in whatever kit its parent is in — adding the parent
 			// brings it along, and there is no way to add it on its own.
 			if (a.parentAssetId) return false;
-			if (!q) return true;
-			return (
-				a.product.name.toLowerCase().includes(q) ||
-				(a.product.manufacturer?.name.toLowerCase().includes(q) ?? false) ||
-				(a.serialNumber?.toLowerCase().includes(q) ?? false)
-			);
+			return isBookableStatus(a.status);
 		});
+	});
+	let pickerUnits = $derived<PickerUnit[]>(
+		availableToAdd.map((a) => ({
+			id: a.id,
+			productId: a.productId,
+			productName: a.product.name,
+			productCaption: a.product.caption,
+			manufacturerName: a.product.manufacturer?.name ?? null,
+			imagePath: a.product.imagePath,
+			assetTag: a.assetTag,
+			serialNumber: a.serialNumber,
+			locationName: a.location?.name ?? null
+		}))
+	);
+	// What the picker may count up to per product: the kit's room for it, or
+	// anything once the type itself is allowed to change.
+	function limitFor(productId: string) {
+		if (changeType || specLines.length === 0) return Infinity;
+		return roomFor(specLines, memberCounts, productId);
+	}
+	let pickedIds = $state<string[]>([]);
+	// Picks follow what is on offer: unticking "show everything", or a unit that
+	// went into another case meanwhile, takes it out of the selection. Closing
+	// the dialog starts over.
+	$effect(() => {
+		const offered = showAddModal ? new Set(availableToAdd.map((a) => a.id)) : new Set<string>();
+		const kept = pickedIds.filter((id) => offered.has(id));
+		if (kept.length !== pickedIds.length) pickedIds = kept;
 	});
 
 	// Same idea as the accessory picker on the asset detail page: the unit you
@@ -406,11 +430,20 @@
 		newOpen = true;
 	}
 
-	async function handleAdd(assetId: string) {
+	async function handleAdd() {
+		if (pickedIds.length === 0) return;
 		working = true;
 		try {
-			await addAssetToBundle({ bundleId, assetId, allowTypeChange: changeType || undefined });
-			toast.success('Asset added to bundle');
+			await addAssetsToBundle({
+				bundleId,
+				assetIds: pickedIds,
+				allowTypeChange: changeType || undefined
+			});
+			toast.success(
+				plural(pickedIds.length, ['Device added to bundle', '# devices added to bundle'])
+			);
+			pickedIds = [];
+			showAddModal = false;
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {
@@ -1005,22 +1038,13 @@
 
 <Modal bind:open={showAddModal} title="Add Assets to Bundle" size="xl">
 	{#snippet description()}
-		Only devices without a bundle can be added.
+		Only devices without a bundle can be added. Pick how many of each, or open a row to choose by
+		asset tag.
 	{/snippet}
 	{#snippet headerActions()}
 		<Button icon="add" size="sm" disabled={working} onclick={openNewAsset}>New device</Button>
-		<Button icon="close" variant="outline" size="sm" onclick={() => (showAddModal = false)}>
-			Close
-		</Button>
 	{/snippet}
 	{#snippet children()}
-		<input
-			type="search"
-			bind:value={searchQuery}
-			placeholder="Search assets…"
-			class="mb-3 h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-		/>
-
 		{#if specLines.length > 0}
 			<div class="mb-3 rounded-md border bg-muted/30 p-3 text-sm">
 				<p>
@@ -1051,52 +1075,12 @@
 			</div>
 		{/if}
 
-		{#if availableToAdd.length === 0}
-			<p class="text-sm text-muted-foreground">
-				{searchQuery.trim()
-					? `Nothing here matches "${searchQuery.trim()}".`
-					: 'No assets available to add.'}
-			</p>
-		{:else}
-			<div class="max-h-80 overflow-y-auto rounded-md border">
-				<table class="w-full text-sm">
-					<thead class="sticky top-0 bg-muted/80 backdrop-blur-sm">
-						<tr class="border-b">
-							<th class="px-3 py-2 text-left font-medium text-muted-foreground">Product</th>
-							<th class="px-3 py-2 text-left font-medium text-muted-foreground">S/N</th>
-							<th class="px-3 py-2 text-left font-medium text-muted-foreground">Org</th>
-							<th class="px-3 py-2"></th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each availableToAdd as asset (asset.id)}
-							<tr class="border-b bg-background last:border-0 hover:bg-muted/30">
-								<td class="px-3 py-2">
-									<div class="flex items-center gap-2">
-										<ProductThumb path={asset.product.imagePath} alt={asset.product.name} />
-										<div>
-											<p class="font-medium">{asset.product.name}</p>
-											<p class="text-xs text-muted-foreground">
-												{asset.product.manufacturer?.name}
-											</p>
-										</div>
-									</div>
-								</td>
-								<td class="px-3 py-2 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
-								<td class="px-3 py-2 text-xs text-muted-foreground"
-									>{orgLabel(asset.organization)}</td
-								>
-								<td class="px-3 py-2 text-right">
-									<Button size="sm" disabled={working} onclick={() => handleAdd(asset.id)}
-										>Add</Button
-									>
-								</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
-		{/if}
+		<UnitPicker
+			units={pickerUnits}
+			bind:selected={pickedIds}
+			bind:search={searchQuery}
+			{limitFor}
+		/>
 
 		<!-- The catalogue, under the units. Everything above is a unit standing
 		     loose in the warehouse; below is every product the system knows, so a
@@ -1131,6 +1115,12 @@
 				{/each}
 			</ul>
 		{/if}
+	{/snippet}
+	{#snippet footer()}
+		<Button icon="add" disabled={working || pickedIds.length === 0} onclick={handleAdd}>
+			{pickedIds.length === 0 ? 'Add' : plural(pickedIds.length, ['Add 1 device', 'Add # devices'])}
+		</Button>
+		<Button variant="outline" onclick={() => (showAddModal = false)}>Cancel</Button>
 	{/snippet}
 </Modal>
 

@@ -18,12 +18,14 @@
 		getBundleTypeSpec,
 		createBundleInstance
 	} from '$lib/remote/assets.remote';
-	import { countProducts, matchesSpec, roomFor, specShortfall } from '$lib/bundle-spec';
+	import { countProducts, matchesSpec, specShortfall } from '$lib/bundle-spec';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
+	import { UnitPicker, type PickerUnit } from '$lib/components/ui/unit-picker';
+	import { isBookableStatus } from '$lib/asset-status';
 
 	// Bundle fields
 	type SelectionOrNew = { id: string | null; name: string } | null;
@@ -40,17 +42,7 @@
 	// Asset picker
 	let assetSearch = $state('');
 
-	type SelectedAsset = {
-		id: string;
-		productId: string;
-		productName: string;
-		manufacturerName: string | null;
-		serialNumber: string | null;
-		assetTag: string | null;
-		status: string;
-	};
-
-	let selectedAssets = $state<SelectedAsset[]>([]);
+	let selectedIds = $state<string[]>([]);
 
 	// Remote data
 	// Creating a kit is the same org-admin right as creating an asset, so the
@@ -78,7 +70,11 @@
 	let availableAssets = $derived(availableAssetsQuery?.current ?? []);
 	let orgLocationsQuery = $derived(selectedOrgId ? getLocations(selectedOrgId) : null);
 	let orgLocations = $derived(orgLocationsQuery?.current ?? []);
-	let selectedIds = $derived(new Set(selectedAssets.map((a) => a.id)));
+	// Read back from the org's units rather than kept on the side: a device
+	// registered from here is picked by id and shows up once the list refreshes.
+	let selectedAssets = $derived(
+		selectedIds.flatMap((id) => availableAssets.filter((a) => a.id === id))
+	);
 
 	// ── What this case has to hold ───────────────────────────────────────────
 	// Every case of a bundle type holds the same gear, so a case of a type that
@@ -94,48 +90,35 @@
 	let stillMissing = $derived(shortfall.reduce((total, line) => total + line.missing, 0));
 	let fitsType = $derived(specLines.length === 0 || matchesSpec(specLines, selectedCounts));
 
-	type ExistingAsset = (typeof availableAssets)[number];
-
-	let filteredAvailable = $derived(
-		availableAssets.filter((a) => {
-			if (selectedIds.has(a.id)) return false;
-			// Nothing the kit has no room for: a unit of a product this type does
-			// not hold, or one more than it holds.
-			if (specLines.length > 0 && roomFor(specLines, selectedCounts, a.productId) === 0)
-				return false;
-			// A unit belongs to one kit at a time, so one already in a bundle isn't
-			// on offer here — same rule the bundle detail page's picker applies.
-			if (a.bundleId) return false;
-			// An accessory follows its parent into the kit; it is never picked.
-			if (a.parentAssetId) return false;
-			if (!assetSearch.trim()) return true;
-			const q = assetSearch.toLowerCase();
-			return (
-				a.product.name.toLowerCase().includes(q) ||
-				(a.product.manufacturer?.name.toLowerCase().includes(q) ?? false) ||
-				(a.serialNumber?.toLowerCase().includes(q) ?? false) ||
-				(a.assetTag?.toLowerCase().includes(q) ?? false)
-			);
-		})
-	);
-
-	function addExisting(a: ExistingAsset) {
-		selectedAssets = [
-			...selectedAssets,
-			{
+	// A unit belongs to one kit at a time and an accessory follows its parent,
+	// so neither is on offer — the same rule the bundle page's picker applies.
+	// Nor is a product the type doesn't hold.
+	let pickerUnits = $derived<PickerUnit[]>(
+		availableAssets
+			.filter((a) => !a.bundleId && !a.parentAssetId && isBookableStatus(a.status))
+			.filter((a) => limitFor(a.productId) > 0)
+			.map((a) => ({
 				id: a.id,
 				productId: a.productId,
 				productName: a.product.name,
+				productCaption: a.product.caption,
 				manufacturerName: a.product.manufacturer?.name ?? null,
-				serialNumber: a.serialNumber,
+				imagePath: a.product.imagePath,
 				assetTag: a.assetTag,
-				status: a.status
-			}
-		];
+				serialNumber: a.serialNumber,
+				locationName: a.location?.name ?? null
+			}))
+	);
+
+	// A type that is already on the shelf holds a fixed number of each product,
+	// and nothing it doesn't hold; a new type takes whatever it is given.
+	function limitFor(productId: string) {
+		if (specLines.length === 0) return Infinity;
+		return specLines.find((line) => line.productId === productId)?.quantity ?? 0;
 	}
 
 	function removeSelected(id: string) {
-		selectedAssets = selectedAssets.filter((a) => a.id !== id);
+		selectedIds = selectedIds.filter((selectedId) => selectedId !== id);
 	}
 
 	// Registering a unit that isn't in the pool yet. The bundle doesn't exist
@@ -167,7 +150,7 @@
 				details: isNewBundleType ? bundleDetails.trim() || undefined : undefined,
 				categoryId: isNewBundleType ? bundleCategoryId : undefined,
 				tag: bundleTag.trim() || undefined,
-				assetIds: selectedAssets.map((a) => a.id)
+				assetIds: selectedIds
 			});
 			toast.success('Bundle created!');
 			goto(resolve(`/assets/bundles/${bundle.id}`));
@@ -315,8 +298,10 @@
 								<tbody>
 									{#each selectedAssets as asset (asset.id)}
 										<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
-											<td class="px-3 py-2 font-medium">{asset.productName}</td>
-											<td class="px-3 py-2 text-muted-foreground">{asset.manufacturerName}</td>
+											<td class="px-3 py-2 font-medium">{asset.product.name}</td>
+											<td class="px-3 py-2 text-muted-foreground">
+												{asset.product.manufacturer?.name}
+											</td>
 											<td class="px-3 py-2 font-mono text-xs">{asset.assetTag ?? '—'}</td>
 											<td class="px-3 py-2 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
 											<td class="px-3 py-2">
@@ -340,65 +325,14 @@
 				{/if}
 
 				<!-- Picker -->
-				<div>
-					<input
-						type="search"
-						bind:value={assetSearch}
-						placeholder="Search existing assets…"
-						class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+				{#if selectedOrgId}
+					<UnitPicker
+						units={pickerUnits}
+						bind:selected={selectedIds}
+						bind:search={assetSearch}
+						{limitFor}
 					/>
-					{#if filteredAvailable.length > 0}
-						<div class="mt-2 max-h-60 overflow-y-auto rounded-md border">
-							<table class="w-full text-sm">
-								<thead class="sticky top-0 bg-muted/80 backdrop-blur-sm">
-									<tr class="border-b">
-										<th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground"
-											>Product</th
-										>
-										<th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground"
-											>Asset Tag</th
-										>
-										<th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground"
-											>S/N</th
-										>
-										<th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground"
-											>Status</th
-										>
-										<th class="px-3 py-2"></th>
-									</tr>
-								</thead>
-								<tbody>
-									{#each filteredAvailable as asset (asset.id)}
-										<tr class="border-b bg-background last:border-0 hover:bg-muted/30">
-											<td class="px-3 py-2">
-												<p class="font-medium">{asset.product.name}</p>
-												<p class="text-xs text-muted-foreground">
-													{asset.product.manufacturer?.name}
-												</p>
-											</td>
-											<td class="px-3 py-2 font-mono text-xs">{asset.assetTag ?? '—'}</td>
-											<td class="px-3 py-2 font-mono text-xs">{asset.serialNumber ?? '—'}</td>
-											<td class="px-3 py-2">
-												<AssetStatusBadge status={asset.status} />
-											</td>
-											<td class="px-3 py-2 text-right">
-												<Button size="sm" type="button" onclick={() => addExisting(asset)}
-													>Add</Button
-												>
-											</td>
-										</tr>
-									{/each}
-								</tbody>
-							</table>
-						</div>
-					{:else if selectedOrgId && availableAssets.length > 0}
-						<p class="mt-2 text-sm text-muted-foreground">No assets match your search.</p>
-					{:else if selectedOrgId}
-						<p class="mt-2 text-sm text-muted-foreground">
-							No assets in this organization yet. Use "+ New Asset" to create one.
-						</p>
-					{/if}
-				</div>
+				{/if}
 			</Card.Content>
 		</Card.Root>
 
@@ -432,18 +366,7 @@
 	heading="New device"
 	locations={orgLocations}
 	onCreated={(created) => {
-		selectedAssets = [
-			...selectedAssets,
-			...created.map((a) => ({
-				id: a.id,
-				productId: a.productId,
-				productName: a.product.name,
-				manufacturerName: a.product.manufacturer?.name ?? null,
-				serialNumber: a.serialNumber,
-				assetTag: a.assetTag,
-				status: a.status
-			}))
-		];
+		selectedIds = [...selectedIds, ...created.map((a) => a.id)];
 		assetSearch = '';
 		toast.success(
 			created.length === 1

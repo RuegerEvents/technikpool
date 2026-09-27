@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { naturalCompare } from '$lib/sort';
 	import { withCaption } from '$lib/product-label';
+	import { CountStepper } from '$lib/components/ui/count-stepper';
 	import { categoryLabel } from '$lib/category';
 	import { getErrorMessage, plural, orgLabel } from '$lib/utils';
 	import { resolve } from '$app/paths';
@@ -477,106 +478,21 @@
 	function onBeforeUnload(e: BeforeUnloadEvent) {
 		if (dirty) e.preventDefault();
 	}
-
-	function commitTyped(e: Event, max: number, apply: (n: number) => void, current: number) {
-		const input = e.currentTarget as HTMLInputElement;
-		const n = Number(input.value);
-		const next = Number.isFinite(n) ? Math.min(Math.max(0, Math.round(n)), max) : current;
-		// Clamping to the value already shown changes no state, so nothing would
-		// redraw the input — put the number back by hand.
-		input.value = String(next);
-		if (next !== current) apply(next);
-	}
 </script>
-
-<!--
-  `limit` is what this row can reach on its own; `shownMax` is the "of n" beside
-  it, which for a product also counts units that came in through a bundle.
--->
-{#snippet countStepper(current: number, limit: number, shownMax: number, set: (n: number) => void)}
-	<!-- None and All only appear when they would do something, but keep their
-	     width either way, so the steppers line up down the list. -->
-	<div class="flex items-center gap-1.5">
-		<button
-			type="button"
-			disabled={current <= 0}
-			title="Remove all"
-			onclick={(e) => {
-				e.stopPropagation();
-				set(0);
-			}}
-			class="h-6 w-12 rounded-md border text-xs font-medium hover:bg-muted {current <= 0
-				? 'invisible'
-				: ''}"
-		>
-			None
-		</button>
-		<button
-			type="button"
-			disabled={current <= 0}
-			onclick={(e) => {
-				e.stopPropagation();
-				set(current - 1);
-			}}
-			class="flex h-6 w-6 items-center justify-center rounded-md border text-base disabled:cursor-not-allowed disabled:opacity-40"
-		>
-			−
-		</button>
-		<input
-			type="number"
-			inputmode="numeric"
-			min="0"
-			max={limit}
-			value={current}
-			aria-label="Quantity"
-			onclick={(e) => e.stopPropagation()}
-			onfocus={(e) => e.currentTarget.select()}
-			onkeydown={(e) => {
-				if (e.key === 'Enter') e.currentTarget.blur();
-			}}
-			onchange={(e) => commitTyped(e, limit, set, current)}
-			class="h-6 w-9 [appearance:textfield] rounded-md border border-transparent bg-transparent text-center text-sm font-semibold tabular-nums hover:border-input focus:border-input focus:bg-background focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-		/>
-		<button
-			type="button"
-			disabled={current >= limit}
-			onclick={(e) => {
-				e.stopPropagation();
-				set(current + 1);
-			}}
-			class="flex h-6 w-6 items-center justify-center rounded-md border text-base disabled:cursor-not-allowed disabled:opacity-40"
-		>
-			+
-		</button>
-		<button
-			type="button"
-			disabled={current >= limit}
-			title="Add all available"
-			onclick={(e) => {
-				e.stopPropagation();
-				set(limit);
-			}}
-			class="h-6 w-14 rounded-md border text-xs font-medium whitespace-nowrap tabular-nums hover:bg-muted {current >=
-			limit
-				? 'invisible'
-				: ''}"
-		>
-			All {limit}
-		</button>
-	</div>
-	<div class="w-10 shrink-0 text-right text-[10px] text-muted-foreground">of {shownMax}</div>
-{/snippet}
 
 {#snippet stepper(g: Group)}
 	{@const maxQty = groupMaxQty(g)}
-	{@render countStepper(groupBookedIndividually(g), maxQty - g.bookedFromBundle, maxQty, (n) =>
-		setQty(g, n)
-	)}
+	<CountStepper
+		current={groupBookedIndividually(g)}
+		limit={maxQty - g.bookedFromBundle}
+		shownMax={maxQty}
+		onchange={(n) => setQty(g, n)}
+	/>
 {/snippet}
 
 {#snippet bundleStepper(row: BundleTemplateRow)}
 	{@const kits = row.booked.length + row.addable.length}
-	{@render countStepper(row.booked.length, kits, kits, (n) => setKits(row, n))}
+	<CountStepper current={row.booked.length} limit={kits} onchange={(n) => setKits(row, n)} />
 {/snippet}
 
 <svelte:window onbeforeunload={onBeforeUnload} />
