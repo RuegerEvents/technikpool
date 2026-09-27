@@ -5,7 +5,13 @@ import { appBaseUrl } from '$lib/server/app-url';
 import { addedToOrgEmail } from '$lib/server/emails/added-to-org';
 import * as v from 'valibot';
 import { ORG_ROLES, type OrgRole } from '$lib/roles';
-import { isSystemAdmin, requireAuth, requireOrgOwner } from '$lib/server/services/access';
+import {
+	isSystemAdmin,
+	requireAuth,
+	requireOrgInventory,
+	requireOrgOwner
+} from '$lib/server/services/access';
+import { peekNextTag } from '$lib/server/services/tag-counter';
 import { appError } from '$lib/errors';
 import { issueInvitation } from '$lib/server/services/invitations';
 import { accountDeletionBlocker } from '$lib/server/services/account-deletion';
@@ -107,6 +113,27 @@ export const getOrgWithMembers = query(v.string(), async (orgId: string) => {
 		}
 	});
 });
+
+/** The tag the next unit created without one would get, or null where the org doesn't number. */
+export const getNextAssetTag = query(v.string(), async (orgId: string) => {
+	await requireOrgInventory(orgId);
+	return peekNextTag(prisma, orgId);
+});
+
+/**
+ * Whether the org numbers units created without a tag. Inventory work, like
+ * creating the units themselves, so an org ADMIN may switch it — not only the
+ * OWNER who runs the rest of the org's settings.
+ */
+export const setAutoAssetTags = command(
+	v.object({ orgId: v.string(), enabled: v.boolean() }),
+	async ({ orgId, enabled }) => {
+		await requireOrgInventory(orgId);
+		await prisma.organization.update({ where: { id: orgId }, data: { autoAssetTags: enabled } });
+		await getOrgWithMembers(orgId).refresh();
+		await getNextAssetTag(orgId).refresh();
+	}
+);
 
 const roleSchema = v.picklist(ORG_ROLES);
 

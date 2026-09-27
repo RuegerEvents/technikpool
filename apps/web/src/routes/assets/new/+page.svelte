@@ -27,7 +27,7 @@
 		getProductAccessoryProfile,
 		createAssets
 	} from '$lib/remote/assets.remote';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
+	import { getMyOrgs, getNextAssetTag } from '$lib/remote/orgs.remote';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -44,6 +44,10 @@
 	let orgsQuery = $derived(getMyOrgs());
 	let orgs = $derived((orgsQuery.current ?? []).filter(canManageInventory));
 	let selectedOrgId = $state('');
+	// Where the org numbers units created without a tag, the next number; null
+	// where it doesn't, and a blank tag is refused.
+	let nextTagQuery = $derived(selectedOrgId ? getNextAssetTag(selectedOrgId) : null);
+	let nextTag = $derived(nextTagQuery?.current ?? null);
 	let locationId = $state('');
 	let locationsQuery = $derived(selectedOrgId ? getLocations(selectedOrgId) : null);
 	let locations = $derived(locationsQuery?.current ?? []);
@@ -241,9 +245,9 @@
 			toast.error('Please complete the new product details');
 			return;
 		}
-		// Nothing is numbered on the server: a tag is what is printed on the
-		// sticker, so a blank one is a unit someone forgot, not one to invent.
-		if (!noAssetTag && items.some((item) => !item.assetTag.trim())) {
+		// A blank tag is the org's next number where it numbers its units, and a
+		// unit someone forgot everywhere else — a tag is what is on the sticker.
+		if (!noAssetTag && !nextTag && items.some((item) => !item.assetTag.trim())) {
 			toast.error(messageForErrorCode('asset_tag_required'));
 			return;
 		}
@@ -269,7 +273,7 @@
 					copyAccessories && reuseAccessories && reusableSummary ? true : undefined,
 				items: items.map((item) => ({
 					serialNumber: item.serialNumber || undefined,
-					assetTag: noAssetTag ? undefined : item.assetTag.trim(),
+					assetTag: noAssetTag ? undefined : item.assetTag.trim() || undefined,
 					noAssetTag: noAssetTag || undefined
 				}))
 			});
@@ -493,7 +497,13 @@
 												<td class="px-3 py-2">
 													<Input
 														bind:value={item.assetTag}
-														placeholder={orgPrefix ? `${orgPrefix}…` : 'Scan or type'}
+														placeholder={nextTag
+															? i === 0
+																? `Blank: ${nextTag}`
+																: 'Blank: next number'
+															: orgPrefix
+																? `${orgPrefix}…`
+																: 'Scan or type'}
 														class="h-8 font-mono text-sm"
 													/>
 												</td>
@@ -518,7 +528,11 @@
 								<Input
 									id="tag-0"
 									bind:value={items[0].assetTag}
-									placeholder={orgPrefix ? `${orgPrefix}…` : 'Scan or type the sticker'}
+									placeholder={nextTag
+										? `Blank: ${nextTag}`
+										: orgPrefix
+											? `${orgPrefix}…`
+											: 'Scan or type the sticker'}
 									class="font-mono"
 								/>
 							</div>

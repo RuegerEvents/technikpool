@@ -45,6 +45,7 @@
 	} from '$lib/components/ui/product-fields';
 	import { getErrorMessage } from '$lib/utils';
 	import { messageForErrorCode } from '$lib/error-messages.svelte';
+	import { getNextAssetTag } from '$lib/remote/orgs.remote';
 	import { toast } from 'svelte-sonner';
 	import {
 		createAssets,
@@ -111,6 +112,11 @@
 	// Set from `defaultNoTag` by reset(), which every caller runs before opening —
 	// reading the prop here would capture only its first value.
 	let noTag = $state(false);
+	// Where the org numbers units created without a tag, the next number — so
+	// a blank field says what it will become. Null where it doesn't.
+	let nextTagQuery = $derived(open ? getNextAssetTag(organizationId) : null);
+	let nextTag = $derived(nextTagQuery?.current ?? null);
+	let numbered = $derived(nextTag !== null);
 	let chosenLocationId = $state('');
 	let saving = $state(false);
 	// Remounts the product picker when the manufacturer changes, so a stale
@@ -309,7 +315,9 @@
 			toast.error('Please select a location');
 			return;
 		}
-		if (!noTag && tags.some((t) => !t.trim())) {
+		// A blank tag is the org's next number where it numbers its units, and a
+		// unit someone forgot everywhere else.
+		if (!noTag && !numbered && tags.some((t) => !t.trim())) {
 			toast.error(messageForErrorCode('asset_tag_required'));
 			return;
 		}
@@ -357,7 +365,7 @@
 					// identical things, and the serials can go on afterwards.
 					serialNumber:
 						quantity === 1 && kind === 'device' ? serial.trim() || undefined : undefined,
-					assetTag: noTag ? undefined : tag.trim(),
+					assetTag: noTag ? undefined : tag.trim() || undefined,
 					noAssetTag: noTag || undefined
 				}))
 			});
@@ -548,7 +556,13 @@
 							id="newAssetTag-{i}"
 							bind:value={tags[i]}
 							disabled={saving}
-							placeholder={quantity === 1 ? 'Scan or type the sticker' : `Unit ${i + 1}`}
+							placeholder={numbered
+								? i === 0
+									? `Blank: ${nextTag}`
+									: 'Blank: next number'
+								: quantity === 1
+									? 'Scan or type the sticker'
+									: `Unit ${i + 1}`}
 						/>
 					{/each}
 				</div>

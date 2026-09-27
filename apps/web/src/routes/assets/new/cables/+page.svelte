@@ -17,7 +17,7 @@
 		getProducts
 	} from '$lib/remote/assets.remote';
 	import { getConnectors } from '$lib/remote/connectors.remote';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
+	import { getMyOrgs, getNextAssetTag } from '$lib/remote/orgs.remote';
 	import {
 		CABLE_END_LABEL,
 		QUICK_ENTRY_EXAMPLES,
@@ -49,6 +49,18 @@
 	let orgsQuery = $derived(getMyOrgs());
 	let orgs = $derived((orgsQuery.current ?? []).filter(canManageInventory));
 	let selectedOrgId = $state('');
+	// Cables are registered untagged unless the org numbers its units and this
+	// is ticked — a sticker on a 1.5 m Schuko lead costs more to maintain than
+	// the lead is worth. Remembered, because a pool that tags its cables tags
+	// all of them.
+	let nextTagQuery = $derived(selectedOrgId ? getNextAssetTag(selectedOrgId) : null);
+	let nextTag = $derived(nextTagQuery?.current ?? null);
+	let assignTags = $state(
+		browser ? localStorage.getItem('cable_batch_assign_tags') === 'true' : false
+	);
+	$effect(() => {
+		if (browser) localStorage.setItem('cable_batch_assign_tags', String(assignTags));
+	});
 	let locationId = $state('');
 	let locationsQuery = $derived(selectedOrgId ? getLocations(selectedOrgId) : null);
 	let locations = $derived(locationsQuery?.current ?? []);
@@ -368,6 +380,7 @@
 		try {
 			const result = await createCableBatch({
 				organizationId: selectedOrgId,
+				assignAssetTags: nextTag !== null && assignTags,
 				locationId,
 				rows: filled.map((r) => ({
 					cableType: r.cableType.trim() || null,
@@ -699,8 +712,18 @@
 
 					<Button icon="add" type="button" variant="outline" onclick={addRow}>Add row</Button>
 
-					<!-- Cables are registered untagged; one that carries a sticker gets its
-					     tag by being scanned. -->
+					<!-- Untagged unless the org numbers its units and asked for it here; a
+					     cable that carries a sticker otherwise gets its tag by being scanned. -->
+					{#if nextTag}
+						<label class="flex cursor-pointer items-center gap-2 pt-2 text-sm select-none">
+							<input
+								type="checkbox"
+								bind:checked={assignTags}
+								class="h-4 w-4 rounded border-input"
+							/>
+							Number these cables (from {nextTag})
+						</label>
+					{/if}
 					<div class="flex flex-row-reverse items-center justify-start gap-4 pt-2">
 						<Button icon="add" type="submit" disabled={saving}>
 							{saving ? 'Saving…' : 'Add Cables'}

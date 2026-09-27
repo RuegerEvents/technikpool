@@ -10234,6 +10234,7 @@ msgid "Enter the asset tag, or tick \"No asset tag\"."
 msgstr "Inventarnummer eingeben oder „Keine Inventarnummer“ ankreuzen."
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/routes/orgs/[id]/+page.svelte
 msgid "Asset tags"
 msgstr "Inventarnummern"
 
@@ -10641,3 +10642,48 @@ msgstr "Nach Produkt, Asset-Tag oder Seriennummer suchen…"
 #: src/lib/components/ui/unit-picker/unit-picker.svelte
 msgid "No loose units to add."
 msgstr "Keine freien Geräte zum Hinzufügen."
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Count # accessory"
+msgid_plural "Count # accessories<<<<<<< HEAD"
+msgstr[0] "# Zubehör zählen"
+msgstr[1] "# Zubehör zählen<<<<<<< HEAD"
+
+#~ msgid "No loose units to add.=======next free number\" — a tag is typed or scanned)"
+#~ msgstr "Keine freien Geräte zum Hinzufügen.=======next free number\" — a tag is typed or scanned)"
+
+#. 0: prefix
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Give devices created without a tag the next number: the prefix {0} and five digits."
+msgstr "Geräte, die ohne Tag angelegt werden, bekommen die nächste Nummer: das Präfix {0} und fünf Ziffern."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Next number: <0/>. A number is never handed out twice, even after its device is deleted."
+msgstr "Nächste Nummer: <0/>. Eine Nummer wird nie zweimal vergeben, auch nicht, nachdem ihr Gerät gelöscht wurde."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Off: a device gets its tag by typing or scanning the sticker."
+msgstr "Aus: Ein Gerät bekommt seinen Tag durch Eintippen oder Scannen des Aufklebers."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "<0/> Number new devices automatically"
+msgstr "<0/> Neue Geräte automatisch nummerieren"
+
+#. 0: nextTag
+#. 0: nextTag
+#. 0: nextTag
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/routes/assets/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
+msgid "Blank: {0}"
+msgstr "Leer: {0}"
+
+#. 0: nextTag
+#: src/routes/assets/new/cables/+page.svelte
+msgid "<0/> Number these cables (from {0})"
+msgstr "<0/> Diese Kabel nummerieren (ab {0})"
+
+#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/routes/assets/new/+page.svelte
+msgid "Blank: next number"
+msgstr "Leer: nächste Nummer"

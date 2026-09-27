@@ -133,6 +133,13 @@ model Organization {
 
   assetIdPrefix String @unique
 
+  // Whether a unit created without a tag is given the next number: prefix plus
+  // five digits. Off by default — a number nobody printed is on no sticker.
+  // `nextAssetTagNumber` only ever grows, so a number handed out once is never
+  // handed out again, even after its unit is deleted (see tag-counter.ts).
+  autoAssetTags      Boolean @default(false)
+  nextAssetTagNumber Int     @default(1)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

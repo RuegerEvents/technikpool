@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getErrorMessage, orgLabel } from '$lib/utils';
-	import { DEFAULT_ORG_ROLE, ORG_ROLES, type OrgRole } from '$lib/roles';
+	import { DEFAULT_ORG_ROLE, ORG_ROLES, canManageInventory, type OrgRole } from '$lib/roles';
 	import { roleName, roleSummary } from '$lib/role-descriptions.svelte';
 	import {
 		InvitationLink,
@@ -18,7 +18,9 @@
 		removeUserFromOrg,
 		updateMemberRole,
 		updateOrg,
-		getOrgIdentityInUse
+		getOrgIdentityInUse,
+		getNextAssetTag,
+		setAutoAssetTags
 	} from '$lib/remote/orgs.remote';
 	import { page } from '$app/state';
 	import { goto, invalidateAll } from '$app/navigation';
@@ -49,6 +51,22 @@
 
 	let myMembership = $derived(org?.members.find((m) => m.userId === data.user?.id));
 	let canManage = $derived(myMembership?.role === 'OWNER' || data.isAdmin);
+	// Numbering new units is inventory work: an ADMIN may switch it as well.
+	let canNumber = $derived(canManage || (!!myMembership && canManageInventory(myMembership)));
+	let nextTagQuery = $derived(canNumber ? getNextAssetTag(orgId) : null);
+	let nextTag = $derived(nextTagQuery?.current ?? null);
+	let savingAutoTags = $state(false);
+
+	async function toggleAutoTags(enabled: boolean) {
+		savingAutoTags = true;
+		try {
+			await setAutoAssetTags({ orgId, enabled });
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			savingAutoTags = false;
+		}
+	}
 	let deleteOpen = $state(false);
 	let deleting = $state(false);
 
@@ -316,365 +334,378 @@
 		</div>
 
 		<div class="grid gap-6 lg:grid-cols-3">
-			{#if canManage}
+			{#if canManage || canNumber}
 				<div class="space-y-6">
-					<Card.Root>
-						<Card.Header>
-							<Card.Title>Organization Settings</Card.Title>
-							<Card.Description>
-								Asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer
-								status.
-							</Card.Description>
-						</Card.Header>
-						<Card.Content>
-							{#if editingSettings}
-								<form onsubmit={handleSettingsSave} class="space-y-4">
-									<div class="space-y-2">
-										<Label for="shortNameInput"
-											>Short name <span class="text-muted-foreground">(optional)</span></Label
-										>
-										<Input
-											id="shortNameInput"
-											bind:value={shortNameDraft}
-											placeholder={org.name}
-											maxlength={24}
-										/>
-										<p class="text-xs text-muted-foreground">
-											Shown instead of the full name in tables and pickers. Invoices and offers
-											always use the full name.
-										</p>
-									</div>
-									<div class="space-y-2">
-										<Label for="prefixInput">Asset ID prefix</Label>
-										<Input
-											id="prefixInput"
-											bind:value={prefixDraft}
-											placeholder="123"
-											maxlength={3}
-											required
-											class="w-24"
-										/>
-									</div>
-									<div class="flex gap-4">
-										<div class="space-y-2">
-											<Label for="colorInput">Color</Label>
-											<div class="flex gap-2">
-												<Input
-													id="colorInput"
-													type="color"
-													bind:value={colorDraft}
-													class="h-10 w-14 p-1"
-												/>
-												<Input bind:value={colorDraft} class="w-28 font-mono" required />
-											</div>
-										</div>
-										<div class="space-y-2">
-											<Label for="avatarLabelInput">Avatar label</Label>
-											<Input
-												id="avatarLabelInput"
-												bind:value={avatarLabelDraft}
-												maxlength={2}
-												required
-												class="w-20 font-mono uppercase"
-											/>
-										</div>
-									</div>
-									<div class="space-y-2">
-										<Label for="inspectionIntervalInput"
-											>Default DGUV inspection interval (months)</Label
-										>
-										<Input
-											id="inspectionIntervalInput"
-											type="number"
-											min="1"
-											bind:value={inspectionIntervalDraft}
-											placeholder="e.g. 12"
-											class="w-28"
-										/>
-										<p class="text-xs text-muted-foreground">
-											Copied onto new assets at creation; leave blank to not track inspections by
-											default.
-										</p>
-									</div>
-									<label class="flex items-center gap-2 text-sm">
-										<input
-											type="checkbox"
-											bind:checked={isKleinunternehmerDraft}
-											class="h-4 w-4 rounded border-input"
-										/>
-										Kleinunternehmer (§19 UStG) — no VAT charged
-									</label>
-									<div class="flex gap-2">
-										<Button icon="save" type="submit" disabled={savingSettings}>
-											{savingSettings ? 'Saving…' : 'Save'}
-										</Button>
-										<Button
-											icon="close"
-											type="button"
-											variant="outline"
-											onclick={() => (editingSettings = false)}
-										>
-											Cancel
-										</Button>
-									</div>
-								</form>
-							{:else}
-								<div class="space-y-3">
-									<div class="flex items-center justify-between">
-										<span class="text-sm text-muted-foreground">Short name</span>
-										<span>{org.shortName || '—'}</span>
-									</div>
-									<div class="flex items-center justify-between">
-										<span class="text-sm text-muted-foreground">Asset ID prefix</span>
-										<span class="font-mono">{org.assetIdPrefix}</span>
-									</div>
-									<div class="flex items-center justify-between">
-										<span class="text-sm text-muted-foreground">Visual identity</span>
-										<OrgBadge
-											name={orgLabel(org)}
-											color={org.color}
-											avatarLabel={org.avatarLabel}
-										/>
-									</div>
-									<div class="flex items-center justify-between">
-										<span class="text-sm text-muted-foreground">DGUV default interval</span>
-										<span>
-											{org.defaultInspectionIntervalMonths
-												? `${org.defaultInspectionIntervalMonths} months`
-												: 'Not tracked'}
-										</span>
-									</div>
-									<div class="flex items-center justify-between">
-										<span class="text-sm text-muted-foreground">Kleinunternehmer</span>
-										<span>{org.isKleinunternehmer ? 'Yes' : 'No'}</span>
-									</div>
-									<Button
-										icon="edit"
-										variant="outline"
-										size="sm"
-										class="w-full"
-										onclick={() => (editingSettings = true)}
-									>
-										Edit
-									</Button>
-								</div>
-							{/if}
-						</Card.Content>
-					</Card.Root>
-
-					<OrgLogoCard {orgId} logoPath={org.logoPath} />
-
-					{#if org.dpaAcceptances[0]}
+					{#if canNumber}
+						{@render assetTagsCard(org.autoAssetTags, org.assetIdPrefix)}
+					{/if}
+					{#if canManage}
 						<Card.Root>
 							<Card.Header>
-								<Card.Title>Data processing agreement</Card.Title>
+								<Card.Title>Organization Settings</Card.Title>
 								<Card.Description>
-									Accepted with the operator of this server on {new Date(
-										org.dpaAcceptances[0].acceptedAt
-									).toLocaleDateString()}. The PDF shows who accepted which version, and when.
+									Asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer
+									status.
 								</Card.Description>
 							</Card.Header>
 							<Card.Content>
-								<Button
-									variant="outline"
-									size="sm"
-									href={resolve(`/api/dpa-acceptances/${org.dpaAcceptances[0].id}`)}
-									target="_blank">Download PDF</Button
-								>
-							</Card.Content>
-						</Card.Root>
-					{/if}
-
-					<Card.Root id="billing" class="scroll-mt-20">
-						<Card.Header>
-							<Card.Title>Billing Details</Card.Title>
-							<Card.Description
-								>Address, tax numbers, and bank account — used on generated offers/invoices.</Card.Description
-							>
-						</Card.Header>
-						<Card.Content>
-							{#if editingBilling}
-								<form onsubmit={handleBillingSave} class="space-y-4">
-									<AddressInput bind:value={billingAddress} idPrefix="billing" />
-									<div class="grid gap-4 sm:grid-cols-2">
+								{#if editingSettings}
+									<form onsubmit={handleSettingsSave} class="space-y-4">
 										<div class="space-y-2">
-											<Label for="billingTaxNumber">Tax number (Steuernummer)</Label>
+											<Label for="shortNameInput"
+												>Short name <span class="text-muted-foreground">(optional)</span></Label
+											>
 											<Input
-												id="billingTaxNumber"
-												bind:value={billingDraft.taxNumber}
-												placeholder="12/345/67890"
+												id="shortNameInput"
+												bind:value={shortNameDraft}
+												placeholder={org.name}
+												maxlength={24}
 											/>
-										</div>
-										<div class="space-y-2">
-											<Label for="billingVatId">VAT ID (USt-IdNr.)</Label>
-											<Input
-												id="billingVatId"
-												bind:value={billingDraft.vatId}
-												placeholder="DE123456789"
-												class="font-mono"
-											/>
-										</div>
-										<p class="text-xs text-muted-foreground sm:col-span-2">
-											Invoices need at least one of the two and show both if both are set. Not your
-											personal tax ID (Steuer-ID) — that one does not belong on an invoice.
-										</p>
-									</div>
-									<div class="space-y-2">
-										<Label for="billingHolder">Bank account holder</Label>
-										<Input id="billingHolder" bind:value={billingDraft.bankAccountHolder} />
-									</div>
-									<div class="flex gap-4">
-										<div class="flex-1 space-y-2">
-											<Label for="billingIban">IBAN</Label>
-											<Input id="billingIban" bind:value={billingDraft.iban} class="font-mono" />
-										</div>
-										<div class="space-y-2">
-											<Label for="billingBic">BIC</Label>
-											<Input id="billingBic" bind:value={billingDraft.bic} class="w-32 font-mono" />
-										</div>
-									</div>
-									<div class="space-y-2">
-										<Label for="billingBankName">Bank name</Label>
-										<Input id="billingBankName" bind:value={billingDraft.bankName} />
-									</div>
-									<div class="grid gap-4 sm:grid-cols-2">
-										<div class="space-y-2">
-											<Label for="billingEmail">Billing email</Label><Input
-												id="billingEmail"
-												type="email"
-												bind:value={billingDraft.billingEmail}
-											/>
-										</div>
-										<div class="space-y-2">
-											<Label for="billingWebsite">Website</Label><Input
-												id="billingWebsite"
-												bind:value={billingDraft.billingWebsite}
-											/>
-										</div>
-										<div class="space-y-2">
-											<Label for="paymentTerms">Payment term (days)</Label><Input
-												id="paymentTerms"
-												type="number"
-												min="0"
-												bind:value={billingDraft.paymentTermsDays}
-											/>
-										</div>
-									</div>
-									<div class="space-y-4 rounded-md border p-4">
-										<div>
-											<p class="font-medium">Document text presets</p>
-											<p class="text-sm text-muted-foreground">
-												Placeholders: {'{production}'}, {'{startDate}'}, {'{endDate}'}, {'{servicePeriod}'},
-												{'{customer}'}, {'{documentNumber}'}, {'{paymentTermsDays}'}
+											<p class="text-xs text-muted-foreground">
+												Shown instead of the full name in tables and pickers. Invoices and offers
+												always use the full name.
 											</p>
 										</div>
 										<div class="space-y-2">
-											<Label for="offerIntro">Offer introduction</Label><textarea
-												id="offerIntro"
-												bind:value={billingDraft.offerIntroTemplate}
-												rows="3"
-												class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+											<Label for="prefixInput">Asset ID prefix</Label>
+											<Input
+												id="prefixInput"
+												bind:value={prefixDraft}
+												placeholder="123"
+												maxlength={3}
+												required
+												class="w-24"
+											/>
+										</div>
+										<div class="flex gap-4">
+											<div class="space-y-2">
+												<Label for="colorInput">Color</Label>
+												<div class="flex gap-2">
+													<Input
+														id="colorInput"
+														type="color"
+														bind:value={colorDraft}
+														class="h-10 w-14 p-1"
+													/>
+													<Input bind:value={colorDraft} class="w-28 font-mono" required />
+												</div>
+											</div>
+											<div class="space-y-2">
+												<Label for="avatarLabelInput">Avatar label</Label>
+												<Input
+													id="avatarLabelInput"
+													bind:value={avatarLabelDraft}
+													maxlength={2}
+													required
+													class="w-20 font-mono uppercase"
+												/>
+											</div>
 										</div>
 										<div class="space-y-2">
-											<Label for="offerClosing">Offer closing</Label><textarea
-												id="offerClosing"
-												bind:value={billingDraft.offerClosingTemplate}
-												rows="3"
-												class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+											<Label for="inspectionIntervalInput"
+												>Default DGUV inspection interval (months)</Label
+											>
+											<Input
+												id="inspectionIntervalInput"
+												type="number"
+												min="1"
+												bind:value={inspectionIntervalDraft}
+												placeholder="e.g. 12"
+												class="w-28"
+											/>
+											<p class="text-xs text-muted-foreground">
+												Copied onto new assets at creation; leave blank to not track inspections by
+												default.
+											</p>
 										</div>
-										<div class="space-y-2">
-											<Label for="invoiceIntro">Invoice introduction</Label><textarea
-												id="invoiceIntro"
-												bind:value={billingDraft.invoiceIntroTemplate}
-												rows="3"
-												class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+										<label class="flex items-center gap-2 text-sm">
+											<input
+												type="checkbox"
+												bind:checked={isKleinunternehmerDraft}
+												class="h-4 w-4 rounded border-input"
+											/>
+											Kleinunternehmer (§19 UStG) — no VAT charged
+										</label>
+										<div class="flex gap-2">
+											<Button icon="save" type="submit" disabled={savingSettings}>
+												{savingSettings ? 'Saving…' : 'Save'}
+											</Button>
+											<Button
+												icon="close"
+												type="button"
+												variant="outline"
+												onclick={() => (editingSettings = false)}
+											>
+												Cancel
+											</Button>
 										</div>
-										<div class="space-y-2">
-											<Label for="invoiceClosing">Invoice closing</Label><textarea
-												id="invoiceClosing"
-												bind:value={billingDraft.invoiceClosingTemplate}
-												rows="3"
-												class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+									</form>
+								{:else}
+									<div class="space-y-3">
+										<div class="flex items-center justify-between">
+											<span class="text-sm text-muted-foreground">Short name</span>
+											<span>{org.shortName || '—'}</span>
 										</div>
-									</div>
-									<div class="flex gap-2">
-										<Button icon="save" type="submit" disabled={savingBilling}>
-											{savingBilling ? 'Saving…' : 'Save'}
-										</Button>
+										<div class="flex items-center justify-between">
+											<span class="text-sm text-muted-foreground">Asset ID prefix</span>
+											<span class="font-mono">{org.assetIdPrefix}</span>
+										</div>
+										<div class="flex items-center justify-between">
+											<span class="text-sm text-muted-foreground">Visual identity</span>
+											<OrgBadge
+												name={orgLabel(org)}
+												color={org.color}
+												avatarLabel={org.avatarLabel}
+											/>
+										</div>
+										<div class="flex items-center justify-between">
+											<span class="text-sm text-muted-foreground">DGUV default interval</span>
+											<span>
+												{org.defaultInspectionIntervalMonths
+													? `${org.defaultInspectionIntervalMonths} months`
+													: 'Not tracked'}
+											</span>
+										</div>
+										<div class="flex items-center justify-between">
+											<span class="text-sm text-muted-foreground">Kleinunternehmer</span>
+											<span>{org.isKleinunternehmer ? 'Yes' : 'No'}</span>
+										</div>
 										<Button
-											icon="close"
-											type="button"
+											icon="edit"
 											variant="outline"
-											onclick={() => (editingBilling = false)}
+											size="sm"
+											class="w-full"
+											onclick={() => (editingSettings = true)}
 										>
-											Cancel
+											Edit
 										</Button>
 									</div>
-								</form>
-							{:else}
-								<div class="space-y-3 text-sm">
-									<div>
-										<p class="text-muted-foreground">Address</p>
-										<p>
-											{#if org.address}
-												{org.address.line1}{#if org.address.line2}, {org.address.line2}{/if},
-												{org.address.postalCode}
-												{org.address.city}
-											{:else}
-												Not set
-											{/if}
-										</p>
-									</div>
-									<div>
-										<p class="text-muted-foreground">Tax number</p>
-										<p>{org.taxNumber ?? 'Not set'}</p>
-									</div>
-									<div>
-										<p class="text-muted-foreground">VAT ID</p>
-										<p>{org.vatId ?? 'Not set'}</p>
-									</div>
-									<div>
-										<p class="text-muted-foreground">Bank account</p>
-										<p>
-											{#if org.iban}
-												{org.bankAccountHolder ?? ''} · {org.iban} · {org.bic ?? ''}
-											{:else}
-												Not set
-											{/if}
-										</p>
-									</div>
+								{/if}
+							</Card.Content>
+						</Card.Root>
+
+						<OrgLogoCard {orgId} logoPath={org.logoPath} />
+
+						{#if org.dpaAcceptances[0]}
+							<Card.Root>
+								<Card.Header>
+									<Card.Title>Data processing agreement</Card.Title>
+									<Card.Description>
+										Accepted with the operator of this server on {new Date(
+											org.dpaAcceptances[0].acceptedAt
+										).toLocaleDateString()}. The PDF shows who accepted which version, and when.
+									</Card.Description>
+								</Card.Header>
+								<Card.Content>
 									<Button
-										icon="edit"
 										variant="outline"
 										size="sm"
-										class="w-full"
-										onclick={() => (editingBilling = true)}
+										href={resolve(`/api/dpa-acceptances/${org.dpaAcceptances[0].id}`)}
+										target="_blank">Download PDF</Button
 									>
-										Edit
-									</Button>
-								</div>
-							{/if}
-						</Card.Content>
-					</Card.Root>
+								</Card.Content>
+							</Card.Root>
+						{/if}
 
-					<Card.Root>
-						<Card.Header>
-							<Card.Title>Data Export</Card.Title>
-							<Card.Description>
-								Download everything this organization owns — members, inventory, productions, offers
-								and invoices including the archived PDFs — as one JSON file.
-							</Card.Description>
-						</Card.Header>
-						<Card.Content>
-							<Button icon="download" variant="outline" href={`/api/orgs/${orgId}/export`}>
-								Export all data (JSON)
-							</Button>
-						</Card.Content>
-					</Card.Root>
+						<Card.Root id="billing" class="scroll-mt-20">
+							<Card.Header>
+								<Card.Title>Billing Details</Card.Title>
+								<Card.Description
+									>Address, tax numbers, and bank account — used on generated offers/invoices.</Card.Description
+								>
+							</Card.Header>
+							<Card.Content>
+								{#if editingBilling}
+									<form onsubmit={handleBillingSave} class="space-y-4">
+										<AddressInput bind:value={billingAddress} idPrefix="billing" />
+										<div class="grid gap-4 sm:grid-cols-2">
+											<div class="space-y-2">
+												<Label for="billingTaxNumber">Tax number (Steuernummer)</Label>
+												<Input
+													id="billingTaxNumber"
+													bind:value={billingDraft.taxNumber}
+													placeholder="12/345/67890"
+												/>
+											</div>
+											<div class="space-y-2">
+												<Label for="billingVatId">VAT ID (USt-IdNr.)</Label>
+												<Input
+													id="billingVatId"
+													bind:value={billingDraft.vatId}
+													placeholder="DE123456789"
+													class="font-mono"
+												/>
+											</div>
+											<p class="text-xs text-muted-foreground sm:col-span-2">
+												Invoices need at least one of the two and show both if both are set. Not
+												your personal tax ID (Steuer-ID) — that one does not belong on an invoice.
+											</p>
+										</div>
+										<div class="space-y-2">
+											<Label for="billingHolder">Bank account holder</Label>
+											<Input id="billingHolder" bind:value={billingDraft.bankAccountHolder} />
+										</div>
+										<div class="flex gap-4">
+											<div class="flex-1 space-y-2">
+												<Label for="billingIban">IBAN</Label>
+												<Input id="billingIban" bind:value={billingDraft.iban} class="font-mono" />
+											</div>
+											<div class="space-y-2">
+												<Label for="billingBic">BIC</Label>
+												<Input
+													id="billingBic"
+													bind:value={billingDraft.bic}
+													class="w-32 font-mono"
+												/>
+											</div>
+										</div>
+										<div class="space-y-2">
+											<Label for="billingBankName">Bank name</Label>
+											<Input id="billingBankName" bind:value={billingDraft.bankName} />
+										</div>
+										<div class="grid gap-4 sm:grid-cols-2">
+											<div class="space-y-2">
+												<Label for="billingEmail">Billing email</Label><Input
+													id="billingEmail"
+													type="email"
+													bind:value={billingDraft.billingEmail}
+												/>
+											</div>
+											<div class="space-y-2">
+												<Label for="billingWebsite">Website</Label><Input
+													id="billingWebsite"
+													bind:value={billingDraft.billingWebsite}
+												/>
+											</div>
+											<div class="space-y-2">
+												<Label for="paymentTerms">Payment term (days)</Label><Input
+													id="paymentTerms"
+													type="number"
+													min="0"
+													bind:value={billingDraft.paymentTermsDays}
+												/>
+											</div>
+										</div>
+										<div class="space-y-4 rounded-md border p-4">
+											<div>
+												<p class="font-medium">Document text presets</p>
+												<p class="text-sm text-muted-foreground">
+													Placeholders: {'{production}'}, {'{startDate}'}, {'{endDate}'}, {'{servicePeriod}'},
+													{'{customer}'}, {'{documentNumber}'}, {'{paymentTermsDays}'}
+												</p>
+											</div>
+											<div class="space-y-2">
+												<Label for="offerIntro">Offer introduction</Label><textarea
+													id="offerIntro"
+													bind:value={billingDraft.offerIntroTemplate}
+													rows="3"
+													class="w-full rounded-md border bg-background px-3 py-2 text-sm"
+												></textarea>
+											</div>
+											<div class="space-y-2">
+												<Label for="offerClosing">Offer closing</Label><textarea
+													id="offerClosing"
+													bind:value={billingDraft.offerClosingTemplate}
+													rows="3"
+													class="w-full rounded-md border bg-background px-3 py-2 text-sm"
+												></textarea>
+											</div>
+											<div class="space-y-2">
+												<Label for="invoiceIntro">Invoice introduction</Label><textarea
+													id="invoiceIntro"
+													bind:value={billingDraft.invoiceIntroTemplate}
+													rows="3"
+													class="w-full rounded-md border bg-background px-3 py-2 text-sm"
+												></textarea>
+											</div>
+											<div class="space-y-2">
+												<Label for="invoiceClosing">Invoice closing</Label><textarea
+													id="invoiceClosing"
+													bind:value={billingDraft.invoiceClosingTemplate}
+													rows="3"
+													class="w-full rounded-md border bg-background px-3 py-2 text-sm"
+												></textarea>
+											</div>
+										</div>
+										<div class="flex gap-2">
+											<Button icon="save" type="submit" disabled={savingBilling}>
+												{savingBilling ? 'Saving…' : 'Save'}
+											</Button>
+											<Button
+												icon="close"
+												type="button"
+												variant="outline"
+												onclick={() => (editingBilling = false)}
+											>
+												Cancel
+											</Button>
+										</div>
+									</form>
+								{:else}
+									<div class="space-y-3 text-sm">
+										<div>
+											<p class="text-muted-foreground">Address</p>
+											<p>
+												{#if org.address}
+													{org.address.line1}{#if org.address.line2}, {org.address.line2}{/if},
+													{org.address.postalCode}
+													{org.address.city}
+												{:else}
+													Not set
+												{/if}
+											</p>
+										</div>
+										<div>
+											<p class="text-muted-foreground">Tax number</p>
+											<p>{org.taxNumber ?? 'Not set'}</p>
+										</div>
+										<div>
+											<p class="text-muted-foreground">VAT ID</p>
+											<p>{org.vatId ?? 'Not set'}</p>
+										</div>
+										<div>
+											<p class="text-muted-foreground">Bank account</p>
+											<p>
+												{#if org.iban}
+													{org.bankAccountHolder ?? ''} · {org.iban} · {org.bic ?? ''}
+												{:else}
+													Not set
+												{/if}
+											</p>
+										</div>
+										<Button
+											icon="edit"
+											variant="outline"
+											size="sm"
+											class="w-full"
+											onclick={() => (editingBilling = true)}
+										>
+											Edit
+										</Button>
+									</div>
+								{/if}
+							</Card.Content>
+						</Card.Root>
+
+						<Card.Root>
+							<Card.Header>
+								<Card.Title>Data Export</Card.Title>
+								<Card.Description>
+									Download everything this organization owns — members, inventory, productions,
+									offers and invoices including the archived PDFs — as one JSON file.
+								</Card.Description>
+							</Card.Header>
+							<Card.Content>
+								<Button icon="download" variant="outline" href={`/api/orgs/${orgId}/export`}>
+									Export all data (JSON)
+								</Button>
+							</Card.Content>
+						</Card.Root>
+					{/if}
 				</div>
 			{/if}
 
-			<div class="min-w-0 space-y-4 {canManage ? 'lg:col-span-2' : 'lg:col-span-3'}">
+			<div class="min-w-0 space-y-4 {canManage || canNumber ? 'lg:col-span-2' : 'lg:col-span-3'}">
 				<h2 class="text-xl font-semibold">Members ({org.members.length})</h2>
 
 				<!-- The roles are a ladder: each one carries everything below it. Spelling
@@ -826,3 +857,39 @@
 		>
 	{/snippet}
 </Modal>
+
+<!-- Numbering units created without a tag. Its own card rather than a field of
+     the settings form, because an ADMIN may switch it and that form is the
+     OWNER's. It saves the moment it is ticked. -->
+{#snippet assetTagsCard(enabled: boolean, prefix: string)}
+	<Card.Root>
+		<Card.Header>
+			<Card.Title>Asset tags</Card.Title>
+			<Card.Description>
+				Give devices created without a tag the next number: the prefix {prefix} and five digits.
+			</Card.Description>
+		</Card.Header>
+		<Card.Content class="space-y-2">
+			<label class="flex cursor-pointer items-center gap-2 text-sm">
+				<input
+					type="checkbox"
+					checked={enabled}
+					disabled={savingAutoTags}
+					onchange={(e) => toggleAutoTags(e.currentTarget.checked)}
+					class="h-4 w-4 rounded border-input"
+				/>
+				Number new devices automatically
+			</label>
+			{#if enabled && nextTag}
+				<p class="text-xs text-muted-foreground">
+					Next number: <span class="font-mono">{nextTag}</span>. A number is never handed out twice,
+					even after its device is deleted.
+				</p>
+			{:else if !enabled}
+				<p class="text-xs text-muted-foreground">
+					Off: a device gets its tag by typing or scanning the sticker.
+				</p>
+			{/if}
+		</Card.Content>
+	</Card.Root>
+{/snippet}

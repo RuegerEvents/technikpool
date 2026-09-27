@@ -3838,6 +3838,8 @@ export const OrganizationScalarFieldEnum = {
   name: 'name',
   shortName: 'shortName',
   assetIdPrefix: 'assetIdPrefix',
+  autoAssetTags: 'autoAssetTags',
+  nextAssetTagNumber: 'nextAssetTagNumber',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   defaultAssetVisibility: 'defaultAssetVisibility',
