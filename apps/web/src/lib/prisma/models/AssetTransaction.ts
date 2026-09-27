@@ -158,7 +158,7 @@ export type AssetTransactionGroupByArgs<ExtArgs extends runtime.Types.Extensions
 export type AssetTransactionGroupByOutputType = {
   id: string
   assetId: string
-  userId: string
+  userId: string | null
   productionId: string | null
   action: string
   data: runtime.JsonValue | null
@@ -189,20 +189,20 @@ export type AssetTransactionWhereInput = {
   NOT?: Prisma.AssetTransactionWhereInput | Prisma.AssetTransactionWhereInput[]
   id?: Prisma.StringFilter<"AssetTransaction"> | string
   assetId?: Prisma.StringFilter<"AssetTransaction"> | string
-  userId?: Prisma.StringFilter<"AssetTransaction"> | string
+  userId?: Prisma.StringNullableFilter<"AssetTransaction"> | string | null
   productionId?: Prisma.StringNullableFilter<"AssetTransaction"> | string | null
   action?: Prisma.StringFilter<"AssetTransaction"> | string
   data?: Prisma.JsonNullableFilter<"AssetTransaction">
   createdAt?: Prisma.DateTimeFilter<"AssetTransaction"> | Date | string
   asset?: Prisma.XOR<Prisma.AssetScalarRelationFilter, Prisma.AssetWhereInput>
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   production?: Prisma.XOR<Prisma.ProductionNullableScalarRelationFilter, Prisma.ProductionWhereInput> | null
 }
 
 export type AssetTransactionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   assetId?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
   productionId?: Prisma.SortOrderInput | Prisma.SortOrder
   action?: Prisma.SortOrder
   data?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -218,20 +218,20 @@ export type AssetTransactionWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.AssetTransactionWhereInput[]
   NOT?: Prisma.AssetTransactionWhereInput | Prisma.AssetTransactionWhereInput[]
   assetId?: Prisma.StringFilter<"AssetTransaction"> | string
-  userId?: Prisma.StringFilter<"AssetTransaction"> | string
+  userId?: Prisma.StringNullableFilter<"AssetTransaction"> | string | null
   productionId?: Prisma.StringNullableFilter<"AssetTransaction"> | string | null
   action?: Prisma.StringFilter<"AssetTransaction"> | string
   data?: Prisma.JsonNullableFilter<"AssetTransaction">
   createdAt?: Prisma.DateTimeFilter<"AssetTransaction"> | Date | string
   asset?: Prisma.XOR<Prisma.AssetScalarRelationFilter, Prisma.AssetWhereInput>
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   production?: Prisma.XOR<Prisma.ProductionNullableScalarRelationFilter, Prisma.ProductionWhereInput> | null
 }, "id">
 
 export type AssetTransactionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   assetId?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
   productionId?: Prisma.SortOrderInput | Prisma.SortOrder
   action?: Prisma.SortOrder
   data?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -247,7 +247,7 @@ export type AssetTransactionScalarWhereWithAggregatesInput = {
   NOT?: Prisma.AssetTransactionScalarWhereWithAggregatesInput | Prisma.AssetTransactionScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"AssetTransaction"> | string
   assetId?: Prisma.StringWithAggregatesFilter<"AssetTransaction"> | string
-  userId?: Prisma.StringWithAggregatesFilter<"AssetTransaction"> | string
+  userId?: Prisma.StringNullableWithAggregatesFilter<"AssetTransaction"> | string | null
   productionId?: Prisma.StringNullableWithAggregatesFilter<"AssetTransaction"> | string | null
   action?: Prisma.StringWithAggregatesFilter<"AssetTransaction"> | string
   data?: Prisma.JsonNullableWithAggregatesFilter<"AssetTransaction">
@@ -260,14 +260,14 @@ export type AssetTransactionCreateInput = {
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   asset: Prisma.AssetCreateNestedOneWithoutTransactionsInput
-  user: Prisma.UserCreateNestedOneWithoutTransactionsInput
+  user?: Prisma.UserCreateNestedOneWithoutTransactionsInput
   production?: Prisma.ProductionCreateNestedOneWithoutTransactionsInput
 }
 
 export type AssetTransactionUncheckedCreateInput = {
   id?: string
   assetId: string
-  userId: string
+  userId?: string | null
   productionId?: string | null
   action: string
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -280,14 +280,14 @@ export type AssetTransactionUpdateInput = {
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   asset?: Prisma.AssetUpdateOneRequiredWithoutTransactionsNestedInput
-  user?: Prisma.UserUpdateOneRequiredWithoutTransactionsNestedInput
+  user?: Prisma.UserUpdateOneWithoutTransactionsNestedInput
   production?: Prisma.ProductionUpdateOneWithoutTransactionsNestedInput
 }
 
 export type AssetTransactionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   assetId?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -297,7 +297,7 @@ export type AssetTransactionUncheckedUpdateInput = {
 export type AssetTransactionCreateManyInput = {
   id?: string
   assetId: string
-  userId: string
+  userId?: string | null
   productionId?: string | null
   action: string
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -314,7 +314,7 @@ export type AssetTransactionUpdateManyMutationInput = {
 export type AssetTransactionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   assetId?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -535,7 +535,7 @@ export type AssetTransactionScalarWhereInput = {
   NOT?: Prisma.AssetTransactionScalarWhereInput | Prisma.AssetTransactionScalarWhereInput[]
   id?: Prisma.StringFilter<"AssetTransaction"> | string
   assetId?: Prisma.StringFilter<"AssetTransaction"> | string
-  userId?: Prisma.StringFilter<"AssetTransaction"> | string
+  userId?: Prisma.StringNullableFilter<"AssetTransaction"> | string | null
   productionId?: Prisma.StringNullableFilter<"AssetTransaction"> | string | null
   action?: Prisma.StringFilter<"AssetTransaction"> | string
   data?: Prisma.JsonNullableFilter<"AssetTransaction">
@@ -547,13 +547,13 @@ export type AssetTransactionCreateWithoutAssetInput = {
   action: string
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutTransactionsInput
+  user?: Prisma.UserCreateNestedOneWithoutTransactionsInput
   production?: Prisma.ProductionCreateNestedOneWithoutTransactionsInput
 }
 
 export type AssetTransactionUncheckedCreateWithoutAssetInput = {
   id?: string
-  userId: string
+  userId?: string | null
   productionId?: string | null
   action: string
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -592,13 +592,13 @@ export type AssetTransactionCreateWithoutProductionInput = {
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   asset: Prisma.AssetCreateNestedOneWithoutTransactionsInput
-  user: Prisma.UserCreateNestedOneWithoutTransactionsInput
+  user?: Prisma.UserCreateNestedOneWithoutTransactionsInput
 }
 
 export type AssetTransactionUncheckedCreateWithoutProductionInput = {
   id?: string
   assetId: string
-  userId: string
+  userId?: string | null
   action: string
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -668,7 +668,7 @@ export type AssetTransactionUncheckedUpdateManyWithoutUserInput = {
 
 export type AssetTransactionCreateManyAssetInput = {
   id?: string
-  userId: string
+  userId?: string | null
   productionId?: string | null
   action: string
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -680,13 +680,13 @@ export type AssetTransactionUpdateWithoutAssetInput = {
   action?: Prisma.StringFieldUpdateOperationsInput | string
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutTransactionsNestedInput
+  user?: Prisma.UserUpdateOneWithoutTransactionsNestedInput
   production?: Prisma.ProductionUpdateOneWithoutTransactionsNestedInput
 }
 
 export type AssetTransactionUncheckedUpdateWithoutAssetInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -695,7 +695,7 @@ export type AssetTransactionUncheckedUpdateWithoutAssetInput = {
 
 export type AssetTransactionUncheckedUpdateManyWithoutAssetInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -705,7 +705,7 @@ export type AssetTransactionUncheckedUpdateManyWithoutAssetInput = {
 export type AssetTransactionCreateManyProductionInput = {
   id?: string
   assetId: string
-  userId: string
+  userId?: string | null
   action: string
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -717,13 +717,13 @@ export type AssetTransactionUpdateWithoutProductionInput = {
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   asset?: Prisma.AssetUpdateOneRequiredWithoutTransactionsNestedInput
-  user?: Prisma.UserUpdateOneRequiredWithoutTransactionsNestedInput
+  user?: Prisma.UserUpdateOneWithoutTransactionsNestedInput
 }
 
 export type AssetTransactionUncheckedUpdateWithoutProductionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   assetId?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -732,7 +732,7 @@ export type AssetTransactionUncheckedUpdateWithoutProductionInput = {
 export type AssetTransactionUncheckedUpdateManyWithoutProductionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   assetId?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -749,7 +749,7 @@ export type AssetTransactionSelect<ExtArgs extends runtime.Types.Extensions.Inte
   data?: boolean
   createdAt?: boolean
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.AssetTransaction$userArgs<ExtArgs>
   production?: boolean | Prisma.AssetTransaction$productionArgs<ExtArgs>
 }, ExtArgs["result"]["assetTransaction"]>
 
@@ -762,7 +762,7 @@ export type AssetTransactionSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   data?: boolean
   createdAt?: boolean
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.AssetTransaction$userArgs<ExtArgs>
   production?: boolean | Prisma.AssetTransaction$productionArgs<ExtArgs>
 }, ExtArgs["result"]["assetTransaction"]>
 
@@ -775,7 +775,7 @@ export type AssetTransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   data?: boolean
   createdAt?: boolean
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.AssetTransaction$userArgs<ExtArgs>
   production?: boolean | Prisma.AssetTransaction$productionArgs<ExtArgs>
 }, ExtArgs["result"]["assetTransaction"]>
 
@@ -792,17 +792,17 @@ export type AssetTransactionSelectScalar = {
 export type AssetTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assetId" | "userId" | "productionId" | "action" | "data" | "createdAt", ExtArgs["result"]["assetTransaction"]>
 export type AssetTransactionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.AssetTransaction$userArgs<ExtArgs>
   production?: boolean | Prisma.AssetTransaction$productionArgs<ExtArgs>
 }
 export type AssetTransactionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.AssetTransaction$userArgs<ExtArgs>
   production?: boolean | Prisma.AssetTransaction$productionArgs<ExtArgs>
 }
 export type AssetTransactionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.AssetTransaction$userArgs<ExtArgs>
   production?: boolean | Prisma.AssetTransaction$productionArgs<ExtArgs>
 }
 
@@ -810,13 +810,13 @@ export type $AssetTransactionPayload<ExtArgs extends runtime.Types.Extensions.In
   name: "AssetTransaction"
   objects: {
     asset: Prisma.$AssetPayload<ExtArgs>
-    user: Prisma.$UserPayload<ExtArgs>
+    user: Prisma.$UserPayload<ExtArgs> | null
     production: Prisma.$ProductionPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     assetId: string
-    userId: string
+    userId: string | null
     productionId: string | null
     action: string
     data: runtime.JsonValue | null
@@ -1216,7 +1216,7 @@ readonly fields: AssetTransactionFieldRefs;
 export interface Prisma__AssetTransactionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   asset<T extends Prisma.AssetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssetDefaultArgs<ExtArgs>>): Prisma.Prisma__AssetClient<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.AssetTransaction$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssetTransaction$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   production<T extends Prisma.AssetTransaction$productionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssetTransaction$productionArgs<ExtArgs>>): Prisma.Prisma__ProductionClient<runtime.Types.Result.GetResult<Prisma.$ProductionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1652,6 +1652,25 @@ export type AssetTransactionDeleteManyArgs<ExtArgs extends runtime.Types.Extensi
    * Limit how many AssetTransactions to delete.
    */
   limit?: number
+}
+
+/**
+ * AssetTransaction.user
+ */
+export type AssetTransaction$userArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

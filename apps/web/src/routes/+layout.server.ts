@@ -2,6 +2,7 @@ import type { LayoutServerLoad } from './$types';
 import { prisma } from '$lib/server/auth';
 import { orgLabel } from '$lib/utils';
 import { ROLE_FOR, roleAtLeast, roleRank } from '$lib/roles';
+import { legalLinks, pendingDpaFor } from '$lib/server/services/legal';
 
 export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 	let isAdmin = false;
@@ -59,6 +60,13 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 		homeOrgId,
 		homeOrg,
 		hasOrg,
-		locale: cookies.get('locale') ?? 'de'
+		locale: cookies.get('locale') ?? 'de',
+		// Imprint, privacy policy, terms — signed out as well, since the sign-in
+		// pages are exactly where someone looks for them.
+		legalLinks: await legalLinks(),
+		// Organizations this user owns that still have to accept the data
+		// processing agreement; DpaGate asks. Not a system admin's: the operator
+		// runs the install, so their own org processes nothing on anyone's behalf.
+		pendingDpa: locals.user?.id && !isAdmin ? await pendingDpaFor(locals.user.id) : null
 	};
 };

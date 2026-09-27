@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { userLabel } from '$lib/user-label.svelte';
 	import * as Card from '$lib/components/ui/card';
 	import { getCatalogTransactions, revertCatalogChange } from '$lib/remote/assets.remote';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
@@ -180,7 +181,7 @@
 							<td class="px-4 py-3 whitespace-nowrap text-muted-foreground">
 								{new Date(entry.createdAt).toLocaleString('de-DE')}
 							</td>
-							<td class="px-4 py-3">{entry.user.name || entry.user.email}</td>
+							<td class="px-4 py-3">{userLabel(entry.user)}</td>
 							<td class="px-4 py-3">
 								{actionLabels[entry.action] ?? entry.action}
 								{#if (entry.data as Payload)?.revertOf}

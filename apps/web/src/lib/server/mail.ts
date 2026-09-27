@@ -26,13 +26,19 @@ export async function sendMail(options: {
 	subject: string;
 	html: string;
 	text: string;
+	attachments?: { filename: string; content: Uint8Array; contentType: string }[];
 }) {
 	const info = await transporter.sendMail({
 		from,
 		to: options.to,
 		subject: options.subject,
 		html: options.html,
-		text: options.text
+		text: options.text,
+		attachments: options.attachments?.map((a) => ({
+			filename: a.filename,
+			content: Buffer.from(a.content),
+			contentType: a.contentType
+		}))
 	});
 
 	if (dev) {

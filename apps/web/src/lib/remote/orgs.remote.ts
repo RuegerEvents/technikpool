@@ -8,6 +8,7 @@ import { ORG_ROLES, type OrgRole } from '$lib/roles';
 import { isSystemAdmin, requireAuth, requireOrgOwner } from '$lib/server/services/access';
 import { appError } from '$lib/errors';
 import { issueInvitation } from '$lib/server/services/invitations';
+import { accountDeletionBlocker } from '$lib/server/services/account-deletion';
 import { getInvitations } from './invitations.remote';
 import { getKnownAddresses } from './addresses.remote';
 
@@ -96,6 +97,12 @@ export const getOrgWithMembers = query(v.string(), async (orgId: string) => {
 					user: { select: { id: true, name: true, email: true, isAdmin: true } }
 				},
 				orderBy: { role: 'asc' }
+			},
+			// The latest accepted data processing agreement, to link its PDF.
+			dpaAcceptances: {
+				orderBy: { acceptedAt: 'desc' },
+				take: 1,
+				select: { id: true, acceptedAt: true }
 			}
 		}
 	});
@@ -549,13 +556,10 @@ export const deleteUser = command(v.string(), async (userId: string) => {
 	if (!(await isSystemAdmin(current.id))) appError(403, 'admin_required');
 	if (userId === current.id) appError(409, 'cannot_delete_own_account');
 
-	const user = await prisma.user.findUniqueOrThrow({
-		where: { id: userId },
-		select: { id: true, _count: { select: { transactions: true } } }
-	});
-	if (user._count.transactions > 0) {
-		appError(409, 'user_has_history');
-	}
+	// History stays behind, anonymised — see account-deletion.ts.
+	const blocker = await accountDeletionBlocker(prisma, userId);
+	if (blocker?.code === 'last_org_owner') appError(409, 'last_org_owner', [blocker.orgName]);
+	if (blocker) appError(409, blocker.code);
 
 	await prisma.user.delete({ where: { id: userId } });
 	await getAllUsers().refresh();

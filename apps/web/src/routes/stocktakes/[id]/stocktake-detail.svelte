@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { userLabel } from '$lib/user-label.svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { tick as nextTick } from 'svelte';
@@ -574,8 +575,7 @@
 					avatarLabel={stocktake.organization.avatarLabel}
 				/>
 				<span>
-					Started {formatDateTime(stocktake.createdAt)} by {stocktake.createdBy.name ||
-						stocktake.createdBy.email}
+					Started {formatDateTime(stocktake.createdAt)} by {userLabel(stocktake.createdBy)}
 				</span>
 				{#if stocktake.closedAt}
 					<span>

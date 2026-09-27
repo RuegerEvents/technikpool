@@ -18,3 +18,13 @@ export const Role = {
 } as const
 
 export type Role = (typeof Role)[keyof typeof Role]
+
+
+export const LegalDocumentKind = {
+  IMPRINT: 'IMPRINT',
+  PRIVACY: 'PRIVACY',
+  TERMS: 'TERMS',
+  DPA: 'DPA'
+} as const
+
+export type LegalDocumentKind = (typeof LegalDocumentKind)[keyof typeof LegalDocumentKind]

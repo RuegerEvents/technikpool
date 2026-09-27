@@ -7,6 +7,7 @@ import {
 	writableOrgIds
 } from './access';
 import type { LicenseCredentials, LicenseHolder, RevealGrant } from '$lib/license';
+import { userLabel } from '$lib/user-label.svelte';
 
 // Who may see a licence's credentials, and who has the licence right now.
 //
@@ -123,7 +124,7 @@ export async function licenseHolders(
 			endDate: item.production.endDate,
 			since: checkout?.createdAt ?? null,
 			// Who in another org handled it is that org's business.
-			checkedOutBy: visible && checkout ? checkout.user.name || checkout.user.email : null
+			checkedOutBy: visible && checkout ? userLabel(checkout.user) : null
 		});
 		holders.set(item.assetId, list);
 	}

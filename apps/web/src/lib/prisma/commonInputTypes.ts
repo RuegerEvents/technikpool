@@ -219,6 +219,23 @@ export type EnumRoleWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumRoleFilter<$PrismaModel>
 }
 
+export type EnumLegalDocumentKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalDocumentKind | Prisma.EnumLegalDocumentKindFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalDocumentKind[] | Prisma.ListEnumLegalDocumentKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalDocumentKind[] | Prisma.ListEnumLegalDocumentKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalDocumentKindFilter<$PrismaModel> | $Enums.LegalDocumentKind
+}
+
+export type EnumLegalDocumentKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalDocumentKind | Prisma.EnumLegalDocumentKindFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalDocumentKind[] | Prisma.ListEnumLegalDocumentKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalDocumentKind[] | Prisma.ListEnumLegalDocumentKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalDocumentKindWithAggregatesFilter<$PrismaModel> | $Enums.LegalDocumentKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalDocumentKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalDocumentKindFilter<$PrismaModel>
+}
+
 export type EnumRoleNullableFilter<$PrismaModel = never> = {
   equals?: $Enums.Role | Prisma.EnumRoleFieldRefInput<$PrismaModel> | null
   in?: $Enums.Role[] | Prisma.ListEnumRoleFieldRefInput<$PrismaModel> | null
@@ -608,6 +625,23 @@ export type NestedEnumRoleWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumRoleFilter<$PrismaModel>
   _max?: Prisma.NestedEnumRoleFilter<$PrismaModel>
+}
+
+export type NestedEnumLegalDocumentKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalDocumentKind | Prisma.EnumLegalDocumentKindFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalDocumentKind[] | Prisma.ListEnumLegalDocumentKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalDocumentKind[] | Prisma.ListEnumLegalDocumentKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalDocumentKindFilter<$PrismaModel> | $Enums.LegalDocumentKind
+}
+
+export type NestedEnumLegalDocumentKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalDocumentKind | Prisma.EnumLegalDocumentKindFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalDocumentKind[] | Prisma.ListEnumLegalDocumentKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalDocumentKind[] | Prisma.ListEnumLegalDocumentKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalDocumentKindWithAggregatesFilter<$PrismaModel> | $Enums.LegalDocumentKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalDocumentKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalDocumentKindFilter<$PrismaModel>
 }
 
 export type NestedEnumRoleNullableFilter<$PrismaModel = never> = {

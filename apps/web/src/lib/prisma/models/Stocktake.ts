@@ -189,7 +189,7 @@ export type StocktakeGroupByOutputType = {
   scope: runtime.JsonValue
   recountOfId: string | null
   appliedActions: string[]
-  createdById: string
+  createdById: string | null
   closedById: string | null
   closedAt: Date | null
   createdAt: Date
@@ -225,7 +225,7 @@ export type StocktakeWhereInput = {
   scope?: Prisma.JsonFilter<"Stocktake">
   recountOfId?: Prisma.StringNullableFilter<"Stocktake"> | string | null
   appliedActions?: Prisma.StringNullableListFilter<"Stocktake">
-  createdById?: Prisma.StringFilter<"Stocktake"> | string
+  createdById?: Prisma.StringNullableFilter<"Stocktake"> | string | null
   closedById?: Prisma.StringNullableFilter<"Stocktake"> | string | null
   closedAt?: Prisma.DateTimeNullableFilter<"Stocktake"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Stocktake"> | Date | string
@@ -233,7 +233,7 @@ export type StocktakeWhereInput = {
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   recountOf?: Prisma.XOR<Prisma.StocktakeNullableScalarRelationFilter, Prisma.StocktakeWhereInput> | null
   recounts?: Prisma.StocktakeListRelationFilter
-  createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   closedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   items?: Prisma.StocktakeItemListRelationFilter
   lines?: Prisma.StocktakeLineListRelationFilter
@@ -249,7 +249,7 @@ export type StocktakeOrderByWithRelationInput = {
   scope?: Prisma.SortOrder
   recountOfId?: Prisma.SortOrderInput | Prisma.SortOrder
   appliedActions?: Prisma.SortOrder
-  createdById?: Prisma.SortOrder
+  createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   closedById?: Prisma.SortOrderInput | Prisma.SortOrder
   closedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -276,7 +276,7 @@ export type StocktakeWhereUniqueInput = Prisma.AtLeast<{
   scope?: Prisma.JsonFilter<"Stocktake">
   recountOfId?: Prisma.StringNullableFilter<"Stocktake"> | string | null
   appliedActions?: Prisma.StringNullableListFilter<"Stocktake">
-  createdById?: Prisma.StringFilter<"Stocktake"> | string
+  createdById?: Prisma.StringNullableFilter<"Stocktake"> | string | null
   closedById?: Prisma.StringNullableFilter<"Stocktake"> | string | null
   closedAt?: Prisma.DateTimeNullableFilter<"Stocktake"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Stocktake"> | Date | string
@@ -284,7 +284,7 @@ export type StocktakeWhereUniqueInput = Prisma.AtLeast<{
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   recountOf?: Prisma.XOR<Prisma.StocktakeNullableScalarRelationFilter, Prisma.StocktakeWhereInput> | null
   recounts?: Prisma.StocktakeListRelationFilter
-  createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   closedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   items?: Prisma.StocktakeItemListRelationFilter
   lines?: Prisma.StocktakeLineListRelationFilter
@@ -300,7 +300,7 @@ export type StocktakeOrderByWithAggregationInput = {
   scope?: Prisma.SortOrder
   recountOfId?: Prisma.SortOrderInput | Prisma.SortOrder
   appliedActions?: Prisma.SortOrder
-  createdById?: Prisma.SortOrder
+  createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   closedById?: Prisma.SortOrderInput | Prisma.SortOrder
   closedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -321,7 +321,7 @@ export type StocktakeScalarWhereWithAggregatesInput = {
   scope?: Prisma.JsonWithAggregatesFilter<"Stocktake">
   recountOfId?: Prisma.StringNullableWithAggregatesFilter<"Stocktake"> | string | null
   appliedActions?: Prisma.StringNullableListFilter<"Stocktake">
-  createdById?: Prisma.StringWithAggregatesFilter<"Stocktake"> | string
+  createdById?: Prisma.StringNullableWithAggregatesFilter<"Stocktake"> | string | null
   closedById?: Prisma.StringNullableWithAggregatesFilter<"Stocktake"> | string | null
   closedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Stocktake"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Stocktake"> | Date | string
@@ -340,7 +340,7 @@ export type StocktakeCreateInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutStocktakesInput
   recountOf?: Prisma.StocktakeCreateNestedOneWithoutRecountsInput
   recounts?: Prisma.StocktakeCreateNestedManyWithoutRecountOfInput
-  createdBy: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
   closedBy?: Prisma.UserCreateNestedOneWithoutStocktakesClosedInput
   items?: Prisma.StocktakeItemCreateNestedManyWithoutStocktakeInput
   lines?: Prisma.StocktakeLineCreateNestedManyWithoutStocktakeInput
@@ -356,7 +356,7 @@ export type StocktakeUncheckedCreateInput = {
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: string | null
   appliedActions?: Prisma.StocktakeCreateappliedActionsInput | string[]
-  createdById: string
+  createdById?: string | null
   closedById?: string | null
   closedAt?: Date | string | null
   createdAt?: Date | string
@@ -380,7 +380,7 @@ export type StocktakeUpdateInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutStocktakesNestedInput
   recountOf?: Prisma.StocktakeUpdateOneWithoutRecountsNestedInput
   recounts?: Prisma.StocktakeUpdateManyWithoutRecountOfNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutStocktakesStartedNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutStocktakesStartedNestedInput
   closedBy?: Prisma.UserUpdateOneWithoutStocktakesClosedNestedInput
   items?: Prisma.StocktakeItemUpdateManyWithoutStocktakeNestedInput
   lines?: Prisma.StocktakeLineUpdateManyWithoutStocktakeNestedInput
@@ -396,7 +396,7 @@ export type StocktakeUncheckedUpdateInput = {
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedActions?: Prisma.StocktakeUpdateappliedActionsInput | string[]
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -416,7 +416,7 @@ export type StocktakeCreateManyInput = {
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: string | null
   appliedActions?: Prisma.StocktakeCreateappliedActionsInput | string[]
-  createdById: string
+  createdById?: string | null
   closedById?: string | null
   closedAt?: Date | string | null
   createdAt?: Date | string
@@ -442,7 +442,7 @@ export type StocktakeUncheckedUpdateManyInput = {
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedActions?: Prisma.StocktakeUpdateappliedActionsInput | string[]
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -827,7 +827,7 @@ export type StocktakeCreateWithoutClosedByInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutStocktakesInput
   recountOf?: Prisma.StocktakeCreateNestedOneWithoutRecountsInput
   recounts?: Prisma.StocktakeCreateNestedManyWithoutRecountOfInput
-  createdBy: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
   items?: Prisma.StocktakeItemCreateNestedManyWithoutStocktakeInput
   lines?: Prisma.StocktakeLineCreateNestedManyWithoutStocktakeInput
   counts?: Prisma.StocktakeCountCreateNestedManyWithoutStocktakeInput
@@ -842,7 +842,7 @@ export type StocktakeUncheckedCreateWithoutClosedByInput = {
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: string | null
   appliedActions?: Prisma.StocktakeCreateappliedActionsInput | string[]
-  createdById: string
+  createdById?: string | null
   closedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -890,7 +890,7 @@ export type StocktakeScalarWhereInput = {
   scope?: Prisma.JsonFilter<"Stocktake">
   recountOfId?: Prisma.StringNullableFilter<"Stocktake"> | string | null
   appliedActions?: Prisma.StringNullableListFilter<"Stocktake">
-  createdById?: Prisma.StringFilter<"Stocktake"> | string
+  createdById?: Prisma.StringNullableFilter<"Stocktake"> | string | null
   closedById?: Prisma.StringNullableFilter<"Stocktake"> | string | null
   closedAt?: Prisma.DateTimeNullableFilter<"Stocktake"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Stocktake"> | Date | string
@@ -924,7 +924,7 @@ export type StocktakeCreateWithoutOrganizationInput = {
   updatedAt?: Date | string
   recountOf?: Prisma.StocktakeCreateNestedOneWithoutRecountsInput
   recounts?: Prisma.StocktakeCreateNestedManyWithoutRecountOfInput
-  createdBy: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
   closedBy?: Prisma.UserCreateNestedOneWithoutStocktakesClosedInput
   items?: Prisma.StocktakeItemCreateNestedManyWithoutStocktakeInput
   lines?: Prisma.StocktakeLineCreateNestedManyWithoutStocktakeInput
@@ -939,7 +939,7 @@ export type StocktakeUncheckedCreateWithoutOrganizationInput = {
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: string | null
   appliedActions?: Prisma.StocktakeCreateappliedActionsInput | string[]
-  createdById: string
+  createdById?: string | null
   closedById?: string | null
   closedAt?: Date | string | null
   createdAt?: Date | string
@@ -988,7 +988,7 @@ export type StocktakeCreateWithoutRecountsInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutStocktakesInput
   recountOf?: Prisma.StocktakeCreateNestedOneWithoutRecountsInput
-  createdBy: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
   closedBy?: Prisma.UserCreateNestedOneWithoutStocktakesClosedInput
   items?: Prisma.StocktakeItemCreateNestedManyWithoutStocktakeInput
   lines?: Prisma.StocktakeLineCreateNestedManyWithoutStocktakeInput
@@ -1004,7 +1004,7 @@ export type StocktakeUncheckedCreateWithoutRecountsInput = {
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: string | null
   appliedActions?: Prisma.StocktakeCreateappliedActionsInput | string[]
-  createdById: string
+  createdById?: string | null
   closedById?: string | null
   closedAt?: Date | string | null
   createdAt?: Date | string
@@ -1031,7 +1031,7 @@ export type StocktakeCreateWithoutRecountOfInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutStocktakesInput
   recounts?: Prisma.StocktakeCreateNestedManyWithoutRecountOfInput
-  createdBy: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
   closedBy?: Prisma.UserCreateNestedOneWithoutStocktakesClosedInput
   items?: Prisma.StocktakeItemCreateNestedManyWithoutStocktakeInput
   lines?: Prisma.StocktakeLineCreateNestedManyWithoutStocktakeInput
@@ -1046,7 +1046,7 @@ export type StocktakeUncheckedCreateWithoutRecountOfInput = {
   status?: string
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   appliedActions?: Prisma.StocktakeCreateappliedActionsInput | string[]
-  createdById: string
+  createdById?: string | null
   closedById?: string | null
   closedAt?: Date | string | null
   createdAt?: Date | string
@@ -1090,7 +1090,7 @@ export type StocktakeUpdateWithoutRecountsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutStocktakesNestedInput
   recountOf?: Prisma.StocktakeUpdateOneWithoutRecountsNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutStocktakesStartedNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutStocktakesStartedNestedInput
   closedBy?: Prisma.UserUpdateOneWithoutStocktakesClosedNestedInput
   items?: Prisma.StocktakeItemUpdateManyWithoutStocktakeNestedInput
   lines?: Prisma.StocktakeLineUpdateManyWithoutStocktakeNestedInput
@@ -1106,7 +1106,7 @@ export type StocktakeUncheckedUpdateWithoutRecountsInput = {
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedActions?: Prisma.StocktakeUpdateappliedActionsInput | string[]
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1145,7 +1145,7 @@ export type StocktakeCreateWithoutItemsInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutStocktakesInput
   recountOf?: Prisma.StocktakeCreateNestedOneWithoutRecountsInput
   recounts?: Prisma.StocktakeCreateNestedManyWithoutRecountOfInput
-  createdBy: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
   closedBy?: Prisma.UserCreateNestedOneWithoutStocktakesClosedInput
   lines?: Prisma.StocktakeLineCreateNestedManyWithoutStocktakeInput
   counts?: Prisma.StocktakeCountCreateNestedManyWithoutStocktakeInput
@@ -1160,7 +1160,7 @@ export type StocktakeUncheckedCreateWithoutItemsInput = {
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: string | null
   appliedActions?: Prisma.StocktakeCreateappliedActionsInput | string[]
-  createdById: string
+  createdById?: string | null
   closedById?: string | null
   closedAt?: Date | string | null
   createdAt?: Date | string
@@ -1199,7 +1199,7 @@ export type StocktakeUpdateWithoutItemsInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutStocktakesNestedInput
   recountOf?: Prisma.StocktakeUpdateOneWithoutRecountsNestedInput
   recounts?: Prisma.StocktakeUpdateManyWithoutRecountOfNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutStocktakesStartedNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutStocktakesStartedNestedInput
   closedBy?: Prisma.UserUpdateOneWithoutStocktakesClosedNestedInput
   lines?: Prisma.StocktakeLineUpdateManyWithoutStocktakeNestedInput
   counts?: Prisma.StocktakeCountUpdateManyWithoutStocktakeNestedInput
@@ -1214,7 +1214,7 @@ export type StocktakeUncheckedUpdateWithoutItemsInput = {
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedActions?: Prisma.StocktakeUpdateappliedActionsInput | string[]
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1237,7 +1237,7 @@ export type StocktakeCreateWithoutLinesInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutStocktakesInput
   recountOf?: Prisma.StocktakeCreateNestedOneWithoutRecountsInput
   recounts?: Prisma.StocktakeCreateNestedManyWithoutRecountOfInput
-  createdBy: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
   closedBy?: Prisma.UserCreateNestedOneWithoutStocktakesClosedInput
   items?: Prisma.StocktakeItemCreateNestedManyWithoutStocktakeInput
   counts?: Prisma.StocktakeCountCreateNestedManyWithoutStocktakeInput
@@ -1252,7 +1252,7 @@ export type StocktakeUncheckedCreateWithoutLinesInput = {
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: string | null
   appliedActions?: Prisma.StocktakeCreateappliedActionsInput | string[]
-  createdById: string
+  createdById?: string | null
   closedById?: string | null
   closedAt?: Date | string | null
   createdAt?: Date | string
@@ -1291,7 +1291,7 @@ export type StocktakeUpdateWithoutLinesInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutStocktakesNestedInput
   recountOf?: Prisma.StocktakeUpdateOneWithoutRecountsNestedInput
   recounts?: Prisma.StocktakeUpdateManyWithoutRecountOfNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutStocktakesStartedNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutStocktakesStartedNestedInput
   closedBy?: Prisma.UserUpdateOneWithoutStocktakesClosedNestedInput
   items?: Prisma.StocktakeItemUpdateManyWithoutStocktakeNestedInput
   counts?: Prisma.StocktakeCountUpdateManyWithoutStocktakeNestedInput
@@ -1306,7 +1306,7 @@ export type StocktakeUncheckedUpdateWithoutLinesInput = {
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedActions?: Prisma.StocktakeUpdateappliedActionsInput | string[]
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1329,7 +1329,7 @@ export type StocktakeCreateWithoutCountsInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutStocktakesInput
   recountOf?: Prisma.StocktakeCreateNestedOneWithoutRecountsInput
   recounts?: Prisma.StocktakeCreateNestedManyWithoutRecountOfInput
-  createdBy: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
   closedBy?: Prisma.UserCreateNestedOneWithoutStocktakesClosedInput
   items?: Prisma.StocktakeItemCreateNestedManyWithoutStocktakeInput
   lines?: Prisma.StocktakeLineCreateNestedManyWithoutStocktakeInput
@@ -1344,7 +1344,7 @@ export type StocktakeUncheckedCreateWithoutCountsInput = {
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: string | null
   appliedActions?: Prisma.StocktakeCreateappliedActionsInput | string[]
-  createdById: string
+  createdById?: string | null
   closedById?: string | null
   closedAt?: Date | string | null
   createdAt?: Date | string
@@ -1383,7 +1383,7 @@ export type StocktakeUpdateWithoutCountsInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutStocktakesNestedInput
   recountOf?: Prisma.StocktakeUpdateOneWithoutRecountsNestedInput
   recounts?: Prisma.StocktakeUpdateManyWithoutRecountOfNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutStocktakesStartedNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutStocktakesStartedNestedInput
   closedBy?: Prisma.UserUpdateOneWithoutStocktakesClosedNestedInput
   items?: Prisma.StocktakeItemUpdateManyWithoutStocktakeNestedInput
   lines?: Prisma.StocktakeLineUpdateManyWithoutStocktakeNestedInput
@@ -1398,7 +1398,7 @@ export type StocktakeUncheckedUpdateWithoutCountsInput = {
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedActions?: Prisma.StocktakeUpdateappliedActionsInput | string[]
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1421,7 +1421,7 @@ export type StocktakeCreateWithoutEventsInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutStocktakesInput
   recountOf?: Prisma.StocktakeCreateNestedOneWithoutRecountsInput
   recounts?: Prisma.StocktakeCreateNestedManyWithoutRecountOfInput
-  createdBy: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutStocktakesStartedInput
   closedBy?: Prisma.UserCreateNestedOneWithoutStocktakesClosedInput
   items?: Prisma.StocktakeItemCreateNestedManyWithoutStocktakeInput
   lines?: Prisma.StocktakeLineCreateNestedManyWithoutStocktakeInput
@@ -1436,7 +1436,7 @@ export type StocktakeUncheckedCreateWithoutEventsInput = {
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: string | null
   appliedActions?: Prisma.StocktakeCreateappliedActionsInput | string[]
-  createdById: string
+  createdById?: string | null
   closedById?: string | null
   closedAt?: Date | string | null
   createdAt?: Date | string
@@ -1475,7 +1475,7 @@ export type StocktakeUpdateWithoutEventsInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutStocktakesNestedInput
   recountOf?: Prisma.StocktakeUpdateOneWithoutRecountsNestedInput
   recounts?: Prisma.StocktakeUpdateManyWithoutRecountOfNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutStocktakesStartedNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutStocktakesStartedNestedInput
   closedBy?: Prisma.UserUpdateOneWithoutStocktakesClosedNestedInput
   items?: Prisma.StocktakeItemUpdateManyWithoutStocktakeNestedInput
   lines?: Prisma.StocktakeLineUpdateManyWithoutStocktakeNestedInput
@@ -1490,7 +1490,7 @@ export type StocktakeUncheckedUpdateWithoutEventsInput = {
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedActions?: Prisma.StocktakeUpdateappliedActionsInput | string[]
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1523,7 +1523,7 @@ export type StocktakeCreateManyClosedByInput = {
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: string | null
   appliedActions?: Prisma.StocktakeCreateappliedActionsInput | string[]
-  createdById: string
+  createdById?: string | null
   closedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1593,7 +1593,7 @@ export type StocktakeUpdateWithoutClosedByInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutStocktakesNestedInput
   recountOf?: Prisma.StocktakeUpdateOneWithoutRecountsNestedInput
   recounts?: Prisma.StocktakeUpdateManyWithoutRecountOfNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutStocktakesStartedNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutStocktakesStartedNestedInput
   items?: Prisma.StocktakeItemUpdateManyWithoutStocktakeNestedInput
   lines?: Prisma.StocktakeLineUpdateManyWithoutStocktakeNestedInput
   counts?: Prisma.StocktakeCountUpdateManyWithoutStocktakeNestedInput
@@ -1608,7 +1608,7 @@ export type StocktakeUncheckedUpdateWithoutClosedByInput = {
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedActions?: Prisma.StocktakeUpdateappliedActionsInput | string[]
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1627,7 +1627,7 @@ export type StocktakeUncheckedUpdateManyWithoutClosedByInput = {
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedActions?: Prisma.StocktakeUpdateappliedActionsInput | string[]
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1640,7 +1640,7 @@ export type StocktakeCreateManyOrganizationInput = {
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: string | null
   appliedActions?: Prisma.StocktakeCreateappliedActionsInput | string[]
-  createdById: string
+  createdById?: string | null
   closedById?: string | null
   closedAt?: Date | string | null
   createdAt?: Date | string
@@ -1658,7 +1658,7 @@ export type StocktakeUpdateWithoutOrganizationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   recountOf?: Prisma.StocktakeUpdateOneWithoutRecountsNestedInput
   recounts?: Prisma.StocktakeUpdateManyWithoutRecountOfNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutStocktakesStartedNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutStocktakesStartedNestedInput
   closedBy?: Prisma.UserUpdateOneWithoutStocktakesClosedNestedInput
   items?: Prisma.StocktakeItemUpdateManyWithoutStocktakeNestedInput
   lines?: Prisma.StocktakeLineUpdateManyWithoutStocktakeNestedInput
@@ -1673,7 +1673,7 @@ export type StocktakeUncheckedUpdateWithoutOrganizationInput = {
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedActions?: Prisma.StocktakeUpdateappliedActionsInput | string[]
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1692,7 +1692,7 @@ export type StocktakeUncheckedUpdateManyWithoutOrganizationInput = {
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   recountOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedActions?: Prisma.StocktakeUpdateappliedActionsInput | string[]
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1706,7 +1706,7 @@ export type StocktakeCreateManyRecountOfInput = {
   status?: string
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   appliedActions?: Prisma.StocktakeCreateappliedActionsInput | string[]
-  createdById: string
+  createdById?: string | null
   closedById?: string | null
   closedAt?: Date | string | null
   createdAt?: Date | string
@@ -1724,7 +1724,7 @@ export type StocktakeUpdateWithoutRecountOfInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutStocktakesNestedInput
   recounts?: Prisma.StocktakeUpdateManyWithoutRecountOfNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutStocktakesStartedNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutStocktakesStartedNestedInput
   closedBy?: Prisma.UserUpdateOneWithoutStocktakesClosedNestedInput
   items?: Prisma.StocktakeItemUpdateManyWithoutStocktakeNestedInput
   lines?: Prisma.StocktakeLineUpdateManyWithoutStocktakeNestedInput
@@ -1739,7 +1739,7 @@ export type StocktakeUncheckedUpdateWithoutRecountOfInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   appliedActions?: Prisma.StocktakeUpdateappliedActionsInput | string[]
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1758,7 +1758,7 @@ export type StocktakeUncheckedUpdateManyWithoutRecountOfInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   appliedActions?: Prisma.StocktakeUpdateappliedActionsInput | string[]
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1848,7 +1848,7 @@ export type StocktakeSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   recountOf?: boolean | Prisma.Stocktake$recountOfArgs<ExtArgs>
   recounts?: boolean | Prisma.Stocktake$recountsArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.Stocktake$createdByArgs<ExtArgs>
   closedBy?: boolean | Prisma.Stocktake$closedByArgs<ExtArgs>
   items?: boolean | Prisma.Stocktake$itemsArgs<ExtArgs>
   lines?: boolean | Prisma.Stocktake$linesArgs<ExtArgs>
@@ -1872,7 +1872,7 @@ export type StocktakeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   recountOf?: boolean | Prisma.Stocktake$recountOfArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.Stocktake$createdByArgs<ExtArgs>
   closedBy?: boolean | Prisma.Stocktake$closedByArgs<ExtArgs>
 }, ExtArgs["result"]["stocktake"]>
 
@@ -1891,7 +1891,7 @@ export type StocktakeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   recountOf?: boolean | Prisma.Stocktake$recountOfArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.Stocktake$createdByArgs<ExtArgs>
   closedBy?: boolean | Prisma.Stocktake$closedByArgs<ExtArgs>
 }, ExtArgs["result"]["stocktake"]>
 
@@ -1915,7 +1915,7 @@ export type StocktakeInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   recountOf?: boolean | Prisma.Stocktake$recountOfArgs<ExtArgs>
   recounts?: boolean | Prisma.Stocktake$recountsArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.Stocktake$createdByArgs<ExtArgs>
   closedBy?: boolean | Prisma.Stocktake$closedByArgs<ExtArgs>
   items?: boolean | Prisma.Stocktake$itemsArgs<ExtArgs>
   lines?: boolean | Prisma.Stocktake$linesArgs<ExtArgs>
@@ -1926,13 +1926,13 @@ export type StocktakeInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type StocktakeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   recountOf?: boolean | Prisma.Stocktake$recountOfArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.Stocktake$createdByArgs<ExtArgs>
   closedBy?: boolean | Prisma.Stocktake$closedByArgs<ExtArgs>
 }
 export type StocktakeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   recountOf?: boolean | Prisma.Stocktake$recountOfArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.Stocktake$createdByArgs<ExtArgs>
   closedBy?: boolean | Prisma.Stocktake$closedByArgs<ExtArgs>
 }
 
@@ -1942,7 +1942,7 @@ export type $StocktakePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     organization: Prisma.$OrganizationPayload<ExtArgs>
     recountOf: Prisma.$StocktakePayload<ExtArgs> | null
     recounts: Prisma.$StocktakePayload<ExtArgs>[]
-    createdBy: Prisma.$UserPayload<ExtArgs>
+    createdBy: Prisma.$UserPayload<ExtArgs> | null
     closedBy: Prisma.$UserPayload<ExtArgs> | null
     items: Prisma.$StocktakeItemPayload<ExtArgs>[]
     lines: Prisma.$StocktakeLinePayload<ExtArgs>[]
@@ -1957,7 +1957,7 @@ export type $StocktakePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     scope: runtime.JsonValue
     recountOfId: string | null
     appliedActions: string[]
-    createdById: string
+    createdById: string | null
     closedById: string | null
     closedAt: Date | null
     createdAt: Date
@@ -2359,7 +2359,7 @@ export interface Prisma__StocktakeClient<T, Null = never, ExtArgs extends runtim
   organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   recountOf<T extends Prisma.Stocktake$recountOfArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Stocktake$recountOfArgs<ExtArgs>>): Prisma.Prisma__StocktakeClient<runtime.Types.Result.GetResult<Prisma.$StocktakePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   recounts<T extends Prisma.Stocktake$recountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Stocktake$recountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StocktakePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  createdBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  createdBy<T extends Prisma.Stocktake$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Stocktake$createdByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   closedBy<T extends Prisma.Stocktake$closedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Stocktake$closedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   items<T extends Prisma.Stocktake$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Stocktake$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StocktakeItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   lines<T extends Prisma.Stocktake$linesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Stocktake$linesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StocktakeLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2847,6 +2847,25 @@ export type Stocktake$recountsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.StocktakeScalarFieldEnum | Prisma.StocktakeScalarFieldEnum[]
+}
+
+/**
+ * Stocktake.createdBy
+ */
+export type Stocktake$createdByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

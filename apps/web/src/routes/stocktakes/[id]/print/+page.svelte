@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { userLabel } from '$lib/user-label.svelte';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { getStocktake } from '$lib/remote/stocktakes.remote';
@@ -37,7 +38,7 @@
 		...new Set(
 			[
 				...stocktake.items.map((i) => i.foundBy?.name || i.foundBy?.email),
-				...stocktake.counts.map((c) => c.user.name || c.user.email)
+				...stocktake.counts.map((c) => c.user?.name || c.user?.email)
 			].filter(Boolean)
 		)
 	]);
@@ -65,8 +66,7 @@
 		<h1 class="text-2xl font-bold">{stocktake.name}</h1>
 		<p>{stocktake.organization.name}</p>
 		<p class="text-gray-600">
-			Started {formatDateTime(stocktake.createdAt)} by {stocktake.createdBy.name ||
-				stocktake.createdBy.email}
+			Started {formatDateTime(stocktake.createdAt)} by {userLabel(stocktake.createdBy)}
 			{#if stocktake.closedAt}
 				· Closed {formatDateTime(stocktake.closedAt)} by {stocktake.closedBy?.name ||
 					stocktake.closedBy?.email}

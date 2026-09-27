@@ -37,6 +37,10 @@ ctx.onmessage = async (event: MessageEvent<BackgroundRemovalRequest>) => {
 			rescale: true,
 			// We are the worker. Left on, imgly would nest a second one inside this.
 			proxyToWorker: false,
+			// Served by this app (scripts/fetch-imgly-assets.mjs puts them in
+			// static/imgly at build). The default is IMG.LY's CDN, which would send
+			// every user's IP address to a third party.
+			publicPath: new URL('/imgly/', self.location.origin).href,
 			progress: (stage, current, total) => reply({ kind: 'progress', stage, current, total })
 		});
 		reply({ kind: 'done', result });

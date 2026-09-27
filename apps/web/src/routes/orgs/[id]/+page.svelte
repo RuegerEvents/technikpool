@@ -464,6 +464,27 @@
 
 					<OrgLogoCard {orgId} logoPath={org.logoPath} />
 
+					{#if org.dpaAcceptances[0]}
+						<Card.Root>
+							<Card.Header>
+								<Card.Title>Data processing agreement</Card.Title>
+								<Card.Description>
+									Accepted with the operator of this server on {new Date(
+										org.dpaAcceptances[0].acceptedAt
+									).toLocaleDateString()}. The PDF shows who accepted which version, and when.
+								</Card.Description>
+							</Card.Header>
+							<Card.Content>
+								<Button
+									variant="outline"
+									size="sm"
+									href={resolve(`/api/dpa-acceptances/${org.dpaAcceptances[0].id}`)}
+									target="_blank">Download PDF</Button
+								>
+							</Card.Content>
+						</Card.Root>
+					{/if}
+
 					<Card.Root id="billing" class="scroll-mt-20">
 						<Card.Header>
 							<Card.Title>Billing Details</Card.Title>

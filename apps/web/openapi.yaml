@@ -192,6 +192,27 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  /api/v1/legal:
+    get:
+      operationId: listLegalLinks
+      tags: [identity]
+      summary: The server operator's imprint, privacy policy and terms
+      description: |
+        Whatever the operator has set up, in the order imprint, privacy, terms;
+        a page they haven't set up is left out, so the list may be empty. Each
+        `url` is absolute and opens in a browser: either the operator's own site
+        or a page on this server. Needs no token, like the pages themselves.
+      security: []
+      responses:
+        '200':
+          description: Configured legal pages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LegalLink'
+
   /api/v1/locations:
     get:
       operationId: listLocations
@@ -1004,6 +1025,18 @@ components:
           description: Hex colour for the org badge.
         avatarLabel:
           type: string
+
+    LegalLink:
+      type: object
+      required: [kind, url]
+      properties:
+        kind:
+          type: string
+          enum: [imprint, privacy, terms]
+          description: What the page is; the client names it in its own language.
+        url:
+          type: string
+          format: uri
 
     CurrentUser:
       type: object

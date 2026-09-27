@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { userLabel } from '$lib/user-label.svelte';
 	import { resolve } from '$app/paths';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -65,7 +66,7 @@
 											avatarLabel={s.organization.avatarLabel}
 										/>
 										<span>
-											Started {formatDate(s.createdAt)} by {s.createdBy.name || s.createdBy.email}
+											Started {formatDate(s.createdAt)} by {userLabel(s.createdBy)}
 										</span>
 									</p>
 								</div>

@@ -44,6 +44,7 @@ model User {
   stocktakeFinds       StocktakeItem[]
   stocktakeCounts      StocktakeCount[]
   stocktakeEvents      StocktakeEvent[]
+  dpaAcceptances       DpaAcceptance[]
 
   @@map("user")
 }
@@ -169,9 +170,10 @@ model Organization {
   invoiceIntroTemplate   String? @db.Text
   invoiceClosingTemplate String? @db.Text
 
-  homeUsers   User[]          @relation("HomeOrg")
-  members     OrgMembership[]
-  invitations Invitation[]
+  homeUsers      User[]          @relation("HomeOrg")
+  members        OrgMembership[]
+  dpaAcceptances DpaAcceptance[]
+  invitations    Invitation[]
 
   locations         Location[]
   assets            Asset[]
@@ -225,6 +227,75 @@ model SystemSettings {
   signUpEnabled Boolean @default(false)
 
   updatedAt DateTime @updatedAt
+}
+
+enum LegalDocumentKind {
+  IMPRINT
+  PRIVACY
+  TERMS
+  // The data processing agreement (AVV, Art. 28 GDPR) every organization's
+  // owner accepts in the app. Text only: an acceptance has to record exactly
+  // what was accepted, and a link can change behind its back.
+  DPA
+}
+
+/// The operator's imprint, privacy policy and terms. Technikpool is open
+/// source, so every install shows its own: either a link to the operator's own
+/// site, or Markdown rendered at /legal/<kind>. A kind with neither is not
+/// linked anywhere. One text, in whatever language the operator writes it:
+/// two copies of a legal text are two texts that can disagree.
+model LegalDocument {
+  id   String            @id @default(cuid())
+  kind LegalDocumentKind @unique
+
+  /// Wins over the text when set.
+  externalUrl String?
+  body        String?
+
+  updatedById String?
+  updatedAt   DateTime @updatedAt
+}
+
+/// An organization accepting the operator's data processing agreement. The
+/// operator processes personal data on each organization's behalf (its staff,
+/// customers, crew), which Art. 28 GDPR requires a contract for; Art. 28(9)
+/// allows it in electronic form, and this row is that form. Append-only: a new
+/// version of the text means a new acceptance, and the old rows stay as the
+/// record of what applied when.
+model DpaAcceptance {
+  id             String        @id @default(cuid())
+  // Null once the organization is deleted: the record of what it agreed to
+  // outlives it, which is why the name is kept below as well.
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  /// SHA-256 of `body`. Compared with the current text's to tell whether the
+  /// organization has accepted the version in force.
+  versionHash String
+  /// The text as accepted, so the record still shows it after the operator
+  /// edits the agreement.
+  body        String
+
+  // Who accepted, kept as text as well: the acceptance must still say who it
+  // was after that account is deleted.
+  userId     String?
+  user       User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userName   String
+  userEmail  String
+  // The parties' side of the contract: the text names the organization only
+  // as "whoever accepts", so its name and address as they were at the time
+  // are part of the record.
+  orgName    String
+  orgAddress String?
+
+  /// The acceptance as a PDF in the object store (outside the public prefix),
+  /// written once and never again. Null until it has been written: the
+  /// download route renders and stores it on first request then.
+  pdfPath String?
+
+  acceptedAt DateTime @default(now())
+
+  @@index([organizationId, acceptedAt])
 }
 
 /// A link that lets one email address create an account while sign-up is
@@ -772,8 +843,9 @@ model AssetTransaction {
   assetId String
   asset   Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
+  // Null once the account is deleted: the entry stays, the person does not.
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   productionId String?
   production   Production? @relation(fields: [productionId], references: [id], onDelete: SetNull)
@@ -1100,9 +1172,10 @@ model Invoice {
 // did what; merges delete their source rows, which is why the references
 // here are soft strings rather than relations.
 model CatalogTransaction {
-  id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
+  id     String  @id @default(cuid())
+  // Null once the account is deleted, like AssetTransaction.userId.
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   action String // e.g. PRODUCT_UPDATED, PRODUCT_MERGED, MANUFACTURER_MERGED, PRICE_SET
 
@@ -1191,10 +1264,11 @@ model Stocktake {
   // Close-report actions already applied; each can be applied once.
   appliedActions String[] @default([])
 
-  createdById String
-  createdBy   User      @relation("StocktakeStarter", fields: [createdById], references: [id])
+  // Both null once the account is deleted.
+  createdById String?
+  createdBy   User?     @relation("StocktakeStarter", fields: [createdById], references: [id], onDelete: SetNull)
   closedById  String?
-  closedBy    User?     @relation("StocktakeCloser", fields: [closedById], references: [id])
+  closedBy    User?     @relation("StocktakeCloser", fields: [closedById], references: [id], onDelete: SetNull)
   closedAt    DateTime?
 
   createdAt DateTime @default(now())
@@ -1273,8 +1347,9 @@ model StocktakeCount {
   product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   locationId  String
   location    Location  @relation(fields: [locationId], references: [id], onDelete: Cascade)
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Null once the account is deleted — the count still adds up.
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
   count       Int
   updatedAt   DateTime  @updatedAt
 
@@ -1287,8 +1362,9 @@ model StocktakeEvent {
   id          String    @id @default(cuid())
   stocktakeId String
   stocktake   Stocktake @relation(fields: [stocktakeId], references: [id], onDelete: Cascade)
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Null once the account is deleted.
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
   // FOUND | UNFOUND | COUNTED | NOTED
   action      String
   assetId     String?

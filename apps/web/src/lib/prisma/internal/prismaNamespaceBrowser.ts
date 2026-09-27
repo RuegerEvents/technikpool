@@ -59,6 +59,8 @@ export const ModelName = {
   Organization: 'Organization',
   OrgMembership: 'OrgMembership',
   SystemSettings: 'SystemSettings',
+  LegalDocument: 'LegalDocument',
+  DpaAcceptance: 'DpaAcceptance',
   Invitation: 'Invitation',
   Manufacturer: 'Manufacturer',
   Connector: 'Connector',
@@ -240,6 +242,35 @@ export const SystemSettingsScalarFieldEnum = {
 } as const
 
 export type SystemSettingsScalarFieldEnum = (typeof SystemSettingsScalarFieldEnum)[keyof typeof SystemSettingsScalarFieldEnum]
+
+
+export const LegalDocumentScalarFieldEnum = {
+  id: 'id',
+  kind: 'kind',
+  externalUrl: 'externalUrl',
+  body: 'body',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LegalDocumentScalarFieldEnum = (typeof LegalDocumentScalarFieldEnum)[keyof typeof LegalDocumentScalarFieldEnum]
+
+
+export const DpaAcceptanceScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  versionHash: 'versionHash',
+  body: 'body',
+  userId: 'userId',
+  userName: 'userName',
+  userEmail: 'userEmail',
+  orgName: 'orgName',
+  orgAddress: 'orgAddress',
+  pdfPath: 'pdfPath',
+  acceptedAt: 'acceptedAt'
+} as const
+
+export type DpaAcceptanceScalarFieldEnum = (typeof DpaAcceptanceScalarFieldEnum)[keyof typeof DpaAcceptanceScalarFieldEnum]
 
 
 export const InvitationScalarFieldEnum = {

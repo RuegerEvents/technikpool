@@ -78,6 +78,7 @@ async function requireAuth() {
 | `src/lib/remote/addresses.remote.ts`       | `getKnownAddresses` — feeds the picker in `AddressInput`; a pick copies the values, owners never share an `Address` row                                                                                                                   |
 | `src/lib/remote/service-catalog.remote.ts` | `getServiceCatalog` and CRUD for `ServiceCategory` / `OrgService` — the org's price list for service lines (Personal, Transport …); a line copies from it and never points back                                                           |
 | `src/lib/remote/stocktakes.remote.ts`      | `getStocktakes`, `getStocktake`, `getStocktakePreview`, `createStocktake`, `scanStocktakeCode`, `tickStocktake`, `setStocktakeCount`, `closeStocktake`, `applyStocktakeAction`, `recountStocktake` …                                      |
+| `src/lib/remote/legal.remote.ts`           | `getLegalSettings`, `saveLegalDocument`, `getDpaOverview`, `acceptDpa` — the operator's legal texts and each org's acceptance of the AVV                                                                                                  |
 
 ## External API (`/api/v1`)
 
@@ -217,6 +218,43 @@ page maps to translated text.
 `getSignUpStatus` and `getInvitationPreview` are the only remote functions meant to be called
 signed out. They work because a remote request carries the _calling page's_ path, and the
 guard in `hooks.server.ts` lets `/auth/*` through.
+
+## Legal pages and personal data
+
+Technikpool is open source, so the imprint, privacy policy and terms are the **operator's**, not
+the project's. `LegalDocument` holds one row per kind: an `externalUrl` (wins, and `/legal/<slug>`
+redirects to it) or one Markdown `body`, in whatever language the operator writes. It is one text
+on purpose, because two copies of a legal text can say different things. System admins edit them at
+`/admin/legal`. `legalLinks()` in `src/lib/server/services/legal.ts` is the one list, used by
+the layout data (the sign-in pages' footer and the user menu), the register form's notice and
+`GET /api/v1/legal` (the scanner's Settings). A kind with neither a URL nor a body is linked nowhere.
+`/legal/*` is public. `src/lib/server/markdown.ts` escapes raw HTML, drops images and allows
+only http(s)/mailto/tel/relative links, because the result is shown to signed-out visitors.
+Templates for the operator (AVV, privacy policy, terms) are in `docs/legal/`. The scanner's own
+store privacy page is `docs/privacy/`, served by GitHub Pages.
+
+- **The data processing agreement (AVV) is accepted in the app.** It is the fourth kind,
+  `DPA`, and is text only. `currentDpa()` hashes it, and that hash is the version.
+  `pendingDpaFor()` in the layout data makes `DpaGate` ask every org OWNER until their org has a
+  `DpaAcceptance` for that hash. System admins are never asked, since they run the server.
+  Acceptances are append-only and keep the full text plus the org and user names, so they survive
+  both deletions. Each acceptance becomes a PDF (`src/lib/server/dpa-pdf.ts`), stored outside the public S3 prefix, mailed to whoever accepted and served only by `/api/dpa-acceptances/[id]` (org OWNER or system admin). The overview is on
+  `/admin/legal`.
+- **Deleting an account never deletes history.** `AssetTransaction`, `CatalogTransaction`,
+  `Stocktake.createdBy/closedBy`, `StocktakeCount` and `StocktakeEvent` null their user
+  (`onDelete: SetNull`), and every place that names one goes through `userLabel()`
+  (`src/lib/user-label.svelte.ts`), which shows "Deleted account". A new relation to `User` that
+  records who did something follows the same rule.
+- Users delete themselves from `/profile` through better-auth's `deleteUser`, with their password.
+  Admins delete from `/admin/users`. Both paths ask `accountDeletionBlocker`
+  (`services/account-deletion.ts`), which refuses to delete the last system admin or the only OWNER
+  of an org.
+- `src/lib/server/cleanup.ts` runs hourly and deletes expired sessions (they hold IP address and
+  user agent), verifications, device codes, and invitations that are more than 30 days past expiry.
+- The background-removal model is **self-hosted**. `scripts/fetch-imgly-assets.mjs` (run by
+  `build` and `dev`) downloads it into `static/imgly/`, which is gitignored and about 200 MB, and
+  checks each chunk's hash. The worker points `publicPath` there, so no user's IP address goes to
+  IMG.LY.
 
 ## Service lines on offers and invoices
 

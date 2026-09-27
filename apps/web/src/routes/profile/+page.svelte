@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { changeEmail, changePassword, updateUser } from '$lib/auth-client';
+	import { changeEmail, changePassword, deleteUser, updateUser } from '$lib/auth-client';
+	import { Modal } from '$lib/components/ui/modal';
+	import { messageForErrorCode } from '$lib/error-messages.svelte';
+	import type { AppErrorCode } from '$lib/errors';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
@@ -99,6 +104,38 @@
 				onError: (ctx) => {
 					toast.error(ctx.error.message);
 					savingPassword = false;
+				}
+			}
+		);
+	}
+
+	let deleteOpen = $state(false);
+	let deletePassword = $state('');
+	let deleting = $state(false);
+
+	async function handleDelete(e: Event) {
+		e.preventDefault();
+		if (!deletePassword || deleting) return;
+		deleting = true;
+		await deleteUser(
+			{ password: deletePassword },
+			{
+				onSuccess: async () => {
+					deleteOpen = false;
+					toast.success('Your account has been deleted.');
+					await goto(resolve('/auth/login'), { invalidateAll: true });
+				},
+				onError: (ctx) => {
+					// A blocker from account-deletion.ts carries one of our own codes;
+					// a wrong password comes back in better-auth's wording.
+					const { code, params } = ctx.error as { code?: string; params?: unknown[] };
+					const ours = code === 'last_org_owner' || code === 'last_system_admin';
+					toast.error(
+						ours
+							? messageForErrorCode(code as AppErrorCode, (params ?? []) as string[])
+							: ctx.error.message
+					);
+					deleting = false;
 				}
 			}
 		);
@@ -210,4 +247,50 @@
 			</form>
 		</Card.Content>
 	</Card.Root>
+
+	<Card.Root class="border-destructive/40">
+		<Card.Header>
+			<Card.Title>Delete account</Card.Title>
+			<Card.Description>
+				Removes your account, your sessions and paired scanners, and your memberships. Entries you
+				made in the history of devices and stocktakes stay, without your name.
+			</Card.Description>
+		</Card.Header>
+		<Card.Content>
+			<Button icon="delete" variant="destructive" onclick={() => (deleteOpen = true)}
+				>Delete account…</Button
+			>
+		</Card.Content>
+	</Card.Root>
 </div>
+
+<Modal bind:open={deleteOpen} title="Delete account" dismissible={!deleting}>
+	<form id="delete-account" onsubmit={handleDelete} class="space-y-2">
+		<Label for="deletePassword">Confirm with your password</Label>
+		<Input
+			id="deletePassword"
+			type="password"
+			bind:value={deletePassword}
+			autocomplete="current-password"
+			required
+		/>
+	</form>
+	{#snippet description()}
+		This cannot be undone. If you are the only owner of an organization, make someone else owner or
+		delete the organization first.
+	{/snippet}
+	{#snippet footer()}
+		<Button
+			icon="delete"
+			variant="destructive"
+			type="submit"
+			form="delete-account"
+			disabled={deleting || !deletePassword}
+		>
+			{deleting ? 'Deleting…' : 'Delete account'}
+		</Button>
+		<Button icon="close" variant="outline" onclick={() => (deleteOpen = false)} disabled={deleting}
+			>Cancel</Button
+		>
+	{/snippet}
+</Modal>

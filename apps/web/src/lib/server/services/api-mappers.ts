@@ -11,6 +11,7 @@ import {
 	type StocktakeScanOutcome,
 	type StocktakeSummary
 } from '$lib/server/services/stocktake';
+import { userLabel } from '$lib/user-label.svelte';
 
 // Prisma payloads are deliberately not returned straight to clients: they carry
 // fields the API doesn't promise, and adding a column to the schema would
@@ -245,7 +246,7 @@ export function toStocktakeSummary(s: StocktakeSummaryRow): Schemas['StocktakeSu
 		status: s.status === 'CLOSED' ? 'CLOSED' : 'OPEN',
 		organization: toOrganization(s.organization),
 		createdAt: s.createdAt.toISOString(),
-		createdByName: s.createdBy.name || s.createdBy.email,
+		createdByName: userLabel(s.createdBy),
 		closedAt: s.closedAt?.toISOString() ?? null,
 		progress: s.progress,
 		countingLocations: s.countingLocations

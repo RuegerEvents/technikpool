@@ -14,6 +14,7 @@ import { passwordChangedEmail } from './emails/password-changed';
 import { emailVerificationEmail } from './emails/email-verification';
 import { emailChangeConfirmationEmail } from './emails/email-change-confirmation';
 import { completeSignUp, decideSignUp, signUpRefusalMessages } from './signup-gate';
+import { accountDeletionBlocker } from './services/account-deletion';
 import { USER_CODE_LENGTH } from '$lib/device-code';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -64,7 +65,9 @@ const prefixes: Partial<Record<ModelName, string>> = {
 	StocktakeItem: 'stki',
 	StocktakeLine: 'stkl',
 	StocktakeCount: 'stkc',
-	StocktakeEvent: 'stke'
+	StocktakeEvent: 'stke',
+	LegalDocument: 'lgl',
+	DpaAcceptance: 'dpaa'
 };
 
 // Extend the client with prefixed IDs
@@ -121,6 +124,22 @@ const createAuth = () =>
 						url
 					});
 					await sendMail({ to: user.email, subject, html, text });
+				}
+			},
+			// Anyone may delete their own account from /profile (GDPR Art. 17), with
+			// their password. Their history stays, anonymised by the SetNull foreign
+			// keys; what stops it is an org or an install left without anyone in charge.
+			deleteUser: {
+				enabled: true,
+				beforeDelete: async (user) => {
+					const blocker = await accountDeletionBlocker(prisma, user.id);
+					if (blocker) {
+						throw new APIError('CONFLICT', {
+							code: blocker.code,
+							params: blocker.code === 'last_org_owner' ? [blocker.orgName] : [],
+							message: blocker.code
+						});
+					}
 				}
 			}
 		},

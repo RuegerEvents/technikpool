@@ -108,6 +108,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/legal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The server operator's imprint, privacy policy and terms
+         * @description Whatever the operator has set up, in the order imprint, privacy, terms;
+         *     a page they haven't set up is left out, so the list may be empty. Each
+         *     `url` is absolute and opens in a browser: either the operator's own site
+         *     or a page on this server. Needs no token, like the pages themselves.
+         */
+        get: operations["listLegalLinks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/locations": {
         parameters: {
             query?: never;
@@ -551,6 +574,15 @@ export interface components {
             /** @description Hex colour for the org badge. */
             color: string;
             avatarLabel: string;
+        };
+        LegalLink: {
+            /**
+             * @description What the page is; the client names it in its own language.
+             * @enum {string}
+             */
+            kind: "imprint" | "privacy" | "terms";
+            /** Format: uri */
+            url: string;
         };
         CurrentUser: {
             user: components["schemas"]["User"];
@@ -1210,6 +1242,26 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+        };
+    };
+    listLegalLinks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Configured legal pages */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalLink"][];
+                };
+            };
         };
     };
     listLocations: {

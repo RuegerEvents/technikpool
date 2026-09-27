@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { LegalLinks } from '$lib/components/ui/legal-links';
 	import { signUp } from '$lib/auth-client';
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
@@ -7,10 +8,16 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import type { LegalLink } from '$lib/legal.svelte';
 	import { getInvitationPreview, getSignUpStatus } from '$lib/remote/invitations.remote';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 
+	let legalLinks = $derived((page.data.legalLinks ?? []) as LegalLink[]);
+	let termsLink = $derived(legalLinks.find((l) => l.slug === 'terms'));
+	let privacyLink = $derived(legalLinks.find((l) => l.slug === 'privacy'));
+
 	// Same contract as the login page — see the auth guard in hooks.server.ts.
+
 	let redirectTo = $derived.by(() => {
 		const raw = page.url.searchParams.get('redirectTo');
 		return raw && raw.startsWith('/') && !raw.startsWith('//') ? raw : null;
@@ -86,7 +93,9 @@
 
 <svelte:head><title>Register | Technikpool</title></svelte:head>
 
-<div class="flex min-h-screen items-center justify-center bg-zinc-50 p-4 dark:bg-zinc-950">
+<div
+	class="flex min-h-screen flex-col items-center justify-center gap-6 bg-zinc-50 p-4 dark:bg-zinc-950"
+>
 	<Card.Root class="w-full max-w-md">
 		<Card.Header>
 			<Card.Title class="text-2xl font-bold">Sign up for Technikpool</Card.Title>
@@ -147,6 +156,29 @@
 					<Button icon="signup" type="submit" class="w-full" disabled={loading || success}>
 						{loading ? 'Creating account...' : 'Create an account'}
 					</Button>
+					<!-- A notice, not a consent checkbox: an account is a contract (terms) and
+					     the privacy policy informs, neither asks for permission. The links are
+					     the operator's, set on /admin/legal; either may be missing. -->
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
+					{#if termsLink}
+						<p class="text-xs text-muted-foreground">
+							By creating an account you accept the <a
+								href={termsLink.href}
+								target={termsLink.external ? '_blank' : undefined}
+								class="underline">terms of use</a
+							>.
+						</p>
+					{/if}
+					{#if privacyLink}
+						<p class="text-xs text-muted-foreground">
+							How your data is handled is described in the <a
+								href={privacyLink.href}
+								target={privacyLink.external ? '_blank' : undefined}
+								class="underline">privacy policy</a
+							>.
+						</p>
+					{/if}
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				</form>
 			{/if}
 			<div class="mt-4 text-center text-sm">
@@ -156,4 +188,5 @@
 			</div>
 		</Card.Content>
 	</Card.Root>
+	<LegalLinks />
 </div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { LegalLinks } from '$lib/components/ui/legal-links';
 	import { requestPasswordReset } from '$lib/auth-client';
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
@@ -34,7 +35,9 @@
 
 <svelte:head><title>Forgot password | Technikpool</title></svelte:head>
 
-<div class="flex min-h-screen items-center justify-center bg-zinc-50 p-4 dark:bg-zinc-950">
+<div
+	class="flex min-h-screen flex-col items-center justify-center gap-6 bg-zinc-50 p-4 dark:bg-zinc-950"
+>
 	<Card.Root class="w-full max-w-md">
 		<Card.Header>
 			<Card.Title class="text-2xl font-bold">Reset your password</Card.Title>
@@ -72,4 +75,5 @@
 			</div>
 		</Card.Content>
 	</Card.Root>
+	<LegalLinks />
 </div>

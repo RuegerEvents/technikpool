@@ -7,11 +7,13 @@ import * as main from './locales/main.loader.server.svelte.js';
 import { runWithLocale, loadLocales } from 'wuchale/load-utils/server';
 import { locales } from './locales/data.js';
 import { ensureBucket } from '$lib/server/storage';
+import { schedulePurge } from '$lib/server/cleanup';
 
 loadLocales(main.key, main.loadCount, main.loadCatalog, locales);
 
 if (!building) {
 	ensureBucket();
+	schedulePurge();
 }
 
 const localeHandle: Handle = async ({ event, resolve }) => {
@@ -36,7 +38,9 @@ const publicPaths = [
 	'/auth/login',
 	'/auth/register',
 	'/auth/forgot-password',
-	'/auth/reset-password'
+	'/auth/reset-password',
+	// The operator's imprint and privacy policy have to be readable before signing in.
+	'/legal'
 ];
 
 const guardHandle: Handle = async ({ event, resolve }) => {

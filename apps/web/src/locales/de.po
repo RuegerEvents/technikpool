@@ -144,6 +144,7 @@ msgstr "S/N"
 msgid "Org"
 msgstr "Org"
 
+#: src/routes/admin/legal/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -194,6 +195,7 @@ msgstr "Crew"
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 #: src/routes/+page.svelte
 #: src/routes/admin/connectors/+page.svelte
+#: src/routes/admin/users/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -228,6 +230,7 @@ msgstr "Crew"
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/new/+page.svelte
+#: src/routes/profile/+page.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
@@ -449,6 +452,7 @@ msgstr "Bundle"
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/billing-issues/billing-issues.svelte
+#: src/routes/admin/legal/+page.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -730,8 +734,10 @@ msgstr "<0/> Nach dem Speichern weiteres erstellen"
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
+#: src/routes/admin/legal/legal-editor.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -889,7 +895,7 @@ msgstr "Kein Verlauf für dieses Gerät vorhanden."
 #~ msgid "for production <0/>"
 #~ msgstr "für Produktion <0/>"
 
-#. 0: item.user.name || item.user.email; 1: new Date( item.createdAt ).toLocaleString()
+#. 0: userLabel(item.user); 1: new Date( item.createdAt ).toLocaleString()
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "By {0} on {1}"
 msgstr "Von {0} am {1}"
@@ -1352,6 +1358,7 @@ msgstr "Standort"
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/admin/categories/+page.svelte
+#: src/routes/admin/legal/legal-editor.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -1529,12 +1536,14 @@ msgstr "Gerätebundles | Technikpool"
 
 #. 0: asset.product.name
 #. 0: bundle.template.name
+#. 0: title
 #. 0: org?.name ?? ''
 #. 0: production.name
 #. 0: product?.name ?? 'Product'
 #. 0: stocktake.name
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/routes/legal/[slug]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/products/[id]/product-detail.svelte
@@ -4275,6 +4284,7 @@ msgstr "Löschen"
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/profile/+page.svelte
 msgid "Deleting…"
 msgstr "Wird gelöscht…"
 
@@ -5288,9 +5298,8 @@ msgstr "{0} gelöscht"
 msgid "Delete user"
 msgstr "Benutzer löschen"
 
-#: src/routes/admin/users/+page.svelte
-msgid "The account, sessions, and organization memberships are permanently removed. Users recorded in asset history cannot be deleted."
-msgstr "Das Konto, die Sitzungen und die Organisationsmitgliedschaften werden dauerhaft entfernt. Benutzer, die im Geräteverlauf erfasst sind, können nicht gelöscht werden."
+#~ msgid "The account, sessions, and organization memberships are permanently removed. Users recorded in asset history cannot be deleted."
+#~ msgstr "Das Konto, die Sitzungen und die Organisationsmitgliedschaften werden dauerhaft entfernt. Benutzer, die im Geräteverlauf erfasst sind, können nicht gelöscht werden."
 
 #: src/routes/offers/[id]/offer-detail.svelte
 msgid "Back to equipment"
@@ -6957,9 +6966,8 @@ msgstr "Das PDF kann nicht erzeugt werden. Fehlende Abrechnungsdaten: {0}"
 #~ msgid "No user found with that email."
 #~ msgstr "Kein Benutzer mit dieser E-Mail-Adresse gefunden."
 
-#: src/lib/error-messages.svelte.ts
-msgid "This user appears in asset history and cannot be deleted."
-msgstr "Dieser Benutzer kommt in der Gerätehistorie vor und kann nicht gelöscht werden."
+#~ msgid "This user appears in asset history and cannot be deleted."
+#~ msgstr "Dieser Benutzer kommt in der Gerätehistorie vor und kann nicht gelöscht werden."
 
 #: src/lib/error-messages.svelte.ts
 msgid "You cannot remove yourself from the organization."
@@ -9671,8 +9679,8 @@ msgstr[1] "# Geräte geändert"
 msgid "· Closed {0} by {1}"
 msgstr "· Abgeschlossen {0} von {1}"
 
-#. 0: formatDate(s.createdAt); 1: s.createdBy.name || s.createdBy.email
-#. 0: formatDateTime(stocktake.createdAt); 1: stocktake.createdBy.name || stocktake.createdBy.email
+#. 0: formatDate(s.createdAt); 1: userLabel(s.createdBy)
+#. 0: formatDateTime(stocktake.createdAt); 1: userLabel(stocktake.createdBy)
 #: src/routes/stocktakes/+page.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Started {0} by {1}"
@@ -10096,7 +10104,7 @@ msgstr "Zählen"
 msgid "· Still open"
 msgstr "· Noch offen"
 
-#. 0: formatDateTime(stocktake.createdAt); 1: stocktake.createdBy.name || stocktake.createdBy.email
+#. 0: formatDateTime(stocktake.createdAt); 1: userLabel(stocktake.createdBy)
 #: src/routes/stocktakes/[id]/print/+page.svelte
 msgid "Started {0} by {1} <0/>"
 msgstr "Gestartet {0} von {1} <0/>"
@@ -10317,3 +10325,264 @@ msgstr "Jede Einheit dieses Produkts in allen Organisationen. Ausgemusterte Einh
 #: src/routes/products/[id]/product-detail.svelte
 msgid "No organization holds a unit of this product."
 msgstr "Keine Organisation hat eine Einheit dieses Produkts."
+
+#: src/lib/legal.svelte.ts
+msgid "Imprint"
+msgstr "Impressum"
+
+#: src/lib/legal.svelte.ts
+msgid "Privacy policy"
+msgstr "Datenschutzerklärung"
+
+#: src/lib/legal.svelte.ts
+msgid "Terms of use"
+msgstr "Nutzungsbedingungen"
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "The account is the only owner of {0}. Make someone else owner or delete the organization first."
+msgstr "Das Konto ist der einzige Owner von {0}. Mach zuerst jemand anderen zum Owner oder lösche die Organisation."
+
+#: src/lib/error-messages.svelte.ts
+msgid "The account is the last system admin. Make someone else system admin first."
+msgstr "Das Konto ist der letzte Systemadmin. Mach zuerst jemand anderen zum Systemadmin."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Enter the link as a full address starting with https://."
+msgstr "Gib den Link als vollständige Adresse mit https:// ein."
+
+#: src/lib/user-label.svelte.ts
+msgid "Deleted account"
+msgstr "Gelöschtes Konto"
+
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+msgid "<0/> Legal pages"
+msgstr "<0/> Rechtstexte"
+
+#: src/routes/profile/+page.svelte
+msgid "Your account has been deleted."
+msgstr "Dein Konto wurde gelöscht."
+
+#: src/routes/profile/+page.svelte
+#: src/routes/profile/+page.svelte
+#: src/routes/profile/+page.svelte
+msgid "Delete account"
+msgstr "Konto löschen"
+
+#: src/routes/profile/+page.svelte
+msgid "Removes your account, your sessions and paired scanners, and your memberships. Entries you made in the history of devices and stocktakes stay, without your name."
+msgstr "Entfernt dein Konto, deine Sitzungen und gekoppelten Scanner sowie deine Mitgliedschaften. Deine Einträge in der Historie von Geräten und Inventuren bleiben, ohne deinen Namen."
+
+#: src/routes/profile/+page.svelte
+msgid "Delete account…"
+msgstr "Konto löschen…"
+
+#: src/routes/profile/+page.svelte
+msgid "Confirm with your password"
+msgstr "Mit deinem Passwort bestätigen"
+
+#: src/routes/profile/+page.svelte
+msgid "This cannot be undone. If you are the only owner of an organization, make someone else owner or delete the organization first."
+msgstr "Das lässt sich nicht rückgängig machen. Bist du einziger Owner einer Organisation, mach zuerst jemand anderen zum Owner oder lösche die Organisation."
+
+#: src/routes/admin/legal/+page.svelte
+msgid "Legal pages | Technikpool"
+msgstr "Rechtstexte | Technikpool"
+
+#: src/routes/admin/legal/+page.svelte
+msgid "Legal pages"
+msgstr "Rechtstexte"
+
+#: src/routes/admin/legal/+page.svelte
+msgid "Your imprint, privacy policy and terms of use. They are linked below the sign-in and sign-up forms, in the user menu and in the scanner app's settings. Templates to start from are in the repository under docs/legal."
+msgstr "Impressum, Datenschutzerklärung und Nutzungsbedingungen. Sie werden unter dem Anmelde- und Registrierungsformular, im Benutzermenü und in den Einstellungen der Scanner-App verlinkt. Vorlagen zum Anfangen liegen im Repository unter docs/legal."
+
+#. 0: legalTitle(doc.slug)
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "{0} saved"
+msgstr "{0} gespeichert"
+
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "Not set up — linked nowhere."
+msgstr "Nicht eingerichtet — wird nirgends verlinkt."
+
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "Links to your own page."
+msgstr "Verweist auf deine eigene Seite."
+
+#. 0.0: doc.slug
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "Shown at <0>/legal/{0}</0>."
+msgstr "Angezeigt unter <0>/legal/{0}</0>."
+
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "If set, this is used and the text below is ignored."
+msgstr "Ist er gesetzt, wird er verwendet und der Text darunter ignoriert."
+
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "Link to your own page"
+msgstr "Link auf deine eigene Seite"
+
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "Text (Markdown)"
+msgstr "Text (Markdown)"
+
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "One text for every reader, in the language you write it in. Headings, lists, tables and links work; HTML and images are shown as plain text."
+msgstr "Ein Text für alle Leser, in der Sprache, in der du ihn schreibst. Überschriften, Listen, Tabellen und Links funktionieren; HTML und Bilder erscheinen als reiner Text."
+
+#: src/routes/admin/users/+page.svelte
+msgid "The account, sessions, and organization memberships are permanently removed. Entries in the history stay and show \"Deleted account\" instead of the name."
+msgstr "Konto, Sitzungen und Mitgliedschaften werden endgültig entfernt. Einträge in der Historie bleiben und zeigen „Gelöschtes Konto“ statt des Namens."
+
+#: src/routes/auth/register/+page.svelte
+msgid "By creating an account you accept the <0>terms of use</0>."
+msgstr "Mit der Registrierung akzeptierst du die <0>Nutzungsbedingungen</0>."
+
+#: src/routes/auth/register/+page.svelte
+msgid "How your data is handled is described in the <0>privacy policy</0>."
+msgstr "Wie deine Daten verarbeitet werden, steht in der <0>Datenschutzerklärung</0>."
+
+#. 0: new Date(data.updatedAt).toLocaleDateString()
+#: src/routes/legal/[slug]/+page.svelte
+msgid "Last updated {0}"
+msgstr "Zuletzt geändert am {0}"
+
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+#: src/lib/legal.svelte.ts
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/dpa/print/+page.svelte
+msgid "Data processing agreement"
+msgstr "Auftragsverarbeitungsvertrag"
+
+#: src/lib/error-messages.svelte.ts
+msgid "The agreement was changed in the meantime. Please read the current version."
+msgstr "Der Vertrag wurde inzwischen geändert. Bitte lies die aktuelle Fassung."
+
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+msgid "Agreement accepted"
+msgstr "Vertrag angenommen"
+
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+msgid "I accept this agreement on behalf of <0/> and am authorized to do so."
+msgstr "Ich nehme diesen Vertrag im Namen von <0/> an und bin dazu berechtigt."
+
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+msgid "This server processes personal data on behalf of your organization — its members, customers and crew. The law requires an agreement for that. As an owner, please read and accept it."
+msgstr "Dieser Server verarbeitet personenbezogene Daten im Auftrag deiner Organisation — ihrer Mitglieder, Kunden und Crew. Dafür schreibt das Gesetz einen Vertrag vor. Als Owner lies ihn bitte und nimm ihn an."
+
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+msgid "Accept"
+msgstr "Annehmen"
+
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+msgid "Sign out"
+msgstr "Abmelden"
+
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "Every organization's owner is asked to accept it. Changing the text asks them all again."
+msgstr "Der Owner jeder Organisation wird gebeten, ihn anzunehmen. Eine Änderung des Texts fragt alle erneut."
+
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "Not set up — nobody is asked to accept one."
+msgstr "Nicht eingerichtet — niemand wird um Annahme gebeten."
+
+#: src/routes/admin/legal/+page.svelte
+msgid "Accepted agreements"
+msgstr "Angenommene Verträge"
+
+#~ msgid "The latest acceptance of each organization. Organizations you are an owner of are not asked, since you run this server."
+#~ msgstr ""
+
+#: src/routes/admin/legal/+page.svelte
+msgid "No data processing agreement is set up."
+msgstr "Es ist kein Auftragsverarbeitungsvertrag eingerichtet."
+
+#: src/routes/admin/legal/+page.svelte
+#: src/routes/orgs/[id]/dpa/print/+page.svelte
+msgid "Accepted by"
+msgstr "Angenommen von"
+
+#: src/routes/admin/legal/+page.svelte
+msgid "Not accepted"
+msgstr "Nicht angenommen"
+
+#: src/routes/admin/legal/+page.svelte
+msgid "Current version"
+msgstr "Aktuelle Fassung"
+
+#: src/routes/admin/legal/+page.svelte
+msgid "Older version"
+msgstr "Ältere Fassung"
+
+#~ msgid "Record"
+#~ msgstr "Nachweis"
+
+#: src/routes/admin/legal/+page.svelte
+msgid "The latest acceptance of each organization. System admins are not asked to accept it, since they run this server."
+msgstr "Die letzte Annahme jeder Organisation. Systemadmins werden nicht gefragt, da sie diesen Server betreiben."
+
+#. 0: data.orgName
+#: src/routes/orgs/[id]/dpa/print/+page.svelte
+msgid "Data processing agreement | {0}"
+msgstr "Auftragsverarbeitungsvertrag | {0}"
+
+#: src/routes/orgs/[id]/dpa/print/+page.svelte
+msgid "(no longer the current version)"
+msgstr "(nicht mehr die aktuelle Fassung)"
+
+#: src/routes/orgs/[id]/dpa/print/+page.svelte
+msgid "Accepted on"
+msgstr "Angenommen am"
+
+#: src/routes/orgs/[id]/dpa/print/+page.svelte
+msgid "Version"
+msgstr "Fassung"
+
+#: src/routes/orgs/[id]/dpa/print/+page.svelte
+msgid "Earlier acceptances"
+msgstr "Frühere Annahmen"
+
+#~ msgid "Accepted with the operator of this server. The record shows who accepted which version, and when."
+#~ msgstr "Mit dem Betreiber dieses Servers abgeschlossen. Der Nachweis zeigt, wer welche Fassung wann angenommen hat."
+
+#~ msgid "Open record"
+#~ msgstr "Nachweis öffnen"
+
+#. 0: placeholders.slice(0, 5).join(', ')
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "Still contains placeholders from the template: {0}"
+msgstr "Enthält noch Platzhalter aus der Vorlage: {0}"
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "Enter the address of {0} — it is named as a party to the agreement."
+msgstr "Gib die Anschrift von {0} an — die Organisation ist Vertragspartei."
+
+#. 0: org.name
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+msgid "Address of {0}"
+msgstr "Anschrift von {0}"
+
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+msgid "The organization is a party to the agreement and needs an address. It is also saved as its billing address."
+msgstr "Die Organisation ist Vertragspartei und braucht deshalb eine Anschrift. Sie wird auch als Rechnungsanschrift gespeichert."
+
+#. 0: new Date( org.dpaAcceptances[0].acceptedAt ).toLocaleDateString()
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Accepted with the operator of this server on {0}. The PDF shows who accepted which version, and when."
+msgstr "Am {0} mit dem Betreiber dieses Servers abgeschlossen. Das PDF zeigt, wer welche Fassung wann angenommen hat."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Download PDF"
+msgstr "PDF herunterladen"
+
+#: src/routes/admin/legal/+page.svelte
+#: src/routes/admin/legal/+page.svelte
+msgid "Not set up"
+msgstr "Nicht eingerichtet"
+
+#: src/routes/admin/legal/+page.svelte
+msgid "PDF"
+msgstr "PDF"

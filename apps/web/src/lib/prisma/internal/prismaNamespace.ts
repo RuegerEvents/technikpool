@@ -405,6 +405,8 @@ export const ModelName = {
   Organization: 'Organization',
   OrgMembership: 'OrgMembership',
   SystemSettings: 'SystemSettings',
+  LegalDocument: 'LegalDocument',
+  DpaAcceptance: 'DpaAcceptance',
   Invitation: 'Invitation',
   Manufacturer: 'Manufacturer',
   Connector: 'Connector',
@@ -454,7 +456,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "invitation" | "manufacturer" | "connector" | "productPort" | "cableWay" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "serviceCategory" | "orgService" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem" | "stocktake" | "stocktakeItem" | "stocktakeLine" | "stocktakeCount" | "stocktakeEvent"
+    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "legalDocument" | "dpaAcceptance" | "invitation" | "manufacturer" | "connector" | "productPort" | "cableWay" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "serviceCategory" | "orgService" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem" | "stocktake" | "stocktakeItem" | "stocktakeLine" | "stocktakeCount" | "stocktakeEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1047,6 +1049,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SystemSettingsCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SystemSettingsCountAggregateOutputType> | number
+        }
+      }
+    }
+    LegalDocument: {
+      payload: Prisma.$LegalDocumentPayload<ExtArgs>
+      fields: Prisma.LegalDocumentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LegalDocumentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalDocumentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LegalDocumentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalDocumentPayload>
+        }
+        findFirst: {
+          args: Prisma.LegalDocumentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalDocumentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LegalDocumentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalDocumentPayload>
+        }
+        findMany: {
+          args: Prisma.LegalDocumentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalDocumentPayload>[]
+        }
+        create: {
+          args: Prisma.LegalDocumentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalDocumentPayload>
+        }
+        createMany: {
+          args: Prisma.LegalDocumentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LegalDocumentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalDocumentPayload>[]
+        }
+        delete: {
+          args: Prisma.LegalDocumentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalDocumentPayload>
+        }
+        update: {
+          args: Prisma.LegalDocumentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalDocumentPayload>
+        }
+        deleteMany: {
+          args: Prisma.LegalDocumentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LegalDocumentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LegalDocumentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalDocumentPayload>[]
+        }
+        upsert: {
+          args: Prisma.LegalDocumentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalDocumentPayload>
+        }
+        aggregate: {
+          args: Prisma.LegalDocumentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLegalDocument>
+        }
+        groupBy: {
+          args: Prisma.LegalDocumentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegalDocumentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LegalDocumentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegalDocumentCountAggregateOutputType> | number
+        }
+      }
+    }
+    DpaAcceptance: {
+      payload: Prisma.$DpaAcceptancePayload<ExtArgs>
+      fields: Prisma.DpaAcceptanceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DpaAcceptanceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DpaAcceptancePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DpaAcceptanceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DpaAcceptancePayload>
+        }
+        findFirst: {
+          args: Prisma.DpaAcceptanceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DpaAcceptancePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DpaAcceptanceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DpaAcceptancePayload>
+        }
+        findMany: {
+          args: Prisma.DpaAcceptanceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DpaAcceptancePayload>[]
+        }
+        create: {
+          args: Prisma.DpaAcceptanceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DpaAcceptancePayload>
+        }
+        createMany: {
+          args: Prisma.DpaAcceptanceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DpaAcceptanceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DpaAcceptancePayload>[]
+        }
+        delete: {
+          args: Prisma.DpaAcceptanceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DpaAcceptancePayload>
+        }
+        update: {
+          args: Prisma.DpaAcceptanceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DpaAcceptancePayload>
+        }
+        deleteMany: {
+          args: Prisma.DpaAcceptanceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DpaAcceptanceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DpaAcceptanceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DpaAcceptancePayload>[]
+        }
+        upsert: {
+          args: Prisma.DpaAcceptanceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DpaAcceptancePayload>
+        }
+        aggregate: {
+          args: Prisma.DpaAcceptanceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDpaAcceptance>
+        }
+        groupBy: {
+          args: Prisma.DpaAcceptanceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DpaAcceptanceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DpaAcceptanceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DpaAcceptanceCountAggregateOutputType> | number
         }
       }
     }
@@ -3736,6 +3886,35 @@ export const SystemSettingsScalarFieldEnum = {
 export type SystemSettingsScalarFieldEnum = (typeof SystemSettingsScalarFieldEnum)[keyof typeof SystemSettingsScalarFieldEnum]
 
 
+export const LegalDocumentScalarFieldEnum = {
+  id: 'id',
+  kind: 'kind',
+  externalUrl: 'externalUrl',
+  body: 'body',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LegalDocumentScalarFieldEnum = (typeof LegalDocumentScalarFieldEnum)[keyof typeof LegalDocumentScalarFieldEnum]
+
+
+export const DpaAcceptanceScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  versionHash: 'versionHash',
+  body: 'body',
+  userId: 'userId',
+  userName: 'userName',
+  userEmail: 'userEmail',
+  orgName: 'orgName',
+  orgAddress: 'orgAddress',
+  pdfPath: 'pdfPath',
+  acceptedAt: 'acceptedAt'
+} as const
+
+export type DpaAcceptanceScalarFieldEnum = (typeof DpaAcceptanceScalarFieldEnum)[keyof typeof DpaAcceptanceScalarFieldEnum]
+
+
 export const InvitationScalarFieldEnum = {
   id: 'id',
   email: 'email',
@@ -4444,6 +4623,20 @@ export type ListEnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'LegalDocumentKind'
+ */
+export type EnumLegalDocumentKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalDocumentKind'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalDocumentKind[]'
+ */
+export type ListEnumLegalDocumentKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalDocumentKind[]'>
+    
+
+
+/**
  * Reference to a field of type 'Decimal'
  */
 export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
@@ -4643,6 +4836,8 @@ export type GlobalOmitConfig = {
   organization?: Prisma.OrganizationOmit
   orgMembership?: Prisma.OrgMembershipOmit
   systemSettings?: Prisma.SystemSettingsOmit
+  legalDocument?: Prisma.LegalDocumentOmit
+  dpaAcceptance?: Prisma.DpaAcceptanceOmit
   invitation?: Prisma.InvitationOmit
   manufacturer?: Prisma.ManufacturerOmit
   connector?: Prisma.ConnectorOmit

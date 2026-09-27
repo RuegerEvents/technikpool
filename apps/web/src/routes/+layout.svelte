@@ -26,12 +26,15 @@
 		ScanBarcode,
 		PlugZap,
 		Shapes,
+		Scale,
 		ScrollText,
 		Tags,
 		Wrench
 	} from '@lucide/svelte';
 	import { currentVersion } from '$lib/changelog';
 	import { OrgBadge } from '$lib/components/ui/org-badge';
+	import { legalTitle } from '$lib/legal.svelte';
+	import { DpaGate } from '$lib/components/ui/dpa-gate';
 
 	let { data, children } = $props();
 
@@ -258,6 +261,13 @@
 											<ScrollText aria-hidden="true" />
 											Catalog Log
 										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onSelect={() => goto(resolve('/admin/legal'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<Scale aria-hidden="true" />
+											Legal pages
+										</DropdownMenu.Item>
 									{/if}
 								</DropdownMenu.Content>
 							</DropdownMenu.Portal>
@@ -451,7 +461,8 @@
 													'/admin/users'
 												) ||
 												page.url.pathname.startsWith('/admin/maintenance') ||
-												page.url.pathname.startsWith('/admin/catalog-log')
+												page.url.pathname.startsWith('/admin/catalog-log') ||
+												page.url.pathname.startsWith('/admin/legal')
 													? 'text-foreground'
 													: 'text-muted-foreground hover:text-foreground'}"
 											>
@@ -499,6 +510,13 @@
 											>
 												<ScrollText aria-hidden="true" />
 												Catalog Log
+											</DropdownMenu.Item>
+											<DropdownMenu.Item
+												onSelect={() => goto(resolve('/admin/legal'))}
+												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+											>
+												<Scale aria-hidden="true" />
+												Legal pages
 											</DropdownMenu.Item>
 										</DropdownMenu.Content>
 									</DropdownMenu.Portal>
@@ -694,6 +712,18 @@
 											<span class="h-1.5 w-1.5 shrink-0 rounded-full bg-primary"></span>
 										{/if}
 									</DropdownMenu.Item>
+									{#each data.legalLinks as link (link.slug)}
+										<DropdownMenu.Item
+											onSelect={() =>
+												link.external
+													? window.open(link.href, '_blank', 'noopener')
+													: goto(resolve(`/legal/${link.slug}`))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<Scale aria-hidden="true" class="size-3.5" />
+											{legalTitle(link.slug)}
+										</DropdownMenu.Item>
+									{/each}
 									<DropdownMenu.Separator class="my-1 h-px bg-border" />
 									<DropdownMenu.Item
 										onSelect={handleSignOut}
@@ -736,6 +766,11 @@
 			{@render children()}
 		</main>
 	</div>
+	{#if data.pendingDpa}
+		{#key data.pendingDpa.versionHash}
+			<DpaGate pending={data.pendingDpa} onsignout={handleSignOut} />
+		{/key}
+	{/if}
 {/if}
 
 <Toaster richColors position="bottom-right" />

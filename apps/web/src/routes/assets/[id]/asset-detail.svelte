@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { userLabel } from '$lib/user-label.svelte';
 	import {
 		manufacturerIdOf,
 		manufacturerSelection,
@@ -1228,9 +1229,7 @@
 											{/if}
 										</div>
 										<div class="text-xs text-muted-foreground">
-											By {item.user.name || item.user.email} on {new Date(
-												item.createdAt
-											).toLocaleString()}
+											By {userLabel(item.user)} on {new Date(item.createdAt).toLocaleString()}
 										</div>
 										{#if tx?.type === 'UPDATED' && tx.changes.length > 0}
 											<div class="mt-2 space-y-1 rounded-md bg-muted/50 p-2">

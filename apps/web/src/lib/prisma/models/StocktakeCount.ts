@@ -196,7 +196,7 @@ export type StocktakeCountGroupByOutputType = {
   stocktakeId: string
   productId: string
   locationId: string
-  userId: string
+  userId: string | null
   count: number
   updatedAt: Date
   _count: StocktakeCountCountAggregateOutputType | null
@@ -229,13 +229,13 @@ export type StocktakeCountWhereInput = {
   stocktakeId?: Prisma.StringFilter<"StocktakeCount"> | string
   productId?: Prisma.StringFilter<"StocktakeCount"> | string
   locationId?: Prisma.StringFilter<"StocktakeCount"> | string
-  userId?: Prisma.StringFilter<"StocktakeCount"> | string
+  userId?: Prisma.StringNullableFilter<"StocktakeCount"> | string | null
   count?: Prisma.IntFilter<"StocktakeCount"> | number
   updatedAt?: Prisma.DateTimeFilter<"StocktakeCount"> | Date | string
   stocktake?: Prisma.XOR<Prisma.StocktakeScalarRelationFilter, Prisma.StocktakeWhereInput>
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
   location?: Prisma.XOR<Prisma.LocationScalarRelationFilter, Prisma.LocationWhereInput>
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type StocktakeCountOrderByWithRelationInput = {
@@ -243,7 +243,7 @@ export type StocktakeCountOrderByWithRelationInput = {
   stocktakeId?: Prisma.SortOrder
   productId?: Prisma.SortOrder
   locationId?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
   count?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   stocktake?: Prisma.StocktakeOrderByWithRelationInput
@@ -261,13 +261,13 @@ export type StocktakeCountWhereUniqueInput = Prisma.AtLeast<{
   stocktakeId?: Prisma.StringFilter<"StocktakeCount"> | string
   productId?: Prisma.StringFilter<"StocktakeCount"> | string
   locationId?: Prisma.StringFilter<"StocktakeCount"> | string
-  userId?: Prisma.StringFilter<"StocktakeCount"> | string
+  userId?: Prisma.StringNullableFilter<"StocktakeCount"> | string | null
   count?: Prisma.IntFilter<"StocktakeCount"> | number
   updatedAt?: Prisma.DateTimeFilter<"StocktakeCount"> | Date | string
   stocktake?: Prisma.XOR<Prisma.StocktakeScalarRelationFilter, Prisma.StocktakeWhereInput>
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
   location?: Prisma.XOR<Prisma.LocationScalarRelationFilter, Prisma.LocationWhereInput>
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id" | "stocktakeId_productId_locationId_userId">
 
 export type StocktakeCountOrderByWithAggregationInput = {
@@ -275,7 +275,7 @@ export type StocktakeCountOrderByWithAggregationInput = {
   stocktakeId?: Prisma.SortOrder
   productId?: Prisma.SortOrder
   locationId?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
   count?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.StocktakeCountCountOrderByAggregateInput
@@ -293,7 +293,7 @@ export type StocktakeCountScalarWhereWithAggregatesInput = {
   stocktakeId?: Prisma.StringWithAggregatesFilter<"StocktakeCount"> | string
   productId?: Prisma.StringWithAggregatesFilter<"StocktakeCount"> | string
   locationId?: Prisma.StringWithAggregatesFilter<"StocktakeCount"> | string
-  userId?: Prisma.StringWithAggregatesFilter<"StocktakeCount"> | string
+  userId?: Prisma.StringNullableWithAggregatesFilter<"StocktakeCount"> | string | null
   count?: Prisma.IntWithAggregatesFilter<"StocktakeCount"> | number
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"StocktakeCount"> | Date | string
 }
@@ -305,7 +305,7 @@ export type StocktakeCountCreateInput = {
   stocktake: Prisma.StocktakeCreateNestedOneWithoutCountsInput
   product: Prisma.ProductCreateNestedOneWithoutStocktakeCountsInput
   location: Prisma.LocationCreateNestedOneWithoutStocktakeCountsInput
-  user: Prisma.UserCreateNestedOneWithoutStocktakeCountsInput
+  user?: Prisma.UserCreateNestedOneWithoutStocktakeCountsInput
 }
 
 export type StocktakeCountUncheckedCreateInput = {
@@ -313,7 +313,7 @@ export type StocktakeCountUncheckedCreateInput = {
   stocktakeId: string
   productId: string
   locationId: string
-  userId: string
+  userId?: string | null
   count: number
   updatedAt?: Date | string
 }
@@ -325,7 +325,7 @@ export type StocktakeCountUpdateInput = {
   stocktake?: Prisma.StocktakeUpdateOneRequiredWithoutCountsNestedInput
   product?: Prisma.ProductUpdateOneRequiredWithoutStocktakeCountsNestedInput
   location?: Prisma.LocationUpdateOneRequiredWithoutStocktakeCountsNestedInput
-  user?: Prisma.UserUpdateOneRequiredWithoutStocktakeCountsNestedInput
+  user?: Prisma.UserUpdateOneWithoutStocktakeCountsNestedInput
 }
 
 export type StocktakeCountUncheckedUpdateInput = {
@@ -333,7 +333,7 @@ export type StocktakeCountUncheckedUpdateInput = {
   stocktakeId?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.StringFieldUpdateOperationsInput | string
   locationId?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   count?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -343,7 +343,7 @@ export type StocktakeCountCreateManyInput = {
   stocktakeId: string
   productId: string
   locationId: string
-  userId: string
+  userId?: string | null
   count: number
   updatedAt?: Date | string
 }
@@ -359,7 +359,7 @@ export type StocktakeCountUncheckedUpdateManyInput = {
   stocktakeId?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.StringFieldUpdateOperationsInput | string
   locationId?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   count?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -639,7 +639,7 @@ export type StocktakeCountScalarWhereInput = {
   stocktakeId?: Prisma.StringFilter<"StocktakeCount"> | string
   productId?: Prisma.StringFilter<"StocktakeCount"> | string
   locationId?: Prisma.StringFilter<"StocktakeCount"> | string
-  userId?: Prisma.StringFilter<"StocktakeCount"> | string
+  userId?: Prisma.StringNullableFilter<"StocktakeCount"> | string | null
   count?: Prisma.IntFilter<"StocktakeCount"> | number
   updatedAt?: Prisma.DateTimeFilter<"StocktakeCount"> | Date | string
 }
@@ -650,14 +650,14 @@ export type StocktakeCountCreateWithoutProductInput = {
   updatedAt?: Date | string
   stocktake: Prisma.StocktakeCreateNestedOneWithoutCountsInput
   location: Prisma.LocationCreateNestedOneWithoutStocktakeCountsInput
-  user: Prisma.UserCreateNestedOneWithoutStocktakeCountsInput
+  user?: Prisma.UserCreateNestedOneWithoutStocktakeCountsInput
 }
 
 export type StocktakeCountUncheckedCreateWithoutProductInput = {
   id?: string
   stocktakeId: string
   locationId: string
-  userId: string
+  userId?: string | null
   count: number
   updatedAt?: Date | string
 }
@@ -694,14 +694,14 @@ export type StocktakeCountCreateWithoutLocationInput = {
   updatedAt?: Date | string
   stocktake: Prisma.StocktakeCreateNestedOneWithoutCountsInput
   product: Prisma.ProductCreateNestedOneWithoutStocktakeCountsInput
-  user: Prisma.UserCreateNestedOneWithoutStocktakeCountsInput
+  user?: Prisma.UserCreateNestedOneWithoutStocktakeCountsInput
 }
 
 export type StocktakeCountUncheckedCreateWithoutLocationInput = {
   id?: string
   stocktakeId: string
   productId: string
-  userId: string
+  userId?: string | null
   count: number
   updatedAt?: Date | string
 }
@@ -738,14 +738,14 @@ export type StocktakeCountCreateWithoutStocktakeInput = {
   updatedAt?: Date | string
   product: Prisma.ProductCreateNestedOneWithoutStocktakeCountsInput
   location: Prisma.LocationCreateNestedOneWithoutStocktakeCountsInput
-  user: Prisma.UserCreateNestedOneWithoutStocktakeCountsInput
+  user?: Prisma.UserCreateNestedOneWithoutStocktakeCountsInput
 }
 
 export type StocktakeCountUncheckedCreateWithoutStocktakeInput = {
   id?: string
   productId: string
   locationId: string
-  userId: string
+  userId?: string | null
   count: number
   updatedAt?: Date | string
 }
@@ -816,7 +816,7 @@ export type StocktakeCountCreateManyProductInput = {
   id?: string
   stocktakeId: string
   locationId: string
-  userId: string
+  userId?: string | null
   count: number
   updatedAt?: Date | string
 }
@@ -827,14 +827,14 @@ export type StocktakeCountUpdateWithoutProductInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stocktake?: Prisma.StocktakeUpdateOneRequiredWithoutCountsNestedInput
   location?: Prisma.LocationUpdateOneRequiredWithoutStocktakeCountsNestedInput
-  user?: Prisma.UserUpdateOneRequiredWithoutStocktakeCountsNestedInput
+  user?: Prisma.UserUpdateOneWithoutStocktakeCountsNestedInput
 }
 
 export type StocktakeCountUncheckedUpdateWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   stocktakeId?: Prisma.StringFieldUpdateOperationsInput | string
   locationId?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   count?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -843,7 +843,7 @@ export type StocktakeCountUncheckedUpdateManyWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   stocktakeId?: Prisma.StringFieldUpdateOperationsInput | string
   locationId?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   count?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -852,7 +852,7 @@ export type StocktakeCountCreateManyLocationInput = {
   id?: string
   stocktakeId: string
   productId: string
-  userId: string
+  userId?: string | null
   count: number
   updatedAt?: Date | string
 }
@@ -863,14 +863,14 @@ export type StocktakeCountUpdateWithoutLocationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stocktake?: Prisma.StocktakeUpdateOneRequiredWithoutCountsNestedInput
   product?: Prisma.ProductUpdateOneRequiredWithoutStocktakeCountsNestedInput
-  user?: Prisma.UserUpdateOneRequiredWithoutStocktakeCountsNestedInput
+  user?: Prisma.UserUpdateOneWithoutStocktakeCountsNestedInput
 }
 
 export type StocktakeCountUncheckedUpdateWithoutLocationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   stocktakeId?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   count?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -879,7 +879,7 @@ export type StocktakeCountUncheckedUpdateManyWithoutLocationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   stocktakeId?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   count?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -888,7 +888,7 @@ export type StocktakeCountCreateManyStocktakeInput = {
   id?: string
   productId: string
   locationId: string
-  userId: string
+  userId?: string | null
   count: number
   updatedAt?: Date | string
 }
@@ -899,14 +899,14 @@ export type StocktakeCountUpdateWithoutStocktakeInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   product?: Prisma.ProductUpdateOneRequiredWithoutStocktakeCountsNestedInput
   location?: Prisma.LocationUpdateOneRequiredWithoutStocktakeCountsNestedInput
-  user?: Prisma.UserUpdateOneRequiredWithoutStocktakeCountsNestedInput
+  user?: Prisma.UserUpdateOneWithoutStocktakeCountsNestedInput
 }
 
 export type StocktakeCountUncheckedUpdateWithoutStocktakeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.StringFieldUpdateOperationsInput | string
   locationId?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   count?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -915,7 +915,7 @@ export type StocktakeCountUncheckedUpdateManyWithoutStocktakeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.StringFieldUpdateOperationsInput | string
   locationId?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   count?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -933,7 +933,7 @@ export type StocktakeCountSelect<ExtArgs extends runtime.Types.Extensions.Intern
   stocktake?: boolean | Prisma.StocktakeDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   location?: boolean | Prisma.LocationDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.StocktakeCount$userArgs<ExtArgs>
 }, ExtArgs["result"]["stocktakeCount"]>
 
 export type StocktakeCountSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -947,7 +947,7 @@ export type StocktakeCountSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   stocktake?: boolean | Prisma.StocktakeDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   location?: boolean | Prisma.LocationDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.StocktakeCount$userArgs<ExtArgs>
 }, ExtArgs["result"]["stocktakeCount"]>
 
 export type StocktakeCountSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -961,7 +961,7 @@ export type StocktakeCountSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   stocktake?: boolean | Prisma.StocktakeDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   location?: boolean | Prisma.LocationDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.StocktakeCount$userArgs<ExtArgs>
 }, ExtArgs["result"]["stocktakeCount"]>
 
 export type StocktakeCountSelectScalar = {
@@ -979,19 +979,19 @@ export type StocktakeCountInclude<ExtArgs extends runtime.Types.Extensions.Inter
   stocktake?: boolean | Prisma.StocktakeDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   location?: boolean | Prisma.LocationDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.StocktakeCount$userArgs<ExtArgs>
 }
 export type StocktakeCountIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   stocktake?: boolean | Prisma.StocktakeDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   location?: boolean | Prisma.LocationDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.StocktakeCount$userArgs<ExtArgs>
 }
 export type StocktakeCountIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   stocktake?: boolean | Prisma.StocktakeDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   location?: boolean | Prisma.LocationDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.StocktakeCount$userArgs<ExtArgs>
 }
 
 export type $StocktakeCountPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1000,14 +1000,14 @@ export type $StocktakeCountPayload<ExtArgs extends runtime.Types.Extensions.Inte
     stocktake: Prisma.$StocktakePayload<ExtArgs>
     product: Prisma.$ProductPayload<ExtArgs>
     location: Prisma.$LocationPayload<ExtArgs>
-    user: Prisma.$UserPayload<ExtArgs>
+    user: Prisma.$UserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     stocktakeId: string
     productId: string
     locationId: string
-    userId: string
+    userId: string | null
     count: number
     updatedAt: Date
   }, ExtArgs["result"]["stocktakeCount"]>
@@ -1407,7 +1407,7 @@ export interface Prisma__StocktakeCountClient<T, Null = never, ExtArgs extends r
   stocktake<T extends Prisma.StocktakeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StocktakeDefaultArgs<ExtArgs>>): Prisma.Prisma__StocktakeClient<runtime.Types.Result.GetResult<Prisma.$StocktakePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   product<T extends Prisma.ProductDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductDefaultArgs<ExtArgs>>): Prisma.Prisma__ProductClient<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   location<T extends Prisma.LocationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LocationDefaultArgs<ExtArgs>>): Prisma.Prisma__LocationClient<runtime.Types.Result.GetResult<Prisma.$LocationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.StocktakeCount$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StocktakeCount$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1842,6 +1842,25 @@ export type StocktakeCountDeleteManyArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many StocktakeCounts to delete.
    */
   limit?: number
+}
+
+/**
+ * StocktakeCount.user
+ */
+export type StocktakeCount$userArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

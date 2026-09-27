@@ -83,6 +83,25 @@ export type OrgMembership = Prisma.OrgMembershipModel
  */
 export type SystemSettings = Prisma.SystemSettingsModel
 /**
+ * Model LegalDocument
+ * The operator's imprint, privacy policy and terms. Technikpool is open
+ * source, so every install shows its own: either a link to the operator's own
+ * site, or Markdown rendered at /legal/<kind>. A kind with neither is not
+ * linked anywhere. One text, in whatever language the operator writes it:
+ * two copies of a legal text are two texts that can disagree.
+ */
+export type LegalDocument = Prisma.LegalDocumentModel
+/**
+ * Model DpaAcceptance
+ * An organization accepting the operator's data processing agreement. The
+ * operator processes personal data on each organization's behalf (its staff,
+ * customers, crew), which Art. 28 GDPR requires a contract for; Art. 28(9)
+ * allows it in electronic form, and this row is that form. Append-only: a new
+ * version of the text means a new acceptance, and the old rows stay as the
+ * record of what applied when.
+ */
+export type DpaAcceptance = Prisma.DpaAcceptanceModel
+/**
  * Model Invitation
  * A link that lets one email address create an account while sign-up is
  * closed, optionally landing in an org with a role. Only the hash of the token

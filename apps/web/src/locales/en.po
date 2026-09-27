@@ -144,6 +144,7 @@ msgstr "S/N"
 msgid "Org"
 msgstr "Org"
 
+#: src/routes/admin/legal/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -194,6 +195,7 @@ msgstr "Crew"
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 #: src/routes/+page.svelte
 #: src/routes/admin/connectors/+page.svelte
+#: src/routes/admin/users/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -228,6 +230,7 @@ msgstr "Crew"
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/new/+page.svelte
+#: src/routes/profile/+page.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
@@ -449,6 +452,7 @@ msgstr "Bundle"
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/billing-issues/billing-issues.svelte
+#: src/routes/admin/legal/+page.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -730,8 +734,10 @@ msgstr "<0/> Create another after saving"
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
+#: src/routes/admin/legal/legal-editor.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -889,7 +895,7 @@ msgstr "No history available for this asset."
 #~ msgid "for production <0/>"
 #~ msgstr "for production <0/>"
 
-#. 0: item.user.name || item.user.email; 1: new Date( item.createdAt ).toLocaleString()
+#. 0: userLabel(item.user); 1: new Date( item.createdAt ).toLocaleString()
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "By {0} on {1}"
 msgstr "By {0} on {1}"
@@ -1352,6 +1358,7 @@ msgstr "Location"
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/admin/categories/+page.svelte
+#: src/routes/admin/legal/legal-editor.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -1529,12 +1536,14 @@ msgstr "Asset Bundles | Technikpool"
 
 #. 0: asset.product.name
 #. 0: bundle.template.name
+#. 0: title
 #. 0: org?.name ?? ''
 #. 0: production.name
 #. 0: product?.name ?? 'Product'
 #. 0: stocktake.name
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/routes/legal/[slug]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/products/[id]/product-detail.svelte
@@ -4275,6 +4284,7 @@ msgstr "Delete"
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/profile/+page.svelte
 msgid "Deleting…"
 msgstr "Deleting…"
 
@@ -5288,9 +5298,8 @@ msgstr "{0} deleted"
 msgid "Delete user"
 msgstr "Delete user"
 
-#: src/routes/admin/users/+page.svelte
-msgid "The account, sessions, and organization memberships are permanently removed. Users recorded in asset history cannot be deleted."
-msgstr "The account, sessions, and organization memberships are permanently removed. Users recorded in asset history cannot be deleted."
+#~ msgid "The account, sessions, and organization memberships are permanently removed. Users recorded in asset history cannot be deleted."
+#~ msgstr "The account, sessions, and organization memberships are permanently removed. Users recorded in asset history cannot be deleted."
 
 #: src/routes/offers/[id]/offer-detail.svelte
 msgid "Back to equipment"
@@ -6957,9 +6966,8 @@ msgstr "The PDF cannot be generated. Missing billing data: {0}"
 #~ msgid "No user found with that email."
 #~ msgstr "No user found with that email."
 
-#: src/lib/error-messages.svelte.ts
-msgid "This user appears in asset history and cannot be deleted."
-msgstr "This user appears in asset history and cannot be deleted."
+#~ msgid "This user appears in asset history and cannot be deleted."
+#~ msgstr "This user appears in asset history and cannot be deleted."
 
 #: src/lib/error-messages.svelte.ts
 msgid "You cannot remove yourself from the organization."
@@ -9671,8 +9679,8 @@ msgstr[1] "# units changed"
 msgid "· Closed {0} by {1}"
 msgstr "· Closed {0} by {1}"
 
-#. 0: formatDate(s.createdAt); 1: s.createdBy.name || s.createdBy.email
-#. 0: formatDateTime(stocktake.createdAt); 1: stocktake.createdBy.name || stocktake.createdBy.email
+#. 0: formatDate(s.createdAt); 1: userLabel(s.createdBy)
+#. 0: formatDateTime(stocktake.createdAt); 1: userLabel(stocktake.createdBy)
 #: src/routes/stocktakes/+page.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Started {0} by {1}"
@@ -10096,7 +10104,7 @@ msgstr "Count it"
 msgid "· Still open"
 msgstr "· Still open"
 
-#. 0: formatDateTime(stocktake.createdAt); 1: stocktake.createdBy.name || stocktake.createdBy.email
+#. 0: formatDateTime(stocktake.createdAt); 1: userLabel(stocktake.createdBy)
 #: src/routes/stocktakes/[id]/print/+page.svelte
 msgid "Started {0} by {1} <0/>"
 msgstr "Started {0} by {1} <0/>"
@@ -10317,3 +10325,264 @@ msgstr "Every unit of this product in every organization. Retired units are not 
 #: src/routes/products/[id]/product-detail.svelte
 msgid "No organization holds a unit of this product."
 msgstr "No organization holds a unit of this product."
+
+#: src/lib/legal.svelte.ts
+msgid "Imprint"
+msgstr "Imprint"
+
+#: src/lib/legal.svelte.ts
+msgid "Privacy policy"
+msgstr "Privacy policy"
+
+#: src/lib/legal.svelte.ts
+msgid "Terms of use"
+msgstr "Terms of use"
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "The account is the only owner of {0}. Make someone else owner or delete the organization first."
+msgstr "The account is the only owner of {0}. Make someone else owner or delete the organization first."
+
+#: src/lib/error-messages.svelte.ts
+msgid "The account is the last system admin. Make someone else system admin first."
+msgstr "The account is the last system admin. Make someone else system admin first."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Enter the link as a full address starting with https://."
+msgstr "Enter the link as a full address starting with https://."
+
+#: src/lib/user-label.svelte.ts
+msgid "Deleted account"
+msgstr "Deleted account"
+
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+msgid "<0/> Legal pages"
+msgstr "<0/> Legal pages"
+
+#: src/routes/profile/+page.svelte
+msgid "Your account has been deleted."
+msgstr "Your account has been deleted."
+
+#: src/routes/profile/+page.svelte
+#: src/routes/profile/+page.svelte
+#: src/routes/profile/+page.svelte
+msgid "Delete account"
+msgstr "Delete account"
+
+#: src/routes/profile/+page.svelte
+msgid "Removes your account, your sessions and paired scanners, and your memberships. Entries you made in the history of devices and stocktakes stay, without your name."
+msgstr "Removes your account, your sessions and paired scanners, and your memberships. Entries you made in the history of devices and stocktakes stay, without your name."
+
+#: src/routes/profile/+page.svelte
+msgid "Delete account…"
+msgstr "Delete account…"
+
+#: src/routes/profile/+page.svelte
+msgid "Confirm with your password"
+msgstr "Confirm with your password"
+
+#: src/routes/profile/+page.svelte
+msgid "This cannot be undone. If you are the only owner of an organization, make someone else owner or delete the organization first."
+msgstr "This cannot be undone. If you are the only owner of an organization, make someone else owner or delete the organization first."
+
+#: src/routes/admin/legal/+page.svelte
+msgid "Legal pages | Technikpool"
+msgstr "Legal pages | Technikpool"
+
+#: src/routes/admin/legal/+page.svelte
+msgid "Legal pages"
+msgstr "Legal pages"
+
+#: src/routes/admin/legal/+page.svelte
+msgid "Your imprint, privacy policy and terms of use. They are linked below the sign-in and sign-up forms, in the user menu and in the scanner app's settings. Templates to start from are in the repository under docs/legal."
+msgstr "Your imprint, privacy policy and terms of use. They are linked below the sign-in and sign-up forms, in the user menu and in the scanner app's settings. Templates to start from are in the repository under docs/legal."
+
+#. 0: legalTitle(doc.slug)
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "{0} saved"
+msgstr "{0} saved"
+
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "Not set up — linked nowhere."
+msgstr "Not set up — linked nowhere."
+
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "Links to your own page."
+msgstr "Links to your own page."
+
+#. 0.0: doc.slug
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "Shown at <0>/legal/{0}</0>."
+msgstr "Shown at <0>/legal/{0}</0>."
+
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "If set, this is used and the text below is ignored."
+msgstr "If set, this is used and the text below is ignored."
+
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "Link to your own page"
+msgstr "Link to your own page"
+
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "Text (Markdown)"
+msgstr "Text (Markdown)"
+
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "One text for every reader, in the language you write it in. Headings, lists, tables and links work; HTML and images are shown as plain text."
+msgstr "One text for every reader, in the language you write it in. Headings, lists, tables and links work; HTML and images are shown as plain text."
+
+#: src/routes/admin/users/+page.svelte
+msgid "The account, sessions, and organization memberships are permanently removed. Entries in the history stay and show \"Deleted account\" instead of the name."
+msgstr "The account, sessions, and organization memberships are permanently removed. Entries in the history stay and show \"Deleted account\" instead of the name."
+
+#: src/routes/auth/register/+page.svelte
+msgid "By creating an account you accept the <0>terms of use</0>."
+msgstr "By creating an account you accept the <0>terms of use</0>."
+
+#: src/routes/auth/register/+page.svelte
+msgid "How your data is handled is described in the <0>privacy policy</0>."
+msgstr "How your data is handled is described in the <0>privacy policy</0>."
+
+#. 0: new Date(data.updatedAt).toLocaleDateString()
+#: src/routes/legal/[slug]/+page.svelte
+msgid "Last updated {0}"
+msgstr "Last updated {0}"
+
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+#: src/lib/legal.svelte.ts
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/dpa/print/+page.svelte
+msgid "Data processing agreement"
+msgstr "Data processing agreement"
+
+#: src/lib/error-messages.svelte.ts
+msgid "The agreement was changed in the meantime. Please read the current version."
+msgstr "The agreement was changed in the meantime. Please read the current version."
+
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+msgid "Agreement accepted"
+msgstr "Agreement accepted"
+
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+msgid "I accept this agreement on behalf of <0/> and am authorized to do so."
+msgstr "I accept this agreement on behalf of <0/> and am authorized to do so."
+
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+msgid "This server processes personal data on behalf of your organization — its members, customers and crew. The law requires an agreement for that. As an owner, please read and accept it."
+msgstr "This server processes personal data on behalf of your organization — its members, customers and crew. The law requires an agreement for that. As an owner, please read and accept it."
+
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+msgid "Accept"
+msgstr "Accept"
+
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+msgid "Sign out"
+msgstr "Sign out"
+
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "Every organization's owner is asked to accept it. Changing the text asks them all again."
+msgstr "Every organization's owner is asked to accept it. Changing the text asks them all again."
+
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "Not set up — nobody is asked to accept one."
+msgstr "Not set up — nobody is asked to accept one."
+
+#: src/routes/admin/legal/+page.svelte
+msgid "Accepted agreements"
+msgstr "Accepted agreements"
+
+#~ msgid "The latest acceptance of each organization. Organizations you are an owner of are not asked, since you run this server."
+#~ msgstr "The latest acceptance of each organization. Organizations you are an owner of are not asked, since you run this server."
+
+#: src/routes/admin/legal/+page.svelte
+msgid "No data processing agreement is set up."
+msgstr "No data processing agreement is set up."
+
+#: src/routes/admin/legal/+page.svelte
+#: src/routes/orgs/[id]/dpa/print/+page.svelte
+msgid "Accepted by"
+msgstr "Accepted by"
+
+#: src/routes/admin/legal/+page.svelte
+msgid "Not accepted"
+msgstr "Not accepted"
+
+#: src/routes/admin/legal/+page.svelte
+msgid "Current version"
+msgstr "Current version"
+
+#: src/routes/admin/legal/+page.svelte
+msgid "Older version"
+msgstr "Older version"
+
+#~ msgid "Record"
+#~ msgstr "Record"
+
+#: src/routes/admin/legal/+page.svelte
+msgid "The latest acceptance of each organization. System admins are not asked to accept it, since they run this server."
+msgstr "The latest acceptance of each organization. System admins are not asked to accept it, since they run this server."
+
+#. 0: data.orgName
+#: src/routes/orgs/[id]/dpa/print/+page.svelte
+msgid "Data processing agreement | {0}"
+msgstr "Data processing agreement | {0}"
+
+#: src/routes/orgs/[id]/dpa/print/+page.svelte
+msgid "(no longer the current version)"
+msgstr "(no longer the current version)"
+
+#: src/routes/orgs/[id]/dpa/print/+page.svelte
+msgid "Accepted on"
+msgstr "Accepted on"
+
+#: src/routes/orgs/[id]/dpa/print/+page.svelte
+msgid "Version"
+msgstr "Version"
+
+#: src/routes/orgs/[id]/dpa/print/+page.svelte
+msgid "Earlier acceptances"
+msgstr "Earlier acceptances"
+
+#~ msgid "Accepted with the operator of this server. The record shows who accepted which version, and when."
+#~ msgstr "Accepted with the operator of this server. The record shows who accepted which version, and when."
+
+#~ msgid "Open record"
+#~ msgstr "Open record"
+
+#. 0: placeholders.slice(0, 5).join(', ')
+#: src/routes/admin/legal/legal-editor.svelte
+msgid "Still contains placeholders from the template: {0}"
+msgstr "Still contains placeholders from the template: {0}"
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "Enter the address of {0} — it is named as a party to the agreement."
+msgstr "Enter the address of {0} — it is named as a party to the agreement."
+
+#. 0: org.name
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+msgid "Address of {0}"
+msgstr "Address of {0}"
+
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+msgid "The organization is a party to the agreement and needs an address. It is also saved as its billing address."
+msgstr "The organization is a party to the agreement and needs an address. It is also saved as its billing address."
+
+#. 0: new Date( org.dpaAcceptances[0].acceptedAt ).toLocaleDateString()
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Accepted with the operator of this server on {0}. The PDF shows who accepted which version, and when."
+msgstr "Accepted with the operator of this server on {0}. The PDF shows who accepted which version, and when."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Download PDF"
+msgstr "Download PDF"
+
+#: src/routes/admin/legal/+page.svelte
+#: src/routes/admin/legal/+page.svelte
+msgid "Not set up"
+msgstr "Not set up"
+
+#: src/routes/admin/legal/+page.svelte
+msgid "PDF"
+msgstr "PDF"

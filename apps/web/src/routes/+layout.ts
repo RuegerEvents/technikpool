@@ -8,8 +8,9 @@ import type { LayoutLoad } from './$types';
 
 // What an account without an organization can still use: the dashboard, which
 // tells it what to do next, its own profile, the org list (where a system admin
-// creates the first one) and, for that admin, the admin pages.
-const orglessPaths = ['/profile', '/orgs', '/auth'];
+// creates the first one), the operator's legal pages and, for that admin, the
+// admin pages.
+const orglessPaths = ['/profile', '/orgs', '/auth', '/legal'];
 
 // Reading `url.pathname` below makes this load run on every navigation, and the
 // catalogs only need fetching when the locale is a different one.

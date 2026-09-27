@@ -169,7 +169,7 @@ export type CatalogTransactionGroupByArgs<ExtArgs extends runtime.Types.Extensio
 
 export type CatalogTransactionGroupByOutputType = {
   id: string
-  userId: string
+  userId: string | null
   action: string
   productId: string | null
   manufacturerId: string | null
@@ -202,7 +202,7 @@ export type CatalogTransactionWhereInput = {
   OR?: Prisma.CatalogTransactionWhereInput[]
   NOT?: Prisma.CatalogTransactionWhereInput | Prisma.CatalogTransactionWhereInput[]
   id?: Prisma.StringFilter<"CatalogTransaction"> | string
-  userId?: Prisma.StringFilter<"CatalogTransaction"> | string
+  userId?: Prisma.StringNullableFilter<"CatalogTransaction"> | string | null
   action?: Prisma.StringFilter<"CatalogTransaction"> | string
   productId?: Prisma.StringNullableFilter<"CatalogTransaction"> | string | null
   manufacturerId?: Prisma.StringNullableFilter<"CatalogTransaction"> | string | null
@@ -210,12 +210,12 @@ export type CatalogTransactionWhereInput = {
   organizationId?: Prisma.StringNullableFilter<"CatalogTransaction"> | string | null
   data?: Prisma.JsonNullableFilter<"CatalogTransaction">
   createdAt?: Prisma.DateTimeFilter<"CatalogTransaction"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type CatalogTransactionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
   action?: Prisma.SortOrder
   productId?: Prisma.SortOrderInput | Prisma.SortOrder
   manufacturerId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -231,7 +231,7 @@ export type CatalogTransactionWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.CatalogTransactionWhereInput | Prisma.CatalogTransactionWhereInput[]
   OR?: Prisma.CatalogTransactionWhereInput[]
   NOT?: Prisma.CatalogTransactionWhereInput | Prisma.CatalogTransactionWhereInput[]
-  userId?: Prisma.StringFilter<"CatalogTransaction"> | string
+  userId?: Prisma.StringNullableFilter<"CatalogTransaction"> | string | null
   action?: Prisma.StringFilter<"CatalogTransaction"> | string
   productId?: Prisma.StringNullableFilter<"CatalogTransaction"> | string | null
   manufacturerId?: Prisma.StringNullableFilter<"CatalogTransaction"> | string | null
@@ -239,12 +239,12 @@ export type CatalogTransactionWhereUniqueInput = Prisma.AtLeast<{
   organizationId?: Prisma.StringNullableFilter<"CatalogTransaction"> | string | null
   data?: Prisma.JsonNullableFilter<"CatalogTransaction">
   createdAt?: Prisma.DateTimeFilter<"CatalogTransaction"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id">
 
 export type CatalogTransactionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
   action?: Prisma.SortOrder
   productId?: Prisma.SortOrderInput | Prisma.SortOrder
   manufacturerId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -262,7 +262,7 @@ export type CatalogTransactionScalarWhereWithAggregatesInput = {
   OR?: Prisma.CatalogTransactionScalarWhereWithAggregatesInput[]
   NOT?: Prisma.CatalogTransactionScalarWhereWithAggregatesInput | Prisma.CatalogTransactionScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"CatalogTransaction"> | string
-  userId?: Prisma.StringWithAggregatesFilter<"CatalogTransaction"> | string
+  userId?: Prisma.StringNullableWithAggregatesFilter<"CatalogTransaction"> | string | null
   action?: Prisma.StringWithAggregatesFilter<"CatalogTransaction"> | string
   productId?: Prisma.StringNullableWithAggregatesFilter<"CatalogTransaction"> | string | null
   manufacturerId?: Prisma.StringNullableWithAggregatesFilter<"CatalogTransaction"> | string | null
@@ -281,12 +281,12 @@ export type CatalogTransactionCreateInput = {
   organizationId?: string | null
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutCatalogTransactionsInput
+  user?: Prisma.UserCreateNestedOneWithoutCatalogTransactionsInput
 }
 
 export type CatalogTransactionUncheckedCreateInput = {
   id?: string
-  userId: string
+  userId?: string | null
   action: string
   productId?: string | null
   manufacturerId?: string | null
@@ -305,12 +305,12 @@ export type CatalogTransactionUpdateInput = {
   organizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutCatalogTransactionsNestedInput
+  user?: Prisma.UserUpdateOneWithoutCatalogTransactionsNestedInput
 }
 
 export type CatalogTransactionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -322,7 +322,7 @@ export type CatalogTransactionUncheckedUpdateInput = {
 
 export type CatalogTransactionCreateManyInput = {
   id?: string
-  userId: string
+  userId?: string | null
   action: string
   productId?: string | null
   manufacturerId?: string | null
@@ -345,7 +345,7 @@ export type CatalogTransactionUpdateManyMutationInput = {
 
 export type CatalogTransactionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -494,7 +494,7 @@ export type CatalogTransactionScalarWhereInput = {
   OR?: Prisma.CatalogTransactionScalarWhereInput[]
   NOT?: Prisma.CatalogTransactionScalarWhereInput | Prisma.CatalogTransactionScalarWhereInput[]
   id?: Prisma.StringFilter<"CatalogTransaction"> | string
-  userId?: Prisma.StringFilter<"CatalogTransaction"> | string
+  userId?: Prisma.StringNullableFilter<"CatalogTransaction"> | string | null
   action?: Prisma.StringFilter<"CatalogTransaction"> | string
   productId?: Prisma.StringNullableFilter<"CatalogTransaction"> | string | null
   manufacturerId?: Prisma.StringNullableFilter<"CatalogTransaction"> | string | null
@@ -560,7 +560,7 @@ export type CatalogTransactionSelect<ExtArgs extends runtime.Types.Extensions.In
   organizationId?: boolean
   data?: boolean
   createdAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.CatalogTransaction$userArgs<ExtArgs>
 }, ExtArgs["result"]["catalogTransaction"]>
 
 export type CatalogTransactionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -573,7 +573,7 @@ export type CatalogTransactionSelectCreateManyAndReturn<ExtArgs extends runtime.
   organizationId?: boolean
   data?: boolean
   createdAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.CatalogTransaction$userArgs<ExtArgs>
 }, ExtArgs["result"]["catalogTransaction"]>
 
 export type CatalogTransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -586,7 +586,7 @@ export type CatalogTransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.
   organizationId?: boolean
   data?: boolean
   createdAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.CatalogTransaction$userArgs<ExtArgs>
 }, ExtArgs["result"]["catalogTransaction"]>
 
 export type CatalogTransactionSelectScalar = {
@@ -603,23 +603,23 @@ export type CatalogTransactionSelectScalar = {
 
 export type CatalogTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "action" | "productId" | "manufacturerId" | "categoryId" | "organizationId" | "data" | "createdAt", ExtArgs["result"]["catalogTransaction"]>
 export type CatalogTransactionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.CatalogTransaction$userArgs<ExtArgs>
 }
 export type CatalogTransactionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.CatalogTransaction$userArgs<ExtArgs>
 }
 export type CatalogTransactionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.CatalogTransaction$userArgs<ExtArgs>
 }
 
 export type $CatalogTransactionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CatalogTransaction"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>
+    user: Prisma.$UserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    userId: string
+    userId: string | null
     action: string
     productId: string | null
     manufacturerId: string | null
@@ -1021,7 +1021,7 @@ readonly fields: CatalogTransactionFieldRefs;
  */
 export interface Prisma__CatalogTransactionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.CatalogTransaction$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CatalogTransaction$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1458,6 +1458,25 @@ export type CatalogTransactionDeleteManyArgs<ExtArgs extends runtime.Types.Exten
    * Limit how many CatalogTransactions to delete.
    */
   limit?: number
+}
+
+/**
+ * CatalogTransaction.user
+ */
+export type CatalogTransaction$userArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

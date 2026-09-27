@@ -11,6 +11,7 @@ import { ACTIVE_ASSET_WHERE, isRetiredStatus, type AssetStatus } from '$lib/asse
 import { resolveScannedCode } from './asset-lookup';
 import { syncAccessories } from './accessories';
 import { CABLE_ENDS } from './cable-ends';
+import { userLabel } from '$lib/user-label.svelte';
 
 // Stocktakes (Inventur): counting what an org actually has against what it
 // should have. Framework-agnostic like checkout.ts, so the web's remote
@@ -1002,7 +1003,7 @@ export function productCounts(detail: StocktakeDetail, userId: string) {
 			counters: []
 		};
 		at.counted += count.count;
-		at.counters.push({ name: count.user.name || count.user.email, count: count.count });
+		at.counters.push({ name: userLabel(count.user), count: count.count });
 		if (count.userId === userId) at.myCount = count.count;
 		entry.locations.set(count.locationId, at);
 	}

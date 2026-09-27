@@ -330,8 +330,16 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return `The avatar label ${p0} is already taken. Pick another one.`;
 		case 'org_color_taken':
 			return `The color ${p0} is already taken. Pick another one.`;
-		case 'user_has_history':
-			return 'This user appears in asset history and cannot be deleted.';
+		case 'last_org_owner':
+			return `The account is the only owner of ${p0}. Make someone else owner or delete the organization first.`;
+		case 'last_system_admin':
+			return 'The account is the last system admin. Make someone else system admin first.';
+		case 'legal_url_invalid':
+			return 'Enter the link as a full address starting with https://.';
+		case 'dpa_outdated':
+			return 'The agreement was changed in the meantime. Please read the current version.';
+		case 'dpa_address_required':
+			return `Enter the address of ${p0} — it is named as a party to the agreement.`;
 		case 'cannot_remove_self':
 			return 'You cannot remove yourself from the organization.';
 		case 'cannot_change_own_admin':

@@ -170,7 +170,7 @@ export type StocktakeEventGroupByArgs<ExtArgs extends runtime.Types.Extensions.I
 export type StocktakeEventGroupByOutputType = {
   id: string
   stocktakeId: string
-  userId: string
+  userId: string | null
   action: string
   assetId: string | null
   productId: string | null
@@ -203,7 +203,7 @@ export type StocktakeEventWhereInput = {
   NOT?: Prisma.StocktakeEventWhereInput | Prisma.StocktakeEventWhereInput[]
   id?: Prisma.StringFilter<"StocktakeEvent"> | string
   stocktakeId?: Prisma.StringFilter<"StocktakeEvent"> | string
-  userId?: Prisma.StringFilter<"StocktakeEvent"> | string
+  userId?: Prisma.StringNullableFilter<"StocktakeEvent"> | string | null
   action?: Prisma.StringFilter<"StocktakeEvent"> | string
   assetId?: Prisma.StringNullableFilter<"StocktakeEvent"> | string | null
   productId?: Prisma.StringNullableFilter<"StocktakeEvent"> | string | null
@@ -211,13 +211,13 @@ export type StocktakeEventWhereInput = {
   data?: Prisma.JsonNullableFilter<"StocktakeEvent">
   createdAt?: Prisma.DateTimeFilter<"StocktakeEvent"> | Date | string
   stocktake?: Prisma.XOR<Prisma.StocktakeScalarRelationFilter, Prisma.StocktakeWhereInput>
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type StocktakeEventOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   stocktakeId?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
   action?: Prisma.SortOrder
   assetId?: Prisma.SortOrderInput | Prisma.SortOrder
   productId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -234,7 +234,7 @@ export type StocktakeEventWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.StocktakeEventWhereInput[]
   NOT?: Prisma.StocktakeEventWhereInput | Prisma.StocktakeEventWhereInput[]
   stocktakeId?: Prisma.StringFilter<"StocktakeEvent"> | string
-  userId?: Prisma.StringFilter<"StocktakeEvent"> | string
+  userId?: Prisma.StringNullableFilter<"StocktakeEvent"> | string | null
   action?: Prisma.StringFilter<"StocktakeEvent"> | string
   assetId?: Prisma.StringNullableFilter<"StocktakeEvent"> | string | null
   productId?: Prisma.StringNullableFilter<"StocktakeEvent"> | string | null
@@ -242,13 +242,13 @@ export type StocktakeEventWhereUniqueInput = Prisma.AtLeast<{
   data?: Prisma.JsonNullableFilter<"StocktakeEvent">
   createdAt?: Prisma.DateTimeFilter<"StocktakeEvent"> | Date | string
   stocktake?: Prisma.XOR<Prisma.StocktakeScalarRelationFilter, Prisma.StocktakeWhereInput>
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id">
 
 export type StocktakeEventOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   stocktakeId?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
   action?: Prisma.SortOrder
   assetId?: Prisma.SortOrderInput | Prisma.SortOrder
   productId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -266,7 +266,7 @@ export type StocktakeEventScalarWhereWithAggregatesInput = {
   NOT?: Prisma.StocktakeEventScalarWhereWithAggregatesInput | Prisma.StocktakeEventScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"StocktakeEvent"> | string
   stocktakeId?: Prisma.StringWithAggregatesFilter<"StocktakeEvent"> | string
-  userId?: Prisma.StringWithAggregatesFilter<"StocktakeEvent"> | string
+  userId?: Prisma.StringNullableWithAggregatesFilter<"StocktakeEvent"> | string | null
   action?: Prisma.StringWithAggregatesFilter<"StocktakeEvent"> | string
   assetId?: Prisma.StringNullableWithAggregatesFilter<"StocktakeEvent"> | string | null
   productId?: Prisma.StringNullableWithAggregatesFilter<"StocktakeEvent"> | string | null
@@ -284,13 +284,13 @@ export type StocktakeEventCreateInput = {
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   stocktake: Prisma.StocktakeCreateNestedOneWithoutEventsInput
-  user: Prisma.UserCreateNestedOneWithoutStocktakeEventsInput
+  user?: Prisma.UserCreateNestedOneWithoutStocktakeEventsInput
 }
 
 export type StocktakeEventUncheckedCreateInput = {
   id?: string
   stocktakeId: string
-  userId: string
+  userId?: string | null
   action: string
   assetId?: string | null
   productId?: string | null
@@ -308,13 +308,13 @@ export type StocktakeEventUpdateInput = {
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stocktake?: Prisma.StocktakeUpdateOneRequiredWithoutEventsNestedInput
-  user?: Prisma.UserUpdateOneRequiredWithoutStocktakeEventsNestedInput
+  user?: Prisma.UserUpdateOneWithoutStocktakeEventsNestedInput
 }
 
 export type StocktakeEventUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   stocktakeId?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   assetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -326,7 +326,7 @@ export type StocktakeEventUncheckedUpdateInput = {
 export type StocktakeEventCreateManyInput = {
   id?: string
   stocktakeId: string
-  userId: string
+  userId?: string | null
   action: string
   assetId?: string | null
   productId?: string | null
@@ -348,7 +348,7 @@ export type StocktakeEventUpdateManyMutationInput = {
 export type StocktakeEventUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   stocktakeId?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   assetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -539,7 +539,7 @@ export type StocktakeEventScalarWhereInput = {
   NOT?: Prisma.StocktakeEventScalarWhereInput | Prisma.StocktakeEventScalarWhereInput[]
   id?: Prisma.StringFilter<"StocktakeEvent"> | string
   stocktakeId?: Prisma.StringFilter<"StocktakeEvent"> | string
-  userId?: Prisma.StringFilter<"StocktakeEvent"> | string
+  userId?: Prisma.StringNullableFilter<"StocktakeEvent"> | string | null
   action?: Prisma.StringFilter<"StocktakeEvent"> | string
   assetId?: Prisma.StringNullableFilter<"StocktakeEvent"> | string | null
   productId?: Prisma.StringNullableFilter<"StocktakeEvent"> | string | null
@@ -556,12 +556,12 @@ export type StocktakeEventCreateWithoutStocktakeInput = {
   locationId?: string | null
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutStocktakeEventsInput
+  user?: Prisma.UserCreateNestedOneWithoutStocktakeEventsInput
 }
 
 export type StocktakeEventUncheckedCreateWithoutStocktakeInput = {
   id?: string
-  userId: string
+  userId?: string | null
   action: string
   assetId?: string | null
   productId?: string | null
@@ -642,7 +642,7 @@ export type StocktakeEventUncheckedUpdateManyWithoutUserInput = {
 
 export type StocktakeEventCreateManyStocktakeInput = {
   id?: string
-  userId: string
+  userId?: string | null
   action: string
   assetId?: string | null
   productId?: string | null
@@ -659,12 +659,12 @@ export type StocktakeEventUpdateWithoutStocktakeInput = {
   locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutStocktakeEventsNestedInput
+  user?: Prisma.UserUpdateOneWithoutStocktakeEventsNestedInput
 }
 
 export type StocktakeEventUncheckedUpdateWithoutStocktakeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   assetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -675,7 +675,7 @@ export type StocktakeEventUncheckedUpdateWithoutStocktakeInput = {
 
 export type StocktakeEventUncheckedUpdateManyWithoutStocktakeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   assetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -697,7 +697,7 @@ export type StocktakeEventSelect<ExtArgs extends runtime.Types.Extensions.Intern
   data?: boolean
   createdAt?: boolean
   stocktake?: boolean | Prisma.StocktakeDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.StocktakeEvent$userArgs<ExtArgs>
 }, ExtArgs["result"]["stocktakeEvent"]>
 
 export type StocktakeEventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -711,7 +711,7 @@ export type StocktakeEventSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   data?: boolean
   createdAt?: boolean
   stocktake?: boolean | Prisma.StocktakeDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.StocktakeEvent$userArgs<ExtArgs>
 }, ExtArgs["result"]["stocktakeEvent"]>
 
 export type StocktakeEventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -725,7 +725,7 @@ export type StocktakeEventSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   data?: boolean
   createdAt?: boolean
   stocktake?: boolean | Prisma.StocktakeDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.StocktakeEvent$userArgs<ExtArgs>
 }, ExtArgs["result"]["stocktakeEvent"]>
 
 export type StocktakeEventSelectScalar = {
@@ -743,27 +743,27 @@ export type StocktakeEventSelectScalar = {
 export type StocktakeEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "stocktakeId" | "userId" | "action" | "assetId" | "productId" | "locationId" | "data" | "createdAt", ExtArgs["result"]["stocktakeEvent"]>
 export type StocktakeEventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   stocktake?: boolean | Prisma.StocktakeDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.StocktakeEvent$userArgs<ExtArgs>
 }
 export type StocktakeEventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   stocktake?: boolean | Prisma.StocktakeDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.StocktakeEvent$userArgs<ExtArgs>
 }
 export type StocktakeEventIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   stocktake?: boolean | Prisma.StocktakeDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.StocktakeEvent$userArgs<ExtArgs>
 }
 
 export type $StocktakeEventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "StocktakeEvent"
   objects: {
     stocktake: Prisma.$StocktakePayload<ExtArgs>
-    user: Prisma.$UserPayload<ExtArgs>
+    user: Prisma.$UserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     stocktakeId: string
-    userId: string
+    userId: string | null
     action: string
     assetId: string | null
     productId: string | null
@@ -1165,7 +1165,7 @@ readonly fields: StocktakeEventFieldRefs;
 export interface Prisma__StocktakeEventClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   stocktake<T extends Prisma.StocktakeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StocktakeDefaultArgs<ExtArgs>>): Prisma.Prisma__StocktakeClient<runtime.Types.Result.GetResult<Prisma.$StocktakePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.StocktakeEvent$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StocktakeEvent$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1602,6 +1602,25 @@ export type StocktakeEventDeleteManyArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many StocktakeEvents to delete.
    */
   limit?: number
+}
+
+/**
+ * StocktakeEvent.user
+ */
+export type StocktakeEvent$userArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

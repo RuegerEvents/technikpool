@@ -275,15 +275,15 @@
 </div>
 
 <Modal bind:open={deleteOpen} title="Delete user" dismissible={!deleting}>
-	{#snippet description()}
-		The account, sessions, and organization memberships are permanently removed. Users recorded in
-		asset history cannot be deleted.
-	{/snippet}
 	{#if deleteTarget}
 		<p class="text-sm">
 			Delete <span class="font-medium">{deleteTarget.name || deleteTarget.email}</span>?
 		</p>
 	{/if}
+	{#snippet description()}
+		The account, sessions, and organization memberships are permanently removed. Entries in the
+		history stay and show "Deleted account" instead of the name.
+	{/snippet}
 	{#snippet footer()}
 		<Button icon="delete" variant="destructive" onclick={handleDeleteUser} disabled={deleting}>
 			{deleting ? 'Deleting…' : 'Delete user'}
