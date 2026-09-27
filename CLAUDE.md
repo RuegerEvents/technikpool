@@ -486,6 +486,9 @@ Located in `src/lib/components/ui/`: `button`, `card`, `input`, `label`, `creata
 - `Organization` — multi-tenant root; has `defaultAssetVisibility`
 - `OrgMembership` — `userId + organizationId` unique; role enum `OWNER|ADMIN|MEMBER|VIEWER|DEVICE_VIEWER`
 - `Asset` — belongs to an org; can be in a `AssetBundle`
+- `Asset.orgIndex` — the unit's number in its org ("#123"), assigned by a Postgres `BEFORE INSERT`
+  trigger from `Organization.nextAssetIndex`, never reused. Never set it in app code; Prisma's `0` is
+  replaced on insert.
 - `Production` — belongs to an org; has `ProductionItem[]` (assets) and `ProductionCrew[]` (users)
 - `ProductionItem.status` — `PENDING` for cross-org requests, `APPROVED|CHECKED_OUT|RETURNED` otherwise
 - `AssetTransaction` — audit log for all asset actions

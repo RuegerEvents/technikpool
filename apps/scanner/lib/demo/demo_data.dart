@@ -299,6 +299,8 @@ class DemoData {
     id: 'asset_demo_$tag',
     assetTag: tag,
     serialNumber: serial,
+    // The demo's tags run 40000001 onwards, so the unit's number is its tail.
+    orgIndex: int.parse(tag.substring(4)),
     status: status,
     product: product,
     location: locations[locationIndex],

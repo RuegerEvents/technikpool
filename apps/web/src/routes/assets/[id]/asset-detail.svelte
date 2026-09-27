@@ -665,6 +665,13 @@
 						<Tag class="size-3 text-muted-foreground" />{asset.assetTag}
 					</span>
 				{/if}
+				<!-- The unit's number within its org, for its whole life (Asset.orgIndex). -->
+				<span
+					class="inline-flex items-center rounded-md border px-2 py-0.5 font-mono text-xs text-muted-foreground"
+					title="Device number in this organization"
+				>
+					#{asset.orgIndex}
+				</span>
 				{#if asset.parent}
 					<a
 						href={resolve(`/assets/${asset.parent.id}`)}

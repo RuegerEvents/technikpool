@@ -140,6 +140,8 @@ model Organization {
   // handed out again, even after its unit is deleted (see tag-counter.ts).
   autoAssetTags      Boolean @default(false)
   nextAssetTagNumber Int     @default(1)
+  // The next Asset.orgIndex. Drawn by a database trigger, see Asset.orgIndex.
+  nextAssetIndex     Int     @default(1)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -631,6 +633,14 @@ model Asset {
   assetTag     String? @unique
   status       String  @default("AVAILABLE") // see src/lib/asset-status.ts
 
+  // The unit's number within its org, #1 onwards, for its whole life — shown
+  // as "#123". Assigned by the database, not by the app: a BEFORE INSERT
+  // trigger (migration 20260928090000_asset_org_index) draws it from
+  // Organization.nextAssetIndex, so every way a unit is created gets one and a
+  // number is never handed out twice, even after its unit is deleted. The 0
+  // here is only what Prisma sends; the trigger always replaces it.
+  orgIndex Int @default(0)
+
   bundleId String?
   bundle   AssetBundle? @relation(fields: [bundleId], references: [id])
 
@@ -667,6 +677,7 @@ model Asset {
   // The one index this schema declares: every booking, scan and print walks
   // parent → accessories, and Prisma indexes no relation scalar on its own.
   @@index([parentAssetId])
+  @@unique([organizationId, orgIndex])
 }
 
 // The secret half of a licence unit — its key, or the account it is used

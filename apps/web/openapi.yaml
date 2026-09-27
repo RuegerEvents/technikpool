@@ -1145,6 +1145,12 @@ components:
           description: The printed tag. Null for assets that have never been labelled.
         serialNumber:
           type: [string, 'null']
+        orgIndex:
+          type: integer
+          description: |
+            The unit's number within its organization, 1 onwards, for its whole
+            life and never reused — shown as "#123". Not required, so an older
+            client keeps compiling.
         status:
           type: string
           description: |

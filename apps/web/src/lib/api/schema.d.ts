@@ -634,6 +634,12 @@ export interface components {
             assetTag?: string | null;
             serialNumber?: string | null;
             /**
+             * @description The unit's number within its organization, 1 onwards, for its whole
+             *     life and never reused — shown as "#123". Not required, so an older
+             *     client keeps compiling.
+             */
+            orgIndex?: number;
+            /**
              * @description `SOLD` and `DECOMMISSIONED` are end of life: the unit has left the
              *     pool, cannot be booked or scanned onto anything, and is omitted from
              *     listAssets. getAssetByTag still returns it, so a scan of a retired

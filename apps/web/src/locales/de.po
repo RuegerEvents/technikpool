@@ -11006,3 +11006,7 @@ msgstr "Der Link funktioniert dann für niemanden mehr, der ihn hat."
 #: src/routes/share/[id]/[signature]/+page.svelte
 msgid "with {0}"
 msgstr "mit {0}"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Device number in this organization"
+msgstr "Gerätenummer in dieser Organisation"

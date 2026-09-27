@@ -16,6 +16,7 @@ Asset _$AssetFromJson(Map<String, dynamic> json) => Asset(
   ),
   assetTag: json['assetTag'] as String?,
   serialNumber: json['serialNumber'] as String?,
+  orgIndex: (json['orgIndex'] as num?)?.toInt(),
   bundleId: json['bundleId'] as String?,
   parentAssetId: json['parentAssetId'] as String?,
 );
@@ -24,6 +25,7 @@ Map<String, dynamic> _$AssetToJson(Asset instance) => <String, dynamic>{
   'id': instance.id,
   'assetTag': ?instance.assetTag,
   'serialNumber': ?instance.serialNumber,
+  'orgIndex': ?instance.orgIndex,
   'status': instance.status,
   'product': instance.product,
   'location': instance.location,

@@ -203,6 +203,7 @@ type AssetRow = {
 	id: string;
 	assetTag: string | null;
 	serialNumber: string | null;
+	orgIndex: number;
 	status: string;
 	bundleId: string | null;
 	parentAssetId: string | null;
@@ -216,6 +217,7 @@ export function toAsset(asset: AssetRow): Schemas['Asset'] {
 		id: asset.id,
 		assetTag: asset.assetTag,
 		serialNumber: asset.serialNumber,
+		orgIndex: asset.orgIndex,
 		// Free text in the database; the spec pins it to the three values the app
 		// actually writes. Anything else would be a data bug, not a new state.
 		status: asset.status as Schemas['Asset']['status'],

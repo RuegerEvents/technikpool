@@ -26,6 +26,7 @@ class AssetDetail {
     required this.history,
     this.assetTag,
     this.serialNumber,
+    this.orgIndex,
     this.bundleId,
     this.parentAssetId,
     this.documents,
@@ -38,6 +39,12 @@ class AssetDetail {
   /// The printed tag. Null for assets that have never been labelled.
   final String? assetTag;
   final String? serialNumber;
+
+  /// The unit's number within its organization, 1 onwards, for its whole.
+  /// life and never reused — shown as "#123". Not required, so an older.
+  /// client keeps compiling.
+  ///
+  final int? orgIndex;
 
   /// `SOLD` and `DECOMMISSIONED` are end of life: the unit has left the.
   /// pool, cannot be booked or scanned onto anything, and is omitted from.

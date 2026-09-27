@@ -168,6 +168,16 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
                 style: const TextStyle(fontFamily: 'monospace', fontSize: 16),
               ),
             ),
+            // The unit's number within its org, for its whole life.
+            if (asset.orgIndex case final index?)
+              Text(
+                '#$index',
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 16,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
           ],
         ),
         const SizedBox(height: 20),
