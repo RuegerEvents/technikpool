@@ -40,6 +40,8 @@ export type ProductMinAggregateOutputType = {
   manufacturerId: string | null
   categoryId: string | null
   imagePath: string | null
+  caption: string | null
+  details: string | null
   cableType: string | null
   connectorAId: string | null
   connectorBId: string | null
@@ -56,6 +58,8 @@ export type ProductMaxAggregateOutputType = {
   manufacturerId: string | null
   categoryId: string | null
   imagePath: string | null
+  caption: string | null
+  details: string | null
   cableType: string | null
   connectorAId: string | null
   connectorBId: string | null
@@ -72,6 +76,8 @@ export type ProductCountAggregateOutputType = {
   manufacturerId: number
   categoryId: number
   imagePath: number
+  caption: number
+  details: number
   cableType: number
   connectorAId: number
   connectorBId: number
@@ -98,6 +104,8 @@ export type ProductMinAggregateInputType = {
   manufacturerId?: true
   categoryId?: true
   imagePath?: true
+  caption?: true
+  details?: true
   cableType?: true
   connectorAId?: true
   connectorBId?: true
@@ -114,6 +122,8 @@ export type ProductMaxAggregateInputType = {
   manufacturerId?: true
   categoryId?: true
   imagePath?: true
+  caption?: true
+  details?: true
   cableType?: true
   connectorAId?: true
   connectorBId?: true
@@ -130,6 +140,8 @@ export type ProductCountAggregateInputType = {
   manufacturerId?: true
   categoryId?: true
   imagePath?: true
+  caption?: true
+  details?: true
   cableType?: true
   connectorAId?: true
   connectorBId?: true
@@ -233,6 +245,8 @@ export type ProductGroupByOutputType = {
   manufacturerId: string | null
   categoryId: string
   imagePath: string | null
+  caption: string | null
+  details: string | null
   cableType: string | null
   connectorAId: string | null
   connectorBId: string | null
@@ -272,6 +286,8 @@ export type ProductWhereInput = {
   manufacturerId?: Prisma.StringNullableFilter<"Product"> | string | null
   categoryId?: Prisma.StringFilter<"Product"> | string
   imagePath?: Prisma.StringNullableFilter<"Product"> | string | null
+  caption?: Prisma.StringNullableFilter<"Product"> | string | null
+  details?: Prisma.StringNullableFilter<"Product"> | string | null
   cableType?: Prisma.StringNullableFilter<"Product"> | string | null
   connectorAId?: Prisma.StringNullableFilter<"Product"> | string | null
   connectorBId?: Prisma.StringNullableFilter<"Product"> | string | null
@@ -300,6 +316,8 @@ export type ProductOrderByWithRelationInput = {
   manufacturerId?: Prisma.SortOrderInput | Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   imagePath?: Prisma.SortOrderInput | Prisma.SortOrder
+  caption?: Prisma.SortOrderInput | Prisma.SortOrder
+  details?: Prisma.SortOrderInput | Prisma.SortOrder
   cableType?: Prisma.SortOrderInput | Prisma.SortOrder
   connectorAId?: Prisma.SortOrderInput | Prisma.SortOrder
   connectorBId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -331,6 +349,8 @@ export type ProductWhereUniqueInput = Prisma.AtLeast<{
   manufacturerId?: Prisma.StringNullableFilter<"Product"> | string | null
   categoryId?: Prisma.StringFilter<"Product"> | string
   imagePath?: Prisma.StringNullableFilter<"Product"> | string | null
+  caption?: Prisma.StringNullableFilter<"Product"> | string | null
+  details?: Prisma.StringNullableFilter<"Product"> | string | null
   cableType?: Prisma.StringNullableFilter<"Product"> | string | null
   connectorAId?: Prisma.StringNullableFilter<"Product"> | string | null
   connectorBId?: Prisma.StringNullableFilter<"Product"> | string | null
@@ -359,6 +379,8 @@ export type ProductOrderByWithAggregationInput = {
   manufacturerId?: Prisma.SortOrderInput | Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   imagePath?: Prisma.SortOrderInput | Prisma.SortOrder
+  caption?: Prisma.SortOrderInput | Prisma.SortOrder
+  details?: Prisma.SortOrderInput | Prisma.SortOrder
   cableType?: Prisma.SortOrderInput | Prisma.SortOrder
   connectorAId?: Prisma.SortOrderInput | Prisma.SortOrder
   connectorBId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -383,6 +405,8 @@ export type ProductScalarWhereWithAggregatesInput = {
   manufacturerId?: Prisma.StringNullableWithAggregatesFilter<"Product"> | string | null
   categoryId?: Prisma.StringWithAggregatesFilter<"Product"> | string
   imagePath?: Prisma.StringNullableWithAggregatesFilter<"Product"> | string | null
+  caption?: Prisma.StringNullableWithAggregatesFilter<"Product"> | string | null
+  details?: Prisma.StringNullableWithAggregatesFilter<"Product"> | string | null
   cableType?: Prisma.StringNullableWithAggregatesFilter<"Product"> | string | null
   connectorAId?: Prisma.StringNullableWithAggregatesFilter<"Product"> | string | null
   connectorBId?: Prisma.StringNullableWithAggregatesFilter<"Product"> | string | null
@@ -397,6 +421,8 @@ export type ProductCreateInput = {
   id?: string
   name: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
@@ -422,6 +448,8 @@ export type ProductUncheckedCreateInput = {
   manufacturerId?: string | null
   categoryId: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorAId?: string | null
   connectorBId?: string | null
@@ -443,6 +471,8 @@ export type ProductUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -468,6 +498,8 @@ export type ProductUncheckedUpdateInput = {
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -491,6 +523,8 @@ export type ProductCreateManyInput = {
   manufacturerId?: string | null
   categoryId: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorAId?: string | null
   connectorBId?: string | null
@@ -505,6 +539,8 @@ export type ProductUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -518,6 +554,8 @@ export type ProductUncheckedUpdateManyInput = {
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -549,6 +587,8 @@ export type ProductCountOrderByAggregateInput = {
   manufacturerId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   imagePath?: Prisma.SortOrder
+  caption?: Prisma.SortOrder
+  details?: Prisma.SortOrder
   cableType?: Prisma.SortOrder
   connectorAId?: Prisma.SortOrder
   connectorBId?: Prisma.SortOrder
@@ -569,6 +609,8 @@ export type ProductMaxOrderByAggregateInput = {
   manufacturerId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   imagePath?: Prisma.SortOrder
+  caption?: Prisma.SortOrder
+  details?: Prisma.SortOrder
   cableType?: Prisma.SortOrder
   connectorAId?: Prisma.SortOrder
   connectorBId?: Prisma.SortOrder
@@ -585,6 +627,8 @@ export type ProductMinOrderByAggregateInput = {
   manufacturerId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   imagePath?: Prisma.SortOrder
+  caption?: Prisma.SortOrder
+  details?: Prisma.SortOrder
   cableType?: Prisma.SortOrder
   connectorAId?: Prisma.SortOrder
   connectorBId?: Prisma.SortOrder
@@ -935,6 +979,8 @@ export type ProductCreateWithoutCreatedByInput = {
   id?: string
   name: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
@@ -959,6 +1005,8 @@ export type ProductUncheckedCreateWithoutCreatedByInput = {
   manufacturerId?: string | null
   categoryId: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorAId?: string | null
   connectorBId?: string | null
@@ -1010,6 +1058,8 @@ export type ProductScalarWhereInput = {
   manufacturerId?: Prisma.StringNullableFilter<"Product"> | string | null
   categoryId?: Prisma.StringFilter<"Product"> | string
   imagePath?: Prisma.StringNullableFilter<"Product"> | string | null
+  caption?: Prisma.StringNullableFilter<"Product"> | string | null
+  details?: Prisma.StringNullableFilter<"Product"> | string | null
   cableType?: Prisma.StringNullableFilter<"Product"> | string | null
   connectorAId?: Prisma.StringNullableFilter<"Product"> | string | null
   connectorBId?: Prisma.StringNullableFilter<"Product"> | string | null
@@ -1024,6 +1074,8 @@ export type ProductCreateWithoutManufacturerInput = {
   id?: string
   name: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
@@ -1047,6 +1099,8 @@ export type ProductUncheckedCreateWithoutManufacturerInput = {
   name: string
   categoryId: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorAId?: string | null
   connectorBId?: string | null
@@ -1094,6 +1148,8 @@ export type ProductCreateWithoutConnectorARefInput = {
   id?: string
   name: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
@@ -1118,6 +1174,8 @@ export type ProductUncheckedCreateWithoutConnectorARefInput = {
   manufacturerId?: string | null
   categoryId: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorBId?: string | null
   lengthCm?: number | null
@@ -1148,6 +1206,8 @@ export type ProductCreateWithoutConnectorBRefInput = {
   id?: string
   name: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
@@ -1172,6 +1232,8 @@ export type ProductUncheckedCreateWithoutConnectorBRefInput = {
   manufacturerId?: string | null
   categoryId: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorAId?: string | null
   lengthCm?: number | null
@@ -1234,6 +1296,8 @@ export type ProductCreateWithoutPortsInput = {
   id?: string
   name: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
@@ -1258,6 +1322,8 @@ export type ProductUncheckedCreateWithoutPortsInput = {
   manufacturerId?: string | null
   categoryId: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorAId?: string | null
   connectorBId?: string | null
@@ -1294,6 +1360,8 @@ export type ProductUpdateWithoutPortsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1318,6 +1386,8 @@ export type ProductUncheckedUpdateWithoutPortsInput = {
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1338,6 +1408,8 @@ export type ProductCreateWithoutWaysInput = {
   id?: string
   name: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
@@ -1362,6 +1434,8 @@ export type ProductUncheckedCreateWithoutWaysInput = {
   manufacturerId?: string | null
   categoryId: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorAId?: string | null
   connectorBId?: string | null
@@ -1398,6 +1472,8 @@ export type ProductUpdateWithoutWaysInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1422,6 +1498,8 @@ export type ProductUncheckedUpdateWithoutWaysInput = {
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1442,6 +1520,8 @@ export type ProductCreateWithoutCategoryInput = {
   id?: string
   name: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
@@ -1465,6 +1545,8 @@ export type ProductUncheckedCreateWithoutCategoryInput = {
   name: string
   manufacturerId?: string | null
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorAId?: string | null
   connectorBId?: string | null
@@ -1512,6 +1594,8 @@ export type ProductCreateWithoutOrgPricesInput = {
   id?: string
   name: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
@@ -1536,6 +1620,8 @@ export type ProductUncheckedCreateWithoutOrgPricesInput = {
   manufacturerId?: string | null
   categoryId: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorAId?: string | null
   connectorBId?: string | null
@@ -1572,6 +1658,8 @@ export type ProductUpdateWithoutOrgPricesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1596,6 +1684,8 @@ export type ProductUncheckedUpdateWithoutOrgPricesInput = {
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1616,6 +1706,8 @@ export type ProductCreateWithoutAssetsInput = {
   id?: string
   name: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
@@ -1640,6 +1732,8 @@ export type ProductUncheckedCreateWithoutAssetsInput = {
   manufacturerId?: string | null
   categoryId: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorAId?: string | null
   connectorBId?: string | null
@@ -1676,6 +1770,8 @@ export type ProductUpdateWithoutAssetsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1700,6 +1796,8 @@ export type ProductUncheckedUpdateWithoutAssetsInput = {
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1720,6 +1818,8 @@ export type ProductCreateWithoutFeaturedInBundleTemplatesInput = {
   id?: string
   name: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
@@ -1744,6 +1844,8 @@ export type ProductUncheckedCreateWithoutFeaturedInBundleTemplatesInput = {
   manufacturerId?: string | null
   categoryId: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorAId?: string | null
   connectorBId?: string | null
@@ -1785,6 +1887,8 @@ export type ProductCreateWithoutStocktakeLinesInput = {
   id?: string
   name: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
@@ -1809,6 +1913,8 @@ export type ProductUncheckedCreateWithoutStocktakeLinesInput = {
   manufacturerId?: string | null
   categoryId: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorAId?: string | null
   connectorBId?: string | null
@@ -1845,6 +1951,8 @@ export type ProductUpdateWithoutStocktakeLinesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1869,6 +1977,8 @@ export type ProductUncheckedUpdateWithoutStocktakeLinesInput = {
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1889,6 +1999,8 @@ export type ProductCreateWithoutStocktakeCountsInput = {
   id?: string
   name: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
@@ -1913,6 +2025,8 @@ export type ProductUncheckedCreateWithoutStocktakeCountsInput = {
   manufacturerId?: string | null
   categoryId: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorAId?: string | null
   connectorBId?: string | null
@@ -1949,6 +2063,8 @@ export type ProductUpdateWithoutStocktakeCountsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1973,6 +2089,8 @@ export type ProductUncheckedUpdateWithoutStocktakeCountsInput = {
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1995,6 +2113,8 @@ export type ProductCreateManyCreatedByInput = {
   manufacturerId?: string | null
   categoryId: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorAId?: string | null
   connectorBId?: string | null
@@ -2008,6 +2128,8 @@ export type ProductUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2032,6 +2154,8 @@ export type ProductUncheckedUpdateWithoutCreatedByInput = {
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2054,6 +2178,8 @@ export type ProductUncheckedUpdateManyWithoutCreatedByInput = {
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2068,6 +2194,8 @@ export type ProductCreateManyManufacturerInput = {
   name: string
   categoryId: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorAId?: string | null
   connectorBId?: string | null
@@ -2082,6 +2210,8 @@ export type ProductUpdateWithoutManufacturerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2105,6 +2235,8 @@ export type ProductUncheckedUpdateWithoutManufacturerInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2127,6 +2259,8 @@ export type ProductUncheckedUpdateManyWithoutManufacturerInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2143,6 +2277,8 @@ export type ProductCreateManyConnectorARefInput = {
   manufacturerId?: string | null
   categoryId: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorBId?: string | null
   lengthCm?: number | null
@@ -2158,6 +2294,8 @@ export type ProductCreateManyConnectorBRefInput = {
   manufacturerId?: string | null
   categoryId: string
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorAId?: string | null
   lengthCm?: number | null
@@ -2171,6 +2309,8 @@ export type ProductUpdateWithoutConnectorARefInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2195,6 +2335,8 @@ export type ProductUncheckedUpdateWithoutConnectorARefInput = {
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2217,6 +2359,8 @@ export type ProductUncheckedUpdateManyWithoutConnectorARefInput = {
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2230,6 +2374,8 @@ export type ProductUpdateWithoutConnectorBRefInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2254,6 +2400,8 @@ export type ProductUncheckedUpdateWithoutConnectorBRefInput = {
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2276,6 +2424,8 @@ export type ProductUncheckedUpdateManyWithoutConnectorBRefInput = {
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2290,6 +2440,8 @@ export type ProductCreateManyCategoryInput = {
   name: string
   manufacturerId?: string | null
   imagePath?: string | null
+  caption?: string | null
+  details?: string | null
   cableType?: string | null
   connectorAId?: string | null
   connectorBId?: string | null
@@ -2304,6 +2456,8 @@ export type ProductUpdateWithoutCategoryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2327,6 +2481,8 @@ export type ProductUncheckedUpdateWithoutCategoryInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2349,6 +2505,8 @@ export type ProductUncheckedUpdateManyWithoutCategoryInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2363,6 +2521,8 @@ export type ProductUpdateWithoutFeaturedInBundleTemplatesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2387,6 +2547,8 @@ export type ProductUncheckedUpdateWithoutFeaturedInBundleTemplatesInput = {
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2409,6 +2571,8 @@ export type ProductUncheckedUpdateManyWithoutFeaturedInBundleTemplatesInput = {
   manufacturerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2510,6 +2674,8 @@ export type ProductSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   manufacturerId?: boolean
   categoryId?: boolean
   imagePath?: boolean
+  caption?: boolean
+  details?: boolean
   cableType?: boolean
   connectorAId?: boolean
   connectorBId?: boolean
@@ -2539,6 +2705,8 @@ export type ProductSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   manufacturerId?: boolean
   categoryId?: boolean
   imagePath?: boolean
+  caption?: boolean
+  details?: boolean
   cableType?: boolean
   connectorAId?: boolean
   connectorBId?: boolean
@@ -2560,6 +2728,8 @@ export type ProductSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   manufacturerId?: boolean
   categoryId?: boolean
   imagePath?: boolean
+  caption?: boolean
+  details?: boolean
   cableType?: boolean
   connectorAId?: boolean
   connectorBId?: boolean
@@ -2581,6 +2751,8 @@ export type ProductSelectScalar = {
   manufacturerId?: boolean
   categoryId?: boolean
   imagePath?: boolean
+  caption?: boolean
+  details?: boolean
   cableType?: boolean
   connectorAId?: boolean
   connectorBId?: boolean
@@ -2591,7 +2763,7 @@ export type ProductSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "manufacturerId" | "categoryId" | "imagePath" | "cableType" | "connectorAId" | "connectorBId" | "lengthCm" | "isLicense" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
+export type ProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "manufacturerId" | "categoryId" | "imagePath" | "caption" | "details" | "cableType" | "connectorAId" | "connectorBId" | "lengthCm" | "isLicense" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
 export type ProductInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   manufacturer?: boolean | Prisma.Product$manufacturerArgs<ExtArgs>
   category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
@@ -2656,6 +2828,17 @@ export type $ProductPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
      * Object key, like Manufacturer.logoPath.
      */
     imagePath: string | null
+    /**
+     * What this product is, in the words the team uses for it — "16-Port PoE
+     * switch" for a USW-Pro-Max-16-PoE. Shown after the name wherever units are
+     * listed. Part of the shared catalogue, so it answers to productControl.
+     */
+    caption: string | null
+    /**
+     * Everything longer: handling notes, what to watch out for. Shown on the
+     * product's own panel only.
+     */
+    details: string | null
     /**
      * Cable attributes — null on anything that is not a cable. Any of them set is
      * what makes a product a cable (`isCable` in src/lib/cable.ts); the name is
@@ -3137,6 +3320,8 @@ export interface ProductFieldRefs {
   readonly manufacturerId: Prisma.FieldRef<"Product", 'String'>
   readonly categoryId: Prisma.FieldRef<"Product", 'String'>
   readonly imagePath: Prisma.FieldRef<"Product", 'String'>
+  readonly caption: Prisma.FieldRef<"Product", 'String'>
+  readonly details: Prisma.FieldRef<"Product", 'String'>
   readonly cableType: Prisma.FieldRef<"Product", 'String'>
   readonly connectorAId: Prisma.FieldRef<"Product", 'String'>
   readonly connectorBId: Prisma.FieldRef<"Product", 'String'>

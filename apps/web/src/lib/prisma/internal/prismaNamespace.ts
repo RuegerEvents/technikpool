@@ -4002,6 +4002,8 @@ export const ProductScalarFieldEnum = {
   manufacturerId: 'manufacturerId',
   categoryId: 'categoryId',
   imagePath: 'imagePath',
+  caption: 'caption',
+  details: 'details',
   cableType: 'cableType',
   connectorAId: 'connectorAId',
   connectorBId: 'connectorBId',
@@ -4089,7 +4091,8 @@ export type LicenseCredentialScalarFieldEnum = (typeof LicenseCredentialScalarFi
 export const BundleTemplateScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  description: 'description',
+  caption: 'caption',
+  details: 'details',
   organizationId: 'organizationId',
   categoryId: 'categoryId',
   createdAt: 'createdAt',

@@ -487,6 +487,14 @@ model Product {
   /// Object key, like Manufacturer.logoPath.
   imagePath      String?
 
+  /// What this product is, in the words the team uses for it — "16-Port PoE
+  /// switch" for a USW-Pro-Max-16-PoE. Shown after the name wherever units are
+  /// listed. Part of the shared catalogue, so it answers to productControl.
+  caption        String?
+  /// Everything longer: handling notes, what to watch out for. Shown on the
+  /// product's own panel only.
+  details        String?
+
   /// Cable attributes — null on anything that is not a cable. Any of them set is
   /// what makes a product a cable (`isCable` in src/lib/cable.ts); the name is
   /// still the label everywhere, these drive filters, prefills and the API's
@@ -680,7 +688,9 @@ model LicenseCredential {
 model BundleTemplate {
   id             String       @id @default(cuid())
   name           String
-  description    String?
+  // Same pair as Product.caption/details, for the kit type.
+  caption        String?
+  details        String?
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   categoryId     String

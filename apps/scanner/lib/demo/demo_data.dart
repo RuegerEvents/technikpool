@@ -159,6 +159,8 @@ class DemoData {
     id: 'prd_demo_speaker',
     name: 'K2',
     manufacturerName: 'L-Acoustics',
+    caption: 'Line-Array-Element',
+    details: 'Nur im Verbund fliegen, max. 12 Elemente pro Seite.',
     category: Category(
       id: 'catg_demo_sound',
       name: 'Ton',
@@ -171,6 +173,7 @@ class DemoData {
     id: 'prd_demo_mixer',
     name: 'CL5',
     manufacturerName: 'Yamaha',
+    caption: 'FOH-Pult',
     category: Category(
       id: 'catg_demo_sound',
       name: 'Ton',

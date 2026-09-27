@@ -1,3 +1,4 @@
+import { bundleLabel, withCaption } from '$lib/product-label';
 import { naturalCompare } from '$lib/sort';
 import { prisma } from '$lib/server/auth';
 import {
@@ -29,6 +30,7 @@ export interface ScannedAsset {
 	id: string;
 	assetTag: string;
 	productName: string;
+	productCaption: string | null;
 	manufacturerName: string | null;
 }
 
@@ -49,6 +51,7 @@ export interface ScanGroupUnit {
 	id: string;
 	assetTag: string | null;
 	productName: string;
+	productCaption: string | null;
 	manufacturerName: string | null;
 	/** Already where the scan put the unit: nothing to book, shown for completeness. */
 	done: boolean;
@@ -226,6 +229,7 @@ export async function performScan(
 		id: asset.id,
 		assetTag: asset.assetTag ?? input.assetTag,
 		productName: asset.product.name,
+		productCaption: asset.product.caption,
 		manufacturerName: asset.product.manufacturer?.name ?? null
 	};
 
@@ -387,7 +391,7 @@ const GROUP_UNIT_SELECT = {
 	status: true,
 	locationId: true,
 	parentAssetId: true,
-	product: { select: { name: true, manufacturer: { select: { name: true } } } },
+	product: { select: { name: true, caption: true, manufacturer: { select: { name: true } } } },
 	productionItems: { where: { status: 'CHECKED_OUT' }, select: { productionId: true } }
 } as const;
 
@@ -408,10 +412,11 @@ async function scanGroup(
 	if (asset.parentAssetId) {
 		const parent = await prisma.asset.findUniqueOrThrow({
 			where: { id: asset.parentAssetId },
-			select: { assetTag: true, product: { select: { name: true } } }
+			select: { assetTag: true, product: { select: { name: true, caption: true } } }
 		});
 		kind = 'parent';
-		name = parent.assetTag ? `${parent.product.name} (${parent.assetTag})` : parent.product.name;
+		const parentName = withCaption(parent.product.name, parent.product.caption);
+		name = parent.assetTag ? `${parentName} (${parent.assetTag})` : parentName;
 		rows = await prisma.asset.findMany({
 			where: {
 				OR: [
@@ -425,10 +430,10 @@ async function scanGroup(
 	} else if (asset.bundleId) {
 		const bundle = await prisma.assetBundle.findUniqueOrThrow({
 			where: { id: asset.bundleId },
-			select: { tag: true, template: { select: { name: true } } }
+			select: { tag: true, template: { select: { name: true, caption: true } } }
 		});
 		kind = 'bundle';
-		name = bundle.tag ? `${bundle.template.name} (${bundle.tag})` : bundle.template.name;
+		name = bundleLabel(bundle);
 		rows = await prisma.asset.findMany({
 			where: {
 				bundleId: asset.bundleId,
@@ -451,6 +456,7 @@ async function scanGroup(
 			id: row.id,
 			assetTag: row.assetTag,
 			productName: row.product.name,
+			productCaption: row.product.caption,
 			manufacturerName: row.product.manufacturer?.name ?? null,
 			done: toProduction
 				? row.productionItems.some((item) => item.productionId === target.targetId)

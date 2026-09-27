@@ -314,8 +314,9 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
     }
   }
 
-  static String _itemLabel(StocktakeItem? item) =>
-      item == null ? '—' : productLabel(item.manufacturerName, item.productName);
+  static String _itemLabel(StocktakeItem? item) => item == null
+      ? '—'
+      : withCaption(productLabel(item.manufacturerName, item.productName), item.productCaption);
 
   /// The accessories that came with a scanned unit, or a bundle's members,
   /// pre-checked: the operator unchecks what is missing. With a [group], what
@@ -350,7 +351,11 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
       picked.toList(),
       bundle ? StocktakeTickRequestVia.bundle : StocktakeTickRequestVia.parent,
       titles: {
-        for (final e in entries) e.assetId: productLabel(e.manufacturerName, e.productName),
+        for (final e in entries)
+          e.assetId: withCaption(
+            productLabel(e.manufacturerName, e.productName),
+            e.productCaption,
+          ),
       },
       codes: {for (final e in entries) e.assetId: e.assetTag ?? ''},
     );
@@ -559,7 +564,10 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
     final count = await showDialog<int>(
       context: context,
       builder: (_) => _CountDialog(
-        title: productLabel(product.manufacturerName, product.productName),
+        title: withCaption(
+          productLabel(product.manufacturerName, product.productName),
+          product.productCaption,
+        ),
         initial: current,
       ),
     );
@@ -901,7 +909,12 @@ class _ConfirmSheetState extends State<_ConfirmSheet> {
                                   ? _checked.add(e.assetId)
                                   : _checked.remove(e.assetId),
                             ),
-                      title: Text(productLabel(e.manufacturerName, e.productName)),
+                      title: Text(
+                        withCaption(
+                          productLabel(e.manufacturerName, e.productName),
+                          e.productCaption,
+                        ),
+                      ),
                       subtitle: Text(
                         [
                           ?e.assetTag,
@@ -1009,6 +1022,7 @@ class _OpenHereState extends State<_OpenHere> {
                     i.manufacturerName,
                     i.assetTag,
                     i.serialNumber,
+                    i.productCaption,
                     i.bundleName,
                     i.category.name,
                     if (i.cable case final cable?) cableConnectors(cable),
@@ -1023,6 +1037,7 @@ class _OpenHereState extends State<_OpenHere> {
                   inFilter(p.category) &&
                   _matches([
                     p.productName,
+                    p.productCaption,
                     p.manufacturerName,
                     p.category.name,
                     if (p.cable case final cable?) cableConnectors(cable),
@@ -1111,7 +1126,12 @@ class _OpenHereState extends State<_OpenHere> {
           for (final item in shownItems)
             ListTile(
               leading: const Icon(Icons.check_box_outline_blank),
-              title: Text(productLabel(item.manufacturerName, item.productName)),
+              title: Text(
+                withCaption(
+                  productLabel(item.manufacturerName, item.productName),
+                  item.productCaption,
+                ),
+              ),
               subtitle: _Subtitle(
                 category: item.category,
                 cable: item.cable,
@@ -1132,7 +1152,12 @@ class _OpenHereState extends State<_OpenHere> {
                 final at = here(p);
                 final mine = widget.pendingCounts[p.productId] ?? at?.myCount;
                 return ListTile(
-                  title: Text(productLabel(p.manufacturerName, p.productName)),
+                  title: Text(
+                    withCaption(
+                      productLabel(p.manufacturerName, p.productName),
+                      p.productCaption,
+                    ),
+                  ),
                   subtitle: _Subtitle(
                     category: p.category,
                     cable: p.cable,

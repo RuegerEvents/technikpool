@@ -52,7 +52,7 @@ abstract class InventoryClient {
   ///
   /// [productId] - Only units of this product.
   ///
-  /// [q] - Case-insensitive match on asset tag, serial number, product or manufacturer name.
+  /// [q] - Case-insensitive match on asset tag, serial number, product name or caption, or manufacturer name.
   ///
   /// [cursor] - The `nextCursor` from a previous page.
   @GET('/api/v1/assets')

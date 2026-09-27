@@ -16,6 +16,8 @@ class Product {
     required this.name,
     required this.manufacturerName,
     required this.category,
+    this.caption,
+    this.details,
     this.imageUrl,
     this.cable,
   });
@@ -29,6 +31,17 @@ class Product {
   /// generic laptop. Show the product name alone then, not a placeholder.
   ///
   final String? manufacturerName;
+
+  /// What the team calls this product ("16-port PoE switch"), to be.
+  /// shown after its name. Not required, so an older client keeps.
+  /// compiling.
+  ///
+  final String? caption;
+
+  /// Free text about the product — handling notes and the like. For a.
+  /// view of the product or one of its units, not for lists.
+  ///
+  final String? details;
   final Category category;
   final String? imageUrl;
 

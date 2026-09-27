@@ -207,9 +207,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       ),
                     ),
                     title: Text(
-                      productLabel(
-                        asset.product.manufacturerName,
-                        asset.product.name,
+                      withCaption(
+                        productLabel(
+                          asset.product.manufacturerName,
+                          asset.product.name,
+                        ),
+                        asset.product.caption,
                       ),
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),

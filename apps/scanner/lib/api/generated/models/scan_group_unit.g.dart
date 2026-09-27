@@ -13,6 +13,7 @@ ScanGroupUnit _$ScanGroupUnitFromJson(Map<String, dynamic> json) =>
       productName: json['productName'] as String,
       manufacturerName: json['manufacturerName'] as String?,
       done: json['done'] as bool,
+      productCaption: json['productCaption'] as String?,
     );
 
 Map<String, dynamic> _$ScanGroupUnitToJson(ScanGroupUnit instance) =>
@@ -21,5 +22,6 @@ Map<String, dynamic> _$ScanGroupUnitToJson(ScanGroupUnit instance) =>
       'assetTag': ?instance.assetTag,
       'productName': instance.productName,
       'manufacturerName': ?instance.manufacturerName,
+      'productCaption': ?instance.productCaption,
       'done': instance.done,
     };

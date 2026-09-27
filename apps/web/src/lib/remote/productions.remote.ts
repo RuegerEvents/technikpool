@@ -156,7 +156,9 @@ export const getProduction = query(v.string(), async (id: string) => {
 							accessories: { select: { id: true } }
 						}
 					},
-					sourceBundle: { select: { id: true, template: { select: { name: true } } } }
+					sourceBundle: {
+						select: { id: true, template: { select: { name: true, caption: true } } }
+					}
 				},
 				// The page groups these into sections in the order it meets them, and
 				// the print routes walk them as they come — so an unordered list is a

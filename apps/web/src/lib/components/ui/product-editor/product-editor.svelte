@@ -38,6 +38,8 @@
 	} from '$lib/remote/assets.remote';
 	import type { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
 	import * as Card from '$lib/components/ui/card';
 	import { isCable, sameWays } from '$lib/cable';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
@@ -182,6 +184,11 @@
 		cable: null,
 		isLicense: false
 	});
+	// Kept beside the draft rather than in it: ProductFields is also the form a
+	// new product is created with, and these two are edited on a product that
+	// already exists.
+	let captionDraft = $state('');
+	let detailsDraft = $state('');
 	let manufacturer = $state<{ id: string | null; name: string } | null>(null);
 	// A cleared field means no manufacturer, the same as picking that entry.
 	let chosenManufacturerId = $derived(manufacturer ? manufacturerIdOf(manufacturer) : null);
@@ -212,6 +219,8 @@
 			cable: cableDraftFrom(product),
 			isLicense: product.isLicense
 		};
+		captionDraft = product.caption ?? '';
+		detailsDraft = product.details ?? '';
 		portRows = portDraftsFrom(product.ports);
 	});
 
@@ -246,6 +255,8 @@
 				chosenManufacturerId !== product.manufacturerId ||
 				draft.categoryId !== product.categoryId ||
 				draft.isLicense !== product.isLicense ||
+				captionDraft.trim() !== (product.caption ?? '') ||
+				detailsDraft.trim() !== (product.details ?? '') ||
 				cableDirty)
 	);
 	let imageDirty = $derived(seeded && draft.imagePath.trim() !== (product.imagePath ?? ''));
@@ -293,7 +304,9 @@
 								manufacturerId: chosenManufacturerId,
 								categoryId: draft.categoryId,
 								cable: cableDraftInput,
-								isLicense: draft.isLicense
+								isLicense: draft.isLicense,
+								caption: captionDraft,
+								details: detailsDraft
 							}),
 					imagePath: draft.imagePath
 				}).updates(...PRODUCT_VIEWS);
@@ -547,10 +560,10 @@
 			<div class="mb-4 rounded-md border border-dashed p-3 text-sm text-muted-foreground">
 				{#if product.hasAssets}
 					Units of this product belong to organizations you don't administer, so its name,
-					manufacturer and category are locked here.
+					manufacturer, category, caption and details are locked here.
 				{:else}
 					No organization holds units of this product, so only whoever added it or a system admin
-					can change its name, manufacturer and category.
+					can change its name, manufacturer, category, caption and details.
 				{/if}
 				{#if product.imagePath}
 					Your own organization's price still saves.
@@ -579,6 +592,35 @@
 			productId={product.id}
 			onMergeTwin={canEdit ? openMerge : undefined}
 		/>
+		<div class="mt-4 space-y-2">
+			<Label for="{idPrefix}-caption"
+				>Caption <span class="text-muted-foreground">(optional)</span></Label
+			>
+			<Input
+				id="{idPrefix}-caption"
+				bind:value={captionDraft}
+				disabled={identityLocked}
+				placeholder="e.g. 16-port PoE switch"
+			/>
+			<p class="text-xs text-muted-foreground">
+				What the team calls it. Shown next to the name wherever units are listed.
+			</p>
+		</div>
+		<div class="mt-4 space-y-2">
+			<Label for="{idPrefix}-details"
+				>Details <span class="text-muted-foreground">(optional)</span></Label
+			>
+			<textarea
+				id="{idPrefix}-details"
+				bind:value={detailsDraft}
+				disabled={identityLocked}
+				rows="4"
+				class="w-full rounded-md border bg-background px-3 py-2 text-sm disabled:opacity-50"
+			></textarea>
+			<p class="text-xs text-muted-foreground">
+				Handling notes and anything else worth knowing. Shown with the product only.
+			</p>
+		</div>
 		{#if hasPanel}
 			<div class="mt-4 space-y-2">
 				<p class="text-sm font-medium">Connectors</p>

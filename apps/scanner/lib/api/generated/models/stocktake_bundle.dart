@@ -18,6 +18,8 @@ class StocktakeBundle {
   
   final String id;
   final String? tag;
+
+  /// The bundle type, with its caption where it has one.
   final String name;
 
   Map<String, Object?> toJson() => _$StocktakeBundleToJson(this);

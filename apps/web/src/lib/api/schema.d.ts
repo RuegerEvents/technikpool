@@ -669,6 +669,17 @@ export interface components {
              *     generic laptop. Show the product name alone then, not a placeholder.
              */
             manufacturerName: string | null;
+            /**
+             * @description What the team calls this product ("16-port PoE switch"), to be
+             *     shown after its name. Not required, so an older client keeps
+             *     compiling.
+             */
+            caption?: string | null;
+            /**
+             * @description Free text about the product — handling notes and the like. For a
+             *     view of the product or one of its units, not for lists.
+             */
+            details?: string | null;
             category: components["schemas"]["Category"];
             imageUrl?: string | null;
             /**
@@ -783,7 +794,10 @@ export interface components {
              * @enum {string}
              */
             kind: "bundle" | "parent";
-            /** @description The kit's or the parent unit's name, with its tag where it has one. */
+            /**
+             * @description The kit's or the parent unit's name, with its caption and its tag
+             *     where it has them.
+             */
             name: string;
             units: components["schemas"]["ScanGroupUnit"][];
         };
@@ -792,6 +806,11 @@ export interface components {
             assetTag: string | null;
             productName: string;
             manufacturerName: string | null;
+            /**
+             * @description The product's caption (see Product.caption), to be shown after the
+             *     product name. Not required, so an older client keeps compiling.
+             */
+            productCaption?: string | null;
             /** @description Already at the scan's target; nothing to book. */
             done: boolean;
         };
@@ -822,6 +841,11 @@ export interface components {
             productName: string;
             /** @description Null when the product has no maker; see Product.manufacturerName. */
             manufacturerName: string | null;
+            /**
+             * @description The product's caption (see Product.caption), to be shown after the
+             *     product name. Not required, so an older client keeps compiling.
+             */
+            productCaption?: string | null;
         };
         StocktakeScopeRequest: {
             organizationId: string;
@@ -888,6 +912,11 @@ export interface components {
             assetTag: string | null;
             serialNumber?: string | null;
             productName: string;
+            /**
+             * @description The product's caption (see Product.caption), to be shown after the
+             *     product name. Not required, so an older client keeps compiling.
+             */
+            productCaption?: string | null;
             manufacturerName: string | null;
             category: components["schemas"]["Category"];
             /**
@@ -898,7 +927,7 @@ export interface components {
             cable?: components["schemas"]["CableSpec"] | null;
             /** @description Set on an accessory; it is confirmed when its parent is scanned. */
             parentAssetId: string | null;
-            /** @description The bundle it belongs to, with its tag where it has one. */
+            /** @description The bundle it belongs to, with its caption and its tag where it has them. */
             bundleName?: string | null;
             /**
              * @description `open` is not counted yet; it turns into `missing` when the
@@ -924,6 +953,11 @@ export interface components {
         StocktakeProductCount: {
             productId: string;
             productName: string;
+            /**
+             * @description The product's caption (see Product.caption), to be shown after the
+             *     product name. Not required, so an older client keeps compiling.
+             */
+            productCaption?: string | null;
             manufacturerName: string | null;
             category: components["schemas"]["Category"];
             /**
@@ -978,12 +1012,16 @@ export interface components {
         StocktakeConfirmGroup: {
             /** @enum {string} */
             kind: "bundle" | "parent";
-            /** @description The kit's or the parent unit's name, with its tag where it has one. */
+            /**
+             * @description The kit's or the parent unit's name, with its caption and its tag
+             *     where it has them.
+             */
             name: string;
         };
         StocktakeBundle: {
             id: string;
             tag?: string | null;
+            /** @description The bundle type, with its caption where it has one. */
             name: string;
         };
         StocktakeConfirmEntry: {
@@ -991,6 +1029,11 @@ export interface components {
             assetTag: string | null;
             productName: string;
             manufacturerName: string | null;
+            /**
+             * @description The product's caption (see Product.caption), to be shown after the
+             *     product name. Not required, so an older client keeps compiling.
+             */
+            productCaption?: string | null;
             /** @description Counted already, by this person. Null when still to confirm. */
             foundByName: string | null;
         };
@@ -1338,7 +1381,7 @@ export interface operations {
                 categoryId?: string;
                 /** @description Only units of this product. */
                 productId?: string;
-                /** @description Case-insensitive match on asset tag, serial number, product or manufacturer name. */
+                /** @description Case-insensitive match on asset tag, serial number, product name or caption, or manufacturer name. */
                 q?: string;
                 limit?: number;
                 /** @description The `nextCursor` from a previous page. */

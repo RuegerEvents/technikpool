@@ -150,7 +150,10 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
       padding: const EdgeInsets.all(16),
       children: [
         Text(
-          productLabel(asset.product.manufacturerName, asset.product.name),
+          withCaption(
+            productLabel(asset.product.manufacturerName, asset.product.name),
+            asset.product.caption,
+          ),
           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
@@ -184,6 +187,12 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
         ],
         if (asset.currentProduction != null)
           _row(l10n.checkedOutTo, asset.currentProduction!.name),
+        // The product's notes — what a label has no room for.
+        if (asset.product.details case final details?
+            when details.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text(details),
+        ],
         const SizedBox(height: 24),
         Text(
           l10n.history,

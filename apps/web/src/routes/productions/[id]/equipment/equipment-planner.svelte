@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { naturalCompare } from '$lib/sort';
+	import { withCaption } from '$lib/product-label';
 	import { categoryLabel } from '$lib/category';
 	import { getErrorMessage, plural, orgLabel } from '$lib/utils';
 	import { resolve } from '$app/paths';
@@ -27,6 +28,7 @@
 	type BundleTemplateRow = {
 		templateId: string;
 		name: string;
+		caption: string | null;
 		categoryId: string;
 		categoryColor: string;
 		organizationName: string;
@@ -241,6 +243,7 @@
 				row = {
 					templateId: b.templateId,
 					name: b.name,
+					caption: b.caption,
 					categoryId: b.categoryId,
 					categoryColor: b.categoryColor,
 					organizationName: b.organizationName,
@@ -818,7 +821,7 @@
 										class="mr-1 inline-block h-1.5 w-1.5 rounded-full"
 										style="background-color: {row.categoryColor}"
 									></span>
-									Bundle · {row.name}
+									Bundle · {withCaption(row.name, row.caption)}
 								</p>
 								<p class="truncate text-xs text-muted-foreground">
 									{row.organizationName}{locationName ? ` · ${locationName}` : ''} · {plural(
@@ -846,7 +849,7 @@
 										class="mr-1 inline-block h-1.5 w-1.5 rounded-full"
 										style="background-color: {g.categoryColor}"
 									></span>
-									{g.productName}
+									{withCaption(g.productName, g.productCaption)}
 								</p>
 								<p class="truncate text-xs text-muted-foreground">
 									{[g.manufacturerName, g.organizationName, g.locationName]
@@ -910,7 +913,7 @@
 									<ProductThumb path={row.imagePath} alt={row.name} />
 									<div class="min-w-0 flex-1">
 										<p class="truncate text-sm font-medium">
-											Bundle · {row.name}{tags ? ` (${tags})` : ''}
+											Bundle · {withCaption(row.name, row.caption)}{tags ? ` (${tags})` : ''}
 										</p>
 										<p class="truncate text-xs text-muted-foreground">
 											{row.organizationName}{locationName ? ` · ${locationName}` : ''} · {plural(
@@ -926,7 +929,9 @@
 								<div class="flex items-center gap-2 border-b px-3 py-2 last:border-0">
 									<ProductThumb path={g.imagePath} alt={g.productName} />
 									<div class="min-w-0 flex-1">
-										<p class="truncate text-sm font-medium">{g.productName}</p>
+										<p class="truncate text-sm font-medium">
+											{withCaption(g.productName, g.productCaption)}
+										</p>
 										<p class="truncate text-xs text-muted-foreground">
 											{[g.manufacturerName, g.organizationName].filter(Boolean).join(' · ')}
 										</p>

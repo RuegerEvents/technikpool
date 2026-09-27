@@ -134,7 +134,8 @@
 	let bundleDraft = $state({
 		name: '',
 		categoryId: '',
-		description: '',
+		caption: '',
+		details: '',
 		tag: '',
 		netPurchasePrice: '',
 		locationId: ''
@@ -145,7 +146,8 @@
 		bundleDraft = {
 			name: bundle.template.name,
 			categoryId: bundle.template.categoryId,
-			description: bundle.template.description ?? '',
+			caption: bundle.template.caption ?? '',
+			details: bundle.template.details ?? '',
 			tag: bundle.tag ?? '',
 			netPurchasePrice: bundle.netPurchasePrice?.toString() ?? '',
 			locationId: bundle.locationId ?? ''
@@ -157,7 +159,8 @@
 	let templateDirty = $derived(
 		bundleDraft.name !== bundle.template.name ||
 			bundleDraft.categoryId !== bundle.template.categoryId ||
-			bundleDraft.description !== (bundle.template.description ?? '')
+			bundleDraft.caption.trim() !== (bundle.template.caption ?? '') ||
+			bundleDraft.details.trim() !== (bundle.template.details ?? '')
 	);
 
 	async function handleBundleSave(e: Event) {
@@ -169,7 +172,8 @@
 					? updateBundleTemplate({
 							templateId: bundle.templateId,
 							name: bundleDraft.name,
-							description: bundleDraft.description,
+							caption: bundleDraft.caption,
+							details: bundleDraft.details,
 							categoryId: bundleDraft.categoryId
 						})
 					: Promise.resolve(),
@@ -477,7 +481,11 @@
 						avatarLabel={bundle.template.organization.avatarLabel}
 						class="text-sm text-muted-foreground"
 					/>
-					<h1 class="text-3xl font-bold tracking-tight">{bundle.template.name}</h1>
+					<h1 class="text-3xl font-bold tracking-tight">
+						{bundle.template.name}{#if bundle.template.caption}<span
+								class="ml-2 font-normal text-muted-foreground">— {bundle.template.caption}</span
+							>{/if}
+					</h1>
 					<div class="flex flex-wrap items-center gap-2">
 						<CategoryPill
 							name={categoryLabel(bundle.template.category)}
@@ -565,8 +573,10 @@
 				</div>
 			</div>
 
-			{#if bundle.template.description}
-				<p class="max-w-prose text-sm text-muted-foreground">{bundle.template.description}</p>
+			{#if bundle.template.details}
+				<p class="max-w-prose text-sm whitespace-pre-line text-muted-foreground">
+					{bundle.template.details}
+				</p>
 			{/if}
 
 			{#if specLines.length > 0}
@@ -1148,7 +1158,7 @@
 
 <Modal bind:open={editingBundle} title="Edit Bundle" dismissible={!savingBundle}>
 	{#snippet description()}
-		Name, category, pricing, and location.
+		Name, category, caption, details, pricing, and location.
 	{/snippet}
 	{#snippet children()}
 		<form id="edit-bundle-form" class="space-y-4" onsubmit={handleBundleSave}>
@@ -1162,14 +1172,23 @@
 				<CategorySelect {categories} bind:value={bundleDraft.categoryId} />
 			</div>
 			<div class="space-y-2">
-				<Label for="description"
-					>Description <span class="text-muted-foreground">(optional)</span></Label
-				>
-				<Input
-					id="description"
-					bind:value={bundleDraft.description}
-					placeholder="What's in this bundle?"
-				/>
+				<Label for="caption">Caption <span class="text-muted-foreground">(optional)</span></Label>
+				<Input id="caption" bind:value={bundleDraft.caption} placeholder="e.g. FOH Rack" />
+				<p class="text-xs text-muted-foreground">
+					What the team calls it. Shared with every instance, and shown next to the name in every
+					list.
+				</p>
+			</div>
+			<div class="space-y-2">
+				<Label for="details">Details <span class="text-muted-foreground">(optional)</span></Label>
+				<textarea
+					id="details"
+					bind:value={bundleDraft.details}
+					rows="4"
+					class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+				<p class="text-xs text-muted-foreground">
+					What's in it, how it's packed. Shared with every instance, shown on this page only.
+				</p>
 			</div>
 			<div class="space-y-2">
 				<Label for="tag">Tag <span class="text-muted-foreground">(optional)</span></Label>

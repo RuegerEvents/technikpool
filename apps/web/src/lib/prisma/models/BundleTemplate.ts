@@ -27,7 +27,8 @@ export type AggregateBundleTemplate = {
 export type BundleTemplateMinAggregateOutputType = {
   id: string | null
   name: string | null
-  description: string | null
+  caption: string | null
+  details: string | null
   organizationId: string | null
   categoryId: string | null
   createdAt: Date | null
@@ -37,7 +38,8 @@ export type BundleTemplateMinAggregateOutputType = {
 export type BundleTemplateMaxAggregateOutputType = {
   id: string | null
   name: string | null
-  description: string | null
+  caption: string | null
+  details: string | null
   organizationId: string | null
   categoryId: string | null
   createdAt: Date | null
@@ -47,7 +49,8 @@ export type BundleTemplateMaxAggregateOutputType = {
 export type BundleTemplateCountAggregateOutputType = {
   id: number
   name: number
-  description: number
+  caption: number
+  details: number
   organizationId: number
   categoryId: number
   createdAt: number
@@ -59,7 +62,8 @@ export type BundleTemplateCountAggregateOutputType = {
 export type BundleTemplateMinAggregateInputType = {
   id?: true
   name?: true
-  description?: true
+  caption?: true
+  details?: true
   organizationId?: true
   categoryId?: true
   createdAt?: true
@@ -69,7 +73,8 @@ export type BundleTemplateMinAggregateInputType = {
 export type BundleTemplateMaxAggregateInputType = {
   id?: true
   name?: true
-  description?: true
+  caption?: true
+  details?: true
   organizationId?: true
   categoryId?: true
   createdAt?: true
@@ -79,7 +84,8 @@ export type BundleTemplateMaxAggregateInputType = {
 export type BundleTemplateCountAggregateInputType = {
   id?: true
   name?: true
-  description?: true
+  caption?: true
+  details?: true
   organizationId?: true
   categoryId?: true
   createdAt?: true
@@ -162,7 +168,8 @@ export type BundleTemplateGroupByArgs<ExtArgs extends runtime.Types.Extensions.I
 export type BundleTemplateGroupByOutputType = {
   id: string
   name: string
-  description: string | null
+  caption: string | null
+  details: string | null
   organizationId: string
   categoryId: string
   createdAt: Date
@@ -193,7 +200,8 @@ export type BundleTemplateWhereInput = {
   NOT?: Prisma.BundleTemplateWhereInput | Prisma.BundleTemplateWhereInput[]
   id?: Prisma.StringFilter<"BundleTemplate"> | string
   name?: Prisma.StringFilter<"BundleTemplate"> | string
-  description?: Prisma.StringNullableFilter<"BundleTemplate"> | string | null
+  caption?: Prisma.StringNullableFilter<"BundleTemplate"> | string | null
+  details?: Prisma.StringNullableFilter<"BundleTemplate"> | string | null
   organizationId?: Prisma.StringFilter<"BundleTemplate"> | string
   categoryId?: Prisma.StringFilter<"BundleTemplate"> | string
   createdAt?: Prisma.DateTimeFilter<"BundleTemplate"> | Date | string
@@ -207,7 +215,8 @@ export type BundleTemplateWhereInput = {
 export type BundleTemplateOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  description?: Prisma.SortOrderInput | Prisma.SortOrder
+  caption?: Prisma.SortOrderInput | Prisma.SortOrder
+  details?: Prisma.SortOrderInput | Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -224,7 +233,8 @@ export type BundleTemplateWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.BundleTemplateWhereInput[]
   NOT?: Prisma.BundleTemplateWhereInput | Prisma.BundleTemplateWhereInput[]
   name?: Prisma.StringFilter<"BundleTemplate"> | string
-  description?: Prisma.StringNullableFilter<"BundleTemplate"> | string | null
+  caption?: Prisma.StringNullableFilter<"BundleTemplate"> | string | null
+  details?: Prisma.StringNullableFilter<"BundleTemplate"> | string | null
   organizationId?: Prisma.StringFilter<"BundleTemplate"> | string
   categoryId?: Prisma.StringFilter<"BundleTemplate"> | string
   createdAt?: Prisma.DateTimeFilter<"BundleTemplate"> | Date | string
@@ -238,7 +248,8 @@ export type BundleTemplateWhereUniqueInput = Prisma.AtLeast<{
 export type BundleTemplateOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  description?: Prisma.SortOrderInput | Prisma.SortOrder
+  caption?: Prisma.SortOrderInput | Prisma.SortOrder
+  details?: Prisma.SortOrderInput | Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -254,7 +265,8 @@ export type BundleTemplateScalarWhereWithAggregatesInput = {
   NOT?: Prisma.BundleTemplateScalarWhereWithAggregatesInput | Prisma.BundleTemplateScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"BundleTemplate"> | string
   name?: Prisma.StringWithAggregatesFilter<"BundleTemplate"> | string
-  description?: Prisma.StringNullableWithAggregatesFilter<"BundleTemplate"> | string | null
+  caption?: Prisma.StringNullableWithAggregatesFilter<"BundleTemplate"> | string | null
+  details?: Prisma.StringNullableWithAggregatesFilter<"BundleTemplate"> | string | null
   organizationId?: Prisma.StringWithAggregatesFilter<"BundleTemplate"> | string
   categoryId?: Prisma.StringWithAggregatesFilter<"BundleTemplate"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"BundleTemplate"> | Date | string
@@ -264,7 +276,8 @@ export type BundleTemplateScalarWhereWithAggregatesInput = {
 export type BundleTemplateCreateInput = {
   id?: string
   name: string
-  description?: string | null
+  caption?: string | null
+  details?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBundleTemplatesInput
@@ -276,7 +289,8 @@ export type BundleTemplateCreateInput = {
 export type BundleTemplateUncheckedCreateInput = {
   id?: string
   name: string
-  description?: string | null
+  caption?: string | null
+  details?: string | null
   organizationId: string
   categoryId: string
   createdAt?: Date | string
@@ -288,7 +302,8 @@ export type BundleTemplateUncheckedCreateInput = {
 export type BundleTemplateUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundleTemplatesNestedInput
@@ -300,7 +315,8 @@ export type BundleTemplateUpdateInput = {
 export type BundleTemplateUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -312,7 +328,8 @@ export type BundleTemplateUncheckedUpdateInput = {
 export type BundleTemplateCreateManyInput = {
   id?: string
   name: string
-  description?: string | null
+  caption?: string | null
+  details?: string | null
   organizationId: string
   categoryId: string
   createdAt?: Date | string
@@ -322,7 +339,8 @@ export type BundleTemplateCreateManyInput = {
 export type BundleTemplateUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -330,7 +348,8 @@ export type BundleTemplateUpdateManyMutationInput = {
 export type BundleTemplateUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -350,7 +369,8 @@ export type BundleTemplateOrderByRelationAggregateInput = {
 export type BundleTemplateCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  description?: Prisma.SortOrder
+  caption?: Prisma.SortOrder
+  details?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -360,7 +380,8 @@ export type BundleTemplateCountOrderByAggregateInput = {
 export type BundleTemplateMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  description?: Prisma.SortOrder
+  caption?: Prisma.SortOrder
+  details?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -370,7 +391,8 @@ export type BundleTemplateMaxOrderByAggregateInput = {
 export type BundleTemplateMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  description?: Prisma.SortOrder
+  caption?: Prisma.SortOrder
+  details?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -521,7 +543,8 @@ export type BundleTemplateUpdateOneRequiredWithoutInstancesNestedInput = {
 export type BundleTemplateCreateWithoutOrganizationInput = {
   id?: string
   name: string
-  description?: string | null
+  caption?: string | null
+  details?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   category: Prisma.CategoryCreateNestedOneWithoutBundleTemplatesInput
@@ -532,7 +555,8 @@ export type BundleTemplateCreateWithoutOrganizationInput = {
 export type BundleTemplateUncheckedCreateWithoutOrganizationInput = {
   id?: string
   name: string
-  description?: string | null
+  caption?: string | null
+  details?: string | null
   categoryId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -572,7 +596,8 @@ export type BundleTemplateScalarWhereInput = {
   NOT?: Prisma.BundleTemplateScalarWhereInput | Prisma.BundleTemplateScalarWhereInput[]
   id?: Prisma.StringFilter<"BundleTemplate"> | string
   name?: Prisma.StringFilter<"BundleTemplate"> | string
-  description?: Prisma.StringNullableFilter<"BundleTemplate"> | string | null
+  caption?: Prisma.StringNullableFilter<"BundleTemplate"> | string | null
+  details?: Prisma.StringNullableFilter<"BundleTemplate"> | string | null
   organizationId?: Prisma.StringFilter<"BundleTemplate"> | string
   categoryId?: Prisma.StringFilter<"BundleTemplate"> | string
   createdAt?: Prisma.DateTimeFilter<"BundleTemplate"> | Date | string
@@ -582,7 +607,8 @@ export type BundleTemplateScalarWhereInput = {
 export type BundleTemplateCreateWithoutCategoryInput = {
   id?: string
   name: string
-  description?: string | null
+  caption?: string | null
+  details?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBundleTemplatesInput
@@ -593,7 +619,8 @@ export type BundleTemplateCreateWithoutCategoryInput = {
 export type BundleTemplateUncheckedCreateWithoutCategoryInput = {
   id?: string
   name: string
-  description?: string | null
+  caption?: string | null
+  details?: string | null
   organizationId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -630,7 +657,8 @@ export type BundleTemplateUpdateManyWithWhereWithoutCategoryInput = {
 export type BundleTemplateCreateWithoutFeaturedProductsInput = {
   id?: string
   name: string
-  description?: string | null
+  caption?: string | null
+  details?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBundleTemplatesInput
@@ -641,7 +669,8 @@ export type BundleTemplateCreateWithoutFeaturedProductsInput = {
 export type BundleTemplateUncheckedCreateWithoutFeaturedProductsInput = {
   id?: string
   name: string
-  description?: string | null
+  caption?: string | null
+  details?: string | null
   organizationId: string
   categoryId: string
   createdAt?: Date | string
@@ -673,7 +702,8 @@ export type BundleTemplateUpdateManyWithWhereWithoutFeaturedProductsInput = {
 export type BundleTemplateCreateWithoutInstancesInput = {
   id?: string
   name: string
-  description?: string | null
+  caption?: string | null
+  details?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBundleTemplatesInput
@@ -684,7 +714,8 @@ export type BundleTemplateCreateWithoutInstancesInput = {
 export type BundleTemplateUncheckedCreateWithoutInstancesInput = {
   id?: string
   name: string
-  description?: string | null
+  caption?: string | null
+  details?: string | null
   organizationId: string
   categoryId: string
   createdAt?: Date | string
@@ -711,7 +742,8 @@ export type BundleTemplateUpdateToOneWithWhereWithoutInstancesInput = {
 export type BundleTemplateUpdateWithoutInstancesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundleTemplatesNestedInput
@@ -722,7 +754,8 @@ export type BundleTemplateUpdateWithoutInstancesInput = {
 export type BundleTemplateUncheckedUpdateWithoutInstancesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -733,7 +766,8 @@ export type BundleTemplateUncheckedUpdateWithoutInstancesInput = {
 export type BundleTemplateCreateManyOrganizationInput = {
   id?: string
   name: string
-  description?: string | null
+  caption?: string | null
+  details?: string | null
   categoryId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -742,7 +776,8 @@ export type BundleTemplateCreateManyOrganizationInput = {
 export type BundleTemplateUpdateWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.CategoryUpdateOneRequiredWithoutBundleTemplatesNestedInput
@@ -753,7 +788,8 @@ export type BundleTemplateUpdateWithoutOrganizationInput = {
 export type BundleTemplateUncheckedUpdateWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -764,7 +800,8 @@ export type BundleTemplateUncheckedUpdateWithoutOrganizationInput = {
 export type BundleTemplateUncheckedUpdateManyWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -773,7 +810,8 @@ export type BundleTemplateUncheckedUpdateManyWithoutOrganizationInput = {
 export type BundleTemplateCreateManyCategoryInput = {
   id?: string
   name: string
-  description?: string | null
+  caption?: string | null
+  details?: string | null
   organizationId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -782,7 +820,8 @@ export type BundleTemplateCreateManyCategoryInput = {
 export type BundleTemplateUpdateWithoutCategoryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundleTemplatesNestedInput
@@ -793,7 +832,8 @@ export type BundleTemplateUpdateWithoutCategoryInput = {
 export type BundleTemplateUncheckedUpdateWithoutCategoryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -804,7 +844,8 @@ export type BundleTemplateUncheckedUpdateWithoutCategoryInput = {
 export type BundleTemplateUncheckedUpdateManyWithoutCategoryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -813,7 +854,8 @@ export type BundleTemplateUncheckedUpdateManyWithoutCategoryInput = {
 export type BundleTemplateUpdateWithoutFeaturedProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBundleTemplatesNestedInput
@@ -824,7 +866,8 @@ export type BundleTemplateUpdateWithoutFeaturedProductsInput = {
 export type BundleTemplateUncheckedUpdateWithoutFeaturedProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -835,7 +878,8 @@ export type BundleTemplateUncheckedUpdateWithoutFeaturedProductsInput = {
 export type BundleTemplateUncheckedUpdateManyWithoutFeaturedProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  caption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -885,7 +929,8 @@ export type BundleTemplateCountOutputTypeCountFeaturedProductsArgs<ExtArgs exten
 export type BundleTemplateSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
-  description?: boolean
+  caption?: boolean
+  details?: boolean
   organizationId?: boolean
   categoryId?: boolean
   createdAt?: boolean
@@ -900,7 +945,8 @@ export type BundleTemplateSelect<ExtArgs extends runtime.Types.Extensions.Intern
 export type BundleTemplateSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
-  description?: boolean
+  caption?: boolean
+  details?: boolean
   organizationId?: boolean
   categoryId?: boolean
   createdAt?: boolean
@@ -912,7 +958,8 @@ export type BundleTemplateSelectCreateManyAndReturn<ExtArgs extends runtime.Type
 export type BundleTemplateSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
-  description?: boolean
+  caption?: boolean
+  details?: boolean
   organizationId?: boolean
   categoryId?: boolean
   createdAt?: boolean
@@ -924,14 +971,15 @@ export type BundleTemplateSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
 export type BundleTemplateSelectScalar = {
   id?: boolean
   name?: boolean
-  description?: boolean
+  caption?: boolean
+  details?: boolean
   organizationId?: boolean
   categoryId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type BundleTemplateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "organizationId" | "categoryId" | "createdAt" | "updatedAt", ExtArgs["result"]["bundleTemplate"]>
+export type BundleTemplateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "caption" | "details" | "organizationId" | "categoryId" | "createdAt" | "updatedAt", ExtArgs["result"]["bundleTemplate"]>
 export type BundleTemplateInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
@@ -959,7 +1007,8 @@ export type $BundleTemplatePayload<ExtArgs extends runtime.Types.Extensions.Inte
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
-    description: string | null
+    caption: string | null
+    details: string | null
     organizationId: string
     categoryId: string
     createdAt: Date
@@ -1393,7 +1442,8 @@ export interface Prisma__BundleTemplateClient<T, Null = never, ExtArgs extends r
 export interface BundleTemplateFieldRefs {
   readonly id: Prisma.FieldRef<"BundleTemplate", 'String'>
   readonly name: Prisma.FieldRef<"BundleTemplate", 'String'>
-  readonly description: Prisma.FieldRef<"BundleTemplate", 'String'>
+  readonly caption: Prisma.FieldRef<"BundleTemplate", 'String'>
+  readonly details: Prisma.FieldRef<"BundleTemplate", 'String'>
   readonly organizationId: Prisma.FieldRef<"BundleTemplate", 'String'>
   readonly categoryId: Prisma.FieldRef<"BundleTemplate", 'String'>
   readonly createdAt: Prisma.FieldRef<"BundleTemplate", 'DateTime'>

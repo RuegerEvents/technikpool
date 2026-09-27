@@ -228,7 +228,10 @@ class _ProductUnitsScreenState extends ConsumerState<ProductUnitsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              productLabel(widget.product.manufacturerName, widget.product.name),
+              withCaption(
+                productLabel(widget.product.manufacturerName, widget.product.name),
+                widget.product.caption,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
             Text(

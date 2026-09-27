@@ -161,7 +161,7 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 			},
 			location: true,
 			organization: true,
-			bundle: { select: { id: true, template: { select: { name: true } } } },
+			bundle: { select: { id: true, template: { select: { name: true, caption: true } } } },
 			parent: PARENT_SELECT,
 			accessories: ACCESSORIES_INCLUDE
 		},
@@ -191,7 +191,7 @@ export const getProductUnits = query(v.string(), async (productId: string) => {
 		include: {
 			organization: true,
 			location: true,
-			bundle: { select: { id: true, template: { select: { name: true } } } },
+			bundle: { select: { id: true, template: { select: { name: true, caption: true } } } },
 			parent: PARENT_SELECT
 		},
 		orderBy: [{ organization: { name: 'asc' } }, ...ASSET_ORDER_BY]
@@ -216,7 +216,7 @@ export const getRetiredAssets = query(v.optional(v.string()), async (organizatio
 			},
 			location: true,
 			organization: true,
-			bundle: { select: { id: true, template: { select: { name: true } } } },
+			bundle: { select: { id: true, template: { select: { name: true, caption: true } } } },
 			// Retiring detaches in both directions, so these are always empty here —
 			// they are included so the two listings stay one shape for the page that
 			// renders both.
@@ -246,7 +246,7 @@ export const getAsset = query(v.string(), async (assetId: string) => {
 			},
 			location: true,
 			organization: true,
-			bundle: { select: { id: true, template: { select: { name: true } } } },
+			bundle: { select: { id: true, template: { select: { name: true, caption: true } } } },
 			parent: PARENT_SELECT,
 			accessories: ACCESSORIES_INCLUDE
 		}
@@ -1648,7 +1648,7 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 				product: { include: { manufacturer: true } },
 				location: true,
 				organization: true,
-				bundle: { select: { id: true, template: { select: { name: true } } } }
+				bundle: { select: { id: true, template: { select: { name: true, caption: true } } } }
 			}
 		});
 		if (detachingAccessories.length > 0) {
@@ -1983,7 +1983,10 @@ const updateProductSchema = v.object({
 	 */
 	cable: v.optional(v.nullable(cableAttrsSchema)),
 	/** Whether units of this product are licences carrying credentials. */
-	isLicense: v.optional(v.boolean())
+	isLicense: v.optional(v.boolean()),
+	/** What the team calls it, and the longer notes. `''` clears either. */
+	caption: v.optional(v.string()),
+	details: v.optional(v.string())
 });
 
 export const updateProduct = command(updateProductSchema, async (input) => {
@@ -2004,7 +2007,9 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 				connectorARef: { select: { name: true } },
 				connectorBRef: { select: { name: true } },
 				lengthCm: true,
-				isLicense: true
+				isLicense: true,
+				caption: true,
+				details: true
 			}
 		})
 	);
@@ -2041,7 +2046,13 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 	// `mergeProducts` — see `productControl`: whoever's gear it is controls what
 	// it is called. Recategorizing is identity *and* money: the category decides
 	// which rental rate other orgs' offers apply.
+	// Caption and details are shared text every org reads, so they answer to
+	// the same rule as the name rather than being open to anyone.
+	const nextCaption = input.caption === undefined ? undefined : input.caption.trim() || null;
+	const nextDetails = input.details === undefined ? undefined : input.details.trim() || null;
 	const changesIdentity =
+		(nextCaption !== undefined && nextCaption !== previousProduct.caption) ||
+		(nextDetails !== undefined && nextDetails !== previousProduct.details) ||
 		(input.name !== undefined && input.name.trim() !== previousProduct.name) ||
 		(input.manufacturerId !== undefined &&
 			input.manufacturerId !== previousProduct.manufacturerId) ||
@@ -2096,7 +2107,9 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 			...(input.categoryId ? { categoryId: input.categoryId } : {}),
 			imagePath: nextImagePath,
 			...(storedCable ?? {}),
-			...(nextIsLicense !== undefined ? { isLicense: nextIsLicense } : {})
+			...(nextIsLicense !== undefined ? { isLicense: nextIsLicense } : {}),
+			...(nextCaption !== undefined ? { caption: nextCaption } : {}),
+			...(nextDetails !== undefined ? { details: nextDetails } : {})
 		},
 		include: { manufacturer: true, category: true, ...CABLE_ENDS }
 	});
@@ -2116,7 +2129,9 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 					lengthCm: nextCable.lengthCm
 				}
 			: {}),
-		...(nextIsLicense !== undefined ? { isLicense: nextIsLicense } : {})
+		...(nextIsLicense !== undefined ? { isLicense: nextIsLicense } : {}),
+		...(nextCaption !== undefined ? { caption: nextCaption } : {}),
+		...(nextDetails !== undefined ? { details: nextDetails } : {})
 	});
 	// The loom is logged as the whole list on both sides, like a device's panel:
 	// a way has no id a revert could match, so what it can put back is the list.
@@ -2722,7 +2737,9 @@ const REVERTIBLE_PRODUCT_FIELDS = [
 	'connectorA',
 	'connectorB',
 	'lengthCm',
-	'isLicense'
+	'isLicense',
+	'caption',
+	'details'
 ] as const;
 type RevertibleProductField = (typeof REVERTIBLE_PRODUCT_FIELDS)[number];
 
@@ -3062,7 +3079,8 @@ const createBundleInstanceSchema = v.object({
 	organizationId: v.string(),
 	templateId: v.optional(v.string()),
 	newTemplateName: v.optional(v.string()),
-	description: v.optional(v.string()),
+	caption: v.optional(v.string()),
+	details: v.optional(v.string()),
 	categoryId: v.optional(v.string()),
 	tag: v.optional(v.string()),
 	// The units that go in, picked before the case exists. They are part of the
@@ -3095,7 +3113,8 @@ export const createBundleInstance = command(createBundleInstanceSchema, async (d
 		const template = await prisma.bundleTemplate.create({
 			data: {
 				name: data.newTemplateName,
-				description: data.description?.trim() || undefined,
+				caption: data.caption?.trim() || undefined,
+				details: data.details?.trim() || undefined,
 				organizationId: data.organizationId,
 				categoryId: data.categoryId
 			}
@@ -3149,7 +3168,8 @@ export const createBundleInstance = command(createBundleInstanceSchema, async (d
 const updateBundleTemplateSchema = v.object({
 	templateId: v.string(),
 	name: v.optional(v.string()),
-	description: v.optional(v.string()),
+	caption: v.optional(v.string()),
+	details: v.optional(v.string()),
 	categoryId: v.optional(v.string())
 });
 
@@ -3159,9 +3179,15 @@ export const updateBundleTemplate = command(updateBundleTemplateSchema, async (i
 	});
 	await requireOrgInventory(template.organizationId);
 
-	const data: { name?: string; description?: string | null; categoryId?: string } = {};
+	const data: {
+		name?: string;
+		caption?: string | null;
+		details?: string | null;
+		categoryId?: string;
+	} = {};
 	if (input.name !== undefined) data.name = input.name.trim();
-	if ('description' in input) data.description = input.description?.trim() || null;
+	if ('caption' in input) data.caption = input.caption?.trim() || null;
+	if ('details' in input) data.details = input.details?.trim() || null;
 	if (input.categoryId !== undefined) data.categoryId = input.categoryId;
 
 	const updated = await prisma.bundleTemplate.update({

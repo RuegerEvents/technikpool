@@ -30,7 +30,8 @@
 
 	let bundleType = $state<SelectionOrNew>(null);
 	let bundleTag = $state('');
-	let bundleDescription = $state('');
+	let bundleCaption = $state('');
+	let bundleDetails = $state('');
 	let selectedOrgId = $state('');
 	let bundleCategoryId = $state('');
 	let saving = $state(false);
@@ -162,7 +163,8 @@
 				organizationId: selectedOrgId,
 				templateId: bundleType.id ?? undefined,
 				newTemplateName: bundleType.id ? undefined : bundleType.name.trim(),
-				description: isNewBundleType ? bundleDescription.trim() || undefined : undefined,
+				caption: isNewBundleType ? bundleCaption.trim() || undefined : undefined,
+				details: isNewBundleType ? bundleDetails.trim() || undefined : undefined,
 				categoryId: isNewBundleType ? bundleCategoryId : undefined,
 				tag: bundleTag.trim() || undefined,
 				assetIds: selectedAssets.map((a) => a.id)
@@ -246,14 +248,23 @@
 				</div>
 				{#if isNewBundleType}
 					<div class="space-y-2">
-						<Label for="bundle-desc"
-							>Description <span class="text-muted-foreground">(optional)</span></Label
+						<Label for="bundle-caption"
+							>Caption <span class="text-muted-foreground">(optional)</span></Label
 						>
-						<Input
-							id="bundle-desc"
-							bind:value={bundleDescription}
-							placeholder="What's in this bundle?"
-						/>
+						<Input id="bundle-caption" bind:value={bundleCaption} placeholder="e.g. FOH Rack" />
+						<p class="text-xs text-muted-foreground">
+							What the team calls it. Shown next to the name in every list.
+						</p>
+					</div>
+					<div class="space-y-2">
+						<Label for="bundle-details"
+							>Details <span class="text-muted-foreground">(optional)</span></Label
+						>
+						<textarea
+							id="bundle-details"
+							bind:value={bundleDetails}
+							rows="3"
+							class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
 					</div>
 				{/if}
 			</Card.Content>

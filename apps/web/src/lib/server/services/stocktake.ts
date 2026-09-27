@@ -1,3 +1,4 @@
+import { bundleLabel, withCaption } from '$lib/product-label';
 import { naturalCompare } from '$lib/sort';
 import { prisma } from '$lib/server/auth';
 import type { Prisma } from '$lib/prisma/client';
@@ -578,11 +579,12 @@ const ITEM_INCLUDE = {
 			organizationId: true,
 			locationId: true,
 			organization: { select: { name: true, shortName: true } },
-			bundle: { select: { tag: true, template: { select: { name: true } } } },
+			bundle: { select: { tag: true, template: { select: { name: true, caption: true } } } },
 			product: {
 				select: {
 					id: true,
 					name: true,
+					caption: true,
 					imagePath: true,
 					// So the scanner can show a cable's ends on the list it counts from:
 					// "Kabel 5 m" alone does not say which drawer.
@@ -608,6 +610,7 @@ const LINE_INCLUDE = {
 		select: {
 			id: true,
 			name: true,
+			caption: true,
 			imagePath: true,
 			cableType: true,
 			lengthCm: true,
@@ -1104,7 +1107,7 @@ async function tick(
 const CONFIRM_SELECT = {
 	id: true,
 	assetTag: true,
-	product: { select: { name: true, manufacturer: { select: { name: true } } } }
+	product: { select: { name: true, caption: true, manufacturer: { select: { name: true } } } }
 } as const;
 
 type ConfirmAsset = Prisma.AssetGetPayload<{ select: typeof CONFIRM_SELECT }>;
@@ -1114,6 +1117,7 @@ export type ConfirmEntry = {
 	assetId: string;
 	assetTag: string | null;
 	productName: string;
+	productCaption: string | null;
 	manufacturerName: string | null;
 	foundByName: string | null;
 };
@@ -1132,6 +1136,7 @@ async function confirmEntries(
 			assetId: a.id,
 			assetTag: a.assetTag,
 			productName: a.product.name,
+			productCaption: a.product.caption,
 			manufacturerName: a.product.manufacturer?.name ?? null,
 			foundByName: item ? item.foundBy?.name || item.foundBy?.email || '—' : null
 		};
@@ -1188,7 +1193,7 @@ export async function scanIntoStocktake(
 		const bundle = code
 			? await prisma.assetBundle.findUnique({
 					where: { tag: code },
-					select: { id: true, tag: true, template: { select: { name: true } } }
+					select: { id: true, tag: true, template: { select: { name: true, caption: true } } }
 				})
 			: null;
 		if (!bundle) throw new StocktakeError('asset_not_found', `Tag "${code}" not found`, code);
@@ -1199,7 +1204,11 @@ export async function scanIntoStocktake(
 		});
 		return {
 			outcome: 'bundle',
-			bundle: { id: bundle.id, tag: bundle.tag, name: bundle.template.name },
+			bundle: {
+				id: bundle.id,
+				tag: bundle.tag,
+				name: withCaption(bundle.template.name, bundle.template.caption)
+			},
 			confirm: await confirmEntries(stocktakeId, members)
 		};
 	}
@@ -1243,14 +1252,16 @@ export async function scanIntoStocktake(
 		});
 		confirmGroup = {
 			kind: 'parent',
-			name: parent.assetTag ? `${parent.product.name} (${parent.assetTag})` : parent.product.name
+			name: parent.assetTag
+				? `${withCaption(parent.product.name, parent.product.caption)} (${parent.assetTag})`
+				: withCaption(parent.product.name, parent.product.caption)
 		};
 		group = [parent, ...siblings];
 	} else if (bundleId) {
 		const [bundle, members] = await Promise.all([
 			prisma.assetBundle.findUniqueOrThrow({
 				where: { id: bundleId },
-				select: { tag: true, template: { select: { name: true } } }
+				select: { tag: true, template: { select: { name: true, caption: true } } }
 			}),
 			prisma.asset.findMany({
 				where: { bundleId, id: { not: match.assetId }, ...ACTIVE_ASSET_WHERE },
@@ -1260,7 +1271,7 @@ export async function scanIntoStocktake(
 		]);
 		confirmGroup = {
 			kind: 'bundle',
-			name: bundle.tag ? `${bundle.template.name} (${bundle.tag})` : bundle.template.name
+			name: bundleLabel(bundle)
 		};
 		// Its own accessories are in the kit too, so they come first rather than
 		// being asked about separately.

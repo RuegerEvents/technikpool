@@ -78,6 +78,9 @@
 						<div class="flex items-start justify-between gap-2">
 							<div class="min-w-0">
 								<Card.Title class="truncate text-base">{template.name}</Card.Title>
+								{#if template.caption}
+									<p class="truncate text-sm text-muted-foreground">{template.caption}</p>
+								{/if}
 								<p class="mt-0.5 text-xs text-muted-foreground">
 									{orgLabel(template.organization)}
 								</p>
@@ -99,9 +102,6 @@
 								{/if}
 							</span>
 						</div>
-						{#if template.description}
-							<p class="mt-2 truncate text-xs text-muted-foreground">{template.description}</p>
-						{/if}
 						{#if template.instances.length > 0}
 							<div class="mt-3 flex flex-wrap gap-1.5">
 								{#each template.instances as instance, i (instance.id)}

@@ -21,6 +21,7 @@ class StocktakeProductCount {
     required this.out,
     required this.counted,
     required this.locations,
+    this.productCaption,
     this.cable,
   });
   
@@ -28,6 +29,11 @@ class StocktakeProductCount {
   
   final String productId;
   final String productName;
+
+  /// The product's caption (see Product.caption), to be shown after the.
+  /// product name. Not required, so an older client keeps compiling.
+  ///
+  final String? productCaption;
   final String? manufacturerName;
   final Category category;
 

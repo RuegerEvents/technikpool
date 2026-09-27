@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { withCaption } from '$lib/product-label';
 	import { orgLabel } from '$lib/utils';
 	import { page } from '$app/state';
 	import { getProduction } from '$lib/remote/productions.remote';
@@ -40,7 +41,10 @@
 			if (!map.has(bid)) {
 				map.set(bid, {
 					bundleId: bid,
-					bundleName: item.sourceBundle.template.name,
+					bundleName: withCaption(
+						item.sourceBundle.template.name,
+						item.sourceBundle.template.caption
+					),
 					orgName: orgLabel(item.asset.organization),
 					productCounts: []
 				});
@@ -125,7 +129,7 @@
 						<div class="inline-block h-5 w-5 border-2 border-black"></div>
 					</td>
 					<td class="py-3 font-medium">
-						{item.asset.product.name}
+						{withCaption(item.asset.product.name, item.asset.product.caption)}
 						{#if item.accessories.length > 0}
 							<!-- Tags rather than counts: someone is ticking physical
 							     objects off against this sheet. -->

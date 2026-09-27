@@ -27,6 +27,7 @@ class StocktakeItem {
     required this.foundByMe,
     required this.needsAttention,
     this.serialNumber,
+    this.productCaption,
     this.cable,
     this.bundleName,
     this.outAt,
@@ -40,6 +41,11 @@ class StocktakeItem {
   final String? assetTag;
   final String? serialNumber;
   final String productName;
+
+  /// The product's caption (see Product.caption), to be shown after the.
+  /// product name. Not required, so an older client keeps compiling.
+  ///
+  final String? productCaption;
   final String? manufacturerName;
   final Category category;
 
@@ -52,7 +58,7 @@ class StocktakeItem {
   /// Set on an accessory; it is confirmed when its parent is scanned.
   final String? parentAssetId;
 
-  /// The bundle it belongs to, with its tag where it has one.
+  /// The bundle it belongs to, with its caption and its tag where it has them.
   final String? bundleName;
 
   /// `open` is not counted yet; it turns into `missing` when the.

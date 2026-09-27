@@ -14,6 +14,7 @@ StocktakeConfirmEntry _$StocktakeConfirmEntryFromJson(
   productName: json['productName'] as String,
   manufacturerName: json['manufacturerName'] as String?,
   foundByName: json['foundByName'] as String?,
+  productCaption: json['productCaption'] as String?,
 );
 
 Map<String, dynamic> _$StocktakeConfirmEntryToJson(
@@ -23,5 +24,6 @@ Map<String, dynamic> _$StocktakeConfirmEntryToJson(
   'assetTag': ?instance.assetTag,
   'productName': instance.productName,
   'manufacturerName': ?instance.manufacturerName,
+  'productCaption': ?instance.productCaption,
   'foundByName': ?instance.foundByName,
 };

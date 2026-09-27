@@ -87,6 +87,7 @@ export const GET: RequestHandler = ({ locals, url }) =>
 							{ assetTag: { contains: q, mode: 'insensitive' } },
 							{ serialNumber: { contains: q, mode: 'insensitive' } },
 							{ product: { name: { contains: q, mode: 'insensitive' } } },
+							{ product: { caption: { contains: q, mode: 'insensitive' } } },
 							{ product: { manufacturer: { name: { contains: q, mode: 'insensitive' } } } }
 						]
 					}

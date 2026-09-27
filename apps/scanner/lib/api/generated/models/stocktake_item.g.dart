@@ -29,6 +29,7 @@ StocktakeItem _$StocktakeItemFromJson(Map<String, dynamic> json) =>
       foundByMe: json['foundByMe'] as bool,
       needsAttention: json['needsAttention'] as bool,
       serialNumber: json['serialNumber'] as String?,
+      productCaption: json['productCaption'] as String?,
       cable: json['cable'] == null
           ? null
           : CableSpec.fromJson(json['cable'] as Map<String, dynamic>),
@@ -44,6 +45,7 @@ Map<String, dynamic> _$StocktakeItemToJson(StocktakeItem instance) =>
       'assetTag': ?instance.assetTag,
       'serialNumber': ?instance.serialNumber,
       'productName': instance.productName,
+      'productCaption': ?instance.productCaption,
       'manufacturerName': ?instance.manufacturerName,
       'category': instance.category,
       'cable': ?instance.cable,

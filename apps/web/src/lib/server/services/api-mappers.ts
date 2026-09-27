@@ -2,6 +2,7 @@ import type { Schemas } from '$lib/server/api';
 import type { OrgRole } from '$lib/roles';
 import { imageSrc } from '$lib/images';
 import { isCable } from '$lib/cable';
+import { bundleLabel } from '$lib/product-label';
 import { withCableNames } from '$lib/server/services/cable-ends';
 import {
 	itemState,
@@ -130,6 +131,8 @@ type EndRefs = {
 type ProductRow = EndRefs & {
 	id: string;
 	name: string;
+	caption: string | null;
+	details: string | null;
 	imagePath: string | null;
 	cableType: string | null;
 	lengthCm: number | null;
@@ -166,6 +169,8 @@ export function toProduct(product: ProductRow): Schemas['Product'] {
 	return {
 		id: product.id,
 		name: product.name,
+		caption: product.caption,
+		details: product.details,
 		manufacturerName: product.manufacturer?.name ?? null,
 		category: toCategory(product.category),
 		// The API keeps promising an address, because the scanner has nowhere to
@@ -264,15 +269,12 @@ export function toStocktakeItem(
 		assetTag: item.asset.assetTag,
 		serialNumber: item.asset.serialNumber,
 		productName: item.asset.product.name,
+		productCaption: item.asset.product.caption,
 		manufacturerName: item.asset.product.manufacturer?.name ?? null,
 		category: toCategory(item.asset.product.category),
 		cable: toCableSpec(item.asset.product),
 		parentAssetId: item.asset.parentAssetId,
-		bundleName: bundle
-			? bundle.tag
-				? `${bundle.template.name} (${bundle.tag})`
-				: bundle.template.name
-			: null,
+		bundleName: bundle ? bundleLabel(bundle) : null,
 		state: itemState(item, closed),
 		expectedLocation: item.expectedLocation,
 		foundLocation: item.foundLocation,
@@ -296,6 +298,7 @@ export function toStocktakeDetail(
 		products: productCounts(detail, userId).map((p) => ({
 			productId: p.product.id,
 			productName: p.product.name,
+			productCaption: p.product.caption,
 			manufacturerName: p.product.manufacturer?.name ?? null,
 			category: toCategory(p.product.category),
 			cable: toCableSpec(p.product),

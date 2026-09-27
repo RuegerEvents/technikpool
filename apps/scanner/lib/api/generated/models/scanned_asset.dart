@@ -13,6 +13,7 @@ class ScannedAsset {
     required this.assetTag,
     required this.productName,
     required this.manufacturerName,
+    this.productCaption,
   });
   
   factory ScannedAsset.fromJson(Map<String, Object?> json) => _$ScannedAssetFromJson(json);
@@ -23,6 +24,11 @@ class ScannedAsset {
 
   /// Null when the product has no maker; see Product.manufacturerName.
   final String? manufacturerName;
+
+  /// The product's caption (see Product.caption), to be shown after the.
+  /// product name. Not required, so an older client keeps compiling.
+  ///
+  final String? productCaption;
 
   Map<String, Object?> toJson() => _$ScannedAssetToJson(this);
 }

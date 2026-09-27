@@ -103,7 +103,10 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
         _Entry(
           tag: tag,
           ok: true,
-          title: productLabel(result.asset.manufacturerName, result.asset.productName),
+          title: withCaption(
+            productLabel(result.asset.manufacturerName, result.asset.productName),
+            result.asset.productCaption,
+          ),
           detail: returned.isEmpty
               ? Labels.scanAction(l10n, result.action)
               : '${Labels.scanAction(l10n, result.action)} · '
@@ -360,7 +363,12 @@ class _GroupSheetState extends State<_GroupSheet> {
                           : (on) => setState(
                               () => on == true ? _checked.add(u.id) : _checked.remove(u.id),
                             ),
-                      title: Text(productLabel(u.manufacturerName, u.productName)),
+                      title: Text(
+                        withCaption(
+                          productLabel(u.manufacturerName, u.productName),
+                          u.productCaption,
+                        ),
+                      ),
                       subtitle: Text(
                         [?u.assetTag, if (u.done) l10n.groupAlreadyThere].join(' · '),
                       ),

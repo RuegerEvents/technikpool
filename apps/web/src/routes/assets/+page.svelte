@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { naturalCompare } from '$lib/sort';
+	import { withCaption } from '$lib/product-label';
 	import { categoryLabel } from '$lib/category';
 	import { getErrorMessage, orgLabel } from '$lib/utils';
 	import {
@@ -249,6 +250,7 @@
 	type Group = {
 		productId: string;
 		name: string;
+		caption: string | null;
 		imagePath: string | null;
 		manufacturerName: string | null;
 		categoryId: string;
@@ -376,6 +378,7 @@
 					acc[pid] = {
 						productId: pid,
 						name: asset.product.name,
+						caption: asset.product.caption,
 						imagePath:
 							bundleGrouping && asset.accessories.length > 0
 								? (asset.generatedImagePath ?? asset.product.imagePath)
@@ -428,6 +431,7 @@
 		if (!searchTrimmed) return true;
 		return [
 			a.product.name,
+			a.product.caption,
 			a.product.manufacturer?.name,
 			categoryLabel(a.product.category),
 			a.product.cableType,
@@ -438,6 +442,7 @@
 			a.serialNumber,
 			a.assetTag,
 			a.bundle?.template.name,
+			a.bundle?.template.caption,
 			orgLabel(a.organization),
 			a.organization.name
 		].some((v) => v?.toLowerCase().includes(searchTrimmed));
@@ -608,7 +613,8 @@
 					})
 					.filter((t) => {
 						if (!searchTrimmed) return t.totalAssets > 0;
-						if (t.name.toLowerCase().includes(searchTrimmed)) return true;
+						if ([t.name, t.caption].some((v) => v?.toLowerCase().includes(searchTrimmed)))
+							return true;
 						if (t.instances.some((i) => i.tag?.toLowerCase().includes(searchTrimmed))) return true;
 						// Search full asset list so bundles surface even when status/category filter hides the match
 						return t.instances.some((inst) =>
@@ -617,6 +623,7 @@
 								.some(
 									(a) =>
 										a.product.name.toLowerCase().includes(searchTrimmed) ||
+										(a.product.caption?.toLowerCase().includes(searchTrimmed) ?? false) ||
 										(a.product.manufacturer?.name.toLowerCase().includes(searchTrimmed) ?? false) ||
 										(a.serialNumber?.toLowerCase().includes(searchTrimmed) ?? false) ||
 										(a.assetTag?.toLowerCase().includes(searchTrimmed) ?? false)
@@ -950,6 +957,14 @@
 		{/if}
 	{/snippet}
 
+	<!-- What the team calls the product or kit ("16-port PoE switch"), right
+	     after the name it explains. -->
+	{#snippet captionChip(caption: string | null)}
+		{#if caption}
+			<span class="truncate text-xs text-muted-foreground">— {caption}</span>
+		{/if}
+	{/snippet}
+
 	{#snippet cableChips(cable: (CableAttrs & WithWays) | null)}
 		{#if cable}
 			{@const ends = cable.ways.length ? loomSummary(cable.ways) : connectorLabel(cable)}
@@ -1061,6 +1076,7 @@
 									<div class="min-w-0">
 										<div class="flex flex-wrap items-center gap-1.5">
 											<span class="font-medium">{asset.product.name}</span>
+											{@render captionChip(asset.product.caption)}
 											{@render cableChips(isCable(asset.product) ? asset.product : null)}
 										</div>
 										{#if asset.parent}
@@ -1097,7 +1113,7 @@
 										class="hover:underline"
 										onclick={(e) => e.stopPropagation()}
 									>
-										{asset.bundle.template.name}
+										{withCaption(asset.bundle.template.name, asset.bundle.template.caption)}
 									</a>
 								{:else}
 									—
@@ -1143,6 +1159,9 @@
 						</div>
 						<div class="flex flex-1 flex-col gap-1 border-t p-3">
 							<span class="text-sm leading-snug font-medium">{template.name}</span>
+							{#if template.caption}
+								<span class="text-xs text-muted-foreground">{template.caption}</span>
+							{/if}
 							<span class="text-xs text-muted-foreground">Bundle</span>
 							<div class="mt-auto flex flex-wrap items-center gap-2 pt-2">
 								{#if template.category}
@@ -1235,6 +1254,9 @@
 						</div>
 						<div class="flex flex-1 flex-col gap-1 border-t p-3">
 							<span class="text-sm leading-snug font-medium">{group.name}</span>
+							{#if group.caption}
+								<span class="text-xs text-muted-foreground">{group.caption}</span>
+							{/if}
 							<span class="text-xs text-muted-foreground">{group.manufacturerName}</span>
 							{#if group.cable}
 								<div class="flex flex-wrap items-center gap-1">
@@ -1411,6 +1433,7 @@
 											class="border-0 bg-transparent p-0"
 										/>
 										<span class="font-medium">{template.name}</span>
+										{@render captionChip(template.caption)}
 										<span
 											class="rounded-full border border-border px-1.5 py-0.5 text-xs text-muted-foreground"
 											>Bundle</span
@@ -1597,6 +1620,7 @@
 														<span class="truncate text-xs font-medium">
 															{asset.product.name}
 														</span>
+														{@render captionChip(asset.product.caption)}
 														<!-- A unit without a tag shows nothing here, unless quick-add
 														     mode is on and the gap is what somebody is here to fill. -->
 														{#if asset.assetTag || quickTagMode}
@@ -1695,6 +1719,7 @@
 											onclick={(e) => e.stopPropagation()}
 											class="font-medium underline-offset-2 hover:underline">{group.name}</a
 										>
+										{@render captionChip(group.caption)}
 										{@render cableChips(group.cable)}
 									</div>
 								</td>
@@ -1794,7 +1819,7 @@
 														class="truncate hover:underline"
 														onclick={(e) => e.stopPropagation()}
 													>
-														{asset.bundle.template.name}
+														{withCaption(asset.bundle.template.name, asset.bundle.template.caption)}
 													</a>
 												{/if}
 												<span class="ml-auto"><AssetStatusBadge status={asset.status} /></span>

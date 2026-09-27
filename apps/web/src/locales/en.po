@@ -789,10 +789,8 @@ msgstr "New Bundle"
 #~ msgid "Description (optional)"
 #~ msgstr "Description (optional)"
 
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
-#: src/routes/assets/bundles/new/+page.svelte
-msgid "What's in this bundle?"
-msgstr "What's in this bundle?"
+#~ msgid "What's in this bundle?"
+#~ msgstr "What's in this bundle?"
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
@@ -895,7 +893,7 @@ msgstr "No history available for this asset."
 #~ msgid "for production <0/>"
 #~ msgstr "for production <0/>"
 
-#. 0: userLabel(item.user); 1: new Date( item.createdAt ).toLocaleString()
+#. 0: userLabel(item.user); 1: new Date(item.createdAt).toLocaleString()
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "By {0} on {1}"
 msgstr "By {0} on {1}"
@@ -1230,10 +1228,8 @@ msgstr "View →"
 msgid "Bundle Details"
 msgstr "Bundle Details"
 
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
-#: src/routes/assets/bundles/new/+page.svelte
-msgid "Description <0>(optional)</0>"
-msgstr "Description <0>(optional)</0>"
+#~ msgid "Description <0>(optional)</0>"
+#~ msgstr "Description <0>(optional)</0>"
 
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "Add existing assets or create new ones."
@@ -3566,7 +3562,7 @@ msgstr "<0/> Show duration same as total duration"
 msgid "<0/> Show items in bundles"
 msgstr "<0/> Show items in bundles"
 
-#. 0: row.name
+#. 0: withCaption(row.name, row.caption)
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
 msgid "<0/> Bundle · {0}"
 msgstr "<0/> Bundle · {0}"
@@ -3666,9 +3662,8 @@ msgstr "Select none"
 #~ msgid "{0} — Category: <0/>{1} <1/>"
 #~ msgstr "{0} — Category: <0/>{1} <1/>"
 
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
-msgid "Name, category, pricing, and location."
-msgstr "Name, category, pricing, and location."
+#~ msgid "Name, category, pricing, and location."
+#~ msgstr "Name, category, pricing, and location."
 
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
@@ -3947,7 +3942,7 @@ msgstr "{0}% / day"
 #~ msgid "<0/> Bundle · {0}{1}"
 #~ msgstr "<0/> Bundle · {0}{1}"
 
-#. 0: row.name; 1: tags ? ` (${tags})` \\: ''
+#. 0: withCaption(row.name, row.caption); 1: tags ? ` (${tags})` \\: ''
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
 msgid "Bundle · {0}{1}"
 msgstr "Bundle · {0}{1}"
@@ -7890,13 +7885,11 @@ msgstr "{0} already has an account. Add them from the organization's page."
 msgid "You can look through the catalog and add a picture where one is missing. Editing a product needs admin or owner rights in one of your organizations."
 msgstr "You can look through the catalog and add a picture where one is missing. Editing a product needs admin or owner rights in one of your organizations."
 
-#: src/lib/components/ui/product-editor/product-editor.svelte
-msgid "Units of this product belong to organizations you don't administer, so its name, manufacturer and category are locked here."
-msgstr "Units of this product belong to organizations you don't administer, so its name, manufacturer and category are locked here."
+#~ msgid "Units of this product belong to organizations you don't administer, so its name, manufacturer and category are locked here."
+#~ msgstr "Units of this product belong to organizations you don't administer, so its name, manufacturer and category are locked here."
 
-#: src/lib/components/ui/product-editor/product-editor.svelte
-msgid "No organization holds units of this product, so only whoever added it or a system admin can change its name, manufacturer and category."
-msgstr "No organization holds units of this product, so only whoever added it or a system admin can change its name, manufacturer and category."
+#~ msgid "No organization holds units of this product, so only whoever added it or a system admin can change its name, manufacturer and category."
+#~ msgstr "No organization holds units of this product, so only whoever added it or a system admin can change its name, manufacturer and category."
 
 #: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Your own organization's price still saves."
@@ -10595,3 +10588,49 @@ msgstr "Enter the address of {0} above."
 #: src/lib/components/ui/dpa-gate/dpa-gate.svelte
 msgid "Tick the box above to accept."
 msgstr "Tick the box above to accept."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "Caption <0>(optional)</0>"
+msgstr "Caption <0>(optional)</0>"
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "Details <0>(optional)</0>"
+msgstr "Details <0>(optional)</0>"
+
+
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Units of this product belong to organizations you don't administer, so its name, manufacturer, category, caption and details are locked here."
+msgstr "Units of this product belong to organizations you don't administer, so its name, manufacturer, category, caption and details are locked here."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "No organization holds units of this product, so only whoever added it or a system admin can change its name, manufacturer, category, caption and details."
+msgstr "No organization holds units of this product, so only whoever added it or a system admin can change its name, manufacturer, category, caption and details."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "What the team calls it. Shown next to the name wherever units are listed."
+msgstr "What the team calls it. Shown next to the name wherever units are listed."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Handling notes and anything else worth knowing. Shown with the product only."
+msgstr "Handling notes and anything else worth knowing. Shown with the product only."
+
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "What the team calls it. Shown next to the name in every list."
+msgstr "What the team calls it. Shown next to the name in every list."
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Name, category, caption, details, pricing, and location."
+msgstr "Name, category, caption, details, pricing, and location."
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "What the team calls it. Shared with every instance, and shown next to the name in every list."
+msgstr "What the team calls it. Shared with every instance, and shown next to the name in every list."
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "What's in it, how it's packed. Shared with every instance, shown on this page only."
+msgstr "What's in it, how it's packed. Shared with every instance, shown on this page only."

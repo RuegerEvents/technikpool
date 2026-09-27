@@ -19,7 +19,9 @@ class StocktakeConfirmGroup {
   
   final StocktakeConfirmGroupKind kind;
 
-  /// The kit's or the parent unit's name, with its tag where it has one.
+  /// The kit's or the parent unit's name, with its caption and its tag.
+  /// where it has them.
+  ///
   final String name;
 
   Map<String, Object?> toJson() => _$StocktakeConfirmGroupToJson(this);

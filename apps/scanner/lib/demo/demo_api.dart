@@ -228,6 +228,7 @@ class DemoBackend {
       id: asset.id,
       assetTag: asset.assetTag ?? assetTag,
       productName: asset.product.name,
+      productCaption: asset.product.caption,
       manufacturerName: asset.product.manufacturerName,
     );
 
@@ -657,6 +658,7 @@ class DemoBackend {
               assetId: a.id,
               assetTag: a.assetTag,
               productName: a.product.name,
+              productCaption: a.product.caption,
               manufacturerName: a.product.manufacturerName,
               foundByName: (stocktake.items[a.id]?.found ?? false)
                   ? DemoData.user.name
@@ -710,6 +712,7 @@ class DemoBackend {
       assetTag: asset.assetTag,
       serialNumber: asset.serialNumber,
       productName: asset.product.name,
+      productCaption: asset.product.caption,
       manufacturerName: asset.product.manufacturerName,
       category: asset.product.category,
       cable: asset.product.cable,
@@ -736,6 +739,7 @@ class DemoBackend {
         StocktakeProductCount(
           productId: lines.first.product.id,
           productName: lines.first.product.name,
+          productCaption: lines.first.product.caption,
           manufacturerName: lines.first.product.manufacturerName,
           category: lines.first.product.category,
           cable: lines.first.product.cable,

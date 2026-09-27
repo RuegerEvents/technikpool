@@ -14,6 +14,7 @@ class StocktakeConfirmEntry {
     required this.productName,
     required this.manufacturerName,
     required this.foundByName,
+    this.productCaption,
   });
   
   factory StocktakeConfirmEntry.fromJson(Map<String, Object?> json) => _$StocktakeConfirmEntryFromJson(json);
@@ -22,6 +23,11 @@ class StocktakeConfirmEntry {
   final String? assetTag;
   final String productName;
   final String? manufacturerName;
+
+  /// The product's caption (see Product.caption), to be shown after the.
+  /// product name. Not required, so an older client keeps compiling.
+  ///
+  final String? productCaption;
 
   /// Counted already, by this person. Null when still to confirm.
   final String? foundByName;

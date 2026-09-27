@@ -306,7 +306,7 @@ paths:
             type: string
         - name: q
           in: query
-          description: Case-insensitive match on asset tag, serial number, product or manufacturer name.
+          description: Case-insensitive match on asset tag, serial number, product name or caption, or manufacturer name.
           schema:
             type: string
         - name: limit
@@ -1190,6 +1190,17 @@ components:
           description: |
             Null for a product nobody makes in particular — a Schuko lead, a
             generic laptop. Show the product name alone then, not a placeholder.
+        caption:
+          type: [string, 'null']
+          description: |
+            What the team calls this product ("16-port PoE switch"), to be
+            shown after its name. Not required, so an older client keeps
+            compiling.
+        details:
+          type: [string, 'null']
+          description: |
+            Free text about the product — handling notes and the like. For a
+            view of the product or one of its units, not for lists.
         category:
           $ref: '#/components/schemas/Category'
         imageUrl:
@@ -1378,7 +1389,9 @@ components:
             hangs off (first) and that unit's other accessories.
         name:
           type: string
-          description: The kit's or the parent unit's name, with its tag where it has one.
+          description: |
+            The kit's or the parent unit's name, with its caption and its tag
+            where it has them.
         units:
           type: array
           items:
@@ -1396,6 +1409,11 @@ components:
           type: string
         manufacturerName:
           type: [string, 'null']
+        productCaption:
+          type: [string, 'null']
+          description: |
+            The product's caption (see Product.caption), to be shown after the
+            product name. Not required, so an older client keeps compiling.
         done:
           type: boolean
           description: Already at the scan's target; nothing to book.
@@ -1459,6 +1477,11 @@ components:
         manufacturerName:
           type: [string, 'null']
           description: Null when the product has no maker; see Product.manufacturerName.
+        productCaption:
+          type: [string, 'null']
+          description: |
+            The product's caption (see Product.caption), to be shown after the
+            product name. Not required, so an older client keeps compiling.
 
     StocktakeScopeRequest:
       type: object
@@ -1618,6 +1641,11 @@ components:
           type: [string, 'null']
         productName:
           type: string
+        productCaption:
+          type: [string, 'null']
+          description: |
+            The product's caption (see Product.caption), to be shown after the
+            product name. Not required, so an older client keeps compiling.
         manufacturerName:
           type: [string, 'null']
         category:
@@ -1635,7 +1663,7 @@ components:
           description: Set on an accessory; it is confirmed when its parent is scanned.
         bundleName:
           type: [string, 'null']
-          description: The bundle it belongs to, with its tag where it has one.
+          description: The bundle it belongs to, with its caption and its tag where it has them.
         state:
           type: string
           enum: [open, found, out, missing, unexpected]
@@ -1678,6 +1706,11 @@ components:
           type: string
         productName:
           type: string
+        productCaption:
+          type: [string, 'null']
+          description: |
+            The product's caption (see Product.caption), to be shown after the
+            product name. Not required, so an older client keeps compiling.
         manufacturerName:
           type: [string, 'null']
         category:
@@ -1776,7 +1809,9 @@ components:
           enum: [bundle, parent]
         name:
           type: string
-          description: The kit's or the parent unit's name, with its tag where it has one.
+          description: |
+            The kit's or the parent unit's name, with its caption and its tag
+            where it has them.
 
     StocktakeBundle:
       type: object
@@ -1788,6 +1823,7 @@ components:
           type: [string, 'null']
         name:
           type: string
+          description: The bundle type, with its caption where it has one.
 
     StocktakeConfirmEntry:
       type: object
@@ -1801,6 +1837,11 @@ components:
           type: string
         manufacturerName:
           type: [string, 'null']
+        productCaption:
+          type: [string, 'null']
+          description: |
+            The product's caption (see Product.caption), to be shown after the
+            product name. Not required, so an older client keeps compiling.
         foundByName:
           type: [string, 'null']
           description: Counted already, by this person. Null when still to confirm.

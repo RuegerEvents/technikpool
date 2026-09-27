@@ -143,6 +143,7 @@
 		if (!searchTrimmed) return true;
 		return (
 			product.name.toLowerCase().includes(searchTrimmed) ||
+			(product.caption?.toLowerCase().includes(searchTrimmed) ?? false) ||
 			(product.manufacturer?.name.toLowerCase().includes(searchTrimmed) ?? false) ||
 			categoryLabel(product.category).toLowerCase().includes(searchTrimmed) ||
 			// "everything with a TRUE1 end" is a question the name can't answer.
@@ -456,7 +457,9 @@
 								<span class="min-w-0 flex-1">
 									<span class="block truncate text-sm font-medium">{product.name}</span>
 									<span class="block truncate text-xs text-muted-foreground"
-										>{product.manufacturer?.name}</span
+										>{[product.manufacturer?.name, product.caption]
+											.filter(Boolean)
+											.join(' · ')}</span
 									>
 								</span>
 								{#if hasTwin(product)}

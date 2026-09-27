@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { withCaption } from '$lib/product-label';
 	import { customerLabel, getErrorMessage, orgLabel, plural } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -252,7 +253,9 @@
 					accessories: { select: { id: true } };
 				};
 			};
-			sourceBundle: { select: { id: true; template: { select: { name: true } } } };
+			sourceBundle: {
+				select: { id: true; template: { select: { name: true; caption: true } } };
+			};
 		};
 	}>;
 
@@ -296,7 +299,10 @@
 					bundleMap.set(bid, {
 						kind: 'bundle',
 						bundleId: bid,
-						bundleName: item.sourceBundle.template.name,
+						bundleName: withCaption(
+							item.sourceBundle.template.name,
+							item.sourceBundle.template.caption
+						),
 						total: 0,
 						pending: 0,
 						approved: 0,
@@ -318,7 +324,7 @@
 					productMap.set(pid, {
 						kind: 'product',
 						productId: pid,
-						productName: item.asset.product.name,
+						productName: withCaption(item.asset.product.name, item.asset.product.caption),
 						imagePath: item.asset.product.imagePath,
 						manufacturerName: item.asset.product.manufacturer?.name ?? null,
 						total: 0,
@@ -1243,11 +1249,17 @@
 															alt={item.asset.product.name}
 															size={22}
 														/>
-														<span class="font-medium">{item.asset.product.name}</span>
+														<span class="font-medium"
+															>{withCaption(
+																item.asset.product.name,
+																item.asset.product.caption
+															)}</span
+														>
 													{/if}
 													<span class="w-36 font-mono text-xs text-muted-foreground">
 														{item.asset.serialNumber ? `S/N: ${item.asset.serialNumber}` : '—'}
 													</span>
+
 													<span class="text-xs text-muted-foreground"
 														>{orgLabel(item.asset.organization)}</span
 													>

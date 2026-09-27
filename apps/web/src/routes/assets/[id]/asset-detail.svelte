@@ -576,7 +576,11 @@
 							{asset.product.manufacturer.name}
 						</p>
 					{/if}
-					<h1 class="text-3xl font-bold tracking-tight">{asset.product.name}</h1>
+					<h1 class="text-3xl font-bold tracking-tight">
+						{asset.product.name}{#if asset.product.caption}<span
+								class="ml-2 font-normal text-muted-foreground">— {asset.product.caption}</span
+							>{/if}
+					</h1>
 					{#if isCable(asset.product)}
 						<p class="text-sm text-muted-foreground">
 							{[
@@ -794,6 +798,9 @@
 				</div>
 			</Card.Header>
 			<Card.Content class="space-y-6">
+				{#if asset.product.details}
+					<p class="text-sm whitespace-pre-line">{asset.product.details}</p>
+				{/if}
 				<dl class="grid gap-x-6 gap-y-5 sm:grid-cols-2">
 					<Fact icon={Factory} label="Manufacturer">{asset.product.manufacturer?.name ?? '—'}</Fact>
 					<Fact icon={Shapes} label="Category">

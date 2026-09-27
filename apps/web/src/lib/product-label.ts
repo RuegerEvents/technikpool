@@ -15,3 +15,21 @@ export function productLabel(product: {
 export function makerAndName(manufacturerName: string | null | undefined, name: string): string {
 	return manufacturerName ? `${manufacturerName} ${name}` : name;
 }
+
+/**
+ * A product or kit named with its caption: "USW-Pro-Max-16-PoE — 16-port PoE
+ * switch". The caption explains the name rather than replacing it — the name is
+ * still what is on the box.
+ */
+export function withCaption(name: string, caption: string | null | undefined): string {
+	return caption ? `${name} — ${caption}` : name;
+}
+
+/** A case named for a list read out loud: "Router Kit XL — FOH Rack (K-03)". */
+export function bundleLabel(bundle: {
+	tag: string | null;
+	template: { name: string; caption: string | null };
+}): string {
+	const name = withCaption(bundle.template.name, bundle.template.caption);
+	return bundle.tag ? `${name} (${bundle.tag})` : name;
+}
