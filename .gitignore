@@ -9,3 +9,7 @@ Thumbs.db
 .env.*
 !.env.example
 !.env.test
+
+# The operator's own filled-in legal texts (from the templates in docs/legal).
+# Contain personal details and are pasted into /admin/legal, not published here.
+docs/legal/private/
