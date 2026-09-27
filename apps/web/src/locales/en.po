@@ -10586,3 +10586,12 @@ msgstr "Not set up"
 #: src/routes/admin/legal/+page.svelte
 msgid "PDF"
 msgstr "PDF"
+
+#. 0: missingAddress.map((o) => o.name).join(', ')
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+msgid "Enter the address of {0} above."
+msgstr "Enter the address of {0} above."
+
+#: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+msgid "Tick the box above to accept."
+msgstr "Tick the box above to accept."

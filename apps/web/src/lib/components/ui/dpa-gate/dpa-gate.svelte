@@ -109,5 +109,14 @@
 			{accepting ? 'Saving…' : 'Accept'}
 		</Button>
 		<Button variant="outline" onclick={onsignout} disabled={accepting}>Sign out</Button>
+		<!-- A greyed-out button says nothing about why, and the address block sits
+		     between a long text and the checkbox, where it reads as optional. -->
+		{#if !addressesComplete}
+			<p class="mr-auto self-center text-sm text-muted-foreground">
+				Enter the address of {missingAddress.map((o) => o.name).join(', ')} above.
+			</p>
+		{:else if !authorized}
+			<p class="mr-auto self-center text-sm text-muted-foreground">Tick the box above to accept.</p>
+		{/if}
 	{/snippet}
 </Modal>
