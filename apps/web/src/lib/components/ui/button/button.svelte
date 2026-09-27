@@ -15,6 +15,7 @@
 		RefreshCw,
 		Save,
 		Send,
+		Share2,
 		Trash2,
 		Copy,
 		Upload,
@@ -38,6 +39,7 @@
 		refresh: RefreshCw,
 		save: Save,
 		send: Send,
+		share: Share2,
 		signup: UserPlus,
 		upload: Upload
 	} as const;

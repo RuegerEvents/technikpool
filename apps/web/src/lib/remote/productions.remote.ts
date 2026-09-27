@@ -32,6 +32,7 @@ import {
 } from '$lib/server/services/approval-notifications';
 import { appError } from '$lib/errors';
 import { requireOpenProduction } from '$lib/server/services/production-state';
+import { shareExpiry, shareUrl } from '$lib/server/services/production-share';
 import { orgLabel } from '$lib/utils';
 import { getKnownAddresses } from './addresses.remote';
 import type {
@@ -806,6 +807,52 @@ export const updateProductionCustomer = command(updateProductionCustomerSchema, 
 	await refreshProduction(input.productionId);
 	return updated;
 });
+
+// ── The customer's info link ─────────────────────────────────────────────────
+// See production-share.ts. Whoever may plan the production may hand it out.
+
+/** The active link and when it runs out, or null when there is none. */
+export const getShareLink = query(v.string(), async (productionId: string) => {
+	const production = await prisma.production.findUniqueOrThrow({
+		where: { id: productionId },
+		select: {
+			id: true,
+			organizationId: true,
+			endDate: true,
+			shareLinkActive: true,
+			shareLinkVersion: true
+		}
+	});
+	await requireOrgWrite(production.organizationId);
+	if (!production.shareLinkActive) return null;
+	const expiresAt = shareExpiry(production);
+	return {
+		url: shareUrl(production.id, production.shareLinkVersion),
+		expiresAt,
+		expired: !!expiresAt && expiresAt < new Date()
+	};
+});
+
+/**
+ * `create` makes a new link — and so ends the one before, if any; `revoke`
+ * ends it without a replacement. Both bump the version, so a link once
+ * revoked never works again even when sharing is switched back on.
+ */
+export const setShareLink = command(
+	v.object({ productionId: v.string(), action: v.picklist(['create', 'revoke']) }),
+	async ({ productionId, action }) => {
+		const production = await prisma.production.findUniqueOrThrow({
+			where: { id: productionId },
+			select: { organizationId: true }
+		});
+		await requireOrgWrite(production.organizationId);
+		await prisma.production.update({
+			where: { id: productionId },
+			data: { shareLinkActive: action === 'create', shareLinkVersion: { increment: 1 } }
+		});
+		await getShareLink(productionId).refresh();
+	}
+);
 
 const addAssetSchema = v.object({
 	productionId: v.string(),

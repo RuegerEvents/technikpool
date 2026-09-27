@@ -492,6 +492,8 @@ export const ProductionScalarFieldEnum = {
   cancelledAt: 'cancelledAt',
   cancellationReason: 'cancellationReason',
   cancelledById: 'cancelledById',
+  shareLinkActive: 'shareLinkActive',
+  shareLinkVersion: 'shareLinkVersion',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

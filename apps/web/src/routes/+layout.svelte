@@ -47,6 +47,9 @@
 	let isPrintRoute = $derived(
 		/\/(packing-list|crew-passes|inventory-list|print)$/.test(page.url.pathname)
 	);
+	// A customer's info link is the operator's page, not the app: no navigation
+	// into places the visitor has no account for.
+	let isShareRoute = $derived(page.url.pathname.startsWith('/share/'));
 	let isCalendarRoute = $derived(page.url.pathname.startsWith('/calendar'));
 	let isEquipmentRoute = $derived(/\/equipment$/.test(page.url.pathname));
 
@@ -86,7 +89,7 @@
 	}
 </script>
 
-{#if isAuthRoute || isPrintRoute}
+{#if isAuthRoute || isPrintRoute || isShareRoute}
 	{@render children()}
 {:else}
 	<div class="flex h-dvh flex-col bg-zinc-50 dark:bg-zinc-950">

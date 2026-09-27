@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { withCaption } from '$lib/product-label';
+	import ShareLinkMenu from './share-link-menu.svelte';
 	import { customerLabel, getErrorMessage, orgLabel, plural } from '$lib/utils';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -644,6 +645,9 @@
 					</DropdownMenu.Content>
 				</DropdownMenu.Portal>
 			</DropdownMenu.Root>
+			{#if canEdit}
+				<ShareLinkMenu productionId={production.id} />
+			{/if}
 			{#if canManage}
 				{#if currentOffer}
 					<Button icon="forward" href={resolve(`/offers/${currentOffer.id}`)}>Open Offer</Button>

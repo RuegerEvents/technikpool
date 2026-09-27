@@ -225,6 +225,9 @@ msgstr "Crew"
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/productions/[id]/share-link-card.svelte
+#: src/routes/productions/[id]/share-link-card.svelte
+#: src/routes/productions/[id]/share-link-menu.svelte
 #: src/routes/productions/new/+page.svelte
 #: src/routes/profile/+page.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
@@ -1168,10 +1171,12 @@ msgid "Checked By:"
 msgstr "Checked By:"
 
 #: src/routes/+layout.svelte
+#: src/routes/share/[id]/[signature]/+page.svelte
 msgid "DE"
 msgstr "DE"
 
 #: src/routes/+layout.svelte
+#: src/routes/share/[id]/[signature]/+page.svelte
 msgid "EN"
 msgstr "EN"
 
@@ -3084,6 +3089,7 @@ msgstr "Copying…"
 #: src/lib/components/ui/invitations/invitation-link.svelte
 #: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
+#: src/routes/productions/[id]/share-link-card.svelte
 msgid "Copy"
 msgstr "Copy"
 
@@ -6245,6 +6251,7 @@ msgstr "Printed in the sheet header and along the bottom of every sticker."
 
 #: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
 #: src/lib/components/ui/invitations/invitation-link.svelte
+#: src/routes/productions/[id]/share-link-card.svelte
 msgid "Link copied"
 msgstr "Link copied"
 
@@ -6365,6 +6372,7 @@ msgid "Customer no. {0}"
 msgstr "Customer no. {0}"
 
 #: src/lib/components/ui/billing-issues/billing-issues.svelte
+#: src/routes/share/[id]/[signature]/+page.svelte
 msgid "Document"
 msgstr "Document"
 
@@ -7979,10 +7987,17 @@ msgid "Valid until {0}"
 msgstr "Valid until {0}"
 
 #: src/lib/components/ui/invitations/invitation-list.svelte
+#: src/routes/productions/[id]/share-link-card.svelte
+#: src/routes/productions/[id]/share-link-card.svelte
+#: src/routes/productions/[id]/share-link-menu.svelte
 msgid "New link"
 msgstr "New link"
 
 #: src/lib/components/ui/invitations/invitation-list.svelte
+#: src/routes/productions/[id]/share-link-card.svelte
+#: src/routes/productions/[id]/share-link-card.svelte
+#: src/routes/productions/[id]/share-link-card.svelte
+#: src/routes/productions/[id]/share-link-menu.svelte
 msgid "Withdraw"
 msgstr "Withdraw"
 
@@ -10704,12 +10719,14 @@ msgstr "That upload is not a PDF this product can use. Try uploading it again."
 #: src/lib/components/ui/product-documents/product-documents.svelte
 #: src/lib/components/ui/product-documents/product-documents.svelte
 #: src/lib/components/ui/product-documents/product-documents.svelte
+#: src/routes/share/[id]/[signature]/+page.svelte
 msgid "Manual"
 msgstr "Manual"
 
 #: src/lib/components/ui/product-documents/product-documents.svelte
 #: src/lib/components/ui/product-documents/product-documents.svelte
 #: src/lib/components/ui/product-documents/product-documents.svelte
+#: src/routes/share/[id]/[signature]/+page.svelte
 msgid "Datasheet"
 msgstr "Datasheet"
 
@@ -10760,3 +10777,232 @@ msgstr "PDFs"
 #: src/routes/products/[id]/product-detail.svelte
 msgid "Manuals, datasheets and the like, for every unit of it."
 msgstr "Manuals, datasheets and the like, for every unit of it."
+
+#: src/routes/productions/[id]/share-link-card.svelte
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "Link created"
+msgstr "Link created"
+
+#: src/routes/productions/[id]/share-link-card.svelte
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "Link withdrawn"
+msgstr "Link withdrawn"
+
+#: src/routes/productions/[id]/share-link-card.svelte
+msgid "Could not copy — select the link and copy it by hand."
+msgstr "Could not copy — select the link and copy it by hand."
+
+#: src/routes/productions/[id]/share-link-card.svelte
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "Customer link"
+msgstr "Customer link"
+
+#: src/routes/productions/[id]/share-link-card.svelte
+msgid "A page for the customer with the booked equipment, a packing checklist and the PDFs — no account needed, no prices."
+msgstr "A page for the customer with the booked equipment, a packing checklist and the PDFs — no account needed, no prices."
+
+#: src/routes/productions/[id]/share-link-card.svelte
+msgid "Create link"
+msgstr "Create link"
+
+#. 0: new Date(link.expiresAt).toLocaleDateString('de-DE')
+#: src/routes/productions/[id]/share-link-card.svelte
+msgid "It works until {0}."
+msgstr "It works until {0}."
+
+#: src/routes/productions/[id]/share-link-card.svelte
+msgid "The current link stops working. Create a new one?"
+msgstr "The current link stops working. Create a new one?"
+
+#: src/routes/productions/[id]/share-link-card.svelte
+msgid "The link stops working for everyone who has it. Withdraw it?"
+msgstr "The link stops working for everyone who has it. Withdraw it?"
+
+#: src/routes/productions/[id]/share-link-card.svelte
+msgid "Open"
+msgstr "Open"
+
+#: src/routes/productions/[id]/share-link-card.svelte
+msgid "Anyone with this link can open the page. <0/>"
+msgstr "Anyone with this link can open the page. <0/>"
+
+#~ msgid "The camera could not be started."
+#~ msgstr "The camera could not be started."
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "Link no longer valid"
+msgstr "Link no longer valid"
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "This link is no longer valid"
+msgstr "This link is no longer valid"
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "It may have been replaced or withdrawn, or the event is long over. Ask whoever sent it to you for a current one."
+msgstr "It may have been replaced or withdrawn, or the event is long over. Ask whoever sent it to you for a current one."
+
+#. 0: done; 1: allIds.length
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "{0} of {1} packed"
+msgstr "{0} of {1} packed"
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "<0/> Stop"
+msgstr "<0/> Stop"
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "<0/> Scan tag"
+msgstr "<0/> Scan tag"
+
+#. 0: scanMessage.text
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "Packed: {0}"
+msgstr "Packed: {0}"
+
+#. 0: scanMessage.text
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "Not on this list: {0}"
+msgstr "Not on this list: {0}"
+
+#. 0: bundle.tag
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "Case {0} · "
+msgstr "Case {0} · "
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "Individual devices"
+msgstr "Individual devices"
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "Nothing is booked for this event yet."
+msgstr "Nothing is booked for this event yet."
+
+#. 0: day(view.expiresAt)
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "This link works until {0}."
+msgstr "This link works until {0}."
+
+#~ msgid "Your ticks are kept in this browser only. <0/>"
+#~ msgstr "Your ticks are kept in this browser only. <0/>"
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "Clear all ticks"
+msgstr "Clear all ticks"
+
+#: src/routes/productions/[id]/share-link-card.svelte
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "The production ended more than 30 days ago, so the link no longer opens."
+msgstr "The production ended more than 30 days ago, so the link no longer opens."
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "Sections"
+msgstr "Sections"
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "<0/> Equipment"
+msgstr "<0/> Equipment"
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "<0/> Manuals <1/>"
+msgstr "<0/> Manuals <1/>"
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "<0/> Pack & check"
+msgstr "<0/> Pack & check"
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "The camera could not be started. Allow camera access for this page, or tick the items by hand."
+msgstr "The camera could not be started. Allow camera access for this page, or tick the items by hand."
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "Cases"
+msgstr "Cases"
+
+#~ msgid "{0} devices{1}."
+#~ msgstr "{0} devices{1}."
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "There are no manuals or datasheets for this equipment yet."
+msgstr "There are no manuals or datasheets for this equipment yet."
+
+#~ msgid "Ticks are kept in this browser only. <0/>"
+#~ msgstr "Ticks are kept in this browser only. <0/>"
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "Ticks are kept in this browser only."
+msgstr "Ticks are kept in this browser only."
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "1 device"
+msgid_plural "# devices"
+msgstr[0] "1 device"
+msgstr[1] "# devices"
+
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "1 case"
+msgid_plural "# cases"
+msgstr[0] "1 case"
+msgstr[1] "# cases"
+
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "Link created and copied"
+msgstr "Link created and copied"
+
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "Could not copy the link."
+msgstr "Could not copy the link."
+
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "A page for the customer with the booked equipment, the manuals and a packing checklist — no account needed, no prices."
+msgstr "A page for the customer with the booked equipment, the manuals and a packing checklist — no account needed, no prices."
+
+#. 0: new Date(link.expiresAt).toLocaleDateString( 'de-DE' )
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "Anyone with the link can open it, until {0}."
+msgstr "Anyone with the link can open it, until {0}."
+
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "Anyone with the link can open it."
+msgstr "Anyone with the link can open it."
+
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "Create and copy link"
+msgstr "Create and copy link"
+
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "Copy link"
+msgstr "Copy link"
+
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "Open as the customer sees it"
+msgstr "Open as the customer sees it"
+
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "Replace with a new link…"
+msgstr "Replace with a new link…"
+
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "Withdraw link…"
+msgstr "Withdraw link…"
+
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "Replace the customer link?"
+msgstr "Replace the customer link?"
+
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "Withdraw the customer link?"
+msgstr "Withdraw the customer link?"
+
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "The current link stops working. Whoever has it needs the new one."
+msgstr "The current link stops working. Whoever has it needs the new one."
+
+#: src/routes/productions/[id]/share-link-menu.svelte
+msgid "The link stops working for everyone who has it."
+msgstr "The link stops working for everyone who has it."
+
+#. 0: counted(line.accessories)
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "with {0}"
+msgstr "with {0}"

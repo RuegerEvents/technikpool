@@ -780,6 +780,13 @@ model Production {
   cancelledById      String?
   cancelledBy        User?     @relation("ProductionCanceller", fields: [cancelledById], references: [id], onDelete: SetNull)
 
+  // The customer's info link (/share/…): signed over the production id and
+  // this version rather than stored, see production-share.ts. Creating a new
+  // link or revoking the old one bumps the version, which kills every link
+  // signed before it.
+  shareLinkActive  Boolean @default(false)
+  shareLinkVersion Int     @default(0)
+
   items        ProductionItem[]
   crew         ProductionCrew[]
   transactions AssetTransaction[]

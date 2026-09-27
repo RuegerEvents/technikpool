@@ -257,6 +257,18 @@ store privacy page is `docs/privacy/`, served by GitHub Pages.
   checks each chunk's hash. The worker points `publicPath` there, so no user's IP address goes to
   IMG.LY.
 
+## Customer info link (`/share/…`)
+
+A production can hand its customer a link to a page with the booked equipment (APPROVED and
+CHECKED_OUT items), the products' PDFs and a packing checklist whose ticks live in the visitor's
+localStorage only. `/share` is in the `publicPaths` of `hooks.server.ts` and renders without the app
+shell. The URL is the credential, signed like the calendar feed rather than stored
+(`src/lib/server/services/production-share.ts`): HMAC over the production id and
+`Production.shareLinkVersion`, so the team can show it again at any time, and replacing or
+withdrawing it bumps the version and kills every older link. It stops opening 30 days after the
+production's end. The page gets `ShareView` (`src/lib/production-share.ts`) and nothing else — no
+prices, no customer record. Created from the "Customer link" menu on the production page (MEMBER+).
+
 ## Service lines on offers and invoices
 
 `OfferItem`/`InvoiceItem.kind` is `EQUIPMENT` (built from the production, rebuilt by every

@@ -20,8 +20,18 @@ export type ProductionModel = runtime.Types.Result.DefaultSelection<Prisma.$Prod
 
 export type AggregateProduction = {
   _count: ProductionCountAggregateOutputType | null
+  _avg: ProductionAvgAggregateOutputType | null
+  _sum: ProductionSumAggregateOutputType | null
   _min: ProductionMinAggregateOutputType | null
   _max: ProductionMaxAggregateOutputType | null
+}
+
+export type ProductionAvgAggregateOutputType = {
+  shareLinkVersion: number | null
+}
+
+export type ProductionSumAggregateOutputType = {
+  shareLinkVersion: number | null
 }
 
 export type ProductionMinAggregateOutputType = {
@@ -38,6 +48,8 @@ export type ProductionMinAggregateOutputType = {
   cancelledAt: Date | null
   cancellationReason: string | null
   cancelledById: string | null
+  shareLinkActive: boolean | null
+  shareLinkVersion: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -56,6 +68,8 @@ export type ProductionMaxAggregateOutputType = {
   cancelledAt: Date | null
   cancellationReason: string | null
   cancelledById: string | null
+  shareLinkActive: boolean | null
+  shareLinkVersion: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -74,11 +88,21 @@ export type ProductionCountAggregateOutputType = {
   cancelledAt: number
   cancellationReason: number
   cancelledById: number
+  shareLinkActive: number
+  shareLinkVersion: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
+
+export type ProductionAvgAggregateInputType = {
+  shareLinkVersion?: true
+}
+
+export type ProductionSumAggregateInputType = {
+  shareLinkVersion?: true
+}
 
 export type ProductionMinAggregateInputType = {
   id?: true
@@ -94,6 +118,8 @@ export type ProductionMinAggregateInputType = {
   cancelledAt?: true
   cancellationReason?: true
   cancelledById?: true
+  shareLinkActive?: true
+  shareLinkVersion?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -112,6 +138,8 @@ export type ProductionMaxAggregateInputType = {
   cancelledAt?: true
   cancellationReason?: true
   cancelledById?: true
+  shareLinkActive?: true
+  shareLinkVersion?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -130,6 +158,8 @@ export type ProductionCountAggregateInputType = {
   cancelledAt?: true
   cancellationReason?: true
   cancelledById?: true
+  shareLinkActive?: true
+  shareLinkVersion?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -173,6 +203,18 @@ export type ProductionAggregateArgs<ExtArgs extends runtime.Types.Extensions.Int
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: ProductionAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: ProductionSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: ProductionMinAggregateInputType
@@ -203,6 +245,8 @@ export type ProductionGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   _count?: ProductionCountAggregateInputType | true
+  _avg?: ProductionAvgAggregateInputType
+  _sum?: ProductionSumAggregateInputType
   _min?: ProductionMinAggregateInputType
   _max?: ProductionMaxAggregateInputType
 }
@@ -221,9 +265,13 @@ export type ProductionGroupByOutputType = {
   cancelledAt: Date | null
   cancellationReason: string | null
   cancelledById: string | null
+  shareLinkActive: boolean
+  shareLinkVersion: number
   createdAt: Date
   updatedAt: Date
   _count: ProductionCountAggregateOutputType | null
+  _avg: ProductionAvgAggregateOutputType | null
+  _sum: ProductionSumAggregateOutputType | null
   _min: ProductionMinAggregateOutputType | null
   _max: ProductionMaxAggregateOutputType | null
 }
@@ -260,6 +308,8 @@ export type ProductionWhereInput = {
   cancelledAt?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
   cancellationReason?: Prisma.StringNullableFilter<"Production"> | string | null
   cancelledById?: Prisma.StringNullableFilter<"Production"> | string | null
+  shareLinkActive?: Prisma.BoolFilter<"Production"> | boolean
+  shareLinkVersion?: Prisma.IntFilter<"Production"> | number
   createdAt?: Prisma.DateTimeFilter<"Production"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Production"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -287,6 +337,8 @@ export type ProductionOrderByWithRelationInput = {
   cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   cancellationReason?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelledById?: Prisma.SortOrderInput | Prisma.SortOrder
+  shareLinkActive?: Prisma.SortOrder
+  shareLinkVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
@@ -317,6 +369,8 @@ export type ProductionWhereUniqueInput = Prisma.AtLeast<{
   cancelledAt?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
   cancellationReason?: Prisma.StringNullableFilter<"Production"> | string | null
   cancelledById?: Prisma.StringNullableFilter<"Production"> | string | null
+  shareLinkActive?: Prisma.BoolFilter<"Production"> | boolean
+  shareLinkVersion?: Prisma.IntFilter<"Production"> | number
   createdAt?: Prisma.DateTimeFilter<"Production"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Production"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -344,11 +398,15 @@ export type ProductionOrderByWithAggregationInput = {
   cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   cancellationReason?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelledById?: Prisma.SortOrderInput | Prisma.SortOrder
+  shareLinkActive?: Prisma.SortOrder
+  shareLinkVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ProductionCountOrderByAggregateInput
+  _avg?: Prisma.ProductionAvgOrderByAggregateInput
   _max?: Prisma.ProductionMaxOrderByAggregateInput
   _min?: Prisma.ProductionMinOrderByAggregateInput
+  _sum?: Prisma.ProductionSumOrderByAggregateInput
 }
 
 export type ProductionScalarWhereWithAggregatesInput = {
@@ -368,6 +426,8 @@ export type ProductionScalarWhereWithAggregatesInput = {
   cancelledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Production"> | Date | string | null
   cancellationReason?: Prisma.StringNullableWithAggregatesFilter<"Production"> | string | null
   cancelledById?: Prisma.StringNullableWithAggregatesFilter<"Production"> | string | null
+  shareLinkActive?: Prisma.BoolWithAggregatesFilter<"Production"> | boolean
+  shareLinkVersion?: Prisma.IntWithAggregatesFilter<"Production"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Production"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Production"> | Date | string
 }
@@ -382,6 +442,8 @@ export type ProductionCreateInput = {
   venueName?: string | null
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
@@ -409,6 +471,8 @@ export type ProductionUncheckedCreateInput = {
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
   cancelledById?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
@@ -428,6 +492,8 @@ export type ProductionUpdateInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
@@ -455,6 +521,8 @@ export type ProductionUncheckedUpdateInput = {
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
@@ -478,6 +546,8 @@ export type ProductionCreateManyInput = {
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
   cancelledById?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -492,6 +562,8 @@ export type ProductionUpdateManyMutationInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -510,6 +582,8 @@ export type ProductionUncheckedUpdateManyInput = {
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -538,8 +612,14 @@ export type ProductionCountOrderByAggregateInput = {
   cancelledAt?: Prisma.SortOrder
   cancellationReason?: Prisma.SortOrder
   cancelledById?: Prisma.SortOrder
+  shareLinkActive?: Prisma.SortOrder
+  shareLinkVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ProductionAvgOrderByAggregateInput = {
+  shareLinkVersion?: Prisma.SortOrder
 }
 
 export type ProductionMaxOrderByAggregateInput = {
@@ -556,6 +636,8 @@ export type ProductionMaxOrderByAggregateInput = {
   cancelledAt?: Prisma.SortOrder
   cancellationReason?: Prisma.SortOrder
   cancelledById?: Prisma.SortOrder
+  shareLinkActive?: Prisma.SortOrder
+  shareLinkVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -574,8 +656,14 @@ export type ProductionMinOrderByAggregateInput = {
   cancelledAt?: Prisma.SortOrder
   cancellationReason?: Prisma.SortOrder
   cancelledById?: Prisma.SortOrder
+  shareLinkActive?: Prisma.SortOrder
+  shareLinkVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ProductionSumOrderByAggregateInput = {
+  shareLinkVersion?: Prisma.SortOrder
 }
 
 export type ProductionScalarRelationFilter = {
@@ -842,6 +930,8 @@ export type ProductionCreateWithoutCancelledByInput = {
   venueName?: string | null
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
@@ -867,6 +957,8 @@ export type ProductionUncheckedCreateWithoutCancelledByInput = {
   customerId?: string | null
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
@@ -919,6 +1011,8 @@ export type ProductionScalarWhereInput = {
   cancelledAt?: Prisma.DateTimeNullableFilter<"Production"> | Date | string | null
   cancellationReason?: Prisma.StringNullableFilter<"Production"> | string | null
   cancelledById?: Prisma.StringNullableFilter<"Production"> | string | null
+  shareLinkActive?: Prisma.BoolFilter<"Production"> | boolean
+  shareLinkVersion?: Prisma.IntFilter<"Production"> | number
   createdAt?: Prisma.DateTimeFilter<"Production"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Production"> | Date | string
 }
@@ -933,6 +1027,8 @@ export type ProductionCreateWithoutOrganizationInput = {
   venueName?: string | null
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
@@ -958,6 +1054,8 @@ export type ProductionUncheckedCreateWithoutOrganizationInput = {
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
   cancelledById?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
@@ -1003,6 +1101,8 @@ export type ProductionCreateWithoutAddressInput = {
   venueName?: string | null
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
@@ -1028,6 +1128,8 @@ export type ProductionUncheckedCreateWithoutAddressInput = {
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
   cancelledById?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
@@ -1073,6 +1175,8 @@ export type ProductionCreateWithoutCustomerInput = {
   venueName?: string | null
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
@@ -1098,6 +1202,8 @@ export type ProductionUncheckedCreateWithoutCustomerInput = {
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
   cancelledById?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
@@ -1143,6 +1249,8 @@ export type ProductionCreateWithoutItemsInput = {
   venueName?: string | null
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
@@ -1169,6 +1277,8 @@ export type ProductionUncheckedCreateWithoutItemsInput = {
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
   cancelledById?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
@@ -1203,6 +1313,8 @@ export type ProductionUpdateWithoutItemsInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
@@ -1229,6 +1341,8 @@ export type ProductionUncheckedUpdateWithoutItemsInput = {
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
@@ -1247,6 +1361,8 @@ export type ProductionCreateWithoutCrewInput = {
   venueName?: string | null
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
@@ -1273,6 +1389,8 @@ export type ProductionUncheckedCreateWithoutCrewInput = {
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
   cancelledById?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
@@ -1307,6 +1425,8 @@ export type ProductionUpdateWithoutCrewInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
@@ -1333,6 +1453,8 @@ export type ProductionUncheckedUpdateWithoutCrewInput = {
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
@@ -1351,6 +1473,8 @@ export type ProductionCreateWithoutTransactionsInput = {
   venueName?: string | null
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
@@ -1377,6 +1501,8 @@ export type ProductionUncheckedCreateWithoutTransactionsInput = {
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
   cancelledById?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
@@ -1411,6 +1537,8 @@ export type ProductionUpdateWithoutTransactionsInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
@@ -1437,6 +1565,8 @@ export type ProductionUncheckedUpdateWithoutTransactionsInput = {
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
@@ -1455,6 +1585,8 @@ export type ProductionCreateWithoutOffersInput = {
   venueName?: string | null
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
@@ -1481,6 +1613,8 @@ export type ProductionUncheckedCreateWithoutOffersInput = {
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
   cancelledById?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
@@ -1515,6 +1649,8 @@ export type ProductionUpdateWithoutOffersInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
@@ -1541,6 +1677,8 @@ export type ProductionUncheckedUpdateWithoutOffersInput = {
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
@@ -1559,6 +1697,8 @@ export type ProductionCreateWithoutInvoicesInput = {
   venueName?: string | null
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
@@ -1585,6 +1725,8 @@ export type ProductionUncheckedCreateWithoutInvoicesInput = {
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
   cancelledById?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
@@ -1619,6 +1761,8 @@ export type ProductionUpdateWithoutInvoicesInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
@@ -1645,6 +1789,8 @@ export type ProductionUncheckedUpdateWithoutInvoicesInput = {
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
@@ -1666,6 +1812,8 @@ export type ProductionCreateManyCancelledByInput = {
   customerId?: string | null
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1680,6 +1828,8 @@ export type ProductionUpdateWithoutCancelledByInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
@@ -1705,6 +1855,8 @@ export type ProductionUncheckedUpdateWithoutCancelledByInput = {
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
@@ -1727,6 +1879,8 @@ export type ProductionUncheckedUpdateManyWithoutCancelledByInput = {
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1744,6 +1898,8 @@ export type ProductionCreateManyOrganizationInput = {
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
   cancelledById?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1758,6 +1914,8 @@ export type ProductionUpdateWithoutOrganizationInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
@@ -1783,6 +1941,8 @@ export type ProductionUncheckedUpdateWithoutOrganizationInput = {
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
@@ -1805,6 +1965,8 @@ export type ProductionUncheckedUpdateManyWithoutOrganizationInput = {
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1822,6 +1984,8 @@ export type ProductionCreateManyAddressInput = {
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
   cancelledById?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1836,6 +2000,8 @@ export type ProductionUpdateWithoutAddressInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
@@ -1861,6 +2027,8 @@ export type ProductionUncheckedUpdateWithoutAddressInput = {
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
@@ -1883,6 +2051,8 @@ export type ProductionUncheckedUpdateManyWithoutAddressInput = {
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1900,6 +2070,8 @@ export type ProductionCreateManyCustomerInput = {
   cancelledAt?: Date | string | null
   cancellationReason?: string | null
   cancelledById?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1914,6 +2086,8 @@ export type ProductionUpdateWithoutCustomerInput = {
   venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
@@ -1939,6 +2113,8 @@ export type ProductionUncheckedUpdateWithoutCustomerInput = {
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
@@ -1961,6 +2137,8 @@ export type ProductionUncheckedUpdateManyWithoutCustomerInput = {
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -2046,6 +2224,8 @@ export type ProductionSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   cancelledAt?: boolean
   cancellationReason?: boolean
   cancelledById?: boolean
+  shareLinkActive?: boolean
+  shareLinkVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -2074,6 +2254,8 @@ export type ProductionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   cancelledAt?: boolean
   cancellationReason?: boolean
   cancelledById?: boolean
+  shareLinkActive?: boolean
+  shareLinkVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -2096,6 +2278,8 @@ export type ProductionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   cancelledAt?: boolean
   cancellationReason?: boolean
   cancelledById?: boolean
+  shareLinkActive?: boolean
+  shareLinkVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -2118,11 +2302,13 @@ export type ProductionSelectScalar = {
   cancelledAt?: boolean
   cancellationReason?: boolean
   cancelledById?: boolean
+  shareLinkActive?: boolean
+  shareLinkVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProductionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "startDate" | "endDate" | "showStartDate" | "showEndDate" | "organizationId" | "venueName" | "addressId" | "customerId" | "cancelledAt" | "cancellationReason" | "cancelledById" | "createdAt" | "updatedAt", ExtArgs["result"]["production"]>
+export type ProductionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "startDate" | "endDate" | "showStartDate" | "showEndDate" | "organizationId" | "venueName" | "addressId" | "customerId" | "cancelledAt" | "cancellationReason" | "cancelledById" | "shareLinkActive" | "shareLinkVersion" | "createdAt" | "updatedAt", ExtArgs["result"]["production"]>
 export type ProductionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   address?: boolean | Prisma.Production$addressArgs<ExtArgs>
@@ -2175,6 +2361,8 @@ export type $ProductionPayload<ExtArgs extends runtime.Types.Extensions.Internal
     cancelledAt: Date | null
     cancellationReason: string | null
     cancelledById: string | null
+    shareLinkActive: boolean
+    shareLinkVersion: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["production"]>
@@ -2622,6 +2810,8 @@ export interface ProductionFieldRefs {
   readonly cancelledAt: Prisma.FieldRef<"Production", 'DateTime'>
   readonly cancellationReason: Prisma.FieldRef<"Production", 'String'>
   readonly cancelledById: Prisma.FieldRef<"Production", 'String'>
+  readonly shareLinkActive: Prisma.FieldRef<"Production", 'Boolean'>
+  readonly shareLinkVersion: Prisma.FieldRef<"Production", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Production", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Production", 'DateTime'>
 }

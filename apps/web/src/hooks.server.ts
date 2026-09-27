@@ -40,7 +40,10 @@ const publicPaths = [
 	'/auth/forgot-password',
 	'/auth/reset-password',
 	// The operator's imprint and privacy policy have to be readable before signing in.
-	'/legal'
+	'/legal',
+	// A production's info link for its customer, who has no account — the signed
+	// URL is the credential (production-share.ts).
+	'/share'
 ];
 
 const guardHandle: Handle = async ({ event, resolve }) => {
