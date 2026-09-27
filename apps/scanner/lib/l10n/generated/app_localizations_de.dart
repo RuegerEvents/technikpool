@@ -184,6 +184,28 @@ class SDe extends S {
   String get whatsNew => 'Was ist neu';
 
   @override
+  String get legal => 'Rechtliches';
+
+  @override
+  String get imprint => 'Impressum';
+
+  @override
+  String get privacyPolicy => 'Datenschutzerklärung';
+
+  @override
+  String get termsOfUse => 'Nutzungsbedingungen';
+
+  @override
+  String get appPrivacyPolicy => 'Datenschutz dieser App';
+
+  @override
+  String get appPrivacyPolicyHint =>
+      'Die App selbst erhebt nichts. Was der Server speichert, verantwortet sein Betreiber.';
+
+  @override
+  String get linkOpenFailed => 'Der Link konnte nicht geöffnet werden.';
+
+  @override
   String versionLabel(String version) {
     return 'Version $version';
   }

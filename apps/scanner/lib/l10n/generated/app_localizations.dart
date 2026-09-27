@@ -433,6 +433,48 @@ abstract class S {
   /// **'What\'s new'**
   String get whatsNew;
 
+  /// No description provided for @legal.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal'**
+  String get legal;
+
+  /// No description provided for @imprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Imprint'**
+  String get imprint;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @termsOfUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of use'**
+  String get termsOfUse;
+
+  /// No description provided for @appPrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy of this app'**
+  String get appPrivacyPolicy;
+
+  /// No description provided for @appPrivacyPolicyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The app itself collects nothing. What the server keeps is its operator\'s business.'**
+  String get appPrivacyPolicyHint;
+
+  /// No description provided for @linkOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the link.'**
+  String get linkOpenFailed;
+
   /// Heads a changelog entry, and names the running version under Settings.
   ///
   /// In en, this message translates to:

@@ -305,6 +305,12 @@ final currentUserProvider = FutureProvider<CurrentUser>(
   (ref) => _requireApi(ref).identity.getCurrentUser(),
 );
 
+/// The server operator's imprint, privacy policy and terms, as far as they
+/// have set them up. Settings lists them next to the app's own policy.
+final legalLinksProvider = FutureProvider<List<LegalLink>>(
+  (ref) => _requireApi(ref).identity.listLegalLinks(),
+);
+
 final locationsProvider = FutureProvider<List<Location>>(
   (ref) => _requireApi(ref).inventory.listLocations(),
 );

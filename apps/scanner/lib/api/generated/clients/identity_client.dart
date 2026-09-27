@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
 import '../models/current_user.dart';
+import '../models/legal_link.dart';
 
 part 'identity_client.g.dart';
 
@@ -19,4 +20,13 @@ abstract class IdentityClient {
   /// still valid — a 401 here means unpair and sign in again.
   @GET('/api/v1/me')
   Future<CurrentUser> getCurrentUser();
+
+  /// The server operator's imprint, privacy policy and terms.
+  ///
+  /// Whatever the operator has set up, in the order imprint, privacy, terms;.
+  /// a page they haven't set up is left out, so the list may be empty. Each.
+  /// `url` is absolute and opens in a browser: either the operator's own site.
+  /// or a page on this server. Needs no token, like the pages themselves.
+  @GET('/api/v1/legal')
+  Future<List<LegalLink>> listLegalLinks();
 }

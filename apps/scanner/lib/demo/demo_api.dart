@@ -71,6 +71,10 @@ class DemoBackend {
     if (method == 'GET' && path == '/api/v1/me') {
       return _ok(options, DemoData.currentUser);
     }
+    // A demo has no operator, so there is nothing of theirs to link.
+    if (method == 'GET' && path == '/api/v1/legal') {
+      return _ok(options, <Object>[]);
+    }
     if (method == 'GET' && path == '/api/v1/locations') {
       return _ok(options, DemoData.locations);
     }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../api/generated/export.dart';
 import '../changelog.dart';
 import '../l10n/generated/app_localizations.dart';
+import '../legal.dart';
 import '../scan/scan_channel.dart';
 import '../scan/scan_settings.dart';
 import '../state/providers.dart';
@@ -20,6 +22,9 @@ class SettingsScreen extends ConsumerWidget {
     final config = ref.watch(scannerConfigProvider).value;
     final settings = ref.watch(scanSettingsProvider);
     final latest = ref.watch(changelogProvider).value?.firstOrNull;
+    // Missing or failed is the same as none set up: the app's own policy is
+    // listed either way, and there is nothing to retry here.
+    final legalLinks = ref.watch(legalLinksProvider).value ?? const <LegalLink>[];
 
     return Scaffold(
       // HomeScreen's Scaffold owns the keyboard inset for every tab.
@@ -138,6 +143,22 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ],
           const Divider(),
+          _SectionHeader(l10n.legal),
+          for (final link in legalLinks)
+            if (_legalTitle(l10n, link.kind) case final title?)
+              ListTile(
+                title: Text(title),
+                subtitle: Text(Uri.parse(link.url).host),
+                trailing: const Icon(Icons.open_in_new),
+                onTap: () => openExternal(context, Uri.parse(link.url)),
+              ),
+          ListTile(
+            title: Text(l10n.appPrivacyPolicy),
+            subtitle: Text(l10n.appPrivacyPolicyHint),
+            trailing: const Icon(Icons.open_in_new),
+            onTap: () => openExternal(context, appPrivacyPolicyUrl),
+          ),
+          const Divider(),
           ListTile(
             title: Text(l10n.whatsNew),
             // The newest entry names the version this build is: the release
@@ -172,6 +193,14 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 }
+
+/// Null for a kind a newer server knows and this build doesn't.
+String? _legalTitle(S l10n, LegalLinkKind kind) => switch (kind) {
+  LegalLinkKind.imprint => l10n.imprint,
+  LegalLinkKind.privacy => l10n.privacyPolicy,
+  LegalLinkKind.terms => l10n.termsOfUse,
+  LegalLinkKind.$unknown => null,
+};
 
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader(this.label);

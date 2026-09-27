@@ -184,6 +184,28 @@ class SEn extends S {
   String get whatsNew => 'What\'s new';
 
   @override
+  String get legal => 'Legal';
+
+  @override
+  String get imprint => 'Imprint';
+
+  @override
+  String get privacyPolicy => 'Privacy policy';
+
+  @override
+  String get termsOfUse => 'Terms of use';
+
+  @override
+  String get appPrivacyPolicy => 'Privacy policy of this app';
+
+  @override
+  String get appPrivacyPolicyHint =>
+      'The app itself collects nothing. What the server keeps is its operator\'s business.';
+
+  @override
+  String get linkOpenFailed => 'Could not open the link.';
+
+  @override
   String versionLabel(String version) {
     return 'Version $version';
   }

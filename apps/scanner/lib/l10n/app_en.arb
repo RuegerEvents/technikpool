@@ -80,6 +80,13 @@
   "diagnosticsHint": "Pull the trigger. Every broadcast received shows up here with all its extras.",
   "diagnosticsEmpty": "Nothing received yet.",
   "whatsNew": "What's new",
+  "legal": "Legal",
+  "imprint": "Imprint",
+  "privacyPolicy": "Privacy policy",
+  "termsOfUse": "Terms of use",
+  "appPrivacyPolicy": "Privacy policy of this app",
+  "appPrivacyPolicyHint": "The app itself collects nothing. What the server keeps is its operator's business.",
+  "linkOpenFailed": "Could not open the link.",
   "versionLabel": "Version {version}",
   "@versionLabel": {
     "description": "Heads a changelog entry, and names the running version under Settings.",
