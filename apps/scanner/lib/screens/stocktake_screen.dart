@@ -12,6 +12,7 @@ import '../l10n/labels.dart';
 import '../natural_sort.dart';
 import '../product_label.dart';
 import '../scan/camera_scan_screen.dart';
+import '../scan/scan_tones.dart';
 import '../state/providers.dart';
 import '../theme.dart';
 import '../widgets/category_pill.dart';
@@ -254,7 +255,6 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
               assetId: item?.assetId,
             ),
           );
-          unawaited(SystemSound.play(SystemSoundType.click));
           unawaited(HapticFeedback.lightImpact());
         case StocktakeScanResultOutcome.unexpected:
           _push(
@@ -288,13 +288,21 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
               detail: l10n.stocktakeConfirmBundle,
             ),
           );
-          unawaited(SystemSound.play(SystemSoundType.click));
         case StocktakeScanResultOutcome.$unknown:
           break;
       }
 
       final confirmable = result.outcome != StocktakeScanResultOutcome.already;
-      if (confirmable && result.confirm.any((e) => e.foundByName == null)) {
+      final toConfirm = confirmable && result.confirm.any((e) => e.foundByName == null);
+      // A found unit whose accessories or kit now want confirming needs the
+      // operator as much as an unexpected one does, so it sounds like one.
+      _tone(switch (result.outcome) {
+        _ when toConfirm => ScanTone.attention,
+        StocktakeScanResultOutcome.found => ScanTone.ok,
+        StocktakeScanResultOutcome.already => ScanTone.already,
+        _ => ScanTone.attention,
+      });
+      if (toConfirm) {
         await _confirm(
           result.confirm,
           bundle:
@@ -308,10 +316,16 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
         _Entry(code: code, kind: _Kind.error, title: code, detail: describeError(l10n, error)),
       );
       unawaited(HapticFeedback.heavyImpact());
+      _tone(ScanTone.error);
     } finally {
       if (mounted) setState(() => _busy = false);
       _refresh();
     }
+  }
+
+  /// After the scan's round trip, so the screen may be gone by now.
+  void _tone(ScanTone tone) {
+    if (mounted) ref.scanTone(tone);
   }
 
   static String _itemLabel(StocktakeItem? item) => item == null

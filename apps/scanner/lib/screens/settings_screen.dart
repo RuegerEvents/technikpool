@@ -7,6 +7,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../legal.dart';
 import '../scan/scan_channel.dart';
 import '../scan/scan_settings.dart';
+import '../scan/scan_tones.dart';
 import '../state/providers.dart';
 import 'diagnostics_screen.dart';
 import 'whats_new_screen.dart';
@@ -118,6 +119,17 @@ class SettingsScreen extends ConsumerWidget {
                     )
                   : null,
             ),
+          SwitchListTile(
+            title: Text(l10n.scanTones),
+            subtitle: Text(l10n.scanTonesHint),
+            value: ref.watch(scanTonesEnabledProvider).value ?? true,
+            onChanged: (on) {
+              ref.read(scanTonesEnabledProvider.notifier).set(on);
+              // Heard where it is switched on, so the operator knows what to
+              // listen for.
+              if (on) ref.read(scanTonesProvider).play(ScanTone.ok);
+            },
+          ),
           // Both of these configure the Android broadcast bridge, which does
           // not exist on a device that scans with its camera.
           if (ScanChannel.isSupported) ...[

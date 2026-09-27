@@ -319,6 +319,18 @@ abstract class S {
   /// **'History'**
   String get history;
 
+  /// No description provided for @scanTones.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan sounds'**
+  String get scanTones;
+
+  /// No description provided for @scanTonesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pling: done. Two low tones: already done. Three rising tones: look at the screen. Two falling tones: that did not work.'**
+  String get scanTonesHint;
+
   /// Heading over a product's manuals and datasheets on the lookup screen.
   ///
   /// In en, this message translates to:

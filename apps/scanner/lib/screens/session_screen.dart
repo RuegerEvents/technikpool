@@ -9,6 +9,7 @@ import '../api/generated/export.dart';
 import '../l10n/labels.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../product_label.dart';
+import '../scan/scan_tones.dart';
 import '../scan/camera_scan_screen.dart';
 import '../state/providers.dart';
 import '../theme.dart';
@@ -114,17 +115,20 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
         ),
       );
       // Warehouse users watch the shelf, not the screen — the feedback has to
-      // be audible and physical, not just visual.
-      unawaited(SystemSound.play(SystemSoundType.click));
+      // be audible and physical, not just visual. A kit or accessories to
+      // confirm need the operator, so that one asks them to look.
+      final group = result.group;
+      final offer = group != null && group.units.any((u) => !u.done);
+      if (mounted) ref.scanTone(offer ? ScanTone.attention : ScanTone.ok);
       unawaited(HapticFeedback.lightImpact());
 
       // A unit taken out of its kit, or off the unit it hangs off, was booked
       // on its own; what it belongs with is offered now. The sheet holds the
       // queue, so scans made meanwhile wait their turn rather than vanish.
-      final group = result.group;
-      if (group != null && group.units.any((u) => !u.done)) await _offerGroup(group);
+      if (offer) await _offerGroup(group);
     } catch (error) {
       _push(_Entry(tag: tag, ok: false, title: tag, detail: describeError(l10n, error)));
+      if (mounted) ref.scanTone(ScanTone.error);
       unawaited(HapticFeedback.heavyImpact());
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -161,9 +165,11 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
           detail: l10n.groupBooked(booked.count),
         ),
       );
+      if (mounted) ref.scanTone(ScanTone.ok);
       unawaited(HapticFeedback.lightImpact());
     } catch (error) {
       _push(_Entry(tag: '', ok: false, title: group.name, detail: describeError(l10n, error)));
+      if (mounted) ref.scanTone(ScanTone.error);
       unawaited(HapticFeedback.heavyImpact());
     }
   }

@@ -11,6 +11,7 @@ import '../demo/demo_api.dart';
 import '../scan/scan_bus.dart';
 import '../scan/scan_channel.dart';
 import '../scan/scan_settings.dart';
+import '../scan/scan_tones.dart';
 
 const _kBaseUrl = 'base_url';
 const _kToken = 'session_token';
@@ -19,6 +20,7 @@ const _kScanMode = 'scan_mode';
 const _kHardwareSeen = 'hardware_seen';
 const _kLocale = 'locale';
 const _kSeenVersion = 'seen_version';
+const _kScanTones = 'scan_tones';
 
 final storageProvider = Provider((_) => const FlutterSecureStorage());
 
@@ -187,6 +189,34 @@ class HardwareSeenNotifier extends AsyncNotifier<bool> {
 final hardwareSeenProvider = AsyncNotifierProvider<HardwareSeenNotifier, bool>(
   HardwareSeenNotifier.new,
 );
+
+final scanTonesProvider = Provider<ScanTones>((_) => ScanTones());
+
+/// Whether scans play their tone (see [ScanTone]). On unless turned off: in a
+/// quiet office, or on a shared handheld someone finds annoying.
+class ScanTonesEnabledNotifier extends AsyncNotifier<bool> {
+  FlutterSecureStorage get _storage => ref.read(storageProvider);
+
+  @override
+  Future<bool> build() async => await _storage.read(key: _kScanTones) != 'off';
+
+  Future<void> set(bool on) async {
+    state = AsyncData(on);
+    await _storage.write(key: _kScanTones, value: on ? 'on' : 'off');
+  }
+}
+
+final scanTonesEnabledProvider = AsyncNotifierProvider<ScanTonesEnabledNotifier, bool>(
+  ScanTonesEnabledNotifier.new,
+);
+
+/// `ref.scanTone(ScanTone.ok)` from any screen that scans: plays it unless
+/// the operator turned scan tones off.
+extension ScanToneRef on WidgetRef {
+  void scanTone(ScanTone tone) {
+    if (read(scanTonesEnabledProvider).value ?? true) read(scanTonesProvider).play(tone);
+  }
+}
 
 /// The language the app is pinned to, or null to follow the device.
 ///

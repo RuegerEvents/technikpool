@@ -125,6 +125,13 @@ class SDe extends S {
   String get history => 'Verlauf';
 
   @override
+  String get scanTones => 'Scan-Töne';
+
+  @override
+  String get scanTonesHint =>
+      'Pling: erledigt. Zwei tiefe Töne: schon erledigt. Drei steigende Töne: auf den Bildschirm schauen. Zwei fallende Töne: hat nicht geklappt.';
+
+  @override
   String get documents => 'PDFs';
 
   @override

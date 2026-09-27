@@ -37,6 +37,8 @@
   "cableLength": "Länge",
   "checkedOutTo": "Ausgebucht an",
   "history": "Verlauf",
+  "scanTones": "Scan-Töne",
+  "scanTonesHint": "Pling: erledigt. Zwei tiefe Töne: schon erledigt. Drei steigende Töne: auf den Bildschirm schauen. Zwei fallende Töne: hat nicht geklappt.",
   "documents": "PDFs",
   "documentManual": "Handbuch",
   "documentDatasheet": "Datenblatt",

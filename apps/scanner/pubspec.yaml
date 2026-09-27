@@ -43,6 +43,7 @@ dependencies:
     sdk: flutter
   intl: any
   url_launcher: ^6.3.2
+  audioplayers: ^6.8.1
 
 dev_dependencies:
   flutter_test:
@@ -93,6 +94,7 @@ flutter:
   # without parsing Dart, the same way the web app's changelog is plain JSON.
   assets:
     - assets/changelog.json
+    - assets/sounds/
 
   # The web app's typeface, bundled rather than fetched: these devices work in
   # a warehouse and cannot rely on a network at launch. Static instances, not

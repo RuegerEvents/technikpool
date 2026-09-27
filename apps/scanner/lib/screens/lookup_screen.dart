@@ -11,6 +11,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../legal.dart';
 import '../product_label.dart';
 import '../scan/camera_scan_screen.dart';
+import '../scan/scan_tones.dart';
 import '../demo/demo_data.dart';
 import '../state/providers.dart';
 import '../widgets/category_pill.dart';
@@ -75,6 +76,8 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
       if (mounted) setState(() => _asset = asset);
     } catch (error) {
       if (mounted) {
+        // A hit is read off the screen anyway; only a miss makes a sound.
+        ref.scanTone(ScanTone.error);
         setState(() {
           _asset = null;
           _error = describeError(l10n, error);

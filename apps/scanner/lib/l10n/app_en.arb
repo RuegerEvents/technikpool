@@ -55,6 +55,8 @@
   "cableLength": "Length",
   "checkedOutTo": "Checked out to",
   "history": "History",
+  "scanTones": "Scan sounds",
+  "scanTonesHint": "Pling: done. Two low tones: already done. Three rising tones: look at the screen. Two falling tones: that did not work.",
   "documents": "PDFs",
   "@documents": {
     "description": "Heading over a product's manuals and datasheets on the lookup screen."

@@ -10,6 +10,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../natural_sort.dart';
 import '../product_label.dart';
 import '../scan/camera_scan_screen.dart';
+import '../scan/scan_tones.dart';
 import '../state/providers.dart';
 import '../theme.dart';
 
@@ -188,12 +189,8 @@ class _ProductUnitsScreenState extends ConsumerState<ProductUnitsScreen> {
     if (!_feedback.isClosed) {
       _feedback.add(CameraScanFeedback(ok: ok, title: code, detail: text));
     }
-    if (ok) {
-      unawaited(SystemSound.play(SystemSoundType.click));
-      unawaited(HapticFeedback.lightImpact());
-    } else {
-      unawaited(HapticFeedback.heavyImpact());
-    }
+    if (mounted) ref.scanTone(ok ? ScanTone.ok : ScanTone.error);
+    unawaited(ok ? HapticFeedback.lightImpact() : HapticFeedback.heavyImpact());
     if (mounted) setState(() => _last = (ok: ok, text: text));
   }
 

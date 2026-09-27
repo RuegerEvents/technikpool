@@ -125,6 +125,13 @@ class SEn extends S {
   String get history => 'History';
 
   @override
+  String get scanTones => 'Scan sounds';
+
+  @override
+  String get scanTonesHint =>
+      'Pling: done. Two low tones: already done. Three rising tones: look at the screen. Two falling tones: that did not work.';
+
+  @override
   String get documents => 'PDFs';
 
   @override
