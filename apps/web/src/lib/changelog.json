@@ -1,5 +1,23 @@
 [
 	{
+		"version": "0.23.0",
+		"date": "2026-09-27",
+		"en": [
+			"Imprint, privacy policy and terms of use: system admins set up the operator's texts under Admin › Legal pages, and they are linked below the sign-in form, in the user menu and in the scanner app.",
+			"Organization owners accept the operator's data processing agreement (AVV) in the app, once per version. Each acceptance is kept as a PDF, mailed to whoever accepted and available on the organization's page.",
+			"You can delete your own account in your profile. Entries you made in the history stay and show \"Deleted account\" instead of your name; admins can now delete users who appear in the history too.",
+			"Removing a photo's background loads its model from this server instead of a third party.",
+			"Productions an organization lends equipment to show up on its dashboard too, marked \"On loan\"."
+		],
+		"de": [
+			"Impressum, Datenschutzerklärung und Nutzungsbedingungen: System-Admins hinterlegen die Texte des Betreibers unter Admin › Rechtstexte, verlinkt werden sie unter dem Anmeldeformular, im Benutzermenü und in der Scanner-App.",
+			"Owner einer Organisation nehmen den Auftragsverarbeitungsvertrag (AVV) des Betreibers in der App an, einmal pro Fassung. Jede Annahme wird als PDF festgehalten, an die annehmende Person geschickt und ist auf der Seite der Organisation abrufbar.",
+			"Du kannst dein Konto im Profil selbst löschen. Deine Einträge in der Historie bleiben und zeigen „Gelöschtes Konto“ statt deines Namens; Admins können jetzt auch Nutzer löschen, die in der Historie vorkommen.",
+			"Das Freistellen von Fotos lädt sein Modell von diesem Server statt von einem Drittanbieter.",
+			"Produktionen, für die eine Organisation Geräte verleiht, erscheinen jetzt auch auf ihrem Dashboard, markiert als „Leihgabe“."
+		]
+	},
+	{
 		"version": "0.22.2",
 		"date": "2026-09-25",
 		"en": [
