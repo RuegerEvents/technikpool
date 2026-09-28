@@ -1,5 +1,15 @@
 [
 	{
+		"version": "0.24.1",
+		"date": "2026-09-28",
+		"en": [
+			"The customer info link shows pictures: each case's preview and each device's photo, on every tab. On the equipment overview a tap opens the picture large."
+		],
+		"de": [
+			"Der Kundenlink zeigt Bilder: die Vorschau jedes Cases und das Foto jedes Geräts, auf allen Tabs. In der Equipment-Übersicht öffnet ein Tipp das Bild groß."
+		]
+	},
+	{
 		"version": "0.24.0",
 		"date": "2026-09-28",
 		"en": [
