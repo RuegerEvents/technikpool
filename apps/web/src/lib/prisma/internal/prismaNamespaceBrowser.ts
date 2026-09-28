@@ -78,6 +78,8 @@ export const ModelName = {
   Production: 'Production',
   Customer: 'Customer',
   ProductionItem: 'ProductionItem',
+  ProductionCheck: 'ProductionCheck',
+  ProductionCheckTick: 'ProductionCheckTick',
   ProductionCrew: 'ProductionCrew',
   AssetTransaction: 'AssetTransaction',
   Inspection: 'Inspection',
@@ -526,10 +528,41 @@ export const ProductionItemScalarFieldEnum = {
   assetId: 'assetId',
   sourceBundleId: 'sourceBundleId',
   sourceParentAssetId: 'sourceParentAssetId',
-  status: 'status'
+  status: 'status',
+  receivedAt: 'receivedAt',
+  receivedById: 'receivedById',
+  returnReportedAt: 'returnReportedAt',
+  returnReportedById: 'returnReportedById'
 } as const
 
 export type ProductionItemScalarFieldEnum = (typeof ProductionItemScalarFieldEnum)[keyof typeof ProductionItemScalarFieldEnum]
+
+
+export const ProductionCheckScalarFieldEnum = {
+  id: 'id',
+  productionId: 'productionId',
+  organizationId: 'organizationId',
+  status: 'status',
+  createdById: 'createdById',
+  closedById: 'closedById',
+  closedAt: 'closedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ProductionCheckScalarFieldEnum = (typeof ProductionCheckScalarFieldEnum)[keyof typeof ProductionCheckScalarFieldEnum]
+
+
+export const ProductionCheckTickScalarFieldEnum = {
+  id: 'id',
+  checkId: 'checkId',
+  assetId: 'assetId',
+  userId: 'userId',
+  via: 'via',
+  unexpected: 'unexpected',
+  createdAt: 'createdAt'
+} as const
+
+export type ProductionCheckTickScalarFieldEnum = (typeof ProductionCheckTickScalarFieldEnum)[keyof typeof ProductionCheckTickScalarFieldEnum]
 
 
 export const ProductionCrewScalarFieldEnum = {

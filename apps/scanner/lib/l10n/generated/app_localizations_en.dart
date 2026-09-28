@@ -840,4 +840,167 @@ class SEn extends S {
   String caseCheckDemoHint(String tag) {
     return 'Try the cable case\'s tag $tag';
   }
+
+  @override
+  String get errorNotApproved =>
+      'This unit is not booked and approved on that production — only the production\'s own organization can add it.';
+
+  @override
+  String get errorCheckClosed =>
+      'This check is already closed. Start a new one.';
+
+  @override
+  String get errorTickNotYours =>
+      'Only whoever ticked a unit can take the tick back.';
+
+  @override
+  String get errorReceiptForbidden =>
+      'Only the production\'s own organization or its crew can confirm a handover.';
+
+  @override
+  String get actionProductionChecked => 'Checked on a production';
+
+  @override
+  String get actionHandoverReceived => 'Receipt confirmed';
+
+  @override
+  String get actionReturnReported => 'Reported returned';
+
+  @override
+  String get productionCheck => 'Check';
+
+  @override
+  String get productionCheckLenderOnly => 'only your units';
+
+  @override
+  String get productionCheckEverything => 'Everything on the production';
+
+  @override
+  String productionCheckUnitsOf(String org) {
+    return 'Only the units of $org';
+  }
+
+  @override
+  String get productionCheckFound => 'Found';
+
+  @override
+  String productionCheckFoundBy(String name) {
+    return 'Found by $name';
+  }
+
+  @override
+  String get productionCheckAlready => 'Already ticked';
+
+  @override
+  String get productionCheckNotOnList => 'Not on this list';
+
+  @override
+  String productionCheckWithAccessories(String name, int count) {
+    return '$name (+$count accessories)';
+  }
+
+  @override
+  String get productionCheckNotOut => 'Not out yet';
+
+  @override
+  String get productionCheckReceiptOpen => 'Receipt open';
+
+  @override
+  String get productionCheckReceived => 'Received';
+
+  @override
+  String get productionCheckReturnReported => 'Return reported';
+
+  @override
+  String productionCheckLentBy(String org) {
+    return 'from $org';
+  }
+
+  @override
+  String get productionCheckEmpty =>
+      'Nothing is booked for this production yet.';
+
+  @override
+  String get productionCheckTickAll => 'Tick all';
+
+  @override
+  String get productionCheckFinish => 'Finish and save';
+
+  @override
+  String productionCheckSaved(int found, int missing) {
+    return 'Check saved: $found found, $missing missing.';
+  }
+
+  @override
+  String productionCheckConfirmReceipt(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Confirm receipt of $count units',
+      one: 'Confirm receipt of 1 unit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String productionCheckReportReturn(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Report $count units returned',
+      one: 'Report 1 unit returned',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String productionCheckReceiptDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Receipt confirmed for $count units',
+      one: 'Receipt confirmed for 1 unit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String productionCheckReturnDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count units reported returned',
+      one: '1 unit reported returned',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get productionCheckLentHint =>
+      'Applies to the ticked units other organizations lent to this production.';
+
+  @override
+  String get productionCheckClosed => 'This check is closed.';
+
+  @override
+  String productionCheckLentBySection(String org) {
+    return 'Lent by $org';
+  }
+
+  @override
+  String get productionCheckNoLocation => 'No location';
+
+  @override
+  String get productionCheckTickSection => 'Tick section';
+
+  @override
+  String get productionActionBook => 'Check out';
+
+  @override
+  String get productionActionBookHint =>
+      'Every scan books the unit to this production.';
+
+  @override
+  String get productionActionCheckHint =>
+      'Tick what is there against its list. Changes nothing.';
 }

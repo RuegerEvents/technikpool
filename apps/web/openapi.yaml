@@ -60,6 +60,18 @@ tags:
       off locally as it scans; nothing is stored until the check is recorded,
       which writes one `CASE_CHECKED` entry into the history of every unit in
       the case. Missing units are reported, never changed.
+  - name: productionCheck
+    description: |
+      Checking a production's equipment against its list (Prüfen), as often
+      as needed and by several people at once — ticks are stored and shared,
+      and nothing about an asset changes. A check belongs to one side: the
+      production's own org checks every unit on it, a lending org only its
+      own units. Each side has at most one open check; starting one joins it.
+
+      On the production's own side a check is also where lent units change
+      hands: ticked units another org lent can be confirmed as received, and
+      later reported as sent back. The lender's side of the handover is the
+      ordinary scan — out to the production, then back onto a location.
 
 paths:
   /api/auth/device/code:
@@ -246,6 +258,10 @@ paths:
         Cancelled productions are left out: nothing can be checked out to one,
         so it is never a scan target. Units still out on a cancelled production
         come back by scanning them onto a location, as always.
+
+        Includes other orgs' productions that the caller's orgs lend units to.
+        `checkoutRole` says what a scan to each may do, `canCheck` whether the
+        caller may check it.
       responses:
         '200':
           description: Productions
@@ -877,6 +893,233 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /api/v1/productions/{productionId}/checks:
+    post:
+      operationId: startProductionCheck
+      tags: [productionCheck]
+      summary: Start a check of a production, or join the open one
+      description: |
+        Without `organizationId` the caller checks as the production's own org
+        when they may, else as the first org of theirs that lends to it.
+      parameters:
+        - $ref: '#/components/parameters/ProductionId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductionCheckStartRequest'
+      responses:
+        '200':
+          description: The open check
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductionCheck'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/production-checks/{checkId}:
+    get:
+      operationId: getProductionCheck
+      tags: [productionCheck]
+      summary: A check with its list and who ticked what
+      parameters:
+        - $ref: '#/components/parameters/CheckId'
+      responses:
+        '200':
+          description: The check
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductionCheck'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/production-checks/{checkId}/scans:
+    post:
+      operationId: scanIntoProductionCheck
+      tags: [productionCheck]
+      summary: Tick one scanned code
+      description: |
+        An asset tag — or a serial number that belongs to exactly one unit —
+        ticks that unit (`ticked`), along with its accessories that carry no
+        tag of their own. A unit already ticked answers `already`; one that is
+        not on the list is recorded as `unexpected`.
+      parameters:
+        - $ref: '#/components/parameters/CheckId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductionCheckScanRequest'
+      responses:
+        '200':
+          description: What the code turned out to be
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductionCheckScanResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/production-checks/{checkId}/ticks:
+    post:
+      operationId: tickProductionCheckItems
+      tags: [productionCheck]
+      summary: Tick units by hand
+      description: Ids not on the list are ignored.
+      parameters:
+        - $ref: '#/components/parameters/CheckId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductionCheckTickRequest'
+      responses:
+        '200':
+          description: How many were ticked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductionCheckTickResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/production-checks/{checkId}/ticks/{assetId}:
+    delete:
+      operationId: untickProductionCheckItem
+      tags: [productionCheck]
+      summary: Take back one's own tick
+      description: Only whoever ticked a unit can untick it (`403 tick_not_yours`).
+      parameters:
+        - $ref: '#/components/parameters/CheckId'
+        - name: assetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Unticked
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/production-checks/{checkId}/close:
+    post:
+      operationId: closeProductionCheck
+      tags: [productionCheck]
+      summary: Finish a check
+      description: |
+        Writes one `PRODUCTION_CHECKED` entry into the history of every unit on
+        the list, found or missing, and closes the check. The next check starts
+        with nothing ticked.
+      parameters:
+        - $ref: '#/components/parameters/CheckId'
+      responses:
+        '200':
+          description: How the check came out
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductionCheckCloseResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/production-checks/{checkId}/receipt:
+    post:
+      operationId: confirmProductionCheckReceipt
+      tags: [productionCheck]
+      summary: Confirm receiving the ticked lent units
+      description: |
+        For the ticked units other orgs lent that are checked out to the
+        production and not yet confirmed. Only the production's own org
+        (MEMBER or above) or its crew (`403 receipt_forbidden`).
+      parameters:
+        - $ref: '#/components/parameters/CheckId'
+      responses:
+        '200':
+          description: How many units were confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HandoverResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/production-checks/{checkId}/return-report:
+    post:
+      operationId: reportProductionCheckReturn
+      tags: [productionCheck]
+      summary: Report the ticked lent units as sent back
+      description: |
+        For ticked lent units whose receipt was confirmed. Tells the lender
+        they are on their way; the lender scanning them onto a location is
+        what returns them. Same rights as `receipt`.
+      parameters:
+        - $ref: '#/components/parameters/CheckId'
+      responses:
+        '200':
+          description: How many units were reported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HandoverResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -887,6 +1130,18 @@ components:
   parameters:
     StocktakeId:
       name: stocktakeId
+      in: path
+      required: true
+      schema:
+        type: string
+    ProductionId:
+      name: productionId
+      in: path
+      required: true
+      schema:
+        type: string
+    CheckId:
+      name: checkId
       in: path
       required: true
       schema:
@@ -936,6 +1191,11 @@ components:
 
         Case checks: a unit that is neither in a kit nor has accessories, or
         an accessory, is no case to check (`not_a_case`).
+
+        Loans: a lending org checks out only units the production has booked
+        and approved (`not_approved`). A closed production check takes no more
+        ticks (`check_closed`), and a cancelled production is not checked
+        (`production_cancelled`).
       content:
         application/json:
           schema:
@@ -1207,6 +1467,16 @@ components:
           format: date-time
         organization:
           $ref: '#/components/schemas/Organization'
+        checkoutRole:
+          type: string
+          enum: [production, lender, none]
+          description: |
+            `production`: a member of the org that runs it — anything can be
+            checked out to it. `lender`: it has the caller's org's units booked
+            and approved, and only those can be. `none`: read only.
+        canCheck:
+          type: boolean
+          description: Whether the caller may check its list — crew may, without booking rights.
 
     Asset:
       type: object
@@ -2136,3 +2406,227 @@ components:
         away:
           type: integer
           description: Not found, but checked out to another production.
+
+    ProductionCheckStartRequest:
+      type: object
+      properties:
+        organizationId:
+          type: string
+          description: Which side to check as, for a caller on both.
+
+    ProductionCheckSide:
+      type: object
+      required: [organizationId, organizationName, own]
+      properties:
+        organizationId:
+          type: string
+        organizationName:
+          type: string
+        own:
+          type: boolean
+          description: The production's own org — the whole list, and the handover steps.
+
+    ProductionCheckTick:
+      type: object
+      required: [userName, mine, via, at]
+      properties:
+        userName:
+          type: string
+        mine:
+          type: boolean
+          description: Ticked by the caller, who alone may untick it.
+        via:
+          type: string
+          enum: [scan, manual]
+        at:
+          type: string
+          format: date-time
+
+    ProductionCheckItem:
+      type: object
+      required:
+        - assetId
+        - assetTag
+        - productName
+        - productCaption
+        - manufacturerName
+        - lentBy
+        - accessoryOf
+        - group
+        - status
+        - received
+        - returnReported
+        - tick
+      properties:
+        assetId:
+          type: string
+        assetTag:
+          type: [string, 'null']
+        productName:
+          type: string
+        productCaption:
+          type: [string, 'null']
+        manufacturerName:
+          type: [string, 'null']
+        lentBy:
+          type: [string, 'null']
+          description: The org that lent the unit; null for the production's own.
+        accessoryOf:
+          type: [string, 'null']
+          description: The unit it hangs off; listed right after it.
+        group:
+          $ref: '#/components/schemas/ProductionCheckGroup'
+        status:
+          type: string
+          enum: [APPROVED, CHECKED_OUT]
+          description: APPROVED is booked but not handed over yet.
+        received:
+          type: boolean
+          description: Lent units only — the production confirmed having it.
+        returnReported:
+          type: boolean
+          description: Lent units only — the production reported it as sent back.
+        tick:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/ProductionCheckTick'
+
+    ProductionCheckGroup:
+      type: object
+      required: [kind, name]
+      description: |
+        The section a unit is listed under. Items arrive sorted by it, so a
+        client starts a new heading whenever it changes. `location`: the shelf
+        it is kept on. `lender`: lent units, one section per lending org
+        (`name` is the org). `none`: no location, `name` is null. An accessory
+        is always in its parent's section.
+      properties:
+        kind:
+          type: string
+          enum: [location, lender, none]
+        name:
+          type: [string, 'null']
+
+    ProductionCheckUnexpected:
+      type: object
+      required: [assetId, assetTag, productName, userName, mine]
+      properties:
+        assetId:
+          type: string
+        assetTag:
+          type: [string, 'null']
+        productName:
+          type: string
+        userName:
+          type: string
+        mine:
+          type: boolean
+
+    ProductionCheck:
+      type: object
+      required:
+        - id
+        - status
+        - productionId
+        - productionName
+        - side
+        - createdAt
+        - createdBy
+        - closedAt
+        - closedBy
+        - items
+        - unexpected
+        - canConfirmReceipt
+        - canReportReturn
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [OPEN, CLOSED]
+        productionId:
+          type: string
+        productionName:
+          type: string
+        side:
+          $ref: '#/components/schemas/ProductionCheckSide'
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        closedAt:
+          type: [string, 'null']
+          format: date-time
+        closedBy:
+          type: [string, 'null']
+        items:
+          type: array
+          description: The list as it is now, by section, each unit followed by its accessories.
+          items:
+            $ref: '#/components/schemas/ProductionCheckItem'
+        unexpected:
+          type: array
+          description: Ticked but not on the list.
+          items:
+            $ref: '#/components/schemas/ProductionCheckUnexpected'
+        canConfirmReceipt:
+          type: integer
+          description: How many units `receipt` would confirm for the caller — 0 hides it.
+        canReportReturn:
+          type: integer
+          description: How many units `return-report` would report for the caller — 0 hides it.
+
+    ProductionCheckScanRequest:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+
+    ProductionCheckScanResult:
+      type: object
+      required: [result, assetTag, productName, ticked]
+      properties:
+        result:
+          type: string
+          enum: [ticked, already, unexpected]
+        assetTag:
+          type: string
+        productName:
+          type: string
+        ticked:
+          type: integer
+          description: Units this scan ticked — the unit and its untagged accessories.
+
+    ProductionCheckTickRequest:
+      type: object
+      required: [assetIds]
+      properties:
+        assetIds:
+          type: array
+          items:
+            type: string
+
+    ProductionCheckTickResult:
+      type: object
+      required: [ticked]
+      properties:
+        ticked:
+          type: integer
+
+    ProductionCheckCloseResult:
+      type: object
+      required: [found, missing]
+      properties:
+        found:
+          type: integer
+        missing:
+          type: integer
+
+    HandoverResult:
+      type: object
+      required: [count]
+      properties:
+        count:
+          type: integer

@@ -79,6 +79,7 @@ class ApiClient {
     scanning = ScanningClient(_dio);
     stocktake = StocktakeClient(_dio);
     caseCheck = CaseCheckClient(_dio);
+    productionCheck = ProductionCheckClient(_dio);
     auth = AuthClient(_dio);
   }
 
@@ -90,6 +91,7 @@ class ApiClient {
   late final ScanningClient scanning;
   late final StocktakeClient stocktake;
   late final CaseCheckClient caseCheck;
+  late final ProductionCheckClient productionCheck;
   late final AuthClient auth;
 
   Dio get raw => _dio;
@@ -167,6 +169,10 @@ String describeError(S l10n, Object error) {
     'stocktake_count_changed' => l10n.errorStocktakeCountChanged,
     'stocktake_action_applied' => l10n.errorStocktakeActionApplied,
     'not_a_case' => l10n.errorNotACase,
+    'not_approved' => l10n.errorNotApproved,
+    'check_closed' => l10n.errorCheckClosed,
+    'tick_not_yours' => l10n.errorTickNotYours,
+    'receipt_forbidden' => l10n.errorReceiptForbidden,
     'unauthorized' => l10n.errorUnauthorized,
     'invalid_request' => l10n.errorInvalidRequest,
     'invalid_limit' => l10n.errorInvalidLimit,

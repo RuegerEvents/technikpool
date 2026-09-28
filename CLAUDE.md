@@ -79,6 +79,7 @@ async function requireAuth() {
 | `src/lib/remote/service-catalog.remote.ts`   | `getServiceCatalog` and CRUD for `ServiceCategory` / `OrgService` — the org's price list for service lines (Personal, Transport …); a line copies from it and never points back                                                           |
 | `src/lib/remote/stocktakes.remote.ts`        | `getStocktakes`, `getStocktake`, `getStocktakePreview`, `createStocktake`, `scanStocktakeCode`, `tickStocktake`, `setStocktakeCount`, `closeStocktake`, `applyStocktakeAction`, `recountStocktake` …                                      |
 | `src/lib/remote/legal.remote.ts`             | `getLegalSettings`, `saveLegalDocument`, `getDpaOverview`, `acceptDpa` — the operator's legal texts and each org's acceptance of the AVV                                                                                                  |
+| `src/lib/remote/production-checks.remote.ts` | `getProductionChecks`, `getProductionCheck`, `startProductionCheck`, `scanProductionCheck`, `tickProductionCheck`, `closeCheck`, `confirmCheckReceipt`, `reportCheckReturn`, `getHandoverTodos` — see "Loans: handover and checks"        |
 | `src/lib/remote/product-documents.remote.ts` | `getProductDocuments`, `addProductDocument`, `updateProductDocument`, `removeProductDocument` — a product's PDFs, public by design (see `services/product-documents.ts`)                                                                  |
 
 ## External API (`/api/v1`)
@@ -308,6 +309,32 @@ copy to customer, invoice) goes through `copyItem`, so a new item column has to 
   assets as they are _now_ (`actionCandidates`). Cancelling an open one deletes it.
 - MEMBER+ of the org may do all of it. Print at `/stocktakes/[id]/print`, CSV at
   `/stocktakes/[id]/export.csv`.
+
+## Loans: handover and checks (Prüfen)
+
+The **Scan** page (`/checkout`, "Scannen" — it books both ways, so it is no longer called
+Ausgabe) and the scanner's session both check a lent unit out and back in. Rules in
+`src/lib/server/services/production-check.ts` and `checkout.ts`, shared with `/api/v1`.
+
+- **The lender hands over by scanning.** A MEMBER+ of the unit's org may check it out to
+  another org's production without any right there, but only if the production has it booked
+  and approved (`not_approved` otherwise). `productionTargets` lists those productions with
+  `checkoutRole: 'lender'`. Taking it back is the ordinary scan onto a location.
+- **The borrower's two steps are columns, not statuses**: `ProductionItem.receivedAt` and
+  `returnReportedAt`. Every "is it out?" list keeps asking `CHECKED_OUT`, so none of them had
+  to change. Both reset when the unit goes out again. Someone on both sides (MEMBER+ of the
+  production's org, or its crew) receives it with the scan itself.
+- **A check** (`ProductionCheck`/`ProductionCheckTick`) ticks units against the production's
+  APPROVED + CHECKED_OUT list and changes nothing. It is stored and shared, like a stocktake,
+  because several people check one production at once, and it can be repeated at will.
+  It belongs to one side: the production's own org sees every unit, a lending org only its own.
+  The list comes in sections (`group` on each item, sorted by it): own units by the location
+  they are kept on, lent units one section per lending org.
+  Closing writes `PRODUCTION_CHECKED` into each unit's history. On the production's side the
+  check is where ticked lent units are confirmed received (`HANDOVER_RECEIVED`) and later
+  reported sent back (`RETURN_REPORTED`, only once received).
+- The dashboard's "Handovers" (`handoverTodos`) lists receipts to confirm and reported returns
+  still to scan in.
 
 ## Who may change a product
 

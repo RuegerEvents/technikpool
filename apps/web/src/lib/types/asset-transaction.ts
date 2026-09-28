@@ -119,6 +119,32 @@ export type CaseCheckedData = {
 	expected: number;
 };
 
+/** Checked against a production's list (Prüfen), written once per unit when the check closes. */
+export type ProductionCheckedData = {
+	type: 'PRODUCTION_CHECKED';
+	productionId: string;
+	productionName: string;
+	checkId: string;
+	result: 'found' | 'missing';
+	/** Of the whole list, so one entry tells how the check went. */
+	found: number;
+	expected: number;
+};
+
+/** The borrowing production confirmed it has this lent unit. */
+export type HandoverReceivedData = {
+	type: 'HANDOVER_RECEIVED';
+	productionId: string;
+	productionName: string;
+};
+
+/** The borrowing production reported this lent unit as sent back. */
+export type ReturnReportedData = {
+	type: 'RETURN_REPORTED';
+	productionId: string;
+	productionName: string;
+};
+
 export type TransactionData =
 	| CreatedData
 	| UpdatedData
@@ -136,4 +162,7 @@ export type TransactionData =
 	| CredentialsRemovedData
 	| CredentialsRevealedData
 	| StocktakeCountedData
-	| CaseCheckedData;
+	| CaseCheckedData
+	| ProductionCheckedData
+	| HandoverReceivedData
+	| ReturnReportedData;

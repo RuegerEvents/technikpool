@@ -1566,6 +1566,228 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Try the cable case\'s tag {tag}'**
   String caseCheckDemoHint(String tag);
+
+  /// No description provided for @errorNotApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'This unit is not booked and approved on that production — only the production\'s own organization can add it.'**
+  String get errorNotApproved;
+
+  /// No description provided for @errorCheckClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'This check is already closed. Start a new one.'**
+  String get errorCheckClosed;
+
+  /// No description provided for @errorTickNotYours.
+  ///
+  /// In en, this message translates to:
+  /// **'Only whoever ticked a unit can take the tick back.'**
+  String get errorTickNotYours;
+
+  /// No description provided for @errorReceiptForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the production\'s own organization or its crew can confirm a handover.'**
+  String get errorReceiptForbidden;
+
+  /// The PRODUCTION_CHECKED history entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked on a production'**
+  String get actionProductionChecked;
+
+  /// The HANDOVER_RECEIVED history entry: the borrowing production confirmed having a lent unit.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt confirmed'**
+  String get actionHandoverReceived;
+
+  /// The RETURN_REPORTED history entry: the borrowing production sent a lent unit back.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported returned'**
+  String get actionReturnReported;
+
+  /// Checking a production's equipment against its list (Prüfen).
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get productionCheck;
+
+  /// Subtitle of a production that borrows the user's units: a scan to it can book those only.
+  ///
+  /// In en, this message translates to:
+  /// **'only your units'**
+  String get productionCheckLenderOnly;
+
+  /// No description provided for @productionCheckEverything.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything on the production'**
+  String get productionCheckEverything;
+
+  /// No description provided for @productionCheckUnitsOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the units of {org}'**
+  String productionCheckUnitsOf(String org);
+
+  /// No description provided for @productionCheckFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Found'**
+  String get productionCheckFound;
+
+  /// No description provided for @productionCheckFoundBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Found by {name}'**
+  String productionCheckFoundBy(String name);
+
+  /// No description provided for @productionCheckAlready.
+  ///
+  /// In en, this message translates to:
+  /// **'Already ticked'**
+  String get productionCheckAlready;
+
+  /// No description provided for @productionCheckNotOnList.
+  ///
+  /// In en, this message translates to:
+  /// **'Not on this list'**
+  String get productionCheckNotOnList;
+
+  /// No description provided for @productionCheckWithAccessories.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} (+{count} accessories)'**
+  String productionCheckWithAccessories(String name, int count);
+
+  /// No description provided for @productionCheckNotOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Not out yet'**
+  String get productionCheckNotOut;
+
+  /// No description provided for @productionCheckReceiptOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt open'**
+  String get productionCheckReceiptOpen;
+
+  /// No description provided for @productionCheckReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get productionCheckReceived;
+
+  /// No description provided for @productionCheckReturnReported.
+  ///
+  /// In en, this message translates to:
+  /// **'Return reported'**
+  String get productionCheckReturnReported;
+
+  /// No description provided for @productionCheckLentBy.
+  ///
+  /// In en, this message translates to:
+  /// **'from {org}'**
+  String productionCheckLentBy(String org);
+
+  /// No description provided for @productionCheckEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is booked for this production yet.'**
+  String get productionCheckEmpty;
+
+  /// No description provided for @productionCheckTickAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick all'**
+  String get productionCheckTickAll;
+
+  /// No description provided for @productionCheckFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish and save'**
+  String get productionCheckFinish;
+
+  /// No description provided for @productionCheckSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Check saved: {found} found, {missing} missing.'**
+  String productionCheckSaved(int found, int missing);
+
+  /// No description provided for @productionCheckConfirmReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Confirm receipt of 1 unit} other{Confirm receipt of {count} units}}'**
+  String productionCheckConfirmReceipt(int count);
+
+  /// No description provided for @productionCheckReportReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Report 1 unit returned} other{Report {count} units returned}}'**
+  String productionCheckReportReturn(int count);
+
+  /// No description provided for @productionCheckReceiptDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Receipt confirmed for 1 unit} other{Receipt confirmed for {count} units}}'**
+  String productionCheckReceiptDone(int count);
+
+  /// No description provided for @productionCheckReturnDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 unit reported returned} other{{count} units reported returned}}'**
+  String productionCheckReturnDone(int count);
+
+  /// No description provided for @productionCheckLentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to the ticked units other organizations lent to this production.'**
+  String get productionCheckLentHint;
+
+  /// No description provided for @productionCheckClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'This check is closed.'**
+  String get productionCheckClosed;
+
+  /// Section heading for units another organization lent.
+  ///
+  /// In en, this message translates to:
+  /// **'Lent by {org}'**
+  String productionCheckLentBySection(String org);
+
+  /// No description provided for @productionCheckNoLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'No location'**
+  String get productionCheckNoLocation;
+
+  /// No description provided for @productionCheckTickSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick section'**
+  String get productionCheckTickSection;
+
+  /// Bottom sheet choice: start a session that books scanned units to the production.
+  ///
+  /// In en, this message translates to:
+  /// **'Check out'**
+  String get productionActionBook;
+
+  /// No description provided for @productionActionBookHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Every scan books the unit to this production.'**
+  String get productionActionBookHint;
+
+  /// No description provided for @productionActionCheckHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick what is there against its list. Changes nothing.'**
+  String get productionActionCheckHint;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

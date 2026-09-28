@@ -35,17 +35,22 @@ model User {
 
   // App-specific relations
   homeOrgId            String?
-  homeOrg              Organization?      @relation("HomeOrg", fields: [homeOrgId], references: [id])
+  homeOrg              Organization?         @relation("HomeOrg", fields: [homeOrgId], references: [id])
   memberships          OrgMembership[]
   transactions         AssetTransaction[]
   crewAssignments      ProductionCrew[]
-  cancelledProductions Production[]       @relation("ProductionCanceller")
-  stocktakesStarted    Stocktake[]        @relation("StocktakeStarter")
-  stocktakesClosed     Stocktake[]        @relation("StocktakeCloser")
+  cancelledProductions Production[]          @relation("ProductionCanceller")
+  stocktakesStarted    Stocktake[]           @relation("StocktakeStarter")
+  stocktakesClosed     Stocktake[]           @relation("StocktakeCloser")
   stocktakeFinds       StocktakeItem[]
   stocktakeCounts      StocktakeCount[]
   stocktakeEvents      StocktakeEvent[]
   dpaAcceptances       DpaAcceptance[]
+  itemsReceived        ProductionItem[]      @relation("ProductionItemReceiver")
+  returnsReported      ProductionItem[]      @relation("ProductionItemReturnReporter")
+  checksStarted        ProductionCheck[]     @relation("ProductionCheckStarter")
+  checksClosed         ProductionCheck[]     @relation("ProductionCheckCloser")
+  checkTicks           ProductionCheckTick[]
 
   @@map("user")
 }
@@ -198,6 +203,7 @@ model Organization {
   invoices          Invoice[]
   customers         Customer[]
   stocktakes        Stocktake[]
+  productionChecks  ProductionCheck[]
 }
 
 // Declared highest first, so `orderBy: { role: 'asc' }` lists owners at the
@@ -500,10 +506,10 @@ model Product {
   /// What this product is, in the words the team uses for it — "16-Port PoE
   /// switch" for a USW-Pro-Max-16-PoE. Shown after the name wherever units are
   /// listed. Part of the shared catalogue, so it answers to productControl.
-  caption        String?
+  caption String?
   /// Everything longer: handling notes, what to watch out for. Shown on the
   /// product's own panel only.
-  details        String?
+  details String?
 
   /// Cable attributes — null on anything that is not a cable. Any of them set is
   /// what makes a product a cable (`isCable` in src/lib/cable.ts); the name is
@@ -672,12 +678,13 @@ model Asset {
   transactions    AssetTransaction[]
   inspections     Inspection[]
   stocktakeItems  StocktakeItem[]
+  checkTicks      ProductionCheckTick[]
   credentials     LicenseCredential?
 
+  @@unique([organizationId, orgIndex])
   // The one index this schema declares: every booking, scan and print walks
   // parent → accessories, and Prisma indexes no relation scalar on its own.
   @@index([parentAssetId])
-  @@unique([organizationId, orgIndex])
 }
 
 // The secret half of a licence unit — its key, or the account it is used
@@ -801,6 +808,7 @@ model Production {
   items        ProductionItem[]
   crew         ProductionCrew[]
   transactions AssetTransaction[]
+  checks       ProductionCheck[]
   offers       Offer[]
   invoices     Invoice[]
 
@@ -860,7 +868,64 @@ model ProductionItem {
   // booking the production's cancellation released (see Production.cancelledAt).
   status String @default("PENDING")
 
+  // The handover of a lent unit, from the borrower's side (see
+  // services/production-check.ts). The lender's side needs no column: checking
+  // the unit out is the lender handing it over, scanning it back onto their
+  // shelf is the lender taking it back. Both reset when the unit goes out
+  // again, and mean nothing on a unit of the production's own org.
+  receivedAt         DateTime?
+  receivedById       String?
+  receivedBy         User?     @relation("ProductionItemReceiver", fields: [receivedById], references: [id], onDelete: SetNull)
+  returnReportedAt   DateTime?
+  returnReportedById String?
+  returnReportedBy   User?     @relation("ProductionItemReturnReporter", fields: [returnReportedById], references: [id], onDelete: SetNull)
+
   @@unique([productionId, assetId])
+}
+
+// Checking a production's equipment against its list (Prüfen): scanned or
+// ticked, as often as anyone likes, by several people at once. Nothing on the
+// assets changes. A check belongs to one side — the production's own org sees
+// every unit, a lending org only its own — so a lender checking before the
+// handover and the crew checking on location never tick into each other's list.
+model ProductionCheck {
+  id             String       @id @default(cuid())
+  productionId   String
+  production     Production   @relation(fields: [productionId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // OPEN or CLOSED. At most one OPEN per production and org.
+  status String @default("OPEN")
+
+  createdById String?
+  createdBy   User?     @relation("ProductionCheckStarter", fields: [createdById], references: [id], onDelete: SetNull)
+  closedById  String?
+  closedBy    User?     @relation("ProductionCheckCloser", fields: [closedById], references: [id], onDelete: SetNull)
+  closedAt    DateTime?
+  createdAt   DateTime  @default(now())
+
+  ticks ProductionCheckTick[]
+
+  @@index([productionId, organizationId, status])
+}
+
+model ProductionCheckTick {
+  id      String          @id @default(cuid())
+  checkId String
+  check   ProductionCheck @relation(fields: [checkId], references: [id], onDelete: Cascade)
+  assetId String
+  asset   Asset           @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  userId  String?
+  user    User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // "scan" or "manual"
+  via        String
+  // Scanned but not on the list this check is against.
+  unexpected Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@unique([checkId, assetId])
 }
 
 model ProductionCrew {

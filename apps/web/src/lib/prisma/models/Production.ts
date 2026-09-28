@@ -319,6 +319,7 @@ export type ProductionWhereInput = {
   items?: Prisma.ProductionItemListRelationFilter
   crew?: Prisma.ProductionCrewListRelationFilter
   transactions?: Prisma.AssetTransactionListRelationFilter
+  checks?: Prisma.ProductionCheckListRelationFilter
   offers?: Prisma.OfferListRelationFilter
   invoices?: Prisma.InvoiceListRelationFilter
 }
@@ -348,6 +349,7 @@ export type ProductionOrderByWithRelationInput = {
   items?: Prisma.ProductionItemOrderByRelationAggregateInput
   crew?: Prisma.ProductionCrewOrderByRelationAggregateInput
   transactions?: Prisma.AssetTransactionOrderByRelationAggregateInput
+  checks?: Prisma.ProductionCheckOrderByRelationAggregateInput
   offers?: Prisma.OfferOrderByRelationAggregateInput
   invoices?: Prisma.InvoiceOrderByRelationAggregateInput
 }
@@ -380,6 +382,7 @@ export type ProductionWhereUniqueInput = Prisma.AtLeast<{
   items?: Prisma.ProductionItemListRelationFilter
   crew?: Prisma.ProductionCrewListRelationFilter
   transactions?: Prisma.AssetTransactionListRelationFilter
+  checks?: Prisma.ProductionCheckListRelationFilter
   offers?: Prisma.OfferListRelationFilter
   invoices?: Prisma.InvoiceListRelationFilter
 }, "id">
@@ -453,6 +456,7 @@ export type ProductionCreateInput = {
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
@@ -478,6 +482,7 @@ export type ProductionUncheckedCreateInput = {
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
@@ -503,6 +508,7 @@ export type ProductionUpdateInput = {
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
@@ -528,6 +534,7 @@ export type ProductionUncheckedUpdateInput = {
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
@@ -858,6 +865,20 @@ export type ProductionUpdateOneRequiredWithoutItemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProductionUpdateToOneWithWhereWithoutItemsInput, Prisma.ProductionUpdateWithoutItemsInput>, Prisma.ProductionUncheckedUpdateWithoutItemsInput>
 }
 
+export type ProductionCreateNestedOneWithoutChecksInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutChecksInput, Prisma.ProductionUncheckedCreateWithoutChecksInput>
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutChecksInput
+  connect?: Prisma.ProductionWhereUniqueInput
+}
+
+export type ProductionUpdateOneRequiredWithoutChecksNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutChecksInput, Prisma.ProductionUncheckedCreateWithoutChecksInput>
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutChecksInput
+  upsert?: Prisma.ProductionUpsertWithoutChecksInput
+  connect?: Prisma.ProductionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProductionUpdateToOneWithWhereWithoutChecksInput, Prisma.ProductionUpdateWithoutChecksInput>, Prisma.ProductionUncheckedUpdateWithoutChecksInput>
+}
+
 export type ProductionCreateNestedOneWithoutCrewInput = {
   create?: Prisma.XOR<Prisma.ProductionCreateWithoutCrewInput, Prisma.ProductionUncheckedCreateWithoutCrewInput>
   connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutCrewInput
@@ -940,6 +961,7 @@ export type ProductionCreateWithoutCancelledByInput = {
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
@@ -964,6 +986,7 @@ export type ProductionUncheckedCreateWithoutCancelledByInput = {
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
@@ -1037,6 +1060,7 @@ export type ProductionCreateWithoutOrganizationInput = {
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
@@ -1061,6 +1085,7 @@ export type ProductionUncheckedCreateWithoutOrganizationInput = {
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
@@ -1111,6 +1136,7 @@ export type ProductionCreateWithoutAddressInput = {
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
@@ -1135,6 +1161,7 @@ export type ProductionUncheckedCreateWithoutAddressInput = {
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
@@ -1185,6 +1212,7 @@ export type ProductionCreateWithoutCustomerInput = {
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
@@ -1209,6 +1237,7 @@ export type ProductionUncheckedCreateWithoutCustomerInput = {
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
@@ -1259,6 +1288,7 @@ export type ProductionCreateWithoutItemsInput = {
   cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledProductionsInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
@@ -1283,6 +1313,7 @@ export type ProductionUncheckedCreateWithoutItemsInput = {
   updatedAt?: Date | string
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
@@ -1323,6 +1354,7 @@ export type ProductionUpdateWithoutItemsInput = {
   cancelledBy?: Prisma.UserUpdateOneWithoutCancelledProductionsNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
@@ -1345,6 +1377,123 @@ export type ProductionUncheckedUpdateWithoutItemsInput = {
   shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
+}
+
+export type ProductionCreateWithoutChecksInput = {
+  id?: string
+  name: string
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
+  venueName?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
+  address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
+  cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledProductionsInput
+  items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
+  crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
+}
+
+export type ProductionUncheckedCreateWithoutChecksInput = {
+  id?: string
+  name: string
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
+  organizationId: string
+  venueName?: string | null
+  addressId?: string | null
+  customerId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  cancelledById?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
+  crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
+}
+
+export type ProductionCreateOrConnectWithoutChecksInput = {
+  where: Prisma.ProductionWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductionCreateWithoutChecksInput, Prisma.ProductionUncheckedCreateWithoutChecksInput>
+}
+
+export type ProductionUpsertWithoutChecksInput = {
+  update: Prisma.XOR<Prisma.ProductionUpdateWithoutChecksInput, Prisma.ProductionUncheckedUpdateWithoutChecksInput>
+  create: Prisma.XOR<Prisma.ProductionCreateWithoutChecksInput, Prisma.ProductionUncheckedCreateWithoutChecksInput>
+  where?: Prisma.ProductionWhereInput
+}
+
+export type ProductionUpdateToOneWithWhereWithoutChecksInput = {
+  where?: Prisma.ProductionWhereInput
+  data: Prisma.XOR<Prisma.ProductionUpdateWithoutChecksInput, Prisma.ProductionUncheckedUpdateWithoutChecksInput>
+}
+
+export type ProductionUpdateWithoutChecksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
+  address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
+  cancelledBy?: Prisma.UserUpdateOneWithoutCancelledProductionsNestedInput
+  items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
+  crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
+}
+
+export type ProductionUncheckedUpdateWithoutChecksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
@@ -1371,6 +1520,7 @@ export type ProductionCreateWithoutCrewInput = {
   cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledProductionsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
@@ -1395,6 +1545,7 @@ export type ProductionUncheckedCreateWithoutCrewInput = {
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
@@ -1435,6 +1586,7 @@ export type ProductionUpdateWithoutCrewInput = {
   cancelledBy?: Prisma.UserUpdateOneWithoutCancelledProductionsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
@@ -1459,6 +1611,7 @@ export type ProductionUncheckedUpdateWithoutCrewInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
@@ -1483,6 +1636,7 @@ export type ProductionCreateWithoutTransactionsInput = {
   cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledProductionsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
@@ -1507,6 +1661,7 @@ export type ProductionUncheckedCreateWithoutTransactionsInput = {
   updatedAt?: Date | string
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
@@ -1547,6 +1702,7 @@ export type ProductionUpdateWithoutTransactionsInput = {
   cancelledBy?: Prisma.UserUpdateOneWithoutCancelledProductionsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
@@ -1571,6 +1727,7 @@ export type ProductionUncheckedUpdateWithoutTransactionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
@@ -1596,6 +1753,7 @@ export type ProductionCreateWithoutOffersInput = {
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
 
@@ -1620,6 +1778,7 @@ export type ProductionUncheckedCreateWithoutOffersInput = {
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
 
@@ -1660,6 +1819,7 @@ export type ProductionUpdateWithoutOffersInput = {
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
 
@@ -1684,6 +1844,7 @@ export type ProductionUncheckedUpdateWithoutOffersInput = {
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
 
@@ -1708,6 +1869,7 @@ export type ProductionCreateWithoutInvoicesInput = {
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
 }
 
@@ -1732,6 +1894,7 @@ export type ProductionUncheckedCreateWithoutInvoicesInput = {
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
 }
 
@@ -1772,6 +1935,7 @@ export type ProductionUpdateWithoutInvoicesInput = {
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
 }
 
@@ -1796,6 +1960,7 @@ export type ProductionUncheckedUpdateWithoutInvoicesInput = {
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
 }
 
@@ -1838,6 +2003,7 @@ export type ProductionUpdateWithoutCancelledByInput = {
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
@@ -1862,6 +2028,7 @@ export type ProductionUncheckedUpdateWithoutCancelledByInput = {
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
@@ -1924,6 +2091,7 @@ export type ProductionUpdateWithoutOrganizationInput = {
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
@@ -1948,6 +2116,7 @@ export type ProductionUncheckedUpdateWithoutOrganizationInput = {
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
@@ -2010,6 +2179,7 @@ export type ProductionUpdateWithoutAddressInput = {
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
@@ -2034,6 +2204,7 @@ export type ProductionUncheckedUpdateWithoutAddressInput = {
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
@@ -2096,6 +2267,7 @@ export type ProductionUpdateWithoutCustomerInput = {
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
@@ -2120,6 +2292,7 @@ export type ProductionUncheckedUpdateWithoutCustomerInput = {
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
@@ -2152,6 +2325,7 @@ export type ProductionCountOutputType = {
   items: number
   crew: number
   transactions: number
+  checks: number
   offers: number
   invoices: number
 }
@@ -2160,6 +2334,7 @@ export type ProductionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extens
   items?: boolean | ProductionCountOutputTypeCountItemsArgs
   crew?: boolean | ProductionCountOutputTypeCountCrewArgs
   transactions?: boolean | ProductionCountOutputTypeCountTransactionsArgs
+  checks?: boolean | ProductionCountOutputTypeCountChecksArgs
   offers?: boolean | ProductionCountOutputTypeCountOffersArgs
   invoices?: boolean | ProductionCountOutputTypeCountInvoicesArgs
 }
@@ -2193,6 +2368,13 @@ export type ProductionCountOutputTypeCountCrewArgs<ExtArgs extends runtime.Types
  */
 export type ProductionCountOutputTypeCountTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AssetTransactionWhereInput
+}
+
+/**
+ * ProductionCountOutputType without action
+ */
+export type ProductionCountOutputTypeCountChecksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProductionCheckWhereInput
 }
 
 /**
@@ -2235,6 +2417,7 @@ export type ProductionSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   items?: boolean | Prisma.Production$itemsArgs<ExtArgs>
   crew?: boolean | Prisma.Production$crewArgs<ExtArgs>
   transactions?: boolean | Prisma.Production$transactionsArgs<ExtArgs>
+  checks?: boolean | Prisma.Production$checksArgs<ExtArgs>
   offers?: boolean | Prisma.Production$offersArgs<ExtArgs>
   invoices?: boolean | Prisma.Production$invoicesArgs<ExtArgs>
   _count?: boolean | Prisma.ProductionCountOutputTypeDefaultArgs<ExtArgs>
@@ -2317,6 +2500,7 @@ export type ProductionInclude<ExtArgs extends runtime.Types.Extensions.InternalA
   items?: boolean | Prisma.Production$itemsArgs<ExtArgs>
   crew?: boolean | Prisma.Production$crewArgs<ExtArgs>
   transactions?: boolean | Prisma.Production$transactionsArgs<ExtArgs>
+  checks?: boolean | Prisma.Production$checksArgs<ExtArgs>
   offers?: boolean | Prisma.Production$offersArgs<ExtArgs>
   invoices?: boolean | Prisma.Production$invoicesArgs<ExtArgs>
   _count?: boolean | Prisma.ProductionCountOutputTypeDefaultArgs<ExtArgs>
@@ -2344,6 +2528,7 @@ export type $ProductionPayload<ExtArgs extends runtime.Types.Extensions.Internal
     items: Prisma.$ProductionItemPayload<ExtArgs>[]
     crew: Prisma.$ProductionCrewPayload<ExtArgs>[]
     transactions: Prisma.$AssetTransactionPayload<ExtArgs>[]
+    checks: Prisma.$ProductionCheckPayload<ExtArgs>[]
     offers: Prisma.$OfferPayload<ExtArgs>[]
     invoices: Prisma.$InvoicePayload<ExtArgs>[]
   }
@@ -2766,6 +2951,7 @@ export interface Prisma__ProductionClient<T, Null = never, ExtArgs extends runti
   items<T extends Prisma.Production$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   crew<T extends Prisma.Production$crewArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$crewArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionCrewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   transactions<T extends Prisma.Production$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  checks<T extends Prisma.Production$checksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$checksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionCheckPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   offers<T extends Prisma.Production$offersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$offersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OfferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   invoices<T extends Prisma.Production$invoicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -3341,6 +3527,30 @@ export type Production$transactionsArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.AssetTransactionScalarFieldEnum | Prisma.AssetTransactionScalarFieldEnum[]
+}
+
+/**
+ * Production.checks
+ */
+export type Production$checksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProductionCheck
+   */
+  select?: Prisma.ProductionCheckSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProductionCheck
+   */
+  omit?: Prisma.ProductionCheckOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProductionCheckInclude<ExtArgs> | null
+  where?: Prisma.ProductionCheckWhereInput
+  orderBy?: Prisma.ProductionCheckOrderByWithRelationInput | Prisma.ProductionCheckOrderByWithRelationInput[]
+  cursor?: Prisma.ProductionCheckWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProductionCheckScalarFieldEnum | Prisma.ProductionCheckScalarFieldEnum[]
 }
 
 /**

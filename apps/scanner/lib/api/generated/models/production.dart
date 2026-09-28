@@ -5,6 +5,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'organization.dart';
+import 'production_checkout_role.dart';
 
 part 'production.g.dart';
 
@@ -16,6 +17,8 @@ class Production {
     required this.organization,
     this.startDate,
     this.endDate,
+    this.checkoutRole,
+    this.canCheck,
   });
   
   factory Production.fromJson(Map<String, Object?> json) => _$ProductionFromJson(json);
@@ -25,6 +28,15 @@ class Production {
   final DateTime? startDate;
   final DateTime? endDate;
   final Organization organization;
+
+  /// `production`: a member of the org that runs it — anything can be.
+  /// checked out to it. `lender`: it has the caller's org's units booked.
+  /// and approved, and only those can be. `none`: read only.
+  ///
+  final ProductionCheckoutRole? checkoutRole;
+
+  /// Whether the caller may check its list — crew may, without booking rights.
+  final bool? canCheck;
 
   Map<String, Object?> toJson() => _$ProductionToJson(this);
 }

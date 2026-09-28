@@ -105,6 +105,14 @@ class DemoBackend {
     if (method == 'POST' && path == '/api/v1/case-checks') {
       return _recordCase(options);
     }
+    if (method == 'POST' &&
+        path.startsWith('/api/v1/productions/') &&
+        path.endsWith('/checks')) {
+      return _startCheck(options, path.split('/')[4]);
+    }
+    if (path.startsWith('/api/v1/production-checks/')) {
+      return _checkRoute(options, method, path);
+    }
 
     return _error(options, 404, 'not_found', 'Not available in the demo');
   }
@@ -246,6 +254,10 @@ class DemoBackend {
         orElse: () => DemoData.productions.first,
       );
       _checkedOutTo[asset.id] = production;
+      // Going out again starts a new handover; the demo user stands on both
+      // sides, so it is received at once — as the server does for them.
+      _returnReported.remove(asset.id);
+      if (asset.organization.id != production.organization.id) _received.add(asset.id);
       _log(asset, 'CHECKED_OUT', production.name);
       return _ok(
         options,
@@ -326,6 +338,221 @@ class DemoBackend {
         userName: DemoData.user.name,
         productionName: action == 'CHECKED_OUT' ? targetName : null,
       ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Production checks — mirrors services/production-check.ts on the server.
+  // The demo has no bookings, so a production's list is what is out on it, and
+  // the demo user is on every side: one check per production.
+
+  final _checks = <String, _DemoCheck>{};
+  final _received = <String>{};
+  final _returnReported = <String>{};
+  var _checkSeq = 0;
+
+  Response<dynamic> _startCheck(RequestOptions options, String productionId) {
+    final production = DemoData.productions.where((p) => p.id == productionId).firstOrNull;
+    if (production == null) {
+      return _error(options, 404, 'not_found', 'Production not found');
+    }
+    final existing = _checks.values
+        .where((c) => c.production.id == productionId && c.open)
+        .firstOrNull;
+    final check =
+        existing ??
+        (_checks['prck_demo_${++_checkSeq}'] = _DemoCheck(
+          id: 'prck_demo_$_checkSeq',
+          production: production,
+        ));
+    return _ok(options, _checkView(check));
+  }
+
+  Response<dynamic> _checkRoute(RequestOptions options, String method, String path) {
+    // ['', 'api', 'v1', 'production-checks', id, sub?, assetId?]
+    final parts = path.split('/');
+    final check = _checks[parts[4]];
+    if (check == null) return _error(options, 404, 'not_found', 'Check not found');
+    final sub = parts.length > 5 ? parts[5] : null;
+    if (method == 'GET' && sub == null) return _ok(options, _checkView(check));
+    if (!check.open) {
+      return _error(options, 409, 'check_closed', 'This check is already closed');
+    }
+    final listed = _checkList(check).map((a) => a.id).toSet();
+    final lent = {
+      for (final a in _checkList(check))
+        if (a.organization.id != check.production.organization.id) a.id,
+    };
+
+    switch ((method, sub)) {
+      case ('POST', 'scans'):
+        final body = options.data;
+        final code = body is Map ? '${body['code'] ?? ''}'.trim() : '';
+        final match = _resolve(code);
+        if (match.ambiguous) {
+          return _error(options, 409, 'serial_ambiguous', 'Serial number is on more than one unit');
+        }
+        final asset = match.asset;
+        if (asset == null) {
+          return _error(options, 404, 'asset_not_found', 'Tag "$code" not found');
+        }
+        final String result;
+        var ticked = 0;
+        if (check.ticks.containsKey(asset.id)) {
+          result = listed.contains(asset.id) ? 'already' : 'unexpected';
+        } else if (!listed.contains(asset.id)) {
+          check.ticks[asset.id] = 'scan';
+          result = 'unexpected';
+          ticked = 1;
+        } else {
+          final riders = _assets.where(
+            (a) => a.parentAssetId == asset.id && a.assetTag == null && listed.contains(a.id),
+          );
+          for (final a in [asset, ...riders]) {
+            if (check.ticks.putIfAbsent(a.id, () => 'scan') == 'scan') ticked++;
+          }
+          result = 'ticked';
+        }
+        return _ok(
+          options,
+          ProductionCheckScanResult(
+            result: ProductionCheckScanResultResult.fromJson(result),
+            assetTag: asset.assetTag ?? code,
+            productName: asset.product.name,
+            ticked: ticked,
+          ),
+        );
+      case ('POST', 'ticks'):
+        final body = options.data;
+        final ids = body is Map ? (body['assetIds'] as List? ?? const []) : const [];
+        var ticked = 0;
+        for (final id in ids.whereType<String>().where(listed.contains)) {
+          if (!check.ticks.containsKey(id)) {
+            check.ticks[id] = 'manual';
+            ticked++;
+          }
+        }
+        return _ok(options, ProductionCheckTickResult(ticked: ticked));
+      case ('DELETE', 'ticks'):
+        check.ticks.remove(parts[6]);
+        return _noContent(options);
+      case ('POST', 'close'):
+        final found = listed.where(check.ticks.containsKey).length;
+        check.open = false;
+        for (final asset in _checkList(check)) {
+          _log(asset, 'PRODUCTION_CHECKED', check.production.name);
+        }
+        return _ok(
+          options,
+          ProductionCheckCloseResult(found: found, missing: listed.length - found),
+        );
+      case ('POST', 'receipt'):
+        final ids = lent.where((id) => check.ticks.containsKey(id) && !_received.contains(id));
+        final count = ids.length;
+        _received.addAll(ids.toList());
+        return _ok(options, HandoverResult(count: count));
+      case ('POST', 'return-report'):
+        final ids = lent.where(
+          (id) =>
+              check.ticks.containsKey(id) &&
+              _received.contains(id) &&
+              !_returnReported.contains(id),
+        );
+        final count = ids.length;
+        _returnReported.addAll(ids.toList());
+        return _ok(options, HandoverResult(count: count));
+    }
+    return _error(options, 404, 'not_found', 'Not available in the demo');
+  }
+
+  /// Sorted as the server sends it: own units by location, then lent ones.
+  List<Asset> _checkList(_DemoCheck check) {
+    String key(Asset a) => a.organization.id == check.production.organization.id
+        ? '0${a.location.name}'
+        : '1${a.organization.name}';
+    return [
+      for (final asset in _assets)
+        if (_checkedOutTo[asset.id]?.id == check.production.id) asset,
+    ]..sort((a, b) => key(a).compareTo(key(b)));
+  }
+
+  ProductionCheck _checkView(_DemoCheck check) {
+    final list = _checkList(check);
+    final listed = list.map((a) => a.id).toSet();
+    final lentTicked = [
+      for (final a in list)
+        if (a.organization.id != check.production.organization.id &&
+            check.ticks.containsKey(a.id))
+          a.id,
+    ];
+    return ProductionCheck(
+      id: check.id,
+      status: check.open ? ProductionCheckStatus.open : ProductionCheckStatus.closed,
+      productionId: check.production.id,
+      productionName: check.production.name,
+      side: ProductionCheckSide(
+        organizationId: check.production.organization.id,
+        organizationName: check.production.organization.name,
+        own: true,
+      ),
+      createdAt: check.createdAt,
+      createdBy: DemoData.user.name ?? DemoData.user.email,
+      closedAt: null,
+      closedBy: null,
+      items: [
+        for (final asset in list)
+          ProductionCheckItem(
+            assetId: asset.id,
+            assetTag: asset.assetTag,
+            productName: asset.product.name,
+            productCaption: asset.product.caption,
+            manufacturerName: asset.product.manufacturerName,
+            lentBy: asset.organization.id == check.production.organization.id
+                ? null
+                : asset.organization.shortName ?? asset.organization.name,
+            accessoryOf: asset.parentAssetId,
+            group: asset.organization.id == check.production.organization.id
+                ? ProductionCheckGroup(
+                    kind: ProductionCheckGroupKind.location,
+                    name: asset.location.name,
+                  )
+                : ProductionCheckGroup(
+                    kind: ProductionCheckGroupKind.lender,
+                    name: asset.organization.shortName ?? asset.organization.name,
+                  ),
+            status: ProductionCheckItemStatus.checkedOut,
+            received: _received.contains(asset.id),
+            returnReported: _returnReported.contains(asset.id),
+            tick: switch (check.ticks[asset.id]) {
+              final via? => ProductionCheckTick(
+                userName: DemoData.user.name ?? DemoData.user.email,
+                mine: true,
+                via: ProductionCheckTickVia.fromJson(via),
+                at: DateTime.now(),
+              ),
+              null => null,
+            },
+          ),
+      ],
+      unexpected: [
+        for (final id in check.ticks.keys.where((id) => !listed.contains(id)))
+          if (_assets.where((a) => a.id == id).firstOrNull case final asset?)
+            ProductionCheckUnexpected(
+              assetId: asset.id,
+              assetTag: asset.assetTag,
+              productName: asset.product.name,
+              userName: DemoData.user.name ?? DemoData.user.email,
+              mine: true,
+            ),
+      ],
+      canConfirmReceipt: check.open
+          ? lentTicked.where((id) => !_received.contains(id)).length
+          : 0,
+      canReportReturn: check.open
+          ? lentTicked
+                .where((id) => _received.contains(id) && !_returnReported.contains(id))
+                .length
+          : 0,
     );
   }
 
@@ -1046,3 +1273,16 @@ class _DemoItem {
 /// An [ApiClient] wired to a [DemoBackend] instead of the network.
 ApiClient demoApiClient(DemoBackend backend) =>
     ApiClient(baseUrl: demoBaseUrl, dio: backend.dio());
+
+/// A production check held in memory — see `_startCheck`.
+class _DemoCheck {
+  _DemoCheck({required this.id, required this.production}) : createdAt = DateTime.now();
+
+  final String id;
+  final Production production;
+  final DateTime createdAt;
+  bool open = true;
+
+  /// Asset id → how it was ticked (`scan` or `manual`).
+  final ticks = <String, String>{};
+}

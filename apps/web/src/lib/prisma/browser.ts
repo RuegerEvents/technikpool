@@ -183,6 +183,16 @@ export type Customer = Prisma.CustomerModel
  */
 export type ProductionItem = Prisma.ProductionItemModel
 /**
+ * Model ProductionCheck
+ * 
+ */
+export type ProductionCheck = Prisma.ProductionCheckModel
+/**
+ * Model ProductionCheckTick
+ * 
+ */
+export type ProductionCheckTick = Prisma.ProductionCheckTickModel
+/**
  * Model ProductionCrew
  * 
  */

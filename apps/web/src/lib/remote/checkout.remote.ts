@@ -1,30 +1,22 @@
 import { query, command } from '$app/server';
-import { prisma } from '$lib/server/auth';
 import * as v from 'valibot';
 import { getAsset, getAssets, getBundle, getBundles, getBundleTemplates } from './assets.remote';
 import { getProduction } from './productions.remote';
 import { getLicenses, getLicenseStatus } from './licenses.remote';
-import {
-	productionReadWhere,
-	requireAuth,
-	visibleProductionIds
-} from '$lib/server/services/access';
+import { getHandoverTodos } from './production-checks.remote';
+import { requireAuth, visibleProductionIds } from '$lib/server/services/access';
 import {
 	CheckoutError,
 	performBulkCheckout,
 	performScan,
+	productionTargets,
 	type AffectedRecords
 } from '$lib/server/services/checkout';
 import { appError, type AppErrorCode } from '$lib/errors';
 
 export const getAllProductions = query(async () => {
 	const user = await requireAuth();
-	return await prisma.production.findMany({
-		// A cancelled production takes no checkouts, so it is not offered as a target.
-		where: { ...(await productionReadWhere(user.id)), cancelledAt: null },
-		include: { organization: { select: { name: true, shortName: true } } },
-		orderBy: [{ startDate: 'desc' }, { name: 'asc' }]
-	});
+	return await productionTargets(user.id);
 });
 
 /**
@@ -59,7 +51,9 @@ async function refreshAffected(userId: string, affected: AffectedRecords) {
 		// checking it out is also what lets that production's crew see the key.
 		...affected.assetIds.map((id) => getLicenseStatus(id).refresh()),
 		...affected.organizationIds.map((id) => getLicenses(id).refresh()),
-		getLicenses().refresh()
+		getLicenses().refresh(),
+		// A lent unit going out or coming back opens or closes a handover.
+		...(affected.productionIds.length > 0 ? [getHandoverTodos().refresh()] : [])
 	]);
 }
 
@@ -76,7 +70,8 @@ const ERROR_CODES: Record<CheckoutError['code'], AppErrorCode> = {
 	wrong_organization: 'asset_wrong_organization',
 	asset_retired: 'asset_retired_no_booking',
 	asset_unavailable: 'asset_unavailable_no_booking',
-	production_cancelled: 'production_cancelled'
+	production_cancelled: 'production_cancelled',
+	not_approved: 'booking_not_approved'
 };
 
 const STATUS_BY_CODE: Record<CheckoutError['code'], number> = {
@@ -86,7 +81,8 @@ const STATUS_BY_CODE: Record<CheckoutError['code'], number> = {
 	wrong_organization: 403,
 	asset_retired: 409,
 	asset_unavailable: 409,
-	production_cancelled: 409
+	production_cancelled: 409,
+	not_approved: 409
 };
 
 async function withCheckoutErrors<T>(fn: () => Promise<T>): Promise<T> {

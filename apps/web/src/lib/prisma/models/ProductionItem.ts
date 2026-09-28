@@ -31,6 +31,10 @@ export type ProductionItemMinAggregateOutputType = {
   sourceBundleId: string | null
   sourceParentAssetId: string | null
   status: string | null
+  receivedAt: Date | null
+  receivedById: string | null
+  returnReportedAt: Date | null
+  returnReportedById: string | null
 }
 
 export type ProductionItemMaxAggregateOutputType = {
@@ -40,6 +44,10 @@ export type ProductionItemMaxAggregateOutputType = {
   sourceBundleId: string | null
   sourceParentAssetId: string | null
   status: string | null
+  receivedAt: Date | null
+  receivedById: string | null
+  returnReportedAt: Date | null
+  returnReportedById: string | null
 }
 
 export type ProductionItemCountAggregateOutputType = {
@@ -49,6 +57,10 @@ export type ProductionItemCountAggregateOutputType = {
   sourceBundleId: number
   sourceParentAssetId: number
   status: number
+  receivedAt: number
+  receivedById: number
+  returnReportedAt: number
+  returnReportedById: number
   _all: number
 }
 
@@ -60,6 +72,10 @@ export type ProductionItemMinAggregateInputType = {
   sourceBundleId?: true
   sourceParentAssetId?: true
   status?: true
+  receivedAt?: true
+  receivedById?: true
+  returnReportedAt?: true
+  returnReportedById?: true
 }
 
 export type ProductionItemMaxAggregateInputType = {
@@ -69,6 +85,10 @@ export type ProductionItemMaxAggregateInputType = {
   sourceBundleId?: true
   sourceParentAssetId?: true
   status?: true
+  receivedAt?: true
+  receivedById?: true
+  returnReportedAt?: true
+  returnReportedById?: true
 }
 
 export type ProductionItemCountAggregateInputType = {
@@ -78,6 +98,10 @@ export type ProductionItemCountAggregateInputType = {
   sourceBundleId?: true
   sourceParentAssetId?: true
   status?: true
+  receivedAt?: true
+  receivedById?: true
+  returnReportedAt?: true
+  returnReportedById?: true
   _all?: true
 }
 
@@ -160,6 +184,10 @@ export type ProductionItemGroupByOutputType = {
   sourceBundleId: string | null
   sourceParentAssetId: string | null
   status: string
+  receivedAt: Date | null
+  receivedById: string | null
+  returnReportedAt: Date | null
+  returnReportedById: string | null
   _count: ProductionItemCountAggregateOutputType | null
   _min: ProductionItemMinAggregateOutputType | null
   _max: ProductionItemMaxAggregateOutputType | null
@@ -190,9 +218,15 @@ export type ProductionItemWhereInput = {
   sourceBundleId?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
   sourceParentAssetId?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
   status?: Prisma.StringFilter<"ProductionItem"> | string
+  receivedAt?: Prisma.DateTimeNullableFilter<"ProductionItem"> | Date | string | null
+  receivedById?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
+  returnReportedAt?: Prisma.DateTimeNullableFilter<"ProductionItem"> | Date | string | null
+  returnReportedById?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
   production?: Prisma.XOR<Prisma.ProductionScalarRelationFilter, Prisma.ProductionWhereInput>
   asset?: Prisma.XOR<Prisma.AssetScalarRelationFilter, Prisma.AssetWhereInput>
   sourceBundle?: Prisma.XOR<Prisma.AssetBundleNullableScalarRelationFilter, Prisma.AssetBundleWhereInput> | null
+  receivedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  returnReportedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type ProductionItemOrderByWithRelationInput = {
@@ -202,9 +236,15 @@ export type ProductionItemOrderByWithRelationInput = {
   sourceBundleId?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceParentAssetId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  receivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  receivedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  returnReportedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  returnReportedById?: Prisma.SortOrderInput | Prisma.SortOrder
   production?: Prisma.ProductionOrderByWithRelationInput
   asset?: Prisma.AssetOrderByWithRelationInput
   sourceBundle?: Prisma.AssetBundleOrderByWithRelationInput
+  receivedBy?: Prisma.UserOrderByWithRelationInput
+  returnReportedBy?: Prisma.UserOrderByWithRelationInput
 }
 
 export type ProductionItemWhereUniqueInput = Prisma.AtLeast<{
@@ -218,9 +258,15 @@ export type ProductionItemWhereUniqueInput = Prisma.AtLeast<{
   sourceBundleId?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
   sourceParentAssetId?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
   status?: Prisma.StringFilter<"ProductionItem"> | string
+  receivedAt?: Prisma.DateTimeNullableFilter<"ProductionItem"> | Date | string | null
+  receivedById?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
+  returnReportedAt?: Prisma.DateTimeNullableFilter<"ProductionItem"> | Date | string | null
+  returnReportedById?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
   production?: Prisma.XOR<Prisma.ProductionScalarRelationFilter, Prisma.ProductionWhereInput>
   asset?: Prisma.XOR<Prisma.AssetScalarRelationFilter, Prisma.AssetWhereInput>
   sourceBundle?: Prisma.XOR<Prisma.AssetBundleNullableScalarRelationFilter, Prisma.AssetBundleWhereInput> | null
+  receivedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  returnReportedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id" | "productionId_assetId">
 
 export type ProductionItemOrderByWithAggregationInput = {
@@ -230,6 +276,10 @@ export type ProductionItemOrderByWithAggregationInput = {
   sourceBundleId?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceParentAssetId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  receivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  receivedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  returnReportedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  returnReportedById?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ProductionItemCountOrderByAggregateInput
   _max?: Prisma.ProductionItemMaxOrderByAggregateInput
   _min?: Prisma.ProductionItemMinOrderByAggregateInput
@@ -245,15 +295,23 @@ export type ProductionItemScalarWhereWithAggregatesInput = {
   sourceBundleId?: Prisma.StringNullableWithAggregatesFilter<"ProductionItem"> | string | null
   sourceParentAssetId?: Prisma.StringNullableWithAggregatesFilter<"ProductionItem"> | string | null
   status?: Prisma.StringWithAggregatesFilter<"ProductionItem"> | string
+  receivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ProductionItem"> | Date | string | null
+  receivedById?: Prisma.StringNullableWithAggregatesFilter<"ProductionItem"> | string | null
+  returnReportedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ProductionItem"> | Date | string | null
+  returnReportedById?: Prisma.StringNullableWithAggregatesFilter<"ProductionItem"> | string | null
 }
 
 export type ProductionItemCreateInput = {
   id?: string
   sourceParentAssetId?: string | null
   status?: string
+  receivedAt?: Date | string | null
+  returnReportedAt?: Date | string | null
   production: Prisma.ProductionCreateNestedOneWithoutItemsInput
   asset: Prisma.AssetCreateNestedOneWithoutProductionItemsInput
   sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput
+  receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput
+  returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput
 }
 
 export type ProductionItemUncheckedCreateInput = {
@@ -263,15 +321,23 @@ export type ProductionItemUncheckedCreateInput = {
   sourceBundleId?: string | null
   sourceParentAssetId?: string | null
   status?: string
+  receivedAt?: Date | string | null
+  receivedById?: string | null
+  returnReportedAt?: Date | string | null
+  returnReportedById?: string | null
 }
 
 export type ProductionItemUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   production?: Prisma.ProductionUpdateOneRequiredWithoutItemsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutProductionItemsNestedInput
   sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput
+  receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput
+  returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput
 }
 
 export type ProductionItemUncheckedUpdateInput = {
@@ -281,6 +347,10 @@ export type ProductionItemUncheckedUpdateInput = {
   sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ProductionItemCreateManyInput = {
@@ -290,12 +360,18 @@ export type ProductionItemCreateManyInput = {
   sourceBundleId?: string | null
   sourceParentAssetId?: string | null
   status?: string
+  receivedAt?: Date | string | null
+  receivedById?: string | null
+  returnReportedAt?: Date | string | null
+  returnReportedById?: string | null
 }
 
 export type ProductionItemUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ProductionItemUncheckedUpdateManyInput = {
@@ -305,6 +381,10 @@ export type ProductionItemUncheckedUpdateManyInput = {
   sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ProductionItemListRelationFilter = {
@@ -329,6 +409,10 @@ export type ProductionItemCountOrderByAggregateInput = {
   sourceBundleId?: Prisma.SortOrder
   sourceParentAssetId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  receivedAt?: Prisma.SortOrder
+  receivedById?: Prisma.SortOrder
+  returnReportedAt?: Prisma.SortOrder
+  returnReportedById?: Prisma.SortOrder
 }
 
 export type ProductionItemMaxOrderByAggregateInput = {
@@ -338,6 +422,10 @@ export type ProductionItemMaxOrderByAggregateInput = {
   sourceBundleId?: Prisma.SortOrder
   sourceParentAssetId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  receivedAt?: Prisma.SortOrder
+  receivedById?: Prisma.SortOrder
+  returnReportedAt?: Prisma.SortOrder
+  returnReportedById?: Prisma.SortOrder
 }
 
 export type ProductionItemMinOrderByAggregateInput = {
@@ -347,6 +435,94 @@ export type ProductionItemMinOrderByAggregateInput = {
   sourceBundleId?: Prisma.SortOrder
   sourceParentAssetId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  receivedAt?: Prisma.SortOrder
+  receivedById?: Prisma.SortOrder
+  returnReportedAt?: Prisma.SortOrder
+  returnReportedById?: Prisma.SortOrder
+}
+
+export type ProductionItemCreateNestedManyWithoutReceivedByInput = {
+  create?: Prisma.XOR<Prisma.ProductionItemCreateWithoutReceivedByInput, Prisma.ProductionItemUncheckedCreateWithoutReceivedByInput> | Prisma.ProductionItemCreateWithoutReceivedByInput[] | Prisma.ProductionItemUncheckedCreateWithoutReceivedByInput[]
+  connectOrCreate?: Prisma.ProductionItemCreateOrConnectWithoutReceivedByInput | Prisma.ProductionItemCreateOrConnectWithoutReceivedByInput[]
+  createMany?: Prisma.ProductionItemCreateManyReceivedByInputEnvelope
+  connect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+}
+
+export type ProductionItemCreateNestedManyWithoutReturnReportedByInput = {
+  create?: Prisma.XOR<Prisma.ProductionItemCreateWithoutReturnReportedByInput, Prisma.ProductionItemUncheckedCreateWithoutReturnReportedByInput> | Prisma.ProductionItemCreateWithoutReturnReportedByInput[] | Prisma.ProductionItemUncheckedCreateWithoutReturnReportedByInput[]
+  connectOrCreate?: Prisma.ProductionItemCreateOrConnectWithoutReturnReportedByInput | Prisma.ProductionItemCreateOrConnectWithoutReturnReportedByInput[]
+  createMany?: Prisma.ProductionItemCreateManyReturnReportedByInputEnvelope
+  connect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+}
+
+export type ProductionItemUncheckedCreateNestedManyWithoutReceivedByInput = {
+  create?: Prisma.XOR<Prisma.ProductionItemCreateWithoutReceivedByInput, Prisma.ProductionItemUncheckedCreateWithoutReceivedByInput> | Prisma.ProductionItemCreateWithoutReceivedByInput[] | Prisma.ProductionItemUncheckedCreateWithoutReceivedByInput[]
+  connectOrCreate?: Prisma.ProductionItemCreateOrConnectWithoutReceivedByInput | Prisma.ProductionItemCreateOrConnectWithoutReceivedByInput[]
+  createMany?: Prisma.ProductionItemCreateManyReceivedByInputEnvelope
+  connect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+}
+
+export type ProductionItemUncheckedCreateNestedManyWithoutReturnReportedByInput = {
+  create?: Prisma.XOR<Prisma.ProductionItemCreateWithoutReturnReportedByInput, Prisma.ProductionItemUncheckedCreateWithoutReturnReportedByInput> | Prisma.ProductionItemCreateWithoutReturnReportedByInput[] | Prisma.ProductionItemUncheckedCreateWithoutReturnReportedByInput[]
+  connectOrCreate?: Prisma.ProductionItemCreateOrConnectWithoutReturnReportedByInput | Prisma.ProductionItemCreateOrConnectWithoutReturnReportedByInput[]
+  createMany?: Prisma.ProductionItemCreateManyReturnReportedByInputEnvelope
+  connect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+}
+
+export type ProductionItemUpdateManyWithoutReceivedByNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductionItemCreateWithoutReceivedByInput, Prisma.ProductionItemUncheckedCreateWithoutReceivedByInput> | Prisma.ProductionItemCreateWithoutReceivedByInput[] | Prisma.ProductionItemUncheckedCreateWithoutReceivedByInput[]
+  connectOrCreate?: Prisma.ProductionItemCreateOrConnectWithoutReceivedByInput | Prisma.ProductionItemCreateOrConnectWithoutReceivedByInput[]
+  upsert?: Prisma.ProductionItemUpsertWithWhereUniqueWithoutReceivedByInput | Prisma.ProductionItemUpsertWithWhereUniqueWithoutReceivedByInput[]
+  createMany?: Prisma.ProductionItemCreateManyReceivedByInputEnvelope
+  set?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  disconnect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  delete?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  connect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  update?: Prisma.ProductionItemUpdateWithWhereUniqueWithoutReceivedByInput | Prisma.ProductionItemUpdateWithWhereUniqueWithoutReceivedByInput[]
+  updateMany?: Prisma.ProductionItemUpdateManyWithWhereWithoutReceivedByInput | Prisma.ProductionItemUpdateManyWithWhereWithoutReceivedByInput[]
+  deleteMany?: Prisma.ProductionItemScalarWhereInput | Prisma.ProductionItemScalarWhereInput[]
+}
+
+export type ProductionItemUpdateManyWithoutReturnReportedByNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductionItemCreateWithoutReturnReportedByInput, Prisma.ProductionItemUncheckedCreateWithoutReturnReportedByInput> | Prisma.ProductionItemCreateWithoutReturnReportedByInput[] | Prisma.ProductionItemUncheckedCreateWithoutReturnReportedByInput[]
+  connectOrCreate?: Prisma.ProductionItemCreateOrConnectWithoutReturnReportedByInput | Prisma.ProductionItemCreateOrConnectWithoutReturnReportedByInput[]
+  upsert?: Prisma.ProductionItemUpsertWithWhereUniqueWithoutReturnReportedByInput | Prisma.ProductionItemUpsertWithWhereUniqueWithoutReturnReportedByInput[]
+  createMany?: Prisma.ProductionItemCreateManyReturnReportedByInputEnvelope
+  set?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  disconnect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  delete?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  connect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  update?: Prisma.ProductionItemUpdateWithWhereUniqueWithoutReturnReportedByInput | Prisma.ProductionItemUpdateWithWhereUniqueWithoutReturnReportedByInput[]
+  updateMany?: Prisma.ProductionItemUpdateManyWithWhereWithoutReturnReportedByInput | Prisma.ProductionItemUpdateManyWithWhereWithoutReturnReportedByInput[]
+  deleteMany?: Prisma.ProductionItemScalarWhereInput | Prisma.ProductionItemScalarWhereInput[]
+}
+
+export type ProductionItemUncheckedUpdateManyWithoutReceivedByNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductionItemCreateWithoutReceivedByInput, Prisma.ProductionItemUncheckedCreateWithoutReceivedByInput> | Prisma.ProductionItemCreateWithoutReceivedByInput[] | Prisma.ProductionItemUncheckedCreateWithoutReceivedByInput[]
+  connectOrCreate?: Prisma.ProductionItemCreateOrConnectWithoutReceivedByInput | Prisma.ProductionItemCreateOrConnectWithoutReceivedByInput[]
+  upsert?: Prisma.ProductionItemUpsertWithWhereUniqueWithoutReceivedByInput | Prisma.ProductionItemUpsertWithWhereUniqueWithoutReceivedByInput[]
+  createMany?: Prisma.ProductionItemCreateManyReceivedByInputEnvelope
+  set?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  disconnect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  delete?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  connect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  update?: Prisma.ProductionItemUpdateWithWhereUniqueWithoutReceivedByInput | Prisma.ProductionItemUpdateWithWhereUniqueWithoutReceivedByInput[]
+  updateMany?: Prisma.ProductionItemUpdateManyWithWhereWithoutReceivedByInput | Prisma.ProductionItemUpdateManyWithWhereWithoutReceivedByInput[]
+  deleteMany?: Prisma.ProductionItemScalarWhereInput | Prisma.ProductionItemScalarWhereInput[]
+}
+
+export type ProductionItemUncheckedUpdateManyWithoutReturnReportedByNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductionItemCreateWithoutReturnReportedByInput, Prisma.ProductionItemUncheckedCreateWithoutReturnReportedByInput> | Prisma.ProductionItemCreateWithoutReturnReportedByInput[] | Prisma.ProductionItemUncheckedCreateWithoutReturnReportedByInput[]
+  connectOrCreate?: Prisma.ProductionItemCreateOrConnectWithoutReturnReportedByInput | Prisma.ProductionItemCreateOrConnectWithoutReturnReportedByInput[]
+  upsert?: Prisma.ProductionItemUpsertWithWhereUniqueWithoutReturnReportedByInput | Prisma.ProductionItemUpsertWithWhereUniqueWithoutReturnReportedByInput[]
+  createMany?: Prisma.ProductionItemCreateManyReturnReportedByInputEnvelope
+  set?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  disconnect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  delete?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  connect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  update?: Prisma.ProductionItemUpdateWithWhereUniqueWithoutReturnReportedByInput | Prisma.ProductionItemUpdateWithWhereUniqueWithoutReturnReportedByInput[]
+  updateMany?: Prisma.ProductionItemUpdateManyWithWhereWithoutReturnReportedByInput | Prisma.ProductionItemUpdateManyWithWhereWithoutReturnReportedByInput[]
+  deleteMany?: Prisma.ProductionItemScalarWhereInput | Prisma.ProductionItemScalarWhereInput[]
 }
 
 export type ProductionItemCreateNestedManyWithoutAssetInput = {
@@ -475,12 +651,132 @@ export type ProductionItemUncheckedUpdateManyWithoutProductionNestedInput = {
   deleteMany?: Prisma.ProductionItemScalarWhereInput | Prisma.ProductionItemScalarWhereInput[]
 }
 
+export type ProductionItemCreateWithoutReceivedByInput = {
+  id?: string
+  sourceParentAssetId?: string | null
+  status?: string
+  receivedAt?: Date | string | null
+  returnReportedAt?: Date | string | null
+  production: Prisma.ProductionCreateNestedOneWithoutItemsInput
+  asset: Prisma.AssetCreateNestedOneWithoutProductionItemsInput
+  sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput
+  returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput
+}
+
+export type ProductionItemUncheckedCreateWithoutReceivedByInput = {
+  id?: string
+  productionId: string
+  assetId: string
+  sourceBundleId?: string | null
+  sourceParentAssetId?: string | null
+  status?: string
+  receivedAt?: Date | string | null
+  returnReportedAt?: Date | string | null
+  returnReportedById?: string | null
+}
+
+export type ProductionItemCreateOrConnectWithoutReceivedByInput = {
+  where: Prisma.ProductionItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductionItemCreateWithoutReceivedByInput, Prisma.ProductionItemUncheckedCreateWithoutReceivedByInput>
+}
+
+export type ProductionItemCreateManyReceivedByInputEnvelope = {
+  data: Prisma.ProductionItemCreateManyReceivedByInput | Prisma.ProductionItemCreateManyReceivedByInput[]
+  skipDuplicates?: boolean
+}
+
+export type ProductionItemCreateWithoutReturnReportedByInput = {
+  id?: string
+  sourceParentAssetId?: string | null
+  status?: string
+  receivedAt?: Date | string | null
+  returnReportedAt?: Date | string | null
+  production: Prisma.ProductionCreateNestedOneWithoutItemsInput
+  asset: Prisma.AssetCreateNestedOneWithoutProductionItemsInput
+  sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput
+  receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput
+}
+
+export type ProductionItemUncheckedCreateWithoutReturnReportedByInput = {
+  id?: string
+  productionId: string
+  assetId: string
+  sourceBundleId?: string | null
+  sourceParentAssetId?: string | null
+  status?: string
+  receivedAt?: Date | string | null
+  receivedById?: string | null
+  returnReportedAt?: Date | string | null
+}
+
+export type ProductionItemCreateOrConnectWithoutReturnReportedByInput = {
+  where: Prisma.ProductionItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductionItemCreateWithoutReturnReportedByInput, Prisma.ProductionItemUncheckedCreateWithoutReturnReportedByInput>
+}
+
+export type ProductionItemCreateManyReturnReportedByInputEnvelope = {
+  data: Prisma.ProductionItemCreateManyReturnReportedByInput | Prisma.ProductionItemCreateManyReturnReportedByInput[]
+  skipDuplicates?: boolean
+}
+
+export type ProductionItemUpsertWithWhereUniqueWithoutReceivedByInput = {
+  where: Prisma.ProductionItemWhereUniqueInput
+  update: Prisma.XOR<Prisma.ProductionItemUpdateWithoutReceivedByInput, Prisma.ProductionItemUncheckedUpdateWithoutReceivedByInput>
+  create: Prisma.XOR<Prisma.ProductionItemCreateWithoutReceivedByInput, Prisma.ProductionItemUncheckedCreateWithoutReceivedByInput>
+}
+
+export type ProductionItemUpdateWithWhereUniqueWithoutReceivedByInput = {
+  where: Prisma.ProductionItemWhereUniqueInput
+  data: Prisma.XOR<Prisma.ProductionItemUpdateWithoutReceivedByInput, Prisma.ProductionItemUncheckedUpdateWithoutReceivedByInput>
+}
+
+export type ProductionItemUpdateManyWithWhereWithoutReceivedByInput = {
+  where: Prisma.ProductionItemScalarWhereInput
+  data: Prisma.XOR<Prisma.ProductionItemUpdateManyMutationInput, Prisma.ProductionItemUncheckedUpdateManyWithoutReceivedByInput>
+}
+
+export type ProductionItemScalarWhereInput = {
+  AND?: Prisma.ProductionItemScalarWhereInput | Prisma.ProductionItemScalarWhereInput[]
+  OR?: Prisma.ProductionItemScalarWhereInput[]
+  NOT?: Prisma.ProductionItemScalarWhereInput | Prisma.ProductionItemScalarWhereInput[]
+  id?: Prisma.StringFilter<"ProductionItem"> | string
+  productionId?: Prisma.StringFilter<"ProductionItem"> | string
+  assetId?: Prisma.StringFilter<"ProductionItem"> | string
+  sourceBundleId?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
+  sourceParentAssetId?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
+  status?: Prisma.StringFilter<"ProductionItem"> | string
+  receivedAt?: Prisma.DateTimeNullableFilter<"ProductionItem"> | Date | string | null
+  receivedById?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
+  returnReportedAt?: Prisma.DateTimeNullableFilter<"ProductionItem"> | Date | string | null
+  returnReportedById?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
+}
+
+export type ProductionItemUpsertWithWhereUniqueWithoutReturnReportedByInput = {
+  where: Prisma.ProductionItemWhereUniqueInput
+  update: Prisma.XOR<Prisma.ProductionItemUpdateWithoutReturnReportedByInput, Prisma.ProductionItemUncheckedUpdateWithoutReturnReportedByInput>
+  create: Prisma.XOR<Prisma.ProductionItemCreateWithoutReturnReportedByInput, Prisma.ProductionItemUncheckedCreateWithoutReturnReportedByInput>
+}
+
+export type ProductionItemUpdateWithWhereUniqueWithoutReturnReportedByInput = {
+  where: Prisma.ProductionItemWhereUniqueInput
+  data: Prisma.XOR<Prisma.ProductionItemUpdateWithoutReturnReportedByInput, Prisma.ProductionItemUncheckedUpdateWithoutReturnReportedByInput>
+}
+
+export type ProductionItemUpdateManyWithWhereWithoutReturnReportedByInput = {
+  where: Prisma.ProductionItemScalarWhereInput
+  data: Prisma.XOR<Prisma.ProductionItemUpdateManyMutationInput, Prisma.ProductionItemUncheckedUpdateManyWithoutReturnReportedByInput>
+}
+
 export type ProductionItemCreateWithoutAssetInput = {
   id?: string
   sourceParentAssetId?: string | null
   status?: string
+  receivedAt?: Date | string | null
+  returnReportedAt?: Date | string | null
   production: Prisma.ProductionCreateNestedOneWithoutItemsInput
   sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput
+  receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput
+  returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput
 }
 
 export type ProductionItemUncheckedCreateWithoutAssetInput = {
@@ -489,6 +785,10 @@ export type ProductionItemUncheckedCreateWithoutAssetInput = {
   sourceBundleId?: string | null
   sourceParentAssetId?: string | null
   status?: string
+  receivedAt?: Date | string | null
+  receivedById?: string | null
+  returnReportedAt?: Date | string | null
+  returnReportedById?: string | null
 }
 
 export type ProductionItemCreateOrConnectWithoutAssetInput = {
@@ -517,24 +817,16 @@ export type ProductionItemUpdateManyWithWhereWithoutAssetInput = {
   data: Prisma.XOR<Prisma.ProductionItemUpdateManyMutationInput, Prisma.ProductionItemUncheckedUpdateManyWithoutAssetInput>
 }
 
-export type ProductionItemScalarWhereInput = {
-  AND?: Prisma.ProductionItemScalarWhereInput | Prisma.ProductionItemScalarWhereInput[]
-  OR?: Prisma.ProductionItemScalarWhereInput[]
-  NOT?: Prisma.ProductionItemScalarWhereInput | Prisma.ProductionItemScalarWhereInput[]
-  id?: Prisma.StringFilter<"ProductionItem"> | string
-  productionId?: Prisma.StringFilter<"ProductionItem"> | string
-  assetId?: Prisma.StringFilter<"ProductionItem"> | string
-  sourceBundleId?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
-  sourceParentAssetId?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
-  status?: Prisma.StringFilter<"ProductionItem"> | string
-}
-
 export type ProductionItemCreateWithoutSourceBundleInput = {
   id?: string
   sourceParentAssetId?: string | null
   status?: string
+  receivedAt?: Date | string | null
+  returnReportedAt?: Date | string | null
   production: Prisma.ProductionCreateNestedOneWithoutItemsInput
   asset: Prisma.AssetCreateNestedOneWithoutProductionItemsInput
+  receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput
+  returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput
 }
 
 export type ProductionItemUncheckedCreateWithoutSourceBundleInput = {
@@ -543,6 +835,10 @@ export type ProductionItemUncheckedCreateWithoutSourceBundleInput = {
   assetId: string
   sourceParentAssetId?: string | null
   status?: string
+  receivedAt?: Date | string | null
+  receivedById?: string | null
+  returnReportedAt?: Date | string | null
+  returnReportedById?: string | null
 }
 
 export type ProductionItemCreateOrConnectWithoutSourceBundleInput = {
@@ -575,8 +871,12 @@ export type ProductionItemCreateWithoutProductionInput = {
   id?: string
   sourceParentAssetId?: string | null
   status?: string
+  receivedAt?: Date | string | null
+  returnReportedAt?: Date | string | null
   asset: Prisma.AssetCreateNestedOneWithoutProductionItemsInput
   sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput
+  receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput
+  returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput
 }
 
 export type ProductionItemUncheckedCreateWithoutProductionInput = {
@@ -585,6 +885,10 @@ export type ProductionItemUncheckedCreateWithoutProductionInput = {
   sourceBundleId?: string | null
   sourceParentAssetId?: string | null
   status?: string
+  receivedAt?: Date | string | null
+  receivedById?: string | null
+  returnReportedAt?: Date | string | null
+  returnReportedById?: string | null
 }
 
 export type ProductionItemCreateOrConnectWithoutProductionInput = {
@@ -613,20 +917,124 @@ export type ProductionItemUpdateManyWithWhereWithoutProductionInput = {
   data: Prisma.XOR<Prisma.ProductionItemUpdateManyMutationInput, Prisma.ProductionItemUncheckedUpdateManyWithoutProductionInput>
 }
 
+export type ProductionItemCreateManyReceivedByInput = {
+  id?: string
+  productionId: string
+  assetId: string
+  sourceBundleId?: string | null
+  sourceParentAssetId?: string | null
+  status?: string
+  receivedAt?: Date | string | null
+  returnReportedAt?: Date | string | null
+  returnReportedById?: string | null
+}
+
+export type ProductionItemCreateManyReturnReportedByInput = {
+  id?: string
+  productionId: string
+  assetId: string
+  sourceBundleId?: string | null
+  sourceParentAssetId?: string | null
+  status?: string
+  receivedAt?: Date | string | null
+  receivedById?: string | null
+  returnReportedAt?: Date | string | null
+}
+
+export type ProductionItemUpdateWithoutReceivedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  production?: Prisma.ProductionUpdateOneRequiredWithoutItemsNestedInput
+  asset?: Prisma.AssetUpdateOneRequiredWithoutProductionItemsNestedInput
+  sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput
+  returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput
+}
+
+export type ProductionItemUncheckedUpdateWithoutReceivedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  productionId?: Prisma.StringFieldUpdateOperationsInput | string
+  assetId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type ProductionItemUncheckedUpdateManyWithoutReceivedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  productionId?: Prisma.StringFieldUpdateOperationsInput | string
+  assetId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type ProductionItemUpdateWithoutReturnReportedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  production?: Prisma.ProductionUpdateOneRequiredWithoutItemsNestedInput
+  asset?: Prisma.AssetUpdateOneRequiredWithoutProductionItemsNestedInput
+  sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput
+  receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput
+}
+
+export type ProductionItemUncheckedUpdateWithoutReturnReportedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  productionId?: Prisma.StringFieldUpdateOperationsInput | string
+  assetId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type ProductionItemUncheckedUpdateManyWithoutReturnReportedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  productionId?: Prisma.StringFieldUpdateOperationsInput | string
+  assetId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
 export type ProductionItemCreateManyAssetInput = {
   id?: string
   productionId: string
   sourceBundleId?: string | null
   sourceParentAssetId?: string | null
   status?: string
+  receivedAt?: Date | string | null
+  receivedById?: string | null
+  returnReportedAt?: Date | string | null
+  returnReportedById?: string | null
 }
 
 export type ProductionItemUpdateWithoutAssetInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   production?: Prisma.ProductionUpdateOneRequiredWithoutItemsNestedInput
   sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput
+  receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput
+  returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput
 }
 
 export type ProductionItemUncheckedUpdateWithoutAssetInput = {
@@ -635,6 +1043,10 @@ export type ProductionItemUncheckedUpdateWithoutAssetInput = {
   sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ProductionItemUncheckedUpdateManyWithoutAssetInput = {
@@ -643,6 +1055,10 @@ export type ProductionItemUncheckedUpdateManyWithoutAssetInput = {
   sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ProductionItemCreateManySourceBundleInput = {
@@ -651,14 +1067,22 @@ export type ProductionItemCreateManySourceBundleInput = {
   assetId: string
   sourceParentAssetId?: string | null
   status?: string
+  receivedAt?: Date | string | null
+  receivedById?: string | null
+  returnReportedAt?: Date | string | null
+  returnReportedById?: string | null
 }
 
 export type ProductionItemUpdateWithoutSourceBundleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   production?: Prisma.ProductionUpdateOneRequiredWithoutItemsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutProductionItemsNestedInput
+  receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput
+  returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput
 }
 
 export type ProductionItemUncheckedUpdateWithoutSourceBundleInput = {
@@ -667,6 +1091,10 @@ export type ProductionItemUncheckedUpdateWithoutSourceBundleInput = {
   assetId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ProductionItemUncheckedUpdateManyWithoutSourceBundleInput = {
@@ -675,6 +1103,10 @@ export type ProductionItemUncheckedUpdateManyWithoutSourceBundleInput = {
   assetId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ProductionItemCreateManyProductionInput = {
@@ -683,14 +1115,22 @@ export type ProductionItemCreateManyProductionInput = {
   sourceBundleId?: string | null
   sourceParentAssetId?: string | null
   status?: string
+  receivedAt?: Date | string | null
+  receivedById?: string | null
+  returnReportedAt?: Date | string | null
+  returnReportedById?: string | null
 }
 
 export type ProductionItemUpdateWithoutProductionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   asset?: Prisma.AssetUpdateOneRequiredWithoutProductionItemsNestedInput
   sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput
+  receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput
+  returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput
 }
 
 export type ProductionItemUncheckedUpdateWithoutProductionInput = {
@@ -699,6 +1139,10 @@ export type ProductionItemUncheckedUpdateWithoutProductionInput = {
   sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ProductionItemUncheckedUpdateManyWithoutProductionInput = {
@@ -707,6 +1151,10 @@ export type ProductionItemUncheckedUpdateManyWithoutProductionInput = {
   sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -718,9 +1166,15 @@ export type ProductionItemSelect<ExtArgs extends runtime.Types.Extensions.Intern
   sourceBundleId?: boolean
   sourceParentAssetId?: boolean
   status?: boolean
+  receivedAt?: boolean
+  receivedById?: boolean
+  returnReportedAt?: boolean
+  returnReportedById?: boolean
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   sourceBundle?: boolean | Prisma.ProductionItem$sourceBundleArgs<ExtArgs>
+  receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>
+  returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>
 }, ExtArgs["result"]["productionItem"]>
 
 export type ProductionItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -730,9 +1184,15 @@ export type ProductionItemSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   sourceBundleId?: boolean
   sourceParentAssetId?: boolean
   status?: boolean
+  receivedAt?: boolean
+  receivedById?: boolean
+  returnReportedAt?: boolean
+  returnReportedById?: boolean
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   sourceBundle?: boolean | Prisma.ProductionItem$sourceBundleArgs<ExtArgs>
+  receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>
+  returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>
 }, ExtArgs["result"]["productionItem"]>
 
 export type ProductionItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -742,9 +1202,15 @@ export type ProductionItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   sourceBundleId?: boolean
   sourceParentAssetId?: boolean
   status?: boolean
+  receivedAt?: boolean
+  receivedById?: boolean
+  returnReportedAt?: boolean
+  returnReportedById?: boolean
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   sourceBundle?: boolean | Prisma.ProductionItem$sourceBundleArgs<ExtArgs>
+  receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>
+  returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>
 }, ExtArgs["result"]["productionItem"]>
 
 export type ProductionItemSelectScalar = {
@@ -754,23 +1220,33 @@ export type ProductionItemSelectScalar = {
   sourceBundleId?: boolean
   sourceParentAssetId?: boolean
   status?: boolean
+  receivedAt?: boolean
+  receivedById?: boolean
+  returnReportedAt?: boolean
+  returnReportedById?: boolean
 }
 
-export type ProductionItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productionId" | "assetId" | "sourceBundleId" | "sourceParentAssetId" | "status", ExtArgs["result"]["productionItem"]>
+export type ProductionItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productionId" | "assetId" | "sourceBundleId" | "sourceParentAssetId" | "status" | "receivedAt" | "receivedById" | "returnReportedAt" | "returnReportedById", ExtArgs["result"]["productionItem"]>
 export type ProductionItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   sourceBundle?: boolean | Prisma.ProductionItem$sourceBundleArgs<ExtArgs>
+  receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>
+  returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>
 }
 export type ProductionItemIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   sourceBundle?: boolean | Prisma.ProductionItem$sourceBundleArgs<ExtArgs>
+  receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>
+  returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>
 }
 export type ProductionItemIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   sourceBundle?: boolean | Prisma.ProductionItem$sourceBundleArgs<ExtArgs>
+  receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>
+  returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>
 }
 
 export type $ProductionItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -779,6 +1255,8 @@ export type $ProductionItemPayload<ExtArgs extends runtime.Types.Extensions.Inte
     production: Prisma.$ProductionPayload<ExtArgs>
     asset: Prisma.$AssetPayload<ExtArgs>
     sourceBundle: Prisma.$AssetBundlePayload<ExtArgs> | null
+    receivedBy: Prisma.$UserPayload<ExtArgs> | null
+    returnReportedBy: Prisma.$UserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -787,6 +1265,10 @@ export type $ProductionItemPayload<ExtArgs extends runtime.Types.Extensions.Inte
     sourceBundleId: string | null
     sourceParentAssetId: string | null
     status: string
+    receivedAt: Date | null
+    receivedById: string | null
+    returnReportedAt: Date | null
+    returnReportedById: string | null
   }, ExtArgs["result"]["productionItem"]>
   composites: {}
 }
@@ -1184,6 +1666,8 @@ export interface Prisma__ProductionItemClient<T, Null = never, ExtArgs extends r
   production<T extends Prisma.ProductionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductionDefaultArgs<ExtArgs>>): Prisma.Prisma__ProductionClient<runtime.Types.Result.GetResult<Prisma.$ProductionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   asset<T extends Prisma.AssetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssetDefaultArgs<ExtArgs>>): Prisma.Prisma__AssetClient<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   sourceBundle<T extends Prisma.ProductionItem$sourceBundleArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductionItem$sourceBundleArgs<ExtArgs>>): Prisma.Prisma__AssetBundleClient<runtime.Types.Result.GetResult<Prisma.$AssetBundlePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  receivedBy<T extends Prisma.ProductionItem$receivedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductionItem$receivedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  returnReportedBy<T extends Prisma.ProductionItem$returnReportedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductionItem$returnReportedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1219,6 +1703,10 @@ export interface ProductionItemFieldRefs {
   readonly sourceBundleId: Prisma.FieldRef<"ProductionItem", 'String'>
   readonly sourceParentAssetId: Prisma.FieldRef<"ProductionItem", 'String'>
   readonly status: Prisma.FieldRef<"ProductionItem", 'String'>
+  readonly receivedAt: Prisma.FieldRef<"ProductionItem", 'DateTime'>
+  readonly receivedById: Prisma.FieldRef<"ProductionItem", 'String'>
+  readonly returnReportedAt: Prisma.FieldRef<"ProductionItem", 'DateTime'>
+  readonly returnReportedById: Prisma.FieldRef<"ProductionItem", 'String'>
 }
     
 
@@ -1636,6 +2124,44 @@ export type ProductionItem$sourceBundleArgs<ExtArgs extends runtime.Types.Extens
    */
   include?: Prisma.AssetBundleInclude<ExtArgs> | null
   where?: Prisma.AssetBundleWhereInput
+}
+
+/**
+ * ProductionItem.receivedBy
+ */
+export type ProductionItem$receivedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * ProductionItem.returnReportedBy
+ */
+export type ProductionItem$returnReportedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

@@ -17,6 +17,7 @@
 	import { billingSetupSteps } from '$lib/billing-setup.svelte';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 	import { getStocktakes } from '$lib/remote/stocktakes.remote';
+	import { getHandoverTodos } from '$lib/remote/production-checks.remote';
 	import StocktakeProgress from '$lib/components/stocktake-progress.svelte';
 	import { formatReleaseDate, notesFor, releases } from '$lib/changelog';
 	import {
@@ -31,7 +32,9 @@
 		Hourglass,
 		ChevronRight,
 		Sparkles,
-		ReceiptText
+		ReceiptText,
+		PackageCheck,
+		Undo2
 	} from '@lucide/svelte';
 
 	let { data } = $props();
@@ -73,6 +76,9 @@
 	let pending = $derived(pendingQueries.flatMap((q) => q.current ?? []));
 	let awaitingQuery = $derived(active ? getAwaitingApprovals() : null);
 	let awaiting = $derived(awaitingQuery?.current ?? []);
+	let handoverQuery = $derived(active ? getHandoverTodos() : null);
+	let toReceive = $derived(handoverQuery?.current?.toReceive ?? []);
+	let toTakeBack = $derived(handoverQuery?.current?.toTakeBack ?? []);
 	let statsQuery = $derived(active ? getDashboardStats() : null);
 	let stocktakesQuery = $derived(active ? getStocktakes() : null);
 	let openStocktakes = $derived(
@@ -91,7 +97,9 @@
 
 	// Held back until everything it counts has answered, so "All clear" never
 	// flashes up in front of a queue that is still loading.
-	let attentionReady = $derived(!!stats && pendingReady && !!awaitingQuery?.ready);
+	let attentionReady = $derived(
+		!!stats && pendingReady && !!awaitingQuery?.ready && !!handoverQuery?.ready
+	);
 	let attention = $derived.by(() => {
 		if (!stats) return [];
 		const items: AttentionItem[] = [];
@@ -130,6 +138,26 @@
 				hint: 'Back in the pool once repaired',
 				href: `${resolve('/assets')}?status=MAINTENANCE&org=all`,
 				tone: 'neutral'
+			});
+		const receiveCount = toReceive.reduce((sum, p) => sum + p.count, 0);
+		if (receiveCount > 0)
+			items.push({
+				key: 'receive',
+				count: receiveCount,
+				label: 'Receipt to confirm',
+				hint: 'Lent to your productions and handed over',
+				href: '#handovers',
+				tone: 'amber'
+			});
+		const takeBackCount = toTakeBack.reduce((sum, p) => sum + p.count, 0);
+		if (takeBackCount > 0)
+			items.push({
+				key: 'take-back',
+				count: takeBackCount,
+				label: 'Reported returned',
+				hint: 'Scan it back onto a shelf',
+				href: '#handovers',
+				tone: 'amber'
 			});
 		const awaitingCount = awaiting.reduce((sum, req) => sum + req.count, 0);
 		if (awaitingCount > 0)
@@ -642,6 +670,50 @@
 						</Card.Root>
 					{/if}
 				</section>
+
+				<!-- Loans changing hands: lent units our productions have not confirmed
+				     receiving, and our own units reported sent back that nobody has
+				     scanned in yet. -->
+				{#if toReceive.length > 0 || toTakeBack.length > 0}
+					<section id="handovers" class="scroll-mt-20">
+						<h2 class="mb-3 text-lg font-semibold">Handovers</h2>
+						<Card.Root class="gap-0 overflow-hidden py-0">
+							<div class="divide-y">
+								{#each toReceive as p (p.productionId)}
+									<a
+										href={resolve(`/productions/${p.productionId}`)}
+										class="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/40"
+									>
+										<PackageCheck aria-hidden="true" class="size-4 shrink-0 text-amber-500" />
+										<div class="min-w-0 flex-1">
+											<p class="truncate text-sm font-medium">{p.productionName}</p>
+											<p class="truncate text-xs text-muted-foreground">
+												{plural(p.count, ['1 lent unit to confirm', '# lent units to confirm'])}
+											</p>
+										</div>
+									</a>
+								{/each}
+								{#each toTakeBack as p (p.productionId)}
+									<a
+										href={resolve('/checkout')}
+										class="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/40"
+									>
+										<Undo2 aria-hidden="true" class="size-4 shrink-0 text-amber-500" />
+										<div class="min-w-0 flex-1">
+											<p class="truncate text-sm font-medium">{p.productionName}</p>
+											<p class="truncate text-xs text-muted-foreground">
+												{plural(p.count, [
+													'1 unit reported returned — scan it in',
+													'# units reported returned — scan them in'
+												])}
+											</p>
+										</div>
+									</a>
+								{/each}
+							</div>
+						</Card.Root>
+					</section>
+				{/if}
 
 				<!-- What our own productions asked other orgs for. Nobody can act on
 				     it from here, so it lives in the side column. -->

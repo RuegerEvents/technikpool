@@ -1,8 +1,10 @@
+import type { Prisma } from '$lib/prisma/client';
 import { bundleLabel, withCaption } from '$lib/product-label';
 import { naturalCompare } from '$lib/sort';
 import { prisma } from '$lib/server/auth';
 import {
 	isSystemAdmin,
+	productionReadWhere,
 	productionVisibility,
 	visibleProductionName,
 	writableOrgIds
@@ -10,6 +12,7 @@ import {
 import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '$lib/asset-status';
 import { withAccessories } from './accessories';
 import { resolveScannedCode } from './asset-lookup';
+import { onProductionSide } from './production-check';
 
 // Scan/checkout behaviour lives here rather than in checkout.remote.ts so the
 // /api/v1 endpoints and the web UI share one implementation. These functions
@@ -99,7 +102,8 @@ export class CheckoutError extends Error {
 			| 'wrong_organization'
 			| 'asset_retired'
 			| 'asset_unavailable'
-			| 'production_cancelled',
+			| 'production_cancelled'
+			| 'not_approved',
 		message: string,
 		/** The scanned tag, where there is one — a message naming it is worth more. */
 		readonly assetTag?: string
@@ -117,7 +121,8 @@ export const CHECKOUT_ERROR_STATUS: Record<CheckoutError['code'], number> = {
 	wrong_organization: 403,
 	asset_retired: 409,
 	asset_unavailable: 409,
-	production_cancelled: 409
+	production_cancelled: 409,
+	not_approved: 409
 };
 
 const RETURNED_FROM_SELECT = {
@@ -148,18 +153,95 @@ async function returnedFromNames(
 
 /**
  * Checking a unit out to a production changes that production, so it takes the
- * same right as any other change to it: MEMBER in the org that runs it. Owning
- * the unit is checked separately and is not enough on its own.
+ * same right as any other change to it: MEMBER in the org that runs it. The one
+ * exception is the lender, who hands its own units over to someone else's
+ * production — but only units that production has booked and the lender has
+ * approved (`assertLenderMayHandOver`). Owning the unit is checked separately
+ * either way.
+ *
+ * `borrower` says whether the person scanning is also on the receiving side
+ * (see `onProductionSide`): then handing over and receiving are one act, and a
+ * lent unit goes out with its receipt already confirmed.
  */
-async function assertProductionAccess(
+async function productionCheckoutRole(
 	userId: string,
-	production: { organizationId: string },
+	production: { id: string; organizationId: string },
 	systemAdmin: boolean
 ) {
-	if (systemAdmin) return;
-	if (!(await writableOrgIds(userId)).includes(production.organizationId)) {
-		throw new CheckoutError('forbidden', 'No access to this production');
+	const borrower = await onProductionSide(userId, production);
+	const asProduction =
+		systemAdmin || (await writableOrgIds(userId)).includes(production.organizationId);
+	return { asProduction, borrower };
+}
+
+/**
+ * Productions a scan could go to, each with the part this user plays in it:
+ * `production` for its own org (anything goes), `lender` for one that has this
+ * user's org's units booked and approved (those units only), null for one they
+ * can only read. `canCheck` is less: crew may check what they work with.
+ * Cancelled ones are left out — nothing is checked out to them.
+ */
+export async function productionTargets(userId: string) {
+	const [writable, admin] = await Promise.all([writableOrgIds(userId), isSystemAdmin(userId)]);
+	const productions = await prisma.production.findMany({
+		where: { ...(await productionReadWhere(userId, undefined, { lent: true })), cancelledAt: null },
+		include: {
+			organization: true,
+			items: {
+				where: {
+					status: { in: HANDOVER_STATUSES },
+					asset: { organizationId: { in: writable } }
+				},
+				select: { id: true },
+				take: 1
+			},
+			crew: { where: { userId }, select: { id: true } }
+		},
+		orderBy: [{ startDate: 'desc' }, { name: 'asc' }]
+	});
+	return productions.map(({ items, crew, ...production }) => {
+		const checkoutRole: 'production' | 'lender' | null =
+			admin || writable.includes(production.organizationId)
+				? 'production'
+				: items.length > 0
+					? 'lender'
+					: null;
+		return { ...production, checkoutRole, canCheck: checkoutRole !== null || crew.length > 0 };
+	});
+}
+
+/** What a lender may still hand over: approved, out already, or back and going out again. */
+const HANDOVER_STATUSES = ['APPROVED', 'CHECKED_OUT', 'RETURNED'];
+
+function assertLenderMayHandOver(
+	items: { assetId: string; status: string }[],
+	assetIds: string[],
+	assetTag?: string
+) {
+	for (const assetId of assetIds) {
+		const item = items.find((i) => i.assetId === assetId);
+		if (!item || !HANDOVER_STATUSES.includes(item.status)) {
+			throw new CheckoutError(
+				'not_approved',
+				'Not booked and approved on this production — only the production’s own org can add it',
+				assetTag
+			);
+		}
 	}
+}
+
+/**
+ * The receipt columns of a lent unit going out. Going out again after a
+ * return starts a new handover, so whatever the last one confirmed is cleared.
+ */
+function handoverOnCheckout(lent: boolean, borrower: boolean, userId: string) {
+	if (!lent) return {};
+	return {
+		receivedAt: borrower ? new Date() : null,
+		receivedById: borrower ? userId : null,
+		returnReportedAt: null,
+		returnReportedById: null
+	};
 }
 
 /**
@@ -331,22 +413,20 @@ export async function performScan(
 	}
 
 	const production = await prisma.production.findUniqueOrThrow({ where: { id: input.targetId } });
-	await assertProductionAccess(userId, production, systemAdmin);
+	const role = await productionCheckoutRole(userId, production, systemAdmin);
 	assertProductionOpen(production);
 
 	const existingItems = await prisma.productionItem.findMany({
 		where: { productionId: input.targetId, assetId: { in: touchedIds } },
-		select: { id: true, assetId: true }
+		select: { id: true, assetId: true, status: true }
 	});
 	const alreadyBooked = new Set(existingItems.map((i) => i.assetId));
+	// Accessories follow the unit they hang off, booked or not.
+	if (!role.asProduction) assertLenderMayHandOver(existingItems, [asset.id], input.assetTag);
 
+	const lent = asset.organizationId !== production.organizationId;
 	await prisma.$transaction(async (tx) => {
-		if (existingItems.length > 0) {
-			await tx.productionItem.updateMany({
-				where: { id: { in: existingItems.map((i) => i.id) } },
-				data: { status: 'CHECKED_OUT' }
-			});
-		}
+		await checkOutExisting(tx, existingItems, lent, role.borrower, userId);
 		const newIds = touchedIds.filter((id) => !alreadyBooked.has(id));
 		if (newIds.length > 0) {
 			await tx.productionItem.createMany({
@@ -356,7 +436,8 @@ export async function performScan(
 					sourceParentAssetId: accessories.some((accessory) => accessory.id === assetId)
 						? asset.id
 						: null,
-					status: 'CHECKED_OUT'
+					status: 'CHECKED_OUT',
+					...handoverOnCheckout(lent, role.borrower, userId)
 				}))
 			});
 		}
@@ -383,6 +464,32 @@ export async function performScan(
 		},
 		affected
 	};
+}
+
+/**
+ * Sets booked items to CHECKED_OUT. Only an item actually going out starts a
+ * new handover — a second scan of a unit that is already out must not wipe the
+ * receipt the borrower confirmed in between.
+ */
+async function checkOutExisting(
+	tx: Prisma.TransactionClient,
+	items: { id: string; status: string }[],
+	lent: boolean,
+	borrower: boolean,
+	userId: string
+) {
+	if (items.length === 0) return;
+	const ids = items.map((i) => i.id);
+	await tx.productionItem.updateMany({
+		where: { id: { in: ids }, status: { not: 'CHECKED_OUT' } },
+		data: { status: 'CHECKED_OUT', ...handoverOnCheckout(lent, borrower, userId) }
+	});
+	if (lent && borrower) {
+		await tx.productionItem.updateMany({
+			where: { id: { in: ids }, receivedAt: null },
+			data: { receivedAt: new Date(), receivedById: userId }
+		});
+	}
 }
 
 const GROUP_UNIT_SELECT = {
@@ -606,26 +713,33 @@ export async function performBulkCheckout(
 	}
 
 	const production = await prisma.production.findUniqueOrThrow({ where: { id: input.targetId } });
-	await assertProductionAccess(userId, production, systemAdmin);
+	const role = await productionCheckoutRole(userId, production, systemAdmin);
 	assertProductionOpen(production);
 
+	const existingItems = await prisma.productionItem.findMany({
+		where: { productionId: input.targetId, assetId: { in: assets.map((a) => a.id) } },
+		select: { id: true, assetId: true, status: true }
+	});
+	if (!role.asProduction) {
+		assertLenderMayHandOver(existingItems, input.assetIds);
+	}
+
 	for (const asset of assets) {
-		const existing = await prisma.productionItem.findFirst({
-			where: { productionId: input.targetId, assetId: asset.id }
-		});
+		const existing = existingItems.find((i) => i.assetId === asset.id);
+		const lent = asset.organizationId !== production.organizationId;
 
 		if (existing) {
-			await prisma.productionItem.update({
-				where: { id: existing.id },
-				data: { status: 'CHECKED_OUT' }
-			});
+			await prisma.$transaction((tx) =>
+				checkOutExisting(tx, [existing], lent, role.borrower, userId)
+			);
 		} else {
 			await prisma.productionItem.create({
 				data: {
 					productionId: input.targetId,
 					assetId: asset.id,
 					sourceParentAssetId: asset.parentAssetId,
-					status: 'CHECKED_OUT'
+					status: 'CHECKED_OUT',
+					...handoverOnCheckout(lent, role.borrower, userId)
 				}
 			});
 		}

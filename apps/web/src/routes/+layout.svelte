@@ -100,7 +100,7 @@
 						<!-- The desktop nav is `hidden md:flex`, so below that breakpoint this is the
 						     only way to reach anything but the dashboard. It mirrors the same
 						     destinations rather than a reduced set: a phone in the warehouse needs
-						     Checkout and Productions more than a desk browser does. -->
+						     Scan and Productions more than a desk browser does. -->
 						<DropdownMenu.Root>
 							<DropdownMenu.Trigger>
 								{#snippet child({ props })}
@@ -156,7 +156,7 @@
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<ScanBarcode aria-hidden="true" />
-											Checkout
+											Scan
 										</DropdownMenu.Item>
 										{#if data.canBill}
 											<DropdownMenu.Item
@@ -316,7 +316,7 @@
 									)
 										? 'text-foreground'
 										: 'text-muted-foreground hover:text-foreground'}"
-									><ScanBarcode aria-hidden="true" class="size-4" />Checkout</a
+									><ScanBarcode aria-hidden="true" class="size-4" />Scan</a
 								>
 								{#if data.canBill}
 									<a

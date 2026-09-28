@@ -121,6 +121,8 @@ class DemoData {
       startDate: DateTime.now().subtract(const Duration(days: 1)),
       endDate: DateTime.now().add(const Duration(days: 3)),
       organization: nordlicht,
+      checkoutRole: ProductionCheckoutRole.production,
+      canCheck: true,
     ),
     Production(
       id: 'prdn_demo_theatre',
@@ -128,6 +130,8 @@ class DemoData {
       startDate: DateTime.now().add(const Duration(days: 12)),
       endDate: DateTime.now().add(const Duration(days: 15)),
       organization: buehnenwerk,
+      checkoutRole: ProductionCheckoutRole.production,
+      canCheck: true,
     ),
   ];
 

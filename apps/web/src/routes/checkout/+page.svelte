@@ -3,6 +3,9 @@
 	import { canWrite } from '$lib/roles';
 	import { getLocations } from '$lib/remote/assets.remote';
 	import { checkoutAssets, getAllProductions, scanAsset } from '$lib/remote/checkout.remote';
+	import { startProductionCheck } from '$lib/remote/production-checks.remote';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -12,6 +15,7 @@
 	import type { ScanGroup } from '$lib/server/services/checkout';
 	import * as Card from '$lib/components/ui/card';
 	import { CreatableSelect } from '$lib/components/ui/creatable-select';
+	import { ProductionSelect } from '$lib/components/ui/production-select';
 	import { toast } from 'svelte-sonner';
 	import { tick, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
@@ -32,8 +36,12 @@
 	let locations = $derived(
 		(locationsQuery.current ?? []).filter((loc) => writableOrgIds.has(loc.organizationId))
 	);
+	// A lending org's units go out to someone else's production, so that one is
+	// on offer too — see `checkoutRole`. Checking takes less: crew may check.
 	let productions = $derived(
-		(productionsQuery.current ?? []).filter((prod) => writableOrgIds.has(prod.organizationId))
+		(productionsQuery.current ?? []).filter((prod) =>
+			targetType === 'check' ? prod.canCheck : prod.checkoutRole !== null
+		)
 	);
 
 	let locationItems = $derived(
@@ -47,7 +55,7 @@
 	);
 	let locationSelection = $state<{ id: string | null; name: string } | null>(null);
 
-	let targetType = $state<'location' | 'production'>('location');
+	let targetType = $state<'location' | 'production' | 'check'>('location');
 	let targetId = $state('');
 	let inputMode = $state<'qr' | 'text'>('qr');
 	let sessionActive = $state(false);
@@ -138,15 +146,31 @@
 	let successCount = $derived(sessionLog.filter((e) => e.status === 'success').length);
 	let errorCount = $derived(sessionLog.filter((e) => e.status === 'error').length);
 
-	function setTargetType(type: 'location' | 'production') {
+	function setTargetType(type: 'location' | 'production' | 'check') {
 		targetType = type;
 		targetId = '';
 		locationSelection = null;
 	}
 
+	let startingCheck = $state(false);
+
 	async function startSession() {
 		if (!targetId) {
 			toast.error('Please select a target first');
+			return;
+		}
+		// A check ticks against the production's list and lives on a page of its
+		// own, shared with whoever else is checking.
+		if (targetType === 'check') {
+			startingCheck = true;
+			try {
+				const check = await startProductionCheck({ productionId: targetId });
+				await goto(resolve(`/productions/${targetId}/check/${check.id}`));
+			} catch (err) {
+				toast.error(getErrorMessage(err));
+			} finally {
+				startingCheck = false;
+			}
 			return;
 		}
 		sessionLog = [];
@@ -216,7 +240,7 @@
 
 	async function processTag(tag: string) {
 		const t = tag.trim();
-		if (!t || processing) return;
+		if (!t || processing || targetType === 'check') return;
 		processing = true;
 		try {
 			const result = await scanAsset({ assetTag: t, targetType, targetId });
@@ -295,7 +319,7 @@
 </script>
 
 <svelte:head>
-	<title>Checkout | Technikpool</title>
+	<title>Scan | Technikpool</title>
 	<style>
 		@media print {
 			.no-print {
@@ -314,9 +338,10 @@
 <div class="mx-auto max-w-3xl space-y-6">
 	<!-- Page title -->
 	<div class="no-print">
-		<h1 class="text-3xl font-bold tracking-tight">Checkout / Check-in</h1>
+		<h1 class="text-3xl font-bold tracking-tight">Scan</h1>
 		<p class="text-muted-foreground">
-			Scan asset tags to book equipment to a location or production.
+			Scan asset tags to put equipment on a shelf, check it out to a production, or check a
+			production's list.
 		</p>
 	</div>
 
@@ -349,8 +374,22 @@
 								: 'bg-background text-muted-foreground hover:bg-muted'}"
 						>
 							Production
+						</button><button
+							type="button"
+							onclick={() => setTargetType('check')}
+							class="flex-1 px-4 py-2 transition-colors {targetType === 'check'
+								? 'bg-primary text-primary-foreground'
+								: 'bg-background text-muted-foreground hover:bg-muted'}"
+						>
+							Check list
 						</button>
 					</div>
+					{#if targetType === 'check'}
+						<p class="text-xs text-muted-foreground">
+							Tick what is there against the production's list. Changes nothing, and can be repeated
+							as often as needed.
+						</p>
+					{/if}
 				</div>
 
 				<!-- Target select -->
@@ -368,21 +407,12 @@
 				{:else}
 					<div class="space-y-2">
 						<Label for="target-production">Production</Label>
-						<select
-							id="target-production"
-							bind:value={targetId}
-							class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-						>
-							<option value="" disabled>Select a production…</option>
-							{#each productions as prod (prod.id)}
-								<option value={prod.id}>{prod.name} — {orgLabel(prod.organization)}</option>
-							{/each}
-						</select>
+						<ProductionSelect id="target-production" {productions} bind:value={targetId} />
 					</div>
 				{/if}
 
 				<!-- Input mode -->
-				<div class="space-y-2">
+				<div class="space-y-2" class:hidden={targetType === 'check'}>
 					<Label>Input Mode</Label>
 					<div class="flex overflow-hidden rounded-md border border-input text-sm font-medium">
 						<button
@@ -406,7 +436,9 @@
 				</div>
 			</Card.Content>
 			<Card.Footer>
-				<Button onclick={startSession} disabled={!targetId}>Start Session</Button>
+				<Button onclick={startSession} disabled={!targetId || startingCheck}>
+					{targetType === 'check' ? 'Start check' : 'Start Session'}
+				</Button>
 			</Card.Footer>
 		</Card.Root>
 	{/if}
@@ -459,7 +491,7 @@
 		<div>
 			<!-- Print header (hidden on screen) -->
 			<div class="print-only mb-6 space-y-1">
-				<h1 class="text-2xl font-bold">Checkout Session Report</h1>
+				<h1 class="text-2xl font-bold">Scan Session Report</h1>
 				<p><strong>Target:</strong> {selectedTargetName}</p>
 				{#if sessionStartedAt}
 					<p><strong>Started:</strong> {fmtDate(sessionStartedAt)}</p>

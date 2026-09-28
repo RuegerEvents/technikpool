@@ -41,7 +41,7 @@
 		(locationsQuery.current ?? []).filter((loc) => writableOrgIds.has(loc.organizationId))
 	);
 	let productions = $derived(
-		(productionsQuery.current ?? []).filter((prod) => writableOrgIds.has(prod.organizationId))
+		(productionsQuery.current ?? []).filter((prod) => prod.checkoutRole !== null)
 	);
 
 	let targets = $derived(

@@ -14,6 +14,7 @@ import {
 } from '$lib/server/services/stocktake';
 import { userLabel } from '$lib/user-label.svelte';
 import type { CaseCheck } from '$lib/server/services/case-check';
+import type { ProductionCheckView } from '$lib/server/services/production-check';
 
 // Prisma payloads are deliberately not returned straight to clients: they carry
 // fields the API doesn't promise, and adding a column to the schema would
@@ -95,6 +96,9 @@ type ProductionRow = {
 	startDate: Date | null;
 	endDate: Date | null;
 	organization: OrgRow;
+	/** Only where the production is offered as a target — see `listProductions`. */
+	checkoutRole?: 'production' | 'lender' | null;
+	canCheck?: boolean;
 };
 
 export function toProduction(production: ProductionRow): Schemas['Production'] {
@@ -103,7 +107,11 @@ export function toProduction(production: ProductionRow): Schemas['Production'] {
 		name: production.name,
 		startDate: production.startDate?.toISOString() ?? null,
 		endDate: production.endDate?.toISOString() ?? null,
-		organization: toOrganization(production.organization)
+		organization: toOrganization(production.organization),
+		...(production.checkoutRole !== undefined
+			? { checkoutRole: production.checkoutRole ?? ('none' as const) }
+			: {}),
+		...(production.canCheck !== undefined ? { canCheck: production.canCheck } : {})
 	};
 }
 
@@ -386,5 +394,51 @@ export function toCaseCheck(check: CaseCheck, scannedAssetId: string | null): Sc
 		},
 		canRecord: check.canRecord,
 		scannedAssetId
+	};
+}
+
+export function toProductionCheck(check: ProductionCheckView): Schemas['ProductionCheck'] {
+	return {
+		id: check.id,
+		status: check.status,
+		productionId: check.productionId,
+		productionName: check.productionName,
+		side: {
+			organizationId: check.side.organizationId,
+			organizationName: check.side.organizationName,
+			own: check.side.own
+		},
+		createdAt: check.createdAt.toISOString(),
+		createdBy: check.createdBy,
+		closedAt: check.closedAt?.toISOString() ?? null,
+		closedBy: check.closedBy,
+		items: check.items.map((i) => ({
+			assetId: i.assetId,
+			assetTag: i.assetTag,
+			productName: i.productName,
+			productCaption: i.productCaption,
+			manufacturerName: i.manufacturerName,
+			lentBy: i.lentBy,
+			accessoryOf: i.accessoryOf,
+			group: { kind: i.group.kind, name: i.group.name },
+			status: i.status,
+			received: i.received,
+			returnReported: i.returnReported,
+			tick: i.tick && {
+				userName: i.tick.userName,
+				mine: i.tick.mine,
+				via: i.tick.via,
+				at: i.tick.at.toISOString()
+			}
+		})),
+		unexpected: check.unexpected.map((u) => ({
+			assetId: u.assetId,
+			assetTag: u.assetTag,
+			productName: u.productName,
+			userName: u.userName,
+			mine: u.mine
+		})),
+		canConfirmReceipt: check.canConfirmReceipt,
+		canReportReturn: check.canReportReturn
 	};
 }

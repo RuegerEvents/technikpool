@@ -270,6 +270,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'Give a reason for the cancellation.';
 		case 'booking_not_pending':
 			return 'This request is no longer open — it was withdrawn or has already been answered.';
+		case 'booking_not_approved':
+			return `${p0} is not booked and approved on this production — only the production’s own organization can add it.`;
 
 		// Offers and invoices
 		case 'offer_immutable':
@@ -392,6 +394,16 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'That location, count or selection is not valid for this stocktake.';
 		case 'case_not_a_case':
 			return `${p0} is neither in a kit nor has accessories, so there is no case to check.`;
+
+		// Production checks
+		case 'check_not_found':
+			return 'This check no longer exists.';
+		case 'check_closed':
+			return 'This check is already closed — start a new one.';
+		case 'check_not_your_tick':
+			return 'Only whoever ticked a unit can take the tick back.';
+		case 'check_receipt_forbidden':
+			return 'Only the production’s own organization or its crew can confirm a handover.';
 		default: {
 			// Exhaustiveness guard — a new code without a message fails to compile here.
 			const unhandled: never = code;

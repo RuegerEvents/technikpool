@@ -6,6 +6,7 @@ import '../api/generated/export.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../state/providers.dart';
 import 'case_check_screen.dart';
+import 'production_check_screen.dart';
 import 'session_screen.dart';
 import 'stocktake_new_screen.dart';
 import 'stocktake_screen.dart';
@@ -13,6 +14,9 @@ import 'stocktake_screen.dart';
 /// The three things a batch of scans can go to. The first two book equipment;
 /// a stocktake only counts it.
 enum _Mode { location, production, stocktake }
+
+/// What a tap on a production offers — see `_open`.
+enum _ProductionAction { book, check }
 
 /// Pick what the next batch of scans books against, mirroring the web app's
 /// /checkout setup step — or the stocktake it counts into.
@@ -37,6 +41,74 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
           targetId: id,
           targetName: name,
         ),
+      ),
+    );
+  }
+
+  /// A production can be booked to or checked, and a second button on the row
+  /// read as the same action as the row itself — so the row asks. With only
+  /// one of the two on offer (a location; crew who may check but not book)
+  /// there is nothing to ask.
+  Future<void> _open(({String id, String name, String subtitle, bool book, bool check}) row) async {
+    if (!row.check) return _start(row.id, row.name);
+    if (!row.book) return _check(row.id, row.name);
+    final l10n = S.of(context);
+    final choice = await showModalBottomSheet<_ProductionAction>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(row.name, style: Theme.of(context).textTheme.titleMedium),
+                  if (row.subtitle.isNotEmpty)
+                    Text(
+                      row.subtitle,
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    ),
+                ],
+              ),
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+              leading: const Icon(Icons.qr_code_scanner),
+              title: Text(l10n.productionActionBook),
+              subtitle: Text(l10n.productionActionBookHint),
+              onTap: () => Navigator.of(context).pop(_ProductionAction.book),
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+              leading: const Icon(Icons.checklist),
+              title: Text(l10n.productionCheck),
+              subtitle: Text(l10n.productionActionCheckHint),
+              onTap: () => Navigator.of(context).pop(_ProductionAction.check),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (!mounted) return;
+    switch (choice) {
+      case _ProductionAction.book:
+        _start(row.id, row.name);
+      case _ProductionAction.check:
+        _check(row.id, row.name);
+      case null:
+        break;
+    }
+  }
+
+  void _check(String id, String name) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ProductionCheckScreen(productionId: id, productionName: name),
       ),
     );
   }
@@ -144,8 +216,10 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
                     onRefresh: () => ref.refresh(openStocktakesProvider.future),
                   );
                 }
+                // A server older than checks sends neither field: every
+                // production it lists is one a scan may go to.
                 final rows =
-                    <({String id, String name, String subtitle})>[
+                    <({String id, String name, String subtitle, bool book, bool check})>[
                           for (final item in items)
                             if (item is Location)
                               (
@@ -156,15 +230,25 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
                                   if (item.address != null)
                                     '${item.address!.postalCode} ${item.address!.city}',
                                 ].join(' · '),
+                                book: true,
+                                check: false,
                               )
                             else if (item is Production)
                               (
                                 id: item.id,
                                 name: item.name,
-                                subtitle:
-                                    item.organization.shortName ?? item.organization.name,
+                                subtitle: [
+                                  item.organization.shortName ?? item.organization.name,
+                                  // Lent to someone else's production: only
+                                  // this org's own units go out to it.
+                                  if (item.checkoutRole == ProductionCheckoutRole.lender)
+                                    l10n.productionCheckLenderOnly,
+                                ].join(' · '),
+                                book: item.checkoutRole != ProductionCheckoutRole.none,
+                                check: item.canCheck ?? false,
                               ),
                         ]
+                        .where((r) => r.book || r.check)
                         .where(
                           (r) => _query.isEmpty || r.name.toLowerCase().contains(_query),
                         )
@@ -189,7 +273,7 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
                       ),
                       subtitle: row.subtitle.isEmpty ? null : Text(row.subtitle),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () => _start(row.id, row.name),
+                      onTap: () => _open(row),
                     );
                   },
                 );

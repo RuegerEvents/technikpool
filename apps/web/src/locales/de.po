@@ -571,6 +571,7 @@ msgstr "Gebuchte Artikel"
 msgid "Manage events and equipment bookings."
 msgstr "Veranstaltungen und Gerätebuchungen verwalten."
 
+#: src/lib/components/ui/production-select/production-select.svelte
 #: src/routes/productions/+page.svelte
 msgid "Search productions…"
 msgstr "Produktionen suchen…"
@@ -922,6 +923,7 @@ msgstr "Suchen…"
 
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
+#: src/lib/components/ui/production-select/production-select.svelte
 msgid "ArrowDown"
 msgstr "ArrowDown"
 
@@ -929,6 +931,7 @@ msgstr "ArrowDown"
 #: src/lib/components/ui/count-stepper/count-stepper.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
+#: src/lib/components/ui/production-select/production-select.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
@@ -936,6 +939,7 @@ msgid "Enter"
 msgstr "Enter"
 
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
+#: src/lib/components/ui/production-select/production-select.svelte
 msgid "ArrowUp"
 msgstr "ArrowUp"
 
@@ -943,6 +947,7 @@ msgstr "ArrowUp"
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 #: src/lib/components/ui/modal/modal.svelte
 #: src/lib/components/ui/org-multi-select/org-multi-select.svelte
+#: src/lib/components/ui/production-select/production-select.svelte
 #: src/routes/share/[id]/[signature]/+page.svelte
 msgid "Escape"
 msgstr "Escape"
@@ -1708,17 +1713,14 @@ msgstr "Standort zugewiesen"
 msgid "Checked out"
 msgstr "Ausgecheckt"
 
-#: src/routes/checkout/+page.svelte
-msgid "Checkout | Technikpool"
-msgstr "Checkout | Technikpool"
+#~ msgid "Checkout | Technikpool"
+#~ msgstr "Checkout | Technikpool"
 
-#: src/routes/checkout/+page.svelte
-msgid "Checkout / Check-in"
-msgstr "Checkout / Einbuchen"
+#~ msgid "Checkout / Check-in"
+#~ msgstr "Checkout / Einbuchen"
 
-#: src/routes/checkout/+page.svelte
-msgid "Scan asset tags to book equipment to a location or production."
-msgstr "Asset-Tags scannen, um Geräte einem Standort oder einer Produktion zuzuordnen."
+#~ msgid "Scan asset tags to book equipment to a location or production."
+#~ msgstr "Asset-Tags scannen, um Geräte einem Standort oder einer Produktion zuzuordnen."
 
 #: src/routes/checkout/+page.svelte
 msgid "Session Setup"
@@ -1731,7 +1733,7 @@ msgstr "Ziel"
 #~ msgid "Select a location…"
 #~ msgstr "Standort auswählen…"
 
-#: src/routes/checkout/+page.svelte
+#: src/lib/components/ui/production-select/production-select.svelte
 msgid "Select a production…"
 msgstr "Produktion auswählen…"
 
@@ -1781,9 +1783,8 @@ msgstr "Verarbeitung…"
 msgid "Submit"
 msgstr "Übernehmen"
 
-#: src/routes/checkout/+page.svelte
-msgid "Checkout Session Report"
-msgstr "Checkout-Sitzungsbericht"
+#~ msgid "Checkout Session Report"
+#~ msgstr "Checkout-Sitzungsbericht"
 
 #: src/routes/checkout/+page.svelte
 msgid "Target:"
@@ -2038,6 +2039,7 @@ msgstr "Alle Produkte"
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
 msgid "No location"
 msgstr "Kein Standort"
 
@@ -5261,9 +5263,8 @@ msgstr "<0/>Produktionen"
 msgid "<0/>Calendar"
 msgstr "<0/>Kalender"
 
-#: src/routes/+layout.svelte
-msgid "<0/>Checkout"
-msgstr "<0/>Ausgabe"
+#~ msgid "<0/>Checkout"
+#~ msgstr "<0/>Ausgabe"
 
 #: src/routes/+layout.svelte
 msgid "<0/>Offers"
@@ -6483,9 +6484,8 @@ msgstr "<0/> Produktionen"
 msgid "<0/> Calendar"
 msgstr "<0/> Kalender"
 
-#: src/routes/+layout.svelte
-msgid "<0/> Checkout"
-msgstr "<0/> Ausgabe"
+#~ msgid "<0/> Checkout"
+#~ msgstr "<0/> Ausgabe"
 
 #: src/routes/+layout.svelte
 msgid "<0/> Offers"
@@ -8987,14 +8987,17 @@ msgstr "Keine bevorstehenden Produktionen geplant. <0/> <1>Produktion anlegen �
 msgid "· until {0}"
 msgstr "· bis {0}"
 
+#: src/lib/components/ui/production-select/production-select.svelte
 #: src/routes/+page.svelte
 msgid "Running now"
 msgstr "Läuft gerade"
 
+#: src/lib/components/ui/production-select/production-select.svelte
 #: src/routes/+page.svelte
 msgid "Tomorrow"
 msgstr "Morgen"
 
+#: src/lib/components/ui/production-select/production-select.svelte
 #: src/routes/+page.svelte
 msgid "In # day"
 msgid_plural "In # days"
@@ -9588,8 +9591,10 @@ msgid "Unexpected: {0}"
 msgstr "Unerwartet: {0}"
 
 #. 0: item.name
+#. 0: result.productName
 #. 0: name
 #: src/routes/case-check/+page.svelte
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Found: {0}"
 msgstr "Gefunden: {0}"
@@ -9820,6 +9825,7 @@ msgstr "Gezählt von {0}"
 
 #: src/routes/case-check/+page.svelte
 #: src/routes/checkout/+page.svelte
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "No tag"
@@ -9922,6 +9928,7 @@ msgstr "Noch nicht gezählt"
 
 #: src/lib/stocktake-labels.svelte.ts
 #: src/routes/case-check/+page.svelte
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
 #: src/routes/stocktakes/+page.svelte
 #: src/routes/stocktakes/[id]/print/+page.svelte
 msgid "Found"
@@ -10832,7 +10839,9 @@ msgstr "<0/> Tag scannen"
 msgid "Packed: {0}"
 msgstr "Gepackt: {0}"
 
+#. 0: result.productName
 #. 0: scanMessage.text
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
 #: src/routes/share/[id]/[signature]/+page.svelte
 msgid "Not on this list: {0}"
 msgstr "Nicht auf dieser Liste: {0}"
@@ -11038,6 +11047,7 @@ msgid "Scan the case"
 msgstr "Kiste scannen"
 
 #: src/routes/case-check/+page.svelte
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
 msgid "Tick"
 msgstr "Abhaken"
 
@@ -11081,15 +11091,19 @@ msgstr "{0} fehlen"
 #~ msgstr ""
 
 #: src/routes/case-check/+page.svelte
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
 msgid "Everything is there."
 msgstr "Alles da."
 
 #. 0: missing.length
+#. 0: remaining.length
 #: src/routes/case-check/+page.svelte
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
 msgid "{0} still missing."
 msgstr "{0} fehlen noch."
 
 #: src/routes/case-check/+page.svelte
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
 msgid "Finish and save"
 msgstr "Abschließen und speichern"
 
@@ -11110,6 +11124,8 @@ msgid "Missing in case check"
 msgstr "Beim Kistencheck gefehlt"
 
 #. 0: tx.found; 1: tx.expected
+#. 0: tx.found; 1: tx.expected
+#: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "({0} of {1} there)"
 msgstr "({0} von {1} da)"
@@ -11229,3 +11245,322 @@ msgstr "Dieser Hersteller hat bereits ein Produkt namens „{0}“."
 #: src/lib/error-messages.svelte.ts
 msgid "Both manufacturers have a product called {0}. Merge those products first."
 msgstr "Beide Hersteller haben ein Produkt namens {0}. Führen Sie diese Produkte zuerst zusammen."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "{0} is not booked and approved on this production — only the production’s own organization can add it."
+msgstr "{0} ist auf dieser Produktion nicht gebucht und genehmigt — nur die eigene Organisation der Produktion kann es hinzufügen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This check no longer exists."
+msgstr "Diese Prüfung gibt es nicht mehr."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This check is already closed — start a new one."
+msgstr "Diese Prüfung ist bereits abgeschlossen — starte eine neue."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Only whoever ticked a unit can take the tick back."
+msgstr "Nur wer ein Gerät abgehakt hat, kann den Haken zurücknehmen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Only the production’s own organization or its crew can confirm a handover."
+msgstr "Nur die eigene Organisation der Produktion oder ihre Crew kann eine Übergabe bestätigen."
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Found in check of"
+msgstr "Bei Prüfung gefunden:"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Missing in check of"
+msgstr "Bei Prüfung gefehlt:"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Receipt confirmed by <0/>"
+msgstr "Empfang bestätigt von <0/>"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Reported returned by <0/>"
+msgstr "Als zurückgegeben gemeldet von <0/>"
+
+#: src/routes/checkout/+page.svelte
+msgid "Scan | Technikpool"
+msgstr "Scannen | Technikpool"
+
+#: src/routes/checkout/+page.svelte
+msgid "Scan"
+msgstr "Scannen"
+
+#: src/routes/checkout/+page.svelte
+msgid "Scan asset tags to put equipment on a shelf, check it out to a production, or check a production's list."
+msgstr "Asset-Tags scannen, um Geräte einzulagern, an eine Produktion auszugeben oder die Liste einer Produktion zu prüfen."
+
+#: src/routes/checkout/+page.svelte
+msgid "Tick what is there against the production's list. Changes nothing, and can be repeated as often as needed."
+msgstr "Abhaken, was da ist, gegen die Liste der Produktion. Ändert nichts und lässt sich beliebig oft wiederholen."
+
+#: src/routes/checkout/+page.svelte
+msgid "Start check"
+msgstr "Prüfung starten"
+
+#: src/routes/checkout/+page.svelte
+msgid "Scan Session Report"
+msgstr "Scan-Protokoll"
+
+#: src/routes/+layout.svelte
+msgid "<0/> Scan"
+msgstr "<0/> Scannen"
+
+#: src/routes/+layout.svelte
+msgid "<0/>Scan"
+msgstr "<0/>Scannen"
+
+#. 0: result.productName; 1: result.ticked - 1
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Found: {0} (+{1} accessories)"
+msgstr "Gefunden: {0} (+{1} Zubehör)"
+
+#. 0: result.productName
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Already ticked: {0}"
+msgstr "Schon abgehakt: {0}"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Receipt confirmed for 1 unit"
+msgid_plural "Receipt confirmed for # units"
+msgstr[0] "Empfang für 1 Gerät bestätigt"
+msgstr[1] "Empfang für # Geräte bestätigt"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "1 unit reported as returned"
+msgid_plural "# units reported as returned"
+msgstr[0] "1 Gerät als zurückgegeben gemeldet"
+msgstr[1] "# Geräte als zurückgegeben gemeldet"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Check saved — everything is there"
+msgstr "Prüfung gespeichert — alles da"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Check saved — 1 unit missing"
+msgid_plural "Check saved — # units missing"
+msgstr[0] "Prüfung gespeichert — 1 Gerät fehlt"
+msgstr[1] "Prüfung gespeichert — # Geräte fehlen"
+
+#. 0: check.productionName
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Check {0} | Technikpool"
+msgstr "Prüfen: {0} | Technikpool"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Everything on the production."
+msgstr "Alles auf der Produktion."
+
+#. 0: check.side.organizationName
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Only the units of {0}."
+msgstr "Nur die Geräte von {0}."
+
+#. 0: formatDate(check.closedAt); 1: check.closedBy
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Closed {0} by {1}."
+msgstr "Abgeschlossen am {0} von {1}."
+
+#. 0: check.productionName
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Check: {0}"
+msgstr "Prüfen: {0}"
+
+#. 0: formatDate(check.createdAt); 1: check.createdBy
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "<0/> Started {0} by {1}. <1/>"
+msgstr "<0/> Gestartet am {0} von {1}. <1/>"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Back to the production"
+msgstr "Zurück zur Produktion"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Asset tag or serial number"
+msgstr "Asset-Tag oder Seriennummer"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Scan what is there"
+msgstr "Scanne, was da ist"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Lent equipment"
+msgstr "Geliehenes Equipment"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Applies to the ticked units other organizations lent to this production."
+msgstr "Gilt für die abgehakten Geräte, die andere Organisationen dieser Produktion geliehen haben."
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Confirm receipt of 1 unit"
+msgid_plural "Confirm receipt of # units"
+msgstr[0] "Empfang von 1 Gerät bestätigen"
+msgstr[1] "Empfang von # Geräten bestätigen"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Report 1 unit returned"
+msgid_plural "Report # units returned"
+msgstr[0] "1 Gerät als zurückgegeben melden"
+msgstr[1] "# Geräte als zurückgegeben melden"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Nothing is booked for this production yet."
+msgstr "Für diese Produktion ist noch nichts gebucht."
+
+#. 0: item.tick.userName
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Found by {0}"
+msgstr "Gefunden von {0}"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Not out yet"
+msgstr "Noch nicht ausgegeben"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Return reported"
+msgstr "Rückgabe gemeldet"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Received"
+msgstr "Empfangen"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Receipt open"
+msgstr "Empfang offen"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Scanned but not on this list"
+msgstr "Gescannt, aber nicht auf dieser Liste"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Tick all"
+msgstr "Alle abhaken"
+
+#: src/routes/productions/[id]/check-button.svelte
+msgid "Continue check"
+msgstr "Prüfung fortsetzen"
+
+#: src/routes/productions/[id]/check-button.svelte
+msgid "Everything on the production"
+msgstr "Alles auf der Produktion"
+
+#. 0: side.organizationName
+#: src/routes/productions/[id]/check-button.svelte
+msgid "Units of {0}"
+msgstr "Geräte von {0}"
+
+#: src/routes/productions/[id]/check-button.svelte
+msgid "A check is open"
+msgstr "Eine Prüfung läuft"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "The production reported it as sent back; it is returned once its owner scans it in"
+msgstr "Die Produktion hat es als zurückgeschickt gemeldet; zurückgegeben ist es, sobald der Eigentümer es einscannt"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Handed over by its owner; the production has not confirmed receiving it yet"
+msgstr "Vom Eigentümer übergeben; die Produktion hat den Empfang noch nicht bestätigt"
+
+#: src/routes/checkout/+page.svelte
+msgid "Check list"
+msgstr "Prüfen"
+
+#: src/routes/productions/[id]/check-button.svelte
+#: src/routes/productions/[id]/check-button.svelte
+msgid "Check equipment"
+msgstr "Prüfen"
+
+#~ msgid "· only your units"
+#~ msgstr "· nur eure Geräte"
+
+#: src/routes/+page.svelte
+msgid "Receipt to confirm"
+msgstr "Empfang zu bestätigen"
+
+#: src/routes/+page.svelte
+msgid "Lent to your productions and handed over"
+msgstr "An eure Produktionen verliehen und übergeben"
+
+#: src/routes/+page.svelte
+msgid "Reported returned"
+msgstr "Rückgabe gemeldet"
+
+#: src/routes/+page.svelte
+msgid "Scan it back onto a shelf"
+msgstr "Zurück ins Lager scannen"
+
+#: src/routes/+page.svelte
+msgid "1 lent unit to confirm"
+msgid_plural "# lent units to confirm"
+msgstr[0] "1 geliehenes Gerät zu bestätigen"
+msgstr[1] "# geliehene Geräte zu bestätigen"
+
+#: src/routes/+page.svelte
+msgid "1 unit reported returned — scan it in"
+msgid_plural "# units reported returned — scan them in"
+msgstr[0] "1 Gerät als zurückgegeben gemeldet — einscannen"
+msgstr[1] "# Geräte als zurückgegeben gemeldet — einscannen"
+
+#: src/routes/+page.svelte
+msgid "Handovers"
+msgstr "Übergaben"
+
+#. 0: section.group.name
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Lent by {0}"
+msgstr "Geliehen von {0}"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Tick section"
+msgstr "Abschnitt abhaken"
+
+#: src/lib/components/ui/production-select/production-select.svelte
+msgid "No date"
+msgstr "Ohne Datum"
+
+#: src/lib/components/ui/production-select/production-select.svelte
+msgid "Yesterday"
+msgstr "Gestern"
+
+#: src/lib/components/ui/production-select/production-select.svelte
+msgid "# day ago"
+msgid_plural "# days ago"
+msgstr[0] "Vor 1 Tag"
+msgstr[1] "Vor # Tagen"
+
+#: src/lib/components/ui/production-select/production-select.svelte
+msgid "Search productions"
+msgstr "Produktionen suchen"
+
+#: src/lib/components/ui/production-select/production-select.svelte
+msgid "No productions found."
+msgstr "Keine Produktionen gefunden."
+
+#: src/lib/components/ui/production-select/production-select.svelte
+msgid "Running"
+msgstr "Laufend"
+
+#: src/lib/components/ui/production-select/production-select.svelte
+msgid "Upcoming"
+msgstr "Demnächst"
+
+#: src/lib/components/ui/production-select/production-select.svelte
+msgid "Past"
+msgstr "Vergangen"
+
+#: src/lib/components/ui/production-select/production-select.svelte
+msgid "Your units only"
+msgstr "Nur eure Geräte"
+
+#: src/lib/components/ui/production-select/production-select.svelte
+msgid "1 older one — search to find it"
+msgid_plural "# older ones — search to find them"
+msgstr[0] "1 ältere — über die Suche zu finden"
+msgstr[1] "# ältere — über die Suche zu finden"

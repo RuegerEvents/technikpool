@@ -41,6 +41,7 @@
 	import { DropdownMenu } from 'bits-ui';
 	import { LicenseRevealModal } from '$lib/components/ui/license-credentials';
 	import CopyEquipmentModal from './copy-equipment-modal.svelte';
+	import CheckButton from './check-button.svelte';
 	import { accessorySummary, nestAccessories, type Nested } from '$lib/production-items';
 
 	let { productionId }: { productionId: string } = $props();
@@ -642,6 +643,9 @@
 					</DropdownMenu.Content>
 				</DropdownMenu.Portal>
 			</DropdownMenu.Root>
+			{#if !cancelled}
+				<CheckButton productionId={production.id} />
+			{/if}
 			{#if canEdit}
 				<ShareLinkMenu productionId={production.id} />
 			{/if}
@@ -1254,6 +1258,21 @@
 															item.status
 														] ?? ''}">{statusLabels[item.status] ?? item.status}</span
 													>
+													{#if item.status === 'CHECKED_OUT' && item.asset.organizationId !== production.organizationId}
+														{#if item.returnReportedAt}
+															<span
+																class="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground"
+																title="The production reported it as sent back; it is returned once its owner scans it in"
+																>Return reported</span
+															>
+														{:else if !item.receivedAt}
+															<span
+																class="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900 dark:text-amber-300"
+																title="Handed over by its owner; the production has not confirmed receiving it yet"
+																>Receipt open</span
+															>
+														{/if}
+													{/if}
 													{#if item.asset.product.isLicense && item.status === 'CHECKED_OUT'}
 														<button
 															type="button"

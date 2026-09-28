@@ -1270,6 +1270,39 @@
 												<span class="font-normal text-muted-foreground">
 													({tx.found} of {tx.expected} there)
 												</span>
+											{:else if tx?.type === 'PRODUCTION_CHECKED'}
+												{tx.result === 'found' ? 'Found in check of' : 'Missing in check of'}
+												<a
+													href={item.productionRestricted
+														? undefined
+														: resolve(`/productions/${tx.productionId}`)}
+													class="text-foreground {item.productionRestricted
+														? ''
+														: 'underline underline-offset-2'}">{tx.productionName}</a
+												>
+												<span class="font-normal text-muted-foreground">
+													({tx.found} of {tx.expected} there)
+												</span>
+											{:else if tx?.type === 'HANDOVER_RECEIVED'}
+												Receipt confirmed by
+												<a
+													href={item.productionRestricted
+														? undefined
+														: resolve(`/productions/${tx.productionId}`)}
+													class="text-foreground {item.productionRestricted
+														? ''
+														: 'underline underline-offset-2'}">{tx.productionName}</a
+												>
+											{:else if tx?.type === 'RETURN_REPORTED'}
+												Reported returned by
+												<a
+													href={item.productionRestricted
+														? undefined
+														: resolve(`/productions/${tx.productionId}`)}
+													class="text-foreground {item.productionRestricted
+														? ''
+														: 'underline underline-offset-2'}">{tx.productionName}</a
+												>
 											{:else if tx?.type === 'ACCESSORY_DETACHED'}
 												Detached from
 												<a

@@ -29,6 +29,10 @@ abstract class InventoryClient {
   /// Cancelled productions are left out: nothing can be checked out to one,.
   /// so it is never a scan target. Units still out on a cancelled production.
   /// come back by scanning them onto a location, as always.
+  ///
+  /// Includes other orgs' productions that the caller's orgs lend units to.
+  /// `checkoutRole` says what a scan to each may do, `canCheck` whether the.
+  /// caller may check it.
   @GET('/api/v1/productions')
   Future<List<Production>> listProductions();
 

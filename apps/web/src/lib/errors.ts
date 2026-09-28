@@ -141,6 +141,7 @@ export type AppErrorCode =
 	| 'production_not_cancelled'
 	| 'cancellation_reason_required'
 	| 'booking_not_pending'
+	| 'booking_not_approved'
 	// Offers and invoices
 	| 'offer_immutable'
 	| 'offer_already_finalized'
@@ -196,6 +197,11 @@ export type AppErrorCode =
 	| 'stocktake_invalid_request'
 	// Case checks
 	| 'case_not_a_case'
+	// Production checks
+	| 'check_not_found'
+	| 'check_closed'
+	| 'check_not_your_tick'
+	| 'check_receipt_forbidden'
 	// Sticker sheets (their own endpoint, not a remote function)
 	| 'sticker_config_invalid'
 	// Org logo upload (its own endpoint: a command takes no file)

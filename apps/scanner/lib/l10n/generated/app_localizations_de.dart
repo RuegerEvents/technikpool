@@ -845,4 +845,167 @@ class SDe extends S {
   String caseCheckDemoHint(String tag) {
     return 'Etikett $tag der Kabelkiste probieren';
   }
+
+  @override
+  String get errorNotApproved =>
+      'Dieses Gerät ist auf der Produktion nicht gebucht und genehmigt – nur die eigene Organisation der Produktion kann es hinzufügen.';
+
+  @override
+  String get errorCheckClosed =>
+      'Diese Prüfung ist bereits abgeschlossen. Starte eine neue.';
+
+  @override
+  String get errorTickNotYours =>
+      'Nur wer ein Gerät abgehakt hat, kann den Haken zurücknehmen.';
+
+  @override
+  String get errorReceiptForbidden =>
+      'Nur die eigene Organisation der Produktion oder ihre Crew kann eine Übergabe bestätigen.';
+
+  @override
+  String get actionProductionChecked => 'Auf Produktion geprüft';
+
+  @override
+  String get actionHandoverReceived => 'Empfang bestätigt';
+
+  @override
+  String get actionReturnReported => 'Rückgabe gemeldet';
+
+  @override
+  String get productionCheck => 'Prüfen';
+
+  @override
+  String get productionCheckLenderOnly => 'nur eure Geräte';
+
+  @override
+  String get productionCheckEverything => 'Alles auf der Produktion';
+
+  @override
+  String productionCheckUnitsOf(String org) {
+    return 'Nur die Geräte von $org';
+  }
+
+  @override
+  String get productionCheckFound => 'Gefunden';
+
+  @override
+  String productionCheckFoundBy(String name) {
+    return 'Gefunden von $name';
+  }
+
+  @override
+  String get productionCheckAlready => 'Schon abgehakt';
+
+  @override
+  String get productionCheckNotOnList => 'Nicht auf dieser Liste';
+
+  @override
+  String productionCheckWithAccessories(String name, int count) {
+    return '$name (+$count Zubehör)';
+  }
+
+  @override
+  String get productionCheckNotOut => 'Noch nicht ausgegeben';
+
+  @override
+  String get productionCheckReceiptOpen => 'Empfang offen';
+
+  @override
+  String get productionCheckReceived => 'Empfangen';
+
+  @override
+  String get productionCheckReturnReported => 'Rückgabe gemeldet';
+
+  @override
+  String productionCheckLentBy(String org) {
+    return 'von $org';
+  }
+
+  @override
+  String get productionCheckEmpty =>
+      'Für diese Produktion ist noch nichts gebucht.';
+
+  @override
+  String get productionCheckTickAll => 'Alle abhaken';
+
+  @override
+  String get productionCheckFinish => 'Abschließen und speichern';
+
+  @override
+  String productionCheckSaved(int found, int missing) {
+    return 'Prüfung gespeichert: $found gefunden, $missing fehlen.';
+  }
+
+  @override
+  String productionCheckConfirmReceipt(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Empfang von $count Geräten bestätigen',
+      one: 'Empfang von 1 Gerät bestätigen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String productionCheckReportReturn(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Geräte als zurückgegeben melden',
+      one: '1 Gerät als zurückgegeben melden',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String productionCheckReceiptDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Empfang für $count Geräte bestätigt',
+      one: 'Empfang für 1 Gerät bestätigt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String productionCheckReturnDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Geräte als zurückgegeben gemeldet',
+      one: '1 Gerät als zurückgegeben gemeldet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get productionCheckLentHint =>
+      'Gilt für die abgehakten Geräte, die andere Organisationen dieser Produktion geliehen haben.';
+
+  @override
+  String get productionCheckClosed => 'Diese Prüfung ist abgeschlossen.';
+
+  @override
+  String productionCheckLentBySection(String org) {
+    return 'Geliehen von $org';
+  }
+
+  @override
+  String get productionCheckNoLocation => 'Ohne Lagerort';
+
+  @override
+  String get productionCheckTickSection => 'Abschnitt abhaken';
+
+  @override
+  String get productionActionBook => 'Ausgeben';
+
+  @override
+  String get productionActionBookHint =>
+      'Jeder Scan bucht das Gerät auf diese Produktion.';
+
+  @override
+  String get productionActionCheckHint =>
+      'Abhaken, was da ist, gegen die Liste. Ändert nichts.';
 }

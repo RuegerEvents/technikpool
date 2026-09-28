@@ -18,6 +18,10 @@ Production _$ProductionFromJson(Map<String, dynamic> json) => Production(
   endDate: json['endDate'] == null
       ? null
       : DateTime.parse(json['endDate'] as String),
+  checkoutRole: json['checkoutRole'] == null
+      ? null
+      : ProductionCheckoutRole.fromJson(json['checkoutRole'] as String),
+  canCheck: json['canCheck'] as bool?,
 );
 
 Map<String, dynamic> _$ProductionToJson(Production instance) =>
@@ -27,4 +31,6 @@ Map<String, dynamic> _$ProductionToJson(Production instance) =>
       'startDate': ?instance.startDate?.toIso8601String(),
       'endDate': ?instance.endDate?.toIso8601String(),
       'organization': instance.organization,
+      'checkoutRole': ?instance.checkoutRole,
+      'canCheck': ?instance.canCheck,
     };

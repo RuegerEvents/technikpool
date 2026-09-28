@@ -160,6 +160,10 @@ export interface paths {
          * @description Cancelled productions are left out: nothing can be checked out to one,
          *     so it is never a scan target. Units still out on a cancelled production
          *     come back by scanning them onto a location, as always.
+         *
+         *     Includes other orgs' productions that the caller's orgs lend units to.
+         *     `checkoutRole` says what a scan to each may do, `canCheck` whether the
+         *     caller may check it.
          */
         get: operations["listProductions"];
         put?: never;
@@ -537,6 +541,173 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/productions/{productionId}/checks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start a check of a production, or join the open one
+         * @description Without `organizationId` the caller checks as the production's own org
+         *     when they may, else as the first org of theirs that lends to it.
+         */
+        post: operations["startProductionCheck"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production-checks/{checkId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A check with its list and who ticked what */
+        get: operations["getProductionCheck"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production-checks/{checkId}/scans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Tick one scanned code
+         * @description An asset tag — or a serial number that belongs to exactly one unit —
+         *     ticks that unit (`ticked`), along with its accessories that carry no
+         *     tag of their own. A unit already ticked answers `already`; one that is
+         *     not on the list is recorded as `unexpected`.
+         */
+        post: operations["scanIntoProductionCheck"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production-checks/{checkId}/ticks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Tick units by hand
+         * @description Ids not on the list are ignored.
+         */
+        post: operations["tickProductionCheckItems"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production-checks/{checkId}/ticks/{assetId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Take back one's own tick
+         * @description Only whoever ticked a unit can untick it (`403 tick_not_yours`).
+         */
+        delete: operations["untickProductionCheckItem"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production-checks/{checkId}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finish a check
+         * @description Writes one `PRODUCTION_CHECKED` entry into the history of every unit on
+         *     the list, found or missing, and closes the check. The next check starts
+         *     with nothing ticked.
+         */
+        post: operations["closeProductionCheck"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production-checks/{checkId}/receipt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm receiving the ticked lent units
+         * @description For the ticked units other orgs lent that are checked out to the
+         *     production and not yet confirmed. Only the production's own org
+         *     (MEMBER or above) or its crew (`403 receipt_forbidden`).
+         */
+        post: operations["confirmProductionCheckReceipt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production-checks/{checkId}/return-report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Report the ticked lent units as sent back
+         * @description For ticked lent units whose receipt was confirmed. Tells the lender
+         *     they are on their way; the lender scanning them onto a location is
+         *     what returns them. Same rights as `receipt`.
+         */
+        post: operations["reportProductionCheckReturn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -673,6 +844,15 @@ export interface components {
             /** Format: date-time */
             endDate?: string | null;
             organization: components["schemas"]["Organization"];
+            /**
+             * @description `production`: a member of the org that runs it — anything can be
+             *     checked out to it. `lender`: it has the caller's org's units booked
+             *     and approved, and only those can be. `none`: read only.
+             * @enum {string}
+             */
+            checkoutRole?: "production" | "lender" | "none";
+            /** @description Whether the caller may check its list — crew may, without booking rights. */
+            canCheck?: boolean;
         };
         Asset: {
             id: string;
@@ -1204,6 +1384,112 @@ export interface components {
             /** @description Not found, but checked out to another production. */
             away: number;
         };
+        ProductionCheckStartRequest: {
+            /** @description Which side to check as, for a caller on both. */
+            organizationId?: string;
+        };
+        ProductionCheckSide: {
+            organizationId: string;
+            organizationName: string;
+            /** @description The production's own org — the whole list, and the handover steps. */
+            own: boolean;
+        };
+        ProductionCheckTick: {
+            userName: string;
+            /** @description Ticked by the caller, who alone may untick it. */
+            mine: boolean;
+            /** @enum {string} */
+            via: "scan" | "manual";
+            /** Format: date-time */
+            at: string;
+        };
+        ProductionCheckItem: {
+            assetId: string;
+            assetTag: string | null;
+            productName: string;
+            productCaption: string | null;
+            manufacturerName: string | null;
+            /** @description The org that lent the unit; null for the production's own. */
+            lentBy: string | null;
+            /** @description The unit it hangs off; listed right after it. */
+            accessoryOf: string | null;
+            group: components["schemas"]["ProductionCheckGroup"];
+            /**
+             * @description APPROVED is booked but not handed over yet.
+             * @enum {string}
+             */
+            status: "APPROVED" | "CHECKED_OUT";
+            /** @description Lent units only — the production confirmed having it. */
+            received: boolean;
+            /** @description Lent units only — the production reported it as sent back. */
+            returnReported: boolean;
+            tick: null | components["schemas"]["ProductionCheckTick"];
+        };
+        /**
+         * @description The section a unit is listed under. Items arrive sorted by it, so a
+         *     client starts a new heading whenever it changes. `location`: the shelf
+         *     it is kept on. `lender`: lent units, one section per lending org
+         *     (`name` is the org). `none`: no location, `name` is null. An accessory
+         *     is always in its parent's section.
+         */
+        ProductionCheckGroup: {
+            /** @enum {string} */
+            kind: "location" | "lender" | "none";
+            name: string | null;
+        };
+        ProductionCheckUnexpected: {
+            assetId: string;
+            assetTag: string | null;
+            productName: string;
+            userName: string;
+            mine: boolean;
+        };
+        ProductionCheck: {
+            id: string;
+            /** @enum {string} */
+            status: "OPEN" | "CLOSED";
+            productionId: string;
+            productionName: string;
+            side: components["schemas"]["ProductionCheckSide"];
+            /** Format: date-time */
+            createdAt: string;
+            createdBy: string;
+            /** Format: date-time */
+            closedAt: string | null;
+            closedBy: string | null;
+            /** @description The list as it is now, by section, each unit followed by its accessories. */
+            items: components["schemas"]["ProductionCheckItem"][];
+            /** @description Ticked but not on the list. */
+            unexpected: components["schemas"]["ProductionCheckUnexpected"][];
+            /** @description How many units `receipt` would confirm for the caller — 0 hides it. */
+            canConfirmReceipt: number;
+            /** @description How many units `return-report` would report for the caller — 0 hides it. */
+            canReportReturn: number;
+        };
+        ProductionCheckScanRequest: {
+            code: string;
+        };
+        ProductionCheckScanResult: {
+            /** @enum {string} */
+            result: "ticked" | "already" | "unexpected";
+            assetTag: string;
+            productName: string;
+            /** @description Units this scan ticked — the unit and its untagged accessories. */
+            ticked: number;
+        };
+        ProductionCheckTickRequest: {
+            assetIds: string[];
+        };
+        ProductionCheckTickResult: {
+            ticked: number;
+        };
+        ProductionCheckCloseResult: {
+            found: number;
+            missing: number;
+        };
+        HandoverResult: {
+            count: number;
+        };
     };
     responses: {
         /** @description The request was malformed. */
@@ -1257,6 +1543,11 @@ export interface components {
          *
          *     Case checks: a unit that is neither in a kit nor has accessories, or
          *     an accessory, is no case to check (`not_a_case`).
+         *
+         *     Loans: a lending org checks out only units the production has booked
+         *     and approved (`not_approved`). A closed production check takes no more
+         *     ticks (`check_closed`), and a cancelled production is not checked
+         *     (`production_cancelled`).
          */
         Conflict: {
             headers: {
@@ -1287,6 +1578,8 @@ export interface components {
     };
     parameters: {
         StocktakeId: string;
+        ProductionId: string;
+        CheckId: string;
     };
     requestBodies: never;
     headers: never;
@@ -2021,6 +2314,226 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    startProductionCheck: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                productionId: components["parameters"]["ProductionId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ProductionCheckStartRequest"];
+            };
+        };
+        responses: {
+            /** @description The open check */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductionCheck"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    getProductionCheck: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                checkId: components["parameters"]["CheckId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The check */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductionCheck"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    scanIntoProductionCheck: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                checkId: components["parameters"]["CheckId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductionCheckScanRequest"];
+            };
+        };
+        responses: {
+            /** @description What the code turned out to be */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductionCheckScanResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    tickProductionCheckItems: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                checkId: components["parameters"]["CheckId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductionCheckTickRequest"];
+            };
+        };
+        responses: {
+            /** @description How many were ticked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductionCheckTickResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    untickProductionCheckItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                checkId: components["parameters"]["CheckId"];
+                assetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unticked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    closeProductionCheck: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                checkId: components["parameters"]["CheckId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description How the check came out */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductionCheckCloseResult"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    confirmProductionCheckReceipt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                checkId: components["parameters"]["CheckId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description How many units were confirmed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HandoverResult"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    reportProductionCheckReturn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                checkId: components["parameters"]["CheckId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description How many units were reported */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HandoverResult"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
         };
     };

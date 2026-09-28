@@ -462,4 +462,51 @@ void main() {
       expect(again.lastCheck?.expected, 3);
     });
   });
+
+  test('a production check ticks what is out on it and closes', () async {
+    await api.scanning.createScan(
+      body: const ScanRequest(
+        assetTag: '40000001',
+        targetType: ScanRequestTargetType.production,
+        targetId: 'prdn_demo_festival',
+      ),
+    );
+    final check = await api.productionCheck.startProductionCheck(
+      productionId: 'prdn_demo_festival',
+    );
+    expect(check.items.map((i) => i.assetTag), contains('40000001'));
+
+    // Starting again joins the open one rather than opening a second.
+    final joined = await api.productionCheck.startProductionCheck(
+      productionId: 'prdn_demo_festival',
+    );
+    expect(joined.id, check.id);
+
+    final scan = await api.productionCheck.scanIntoProductionCheck(
+      checkId: check.id,
+      body: const ProductionCheckScanRequest(code: '40000001'),
+    );
+    expect(scan.result, ProductionCheckScanResultResult.ticked);
+    final again = await api.productionCheck.scanIntoProductionCheck(
+      checkId: check.id,
+      body: const ProductionCheckScanRequest(code: '40000001'),
+    );
+    expect(again.result, ProductionCheckScanResultResult.already);
+
+    final result = await api.productionCheck.closeProductionCheck(checkId: check.id);
+    expect(result.found, greaterThanOrEqualTo(1));
+    await expectLater(
+      api.productionCheck.scanIntoProductionCheck(
+        checkId: check.id,
+        body: const ProductionCheckScanRequest(code: '40000001'),
+      ),
+      throwsA(
+        isA<Object>().having(
+          (e) => (unwrapError(e) as ApiException).code,
+          'code',
+          'check_closed',
+        ),
+      ),
+    );
+  });
 }

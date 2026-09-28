@@ -424,6 +424,8 @@ export const ModelName = {
   Production: 'Production',
   Customer: 'Customer',
   ProductionItem: 'ProductionItem',
+  ProductionCheck: 'ProductionCheck',
+  ProductionCheckTick: 'ProductionCheckTick',
   ProductionCrew: 'ProductionCrew',
   AssetTransaction: 'AssetTransaction',
   Inspection: 'Inspection',
@@ -457,7 +459,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "legalDocument" | "dpaAcceptance" | "invitation" | "manufacturer" | "connector" | "productPort" | "cableWay" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "serviceCategory" | "orgService" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem" | "stocktake" | "stocktakeItem" | "stocktakeLine" | "stocktakeCount" | "stocktakeEvent" | "productDocument"
+    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "legalDocument" | "dpaAcceptance" | "invitation" | "manufacturer" | "connector" | "productPort" | "cableWay" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCheck" | "productionCheckTick" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "serviceCategory" | "orgService" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem" | "stocktake" | "stocktakeItem" | "stocktakeLine" | "stocktakeCount" | "stocktakeEvent" | "productDocument"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2459,6 +2461,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ProductionCheck: {
+      payload: Prisma.$ProductionCheckPayload<ExtArgs>
+      fields: Prisma.ProductionCheckFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ProductionCheckFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ProductionCheckFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckPayload>
+        }
+        findFirst: {
+          args: Prisma.ProductionCheckFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ProductionCheckFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckPayload>
+        }
+        findMany: {
+          args: Prisma.ProductionCheckFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckPayload>[]
+        }
+        create: {
+          args: Prisma.ProductionCheckCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckPayload>
+        }
+        createMany: {
+          args: Prisma.ProductionCheckCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ProductionCheckCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckPayload>[]
+        }
+        delete: {
+          args: Prisma.ProductionCheckDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckPayload>
+        }
+        update: {
+          args: Prisma.ProductionCheckUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckPayload>
+        }
+        deleteMany: {
+          args: Prisma.ProductionCheckDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ProductionCheckUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ProductionCheckUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckPayload>[]
+        }
+        upsert: {
+          args: Prisma.ProductionCheckUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckPayload>
+        }
+        aggregate: {
+          args: Prisma.ProductionCheckAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProductionCheck>
+        }
+        groupBy: {
+          args: Prisma.ProductionCheckGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProductionCheckGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ProductionCheckCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProductionCheckCountAggregateOutputType> | number
+        }
+      }
+    }
+    ProductionCheckTick: {
+      payload: Prisma.$ProductionCheckTickPayload<ExtArgs>
+      fields: Prisma.ProductionCheckTickFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ProductionCheckTickFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckTickPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ProductionCheckTickFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckTickPayload>
+        }
+        findFirst: {
+          args: Prisma.ProductionCheckTickFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckTickPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ProductionCheckTickFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckTickPayload>
+        }
+        findMany: {
+          args: Prisma.ProductionCheckTickFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckTickPayload>[]
+        }
+        create: {
+          args: Prisma.ProductionCheckTickCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckTickPayload>
+        }
+        createMany: {
+          args: Prisma.ProductionCheckTickCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ProductionCheckTickCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckTickPayload>[]
+        }
+        delete: {
+          args: Prisma.ProductionCheckTickDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckTickPayload>
+        }
+        update: {
+          args: Prisma.ProductionCheckTickUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckTickPayload>
+        }
+        deleteMany: {
+          args: Prisma.ProductionCheckTickDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ProductionCheckTickUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ProductionCheckTickUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckTickPayload>[]
+        }
+        upsert: {
+          args: Prisma.ProductionCheckTickUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductionCheckTickPayload>
+        }
+        aggregate: {
+          args: Prisma.ProductionCheckTickAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProductionCheckTick>
+        }
+        groupBy: {
+          args: Prisma.ProductionCheckTickGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProductionCheckTickGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ProductionCheckTickCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProductionCheckTickCountAggregateOutputType> | number
+        }
+      }
+    }
     ProductionCrew: {
       payload: Prisma.$ProductionCrewPayload<ExtArgs>
       fields: Prisma.ProductionCrewFieldRefs
@@ -4242,10 +4392,41 @@ export const ProductionItemScalarFieldEnum = {
   assetId: 'assetId',
   sourceBundleId: 'sourceBundleId',
   sourceParentAssetId: 'sourceParentAssetId',
-  status: 'status'
+  status: 'status',
+  receivedAt: 'receivedAt',
+  receivedById: 'receivedById',
+  returnReportedAt: 'returnReportedAt',
+  returnReportedById: 'returnReportedById'
 } as const
 
 export type ProductionItemScalarFieldEnum = (typeof ProductionItemScalarFieldEnum)[keyof typeof ProductionItemScalarFieldEnum]
+
+
+export const ProductionCheckScalarFieldEnum = {
+  id: 'id',
+  productionId: 'productionId',
+  organizationId: 'organizationId',
+  status: 'status',
+  createdById: 'createdById',
+  closedById: 'closedById',
+  closedAt: 'closedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ProductionCheckScalarFieldEnum = (typeof ProductionCheckScalarFieldEnum)[keyof typeof ProductionCheckScalarFieldEnum]
+
+
+export const ProductionCheckTickScalarFieldEnum = {
+  id: 'id',
+  checkId: 'checkId',
+  assetId: 'assetId',
+  userId: 'userId',
+  via: 'via',
+  unexpected: 'unexpected',
+  createdAt: 'createdAt'
+} as const
+
+export type ProductionCheckTickScalarFieldEnum = (typeof ProductionCheckTickScalarFieldEnum)[keyof typeof ProductionCheckTickScalarFieldEnum]
 
 
 export const ProductionCrewScalarFieldEnum = {
@@ -4967,6 +5148,8 @@ export type GlobalOmitConfig = {
   production?: Prisma.ProductionOmit
   customer?: Prisma.CustomerOmit
   productionItem?: Prisma.ProductionItemOmit
+  productionCheck?: Prisma.ProductionCheckOmit
+  productionCheckTick?: Prisma.ProductionCheckTickOmit
   productionCrew?: Prisma.ProductionCrewOmit
   assetTransaction?: Prisma.AssetTransactionOmit
   inspection?: Prisma.InspectionOmit
