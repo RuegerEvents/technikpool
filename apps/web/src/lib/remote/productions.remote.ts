@@ -158,7 +158,11 @@ export const getProduction = query(v.string(), async (id: string) => {
 						}
 					},
 					sourceBundle: {
-						select: { id: true, template: { select: { name: true, caption: true } } }
+						select: {
+							id: true,
+							imagePath: true,
+							template: { select: { name: true, caption: true } }
+						}
 					}
 				},
 				// The page groups these into sections in the order it meets them, and

@@ -310,7 +310,6 @@ msgstr "E-Mail"
 #: src/routes/orgs/[id]/org-logo-card.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/stocktakes/new/+page.svelte
 msgid "Remove"
 msgstr "Entfernen"
@@ -443,7 +442,6 @@ msgstr "Asset-Tag"
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/products/+page.svelte
 msgid "Bundle"
 msgstr "Bundle"

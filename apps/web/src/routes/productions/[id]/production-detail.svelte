@@ -11,7 +11,6 @@
 	import {
 		getProduction,
 		getProductionAudience,
-		removeBundleFromProduction,
 		syncBundleInProduction,
 		syncAssetAccessoriesInProduction,
 		addCrewMember,
@@ -166,14 +165,6 @@
 		}
 	}
 
-	async function handleRemoveBundle(bundleId: string) {
-		try {
-			await removeBundleFromProduction({ productionId, bundleId });
-		} catch (err) {
-			toast.error(getErrorMessage(err));
-		}
-	}
-
 	async function handleSyncBundle(bundleId: string) {
 		working = true;
 		try {
@@ -255,7 +246,11 @@
 				};
 			};
 			sourceBundle: {
-				select: { id: true; template: { select: { name: true; caption: true } } };
+				select: {
+					id: true;
+					imagePath: true;
+					template: { select: { name: true; caption: true } };
+				};
 			};
 		};
 	}>;
@@ -264,6 +259,7 @@
 		kind: 'bundle';
 		bundleId: string;
 		bundleName: string;
+		imagePath: string | null;
 		total: number;
 		pending: number;
 		approved: number;
@@ -304,6 +300,7 @@
 							item.sourceBundle.template.name,
 							item.sourceBundle.template.caption
 						),
+						imagePath: item.sourceBundle.imagePath,
 						total: 0,
 						pending: 0,
 						approved: 0,
@@ -1155,10 +1152,7 @@
 												<path d="m9 18 6-6-6-6" />
 											</svg>
 											{#if section.kind === 'bundle'}
-												<span
-													class="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground"
-													>Bundle</span
-												>
+												<ProductThumb path={section.imagePath} alt={section.bundleName} />
 												<span class="font-medium">{section.bundleName}</span>
 												{#if canPlan && divergence}
 													<span
@@ -1181,18 +1175,6 @@
 														class="rounded border border-yellow-400 px-2 py-0.5 text-xs text-yellow-800 transition-colors hover:bg-yellow-100 dark:border-yellow-600 dark:text-yellow-300 dark:hover:bg-yellow-900/40"
 													>
 														Update from bundle
-													</button>
-												{/if}
-												{#if canEdit}
-													<button
-														type="button"
-														onclick={(e) => {
-															e.stopPropagation();
-															handleRemoveBundle(section.bundleId);
-														}}
-														class="ml-auto text-xs text-muted-foreground transition-colors hover:text-destructive"
-													>
-														Remove
 													</button>
 												{/if}
 											{:else}
