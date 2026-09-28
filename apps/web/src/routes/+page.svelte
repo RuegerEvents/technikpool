@@ -1,20 +1,18 @@
 <script lang="ts">
-	import { DropdownMenu } from 'bits-ui';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import {
 		getPendingApprovals,
-		approveProductionItems,
-		declineProductionItems,
 		getAwaitingApprovals,
 		getDashboardStats
 	} from '$lib/remote/productions.remote';
+	import { groupApprovalRequests } from '$lib/approval-requests';
+	import ApprovalRequestModal from './approval-request-modal.svelte';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
 	import { invalidateAll } from '$app/navigation';
-	import { plural, orgLabel, getErrorMessage } from '$lib/utils';
+	import { plural, orgLabel } from '$lib/utils';
 	import { canManageInventory, roleAtLeast, ROLE_FOR } from '$lib/roles';
 	import { billingSetupSteps } from '$lib/billing-setup.svelte';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
@@ -31,7 +29,7 @@
 		Building2,
 		Plus,
 		Hourglass,
-		EllipsisVertical,
+		ChevronRight,
 		Sparkles,
 		ReceiptText
 	} from '@lucide/svelte';
@@ -97,11 +95,11 @@
 	let attention = $derived.by(() => {
 		if (!stats) return [];
 		const items: AttentionItem[] = [];
-		if (pending.length > 0)
+		if (requests.length > 0)
 			items.push({
 				key: 'pending',
-				count: pending.length,
-				label: plural(pending.length, ['Request to approve', 'Requests to approve']),
+				count: requests.length,
+				label: plural(requests.length, ['Request to approve', 'Requests to approve']),
 				hint: 'Other organizations want your equipment',
 				href: '#approvals',
 				tone: 'amber'
@@ -171,89 +169,23 @@
 		}
 	}
 
-	type PendingItem = (typeof pending)[number];
+	let requests = $derived(groupApprovalRequests(pending));
 
-	type ProductGroup = {
-		productId: string;
-		productName: string;
-		items: PendingItem[];
-	};
+	// Held by key rather than as the request itself, so the dialog shows what
+	// is still waiting after every decision and closes on its own once nothing
+	// is left.
+	let openRequestKey = $state<string | null>(null);
+	let openRequest = $derived(requests.find((r) => r.key === openRequestKey) ?? null);
 
-	type RequestGroup = {
-		productionId: string;
-		productionName: string;
-		productionVisible: boolean;
-		requesterOrg: string;
-		productGroups: ProductGroup[];
-		allItems: PendingItem[];
-	};
-
-	let groups = $derived(
-		Object.values(
-			pending.reduce<Record<string, RequestGroup>>((acc, item) => {
-				if (!acc[item.productionId]) {
-					acc[item.productionId] = {
-						productionId: item.productionId,
-						productionName: item.production.name,
-						productionVisible: item.productionVisible,
-						requesterOrg: orgLabel(item.production.organization),
-						productGroups: [],
-						allItems: []
-					};
-				}
-				const group = acc[item.productionId];
-				group.allItems.push(item);
-				let pg = group.productGroups.find((p) => p.productId === item.asset.product.id);
-				if (!pg) {
-					pg = {
-						productId: item.asset.product.id,
-						productName: item.asset.product.name,
-						items: []
-					};
-					group.productGroups.push(pg);
-				}
-				pg.items.push(item);
-				return acc;
-			}, {})
-		)
+	let rangeFormat = $derived(
+		new Intl.DateTimeFormat(dateLocale(), { day: 'numeric', month: 'short' })
 	);
 
-	// Modal state
-	type ModalState = { pg: ProductGroup; action: 'approve' | 'decline'; count: number } | null;
-	let modal = $state<ModalState>(null);
-
-	function openModal(pg: ProductGroup, action: 'approve' | 'decline') {
-		modal = { pg, action, count: 1 };
-	}
-
-	async function confirmModal() {
-		if (!modal) return;
-		const { pg, action, count } = modal;
-		modal = null;
-		const items = pg.items.slice(0, count);
-		if (action === 'approve') await handleApproveAll(items);
-		else await handleDeclineAll(items);
-	}
-
-	// One call per selection, not per unit: the server tells the borrower once
-	// their queue is empty, and it can only tell which call emptied it when the
-	// whole selection arrives together.
-	async function handleApproveAll(items: PendingItem[]) {
-		try {
-			const { reviewed } = await approveProductionItems(items.map((i) => i.id));
-			toast.success(plural(reviewed, ['# asset approved.', '# assets approved.']));
-		} catch (err) {
-			toast.error(getErrorMessage(err));
-		}
-	}
-
-	async function handleDeclineAll(items: PendingItem[]) {
-		try {
-			const { reviewed } = await declineProductionItems(items.map((i) => i.id));
-			toast.success(plural(reviewed, ['# asset declined.', '# assets declined.']));
-		} catch (err) {
-			toast.error(getErrorMessage(err));
-		}
+	function formatPeriod(start: Date | null, end: Date | null) {
+		if (!start) return '—';
+		return end
+			? rangeFormat.formatRange(new Date(start), new Date(end))
+			: rangeFormat.format(new Date(start));
 	}
 
 	function formatDate(d: Date | null | undefined) {
@@ -309,42 +241,12 @@
 
 <svelte:head><title>Technikpool</title></svelte:head>
 
-<!-- Count picker modal -->
-{#if modal}
-	<!-- Bound here because a snippet is its own closure: the narrowing the {#if}
-	     gives us doesn't reach inside one. -->
-	{@const m = modal}
-	<Modal
-		open={true}
-		onclose={() => (modal = null)}
-		title="{m.action === 'approve' ? 'Approve' : 'Decline'} some {m.pg.productName}"
-	>
-		{#snippet description()}
-			How many of the {m.pg.items.length} units do you want to {m.action}?
-		{/snippet}
-		{#snippet children()}
-			<div class="flex items-center gap-3">
-				<input
-					type="number"
-					min="1"
-					max={m.pg.items.length}
-					bind:value={m.count}
-					oninput={(e) => {
-						m.count = Math.min(Math.max(1, +e.currentTarget.value), m.pg.items.length);
-					}}
-					class="w-24 rounded-md border border-input bg-background px-3 py-2 text-center text-sm focus:ring-1 focus:ring-ring focus:outline-none"
-				/>
-				<span class="text-sm text-muted-foreground">of {m.pg.items.length}</span>
-			</div>
-		{/snippet}
-		{#snippet footer()}
-			<Button variant={m.action === 'approve' ? 'default' : 'destructive'} onclick={confirmModal}>
-				{m.action === 'approve' ? 'Approve' : 'Decline'}
-				{m.count}
-			</Button>
-			<Button icon="close" variant="outline" onclick={() => (modal = null)}>Cancel</Button>
-		{/snippet}
-	</Modal>
+{#if openRequest}
+	<ApprovalRequestModal
+		request={openRequest}
+		locale={data.locale}
+		onclose={() => (openRequestKey = null)}
+	/>
 {/if}
 
 {#if !data.user}
@@ -485,107 +387,51 @@
 				     strip above already says "all clear". -->
 				{#if !pendingReady}
 					<ContentSkeleton count={3} error={pendingQueries.find((q) => q.error)?.error} />
-				{:else if groups.length > 0}
+				{:else if requests.length > 0}
 					<section id="approvals" class="scroll-mt-20">
 						<h2 class="mb-3 flex items-center gap-2 text-lg font-semibold">
 							<CircleAlert aria-hidden="true" class="size-5 text-amber-500" />
-							Action Required
+							Requests to approve
 						</h2>
-						<div class="grid gap-4">
-							{#each groups as group (group.productionId)}
-								<Card.Root class="border-l-4 border-l-amber-500">
-									<Card.Header class="flex flex-row items-start justify-between gap-4 pb-3">
-										<div>
-											<a
-												href={group.productionVisible
-													? resolve(`/productions/${group.productionId}`)
-													: undefined}
-												class="font-semibold {group.productionVisible ? 'hover:underline' : ''}"
-												>{group.productionName}</a
+						<!-- One line per request; the equipment itself is in the dialog,
+						     where there is room to nest cases and accessories. -->
+						<Card.Root class="gap-0 overflow-hidden py-0">
+							<div class="divide-y">
+								{#each requests as request (request.key)}
+									<button
+										type="button"
+										onclick={() => (openRequestKey = request.key)}
+										class="flex w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-muted/40"
+									>
+										<div
+											class="flex w-12 shrink-0 flex-col items-center rounded-md border bg-muted py-1 leading-none"
+										>
+											<span class="text-lg font-bold tabular-nums"
+												>{request.startDate ? dayOfMonth(request.startDate) : '–'}</span
 											>
-											<p class="mt-0.5 text-sm text-muted-foreground">
-												Requested by <span class="font-medium text-foreground"
-													>{group.requesterOrg}</span
-												>
+											<span class="text-[10px] tracking-wide text-muted-foreground uppercase"
+												>{request.startDate ? monthShort(request.startDate) : ''}</span
+											>
+										</div>
+										<div class="min-w-0 flex-1">
+											<p class="truncate font-medium">{request.productionName}</p>
+											<p class="truncate text-xs text-muted-foreground">
+												{request.requesterOrg}
 												&middot;
-												{plural(group.allItems.length, ['# asset', '# assets'])}
+												{formatPeriod(request.startDate, request.endDate)}
 											</p>
 										</div>
-										<div class="flex shrink-0 gap-2">
-											<Button
-												variant="outline"
-												size="sm"
-												onclick={() => handleDeclineAll(group.allItems)}>Decline all</Button
-											>
-											<Button size="sm" onclick={() => handleApproveAll(group.allItems)}
-												>Approve all</Button
-											>
-										</div>
-									</Card.Header>
-									<Card.Content class="pt-0">
-										<div class="divide-y">
-											{#each group.productGroups as pg (pg.productId)}
-												<div class="flex items-center justify-between py-2.5">
-													<span class="text-sm">
-														{#if pg.items.length > 1}
-															<span class="font-medium text-muted-foreground"
-																>{pg.items.length}×</span
-															>
-														{/if}
-														{pg.productName}
-													</span>
-													<div class="flex items-center gap-1.5">
-														<Button
-															variant="ghost"
-															size="sm"
-															onclick={() => handleDeclineAll(pg.items)}
-															>Decline{pg.items.length > 1 ? ' all' : ''}</Button
-														>
-														<Button
-															variant="outline"
-															size="sm"
-															onclick={() => handleApproveAll(pg.items)}
-															>Approve{pg.items.length > 1 ? ' all' : ''}</Button
-														>
-														{#if pg.items.length > 1}
-															<DropdownMenu.Root>
-																<DropdownMenu.Trigger>
-																	<button
-																		type="button"
-																		class="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-																		aria-label="Partial actions"
-																	>
-																		<EllipsisVertical aria-hidden="true" class="size-4" />
-																	</button>
-																</DropdownMenu.Trigger>
-																<DropdownMenu.Portal>
-																	<DropdownMenu.Content
-																		align="end"
-																		sideOffset={4}
-																		class="z-50 min-w-[160px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
-																	>
-																		<DropdownMenu.Item
-																			onSelect={() => openModal(pg, 'approve')}
-																			class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
-																			>Approve some…</DropdownMenu.Item
-																		>
-																		<DropdownMenu.Item
-																			onSelect={() => openModal(pg, 'decline')}
-																			class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm text-destructive transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
-																			>Decline some…</DropdownMenu.Item
-																		>
-																	</DropdownMenu.Content>
-																</DropdownMenu.Portal>
-															</DropdownMenu.Root>
-														{/if}
-													</div>
-												</div>
-											{/each}
-										</div>
-									</Card.Content>
-								</Card.Root>
-							{/each}
-						</div>
+										<span class="shrink-0 text-xs text-muted-foreground">
+											{plural(request.unitCount, ['# device', '# devices'])}
+										</span>
+										<ChevronRight
+											aria-hidden="true"
+											class="size-4 shrink-0 text-muted-foreground"
+										/>
+									</button>
+								{/each}
+							</div>
+						</Card.Root>
 					</section>
 				{/if}
 

@@ -190,9 +190,9 @@ msgstr "Crew"
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
-#: src/routes/+page.svelte
 #: src/routes/admin/connectors/+page.svelte
 #: src/routes/admin/users/+page.svelte
+#: src/routes/approval-request-modal.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -329,28 +329,28 @@ msgstr "Remove"
 msgid "Manufacturer"
 msgstr "Manufacturer"
 
-#: src/routes/+page.svelte
-#: src/routes/+page.svelte
+#: src/routes/approval-request-modal.svelte
+#: src/routes/approval-request-modal.svelte
+#: src/routes/approval-request-modal.svelte
 msgid "Approve"
 msgstr "Approve"
 
-#: src/routes/+page.svelte
-#: src/routes/+page.svelte
+#: src/routes/approval-request-modal.svelte
+#: src/routes/approval-request-modal.svelte
+#: src/routes/approval-request-modal.svelte
 msgid "Decline"
 msgstr "Decline"
 
 #~ msgid "{0} some {1}"
 #~ msgstr "{0} some {1}"
 
-#. 0: m.pg.items.length; 1: m.action
-#: src/routes/+page.svelte
-msgid "How many of the {0} units do you want to {1}?"
-msgstr "How many of the {0} units do you want to {1}?"
+#~ msgid "How many of the {0} units do you want to {1}?"
+#~ msgstr "How many of the {0} units do you want to {1}?"
 
 #. 0: shownMax
-#. 0: m.pg.items.length
+#. 0: p.units.length
 #: src/lib/components/ui/count-stepper/count-stepper.svelte
-#: src/routes/+page.svelte
+#: src/routes/approval-request-modal.svelte
 msgid "of {0}"
 msgstr "of {0}"
 
@@ -390,33 +390,29 @@ msgstr "Welcome back, {0}."
 #~ msgid "Requested by <0/> · {0} {1}"
 #~ msgstr "Requested by <0/> · {0} {1}"
 
-#: src/routes/+page.svelte
+#: src/routes/approval-request-modal.svelte
 msgid "Decline all"
 msgstr "Decline all"
 
-#: src/routes/+page.svelte
+#: src/routes/approval-request-modal.svelte
 msgid "Approve all"
 msgstr "Approve all"
 
-#. 0: pg.items.length > 1 ? ' all' \\: ''
-#: src/routes/+page.svelte
-msgid "Decline{0}"
-msgstr "Decline{0}"
+#~ msgid "Decline{0}"
+#~ msgstr "Decline{0}"
 
-#. 0: pg.items.length > 1 ? ' all' \\: ''
-#: src/routes/+page.svelte
-msgid "Approve{0}"
-msgstr "Approve{0}"
+#~ msgid "Approve{0}"
+#~ msgstr "Approve{0}"
 
-#: src/routes/+page.svelte
+#: src/routes/approval-request-modal.svelte
 msgid "Partial actions"
 msgstr "Partial actions"
 
-#: src/routes/+page.svelte
+#: src/routes/approval-request-modal.svelte
 msgid "Approve some…"
 msgstr "Approve some…"
 
-#: src/routes/+page.svelte
+#: src/routes/approval-request-modal.svelte
 msgid "Decline some…"
 msgstr "Decline some…"
 
@@ -1040,6 +1036,7 @@ msgstr "Asset removed from bundle"
 #: src/lib/components/ui/invitations/invitation-link.svelte
 #: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
 #: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
+#: src/routes/approval-request-modal.svelte
 #: src/routes/share/[id]/[signature]/+page.svelte
 msgid "Close"
 msgstr "Close"
@@ -2345,13 +2342,13 @@ msgstr "<0/> New Production"
 #~ msgid "<0/> Inventory"
 #~ msgstr "<0/> Inventory"
 
-#: src/routes/+page.svelte
+#: src/routes/approval-request-modal.svelte
 msgid "# asset approved."
 msgid_plural "# assets approved."
 msgstr[0] "# asset approved."
 msgstr[1] "# assets approved."
 
-#: src/routes/+page.svelte
+#: src/routes/approval-request-modal.svelte
 msgid "# asset declined."
 msgid_plural "# assets declined."
 msgstr[0] "# asset declined."
@@ -2368,16 +2365,13 @@ msgstr[1] "# assets declined."
 #~ msgstr[1] "Requests need your attention"
 
 #: src/routes/+page.svelte
-#: src/routes/+page.svelte
 msgid "# asset"
 msgid_plural "# assets"
 msgstr[0] "# asset"
 msgstr[1] "# assets"
 
-#. 0: plural(group.allItems.length, ['# asset', '# assets'])
-#: src/routes/+page.svelte
-msgid "Requested by <0/> · {0}"
-msgstr "Requested by <0/> · {0}"
+#~ msgid "Requested by <0/> · {0}"
+#~ msgstr "Requested by <0/> · {0}"
 
 #: src/routes/orgs/+page.svelte
 msgid "# member"
@@ -6299,6 +6293,7 @@ msgstr "Pending approval"
 
 #: src/lib/components/ui/production-hover-card/production-hover-card.svelte
 #: src/lib/components/ui/production-hover-card/production-hover-card.svelte
+#: src/routes/approval-request-modal.svelte
 msgid "# day"
 msgid_plural "# days"
 msgstr[0] "# day"
@@ -8975,9 +8970,8 @@ msgstr "All clear."
 msgid "Nothing needs your attention right now."
 msgstr "Nothing needs your attention right now."
 
-#: src/routes/+page.svelte
-msgid "<0/> Action Required"
-msgstr "<0/> Action Required"
+#~ msgid "<0/> Action Required"
+#~ msgstr "<0/> Action Required"
 
 #: src/routes/+page.svelte
 #: src/routes/+page.svelte
@@ -10847,6 +10841,7 @@ msgstr "Not on this list: {0}"
 msgid "Case {0} · "
 msgstr "Case {0} · "
 
+#: src/routes/approval-request-modal.svelte
 #: src/routes/share/[id]/[signature]/+page.svelte
 #: src/routes/share/[id]/[signature]/+page.svelte
 msgid "Individual devices"
@@ -10892,6 +10887,7 @@ msgstr "<0/> Pack & check"
 msgid "The camera could not be started. Allow camera access for this page, or tick the items by hand."
 msgstr "The camera could not be started. Allow camera access for this page, or tick the items by hand."
 
+#: src/routes/approval-request-modal.svelte
 #: src/routes/share/[id]/[signature]/+page.svelte
 msgid "Cases"
 msgstr "Cases"
@@ -11142,3 +11138,42 @@ msgstr "The camera could not be started. Allow camera access for this site, or t
 #: src/lib/components/ui/camera-scan/camera-scan-button.svelte
 msgid "Hold the label inside the frame."
 msgstr "Hold the label inside the frame."
+
+#: src/routes/+page.svelte
+#: src/routes/approval-request-modal.svelte
+msgid "# device"
+msgid_plural "# devices"
+msgstr[0] "# device"
+msgstr[1] "# devices"
+
+#: src/routes/+page.svelte
+msgid "<0/> Requests to approve"
+msgstr "<0/> Requests to approve"
+
+#: src/routes/approval-request-modal.svelte
+msgid "Requested by <0/>"
+msgstr "Requested by <0/>"
+
+#: src/routes/approval-request-modal.svelte
+msgid "No date yet"
+msgstr "No date yet"
+
+#: src/routes/approval-request-modal.svelte
+msgid "Period"
+msgstr "Period"
+
+#: src/routes/approval-request-modal.svelte
+msgid "Requested"
+msgstr "Requested"
+
+#: src/routes/approval-request-modal.svelte
+msgid "Open production →"
+msgstr "Open production →"
+
+#: src/routes/approval-request-modal.svelte
+msgid "Approve some units"
+msgstr "Approve some units"
+
+#: src/routes/approval-request-modal.svelte
+msgid "Decline some units"
+msgstr "Decline some units"

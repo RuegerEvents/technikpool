@@ -1086,8 +1086,17 @@ export const getPendingApprovals = query(v.string(), async (organizationId: stri
 		},
 		include: {
 			asset: { include: { product: true } },
-			production: { include: { organization: true } }
-		}
+			production: { include: { organization: true } },
+			sourceBundle: {
+				select: {
+					id: true,
+					tag: true,
+					imagePath: true,
+					template: { select: { name: true, caption: true } }
+				}
+			}
+		},
+		orderBy: { production: { startDate: 'asc' } }
 	});
 	// A request names the production it is for — deciding to lend means knowing
 	// what to — but the lender usually belongs to a different org and may not
@@ -1100,12 +1109,16 @@ export const getPendingApprovals = query(v.string(), async (organizationId: stri
 
 // The other side of `getPendingApprovals`: requests our productions made that
 // another org has not answered yet, one row per production and lender.
+//
+// A lender the user answers for is left out: that request is already on their
+// list to approve, and someone in both orgs would otherwise see it twice.
 export const getAwaitingApprovals = query(async () => {
 	const user = await requireAuth();
 	const items = await prisma.productionItem.findMany({
 		where: {
 			status: 'PENDING',
-			production: { ...(await productionReadWhere(user.id)), cancelledAt: null }
+			production: { ...(await productionReadWhere(user.id)), cancelledAt: null },
+			asset: { organizationId: { notIn: await managedOrgIds(user.id) } }
 		},
 		select: {
 			productionId: true,
