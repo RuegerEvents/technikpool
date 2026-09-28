@@ -1,5 +1,25 @@
 [
 	{
+		"version": "0.25.0",
+		"date": "2026-09-29",
+		"en": [
+			"Lent equipment changes hands in the app: the lending organization checks its units out to the other production itself, the production confirms receiving them and later reports them sent back, and the lender scans them back onto a shelf. The production page marks lent units as \"Receipt open\" or \"Return reported\", and the dashboard lists handovers waiting on you.",
+			"Check a production's equipment against its list, as often as you like and with several people at once: scan or tick what is there, section by section — your own units by location, lent ones by lender. Nothing changes on the devices; finishing notes the check in each unit's history. From \"Check\" on the production page or the Scan page.",
+			"Checkout is now called Scan, and picking a production there shows when each one runs — running, upcoming, past — with a search.",
+			"Requests to approve are one line per production and lender on the dashboard, and the equipment opens in a dialog.",
+			"\"Add devices\" on a product's or a unit's page opens the registration form prefilled, and the form takes a pasted or scanned list of tags, one device per line.",
+			"A manufacturer can have only one product of a given name, ignoring case and spaces."
+		],
+		"de": [
+			"Geliehenes Equipment wechselt in der App die Hände: Die verleihende Organisation gibt ihre Geräte selbst an die fremde Produktion aus, die Produktion bestätigt den Empfang und meldet später die Rückgabe, und der Verleiher scannt sie wieder ins Lager. Auf der Produktion stehen geliehene Geräte als „Empfang offen“ oder „Rückgabe gemeldet“, und das Dashboard zeigt Übergaben, die auf dich warten.",
+			"Das Equipment einer Produktion gegen ihre Liste prüfen, so oft du willst und mit mehreren Leuten gleichzeitig: scannen oder abhaken, Abschnitt für Abschnitt — eigene Geräte nach Lagerort, geliehene nach Verleiher. An den Geräten ändert sich nichts; beim Abschließen wird die Prüfung in der Historie jedes Geräts vermerkt. Über „Prüfen“ auf der Produktion oder auf der Scannen-Seite.",
+			"„Ausgabe“ heißt jetzt „Scannen“, und bei der Produktionsauswahl steht dort, wann jede läuft — laufend, demnächst, vergangen — mit Suche.",
+			"Anfragen zum Genehmigen stehen auf dem Dashboard als eine Zeile pro Produktion und Verleiher, das Equipment öffnet sich in einem Dialog.",
+			"„Geräte hinzufügen“ auf der Seite eines Produkts oder Geräts öffnet das Anlegen vorausgefüllt, und das Formular nimmt eine eingefügte oder gescannte Liste von Etiketten, ein Gerät pro Zeile.",
+			"Ein Hersteller kann nur ein Produkt mit demselben Namen haben, unabhängig von Groß- und Kleinschreibung und Leerzeichen."
+		]
+	},
+	{
 		"version": "0.24.2",
 		"date": "2026-09-28",
 		"en": [

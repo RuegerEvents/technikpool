@@ -1,5 +1,19 @@
 [
   {
+    "version": "1.7.0",
+    "date": "2026-09-29",
+    "en": [
+      "Check a production's equipment against its list: tap a production under Scans › Production and choose Check. Scan or tick what is there, section by section, together with others checking at the same time; nothing changes on the devices.",
+      "Lent equipment: the lending organization checks its units out to the other production, and from a check the production confirms receiving them and later reports them sent back.",
+      "Tapping a production asks whether to check out to it or check it."
+    ],
+    "de": [
+      "Das Equipment einer Produktion gegen ihre Liste prüfen: unter Scans › Produktion eine Produktion antippen und Prüfen wählen. Scannen oder abhaken, was da ist, Abschnitt für Abschnitt, zusammen mit anderen, die gleichzeitig prüfen; an den Geräten ändert sich nichts.",
+      "Geliehenes Equipment: Die verleihende Organisation gibt ihre Geräte an die fremde Produktion aus, und aus der Prüfung heraus bestätigt die Produktion den Empfang und meldet später die Rückgabe.",
+      "Ein Tipp auf eine Produktion fragt, ob du darauf ausgeben oder sie prüfen willst."
+    ]
+  },
+  {
     "version": "1.6.0",
     "date": "2026-09-28",
     "en": [
