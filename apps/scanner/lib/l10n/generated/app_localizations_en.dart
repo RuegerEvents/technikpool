@@ -750,4 +750,94 @@ class SEn extends S {
   @override
   String get errorStocktakeActionApplied =>
       'This correction has already been applied.';
+
+  @override
+  String get errorNotACase =>
+      'This unit is neither in a kit nor has accessories, so there is no case to check.';
+
+  @override
+  String get actionCaseChecked => 'Case checked';
+
+  @override
+  String get caseCheck => 'Check a case';
+
+  @override
+  String get caseCheckScanCase =>
+      'Scan the case: the kit\'s tag, or any unit in it.';
+
+  @override
+  String caseCheckProgress(int found, int expected) {
+    return '$found of $expected there';
+  }
+
+  @override
+  String caseCheckOutTo(String name) {
+    return 'Checked out to $name';
+  }
+
+  @override
+  String caseCheckLast(String date, String user, int found, int expected) {
+    return 'Last checked $date by $user: $found of $expected there';
+  }
+
+  @override
+  String get caseCheckNever => 'Never checked before';
+
+  @override
+  String get caseCheckShortOfType => 'Other cases of this kit hold more:';
+
+  @override
+  String caseCheckAwayOn(String name) {
+    return 'Out on $name';
+  }
+
+  @override
+  String get caseCheckForeign => 'Not part of this case';
+
+  @override
+  String get caseCheckUnknownCode => 'Unknown code';
+
+  @override
+  String get caseCheckItself => 'That is the case itself';
+
+  @override
+  String get caseCheckAlready => 'Already ticked';
+
+  @override
+  String get caseCheckFound => 'Found';
+
+  @override
+  String get caseCheckNoTag => 'No tag: tick by hand';
+
+  @override
+  String caseCheckMissingCount(int count) {
+    return '$count missing';
+  }
+
+  @override
+  String caseCheckAwayCount(int count) {
+    return '$count out on other jobs';
+  }
+
+  @override
+  String get caseCheckComplete => 'Everything is there';
+
+  @override
+  String get caseCheckFinish => 'Finish and save';
+
+  @override
+  String get caseCheckSaved =>
+      'Saved to the history of every unit in the case.';
+
+  @override
+  String get caseCheckNext => 'Next case';
+
+  @override
+  String get caseCheckNotSaved =>
+      'You can check this case, but saving it needs the Member role.';
+
+  @override
+  String caseCheckDemoHint(String tag) {
+    return 'Try the cable case\'s tag $tag';
+  }
 }

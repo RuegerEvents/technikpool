@@ -754,4 +754,95 @@ class SDe extends S {
   @override
   String get errorStocktakeActionApplied =>
       'Diese Korrektur wurde bereits angewendet.';
+
+  @override
+  String get errorNotACase =>
+      'Dieses Gerät ist weder in einem Bundle noch hat es Zubehör – hier gibt es keine Kiste zu checken.';
+
+  @override
+  String get actionCaseChecked => 'Kiste gecheckt';
+
+  @override
+  String get caseCheck => 'Kiste checken';
+
+  @override
+  String get caseCheckScanCase =>
+      'Kiste scannen: das Etikett des Bundles oder eines Geräts darin.';
+
+  @override
+  String caseCheckProgress(int found, int expected) {
+    return '$found von $expected da';
+  }
+
+  @override
+  String caseCheckOutTo(String name) {
+    return 'Ausgecheckt an $name';
+  }
+
+  @override
+  String caseCheckLast(String date, String user, int found, int expected) {
+    return 'Zuletzt gecheckt $date von $user: $found von $expected da';
+  }
+
+  @override
+  String get caseCheckNever => 'Noch nie gecheckt';
+
+  @override
+  String get caseCheckShortOfType =>
+      'Andere Kisten dieses Bundle-Typs enthalten mehr:';
+
+  @override
+  String caseCheckAwayOn(String name) {
+    return 'Unterwegs auf $name';
+  }
+
+  @override
+  String get caseCheckForeign => 'Gehört nicht in diese Kiste';
+
+  @override
+  String get caseCheckUnknownCode => 'Unbekannter Code';
+
+  @override
+  String get caseCheckItself => 'Das ist die Kiste selbst';
+
+  @override
+  String get caseCheckAlready => 'Schon abgehakt';
+
+  @override
+  String get caseCheckFound => 'Gefunden';
+
+  @override
+  String get caseCheckNoTag => 'Kein Etikett: von Hand abhaken';
+
+  @override
+  String caseCheckMissingCount(int count) {
+    return '$count fehlen';
+  }
+
+  @override
+  String caseCheckAwayCount(int count) {
+    return '$count auf anderen Jobs unterwegs';
+  }
+
+  @override
+  String get caseCheckComplete => 'Alles da';
+
+  @override
+  String get caseCheckFinish => 'Abschließen und speichern';
+
+  @override
+  String get caseCheckSaved =>
+      'In der Historie jedes Geräts der Kiste gespeichert.';
+
+  @override
+  String get caseCheckNext => 'Nächste Kiste';
+
+  @override
+  String get caseCheckNotSaved =>
+      'Du kannst die Kiste checken, zum Speichern brauchst du aber die Rolle Mitglied.';
+
+  @override
+  String caseCheckDemoHint(String tag) {
+    return 'Etikett $tag der Kabelkiste probieren';
+  }
 }

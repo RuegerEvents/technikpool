@@ -408,4 +408,58 @@ void main() {
       );
     });
   });
+
+  group('case check', () {
+    Matcher failsWith(String code) => throwsA(
+      isA<Object>().having(
+        (e) => (unwrapError(e) as ApiException).code,
+        'code',
+        code,
+      ),
+    );
+
+    test('the kit tag opens the kit with nothing ticked', () async {
+      final check = await api.caseCheck.getCaseCheckByCode(
+        code: DemoData.cableKit.tag,
+      );
+      expect(check.kind, CaseKind.bundle);
+      expect(check.tag, DemoData.cableKit.tag);
+      expect(check.items, hasLength(3));
+      expect(check.scannedAssetId, isNull);
+      expect(check.lastCheck, isNull);
+    });
+
+    test('a unit in the kit opens the kit and counts as found', () async {
+      final check = await api.caseCheck.getCaseCheckByCode(code: '40000014');
+      expect(check.id, DemoData.cableKit.id);
+      expect(check.scannedAssetId, 'asset_demo_40000014');
+    });
+
+    test('a unit in no case is refused', () {
+      expect(
+        api.caseCheck.getCaseCheckByCode(code: '40000001'),
+        failsWith('not_a_case'),
+      );
+    });
+
+    test('recording writes the history and the last check', () async {
+      final result = await api.caseCheck.recordCaseCheck(
+        body: CaseCheckRequest(
+          kind: CaseKind.bundle,
+          id: DemoData.cableKit.id,
+          foundAssetIds: ['asset_demo_40000013', 'asset_demo_40000015'],
+        ),
+      );
+      expect(result.found, 2);
+      expect(result.missing, 1);
+
+      final detail = await api.inventory.getAssetByTag(tag: '40000014');
+      expect(detail.history.first.action, 'CASE_CHECKED');
+      final again = await api.caseCheck.getCaseCheckByCode(
+        code: DemoData.cableKit.tag,
+      );
+      expect(again.lastCheck?.found, 2);
+      expect(again.lastCheck?.expected, 3);
+    });
+  });
 }

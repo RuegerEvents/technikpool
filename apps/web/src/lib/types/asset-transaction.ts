@@ -107,6 +107,18 @@ export type StocktakeCountedData = {
 	locationName: string | null;
 };
 
+/** Checked as part of a case — a kit, or a unit with its accessories. One entry per unit. */
+export type CaseCheckedData = {
+	type: 'CASE_CHECKED';
+	caseKind: 'bundle' | 'asset';
+	caseId: string;
+	caseName: string;
+	result: 'found' | 'missing' | 'away';
+	/** Of the whole case, so one entry tells how the check went. */
+	found: number;
+	expected: number;
+};
+
 export type TransactionData =
 	| CreatedData
 	| UpdatedData
@@ -123,4 +135,5 @@ export type TransactionData =
 	| CredentialsSetData
 	| CredentialsRemovedData
 	| CredentialsRevealedData
-	| StocktakeCountedData;
+	| StocktakeCountedData
+	| CaseCheckedData;

@@ -272,7 +272,7 @@ class DemoData {
       2,
       AssetStatus.available,
       'K2-9001',
-      buehnenwerk,
+      owner: buehnenwerk,
     ),
     _asset(
       '40000012',
@@ -280,22 +280,31 @@ class DemoData {
       2,
       AssetStatus.available,
       'CL5-9002',
-      buehnenwerk,
+      owner: buehnenwerk,
     ),
-    // Cables carry no serial number — nobody stamps one on a 10 m XLR.
-    _asset('40000013', _xlrCable, 0, AssetStatus.available, null),
-    _asset('40000014', _xlrCable, 0, AssetStatus.available, null),
-    _asset('40000015', _loom, 0, AssetStatus.available, null),
+    // Cables carry no serial number — nobody stamps one on a 10 m XLR. They
+    // travel in one case, so a case check has something to open.
+    _asset('40000013', _xlrCable, 0, AssetStatus.available, null, kit: true),
+    _asset('40000014', _xlrCable, 0, AssetStatus.available, null, kit: true),
+    _asset('40000015', _loom, 0, AssetStatus.available, null, kit: true),
   ];
+
+  /// The one kit: the cables above, in a case with a tag of its own.
+  static const cableKit = (
+    id: 'bundle_demo_cables',
+    tag: 'K-0001',
+    name: 'Kabelkiste Ton',
+  );
 
   static Asset _asset(
     String tag,
     Product product,
     int locationIndex,
     AssetStatus status,
-    String? serial, [
+    String? serial, {
     Organization owner = nordlicht,
-  ]) => Asset(
+    bool kit = false,
+  }) => Asset(
     id: 'asset_demo_$tag',
     assetTag: tag,
     serialNumber: serial,
@@ -305,5 +314,6 @@ class DemoData {
     product: product,
     location: locations[locationIndex],
     organization: owner,
+    bundleId: kit ? cableKit.id : null,
   );
 }

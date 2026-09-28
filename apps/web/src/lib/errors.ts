@@ -192,6 +192,8 @@ export type AppErrorCode =
 	| 'stocktake_product_not_counted'
 	| 'stocktake_count_changed'
 	| 'stocktake_invalid_request'
+	// Case checks
+	| 'case_not_a_case'
 	// Sticker sheets (their own endpoint, not a remote function)
 	| 'sticker_config_invalid'
 	// Org logo upload (its own endpoint: a command takes no file)

@@ -544,6 +544,9 @@
 					>
 						Print Inventory List
 					</Button>
+					<Button variant="outline" href={`${resolve('/case-check')}?bundle=${bundleId}`}
+						>Check case</Button
+					>
 					<Button
 						icon="back"
 						variant="outline"

@@ -386,6 +386,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'Your count here was changed on another device in the meantime. It shows the current number now — count again from there.';
 		case 'stocktake_invalid_request':
 			return 'That location, count or selection is not valid for this stocktake.';
+		case 'case_not_a_case':
+			return `${p0} is neither in a kit nor has accessories, so there is no case to check.`;
 		default: {
 			// Exhaustiveness guard — a new code without a message fails to compile here.
 			const unhandled: never = code;

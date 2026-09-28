@@ -15,6 +15,7 @@ import '../scan/scan_tones.dart';
 import '../demo/demo_data.dart';
 import '../state/providers.dart';
 import '../widgets/category_pill.dart';
+import 'case_check_screen.dart';
 
 /// Scan a tag outside a session to see what the thing is and where it's been —
 /// without booking it anywhere.
@@ -32,6 +33,9 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
   String? _error;
   bool _busy = false;
 
+  /// While a case check opened from here is in front, its scans are its own.
+  bool _caseCheckOpen = false;
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +43,7 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
       // Every tab stays mounted inside the IndexedStack, so this hears scans
       // meant for a session too. Only react when it is the tab in front.
       if (!mounted || ref.read(activeTabProvider) != HomeTab.lookup) return;
+      if (_caseCheckOpen) return;
       unawaited(_lookup(tag.trim()));
     });
   }
@@ -86,6 +91,14 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  Future<void> _checkCase(String code) async {
+    _caseCheckOpen = true;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(builder: (_) => CaseCheckScreen(initialCode: code)),
+    );
+    _caseCheckOpen = false;
   }
 
   @override
@@ -201,6 +214,18 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
         ],
         if (asset.currentProduction != null)
           _row(l10n.checkedOutTo, asset.currentProduction!.name),
+        // A kit member or an accessory belongs to a case that can be checked.
+        // A unit that *has* accessories can be too, but the detail doesn't
+        // say so; scanning it on the case-check screen opens it all the same.
+        if ((asset.bundleId != null || asset.parentAssetId != null) &&
+            asset.assetTag != null) ...[
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => _checkCase(asset.assetTag!),
+            icon: const Icon(Icons.inventory_2_outlined),
+            label: Text(l10n.caseCheck),
+          ),
+        ],
         // The product's notes — what a label has no room for.
         if (asset.product.details case final details?
             when details.isNotEmpty) ...[

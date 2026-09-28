@@ -970,6 +970,11 @@
 				</Card.Description>
 			</Card.Header>
 			<Card.Content class="space-y-4">
+				{#if !asset.parent && asset.accessories.length > 0 && !retired}
+					<Button variant="outline" size="sm" href={`${resolve('/case-check')}?asset=${asset.id}`}
+						>Check that everything is there</Button
+					>
+				{/if}
 				{#if asset.parent}
 					<div class="flex items-center justify-between gap-4 rounded-md border p-3">
 						<div class="text-sm">
@@ -1244,6 +1249,23 @@
 														at <span class="font-medium text-foreground">{tx.locationName}</span>
 													</span>
 												{/if}
+											{:else if tx?.type === 'CASE_CHECKED'}
+												{#if tx.result === 'found'}
+													Found in case check
+												{:else if tx.result === 'away'}
+													Out on a production during case check
+												{:else}
+													Missing in case check
+												{/if}
+												<a
+													href={tx.caseKind === 'bundle'
+														? resolve(`/assets/bundles/${tx.caseId}`)
+														: resolve(`/assets/${tx.caseId}`)}
+													class="text-foreground underline underline-offset-2">{tx.caseName}</a
+												>
+												<span class="font-normal text-muted-foreground">
+													({tx.found} of {tx.expected} there)
+												</span>
 											{:else if tx?.type === 'ACCESSORY_DETACHED'}
 												Detached from
 												<a

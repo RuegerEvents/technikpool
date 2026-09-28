@@ -491,6 +491,52 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/case-checks/by-code/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Open the case a scanned code belongs to
+         * @description A bundle tag opens its kit. A unit's tag or unique serial number opens
+         *     the kit the unit is in; failing that, the unit it is an accessory of,
+         *     or the unit itself when it has accessories. `scannedAssetId` is the
+         *     unit the code was on, which the client counts as found. A unit that
+         *     is none of these answers `409 not_a_case`.
+         */
+        get: operations["getCaseCheckByCode"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/case-checks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record a finished case check
+         * @description Judges the case as it is now against `foundAssetIds` — ids not in the
+         *     case are ignored — and writes the outcome into every unit's history.
+         *     Needs MEMBER or above of the org that owns the case (`canRecord`).
+         */
+        post: operations["recordCaseCheck"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1091,6 +1137,73 @@ export interface components {
              */
             previous?: number;
         };
+        /**
+         * @description A kit, or one unit with its accessories.
+         * @enum {string}
+         */
+        CaseKind: "bundle" | "asset";
+        CaseCheckItem: {
+            assetId: string;
+            assetTag: string | null;
+            serialNumber: string | null;
+            /** @description The unit's number within its org, shown as "#123". */
+            orgIndex: number;
+            /** @description Maker and product name. */
+            name: string;
+            caption: string | null;
+            /** @description The unit in this case it hangs off; listed right after it. */
+            accessoryOf: string | null;
+            /**
+             * @description The production this unit is checked out to when the rest of the
+             *     case is somewhere else — taken out for another job. Not finding it
+             *     counts as away, not missing.
+             */
+            awayOn: string | null;
+        };
+        CaseCheck: {
+            kind: components["schemas"]["CaseKind"];
+            /** @description The bundle's id, or the unit's. */
+            id: string;
+            /** @description The bundle's own tag. Scanning it inside the check ticks nothing. */
+            tag: string | null;
+            name: string;
+            /** @description The production the case as a whole is out on, if any. */
+            checkedOutTo: string | null;
+            /** @description What the case should hold, each unit followed by its accessories. */
+            items: components["schemas"]["CaseCheckItem"][];
+            /**
+             * @description Kits only: products other cases of the same kit type hold more of.
+             *     A unit taken out of the kit for good is no longer on the list, so
+             *     this is the only place it shows.
+             */
+            shortOfType: {
+                name: string;
+                missing: number;
+            }[];
+            lastCheck: null | components["schemas"]["CaseCheckLast"];
+            /** @description Whether the caller may record the check. Anyone who sees the units may run one. */
+            canRecord: boolean;
+            /** @description The unit the code was on, to count as found. Null for a bundle tag. */
+            scannedAssetId: string | null;
+        };
+        CaseCheckLast: {
+            /** Format: date-time */
+            at: string;
+            userName: string;
+            found: number;
+            expected: number;
+        };
+        CaseCheckRequest: {
+            kind: components["schemas"]["CaseKind"];
+            id: string;
+            foundAssetIds: string[];
+        };
+        CaseCheckResult: {
+            found: number;
+            missing: number;
+            /** @description Not found, but checked out to another production. */
+            away: number;
+        };
     };
     responses: {
         /** @description The request was malformed. */
@@ -1141,6 +1254,9 @@ export interface components {
          *     (`stocktake_product_not_counted`), and a count sent with `previous` is
          *     refused when the caller's stored count is no longer that
          *     (`stocktake_count_changed`) — reload and count again.
+         *
+         *     Case checks: a unit that is neither in a kit nor has accessories, or
+         *     an accessory, is no case to check (`not_a_case`).
          */
         Conflict: {
             headers: {
@@ -1851,6 +1967,60 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    getCaseCheckByCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The case and what it should hold */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseCheck"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    recordCaseCheck: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CaseCheckRequest"];
+            };
+        };
+        responses: {
+            /** @description How the check came out */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseCheckResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
         };
     };

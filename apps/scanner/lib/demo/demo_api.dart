@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 
 import '../api/client.dart';
 import '../api/generated/export.dart';
+import '../product_label.dart';
 import 'demo_data.dart';
 
 /// The base URL that means "this install is a demo".
@@ -97,6 +98,12 @@ class DemoBackend {
     }
     if (path == '/api/v1/stocktakes' || path.startsWith('/api/v1/stocktakes/')) {
       return _stocktakeRoute(options, method, path);
+    }
+    if (method == 'GET' && path.startsWith('/api/v1/case-checks/by-code/')) {
+      return _openCase(options, Uri.decodeComponent(path.split('/').last));
+    }
+    if (method == 'POST' && path == '/api/v1/case-checks') {
+      return _recordCase(options);
     }
 
     return _error(options, 404, 'not_found', 'Not available in the demo');
@@ -319,6 +326,141 @@ class DemoBackend {
         userName: DemoData.user.name,
         productionName: action == 'CHECKED_OUT' ? targetName : null,
       ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Case checks — mirrors services/case-check.ts on the server.
+
+  final _lastCaseCheck = <String, CaseCheckLast>{};
+
+  Response<dynamic> _openCase(RequestOptions options, String code) {
+    final kit = DemoData.cableKit;
+    if (code.trim() == kit.tag) {
+      return _ok(options, _case(CaseKind.bundle, kit.id, null));
+    }
+    final match = _resolve(code);
+    if (match.ambiguous) {
+      return _error(
+        options,
+        409,
+        'serial_ambiguous',
+        'Serial number "$code" is on more than one unit — scan the asset tag instead',
+      );
+    }
+    final asset = match.asset;
+    if (asset == null) {
+      return _error(options, 404, 'asset_not_found', 'Tag "$code" not found');
+    }
+    if (asset.bundleId case final bundleId?) {
+      return _ok(options, _case(CaseKind.bundle, bundleId, asset.id));
+    }
+    if (asset.parentAssetId case final parentId?) {
+      return _ok(options, _case(CaseKind.asset, parentId, asset.id));
+    }
+    if (_assets.any((a) => a.parentAssetId == asset.id)) {
+      return _ok(options, _case(CaseKind.asset, asset.id, asset.id));
+    }
+    return _error(
+      options,
+      409,
+      'not_a_case',
+      '${asset.product.name} is neither a kit nor has accessories',
+    );
+  }
+
+  List<Asset> _caseUnits(CaseKind kind, String id) => kind == CaseKind.bundle
+      ? _assets.where((a) => a.bundleId == id).toList()
+      : [
+          ..._assets.where((a) => a.id == id),
+          ..._assets.where((a) => a.parentAssetId == id),
+        ];
+
+  /// Where most of the case is — home counting as a place — and so which of
+  /// its units are away on another job.
+  String? _caseProductionId(List<Asset> units) {
+    final tally = <String?, int>{};
+    for (final unit in units) {
+      final id = _checkedOutTo[unit.id]?.id;
+      tally[id] = (tally[id] ?? 0) + 1;
+    }
+    if (tally.isEmpty) return null;
+    return (tally.entries.toList()..sort((a, b) => b.value.compareTo(a.value))).first.key;
+  }
+
+  CaseCheck _case(CaseKind kind, String id, String? scannedAssetId) {
+    final units = _caseUnits(kind, id);
+    final home = _caseProductionId(units);
+    final inCase = {for (final u in units) u.id};
+    final name = kind == CaseKind.bundle
+        ? '${DemoData.cableKit.name} (${DemoData.cableKit.tag})'
+        : units.first.product.name;
+    return CaseCheck(
+      kind: kind,
+      id: id,
+      tag: kind == CaseKind.bundle ? DemoData.cableKit.tag : null,
+      name: name,
+      checkedOutTo: home == null
+          ? null
+          : DemoData.productions.firstWhere((p) => p.id == home).name,
+      items: [
+        for (final unit in units)
+          CaseCheckItem(
+            assetId: unit.id,
+            assetTag: unit.assetTag,
+            serialNumber: unit.serialNumber,
+            orgIndex: unit.orgIndex ?? 0,
+            name: productLabel(unit.product.manufacturerName, unit.product.name),
+            caption: unit.product.caption,
+            accessoryOf: inCase.contains(unit.parentAssetId) ? unit.parentAssetId : null,
+            awayOn: switch (_checkedOutTo[unit.id]) {
+              final p? when p.id != home => p.name,
+              _ => null,
+            },
+          ),
+      ],
+      shortOfType: const [],
+      lastCheck: _lastCaseCheck[id],
+      canRecord: true,
+      scannedAssetId: scannedAssetId,
+    );
+  }
+
+  Response<dynamic> _recordCase(RequestOptions options) {
+    // As in `_scan`: the body is the model's own `toJson` map, so `kind` may
+    // still be the enum rather than its string.
+    final body = options.data;
+    if (body is! Map) {
+      return _error(options, 400, 'invalid_request', 'kind, id and foundAssetIds are required');
+    }
+    final rawKind = body['kind'];
+    final kind = rawKind is CaseKind ? rawKind : CaseKind.fromJson('$rawKind');
+    final id = body['id'] as String;
+    final check = _case(kind, id, null);
+    final found = {...(body['foundAssetIds'] as List).cast<String>()};
+    var foundCount = 0, missing = 0, away = 0;
+    for (final item in check.items) {
+      if (found.contains(item.assetId)) {
+        foundCount++;
+      } else if (item.awayOn != null) {
+        away++;
+      } else {
+        missing++;
+      }
+    }
+    for (final item in check.items) {
+      final unit = _assets.firstWhere((a) => a.id == item.assetId);
+      _log(unit, 'CASE_CHECKED', check.name);
+    }
+    _lastCaseCheck[id] = CaseCheckLast(
+      at: DateTime.now(),
+      userName: DemoData.user.name ?? DemoData.user.email,
+      found: foundCount,
+      expected: check.items.length,
+    );
+    return _ok(
+      options,
+      CaseCheckResult(found: foundCount, missing: missing, away: away),
     );
   }
 

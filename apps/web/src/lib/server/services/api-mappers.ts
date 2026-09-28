@@ -13,6 +13,7 @@ import {
 	type StocktakeSummary
 } from '$lib/server/services/stocktake';
 import { userLabel } from '$lib/user-label.svelte';
+import type { CaseCheck } from '$lib/server/services/case-check';
 
 // Prisma payloads are deliberately not returned straight to clients: they carry
 // fields the API doesn't promise, and adding a column to the schema would
@@ -356,5 +357,34 @@ export function toStocktakeScanResult(
 		wasOutAt: result.wasOutAt,
 		confirm: result.confirm,
 		confirmGroup: result.confirmGroup
+	};
+}
+
+export function toCaseCheck(check: CaseCheck, scannedAssetId: string | null): Schemas['CaseCheck'] {
+	return {
+		kind: check.kind,
+		id: check.id,
+		tag: check.tag,
+		name: check.name,
+		checkedOutTo: check.checkedOutTo,
+		items: check.items.map((i) => ({
+			assetId: i.assetId,
+			assetTag: i.assetTag,
+			serialNumber: i.serialNumber,
+			orgIndex: i.orgIndex,
+			name: i.name,
+			caption: i.caption,
+			accessoryOf: i.accessoryOf,
+			awayOn: i.awayOn
+		})),
+		shortOfType: check.shortOfType.map((l) => ({ name: l.name, missing: l.missing })),
+		lastCheck: check.lastCheck && {
+			at: check.lastCheck.at.toISOString(),
+			userName: check.lastCheck.userName,
+			found: check.lastCheck.found,
+			expected: check.lastCheck.expected
+		},
+		canRecord: check.canRecord,
+		scannedAssetId
 	};
 }

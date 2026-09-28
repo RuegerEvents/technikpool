@@ -33,7 +33,10 @@
 				Count what is actually on the shelves — over several days and devices if need be.
 			</p>
 		</div>
-		<Button icon="add" href={resolve('/stocktakes/new')}>New stocktake</Button>
+		<div class="flex flex-wrap gap-2">
+			<Button variant="outline" href={resolve('/case-check')}>Check a case</Button>
+			<Button icon="add" href={resolve('/stocktakes/new')}>New stocktake</Button>
+		</div>
 	</div>
 
 	{#if !stocktakesQuery.ready}

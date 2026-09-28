@@ -225,8 +225,6 @@ msgstr "Crew"
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
-#: src/routes/productions/[id]/share-link-card.svelte
-#: src/routes/productions/[id]/share-link-card.svelte
 #: src/routes/productions/[id]/share-link-menu.svelte
 #: src/routes/productions/new/+page.svelte
 #: src/routes/profile/+page.svelte
@@ -3089,7 +3087,6 @@ msgstr "Wird kopiert…"
 #: src/lib/components/ui/invitations/invitation-link.svelte
 #: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
-#: src/routes/productions/[id]/share-link-card.svelte
 msgid "Copy"
 msgstr "Kopieren"
 
@@ -6251,7 +6248,6 @@ msgstr "Wird in der Kopfzeile des Bogens und unten auf jedem Aufkleber gedruckt.
 
 #: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
 #: src/lib/components/ui/invitations/invitation-link.svelte
-#: src/routes/productions/[id]/share-link-card.svelte
 msgid "Link copied"
 msgstr "Link kopiert"
 
@@ -7987,16 +7983,11 @@ msgid "Valid until {0}"
 msgstr "Gültig bis {0}"
 
 #: src/lib/components/ui/invitations/invitation-list.svelte
-#: src/routes/productions/[id]/share-link-card.svelte
-#: src/routes/productions/[id]/share-link-card.svelte
 #: src/routes/productions/[id]/share-link-menu.svelte
 msgid "New link"
 msgstr "Neuer Link"
 
 #: src/lib/components/ui/invitations/invitation-list.svelte
-#: src/routes/productions/[id]/share-link-card.svelte
-#: src/routes/productions/[id]/share-link-card.svelte
-#: src/routes/productions/[id]/share-link-card.svelte
 #: src/routes/productions/[id]/share-link-menu.svelte
 msgid "Withdraw"
 msgstr "Zurückziehen"
@@ -9600,7 +9591,9 @@ msgstr "Bereits gezählt von {0}"
 msgid "Unexpected: {0}"
 msgstr "Unerwartet: {0}"
 
+#. 0: item.name
 #. 0: name
+#: src/routes/case-check/+page.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Found: {0}"
 msgstr "Gefunden: {0}"
@@ -9726,6 +9719,7 @@ msgstr "Standort wählen…"
 msgid "I am counting at"
 msgstr "Ich zähle in"
 
+#: src/routes/case-check/+page.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Asset tag, bundle tag or serial number"
 msgstr "Asset-Tag, Bundle-Tag oder Seriennummer"
@@ -9828,6 +9822,7 @@ msgstr "Nichts passt zu diesen Filtern."
 msgid "Counted by {0}"
 msgstr "Gezählt von {0}"
 
+#: src/routes/case-check/+page.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
@@ -9930,6 +9925,7 @@ msgid "Not counted yet"
 msgstr "Noch nicht gezählt"
 
 #: src/lib/stocktake-labels.svelte.ts
+#: src/routes/case-check/+page.svelte
 #: src/routes/stocktakes/+page.svelte
 #: src/routes/stocktakes/[id]/print/+page.svelte
 msgid "Found"
@@ -10451,7 +10447,6 @@ msgstr "Zuletzt geändert am {0}"
 #: src/lib/components/ui/dpa-gate/dpa-gate.svelte
 #: src/lib/legal.svelte.ts
 #: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/dpa/print/+page.svelte
 msgid "Data processing agreement"
 msgstr "Auftragsverarbeitungsvertrag"
 
@@ -10499,7 +10494,6 @@ msgid "No data processing agreement is set up."
 msgstr "Es ist kein Auftragsverarbeitungsvertrag eingerichtet."
 
 #: src/routes/admin/legal/+page.svelte
-#: src/routes/orgs/[id]/dpa/print/+page.svelte
 msgid "Accepted by"
 msgstr "Angenommen von"
 
@@ -10522,26 +10516,20 @@ msgstr "Ältere Fassung"
 msgid "The latest acceptance of each organization. System admins are not asked to accept it, since they run this server."
 msgstr "Die letzte Annahme jeder Organisation. Systemadmins werden nicht gefragt, da sie diesen Server betreiben."
 
-#. 0: data.orgName
-#: src/routes/orgs/[id]/dpa/print/+page.svelte
-msgid "Data processing agreement | {0}"
-msgstr "Auftragsverarbeitungsvertrag | {0}"
+#~ msgid "Data processing agreement | {0}"
+#~ msgstr "Auftragsverarbeitungsvertrag | {0}"
 
-#: src/routes/orgs/[id]/dpa/print/+page.svelte
-msgid "(no longer the current version)"
-msgstr "(nicht mehr die aktuelle Fassung)"
+#~ msgid "(no longer the current version)"
+#~ msgstr "(nicht mehr die aktuelle Fassung)"
 
-#: src/routes/orgs/[id]/dpa/print/+page.svelte
-msgid "Accepted on"
-msgstr "Angenommen am"
+#~ msgid "Accepted on"
+#~ msgstr "Angenommen am"
 
-#: src/routes/orgs/[id]/dpa/print/+page.svelte
-msgid "Version"
-msgstr "Fassung"
+#~ msgid "Version"
+#~ msgstr "Fassung"
 
-#: src/routes/orgs/[id]/dpa/print/+page.svelte
-msgid "Earlier acceptances"
-msgstr "Frühere Annahmen"
+#~ msgid "Earlier acceptances"
+#~ msgstr "Frühere Annahmen"
 
 #~ msgid "Accepted with the operator of this server. The record shows who accepted which version, and when."
 #~ msgstr "Mit dem Betreiber dieses Servers abgeschlossen. Der Nachweis zeigt, wer welche Fassung wann angenommen hat."
@@ -10663,11 +10651,10 @@ msgstr "Nach Produkt, Asset-Tag oder Seriennummer suchen…"
 msgid "No loose units to add."
 msgstr "Keine freien Geräte zum Hinzufügen."
 
-#: src/routes/stocktakes/[id]/stocktake-detail.svelte
-msgid "Count # accessory"
-msgid_plural "Count # accessories<<<<<<< HEAD"
-msgstr[0] "# Zubehör zählen"
-msgstr[1] "# Zubehör zählen<<<<<<< HEAD"
+#~ msgid "Count # accessory"
+#~ msgid_plural "Count # accessories<<<<<<< HEAD"
+#~ msgstr[0] "# Zubehör zählen"
+#~ msgstr[1] "# Zubehör zählen<<<<<<< HEAD"
 
 #~ msgid "No loose units to add.=======next free number\" — a tag is typed or scanned)"
 #~ msgstr "Keine freien Geräte zum Hinzufügen.=======next free number\" — a tag is typed or scanned)"
@@ -10778,53 +10765,42 @@ msgstr "PDFs"
 msgid "Manuals, datasheets and the like, for every unit of it."
 msgstr "Handbücher, Datenblätter und Ähnliches, für alle Geräte dieses Produkts."
 
-#: src/routes/productions/[id]/share-link-card.svelte
 #: src/routes/productions/[id]/share-link-menu.svelte
 msgid "Link created"
 msgstr "Link erstellt"
 
-#: src/routes/productions/[id]/share-link-card.svelte
 #: src/routes/productions/[id]/share-link-menu.svelte
 msgid "Link withdrawn"
 msgstr "Link zurückgezogen"
 
-#: src/routes/productions/[id]/share-link-card.svelte
-msgid "Could not copy — select the link and copy it by hand."
-msgstr "Kopieren nicht möglich – markiere den Link und kopiere ihn von Hand."
+#~ msgid "Could not copy — select the link and copy it by hand."
+#~ msgstr "Kopieren nicht möglich – markiere den Link und kopiere ihn von Hand."
 
-#: src/routes/productions/[id]/share-link-card.svelte
 #: src/routes/productions/[id]/share-link-menu.svelte
 msgid "Customer link"
 msgstr "Kundenlink"
 
-#: src/routes/productions/[id]/share-link-card.svelte
-msgid "A page for the customer with the booked equipment, a packing checklist and the PDFs — no account needed, no prices."
-msgstr "Eine Seite für den Kunden mit dem gebuchten Equipment, einer Packliste zum Abhaken und den PDFs – ohne Konto, ohne Preise."
+#~ msgid "A page for the customer with the booked equipment, a packing checklist and the PDFs — no account needed, no prices."
+#~ msgstr "Eine Seite für den Kunden mit dem gebuchten Equipment, einer Packliste zum Abhaken und den PDFs – ohne Konto, ohne Preise."
 
-#: src/routes/productions/[id]/share-link-card.svelte
-msgid "Create link"
-msgstr "Link erstellen"
+#~ msgid "Create link"
+#~ msgstr "Link erstellen"
 
-#. 0: new Date(link.expiresAt).toLocaleDateString('de-DE')
-#: src/routes/productions/[id]/share-link-card.svelte
-msgid "It works until {0}."
-msgstr "Er gilt bis {0}."
+#~ msgid "It works until {0}."
+#~ msgstr "Er gilt bis {0}."
 
-#: src/routes/productions/[id]/share-link-card.svelte
-msgid "The current link stops working. Create a new one?"
-msgstr "Der aktuelle Link funktioniert dann nicht mehr. Neuen erstellen?"
+#~ msgid "The current link stops working. Create a new one?"
+#~ msgstr "Der aktuelle Link funktioniert dann nicht mehr. Neuen erstellen?"
 
-#: src/routes/productions/[id]/share-link-card.svelte
-msgid "The link stops working for everyone who has it. Withdraw it?"
-msgstr "Der Link funktioniert dann für niemanden mehr. Zurückziehen?"
+#~ msgid "The link stops working for everyone who has it. Withdraw it?"
+#~ msgstr "Der Link funktioniert dann für niemanden mehr. Zurückziehen?"
 
-#: src/routes/productions/[id]/share-link-card.svelte
+#: src/routes/case-check/+page.svelte
 msgid "Open"
 msgstr "Öffnen"
 
-#: src/routes/productions/[id]/share-link-card.svelte
-msgid "Anyone with this link can open the page. <0/>"
-msgstr "Jeder mit diesem Link kann die Seite öffnen. <0/>"
+#~ msgid "Anyone with this link can open the page. <0/>"
+#~ msgstr "Jeder mit diesem Link kann die Seite öffnen. <0/>"
 
 #~ msgid "The camera could not be started."
 #~ msgstr ""
@@ -10890,7 +10866,6 @@ msgstr "Dieser Link gilt bis {0}."
 msgid "Clear all ticks"
 msgstr "Alle Häkchen entfernen"
 
-#: src/routes/productions/[id]/share-link-card.svelte
 #: src/routes/productions/[id]/share-link-menu.svelte
 msgid "The production ended more than 30 days ago, so the link no longer opens."
 msgstr "Die Produktion ist seit über 30 Tagen vorbei, der Link öffnet sich nicht mehr."
@@ -11010,3 +10985,146 @@ msgstr "mit {0}"
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "Device number in this organization"
 msgstr "Gerätenummer in dieser Organisation"
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "{0} is neither in a kit nor has accessories, so there is no case to check."
+msgstr "{0} ist weder in einem Bundle noch hat es Zubehör – hier gibt es keine Kiste zu checken."
+
+#: src/routes/case-check/+page.svelte
+msgid "That is the case itself"
+msgstr "Das ist die Kiste selbst"
+
+#: src/routes/case-check/+page.svelte
+msgid "Already ticked"
+msgstr "Schon abgehakt"
+
+#. 0: name
+#: src/routes/case-check/+page.svelte
+msgid "Not part of this case: {0}"
+msgstr "Gehört nicht in diese Kiste: {0}"
+
+#: src/routes/case-check/+page.svelte
+#: src/routes/case-check/+page.svelte
+msgid "Unknown code"
+msgstr "Unbekannter Code"
+
+#: src/routes/case-check/+page.svelte
+msgid "Case check saved to the history"
+msgstr "Kistencheck in der Historie gespeichert"
+
+#: src/routes/case-check/+page.svelte
+msgid "Check a case | Technikpool"
+msgstr "Kiste checken | Technikpool"
+
+#: src/routes/case-check/+page.svelte
+#: src/routes/stocktakes/+page.svelte
+msgid "Check a case"
+msgstr "Kiste checken"
+
+#: src/routes/case-check/+page.svelte
+msgid "Scan a kit or a unit with accessories, then scan what is in it to see whether anything is missing."
+msgstr "Scanne ein Bundle oder ein Gerät mit Zubehör und dann den Inhalt – so siehst du, ob etwas fehlt."
+
+#: src/routes/case-check/+page.svelte
+msgid "Check another case"
+msgstr "Andere Kiste checken"
+
+#: src/routes/case-check/+page.svelte
+msgid "Scan what is in the case"
+msgstr "Inhalt der Kiste scannen"
+
+#: src/routes/case-check/+page.svelte
+msgid "Scan the case"
+msgstr "Kiste scannen"
+
+#: src/routes/case-check/+page.svelte
+msgid "Tick"
+msgstr "Abhaken"
+
+#. 0: check.checkedOutTo
+#: src/routes/case-check/+page.svelte
+msgid "Checked out to {0}."
+msgstr "Ausgecheckt an {0}."
+
+#. 0: formatDate(check.lastCheck.at); 1: check.lastCheck.userName; 2: check.lastCheck.found; 3: check.lastCheck.expected
+#: src/routes/case-check/+page.svelte
+msgid "Last checked {0} by {1}: {2} of {3} there."
+msgstr "Zuletzt gecheckt am {0} von {1}: {2} von {3} da."
+
+#: src/routes/case-check/+page.svelte
+msgid "Never checked before."
+msgstr "Noch nie gecheckt."
+
+#: src/routes/case-check/+page.svelte
+msgid "Other cases of this kit hold more"
+msgstr "Andere Kisten dieses Bundle-Typs enthalten mehr"
+
+#. 0: item.awayOn
+#: src/routes/case-check/+page.svelte
+msgid "Out on {0}"
+msgstr "Unterwegs auf {0}"
+
+#: src/routes/case-check/+page.svelte
+msgid "Scanned but not part of this case"
+msgstr "Gescannt, gehört aber nicht in diese Kiste"
+
+#: src/routes/case-check/+page.svelte
+msgid "Complete — everything is there."
+msgstr "Vollständig – alles da."
+
+#. 0: result.missing
+#: src/routes/case-check/+page.svelte
+msgid "{0} missing"
+msgstr "{0} fehlen"
+
+#~ msgid "{0} found{1}. Saved to the history of every unit in the case."
+#~ msgstr ""
+
+#: src/routes/case-check/+page.svelte
+msgid "Everything is there."
+msgstr "Alles da."
+
+#. 0: missing.length
+#: src/routes/case-check/+page.svelte
+msgid "{0} still missing."
+msgstr "{0} fehlen noch."
+
+#: src/routes/case-check/+page.svelte
+msgid "Finish and save"
+msgstr "Abschließen und speichern"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Check that everything is there"
+msgstr "Prüfen, ob alles da ist"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Found in case check"
+msgstr "Beim Kistencheck gefunden"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Out on a production during case check"
+msgstr "Beim Kistencheck auf einer Produktion unterwegs"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Missing in case check"
+msgstr "Beim Kistencheck gefehlt"
+
+#. 0: tx.found; 1: tx.expected
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "({0} of {1} there)"
+msgstr "({0} von {1} da)"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Check case"
+msgstr "Kiste checken"
+
+#. 0: result.away
+#: src/routes/case-check/+page.svelte
+msgid "{0} out on other jobs."
+msgstr "{0} auf anderen Jobs unterwegs."
+
+#. 0: result.found
+#: src/routes/case-check/+page.svelte
+msgid "{0} found. <0/> Saved to the history of every unit in the case."
+msgstr "{0} gefunden. <0/> In der Historie jedes Geräts der Kiste gespeichert."

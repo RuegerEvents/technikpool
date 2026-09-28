@@ -5,6 +5,7 @@ import '../api/client.dart';
 import '../api/generated/export.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../state/providers.dart';
+import 'case_check_screen.dart';
 import 'session_screen.dart';
 import 'stocktake_new_screen.dart';
 import 'stocktake_screen.dart';
@@ -137,6 +138,9 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
                         .toList(),
                     onOpen: _openStocktake,
                     onNew: _newStocktake,
+                    onCaseCheck: () => Navigator.of(context).push<void>(
+                      MaterialPageRoute(builder: (_) => const CaseCheckScreen()),
+                    ),
                     onRefresh: () => ref.refresh(openStocktakesProvider.future),
                   );
                 }
@@ -203,12 +207,17 @@ class _StocktakeList extends StatelessWidget {
     required this.stocktakes,
     required this.onOpen,
     required this.onNew,
+    required this.onCaseCheck,
     required this.onRefresh,
   });
 
   final List<StocktakeSummary> stocktakes;
   final ValueChanged<StocktakeSummary> onOpen;
   final VoidCallback onNew;
+
+  /// One case rather than a whole stocktake — it lives here because it is
+  /// counting too, just of a single box.
+  final VoidCallback onCaseCheck;
   final Future<void> Function() onRefresh;
 
   @override
@@ -224,6 +233,17 @@ class _StocktakeList extends StatelessWidget {
               onPressed: onNew,
               icon: const Icon(Icons.add),
               label: Text(l10n.stocktakeNew),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+          child: SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: onCaseCheck,
+              icon: const Icon(Icons.inventory_2_outlined),
+              label: Text(l10n.caseCheck),
             ),
           ),
         ),

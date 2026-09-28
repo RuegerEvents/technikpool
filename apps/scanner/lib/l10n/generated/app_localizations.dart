@@ -1422,6 +1422,150 @@ abstract class S {
   /// In en, this message translates to:
   /// **'This correction has already been applied.'**
   String get errorStocktakeActionApplied;
+
+  /// No description provided for @errorNotACase.
+  ///
+  /// In en, this message translates to:
+  /// **'This unit is neither in a kit nor has accessories, so there is no case to check.'**
+  String get errorNotACase;
+
+  /// The CASE_CHECKED history entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Case checked'**
+  String get actionCaseChecked;
+
+  /// Checking one kit, or a unit with its accessories, for completeness (Kiste checken).
+  ///
+  /// In en, this message translates to:
+  /// **'Check a case'**
+  String get caseCheck;
+
+  /// No description provided for @caseCheckScanCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the case: the kit\'s tag, or any unit in it.'**
+  String get caseCheckScanCase;
+
+  /// No description provided for @caseCheckProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{found} of {expected} there'**
+  String caseCheckProgress(int found, int expected);
+
+  /// No description provided for @caseCheckOutTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked out to {name}'**
+  String caseCheckOutTo(String name);
+
+  /// No description provided for @caseCheckLast.
+  ///
+  /// In en, this message translates to:
+  /// **'Last checked {date} by {user}: {found} of {expected} there'**
+  String caseCheckLast(String date, String user, int found, int expected);
+
+  /// No description provided for @caseCheckNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Never checked before'**
+  String get caseCheckNever;
+
+  /// No description provided for @caseCheckShortOfType.
+  ///
+  /// In en, this message translates to:
+  /// **'Other cases of this kit hold more:'**
+  String get caseCheckShortOfType;
+
+  /// A unit of the case checked out to another production.
+  ///
+  /// In en, this message translates to:
+  /// **'Out on {name}'**
+  String caseCheckAwayOn(String name);
+
+  /// No description provided for @caseCheckForeign.
+  ///
+  /// In en, this message translates to:
+  /// **'Not part of this case'**
+  String get caseCheckForeign;
+
+  /// No description provided for @caseCheckUnknownCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown code'**
+  String get caseCheckUnknownCode;
+
+  /// No description provided for @caseCheckItself.
+  ///
+  /// In en, this message translates to:
+  /// **'That is the case itself'**
+  String get caseCheckItself;
+
+  /// No description provided for @caseCheckAlready.
+  ///
+  /// In en, this message translates to:
+  /// **'Already ticked'**
+  String get caseCheckAlready;
+
+  /// No description provided for @caseCheckFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Found'**
+  String get caseCheckFound;
+
+  /// No description provided for @caseCheckNoTag.
+  ///
+  /// In en, this message translates to:
+  /// **'No tag: tick by hand'**
+  String get caseCheckNoTag;
+
+  /// No description provided for @caseCheckMissingCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} missing'**
+  String caseCheckMissingCount(int count);
+
+  /// No description provided for @caseCheckAwayCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} out on other jobs'**
+  String caseCheckAwayCount(int count);
+
+  /// No description provided for @caseCheckComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything is there'**
+  String get caseCheckComplete;
+
+  /// No description provided for @caseCheckFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish and save'**
+  String get caseCheckFinish;
+
+  /// No description provided for @caseCheckSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to the history of every unit in the case.'**
+  String get caseCheckSaved;
+
+  /// No description provided for @caseCheckNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next case'**
+  String get caseCheckNext;
+
+  /// No description provided for @caseCheckNotSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'You can check this case, but saving it needs the Member role.'**
+  String get caseCheckNotSaved;
+
+  /// Demo mode only: the kit tag to type.
+  ///
+  /// In en, this message translates to:
+  /// **'Try the cable case\'s tag {tag}'**
+  String caseCheckDemoHint(String tag);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

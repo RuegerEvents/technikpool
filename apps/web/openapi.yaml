@@ -53,6 +53,13 @@ tags:
       for loose untagged ones; only those are stored. Closing freezes the list
       of that moment into the report. Nothing about an asset changes while a
       stocktake is open.
+  - name: caseCheck
+    description: |
+      Checking one case (Kiste checken): a kit, or a unit with its
+      accessories. The client fetches the case's contents once and ticks them
+      off locally as it scans; nothing is stored until the check is recorded,
+      which writes one `CASE_CHECKED` entry into the history of every unit in
+      the case. Missing units are reported, never changed.
 
 paths:
   /api/auth/device/code:
@@ -806,6 +813,70 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /api/v1/case-checks/by-code/{code}:
+    get:
+      operationId: getCaseCheckByCode
+      tags: [caseCheck]
+      summary: Open the case a scanned code belongs to
+      description: |
+        A bundle tag opens its kit. A unit's tag or unique serial number opens
+        the kit the unit is in; failing that, the unit it is an accessory of,
+        or the unit itself when it has accessories. `scannedAssetId` is the
+        unit the code was on, which the client counts as found. A unit that
+        is none of these answers `409 not_a_case`.
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The case and what it should hold
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseCheck'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/case-checks:
+    post:
+      operationId: recordCaseCheck
+      tags: [caseCheck]
+      summary: Record a finished case check
+      description: |
+        Judges the case as it is now against `foundAssetIds` — ids not in the
+        case are ignored — and writes the outcome into every unit's history.
+        Needs MEMBER or above of the org that owns the case (`canRecord`).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseCheckRequest'
+      responses:
+        '200':
+          description: How the check came out
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseCheckResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -862,6 +933,9 @@ components:
         (`stocktake_product_not_counted`), and a count sent with `previous` is
         refused when the caller's stored count is no longer that
         (`stocktake_count_changed`) — reload and count again.
+
+        Case checks: a unit that is neither in a kit nor has accessories, or
+        an accessory, is no case to check (`not_a_case`).
       content:
         application/json:
           schema:
@@ -1933,3 +2007,132 @@ components:
             with `stocktake_count_changed`, so one person counting on two
             devices can't overwrite a number they never saw. Leave it out to
             replace unconditionally.
+
+    CaseKind:
+      type: string
+      enum: [bundle, asset]
+      description: A kit, or one unit with its accessories.
+
+    CaseCheckItem:
+      type: object
+      required: [assetId, assetTag, serialNumber, orgIndex, name, caption, accessoryOf, awayOn]
+      properties:
+        assetId:
+          type: string
+        assetTag:
+          type: [string, 'null']
+        serialNumber:
+          type: [string, 'null']
+        orgIndex:
+          type: integer
+          description: The unit's number within its org, shown as "#123".
+        name:
+          type: string
+          description: Maker and product name.
+        caption:
+          type: [string, 'null']
+        accessoryOf:
+          type: [string, 'null']
+          description: The unit in this case it hangs off; listed right after it.
+        awayOn:
+          type: [string, 'null']
+          description: |
+            The production this unit is checked out to when the rest of the
+            case is somewhere else — taken out for another job. Not finding it
+            counts as away, not missing.
+
+    CaseCheck:
+      type: object
+      required:
+        - kind
+        - id
+        - tag
+        - name
+        - checkedOutTo
+        - items
+        - shortOfType
+        - lastCheck
+        - canRecord
+        - scannedAssetId
+      properties:
+        kind:
+          $ref: '#/components/schemas/CaseKind'
+        id:
+          type: string
+          description: The bundle's id, or the unit's.
+        tag:
+          type: [string, 'null']
+          description: The bundle's own tag. Scanning it inside the check ticks nothing.
+        name:
+          type: string
+        checkedOutTo:
+          type: [string, 'null']
+          description: The production the case as a whole is out on, if any.
+        items:
+          type: array
+          description: What the case should hold, each unit followed by its accessories.
+          items:
+            $ref: '#/components/schemas/CaseCheckItem'
+        shortOfType:
+          type: array
+          description: |
+            Kits only: products other cases of the same kit type hold more of.
+            A unit taken out of the kit for good is no longer on the list, so
+            this is the only place it shows.
+          items:
+            type: object
+            required: [name, missing]
+            properties:
+              name:
+                type: string
+              missing:
+                type: integer
+        lastCheck:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/CaseCheckLast'
+        canRecord:
+          type: boolean
+          description: Whether the caller may record the check. Anyone who sees the units may run one.
+        scannedAssetId:
+          type: [string, 'null']
+          description: The unit the code was on, to count as found. Null for a bundle tag.
+
+    CaseCheckLast:
+      type: object
+      required: [at, userName, found, expected]
+      properties:
+        at:
+          type: string
+          format: date-time
+        userName:
+          type: string
+        found:
+          type: integer
+        expected:
+          type: integer
+
+    CaseCheckRequest:
+      type: object
+      required: [kind, id, foundAssetIds]
+      properties:
+        kind:
+          $ref: '#/components/schemas/CaseKind'
+        id:
+          type: string
+        foundAssetIds:
+          type: array
+          items:
+            type: string
+
+    CaseCheckResult:
+      type: object
+      required: [found, missing, away]
+      properties:
+        found:
+          type: integer
+        missing:
+          type: integer
+        away:
+          type: integer
+          description: Not found, but checked out to another production.

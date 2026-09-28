@@ -43,6 +43,7 @@ class Labels {
     'CREDENTIALS_REMOVED' => l10n.actionCredentialsRemoved,
     'CREDENTIALS_REVEALED' => l10n.actionCredentialsRevealed,
     'STOCKTAKE_COUNTED' => l10n.actionStocktakeCounted,
+    'CASE_CHECKED' => l10n.actionCaseChecked,
     // Not in that union today; kept because the server owns the vocabulary
     // and these cost nothing until it writes them.
     'DELETED' => l10n.actionDeleted,
