@@ -1,5 +1,15 @@
 [
 	{
+		"version": "0.24.2",
+		"date": "2026-09-28",
+		"en": [
+			"A production's booked equipment shows each case's picture in place of the \"Bundle\" label, and the case header no longer has a Remove button — take a case off in the equipment planner."
+		],
+		"de": [
+			"Bei den gebuchten Geräten einer Produktion steht jetzt das Bild jedes Cases statt des „Bundle“-Schilds, und der Case-Kopf hat keinen Entfernen-Knopf mehr — ein Case wird im Equipment-Planer herausgenommen."
+		]
+	},
+	{
 		"version": "0.24.1",
 		"date": "2026-09-28",
 		"en": [
