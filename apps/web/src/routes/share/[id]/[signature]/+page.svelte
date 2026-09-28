@@ -11,6 +11,7 @@
 	import { BookOpen, FileText, Info, LayoutList, PackageCheck, ScanLine, X } from '@lucide/svelte';
 	import type { Html5Qrcode } from 'html5-qrcode';
 	import type { ShareUnit } from '$lib/production-share';
+	import { ProductThumb } from '$lib/components/ui/product-thumb';
 	import { naturalCompare } from '$lib/sort';
 	import { plural } from '$lib/utils';
 
@@ -73,6 +74,7 @@
 		name: string;
 		caption: string | null;
 		manufacturer: string | null;
+		imageUrl: string | null;
 		count: number;
 		accessories: Map<string, number>;
 	};
@@ -85,6 +87,7 @@
 				name: unit.name,
 				caption: unit.caption,
 				manufacturer: unit.manufacturer,
+				imageUrl: unit.imageUrl,
 				count: 0,
 				accessories: new Map()
 			});
@@ -205,6 +208,9 @@
 		}
 	}
 	onDestroy(stopScan);
+
+	// ── Enlarged picture ────────────────────────────────────────────────────
+	let enlarged = $state<{ src: string; alt: string } | null>(null);
 
 	// ── Formatting ──────────────────────────────────────────────────────────
 	function withCaption(name: string, caption: string | null) {
@@ -383,18 +389,21 @@
 							</h2>
 							<ul class="divide-y overflow-hidden rounded-lg border bg-background">
 								{#each view.bundles as bundle (bundle.id)}
-									<li class="px-4 py-3">
-										<p class="font-medium">
-											{withCaption(bundle.name, bundle.caption)}
-											{#if bundle.tag}
-												<span class="ml-1 font-mono text-xs text-muted-foreground"
-													>{bundle.tag}</span
-												>
-											{/if}
-										</p>
-										<p class="mt-0.5 text-sm text-muted-foreground">
-											{counted(byProduct(bundle.units).map((line) => [line.name, line.count]))}
-										</p>
+									<li class="flex items-start gap-3 px-4 py-3">
+										{@render zoomable(bundle.imageUrl, bundle.name, 48)}
+										<div class="min-w-0">
+											<p class="font-medium">
+												{withCaption(bundle.name, bundle.caption)}
+												{#if bundle.tag}
+													<span class="ml-1 font-mono text-xs text-muted-foreground"
+														>{bundle.tag}</span
+													>
+												{/if}
+											</p>
+											<p class="mt-0.5 text-sm text-muted-foreground">
+												{counted(byProduct(bundle.units).map((line) => [line.name, line.count]))}
+											</p>
+										</div>
 									</li>
 								{/each}
 							</ul>
@@ -414,6 +423,7 @@
 											class="min-w-10 rounded-md bg-muted px-2 py-0.5 text-center text-sm font-semibold tabular-nums"
 											>{line.count}×</span
 										>
+										{@render zoomable(line.imageUrl, line.name, 40)}
 										<span class="min-w-0">
 											<span class="block font-medium">{withCaption(line.name, line.caption)}</span>
 											<span class="block text-sm text-muted-foreground">
@@ -438,29 +448,32 @@
 					{:else}
 						<ul class="space-y-3">
 							{#each manualLines as line (line.productId)}
-								<li class="rounded-lg border bg-background px-4 py-3">
-									<p class="font-medium">{withCaption(line.name, line.caption)}</p>
-									{#if line.manufacturer}
-										<p class="text-sm text-muted-foreground">{line.manufacturer}</p>
-									{/if}
-									<ul class="mt-2 space-y-1">
-										{#each view.documents[line.productId] ?? [] as document (document.id)}
-											<li>
-												<!-- eslint-disable svelte/no-navigation-without-resolve -->
-												<a
-													href={document.url}
-													target="_blank"
-													rel="noopener"
-													class="inline-flex items-center gap-2 text-sm text-primary underline-offset-2 hover:underline"
-												>
-													<FileText class="size-4 shrink-0" />
-													{document.title}
-													<span class="text-muted-foreground">· {kindLabel(document.kind)}</span>
-												</a>
-												<!-- eslint-enable svelte/no-navigation-without-resolve -->
-											</li>
-										{/each}
-									</ul>
+								<li class="flex items-start gap-3 rounded-lg border bg-background px-4 py-3">
+									<ProductThumb path={line.imageUrl} alt={line.name} size={48} />
+									<div class="min-w-0 flex-1">
+										<p class="font-medium">{withCaption(line.name, line.caption)}</p>
+										{#if line.manufacturer}
+											<p class="text-sm text-muted-foreground">{line.manufacturer}</p>
+										{/if}
+										<ul class="mt-2 space-y-1">
+											{#each view.documents[line.productId] ?? [] as document (document.id)}
+												<li>
+													<!-- eslint-disable svelte/no-navigation-without-resolve -->
+													<a
+														href={document.url}
+														target="_blank"
+														rel="noopener"
+														class="inline-flex items-center gap-2 text-sm text-primary underline-offset-2 hover:underline"
+													>
+														<FileText class="size-4 shrink-0" />
+														{document.title}
+														<span class="text-muted-foreground">· {kindLabel(document.kind)}</span>
+													</a>
+													<!-- eslint-enable svelte/no-navigation-without-resolve -->
+												</li>
+											{/each}
+										</ul>
+									</div>
 								</li>
 							{/each}
 						</ul>
@@ -484,6 +497,7 @@
 									checked={all}
 									onchange={(e) => setAll(ids, e.currentTarget.checked)}
 								/>
+								<ProductThumb path={bundle.imageUrl} alt={bundle.name} size={36} />
 								<span class="min-w-0 flex-1">
 									<span class="block font-semibold">{withCaption(bundle.name, bundle.caption)}</span
 									>
@@ -546,6 +560,45 @@
 	</div>
 </div>
 
+<svelte:window
+	onkeydown={(e) => {
+		if (e.key === 'Escape') enlarged = null;
+	}}
+/>
+
+{#if enlarged}
+	<!-- Any click closes it: on a phone there is no corner worth aiming for. -->
+	<button
+		type="button"
+		class="fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/80 p-4"
+		aria-label="Close"
+		onclick={() => (enlarged = null)}
+	>
+		<img
+			src={enlarged.src}
+			alt={enlarged.alt}
+			class="max-h-full max-w-full rounded-lg bg-white object-contain p-2"
+		/>
+		<X class="absolute top-4 right-4 size-6 text-white" />
+	</button>
+{/if}
+
+<!-- A thumbnail that opens large when tapped; without a picture, just the placeholder. -->
+{#snippet zoomable(src: string | null, alt: string, size: number)}
+	{#if src}
+		<button
+			type="button"
+			class="shrink-0 cursor-zoom-in"
+			aria-label={alt}
+			onclick={() => (enlarged = { src, alt })}
+		>
+			<ProductThumb path={src} {alt} {size} />
+		</button>
+	{:else}
+		<ProductThumb path={src} {alt} {size} />
+	{/if}
+{/snippet}
+
 <!-- One unit on the checklist, with its accessories. At the end of the file: a
      snippet in the middle of markup is where wuchale stops extracting. -->
 {#snippet unitRow(unit: ShareUnit)}
@@ -561,6 +614,12 @@
 				class="mt-0.5 size-5 shrink-0"
 				checked={packed.has(unit.id)}
 				onchange={(e) => toggle(unit.id, e.currentTarget.checked)}
+			/>
+			<ProductThumb
+				path={unit.imageUrl}
+				alt={unit.name}
+				size={36}
+				class={packed.has(unit.id) ? 'opacity-60' : ''}
 			/>
 			<span class="min-w-0 flex-1">
 				<span
@@ -581,6 +640,7 @@
 					checked={packed.has(accessory.id)}
 					onchange={(e) => toggle(accessory.id, e.currentTarget.checked)}
 				/>
+				<ProductThumb path={accessory.imageUrl} alt={accessory.name} size={20} />
 				<span class="text-xs {packed.has(accessory.id) ? 'line-through opacity-60' : ''}">
 					↳ {accessory.name}{accessory.tag ? ` · ${accessory.tag}` : ''}
 				</span>

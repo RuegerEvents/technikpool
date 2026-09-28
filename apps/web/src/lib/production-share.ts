@@ -9,7 +9,9 @@ export type ShareUnit = {
 	manufacturer: string | null;
 	tag: string | null;
 	productId: string;
-	accessories: { id: string; name: string; tag: string | null }[];
+	/** The product's photo, resolved to an address like every URL here. */
+	imageUrl: string | null;
+	accessories: { id: string; name: string; tag: string | null; imageUrl: string | null }[];
 };
 
 export type ShareView = {
@@ -25,6 +27,8 @@ export type ShareView = {
 		name: string;
 		caption: string | null;
 		tag: string | null;
+		/** The case's generated preview of what is in it. */
+		imageUrl: string | null;
 		units: ShareUnit[];
 	}[];
 	units: ShareUnit[];

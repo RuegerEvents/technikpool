@@ -948,6 +948,7 @@ msgstr "ArrowUp"
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 #: src/lib/components/ui/modal/modal.svelte
 #: src/lib/components/ui/org-multi-select/org-multi-select.svelte
+#: src/routes/share/[id]/[signature]/+page.svelte
 msgid "Escape"
 msgstr "Escape"
 
@@ -1041,6 +1042,7 @@ msgstr "Gerät aus Bundle entfernt"
 #: src/lib/components/ui/invitations/invitation-link.svelte
 #: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
 #: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
+#: src/routes/share/[id]/[signature]/+page.svelte
 msgid "Close"
 msgstr "Schließen"
 

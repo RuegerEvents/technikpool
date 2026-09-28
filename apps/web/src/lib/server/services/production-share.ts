@@ -70,13 +70,19 @@ export async function resolveShare(productionId: string, signature: string) {
 								select: {
 									name: true,
 									caption: true,
+									imagePath: true,
 									manufacturer: { select: { name: true } }
 								}
 							}
 						}
 					},
 					sourceBundle: {
-						select: { id: true, tag: true, template: { select: { name: true, caption: true } } }
+						select: {
+							id: true,
+							tag: true,
+							imagePath: true,
+							template: { select: { name: true, caption: true } }
+						}
 					}
 				}
 			}
@@ -95,7 +101,8 @@ export async function resolveShare(productionId: string, signature: string) {
 		caption: item.asset.product.caption,
 		manufacturer: item.asset.product.manufacturer?.name ?? null,
 		tag: item.asset.assetTag,
-		productId: item.asset.productId
+		productId: item.asset.productId,
+		imageUrl: imageSrc(item.asset.product.imagePath)
 	});
 	const byUnit = (a: ShareUnit, b: ShareUnit) =>
 		naturalCompare(a.name, b.name) || naturalCompare(a.tag ?? '', b.tag ?? '');
@@ -107,7 +114,8 @@ export async function resolveShare(productionId: string, signature: string) {
 			accessories: item.accessories.map((accessory) => ({
 				id: accessory.asset.id,
 				name: accessory.asset.product.name,
-				tag: accessory.asset.assetTag
+				tag: accessory.asset.assetTag,
+				imageUrl: imageSrc(accessory.asset.product.imagePath)
 			}))
 		} satisfies ShareUnit
 	}));
@@ -127,6 +135,7 @@ export async function resolveShare(productionId: string, signature: string) {
 				name: bundle.template.name,
 				caption: bundle.template.caption,
 				tag: bundle.tag,
+				imageUrl: imageSrc(bundle.imagePath),
 				units: []
 			};
 			bundles.set(bundle.id, entry);
