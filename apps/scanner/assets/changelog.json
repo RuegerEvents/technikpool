@@ -1,5 +1,31 @@
 [
   {
+    "version": "1.6.0",
+    "date": "2026-09-28",
+    "en": [
+      "Check a case: under Scans › Stocktake, or from a kit member you looked up. Scan the case, then what is inside, and see what is missing; finishing it is noted in every unit's history. The demo has a cable case, K-0001, to try.",
+      "Every scan answers with one of four tones: done, already done, look at the screen, or that did not work. They can be switched off under Settings.",
+      "Scanning a unit out of its kit, or an accessory on its own, offers the rest of what it belongs with, when booking and when counting.",
+      "Admins can give untagged units their stickers, and register new units, by scanning — from a product in Inventory.",
+      "A stocktake shows what others counted without reopening it, and a count can no longer overwrite one you never saw. Cables show their connectors on the open list.",
+      "Lookup shows a unit's number (#123), its product's caption and details, and its manuals and datasheets.",
+      "Settings links the server operator's imprint, privacy policy and terms.",
+      "Works with Sunmi handhelds' built-in scanner.",
+      "Names sort naturally: \"2m\" comes before \"10m\"."
+    ],
+    "de": [
+      "Kiste checken: unter Scans › Inventur oder bei einem nachgeschlagenen Bundle-Gerät. Kiste scannen, dann den Inhalt, und sehen, was fehlt; beim Abschließen wird der Check in der Historie jedes Geräts vermerkt. In der Demo gibt es dafür die Kabelkiste K-0001.",
+      "Jeder Scan antwortet mit einem von vier Tönen: erledigt, schon erledigt, auf den Bildschirm schauen oder hat nicht geklappt. Abschalten lassen sie sich in den Einstellungen.",
+      "Scannst du ein Gerät aus seinem Bundle oder ein Zubehörteil allein, wird der Rest angeboten, zu dem es gehört – beim Buchen wie beim Zählen.",
+      "Admins können Geräten ohne Etikett ihren Aufkleber geben und neue Geräte anlegen, einfach per Scan – über ein Produkt im Inventar.",
+      "Eine Inventur zeigt, was andere gezählt haben, ohne sie neu zu öffnen, und eine Zählung kann keine mehr überschreiben, die du nie gesehen hast. Kabel zeigen in der offenen Liste ihre Stecker.",
+      "Nachschlagen zeigt die Nummer eines Geräts (#123), Kurzbeschreibung und Details seines Produkts und dessen Anleitungen und Datenblätter.",
+      "Die Einstellungen verlinken Impressum, Datenschutzerklärung und Nutzungsbedingungen des Server-Betreibers.",
+      "Funktioniert mit dem eingebauten Scanner von Sunmi-Handhelds.",
+      "Namen sind natürlich sortiert: „2m“ kommt vor „10m“."
+    ]
+  },
+  {
     "version": "1.5.0",
     "date": "2026-09-24",
     "en": [

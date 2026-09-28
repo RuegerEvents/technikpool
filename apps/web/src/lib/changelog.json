@@ -1,5 +1,33 @@
 [
 	{
+		"version": "0.24.0",
+		"date": "2026-09-28",
+		"en": [
+			"Check a case: scan a kit or a unit with accessories, then scan what is inside, and the list shows what is there and what is missing, with pictures. Finishing it notes the check in the history of every unit in the case. Opened from a kit's page, a unit's accessories or the stocktakes page.",
+			"A camera button beside every field that takes an asset tag or serial number — the Devices search, tag and serial fields, new units and kits, stocktakes and the case check — reads a sticker with a phone or a webcam.",
+			"A production can hand its customer a link to a page with the booked equipment, the manuals and a packing checklist — no account needed, no prices. It is under \"Customer link\" on the production page and stops opening 30 days after the job.",
+			"Products can carry manuals and datasheets as PDFs, added on the product's page and shown on every unit of it.",
+			"Every unit has a number within its organization, shown as \"#123\", that it keeps for good.",
+			"Organizations can have blank asset tags filled with their next number again, switched on by an admin on the organization's page.",
+			"Products and kit types get a one-line caption shown after the name wherever they are listed, and details for everything else.",
+			"Adding units to a kit works like the equipment planner: a count per product, or open a row and pick units by tag. The search finds asset tags and serial numbers too.",
+			"Names sort naturally everywhere: \"2m\" comes before \"10m\".",
+			"The data processing agreement says why its Accept button is still greyed out."
+		],
+		"de": [
+			"Kiste checken: Scanne ein Bundle oder ein Gerät mit Zubehör und dann den Inhalt – die Liste zeigt mit Bildern, was da ist und was fehlt. Beim Abschließen wird der Check in der Historie jedes Geräts der Kiste vermerkt. Erreichbar über die Seite eines Bundles, das Zubehör eines Geräts oder die Inventur-Seite.",
+			"Neben jedem Feld für Asset-Tag oder Seriennummer – Gerätesuche, Tag- und Seriennummernfelder, neue Geräte und Bundles, Inventur und Kistencheck – liest ein Kamera-Knopf das Etikett mit dem Handy oder der Webcam.",
+			"Eine Produktion kann ihrem Kunden einen Link geben: eine Seite mit dem gebuchten Equipment, den Anleitungen und einer Packliste – ohne Konto, ohne Preise. Zu finden unter „Kunden-Link“ auf der Produktionsseite; er öffnet sich bis 30 Tage nach dem Job.",
+			"Produkte können Anleitungen und Datenblätter als PDF haben, hinzugefügt auf der Produktseite und angezeigt bei jedem Gerät davon.",
+			"Jedes Gerät hat eine Nummer innerhalb seiner Organisation, angezeigt als „#123“, die es für immer behält.",
+			"Organisationen können leere Asset-Tags wieder mit ihrer nächsten Nummer füllen lassen – ein Admin schaltet das auf der Seite der Organisation ein.",
+			"Produkte und Bundle-Typen bekommen eine Kurzbeschreibung, die überall hinter dem Namen steht, und Details für alles Weitere.",
+			"Geräte zu einem Bundle hinzufügen funktioniert wie im Equipment-Planer: eine Anzahl pro Produkt, oder eine Zeile aufklappen und Geräte per Tag wählen. Die Suche findet auch Asset-Tags und Seriennummern.",
+			"Namen sind überall natürlich sortiert: „2m“ kommt vor „10m“.",
+			"Der Auftragsverarbeitungsvertrag sagt, warum sein Annehmen-Knopf noch ausgegraut ist."
+		]
+	},
+	{
 		"version": "0.23.0",
 		"date": "2026-09-27",
 		"en": [
