@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { CameraScanButton } from '$lib/components/ui/camera-scan';
 	import { userLabel } from '$lib/user-label.svelte';
 	import {
 		manufacturerIdOf,
@@ -1313,7 +1314,13 @@
 		<form id="edit-asset-form" class="space-y-4" onsubmit={handleAssetSave}>
 			<div class="space-y-2">
 				<Label for="serial">Serial Number</Label>
-				<Input id="serial" bind:value={assetDraft.serialNumber} disabled={retired} />
+				<div class="flex gap-2">
+					<Input id="serial" bind:value={assetDraft.serialNumber} disabled={retired} />
+					<CameraScanButton
+						disabled={retired}
+						onscan={(code) => (assetDraft.serialNumber = code)}
+					/>
+				</div>
 				<SerialNumberWarning
 					serialNumber={assetDraft.serialNumber}
 					excludeAssetId={asset.id}
@@ -1322,7 +1329,10 @@
 			</div>
 			<div class="space-y-2">
 				<Label for="tag">Asset Tag</Label>
-				<Input id="tag" bind:value={assetDraft.assetTag} disabled={retired} />
+				<div class="flex gap-2">
+					<Input id="tag" bind:value={assetDraft.assetTag} disabled={retired} />
+					<CameraScanButton disabled={retired} onscan={(code) => (assetDraft.assetTag = code)} />
+				</div>
 			</div>
 			<div class="space-y-2">
 				<Label for="status">Status</Label>

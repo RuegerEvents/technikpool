@@ -25,6 +25,7 @@
 	import { CategorySelect } from '$lib/components/ui/category-select';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
+	import { CameraScanButton } from '$lib/components/ui/camera-scan';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
@@ -775,12 +776,15 @@
 	</div>
 
 	<div class="flex flex-wrap items-center gap-2">
-		<input
-			type="search"
-			bind:value={searchQuery}
-			placeholder="Search by product, manufacturer, S/N, tag, bundle…"
-			class="h-10 w-full min-w-48 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none sm:w-64 sm:flex-none"
-		/>
+		<div class="flex w-full min-w-48 flex-1 gap-2 sm:w-auto sm:flex-none">
+			<input
+				type="search"
+				bind:value={searchQuery}
+				placeholder="Search by product, manufacturer, S/N, tag, bundle…"
+				class="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none sm:w-64"
+			/>
+			<CameraScanButton class="size-10" onscan={(code) => (searchQuery = code)} />
+		</div>
 		<CategorySelect
 			class="w-full sm:w-64"
 			{categories}
@@ -1868,14 +1872,17 @@
 	{#snippet children()}
 		<form id="quick-tag-form" class="space-y-2" onsubmit={saveQuickTag}>
 			<Label for="quick-tag">Asset Tag</Label>
-			<Input
-				id="quick-tag"
-				bind:ref={quickTagInput}
-				bind:value={quickTagValue}
-				autocomplete="off"
-				spellcheck={false}
-				class="font-mono"
-			/>
+			<div class="flex gap-2">
+				<Input
+					id="quick-tag"
+					bind:ref={quickTagInput}
+					bind:value={quickTagValue}
+					autocomplete="off"
+					spellcheck={false}
+					class="font-mono"
+				/>
+				<CameraScanButton onscan={(code) => (quickTagValue = code)} />
+			</div>
 			<p class="text-xs text-muted-foreground">Enter saves and closes.</p>
 		</form>
 	{/snippet}

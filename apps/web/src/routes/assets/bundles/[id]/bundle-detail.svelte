@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { CameraScanButton } from '$lib/components/ui/camera-scan';
 	import { makerAndName } from '$lib/product-label';
 	import { manufacturerSelection } from '$lib/no-manufacturer.svelte';
 	import { productLabel } from '$lib/product-label';
@@ -930,7 +931,10 @@
 					{#if copies === 1}
 						<div class="space-y-2">
 							<Label for="copy-tag">Tag for the copy</Label>
-							<Input id="copy-tag" bind:value={copyDraft.tag} disabled={copying} />
+							<div class="flex gap-2">
+								<Input id="copy-tag" bind:value={copyDraft.tag} disabled={copying} />
+								<CameraScanButton disabled={copying} onscan={(code) => (copyDraft.tag = code)} />
+							</div>
 							<p class="text-xs text-muted-foreground">
 								Optional, and how two kits of one type are told apart.
 							</p>
@@ -1185,7 +1189,10 @@
 			</div>
 			<div class="space-y-2">
 				<Label for="tag">Tag <span class="text-muted-foreground">(optional)</span></Label>
-				<Input id="tag" bind:value={bundleDraft.tag} placeholder="e.g. Kit A" />
+				<div class="flex gap-2">
+					<Input id="tag" bind:value={bundleDraft.tag} placeholder="e.g. Kit A" />
+					<CameraScanButton onscan={(code) => (bundleDraft.tag = code)} />
+				</div>
 				<p class="text-xs text-muted-foreground">
 					Distinguishes this physical instance from others of the same type.
 				</p>

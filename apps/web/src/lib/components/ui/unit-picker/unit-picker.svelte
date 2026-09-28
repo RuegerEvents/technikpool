@@ -13,6 +13,7 @@
 </script>
 
 <script lang="ts">
+	import { CameraScanButton } from '$lib/components/ui/camera-scan';
 	// Picking loose units for a kit the way a production books them: one row per
 	// product and place, a count, and "all" — because "4 of the CAT cables" is
 	// the question, not which four. A row opens into its units, tag by tag, for
@@ -140,12 +141,15 @@
 </script>
 
 <div class="space-y-2">
-	<input
-		type="search"
-		bind:value={search}
-		placeholder="Search by product, asset tag or serial number…"
-		class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-	/>
+	<div class="flex gap-2">
+		<input
+			type="search"
+			bind:value={search}
+			placeholder="Search by product, asset tag or serial number…"
+			class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+		/>
+		<CameraScanButton onscan={(code) => (search = code)} />
+	</div>
 	{#if shown.length > 0}
 		<div class="max-h-96 overflow-y-auto rounded-md border">
 			{#each shown as { group, units: listed, byUnit } (group.key)}

@@ -11,6 +11,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Modal } from '$lib/components/ui/modal';
+	import { CameraScanButton } from '$lib/components/ui/camera-scan';
 	import { OrgBadge } from '$lib/components/ui/org-badge';
 	import { CategoryPill } from '$lib/components/ui/category-pill';
 	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
@@ -101,7 +102,6 @@
 	// Scanning
 
 	let code = $state('');
-	let scanning = $state(false);
 	let scanInput = $state<HTMLInputElement | null>(null);
 	type Feedback = { tone: 'good' | 'warn' | 'bad' | 'info'; title: string; detail?: string };
 	let feedback = $state<Feedback | null>(null);
@@ -110,14 +110,24 @@
 		return p.manufacturerName ? `${p.manufacturerName} ${p.productName}` : p.productName;
 	}
 
-	async function handleScan(e: SubmitEvent) {
+	function handleScan(e: SubmitEvent) {
 		e.preventDefault();
-		const value = code.trim();
-		if (!value || !locationId || scanning) return;
-		scanning = true;
+		enqueue(code);
+		code = '';
+	}
+
+	// One code after another: the camera can read the next label while the
+	// last one is still on its way.
+	let queue = Promise.resolve();
+	function enqueue(raw: string) {
+		const value = raw.trim();
+		if (value && locationId) queue = queue.then(() => scanCode(value));
+	}
+
+	async function scanCode(value: string) {
+		if (!locationId) return;
 		try {
 			const result = await scanStocktakeCode({ stocktakeId, code: value, locationId });
-			code = '';
 			if (result.outcome === 'bundle') {
 				feedback = { tone: 'info', title: `Bundle ${result.bundle.name}`, detail: value };
 				openConfirm(`Bundle ${result.bundle.name}`, result.confirm, 'bundle');
@@ -163,9 +173,7 @@
 			}
 		} catch (err) {
 			feedback = { tone: 'bad', title: getErrorMessage(err), detail: value };
-			code = '';
 		} finally {
-			scanning = false;
 			await nextTick();
 			if (!confirmOpen) scanInput?.focus();
 		}
@@ -674,9 +682,8 @@
 								placeholder="Asset tag, bundle tag or serial number"
 								disabled={!locationId}
 							/>
-							<Button type="submit" disabled={!locationId || scanning || !code.trim()}
-								>Count it</Button
-							>
+							<CameraScanButton continuous onscan={enqueue} {feedback} disabled={!locationId} />
+							<Button type="submit" disabled={!locationId || !code.trim()}>Count it</Button>
 						</div>
 					</form>
 				</div>

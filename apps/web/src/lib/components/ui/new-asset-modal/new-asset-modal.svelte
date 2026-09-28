@@ -14,6 +14,7 @@
 </script>
 
 <script lang="ts">
+	import { CameraScanButton } from '$lib/components/ui/camera-scan';
 	// Registering a unit at the moment you need it, rather than being sent to
 	// /assets/new and back to put it where it belongs. Two places need exactly
 	// this: an accessory on the asset detail page, and a member on the bundle
@@ -544,7 +545,10 @@
 			{#if quantity === 1 && kind === 'device'}
 				<div class="space-y-2">
 					<Label for="newAssetSerial">Serial number</Label>
-					<Input id="newAssetSerial" bind:value={serial} disabled={saving} />
+					<div class="flex gap-2">
+						<Input id="newAssetSerial" bind:value={serial} disabled={saving} />
+						<CameraScanButton disabled={saving} onscan={(code) => (serial = code)} />
+					</div>
 					<SerialNumberWarning serialNumber={serial} paused={saving} />
 				</div>
 			{/if}
@@ -552,18 +556,21 @@
 				<div class="space-y-2">
 					<Label for="newAssetTag-0">{quantity === 1 ? 'Asset tag' : 'Asset tags'}</Label>
 					{#each tags, i (i)}
-						<Input
-							id="newAssetTag-{i}"
-							bind:value={tags[i]}
-							disabled={saving}
-							placeholder={numbered
-								? i === 0
-									? `Blank: ${nextTag}`
-									: 'Blank: next number'
-								: quantity === 1
-									? 'Scan or type the sticker'
-									: `Unit ${i + 1}`}
-						/>
+						<div class="flex gap-2">
+							<Input
+								id="newAssetTag-{i}"
+								bind:value={tags[i]}
+								disabled={saving}
+								placeholder={numbered
+									? i === 0
+										? `Blank: ${nextTag}`
+										: 'Blank: next number'
+									: quantity === 1
+										? 'Scan or type the sticker'
+										: `Unit ${i + 1}`}
+							/>
+							<CameraScanButton disabled={saving} onscan={(code) => (tags[i] = code)} />
+						</div>
 					{/each}
 				</div>
 			{/if}

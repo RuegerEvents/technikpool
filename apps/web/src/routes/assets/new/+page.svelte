@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { CameraScanButton } from '$lib/components/ui/camera-scan';
 	import {
 		manufacturerIdOf,
 		manufacturerSelection,
@@ -495,24 +496,36 @@
 											<tr class="border-b last:border-0">
 												<td class="px-3 py-2 text-muted-foreground tabular-nums">{i + 1}</td>
 												<td class="px-3 py-2">
-													<Input
-														bind:value={item.assetTag}
-														placeholder={nextTag
-															? i === 0
-																? `Blank: ${nextTag}`
-																: 'Blank: next number'
-															: orgPrefix
-																? `${orgPrefix}…`
-																: 'Scan or type'}
-														class="h-8 font-mono text-sm"
-													/>
+													<div class="flex gap-2">
+														<Input
+															bind:value={item.assetTag}
+															placeholder={nextTag
+																? i === 0
+																	? `Blank: ${nextTag}`
+																	: 'Blank: next number'
+																: orgPrefix
+																	? `${orgPrefix}…`
+																	: 'Scan or type'}
+															class="h-8 font-mono text-sm"
+														/>
+														<CameraScanButton
+															class="size-8"
+															onscan={(code) => (item.assetTag = code)}
+														/>
+													</div>
 												</td>
 												<td class="px-3 py-2">
-													<Input
-														bind:value={item.serialNumber}
-														placeholder="S/N 123456"
-														class="h-8 text-sm"
-													/>
+													<div class="flex gap-2">
+														<Input
+															bind:value={item.serialNumber}
+															placeholder="S/N 123456"
+															class="h-8 text-sm"
+														/>
+														<CameraScanButton
+															class="size-8"
+															onscan={(code) => (item.serialNumber = code)}
+														/>
+													</div>
 													<SerialNumberWarning serialNumber={item.serialNumber} paused={saving} />
 												</td>
 											</tr>
@@ -525,20 +538,30 @@
 						<div class="grid grid-cols-2 gap-3">
 							<div class="col-span-2 space-y-2">
 								<Label for="tag-0">Asset Tag</Label>
-								<Input
-									id="tag-0"
-									bind:value={items[0].assetTag}
-									placeholder={nextTag
-										? `Blank: ${nextTag}`
-										: orgPrefix
-											? `${orgPrefix}…`
-											: 'Scan or type the sticker'}
-									class="font-mono"
-								/>
+								<div class="flex gap-2">
+									<Input
+										id="tag-0"
+										bind:value={items[0].assetTag}
+										placeholder={nextTag
+											? `Blank: ${nextTag}`
+											: orgPrefix
+												? `${orgPrefix}…`
+												: 'Scan or type the sticker'}
+										class="font-mono"
+									/>
+									<CameraScanButton onscan={(code) => (items[0].assetTag = code)} />
+								</div>
 							</div>
 							<div class="col-span-2 space-y-2">
 								<Label for="serial-0">Serial Number</Label>
-								<Input id="serial-0" bind:value={items[0].serialNumber} placeholder="S/N 123456" />
+								<div class="flex gap-2">
+									<Input
+										id="serial-0"
+										bind:value={items[0].serialNumber}
+										placeholder="S/N 123456"
+									/>
+									<CameraScanButton onscan={(code) => (items[0].serialNumber = code)} />
+								</div>
 								<SerialNumberWarning serialNumber={items[0].serialNumber} paused={saving} />
 							</div>
 						</div>

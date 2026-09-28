@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { CameraScanButton } from '$lib/components/ui/camera-scan';
 	import { makerAndName } from '$lib/product-label';
 	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
 	import { canManageInventory } from '$lib/roles';
@@ -223,7 +224,10 @@
 					<div class="space-y-2">
 						<Label for="bundle-tag">Tag <span class="text-muted-foreground">(optional)</span></Label
 						>
-						<Input id="bundle-tag" bind:value={bundleTag} placeholder="e.g. Kit A" />
+						<div class="flex gap-2">
+							<Input id="bundle-tag" bind:value={bundleTag} placeholder="e.g. Kit A" />
+							<CameraScanButton onscan={(code) => (bundleTag = code)} />
+						</div>
 						<p class="text-xs text-muted-foreground">
 							Distinguishes this physical instance from others of the same type.
 						</p>

@@ -95,6 +95,7 @@ msgstr "Crew-Ausweise"
 #~ msgid "Booked Equipment"
 #~ msgstr "Gebuchte Geräte"
 
+#: src/lib/components/ui/camera-scan/camera-scan-button.svelte
 #: src/routes/assets/new/cables/+page.svelte
 msgid "Done"
 msgstr "Fertig"
@@ -176,6 +177,7 @@ msgstr "Crew"
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
+#: src/lib/components/ui/camera-scan/camera-scan-button.svelte
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
@@ -11128,3 +11130,15 @@ msgstr "{0} auf anderen Jobs unterwegs."
 #: src/routes/case-check/+page.svelte
 msgid "{0} found. <0/> Saved to the history of every unit in the case."
 msgstr "{0} gefunden. <0/> In der Historie jedes Geräts der Kiste gespeichert."
+
+#: src/lib/components/ui/camera-scan/camera-scan-button.svelte
+msgid "Scan with camera"
+msgstr "Mit Kamera scannen"
+
+#: src/lib/components/ui/camera-scan/camera-scan-button.svelte
+msgid "The camera could not be started. Allow camera access for this site, or type the code."
+msgstr "Die Kamera ließ sich nicht starten. Erlaube den Kamerazugriff für diese Seite oder tippe den Code ein."
+
+#: src/lib/components/ui/camera-scan/camera-scan-button.svelte
+msgid "Hold the label inside the frame."
+msgstr "Halte das Etikett in den Rahmen."

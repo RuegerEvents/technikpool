@@ -11,6 +11,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
+	import { CameraScanButton } from '$lib/components/ui/camera-scan';
 	import StocktakeProgress from '$lib/components/stocktake-progress.svelte';
 	import { getErrorMessage } from '$lib/utils';
 	import {
@@ -72,7 +73,6 @@
 	// Scanning
 
 	let code = $state('');
-	let scanning = $state(false);
 	let scanInput = $state<HTMLInputElement | null>(null);
 	type Feedback = { tone: 'good' | 'warn' | 'bad' | 'info'; title: string; detail?: string };
 	let feedback = $state<Feedback | null>(null);
@@ -103,12 +103,21 @@
 		return `${item.name}${item.assetTag ? ` · ${item.assetTag}` : ''}`;
 	}
 
-	async function handleScan(e: SubmitEvent) {
+	function handleScan(e: SubmitEvent) {
 		e.preventDefault();
-		const value = code.trim();
-		if (!value || scanning) return;
+		enqueue(code);
 		code = '';
-		scanning = true;
+	}
+
+	// One code after another: the camera can read the next label while the
+	// last one is still being looked up.
+	let queue = Promise.resolve();
+	function enqueue(raw: string) {
+		const value = raw.trim();
+		if (value && !result) queue = queue.then(() => submitCode(value));
+	}
+
+	async function submitCode(value: string) {
 		try {
 			if (!ref || !check) {
 				const opened = await findCaseByCode(value);
@@ -139,7 +148,6 @@
 		} catch (err) {
 			feedback = { tone: 'bad', title: getErrorMessage(err), detail: value };
 		} finally {
-			scanning = false;
 			await nextTick();
 			scanInput?.focus();
 		}
@@ -203,7 +211,8 @@
 						placeholder="Asset tag, bundle tag or serial number"
 						disabled={!!result}
 					/>
-					<Button type="submit" disabled={scanning || !code.trim() || !!result}>
+					<CameraScanButton continuous onscan={enqueue} {feedback} disabled={!!result} />
+					<Button type="submit" disabled={!code.trim() || !!result}>
 						{ref ? 'Tick' : 'Open'}
 					</Button>
 				</div>
