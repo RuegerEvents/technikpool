@@ -1,3 +1,9 @@
-• Counting a stocktake: the "Open here" tab gets a search field, every word you type has to appear somewhere in the row, so "schuko 5" finds the 5 m cables. Category chips and rows carry their category's colour.
-• Loose products get a + button that counts one more without a dialog, and the count dialog gets − / + steppers.
-• The stocktake list follows the live inventory: a unit registered or moved into the selection appears, one that leaves it disappears, and a unit returned from a production mid-count has to be counted.
+• Check a case: under Scans › Stocktake, or from a kit member you looked up. Scan the case, then what is inside, and see what is missing; finishing it is noted in every unit's history. The demo has a cable case, K-0001, to try.
+• Every scan answers with one of four tones: done, already done, look at the screen, or that did not work. They can be switched off under Settings.
+• Scanning a unit out of its kit, or an accessory on its own, offers the rest of what it belongs with, when booking and when counting.
+• Admins can give untagged units their stickers, and register new units, by scanning — from a product in Inventory.
+• A stocktake shows what others counted without reopening it, and a count can no longer overwrite one you never saw. Cables show their connectors on the open list.
+• Lookup shows a unit's number (#123), its product's caption and details, and its manuals and datasheets.
+• Settings links the server operator's imprint, privacy policy and terms.
+• Works with Sunmi handhelds' built-in scanner.
+• Names sort naturally: "2m" comes before "10m".
