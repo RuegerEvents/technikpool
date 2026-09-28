@@ -1,9 +1,3 @@
-• Check a case: under Scans › Stocktake, or from a kit member you looked up. Scan the case, then what is inside, and see what is missing; finishing it is noted in every unit's history. The demo has a cable case, K-0001, to try.
-• Every scan answers with one of four tones: done, already done, look at the screen, or that did not work. They can be switched off under Settings.
-• Scanning a unit out of its kit, or an accessory on its own, offers the rest of what it belongs with, when booking and when counting.
-• Admins can give untagged units their stickers, and register new units, by scanning — from a product in Inventory.
-• A stocktake shows what others counted without reopening it, and a count can no longer overwrite one you never saw. Cables show their connectors on the open list.
-• Lookup shows a unit's number (#123), its product's caption and details, and its manuals and datasheets.
-• Settings links the server operator's imprint, privacy policy and terms.
-• Works with Sunmi handhelds' built-in scanner.
-• Names sort naturally: "2m" comes before "10m".
+• Check a production's equipment against its list: tap a production under Scans › Production and choose Check. Scan or tick what is there, section by section, together with others checking at the same time; nothing changes on the devices.
+• Lent equipment: the lending organization checks its units out to the other production, and from a check the production confirms receiving them and later reports them sent back.
+• Tapping a production asks whether to check out to it or check it.
