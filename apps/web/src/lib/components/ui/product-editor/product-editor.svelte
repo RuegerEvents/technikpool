@@ -262,6 +262,25 @@
 	);
 	let imageDirty = $derived(seeded && draft.imagePath.trim() !== (product.imagePath ?? ''));
 
+	// One product per name and maker — `assertProductNameFree` on the server,
+	// said here while typing. A maker being created with this save has no
+	// products yet, so nothing can clash with it.
+	let renameClash = $derived.by(() => {
+		const name = draft.name.trim().toLowerCase();
+		if (!seeded || name === '' || chosenManufacturerId === undefined) return false;
+		if (
+			name === product.name.trim().toLowerCase() &&
+			chosenManufacturerId === product.manufacturerId
+		)
+			return false;
+		return allProducts.some(
+			(p) =>
+				p.id !== product.id &&
+				(p.manufacturerId ?? null) === chosenManufacturerId &&
+				p.name.trim().toLowerCase() === name
+		);
+	});
+
 	// A cable's connectors are its two ends, and a license has none — so a
 	// product turned into either loses its panel on save.
 	let hasPanel = $derived(!draft.cable && !draft.isLicense);
@@ -288,6 +307,10 @@
 		}
 		if (chosenManufacturerId === undefined) {
 			toast.error('Pick a manufacturer from the list, or Generic / unknown manufacturer');
+			return false;
+		}
+		if (renameClash) {
+			toast.error(messageForErrorCode('product_exists', [draft.name.trim()]));
 			return false;
 		}
 		saving = true;
@@ -607,6 +630,11 @@
 			productId={product.id}
 			onMergeTwin={canEdit ? openMerge : undefined}
 		/>
+		{#if renameClash}
+			<p class="mt-2 text-sm text-destructive">
+				{messageForErrorCode('product_exists', [draft.name.trim()])}
+			</p>
+		{/if}
 		<div class="mt-4 space-y-2">
 			<Label for="{idPrefix}-caption"
 				>Caption <span class="text-muted-foreground">(optional)</span></Label

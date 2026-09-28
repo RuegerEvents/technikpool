@@ -11224,3 +11224,8 @@ msgstr "More of <0/> — organization, location, manufacturer and product are ta
 #: src/lib/error-messages.svelte.ts
 msgid "This manufacturer already has a product called \"{0}\"."
 msgstr "This manufacturer already has a product called \"{0}\"."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "Both manufacturers have a product called {0}. Merge those products first."
+msgstr "Both manufacturers have a product called {0}. Merge those products first."

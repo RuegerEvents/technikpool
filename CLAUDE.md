@@ -319,6 +319,11 @@ renaming, recategorizing, merging away, deleting, and replacing a picture:
 - a product nobody holds units of answers to `Product.createdById` alone. Rows older than the
   column have no creator, which leaves them to system admins.
 
+**One product per name and manufacturer**, ignoring case and blanks: the expression index
+`Product_manufacturer_name_key` (raw SQL in its migration — Prisma can't express it and leaves it
+alone), with `assertProductNameFree` (`services/product-name.ts`) in front of it so the user reads
+which name is taken. A new path that creates a product or changes its name or maker calls it.
+
 A **first** picture is open to any MEMBER+, replacing or clearing one is not. Prices are
 per-org (`OrgProductPrice`) and unaffected by any of this.
 

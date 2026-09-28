@@ -71,6 +71,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'A manufacturer needs a name.';
 		case 'manufacturer_exists':
 			return 'A manufacturer with this name already exists. Merge them instead.';
+		case 'manufacturer_merge_product_clash':
+			return `Both manufacturers have a product called ${p0}. Merge those products first.`;
 		case 'manufacturer_merge_self':
 			return 'A manufacturer cannot be merged into itself.';
 		case 'category_name_required':

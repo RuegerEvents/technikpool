@@ -21,6 +21,7 @@ import {
 	writableOrgIds
 } from '$lib/server/services/access';
 import { productControl } from '$lib/server/services/product-control';
+import { assertProductNameFree } from '$lib/server/services/product-name';
 import { tagAllocator } from '$lib/server/services/tag-counter';
 import { assetsWithSerial } from '$lib/server/services/asset-lookup';
 import { fieldChanges, logCatalogChange } from '$lib/server/services/catalog-log';
@@ -361,6 +362,19 @@ export const mergeManufacturers = command(
 			prisma.manufacturer.findUniqueOrThrow({ where: { id: sourceManufacturerId } })
 		]);
 		const movedProducts = await prisma.product.count({ where: { manufacturerId: source.id } });
+		// Two spellings of one maker usually both got the same model entered, and
+		// one manufacturer cannot hold two products of one name. Those have to be
+		// merged first, and the product merge is where the units are sorted out.
+		const [sourceNames, targetNames] = await Promise.all(
+			[source.id, target.id].map((manufacturerId) =>
+				prisma.product.findMany({ where: { manufacturerId }, select: { name: true } })
+			)
+		);
+		const taken = new Set(targetNames.map((p) => p.name.trim().toLowerCase()));
+		const clashes = sourceNames.filter((p) => taken.has(p.name.trim().toLowerCase()));
+		if (clashes.length > 0) {
+			appError(409, 'manufacturer_merge_product_clash', [clashes.map((p) => p.name).join(', ')]);
+		}
 		await prisma.$transaction(async (tx) => {
 			await tx.product.updateMany({
 				where: { manufacturerId: source.id },
@@ -904,6 +918,7 @@ async function resolveProductRef(
 			cable?.connectorB,
 			...ways.flatMap((w) => [w.connectorA, w.connectorB])
 		]);
+		await assertProductNameFree(data.newProductName, manufacturerId);
 		const p = await prisma.product.create({
 			data: {
 				name: data.newProductName,
@@ -1396,6 +1411,9 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 			if (existing) {
 				entry = { productId: existing.id, created: false };
 			} else {
+				// The same ends were not found, so a product of this name is a
+				// different cable — and would be a second entry nobody could tell apart.
+				await assertProductNameFree(row.name, manufacturerId ?? null);
 				const product = await prisma.product.create({
 					data: {
 						name: row.name.trim(),
@@ -2105,6 +2123,14 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		appError(403, 'product_edit_forbidden');
 	}
 
+	if (input.name || input.manufacturerId !== undefined) {
+		await assertProductNameFree(
+			input.name || previousProduct.name,
+			input.manufacturerId !== undefined ? input.manufacturerId : previousProduct.manufacturerId,
+			{ exceptId: input.productId }
+		);
+	}
+
 	// Only now, past the rights check: resolving a name nobody has used before
 	// creates its connector row. Stored and logged in the catalogue's spelling.
 	const connectors =
@@ -2342,17 +2368,8 @@ export const duplicateProduct = command(duplicateProductSchema, async (input) =>
 		}
 	});
 
-	// A copy under the same name is two catalogue entries nobody can tell
-	// apart — every picker would offer both. The editor says so while typing;
-	// this is the backstop.
-	const clash = await prisma.product.findFirst({
-		where: {
-			manufacturerId: source.manufacturerId,
-			name: { equals: input.name, mode: 'insensitive' }
-		},
-		select: { id: true }
-	});
-	if (clash) appError(409, 'product_exists', [input.name]);
+	// The editor says so while typing; this is the backstop.
+	await assertProductNameFree(input.name, source.manufacturerId);
 
 	const copy = await prisma.product.create({
 		data: {
@@ -2862,6 +2879,15 @@ export const revertCatalogChange = command(v.string(), async (entryId: string) =
 	}
 	if (Object.keys(data).length === 0 && !portsRevert && !waysRevert) {
 		appError(409, 'catalog_revert_stale');
+	}
+	// A revert is a rename like any other, and the old name may have been
+	// taken since.
+	if ('name' in data || 'manufacturerId' in data) {
+		await assertProductNameFree(
+			'name' in data ? (data.name as string) : product.name,
+			'manufacturerId' in data ? (data.manufacturerId as string | null) : product.manufacturerId,
+			{ exceptId: product.id }
+		);
 	}
 
 	// The logged ends are names, so they are resolved like a form's — and a

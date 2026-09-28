@@ -45,6 +45,7 @@ export type AppErrorCode =
 	| 'manufacturer_name_required'
 	| 'manufacturer_exists'
 	| 'manufacturer_merge_self'
+	| 'manufacturer_merge_product_clash'
 	| 'category_name_required'
 	| 'category_required'
 	| 'category_exists'
