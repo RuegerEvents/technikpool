@@ -2342,6 +2342,18 @@ export const duplicateProduct = command(duplicateProductSchema, async (input) =>
 		}
 	});
 
+	// A copy under the same name is two catalogue entries nobody can tell
+	// apart — every picker would offer both. The editor says so while typing;
+	// this is the backstop.
+	const clash = await prisma.product.findFirst({
+		where: {
+			manufacturerId: source.manufacturerId,
+			name: { equals: input.name, mode: 'insensitive' }
+		},
+		select: { id: true }
+	});
+	if (clash) appError(409, 'product_exists', [input.name]);
+
 	const copy = await prisma.product.create({
 		data: {
 			name: input.name,

@@ -24,6 +24,7 @@
 	import { categoryLabel } from '$lib/category';
 	import { canWrite } from '$lib/roles';
 	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
+	import { messageForErrorCode } from '$lib/error-messages.svelte';
 	import {
 		deleteProduct,
 		duplicateProduct,
@@ -473,13 +474,27 @@
 	let duplicateName = $state('');
 	let duplicating = $state(false);
 
+	// Same maker, same name — the rule `duplicateProduct` enforces, checked here
+	// so the dialog says it before anyone presses the button.
+	let duplicateClash = $derived.by(() => {
+		const name = duplicateName.trim().toLowerCase();
+		return (
+			name !== '' &&
+			allProducts.some(
+				(p) =>
+					(p.manufacturerId ?? null) === (product.manufacturerId ?? null) &&
+					p.name.trim().toLowerCase() === name
+			)
+		);
+	});
+
 	export function openDuplicate() {
 		duplicateName = product.name;
 		duplicateOpen = true;
 	}
 
 	async function doDuplicate() {
-		if (!duplicateName.trim() || duplicating) return;
+		if (!duplicateName.trim() || duplicateClash || duplicating) return;
 		// The copy is made from what is stored, so edits in the form go first.
 		if (isDirty && !(await save())) return;
 		duplicating = true;
@@ -804,6 +819,21 @@
 <Modal bind:open={duplicateOpen} title="Duplicate product" dismissible={!duplicating}>
 	<!-- Body first, snippets after: see CLAUDE.md, wuchale. -->
 	{#snippet children()}
+		<!-- Duplicate sits next to the product's name, which is where people look
+		     for a way to register one more of it — and end up with a second
+		     catalogue entry instead. Said before they fill anything in. -->
+		<div
+			class="mb-4 rounded-md border border-amber-500/40 bg-amber-50/60 px-3 py-2.5 text-sm dark:bg-amber-950/20"
+		>
+			<p class="font-medium">This copies the product, not a device.</p>
+			<p class="mt-0.5 text-muted-foreground">
+				Only use it for a different model that shares most details. To register more units of this
+				one, <a
+					href="{resolve('/assets/new')}?product={encodeURIComponent(product.id)}"
+					class="font-medium text-foreground underline">add devices</a
+				> instead.
+			</p>
+		</div>
 		<form
 			class="space-y-2"
 			onsubmit={(e) => {
@@ -818,6 +848,11 @@
 				disabled={duplicating}
 				class="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
 			/>
+			{#if duplicateClash}
+				<p class="text-sm text-destructive">
+					{messageForErrorCode('product_exists', [duplicateName.trim()])}
+				</p>
+			{/if}
 			<p class="text-sm text-muted-foreground">
 				Manufacturer, category, picture, connectors and cable details are copied. Prices and units
 				are not. Everything else can be changed on the new product's page.
@@ -831,7 +866,11 @@
 	{/snippet}
 
 	{#snippet footer()}
-		<Button icon="copy" onclick={doDuplicate} disabled={!duplicateName.trim() || duplicating}>
+		<Button
+			icon="copy"
+			onclick={doDuplicate}
+			disabled={!duplicateName.trim() || duplicateClash || duplicating}
+		>
 			{duplicating ? 'Duplicating…' : 'Duplicate'}
 		</Button>
 		<Button

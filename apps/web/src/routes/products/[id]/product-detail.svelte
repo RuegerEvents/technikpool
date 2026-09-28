@@ -24,6 +24,8 @@
 	} from '$lib/remote/assets.remote';
 	import { getMyOrgs } from '$lib/remote/orgs.remote';
 	import { orgLabel } from '$lib/utils';
+	import { canManageInventory } from '$lib/roles';
+	import { Plus } from '@lucide/svelte';
 
 	type Props = { productId: string; isAdmin: boolean; userId: string | undefined };
 
@@ -73,6 +75,15 @@
 			</div>
 			<div class="flex flex-wrap items-center gap-2">
 				<Button icon="back" variant="ghost" href={resolve('/products')}>Back to Products</Button>
+				{#if orgs.some(canManageInventory)}
+					<Button
+						variant="outline"
+						href="{resolve('/assets/new')}?product={encodeURIComponent(product.id)}"
+					>
+						<Plus aria-hidden="true" class="mr-1 size-4" />
+						Add devices
+					</Button>
+				{/if}
 				{#if actions}
 					<ProductActions
 						{actions}

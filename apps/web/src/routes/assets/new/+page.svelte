@@ -81,6 +81,20 @@
 	let categoriesQuery = $derived(getCategories());
 	let categories = $derived(categoriesQuery.current ?? []);
 
+	// `?product=` — "Add devices" on a product's page, and the hint in its
+	// Duplicate dialog. Only the product is known, so the org stays whatever the
+	// picker defaults to.
+	let productFromId = $derived(page.url.searchParams.get('product'));
+	let productsQuery = $derived(productFromId ? getProducts() : null);
+	let productFrom = $derived(productsQuery?.current?.find((p) => p.id === productFromId) ?? null);
+	let productPrefilled = $state(false);
+	$effect(() => {
+		if (!productFrom || productPrefilled) return;
+		manufacturer = manufacturerSelection(productFrom.manufacturer);
+		product = { id: productFrom.id, name: productFrom.name };
+		productPrefilled = true;
+	});
+
 	let duplicatePrefilled = $state(false);
 	$effect(() => {
 		if (!duplicateSource || duplicatePrefilled) return;
@@ -203,6 +217,35 @@
 		}
 	}
 
+	// A list of tags in one go — pasted from a spreadsheet, or scanned one after
+	// another with a handheld in keyboard mode, which ends every code with Enter.
+	// Each line becomes a unit; serial numbers typed so far stay on their row.
+	let tagListOpen = $state(false);
+	let tagListText = $state('');
+	let tagList = $derived(
+		tagListText
+			.split(/\r?\n/)
+			.map((line) => line.trim())
+			.filter(Boolean)
+	);
+
+	function openTagList() {
+		tagListText = items
+			.map((item) => item.assetTag.trim())
+			.filter(Boolean)
+			.join('\n');
+		tagListOpen = true;
+	}
+
+	function applyTagList() {
+		if (tagList.length === 0 || tagList.length > 50) return;
+		const serials = items.map((item) => item.serialNumber);
+		quantity = tagList.length;
+		items = tagList.map((assetTag, i) => ({ assetTag, serialNumber: serials[i] ?? '' }));
+		noAssetTag = false;
+		tagListOpen = false;
+	}
+
 	let createMore = $state(browser ? localStorage.getItem('asset_create_more') === 'true' : false);
 
 	$effect(() => {
@@ -310,9 +353,9 @@
 
 	{#if duplicateSource}
 		<div class="max-w-3xl rounded-md border bg-muted/40 px-4 py-3 text-sm">
-			Duplicating <span class="font-medium">{productLabel(duplicateSource.product)}</span>
-			— organization, location, manufacturer and product are prefilled. Serial number and asset tag are
-			left blank.
+			More of <span class="font-medium">{productLabel(duplicateSource.product)}</span>
+			— organization, location, manufacturer and product are taken from the unit you came from. Serial
+			number and asset tag are left blank.
 		</div>
 	{/if}
 
@@ -476,6 +519,15 @@
 						No asset tag (e.g. cables, consumables)
 					</label>
 
+					{#if !noAssetTag}
+						<button
+							type="button"
+							onclick={openTagList}
+							class="text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+							>Paste or scan a list of tags…</button
+						>
+					{/if}
+
 					{#if quantity > 1}
 						{#if !noAssetTag}
 							<div class="overflow-x-auto rounded-lg border">
@@ -604,5 +656,37 @@
 	{#snippet footer()}
 		<Button icon="add" type="button" onclick={confirmNewProduct}>Add Product</Button>
 		<Button icon="close" type="button" variant="outline" onclick={cancelNewProduct}>Cancel</Button>
+	{/snippet}
+</Modal>
+
+<Modal bind:open={tagListOpen} title="List of asset tags" size="md">
+	<!-- Body first, snippets after: see CLAUDE.md, wuchale. -->
+	{#snippet children()}
+		<div class="space-y-2">
+			<textarea
+				bind:value={tagListText}
+				rows="10"
+				aria-label="Asset tags"
+				placeholder="One tag per line"
+				class="w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+			></textarea>
+			<p class="text-sm text-muted-foreground">
+				{#if tagList.length > 50}
+					At most 50 devices at a time.
+				{:else}
+					{plural(tagList.length, ['# device', '# devices'])}
+				{/if}
+			</p>
+		</div>
+	{/snippet}
+	{#snippet description()}
+		One tag per line. Paste them, or scan one after another with a handheld scanner — each scan ends
+		the line. Every line becomes a device.
+	{/snippet}
+	{#snippet footer()}
+		<Button disabled={tagList.length === 0 || tagList.length > 50} onclick={applyTagList}
+			>Apply</Button
+		>
+		<Button icon="close" variant="outline" onclick={() => (tagListOpen = false)}>Cancel</Button>
 	{/snippet}
 </Modal>

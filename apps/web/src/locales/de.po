@@ -206,6 +206,7 @@ msgstr "Crew"
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
+#: src/routes/assets/new/+page.svelte
 #: src/routes/inspections/+page.svelte
 #: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/invoices/[id]/invoice-detail.svelte
@@ -3492,9 +3493,8 @@ msgstr "Wird gespeichert..."
 msgid "Save new password"
 msgstr "Neues Passwort speichern"
 
-#: src/routes/assets/new/+page.svelte
-msgid "Duplicating <0/> — organization, location, manufacturer and product are prefilled. Serial number and asset tag are left blank."
-msgstr "Dupliziert <0/> — Organisation, Standort, Hersteller und Produkt sind vorausgefüllt. Seriennummer und Anlagen-Tag bleiben leer."
+#~ msgid "Duplicating <0/> — organization, location, manufacturer and product are prefilled. Serial number and asset tag are left blank."
+#~ msgstr "Dupliziert <0/> — Organisation, Standort, Hersteller und Produkt sind vorausgefüllt. Seriennummer und Anlagen-Tag bleiben leer."
 
 #: src/lib/components/ui/product-editor/product-actions.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
@@ -4313,6 +4313,7 @@ msgid "Applying…"
 msgstr "Wird übernommen…"
 
 #: src/lib/components/ui/bulk-actions-bar.svelte
+#: src/routes/assets/new/+page.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Apply"
 msgstr "Übernehmen"
@@ -8407,9 +8408,8 @@ msgstr[1] "Unvollständig — # Einheiten fehlen zum Kit"
 msgid "Missing: {0}"
 msgstr "Fehlt: {0}"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "<0/> Duplicate"
-msgstr "<0/> Duplizieren"
+#~ msgid "<0/> Duplicate"
+#~ msgstr "<0/> Duplizieren"
 
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "<0/> Delete"
@@ -10246,6 +10246,7 @@ msgid "Enter the asset tag, or tick \"No asset tag\"."
 msgstr "Inventarnummer eingeben oder „Keine Inventarnummer“ ankreuzen."
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/routes/assets/new/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Asset tags"
 msgstr "Inventarnummern"
@@ -11141,6 +11142,7 @@ msgstr "Halte das Etikett in den Rahmen."
 
 #: src/routes/+page.svelte
 #: src/routes/approval-request-modal.svelte
+#: src/routes/assets/new/+page.svelte
 msgid "# device"
 msgid_plural "# devices"
 msgstr[0] "# Gerät"
@@ -11177,3 +11179,48 @@ msgstr "Einige Einheiten genehmigen"
 #: src/routes/approval-request-modal.svelte
 msgid "Decline some units"
 msgstr "Einige Einheiten ablehnen"
+
+#: src/routes/assets/new/+page.svelte
+msgid "Paste or scan a list of tags…"
+msgstr "Liste von Inventarnummern einfügen oder scannen…"
+
+#: src/routes/assets/new/+page.svelte
+msgid "List of asset tags"
+msgstr "Liste von Inventarnummern"
+
+#: src/routes/assets/new/+page.svelte
+msgid "One tag per line"
+msgstr "Eine Inventarnummer pro Zeile"
+
+#: src/routes/assets/new/+page.svelte
+msgid "At most 50 devices at a time."
+msgstr "Höchstens 50 Geräte auf einmal."
+
+#: src/routes/assets/new/+page.svelte
+msgid "One tag per line. Paste them, or scan one after another with a handheld scanner — each scan ends the line. Every line becomes a device."
+msgstr "Eine Inventarnummer pro Zeile. Einfügen oder mit einem Handscanner nacheinander scannen — jeder Scan beendet die Zeile. Aus jeder Zeile wird ein Gerät."
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "<0/> Add devices"
+msgstr "<0/> Geräte hinzufügen"
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "This copies the product, not a device."
+msgstr "Das kopiert das Produkt, nicht ein Gerät."
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Only use it for a different model that shares most details. To register more units of this one, <0>add devices</0> instead."
+msgstr "Nur für ein anderes Modell mit weitgehend gleichen Angaben gedacht. Um weitere Geräte dieses Produkts zu erfassen, stattdessen <0>Geräte hinzufügen</0>."
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Add devices"
+msgstr "Geräte hinzufügen"
+
+#: src/routes/assets/new/+page.svelte
+msgid "More of <0/> — organization, location, manufacturer and product are taken from the unit you came from. Serial number and asset tag are left blank."
+msgstr "Weitere <0/> — Organisation, Standort, Hersteller und Produkt stammen von dem Gerät, von dem Sie kommen. Seriennummer und Asset-Tag bleiben leer."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "This manufacturer already has a product called \"{0}\"."
+msgstr "Dieser Hersteller hat bereits ein Produkt namens „{0}“."

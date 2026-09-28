@@ -49,6 +49,7 @@ export type AppErrorCode =
 	| 'category_required'
 	| 'category_exists'
 	| 'product_required'
+	| 'product_exists'
 	| 'product_has_units'
 	| 'product_merge_self'
 	| 'product_accessory_self'

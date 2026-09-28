@@ -36,7 +36,6 @@
 		Building2,
 		CalendarDays,
 		ClipboardCheck,
-		Copy,
 		Ellipsis,
 		Euro,
 		Factory,
@@ -58,6 +57,8 @@
 	} from '$lib/components/ui/product-fields';
 	import { DropdownMenu } from 'bits-ui';
 	import { resolve } from '$app/paths';
+	import { getMyOrgs } from '$lib/remote/orgs.remote';
+	import { canManageInventory } from '$lib/roles';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import {
@@ -99,6 +100,9 @@
 
 	let { assetId }: { assetId: string } = $props();
 	let asset = $derived(await getAsset(assetId));
+	// Whoever may register equipment somewhere gets "Add devices": the form
+	// starts as a copy of this unit and lets them pick one of their orgs.
+	let canAddDevices = $derived((await getMyOrgs()).some(canManageInventory));
 	let history = $derived(await getAssetHistory(assetId));
 	let locations = $derived(await getLocations(asset.organizationId));
 	let categories = $derived(await getCategories());
@@ -612,6 +616,13 @@
 						class="hidden sm:inline-flex"
 						href={resolve('/assets')}>Back to Devices</Button
 					>
+					{#if canAddDevices}
+						<Button
+							icon="add"
+							variant="outline"
+							href={resolve(`/assets/new?duplicateFrom=${asset.id}`)}>Add devices</Button
+						>
+					{/if}
 					<DropdownMenu.Root>
 						<DropdownMenu.Trigger>
 							{#snippet child({ props })}
@@ -631,14 +642,6 @@
 								sideOffset={4}
 								class="z-50 min-w-[190px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
 							>
-								<DropdownMenu.Item
-									onSelect={() => goto(resolve(`/assets/new?duplicateFrom=${asset.id}`))}
-									class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
-								>
-									<Copy class="size-4" />
-									Duplicate
-								</DropdownMenu.Item>
-								<DropdownMenu.Separator class="my-1 h-px bg-border" />
 								<DropdownMenu.Item
 									onSelect={() => (confirmingDelete = true)}
 									class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-destructive transition-colors outline-none hover:bg-destructive/10 data-[highlighted]:bg-destructive/10"

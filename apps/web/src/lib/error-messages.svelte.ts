@@ -79,6 +79,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'A category is required for a new product.';
 		case 'category_exists':
 			return `Another category is already called "${p0}".`;
+		case 'product_exists':
+			return `This manufacturer already has a product called "${p0}".`;
 		case 'product_required':
 			return 'A product is required.';
 		case 'product_has_units':
