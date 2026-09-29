@@ -41,6 +41,13 @@ ctx.onmessage = async (event: MessageEvent<BackgroundRemovalRequest>) => {
 			// static/imgly at build). The default is IMG.LY's CDN, which would send
 			// every user's IP address to a third party.
 			publicPath: new URL('/imgly/', self.location.origin).href,
+			// The chunks are named by their SHA-256, so a cached copy can never be
+			// the wrong one. adapter-node serves static/ with no Cache-Control and an
+			// ETag built from the file's mtime, which every image build resets — so
+			// without this each release, and every heuristic expiry in between, sent
+			// the browser back for 176 MB it already had. Only the chunks go through
+			// fetchArgs; resources.json is fetched plainly and stays current.
+			fetchArgs: { cache: 'force-cache' },
 			progress: (stage, current, total) => reply({ kind: 'progress', stage, current, total })
 		});
 		reply({ kind: 'done', result });
