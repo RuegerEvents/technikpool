@@ -1,5 +1,15 @@
 [
 	{
+		"version": "0.25.1",
+		"date": "2026-09-29",
+		"en": [
+			"The background-removal model stays in the browser after its first download instead of being fetched again after every update."
+		],
+		"de": [
+			"Das Modell fürs Freistellen bleibt nach dem ersten Download im Browser, statt nach jedem Update neu geladen zu werden."
+		]
+	},
+	{
 		"version": "0.25.0",
 		"date": "2026-09-29",
 		"en": [
