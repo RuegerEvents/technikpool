@@ -21,6 +21,8 @@ export type AppErrorCode =
 	| 'not_org_member'
 	| 'org_manage_forbidden'
 	| 'billing_manage_forbidden'
+	| 'billing_not_lender'
+	| 'customer_required'
 	| 'production_delete_forbidden'
 	| 'production_cancel_forbidden'
 	| 'asset_create_forbidden'
@@ -141,6 +143,7 @@ export type AppErrorCode =
 	| 'production_not_cancelled'
 	| 'cancellation_reason_required'
 	| 'booking_not_pending'
+	| 'no_draft_loans'
 	| 'booking_not_approved'
 	// Offers and invoices
 	| 'offer_immutable'

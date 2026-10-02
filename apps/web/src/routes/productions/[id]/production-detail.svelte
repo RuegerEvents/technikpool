@@ -27,7 +27,7 @@
 	import { getMyOrgs, getOrgUsers } from '#lib/remote/orgs.remote.js';
 	import { getOffersForProduction, getInvoicesForProduction } from '#lib/remote/offers.remote.js';
 	import { supersededOfferIds } from '#lib/offer-versions.js';
-	import { ROLE_FOR, roleAtLeast, type OrgRole } from '#lib/roles.js';
+	import { ROLE_FOR, canManageInventory, roleAtLeast, type OrgRole } from '#lib/roles.js';
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
@@ -41,9 +41,21 @@
 	import { DropdownMenu } from 'bits-ui';
 	import { LicenseRevealModal } from '#lib/components/ui/license-credentials/index.js';
 	import CopyEquipmentModal from './copy-equipment-modal.svelte';
+	import LoanRequestModal from './loan-request-modal.svelte';
+	import {
+		getBillingDismissals,
+		getBillingTodos,
+		restoreBillingTodo
+	} from '#lib/remote/billing.remote.js';
+	import { BillingTodoActions } from '#lib/components/billing-todo/index.js';
 	import CheckButton from './check-button.svelte';
 	import HandoutButtons from './handout-buttons.svelte';
-	import { accessorySummary, nestAccessories, type Nested } from '#lib/production-items.js';
+	import {
+		accessorySummary,
+		draftLenders,
+		nestAccessories,
+		type Nested
+	} from '#lib/production-items.js';
 	import { SheetDownload } from '#lib/equipment-sheet-download.svelte.js';
 	import { SheetProgress } from '#lib/components/sheet-progress/index.js';
 
@@ -163,11 +175,63 @@
 	);
 	let canEdit = $derived(!!role && roleAtLeast(role, ROLE_FOR.write));
 	let canPlan = $derived(canEdit && !cancelled);
+
+	let loanRequestOpen = $state(false);
+	let draftLenderList = $derived(draftLenders(production.items));
+	let draftCount = $derived(draftLenderList.reduce((sum, l) => sum + l.units, 0));
 	// Deleting it, and its offers and invoices — which are read by the org's
 	// billing admins only (see `billingOrgIds` in offers.remote.ts), so nobody
 	// else is shown the section or has the queries run on their behalf.
 	let canManage = $derived(!!role && roleAtLeast(role, ROLE_FOR.inventory));
-	let offers = $derived(canManage ? await getOffersForProduction(productionId) : []);
+	// The orgs of this user's that lend units here and may bill for them — a
+	// lender's offers and invoices to this production's org live on this page too.
+	let myBillingOrgIds = $derived(
+		new Set(
+			(await getMyOrgs())
+				.filter((org) => page.data.isAdmin || canManageInventory(org))
+				.map((org) => org.id)
+		)
+	);
+	let myLendingOrgs = $derived(
+		ownerOrgs.filter(
+			(org) =>
+				org.id !== production.organizationId &&
+				myBillingOrgIds.has(org.id) &&
+				production.items.some(
+					(i) =>
+						i.asset.organizationId === org.id &&
+						['PENDING', 'APPROVED', 'CHECKED_OUT', 'RETURNED'].includes(i.status)
+				)
+		)
+	);
+	let readsDocuments = $derived(canManage || myLendingOrgs.length > 0);
+	// The reminder to invoice this production, for each org of the user's that
+	// bills it, and the ones that marked it settled outside the app. Not
+	// awaited — the page is whole without them.
+	let billingTodosQuery = $derived(readsDocuments ? getBillingTodos() : null);
+	let billingHere = $derived(
+		(billingTodosQuery?.current ?? []).filter((t) => t.productionId === productionId)
+	);
+	let dismissalsQuery = $derived(readsDocuments ? getBillingDismissals(productionId) : null);
+	let dismissals = $derived(dismissalsQuery?.current ?? []);
+	async function restoreBilling(organizationId: string) {
+		try {
+			await restoreBillingTodo({ productionId, organizationId });
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		}
+	}
+	let allOffers = $derived(readsDocuments ? await getOffersForProduction(productionId) : []);
+	let allInvoices = $derived(readsDocuments ? await getInvoicesForProduction(productionId) : []);
+	// The production's own documents to its customer…
+	let offers = $derived(allOffers.filter((o) => o.organizationId === production.organizationId));
+	// …and those between a lender and this production's org, either way round.
+	let loanOffers = $derived(
+		allOffers.filter((o) => o.organizationId !== production.organizationId)
+	);
+	let loanInvoices = $derived(
+		allInvoices.filter((i) => i.organizationId !== production.organizationId)
+	);
 	// Who else may open it, for the org that runs it — a lender is not told who
 	// else is looking. Not awaited: the page is whole without it.
 	let audienceQuery = $derived(
@@ -180,7 +244,9 @@
 	// leads there. A second, unrelated offer is rare and moves to the menu.
 	// Newest first (see `getOffersForProduction`), so this is the latest current one.
 	let currentOffer = $derived(offers.find((offer) => !supersededOffers.has(offer.id)));
-	let invoices = $derived(canManage ? await getInvoicesForProduction(productionId) : []);
+	let invoices = $derived(
+		allInvoices.filter((i) => i.organizationId === production.organizationId)
+	);
 
 	function fmtEUR(n: number): string {
 		return n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
@@ -461,6 +527,7 @@
 	}
 
 	const statusClass: Record<string, string> = {
+		DRAFT: 'border border-dashed border-muted-foreground/50 text-muted-foreground',
 		APPROVED: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
 		PENDING: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
 		CHECKED_OUT: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
@@ -469,6 +536,7 @@
 	};
 
 	const statusLabels: Record<string, string> = {
+		DRAFT: 'Noted',
 		APPROVED: 'Approved',
 		PENDING: 'Pending',
 		CHECKED_OUT: 'Checked out',
@@ -791,6 +859,38 @@
 			{/if}
 		</div>
 	{/if}
+
+	{#each billingHere as todo (todo.organizationId)}
+		<div
+			class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-500/40 bg-amber-50/60 px-4 py-3 text-sm dark:bg-amber-950/20"
+		>
+			<p>
+				<span class="font-medium">Not invoiced yet.</span>
+				{#if todo.side === 'lender'}
+					{todo.organizationName} has lent equipment to this production and has not sent {todo.recipientName}
+					an invoice.
+				{:else}
+					The equipment has gone out or the production is over, and {todo.organizationName} has not sent
+					an invoice.
+				{/if}
+			</p>
+			<BillingTodoActions {todo} />
+		</div>
+	{/each}
+	{#each dismissals as d (d.organizationId)}
+		<p class="text-xs text-muted-foreground">
+			{#if d.dismissedBy}
+				{d.organizationName}: marked as settled outside the app by {d.dismissedBy}.
+			{:else}
+				{d.organizationName}: marked as settled outside the app.
+			{/if}
+			<button
+				type="button"
+				class="underline underline-offset-2 hover:text-foreground"
+				onclick={() => restoreBilling(d.organizationId)}>Remind again</button
+			>
+		</p>
+	{/each}
 
 	{#if !role}
 		<!-- Nobody outside the org reaches this page but a lender (or a system
@@ -1120,6 +1220,20 @@
 				{/if}
 			</div>
 
+			{#if canPlan && draftCount > 0}
+				<div
+					class="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed px-4 py-3 text-sm"
+				>
+					<p class="text-muted-foreground">
+						{plural(draftCount, [
+							'# device from other organizations is noted but not requested yet.',
+							'# devices from other organizations are noted but not requested yet.'
+						])}
+					</p>
+					<Button size="sm" onclick={() => (loanRequestOpen = true)}>Request…</Button>
+				</div>
+			{/if}
+
 			{#if ownerChoices.length > 0}
 				<div class="mb-3 flex w-fit flex-wrap gap-1 rounded-md border p-1 text-sm">
 					<button
@@ -1321,6 +1435,12 @@
 															item.status
 														] ?? ''}">{statusLabels[item.status] ?? item.status}</span
 													>
+													{#if item.freeOfCharge}
+														<span
+															class="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground"
+															title="The owner lends it free of charge">Free</span
+														>
+													{/if}
 													{#if item.status === 'CHECKED_OUT' && item.asset.organizationId !== production.organizationId}
 														{#if item.returnReportedAt}
 															<span
@@ -1454,6 +1574,110 @@
 									</a>
 								{/each}
 							</div>
+						{/if}
+					</Card.Content>
+				</Card.Root>
+			{/if}
+
+			{#if myLendingOrgs.length > 0 || (canManage && (loanOffers.length > 0 || loanInvoices.length > 0))}
+				<Card.Root>
+					<Card.Header>
+						<Card.Title>Lent equipment</Card.Title>
+						<Card.Description
+							>Offers and invoices between lenders and {orgLabel(
+								production.organization
+							)}.</Card.Description
+						>
+					</Card.Header>
+					<Card.Content class="space-y-4">
+						{#each myLendingOrgs as org (org.id)}
+							{@const ownOffers = loanOffers.filter((o) => o.organizationId === org.id)}
+							{@const ownInvoices = loanInvoices.filter((i) => i.organizationId === org.id)}
+							<div class="space-y-2">
+								<p class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+									{org.label} → {orgLabel(production.organization)}
+								</p>
+								{#each ownOffers as offer (offer.id)}
+									<a
+										href={resolve(`offers/${offer.id}`)}
+										class="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
+									>
+										<span class="min-w-0 truncate"
+											>Offer {offer.number}
+											<span class="text-xs text-muted-foreground"
+												>· {offer.finalizedAt ? 'Sent' : 'Draft'}</span
+											></span
+										>
+										<span class="shrink-0 font-medium tabular-nums"
+											>{fmtEUR(offerTotal(offer))}</span
+										>
+									</a>
+								{/each}
+								{#each ownInvoices as invoice (invoice.id)}
+									<a
+										href={resolve(`invoices/${invoice.id}`)}
+										class="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
+									>
+										<span class="min-w-0 truncate"
+											>Invoice {invoice.number}
+											<span class="text-xs text-muted-foreground"
+												>· {invoice.sentAt ? 'Sent' : 'Draft'}</span
+											></span
+										>
+										<span class="shrink-0 font-medium tabular-nums"
+											>{fmtEUR(invoiceTotal(invoice))}</span
+										>
+									</a>
+								{/each}
+								{#if ownOffers.length === 0}
+									<Button
+										icon="add"
+										size="sm"
+										variant="outline"
+										href={resolve(`offers/new?productionId=${production.id}&org=${org.id}`)}
+										>Offer to {orgLabel(production.organization)}</Button
+									>
+								{/if}
+							</div>
+						{/each}
+						{#if canManage}
+							{@const received = [
+								...loanOffers.map((o) => ({
+									kind: 'offers' as const,
+									doc: o,
+									total: offerTotal(o)
+								})),
+								...loanInvoices.map((i) => ({
+									kind: 'invoices' as const,
+									doc: i,
+									total: invoiceTotal(i)
+								}))
+							].filter((r) => r.doc.recipientOrganizationId === production.organizationId)}
+							{#if received.length > 0}
+								<div class="space-y-2">
+									<p class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+										From lenders
+									</p>
+									{#each received as r (r.doc.id)}
+										<!-- eslint-disable svelte/no-navigation-without-resolve -->
+										<a
+											href={`/api/billing-documents/${r.kind}/${r.doc.id}`}
+											target="_blank"
+											class="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
+										>
+											<!-- eslint-enable svelte/no-navigation-without-resolve -->
+											<span class="min-w-0 truncate"
+												>{r.kind === 'offers' ? 'Offer' : 'Invoice'}
+												{r.doc.number}
+												<span class="text-xs text-muted-foreground"
+													>· {orgLabel(r.doc.organization)}</span
+												></span
+											>
+											<span class="shrink-0 font-medium tabular-nums">{fmtEUR(r.total)}</span>
+										</a>
+									{/each}
+								</div>
+							{/if}
 						{/if}
 					</Card.Content>
 				</Card.Root>
@@ -1618,6 +1842,7 @@
 />
 
 {#if canPlan}
+	<LoanRequestModal {productionId} lenders={draftLenderList} bind:open={loanRequestOpen} />
 	<CopyEquipmentModal
 		{productionId}
 		organizationId={production.organizationId}

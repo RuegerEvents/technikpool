@@ -134,6 +134,7 @@ export const getProductions = query(v.optional(v.string()), async (organizationI
 					.filter(
 						(item) =>
 							item.status !== 'DECLINED' &&
+							item.status !== 'DRAFT' &&
 							item.asset.organizationId !== production.organizationId &&
 							lenders.has(item.asset.organizationId)
 					)
@@ -464,6 +465,8 @@ export const cancelProduction = command(cancelProductionSchema, async (input) =>
 			where: { id: production.id },
 			data: { cancelledAt: new Date(), cancellationReason: reason, cancelledById: user.id }
 		});
+		// Unsent loans were never anyone's business but this production's.
+		await tx.productionItem.deleteMany({ where: { productionId: production.id, status: 'DRAFT' } });
 		await tx.productionItem.updateMany({
 			where: { id: { in: items.map((i) => i.id) } },
 			data: { status: 'CANCELLED' }
@@ -903,12 +906,10 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 		}
 	}
 
+	// Another org's unit is only noted (DRAFT) until the list is sent with
+	// `sendLoanRequests` — the lender hears of it then, not unit by unit.
 	const isCrossOrg = production.organizationId !== asset.organizationId;
-	const initialStatus = isCrossOrg ? 'PENDING' : 'APPROVED';
-
-	const orgsToNotify = isCrossOrg
-		? await getOrgIdsNeedingApprovalNotification(data.productionId, [asset.organizationId])
-		: [];
+	const initialStatus = isCrossOrg ? 'DRAFT' : 'APPROVED';
 
 	// Whatever is attached to it is booked with it — see
 	// src/lib/server/services/accessories.ts. No conflict check of its own: an
@@ -934,39 +935,149 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 		});
 	}
 
-	await prisma.assetTransaction.create({
-		data: {
-			assetId: data.assetId,
-			userId: user.id,
-			productionId: data.productionId,
-			action: isCrossOrg ? 'REQUESTED' : 'ADDED_TO_PRODUCTION',
-			data: isCrossOrg
-				? ({
-						type: 'REQUESTED',
-						productionId: data.productionId,
-						productionName: production.name,
-						requestingOrgId: production.organization.id,
-						requestingOrgName: production.organization.name
-					} satisfies RequestedData)
-				: ({
-						type: 'ADDED_TO_PRODUCTION',
-						productionId: data.productionId,
-						productionName: production.name
-					} satisfies AddedToProductionData)
-		}
-	});
-
-	if (orgsToNotify.length > 0) {
-		await notifyPendingApproval(
-			data.productionId,
-			production.name,
-			production.organization.name,
-			orgsToNotify
-		);
+	// A draft goes into the unit's history when it is sent, as REQUESTED.
+	if (!isCrossOrg) {
+		await prisma.assetTransaction.create({
+			data: {
+				assetId: data.assetId,
+				userId: user.id,
+				productionId: data.productionId,
+				action: 'ADDED_TO_PRODUCTION',
+				data: {
+					type: 'ADDED_TO_PRODUCTION',
+					productionId: data.productionId,
+					productionName: production.name
+				} satisfies AddedToProductionData
+			}
+		});
 	}
 
 	await refreshProduction(data.productionId);
 	return item;
+});
+
+const sendLoanRequestsSchema = v.object({
+	productionId: v.string(),
+	unpaid: v.boolean(),
+	note: v.optional(v.string())
+});
+
+/**
+ * Sends the production's noted loans (DRAFT) to their lenders: one
+ * LoanRequest per lending org, carrying the "unpaid, please lend for free"
+ * flag and the note, and the units turn PENDING. A unit booked elsewhere for
+ * the same days since it was noted, or no longer bookable, stays a draft and
+ * is counted in `held`, so the user sees it on the list rather than losing it.
+ */
+export const sendLoanRequests = command(sendLoanRequestsSchema, async (data) => {
+	const production = await prisma.production.findUniqueOrThrow({
+		where: { id: data.productionId },
+		include: { organization: { select: { id: true, name: true } } }
+	});
+	const user = await requireOrgWrite(production.organizationId);
+	requireOpenProduction(production);
+	const note = data.note?.trim() || null;
+
+	const { sent, held } = await prisma.$transaction(async (tx) => {
+		await tx.$queryRaw`SELECT 1 FROM "Production" WHERE id = ${production.id} FOR UPDATE`;
+		const drafts = await tx.productionItem.findMany({
+			where: { productionId: production.id, status: 'DRAFT' },
+			select: {
+				id: true,
+				assetId: true,
+				sourceParentAssetId: true,
+				asset: { select: { organizationId: true, status: true } }
+			}
+		});
+		if (drafts.length === 0) appError(409, 'no_draft_loans');
+
+		const taken = new Set<string>();
+		if (production.startDate && production.endDate) {
+			const clashes = await tx.productionItem.findMany({
+				where: {
+					assetId: { in: drafts.map((i) => i.assetId) },
+					productionId: { not: production.id },
+					status: { in: ['PENDING', 'APPROVED', 'CHECKED_OUT'] },
+					production: {
+						AND: [
+							{ startDate: { not: null } },
+							{ endDate: { not: null } },
+							{ startDate: { lte: production.endDate } },
+							{ endDate: { gte: production.startDate } }
+						]
+					}
+				},
+				select: { assetId: true }
+			});
+			for (const clash of clashes) taken.add(clash.assetId);
+		}
+		const lost = new Set(
+			drafts
+				.filter((i) => taken.has(i.assetId) || !isBookableStatus(i.asset.status))
+				.map((i) => i.assetId)
+		);
+		// An accessory goes where its parent goes.
+		const isHeld = (i: (typeof drafts)[number]) =>
+			lost.has(i.assetId) || (!!i.sourceParentAssetId && lost.has(i.sourceParentAssetId));
+		const sent = drafts.filter((i) => !isHeld(i));
+		const held = drafts.filter(isHeld);
+
+		const byOrg = new Map<string, typeof sent>();
+		for (const item of sent) {
+			const list = byOrg.get(item.asset.organizationId);
+			if (list) list.push(item);
+			else byOrg.set(item.asset.organizationId, [item]);
+		}
+		for (const [organizationId, items] of byOrg) {
+			const request = await tx.loanRequest.create({
+				data: {
+					productionId: production.id,
+					organizationId,
+					unpaid: data.unpaid,
+					note,
+					requestedById: user.id
+				}
+			});
+			await tx.productionItem.updateMany({
+				where: { id: { in: items.map((i) => i.id) } },
+				data: { status: 'PENDING', loanRequestId: request.id }
+			});
+		}
+		await tx.assetTransaction.createMany({
+			data: sent.map((item) => ({
+				assetId: item.assetId,
+				userId: user.id,
+				productionId: production.id,
+				action: 'REQUESTED',
+				data: {
+					type: 'REQUESTED',
+					productionId: production.id,
+					productionName: production.name,
+					requestingOrgId: production.organization.id,
+					requestingOrgName: production.organization.name
+				} satisfies RequestedData
+			}))
+		});
+		return { sent, held };
+	});
+
+	if (sent.length > 0) {
+		await notifyPendingApproval(
+			production.id,
+			production.name,
+			production.organization.name,
+			[...new Set(sent.map((i) => i.asset.organizationId))],
+			{ unpaid: data.unpaid, note }
+		);
+	}
+
+	await Promise.all([refreshProduction(production.id), getAwaitingApprovals().refresh()]);
+	// Units as the list counts them: an accessory travels inside its parent.
+	const units = (items: typeof sent) =>
+		items.filter(
+			(i) => !i.sourceParentAssetId || !items.some((p) => p.assetId === i.sourceParentAssetId)
+		).length;
+	return { sent: units(sent), held: units(held) };
 });
 
 // Approving and declining answer a whole selection in one call. They used to
@@ -975,7 +1086,11 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 // one "all reviewed" mail per unit. Now the productions involved are locked
 // for the length of the transaction, so exactly one batch sees a queue go from
 // open to empty — and only that batch reports it.
-async function reviewProductionItems(itemIds: string[], decision: 'APPROVED' | 'DECLINED') {
+async function reviewProductionItems(
+	itemIds: string[],
+	decision: 'APPROVED' | 'DECLINED',
+	freeOfCharge = false
+) {
 	const user = await requireAuth();
 
 	const requested = await prisma.productionItem.findMany({
@@ -1008,7 +1123,7 @@ async function reviewProductionItems(itemIds: string[], decision: 'APPROVED' | '
 
 		await tx.productionItem.updateMany({
 			where: { id: { in: reviewed.map((item) => item.id) } },
-			data: { status: decision }
+			data: { status: decision, freeOfCharge: decision === 'APPROVED' && freeOfCharge }
 		});
 		await tx.assetTransaction.createMany({
 			data: reviewed.map((item) => ({
@@ -1019,7 +1134,8 @@ async function reviewProductionItems(itemIds: string[], decision: 'APPROVED' | '
 				data: {
 					type: decision,
 					productionId: item.productionId,
-					productionName: item.production.name
+					productionName: item.production.name,
+					...(decision === 'APPROVED' && freeOfCharge ? { freeOfCharge: true } : {})
 				}
 			}))
 		});
@@ -1067,8 +1183,11 @@ async function reviewProductionItems(itemIds: string[], decision: 'APPROVED' | '
 	return { reviewed: reviewed.length };
 }
 
-export const approveProductionItems = command(v.array(v.string()), (itemIds: string[]) =>
-	reviewProductionItems(itemIds, 'APPROVED')
+// `freeOfCharge`: the lender lends these for nothing — they stay off the
+// lender's invoice and cost the borrower nothing (see ProductionItem).
+export const approveProductionItems = command(
+	v.object({ itemIds: v.array(v.string()), freeOfCharge: v.optional(v.boolean()) }),
+	({ itemIds, freeOfCharge }) => reviewProductionItems(itemIds, 'APPROVED', freeOfCharge ?? false)
 );
 
 export const declineProductionItems = command(v.array(v.string()), (itemIds: string[]) =>
@@ -1087,6 +1206,7 @@ export const getPendingApprovals = query(v.string(), async (organizationId: stri
 		include: {
 			asset: { include: { product: true } },
 			production: { include: { organization: true } },
+			loanRequest: { select: { id: true, unpaid: true, note: true } },
 			sourceBundle: {
 				select: {
 					id: true,
@@ -1260,15 +1380,6 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 
 	if (newAssets.length === 0 && adoptable.length === 0) appError(409, 'bundle_all_booked');
 
-	const crossOrgIds = [
-		...new Set(
-			newAssets
-				.filter((a) => a.organizationId !== production.organizationId)
-				.map((a) => a.organizationId)
-		)
-	];
-	const orgsToNotify = await getOrgIdsNeedingApprovalNotification(data.productionId, crossOrgIds);
-
 	await prisma.$transaction([
 		...newAssets.map((asset) => {
 			const isCrossOrg = production.organizationId !== asset.organizationId;
@@ -1278,7 +1389,7 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 					assetId: asset.id,
 					sourceBundleId: data.bundleId,
 					sourceParentAssetId: asset.parentAssetId,
-					status: isCrossOrg ? 'PENDING' : 'APPROVED'
+					status: isCrossOrg ? 'DRAFT' : 'APPROVED'
 				}
 			});
 		}),
@@ -1294,28 +1405,22 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 			: [])
 	]);
 
+	// Another org's units are drafts until sent; their history starts then.
 	await prisma.assetTransaction.createMany({
-		data: newAssets.map((asset) => ({
-			assetId: asset.id,
-			userId: user.id,
-			productionId: data.productionId,
-			action: 'ADDED_TO_PRODUCTION',
-			data: {
-				type: 'ADDED_TO_PRODUCTION',
+		data: newAssets
+			.filter((asset) => asset.organizationId === production.organizationId)
+			.map((asset) => ({
+				assetId: asset.id,
+				userId: user.id,
 				productionId: data.productionId,
-				productionName: production.name
-			} satisfies AddedToProductionData
-		}))
+				action: 'ADDED_TO_PRODUCTION',
+				data: {
+					type: 'ADDED_TO_PRODUCTION',
+					productionId: data.productionId,
+					productionName: production.name
+				} satisfies AddedToProductionData
+			}))
 	});
-
-	if (orgsToNotify.length > 0) {
-		await notifyPendingApproval(
-			data.productionId,
-			production.name,
-			production.organization.name,
-			orgsToNotify
-		);
-	}
 
 	await refreshProduction(data.productionId);
 	return { added: newAssets.length, adopted: adoptable.length, skippedConflicts };
@@ -1375,7 +1480,9 @@ export const syncAssetAccessoriesInProduction = command(
 								assetId: asset.id,
 								sourceBundleId: parentItem.sourceBundleId,
 								sourceParentAssetId: assetId,
-								status: parentItem.status
+								status: parentItem.status,
+								loanRequestId: parentItem.loanRequestId,
+								freeOfCharge: parentItem.freeOfCharge
 							})),
 							skipDuplicates: true
 						})
@@ -1478,15 +1585,6 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 		toAdd = toAdd.filter((a) => !conflictIds.has(a.id));
 	}
 
-	const crossOrgIds = [
-		...new Set(
-			toAdd
-				.filter((a) => a.organizationId !== production.organizationId)
-				.map((a) => a.organizationId)
-		)
-	];
-	const orgsToNotify = await getOrgIdsNeedingApprovalNotification(data.productionId, crossOrgIds);
-
 	await prisma.$transaction([
 		...toRemove.map((item) => prisma.productionItem.delete({ where: { id: item.id } })),
 		...toAdd.map((asset) => {
@@ -1497,7 +1595,7 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 					assetId: asset.id,
 					sourceBundleId: data.bundleId,
 					sourceParentAssetId: asset.parentAssetId,
-					status: isCrossOrg ? 'PENDING' : 'APPROVED'
+					status: isCrossOrg ? 'DRAFT' : 'APPROVED'
 				}
 			});
 		}),
@@ -1511,9 +1609,10 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 			: [])
 	]);
 
-	if (toAdd.length > 0) {
+	const ownAdded = toAdd.filter((asset) => asset.organizationId === production.organizationId);
+	if (ownAdded.length > 0) {
 		await prisma.assetTransaction.createMany({
-			data: toAdd.map((asset) => ({
+			data: ownAdded.map((asset) => ({
 				assetId: asset.id,
 				userId: user.id,
 				productionId: data.productionId,
@@ -1525,15 +1624,6 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 				} satisfies AddedToProductionData
 			}))
 		});
-	}
-
-	if (orgsToNotify.length > 0) {
-		await notifyPendingApproval(
-			data.productionId,
-			production.name,
-			production.organization.name,
-			orgsToNotify
-		);
 	}
 
 	await refreshProduction(data.productionId);

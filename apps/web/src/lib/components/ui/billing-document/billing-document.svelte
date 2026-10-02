@@ -3,7 +3,7 @@
 	import * as Card from '#lib/components/ui/card/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
-	import { getErrorMessage } from '#lib/utils.js';
+	import { getErrorMessage, plural } from '#lib/utils.js';
 	import { toast } from 'svelte-sonner';
 	import { groupBillingItems, type LineGroup } from '#lib/billing-lines.js';
 	import { formatQuantity, serviceUnitShort } from '#lib/service-lines.svelte.js';
@@ -12,6 +12,7 @@
 	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import ServiceLineModal from './service-line-modal.svelte';
 	import type { BillingItem, DurationInfo, EditedServiceLine, ServiceLineTarget } from './types';
+	import { loanMargins, type LoanCostEntry, type LoanLine } from '#lib/loan-margins.js';
 
 	let {
 		items,
@@ -30,8 +31,14 @@
 		categoryRates = [],
 		serviceTarget,
 		afterItems,
-		asideTop
+		asideTop,
+		loanCosts = null
 	}: {
+		/**
+		 * What the lenders charge for the borrowed equipment on this document
+		 * (`getLoanCosts`); each such line then shows what passing it on earns.
+		 */
+		loanCosts?: LoanCostEntry[] | null;
 		/** Where service lines are added; without it the document takes none. */
 		serviceTarget?: ServiceLineTarget;
 		/** Rendered under the line items, in the wide column. */
@@ -82,6 +89,31 @@
 	let netTotal = $derived(subtotal - discountAmount);
 	let vatAmount = $derived(netTotal * (vatRatePercent / 100));
 	let grossTotal = $derived(netTotal + vatAmount);
+
+	// ── Margin on borrowed equipment ──
+	let margins = $derived(
+		loanCosts ? loanMargins(items, loanCosts, subtotal > 0 ? netTotal / subtotal : 1) : null
+	);
+	/** A display line's share: the sum over its units, open if any of them is. */
+	function lineMargin(line: LineGroup<BillingItem>) {
+		if (!margins) return null;
+		const parts = line.items
+			.map((item) => margins!.lines.get(item.id))
+			.filter((part): part is LoanLine => !!part);
+		if (parts.length === 0) return null;
+		const open = parts.some((part) => part.cost === null);
+		const cost = open ? null : parts.reduce((sum, part) => sum + part.cost!, 0);
+		const revenue = parts.reduce((sum, part) => sum + part.revenue, 0);
+		return {
+			lenderName: parts[0].lenderName,
+			free: parts.every((part) => part.free),
+			cost,
+			margin: cost === null ? null : revenue - cost
+		};
+	}
+	function signedEUR(n: number) {
+		return `${n >= 0 ? '+' : '−'}${fmtEUR(Math.abs(n))}`;
+	}
 
 	// ── Day count ──
 	let dayCountDraft = $derived(String(dayCount));
@@ -395,11 +427,33 @@
 										>
 									</tr>
 								{:else}
+									{@const loan = lineMargin(line)}
 									<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
 										<td class="px-4 py-3">
 											<div class="flex items-center gap-2">
 												<ProductThumb path={line.items[0].imagePath} alt={line.label} />
-												<span>{line.label}</span>
+												<div class="min-w-0">
+													<span>{line.label}</span>
+													{#if loan}
+														<p class="text-xs text-muted-foreground">
+															{#if loan.free}
+																Borrowed free of charge from {loan.lenderName}
+															{:else if loan.cost === null}
+																Borrowed from {loan.lenderName} · cost not known yet
+															{:else}
+																Borrowed from {loan.lenderName} · costs {fmtEUR(loan.cost)}
+															{/if}
+															{#if loan.margin !== null}
+																<span
+																	class="font-medium {loan.margin > 0
+																		? 'text-emerald-600 dark:text-emerald-400'
+																		: 'text-red-600 dark:text-red-400'}"
+																	>· {signedEUR(loan.margin)}</span
+																>
+															{/if}
+														</p>
+													{/if}
+												</div>
 											</div>
 										</td>
 										<td class="px-4 py-3 text-right tabular-nums">{line.quantity}×</td>
@@ -627,6 +681,54 @@
 				</p>
 			</Card.Content>
 		</Card.Root>
+		{#if margins && (margins.lines.size > 0 || margins.unbilled.units > 0)}
+			{@const m = margins}
+			<Card.Root>
+				<Card.Header>
+					<Card.Title>Borrowed equipment</Card.Title>
+					<Card.Description>What passing it on earns — not shown to the customer.</Card.Description>
+				</Card.Header>
+				<Card.Content class="space-y-3 text-sm">
+					{#if m.lines.size > 0}
+						<dl class="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1">
+							<dt class="text-muted-foreground">Charged here</dt>
+							<dd class="text-right tabular-nums">{fmtEUR(m.revenue)}</dd>
+							<dt class="text-muted-foreground">Lenders charge</dt>
+							<dd class="text-right tabular-nums">{fmtEUR(m.cost)}</dd>
+							<dt class="font-medium">Margin</dt>
+							<dd
+								class="text-right font-semibold tabular-nums {m.revenue - m.cost > 0
+									? 'text-emerald-600 dark:text-emerald-400'
+									: 'text-red-600 dark:text-red-400'}"
+							>
+								{signedEUR(m.revenue - m.cost)}
+							</dd>
+						</dl>
+						{#if m.open > 0}
+							<p class="text-xs text-muted-foreground">
+								{plural(m.open, [
+									'# line is left out: its lender has not sent an offer or invoice yet.',
+									'# lines are left out: their lenders have not sent an offer or invoice yet.'
+								])}
+							</p>
+						{/if}
+					{/if}
+					{#if m.unbilled.units > 0}
+						<p
+							class="rounded-md border border-red-500/40 bg-red-50/60 px-3 py-2 text-red-700 dark:bg-red-950/20 dark:text-red-300"
+						>
+							{plural(m.unbilled.units, [
+								'# borrowed unit is not passed on here.',
+								'# borrowed units are not passed on here.'
+							])}
+							{#if m.unbilled.cost > 0}
+								The lenders charge {fmtEUR(m.unbilled.cost)} for it.
+							{/if}
+						</p>
+					{/if}
+				</Card.Content>
+			</Card.Root>
+		{/if}
 	</div>
 </div>
 

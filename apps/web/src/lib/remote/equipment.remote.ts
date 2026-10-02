@@ -14,17 +14,16 @@ import {
 import { BOOKABLE_ASSET_WHERE } from '#lib/asset-status.js';
 import { accessoryIdsOf } from '#lib/server/services/accessories.js';
 import { appError } from '#lib/errors.js';
-import {
-	getOrgIdsNeedingApprovalNotification,
-	notifyPendingApproval
-} from '#lib/server/services/approval-notifications.js';
 import { requireOpenProduction } from '#lib/server/services/production-state.js';
 import { copyEquipment, planEquipmentCopy } from '#lib/server/services/equipment-copy.js';
-import type { AddedToProductionData, RequestedData } from '#lib/types/asset-transaction.js';
+import type { AddedToProductionData } from '#lib/types/asset-transaction.js';
 import { productLabel } from '#lib/product-label.js';
 
 const ACTIVE_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT', 'RETURNED'] as const;
 const CONFLICT_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT'] as const;
+// What counts as being on this production: a noted, unsent loan (DRAFT) as
+// well — it holds nothing back elsewhere, but here it is part of the list.
+const HERE_STATUSES = ['DRAFT', ...ACTIVE_STATUSES] as const;
 
 // Full-page equipment editor (categories | available | booked) — replaces the
 // per-Asset add/remove flow with per-Product-x-org-x-location quantities.
@@ -60,7 +59,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 			location: { select: { id: true, name: true, address: { select: { city: true } } } },
 			productionItems: {
 				where: {
-					status: { in: [...ACTIVE_STATUSES] },
+					status: { in: [...HERE_STATUSES] },
 					OR: [
 						{ productionId },
 						production.startDate && production.endDate
@@ -264,7 +263,7 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 	const currentItems = await prisma.productionItem.findMany({
 		where: {
 			productionId: data.productionId,
-			status: { in: [...ACTIVE_STATUSES] },
+			status: { in: [...HERE_STATUSES] },
 			sourceBundleId: null,
 			asset: {
 				productId: data.productId,
@@ -329,7 +328,8 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 
 		const toAdd = candidates.slice(0, delta);
 		const isCrossOrg = production.organizationId !== data.organizationId;
-		const status = isCrossOrg ? 'PENDING' : 'APPROVED';
+		// Another org's units are only noted until the list is sent.
+		const status = isCrossOrg ? 'DRAFT' : 'APPROVED';
 
 		// What is bolted to a unit ships with it. These get real ProductionItem
 		// rows — `@@unique([productionId, assetId])` is what makes a scan of the
@@ -339,11 +339,6 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 		// own before it was attached, rather than failing the whole batch.
 		const accessoriesByParent = await accessoryIdsOf(toAdd.map((a) => a.id));
 		const accessoryIds = [...accessoriesByParent.values()].flat();
-
-		// Asked before booking: only an org with no open request here yet is told.
-		const orgsToNotify = isCrossOrg
-			? await getOrgIdsNeedingApprovalNotification(data.productionId, [data.organizationId])
-			: [];
 
 		await prisma.$transaction([
 			...toAdd.map((asset) =>
@@ -366,37 +361,25 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 						})
 					]
 				: []),
-			prisma.assetTransaction.createMany({
-				data: [...toAdd.map((a) => a.id), ...accessoryIds].map((assetId) => ({
-					assetId,
-					userId: user.id,
-					productionId: data.productionId,
-					action: isCrossOrg ? 'REQUESTED' : 'ADDED_TO_PRODUCTION',
-					data: isCrossOrg
-						? ({
-								type: 'REQUESTED',
+			// A draft's history starts when it is sent (REQUESTED).
+			...(isCrossOrg
+				? []
+				: [
+						prisma.assetTransaction.createMany({
+							data: [...toAdd.map((a) => a.id), ...accessoryIds].map((assetId) => ({
+								assetId,
+								userId: user.id,
 								productionId: data.productionId,
-								productionName: production.name,
-								requestingOrgId: production.organization.id,
-								requestingOrgName: production.organization.name
-							} satisfies RequestedData)
-						: ({
-								type: 'ADDED_TO_PRODUCTION',
-								productionId: data.productionId,
-								productionName: production.name
-							} satisfies AddedToProductionData)
-				}))
-			})
+								action: 'ADDED_TO_PRODUCTION',
+								data: {
+									type: 'ADDED_TO_PRODUCTION',
+									productionId: data.productionId,
+									productionName: production.name
+								} satisfies AddedToProductionData
+							}))
+						})
+					])
 		]);
-
-		if (orgsToNotify.length > 0) {
-			await notifyPendingApproval(
-				data.productionId,
-				production.name,
-				production.organization.name,
-				orgsToNotify
-			);
-		}
 	} else {
 		const toRemove = currentItems.slice(0, -delta);
 		const removedAssetIds = toRemove.map((i) => i.assetId);

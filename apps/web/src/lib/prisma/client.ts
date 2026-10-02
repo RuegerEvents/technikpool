@@ -207,6 +207,11 @@ export type Customer = Prisma.CustomerModel
  */
 export type ProductionItem = Prisma.ProductionItemModel
 /**
+ * Model LoanRequest
+ * 
+ */
+export type LoanRequest = Prisma.LoanRequestModel
+/**
  * Model ProductionCheck
  * 
  */
@@ -309,3 +314,8 @@ export type StocktakeEvent = Prisma.StocktakeEventModel
  * read it: nothing private goes in one (see src/lib/server/services/product-documents.ts).
  */
 export type ProductDocument = Prisma.ProductDocumentModel
+/**
+ * Model BillingDismissal
+ * 
+ */
+export type BillingDismissal = Prisma.BillingDismissalModel

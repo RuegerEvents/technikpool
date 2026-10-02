@@ -278,6 +278,8 @@ export type UserWhereInput = {
   checksStarted?: Prisma.ProductionCheckListRelationFilter
   checksClosed?: Prisma.ProductionCheckListRelationFilter
   checkTicks?: Prisma.ProductionCheckTickListRelationFilter
+  loanRequests?: Prisma.LoanRequestListRelationFilter
+  billingDismissals?: Prisma.BillingDismissalListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -313,6 +315,8 @@ export type UserOrderByWithRelationInput = {
   checksStarted?: Prisma.ProductionCheckOrderByRelationAggregateInput
   checksClosed?: Prisma.ProductionCheckOrderByRelationAggregateInput
   checkTicks?: Prisma.ProductionCheckTickOrderByRelationAggregateInput
+  loanRequests?: Prisma.LoanRequestOrderByRelationAggregateInput
+  billingDismissals?: Prisma.BillingDismissalOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -351,6 +355,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   checksStarted?: Prisma.ProductionCheckListRelationFilter
   checksClosed?: Prisma.ProductionCheckListRelationFilter
   checkTicks?: Prisma.ProductionCheckTickListRelationFilter
+  loanRequests?: Prisma.LoanRequestListRelationFilter
+  billingDismissals?: Prisma.BillingDismissalListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -419,6 +425,8 @@ export type UserCreateInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -453,6 +461,8 @@ export type UserUncheckedCreateInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUpdateInput = {
@@ -487,6 +497,8 @@ export type UserUpdateInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -521,6 +533,8 @@ export type UserUncheckedUpdateInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -830,6 +844,22 @@ export type UserUpdateOneWithoutReturnsReportedNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReturnsReportedInput, Prisma.UserUpdateWithoutReturnsReportedInput>, Prisma.UserUncheckedUpdateWithoutReturnsReportedInput>
 }
 
+export type UserCreateNestedOneWithoutLoanRequestsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLoanRequestsInput, Prisma.UserUncheckedCreateWithoutLoanRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLoanRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutLoanRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLoanRequestsInput, Prisma.UserUncheckedCreateWithoutLoanRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLoanRequestsInput
+  upsert?: Prisma.UserUpsertWithoutLoanRequestsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLoanRequestsInput, Prisma.UserUpdateWithoutLoanRequestsInput>, Prisma.UserUncheckedUpdateWithoutLoanRequestsInput>
+}
+
 export type UserCreateNestedOneWithoutChecksStartedInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutChecksStartedInput, Prisma.UserUncheckedCreateWithoutChecksStartedInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutChecksStartedInput
@@ -1020,6 +1050,22 @@ export type UserUpdateOneWithoutProductDocumentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProductDocumentsInput, Prisma.UserUpdateWithoutProductDocumentsInput>, Prisma.UserUncheckedUpdateWithoutProductDocumentsInput>
 }
 
+export type UserCreateNestedOneWithoutBillingDismissalsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBillingDismissalsInput, Prisma.UserUncheckedCreateWithoutBillingDismissalsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBillingDismissalsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutBillingDismissalsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBillingDismissalsInput, Prisma.UserUncheckedCreateWithoutBillingDismissalsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBillingDismissalsInput
+  upsert?: Prisma.UserUpsertWithoutBillingDismissalsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutBillingDismissalsInput, Prisma.UserUpdateWithoutBillingDismissalsInput>, Prisma.UserUncheckedUpdateWithoutBillingDismissalsInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   id?: string
   email: string
@@ -1051,6 +1097,8 @@ export type UserCreateWithoutSessionsInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -1084,6 +1132,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -1133,6 +1183,8 @@ export type UserUpdateWithoutSessionsInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -1166,6 +1218,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -1199,6 +1253,8 @@ export type UserCreateWithoutAccountsInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -1232,6 +1288,8 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -1281,6 +1339,8 @@ export type UserUpdateWithoutAccountsInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -1314,6 +1374,8 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateWithoutHomeOrgInput = {
@@ -1347,6 +1409,8 @@ export type UserCreateWithoutHomeOrgInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutHomeOrgInput = {
@@ -1380,6 +1444,8 @@ export type UserUncheckedCreateWithoutHomeOrgInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutHomeOrgInput = {
@@ -1455,6 +1521,8 @@ export type UserCreateWithoutMembershipsInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -1488,6 +1556,8 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -1537,6 +1607,8 @@ export type UserUpdateWithoutMembershipsInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -1570,6 +1642,8 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateWithoutDpaAcceptancesInput = {
@@ -1603,6 +1677,8 @@ export type UserCreateWithoutDpaAcceptancesInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutDpaAcceptancesInput = {
@@ -1636,6 +1712,8 @@ export type UserUncheckedCreateWithoutDpaAcceptancesInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutDpaAcceptancesInput = {
@@ -1685,6 +1763,8 @@ export type UserUpdateWithoutDpaAcceptancesInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDpaAcceptancesInput = {
@@ -1718,6 +1798,8 @@ export type UserUncheckedUpdateWithoutDpaAcceptancesInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateWithoutSentInvitationsInput = {
@@ -1751,6 +1833,8 @@ export type UserCreateWithoutSentInvitationsInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutSentInvitationsInput = {
@@ -1784,6 +1868,8 @@ export type UserUncheckedCreateWithoutSentInvitationsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutSentInvitationsInput = {
@@ -1833,6 +1919,8 @@ export type UserUpdateWithoutSentInvitationsInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSentInvitationsInput = {
@@ -1866,6 +1954,8 @@ export type UserUncheckedUpdateWithoutSentInvitationsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateWithoutCreatedProductsInput = {
@@ -1899,6 +1989,8 @@ export type UserCreateWithoutCreatedProductsInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutCreatedProductsInput = {
@@ -1932,6 +2024,8 @@ export type UserUncheckedCreateWithoutCreatedProductsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutCreatedProductsInput = {
@@ -1981,6 +2075,8 @@ export type UserUpdateWithoutCreatedProductsInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedProductsInput = {
@@ -2014,6 +2110,8 @@ export type UserUncheckedUpdateWithoutCreatedProductsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateWithoutCancelledProductionsInput = {
@@ -2047,6 +2145,8 @@ export type UserCreateWithoutCancelledProductionsInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutCancelledProductionsInput = {
@@ -2080,6 +2180,8 @@ export type UserUncheckedCreateWithoutCancelledProductionsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutCancelledProductionsInput = {
@@ -2129,6 +2231,8 @@ export type UserUpdateWithoutCancelledProductionsInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCancelledProductionsInput = {
@@ -2162,6 +2266,8 @@ export type UserUncheckedUpdateWithoutCancelledProductionsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateWithoutItemsReceivedInput = {
@@ -2195,6 +2301,8 @@ export type UserCreateWithoutItemsReceivedInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutItemsReceivedInput = {
@@ -2228,6 +2336,8 @@ export type UserUncheckedCreateWithoutItemsReceivedInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutItemsReceivedInput = {
@@ -2266,6 +2376,8 @@ export type UserCreateWithoutReturnsReportedInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutReturnsReportedInput = {
@@ -2299,6 +2411,8 @@ export type UserUncheckedCreateWithoutReturnsReportedInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutReturnsReportedInput = {
@@ -2348,6 +2462,8 @@ export type UserUpdateWithoutItemsReceivedInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutItemsReceivedInput = {
@@ -2381,6 +2497,8 @@ export type UserUncheckedUpdateWithoutItemsReceivedInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUpsertWithoutReturnsReportedInput = {
@@ -2425,6 +2543,8 @@ export type UserUpdateWithoutReturnsReportedInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReturnsReportedInput = {
@@ -2458,6 +2578,164 @@ export type UserUncheckedUpdateWithoutReturnsReportedInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
+}
+
+export type UserCreateWithoutLoanRequestsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
+  sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
+  homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
+  memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
+  dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutUserInput
+  itemsReceived?: Prisma.ProductionItemCreateNestedManyWithoutReceivedByInput
+  returnsReported?: Prisma.ProductionItemCreateNestedManyWithoutReturnReportedByInput
+  checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
+  checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
+  checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
+}
+
+export type UserUncheckedCreateWithoutLoanRequestsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  homeOrgId?: string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
+  sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
+  dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutUserInput
+  itemsReceived?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutReceivedByInput
+  returnsReported?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutReturnReportedByInput
+  checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
+  checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
+  checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
+}
+
+export type UserCreateOrConnectWithoutLoanRequestsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutLoanRequestsInput, Prisma.UserUncheckedCreateWithoutLoanRequestsInput>
+}
+
+export type UserUpsertWithoutLoanRequestsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutLoanRequestsInput, Prisma.UserUncheckedUpdateWithoutLoanRequestsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutLoanRequestsInput, Prisma.UserUncheckedCreateWithoutLoanRequestsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutLoanRequestsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutLoanRequestsInput, Prisma.UserUncheckedUpdateWithoutLoanRequestsInput>
+}
+
+export type UserUpdateWithoutLoanRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
+  sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
+  homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
+  memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
+  dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutUserNestedInput
+  itemsReceived?: Prisma.ProductionItemUpdateManyWithoutReceivedByNestedInput
+  returnsReported?: Prisma.ProductionItemUpdateManyWithoutReturnReportedByNestedInput
+  checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
+  checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
+  checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutLoanRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  homeOrgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
+  sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
+  dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutUserNestedInput
+  itemsReceived?: Prisma.ProductionItemUncheckedUpdateManyWithoutReceivedByNestedInput
+  returnsReported?: Prisma.ProductionItemUncheckedUpdateManyWithoutReturnReportedByNestedInput
+  checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
+  checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
+  checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateWithoutChecksStartedInput = {
@@ -2491,6 +2769,8 @@ export type UserCreateWithoutChecksStartedInput = {
   returnsReported?: Prisma.ProductionItemCreateNestedManyWithoutReturnReportedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutChecksStartedInput = {
@@ -2524,6 +2804,8 @@ export type UserUncheckedCreateWithoutChecksStartedInput = {
   returnsReported?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutReturnReportedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutChecksStartedInput = {
@@ -2562,6 +2844,8 @@ export type UserCreateWithoutChecksClosedInput = {
   returnsReported?: Prisma.ProductionItemCreateNestedManyWithoutReturnReportedByInput
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutChecksClosedInput = {
@@ -2595,6 +2879,8 @@ export type UserUncheckedCreateWithoutChecksClosedInput = {
   returnsReported?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutReturnReportedByInput
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutChecksClosedInput = {
@@ -2644,6 +2930,8 @@ export type UserUpdateWithoutChecksStartedInput = {
   returnsReported?: Prisma.ProductionItemUpdateManyWithoutReturnReportedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChecksStartedInput = {
@@ -2677,6 +2965,8 @@ export type UserUncheckedUpdateWithoutChecksStartedInput = {
   returnsReported?: Prisma.ProductionItemUncheckedUpdateManyWithoutReturnReportedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUpsertWithoutChecksClosedInput = {
@@ -2721,6 +3011,8 @@ export type UserUpdateWithoutChecksClosedInput = {
   returnsReported?: Prisma.ProductionItemUpdateManyWithoutReturnReportedByNestedInput
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChecksClosedInput = {
@@ -2754,6 +3046,8 @@ export type UserUncheckedUpdateWithoutChecksClosedInput = {
   returnsReported?: Prisma.ProductionItemUncheckedUpdateManyWithoutReturnReportedByNestedInput
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateWithoutCheckTicksInput = {
@@ -2787,6 +3081,8 @@ export type UserCreateWithoutCheckTicksInput = {
   returnsReported?: Prisma.ProductionItemCreateNestedManyWithoutReturnReportedByInput
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutCheckTicksInput = {
@@ -2820,6 +3116,8 @@ export type UserUncheckedCreateWithoutCheckTicksInput = {
   returnsReported?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutReturnReportedByInput
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutCheckTicksInput = {
@@ -2869,6 +3167,8 @@ export type UserUpdateWithoutCheckTicksInput = {
   returnsReported?: Prisma.ProductionItemUpdateManyWithoutReturnReportedByNestedInput
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCheckTicksInput = {
@@ -2902,6 +3202,8 @@ export type UserUncheckedUpdateWithoutCheckTicksInput = {
   returnsReported?: Prisma.ProductionItemUncheckedUpdateManyWithoutReturnReportedByNestedInput
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateWithoutCrewAssignmentsInput = {
@@ -2935,6 +3237,8 @@ export type UserCreateWithoutCrewAssignmentsInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutCrewAssignmentsInput = {
@@ -2968,6 +3272,8 @@ export type UserUncheckedCreateWithoutCrewAssignmentsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutCrewAssignmentsInput = {
@@ -3017,6 +3323,8 @@ export type UserUpdateWithoutCrewAssignmentsInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCrewAssignmentsInput = {
@@ -3050,6 +3358,8 @@ export type UserUncheckedUpdateWithoutCrewAssignmentsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateWithoutTransactionsInput = {
@@ -3083,6 +3393,8 @@ export type UserCreateWithoutTransactionsInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutTransactionsInput = {
@@ -3116,6 +3428,8 @@ export type UserUncheckedCreateWithoutTransactionsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutTransactionsInput = {
@@ -3165,6 +3479,8 @@ export type UserUpdateWithoutTransactionsInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTransactionsInput = {
@@ -3198,6 +3514,8 @@ export type UserUncheckedUpdateWithoutTransactionsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateWithoutCatalogTransactionsInput = {
@@ -3231,6 +3549,8 @@ export type UserCreateWithoutCatalogTransactionsInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutCatalogTransactionsInput = {
@@ -3264,6 +3584,8 @@ export type UserUncheckedCreateWithoutCatalogTransactionsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutCatalogTransactionsInput = {
@@ -3313,6 +3635,8 @@ export type UserUpdateWithoutCatalogTransactionsInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCatalogTransactionsInput = {
@@ -3346,6 +3670,8 @@ export type UserUncheckedUpdateWithoutCatalogTransactionsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateWithoutStocktakesStartedInput = {
@@ -3379,6 +3705,8 @@ export type UserCreateWithoutStocktakesStartedInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutStocktakesStartedInput = {
@@ -3412,6 +3740,8 @@ export type UserUncheckedCreateWithoutStocktakesStartedInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutStocktakesStartedInput = {
@@ -3450,6 +3780,8 @@ export type UserCreateWithoutStocktakesClosedInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutStocktakesClosedInput = {
@@ -3483,6 +3815,8 @@ export type UserUncheckedCreateWithoutStocktakesClosedInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutStocktakesClosedInput = {
@@ -3532,6 +3866,8 @@ export type UserUpdateWithoutStocktakesStartedInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStocktakesStartedInput = {
@@ -3565,6 +3901,8 @@ export type UserUncheckedUpdateWithoutStocktakesStartedInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUpsertWithoutStocktakesClosedInput = {
@@ -3609,6 +3947,8 @@ export type UserUpdateWithoutStocktakesClosedInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStocktakesClosedInput = {
@@ -3642,6 +3982,8 @@ export type UserUncheckedUpdateWithoutStocktakesClosedInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateWithoutStocktakeFindsInput = {
@@ -3675,6 +4017,8 @@ export type UserCreateWithoutStocktakeFindsInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutStocktakeFindsInput = {
@@ -3708,6 +4052,8 @@ export type UserUncheckedCreateWithoutStocktakeFindsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutStocktakeFindsInput = {
@@ -3757,6 +4103,8 @@ export type UserUpdateWithoutStocktakeFindsInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStocktakeFindsInput = {
@@ -3790,6 +4138,8 @@ export type UserUncheckedUpdateWithoutStocktakeFindsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateWithoutStocktakeCountsInput = {
@@ -3823,6 +4173,8 @@ export type UserCreateWithoutStocktakeCountsInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutStocktakeCountsInput = {
@@ -3856,6 +4208,8 @@ export type UserUncheckedCreateWithoutStocktakeCountsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutStocktakeCountsInput = {
@@ -3905,6 +4259,8 @@ export type UserUpdateWithoutStocktakeCountsInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStocktakeCountsInput = {
@@ -3938,6 +4294,8 @@ export type UserUncheckedUpdateWithoutStocktakeCountsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateWithoutStocktakeEventsInput = {
@@ -3971,6 +4329,8 @@ export type UserCreateWithoutStocktakeEventsInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutStocktakeEventsInput = {
@@ -4004,6 +4364,8 @@ export type UserUncheckedCreateWithoutStocktakeEventsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutStocktakeEventsInput = {
@@ -4053,6 +4415,8 @@ export type UserUpdateWithoutStocktakeEventsInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStocktakeEventsInput = {
@@ -4086,6 +4450,8 @@ export type UserUncheckedUpdateWithoutStocktakeEventsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserCreateWithoutProductDocumentsInput = {
@@ -4119,6 +4485,8 @@ export type UserCreateWithoutProductDocumentsInput = {
   checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserUncheckedCreateWithoutProductDocumentsInput = {
@@ -4152,6 +4520,8 @@ export type UserUncheckedCreateWithoutProductDocumentsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
   checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutDismissedByInput
 }
 
 export type UserCreateOrConnectWithoutProductDocumentsInput = {
@@ -4201,6 +4571,8 @@ export type UserUpdateWithoutProductDocumentsInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProductDocumentsInput = {
@@ -4234,6 +4606,164 @@ export type UserUncheckedUpdateWithoutProductDocumentsInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
+}
+
+export type UserCreateWithoutBillingDismissalsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentCreateNestedManyWithoutUploadedByInput
+  sentInvitations?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
+  homeOrg?: Prisma.OrganizationCreateNestedOneWithoutHomeUsersInput
+  memberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventCreateNestedManyWithoutUserInput
+  dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutUserInput
+  itemsReceived?: Prisma.ProductionItemCreateNestedManyWithoutReceivedByInput
+  returnsReported?: Prisma.ProductionItemCreateNestedManyWithoutReturnReportedByInput
+  checksStarted?: Prisma.ProductionCheckCreateNestedManyWithoutCreatedByInput
+  checksClosed?: Prisma.ProductionCheckCreateNestedManyWithoutClosedByInput
+  checkTicks?: Prisma.ProductionCheckTickCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutRequestedByInput
+}
+
+export type UserUncheckedCreateWithoutBillingDismissalsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isAdmin?: boolean
+  calendarFeedVersion?: number
+  homeOrgId?: string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedCreateNestedManyWithoutUserInput
+  createdProducts?: Prisma.ProductUncheckedCreateNestedManyWithoutCreatedByInput
+  productDocuments?: Prisma.ProductDocumentUncheckedCreateNestedManyWithoutUploadedByInput
+  sentInvitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutUserInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutUserInput
+  cancelledProductions?: Prisma.ProductionUncheckedCreateNestedManyWithoutCancelledByInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedCreateNestedManyWithoutCreatedByInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedCreateNestedManyWithoutClosedByInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedCreateNestedManyWithoutFoundByInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedCreateNestedManyWithoutUserInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedCreateNestedManyWithoutUserInput
+  dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutUserInput
+  itemsReceived?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutReceivedByInput
+  returnsReported?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutReturnReportedByInput
+  checksStarted?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutCreatedByInput
+  checksClosed?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutClosedByInput
+  checkTicks?: Prisma.ProductionCheckTickUncheckedCreateNestedManyWithoutUserInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutRequestedByInput
+}
+
+export type UserCreateOrConnectWithoutBillingDismissalsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutBillingDismissalsInput, Prisma.UserUncheckedCreateWithoutBillingDismissalsInput>
+}
+
+export type UserUpsertWithoutBillingDismissalsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutBillingDismissalsInput, Prisma.UserUncheckedUpdateWithoutBillingDismissalsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutBillingDismissalsInput, Prisma.UserUncheckedCreateWithoutBillingDismissalsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutBillingDismissalsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutBillingDismissalsInput, Prisma.UserUncheckedUpdateWithoutBillingDismissalsInput>
+}
+
+export type UserUpdateWithoutBillingDismissalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUpdateManyWithoutUploadedByNestedInput
+  sentInvitations?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
+  homeOrg?: Prisma.OrganizationUpdateOneWithoutHomeUsersNestedInput
+  memberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUpdateManyWithoutUserNestedInput
+  dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutUserNestedInput
+  itemsReceived?: Prisma.ProductionItemUpdateManyWithoutReceivedByNestedInput
+  returnsReported?: Prisma.ProductionItemUpdateManyWithoutReturnReportedByNestedInput
+  checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
+  checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
+  checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutBillingDismissalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  calendarFeedVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  homeOrgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  catalogTransactions?: Prisma.CatalogTransactionUncheckedUpdateManyWithoutUserNestedInput
+  createdProducts?: Prisma.ProductUncheckedUpdateManyWithoutCreatedByNestedInput
+  productDocuments?: Prisma.ProductDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
+  sentInvitations?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutUserNestedInput
+  crewAssignments?: Prisma.ProductionCrewUncheckedUpdateManyWithoutUserNestedInput
+  cancelledProductions?: Prisma.ProductionUncheckedUpdateManyWithoutCancelledByNestedInput
+  stocktakesStarted?: Prisma.StocktakeUncheckedUpdateManyWithoutCreatedByNestedInput
+  stocktakesClosed?: Prisma.StocktakeUncheckedUpdateManyWithoutClosedByNestedInput
+  stocktakeFinds?: Prisma.StocktakeItemUncheckedUpdateManyWithoutFoundByNestedInput
+  stocktakeCounts?: Prisma.StocktakeCountUncheckedUpdateManyWithoutUserNestedInput
+  stocktakeEvents?: Prisma.StocktakeEventUncheckedUpdateManyWithoutUserNestedInput
+  dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutUserNestedInput
+  itemsReceived?: Prisma.ProductionItemUncheckedUpdateManyWithoutReceivedByNestedInput
+  returnsReported?: Prisma.ProductionItemUncheckedUpdateManyWithoutReturnReportedByNestedInput
+  checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
+  checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
+  checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateManyHomeOrgInput = {
@@ -4279,6 +4809,8 @@ export type UserUpdateWithoutHomeOrgInput = {
   checksStarted?: Prisma.ProductionCheckUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutHomeOrgInput = {
@@ -4312,6 +4844,8 @@ export type UserUncheckedUpdateWithoutHomeOrgInput = {
   checksStarted?: Prisma.ProductionCheckUncheckedUpdateManyWithoutCreatedByNestedInput
   checksClosed?: Prisma.ProductionCheckUncheckedUpdateManyWithoutClosedByNestedInput
   checkTicks?: Prisma.ProductionCheckTickUncheckedUpdateManyWithoutUserNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutDismissedByNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutHomeOrgInput = {
@@ -4353,6 +4887,8 @@ export type UserCountOutputType = {
   checksStarted: number
   checksClosed: number
   checkTicks: number
+  loanRequests: number
+  billingDismissals: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4377,6 +4913,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   checksStarted?: boolean | UserCountOutputTypeCountChecksStartedArgs
   checksClosed?: boolean | UserCountOutputTypeCountChecksClosedArgs
   checkTicks?: boolean | UserCountOutputTypeCountCheckTicksArgs
+  loanRequests?: boolean | UserCountOutputTypeCountLoanRequestsArgs
+  billingDismissals?: boolean | UserCountOutputTypeCountBillingDismissalsArgs
 }
 
 /**
@@ -4536,6 +5074,20 @@ export type UserCountOutputTypeCountCheckTicksArgs<ExtArgs extends runtime.Types
   where?: Prisma.ProductionCheckTickWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountLoanRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LoanRequestWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountBillingDismissalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BillingDismissalWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -4570,6 +5122,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   checksStarted?: boolean | Prisma.User$checksStartedArgs<ExtArgs>
   checksClosed?: boolean | Prisma.User$checksClosedArgs<ExtArgs>
   checkTicks?: boolean | Prisma.User$checkTicksArgs<ExtArgs>
+  loanRequests?: boolean | Prisma.User$loanRequestsArgs<ExtArgs>
+  billingDismissals?: boolean | Prisma.User$billingDismissalsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -4638,6 +5192,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   checksStarted?: boolean | Prisma.User$checksStartedArgs<ExtArgs>
   checksClosed?: boolean | Prisma.User$checksClosedArgs<ExtArgs>
   checkTicks?: boolean | Prisma.User$checkTicksArgs<ExtArgs>
+  loanRequests?: boolean | Prisma.User$loanRequestsArgs<ExtArgs>
+  billingDismissals?: boolean | Prisma.User$billingDismissalsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4672,6 +5228,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     checksStarted: Prisma.$ProductionCheckPayload<ExtArgs>[]
     checksClosed: Prisma.$ProductionCheckPayload<ExtArgs>[]
     checkTicks: Prisma.$ProductionCheckTickPayload<ExtArgs>[]
+    loanRequests: Prisma.$LoanRequestPayload<ExtArgs>[]
+    billingDismissals: Prisma.$BillingDismissalPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -5100,6 +5658,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   checksStarted<T extends Prisma.User$checksStartedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$checksStartedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionCheckPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   checksClosed<T extends Prisma.User$checksClosedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$checksClosedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionCheckPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   checkTicks<T extends Prisma.User$checkTicksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$checkTicksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionCheckTickPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  loanRequests<T extends Prisma.User$loanRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$loanRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LoanRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  billingDismissals<T extends Prisma.User$billingDismissalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$billingDismissalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BillingDismissalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6060,6 +6620,54 @@ export type User$checkTicksArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.ProductionCheckTickScalarFieldEnum | Prisma.ProductionCheckTickScalarFieldEnum[]
+}
+
+/**
+ * User.loanRequests
+ */
+export type User$loanRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LoanRequest
+   */
+  select?: Prisma.LoanRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LoanRequest
+   */
+  omit?: Prisma.LoanRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LoanRequestInclude<ExtArgs> | null
+  where?: Prisma.LoanRequestWhereInput
+  orderBy?: Prisma.LoanRequestOrderByWithRelationInput | Prisma.LoanRequestOrderByWithRelationInput[]
+  cursor?: Prisma.LoanRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LoanRequestScalarFieldEnum | Prisma.LoanRequestScalarFieldEnum[]
+}
+
+/**
+ * User.billingDismissals
+ */
+export type User$billingDismissalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BillingDismissal
+   */
+  select?: Prisma.BillingDismissalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BillingDismissal
+   */
+  omit?: Prisma.BillingDismissalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BillingDismissalInclude<ExtArgs> | null
+  where?: Prisma.BillingDismissalWhereInput
+  orderBy?: Prisma.BillingDismissalOrderByWithRelationInput | Prisma.BillingDismissalOrderByWithRelationInput[]
+  cursor?: Prisma.BillingDismissalWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BillingDismissalScalarFieldEnum | Prisma.BillingDismissalScalarFieldEnum[]
 }
 
 /**

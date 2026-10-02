@@ -6,13 +6,14 @@
 	import { OrgMultiSelect } from '#lib/components/ui/org-multi-select/index.js';
 	import { CalendarFeedButton } from '#lib/components/ui/calendar-feed/index.js';
 	import { getProductions } from '#lib/remote/productions.remote.js';
+	import { getBillingTodos } from '#lib/remote/billing.remote.js';
 	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
 	import { canWrite } from '#lib/roles.js';
 	import { page } from '$app/state';
 	import { plural, orgLabel } from '#lib/utils.js';
 	import { browser } from '$app/env';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
-	import { Hourglass, PackageOpen } from '@lucide/svelte';
+	import { Hourglass, PackageOpen, ReceiptText } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 
@@ -44,6 +45,10 @@
 	let orgs = $derived(orgsQuery.current ?? []);
 	let productionsQuery = $derived(getProductions());
 	let allProductions = $derived(productionsQuery.current ?? []);
+	// Productions one of the user's orgs still has to invoice (see
+	// services/billing-todos.ts); empty for anyone who doesn't bill.
+	let billingQuery = $derived(getBillingTodos());
+	let toInvoice = $derived(new Set((billingQuery.current ?? []).map((t) => t.productionId)));
 
 	let selectedOrgIds = $derived(
 		storedOrgIds
@@ -245,6 +250,9 @@
 							{#if !prod.cancelledAt && pendingCount(prod) > 0}
 								{@render awaitingBadge(pendingCount(prod))}
 							{/if}
+							{#if toInvoice.has(prod.id)}
+								{@render invoiceBadge()}
+							{/if}
 							{#if prod.cancelledAt}
 								<span
 									class="rounded bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive"
@@ -285,6 +293,9 @@
 					{#if !prod.cancelledAt && pendingCount(prod) > 0}
 						<span class="ml-2">{@render awaitingBadge(pendingCount(prod))}</span>
 					{/if}
+					{#if toInvoice.has(prod.id)}
+						<span class="ml-2">{@render invoiceBadge()}</span>
+					{/if}
 					{#if prod.cancelledAt}
 						<span
 							class="ml-2 rounded bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive"
@@ -321,6 +332,16 @@
 		{/if}
 	{/if}
 </div>
+
+{#snippet invoiceBadge()}
+	<span
+		class="inline-flex items-center gap-1 rounded bg-amber-500/15 px-1.5 py-0.5 align-middle text-xs font-medium text-amber-700 dark:text-amber-400"
+		title="Not invoiced yet"
+	>
+		<ReceiptText aria-hidden="true" class="size-3" />
+		Invoice
+	</span>
+{/snippet}
 
 {#snippet awaitingBadge(count: number)}
 	<span

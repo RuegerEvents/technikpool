@@ -78,6 +78,7 @@ export const ModelName = {
   Production: 'Production',
   Customer: 'Customer',
   ProductionItem: 'ProductionItem',
+  LoanRequest: 'LoanRequest',
   ProductionCheck: 'ProductionCheck',
   ProductionCheckTick: 'ProductionCheckTick',
   ProductionCrew: 'ProductionCrew',
@@ -97,7 +98,8 @@ export const ModelName = {
   StocktakeLine: 'StocktakeLine',
   StocktakeCount: 'StocktakeCount',
   StocktakeEvent: 'StocktakeEvent',
-  ProductDocument: 'ProductDocument'
+  ProductDocument: 'ProductDocument',
+  BillingDismissal: 'BillingDismissal'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -532,10 +534,25 @@ export const ProductionItemScalarFieldEnum = {
   receivedAt: 'receivedAt',
   receivedById: 'receivedById',
   returnReportedAt: 'returnReportedAt',
-  returnReportedById: 'returnReportedById'
+  returnReportedById: 'returnReportedById',
+  loanRequestId: 'loanRequestId',
+  freeOfCharge: 'freeOfCharge'
 } as const
 
 export type ProductionItemScalarFieldEnum = (typeof ProductionItemScalarFieldEnum)[keyof typeof ProductionItemScalarFieldEnum]
+
+
+export const LoanRequestScalarFieldEnum = {
+  id: 'id',
+  productionId: 'productionId',
+  organizationId: 'organizationId',
+  unpaid: 'unpaid',
+  note: 'note',
+  requestedById: 'requestedById',
+  createdAt: 'createdAt'
+} as const
+
+export type LoanRequestScalarFieldEnum = (typeof LoanRequestScalarFieldEnum)[keyof typeof LoanRequestScalarFieldEnum]
 
 
 export const ProductionCheckScalarFieldEnum = {
@@ -677,6 +694,7 @@ export const OfferScalarFieldEnum = {
   discountType: 'discountType',
   discountValue: 'discountValue',
   assetScope: 'assetScope',
+  recipientOrganizationId: 'recipientOrganizationId',
   vatRatePercent: 'vatRatePercent',
   isKleinunternehmerSnapshot: 'isKleinunternehmerSnapshot',
   orgName: 'orgName',
@@ -757,6 +775,7 @@ export const InvoiceScalarFieldEnum = {
   discountType: 'discountType',
   discountValue: 'discountValue',
   assetScope: 'assetScope',
+  recipientOrganizationId: 'recipientOrganizationId',
   sentAt: 'sentAt',
   pdfPath: 'pdfPath',
   isKleinunternehmerSnapshot: 'isKleinunternehmerSnapshot',
@@ -918,6 +937,17 @@ export const ProductDocumentScalarFieldEnum = {
 } as const
 
 export type ProductDocumentScalarFieldEnum = (typeof ProductDocumentScalarFieldEnum)[keyof typeof ProductDocumentScalarFieldEnum]
+
+
+export const BillingDismissalScalarFieldEnum = {
+  id: 'id',
+  productionId: 'productionId',
+  organizationId: 'organizationId',
+  dismissedById: 'dismissedById',
+  createdAt: 'createdAt'
+} as const
+
+export type BillingDismissalScalarFieldEnum = (typeof BillingDismissalScalarFieldEnum)[keyof typeof BillingDismissalScalarFieldEnum]
 
 
 export const SortOrder = {

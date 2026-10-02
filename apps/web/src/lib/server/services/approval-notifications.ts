@@ -3,8 +3,8 @@ import { sendMail } from '#lib/server/mail.js';
 import { appBaseUrl } from '#lib/server/app-url.js';
 import { pendingApprovalEmail } from '#lib/server/emails/pending-approval.js';
 
-// Loan requests: every path that books another org's unit as PENDING tells
-// that org once per batch. Shared by the remote functions that book.
+// Loan requests: every path that turns another org's unit PENDING tells that
+// org. Shared by the remote functions that do.
 
 // Returns which of `ownerOrgIds` do NOT currently have any PENDING item in
 // this production — i.e. the orgs for which a new PENDING item would be the
@@ -27,15 +27,15 @@ export async function getOrgIdsNeedingApprovalNotification(
 	return ownerOrgIds.filter((id) => !alreadyPendingOrgIds.has(id));
 }
 
-// Emails the OWNER/ADMIN members of each owning org once per "batch" of
-// approval requests — the caller only passes orgs for which this is the
-// first pending item in the production, so the next email only goes out
-// once the queue is cleared and refilled.
+// Emails the OWNER/ADMIN members of each owning org. Sending a production's
+// loan list is one deliberate act, so each send tells every org it asks;
+// reopening a cancelled production only tells the orgs it asks afresh.
 export async function notifyPendingApproval(
 	productionId: string,
 	productionName: string,
 	requestingOrgName: string,
-	ownerOrgIds: string[]
+	ownerOrgIds: string[],
+	request: { unpaid?: boolean; note?: string | null } = {}
 ) {
 	await Promise.all(
 		ownerOrgIds.map(async (ownerOrgId) => {
@@ -62,7 +62,8 @@ export async function notifyPendingApproval(
 							requestingOrgName,
 							productionName,
 							pendingCount,
-							url: appBaseUrl
+							url: appBaseUrl,
+							...request
 						});
 						return sendMail({ to: membership.user.email, subject, html, text });
 					})

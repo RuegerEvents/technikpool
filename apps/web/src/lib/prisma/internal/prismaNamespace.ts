@@ -424,6 +424,7 @@ export const ModelName = {
   Production: 'Production',
   Customer: 'Customer',
   ProductionItem: 'ProductionItem',
+  LoanRequest: 'LoanRequest',
   ProductionCheck: 'ProductionCheck',
   ProductionCheckTick: 'ProductionCheckTick',
   ProductionCrew: 'ProductionCrew',
@@ -443,7 +444,8 @@ export const ModelName = {
   StocktakeLine: 'StocktakeLine',
   StocktakeCount: 'StocktakeCount',
   StocktakeEvent: 'StocktakeEvent',
-  ProductDocument: 'ProductDocument'
+  ProductDocument: 'ProductDocument',
+  BillingDismissal: 'BillingDismissal'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -459,7 +461,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "legalDocument" | "dpaAcceptance" | "invitation" | "manufacturer" | "connector" | "productPort" | "cableWay" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "productionCheck" | "productionCheckTick" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "serviceCategory" | "orgService" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem" | "stocktake" | "stocktakeItem" | "stocktakeLine" | "stocktakeCount" | "stocktakeEvent" | "productDocument"
+    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "legalDocument" | "dpaAcceptance" | "invitation" | "manufacturer" | "connector" | "productPort" | "cableWay" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "loanRequest" | "productionCheck" | "productionCheckTick" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "serviceCategory" | "orgService" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem" | "stocktake" | "stocktakeItem" | "stocktakeLine" | "stocktakeCount" | "stocktakeEvent" | "productDocument" | "billingDismissal"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2461,6 +2463,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    LoanRequest: {
+      payload: Prisma.$LoanRequestPayload<ExtArgs>
+      fields: Prisma.LoanRequestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LoanRequestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanRequestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LoanRequestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanRequestPayload>
+        }
+        findFirst: {
+          args: Prisma.LoanRequestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanRequestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LoanRequestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanRequestPayload>
+        }
+        findMany: {
+          args: Prisma.LoanRequestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanRequestPayload>[]
+        }
+        create: {
+          args: Prisma.LoanRequestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanRequestPayload>
+        }
+        createMany: {
+          args: Prisma.LoanRequestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LoanRequestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanRequestPayload>[]
+        }
+        delete: {
+          args: Prisma.LoanRequestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanRequestPayload>
+        }
+        update: {
+          args: Prisma.LoanRequestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanRequestPayload>
+        }
+        deleteMany: {
+          args: Prisma.LoanRequestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LoanRequestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LoanRequestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanRequestPayload>[]
+        }
+        upsert: {
+          args: Prisma.LoanRequestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanRequestPayload>
+        }
+        aggregate: {
+          args: Prisma.LoanRequestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLoanRequest>
+        }
+        groupBy: {
+          args: Prisma.LoanRequestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LoanRequestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LoanRequestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LoanRequestCountAggregateOutputType> | number
+        }
+      }
+    }
     ProductionCheck: {
       payload: Prisma.$ProductionCheckPayload<ExtArgs>
       fields: Prisma.ProductionCheckFieldRefs
@@ -3941,6 +4017,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    BillingDismissal: {
+      payload: Prisma.$BillingDismissalPayload<ExtArgs>
+      fields: Prisma.BillingDismissalFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BillingDismissalFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingDismissalPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BillingDismissalFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingDismissalPayload>
+        }
+        findFirst: {
+          args: Prisma.BillingDismissalFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingDismissalPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BillingDismissalFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingDismissalPayload>
+        }
+        findMany: {
+          args: Prisma.BillingDismissalFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingDismissalPayload>[]
+        }
+        create: {
+          args: Prisma.BillingDismissalCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingDismissalPayload>
+        }
+        createMany: {
+          args: Prisma.BillingDismissalCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BillingDismissalCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingDismissalPayload>[]
+        }
+        delete: {
+          args: Prisma.BillingDismissalDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingDismissalPayload>
+        }
+        update: {
+          args: Prisma.BillingDismissalUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingDismissalPayload>
+        }
+        deleteMany: {
+          args: Prisma.BillingDismissalDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BillingDismissalUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BillingDismissalUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingDismissalPayload>[]
+        }
+        upsert: {
+          args: Prisma.BillingDismissalUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingDismissalPayload>
+        }
+        aggregate: {
+          args: Prisma.BillingDismissalAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBillingDismissal>
+        }
+        groupBy: {
+          args: Prisma.BillingDismissalGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BillingDismissalGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BillingDismissalCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BillingDismissalCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -4396,10 +4546,25 @@ export const ProductionItemScalarFieldEnum = {
   receivedAt: 'receivedAt',
   receivedById: 'receivedById',
   returnReportedAt: 'returnReportedAt',
-  returnReportedById: 'returnReportedById'
+  returnReportedById: 'returnReportedById',
+  loanRequestId: 'loanRequestId',
+  freeOfCharge: 'freeOfCharge'
 } as const
 
 export type ProductionItemScalarFieldEnum = (typeof ProductionItemScalarFieldEnum)[keyof typeof ProductionItemScalarFieldEnum]
+
+
+export const LoanRequestScalarFieldEnum = {
+  id: 'id',
+  productionId: 'productionId',
+  organizationId: 'organizationId',
+  unpaid: 'unpaid',
+  note: 'note',
+  requestedById: 'requestedById',
+  createdAt: 'createdAt'
+} as const
+
+export type LoanRequestScalarFieldEnum = (typeof LoanRequestScalarFieldEnum)[keyof typeof LoanRequestScalarFieldEnum]
 
 
 export const ProductionCheckScalarFieldEnum = {
@@ -4541,6 +4706,7 @@ export const OfferScalarFieldEnum = {
   discountType: 'discountType',
   discountValue: 'discountValue',
   assetScope: 'assetScope',
+  recipientOrganizationId: 'recipientOrganizationId',
   vatRatePercent: 'vatRatePercent',
   isKleinunternehmerSnapshot: 'isKleinunternehmerSnapshot',
   orgName: 'orgName',
@@ -4621,6 +4787,7 @@ export const InvoiceScalarFieldEnum = {
   discountType: 'discountType',
   discountValue: 'discountValue',
   assetScope: 'assetScope',
+  recipientOrganizationId: 'recipientOrganizationId',
   sentAt: 'sentAt',
   pdfPath: 'pdfPath',
   isKleinunternehmerSnapshot: 'isKleinunternehmerSnapshot',
@@ -4782,6 +4949,17 @@ export const ProductDocumentScalarFieldEnum = {
 } as const
 
 export type ProductDocumentScalarFieldEnum = (typeof ProductDocumentScalarFieldEnum)[keyof typeof ProductDocumentScalarFieldEnum]
+
+
+export const BillingDismissalScalarFieldEnum = {
+  id: 'id',
+  productionId: 'productionId',
+  organizationId: 'organizationId',
+  dismissedById: 'dismissedById',
+  createdAt: 'createdAt'
+} as const
+
+export type BillingDismissalScalarFieldEnum = (typeof BillingDismissalScalarFieldEnum)[keyof typeof BillingDismissalScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -5148,6 +5326,7 @@ export type GlobalOmitConfig = {
   production?: Prisma.ProductionOmit
   customer?: Prisma.CustomerOmit
   productionItem?: Prisma.ProductionItemOmit
+  loanRequest?: Prisma.LoanRequestOmit
   productionCheck?: Prisma.ProductionCheckOmit
   productionCheckTick?: Prisma.ProductionCheckTickOmit
   productionCrew?: Prisma.ProductionCrewOmit
@@ -5168,6 +5347,7 @@ export type GlobalOmitConfig = {
   stocktakeCount?: Prisma.StocktakeCountOmit
   stocktakeEvent?: Prisma.StocktakeEventOmit
   productDocument?: Prisma.ProductDocumentOmit
+  billingDismissal?: Prisma.BillingDismissalOmit
 }
 
 /* Types for Logging */

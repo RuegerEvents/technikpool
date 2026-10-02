@@ -19,6 +19,8 @@
 	import { getStocktakes } from '#lib/remote/stocktakes.remote.js';
 	import { getHandoverTodos } from '#lib/remote/production-checks.remote.js';
 	import { getPackTodos } from '#lib/remote/production-handout.remote.js';
+	import { getBillingTodos } from '#lib/remote/billing.remote.js';
+	import { BillingTodoActions } from '#lib/components/billing-todo/index.js';
 	import StocktakeProgress from '#lib/components/stocktake-progress.svelte';
 	import { formatReleaseDate, notesFor, releases } from '#lib/changelog.js';
 	import {
@@ -84,6 +86,10 @@
 	// Our units another org's production has booked, starting within the week.
 	let packQuery = $derived(active ? getPackTodos() : null);
 	let toPack = $derived(packQuery?.current ?? []);
+	// Productions our orgs still have to invoice — to a customer, or to the
+	// org we lent to. See services/billing-todos.ts.
+	let billingQuery = $derived(active ? getBillingTodos() : null);
+	let toBill = $derived(billingQuery?.current ?? []);
 	let statsQuery = $derived(active ? getDashboardStats() : null);
 	let stocktakesQuery = $derived(active ? getStocktakes() : null);
 	let openStocktakes = $derived(
@@ -107,7 +113,8 @@
 			pendingReady &&
 			!!awaitingQuery?.ready &&
 			!!handoverQuery?.ready &&
-			!!packQuery?.ready
+			!!packQuery?.ready &&
+			!!billingQuery?.ready
 	);
 	let attention = $derived.by(() => {
 		if (!stats) return [];
@@ -176,6 +183,15 @@
 				label: 'To pack for others',
 				hint: 'Lent out, starting within a week',
 				href: '#pack',
+				tone: 'amber'
+			});
+		if (toBill.length > 0)
+			items.push({
+				key: 'billing',
+				count: toBill.length,
+				label: plural(toBill.length, ['Production to invoice', 'Productions to invoice']),
+				hint: 'Handed out or over, no invoice sent yet',
+				href: '#billing',
 				tone: 'amber'
 			});
 		const awaitingCount = awaiting.reduce((sum, req) => sum + req.count, 0);
@@ -468,6 +484,12 @@
 												{formatPeriod(request.startDate, request.endDate)}
 											</p>
 										</div>
+										{#if request.unpaid}
+											<span
+												class="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+												>Unpaid</span
+											>
+										{/if}
 										<span class="shrink-0 text-xs text-muted-foreground">
 											{plural(request.unitCount, ['# device', '# devices'])}
 										</span>
@@ -686,6 +708,32 @@
 						</Card.Root>
 					{/if}
 				</section>
+
+				{#if toBill.length > 0}
+					<section id="billing" class="scroll-mt-20">
+						<h2 class="mb-3 text-lg font-semibold">To invoice</h2>
+						<Card.Root class="gap-0 overflow-hidden py-0">
+							<div class="divide-y">
+								{#each toBill as t (`${t.productionId}:${t.organizationId}`)}
+									<div class="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5">
+										<a href={resolve(`productions/${t.productionId}`)} class="min-w-0 flex-1">
+											<p class="truncate text-sm font-medium hover:underline">
+												{t.productionName}
+											</p>
+											<p class="truncate text-xs text-muted-foreground">
+												{t.organizationName} → {t.recipientName ?? 'no customer yet'} · {formatPeriod(
+													t.startDate,
+													t.endDate
+												)}
+											</p>
+										</a>
+										<BillingTodoActions todo={t} />
+									</div>
+								{/each}
+							</div>
+						</Card.Root>
+					</section>
+				{/if}
 
 				<!-- Our units booked by another org's production that starts within a
 				     week and nobody has handed out yet: the lender's packing list.

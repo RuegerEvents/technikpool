@@ -25,7 +25,8 @@
 		finalizeInvoice,
 		deleteInvoice,
 		updateDocumentText,
-		updateDocumentOrgSnapshot
+		updateDocumentOrgSnapshot,
+		getLoanCosts
 	} from '#lib/remote/offers.remote.js';
 	import { getCustomers } from '#lib/remote/customers.remote.js';
 	import { StalenessBanner } from '#lib/components/ui/staleness-banner/index.js';
@@ -41,6 +42,14 @@
 
 	let { invoiceId }: { invoiceId: string } = $props();
 	let invoice = $derived(await getInvoice(invoiceId));
+	// What the lenders charge for the borrowed equipment on it, so each such
+	// line can show what passing it on earns. Null on a lender's own document.
+	let loanCostsQuery = $derived(
+		invoice.productionId
+			? getLoanCosts({ productionId: invoice.productionId, organizationId: invoice.organizationId })
+			: null
+	);
+	let loanCosts = $derived(loanCostsQuery?.current?.entries ?? null);
 	// An archived PDF is served as it is; only a render can come up short.
 	let pdfIssues = $derived(
 		invoice.pdfPath
@@ -381,6 +390,7 @@
 	>
 
 	<BillingDocument
+		{loanCosts}
 		items={invoice.items}
 		emptyMessage="No items on this invoice yet."
 		editable={!invoice.sentAt}

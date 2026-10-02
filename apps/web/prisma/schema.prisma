@@ -51,6 +51,8 @@ model User {
   checksStarted        ProductionCheck[]     @relation("ProductionCheckStarter")
   checksClosed         ProductionCheck[]     @relation("ProductionCheckCloser")
   checkTicks           ProductionCheckTick[]
+  loanRequests         LoanRequest[]
+  billingDismissals    BillingDismissal[]
 
   @@map("user")
 }
@@ -201,9 +203,13 @@ model Organization {
   offerSequences    OfferSequence[]
   offers            Offer[]
   invoices          Invoice[]
+  offersReceived    Offer[]            @relation("OfferRecipientOrg")
+  invoicesReceived  Invoice[]          @relation("InvoiceRecipientOrg")
+  billingDismissals BillingDismissal[]
   customers         Customer[]
   stocktakes        Stocktake[]
   productionChecks  ProductionCheck[]
+  loanRequests      LoanRequest[]
 }
 
 // Declared highest first, so `orderBy: { role: 'asc' }` lists owners at the
@@ -805,12 +811,14 @@ model Production {
   shareLinkActive  Boolean @default(false)
   shareLinkVersion Int     @default(0)
 
-  items        ProductionItem[]
-  crew         ProductionCrew[]
-  transactions AssetTransaction[]
-  checks       ProductionCheck[]
-  offers       Offer[]
-  invoices     Invoice[]
+  items             ProductionItem[]
+  crew              ProductionCrew[]
+  transactions      AssetTransaction[]
+  checks            ProductionCheck[]
+  loanRequests      LoanRequest[]
+  billingDismissals BillingDismissal[]
+  offers            Offer[]
+  invoices          Invoice[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -880,7 +888,40 @@ model ProductionItem {
   returnReportedById String?
   returnReportedBy   User?     @relation("ProductionItemReturnReporter", fields: [returnReportedById], references: [id], onDelete: SetNull)
 
+  // The request a lent unit was sent with (see LoanRequest). Null on the
+  // production's own units and on DRAFT ones, which have not been sent yet.
+  loanRequestId String?
+  loanRequest   LoanRequest? @relation(fields: [loanRequestId], references: [id], onDelete: SetNull)
+  // The lender approved it free of charge: it is left off the lender's
+  // invoice to the borrower and costs the borrower nothing.
+  freeOfCharge  Boolean      @default(false)
+
   @@unique([productionId, assetId])
+}
+
+// Another org's units are first noted on a production as DRAFT, a list that
+// holds nothing back and that the lender does not see. Sending it ("Anfragen")
+// turns them PENDING and writes one of these per lending org, carrying what the
+// borrower had to say: whether the production is unpaid and they ask to have
+// the equipment free of charge, and an optional note.
+model LoanRequest {
+  id             String       @id @default(cuid())
+  productionId   String
+  production     Production   @relation(fields: [productionId], references: [id], onDelete: Cascade)
+  // The lending org, the one asked.
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  unpaid Boolean @default(false)
+  note   String? @db.Text
+
+  requestedById String?
+  requestedBy   User?    @relation(fields: [requestedById], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+
+  items ProductionItem[]
+
+  @@index([productionId, organizationId])
 }
 
 // Checking a production's equipment against its list (Prüfen): scanned or
@@ -1080,11 +1121,19 @@ model Offer {
   discountType  String? // "PERCENT" | "AMOUNT"
   discountValue Decimal? @db.Decimal(10, 2)
 
-  // Which of the production's booked assets were billed — "ALL" or
-  // "OWN_ORG_ONLY" (excludes assets loaned in from partner orgs). Persisted
-  // so a later re-sync from the production recomputes the same scope the
-  // offer was originally created with.
+  // Which of the production's booked assets were billed — "ALL",
+  // "OWN_ORG_ONLY" (excludes assets loaned in from partner orgs), or "LENT":
+  // a lender billing the production's org for its own units on that
+  // production, the ones it did not lend free of charge. Persisted so a
+  // later re-sync from the production recomputes the same scope the offer
+  // was originally created with.
   assetScope String @default("ALL")
+
+  // Set on a lender's document ("LENT"): the borrowing org it is addressed
+  // to. Once finalized, that org's billing admins can read it — it is what
+  // the equipment costs them.
+  recipientOrganizationId String?
+  recipientOrganization   Organization? @relation("OfferRecipientOrg", fields: [recipientOrganizationId], references: [id], onDelete: SetNull)
 
   // Snapshot at creation — 19% German VAT, 0% for Kleinunternehmer orgs
   // (§19 UStG). Kept as its own field rather than derived, so a future VAT
@@ -1230,6 +1279,10 @@ model Invoice {
   // Same purpose as Offer.assetScope — lets a pre-send invoice re-sync its
   // items from the production using the original billing scope.
   assetScope String @default("ALL")
+
+  // See Offer.recipientOrganizationId; readable by that org once sent.
+  recipientOrganizationId String?
+  recipientOrganization   Organization? @relation("InvoiceRecipientOrg", fields: [recipientOrganizationId], references: [id], onDelete: SetNull)
 
   // Null while the invoice is still a draft — items can be corrected and
   // re-synced from the production. Once set, the invoice is immutable
@@ -1505,4 +1558,20 @@ model ProductDocument {
   createdAt DateTime @default(now())
 
   @@index([productId])
+}
+
+// An org saying it has settled a production outside the app (or never will),
+// so the reminder to invoice it stops for good. One per production and billing
+// org: the production's own org and each lender decide for themselves.
+model BillingDismissal {
+  id             String       @id @default(cuid())
+  productionId   String
+  production     Production   @relation(fields: [productionId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  dismissedById  String?
+  dismissedBy    User?        @relation(fields: [dismissedById], references: [id], onDelete: SetNull)
+  createdAt      DateTime     @default(now())
+
+  @@unique([productionId, organizationId])
 }

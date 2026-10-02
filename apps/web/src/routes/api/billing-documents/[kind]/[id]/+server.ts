@@ -22,7 +22,18 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 				: null;
 	if (!document) error(404, 'Document not found');
 	// Same rung as the pages that link here — see `billingOrgIds` in offers.remote.ts.
-	await requireOrgInventory(document.organizationId, 'billing_manage_forbidden');
+	// A lender's issued document is also the borrowing org's to read: it is what
+	// the equipment costs them (see `productionDocumentWhere`).
+	const issued = 'sentAt' in document ? !!document.sentAt : !!document.finalizedAt;
+	if (document.recipientOrganizationId && issued) {
+		try {
+			await requireOrgInventory(document.organizationId, 'billing_manage_forbidden');
+		} catch {
+			await requireOrgInventory(document.recipientOrganizationId, 'billing_manage_forbidden');
+		}
+	} else {
+		await requireOrgInventory(document.organizationId, 'billing_manage_forbidden');
+	}
 	let bytes: Uint8Array;
 	if (document.pdfPath) bytes = (await getObject(document.pdfPath)).bytes;
 	else {

@@ -320,6 +320,8 @@ export type ProductionWhereInput = {
   crew?: Prisma.ProductionCrewListRelationFilter
   transactions?: Prisma.AssetTransactionListRelationFilter
   checks?: Prisma.ProductionCheckListRelationFilter
+  loanRequests?: Prisma.LoanRequestListRelationFilter
+  billingDismissals?: Prisma.BillingDismissalListRelationFilter
   offers?: Prisma.OfferListRelationFilter
   invoices?: Prisma.InvoiceListRelationFilter
 }
@@ -350,6 +352,8 @@ export type ProductionOrderByWithRelationInput = {
   crew?: Prisma.ProductionCrewOrderByRelationAggregateInput
   transactions?: Prisma.AssetTransactionOrderByRelationAggregateInput
   checks?: Prisma.ProductionCheckOrderByRelationAggregateInput
+  loanRequests?: Prisma.LoanRequestOrderByRelationAggregateInput
+  billingDismissals?: Prisma.BillingDismissalOrderByRelationAggregateInput
   offers?: Prisma.OfferOrderByRelationAggregateInput
   invoices?: Prisma.InvoiceOrderByRelationAggregateInput
 }
@@ -383,6 +387,8 @@ export type ProductionWhereUniqueInput = Prisma.AtLeast<{
   crew?: Prisma.ProductionCrewListRelationFilter
   transactions?: Prisma.AssetTransactionListRelationFilter
   checks?: Prisma.ProductionCheckListRelationFilter
+  loanRequests?: Prisma.LoanRequestListRelationFilter
+  billingDismissals?: Prisma.BillingDismissalListRelationFilter
   offers?: Prisma.OfferListRelationFilter
   invoices?: Prisma.InvoiceListRelationFilter
 }, "id">
@@ -457,6 +463,8 @@ export type ProductionCreateInput = {
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
@@ -483,6 +491,8 @@ export type ProductionUncheckedCreateInput = {
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
@@ -509,6 +519,8 @@ export type ProductionUpdateInput = {
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
@@ -535,6 +547,8 @@ export type ProductionUncheckedUpdateInput = {
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
@@ -865,6 +879,20 @@ export type ProductionUpdateOneRequiredWithoutItemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProductionUpdateToOneWithWhereWithoutItemsInput, Prisma.ProductionUpdateWithoutItemsInput>, Prisma.ProductionUncheckedUpdateWithoutItemsInput>
 }
 
+export type ProductionCreateNestedOneWithoutLoanRequestsInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutLoanRequestsInput, Prisma.ProductionUncheckedCreateWithoutLoanRequestsInput>
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutLoanRequestsInput
+  connect?: Prisma.ProductionWhereUniqueInput
+}
+
+export type ProductionUpdateOneRequiredWithoutLoanRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutLoanRequestsInput, Prisma.ProductionUncheckedCreateWithoutLoanRequestsInput>
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutLoanRequestsInput
+  upsert?: Prisma.ProductionUpsertWithoutLoanRequestsInput
+  connect?: Prisma.ProductionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProductionUpdateToOneWithWhereWithoutLoanRequestsInput, Prisma.ProductionUpdateWithoutLoanRequestsInput>, Prisma.ProductionUncheckedUpdateWithoutLoanRequestsInput>
+}
+
 export type ProductionCreateNestedOneWithoutChecksInput = {
   create?: Prisma.XOR<Prisma.ProductionCreateWithoutChecksInput, Prisma.ProductionUncheckedCreateWithoutChecksInput>
   connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutChecksInput
@@ -941,6 +969,20 @@ export type ProductionUpdateOneWithoutInvoicesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProductionUpdateToOneWithWhereWithoutInvoicesInput, Prisma.ProductionUpdateWithoutInvoicesInput>, Prisma.ProductionUncheckedUpdateWithoutInvoicesInput>
 }
 
+export type ProductionCreateNestedOneWithoutBillingDismissalsInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutBillingDismissalsInput, Prisma.ProductionUncheckedCreateWithoutBillingDismissalsInput>
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutBillingDismissalsInput
+  connect?: Prisma.ProductionWhereUniqueInput
+}
+
+export type ProductionUpdateOneRequiredWithoutBillingDismissalsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductionCreateWithoutBillingDismissalsInput, Prisma.ProductionUncheckedCreateWithoutBillingDismissalsInput>
+  connectOrCreate?: Prisma.ProductionCreateOrConnectWithoutBillingDismissalsInput
+  upsert?: Prisma.ProductionUpsertWithoutBillingDismissalsInput
+  connect?: Prisma.ProductionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProductionUpdateToOneWithWhereWithoutBillingDismissalsInput, Prisma.ProductionUpdateWithoutBillingDismissalsInput>, Prisma.ProductionUncheckedUpdateWithoutBillingDismissalsInput>
+}
+
 export type ProductionCreateWithoutCancelledByInput = {
   id?: string
   name: string
@@ -962,6 +1004,8 @@ export type ProductionCreateWithoutCancelledByInput = {
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
@@ -987,6 +1031,8 @@ export type ProductionUncheckedCreateWithoutCancelledByInput = {
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
@@ -1061,6 +1107,8 @@ export type ProductionCreateWithoutOrganizationInput = {
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
@@ -1086,6 +1134,8 @@ export type ProductionUncheckedCreateWithoutOrganizationInput = {
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
@@ -1137,6 +1187,8 @@ export type ProductionCreateWithoutAddressInput = {
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
@@ -1162,6 +1214,8 @@ export type ProductionUncheckedCreateWithoutAddressInput = {
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
@@ -1213,6 +1267,8 @@ export type ProductionCreateWithoutCustomerInput = {
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
@@ -1238,6 +1294,8 @@ export type ProductionUncheckedCreateWithoutCustomerInput = {
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
@@ -1289,6 +1347,8 @@ export type ProductionCreateWithoutItemsInput = {
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
@@ -1314,6 +1374,8 @@ export type ProductionUncheckedCreateWithoutItemsInput = {
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
@@ -1355,6 +1417,8 @@ export type ProductionUpdateWithoutItemsInput = {
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
@@ -1380,6 +1444,132 @@ export type ProductionUncheckedUpdateWithoutItemsInput = {
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
+}
+
+export type ProductionCreateWithoutLoanRequestsInput = {
+  id?: string
+  name: string
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
+  venueName?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
+  address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
+  cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledProductionsInput
+  items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
+  crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
+}
+
+export type ProductionUncheckedCreateWithoutLoanRequestsInput = {
+  id?: string
+  name: string
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
+  organizationId: string
+  venueName?: string | null
+  addressId?: string | null
+  customerId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  cancelledById?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
+  crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
+}
+
+export type ProductionCreateOrConnectWithoutLoanRequestsInput = {
+  where: Prisma.ProductionWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductionCreateWithoutLoanRequestsInput, Prisma.ProductionUncheckedCreateWithoutLoanRequestsInput>
+}
+
+export type ProductionUpsertWithoutLoanRequestsInput = {
+  update: Prisma.XOR<Prisma.ProductionUpdateWithoutLoanRequestsInput, Prisma.ProductionUncheckedUpdateWithoutLoanRequestsInput>
+  create: Prisma.XOR<Prisma.ProductionCreateWithoutLoanRequestsInput, Prisma.ProductionUncheckedCreateWithoutLoanRequestsInput>
+  where?: Prisma.ProductionWhereInput
+}
+
+export type ProductionUpdateToOneWithWhereWithoutLoanRequestsInput = {
+  where?: Prisma.ProductionWhereInput
+  data: Prisma.XOR<Prisma.ProductionUpdateWithoutLoanRequestsInput, Prisma.ProductionUncheckedUpdateWithoutLoanRequestsInput>
+}
+
+export type ProductionUpdateWithoutLoanRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
+  address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
+  cancelledBy?: Prisma.UserUpdateOneWithoutCancelledProductionsNestedInput
+  items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
+  crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
+}
+
+export type ProductionUncheckedUpdateWithoutLoanRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
+  crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
@@ -1405,6 +1595,8 @@ export type ProductionCreateWithoutChecksInput = {
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
@@ -1430,6 +1622,8 @@ export type ProductionUncheckedCreateWithoutChecksInput = {
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
@@ -1471,6 +1665,8 @@ export type ProductionUpdateWithoutChecksInput = {
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
@@ -1496,6 +1692,8 @@ export type ProductionUncheckedUpdateWithoutChecksInput = {
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
@@ -1521,6 +1719,8 @@ export type ProductionCreateWithoutCrewInput = {
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
@@ -1546,6 +1746,8 @@ export type ProductionUncheckedCreateWithoutCrewInput = {
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
@@ -1587,6 +1789,8 @@ export type ProductionUpdateWithoutCrewInput = {
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
@@ -1612,6 +1816,8 @@ export type ProductionUncheckedUpdateWithoutCrewInput = {
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
@@ -1637,6 +1843,8 @@ export type ProductionCreateWithoutTransactionsInput = {
   items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
@@ -1662,6 +1870,8 @@ export type ProductionUncheckedCreateWithoutTransactionsInput = {
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
@@ -1703,6 +1913,8 @@ export type ProductionUpdateWithoutTransactionsInput = {
   items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
@@ -1728,6 +1940,8 @@ export type ProductionUncheckedUpdateWithoutTransactionsInput = {
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
@@ -1754,6 +1968,8 @@ export type ProductionCreateWithoutOffersInput = {
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
 }
 
@@ -1779,6 +1995,8 @@ export type ProductionUncheckedCreateWithoutOffersInput = {
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutProductionInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
 }
 
@@ -1820,6 +2038,8 @@ export type ProductionUpdateWithoutOffersInput = {
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
 
@@ -1845,6 +2065,8 @@ export type ProductionUncheckedUpdateWithoutOffersInput = {
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
 
@@ -1870,6 +2092,8 @@ export type ProductionCreateWithoutInvoicesInput = {
   crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
 }
 
@@ -1895,6 +2119,8 @@ export type ProductionUncheckedCreateWithoutInvoicesInput = {
   crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
   transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
   checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutProductionInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutProductionInput
   offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
 }
 
@@ -1936,6 +2162,8 @@ export type ProductionUpdateWithoutInvoicesInput = {
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
 }
 
@@ -1961,7 +2189,133 @@ export type ProductionUncheckedUpdateWithoutInvoicesInput = {
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
+}
+
+export type ProductionCreateWithoutBillingDismissalsInput = {
+  id?: string
+  name: string
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
+  venueName?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutProductionsInput
+  address?: Prisma.AddressCreateNestedOneWithoutProductionsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutProductionsInput
+  cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledProductionsInput
+  items?: Prisma.ProductionItemCreateNestedManyWithoutProductionInput
+  crew?: Prisma.ProductionCrewCreateNestedManyWithoutProductionInput
+  transactions?: Prisma.AssetTransactionCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutProductionInput
+}
+
+export type ProductionUncheckedCreateWithoutBillingDismissalsInput = {
+  id?: string
+  name: string
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  showStartDate?: Date | string | null
+  showEndDate?: Date | string | null
+  organizationId: string
+  venueName?: string | null
+  addressId?: string | null
+  customerId?: string | null
+  cancelledAt?: Date | string | null
+  cancellationReason?: string | null
+  cancelledById?: string | null
+  shareLinkActive?: boolean
+  shareLinkVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutProductionInput
+  crew?: Prisma.ProductionCrewUncheckedCreateNestedManyWithoutProductionInput
+  transactions?: Prisma.AssetTransactionUncheckedCreateNestedManyWithoutProductionInput
+  checks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutProductionInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutProductionInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutProductionInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutProductionInput
+}
+
+export type ProductionCreateOrConnectWithoutBillingDismissalsInput = {
+  where: Prisma.ProductionWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductionCreateWithoutBillingDismissalsInput, Prisma.ProductionUncheckedCreateWithoutBillingDismissalsInput>
+}
+
+export type ProductionUpsertWithoutBillingDismissalsInput = {
+  update: Prisma.XOR<Prisma.ProductionUpdateWithoutBillingDismissalsInput, Prisma.ProductionUncheckedUpdateWithoutBillingDismissalsInput>
+  create: Prisma.XOR<Prisma.ProductionCreateWithoutBillingDismissalsInput, Prisma.ProductionUncheckedCreateWithoutBillingDismissalsInput>
+  where?: Prisma.ProductionWhereInput
+}
+
+export type ProductionUpdateToOneWithWhereWithoutBillingDismissalsInput = {
+  where?: Prisma.ProductionWhereInput
+  data: Prisma.XOR<Prisma.ProductionUpdateWithoutBillingDismissalsInput, Prisma.ProductionUncheckedUpdateWithoutBillingDismissalsInput>
+}
+
+export type ProductionUpdateWithoutBillingDismissalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutProductionsNestedInput
+  address?: Prisma.AddressUpdateOneWithoutProductionsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutProductionsNestedInput
+  cancelledBy?: Prisma.UserUpdateOneWithoutCancelledProductionsNestedInput
+  items?: Prisma.ProductionItemUpdateManyWithoutProductionNestedInput
+  crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
+  transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
+}
+
+export type ProductionUncheckedUpdateWithoutBillingDismissalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  showEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  venueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shareLinkActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareLinkVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.ProductionItemUncheckedUpdateManyWithoutProductionNestedInput
+  crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
+  transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
+  checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutProductionNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
 
 export type ProductionCreateManyCancelledByInput = {
@@ -2004,6 +2358,8 @@ export type ProductionUpdateWithoutCancelledByInput = {
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
@@ -2029,6 +2385,8 @@ export type ProductionUncheckedUpdateWithoutCancelledByInput = {
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
@@ -2092,6 +2450,8 @@ export type ProductionUpdateWithoutOrganizationInput = {
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
@@ -2117,6 +2477,8 @@ export type ProductionUncheckedUpdateWithoutOrganizationInput = {
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
@@ -2180,6 +2542,8 @@ export type ProductionUpdateWithoutAddressInput = {
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
@@ -2205,6 +2569,8 @@ export type ProductionUncheckedUpdateWithoutAddressInput = {
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
@@ -2268,6 +2634,8 @@ export type ProductionUpdateWithoutCustomerInput = {
   crew?: Prisma.ProductionCrewUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutProductionNestedInput
 }
@@ -2293,6 +2661,8 @@ export type ProductionUncheckedUpdateWithoutCustomerInput = {
   crew?: Prisma.ProductionCrewUncheckedUpdateManyWithoutProductionNestedInput
   transactions?: Prisma.AssetTransactionUncheckedUpdateManyWithoutProductionNestedInput
   checks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutProductionNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutProductionNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutProductionNestedInput
   offers?: Prisma.OfferUncheckedUpdateManyWithoutProductionNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutProductionNestedInput
 }
@@ -2326,6 +2696,8 @@ export type ProductionCountOutputType = {
   crew: number
   transactions: number
   checks: number
+  loanRequests: number
+  billingDismissals: number
   offers: number
   invoices: number
 }
@@ -2335,6 +2707,8 @@ export type ProductionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extens
   crew?: boolean | ProductionCountOutputTypeCountCrewArgs
   transactions?: boolean | ProductionCountOutputTypeCountTransactionsArgs
   checks?: boolean | ProductionCountOutputTypeCountChecksArgs
+  loanRequests?: boolean | ProductionCountOutputTypeCountLoanRequestsArgs
+  billingDismissals?: boolean | ProductionCountOutputTypeCountBillingDismissalsArgs
   offers?: boolean | ProductionCountOutputTypeCountOffersArgs
   invoices?: boolean | ProductionCountOutputTypeCountInvoicesArgs
 }
@@ -2380,6 +2754,20 @@ export type ProductionCountOutputTypeCountChecksArgs<ExtArgs extends runtime.Typ
 /**
  * ProductionCountOutputType without action
  */
+export type ProductionCountOutputTypeCountLoanRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LoanRequestWhereInput
+}
+
+/**
+ * ProductionCountOutputType without action
+ */
+export type ProductionCountOutputTypeCountBillingDismissalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BillingDismissalWhereInput
+}
+
+/**
+ * ProductionCountOutputType without action
+ */
 export type ProductionCountOutputTypeCountOffersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.OfferWhereInput
 }
@@ -2418,6 +2806,8 @@ export type ProductionSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   crew?: boolean | Prisma.Production$crewArgs<ExtArgs>
   transactions?: boolean | Prisma.Production$transactionsArgs<ExtArgs>
   checks?: boolean | Prisma.Production$checksArgs<ExtArgs>
+  loanRequests?: boolean | Prisma.Production$loanRequestsArgs<ExtArgs>
+  billingDismissals?: boolean | Prisma.Production$billingDismissalsArgs<ExtArgs>
   offers?: boolean | Prisma.Production$offersArgs<ExtArgs>
   invoices?: boolean | Prisma.Production$invoicesArgs<ExtArgs>
   _count?: boolean | Prisma.ProductionCountOutputTypeDefaultArgs<ExtArgs>
@@ -2501,6 +2891,8 @@ export type ProductionInclude<ExtArgs extends runtime.Types.Extensions.InternalA
   crew?: boolean | Prisma.Production$crewArgs<ExtArgs>
   transactions?: boolean | Prisma.Production$transactionsArgs<ExtArgs>
   checks?: boolean | Prisma.Production$checksArgs<ExtArgs>
+  loanRequests?: boolean | Prisma.Production$loanRequestsArgs<ExtArgs>
+  billingDismissals?: boolean | Prisma.Production$billingDismissalsArgs<ExtArgs>
   offers?: boolean | Prisma.Production$offersArgs<ExtArgs>
   invoices?: boolean | Prisma.Production$invoicesArgs<ExtArgs>
   _count?: boolean | Prisma.ProductionCountOutputTypeDefaultArgs<ExtArgs>
@@ -2529,6 +2921,8 @@ export type $ProductionPayload<ExtArgs extends runtime.Types.Extensions.Internal
     crew: Prisma.$ProductionCrewPayload<ExtArgs>[]
     transactions: Prisma.$AssetTransactionPayload<ExtArgs>[]
     checks: Prisma.$ProductionCheckPayload<ExtArgs>[]
+    loanRequests: Prisma.$LoanRequestPayload<ExtArgs>[]
+    billingDismissals: Prisma.$BillingDismissalPayload<ExtArgs>[]
     offers: Prisma.$OfferPayload<ExtArgs>[]
     invoices: Prisma.$InvoicePayload<ExtArgs>[]
   }
@@ -2952,6 +3346,8 @@ export interface Prisma__ProductionClient<T, Null = never, ExtArgs extends runti
   crew<T extends Prisma.Production$crewArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$crewArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionCrewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   transactions<T extends Prisma.Production$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   checks<T extends Prisma.Production$checksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$checksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionCheckPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  loanRequests<T extends Prisma.Production$loanRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$loanRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LoanRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  billingDismissals<T extends Prisma.Production$billingDismissalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$billingDismissalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BillingDismissalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   offers<T extends Prisma.Production$offersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$offersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OfferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   invoices<T extends Prisma.Production$invoicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Production$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -3551,6 +3947,54 @@ export type Production$checksArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.ProductionCheckScalarFieldEnum | Prisma.ProductionCheckScalarFieldEnum[]
+}
+
+/**
+ * Production.loanRequests
+ */
+export type Production$loanRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LoanRequest
+   */
+  select?: Prisma.LoanRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LoanRequest
+   */
+  omit?: Prisma.LoanRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LoanRequestInclude<ExtArgs> | null
+  where?: Prisma.LoanRequestWhereInput
+  orderBy?: Prisma.LoanRequestOrderByWithRelationInput | Prisma.LoanRequestOrderByWithRelationInput[]
+  cursor?: Prisma.LoanRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LoanRequestScalarFieldEnum | Prisma.LoanRequestScalarFieldEnum[]
+}
+
+/**
+ * Production.billingDismissals
+ */
+export type Production$billingDismissalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BillingDismissal
+   */
+  select?: Prisma.BillingDismissalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BillingDismissal
+   */
+  omit?: Prisma.BillingDismissalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BillingDismissalInclude<ExtArgs> | null
+  where?: Prisma.BillingDismissalWhereInput
+  orderBy?: Prisma.BillingDismissalOrderByWithRelationInput | Prisma.BillingDismissalOrderByWithRelationInput[]
+  cursor?: Prisma.BillingDismissalWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BillingDismissalScalarFieldEnum | Prisma.BillingDismissalScalarFieldEnum[]
 }
 
 /**

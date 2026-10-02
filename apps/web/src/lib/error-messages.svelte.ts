@@ -25,6 +25,10 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'Only org owners or system admins can manage this organization.';
 		case 'billing_manage_forbidden':
 			return 'Only org admins and owners can manage offers and invoices.';
+		case 'billing_not_lender':
+			return 'This organization has no equipment on that production to bill for.';
+		case 'customer_required':
+			return 'Please select or create a customer.';
 		case 'production_delete_forbidden':
 			return 'Only org admins and owners can delete productions.';
 		case 'production_cancel_forbidden':
@@ -268,6 +272,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'This production has not been cancelled.';
 		case 'cancellation_reason_required':
 			return 'Give a reason for the cancellation.';
+		case 'no_draft_loans':
+			return 'There is nothing left to request — the list was already sent.';
 		case 'booking_not_pending':
 			return 'This request is no longer open — it was withdrawn or has already been answered.';
 		case 'booking_not_approved':

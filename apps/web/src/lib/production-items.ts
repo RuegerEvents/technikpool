@@ -45,3 +45,26 @@ export function accessorySummary(accessories: { asset: { product: { name: string
 	}
 	return [...counts.entries()].map(([name, count]) => `${count}× ${name}`).join(' · ');
 }
+
+export type DraftLender = { id: string; name: string; shortName: string | null; units: number };
+
+/**
+ * Other orgs' units noted on a production but not asked for yet (DRAFT), per
+ * lender — what "Request…" sends. Counted as units: an accessory travels
+ * inside its parent.
+ */
+export function draftLenders(
+	items: (NestableItem & {
+		status: string;
+		asset: { organization: { id: string; name: string; shortName: string | null } };
+	})[]
+): DraftLender[] {
+	const byOrg = new Map<string, DraftLender>();
+	for (const unit of nestAccessories(items.filter((i) => i.status === 'DRAFT'))) {
+		const org = unit.asset.organization;
+		const entry = byOrg.get(org.id);
+		if (entry) entry.units++;
+		else byOrg.set(org.id, { id: org.id, name: org.name, shortName: org.shortName, units: 1 });
+	}
+	return [...byOrg.values()];
+}

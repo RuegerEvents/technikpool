@@ -34,6 +34,7 @@ export type RequestItem = {
 		imagePath: string | null;
 		template: { name: string; caption: string | null };
 	} | null;
+	loanRequest: { id: string; unpaid: boolean; note: string | null } | null;
 };
 
 export type RequestUnit<T extends RequestItem> = Nested<T>;
@@ -61,6 +62,10 @@ export type ApprovalRequest<T extends RequestItem> = {
 	lenderOrgId: string;
 	startDate: Date | null;
 	endDate: Date | null;
+	/** The borrower says the production is unpaid and asks to have it for free. */
+	unpaid: boolean;
+	/** The borrower's notes, one per send that is still open here. */
+	notes: string[];
 	/** Every item, accessories included — what "approve all" sends. */
 	items: T[];
 	/** Units as the production page counts them: an accessory is not one. */
@@ -122,6 +127,13 @@ export function groupApprovalRequests<T extends RequestItem>(items: T[]): Approv
 				group.units.push(unit);
 			}
 		}
+		const sends = [
+			...new Map(
+				list.flatMap((item) =>
+					item.loanRequest ? [[item.loanRequest.id, item.loanRequest] as const] : []
+				)
+			).values()
+		];
 		return {
 			key,
 			productionId: first.productionId,
@@ -131,6 +143,8 @@ export function groupApprovalRequests<T extends RequestItem>(items: T[]): Approv
 			lenderOrgId: first.asset.organizationId,
 			startDate: first.production.startDate,
 			endDate: first.production.endDate,
+			unpaid: sends.some((send) => send.unpaid),
+			notes: sends.flatMap((send) => (send.note ? [send.note] : [])),
 			items: list,
 			unitCount: units.length,
 			bundles: [...bundles.values()],

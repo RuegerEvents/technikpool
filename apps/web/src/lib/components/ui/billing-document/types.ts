@@ -6,6 +6,7 @@ export type BillingItem = {
 	categoryColor: string | null;
 	productId?: string | null;
 	productLabel?: string | null;
+	assetId?: string | null;
 	bundleId?: string | null;
 	/** Object key of the product photo or bundle preview, resolved by ProductThumb. */
 	imagePath?: string | null;

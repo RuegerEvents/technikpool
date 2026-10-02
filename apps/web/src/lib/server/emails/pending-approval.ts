@@ -7,12 +7,17 @@ export function pendingApprovalEmail(opts: {
 	productionName: string;
 	pendingCount: number;
 	url: string;
+	/** The borrower says the production is unpaid and asks to have it free of charge. */
+	unpaid?: boolean;
+	note?: string | null;
 }) {
 	const greeting = opts.name ? `Hallo ${opts.name},` : 'Hallo,';
 	const itemText =
 		opts.pendingCount === 1
 			? '1 Ausrüstungsgegenstand wartet'
 			: `${opts.pendingCount} Ausrüstungsgegenstände warten`;
+
+	const unpaidText = 'Die Produktion ist unbezahlt – es wird um eine kostenlose Leihe gebeten.';
 
 	const html = renderEmailLayout({
 		preheader: `${opts.requestingOrgName} möchte Ausrüstung von ${opts.ownerOrgName} ausleihen.`,
@@ -23,11 +28,13 @@ export function pendingApprovalEmail(opts: {
 				<strong>${escapeHtml(opts.ownerOrgName)}</strong> für die Produktion
 				<strong>${escapeHtml(opts.productionName)}</strong> ausleihen. ${itemText} auf deine Freigabe.
 			</p>
+			${opts.unpaid ? `<p style="margin:0 0 16px"><strong>${escapeHtml(unpaidText)}</strong></p>` : ''}
+			${
+				opts.note
+					? `<p style="margin:0 0 16px;padding:12px 16px;border-left:3px solid #d4d4d4;white-space:pre-wrap">${escapeHtml(opts.note)}</p>`
+					: ''
+			}
 			${renderButton('Anfrage ansehen', opts.url)}
-			<p class="tp-muted" style="margin:0;color:#71717a">
-				Du erhältst erst dann wieder eine Benachrichtigung, wenn alle offenen Anfragen
-				für diese Produktion bearbeitet wurden und eine neue hinzukommt.
-			</p>
 		`
 	});
 
@@ -36,10 +43,10 @@ export function pendingApprovalEmail(opts: {
 		'',
 		`${opts.requestingOrgName} möchte Ausrüstung von ${opts.ownerOrgName} für die Produktion "${opts.productionName}" ausleihen.`,
 		`${itemText} auf deine Freigabe.`,
+		...(opts.unpaid ? ['', unpaidText] : []),
+		...(opts.note ? ['', opts.note] : []),
 		'',
-		opts.url,
-		'',
-		'Du erhältst erst dann wieder eine Benachrichtigung, wenn alle offenen Anfragen für diese Produktion bearbeitet wurden und eine neue hinzukommt.'
+		opts.url
 	].join('\n');
 
 	return {

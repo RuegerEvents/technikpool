@@ -1,7 +1,13 @@
 import { query, command } from '$app/server';
 import { prisma } from '#lib/server/auth.js';
 import * as v from 'valibot';
-import { customerLabel, dayCountBetween, formatAddress, getErrorMessage } from '#lib/utils.js';
+import {
+	customerLabel,
+	dayCountBetween,
+	formatAddress,
+	getErrorMessage,
+	orgLabel
+} from '#lib/utils.js';
 import {
 	isSystemAdmin,
 	managedOrgIds,
@@ -25,6 +31,7 @@ import { appError, type AppErrorCode, type ErrorParams } from '#lib/errors.js';
 import type { Prisma } from '#lib/prisma/client.js';
 import { SERVICE_UNITS, serviceLineTotal } from '#lib/service-lines.svelte.js';
 import { getServiceCatalog } from './service-catalog.remote';
+import { getBillingTodos } from './billing.remote';
 
 /**
  * Offers and invoices are inventory-admin work, not org-owner work — deliberately
@@ -195,16 +202,33 @@ export const getOfferVersions = query(v.string(), async (offerId: string) => {
 	};
 });
 
+/**
+ * The documents for a production a user may list: those their orgs issued —
+ * the production's own org to its customer, or a lender to the production's
+ * org — and, once issued, those addressed to one of their orgs by a lender.
+ * A system admin sees every one. `issued` names the column that marks a
+ * document as no longer a draft.
+ */
+async function productionDocumentWhere(issued: 'finalizedAt' | 'sentAt') {
+	const user = await requireAuth();
+	if (await isSystemAdmin(user.id)) return {};
+	const orgIds = await managedOrgIds(user.id);
+	return {
+		OR: [
+			{ organizationId: { in: orgIds } },
+			{ recipientOrganizationId: { in: orgIds }, [issued]: { not: null } }
+		]
+	};
+}
+
 export const getOffersForProduction = query(v.string(), async (productionId: string) => {
-	await requireAuth();
-	const production = await prisma.production.findUniqueOrThrow({
-		where: { id: productionId },
-		select: { organizationId: true }
-	});
-	await requireOrgBilling(production.organizationId);
 	return prisma.offer.findMany({
-		where: { productionId },
-		include: { items: true, invoices: { select: { id: true, number: true } } },
+		where: { productionId, ...(await productionDocumentWhere('finalizedAt')) },
+		include: {
+			items: true,
+			invoices: { select: { id: true, number: true } },
+			organization: { select: { id: true, name: true, shortName: true } }
+		},
 		orderBy: { createdAt: 'desc' }
 	});
 });
@@ -280,7 +304,8 @@ function assetLabel(asset: {
 // complete result.
 async function computeProductionBilling(
 	productionId: string,
-	assetScope: string
+	assetScope: string,
+	billingOrgId: string
 ): Promise<ProductionBilling> {
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: productionId },
@@ -310,10 +335,16 @@ async function computeProductionBilling(
 		}
 	});
 
+	// "LENT" is a lender billing the production's org: its own units, except
+	// what it agreed to lend free of charge.
 	const inScopeItems =
-		assetScope === 'OWN_ORG_ONLY'
-			? production.items.filter((item) => item.asset.organizationId === production.organizationId)
-			: production.items;
+		assetScope === 'LENT'
+			? production.items.filter(
+					(item) => item.asset.organizationId === billingOrgId && !item.freeOfCharge
+				)
+			: assetScope === 'OWN_ORG_ONLY'
+				? production.items.filter((item) => item.asset.organizationId === production.organizationId)
+				: production.items;
 
 	// An accessory is booked because its parent was, and the parent's price is
 	// the price of what ships attached to it — a converter's PSU is not a second
@@ -328,15 +359,16 @@ async function computeProductionBilling(
 	);
 
 	const rates = await prisma.orgCategoryRate.findMany({
-		where: { organizationId: production.organizationId }
+		where: { organizationId: billingOrgId }
 	});
 	const rateByCategory = new Map(rates.map((r) => [r.categoryId, Number(r.percentage)]));
 
 	// Prices are per-org, and it is always the *billing* org's price that
 	// counts — including for equipment loaned in from a partner org: what the
 	// partner paid for the device is their bookkeeping, not this org's tariff.
+	// A lender billing its loan uses its own tariff for the same reason.
 	const orgPrices = await prisma.orgProductPrice.findMany({
-		where: { organizationId: production.organizationId }
+		where: { organizationId: billingOrgId }
 	});
 	const priceByProduct = new Map(orgPrices.map((p) => [p.productId, Number(p.netPurchasePrice)]));
 
@@ -522,11 +554,13 @@ function billingBlocker(
 
 async function computeProductionBillingLines(
 	productionId: string,
-	assetScope: string
+	assetScope: string,
+	billingOrgId: string
 ): Promise<BillingLine[]> {
 	const { lines, missingPrices, missingRates } = await computeProductionBilling(
 		productionId,
-		assetScope
+		assetScope,
+		billingOrgId
 	);
 	if (missingPrices.length > 0 || missingRates.length > 0) {
 		const { code, params } = billingBlocker(missingPrices, missingRates);
@@ -766,9 +800,42 @@ function diffBillingLines(stored: ComparableLine[], current: ComparableLine[]) {
 	return { added, removed, changed };
 }
 
+/** Units a lender has on a production that it may bill the production's org for. */
+const LENT_BILLABLE_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT', 'RETURNED'];
+
+/**
+ * Who issues a document for a production, and for which units. Without
+ * `organizationId` it is the production's own org billing its customer. With
+ * another org's id it is that org billing the production's org for what it
+ * lent ("LENT") — allowed only to an org with units on the production.
+ */
+async function billingParty(
+	production: { id: string; organizationId: string },
+	organizationId: string | undefined,
+	assetScope: string | undefined
+) {
+	const billingOrgId = organizationId ?? production.organizationId;
+	await requireOrgBilling(billingOrgId);
+	if (billingOrgId === production.organizationId) {
+		if (assetScope === 'LENT') appError(400, 'billing_not_lender');
+		return { billingOrgId, assetScope: assetScope ?? 'ALL', lending: false };
+	}
+	const lent = await prisma.productionItem.count({
+		where: {
+			productionId: production.id,
+			status: { in: LENT_BILLABLE_STATUSES },
+			asset: { organizationId: billingOrgId }
+		}
+	});
+	if (lent === 0) appError(400, 'billing_not_lender');
+	return { billingOrgId, assetScope: 'LENT', lending: true };
+}
+
 const billingReadinessSchema = v.object({
 	productionId: v.string(),
-	assetScope: v.optional(v.picklist(['ALL', 'OWN_ORG_ONLY']))
+	// The issuing org, when it is not the production's own — a lender.
+	organizationId: v.optional(v.string()),
+	assetScope: v.optional(v.picklist(['ALL', 'OWN_ORG_ONLY', 'LENT']))
 });
 
 // What the offer form asks before it lets anyone press "Create": which booked
@@ -777,18 +844,19 @@ const billingReadinessSchema = v.object({
 // creation, with no way to act on it from where the user is standing.
 export const getProductionBillingReadiness = query(
 	billingReadinessSchema,
-	async ({ productionId, assetScope }) => {
+	async ({ productionId, organizationId, assetScope }) => {
 		const user = await requireAuth();
 		const production = await prisma.production.findUniqueOrThrow({
 			where: { id: productionId },
-			select: { organizationId: true }
+			select: { id: true, organizationId: true }
 		});
-		await requireOrgBilling(production.organizationId);
+		const party = await billingParty(production, organizationId, assetScope);
 		const systemAdmin = await isSystemAdmin(user.id);
 
 		const { lines, missingPrices, missingRates } = await computeProductionBilling(
 			productionId,
-			assetScope ?? 'ALL'
+			party.assetScope,
+			party.billingOrgId
 		);
 
 		const manageableOrgIds = new Set(
@@ -804,23 +872,26 @@ export const getProductionBillingReadiness = query(
 		const canManage = (orgId: string) => systemAdmin || manageableOrgIds.has(orgId);
 
 		return {
-			organizationId: production.organizationId,
+			organizationId: party.billingOrgId,
 			pricedLineCount: lines.length,
 			pricedDailyTotal: lines.reduce((sum, line) => sum + line.dailyRate, 0),
 			// Both the price and the rate belong to the org doing the billing —
 			// prices are per (org, product), so only this org's admins set them.
-			canEditPrices: canManage(production.organizationId),
+			canEditPrices: canManage(party.billingOrgId),
 			missingPrices,
 			missingRates,
-			canEditRates: canManage(production.organizationId)
+			canEditRates: canManage(party.billingOrgId)
 		};
 	}
 );
 
 const createOfferSchema = v.object({
 	productionId: v.string(),
+	// A lender billing the production's org for its loan; the recipient is
+	// then that org, and the customer fields below are ignored.
+	organizationId: v.optional(v.string()),
 	customerId: v.optional(v.string()),
-	customerName: v.string(),
+	customerName: v.optional(v.string()),
 	customerAddress: v.optional(v.string()),
 	customerContactPerson: v.optional(v.string()),
 	customerEmail: v.optional(v.string()),
@@ -829,17 +900,48 @@ const createOfferSchema = v.object({
 	// 'OWN_ORG_ONLY' excludes assets loaned in from partner orgs — lets the
 	// production owner bill their own equipment separately from partner-owned
 	// equipment contributed to the same production.
-	assetScope: v.optional(v.picklist(['ALL', 'OWN_ORG_ONLY']))
+	assetScope: v.optional(v.picklist(['ALL', 'OWN_ORG_ONLY', 'LENT']))
 });
+
+/**
+ * A lender's document is addressed to the borrowing org, from that org's own
+ * billing details — the same snapshot a Customer would have given.
+ */
+function recipientColumns(org: {
+	id: string;
+	name: string;
+	billingEmail: string | null;
+	vatId: string | null;
+	address: { line1: string; line2: string | null; postalCode: string; city: string } | null;
+}) {
+	return {
+		recipientOrganizationId: org.id,
+		customerId: null,
+		customerName: org.name,
+		customerAddress: formatAddress(org.address) || null,
+		customerContactPerson: null,
+		customerEmail: org.billingEmail,
+		customerNumber: null,
+		customerPhone: null,
+		customerVatId: org.vatId
+	};
+}
 
 export const createOfferFromProduction = command(createOfferSchema, async (data) => {
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: data.productionId },
 		include: { organization: { include: { address: true } } }
 	});
-	await requireOrgBilling(production.organizationId);
-
-	const assetScope = data.assetScope ?? 'ALL';
+	const party = await billingParty(production, data.organizationId, data.assetScope);
+	const assetScope = party.assetScope;
+	// The letterhead, number sequence and templates are the issuer's.
+	const issuer = party.lending
+		? await prisma.organization.findUniqueOrThrow({
+				where: { id: party.billingOrgId },
+				include: { address: true }
+			})
+		: production.organization;
+	if (!party.lending && !data.customerName) appError(400, 'customer_required');
 
 	// Show duration (if set) is the billable day count; total duration only
 	// governs asset blocking/calendar.
@@ -849,23 +951,39 @@ export const createOfferFromProduction = command(createOfferSchema, async (data)
 			production.showEndDate ?? production.endDate
 		) ?? 1;
 
-	const lines = await computeProductionBillingLines(data.productionId, assetScope);
+	const lines = await computeProductionBillingLines(
+		data.productionId,
+		assetScope,
+		party.billingOrgId
+	);
 	// The service period is the whole production — setup and teardown are part
 	// of the service even though only show days are billed.
 	const serviceStartDate = production.startDate ?? production.showStartDate ?? new Date();
 	const serviceEndDate = production.endDate ?? production.showEndDate ?? serviceStartDate;
-	const customer = data.customerId
-		? await prisma.customer.findFirst({
-				where: { id: data.customerId, organizationId: production.organizationId }
-			})
-		: null;
+	const customer =
+		!party.lending && data.customerId
+			? await prisma.customer.findFirst({
+					where: { id: data.customerId, organizationId: production.organizationId }
+				})
+			: null;
+	const recipient = party.lending ? recipientColumns(production.organization) : null;
+	const customerColumns = recipient ?? {
+		customerId: data.customerId || null,
+		customerName: data.customerName!,
+		customerAddress: data.customerAddress?.trim() || null,
+		customerContactPerson: data.customerContactPerson?.trim() || null,
+		customerEmail: data.customerEmail?.trim() || null,
+		customerNumber: customer?.customerNumber ?? null,
+		customerPhone: customer?.phone ?? null,
+		customerVatId: customer?.vatId ?? null
+	};
 	const variables = {
 		production: production.name,
 		startDate: formatBillingDate(serviceStartDate),
 		endDate: formatBillingDate(serviceEndDate),
 		servicePeriod: `${formatBillingDate(serviceStartDate)} bis ${formatBillingDate(serviceEndDate)}`,
-		customer: data.customerName,
-		paymentTermsDays: production.organization.paymentTermsDays
+		customer: customerColumns.customerName,
+		paymentTermsDays: issuer.paymentTermsDays
 	};
 	const itemsData = lines.map((line) => ({
 		assetId: line.assetId,
@@ -884,43 +1002,34 @@ export const createOfferFromProduction = command(createOfferSchema, async (data)
 	const offer = await prisma.$transaction(async (tx) => {
 		return tx.offer.create({
 			data: {
-				number: await nextOfferNumber(tx, production.organizationId),
-				...orgSnapshotColumns(production.organization),
-				organizationId: production.organizationId,
+				number: await nextOfferNumber(tx, issuer.id),
+				...orgSnapshotColumns(issuer),
+				organizationId: issuer.id,
 				productionId: production.id,
-				customerId: data.customerId || null,
-				customerName: data.customerName,
-				customerAddress: data.customerAddress?.trim() || null,
-				customerContactPerson: data.customerContactPerson?.trim() || null,
-				customerEmail: data.customerEmail?.trim() || null,
-				customerNumber: customer?.customerNumber ?? null,
-				customerPhone: customer?.phone ?? null,
-				customerVatId: customer?.vatId ?? null,
+				...customerColumns,
 				serviceStartDate,
 				serviceEndDate,
 				introText:
 					data.introText?.trim() ||
-					renderBillingText(
-						production.organization.offerIntroTemplate || DEFAULT_OFFER_INTRO,
-						variables
-					),
+					renderBillingText(issuer.offerIntroTemplate || DEFAULT_OFFER_INTRO, variables),
 				closingText:
 					data.closingText?.trim() ||
-					renderBillingText(
-						production.organization.offerClosingTemplate || DEFAULT_OFFER_CLOSING,
-						variables
-					),
-				paymentTermsDays: production.organization.paymentTermsDays,
+					renderBillingText(issuer.offerClosingTemplate || DEFAULT_OFFER_CLOSING, variables),
+				paymentTermsDays: issuer.paymentTermsDays,
 				dayCount,
 				assetScope,
-				vatRatePercent: production.organization.isKleinunternehmer ? 0 : 19,
+				vatRatePercent: issuer.isKleinunternehmer ? 0 : 19,
 				items: { create: itemsData }
 			},
 			include: { items: true }
 		});
 	});
 
-	await getOffers().refresh();
+	await Promise.all([
+		getOffers().refresh(),
+		getOffersForProduction(production.id).refresh(),
+		getBillingTodos().refresh()
+	]);
 	return offer;
 });
 
@@ -970,7 +1079,11 @@ export const getOfferStaleness = query(v.string(), async (offerId: string) => {
 
 	let lines: BillingLine[];
 	try {
-		lines = await computeProductionBillingLines(offer.productionId, offer.assetScope);
+		lines = await computeProductionBillingLines(
+			offer.productionId,
+			offer.assetScope,
+			offer.organizationId
+		);
 	} catch (err) {
 		return {
 			applicable: true,
@@ -1020,7 +1133,11 @@ export const updateOfferItemsFromProduction = command(v.string(), async (offerId
 		appError(409, 'offer_no_production');
 	}
 
-	const lines = await computeProductionBillingLines(offer.productionId, offer.assetScope);
+	const lines = await computeProductionBillingLines(
+		offer.productionId,
+		offer.assetScope,
+		offer.organizationId
+	);
 	// The same rule getOfferStaleness applies: custom line rates are kept.
 	const itemsData = itemsFromProduction(lines, offer.items, offer.dayCount);
 
@@ -1291,7 +1408,11 @@ export const createOfferRevision = command(v.string(), async (offerId: string) =
 	const items = source.productionId
 		? [
 				...itemsFromProduction(
-					await computeProductionBillingLines(source.productionId, source.assetScope),
+					await computeProductionBillingLines(
+						source.productionId,
+						source.assetScope,
+						source.organizationId
+					),
 					source.items.filter((item) => item.kind === EQUIPMENT),
 					source.dayCount
 				),
@@ -1330,6 +1451,7 @@ export const createOfferRevision = command(v.string(), async (offerId: string) =
 			discountType: source.discountType,
 			discountValue: source.discountValue,
 			assetScope: source.assetScope,
+			recipientOrganizationId: source.recipientOrganizationId,
 			items: { create: items }
 		},
 		select: { id: true, number: true }
@@ -1434,6 +1556,7 @@ export const convertOfferToInvoice = command(convertOfferSchema, async ({ offerI
 				discountType: offer.discountType,
 				discountValue: offer.discountValue,
 				assetScope: offer.assetScope,
+				recipientOrganizationId: offer.recipientOrganizationId,
 				isKleinunternehmerSnapshot: offer.organization.isKleinunternehmer,
 				vatRatePercent: offer.organization.isKleinunternehmer ? 0 : 19,
 				items: { create: offer.items.map(copyItem) }
@@ -1443,6 +1566,7 @@ export const convertOfferToInvoice = command(convertOfferSchema, async ({ offerI
 	});
 
 	await getInvoices().refresh();
+	await getBillingTodos().refresh();
 	await getOffer(offerId).refresh();
 	await getOfferVersions(offerId).refresh();
 	await getOfferStaleness(offerId).refresh();
@@ -1488,15 +1612,12 @@ export const getInvoice = query(v.string(), async (id: string) => {
 });
 
 export const getInvoicesForProduction = query(v.string(), async (productionId: string) => {
-	await requireAuth();
-	const production = await prisma.production.findUniqueOrThrow({
-		where: { id: productionId },
-		select: { organizationId: true }
-	});
-	await requireOrgBilling(production.organizationId);
 	return prisma.invoice.findMany({
-		where: { productionId },
-		include: { items: true },
+		where: { productionId, ...(await productionDocumentWhere('sentAt')) },
+		include: {
+			items: true,
+			organization: { select: { id: true, name: true, shortName: true } }
+		},
 		orderBy: { issueDate: 'desc' }
 	});
 });
@@ -1532,7 +1653,11 @@ export const getInvoiceStaleness = query(v.string(), async (invoiceId: string) =
 
 	let lines: BillingLine[];
 	try {
-		lines = await computeProductionBillingLines(invoice.productionId, invoice.assetScope);
+		lines = await computeProductionBillingLines(
+			invoice.productionId,
+			invoice.assetScope,
+			invoice.organizationId
+		);
 	} catch (err) {
 		return {
 			applicable: true,
@@ -1590,7 +1715,11 @@ export const updateInvoiceItemsFromProduction = command(v.string(), async (invoi
 		appError(409, 'invoice_no_production');
 	}
 
-	const lines = await computeProductionBillingLines(invoice.productionId, invoice.assetScope);
+	const lines = await computeProductionBillingLines(
+		invoice.productionId,
+		invoice.assetScope,
+		invoice.organizationId
+	);
 	// Custom rates survive the update, as on an offer.
 	const itemsData = itemsFromProduction(lines, invoice.items, invoice.dayCount);
 
@@ -1601,6 +1730,7 @@ export const updateInvoiceItemsFromProduction = command(v.string(), async (invoi
 
 	await getInvoice(invoiceId).refresh();
 	await getInvoices().refresh();
+	await getBillingTodos().refresh();
 	await getInvoiceStaleness(invoiceId).refresh();
 });
 
@@ -1631,6 +1761,7 @@ export const finalizeInvoice = command(v.string(), async (invoiceId: string) => 
 
 	await getInvoice(invoiceId).refresh();
 	await getInvoices().refresh();
+	await getBillingTodos().refresh();
 });
 
 const updateInvoiceNumberSchema = v.object({
@@ -1655,6 +1786,7 @@ export const updateInvoiceNumber = command(
 		await prisma.invoice.update({ where: { id: invoiceId }, data: { number } });
 		await getInvoice(invoiceId).refresh();
 		await getInvoices().refresh();
+		await getBillingTodos().refresh();
 	}
 );
 
@@ -1710,6 +1842,7 @@ export const deleteInvoice = command(v.string(), async (invoiceId: string) => {
 	if (invoice.sentAt) appError(409, 'invoice_finalized_no_delete');
 	await prisma.invoice.delete({ where: { id: invoiceId } });
 	await getInvoices().refresh();
+	await getBillingTodos().refresh();
 	if (invoice.offerId) await getOffer(invoice.offerId).refresh();
 });
 
@@ -1739,6 +1872,7 @@ export const updateInvoiceDayCount = command(
 
 		await getInvoice(invoiceId).refresh();
 		await getInvoices().refresh();
+		await getBillingTodos().refresh();
 		await getInvoiceStaleness(invoiceId).refresh();
 	}
 );
@@ -1842,6 +1976,7 @@ export const updateInvoiceCustomer = command(updateInvoiceCustomerSchema, async 
 
 	await getInvoice(data.invoiceId).refresh();
 	await getInvoices().refresh();
+	await getBillingTodos().refresh();
 });
 
 const updateDocumentTextSchema = v.object({
@@ -1933,6 +2068,7 @@ async function refreshDocument(kind: DocumentKind, id: string) {
 	} else {
 		await getInvoice(id).refresh();
 		await getInvoices().refresh();
+		await getBillingTodos().refresh();
 	}
 }
 
@@ -2120,5 +2256,165 @@ export const moveServiceLine = command(
 			)
 		);
 		await refreshDocument(kind, line.documentId);
+	}
+);
+
+// ── Margin on lent equipment ────────────────────────────────────────────────
+
+/** What a document's discount leaves of each euro on it: 0.9 under 10% off. */
+function netFactor(doc: {
+	discountType: string | null;
+	discountValue: unknown;
+	items: { lineTotal: unknown }[];
+}) {
+	const subtotal = doc.items.reduce((sum, i) => sum + Number(i.lineTotal), 0);
+	if (subtotal <= 0 || !doc.discountType || doc.discountValue == null) return 1;
+	const value = Number(doc.discountValue);
+	const discount =
+		doc.discountType === 'PERCENT' ? subtotal * (value / 100) : Math.min(subtotal, value);
+	return (subtotal - discount) / subtotal;
+}
+
+/**
+ * The equipment another org lends to a production, priced from the lender's
+ * side, for the production's own org to set against what it bills its
+ * customer (see `loanMargins` in #lib/loan-margins.ts, which does the sums).
+ *
+ * One entry per thing a document bills as one line: a unit (`key` = its
+ * asset id), or a kit booked as a kit (`bundle:<id>`). Accessories travel in
+ * their parent's entry. The cost is read from what the lender sent the
+ * production's org for this production — its latest sent invoice, else its
+ * latest finalized offer — after the lender's discount. A unit lent free of
+ * charge costs nothing; a lender that has sent nothing leaves the cost open.
+ * Null when nothing is lent, or for a lender's own document.
+ */
+export const getLoanCosts = query(
+	// The org whose document asks: only the production's own org has a margin
+	// of this kind, so for a lender's document the answer is simply null.
+	v.object({ productionId: v.string(), organizationId: v.string() }),
+	async ({ productionId, organizationId }) => {
+		await requireOrgBilling(organizationId);
+		const production = await prisma.production.findUniqueOrThrow({
+			where: { id: productionId },
+			select: { id: true, organizationId: true }
+		});
+		if (production.organizationId !== organizationId) return null;
+
+		const lent = await prisma.productionItem.findMany({
+			where: {
+				productionId,
+				status: { in: [...ACTIVE_ITEM_STATUSES] },
+				asset: { organizationId: { not: production.organizationId } }
+			},
+			select: {
+				assetId: true,
+				freeOfCharge: true,
+				sourceBundleId: true,
+				sourceParentAssetId: true,
+				asset: {
+					select: {
+						organizationId: true,
+						bundleId: true,
+						organization: { select: { name: true, shortName: true } }
+					}
+				}
+			}
+		});
+		if (lent.length === 0) return null;
+
+		const lenderIds = [...new Set(lent.map((i) => i.asset.organizationId))];
+		const lenderName = new Map(
+			lent.map((i) => [i.asset.organizationId, orgLabel(i.asset.organization)])
+		);
+		const [invoices, offers] = await Promise.all([
+			prisma.invoice.findMany({
+				where: {
+					productionId,
+					organizationId: { in: lenderIds },
+					recipientOrganizationId: production.organizationId,
+					sentAt: { not: null }
+				},
+				include: { items: true },
+				orderBy: { issueDate: 'desc' }
+			}),
+			prisma.offer.findMany({
+				where: {
+					productionId,
+					organizationId: { in: lenderIds },
+					recipientOrganizationId: production.organizationId,
+					finalizedAt: { not: null }
+				},
+				include: { items: true },
+				orderBy: { createdAt: 'desc' }
+			})
+		]);
+		const lenders = lenderIds.map((orgId) => {
+			const invoice = invoices.find((i) => i.organizationId === orgId);
+			const source = invoice ?? offers.find((o) => o.organizationId === orgId) ?? null;
+			const factor = source ? netFactor(source) : 1;
+			const costs = new Map<string, number>();
+			for (const item of source?.items ?? []) {
+				if (item.kind !== EQUIPMENT) continue;
+				const key = item.assetId ?? (item.bundleId ? `bundle:${item.bundleId}` : null);
+				if (key) costs.set(key, (costs.get(key) ?? 0) + Number(item.lineTotal) * factor);
+			}
+			return {
+				organizationId: orgId,
+				name: lenderName.get(orgId)!,
+				document: source
+					? {
+							kind: invoice ? ('invoice' as const) : ('offer' as const),
+							id: source.id,
+							number: source.number,
+							netTotal: source.items.reduce((sum, i) => sum + Number(i.lineTotal), 0) * factor
+						}
+					: null,
+				costs
+			};
+		});
+		const lenderOf = new Map(lenders.map((l) => [l.organizationId, l]));
+
+		// A kit booked as a kit is billed as one line on both sides; everything
+		// else by the unit. Accessories are inside whatever they hang off.
+		const lentIds = new Set(lent.map((i) => i.assetId));
+		const entries = new Map<
+			string,
+			{ key: string; organizationId: string; free: boolean; units: number }
+		>();
+		for (const unit of lent) {
+			if (unit.sourceParentAssetId && lentIds.has(unit.sourceParentAssetId)) continue;
+			const asKit = unit.sourceBundleId !== null && unit.asset.bundleId === unit.sourceBundleId;
+			const key = asKit ? `bundle:${unit.sourceBundleId}` : unit.assetId;
+			const entry = entries.get(key);
+			if (entry) {
+				entry.units++;
+				entry.free &&= unit.freeOfCharge;
+			} else {
+				entries.set(key, {
+					key,
+					organizationId: unit.asset.organizationId,
+					free: unit.freeOfCharge,
+					units: 1
+				});
+			}
+		}
+
+		return {
+			entries: [...entries.values()].map((entry) => {
+				const lender = lenderOf.get(entry.organizationId)!;
+				return {
+					key: entry.key,
+					lenderName: lender.name,
+					free: entry.free,
+					units: entry.units,
+					cost: entry.free ? 0 : lender.document ? (lender.costs.get(entry.key) ?? null) : null
+				};
+			}),
+			lenders: lenders.map(({ organizationId, name, document }) => ({
+				organizationId,
+				name,
+				document
+			}))
+		};
 	}
 );

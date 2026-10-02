@@ -29,7 +29,8 @@
 		updateDocumentText,
 		updateDocumentOrgSnapshot,
 		finalizeOffer,
-		deleteOffer
+		deleteOffer,
+		getLoanCosts
 	} from '#lib/remote/offers.remote.js';
 	import { getCustomers } from '#lib/remote/customers.remote.js';
 	import { StalenessBanner } from '#lib/components/ui/staleness-banner/index.js';
@@ -44,6 +45,14 @@
 
 	let { offerId }: { offerId: string } = $props();
 	let offer = $derived(await getOffer(offerId));
+	// What the lenders charge for the borrowed equipment on it, so each such
+	// line can show what passing it on earns. Null on a lender's own document.
+	let loanCostsQuery = $derived(
+		offer.productionId
+			? getLoanCosts({ productionId: offer.productionId, organizationId: offer.organizationId })
+			: null
+	);
+	let loanCosts = $derived(loanCostsQuery?.current?.entries ?? null);
 	// An archived PDF is served as it is; only a render can come up short.
 	let pdfIssues = $derived(
 		offer.pdfPath
@@ -446,6 +455,7 @@
 	/>
 
 	<BillingDocument
+		{loanCosts}
 		items={offer.items}
 		emptyMessage="No items on this offer yet."
 		editable={!offer.finalizedAt}

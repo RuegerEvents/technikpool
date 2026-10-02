@@ -10,6 +10,8 @@
 		declineProductionItems
 	} from '#lib/remote/productions.remote.js';
 	import { getPackTodos } from '#lib/remote/production-handout.remote.js';
+	import { createOfferFromProduction } from '#lib/remote/offers.remote.js';
+	import { goto } from '$app/navigation';
 	import { accessorySummary } from '#lib/production-items.js';
 	import {
 		itemsOf,
@@ -29,6 +31,26 @@
 	let { request, locale, onclose }: Props = $props();
 
 	let busy = $state(false);
+	// Whether what is approved here goes out free of charge. Starts as the
+	// borrower asked, and the lender may decide either way.
+	let free = $derived(request.unpaid);
+	// Optional: an offer to the borrower for what is approved here, drafted
+	// straight away and opened for review. Lent for free, there is nothing to offer.
+	let withOffer = $state(false);
+
+	// Takes the ids, not the request: once everything is approved the request
+	// leaves the list and this dialog's `request` with it.
+	async function draftOffer(productionId: string, lenderOrgId: string) {
+		try {
+			const offer = await createOfferFromProduction({ productionId, organizationId: lenderOrgId });
+			toast.success('Offer drafted — check it and finalize it to send it');
+			await goto(resolve(`offers/${offer.id}`));
+		} catch (err) {
+			// Usually a missing price or rate: the form lists them and lets them be set.
+			toast.error(getErrorMessage(err));
+			await goto(resolve(`offers/new?productionId=${productionId}&org=${lenderOrgId}`));
+		}
+	}
 
 	let dateFormat = $derived(
 		new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'de-DE', {
@@ -53,13 +75,23 @@
 	// whole selection arrives together.
 	async function decide(items: T[], action: 'approve' | 'decline') {
 		busy = true;
+		const { productionId, lenderOrgId } = request;
+		const offerAfter = withOffer && !free;
 		try {
 			const ids = items.map((i) => i.id);
 			if (action === 'approve') {
-				const { reviewed } = await approveProductionItems(ids);
-				toast.success(plural(reviewed, ['# asset approved.', '# assets approved.']));
+				const { reviewed } = await approveProductionItems({ itemIds: ids, freeOfCharge: free });
+				toast.success(
+					free
+						? plural(reviewed, [
+								'# asset approved free of charge.',
+								'# assets approved free of charge.'
+							])
+						: plural(reviewed, ['# asset approved.', '# assets approved.'])
+				);
 				// What was just approved is what has to be packed next.
 				void getPackTodos().refresh();
+				if (offerAfter) await draftOffer(productionId, lenderOrgId);
 			} else {
 				const { reviewed } = await declineProductionItems(ids);
 				toast.success(plural(reviewed, ['# asset declined.', '# assets declined.']));
@@ -123,6 +155,35 @@
 				<dt class="text-muted-foreground">Requested</dt>
 				<dd>{plural(request.unitCount, ['# device', '# devices'])}</dd>
 			</dl>
+
+			{#if request.unpaid}
+				<p
+					class="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200"
+				>
+					<span class="font-medium">Unpaid production.</span>
+					{request.requesterOrg} asks to borrow this equipment free of charge.
+				</p>
+			{/if}
+
+			{#each request.notes as note, i (i)}
+				<blockquote class="border-l-2 pl-3 text-sm whitespace-pre-wrap text-muted-foreground">
+					{note}
+				</blockquote>
+			{/each}
+
+			<label class="flex cursor-pointer items-center gap-2 text-sm select-none">
+				<input type="checkbox" bind:checked={free} class="h-4 w-4 rounded border-input" />
+				Lend free of charge
+				<span class="text-muted-foreground">— left off your invoice to {request.requesterOrg}</span>
+			</label>
+
+			{#if !free}
+				<label class="flex cursor-pointer items-center gap-2 text-sm select-none">
+					<input type="checkbox" bind:checked={withOffer} class="h-4 w-4 rounded border-input" />
+					Draft an offer to {request.requesterOrg}
+					<span class="text-muted-foreground">— opens after approving, to check and send</span>
+				</label>
+			{/if}
 
 			{#if request.bundles.length > 0}
 				<section>
@@ -254,7 +315,9 @@
 		</div>
 	{/snippet}
 	{#snippet footer()}
-		<Button disabled={busy} onclick={() => decide(request.items, 'approve')}>Approve all</Button>
+		<Button disabled={busy} onclick={() => decide(request.items, 'approve')}
+			>{free ? 'Approve all free of charge' : 'Approve all'}</Button
+		>
 		<Button variant="outline" disabled={busy} onclick={() => decide(request.items, 'decline')}
 			>Decline all</Button
 		>

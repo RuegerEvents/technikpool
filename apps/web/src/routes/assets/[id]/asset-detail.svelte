@@ -1203,6 +1203,9 @@
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
 												>
+												{#if tx.freeOfCharge}
+													<span class="text-muted-foreground">(free of charge)</span>
+												{/if}
 											{:else if tx?.type === 'DECLINED'}
 												Declined for
 												<a

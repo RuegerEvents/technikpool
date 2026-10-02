@@ -35,6 +35,8 @@ export type ProductionItemMinAggregateOutputType = {
   receivedById: string | null
   returnReportedAt: Date | null
   returnReportedById: string | null
+  loanRequestId: string | null
+  freeOfCharge: boolean | null
 }
 
 export type ProductionItemMaxAggregateOutputType = {
@@ -48,6 +50,8 @@ export type ProductionItemMaxAggregateOutputType = {
   receivedById: string | null
   returnReportedAt: Date | null
   returnReportedById: string | null
+  loanRequestId: string | null
+  freeOfCharge: boolean | null
 }
 
 export type ProductionItemCountAggregateOutputType = {
@@ -61,6 +65,8 @@ export type ProductionItemCountAggregateOutputType = {
   receivedById: number
   returnReportedAt: number
   returnReportedById: number
+  loanRequestId: number
+  freeOfCharge: number
   _all: number
 }
 
@@ -76,6 +82,8 @@ export type ProductionItemMinAggregateInputType = {
   receivedById?: true
   returnReportedAt?: true
   returnReportedById?: true
+  loanRequestId?: true
+  freeOfCharge?: true
 }
 
 export type ProductionItemMaxAggregateInputType = {
@@ -89,6 +97,8 @@ export type ProductionItemMaxAggregateInputType = {
   receivedById?: true
   returnReportedAt?: true
   returnReportedById?: true
+  loanRequestId?: true
+  freeOfCharge?: true
 }
 
 export type ProductionItemCountAggregateInputType = {
@@ -102,6 +112,8 @@ export type ProductionItemCountAggregateInputType = {
   receivedById?: true
   returnReportedAt?: true
   returnReportedById?: true
+  loanRequestId?: true
+  freeOfCharge?: true
   _all?: true
 }
 
@@ -188,6 +200,8 @@ export type ProductionItemGroupByOutputType = {
   receivedById: string | null
   returnReportedAt: Date | null
   returnReportedById: string | null
+  loanRequestId: string | null
+  freeOfCharge: boolean
   _count: ProductionItemCountAggregateOutputType | null
   _min: ProductionItemMinAggregateOutputType | null
   _max: ProductionItemMaxAggregateOutputType | null
@@ -222,11 +236,14 @@ export type ProductionItemWhereInput = {
   receivedById?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
   returnReportedAt?: Prisma.DateTimeNullableFilter<"ProductionItem"> | Date | string | null
   returnReportedById?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
+  loanRequestId?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
+  freeOfCharge?: Prisma.BoolFilter<"ProductionItem"> | boolean
   production?: Prisma.XOR<Prisma.ProductionScalarRelationFilter, Prisma.ProductionWhereInput>
   asset?: Prisma.XOR<Prisma.AssetScalarRelationFilter, Prisma.AssetWhereInput>
   sourceBundle?: Prisma.XOR<Prisma.AssetBundleNullableScalarRelationFilter, Prisma.AssetBundleWhereInput> | null
   receivedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   returnReportedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  loanRequest?: Prisma.XOR<Prisma.LoanRequestNullableScalarRelationFilter, Prisma.LoanRequestWhereInput> | null
 }
 
 export type ProductionItemOrderByWithRelationInput = {
@@ -240,11 +257,14 @@ export type ProductionItemOrderByWithRelationInput = {
   receivedById?: Prisma.SortOrderInput | Prisma.SortOrder
   returnReportedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   returnReportedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  loanRequestId?: Prisma.SortOrderInput | Prisma.SortOrder
+  freeOfCharge?: Prisma.SortOrder
   production?: Prisma.ProductionOrderByWithRelationInput
   asset?: Prisma.AssetOrderByWithRelationInput
   sourceBundle?: Prisma.AssetBundleOrderByWithRelationInput
   receivedBy?: Prisma.UserOrderByWithRelationInput
   returnReportedBy?: Prisma.UserOrderByWithRelationInput
+  loanRequest?: Prisma.LoanRequestOrderByWithRelationInput
 }
 
 export type ProductionItemWhereUniqueInput = Prisma.AtLeast<{
@@ -262,11 +282,14 @@ export type ProductionItemWhereUniqueInput = Prisma.AtLeast<{
   receivedById?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
   returnReportedAt?: Prisma.DateTimeNullableFilter<"ProductionItem"> | Date | string | null
   returnReportedById?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
+  loanRequestId?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
+  freeOfCharge?: Prisma.BoolFilter<"ProductionItem"> | boolean
   production?: Prisma.XOR<Prisma.ProductionScalarRelationFilter, Prisma.ProductionWhereInput>
   asset?: Prisma.XOR<Prisma.AssetScalarRelationFilter, Prisma.AssetWhereInput>
   sourceBundle?: Prisma.XOR<Prisma.AssetBundleNullableScalarRelationFilter, Prisma.AssetBundleWhereInput> | null
   receivedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   returnReportedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  loanRequest?: Prisma.XOR<Prisma.LoanRequestNullableScalarRelationFilter, Prisma.LoanRequestWhereInput> | null
 }, "id" | "productionId_assetId">
 
 export type ProductionItemOrderByWithAggregationInput = {
@@ -280,6 +303,8 @@ export type ProductionItemOrderByWithAggregationInput = {
   receivedById?: Prisma.SortOrderInput | Prisma.SortOrder
   returnReportedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   returnReportedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  loanRequestId?: Prisma.SortOrderInput | Prisma.SortOrder
+  freeOfCharge?: Prisma.SortOrder
   _count?: Prisma.ProductionItemCountOrderByAggregateInput
   _max?: Prisma.ProductionItemMaxOrderByAggregateInput
   _min?: Prisma.ProductionItemMinOrderByAggregateInput
@@ -299,6 +324,8 @@ export type ProductionItemScalarWhereWithAggregatesInput = {
   receivedById?: Prisma.StringNullableWithAggregatesFilter<"ProductionItem"> | string | null
   returnReportedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ProductionItem"> | Date | string | null
   returnReportedById?: Prisma.StringNullableWithAggregatesFilter<"ProductionItem"> | string | null
+  loanRequestId?: Prisma.StringNullableWithAggregatesFilter<"ProductionItem"> | string | null
+  freeOfCharge?: Prisma.BoolWithAggregatesFilter<"ProductionItem"> | boolean
 }
 
 export type ProductionItemCreateInput = {
@@ -307,11 +334,13 @@ export type ProductionItemCreateInput = {
   status?: string
   receivedAt?: Date | string | null
   returnReportedAt?: Date | string | null
+  freeOfCharge?: boolean
   production: Prisma.ProductionCreateNestedOneWithoutItemsInput
   asset: Prisma.AssetCreateNestedOneWithoutProductionItemsInput
   sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput
   receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput
   returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput
+  loanRequest?: Prisma.LoanRequestCreateNestedOneWithoutItemsInput
 }
 
 export type ProductionItemUncheckedCreateInput = {
@@ -325,6 +354,8 @@ export type ProductionItemUncheckedCreateInput = {
   receivedById?: string | null
   returnReportedAt?: Date | string | null
   returnReportedById?: string | null
+  loanRequestId?: string | null
+  freeOfCharge?: boolean
 }
 
 export type ProductionItemUpdateInput = {
@@ -333,11 +364,13 @@ export type ProductionItemUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   production?: Prisma.ProductionUpdateOneRequiredWithoutItemsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutProductionItemsNestedInput
   sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput
   receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput
   returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput
+  loanRequest?: Prisma.LoanRequestUpdateOneWithoutItemsNestedInput
 }
 
 export type ProductionItemUncheckedUpdateInput = {
@@ -351,6 +384,8 @@ export type ProductionItemUncheckedUpdateInput = {
   receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ProductionItemCreateManyInput = {
@@ -364,6 +399,8 @@ export type ProductionItemCreateManyInput = {
   receivedById?: string | null
   returnReportedAt?: Date | string | null
   returnReportedById?: string | null
+  loanRequestId?: string | null
+  freeOfCharge?: boolean
 }
 
 export type ProductionItemUpdateManyMutationInput = {
@@ -372,6 +409,7 @@ export type ProductionItemUpdateManyMutationInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ProductionItemUncheckedUpdateManyInput = {
@@ -385,6 +423,8 @@ export type ProductionItemUncheckedUpdateManyInput = {
   receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ProductionItemListRelationFilter = {
@@ -413,6 +453,8 @@ export type ProductionItemCountOrderByAggregateInput = {
   receivedById?: Prisma.SortOrder
   returnReportedAt?: Prisma.SortOrder
   returnReportedById?: Prisma.SortOrder
+  loanRequestId?: Prisma.SortOrder
+  freeOfCharge?: Prisma.SortOrder
 }
 
 export type ProductionItemMaxOrderByAggregateInput = {
@@ -426,6 +468,8 @@ export type ProductionItemMaxOrderByAggregateInput = {
   receivedById?: Prisma.SortOrder
   returnReportedAt?: Prisma.SortOrder
   returnReportedById?: Prisma.SortOrder
+  loanRequestId?: Prisma.SortOrder
+  freeOfCharge?: Prisma.SortOrder
 }
 
 export type ProductionItemMinOrderByAggregateInput = {
@@ -439,6 +483,8 @@ export type ProductionItemMinOrderByAggregateInput = {
   receivedById?: Prisma.SortOrder
   returnReportedAt?: Prisma.SortOrder
   returnReportedById?: Prisma.SortOrder
+  loanRequestId?: Prisma.SortOrder
+  freeOfCharge?: Prisma.SortOrder
 }
 
 export type ProductionItemCreateNestedManyWithoutReceivedByInput = {
@@ -651,16 +697,60 @@ export type ProductionItemUncheckedUpdateManyWithoutProductionNestedInput = {
   deleteMany?: Prisma.ProductionItemScalarWhereInput | Prisma.ProductionItemScalarWhereInput[]
 }
 
+export type ProductionItemCreateNestedManyWithoutLoanRequestInput = {
+  create?: Prisma.XOR<Prisma.ProductionItemCreateWithoutLoanRequestInput, Prisma.ProductionItemUncheckedCreateWithoutLoanRequestInput> | Prisma.ProductionItemCreateWithoutLoanRequestInput[] | Prisma.ProductionItemUncheckedCreateWithoutLoanRequestInput[]
+  connectOrCreate?: Prisma.ProductionItemCreateOrConnectWithoutLoanRequestInput | Prisma.ProductionItemCreateOrConnectWithoutLoanRequestInput[]
+  createMany?: Prisma.ProductionItemCreateManyLoanRequestInputEnvelope
+  connect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+}
+
+export type ProductionItemUncheckedCreateNestedManyWithoutLoanRequestInput = {
+  create?: Prisma.XOR<Prisma.ProductionItemCreateWithoutLoanRequestInput, Prisma.ProductionItemUncheckedCreateWithoutLoanRequestInput> | Prisma.ProductionItemCreateWithoutLoanRequestInput[] | Prisma.ProductionItemUncheckedCreateWithoutLoanRequestInput[]
+  connectOrCreate?: Prisma.ProductionItemCreateOrConnectWithoutLoanRequestInput | Prisma.ProductionItemCreateOrConnectWithoutLoanRequestInput[]
+  createMany?: Prisma.ProductionItemCreateManyLoanRequestInputEnvelope
+  connect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+}
+
+export type ProductionItemUpdateManyWithoutLoanRequestNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductionItemCreateWithoutLoanRequestInput, Prisma.ProductionItemUncheckedCreateWithoutLoanRequestInput> | Prisma.ProductionItemCreateWithoutLoanRequestInput[] | Prisma.ProductionItemUncheckedCreateWithoutLoanRequestInput[]
+  connectOrCreate?: Prisma.ProductionItemCreateOrConnectWithoutLoanRequestInput | Prisma.ProductionItemCreateOrConnectWithoutLoanRequestInput[]
+  upsert?: Prisma.ProductionItemUpsertWithWhereUniqueWithoutLoanRequestInput | Prisma.ProductionItemUpsertWithWhereUniqueWithoutLoanRequestInput[]
+  createMany?: Prisma.ProductionItemCreateManyLoanRequestInputEnvelope
+  set?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  disconnect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  delete?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  connect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  update?: Prisma.ProductionItemUpdateWithWhereUniqueWithoutLoanRequestInput | Prisma.ProductionItemUpdateWithWhereUniqueWithoutLoanRequestInput[]
+  updateMany?: Prisma.ProductionItemUpdateManyWithWhereWithoutLoanRequestInput | Prisma.ProductionItemUpdateManyWithWhereWithoutLoanRequestInput[]
+  deleteMany?: Prisma.ProductionItemScalarWhereInput | Prisma.ProductionItemScalarWhereInput[]
+}
+
+export type ProductionItemUncheckedUpdateManyWithoutLoanRequestNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductionItemCreateWithoutLoanRequestInput, Prisma.ProductionItemUncheckedCreateWithoutLoanRequestInput> | Prisma.ProductionItemCreateWithoutLoanRequestInput[] | Prisma.ProductionItemUncheckedCreateWithoutLoanRequestInput[]
+  connectOrCreate?: Prisma.ProductionItemCreateOrConnectWithoutLoanRequestInput | Prisma.ProductionItemCreateOrConnectWithoutLoanRequestInput[]
+  upsert?: Prisma.ProductionItemUpsertWithWhereUniqueWithoutLoanRequestInput | Prisma.ProductionItemUpsertWithWhereUniqueWithoutLoanRequestInput[]
+  createMany?: Prisma.ProductionItemCreateManyLoanRequestInputEnvelope
+  set?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  disconnect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  delete?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  connect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[]
+  update?: Prisma.ProductionItemUpdateWithWhereUniqueWithoutLoanRequestInput | Prisma.ProductionItemUpdateWithWhereUniqueWithoutLoanRequestInput[]
+  updateMany?: Prisma.ProductionItemUpdateManyWithWhereWithoutLoanRequestInput | Prisma.ProductionItemUpdateManyWithWhereWithoutLoanRequestInput[]
+  deleteMany?: Prisma.ProductionItemScalarWhereInput | Prisma.ProductionItemScalarWhereInput[]
+}
+
 export type ProductionItemCreateWithoutReceivedByInput = {
   id?: string
   sourceParentAssetId?: string | null
   status?: string
   receivedAt?: Date | string | null
   returnReportedAt?: Date | string | null
+  freeOfCharge?: boolean
   production: Prisma.ProductionCreateNestedOneWithoutItemsInput
   asset: Prisma.AssetCreateNestedOneWithoutProductionItemsInput
   sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput
   returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput
+  loanRequest?: Prisma.LoanRequestCreateNestedOneWithoutItemsInput
 }
 
 export type ProductionItemUncheckedCreateWithoutReceivedByInput = {
@@ -673,6 +763,8 @@ export type ProductionItemUncheckedCreateWithoutReceivedByInput = {
   receivedAt?: Date | string | null
   returnReportedAt?: Date | string | null
   returnReportedById?: string | null
+  loanRequestId?: string | null
+  freeOfCharge?: boolean
 }
 
 export type ProductionItemCreateOrConnectWithoutReceivedByInput = {
@@ -691,10 +783,12 @@ export type ProductionItemCreateWithoutReturnReportedByInput = {
   status?: string
   receivedAt?: Date | string | null
   returnReportedAt?: Date | string | null
+  freeOfCharge?: boolean
   production: Prisma.ProductionCreateNestedOneWithoutItemsInput
   asset: Prisma.AssetCreateNestedOneWithoutProductionItemsInput
   sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput
   receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput
+  loanRequest?: Prisma.LoanRequestCreateNestedOneWithoutItemsInput
 }
 
 export type ProductionItemUncheckedCreateWithoutReturnReportedByInput = {
@@ -707,6 +801,8 @@ export type ProductionItemUncheckedCreateWithoutReturnReportedByInput = {
   receivedAt?: Date | string | null
   receivedById?: string | null
   returnReportedAt?: Date | string | null
+  loanRequestId?: string | null
+  freeOfCharge?: boolean
 }
 
 export type ProductionItemCreateOrConnectWithoutReturnReportedByInput = {
@@ -749,6 +845,8 @@ export type ProductionItemScalarWhereInput = {
   receivedById?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
   returnReportedAt?: Prisma.DateTimeNullableFilter<"ProductionItem"> | Date | string | null
   returnReportedById?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
+  loanRequestId?: Prisma.StringNullableFilter<"ProductionItem"> | string | null
+  freeOfCharge?: Prisma.BoolFilter<"ProductionItem"> | boolean
 }
 
 export type ProductionItemUpsertWithWhereUniqueWithoutReturnReportedByInput = {
@@ -773,10 +871,12 @@ export type ProductionItemCreateWithoutAssetInput = {
   status?: string
   receivedAt?: Date | string | null
   returnReportedAt?: Date | string | null
+  freeOfCharge?: boolean
   production: Prisma.ProductionCreateNestedOneWithoutItemsInput
   sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput
   receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput
   returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput
+  loanRequest?: Prisma.LoanRequestCreateNestedOneWithoutItemsInput
 }
 
 export type ProductionItemUncheckedCreateWithoutAssetInput = {
@@ -789,6 +889,8 @@ export type ProductionItemUncheckedCreateWithoutAssetInput = {
   receivedById?: string | null
   returnReportedAt?: Date | string | null
   returnReportedById?: string | null
+  loanRequestId?: string | null
+  freeOfCharge?: boolean
 }
 
 export type ProductionItemCreateOrConnectWithoutAssetInput = {
@@ -823,10 +925,12 @@ export type ProductionItemCreateWithoutSourceBundleInput = {
   status?: string
   receivedAt?: Date | string | null
   returnReportedAt?: Date | string | null
+  freeOfCharge?: boolean
   production: Prisma.ProductionCreateNestedOneWithoutItemsInput
   asset: Prisma.AssetCreateNestedOneWithoutProductionItemsInput
   receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput
   returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput
+  loanRequest?: Prisma.LoanRequestCreateNestedOneWithoutItemsInput
 }
 
 export type ProductionItemUncheckedCreateWithoutSourceBundleInput = {
@@ -839,6 +943,8 @@ export type ProductionItemUncheckedCreateWithoutSourceBundleInput = {
   receivedById?: string | null
   returnReportedAt?: Date | string | null
   returnReportedById?: string | null
+  loanRequestId?: string | null
+  freeOfCharge?: boolean
 }
 
 export type ProductionItemCreateOrConnectWithoutSourceBundleInput = {
@@ -873,10 +979,12 @@ export type ProductionItemCreateWithoutProductionInput = {
   status?: string
   receivedAt?: Date | string | null
   returnReportedAt?: Date | string | null
+  freeOfCharge?: boolean
   asset: Prisma.AssetCreateNestedOneWithoutProductionItemsInput
   sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput
   receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput
   returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput
+  loanRequest?: Prisma.LoanRequestCreateNestedOneWithoutItemsInput
 }
 
 export type ProductionItemUncheckedCreateWithoutProductionInput = {
@@ -889,6 +997,8 @@ export type ProductionItemUncheckedCreateWithoutProductionInput = {
   receivedById?: string | null
   returnReportedAt?: Date | string | null
   returnReportedById?: string | null
+  loanRequestId?: string | null
+  freeOfCharge?: boolean
 }
 
 export type ProductionItemCreateOrConnectWithoutProductionInput = {
@@ -917,6 +1027,60 @@ export type ProductionItemUpdateManyWithWhereWithoutProductionInput = {
   data: Prisma.XOR<Prisma.ProductionItemUpdateManyMutationInput, Prisma.ProductionItemUncheckedUpdateManyWithoutProductionInput>
 }
 
+export type ProductionItemCreateWithoutLoanRequestInput = {
+  id?: string
+  sourceParentAssetId?: string | null
+  status?: string
+  receivedAt?: Date | string | null
+  returnReportedAt?: Date | string | null
+  freeOfCharge?: boolean
+  production: Prisma.ProductionCreateNestedOneWithoutItemsInput
+  asset: Prisma.AssetCreateNestedOneWithoutProductionItemsInput
+  sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput
+  receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput
+  returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput
+}
+
+export type ProductionItemUncheckedCreateWithoutLoanRequestInput = {
+  id?: string
+  productionId: string
+  assetId: string
+  sourceBundleId?: string | null
+  sourceParentAssetId?: string | null
+  status?: string
+  receivedAt?: Date | string | null
+  receivedById?: string | null
+  returnReportedAt?: Date | string | null
+  returnReportedById?: string | null
+  freeOfCharge?: boolean
+}
+
+export type ProductionItemCreateOrConnectWithoutLoanRequestInput = {
+  where: Prisma.ProductionItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductionItemCreateWithoutLoanRequestInput, Prisma.ProductionItemUncheckedCreateWithoutLoanRequestInput>
+}
+
+export type ProductionItemCreateManyLoanRequestInputEnvelope = {
+  data: Prisma.ProductionItemCreateManyLoanRequestInput | Prisma.ProductionItemCreateManyLoanRequestInput[]
+  skipDuplicates?: boolean
+}
+
+export type ProductionItemUpsertWithWhereUniqueWithoutLoanRequestInput = {
+  where: Prisma.ProductionItemWhereUniqueInput
+  update: Prisma.XOR<Prisma.ProductionItemUpdateWithoutLoanRequestInput, Prisma.ProductionItemUncheckedUpdateWithoutLoanRequestInput>
+  create: Prisma.XOR<Prisma.ProductionItemCreateWithoutLoanRequestInput, Prisma.ProductionItemUncheckedCreateWithoutLoanRequestInput>
+}
+
+export type ProductionItemUpdateWithWhereUniqueWithoutLoanRequestInput = {
+  where: Prisma.ProductionItemWhereUniqueInput
+  data: Prisma.XOR<Prisma.ProductionItemUpdateWithoutLoanRequestInput, Prisma.ProductionItemUncheckedUpdateWithoutLoanRequestInput>
+}
+
+export type ProductionItemUpdateManyWithWhereWithoutLoanRequestInput = {
+  where: Prisma.ProductionItemScalarWhereInput
+  data: Prisma.XOR<Prisma.ProductionItemUpdateManyMutationInput, Prisma.ProductionItemUncheckedUpdateManyWithoutLoanRequestInput>
+}
+
 export type ProductionItemCreateManyReceivedByInput = {
   id?: string
   productionId: string
@@ -927,6 +1091,8 @@ export type ProductionItemCreateManyReceivedByInput = {
   receivedAt?: Date | string | null
   returnReportedAt?: Date | string | null
   returnReportedById?: string | null
+  loanRequestId?: string | null
+  freeOfCharge?: boolean
 }
 
 export type ProductionItemCreateManyReturnReportedByInput = {
@@ -939,6 +1105,8 @@ export type ProductionItemCreateManyReturnReportedByInput = {
   receivedAt?: Date | string | null
   receivedById?: string | null
   returnReportedAt?: Date | string | null
+  loanRequestId?: string | null
+  freeOfCharge?: boolean
 }
 
 export type ProductionItemUpdateWithoutReceivedByInput = {
@@ -947,10 +1115,12 @@ export type ProductionItemUpdateWithoutReceivedByInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   production?: Prisma.ProductionUpdateOneRequiredWithoutItemsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutProductionItemsNestedInput
   sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput
   returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput
+  loanRequest?: Prisma.LoanRequestUpdateOneWithoutItemsNestedInput
 }
 
 export type ProductionItemUncheckedUpdateWithoutReceivedByInput = {
@@ -963,6 +1133,8 @@ export type ProductionItemUncheckedUpdateWithoutReceivedByInput = {
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ProductionItemUncheckedUpdateManyWithoutReceivedByInput = {
@@ -975,6 +1147,8 @@ export type ProductionItemUncheckedUpdateManyWithoutReceivedByInput = {
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ProductionItemUpdateWithoutReturnReportedByInput = {
@@ -983,10 +1157,12 @@ export type ProductionItemUpdateWithoutReturnReportedByInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   production?: Prisma.ProductionUpdateOneRequiredWithoutItemsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutProductionItemsNestedInput
   sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput
   receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput
+  loanRequest?: Prisma.LoanRequestUpdateOneWithoutItemsNestedInput
 }
 
 export type ProductionItemUncheckedUpdateWithoutReturnReportedByInput = {
@@ -999,6 +1175,8 @@ export type ProductionItemUncheckedUpdateWithoutReturnReportedByInput = {
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ProductionItemUncheckedUpdateManyWithoutReturnReportedByInput = {
@@ -1011,6 +1189,8 @@ export type ProductionItemUncheckedUpdateManyWithoutReturnReportedByInput = {
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ProductionItemCreateManyAssetInput = {
@@ -1023,6 +1203,8 @@ export type ProductionItemCreateManyAssetInput = {
   receivedById?: string | null
   returnReportedAt?: Date | string | null
   returnReportedById?: string | null
+  loanRequestId?: string | null
+  freeOfCharge?: boolean
 }
 
 export type ProductionItemUpdateWithoutAssetInput = {
@@ -1031,10 +1213,12 @@ export type ProductionItemUpdateWithoutAssetInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   production?: Prisma.ProductionUpdateOneRequiredWithoutItemsNestedInput
   sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput
   receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput
   returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput
+  loanRequest?: Prisma.LoanRequestUpdateOneWithoutItemsNestedInput
 }
 
 export type ProductionItemUncheckedUpdateWithoutAssetInput = {
@@ -1047,6 +1231,8 @@ export type ProductionItemUncheckedUpdateWithoutAssetInput = {
   receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ProductionItemUncheckedUpdateManyWithoutAssetInput = {
@@ -1059,6 +1245,8 @@ export type ProductionItemUncheckedUpdateManyWithoutAssetInput = {
   receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ProductionItemCreateManySourceBundleInput = {
@@ -1071,6 +1259,8 @@ export type ProductionItemCreateManySourceBundleInput = {
   receivedById?: string | null
   returnReportedAt?: Date | string | null
   returnReportedById?: string | null
+  loanRequestId?: string | null
+  freeOfCharge?: boolean
 }
 
 export type ProductionItemUpdateWithoutSourceBundleInput = {
@@ -1079,10 +1269,12 @@ export type ProductionItemUpdateWithoutSourceBundleInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   production?: Prisma.ProductionUpdateOneRequiredWithoutItemsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutProductionItemsNestedInput
   receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput
   returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput
+  loanRequest?: Prisma.LoanRequestUpdateOneWithoutItemsNestedInput
 }
 
 export type ProductionItemUncheckedUpdateWithoutSourceBundleInput = {
@@ -1095,6 +1287,8 @@ export type ProductionItemUncheckedUpdateWithoutSourceBundleInput = {
   receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ProductionItemUncheckedUpdateManyWithoutSourceBundleInput = {
@@ -1107,6 +1301,8 @@ export type ProductionItemUncheckedUpdateManyWithoutSourceBundleInput = {
   receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ProductionItemCreateManyProductionInput = {
@@ -1119,6 +1315,8 @@ export type ProductionItemCreateManyProductionInput = {
   receivedById?: string | null
   returnReportedAt?: Date | string | null
   returnReportedById?: string | null
+  loanRequestId?: string | null
+  freeOfCharge?: boolean
 }
 
 export type ProductionItemUpdateWithoutProductionInput = {
@@ -1127,10 +1325,12 @@ export type ProductionItemUpdateWithoutProductionInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   asset?: Prisma.AssetUpdateOneRequiredWithoutProductionItemsNestedInput
   sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput
   receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput
   returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput
+  loanRequest?: Prisma.LoanRequestUpdateOneWithoutItemsNestedInput
 }
 
 export type ProductionItemUncheckedUpdateWithoutProductionInput = {
@@ -1143,6 +1343,8 @@ export type ProductionItemUncheckedUpdateWithoutProductionInput = {
   receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ProductionItemUncheckedUpdateManyWithoutProductionInput = {
@@ -1155,6 +1357,64 @@ export type ProductionItemUncheckedUpdateManyWithoutProductionInput = {
   receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
+}
+
+export type ProductionItemCreateManyLoanRequestInput = {
+  id?: string
+  productionId: string
+  assetId: string
+  sourceBundleId?: string | null
+  sourceParentAssetId?: string | null
+  status?: string
+  receivedAt?: Date | string | null
+  receivedById?: string | null
+  returnReportedAt?: Date | string | null
+  returnReportedById?: string | null
+  freeOfCharge?: boolean
+}
+
+export type ProductionItemUpdateWithoutLoanRequestInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  production?: Prisma.ProductionUpdateOneRequiredWithoutItemsNestedInput
+  asset?: Prisma.AssetUpdateOneRequiredWithoutProductionItemsNestedInput
+  sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput
+  receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput
+  returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput
+}
+
+export type ProductionItemUncheckedUpdateWithoutLoanRequestInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  productionId?: Prisma.StringFieldUpdateOperationsInput | string
+  assetId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
+}
+
+export type ProductionItemUncheckedUpdateManyWithoutLoanRequestInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  productionId?: Prisma.StringFieldUpdateOperationsInput | string
+  assetId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -1170,11 +1430,14 @@ export type ProductionItemSelect<ExtArgs extends runtime.Types.Extensions.Intern
   receivedById?: boolean
   returnReportedAt?: boolean
   returnReportedById?: boolean
+  loanRequestId?: boolean
+  freeOfCharge?: boolean
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   sourceBundle?: boolean | Prisma.ProductionItem$sourceBundleArgs<ExtArgs>
   receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>
   returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>
+  loanRequest?: boolean | Prisma.ProductionItem$loanRequestArgs<ExtArgs>
 }, ExtArgs["result"]["productionItem"]>
 
 export type ProductionItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1188,11 +1451,14 @@ export type ProductionItemSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   receivedById?: boolean
   returnReportedAt?: boolean
   returnReportedById?: boolean
+  loanRequestId?: boolean
+  freeOfCharge?: boolean
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   sourceBundle?: boolean | Prisma.ProductionItem$sourceBundleArgs<ExtArgs>
   receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>
   returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>
+  loanRequest?: boolean | Prisma.ProductionItem$loanRequestArgs<ExtArgs>
 }, ExtArgs["result"]["productionItem"]>
 
 export type ProductionItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1206,11 +1472,14 @@ export type ProductionItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   receivedById?: boolean
   returnReportedAt?: boolean
   returnReportedById?: boolean
+  loanRequestId?: boolean
+  freeOfCharge?: boolean
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   sourceBundle?: boolean | Prisma.ProductionItem$sourceBundleArgs<ExtArgs>
   receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>
   returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>
+  loanRequest?: boolean | Prisma.ProductionItem$loanRequestArgs<ExtArgs>
 }, ExtArgs["result"]["productionItem"]>
 
 export type ProductionItemSelectScalar = {
@@ -1224,15 +1493,18 @@ export type ProductionItemSelectScalar = {
   receivedById?: boolean
   returnReportedAt?: boolean
   returnReportedById?: boolean
+  loanRequestId?: boolean
+  freeOfCharge?: boolean
 }
 
-export type ProductionItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productionId" | "assetId" | "sourceBundleId" | "sourceParentAssetId" | "status" | "receivedAt" | "receivedById" | "returnReportedAt" | "returnReportedById", ExtArgs["result"]["productionItem"]>
+export type ProductionItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productionId" | "assetId" | "sourceBundleId" | "sourceParentAssetId" | "status" | "receivedAt" | "receivedById" | "returnReportedAt" | "returnReportedById" | "loanRequestId" | "freeOfCharge", ExtArgs["result"]["productionItem"]>
 export type ProductionItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   sourceBundle?: boolean | Prisma.ProductionItem$sourceBundleArgs<ExtArgs>
   receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>
   returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>
+  loanRequest?: boolean | Prisma.ProductionItem$loanRequestArgs<ExtArgs>
 }
 export type ProductionItemIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
@@ -1240,6 +1512,7 @@ export type ProductionItemIncludeCreateManyAndReturn<ExtArgs extends runtime.Typ
   sourceBundle?: boolean | Prisma.ProductionItem$sourceBundleArgs<ExtArgs>
   receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>
   returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>
+  loanRequest?: boolean | Prisma.ProductionItem$loanRequestArgs<ExtArgs>
 }
 export type ProductionItemIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
@@ -1247,6 +1520,7 @@ export type ProductionItemIncludeUpdateManyAndReturn<ExtArgs extends runtime.Typ
   sourceBundle?: boolean | Prisma.ProductionItem$sourceBundleArgs<ExtArgs>
   receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>
   returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>
+  loanRequest?: boolean | Prisma.ProductionItem$loanRequestArgs<ExtArgs>
 }
 
 export type $ProductionItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1257,6 +1531,7 @@ export type $ProductionItemPayload<ExtArgs extends runtime.Types.Extensions.Inte
     sourceBundle: Prisma.$AssetBundlePayload<ExtArgs> | null
     receivedBy: Prisma.$UserPayload<ExtArgs> | null
     returnReportedBy: Prisma.$UserPayload<ExtArgs> | null
+    loanRequest: Prisma.$LoanRequestPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1269,6 +1544,8 @@ export type $ProductionItemPayload<ExtArgs extends runtime.Types.Extensions.Inte
     receivedById: string | null
     returnReportedAt: Date | null
     returnReportedById: string | null
+    loanRequestId: string | null
+    freeOfCharge: boolean
   }, ExtArgs["result"]["productionItem"]>
   composites: {}
 }
@@ -1668,6 +1945,7 @@ export interface Prisma__ProductionItemClient<T, Null = never, ExtArgs extends r
   sourceBundle<T extends Prisma.ProductionItem$sourceBundleArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductionItem$sourceBundleArgs<ExtArgs>>): Prisma.Prisma__AssetBundleClient<runtime.Types.Result.GetResult<Prisma.$AssetBundlePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   receivedBy<T extends Prisma.ProductionItem$receivedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductionItem$receivedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   returnReportedBy<T extends Prisma.ProductionItem$returnReportedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductionItem$returnReportedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  loanRequest<T extends Prisma.ProductionItem$loanRequestArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductionItem$loanRequestArgs<ExtArgs>>): Prisma.Prisma__LoanRequestClient<runtime.Types.Result.GetResult<Prisma.$LoanRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1707,6 +1985,8 @@ export interface ProductionItemFieldRefs {
   readonly receivedById: Prisma.FieldRef<"ProductionItem", 'String'>
   readonly returnReportedAt: Prisma.FieldRef<"ProductionItem", 'DateTime'>
   readonly returnReportedById: Prisma.FieldRef<"ProductionItem", 'String'>
+  readonly loanRequestId: Prisma.FieldRef<"ProductionItem", 'String'>
+  readonly freeOfCharge: Prisma.FieldRef<"ProductionItem", 'Boolean'>
 }
     
 
@@ -2162,6 +2442,25 @@ export type ProductionItem$returnReportedByArgs<ExtArgs extends runtime.Types.Ex
    */
   include?: Prisma.UserInclude<ExtArgs> | null
   where?: Prisma.UserWhereInput
+}
+
+/**
+ * ProductionItem.loanRequest
+ */
+export type ProductionItem$loanRequestArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LoanRequest
+   */
+  select?: Prisma.LoanRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LoanRequest
+   */
+  omit?: Prisma.LoanRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LoanRequestInclude<ExtArgs> | null
+  where?: Prisma.LoanRequestWhereInput
 }
 
 /**

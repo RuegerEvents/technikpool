@@ -2,12 +2,8 @@ import { naturalCompare } from '#lib/sort.js';
 import { prisma } from '#lib/server/auth.js';
 import { BOOKABLE_ASSET_WHERE, isBookableStatus } from '#lib/asset-status.js';
 import { accessoryIdsOf } from '#lib/server/services/accessories.js';
-import {
-	getOrgIdsNeedingApprovalNotification,
-	notifyPendingApproval
-} from '#lib/server/services/approval-notifications.js';
 import { orgLabel } from '#lib/utils.js';
-import type { AddedToProductionData, RequestedData } from '#lib/types/asset-transaction.js';
+import type { AddedToProductionData } from '#lib/types/asset-transaction.js';
 
 // Taking over another production's equipment list. What carries over is the
 // list — so many of this product, so many of that kit — not a promise about
@@ -21,6 +17,9 @@ import type { AddedToProductionData, RequestedData } from '#lib/types/asset-tran
 
 const ACTIVE_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT', 'RETURNED'];
 const CONFLICT_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT'];
+// The target's own list counts its unsent loans (DRAFT) too, so copying twice
+// still tops up instead of noting the same units again.
+const TARGET_STATUSES = ['DRAFT', ...ACTIVE_STATUSES];
 
 type OrgInfo = {
 	id: string;
@@ -162,7 +161,7 @@ export async function planEquipmentCopy(sourceId: string, targetId: string): Pro
 	]);
 
 	const inTarget = new Set(target.items.map((item) => item.assetId));
-	const activeTarget = target.items.filter((item) => ACTIVE_STATUSES.includes(item.status));
+	const activeTarget = target.items.filter((item) => TARGET_STATUSES.includes(item.status));
 	const lines: CopyLine[] = [];
 	const picks = new Map<string, Pick>();
 
@@ -449,16 +448,8 @@ export async function copyEquipment(
 
 	// A unit the source had on its own can sit in a kit that is copied too.
 	const unique = [...new Map(newItems.map((item) => [item.assetId, item])).values()];
-	const lenderOrgIds = [
-		...new Set(
-			unique.map((item) => item.organizationId).filter((id) => id !== target.organizationId)
-		)
-	];
-	// Asked before booking: only an org with no open request here yet is told.
-	const orgsToNotify = await getOrgIdsNeedingApprovalNotification(targetId, lenderOrgIds);
-
 	const statusFor = (organizationId: string) =>
-		organizationId === target.organizationId ? 'APPROVED' : 'PENDING';
+		organizationId === target.organizationId ? 'APPROVED' : 'DRAFT';
 	await prisma.$transaction([
 		prisma.productionItem.createMany({
 			data: unique.map((item) => ({
@@ -473,34 +464,23 @@ export async function copyEquipment(
 		...adoptions.map(({ itemId, bundleId }) =>
 			prisma.productionItem.update({ where: { id: itemId }, data: { sourceBundleId: bundleId } })
 		),
+		// Another org's units are noted as drafts; their history starts when sent.
 		prisma.assetTransaction.createMany({
-			data: unique.map((item) => {
-				const crossOrg = item.organizationId !== target.organizationId;
-				return {
+			data: unique
+				.filter((item) => item.organizationId === target.organizationId)
+				.map((item) => ({
 					assetId: item.assetId,
 					userId,
 					productionId: targetId,
-					action: crossOrg ? 'REQUESTED' : 'ADDED_TO_PRODUCTION',
-					data: crossOrg
-						? ({
-								type: 'REQUESTED',
-								productionId: targetId,
-								productionName: target.name,
-								requestingOrgId: target.organization.id,
-								requestingOrgName: target.organization.name
-							} satisfies RequestedData)
-						: ({
-								type: 'ADDED_TO_PRODUCTION',
-								productionId: targetId,
-								productionName: target.name
-							} satisfies AddedToProductionData)
-				};
-			})
+					action: 'ADDED_TO_PRODUCTION',
+					data: {
+						type: 'ADDED_TO_PRODUCTION',
+						productionId: targetId,
+						productionName: target.name
+					} satisfies AddedToProductionData
+				}))
 		})
 	]);
-
-	if (orgsToNotify.length > 0)
-		await notifyPendingApproval(targetId, target.name, target.organization.name, orgsToNotify);
 
 	return {
 		/** Units booked, accessories included. */

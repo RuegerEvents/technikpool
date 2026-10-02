@@ -28,6 +28,8 @@
 	} from '#lib/billing-text.js';
 
 	const preselectedProductionId = page.url.searchParams.get('productionId');
+	// A lender billing the production's org: `?org=` names the issuing org.
+	const preselectedOrgId = page.url.searchParams.get('org');
 
 	// Only orgs whose offers this user writes: the server refuses the rest
 	// (`requireOrgBilling`), and it would do so only after a production was picked.
@@ -92,8 +94,14 @@
 
 	let selectedProduction = $derived(productions.find((p) => p.id === productionId));
 	let selectedOrg = $derived(orgs.find((org) => org.id === selectedOrgId));
+	// Another org's production this org lends to: the offer bills that org for
+	// this org's units, and is addressed to it rather than to a customer.
+	let lending = $derived(
+		!!selectedProduction && selectedProduction.organizationId !== selectedOrgId
+	);
 	let hasCrossOrgItems = $derived(
-		!!selectedProduction &&
+		!lending &&
+			!!selectedProduction &&
 			selectedProduction.items.some(
 				(i) => i.asset.organizationId !== selectedProduction!.organizationId
 			)
@@ -103,8 +111,14 @@
 	// production's booking, so a single asset without a purchase price would
 	// otherwise only surface as a failed creation — here it's a list with an
 	// input next to it.
-	let effectiveScope = $derived<'ALL' | 'OWN_ORG_ONLY'>(hasCrossOrgItems ? assetScope : 'ALL');
-	let readinessArgs = $derived({ productionId, assetScope: effectiveScope });
+	let effectiveScope = $derived<'ALL' | 'OWN_ORG_ONLY' | 'LENT'>(
+		lending ? 'LENT' : hasCrossOrgItems ? assetScope : 'ALL'
+	);
+	let readinessArgs = $derived(
+		lending
+			? { productionId, organizationId: selectedOrgId, assetScope: effectiveScope }
+			: { productionId, assetScope: effectiveScope }
+	);
 	// The query itself is held, not just its `.current`: SvelteKit keeps a cache
 	// entry alive only while some proxy for it is, so a handler calling
 	// `getProductionBillingReadiness(args).refresh()` could refresh a brand-new
@@ -123,15 +137,17 @@
 	$effect(() => {
 		if (!preselectedProductionId || selectedOrgId) return;
 		getProduction(preselectedProductionId).then((p) => {
-			selectedOrgId = p.organizationId;
+			selectedOrgId = preselectedOrgId ?? p.organizationId;
 			productionId = p.id;
 		});
 	});
 
 	$effect(() => {
 		if (!productionId) return;
+		const issuerId = selectedOrgId;
 		getProduction(productionId).then((p) => {
-			const c = p.customer;
+			const lent = p.organizationId !== issuerId;
+			const c = lent ? null : p.customer;
 			customerId = c?.id ?? '';
 			applyCustomerSnapshot(c);
 			const start = new Date(p.startDate ?? p.showStartDate ?? Date.now());
@@ -141,7 +157,7 @@
 				startDate: formatBillingDate(start),
 				endDate: formatBillingDate(end),
 				servicePeriod: `${formatBillingDate(start)} bis ${formatBillingDate(end)}`,
-				customer: c ? customerLabel(c) : '',
+				customer: lent ? p.organization.name : c ? customerLabel(c) : '',
 				paymentTermsDays: selectedOrg?.paymentTermsDays ?? 14
 			};
 			introText = renderBillingText(selectedOrg?.offerIntroTemplate || DEFAULT_OFFER_INTRO, values);
@@ -217,7 +233,7 @@
 			toast.error('Set the missing prices and rates before creating the offer');
 			return;
 		}
-		if (!customerId || !customerName) {
+		if (!lending && (!customerId || !customerName)) {
 			toast.error('Please select or create a customer');
 			return;
 		}
@@ -225,6 +241,7 @@
 		try {
 			const offer = await createOfferFromProduction({
 				productionId,
+				organizationId: lending ? selectedOrgId : undefined,
 				customerId,
 				customerName,
 				customerAddress: formatAddress(customerAddress) || undefined,
@@ -281,7 +298,11 @@
 							>
 								<option value="" disabled>Select a production</option>
 								{#each productions as p (p.id)}
-									<option value={p.id}>{p.name} ({p.items.length} items)</option>
+									<option value={p.id}
+										>{p.name}{p.organizationId === selectedOrgId
+											? ''
+											: ` — ${orgLabel(p.organization)}`} ({p.items.length} items)</option
+									>
 								{/each}
 							</select>
 						</div>
@@ -305,23 +326,37 @@
 						</div>
 					{/if}
 
-					<div class="space-y-2">
-						<Label for="customer">Customer</Label>
-						<CustomerSelect
-							id="customer"
-							organizationId={selectedOrgId}
-							bind:value={customerId}
-							idPrefix="offer-cust"
-							onChange={applyCustomerSnapshot}
-						/>
-						{#if customerContactPerson || customerEmail || formatAddress(customerAddress)}
-							<p class="text-sm text-muted-foreground">
-								{[customerContactPerson, customerEmail, formatAddress(customerAddress)]
-									.filter(Boolean)
-									.join(' · ')}
+					{#if lending && selectedProduction}
+						<div class="space-y-1 rounded-md bg-muted/50 px-3 py-2 text-sm">
+							<p>
+								Billed to <span class="font-medium"
+									>{orgLabel(selectedProduction.organization)}</span
+								>, for the equipment you lend to this production.
 							</p>
-						{/if}
-					</div>
+							<p class="text-muted-foreground">
+								Units you approved free of charge are left off. The recipient can read the offer
+								once you finalize it.
+							</p>
+						</div>
+					{:else}
+						<div class="space-y-2">
+							<Label for="customer">Customer</Label>
+							<CustomerSelect
+								id="customer"
+								organizationId={selectedOrgId}
+								bind:value={customerId}
+								idPrefix="offer-cust"
+								onChange={applyCustomerSnapshot}
+							/>
+							{#if customerContactPerson || customerEmail || formatAddress(customerAddress)}
+								<p class="text-sm text-muted-foreground">
+									{[customerContactPerson, customerEmail, formatAddress(customerAddress)]
+										.filter(Boolean)
+										.join(' · ')}
+								</p>
+							{/if}
+						</div>
+					{/if}
 
 					<div class="space-y-2">
 						<Label for="introText">Introduction</Label>

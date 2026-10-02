@@ -61,6 +61,8 @@ export type ApprovedData = {
 	type: 'APPROVED';
 	productionId: string;
 	productionName: string;
+	/** Lent free of charge. */
+	freeOfCharge?: boolean;
 };
 
 export type DeclinedData = {

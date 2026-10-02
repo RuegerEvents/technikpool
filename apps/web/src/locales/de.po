@@ -224,6 +224,7 @@ msgstr "Crew"
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/productions/[id]/copy-equipment-modal.svelte
+#: src/routes/productions/[id]/loan-request-modal.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -1954,9 +1955,8 @@ msgstr "Angefragt für <0/> <1>von <0/></1>"
 msgid "Added to <0/>"
 msgstr "Hinzugefügt zu <0/>"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Approved for <0/>"
-msgstr "Genehmigt für <0/>"
+#~ msgid "Approved for <0/>"
+#~ msgstr "Genehmigt für <0/>"
 
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "Declined for <0/>"
@@ -2871,8 +2871,9 @@ msgstr "Kunde"
 msgid "Invoiced"
 msgstr "Abgerechnet"
 
-#~ msgid "Offer"
-#~ msgstr "Angebot"
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Offer"
+msgstr "Angebot"
 
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/invoices/+page.svelte
@@ -3009,10 +3010,8 @@ msgstr "Organisation auswählen"
 msgid "Select a production"
 msgstr "Produktion auswählen"
 
-#. 0: p.name; 1: p.items.length
-#: src/routes/offers/new/+page.svelte
-msgid "{0} ({1} items)"
-msgstr "{0} ({1} Positionen)"
+#~ msgid "{0} ({1} items)"
+#~ msgstr "{0} ({1} Positionen)"
 
 #: src/lib/billing-document-check.svelte.ts
 msgid "Customer name"
@@ -3770,11 +3769,15 @@ msgstr "· Abgerechnet ({0})"
 #~ msgstr "{0} Tage <0/>"
 
 #: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 msgid "Sent"
 msgstr "Versendet"
 
 #: src/routes/invoices/+page.svelte
 #: src/routes/offers/+page.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Draft"
 msgstr "Entwurf"
@@ -5769,7 +5772,9 @@ msgid "Edit invoice number"
 msgstr "Rechnungsnummer bearbeiten"
 
 #. 0: invoice.number
+#. 0: invoice.number
 #: src/routes/invoices/[id]/invoice-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 msgid "Invoice {0} <0/>"
 msgstr "Rechnung {0} <0/>"
 
@@ -7098,6 +7103,7 @@ msgid "New email address"
 msgstr "Neue E-Mail-Adresse"
 
 #: src/routes/admin/users/+page.svelte
+#: src/routes/productions/[id]/loan-request-modal.svelte
 #: src/routes/profile/+page.svelte
 msgid "Sending…"
 msgstr "Wird gesendet…"
@@ -11170,6 +11176,7 @@ msgstr "Halte das Etikett in den Rahmen."
 #: src/routes/+page.svelte
 #: src/routes/approval-request-modal.svelte
 #: src/routes/assets/new/+page.svelte
+#: src/routes/productions/[id]/loan-request-modal.svelte
 msgid "# device"
 msgid_plural "# devices"
 msgstr[0] "# Gerät"
@@ -11401,6 +11408,7 @@ msgid "Scan what is there"
 msgstr "Scanne, was da ist"
 
 #: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 msgid "Lent equipment"
 msgstr "Geliehenes Equipment"
 
@@ -11874,3 +11882,297 @@ msgstr "Wert"
 #: src/routes/orgs/[id]/value/+page.svelte
 msgid "({0} damaged)"
 msgstr "({0} defekt/in Wartung)"
+
+#: src/lib/error-messages.svelte.ts
+msgid "There is nothing left to request — the list was already sent."
+msgstr "Es gibt nichts mehr anzufragen – die Liste wurde schon abgeschickt."
+
+#: src/routes/approval-request-modal.svelte
+msgid "# asset approved free of charge."
+msgid_plural "# assets approved free of charge."
+msgstr[0] "# Gerät kostenlos freigegeben."
+msgstr[1] "# Geräte kostenlos freigegeben."
+
+#. 0: request.requesterOrg
+#: src/routes/approval-request-modal.svelte
+msgid "<0>Unpaid production.</0> {0} asks to borrow this equipment free of charge."
+msgstr "<0>Unbezahlte Produktion.</0> {0} bittet darum, die Ausrüstung kostenlos zu leihen."
+
+#. 1.0: request.requesterOrg
+#: src/routes/approval-request-modal.svelte
+msgid "<0/> Lend free of charge <1>— left off your invoice to {0}</1>"
+msgstr "<0/> Kostenlos verleihen <1>– erscheint nicht auf deiner Rechnung an {0}</1>"
+
+#: src/routes/approval-request-modal.svelte
+msgid "Approve all free of charge"
+msgstr "Alle kostenlos freigeben"
+
+#: src/routes/+page.svelte
+msgid "Unpaid"
+msgstr "Unbezahlt"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Noted"
+msgstr "Vorgemerkt"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "# device from other organizations is noted but not requested yet."
+msgid_plural "# devices from other organizations are noted but not requested yet."
+msgstr[0] "# Gerät anderer Organisationen ist vorgemerkt, aber noch nicht angefragt."
+msgstr[1] "# Geräte anderer Organisationen sind vorgemerkt, aber noch nicht angefragt."
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Request…"
+msgstr "Anfragen…"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "The owner lends it free of charge"
+msgstr "Der Eigentümer verleiht es kostenlos"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Free"
+msgstr "Kostenlos"
+
+#: src/routes/productions/[id]/loan-request-modal.svelte
+#: src/routes/productions/[id]/loan-request-modal.svelte
+msgid "# device requested."
+msgid_plural "# devices requested."
+msgstr[0] "# Gerät angefragt."
+msgstr[1] "# Geräte angefragt."
+
+#: src/routes/productions/[id]/loan-request-modal.svelte
+msgid "# device was booked elsewhere in the meantime and stays noted."
+msgid_plural "# devices were booked elsewhere in the meantime and stay noted."
+msgstr[0] "# Gerät wurde inzwischen anderweitig gebucht und bleibt vorgemerkt."
+msgstr[1] "# Geräte wurden inzwischen anderweitig gebucht und bleiben vorgemerkt."
+
+#: src/routes/productions/[id]/loan-request-modal.svelte
+msgid "Request equipment"
+msgstr "Ausrüstung anfragen"
+
+#: src/routes/productions/[id]/loan-request-modal.svelte
+msgid "Unpaid production"
+msgstr "Unbezahlte Produktion"
+
+#: src/routes/productions/[id]/loan-request-modal.svelte
+msgid "Ask the lenders to lend the equipment free of charge. Each of them decides when approving."
+msgstr "Die Verleiher bitten, die Ausrüstung kostenlos zu überlassen. Jeder entscheidet das bei der Freigabe."
+
+#: src/routes/productions/[id]/loan-request-modal.svelte
+msgid "Charity gig, we pick it up on Friday"
+msgstr "Benefizkonzert, wir holen am Freitag ab"
+
+#: src/routes/productions/[id]/loan-request-modal.svelte
+msgid "Note (optional)"
+msgstr "Notiz (optional)"
+
+#: src/routes/productions/[id]/loan-request-modal.svelte
+msgid "Request # device"
+msgid_plural "Request # devices"
+msgstr[0] "# Gerät anfragen"
+msgstr[1] "# Geräte anfragen"
+
+#: src/routes/productions/[id]/equipment/equipment-planner.svelte
+msgid "Request # device…"
+msgid_plural "Request # devices…"
+msgstr[0] "# Gerät anfragen…"
+msgstr[1] "# Geräte anfragen…"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "(free of charge)"
+msgstr "(kostenlos)"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Approved for <0/> <1/>"
+msgstr "Genehmigt für <0/> <1/>"
+
+#: src/lib/error-messages.svelte.ts
+msgid "This organization has no equipment on that production to bill for."
+msgstr "Diese Organisation hat keine Geräte auf dieser Produktion, die sie abrechnen könnte."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Please select or create a customer."
+msgstr "Bitte wähle einen Kunden aus oder lege einen an."
+
+#: src/routes/approval-request-modal.svelte
+msgid "Offer drafted — check it and finalize it to send it"
+msgstr "Angebotsentwurf erstellt – prüfen und finalisieren, um ihn zu verschicken"
+
+#. 0: request.requesterOrg
+#: src/routes/approval-request-modal.svelte
+msgid "<0/> Draft an offer to {0} <1>— opens after approving, to check and send</1>"
+msgstr "<0/> Angebot an {0} erstellen <1>– öffnet sich nach der Freigabe zum Prüfen und Verschicken</1>"
+
+#. 0: orgLabel( production.organization )
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Offers and invoices between lenders and {0}."
+msgstr "Angebote und Rechnungen zwischen Verleihern und {0}."
+
+#. 0: offer.number
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Offer {0} <0/>"
+msgstr "Angebot {0} <0/>"
+
+#. 0: orgLabel(production.organization)
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Offer to {0}"
+msgstr "Angebot an {0}"
+
+#: src/lib/components/billing-todo/billing-todo-actions.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Invoice"
+msgstr "Abrechnen"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "From lenders"
+msgstr "Von Verleihern"
+
+#: src/routes/+page.svelte
+msgid "Production to invoice"
+msgid_plural "Productions to invoice"
+msgstr[0] "Produktion abzurechnen"
+msgstr[1] "Produktionen abzurechnen"
+
+#: src/routes/+page.svelte
+msgid "Handed out or over, no invoice sent yet"
+msgstr "Ausgegeben oder vorbei, noch keine Rechnung verschickt"
+
+#: src/routes/+page.svelte
+msgid "To invoice"
+msgstr "Abzurechnen"
+
+#: src/lib/components/billing-todo/billing-todo-actions.svelte
+msgid "Marked as settled outside the app"
+msgstr "Als extern abgerechnet markiert"
+
+#: src/lib/components/billing-todo/billing-todo-actions.svelte
+msgid "Undo"
+msgstr "Rückgängig"
+
+#: src/lib/components/billing-todo/billing-todo-actions.svelte
+msgid "Settled outside the app — stop reminding"
+msgstr "Außerhalb der App abgerechnet – nicht mehr erinnern"
+
+#: src/lib/components/billing-todo/billing-todo-actions.svelte
+msgid "Finish invoice"
+msgstr "Rechnung abschließen"
+
+#: src/lib/components/billing-todo/billing-todo-actions.svelte
+msgid "Settled elsewhere"
+msgstr "Extern abgerechnet"
+
+#. 0: todo.organizationName; 1: todo.recipientName
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "{0} has lent equipment to this production and has not sent {1} an invoice."
+msgstr "{0} hat Geräte an diese Produktion verliehen und {1} noch keine Rechnung geschickt."
+
+#. 0: todo.organizationName
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "The equipment has gone out or the production is over, and {0} has not sent an invoice."
+msgstr "Die Geräte sind ausgegeben oder die Produktion ist vorbei, und {0} hat noch keine Rechnung verschickt."
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Not invoiced yet."
+msgstr "Noch nicht abgerechnet."
+
+#~ msgid "{0}: marked as settled outside the app{1}. <0>Remind again</0>"
+#~ msgstr ""
+
+#: src/routes/productions/+page.svelte
+msgid "Not invoiced yet"
+msgstr "Noch nicht abgerechnet"
+
+#: src/routes/productions/+page.svelte
+msgid "<0/> Invoice"
+msgstr "<0/> Abrechnen"
+
+#. 0: p.name; 1: p.organizationId === selectedOrgId ? '' \\: ` — ${orgLabel(p.organization)}`; 2: p.items.length
+#: src/routes/offers/new/+page.svelte
+msgid "{0}{1} ({2} items)"
+msgstr "{0}{1} ({2} Positionen)"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Billed to <0/>, for the equipment you lend to this production."
+msgstr "Rechnung an <0/>, für die Geräte, die du dieser Produktion leihst."
+
+#: src/routes/offers/new/+page.svelte
+msgid "Units you approved free of charge are left off. The recipient can read the offer once you finalize it."
+msgstr "Kostenlos freigegebene Geräte fehlen darauf. Der Empfänger kann das Angebot lesen, sobald du es finalisierst."
+
+#. 0: d.organizationName; 1: d.dismissedBy
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "{0}: marked as settled outside the app by {1}."
+msgstr "{0}: von {1} als extern abgerechnet markiert."
+
+#. 0: d.organizationName
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "{0}: marked as settled outside the app."
+msgstr "{0}: als extern abgerechnet markiert."
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Remind again"
+msgstr "Wieder erinnern"
+
+#. 0: loan.lenderName
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Borrowed free of charge from {0}"
+msgstr "Kostenlos geliehen von {0}"
+
+#. 0: loan.lenderName
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Borrowed from {0} · cost not known yet"
+msgstr "Geliehen von {0} · Kosten noch offen"
+
+#. 0: loan.lenderName; 1: fmtEUR(loan.cost)
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Borrowed from {0} · costs {1}"
+msgstr "Geliehen von {0} · kostet {1}"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Borrowed equipment"
+msgstr "Geliehene Geräte"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "What passing it on earns — not shown to the customer."
+msgstr "Was die Weiterberechnung einbringt – für den Kunden nicht sichtbar."
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Charged here"
+msgstr "Hier berechnet"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Lenders charge"
+msgstr "Verleiher berechnen"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Margin"
+msgstr "Marge"
+
+#~ msgid "{0} lines are left out: their lenders have not sent an offer or invoice yet."
+#~ msgstr ""
+
+#~ msgid "{0} borrowed units are not passed on here, and their lenders charge {1} for them."
+#~ msgstr ""
+
+#~ msgid "{0} borrowed units are not passed on here."
+#~ msgstr ""
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "# line is left out: its lender has not sent an offer or invoice yet."
+msgid_plural "# lines are left out: their lenders have not sent an offer or invoice yet."
+msgstr[0] "# Position fehlt: Ihr Verleiher hat noch kein Angebot und keine Rechnung geschickt."
+msgstr[1] "# Positionen fehlen: Ihre Verleiher haben noch kein Angebot und keine Rechnung geschickt."
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "# borrowed unit is not passed on here."
+msgid_plural "# borrowed units are not passed on here."
+msgstr[0] "# geliehenes Gerät wird hier nicht weiterberechnet."
+msgstr[1] "# geliehene Geräte werden hier nicht weiterberechnet."
+
+#~ msgid "Its lenders charge {0} for it."
+#~ msgstr ""
+
+#. 0: fmtEUR(m.unbilled.cost)
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "The lenders charge {0} for it."
+msgstr "Die Verleiher berechnen dafür {0}."

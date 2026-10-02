@@ -148,10 +148,11 @@ export async function productionVisibility(userId: string) {
 /**
  * The items that let a lender's people into a production: a unit of theirs,
  * requested, lent or already back — anything but a request they turned down,
- * which is where their part in it ended. A cancelled production keeps its
- * lenders, who were told about it and may want to look.
+ * which is where their part in it ended, or one not sent yet (DRAFT), which
+ * they have not heard of. A cancelled production keeps its lenders, who were
+ * told about it and may want to look.
  */
-export const LENDING_ITEM_STATUS = { not: 'DECLINED' } as const;
+export const LENDING_ITEM_STATUS = { notIn: ['DECLINED', 'DRAFT'] };
 
 async function lentProductionIds(lenderOrgIds: string[]) {
 	if (lenderOrgIds.length === 0) return [];

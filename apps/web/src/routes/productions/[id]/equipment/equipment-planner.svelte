@@ -18,6 +18,9 @@
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { onDestroy } from 'svelte';
 	import CopyEquipmentModal from '../copy-equipment-modal.svelte';
+	import LoanRequestModal from '../loan-request-modal.svelte';
+	import { getProduction } from '#lib/remote/productions.remote.js';
+	import { draftLenders } from '#lib/production-items.js';
 
 	let { productionId }: { productionId: string } = $props();
 	let data = $derived(await getEquipmentEditorData(productionId));
@@ -49,6 +52,16 @@
 	let selectedCities = new SvelteSet<string>();
 	let showBundledItems = $state(false);
 	let copyEquipmentOpen = $state(false);
+
+	// Other orgs' units are only noted here; sending them is one step, with the
+	// question whether the production is paid. Not awaited — the planner
+	// does not wait for it.
+	let loanRequestOpen = $state(false);
+	let productionQuery = $derived(getProduction(productionId));
+	let lenders = $derived(
+		productionQuery.current ? draftLenders(productionQuery.current.items) : []
+	);
+	let draftCount = $derived(lenders.reduce((sum, l) => sum + l.units, 0));
 
 	// ── Optimistic editing ──────────────────────────────────────────────────
 	// A click changes the number on screen at once; the server hears about it
@@ -533,6 +546,11 @@
 			<span class="rounded-full bg-muted px-3 py-1 text-sm font-semibold text-muted-foreground">
 				{totalBooked} device{totalBooked !== 1 ? 's' : ''} booked
 			</span>
+			{#if draftCount > 0 && !data.production.cancelledAt}
+				<Button size="sm" onclick={() => (loanRequestOpen = true)}
+					>{plural(draftCount, ['Request # device…', 'Request # devices…'])}</Button
+				>
+			{/if}
 		</div>
 	</div>
 
@@ -898,3 +916,4 @@
 	organizationId={data.production.organizationId}
 	bind:open={copyEquipmentOpen}
 />
+<LoanRequestModal {productionId} {lenders} bind:open={loanRequestOpen} />
