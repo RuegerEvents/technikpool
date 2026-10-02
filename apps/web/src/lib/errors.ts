@@ -15,6 +15,8 @@ import { messageForErrorCode } from './error-messages.svelte';
  * the web client and free to move.
  */
 export type AppErrorCode =
+	// Anything looked up by id that is not there (see `notFoundAs404` in auth.ts)
+	| 'record_not_found'
 	// Authentication and permissions
 	| 'unauthorized'
 	| 'admin_required'

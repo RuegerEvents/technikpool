@@ -16,6 +16,7 @@ import { emailChangeConfirmationEmail } from './emails/email-change-confirmation
 import { completeSignUp, decideSignUp, signUpRefusalMessages } from './signup-gate';
 import { accountDeletionBlocker } from './services/account-deletion';
 import { USER_CODE_LENGTH } from '#lib/device-code.js';
+import { appError } from '#lib/errors.js';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -76,9 +77,32 @@ const prefixes: Partial<Record<ModelName, string>> = {
 };
 
 // Extend the client with prefixed IDs
-export const prisma = extendPrismaClient(originalPrisma, {
+const prefixedPrisma = extendPrismaClient(originalPrisma, {
 	prefixes
 });
+
+// A `findUniqueOrThrow` that misses, or an update or delete of a row that is
+// gone, rejects with P2025 — which SvelteKit can only answer with a bare 500.
+// Nearly every one of those is an id out of a URL or a stale page, so it is a
+// 404 here, once, instead of a null check at each of the many call sites. The
+// auth adapter keeps the plain client: better-auth handles its own misses.
+// Cast back because a query-only extension changes no signature, while its
+// inferred type no longer passes for `Prisma.TransactionClient`.
+export const prisma = prefixedPrisma.$extends({
+	name: 'notFoundAs404',
+	query: {
+		async $allOperations({ args, query }) {
+			try {
+				return await query(args);
+			} catch (err) {
+				if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
+					appError(404, 'record_not_found');
+				}
+				throw err;
+			}
+		}
+	}
+}) as unknown as typeof prefixedPrisma;
 
 function inviteTokenOf(body: unknown) {
 	const token = (body as { inviteToken?: unknown } | null | undefined)?.inviteToken;
@@ -91,7 +115,7 @@ function inviteTokenOf(body: unknown) {
 // evaluated at runtime, so the build-time guard still holds.
 const createAuth = () =>
 	betterAuth({
-		database: prismaAdapter(prisma, {
+		database: prismaAdapter(prefixedPrisma, {
 			provider: 'postgresql'
 		}),
 		emailAndPassword: {

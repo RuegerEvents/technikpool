@@ -71,6 +71,7 @@ msgstr "Crewmitglied hinzugefügt"
 
 #: src/lib/components/CsvImportModal.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
+#: src/routes/+error.svelte
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/productions/[id]/crew-passes/+page.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
@@ -1532,6 +1533,7 @@ msgstr "Gerätebundles | Technikpool"
 #~ msgid "Inventory | Technikpool"
 #~ msgstr "Inventar | Technikpool"
 
+#. 0: notFound ? 'Not found' \\: 'Error'
 #. 0: asset.product.name
 #. 0: bundle.template.name
 #. 0: title
@@ -1539,6 +1541,7 @@ msgstr "Gerätebundles | Technikpool"
 #. 0: production.name
 #. 0: product?.name ?? 'Product'
 #. 0: stocktake.name
+#: src/routes/+error.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/legal/[slug]/+page.svelte
@@ -1831,6 +1834,7 @@ msgstr "Uhrzeit"
 msgid "OK"
 msgstr "OK"
 
+#: src/routes/+error.svelte
 #: src/routes/checkout/+page.svelte
 msgid "Error"
 msgstr "Fehler"
@@ -12176,3 +12180,24 @@ msgstr[1] "# geliehene Geräte werden hier nicht weiterberechnet."
 #: src/lib/components/ui/billing-document/billing-document.svelte
 msgid "The lenders charge {0} for it."
 msgstr "Die Verleiher berechnen dafür {0}."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This does not exist (any more)."
+msgstr "Das gibt es nicht (mehr)."
+
+#: src/routes/+error.svelte
+#: src/routes/+error.svelte
+msgid "Not found"
+msgstr "Nicht gefunden"
+
+#: src/routes/+error.svelte
+msgid "This page does not exist, or what it showed has been deleted."
+msgstr "Diese Seite gibt es nicht, oder was sie gezeigt hat, wurde gelöscht."
+
+#: src/routes/+error.svelte
+msgid "Something went wrong"
+msgstr "Etwas ist schiefgelaufen"
+
+#: src/routes/+error.svelte
+msgid "To the dashboard"
+msgstr "Zum Dashboard"

@@ -14,6 +14,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 	const p1 = String(params[1] ?? '');
 
 	switch (code) {
+		case 'record_not_found':
+			return 'This does not exist (any more).';
 		// Authentication and permissions
 		case 'unauthorized':
 			return 'You are not allowed to do that.';
