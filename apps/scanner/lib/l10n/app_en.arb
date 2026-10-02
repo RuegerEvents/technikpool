@@ -166,6 +166,10 @@
   "actionApproved": "Approved",
   "actionDeclined": "Declined",
   "actionBookingCancelled": "Released",
+  "actionBookingReplaced": "Swapped for another unit",
+  "@actionBookingReplaced": {
+    "description": "The BOOKING_REPLACED history entry: another unit of the same product went out in this one's place."
+  },
   "actionAccessoryAttached": "Accessory attached",
   "actionAccessoryDetached": "Accessory detached",
   "actionCredentialsSet": "Credentials saved",

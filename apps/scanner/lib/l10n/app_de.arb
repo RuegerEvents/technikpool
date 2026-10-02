@@ -113,6 +113,7 @@
   "actionApproved": "Genehmigt",
   "actionDeclined": "Abgelehnt",
   "actionBookingCancelled": "Freigegeben",
+  "actionBookingReplaced": "Gegen anderes Gerät getauscht",
   "actionAccessoryAttached": "Zubehör angehängt",
   "actionAccessoryDetached": "Zubehör abgehängt",
   "actionCredentialsSet": "Zugangsdaten gespeichert",

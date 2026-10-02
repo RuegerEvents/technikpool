@@ -1,4 +1,5 @@
 import type { Prisma } from '$lib/prisma/client';
+import type { BookingReplacedData } from '$lib/types/asset-transaction';
 import { bundleLabel, withCaption } from '$lib/product-label';
 import { naturalCompare } from '$lib/sort';
 import { prisma } from '$lib/server/auth';
@@ -216,9 +217,11 @@ const HANDOVER_STATUSES = ['APPROVED', 'CHECKED_OUT', 'RETURNED'];
 function assertLenderMayHandOver(
 	items: { assetId: string; status: string }[],
 	assetIds: string[],
-	assetTag?: string
+	assetTag?: string,
+	standIns: Map<string, unknown> = new Map()
 ) {
 	for (const assetId of assetIds) {
+		if (standIns.has(assetId)) continue;
 		const item = items.find((i) => i.assetId === assetId);
 		if (!item || !HANDOVER_STATUSES.includes(item.status)) {
 			throw new CheckoutError(
@@ -242,6 +245,105 @@ function handoverOnCheckout(lent: boolean, borrower: boolean, userId: string) {
 		returnReportedAt: null,
 		returnReportedById: null
 	};
+}
+
+type StandIn = { id: string; assetId: string };
+
+/**
+ * Booked units the scanned ones can take the place of. A booking names one
+ * unit, but six power strips are six power strips: whoever packs grabs the six
+ * at the front of the shelf. Without this a different unit of the same product
+ * went on as a seventh line while the booked one stayed APPROVED, and the lender
+ * — who may only hand over what is booked — was refused it outright.
+ *
+ * A stand-in is an APPROVED item (booked, not out yet) of the same product and
+ * the same owner. Not one booked as part of a kit, whose case holds that very
+ * unit, and not an accessory, which goes wherever its parent goes. Each booked
+ * item stands in for one scanned unit at most, lowest unit number first.
+ */
+async function findStandIns(
+	productionId: string,
+	assets: { id: string; productId: string; organizationId: string; parentAssetId: string | null }[],
+	/** Everything going out in this act: a unit booked for itself stands in for nobody. */
+	goingOut: string[]
+): Promise<Map<string, StandIn>> {
+	const candidates = assets.filter((a) => !a.parentAssetId);
+	const standIns = new Map<string, StandIn>();
+	if (candidates.length === 0) return standIns;
+
+	const items = await prisma.productionItem.findMany({
+		where: {
+			productionId,
+			status: 'APPROVED',
+			sourceBundleId: null,
+			sourceParentAssetId: null,
+			assetId: { notIn: goingOut },
+			asset: {
+				OR: candidates.map((a) => ({ productId: a.productId, organizationId: a.organizationId }))
+			}
+		},
+		select: {
+			id: true,
+			assetId: true,
+			asset: { select: { productId: true, organizationId: true } }
+		},
+		orderBy: { asset: { orgIndex: 'asc' } }
+	});
+	const taken = new Set<string>();
+	for (const asset of candidates) {
+		const item = items.find(
+			(i) =>
+				!taken.has(i.id) &&
+				i.asset.productId === asset.productId &&
+				i.asset.organizationId === asset.organizationId
+		);
+		if (!item) continue;
+		taken.add(item.id);
+		standIns.set(asset.id, { id: item.id, assetId: item.assetId });
+	}
+	return standIns;
+}
+
+/**
+ * Hands a booked item over to the unit actually scanned, which goes out on it.
+ * The booked unit stays on the shelf and is free again, so its accessories that
+ * were booked with it go too, and its history says where its booking went.
+ */
+async function checkOutInPlaceOf(
+	tx: Prisma.TransactionClient,
+	standIn: StandIn,
+	scanned: { id: string; assetTag: string | null; orgIndex: number },
+	production: { id: string; name: string },
+	handover: ReturnType<typeof handoverOnCheckout>,
+	userId: string
+) {
+	await tx.productionItem.update({
+		where: { id: standIn.id },
+		data: { assetId: scanned.id, status: 'CHECKED_OUT', ...handover }
+	});
+	await tx.productionItem.deleteMany({
+		where: {
+			productionId: production.id,
+			sourceParentAssetId: standIn.assetId,
+			status: 'APPROVED'
+		}
+	});
+	await tx.assetTransaction.create({
+		data: {
+			assetId: standIn.assetId,
+			userId,
+			productionId: production.id,
+			action: 'BOOKING_REPLACED',
+			data: {
+				type: 'BOOKING_REPLACED',
+				productionId: production.id,
+				productionName: production.name,
+				replacedByAssetId: scanned.id,
+				// Same product by definition, so the tag is what tells the two apart.
+				replacedByLabel: scanned.assetTag ?? `#${scanned.orgIndex}`
+			} satisfies BookingReplacedData
+		}
+	});
 }
 
 /**
@@ -421,13 +523,25 @@ export async function performScan(
 		select: { id: true, assetId: true, status: true }
 	});
 	const alreadyBooked = new Set(existingItems.map((i) => i.assetId));
+	const standIn = alreadyBooked.has(asset.id)
+		? undefined
+		: (await findStandIns(production.id, [asset], touchedIds)).get(asset.id);
 	// Accessories follow the unit they hang off, booked or not.
-	if (!role.asProduction) assertLenderMayHandOver(existingItems, [asset.id], input.assetTag);
+	if (!role.asProduction && !standIn) {
+		assertLenderMayHandOver(existingItems, [asset.id], input.assetTag);
+	}
 
 	const lent = asset.organizationId !== production.organizationId;
 	await prisma.$transaction(async (tx) => {
 		await checkOutExisting(tx, existingItems, lent, role.borrower, userId);
-		const newIds = touchedIds.filter((id) => !alreadyBooked.has(id));
+		if (standIn) {
+			const handover = handoverOnCheckout(lent, role.borrower, userId);
+			await checkOutInPlaceOf(tx, standIn, asset, production, handover, userId);
+		}
+		// The scanned unit itself went out on the item it took over.
+		const newIds = touchedIds.filter(
+			(id) => !alreadyBooked.has(id) && !(standIn && id === asset.id)
+		);
 		if (newIds.length > 0) {
 			await tx.productionItem.createMany({
 				data: newIds.map((assetId) => ({
@@ -600,7 +714,16 @@ export async function performBulkCheckout(
 
 	const assets = await prisma.asset.findMany({
 		where: { id: { in: assetIds } },
-		select: { id: true, organizationId: true, bundleId: true, parentAssetId: true, status: true }
+		select: {
+			id: true,
+			assetTag: true,
+			orgIndex: true,
+			productId: true,
+			organizationId: true,
+			bundleId: true,
+			parentAssetId: true,
+			status: true
+		}
 	});
 
 	for (const asset of assets) {
@@ -720,17 +843,28 @@ export async function performBulkCheckout(
 		where: { productionId: input.targetId, assetId: { in: assets.map((a) => a.id) } },
 		select: { id: true, assetId: true, status: true }
 	});
+	const standIns = await findStandIns(
+		production.id,
+		assets.filter((a) => selected.has(a.id) && !existingItems.some((i) => i.assetId === a.id)),
+		assetIds
+	);
 	if (!role.asProduction) {
-		assertLenderMayHandOver(existingItems, input.assetIds);
+		assertLenderMayHandOver(existingItems, input.assetIds, undefined, standIns);
 	}
 
 	for (const asset of assets) {
 		const existing = existingItems.find((i) => i.assetId === asset.id);
+		const standIn = standIns.get(asset.id);
 		const lent = asset.organizationId !== production.organizationId;
 
 		if (existing) {
 			await prisma.$transaction((tx) =>
 				checkOutExisting(tx, [existing], lent, role.borrower, userId)
+			);
+		} else if (standIn) {
+			const handover = handoverOnCheckout(lent, role.borrower, userId);
+			await prisma.$transaction((tx) =>
+				checkOutInPlaceOf(tx, standIn, asset, production, handover, userId)
 			);
 		} else {
 			await prisma.productionItem.create({

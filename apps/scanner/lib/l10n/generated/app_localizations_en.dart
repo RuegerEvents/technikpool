@@ -368,6 +368,9 @@ class SEn extends S {
   String get actionBookingCancelled => 'Released';
 
   @override
+  String get actionBookingReplaced => 'Swapped for another unit';
+
+  @override
   String get actionAccessoryAttached => 'Accessory attached';
 
   @override

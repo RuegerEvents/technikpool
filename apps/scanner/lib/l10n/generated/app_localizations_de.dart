@@ -369,6 +369,9 @@ class SDe extends S {
   String get actionBookingCancelled => 'Freigegeben';
 
   @override
+  String get actionBookingReplaced => 'Gegen anderes Gerät getauscht';
+
+  @override
   String get actionAccessoryAttached => 'Zubehör angehängt';
 
   @override

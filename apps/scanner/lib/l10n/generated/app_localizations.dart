@@ -775,6 +775,12 @@ abstract class S {
   /// **'Released'**
   String get actionBookingCancelled;
 
+  /// The BOOKING_REPLACED history entry: another unit of the same product went out in this one's place.
+  ///
+  /// In en, this message translates to:
+  /// **'Swapped for another unit'**
+  String get actionBookingReplaced;
+
   /// No description provided for @actionAccessoryAttached.
   ///
   /// In en, this message translates to:

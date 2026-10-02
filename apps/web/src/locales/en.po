@@ -11564,3 +11564,7 @@ msgid "1 older one — search to find it"
 msgid_plural "# older ones — search to find them"
 msgstr[0] "1 older one — search to find it"
 msgstr[1] "# older ones — search to find them"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Released — <0/> went out instead for <1/>"
+msgstr "Released — <0/> went out instead for <1/>"

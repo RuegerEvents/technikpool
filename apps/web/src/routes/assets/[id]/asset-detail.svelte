@@ -1211,6 +1211,22 @@
 														: 'underline underline-offset-2'}">{tx.productionName}</a
 												>
 												was cancelled
+											{:else if tx?.type === 'BOOKING_REPLACED'}
+												Released —
+												<a
+													href={resolve(`/assets/${tx.replacedByAssetId}`)}
+													class="text-foreground underline underline-offset-2"
+													>{tx.replacedByLabel}</a
+												>
+												went out instead for
+												<a
+													href={item.productionRestricted
+														? undefined
+														: resolve(`/productions/${tx.productionId}`)}
+													class="text-foreground {item.productionRestricted
+														? ''
+														: 'underline underline-offset-2'}">{tx.productionName}</a
+												>
 											{:else if tx?.type === 'ACCESSORY_ATTACHED'}
 												Attached as an accessory of
 												<a

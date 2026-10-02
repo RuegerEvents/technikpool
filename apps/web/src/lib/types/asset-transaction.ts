@@ -66,6 +66,18 @@ export type BookingCancelledData = {
 	productionName: string;
 };
 
+/**
+ * Another unit of the same product went out in this one's place, so the
+ * booking moved to it and this one is free again — see `findStandIns`.
+ */
+export type BookingReplacedData = {
+	type: 'BOOKING_REPLACED';
+	productionId: string;
+	productionName: string;
+	replacedByAssetId: string;
+	replacedByLabel: string;
+};
+
 export type AccessoryAttachedData = {
 	type: 'ACCESSORY_ATTACHED';
 	parentAssetId: string;
@@ -156,6 +168,7 @@ export type TransactionData =
 	| ApprovedData
 	| DeclinedData
 	| BookingCancelledData
+	| BookingReplacedData
 	| AccessoryAttachedData
 	| AccessoryDetachedData
 	| CredentialsSetData
