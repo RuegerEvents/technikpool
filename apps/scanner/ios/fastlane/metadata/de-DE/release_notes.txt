@@ -1,3 +1,4 @@
-• Das Equipment einer Produktion gegen ihre Liste prüfen: unter Scans › Produktion eine Produktion antippen und Prüfen wählen. Scannen oder abhaken, was da ist, Abschnitt für Abschnitt, zusammen mit anderen, die gleichzeitig prüfen; an den Geräten ändert sich nichts.
-• Geliehenes Equipment: Die verleihende Organisation gibt ihre Geräte an die fremde Produktion aus, und aus der Prüfung heraus bestätigt die Produktion den Empfang und meldet später die Rückgabe.
-• Ein Tipp auf eine Produktion fragt, ob du darauf ausgeben oder sie prüfen willst.
+• Equipment einer Produktion gegen ihre Liste ausgeben und zurücknehmen: Etikett scannen, Gerät von Hand abhaken oder gleiche Geräte wie Kabel in einer Zeile zählen.
+• Die Produktionsliste zeigt die Termine jeder Produktion und sortiert laufende, kommende und vergangene wie im Web.
+• Wird ein anderes Gerät eines gebuchten Produkts gescannt, übernimmt es die Buchung, statt eine zusätzliche Zeile anzulegen.
+• Scan-Töne spielen unter Android in Medienlautstärke, und jedes Scan-Ergebnis vibriert mit eigenem Muster, auch wenn „Vibration bei Berührung“ ausgeschaltet ist.

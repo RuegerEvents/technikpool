@@ -1,3 +1,4 @@
-• Check a production's equipment against its list: tap a production under Scans › Production and choose Check. Scan or tick what is there, section by section, together with others checking at the same time; nothing changes on the devices.
-• Lent equipment: the lending organization checks its units out to the other production, and from a check the production confirms receiving them and later reports them sent back.
-• Tapping a production asks whether to check out to it or check it.
+• Hand out and take back a production's equipment against its list: scan a tag, tick a unit by hand, or count identical units such as cables on one line.
+• The production list shows each production's dates and sorts running, upcoming and past ones like the web.
+• Scanning a different unit of a booked product takes over the booking instead of adding an extra line.
+• Scan tones play at media volume on Android, and every scan result vibrates with its own pattern, even with "vibrate on touch" switched off.
