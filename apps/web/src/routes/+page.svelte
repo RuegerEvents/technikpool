@@ -1,26 +1,26 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
 	import {
 		getPendingApprovals,
 		getAwaitingApprovals,
 		getDashboardStats
-	} from '$lib/remote/productions.remote';
-	import { groupApprovalRequests } from '$lib/approval-requests';
+	} from '#lib/remote/productions.remote.js';
+	import { groupApprovalRequests } from '#lib/approval-requests.js';
 	import ApprovalRequestModal from './approval-request-modal.svelte';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
-	import { invalidateAll } from '$app/navigation';
-	import { plural, orgLabel } from '$lib/utils';
-	import { canManageInventory, roleAtLeast, ROLE_FOR } from '$lib/roles';
-	import { billingSetupSteps } from '$lib/billing-setup.svelte';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
-	import { getStocktakes } from '$lib/remote/stocktakes.remote';
-	import { getHandoverTodos } from '$lib/remote/production-checks.remote';
-	import { getPackTodos } from '$lib/remote/production-handout.remote';
-	import StocktakeProgress from '$lib/components/stocktake-progress.svelte';
-	import { formatReleaseDate, notesFor, releases } from '$lib/changelog';
+	import { refreshAll } from '$app/navigation';
+	import { plural, orgLabel } from '#lib/utils.js';
+	import { canManageInventory, roleAtLeast, ROLE_FOR } from '#lib/roles.js';
+	import { billingSetupSteps } from '#lib/billing-setup.svelte.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
+	import { getStocktakes } from '#lib/remote/stocktakes.remote.js';
+	import { getHandoverTodos } from '#lib/remote/production-checks.remote.js';
+	import { getPackTodos } from '#lib/remote/production-handout.remote.js';
+	import StocktakeProgress from '#lib/components/stocktake-progress.svelte';
+	import { formatReleaseDate, notesFor, releases } from '#lib/changelog.js';
 	import {
 		Package,
 		Layers,
@@ -127,7 +127,7 @@
 				count: stats.assetsByStatus.broken,
 				label: plural(stats.assetsByStatus.broken, ['Broken device', 'Broken devices']),
 				hint: 'Needs repair',
-				href: `${resolve('/assets')}?status=BROKEN&org=all`,
+				href: `${resolve('assets')}?status=BROKEN&org=all`,
 				tone: 'red'
 			});
 		if (stats.overdueInspections > 0)
@@ -136,7 +136,7 @@
 				count: stats.overdueInspections,
 				label: plural(stats.overdueInspections, ['Overdue inspection', 'Overdue inspections']),
 				hint: 'DGUV inspection due',
-				href: resolve('/inspections'),
+				href: resolve('inspections'),
 				tone: 'amber'
 			});
 		if (stats.assetsByStatus.maintenance > 0)
@@ -145,7 +145,7 @@
 				count: stats.assetsByStatus.maintenance,
 				label: 'In maintenance',
 				hint: 'Back in the pool once repaired',
-				href: `${resolve('/assets')}?status=MAINTENANCE&org=all`,
+				href: `${resolve('assets')}?status=MAINTENANCE&org=all`,
 				tone: 'neutral'
 			});
 		const receiveCount = toReceive.reduce((sum, p) => sum + p.count, 0);
@@ -278,7 +278,7 @@
 	async function checkAgain() {
 		checking = true;
 		try {
-			await invalidateAll();
+			await refreshAll();
 			if (!data.hasOrg) toast.info('You have not been added to an organization yet.');
 		} finally {
 			checking = false;
@@ -303,8 +303,8 @@
 			Manage your equipment across organizations seamlessly.
 		</p>
 		<div class="mt-8 flex gap-4">
-			<Button href={resolve('/auth/login')} size="lg">Login</Button>
-			<Button href={resolve('/auth/register')} variant="outline" size="lg">Sign Up</Button>
+			<Button href={resolve('auth/login')} size="lg">Login</Button>
+			<Button href={resolve('auth/register')} variant="outline" size="lg">Sign Up</Button>
 		</div>
 	</div>
 {:else if !data.hasOrg}
@@ -322,7 +322,7 @@
 			{data.user.email}
 		</p>
 		<div class="mt-8 flex flex-wrap justify-center gap-3">
-			<Button href={resolve('/orgs?new')}>
+			<Button href={resolve('orgs?new')}>
 				<Plus aria-hidden="true" class="mr-1 size-4" />
 				New Organization
 			</Button>
@@ -337,11 +337,11 @@
 				<p class="text-muted-foreground">Welcome back, {data.user.name || data.user.email}.</p>
 			</div>
 			<div class="flex flex-wrap gap-2">
-				<Button variant="outline" href={resolve('/assets/new')}>
+				<Button variant="outline" href={resolve('assets/new')}>
 					<Package aria-hidden="true" class="mr-1 size-4" />
 					Add Assets
 				</Button>
-				<Button href={resolve('/productions/new')}>
+				<Button href={resolve('productions/new')}>
 					<Plus aria-hidden="true" class="mr-1 size-4" />
 					New Production
 				</Button>
@@ -355,7 +355,7 @@
 		{#if homeOrg && billingIncomplete}
 			<!-- eslint-disable svelte/no-navigation-without-resolve -- resolved, plus a hash -->
 			<a
-				href={resolve(`/orgs/${homeOrg.id}`) + '#billing'}
+				href={resolve(`orgs/${homeOrg.id}`) + '#billing'}
 				class="group flex items-center gap-3 rounded-lg border border-amber-500/40 bg-amber-50/60 px-4 py-3 text-sm transition-colors hover:bg-amber-50 dark:bg-amber-950/20 dark:hover:bg-amber-950/40"
 			>
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
@@ -487,7 +487,7 @@
 				<section>
 					<div class="mb-3 flex items-center justify-between">
 						<h2 class="text-lg font-semibold">Productions</h2>
-						<Button variant="ghost" size="sm" href={resolve('/productions')}>
+						<Button variant="ghost" size="sm" href={resolve('productions')}>
 							View all
 							<ArrowRight aria-hidden="true" class="ml-1 size-4" />
 						</Button>
@@ -500,7 +500,7 @@
 								No upcoming productions scheduled.
 								<br />
 								<a
-									href={resolve('/productions/new')}
+									href={resolve('productions/new')}
 									class="mt-2 inline-block text-primary hover:underline">Create a production →</a
 								>
 							</Card.Content>
@@ -512,7 +512,7 @@
 									{@const days = daysUntil(prod.startDate)}
 									{@const running = days < 0 || (days === 0 && isRunning(prod))}
 									<a
-										href={resolve(`/productions/${prod.id}`)}
+										href={resolve(`productions/${prod.id}`)}
 										class="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-muted/40"
 									>
 										<div
@@ -600,7 +600,7 @@
 					<section>
 						<div class="mb-3 flex items-center justify-between">
 							<h2 class="text-lg font-semibold">Stocktakes</h2>
-							<Button variant="ghost" size="sm" href={resolve('/stocktakes')}>
+							<Button variant="ghost" size="sm" href={resolve('stocktakes')}>
 								View all
 								<ArrowRight aria-hidden="true" class="ml-1 size-4" />
 							</Button>
@@ -609,7 +609,7 @@
 							<div class="divide-y">
 								{#each openStocktakes as st (st.id)}
 									<a
-										href={resolve(`/stocktakes/${st.id}`)}
+										href={resolve(`stocktakes/${st.id}`)}
 										class="block space-y-2 px-4 py-3 transition-colors hover:bg-muted/40"
 									>
 										<p class="truncate text-sm font-medium">{st.name}</p>
@@ -627,7 +627,7 @@
 					{:else}
 						<Card.Root>
 							<Card.Content class="space-y-3">
-								<a href={resolve('/assets')} class="flex items-baseline justify-between">
+								<a href={resolve('assets')} class="flex items-baseline justify-between">
 									<span class="text-3xl font-bold tabular-nums">{stats.totalAssets}</span>
 									<span class="text-sm text-muted-foreground hover:text-foreground">Devices →</span>
 								</a>
@@ -671,16 +671,13 @@
 									class="flex items-center justify-between border-t pt-3 text-xs text-muted-foreground"
 								>
 									<a
-										href={resolve('/assets/bundles')}
+										href={resolve('assets/bundles')}
 										class="flex items-center gap-1.5 hover:text-foreground"
 									>
 										<Layers aria-hidden="true" class="size-3.5" />
 										{plural(stats.bundleCount, ['# bundle', '# bundles'])}
 									</a>
-									<a
-										href={resolve('/orgs')}
-										class="flex items-center gap-1.5 hover:text-foreground"
-									>
+									<a href={resolve('orgs')} class="flex items-center gap-1.5 hover:text-foreground">
 										<Building2 aria-hidden="true" class="size-3.5" />
 										{plural(orgs.length, ['# organization', '# organizations'])}
 									</a>
@@ -702,7 +699,7 @@
 									<!-- resolve() takes a path only; the query is the lender's side. -->
 									<!-- eslint-disable svelte/no-navigation-without-resolve -->
 									<a
-										href={`${resolve(`/productions/${p.productionId}/checkout`)}?org=${encodeURIComponent(p.organizationId)}`}
+										href={`${resolve(`productions/${p.productionId}/checkout`)}?org=${encodeURIComponent(p.organizationId)}`}
 										class="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/40"
 									>
 										<!-- eslint-enable svelte/no-navigation-without-resolve -->
@@ -736,7 +733,7 @@
 							<div class="divide-y">
 								{#each toReceive as p (p.productionId)}
 									<a
-										href={resolve(`/productions/${p.productionId}`)}
+										href={resolve(`productions/${p.productionId}`)}
 										class="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/40"
 									>
 										<PackageCheck aria-hidden="true" class="size-4 shrink-0 text-amber-500" />
@@ -750,7 +747,7 @@
 								{/each}
 								{#each toTakeBack as p (p.productionId)}
 									<a
-										href={resolve('/checkout')}
+										href={resolve('checkout')}
 										class="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/40"
 									>
 										<Undo2 aria-hidden="true" class="size-4 shrink-0 text-amber-500" />
@@ -779,7 +776,7 @@
 							<div class="divide-y">
 								{#each awaiting as req (`${req.productionId}:${req.lenderOrg}`)}
 									<a
-										href={resolve(`/productions/${req.productionId}`)}
+										href={resolve(`productions/${req.productionId}`)}
 										class="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/40"
 									>
 										<Hourglass aria-hidden="true" class="size-4 shrink-0 text-amber-500" />
@@ -804,7 +801,7 @@
 				<section>
 					<div class="mb-3 flex items-center justify-between">
 						<h2 class="text-lg font-semibold">What's new</h2>
-						<Button variant="ghost" size="sm" href={resolve('/whats-new')}>
+						<Button variant="ghost" size="sm" href={resolve('whats-new')}>
 							All versions
 							<ArrowRight aria-hidden="true" class="ml-1 size-4" />
 						</Button>
@@ -830,7 +827,7 @@
 							</ul>
 							{#if releaseNotes.length > 3}
 								<a
-									href={resolve('/whats-new')}
+									href={resolve('whats-new')}
 									class="mt-2 inline-block text-xs text-muted-foreground hover:text-foreground"
 									>{plural(releaseNotes.length - 3, ['and # more change', 'and # more changes'])} →</a
 								>

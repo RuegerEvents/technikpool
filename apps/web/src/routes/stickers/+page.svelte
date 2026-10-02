@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { orgLabel } from '$lib/utils';
-	import { Button } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { StickerOrderInfo } from '$lib/components/ui/sticker-order-info';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
-	import { DEFAULT_ORG_NAME, DEFAULT_STICKER_COLOR, stickerOrgName } from '$lib/stickers';
+	import { orgLabel } from '#lib/utils.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { StickerOrderInfo } from '#lib/components/ui/sticker-order-info/index.js';
+	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
+	import { DEFAULT_ORG_NAME, DEFAULT_STICKER_COLOR, stickerOrgName } from '#lib/stickers.js';
 	import { toast } from 'svelte-sonner';
-	import { browser } from '$app/environment';
-	import type { AppErrorCode } from '$lib/errors';
-	import { messageForErrorCode } from '$lib/error-messages.svelte';
+	import { browser } from '$app/env';
+	import type { AppErrorCode } from '#lib/errors.js';
+	import { messageForErrorCode } from '#lib/error-messages.svelte.js';
 
 	// Read through the query instead of awaited: an `await` here would hold the
 	// whole page back, heading and all, until the answer came.

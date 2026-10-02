@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { Modal } from '$lib/components/ui/modal';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
-	import { getErrorMessage } from '$lib/utils';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
+	import { getErrorMessage } from '#lib/utils.js';
 	import {
 		clearLicenseCredentials,
 		getLicenseStatus,
 		setLicenseCredentials
-	} from '$lib/remote/licenses.remote';
-	import type { LicenseCredentialKind } from '$lib/license';
+	} from '#lib/remote/licenses.remote.js';
+	import type { LicenseCredentialKind } from '#lib/license.js';
 	import LicenseRevealModal from './license-reveal-modal.svelte';
 
 	type Props = {
@@ -114,7 +114,7 @@
 						<p class="text-sm">
 							{#if holder.productionId}
 								<a
-									href={resolve(`/productions/${holder.productionId}`)}
+									href={resolve(`productions/${holder.productionId}`)}
 									class="font-medium underline underline-offset-2">{holder.productionName}</a
 								>
 							{:else}

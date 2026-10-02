@@ -1,8 +1,8 @@
-import { apiError } from '$lib/server/api';
+import { apiError } from '#lib/server/api.js';
 import {
 	PRODUCTION_CHECK_ERROR_STATUS,
 	ProductionCheckError
-} from '$lib/server/services/production-check';
+} from '#lib/server/services/production-check.js';
 
 // The /api/v1 production-check handlers share one translation from the
 // service's errors to the spec's envelope. The codes are the service's own, and

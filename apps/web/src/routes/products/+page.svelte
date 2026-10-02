@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { productLabel } from '$lib/product-label';
-	import { categoryLabel } from '$lib/category';
-	import { cableTwinGroups, cableTwinKey } from '$lib/cable';
-	import { getErrorMessage, orgLabel } from '$lib/utils';
+	import { productLabel } from '#lib/product-label.js';
+	import { categoryLabel } from '#lib/category.js';
+	import { cableTwinGroups, cableTwinKey } from '#lib/cable.js';
+	import { getErrorMessage, orgLabel } from '#lib/utils.js';
 	import {
 		getBundles,
 		getCategories,
@@ -10,17 +10,17 @@
 		getProductCatalog,
 		getProducts,
 		updateBundle
-	} from '$lib/remote/assets.remote';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
-	import { Button } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
-	import { CategoryPill } from '$lib/components/ui/category-pill';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { ProductEditor } from '$lib/components/ui/product-editor';
+	} from '#lib/remote/assets.remote.js';
+	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { CategoryPill } from '#lib/components/ui/category-pill/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
+	import { ProductEditor } from '#lib/components/ui/product-editor/index.js';
 	import { resolve } from '$app/paths';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { toast } from 'svelte-sonner';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 
 	let { data } = $props();
 
@@ -537,7 +537,7 @@
 									/>
 									<span>{currentBundle.assets.length} units</span>
 									<a
-										href={resolve(`/assets/bundles/${currentBundle.id}`)}
+										href={resolve(`assets/bundles/${currentBundle.id}`)}
 										class="underline-offset-2 hover:text-foreground hover:underline"
 										>Open bundle →</a
 									>

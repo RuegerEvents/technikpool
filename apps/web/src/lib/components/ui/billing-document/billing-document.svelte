@@ -1,15 +1,15 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { getErrorMessage } from '$lib/utils';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { getErrorMessage } from '#lib/utils.js';
 	import { toast } from 'svelte-sonner';
-	import { groupBillingItems, type LineGroup } from '$lib/billing-lines';
-	import { formatQuantity, serviceUnitShort } from '$lib/service-lines.svelte';
-	import { deleteServiceLine, moveServiceLine } from '$lib/remote/offers.remote';
+	import { groupBillingItems, type LineGroup } from '#lib/billing-lines.js';
+	import { formatQuantity, serviceUnitShort } from '#lib/service-lines.svelte.js';
+	import { deleteServiceLine, moveServiceLine } from '#lib/remote/offers.remote.js';
 	import { ChevronDown, ChevronUp } from '@lucide/svelte';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import ServiceLineModal from './service-line-modal.svelte';
 	import type { BillingItem, DurationInfo, EditedServiceLine, ServiceLineTarget } from './types';
 

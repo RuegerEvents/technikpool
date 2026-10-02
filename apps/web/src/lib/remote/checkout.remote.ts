@@ -1,7 +1,11 @@
 import { query, command } from '$app/server';
 import * as v from 'valibot';
-import { requireAuth } from '$lib/server/services/access';
-import { performBulkCheckout, performScan, productionTargets } from '$lib/server/services/checkout';
+import { requireAuth } from '#lib/server/services/access.js';
+import {
+	performBulkCheckout,
+	performScan,
+	productionTargets
+} from '#lib/server/services/checkout.js';
 import { refreshAffected, withCheckoutErrors } from './checkout-shared';
 
 export const getAllProductions = query(async () => {

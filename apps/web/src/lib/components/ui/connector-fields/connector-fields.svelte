@@ -18,15 +18,15 @@
 </script>
 
 <script lang="ts">
-	import { naturalCompare } from '$lib/sort';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { ImageUpload } from '$lib/components/ui/image-upload';
-	import { CategorySelect } from '$lib/components/ui/category-select';
-	import { CreatableSelect } from '$lib/components/ui/creatable-select';
-	import { getCategories } from '$lib/remote/assets.remote';
-	import { getConnectors } from '$lib/remote/connectors.remote';
-	import { connectorFamily } from '$lib/cable';
+	import { naturalCompare } from '#lib/sort.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { ImageUpload } from '#lib/components/ui/image-upload/index.js';
+	import { CategorySelect } from '#lib/components/ui/category-select/index.js';
+	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
+	import { getCategories } from '#lib/remote/assets.remote.js';
+	import { getConnectors } from '#lib/remote/connectors.remote.js';
+	import { connectorFamily } from '#lib/cable.js';
 
 	type Props = {
 		value?: ConnectorDraft;

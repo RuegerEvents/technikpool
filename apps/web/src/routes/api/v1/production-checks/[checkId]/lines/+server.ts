@@ -1,9 +1,9 @@
 import type { RequestHandler } from './$types';
-import { apiJson, handleApi, requireApiUser } from '$lib/server/api';
-import { jsonBody } from '$lib/server/stocktake-api';
-import { lineCount } from '$lib/server/production-handout-api';
-import { withCheckErrors } from '$lib/server/production-check-api';
-import { setCheckLineCount } from '$lib/server/services/production-check';
+import { apiJson, handleApi, requireApiUser } from '#lib/server/api.js';
+import { jsonBody } from '#lib/server/stocktake-api.js';
+import { lineCount } from '#lib/server/production-handout-api.js';
+import { withCheckErrors } from '#lib/server/production-check-api.js';
+import { setCheckLineCount } from '#lib/server/services/production-check.js';
 
 export const PUT: RequestHandler = ({ locals, params, request }) =>
 	handleApi(async () => {

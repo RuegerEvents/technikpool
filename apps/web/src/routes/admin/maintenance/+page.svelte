@@ -1,7 +1,7 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { listGeneratedPreviews, regenerateGeneratedPreview } from '$lib/remote/assets.remote';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { listGeneratedPreviews, regenerateGeneratedPreview } from '#lib/remote/assets.remote.js';
 	import { toast } from 'svelte-sonner';
 
 	let previewsQuery = $derived(listGeneratedPreviews());

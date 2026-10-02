@@ -1,9 +1,9 @@
-import { prisma } from '$lib/server/auth';
-import { sendMail } from '$lib/server/mail';
-import { appBaseUrl } from '$lib/server/app-url';
-import { invitationEmail } from '$lib/server/emails/invitation';
-import { invitationExpiry, newInviteToken } from '$lib/server/signup-gate';
-import { DEFAULT_ORG_ROLE, type OrgRole } from '$lib/roles';
+import { prisma } from '#lib/server/auth.js';
+import { sendMail } from '#lib/server/mail.js';
+import { appBaseUrl } from '#lib/server/app-url.js';
+import { invitationEmail } from '#lib/server/emails/invitation.js';
+import { invitationExpiry, newInviteToken } from '#lib/server/signup-gate.js';
+import { DEFAULT_ORG_ROLE, type OrgRole } from '#lib/roles.js';
 
 /**
  * Invite one address, replacing whatever invitation to the same place was

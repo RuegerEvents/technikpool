@@ -1,9 +1,9 @@
 import { getRequestEvent } from '$app/server';
-import type { Prisma } from '$lib/prisma/client';
-import { prisma } from '$lib/server/auth';
-import { appError, type AppErrorCode } from '$lib/errors';
-import { ROLE_FOR, roleAtLeast, rolesAtLeast, type OrgRole } from '$lib/roles';
-import { orgLabel } from '$lib/utils';
+import type { Prisma } from '#lib/prisma/client.js';
+import { prisma } from '#lib/server/auth.js';
+import { appError, type AppErrorCode } from '#lib/errors.js';
+import { ROLE_FOR, roleAtLeast, rolesAtLeast, type OrgRole } from '#lib/roles.js';
+import { orgLabel } from '#lib/utils.js';
 
 // Authorisation primitives shared by the remote functions and the /api/v1
 // endpoints. Both surfaces must scope reads identically — the API is not

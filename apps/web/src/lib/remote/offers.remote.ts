@@ -1,13 +1,13 @@
 import { query, command } from '$app/server';
-import { prisma } from '$lib/server/auth';
+import { prisma } from '#lib/server/auth.js';
 import * as v from 'valibot';
-import { customerLabel, dayCountBetween, formatAddress, getErrorMessage } from '$lib/utils';
+import { customerLabel, dayCountBetween, formatAddress, getErrorMessage } from '#lib/utils.js';
 import {
 	isSystemAdmin,
 	managedOrgIds,
 	requireAuth,
 	requireOrgInventory
-} from '$lib/server/services/access';
+} from '#lib/server/services/access.js';
 import {
 	DEFAULT_INVOICE_CLOSING,
 	DEFAULT_INVOICE_INTRO,
@@ -15,15 +15,15 @@ import {
 	DEFAULT_OFFER_INTRO,
 	formatBillingDate,
 	renderBillingText
-} from '$lib/billing-text';
-import { generateBillingPdf } from '$lib/server/billing-pdf';
-import { putObject } from '$lib/server/storage';
-import { organizationFromSnapshot, orgSnapshotColumns } from '$lib/org-snapshot';
-import { summarizeContents } from '$lib/billing-lines';
-import { productLabel } from '$lib/product-label';
-import { appError, type AppErrorCode, type ErrorParams } from '$lib/errors';
-import type { Prisma } from '$lib/prisma/client';
-import { SERVICE_UNITS, serviceLineTotal } from '$lib/service-lines.svelte';
+} from '#lib/billing-text.js';
+import { generateBillingPdf } from '#lib/server/billing-pdf.js';
+import { putObject } from '#lib/server/storage.js';
+import { organizationFromSnapshot, orgSnapshotColumns } from '#lib/org-snapshot.js';
+import { summarizeContents } from '#lib/billing-lines.js';
+import { productLabel } from '#lib/product-label.js';
+import { appError, type AppErrorCode, type ErrorParams } from '#lib/errors.js';
+import type { Prisma } from '#lib/prisma/client.js';
+import { SERVICE_UNITS, serviceLineTotal } from '#lib/service-lines.svelte.js';
 import { getServiceCatalog } from './service-catalog.remote';
 
 /**

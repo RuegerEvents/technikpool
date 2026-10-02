@@ -1,22 +1,22 @@
 <script lang="ts">
-	import { CameraScanButton } from '$lib/components/ui/camera-scan';
-	import { makerAndName } from '$lib/product-label';
-	import { manufacturerSelection } from '$lib/no-manufacturer.svelte';
-	import { productLabel } from '$lib/product-label';
-	import { categoryLabel } from '$lib/category';
-	import { imageSrc } from '$lib/images';
-	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
+	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
+	import { makerAndName } from '#lib/product-label.js';
+	import { manufacturerSelection } from '#lib/no-manufacturer.svelte.js';
+	import { productLabel } from '#lib/product-label.js';
+	import { categoryLabel } from '#lib/category.js';
+	import { imageSrc } from '#lib/images.js';
+	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
 	import { DropdownMenu } from 'bits-ui';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { CategorySelect } from '$lib/components/ui/category-select';
-	import { CategoryPill } from '$lib/components/ui/category-pill';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { OrgBadge } from '$lib/components/ui/org-badge';
-	import { Fact } from '$lib/components/ui/fact';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { CategorySelect } from '#lib/components/ui/category-select/index.js';
+	import { CategoryPill } from '#lib/components/ui/category-pill/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
+	import { OrgBadge } from '#lib/components/ui/org-badge/index.js';
+	import { Fact } from '#lib/components/ui/fact/index.js';
 	import {
 		Boxes,
 		CircleAlert,
@@ -45,18 +45,21 @@
 		deleteBundle,
 		duplicateBundle,
 		getBundleCopyPlan
-	} from '$lib/remote/assets.remote';
+	} from '#lib/remote/assets.remote.js';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { canWrite } from '$lib/roles';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
+	import { canWrite } from '#lib/roles.js';
+	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
-	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
-	import { NewAssetModal, type NewAssetModalHandle } from '$lib/components/ui/new-asset-modal';
-	import { UnitPicker, type PickerUnit } from '$lib/components/ui/unit-picker';
-	import { isBookableStatus } from '$lib/asset-status';
-	import { countProducts, roomFor, specShortfall } from '$lib/bundle-spec';
+	import { AssetStatusBadge } from '#lib/components/ui/asset-status/index.js';
+	import {
+		NewAssetModal,
+		type NewAssetModalHandle
+	} from '#lib/components/ui/new-asset-modal/index.js';
+	import { UnitPicker, type PickerUnit } from '#lib/components/ui/unit-picker/index.js';
+	import { isBookableStatus } from '#lib/asset-status.js';
+	import { countProducts, roomFor, specShortfall } from '#lib/bundle-spec.js';
 
 	// Mirrors MAX_BUNDLE_COPIES on the command, which refuses anything above it.
 	const MAX_COPIES = 20;
@@ -120,8 +123,8 @@
 			// One copy is a place to go; several are a list to look at.
 			await goto(
 				result.bundleIds.length === 1
-					? resolve(`/assets/bundles/${result.bundleIds[0]}`)
-					: resolve('/assets/bundles')
+					? resolve(`assets/bundles/${result.bundleIds[0]}`)
+					: resolve('assets/bundles')
 			);
 		} catch (err) {
 			toast.error(getErrorMessage(err));
@@ -221,7 +224,7 @@
 			toast.success(
 				`Bundle converted — ${plural(result.accessories, ['1 accessory', '# accessories'])} attached`
 			);
-			await goto(resolve(`/assets/${result.assetId}`));
+			await goto(resolve(`assets/${result.assetId}`));
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			converting = false;
@@ -255,7 +258,7 @@
 						? `Bundle deleted — ${plural(result.freedAssets, ['1 unit is back in the pool', '# units are back in the pool'])}`
 						: 'Bundle deleted'
 			);
-			await goto(resolve('/assets/bundles'));
+			await goto(resolve('assets/bundles'));
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			deleting = false;
@@ -475,7 +478,7 @@
 		<!-- On a phone the image stacks above everything else, so the way back
 		     would otherwise sit a whole picture further down. -->
 		<div class="lg:hidden">
-			<Button icon="back" variant="outline" href={resolve('/assets')}>Back to Devices</Button>
+			<Button icon="back" variant="outline" href={resolve('assets')}>Back to Devices</Button>
 		</div>
 		<div
 			class="relative w-full shrink-0 overflow-hidden rounded-lg bg-muted/40 lg:w-96 lg:self-start"
@@ -540,19 +543,19 @@
 					<Button
 						icon="print"
 						variant="outline"
-						href={resolve(`/assets/bundles/${bundleId}/inventory-list`)}
+						href={resolve(`assets/bundles/${bundleId}/inventory-list`)}
 						target="_blank"
 					>
 						Print Inventory List
 					</Button>
-					<Button variant="outline" href={`${resolve('/case-check')}?bundle=${bundleId}`}
+					<Button variant="outline" href={`${resolve('case-check')}?bundle=${bundleId}`}
 						>Check case</Button
 					>
 					<Button
 						icon="back"
 						variant="outline"
 						class="hidden lg:inline-flex"
-						href={resolve('/assets')}>Back to Devices</Button
+						href={resolve('assets')}>Back to Devices</Button
 					>
 					<DropdownMenu.Root>
 						<DropdownMenu.Trigger>
@@ -748,7 +751,7 @@
 								     tab and reached by keyboard. -->
 								<tr
 									class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
-									onclick={() => goto(resolve(`/assets/${asset.id}`))}
+									onclick={() => goto(resolve(`assets/${asset.id}`))}
 								>
 									<td class="px-6 py-3 {nested ? 'pl-12' : ''}">
 										<div class="flex items-center gap-3">
@@ -762,7 +765,7 @@
 											/>
 											<div class="min-w-0">
 												<a
-													href={resolve(`/assets/${asset.id}`)}
+													href={resolve(`assets/${asset.id}`)}
 													class="font-medium hover:underline"
 													onclick={(e) => e.stopPropagation()}>{asset.product.name}</a
 												>

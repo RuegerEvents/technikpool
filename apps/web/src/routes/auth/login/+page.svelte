@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { LegalLinks } from '$lib/components/ui/legal-links';
-	import { signIn } from '$lib/auth-client';
-	import { Input } from '$lib/components/ui/input';
-	import { Button } from '$lib/components/ui/button';
-	import { Label } from '$lib/components/ui/label';
-	import * as Card from '$lib/components/ui/card';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { LegalLinks } from '#lib/components/ui/legal-links/index.js';
+	import { signIn } from '#lib/auth-client.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { goto, refreshAll } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { getSignUpStatus } from '$lib/remote/invitations.remote';
+	import { getSignUpStatus } from '#lib/remote/invitations.remote.js';
 
 	let email = $state('');
 	let password = $state('');
@@ -24,8 +24,8 @@
 
 	let registerHref = $derived(
 		redirectTo
-			? `${resolve('/auth/register')}?redirectTo=${encodeURIComponent(redirectTo)}`
-			: resolve('/auth/register')
+			? `${resolve('auth/register')}?redirectTo=${encodeURIComponent(redirectTo)}`
+			: resolve('auth/register')
 	);
 
 	// Not awaited: the form must not wait for this. While it is on its way the
@@ -45,7 +45,7 @@
 			},
 			{
 				onSuccess: async () => {
-					await invalidateAll();
+					await refreshAll();
 					// eslint-disable-next-line svelte/no-navigation-without-resolve
 					if (redirectTo) goto(redirectTo);
 					else goto(resolve('/'));
@@ -78,7 +78,7 @@
 				<div class="space-y-2">
 					<div class="flex items-center justify-between">
 						<Label for="password">Password</Label>
-						<a href={resolve('/auth/forgot-password')} class="text-sm underline">
+						<a href={resolve('auth/forgot-password')} class="text-sm underline">
 							Forgot password?
 						</a>
 					</div>

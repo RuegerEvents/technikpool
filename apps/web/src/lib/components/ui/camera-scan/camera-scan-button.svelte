@@ -11,9 +11,9 @@
 	import { onDestroy, onMount, tick } from 'svelte';
 	import type { Html5Qrcode } from 'html5-qrcode';
 	import { Camera } from '@lucide/svelte';
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
-	import { cn } from '$lib/utils';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { cn } from '#lib/utils.js';
 
 	type Props = {
 		onscan: (code: string) => void;

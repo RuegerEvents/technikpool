@@ -26,9 +26,9 @@
 </script>
 
 <script lang="ts">
-	import { getErrorMessage } from '$lib/utils';
-	import { imageSrc } from '$lib/images';
-	import { Button } from '$lib/components/ui/button';
+	import { getErrorMessage } from '#lib/utils.js';
+	import { imageSrc } from '#lib/images.js';
+	import { Button } from '#lib/components/ui/button/index.js';
 	import { toast } from 'svelte-sonner';
 	import type {
 		BackgroundRemovalMessage,

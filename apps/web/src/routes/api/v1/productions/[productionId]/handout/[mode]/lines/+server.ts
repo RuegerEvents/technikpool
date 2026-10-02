@@ -1,8 +1,8 @@
 import type { RequestHandler } from './$types';
-import { apiJson, handleApi, requireApiUser } from '$lib/server/api';
-import { jsonBody } from '$lib/server/stocktake-api';
-import { handoutMode, lineCount, withHandoutErrors } from '$lib/server/production-handout-api';
-import { setHandoutLineCount } from '$lib/server/services/production-handout';
+import { apiJson, handleApi, requireApiUser } from '#lib/server/api.js';
+import { jsonBody } from '#lib/server/stocktake-api.js';
+import { handoutMode, lineCount, withHandoutErrors } from '#lib/server/production-handout-api.js';
+import { setHandoutLineCount } from '#lib/server/services/production-handout.js';
 
 export const PUT: RequestHandler = ({ locals, params, request }) =>
 	handleApi(async () => {

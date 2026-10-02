@@ -1,11 +1,11 @@
 import { query, command } from '$app/server';
 import * as v from 'valibot';
-import { prisma } from '$lib/server/auth';
-import { orgRole, requireAuth, requireSystemAdmin } from '$lib/server/services/access';
-import { KIND_OF, currentDpa, deliverDpaAcceptances, hashDpa } from '$lib/server/services/legal';
-import { LEGAL_SLUGS, type LegalSlug } from '$lib/legal.svelte';
-import { appError } from '$lib/errors';
-import { formatAddress } from '$lib/utils';
+import { prisma } from '#lib/server/auth.js';
+import { orgRole, requireAuth, requireSystemAdmin } from '#lib/server/services/access.js';
+import { KIND_OF, currentDpa, deliverDpaAcceptances, hashDpa } from '#lib/server/services/legal.js';
+import { LEGAL_SLUGS, type LegalSlug } from '#lib/legal.svelte.js';
+import { appError } from '#lib/errors.js';
+import { formatAddress } from '#lib/utils.js';
 import { getMyOrgs, getOrgWithMembers } from './orgs.remote';
 import { getKnownAddresses } from './addresses.remote';
 

@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { getErrorMessage, orgLabel } from '$lib/utils';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { AddressInput } from '$lib/components/ui/address-input';
-	import { CustomerSelect } from '$lib/components/ui/customer-select';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
-	import { canWrite } from '$lib/roles';
-	import { createProduction } from '$lib/remote/productions.remote';
+	import { getErrorMessage, orgLabel } from '#lib/utils.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { AddressInput } from '#lib/components/ui/address-input/index.js';
+	import { CustomerSelect } from '#lib/components/ui/customer-select/index.js';
+	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
+	import { canWrite } from '#lib/roles.js';
+	import { createProduction } from '#lib/remote/productions.remote.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
@@ -46,7 +46,7 @@
 				customerId: customerId || undefined
 			});
 			toast.success('Production created!');
-			goto(resolve(`/productions/${production.id}`));
+			goto(resolve(`productions/${production.id}`));
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			saving = false;
@@ -171,7 +171,7 @@
 					<Button icon="add" type="submit" disabled={saving}>
 						{saving ? 'Creating...' : 'Create Production'}
 					</Button>
-					<Button icon="close" type="button" variant="outline" href={resolve('/productions')}
+					<Button icon="close" type="button" variant="outline" href={resolve('productions')}
 						>Cancel</Button
 					>
 				</div>

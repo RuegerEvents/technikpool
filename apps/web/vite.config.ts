@@ -1,3 +1,4 @@
+import adapter from '@sveltejs/adapter-node';
 import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig, type Plugin } from 'vite';
@@ -15,7 +16,6 @@ import { wuchale } from 'wuchale/vite';
 // extraction apart from an external one. That distinction turned out to be
 // unreliable — formatting a source file and then filling in a translation puts
 // the two milliseconds apart — and it buys nothing:
-//
 //   - An edit that adds or changes no string writes no .po at all, so ordinary
 //     HMR never reaches this and keeps its page state.
 //   - An edit that does change a string already triggers a full reload from
@@ -38,5 +38,21 @@ function wuchaleCatalogReload(): Plugin {
 }
 
 export default defineConfig({
-	plugins: [wuchale(), wuchaleCatalogReload(), tailwindcss(), sveltekit()]
+	plugins: [
+		wuchale(),
+		wuchaleCatalogReload(),
+		tailwindcss(),
+		sveltekit({
+			compilerOptions: {
+				// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
+				runes: ({ filename }) =>
+					filename.split(/[/\\]/).includes('node_modules') ? undefined : true,
+				experimental: { async: true }
+			},
+			inspector: true,
+			// Node adapter is suitable for Docker deployments.
+			adapter: adapter(),
+			experimental: { remoteFunctions: true }
+		})
+	]
 });

@@ -28,7 +28,7 @@ The Dockerfile lives at `apps/web/Dockerfile` but its **build context is the rep
 
 ## Tech Stack
 
-- **SvelteKit** + **Svelte 5** (runes: `$state`, `$derived`, `$props`)
+- **SvelteKit 3** + **Svelte 5** (runes: `$state`, `$derived`, `$props`)
 - **Prisma 7** with PostgreSQL — client generated to `src/lib/prisma/`
 - **Better-Auth** for email/password auth
 - **Tailwind CSS 4** + **shadcn-svelte** components + **bits-ui** primitives
@@ -167,7 +167,7 @@ carry them anywhere by accident.
 - Sealed with AES-256-GCM by `src/lib/server/secrets.ts`, keyed by **`CREDENTIALS_ENCRYPTION_KEY`**
   (any long random string). It is deliberately not derived from `BETTER_AUTH_SECRET`, which gets
   rotated; losing or changing this one makes every stored key unreadable. Read through
-  `$env/dynamic/private`, so a dev server picks up a newly added value without a restart.
+  `$app/env/private` (declared in `src/env.ts`), so a dev server picks up a newly added value without a restart.
 - `src/lib/remote/licenses.remote.ts` is the only door. `revealLicenseCredentials` is a
   _command_ so no cache or refresh ever fetches a key, and it writes `CREDENTIALS_REVEALED` into
   the asset's history with the grounds it was allowed on.
@@ -282,7 +282,7 @@ section per lender) and, with `?org=`, holds only that org's units on that org's
 what a lender packs. Only what can ship is listed (no PENDING, DECLINED or CANCELLED items).
 
 The production page gets them through `streamEquipmentSheet`, because a sheet full of pictures
-takes a while: it reports progress (`SheetDownload` in `$lib/equipment-sheet-download.svelte.ts`,
+takes a while: it reports progress (`SheetDownload` in `#lib/equipment-sheet-download.svelte.ts`,
 drawn by `SheetProgress`) and hands over the bytes. The tab is opened on the click and filled
 afterwards, since a tab opened after an `await` is a blocked popup. Each click passes a fresh
 `request`, or the live query's cache would answer with the previous PDF. The plain GET routes
@@ -356,8 +356,8 @@ Ausgabe) and the scanner's session both check a lent unit out and back in. Rules
 
 **One list, three meanings.** Checking, handing out (Ausgabe, `/productions/[id]/checkout`)
 and taking back (Rücknahme, `/productions/[id]/checkin`) all work through the same list
-(`services/production-list.ts`, client half `$lib/production-list.ts`, drawn by
-`$lib/components/production-list`; in the scanner `ProductionListScreen`). A unit is scanned or
+(`services/production-list.ts`, client half `#lib/production-list.ts`, drawn by
+`#lib/components/production-list`; in the scanner `ProductionListScreen`). A unit is scanned or
 ticked by hand; units told apart by nothing (no tag, no kit, no accessories) are one **counted
 line** per product, shelf and owner, so twenty cables are a number, not twenty rows. Only what a
 tick means differs: a check stores it, a handout list _is_ the booking — tick = `CHECKED_OUT`
@@ -602,7 +602,7 @@ const productionId = $derived(page.params.id as string);
 
 **DO** use `SvelteMap` instead of plain `Map` when the map is used reactively in templates.
 
-**DO** import `page` from `$app/state`, not `$app/stores`.
+**DO** import `page` from `$app/state` (`$app/stores` is gone in SvelteKit 3).
 
 ## Loading States
 
@@ -676,17 +676,43 @@ compiles and then fails at render. Load a page you changed before calling it don
 **DO** wrap all internal hrefs with `resolve()` from `$app/paths`:
 
 ```svelte
-import {resolve} from '$app/paths'; href={resolve('/productions')}
-href={resolve(`/productions/${id}/packing-list`)}
+import {resolve} from '$app/paths'; href={resolve('productions')}
+href={resolve(`productions/${id}/packing-list`)}
 ```
 
 **DON'T** use bare string hrefs for internal routes: `href="/productions"`.
+
+A path passed to `resolve()` has **no leading slash** (`'productions'`, not `'/productions'`) —
+only route IDs start with `/` in SvelteKit 3, so `resolve('/')` and
+`resolve('/blog/[slug]', { slug })` keep theirs.
+
+**The lint rule behind this is currently off.** `eslint-plugin-svelte` 3.23 enables
+`svelte/no-navigation-without-resolve` only for SvelteKit 1–2, so under Kit 3 it silently checks
+nothing, and its `eslint-disable` comments show up as "unused directive" warnings. Keep them:
+they are needed again once the plugin supports Kit 3. Until then nothing catches a bare href.
+
+## SvelteKit 3 conventions
+
+- **No `svelte.config.js`.** Kit, compiler and adapter options are passed to `sveltekit({…})` in
+  `vite.config.ts`.
+- **`#lib`, not `$lib`**: a Node subpath import declared in `package.json`'s `imports`, written
+  with the extension — `#lib/utils.js` for `utils.ts`, `#lib/components/ui/button/index.js` for a
+  folder. `components.json` still says `$lib` for the shadcn CLI; fix the imports it writes.
+- **Environment variables the app reads through SvelteKit are declared in `src/env.ts`**
+  (`defineEnvVars`) and imported from `$app/env/private` / `$app/env/public`. `$env/*` and
+  `$app/environment` are deprecated; `browser`, `dev` and `building` come from `$app/env`.
+- `error(status, message, { code, params })` — the message is always the second argument
+  (`appError` does this for you). Redirecting to another origin needs `{ external: true }`.
+- `goto` options are `replace` and `reset: false` (no more `replaceState`, `noScroll`,
+  `keepFocus`); `refreshAll()` replaces `invalidateAll()`. `page.url` is read-only — copy it
+  with `new URL(page.url.href)` before changing it.
+- Responses use `Response.json(…)`; Kit's `json()` / `text()` helpers are deprecated.
 
 ## Sorting names
 
 Names sort naturally everywhere — "2m" before "10m". In the database the name columns carry the
 ICU collation `"natural"` (migration `20260927160000_natural_sort`), so `orderBy: { name }` is
-already right; in JS sort with `naturalCompare` from `$lib/sort`, never `localeCompare`; in the
+already right; in JS sort with `naturalCompare` from `#lib/sort.js`, never `localeCompare`; in the
 scanner with `naturalCompare` from `lib/natural_sort.dart`. **A new text column that lists get
 sorted by needs `ALTER COLUMN … TYPE TEXT COLLATE "natural"` in its migration** — Prisma's schema
 cannot express a collation and ignores it when diffing, so nothing will remind you.
@@ -761,8 +787,8 @@ cannot express a collation and ignores it when diffing, so nothing will remind y
 
 ```ts
 import { resolve } from '$app/paths';
-goto(resolve('/auth/login'));
-goto(resolve(`/productions/${id}`));
+goto(resolve('auth/login'));
+goto(resolve(`productions/${id}`));
 ```
 
 **DON'T** use bare string paths: `goto('/auth/login')`.
@@ -782,7 +808,7 @@ border-b bg-background transition-colors last:border-0 hover:bg-muted/30
 **DO** put each attribute on its own line for elements with 3+ attributes, with the closing `>` on the last attribute's line (Svelte convention):
 
 ```svelte
-<Button variant="secondary" href={resolve(`/productions/${id}/packing-list`)} target="_blank"
+<Button variant="secondary" href={resolve(`productions/${id}/packing-list`)} target="_blank"
 	>Packing List</Button
 >
 ```

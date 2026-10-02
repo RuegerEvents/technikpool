@@ -1,20 +1,20 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { Modal } from '$lib/components/ui/modal';
-	import { getErrorMessage } from '$lib/utils';
-	import { getServiceCatalog } from '$lib/remote/service-catalog.remote';
-	import { addServiceLine, updateServiceLine } from '$lib/remote/offers.remote';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { getErrorMessage } from '#lib/utils.js';
+	import { getServiceCatalog } from '#lib/remote/service-catalog.remote.js';
+	import { addServiceLine, updateServiceLine } from '#lib/remote/offers.remote.js';
 	import {
 		SERVICE_UNITS,
 		isServiceUnit,
 		serviceLineTotal,
 		serviceUnitLabel,
 		type ServiceUnit
-	} from '$lib/service-lines.svelte';
+	} from '#lib/service-lines.svelte.js';
 	import type { EditedServiceLine, ServiceLineTarget } from './types';
 
 	let {
@@ -147,7 +147,7 @@
 				A service goes into one of your organization's service categories, such as Personal or
 				Transport. Set them up under
 				<a
-					href={resolve(`/orgs/${target.organizationId}/rates`)}
+					href={resolve(`orgs/${target.organizationId}/rates`)}
 					class="underline underline-offset-2 hover:text-foreground">Rates & services</a
 				>
 				first.

@@ -1,7 +1,7 @@
 import type { RequestHandler } from './$types';
-import { apiError, handleApi, requireApiUser } from '$lib/server/api';
-import { jsonBody, withStocktakeErrors } from '$lib/server/stocktake-api';
-import { setStocktakeItemNote, untickStocktakeItem } from '$lib/server/services/stocktake';
+import { apiError, handleApi, requireApiUser } from '#lib/server/api.js';
+import { jsonBody, withStocktakeErrors } from '#lib/server/stocktake-api.js';
+import { setStocktakeItemNote, untickStocktakeItem } from '#lib/server/services/stocktake.js';
 
 export const DELETE: RequestHandler = ({ locals, params }) =>
 	handleApi(async () => {

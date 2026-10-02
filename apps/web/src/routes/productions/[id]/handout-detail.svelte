@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import StocktakeProgress from '$lib/components/stocktake-progress.svelte';
-	import { ScanBar, TickList, type ScanFeedback } from '$lib/components/production-list';
-	import { listSections, type ListLine } from '$lib/production-list';
-	import { makerAndName } from '$lib/product-label';
-	import { getErrorMessage, plural } from '$lib/utils';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import StocktakeProgress from '#lib/components/stocktake-progress.svelte';
+	import { ScanBar, TickList, type ScanFeedback } from '#lib/components/production-list/index.js';
+	import { listSections, type ListLine } from '#lib/production-list.js';
+	import { makerAndName } from '#lib/product-label.js';
+	import { getErrorMessage, plural } from '#lib/utils.js';
 	import {
 		getProductionHandout,
 		scanProductionHandout,
 		setProductionHandoutDone,
 		setProductionHandoutLine
-	} from '$lib/remote/production-handout.remote';
+	} from '#lib/remote/production-handout.remote.js';
 
 	// Handing a production's equipment out, or taking it back, against its
 	// list: the same list as a check, but a tick is the booking itself. Scan a
@@ -191,15 +191,15 @@
 			{#if mode === 'checkout'}
 				<Button
 					variant="outline"
-					href={`${resolve(`/productions/${productionId}/checkin`)}${orgQuery}`}>Take back</Button
+					href={`${resolve(`productions/${productionId}/checkin`)}${orgQuery}`}>Take back</Button
 				>
 			{:else}
 				<Button
 					variant="outline"
-					href={`${resolve(`/productions/${productionId}/checkout`)}${orgQuery}`}>Hand out</Button
+					href={`${resolve(`productions/${productionId}/checkout`)}${orgQuery}`}>Hand out</Button
 				>
 			{/if}
-			<Button variant="outline" href={resolve(`/productions/${productionId}`)}
+			<Button variant="outline" href={resolve(`productions/${productionId}`)}
 				>Back to the production</Button
 			>
 		</div>
@@ -213,7 +213,7 @@
 				<!-- resolve() takes a path only; the query is the side. -->
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
-					href={`${resolve(`/productions/${productionId}/${mode}`)}?org=${encodeURIComponent(s.organizationId)}`}
+					href={`${resolve(`productions/${productionId}/${mode}`)}?org=${encodeURIComponent(s.organizationId)}`}
 					class="rounded px-3 py-1 transition-colors {s.organizationId ===
 					handout.side.organizationId
 						? 'bg-primary text-primary-foreground'

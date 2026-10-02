@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import StocktakeProgress from '$lib/components/stocktake-progress.svelte';
-	import { ScanBar, TickList, type ScanFeedback } from '$lib/components/production-list';
-	import { listSections, type ListLine } from '$lib/production-list';
-	import { getErrorMessage, plural } from '$lib/utils';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import StocktakeProgress from '#lib/components/stocktake-progress.svelte';
+	import { ScanBar, TickList, type ScanFeedback } from '#lib/components/production-list/index.js';
+	import { listSections, type ListLine } from '#lib/production-list.js';
+	import { getErrorMessage, plural } from '#lib/utils.js';
 	import {
 		closeCheck,
 		confirmCheckReceipt,
@@ -16,7 +16,7 @@
 		setProductionCheckLine,
 		tickProductionCheck,
 		untickProductionCheck
-	} from '$lib/remote/production-checks.remote';
+	} from '#lib/remote/production-checks.remote.js';
 
 	// Checking a production against its list: scan, tick or count, as often as
 	// needed, with others ticking into the same list. On the production's own
@@ -212,7 +212,7 @@
 				{/if}
 			</p>
 		</div>
-		<Button variant="outline" href={resolve(`/productions/${check.productionId}`)}
+		<Button variant="outline" href={resolve(`productions/${check.productionId}`)}
 			>Back to the production</Button
 		>
 	</div>

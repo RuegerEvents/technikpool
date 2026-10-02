@@ -1,5 +1,5 @@
 // What a device's built-in connectors are called. A plain `.ts` on purpose, like
-// `$lib/cable`: "DMX In" and "Power Out" are what the panel itself is printed
+// `#lib/cable`: "DMX In" and "Power Out" are what the panel itself is printed
 // with, in German warehouses as much as English ones, so wuchale must not
 // extract them into the catalogue.
 

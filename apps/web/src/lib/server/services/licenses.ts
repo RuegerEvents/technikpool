@@ -1,13 +1,13 @@
-import { prisma } from '$lib/server/auth';
-import { openSecret, sealSecret } from '$lib/server/secrets';
+import { prisma } from '#lib/server/auth.js';
+import { openSecret, sealSecret } from '#lib/server/secrets.js';
 import {
 	isSystemAdmin,
 	productionVisibility,
 	visibleProductionName,
 	writableOrgIds
 } from './access';
-import type { LicenseCredentials, LicenseHolder, RevealGrant } from '$lib/license';
-import { userLabel } from '$lib/user-label.svelte';
+import type { LicenseCredentials, LicenseHolder, RevealGrant } from '#lib/license.js';
+import { userLabel } from '#lib/user-label.svelte.js';
 
 // Who may see a licence's credentials, and who has the licence right now.
 //

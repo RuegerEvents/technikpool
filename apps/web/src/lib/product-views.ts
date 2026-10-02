@@ -4,7 +4,7 @@ import {
 	getInventorySummary,
 	getProductCatalog,
 	getProducts
-} from '$lib/remote/assets.remote';
+} from '#lib/remote/assets.remote.js';
 
 /**
  * Every query that shows a product, for `.updates(...)` on a command that

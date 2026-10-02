@@ -5,26 +5,26 @@
 	// is about the model rather than one box of it.
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import {
 		ProductActions,
 		ProductEditor,
 		type ProductEditorActions
-	} from '$lib/components/ui/product-editor';
-	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
-	import { ProductDocuments } from '$lib/components/ui/product-documents';
+	} from '#lib/components/ui/product-editor/index.js';
+	import { AssetStatusBadge } from '#lib/components/ui/asset-status/index.js';
+	import { ProductDocuments } from '#lib/components/ui/product-documents/index.js';
 	import {
 		getCategories,
 		getManufacturers,
 		getProductCatalog,
 		getProducts,
 		getProductUnits
-	} from '$lib/remote/assets.remote';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
-	import { orgLabel } from '$lib/utils';
-	import { canManageInventory } from '$lib/roles';
+	} from '#lib/remote/assets.remote.js';
+	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
+	import { orgLabel } from '#lib/utils.js';
+	import { canManageInventory } from '#lib/roles.js';
 	import { Plus } from '@lucide/svelte';
 
 	type Props = { productId: string; isAdmin: boolean; userId: string | undefined };
@@ -59,7 +59,7 @@
 	<div class="space-y-4">
 		<h1 class="text-3xl font-bold tracking-tight">Product not found</h1>
 		<p class="text-muted-foreground">It may have been merged into another product or deleted.</p>
-		<Button icon="back" variant="outline" href={resolve('/products')}>Back to Products</Button>
+		<Button icon="back" variant="outline" href={resolve('products')}>Back to Products</Button>
 	</div>
 {:else}
 	<div class="space-y-6">
@@ -74,11 +74,11 @@
 				</div>
 			</div>
 			<div class="flex flex-wrap items-center gap-2">
-				<Button icon="back" variant="ghost" href={resolve('/products')}>Back to Products</Button>
+				<Button icon="back" variant="ghost" href={resolve('products')}>Back to Products</Button>
 				{#if orgs.some(canManageInventory)}
 					<Button
 						variant="outline"
-						href="{resolve('/assets/new')}?product={encodeURIComponent(product.id)}"
+						href="{resolve('assets/new')}?product={encodeURIComponent(product.id)}"
 					>
 						<Plus aria-hidden="true" class="mr-1 size-4" />
 						Add devices
@@ -110,9 +110,9 @@
 				{userId}
 				idPrefix="product-page"
 				onMerged={(survivorId) => {
-					if (survivorId !== productId) goto(resolve(`/products/${survivorId}`));
+					if (survivorId !== productId) goto(resolve(`products/${survivorId}`));
 				}}
-				onDeleted={() => goto(resolve('/products'))}
+				onDeleted={() => goto(resolve('products'))}
 			/>
 
 			<div class="space-y-6 self-start">
@@ -157,17 +157,17 @@
 										{#each units as unit (unit.id)}
 											<tr
 												class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
-												onclick={() => goto(resolve(`/assets/${unit.id}`))}
+												onclick={() => goto(resolve(`assets/${unit.id}`))}
 											>
 												<td class="px-4 py-2">
 													<a
-														href={resolve(`/assets/${unit.id}`)}
+														href={resolve(`assets/${unit.id}`)}
 														class="font-mono whitespace-nowrap hover:underline"
 														onclick={(e) => e.stopPropagation()}>{unit.assetTag ?? '—'}</a
 													>
 													{#if unit.parent}
 														<a
-															href={resolve(`/assets/${unit.parent.id}`)}
+															href={resolve(`assets/${unit.parent.id}`)}
 															class="block text-xs whitespace-nowrap text-muted-foreground hover:underline"
 															onclick={(e) => e.stopPropagation()}
 														>

@@ -1,22 +1,22 @@
 import { query, command } from '$app/server';
-import { prisma } from '$lib/server/auth';
-import { sendMail } from '$lib/server/mail';
-import { appBaseUrl } from '$lib/server/app-url';
-import { addedToOrgEmail } from '$lib/server/emails/added-to-org';
+import { prisma } from '#lib/server/auth.js';
+import { sendMail } from '#lib/server/mail.js';
+import { appBaseUrl } from '#lib/server/app-url.js';
+import { addedToOrgEmail } from '#lib/server/emails/added-to-org.js';
 import * as v from 'valibot';
-import { ORG_ROLES, type OrgRole } from '$lib/roles';
+import { ORG_ROLES, type OrgRole } from '#lib/roles.js';
 import {
 	isSystemAdmin,
 	readsOrgRecords,
 	requireAuth,
 	requireOrgInventory,
 	requireOrgOwner
-} from '$lib/server/services/access';
-import { peekNextTag } from '$lib/server/services/tag-counter';
-import { appError } from '$lib/errors';
-import { ACTIVE_ASSET_WHERE } from '$lib/asset-status';
-import { issueInvitation } from '$lib/server/services/invitations';
-import { accountDeletionBlocker } from '$lib/server/services/account-deletion';
+} from '#lib/server/services/access.js';
+import { peekNextTag } from '#lib/server/services/tag-counter.js';
+import { appError } from '#lib/errors.js';
+import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
+import { issueInvitation } from '#lib/server/services/invitations.js';
+import { accountDeletionBlocker } from '#lib/server/services/account-deletion.js';
 import { getInvitations } from './invitations.remote';
 import { getKnownAddresses } from './addresses.remote';
 

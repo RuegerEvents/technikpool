@@ -1,12 +1,12 @@
 import type { RequestHandler } from './$types';
-import { apiError, apiJson, handleApi, requireApiUser } from '$lib/server/api';
+import { apiError, apiJson, handleApi, requireApiUser } from '#lib/server/api.js';
 import {
 	jsonBody,
 	requireString,
 	stringList,
 	withStocktakeErrors
-} from '$lib/server/stocktake-api';
-import { tickStocktakeItems } from '$lib/server/services/stocktake';
+} from '#lib/server/stocktake-api.js';
+import { tickStocktakeItems } from '#lib/server/services/stocktake.js';
 
 const VIA = ['manual', 'parent', 'bundle'] as const;
 

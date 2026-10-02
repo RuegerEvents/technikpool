@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import sharp from 'sharp';
-import { prisma } from '$lib/server/auth';
-import { getObject, PUBLIC_PREFIX, putObject } from '$lib/server/storage';
+import { prisma } from '#lib/server/auth.js';
+import { getObject, PUBLIC_PREFIX, putObject } from '#lib/server/storage.js';
 
 type BundleForImage = {
 	id: string;

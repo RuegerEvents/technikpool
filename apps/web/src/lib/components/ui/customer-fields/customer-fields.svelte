@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import type { AddressValue } from '$lib/components/ui/address-input';
+	import type { AddressValue } from '#lib/components/ui/address-input/index.js';
 
 	export type CustomerDraft = {
 		companyName: string;
@@ -33,9 +33,9 @@
 	// Deliberately just the fields: whether a customer is being created at all,
 	// and what happens to the id afterwards, differ between the two callers and
 	// stay theirs.
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { AddressInput } from '$lib/components/ui/address-input';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { AddressInput } from '#lib/components/ui/address-input/index.js';
 
 	type Props = {
 		value?: CustomerDraft;

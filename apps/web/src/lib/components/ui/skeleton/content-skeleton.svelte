@@ -8,7 +8,7 @@
 </script>
 
 <script lang="ts">
-	import { getErrorMessage } from '$lib/utils';
+	import { getErrorMessage } from '#lib/utils.js';
 	import Skeleton from './skeleton.svelte';
 
 	type Props = {

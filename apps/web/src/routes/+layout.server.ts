@@ -1,8 +1,8 @@
 import type { LayoutServerLoad } from './$types';
-import { prisma } from '$lib/server/auth';
-import { orgLabel } from '$lib/utils';
-import { ROLE_FOR, roleAtLeast, roleRank } from '$lib/roles';
-import { legalLinks, pendingDpaFor } from '$lib/server/services/legal';
+import { prisma } from '#lib/server/auth.js';
+import { orgLabel } from '#lib/utils.js';
+import { ROLE_FOR, roleAtLeast, roleRank } from '#lib/roles.js';
+import { legalLinks, pendingDpaFor } from '#lib/server/services/legal.js';
 
 export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 	let isAdmin = false;

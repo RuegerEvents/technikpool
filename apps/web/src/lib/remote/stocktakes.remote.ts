@@ -1,9 +1,9 @@
 import { query, command } from '$app/server';
 import * as v from 'valibot';
-import { prisma } from '$lib/server/auth';
-import { requireAuth, writableOrgIds, isSystemAdmin } from '$lib/server/services/access';
-import { appError, type AppErrorCode } from '$lib/errors';
-import { ACTIVE_ASSET_WHERE } from '$lib/asset-status';
+import { prisma } from '#lib/server/auth.js';
+import { requireAuth, writableOrgIds, isSystemAdmin } from '#lib/server/services/access.js';
+import { appError, type AppErrorCode } from '#lib/errors.js';
+import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
 import {
 	STOCKTAKE_ACTIONS,
 	STOCKTAKE_ERROR_STATUS,
@@ -24,7 +24,7 @@ import {
 	setStocktakeItemNote,
 	tickStocktakeItems,
 	untickStocktakeItem
-} from '$lib/server/services/stocktake';
+} from '#lib/server/services/stocktake.js';
 import { getAsset, getAssets, getAssetHistory } from './assets.remote';
 
 // The web's door to stocktakes. The rules are in services/stocktake.ts, shared

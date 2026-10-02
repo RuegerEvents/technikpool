@@ -1,11 +1,11 @@
 import { createHash } from 'node:crypto';
 import sharp from 'sharp';
 import { PDFDocument, rgb, type PDFFont, type PDFImage, type PDFPage } from 'pdf-lib';
-import { getObject, putObject } from '$lib/server/storage';
+import { getObject, putObject } from '#lib/server/storage.js';
 import { embedInter } from './fonts';
 import { safe, wrap } from './pdf-text.ts';
 import { drawLogo, embedLogo } from './pdf-logo.ts';
-import type { SheetProgress } from '$lib/equipment-sheet';
+import type { SheetProgress } from '#lib/equipment-sheet.js';
 
 export type EquipmentSheetLine = {
 	label: string;

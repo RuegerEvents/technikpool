@@ -1,6 +1,6 @@
 import { query, command } from '$app/server';
 import * as v from 'valibot';
-import { prisma } from '$lib/server/auth';
+import { prisma } from '#lib/server/auth.js';
 import {
 	isSystemAdmin,
 	orgRole,
@@ -9,23 +9,23 @@ import {
 	scopedOrgIds,
 	userOrgIds,
 	writableOrgIds
-} from '$lib/server/services/access';
+} from '#lib/server/services/access.js';
 import {
 	licenseHolders,
 	openCredentials,
 	revealGrants,
 	sealCredentials
-} from '$lib/server/services/licenses';
-import { ACTIVE_ASSET_WHERE } from '$lib/asset-status';
-import { appError } from '$lib/errors';
-import { ROLE_FOR, roleAtLeast } from '$lib/roles';
-import type { LicenseCredentialKind, LicenseCredentials } from '$lib/license';
+} from '#lib/server/services/licenses.js';
+import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
+import { appError } from '#lib/errors.js';
+import { ROLE_FOR, roleAtLeast } from '#lib/roles.js';
+import type { LicenseCredentialKind, LicenseCredentials } from '#lib/license.js';
 import type {
 	CredentialsRemovedData,
 	CredentialsRevealedData,
 	CredentialsSetData
-} from '$lib/types/asset-transaction';
-import { getAssetHistory } from '$lib/remote/assets.remote';
+} from '#lib/types/asset-transaction.js';
+import { getAssetHistory } from '#lib/remote/assets.remote.js';
 
 // Licences are assets like any other — booked, checked out, returned by the
 // same paths. What is theirs alone is the credentials, and everything that

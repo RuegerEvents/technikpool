@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { withCaption } from '$lib/product-label';
+	import { withCaption } from '#lib/product-label.js';
 	import ShareLinkMenu from './share-link-menu.svelte';
-	import { customerLabel, getErrorMessage, orgLabel, plural } from '$lib/utils';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { AddressInput } from '$lib/components/ui/address-input';
-	import { CustomerSelect } from '$lib/components/ui/customer-select';
+	import { customerLabel, getErrorMessage, orgLabel, plural } from '#lib/utils.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { AddressInput } from '#lib/components/ui/address-input/index.js';
+	import { CustomerSelect } from '#lib/components/ui/customer-select/index.js';
 	import {
 		getProduction,
 		getProductionAudience,
@@ -22,30 +22,30 @@
 		updateProductionAddress,
 		updateProductionDuration,
 		updateProductionCustomer
-	} from '$lib/remote/productions.remote';
-	import { getBundles } from '$lib/remote/assets.remote';
-	import { getMyOrgs, getOrgUsers } from '$lib/remote/orgs.remote';
-	import { getOffersForProduction, getInvoicesForProduction } from '$lib/remote/offers.remote';
-	import { supersededOfferIds } from '$lib/offer-versions';
-	import { ROLE_FOR, roleAtLeast, type OrgRole } from '$lib/roles';
+	} from '#lib/remote/productions.remote.js';
+	import { getBundles } from '#lib/remote/assets.remote.js';
+	import { getMyOrgs, getOrgUsers } from '#lib/remote/orgs.remote.js';
+	import { getOffersForProduction, getInvoicesForProduction } from '#lib/remote/offers.remote.js';
+	import { supersededOfferIds } from '#lib/offer-versions.js';
+	import { ROLE_FOR, roleAtLeast, type OrgRole } from '#lib/roles.js';
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
-	import type { Prisma } from '$lib/prisma/client';
+	import type { Prisma } from '#lib/prisma/client.js';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { resolve } from '$app/paths';
-	import BulkActionsBar from '$lib/components/ui/bulk-actions-bar.svelte';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
-	import { Modal } from '$lib/components/ui/modal';
+	import BulkActionsBar from '#lib/components/ui/bulk-actions-bar.svelte';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
 	import { DropdownMenu } from 'bits-ui';
-	import { LicenseRevealModal } from '$lib/components/ui/license-credentials';
+	import { LicenseRevealModal } from '#lib/components/ui/license-credentials/index.js';
 	import CopyEquipmentModal from './copy-equipment-modal.svelte';
 	import CheckButton from './check-button.svelte';
 	import HandoutButtons from './handout-buttons.svelte';
-	import { accessorySummary, nestAccessories, type Nested } from '$lib/production-items';
-	import { SheetDownload } from '$lib/equipment-sheet-download.svelte';
-	import { SheetProgress } from '$lib/components/sheet-progress';
+	import { accessorySummary, nestAccessories, type Nested } from '#lib/production-items.js';
+	import { SheetDownload } from '#lib/equipment-sheet-download.svelte.js';
+	import { SheetProgress } from '#lib/components/sheet-progress/index.js';
 
 	let { productionId }: { productionId: string } = $props();
 	let production = $derived(await getProduction(productionId));
@@ -58,7 +58,7 @@
 		try {
 			await deleteProduction(productionId);
 			toast.success('Production deleted');
-			goto(resolve('/productions'));
+			goto(resolve('productions'));
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			deleting = false;
@@ -386,7 +386,7 @@
 	let unitCount = $derived(displaySections.reduce((sum, s) => sum + s.total, 0));
 
 	function openPrint(route: 'crew-passes') {
-		window.open(resolve(`/productions/${productionId}/${route}`), '_blank');
+		window.open(resolve(`productions/${productionId}/${route}`), '_blank');
 	}
 
 	// The PDFs take a moment over their pictures, so they report progress. The
@@ -649,7 +649,7 @@
 			</p>
 		</div>
 		<div class="flex flex-wrap gap-2">
-			<Button icon="back" variant="outline" href={resolve('/productions')}>Back</Button>
+			<Button icon="back" variant="outline" href={resolve('productions')}>Back</Button>
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					{#snippet child({ props })}
@@ -694,9 +694,9 @@
 			{/if}
 			{#if canManage}
 				{#if currentOffer}
-					<Button icon="forward" href={resolve(`/offers/${currentOffer.id}`)}>Open Offer</Button>
+					<Button icon="forward" href={resolve(`offers/${currentOffer.id}`)}>Open Offer</Button>
 				{:else}
-					<Button icon="add" href={resolve(`/offers/new?productionId=${production.id}`)}
+					<Button icon="add" href={resolve(`offers/new?productionId=${production.id}`)}
 						>Create Offer</Button
 					>
 				{/if}
@@ -731,7 +731,7 @@
 						>
 							{#if currentOffer}
 								<DropdownMenu.Item
-									onSelect={() => goto(resolve(`/offers/new?productionId=${production.id}`))}
+									onSelect={() => goto(resolve(`offers/new?productionId=${production.id}`))}
 									class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
 								>
 									New offer
@@ -1114,8 +1114,7 @@
 						<Button variant="outline" onclick={() => (copyEquipmentOpen = true)}
 							>Copy equipment from…</Button
 						>
-						<Button href={resolve(`/productions/${productionId}/equipment`)}
-							>Manage Equipment</Button
+						<Button href={resolve(`productions/${productionId}/equipment`)}>Manage Equipment</Button
 						>
 					</div>
 				{/if}
@@ -1402,7 +1401,7 @@
 							<div class="space-y-2">
 								{#each offers as offer (offer.id)}
 									<a
-										href={resolve(`/offers/${offer.id}`)}
+										href={resolve(`offers/${offer.id}`)}
 										class="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
 									>
 										<div class="min-w-0">
@@ -1440,7 +1439,7 @@
 							<div class="space-y-2">
 								{#each invoices as invoice (invoice.id)}
 									<a
-										href={resolve(`/invoices/${invoice.id}`)}
+										href={resolve(`invoices/${invoice.id}`)}
 										class="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/30"
 									>
 										<div>

@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import type { Prisma } from '$lib/prisma/client';
+	import type { Prisma } from '#lib/prisma/client.js';
 
 	export type CustomerWithAddress = Prisma.CustomerGetPayload<{ include: { address: true } }>;
 </script>
@@ -10,15 +10,15 @@
 	// document" forms, the offer/invoice customer editors — opens this instead,
 	// so the record always gets the full structured form (including a real
 	// address, not one line for the whole thing).
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
 	import {
 		CustomerFields,
 		emptyCustomerDraft,
 		type CustomerDraft
-	} from '$lib/components/ui/customer-fields';
-	import { createCustomer, updateCustomer, deleteCustomer } from '$lib/remote/customers.remote';
-	import { getErrorMessage } from '$lib/utils';
+	} from '#lib/components/ui/customer-fields/index.js';
+	import { createCustomer, updateCustomer, deleteCustomer } from '#lib/remote/customers.remote.js';
+	import { getErrorMessage } from '#lib/utils.js';
 	import { toast } from 'svelte-sonner';
 
 	type Props = {

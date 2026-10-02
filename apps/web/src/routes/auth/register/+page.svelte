@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { LegalLinks } from '$lib/components/ui/legal-links';
-	import { signUp } from '$lib/auth-client';
-	import { Input } from '$lib/components/ui/input';
-	import { Button } from '$lib/components/ui/button';
-	import { Label } from '$lib/components/ui/label';
-	import * as Card from '$lib/components/ui/card';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { LegalLinks } from '#lib/components/ui/legal-links/index.js';
+	import { signUp } from '#lib/auth-client.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { goto, refreshAll } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import type { LegalLink } from '$lib/legal.svelte';
-	import { getInvitationPreview, getSignUpStatus } from '$lib/remote/invitations.remote';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import type { LegalLink } from '#lib/legal.svelte.js';
+	import { getInvitationPreview, getSignUpStatus } from '#lib/remote/invitations.remote.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 
 	let legalLinks = $derived((page.data.legalLinks ?? []) as LegalLink[]);
 	let termsLink = $derived(legalLinks.find((l) => l.slug === 'terms'));
@@ -25,8 +25,8 @@
 
 	let loginHref = $derived(
 		redirectTo
-			? `${resolve('/auth/login')}?redirectTo=${encodeURIComponent(redirectTo)}`
-			: resolve('/auth/login')
+			? `${resolve('auth/login')}?redirectTo=${encodeURIComponent(redirectTo)}`
+			: resolve('auth/login')
 	);
 
 	// An invitation link carries its token here. It is sent along with the
@@ -77,7 +77,7 @@
 				onSuccess: async () => {
 					success = true;
 					loading = false;
-					await invalidateAll();
+					await refreshAll();
 					// eslint-disable-next-line svelte/no-navigation-without-resolve
 					if (redirectTo) goto(redirectTo);
 					else goto(resolve('/'));

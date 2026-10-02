@@ -1,12 +1,12 @@
 <script lang="ts">
 	import './layout.css';
 	import { page } from '$app/state';
-	import { Button } from '$lib/components/ui/button';
-	import { signOut } from '$lib/auth-client';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { signOut } from '#lib/auth-client.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { Toaster } from 'svelte-sonner';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { DropdownMenu } from 'bits-ui';
 	import {
 		Boxes,
@@ -31,16 +31,16 @@
 		Tags,
 		Wrench
 	} from '@lucide/svelte';
-	import { currentVersion } from '$lib/changelog';
-	import { OrgBadge } from '$lib/components/ui/org-badge';
-	import { legalTitle } from '$lib/legal.svelte';
-	import { DpaGate } from '$lib/components/ui/dpa-gate';
+	import { currentVersion } from '#lib/changelog.js';
+	import { OrgBadge } from '#lib/components/ui/org-badge/index.js';
+	import { legalTitle } from '#lib/legal.svelte.js';
+	import { DpaGate } from '#lib/components/ui/dpa-gate/index.js';
 
 	let { data, children } = $props();
 
 	async function handleSignOut() {
 		await signOut();
-		goto(resolve('/auth/login'));
+		goto(resolve('auth/login'));
 	}
 
 	let isAuthRoute = $derived(page.url.pathname.startsWith('/auth'));
@@ -129,28 +129,28 @@
 									     they are all empty pages: see the guard in `+layout.ts`. -->
 									{#if data.hasOrg}
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/assets'))}
+											onSelect={() => goto(resolve('assets'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<Package aria-hidden="true" />
 											Devices
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/productions'))}
+											onSelect={() => goto(resolve('productions'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<Clapperboard aria-hidden="true" />
 											Productions
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/calendar'))}
+											onSelect={() => goto(resolve('calendar'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<CalendarDays aria-hidden="true" />
 											Calendar
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/checkout'))}
+											onSelect={() => goto(resolve('checkout'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<ScanBarcode aria-hidden="true" />
@@ -158,14 +158,14 @@
 										</DropdownMenu.Item>
 										{#if data.canBill}
 											<DropdownMenu.Item
-												onSelect={() => goto(resolve('/offers'))}
+												onSelect={() => goto(resolve('offers'))}
 												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 											>
 												<FileText aria-hidden="true" />
 												Offers
 											</DropdownMenu.Item>
 											<DropdownMenu.Item
-												onSelect={() => goto(resolve('/invoices'))}
+												onSelect={() => goto(resolve('invoices'))}
 												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 											>
 												<ReceiptText aria-hidden="true" />
@@ -175,7 +175,7 @@
 										<DropdownMenu.Separator class="my-1 h-px bg-border" />
 										{#if data.canReadRecords}
 											<DropdownMenu.Item
-												onSelect={() => goto(resolve('/customers'))}
+												onSelect={() => goto(resolve('customers'))}
 												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 											>
 												<Users aria-hidden="true" />
@@ -183,42 +183,42 @@
 											</DropdownMenu.Item>
 										{/if}
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/products'))}
+											onSelect={() => goto(resolve('products'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<Boxes aria-hidden="true" />
 											Products
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/manufacturers'))}
+											onSelect={() => goto(resolve('manufacturers'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<Factory aria-hidden="true" />
 											Manufacturers
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/stickers'))}
+											onSelect={() => goto(resolve('stickers'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<Tags aria-hidden="true" />
 											Stickers
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/inspections'))}
+											onSelect={() => goto(resolve('inspections'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<ClipboardCheck aria-hidden="true" />
 											Inspections
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/stocktakes'))}
+											onSelect={() => goto(resolve('stocktakes'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<ListChecks aria-hidden="true" />
 											Stocktakes
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/devices'))}
+											onSelect={() => goto(resolve('devices'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<ScanBarcode aria-hidden="true" />
@@ -228,42 +228,42 @@
 									{#if data.isAdmin}
 										<DropdownMenu.Separator class="my-1 h-px bg-border" />
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/admin/categories'))}
+											onSelect={() => goto(resolve('admin/categories'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<Shapes aria-hidden="true" />
 											Categories
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/admin/connectors'))}
+											onSelect={() => goto(resolve('admin/connectors'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<PlugZap aria-hidden="true" />
 											Connectors
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/admin/users'))}
+											onSelect={() => goto(resolve('admin/users'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<UserCog aria-hidden="true" />
 											Users
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/admin/maintenance'))}
+											onSelect={() => goto(resolve('admin/maintenance'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<Wrench aria-hidden="true" />
 											Maintenance
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/admin/catalog-log'))}
+											onSelect={() => goto(resolve('admin/catalog-log'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<ScrollText aria-hidden="true" />
 											Catalog Log
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve('/admin/legal'))}
+											onSelect={() => goto(resolve('admin/legal'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<Scale aria-hidden="true" />
@@ -281,7 +281,7 @@
 						<nav class="hidden gap-3 lg:flex lg:gap-5">
 							{#if data.hasOrg}
 								<a
-									href={resolve('/assets')}
+									href={resolve('assets')}
 									class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
 										'/assets'
 									)
@@ -290,7 +290,7 @@
 									><Package aria-hidden="true" class="size-4" />Devices</a
 								>
 								<a
-									href={resolve('/productions')}
+									href={resolve('productions')}
 									class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
 										'/productions'
 									)
@@ -299,7 +299,7 @@
 									><Clapperboard aria-hidden="true" class="size-4" />Productions</a
 								>
 								<a
-									href={resolve('/calendar')}
+									href={resolve('calendar')}
 									class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
 										'/calendar'
 									)
@@ -308,7 +308,7 @@
 									><CalendarDays aria-hidden="true" class="size-4" />Calendar</a
 								>
 								<a
-									href={resolve('/checkout')}
+									href={resolve('checkout')}
 									class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
 										'/checkout'
 									)
@@ -318,7 +318,7 @@
 								>
 								{#if data.canBill}
 									<a
-										href={resolve('/offers')}
+										href={resolve('offers')}
 										class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
 											'/offers'
 										)
@@ -327,7 +327,7 @@
 										><FileText aria-hidden="true" class="size-4" />Offers</a
 									>
 									<a
-										href={resolve('/invoices')}
+										href={resolve('invoices')}
 										class="inline-flex items-center gap-1.5 text-sm font-medium transition-colors {page.url.pathname.startsWith(
 											'/invoices'
 										)
@@ -382,7 +382,7 @@
 										>
 											{#if data.canReadRecords}
 												<DropdownMenu.Item
-													onSelect={() => goto(resolve('/customers'))}
+													onSelect={() => goto(resolve('customers'))}
 													class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 												>
 													<Users aria-hidden="true" />
@@ -390,35 +390,35 @@
 												</DropdownMenu.Item>
 											{/if}
 											<DropdownMenu.Item
-												onSelect={() => goto(resolve('/products'))}
+												onSelect={() => goto(resolve('products'))}
 												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 											>
 												<Boxes aria-hidden="true" />
 												Products
 											</DropdownMenu.Item>
 											<DropdownMenu.Item
-												onSelect={() => goto(resolve('/manufacturers'))}
+												onSelect={() => goto(resolve('manufacturers'))}
 												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 											>
 												<Factory aria-hidden="true" />
 												Manufacturers
 											</DropdownMenu.Item>
 											<DropdownMenu.Item
-												onSelect={() => goto(resolve('/stickers'))}
+												onSelect={() => goto(resolve('stickers'))}
 												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 											>
 												<Tags aria-hidden="true" />
 												Stickers
 											</DropdownMenu.Item>
 											<DropdownMenu.Item
-												onSelect={() => goto(resolve('/inspections'))}
+												onSelect={() => goto(resolve('inspections'))}
 												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 											>
 												<ClipboardCheck aria-hidden="true" />
 												Inspections
 											</DropdownMenu.Item>
 											<DropdownMenu.Item
-												onSelect={() => goto(resolve('/stocktakes'))}
+												onSelect={() => goto(resolve('stocktakes'))}
 												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 											>
 												<ListChecks aria-hidden="true" />
@@ -426,14 +426,14 @@
 											</DropdownMenu.Item>
 											{#if data.isAdmin}
 												<DropdownMenu.Item
-													onSelect={() => goto(resolve('/admin/categories'))}
+													onSelect={() => goto(resolve('admin/categories'))}
 													class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 												>
 													<Shapes aria-hidden="true" />
 													Categories
 												</DropdownMenu.Item>
 												<DropdownMenu.Item
-													onSelect={() => goto(resolve('/admin/connectors'))}
+													onSelect={() => goto(resolve('admin/connectors'))}
 													class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 												>
 													<PlugZap aria-hidden="true" />
@@ -441,7 +441,7 @@
 												</DropdownMenu.Item>
 											{/if}
 											<DropdownMenu.Item
-												onSelect={() => goto(resolve('/devices'))}
+												onSelect={() => goto(resolve('devices'))}
 												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 											>
 												<ScanBarcode aria-hidden="true" />
@@ -492,28 +492,28 @@
 											class="z-50 min-w-[180px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md [&_svg]:size-4"
 										>
 											<DropdownMenu.Item
-												onSelect={() => goto(resolve('/admin/users'))}
+												onSelect={() => goto(resolve('admin/users'))}
 												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 											>
 												<UserCog aria-hidden="true" />
 												Users
 											</DropdownMenu.Item>
 											<DropdownMenu.Item
-												onSelect={() => goto(resolve('/admin/maintenance'))}
+												onSelect={() => goto(resolve('admin/maintenance'))}
 												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 											>
 												<Wrench aria-hidden="true" />
 												Maintenance
 											</DropdownMenu.Item>
 											<DropdownMenu.Item
-												onSelect={() => goto(resolve('/admin/catalog-log'))}
+												onSelect={() => goto(resolve('admin/catalog-log'))}
 												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 											>
 												<ScrollText aria-hidden="true" />
 												Catalog Log
 											</DropdownMenu.Item>
 											<DropdownMenu.Item
-												onSelect={() => goto(resolve('/admin/legal'))}
+												onSelect={() => goto(resolve('admin/legal'))}
 												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 											>
 												<Scale aria-hidden="true" />
@@ -636,7 +636,7 @@
 									</div>
 									{#if data.homeOrg}
 										<DropdownMenu.Item
-											onSelect={() => goto(resolve(`/orgs/${data.homeOrg?.id}`))}
+											onSelect={() => goto(resolve(`orgs/${data.homeOrg?.id}`))}
 											title="Home organization"
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
@@ -650,7 +650,7 @@
 									{/if}
 									<DropdownMenu.Separator class="my-1 h-px bg-border" />
 									<DropdownMenu.Item
-										onSelect={() => goto(resolve('/profile'))}
+										onSelect={() => goto(resolve('profile'))}
 										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 									>
 										<svg
@@ -669,7 +669,7 @@
 										Profile
 									</DropdownMenu.Item>
 									<DropdownMenu.Item
-										onSelect={() => goto(resolve('/orgs'))}
+										onSelect={() => goto(resolve('orgs'))}
 										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 									>
 										<svg
@@ -690,7 +690,7 @@
 										Organizations
 									</DropdownMenu.Item>
 									<DropdownMenu.Item
-										onSelect={() => goto(resolve('/whats-new'))}
+										onSelect={() => goto(resolve('whats-new'))}
 										class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 									>
 										<svg
@@ -718,7 +718,7 @@
 											onSelect={() =>
 												link.external
 													? window.open(link.href, '_blank', 'noopener')
-													: goto(resolve(`/legal/${link.slug}`))}
+													: goto(resolve(`legal/${link.slug}`))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
 											<Scale aria-hidden="true" class="size-3.5" />
@@ -751,8 +751,8 @@
 							</DropdownMenu.Portal>
 						</DropdownMenu.Root>
 					{:else}
-						<Button variant="ghost" size="sm" href={resolve('/auth/login')}>Login</Button>
-						<Button size="sm" href={resolve('/auth/register')}>Sign up</Button>
+						<Button variant="ghost" size="sm" href={resolve('auth/login')}>Login</Button>
+						<Button size="sm" href={resolve('auth/register')}>Sign up</Button>
 					{/if}
 				</div>
 			</div>

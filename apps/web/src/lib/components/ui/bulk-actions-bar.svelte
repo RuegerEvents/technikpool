@@ -1,13 +1,16 @@
 <script lang="ts">
-	import { getErrorMessage, orgLabel } from '$lib/utils';
-	import { canWrite } from '$lib/roles';
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
-	import { bulkUpdateAssetStatus, getLocations } from '$lib/remote/assets.remote';
-	import { getAllProductions, checkoutAssets } from '$lib/remote/checkout.remote';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
-	import { ASSET_STATUSES, isRetiredStatus, type AssetStatus } from '$lib/asset-status';
-	import { assetStatusDescription, assetStatusLabel } from '$lib/components/ui/asset-status';
+	import { getErrorMessage, orgLabel } from '#lib/utils.js';
+	import { canWrite } from '#lib/roles.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { bulkUpdateAssetStatus, getLocations } from '#lib/remote/assets.remote.js';
+	import { getAllProductions, checkoutAssets } from '#lib/remote/checkout.remote.js';
+	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
+	import { ASSET_STATUSES, isRetiredStatus, type AssetStatus } from '#lib/asset-status.js';
+	import {
+		assetStatusDescription,
+		assetStatusLabel
+	} from '#lib/components/ui/asset-status/index.js';
 	import { toast } from 'svelte-sonner';
 
 	type Props = {

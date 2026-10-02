@@ -7,7 +7,7 @@
 	// by the product's name instead.
 	import { DropdownMenu } from 'bits-ui';
 	import { Ellipsis, Merge, Trash2 } from '@lucide/svelte';
-	import { Button } from '$lib/components/ui/button';
+	import { Button } from '#lib/components/ui/button/index.js';
 	import type { ProductEditorActions } from './product-editor.svelte';
 
 	type Props = {

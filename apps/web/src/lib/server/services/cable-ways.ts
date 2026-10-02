@@ -1,7 +1,7 @@
-import { prisma } from '$lib/server/auth';
-import { normalizeWays, type CableWayAttrs } from '$lib/cable';
-import { ensureConnectors } from '$lib/server/services/connectors';
-import { CABLE_WAYS } from '$lib/server/services/cable-ends';
+import { prisma } from '#lib/server/auth.js';
+import { normalizeWays, type CableWayAttrs } from '#lib/cable.js';
+import { ensureConnectors } from '#lib/server/services/connectors.js';
+import { CABLE_WAYS } from '#lib/server/services/cable-ends.js';
 
 /**
  * A loom's ways, server side. The shape the forms send is the shape the catalog

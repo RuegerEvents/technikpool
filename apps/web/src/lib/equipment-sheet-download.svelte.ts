@@ -1,7 +1,7 @@
 import { toast } from 'svelte-sonner';
-import { streamEquipmentSheet } from '$lib/remote/equipment-sheets.remote';
-import { getErrorMessage } from '$lib/utils';
-import { sheetFraction, type SheetKind, type SheetProgress } from '$lib/equipment-sheet';
+import { streamEquipmentSheet } from '#lib/remote/equipment-sheets.remote.js';
+import { getErrorMessage } from '#lib/utils.js';
+import { sheetFraction, type SheetKind, type SheetProgress } from '#lib/equipment-sheet.js';
 
 export function sheetTitle(kind: SheetKind) {
 	return kind === 'delivery-note' ? 'Delivery note' : 'Packing list';

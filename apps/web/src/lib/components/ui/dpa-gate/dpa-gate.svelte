@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
-	import { AddressInput, type AddressValue } from '$lib/components/ui/address-input';
-	import { acceptDpa } from '$lib/remote/legal.remote';
-	import { getErrorMessage } from '$lib/utils';
+	import { refreshAll } from '$app/navigation';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { AddressInput, type AddressValue } from '#lib/components/ui/address-input/index.js';
+	import { acceptDpa } from '#lib/remote/legal.remote.js';
+	import { getErrorMessage } from '#lib/utils.js';
 	import { toast } from 'svelte-sonner';
 
 	// Asks an organization's owner to accept the operator's data processing
@@ -70,7 +70,7 @@
 			accepting = false;
 			// Either way the layout is read again: after a success the dialog is
 			// gone, after `dpa_outdated` it shows the current text.
-			await invalidateAll();
+			await refreshAll();
 		}
 	}
 </script>

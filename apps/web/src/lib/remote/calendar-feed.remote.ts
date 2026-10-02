@@ -1,7 +1,7 @@
 import { command, query } from '$app/server';
-import { prisma } from '$lib/server/auth';
-import { requireAuth } from '$lib/server/services/access';
-import { calendarFeedUrl } from '$lib/server/services/calendar-feed';
+import { prisma } from '#lib/server/auth.js';
+import { requireAuth } from '#lib/server/services/access.js';
+import { calendarFeedUrl } from '#lib/server/services/calendar-feed.js';
 
 export const getCalendarFeedUrl = query(async () => {
 	const user = await requireAuth();

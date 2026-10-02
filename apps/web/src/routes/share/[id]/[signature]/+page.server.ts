@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { resolveShare } from '$lib/server/services/production-share';
+import { resolveShare } from '#lib/server/services/production-share.js';
 
 // No session here: the signed URL is the whole credential. A link that does
 // not open — wrong, revoked, expired — renders the same "no longer valid"

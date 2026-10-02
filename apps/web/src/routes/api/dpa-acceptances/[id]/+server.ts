@@ -1,8 +1,8 @@
 import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
-import { prisma } from '$lib/server/auth';
-import { isSystemAdmin, orgRole } from '$lib/server/services/access';
-import { dpaAcceptancePdf, dpaPdfFilename } from '$lib/server/services/legal';
+import { prisma } from '#lib/server/auth.js';
+import { isSystemAdmin, orgRole } from '#lib/server/services/access.js';
+import { dpaAcceptancePdf, dpaPdfFilename } from '#lib/server/services/legal.js';
 
 // An acceptance of the data processing agreement as a PDF, for the two parties
 // to it: the organization's owners and the operator (system admins). Once the

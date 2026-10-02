@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { getErrorMessage, orgLabel } from '$lib/utils';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { getOverdueAssets, logInspection } from '$lib/remote/inspections.remote';
-	import { OrgBadge } from '$lib/components/ui/org-badge';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
+	import { getErrorMessage, orgLabel } from '#lib/utils.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { getOverdueAssets, logInspection } from '#lib/remote/inspections.remote.js';
+	import { OrgBadge } from '#lib/components/ui/org-badge/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import { toast } from 'svelte-sonner';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 
 	let overdueQuery = $derived(getOverdueAssets());
 	let data = $derived(overdueQuery.current ?? { overdue: [], upcoming: [] });

@@ -1,5 +1,5 @@
 import { createCipheriv, createDecipheriv, hkdfSync, randomBytes } from 'node:crypto';
-import { env } from '$env/dynamic/private';
+import { CREDENTIALS_ENCRYPTION_KEY } from '$app/env/private';
 
 // Sealing for the few values that must be stored but never read back casually
 // — licence keys and the accounts licences are used through. AES-256-GCM, so a
@@ -14,9 +14,9 @@ const VERSION = 'v1';
 const INFO = 'technikpool/license-credentials/v1';
 
 function key(): Buffer {
-	// `$env` rather than `process.env`: the dev server re-reads .env on a change,
-	// where `process.env` keeps whatever it held when the process started.
-	const secret = env.CREDENTIALS_ENCRYPTION_KEY;
+	// `$app/env/private` rather than `process.env`: the dev server re-reads .env
+	// on a change, where `process.env` keeps whatever it held when it started.
+	const secret = CREDENTIALS_ENCRYPTION_KEY;
 	// Misconfiguration no user can act on, so a plain throw — see CLAUDE.md, "Errors".
 	if (!secret) throw new Error('CREDENTIALS_ENCRYPTION_KEY is not set');
 	return Buffer.from(hkdfSync('sha256', secret, '', INFO, 32));

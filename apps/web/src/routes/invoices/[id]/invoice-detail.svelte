@@ -1,8 +1,8 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import {
@@ -11,7 +11,7 @@
 		dayCountBetween,
 		formatAddress,
 		orgLabel
-	} from '$lib/utils';
+	} from '#lib/utils.js';
 	import { toast } from 'svelte-sonner';
 	import {
 		getInvoice,
@@ -26,18 +26,18 @@
 		deleteInvoice,
 		updateDocumentText,
 		updateDocumentOrgSnapshot
-	} from '$lib/remote/offers.remote';
-	import { getCustomers } from '$lib/remote/customers.remote';
-	import { StalenessBanner } from '$lib/components/ui/staleness-banner';
-	import type { Staleness } from '$lib/components/ui/staleness-banner';
-	import { OrgSnapshotBanner } from '$lib/components/ui/org-snapshot-banner';
-	import { BillingIssues } from '$lib/components/ui/billing-issues';
-	import { billingDocumentIssues } from '$lib/billing-document-check.svelte';
-	import { organizationFromSnapshot } from '$lib/org-snapshot';
-	import { BillingDocument } from '$lib/components/ui/billing-document';
-	import { Modal } from '$lib/components/ui/modal';
-	import { CustomerSelect } from '$lib/components/ui/customer-select';
-	import type { CustomerWithAddress } from '$lib/components/ui/customer-form-modal';
+	} from '#lib/remote/offers.remote.js';
+	import { getCustomers } from '#lib/remote/customers.remote.js';
+	import { StalenessBanner } from '#lib/components/ui/staleness-banner/index.js';
+	import type { Staleness } from '#lib/components/ui/staleness-banner/index.js';
+	import { OrgSnapshotBanner } from '#lib/components/ui/org-snapshot-banner/index.js';
+	import { BillingIssues } from '#lib/components/ui/billing-issues/index.js';
+	import { billingDocumentIssues } from '#lib/billing-document-check.svelte.js';
+	import { organizationFromSnapshot } from '#lib/org-snapshot.js';
+	import { BillingDocument } from '#lib/components/ui/billing-document/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { CustomerSelect } from '#lib/components/ui/customer-select/index.js';
+	import type { CustomerWithAddress } from '#lib/components/ui/customer-form-modal/index.js';
 
 	let { invoiceId }: { invoiceId: string } = $props();
 	let invoice = $derived(await getInvoice(invoiceId));
@@ -185,7 +185,7 @@
 		try {
 			await deleteInvoice(invoiceId);
 			toast.success('Invoice deleted');
-			await goto(resolve('/invoices'));
+			await goto(resolve('invoices'));
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			deleting = false;
@@ -236,7 +236,7 @@
 				{#if invoice.production}
 					·
 					<a
-						href={resolve(`/productions/${invoice.production.id}`)}
+						href={resolve(`productions/${invoice.production.id}`)}
 						class="underline underline-offset-2 hover:text-foreground"
 					>
 						{invoice.production.name}

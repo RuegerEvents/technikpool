@@ -1,8 +1,8 @@
 <!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
 <script lang="ts" generics="T extends Record<string, any>">
-	import { naturalCompare } from '$lib/sort';
+	import { naturalCompare } from '#lib/sort.js';
 	import type { Snippet } from 'svelte';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { untrack } from 'svelte';
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';

@@ -1,6 +1,6 @@
-import { prisma } from '$lib/server/auth';
-import type { Prisma } from '$lib/prisma/client';
-import { isRetiredStatus } from '$lib/asset-status';
+import { prisma } from '#lib/server/auth.js';
+import type { Prisma } from '#lib/prisma/client.js';
+import { isRetiredStatus } from '#lib/asset-status.js';
 import { isSystemAdmin, managedOrgIds } from './access';
 import { CABLE_ENDS } from './cable-ends';
 

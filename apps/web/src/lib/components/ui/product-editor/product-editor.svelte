@@ -21,10 +21,10 @@
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
-	import { categoryLabel } from '$lib/category';
-	import { canWrite } from '$lib/roles';
-	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
-	import { messageForErrorCode } from '$lib/error-messages.svelte';
+	import { categoryLabel } from '#lib/category.js';
+	import { canWrite } from '#lib/roles.js';
+	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
+	import { messageForErrorCode } from '#lib/error-messages.svelte.js';
 	import {
 		deleteProduct,
 		duplicateProduct,
@@ -36,37 +36,37 @@
 		setOrgProductPrice,
 		setProductPorts,
 		updateProduct
-	} from '$lib/remote/assets.remote';
-	import type { getMyOrgs } from '$lib/remote/orgs.remote';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import * as Card from '$lib/components/ui/card';
-	import { isCable, sameWays } from '$lib/cable';
-	import { CategoryPill } from '$lib/components/ui/category-pill';
-	import { CreatableSelect } from '$lib/components/ui/creatable-select';
-	import { Modal } from '$lib/components/ui/modal';
+	} from '#lib/remote/assets.remote.js';
+	import type { getMyOrgs } from '#lib/remote/orgs.remote.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { isCable, sameWays } from '#lib/cable.js';
+	import { CategoryPill } from '#lib/components/ui/category-pill/index.js';
+	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
 	import ProductActions from './product-actions.svelte';
-	import { productLabel } from '$lib/product-label';
-	import { PRODUCT_VIEWS } from '$lib/product-views';
+	import { productLabel } from '#lib/product-label.js';
+	import { PRODUCT_VIEWS } from '#lib/product-views.js';
 	import {
 		manufacturerIdOf,
 		manufacturerSelection,
 		withNoManufacturer
-	} from '$lib/no-manufacturer.svelte';
+	} from '#lib/no-manufacturer.svelte.js';
 	import {
 		ProductFields,
 		cableDraftFrom,
 		cableInputFrom,
 		type ProductDraft
-	} from '$lib/components/ui/product-fields';
+	} from '#lib/components/ui/product-fields/index.js';
 	import {
 		ProductPorts,
 		portDraftsFrom,
 		portInputsFrom,
 		portsUnchanged,
 		type PortDraft
-	} from '$lib/components/ui/product-ports';
+	} from '#lib/components/ui/product-ports/index.js';
 
 	type CatalogProduct = Awaited<ReturnType<typeof getProductCatalog>>[number];
 
@@ -525,7 +525,7 @@
 			const { id } = await duplicateProduct({ productId: product.id, name: duplicateName });
 			duplicateOpen = false;
 			toast.success('Product duplicated');
-			await goto(resolve(`/products/${id}`));
+			await goto(resolve(`products/${id}`));
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {
@@ -568,13 +568,13 @@
 					{/if}
 					{#if showProductLink}
 						<a
-							href={resolve(`/products/${product.id}`)}
+							href={resolve(`products/${product.id}`)}
 							class="underline-offset-2 hover:text-foreground hover:underline"
 							>Open product page →</a
 						>
 					{/if}
 					<a
-						href="{resolve('/assets')}?q={encodeURIComponent(product.name)}"
+						href="{resolve('assets')}?q={encodeURIComponent(product.name)}"
 						class="underline-offset-2 hover:text-foreground hover:underline">View in Devices →</a
 					>
 				</Card.Description>
@@ -857,7 +857,7 @@
 			<p class="mt-0.5 text-muted-foreground">
 				Only use it for a different model that shares most details. To register more units of this
 				one, <a
-					href="{resolve('/assets/new')}?product={encodeURIComponent(product.id)}"
+					href="{resolve('assets/new')}?product={encodeURIComponent(product.id)}"
 					class="font-medium text-foreground underline">add devices</a
 				> instead.
 			</p>

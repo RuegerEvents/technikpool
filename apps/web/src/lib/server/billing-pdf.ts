@@ -1,6 +1,6 @@
 import { PDFDocument, degrees, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import { groupBillingItems, lineSubtitle, type GroupableItem } from '../billing-lines.ts';
-import { appError } from '$lib/errors';
+import { appError } from '#lib/errors.js';
 import { billingDocumentIssues } from '../billing-document-check.svelte.ts';
 import type { SnapshotOrganization } from '../org-snapshot.ts';
 import { embedInter } from './fonts';

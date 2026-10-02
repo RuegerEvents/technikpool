@@ -1,8 +1,8 @@
 import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
-import { prisma } from '$lib/server/auth';
-import { getObject } from '$lib/server/storage';
-import { isSystemAdmin } from '$lib/server/services/access';
+import { prisma } from '#lib/server/auth.js';
+import { getObject } from '#lib/server/storage.js';
+import { isSystemAdmin } from '#lib/server/services/access.js';
 
 // Everything one organization owns, as a single self-contained JSON document:
 // every table row the org can see plus every stored file (archived PDFs,

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { userLabel } from '$lib/user-label.svelte';
-	import * as Card from '$lib/components/ui/card';
-	import { getCatalogTransactions, revertCatalogChange } from '$lib/remote/assets.remote';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
-	import { Button } from '$lib/components/ui/button';
-	import { getErrorMessage } from '$lib/utils';
-	import { PRODUCT_VIEWS } from '$lib/product-views';
+	import { userLabel } from '#lib/user-label.svelte.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { getCatalogTransactions, revertCatalogChange } from '#lib/remote/assets.remote.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { getErrorMessage } from '#lib/utils.js';
+	import { PRODUCT_VIEWS } from '#lib/product-views.js';
 	import { toast } from 'svelte-sonner';
 
 	// The empty log the page renders before the first answer arrives. Spelled out

@@ -1,6 +1,6 @@
-import type { Prisma } from '$lib/prisma/client';
-import { prisma } from '$lib/server/auth';
-import { appError } from '$lib/errors';
+import type { Prisma } from '#lib/prisma/client.js';
+import { prisma } from '#lib/server/auth.js';
+import { appError } from '#lib/errors.js';
 
 // One product per name and manufacturer, ignoring case and surrounding blanks —
 // the rule the unique index `Product_manufacturer_name_key` enforces. Checked

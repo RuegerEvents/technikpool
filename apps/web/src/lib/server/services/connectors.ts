@@ -1,5 +1,5 @@
-import { prisma } from '$lib/server/auth';
-import { connectorFamily } from '$lib/cable';
+import { prisma } from '#lib/server/auth.js';
+import { connectorFamily } from '#lib/cable.js';
 
 /**
  * The unique key a connector is filed under. Everything about a connector is

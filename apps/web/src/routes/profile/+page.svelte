@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { changeEmail, changePassword, deleteUser, updateUser } from '$lib/auth-client';
-	import { Modal } from '$lib/components/ui/modal';
-	import { messageForErrorCode } from '$lib/error-messages.svelte';
-	import type { AppErrorCode } from '$lib/errors';
+	import { changeEmail, changePassword, deleteUser, updateUser } from '#lib/auth-client.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { messageForErrorCode } from '#lib/error-messages.svelte.js';
+	import type { AppErrorCode } from '#lib/errors.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { Input } from '$lib/components/ui/input';
-	import { Button } from '$lib/components/ui/button';
-	import { Label } from '$lib/components/ui/label';
-	import * as Card from '$lib/components/ui/card';
-	import { invalidateAll } from '$app/navigation';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { refreshAll } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 
 	let { data } = $props();
@@ -18,7 +18,7 @@
 	// reasons and two of them do not take effect at the moment you submit, so a
 	// single button could not honestly report what happened.
 	// A writable $derived: it takes the server's value, the field writes over it
-	// while you type, and it resets to whatever came back once `invalidateAll()`
+	// while you type, and it resets to whatever came back once `refreshAll()`
 	// reloads the layout data after a save.
 	let name = $derived(data.user?.name ?? '');
 	let savingName = $state(false);
@@ -44,7 +44,7 @@
 				onSuccess: async () => {
 					// The header reads the name from the layout's server data, so it keeps
 					// showing the old one until that is reloaded.
-					await invalidateAll();
+					await refreshAll();
 					toast.success('Name updated');
 					savingName = false;
 				},
@@ -123,7 +123,7 @@
 				onSuccess: async () => {
 					deleteOpen = false;
 					toast.success('Your account has been deleted.');
-					await goto(resolve('/auth/login'), { invalidateAll: true });
+					await goto(resolve('auth/login'), { refreshAll: true });
 				},
 				onError: (ctx) => {
 					// A blocker from account-deletion.ts carries one of our own codes;

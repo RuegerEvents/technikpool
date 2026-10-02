@@ -1,11 +1,11 @@
-import { prisma } from '$lib/server/auth';
-import { naturalCompare } from '$lib/sort';
-import { userLabel } from '$lib/user-label.svelte';
+import { prisma } from '#lib/server/auth.js';
+import { naturalCompare } from '#lib/sort.js';
+import { userLabel } from '#lib/user-label.svelte.js';
 import type {
 	HandoverReceivedData,
 	ProductionCheckedData,
 	ReturnReportedData
-} from '$lib/types/asset-transaction';
+} from '#lib/types/asset-transaction.js';
 import {
 	isSystemAdmin,
 	productionVisibility,

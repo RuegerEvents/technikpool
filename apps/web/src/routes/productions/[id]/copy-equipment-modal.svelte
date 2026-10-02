@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { categoryLabel } from '$lib/category';
-	import { getErrorMessage, plural } from '$lib/utils';
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
-	import { OrgBadge } from '$lib/components/ui/org-badge';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { categoryLabel } from '#lib/category.js';
+	import { getErrorMessage, plural } from '#lib/utils.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { OrgBadge } from '#lib/components/ui/org-badge/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import {
 		copyEquipmentFromProduction,
 		getEquipmentCopyPlan,
 		getEquipmentCopySources
-	} from '$lib/remote/equipment.remote';
+	} from '#lib/remote/equipment.remote.js';
 	import { toast } from 'svelte-sonner';
 	import { SvelteSet } from 'svelte/reactivity';
 

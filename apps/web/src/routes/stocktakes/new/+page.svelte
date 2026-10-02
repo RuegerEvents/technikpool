@@ -3,19 +3,19 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
-	import { categoryLabel } from '$lib/category';
-	import { getErrorMessage, orgLabel } from '$lib/utils';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
+	import { categoryLabel } from '#lib/category.js';
+	import { getErrorMessage, orgLabel } from '#lib/utils.js';
 	import {
 		createStocktake,
 		getStocktakeFormOptions,
 		getStocktakePreview,
 		getStocktakeProducts
-	} from '$lib/remote/stocktakes.remote';
+	} from '#lib/remote/stocktakes.remote.js';
 
 	let optionsQuery = $derived(getStocktakeFormOptions());
 	let options = $derived(optionsQuery.current);
@@ -97,7 +97,7 @@
 				categoryIds,
 				productIds
 			});
-			goto(resolve(`/stocktakes/${id}`));
+			goto(resolve(`stocktakes/${id}`));
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			saving = false;
@@ -109,7 +109,7 @@
 
 <div class="mx-auto max-w-3xl space-y-6">
 	<div>
-		<Button variant="ghost" size="sm" icon="back" href={resolve('/stocktakes')}>Stocktakes</Button>
+		<Button variant="ghost" size="sm" icon="back" href={resolve('stocktakes')}>Stocktakes</Button>
 		<h1 class="mt-2 text-3xl font-bold tracking-tight">New stocktake</h1>
 		<p class="text-muted-foreground">
 			Choose what to count. The list follows the equipment while you count: a unit registered or
@@ -256,7 +256,7 @@
 						>
 							Overlaps with the open stocktake
 							<a
-								href={resolve(`/stocktakes/${overlap.id}`)}
+								href={resolve(`stocktakes/${overlap.id}`)}
 								class="font-medium underline underline-offset-2">{overlap.name}</a
 							>
 							({overlap.sharedUnits} units). A scan only counts in the stocktake it is made in.

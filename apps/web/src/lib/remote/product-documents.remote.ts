@@ -1,18 +1,18 @@
 import { query, command } from '$app/server';
 import * as v from 'valibot';
-import { prisma } from '$lib/server/auth';
-import { deleteObject } from '$lib/server/storage';
-import { isSystemAdmin, managedOrgIds, requireAuth } from '$lib/server/services/access';
-import { productControl } from '$lib/server/services/product-control';
-import { logCatalogChange } from '$lib/server/services/catalog-log';
+import { prisma } from '#lib/server/auth.js';
+import { deleteObject } from '#lib/server/storage.js';
+import { isSystemAdmin, managedOrgIds, requireAuth } from '#lib/server/services/access.js';
+import { productControl } from '#lib/server/services/product-control.js';
+import { logCatalogChange } from '#lib/server/services/catalog-log.js';
 import {
 	canAddDocuments,
 	canChangeDocument,
 	DOCUMENT_PREFIX,
 	MAX_DOCUMENT_BYTES,
 	productDocuments
-} from '$lib/server/services/product-documents';
-import { appError } from '$lib/errors';
+} from '#lib/server/services/product-documents.js';
+import { appError } from '#lib/errors.js';
 
 // A product's PDFs — see src/lib/server/services/product-documents.ts for why
 // they are public and who may change them.

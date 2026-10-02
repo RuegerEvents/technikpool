@@ -1,5 +1,5 @@
-import type { Transport } from '@sveltejs/kit';
-import { Prisma } from '$lib/prisma/browser';
+import type { Transport } from '@sveltejs/kit/hooks';
+import { Prisma } from '#lib/prisma/browser.js';
 
 // Prisma `Decimal` fields (netPurchasePrice, ratePercent, ...) come back as
 // Decimal.js instances, which devalue can't stringify as a POJO. Teach

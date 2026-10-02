@@ -1,13 +1,13 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { getCategories, updateCategory } from '$lib/remote/assets.remote';
-	import { getErrorMessage } from '$lib/utils';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { getCategories, updateCategory } from '#lib/remote/assets.remote.js';
+	import { getErrorMessage } from '#lib/utils.js';
 	import { toast } from 'svelte-sonner';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 
 	let categoriesQuery = $derived(getCategories());
 	let categories = $derived(categoriesQuery.current ?? []);

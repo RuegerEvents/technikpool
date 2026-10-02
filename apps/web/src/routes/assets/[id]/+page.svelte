@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import AssetDetail from './asset-detail.svelte';
 
 	const assetId = $derived(page.params.id as string);

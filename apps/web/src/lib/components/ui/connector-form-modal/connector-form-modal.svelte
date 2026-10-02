@@ -3,17 +3,17 @@
 	// ProductFields and the cable batch form, on a name the catalogue has no row
 	// for — so the common path is "type it, then say what it looks like", and
 	// nobody is ever sent to a settings page to register a plug first.
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
 	import {
 		ConnectorFields,
 		emptyConnectorDraft,
 		type ConnectorDraft
-	} from '$lib/components/ui/connector-fields';
-	import { createConnector, updateConnector } from '$lib/remote/connectors.remote';
-	import { getErrorMessage } from '$lib/utils';
+	} from '#lib/components/ui/connector-fields/index.js';
+	import { createConnector, updateConnector } from '#lib/remote/connectors.remote.js';
+	import { getErrorMessage } from '#lib/utils.js';
 	import { toast } from 'svelte-sonner';
-	import type { Connector } from '$lib/prisma/client';
+	import type { Connector } from '#lib/prisma/client.js';
 
 	type Props = {
 		open: boolean;

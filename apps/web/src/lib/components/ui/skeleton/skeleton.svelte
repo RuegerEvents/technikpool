@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn } from '$lib/utils';
+	import { cn } from '#lib/utils.js';
 
 	type Props = {
 		/** Tailwind sizing for this block — it has no size of its own. */

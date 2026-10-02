@@ -1,8 +1,8 @@
-import type { Prisma } from '$lib/prisma/client';
-import type { BookingReplacedData, CheckoutUndoneData } from '$lib/types/asset-transaction';
-import { bundleLabel, withCaption } from '$lib/product-label';
-import { naturalCompare } from '$lib/sort';
-import { prisma } from '$lib/server/auth';
+import type { Prisma } from '#lib/prisma/client.js';
+import type { BookingReplacedData, CheckoutUndoneData } from '#lib/types/asset-transaction.js';
+import { bundleLabel, withCaption } from '#lib/product-label.js';
+import { naturalCompare } from '#lib/sort.js';
+import { prisma } from '#lib/server/auth.js';
 import {
 	isSystemAdmin,
 	productionReadWhere,
@@ -10,7 +10,7 @@ import {
 	visibleProductionName,
 	writableOrgIds
 } from './access';
-import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '$lib/asset-status';
+import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '#lib/asset-status.js';
 import { withAccessories } from './accessories';
 import { resolveScannedCode } from './asset-lookup';
 import { onProductionSide } from './production-check';

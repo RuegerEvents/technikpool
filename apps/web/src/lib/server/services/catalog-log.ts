@@ -1,5 +1,5 @@
-import { prisma } from '$lib/server/auth';
-import type { Prisma } from '$lib/prisma/client';
+import { prisma } from '#lib/server/auth.js';
+import type { Prisma } from '#lib/prisma/client.js';
 
 // The catalog (manufacturers, products, categories, per-org prices) is shared
 // state that several orgs can write to, so every mutation is logged — the

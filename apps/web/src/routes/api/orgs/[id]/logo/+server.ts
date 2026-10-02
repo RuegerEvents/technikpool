@@ -1,11 +1,10 @@
 import type { RequestHandler } from './$types';
-import { json } from '@sveltejs/kit';
 import sharp from 'sharp';
 import { randomUUID } from 'node:crypto';
-import { prisma } from '$lib/server/auth';
-import { putObject, PUBLIC_PREFIX } from '$lib/server/storage';
-import { requireOrgOwner } from '$lib/server/services/access';
-import { appError } from '$lib/errors';
+import { prisma } from '#lib/server/auth.js';
+import { putObject, PUBLIC_PREFIX } from '#lib/server/storage.js';
+import { requireOrgOwner } from '#lib/server/services/access.js';
+import { appError } from '#lib/errors.js';
 
 // The letterhead logo on offers, invoices and delivery notes. An endpoint of its
 // own because a command takes JSON, not a file.
@@ -60,7 +59,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 		'image/png'
 	);
 	await prisma.organization.update({ where: { id: params.id }, data: { logoPath } });
-	return json({ logoPath });
+	return Response.json({ logoPath });
 };
 
 export const DELETE: RequestHandler = async ({ params }) => {

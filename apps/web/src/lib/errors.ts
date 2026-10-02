@@ -227,7 +227,7 @@ export function appError(status: number, code: AppErrorCode, params: ErrorParams
 		// Building the text must never swallow the failure it was describing.
 		message = code;
 	}
-	error(status, { code, params, message });
+	error(status, message, { code, params });
 }
 
 export function errorCodeOf(err: unknown): AppErrorCode | null {

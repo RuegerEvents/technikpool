@@ -1,4 +1,4 @@
-import { ASSET_STATUSES, type AssetStatus } from '$lib/asset-status';
+import { ASSET_STATUSES, type AssetStatus } from '#lib/asset-status.js';
 
 /**
  * Display name for a status. The value on the wire never moves — only its

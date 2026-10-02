@@ -3,9 +3,9 @@
 	generics="U extends { assetId: string; assetTag: string | null; productName: string; productCaption: string | null; accessoryOf: string | null }"
 >
 	import { Handshake, MapPin } from '@lucide/svelte';
-	import { Button } from '$lib/components/ui/button';
-	import { CountStepper } from '$lib/components/ui/count-stepper';
-	import type { ListLine, ListSection } from '$lib/production-list';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { CountStepper } from '#lib/components/ui/count-stepper/index.js';
+	import type { ListLine, ListSection } from '#lib/production-list.js';
 
 	// The list a production's equipment is worked through, whatever a tick means
 	// there — checked, handed out, taken back. Units with a tag (or anything

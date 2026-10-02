@@ -1,19 +1,19 @@
 <script lang="ts">
-	import { categoryLabel } from '$lib/category';
-	import { naturalCompare } from '$lib/sort';
-	import { makerAndName } from '$lib/product-label';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { getOrgWithMembers, getOrgEquipmentValue } from '$lib/remote/orgs.remote';
-	import { setOrgProductPrice } from '$lib/remote/assets.remote';
-	import { canManageInventory } from '$lib/roles';
-	import { getErrorMessage } from '$lib/utils';
+	import { categoryLabel } from '#lib/category.js';
+	import { naturalCompare } from '#lib/sort.js';
+	import { makerAndName } from '#lib/product-label.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { getOrgWithMembers, getOrgEquipmentValue } from '#lib/remote/orgs.remote.js';
+	import { setOrgProductPrice } from '#lib/remote/assets.remote.js';
+	import { canManageInventory } from '#lib/roles.js';
+	import { getErrorMessage } from '#lib/utils.js';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 
 	let { data } = $props();
 
@@ -116,7 +116,7 @@
 	<div class="flex items-center gap-4">
 		<Button
 			variant="ghost"
-			href={resolve(`/orgs/${orgId}`)}
+			href={resolve(`orgs/${orgId}`)}
 			class="flex max-w-full min-w-0 items-center gap-1 text-muted-foreground"
 		>
 			<svg
@@ -219,7 +219,7 @@
 							{#each section.rows as row (row.id)}
 								<tr class="border-b last:border-0">
 									<td class="py-2 pr-4">
-										<a href={resolve(`/products/${row.id}`)} class="hover:underline">
+										<a href={resolve(`products/${row.id}`)} class="hover:underline">
 											{makerAndName(row.manufacturerName, row.name)}
 										</a>
 										{#if row.damaged > 0}

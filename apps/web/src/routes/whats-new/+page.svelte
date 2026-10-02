@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import * as Card from '$lib/components/ui/card';
-	import { currentVersion, formatReleaseDate, notesFor, releases } from '$lib/changelog';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { currentVersion, formatReleaseDate, notesFor, releases } from '#lib/changelog.js';
 
 	let locale = $derived(page.data.locale ?? 'de');
 </script>

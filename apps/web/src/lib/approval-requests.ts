@@ -6,9 +6,9 @@
 // are put back into that shape, so the dashboard's count and the dialog's list
 // cannot disagree.
 
-import { bundleLabel, withCaption } from '$lib/product-label';
-import { nestAccessories, type Nested } from '$lib/production-items';
-import { orgLabel } from '$lib/utils';
+import { bundleLabel, withCaption } from '#lib/product-label.js';
+import { nestAccessories, type Nested } from '#lib/production-items.js';
+import { orgLabel } from '#lib/utils.js';
 
 export type RequestItem = {
 	id: string;

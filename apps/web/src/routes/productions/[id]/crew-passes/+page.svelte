@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { orgLabel } from '$lib/utils';
-	import { page } from '$app/stores';
-	import { getProduction } from '$lib/remote/productions.remote';
+	import { orgLabel } from '#lib/utils.js';
+	import { page } from '$app/state';
+	import { getProduction } from '#lib/remote/productions.remote.js';
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
 
-	const productionId = $page.params.id as string;
+	const productionId = page.params.id as string;
 
 	onMount(() => {
 		const timer = window.setTimeout(() => window.print(), 500);
@@ -43,7 +43,7 @@
 			<button class="rounded bg-zinc-900 px-4 py-2 text-white" onclick={() => window.print()}
 				>Print</button
 			>
-			<a href={resolve(`/productions/${productionId}`)} class="text-zinc-600 underline">Back</a>
+			<a href={resolve(`productions/${productionId}`)} class="text-zinc-600 underline">Back</a>
 		</div>
 
 		{#if !production?.crew.length}

@@ -1,7 +1,7 @@
 import { query } from '$app/server';
 import * as v from 'valibot';
-import { renderEquipmentSheet } from '$lib/server/services/equipment-sheet';
-import type { SheetProgress, SheetStep } from '$lib/equipment-sheet';
+import { renderEquipmentSheet } from '#lib/server/services/equipment-sheet.js';
+import type { SheetProgress, SheetStep } from '#lib/equipment-sheet.js';
 
 /**
  * The delivery note or packing list as a PDF, with progress on the way: a sheet

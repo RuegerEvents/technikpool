@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getSerialNumberUse } from '$lib/remote/assets.remote';
+	import { getSerialNumberUse } from '#lib/remote/assets.remote.js';
 
 	// A serial number is the manufacturer's, not ours: it is optional, it is free
 	// text, and nothing stops two units carrying the same one. Saving a duplicate

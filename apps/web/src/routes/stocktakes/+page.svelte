@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { userLabel } from '$lib/user-label.svelte';
+	import { userLabel } from '#lib/user-label.svelte.js';
 	import { resolve } from '$app/paths';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { OrgBadge } from '$lib/components/ui/org-badge';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
-	import { getStocktakes } from '$lib/remote/stocktakes.remote';
-	import { orgLabel } from '$lib/utils';
-	import StocktakeProgress from '$lib/components/stocktake-progress.svelte';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { OrgBadge } from '#lib/components/ui/org-badge/index.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
+	import { getStocktakes } from '#lib/remote/stocktakes.remote.js';
+	import { orgLabel } from '#lib/utils.js';
+	import StocktakeProgress from '#lib/components/stocktake-progress.svelte';
 
 	let stocktakesQuery = $derived(getStocktakes());
 	let stocktakes = $derived(stocktakesQuery.current ?? []);
@@ -34,8 +34,8 @@
 			</p>
 		</div>
 		<div class="flex flex-wrap gap-2">
-			<Button variant="outline" href={resolve('/case-check')}>Check a case</Button>
-			<Button icon="add" href={resolve('/stocktakes/new')}>New stocktake</Button>
+			<Button variant="outline" href={resolve('case-check')}>Check a case</Button>
+			<Button icon="add" href={resolve('stocktakes/new')}>New stocktake</Button>
 		</div>
 	</div>
 
@@ -57,7 +57,7 @@
 					<div class="divide-y">
 						{#each open as s (s.id)}
 							<a
-								href={resolve(`/stocktakes/${s.id}`)}
+								href={resolve(`stocktakes/${s.id}`)}
 								class="flex flex-wrap items-center gap-4 px-4 py-3 transition-colors hover:bg-muted/40"
 							>
 								<div class="min-w-0 flex-1">
@@ -100,7 +100,7 @@
 								<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
 									<td class="px-4 py-3">
 										<a
-											href={resolve(`/stocktakes/${s.id}`)}
+											href={resolve(`stocktakes/${s.id}`)}
 											class="font-medium underline-offset-2 hover:underline">{s.name}</a
 										>
 									</td>

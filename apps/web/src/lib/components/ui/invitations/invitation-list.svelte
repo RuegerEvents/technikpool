@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import {
 		getInvitations,
 		resendInvitation,
 		revokeInvitation
-	} from '$lib/remote/invitations.remote';
-	import { getErrorMessage, orgLabel } from '$lib/utils';
-	import { roleName } from '$lib/role-descriptions.svelte';
+	} from '#lib/remote/invitations.remote.js';
+	import { getErrorMessage, orgLabel } from '#lib/utils.js';
+	import { roleName } from '#lib/role-descriptions.svelte.js';
 	import { toast } from 'svelte-sonner';
 	import type { IssuedInvitation } from '.';
 

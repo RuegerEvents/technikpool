@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
-	import { CreatableSelect } from '$lib/components/ui/creatable-select';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { getKnownAddresses, type KnownAddress } from '$lib/remote/addresses.remote';
-	import { formatAddress } from '$lib/utils';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
+	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { getKnownAddresses, type KnownAddress } from '#lib/remote/addresses.remote.js';
+	import { formatAddress } from '#lib/utils.js';
 
 	export type AddressValue = {
 		/** The place's own name, when the address belongs to one (a venue). */

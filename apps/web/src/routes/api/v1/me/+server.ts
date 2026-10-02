@@ -1,9 +1,9 @@
 import type { RequestHandler } from './$types';
-import { prisma } from '$lib/server/auth';
-import { apiJson, handleApi, requireApiUser, type Schemas } from '$lib/server/api';
-import { isSystemAdmin } from '$lib/server/services/access';
-import { toMemberOrganization } from '$lib/server/services/api-mappers';
-import type { OrgRole } from '$lib/roles';
+import { prisma } from '#lib/server/auth.js';
+import { apiJson, handleApi, requireApiUser, type Schemas } from '#lib/server/api.js';
+import { isSystemAdmin } from '#lib/server/services/access.js';
+import { toMemberOrganization } from '#lib/server/services/api-mappers.js';
+import type { OrgRole } from '#lib/roles.js';
 
 const ORG_SELECT = {
 	id: true,

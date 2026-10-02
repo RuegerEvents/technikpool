@@ -1,6 +1,6 @@
 import { query, command } from '$app/server';
 import * as v from 'valibot';
-import { requireAuth } from '$lib/server/services/access';
+import { requireAuth } from '#lib/server/services/access.js';
 import {
 	getHandout,
 	handoutSummary,
@@ -9,8 +9,8 @@ import {
 	setHandoutDone,
 	setHandoutLineCount,
 	type HandoutMode
-} from '$lib/server/services/production-handout';
-import type { AffectedRecords } from '$lib/server/services/checkout';
+} from '#lib/server/services/production-handout.js';
+import type { AffectedRecords } from '#lib/server/services/checkout.js';
 import { refreshAffected, withCheckoutErrors } from './checkout-shared';
 
 // The web's door to handing a production's equipment out and taking it back

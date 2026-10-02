@@ -5,15 +5,15 @@
 	// the list is theirs to work through, and nothing they do here reaches the
 	// server. A tag can be scanned with the phone's camera to tick its unit.
 	import { onDestroy, tick } from 'svelte';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { page } from '$app/state';
 	import { SvelteSet } from 'svelte/reactivity';
 	import { BookOpen, FileText, Info, LayoutList, PackageCheck, ScanLine, X } from '@lucide/svelte';
 	import type { Html5Qrcode } from 'html5-qrcode';
-	import type { ShareUnit } from '$lib/production-share';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { naturalCompare } from '$lib/sort';
-	import { plural } from '$lib/utils';
+	import type { ShareUnit } from '#lib/production-share.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
+	import { naturalCompare } from '#lib/sort.js';
+	import { plural } from '#lib/utils.js';
 
 	let { data } = $props();
 	let view = $derived(data.view);

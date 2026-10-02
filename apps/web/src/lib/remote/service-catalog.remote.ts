@@ -1,9 +1,9 @@
 import { query, command } from '$app/server';
-import { prisma } from '$lib/server/auth';
+import { prisma } from '#lib/server/auth.js';
 import * as v from 'valibot';
-import { requireOrgInventory } from '$lib/server/services/access';
-import { appError } from '$lib/errors';
-import { SERVICE_UNITS } from '$lib/service-lines.svelte';
+import { requireOrgInventory } from '#lib/server/services/access.js';
+import { appError } from '#lib/errors.js';
+import { SERVICE_UNITS } from '#lib/service-lines.svelte.js';
 
 // The org's price list for what it bills besides equipment. Kept and read by
 // the same rung that writes offers and invoices: it is their price list, and a

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { cn } from '$lib/utils';
-	import { imageSrc } from '$lib/images';
+	import { cn } from '#lib/utils.js';
+	import { imageSrc } from '#lib/images.js';
 
 	type Props = {
 		/** The stored object key, not an address — resolved here. See $lib/images. */

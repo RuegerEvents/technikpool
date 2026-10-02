@@ -1,4 +1,4 @@
-import { appError } from '$lib/errors';
+import { appError } from '#lib/errors.js';
 
 /**
  * A cancelled production takes nothing new — no units, bundles, crew or

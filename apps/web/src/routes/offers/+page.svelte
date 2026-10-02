@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { orgLabel } from '$lib/utils';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { getOffers } from '$lib/remote/offers.remote';
-	import { supersededOfferIds } from '$lib/offer-versions';
+	import { orgLabel } from '#lib/utils.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { getOffers } from '#lib/remote/offers.remote.js';
+	import { supersededOfferIds } from '#lib/offer-versions.js';
 	import { resolve } from '$app/paths';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 
 	let offersQuery = $derived(getOffers());
 	let offers = $derived(offersQuery.current ?? []);
@@ -35,7 +35,7 @@
 			<h1 class="text-3xl font-bold tracking-tight">Offers</h1>
 			<p class="text-muted-foreground">Angebote generated from production equipment bookings.</p>
 		</div>
-		<Button icon="add" href={resolve('/offers/new')}>New Offer</Button>
+		<Button icon="add" href={resolve('offers/new')}>New Offer</Button>
 	</div>
 
 	{#if !offersQuery.ready}
@@ -95,7 +95,7 @@
 								{/if}
 							</td>
 							<td class="px-4 py-3 text-right">
-								<Button variant="outline" size="sm" href={resolve(`/offers/${offer.id}`)}
+								<Button variant="outline" size="sm" href={resolve(`offers/${offer.id}`)}
 									>View</Button
 								>
 							</td>

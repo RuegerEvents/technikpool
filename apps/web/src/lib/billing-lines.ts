@@ -1,5 +1,5 @@
-import { naturalCompare } from '$lib/sort';
-import { localizedName } from '$lib/category';
+import { naturalCompare } from '#lib/sort.js';
+import { localizedName } from '#lib/category.js';
 
 // Units of the same product are separate rows in the database — each one is a
 // real piece of equipment with its own tag and its own history — but a customer

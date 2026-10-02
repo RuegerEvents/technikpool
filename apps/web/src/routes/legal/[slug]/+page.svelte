@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { legalTitle } from '$lib/legal.svelte';
+	import { legalTitle } from '#lib/legal.svelte.js';
 
 	let { data } = $props();
 	let title = $derived(legalTitle(data.slug));

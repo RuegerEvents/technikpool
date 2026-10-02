@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import { naturalCompare } from '$lib/sort';
+	import { naturalCompare } from '#lib/sort.js';
 	import {
 		cableDisplayName,
 		cableTwinKey,
@@ -17,7 +17,7 @@
 		type CableWayAttrs,
 		type ConnectorRow,
 		type WithWays
-	} from '$lib/cable';
+	} from '#lib/cable.js';
 
 	/**
 	 * The cable half of the form. Length is a string rather than a number because
@@ -129,17 +129,17 @@
 </script>
 
 <script lang="ts">
-	import { productLabel } from '$lib/product-label';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { CategorySelect } from '$lib/components/ui/category-select';
-	import { CreatableSelect } from '$lib/components/ui/creatable-select';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { ImageUpload } from '$lib/components/ui/image-upload';
-	import { ConnectorFormModal } from '$lib/components/ui/connector-form-modal';
-	import { getCableVocabulary, getProducts } from '$lib/remote/assets.remote';
-	import { getConnectors } from '$lib/remote/connectors.remote';
+	import { productLabel } from '#lib/product-label.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { CategorySelect } from '#lib/components/ui/category-select/index.js';
+	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
+	import { ImageUpload } from '#lib/components/ui/image-upload/index.js';
+	import { ConnectorFormModal } from '#lib/components/ui/connector-form-modal/index.js';
+	import { getCableVocabulary, getProducts } from '#lib/remote/assets.remote.js';
+	import { getConnectors } from '#lib/remote/connectors.remote.js';
 
 	type Props = {
 		value?: ProductDraft;

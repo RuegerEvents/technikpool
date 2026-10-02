@@ -1,18 +1,17 @@
 import type { RequestHandler } from './$types';
-import { json } from '@sveltejs/kit';
-import { prisma } from '$lib/server/auth';
-import { apiError, apiJson, handleApi, requireApiUser, type Schemas } from '$lib/server/api';
+import { prisma } from '#lib/server/auth.js';
+import { apiError, apiJson, handleApi, requireApiUser, type Schemas } from '#lib/server/api.js';
 import {
 	API_ASSET_INCLUDE,
 	ASSET_TAG_ERROR_STATUS,
 	AssetTagError,
 	registerTaggedUnit
-} from '$lib/server/services/asset-tags';
-import { isSystemAdmin, productionVisibility, userOrgIds } from '$lib/server/services/access';
-import { toAsset } from '$lib/server/services/api-mappers';
-import { ApiResponse } from '$lib/server/api';
-import type { Prisma } from '$lib/prisma/client';
-import { ACTIVE_ASSET_WHERE } from '$lib/asset-status';
+} from '#lib/server/services/asset-tags.js';
+import { isSystemAdmin, productionVisibility, userOrgIds } from '#lib/server/services/access.js';
+import { toAsset } from '#lib/server/services/api-mappers.js';
+import { ApiResponse } from '#lib/server/api.js';
+import type { Prisma } from '#lib/prisma/client.js';
+import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 200;
@@ -137,7 +136,7 @@ export const POST: RequestHandler = ({ locals, request }) =>
 		}
 		try {
 			const asset = await registerTaggedUnit(user.id, input);
-			return json(toAsset(asset) satisfies Schemas['Asset'], { status: 201 });
+			return Response.json(toAsset(asset) satisfies Schemas['Asset'], { status: 201 });
 		} catch (err) {
 			if (err instanceof AssetTagError) {
 				return apiError(ASSET_TAG_ERROR_STATUS[err.code], err.code, err.message);

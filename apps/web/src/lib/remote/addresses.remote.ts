@@ -1,13 +1,13 @@
-import { naturalCompare } from '$lib/sort';
+import { naturalCompare } from '#lib/sort.js';
 import { query } from '$app/server';
-import { prisma } from '$lib/server/auth';
+import { prisma } from '#lib/server/auth.js';
 import {
 	isSystemAdmin,
 	readableOrgIds,
 	requireAuth,
 	userOrgIds
-} from '$lib/server/services/access';
-import { orgLabel } from '$lib/utils';
+} from '#lib/server/services/access.js';
+import { orgLabel } from '#lib/utils.js';
 
 export type KnownAddressKind = 'venue' | 'location' | 'customer' | 'organization';
 

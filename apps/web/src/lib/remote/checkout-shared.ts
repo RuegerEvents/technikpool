@@ -3,9 +3,9 @@ import { getProduction } from './productions.remote';
 import { getLicenses, getLicenseStatus } from './licenses.remote';
 import { getHandoverTodos } from './production-checks.remote';
 import { getHandoutSummary, getPackTodos } from './production-handout.remote';
-import { visibleProductionIds } from '$lib/server/services/access';
-import { CheckoutError, type AffectedRecords } from '$lib/server/services/checkout';
-import { appError, type AppErrorCode } from '$lib/errors';
+import { visibleProductionIds } from '#lib/server/services/access.js';
+import { CheckoutError, type AffectedRecords } from '#lib/server/services/checkout.js';
+import { appError, type AppErrorCode } from '#lib/errors.js';
 
 // Shared by the remote files that book equipment (checkout.remote.ts,
 // production-handout.remote.ts). Not a remote file itself: those may export

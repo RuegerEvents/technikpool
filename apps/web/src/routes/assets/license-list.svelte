@@ -2,14 +2,14 @@
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import type { SvelteSet } from 'svelte/reactivity';
-	import { categoryLabel } from '$lib/category';
-	import { orgLabel } from '$lib/utils';
-	import { getLicenses } from '$lib/remote/licenses.remote';
-	import { CategoryPill } from '$lib/components/ui/category-pill';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
-	import { LicenseRevealModal } from '$lib/components/ui/license-credentials';
+	import { categoryLabel } from '#lib/category.js';
+	import { orgLabel } from '#lib/utils.js';
+	import { getLicenses } from '#lib/remote/licenses.remote.js';
+	import { CategoryPill } from '#lib/components/ui/category-pill/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
+	import { AssetStatusBadge } from '#lib/components/ui/asset-status/index.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
+	import { LicenseRevealModal } from '#lib/components/ui/license-credentials/index.js';
 
 	type Props = {
 		organizationId: string;
@@ -78,7 +78,7 @@
 
 	function openRow(license: License) {
 		if (license.canOpen) {
-			goto(resolve(`/assets/${license.id}`));
+			goto(resolve(`assets/${license.id}`));
 		} else if (canRevealHere(license)) {
 			revealFor = license;
 			revealOpen = true;
@@ -187,7 +187,7 @@
 										<div>
 											{#if holder.productionId}
 												<a
-													href={resolve(`/productions/${holder.productionId}`)}
+													href={resolve(`productions/${holder.productionId}`)}
 													class="font-medium underline underline-offset-2"
 													onclick={(e) => e.stopPropagation()}>{holder.productionName}</a
 												>

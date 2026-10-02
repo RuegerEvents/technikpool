@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { categoryLabel } from '$lib/category';
+	import { categoryLabel } from '#lib/category.js';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
-	import { getBundle } from '$lib/remote/assets.remote';
+	import { getBundle } from '#lib/remote/assets.remote.js';
 	import { onMount } from 'svelte';
 
 	const bundleId = $derived(page.params.id as string);
@@ -29,7 +29,7 @@
 		<button class="rounded bg-zinc-900 px-4 py-2 text-white" onclick={() => window.print()}
 			>Print</button
 		>
-		<a href={resolve(`/assets/bundles/${bundleId}`)} class="ml-4 text-zinc-600 underline">Back</a>
+		<a href={resolve(`assets/bundles/${bundleId}`)} class="ml-4 text-zinc-600 underline">Back</a>
 	</div>
 
 	<header class="mb-12 border-b-2 border-black pb-4">

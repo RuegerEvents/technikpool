@@ -1,22 +1,26 @@
 <script lang="ts">
-	import { getErrorMessage, orgLabel } from '$lib/utils';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
-	import { deleteUser, getAllOrgs, getAllUsers, setUserAdmin } from '$lib/remote/orgs.remote';
-	import { getSignUpSettings, inviteUser, setSignUpEnabled } from '$lib/remote/invitations.remote';
+	import { getErrorMessage, orgLabel } from '#lib/utils.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { deleteUser, getAllOrgs, getAllUsers, setUserAdmin } from '#lib/remote/orgs.remote.js';
+	import {
+		getSignUpSettings,
+		inviteUser,
+		setSignUpEnabled
+	} from '#lib/remote/invitations.remote.js';
 	import {
 		InvitationLink,
 		InvitationList,
 		type IssuedInvitation
-	} from '$lib/components/ui/invitations';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { DEFAULT_ORG_ROLE, ORG_ROLES, type OrgRole } from '$lib/roles';
-	import { roleName } from '$lib/role-descriptions.svelte';
+	} from '#lib/components/ui/invitations/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { DEFAULT_ORG_ROLE, ORG_ROLES, type OrgRole } from '#lib/roles.js';
+	import { roleName } from '#lib/role-descriptions.svelte.js';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 
 	let { data } = $props();
 
@@ -228,7 +232,7 @@
 										<div class="flex flex-wrap gap-1">
 											{#each user.memberships as m (m.organization.id)}
 												<a
-													href={resolve(`/orgs/${m.organization.id}`)}
+													href={resolve(`orgs/${m.organization.id}`)}
 													class="rounded border px-1.5 py-0.5 text-xs hover:bg-muted"
 												>
 													{orgLabel(m.organization)}

@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { CameraScanButton } from '$lib/components/ui/camera-scan';
-	import { userLabel } from '$lib/user-label.svelte';
+	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
+	import { userLabel } from '#lib/user-label.svelte.js';
 	import {
 		manufacturerIdOf,
 		manufacturerSelection,
 		withNoManufacturer
-	} from '$lib/no-manufacturer.svelte';
-	import { productLabel } from '$lib/product-label';
-	import { categoryLabel } from '$lib/category';
-	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
+	} from '#lib/no-manufacturer.svelte.js';
+	import { productLabel } from '#lib/product-label.js';
+	import { categoryLabel } from '#lib/category.js';
+	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
 	import {
 		CABLE_END_LABEL,
 		connectorRole,
@@ -17,20 +17,20 @@
 		isCable,
 		isLoom,
 		loomSummary
-	} from '$lib/cable';
-	import { getConnectors } from '$lib/remote/connectors.remote';
-	import { imageSrc } from '$lib/images';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
-	import { BundleVsAccessoryInfo } from '$lib/components/ui/bundle-vs-accessory-info';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { CategoryPill } from '$lib/components/ui/category-pill';
-	import { OrgBadge } from '$lib/components/ui/org-badge';
-	import { Fact } from '$lib/components/ui/fact';
-	import { ProductDocuments } from '$lib/components/ui/product-documents';
-	import SerialNumberWarning from '$lib/components/SerialNumberWarning.svelte';
+	} from '#lib/cable.js';
+	import { getConnectors } from '#lib/remote/connectors.remote.js';
+	import { imageSrc } from '#lib/images.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { BundleVsAccessoryInfo } from '#lib/components/ui/bundle-vs-accessory-info/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { CategoryPill } from '#lib/components/ui/category-pill/index.js';
+	import { OrgBadge } from '#lib/components/ui/org-badge/index.js';
+	import { Fact } from '#lib/components/ui/fact/index.js';
+	import { ProductDocuments } from '#lib/components/ui/product-documents/index.js';
+	import SerialNumberWarning from '#lib/components/SerialNumberWarning.svelte';
 	import {
 		Activity,
 		Building2,
@@ -54,11 +54,11 @@
 		cableDraftFrom,
 		cableInputFrom,
 		type ProductDraft
-	} from '$lib/components/ui/product-fields';
+	} from '#lib/components/ui/product-fields/index.js';
 	import { DropdownMenu } from 'bits-ui';
 	import { resolve } from '$app/paths';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
-	import { canManageInventory } from '$lib/roles';
+	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
+	import { canManageInventory } from '#lib/roles.js';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import {
@@ -79,24 +79,27 @@
 		getManufacturers,
 		getOrgProductPrices,
 		setOrgProductPrice
-	} from '$lib/remote/assets.remote';
-	import { CreatableSelect } from '$lib/components/ui/creatable-select';
-	import { NewAssetModal, type NewAssetModalHandle } from '$lib/components/ui/new-asset-modal';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { LicenseCredentials } from '$lib/components/ui/license-credentials';
+	} from '#lib/remote/assets.remote.js';
+	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
+	import {
+		NewAssetModal,
+		type NewAssetModalHandle
+	} from '#lib/components/ui/new-asset-modal/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
+	import { LicenseCredentials } from '#lib/components/ui/license-credentials/index.js';
 	import {
 		AssetStatusBadge,
 		assetStatusDescription,
 		assetStatusLabel
-	} from '$lib/components/ui/asset-status';
-	import type { TransactionData } from '$lib/types/asset-transaction';
-	import { PRODUCT_VIEWS } from '$lib/product-views';
+	} from '#lib/components/ui/asset-status/index.js';
+	import type { TransactionData } from '#lib/types/asset-transaction.js';
+	import { PRODUCT_VIEWS } from '#lib/product-views.js';
 	import {
 		ASSET_STATUSES,
 		isBookableStatus,
 		isRetiredStatus,
 		type AssetStatus
-	} from '$lib/asset-status';
+	} from '#lib/asset-status.js';
 
 	let { assetId }: { assetId: string } = $props();
 	let asset = $derived(await getAsset(assetId));
@@ -404,7 +407,7 @@
 			await deleteAsset(assetId);
 			confirmingDelete = false;
 			toast.success('Asset deleted');
-			await goto(resolve('/assets'));
+			await goto(resolve('assets'));
 		} catch (err) {
 			// The command refuses anything with history, and says which kind — that
 			// reason is the useful part, so it goes in front of the user verbatim.
@@ -562,7 +565,7 @@
 		<!-- On a phone the image stacks above everything else, so the way back
 		     would otherwise sit a whole picture further down. -->
 		<div class="sm:hidden">
-			<Button icon="back" variant="outline" href={resolve('/assets')}>Back to Devices</Button>
+			<Button icon="back" variant="outline" href={resolve('assets')}>Back to Devices</Button>
 		</div>
 		<div
 			class="flex h-48 w-full shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted/40 sm:size-48"
@@ -614,13 +617,13 @@
 						icon="back"
 						variant="outline"
 						class="hidden sm:inline-flex"
-						href={resolve('/assets')}>Back to Devices</Button
+						href={resolve('assets')}>Back to Devices</Button
 					>
 					{#if canAddDevices}
 						<Button
 							icon="add"
 							variant="outline"
-							href={resolve(`/assets/new?duplicateFrom=${asset.id}`)}>Add devices</Button
+							href={resolve(`assets/new?duplicateFrom=${asset.id}`)}>Add devices</Button
 						>
 					{/if}
 					<DropdownMenu.Root>
@@ -678,7 +681,7 @@
 				</span>
 				{#if asset.parent}
 					<a
-						href={resolve(`/assets/${asset.parent.id}`)}
+						href={resolve(`assets/${asset.parent.id}`)}
 						class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs transition-colors hover:bg-muted"
 					>
 						<Link2 class="size-3 text-muted-foreground" />
@@ -696,7 +699,7 @@
 				<Fact icon={Package} label="Bundle">
 					{#if asset.bundle}
 						<a
-							href={resolve(`/assets/bundles/${asset.bundle.id}`)}
+							href={resolve(`assets/bundles/${asset.bundle.id}`)}
 							class="underline underline-offset-2">{asset.bundle.template.name}</a
 						>
 					{:else}
@@ -813,7 +816,7 @@
 					</div>
 					<div class="flex gap-2">
 						<!-- The product's own page: every unit of it, and its connectors. -->
-						<Button variant="outline" href={resolve(`/products/${asset.product.id}`)}>View</Button>
+						<Button variant="outline" href={resolve(`products/${asset.product.id}`)}>View</Button>
 						<Button icon="edit" variant="outline" onclick={openProductModal}>Edit</Button>
 					</div>
 				</div>
@@ -975,7 +978,7 @@
 			</Card.Header>
 			<Card.Content class="space-y-4">
 				{#if !asset.parent && asset.accessories.length > 0 && !retired}
-					<Button variant="outline" size="sm" href={`${resolve('/case-check')}?asset=${asset.id}`}
+					<Button variant="outline" size="sm" href={`${resolve('case-check')}?asset=${asset.id}`}
 						>Check that everything is there</Button
 					>
 				{/if}
@@ -984,7 +987,7 @@
 						<div class="text-sm">
 							<p class="text-xs text-muted-foreground">Accessory of</p>
 							<a
-								href={resolve(`/assets/${asset.parent.id}`)}
+								href={resolve(`assets/${asset.parent.id}`)}
 								class="font-medium underline underline-offset-2"
 							>
 								{productLabel(asset.parent.product)}{asset.parent.assetTag
@@ -1016,7 +1019,7 @@
 										/>
 										<div class="min-w-0 flex-1">
 											<a
-												href={resolve(`/assets/${accessory.id}`)}
+												href={resolve(`assets/${accessory.id}`)}
 												class="text-sm font-medium underline underline-offset-2"
 											>
 												{accessory.product.name}
@@ -1139,7 +1142,7 @@
 												<a
 													href={item.productionRestricted
 														? undefined
-														: resolve(`/productions/${tx.productionId}`)}
+														: resolve(`productions/${tx.productionId}`)}
 													class="text-foreground {item.productionRestricted
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
@@ -1149,7 +1152,7 @@
 												<a
 													href={item.productionRestricted
 														? undefined
-														: resolve(`/productions/${tx.productionId}`)}
+														: resolve(`productions/${tx.productionId}`)}
 													class="text-foreground {item.productionRestricted
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
@@ -1159,7 +1162,7 @@
 												<a
 													href={item.productionRestricted
 														? undefined
-														: resolve(`/productions/${tx.fromProductionId}`)}
+														: resolve(`productions/${tx.fromProductionId}`)}
 													class="text-foreground {item.productionRestricted
 														? ''
 														: 'underline underline-offset-2'}">{tx.fromProductionName}</a
@@ -1172,7 +1175,7 @@
 												<a
 													href={item.productionRestricted
 														? undefined
-														: resolve(`/productions/${tx.productionId}`)}
+														: resolve(`productions/${tx.productionId}`)}
 													class="text-foreground {item.productionRestricted
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
@@ -1185,7 +1188,7 @@
 												<a
 													href={item.productionRestricted
 														? undefined
-														: resolve(`/productions/${tx.productionId}`)}
+														: resolve(`productions/${tx.productionId}`)}
 													class="text-foreground {item.productionRestricted
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
@@ -1195,7 +1198,7 @@
 												<a
 													href={item.productionRestricted
 														? undefined
-														: resolve(`/productions/${tx.productionId}`)}
+														: resolve(`productions/${tx.productionId}`)}
 													class="text-foreground {item.productionRestricted
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
@@ -1205,7 +1208,7 @@
 												<a
 													href={item.productionRestricted
 														? undefined
-														: resolve(`/productions/${tx.productionId}`)}
+														: resolve(`productions/${tx.productionId}`)}
 													class="text-foreground {item.productionRestricted
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
@@ -1215,7 +1218,7 @@
 												<a
 													href={item.productionRestricted
 														? undefined
-														: resolve(`/productions/${tx.productionId}`)}
+														: resolve(`productions/${tx.productionId}`)}
 													class="text-foreground {item.productionRestricted
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
@@ -1224,7 +1227,7 @@
 											{:else if tx?.type === 'BOOKING_REPLACED'}
 												Released —
 												<a
-													href={resolve(`/assets/${tx.replacedByAssetId}`)}
+													href={resolve(`assets/${tx.replacedByAssetId}`)}
 													class="text-foreground underline underline-offset-2"
 													>{tx.replacedByLabel}</a
 												>
@@ -1232,7 +1235,7 @@
 												<a
 													href={item.productionRestricted
 														? undefined
-														: resolve(`/productions/${tx.productionId}`)}
+														: resolve(`productions/${tx.productionId}`)}
 													class="text-foreground {item.productionRestricted
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
@@ -1240,7 +1243,7 @@
 											{:else if tx?.type === 'ACCESSORY_ATTACHED'}
 												Attached as an accessory of
 												<a
-													href={resolve(`/assets/${tx.parentAssetId}`)}
+													href={resolve(`assets/${tx.parentAssetId}`)}
 													class="text-foreground underline underline-offset-2">{tx.parentLabel}</a
 												>
 											{:else if tx?.type === 'CREDENTIALS_SET'}
@@ -1255,7 +1258,7 @@
 														<a
 															href={item.productionRestricted
 																? undefined
-																: resolve(`/productions/${tx.productionId}`)}
+																: resolve(`productions/${tx.productionId}`)}
 															class="font-medium text-foreground {item.productionRestricted
 																? ''
 																: 'underline underline-offset-2'}">{tx.productionName}</a
@@ -1271,7 +1274,7 @@
 													Missing in stocktake
 												{/if}
 												<a
-													href={resolve(`/stocktakes/${tx.stocktakeId}`)}
+													href={resolve(`stocktakes/${tx.stocktakeId}`)}
 													class="text-foreground underline underline-offset-2">{tx.stocktakeName}</a
 												>
 												{#if tx.locationName}
@@ -1289,8 +1292,8 @@
 												{/if}
 												<a
 													href={tx.caseKind === 'bundle'
-														? resolve(`/assets/bundles/${tx.caseId}`)
-														: resolve(`/assets/${tx.caseId}`)}
+														? resolve(`assets/bundles/${tx.caseId}`)
+														: resolve(`assets/${tx.caseId}`)}
 													class="text-foreground underline underline-offset-2">{tx.caseName}</a
 												>
 												<span class="font-normal text-muted-foreground">
@@ -1301,7 +1304,7 @@
 												<a
 													href={item.productionRestricted
 														? undefined
-														: resolve(`/productions/${tx.productionId}`)}
+														: resolve(`productions/${tx.productionId}`)}
 													class="text-foreground {item.productionRestricted
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
@@ -1314,7 +1317,7 @@
 												<a
 													href={item.productionRestricted
 														? undefined
-														: resolve(`/productions/${tx.productionId}`)}
+														: resolve(`productions/${tx.productionId}`)}
 													class="text-foreground {item.productionRestricted
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
@@ -1324,7 +1327,7 @@
 												<a
 													href={item.productionRestricted
 														? undefined
-														: resolve(`/productions/${tx.productionId}`)}
+														: resolve(`productions/${tx.productionId}`)}
 													class="text-foreground {item.productionRestricted
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
@@ -1332,7 +1335,7 @@
 											{:else if tx?.type === 'ACCESSORY_DETACHED'}
 												Detached from
 												<a
-													href={resolve(`/assets/${tx.parentAssetId}`)}
+													href={resolve(`assets/${tx.parentAssetId}`)}
 													class="text-foreground underline underline-offset-2">{tx.parentLabel}</a
 												>
 											{:else}

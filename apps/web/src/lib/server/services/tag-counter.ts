@@ -1,5 +1,5 @@
-import type { Prisma } from '$lib/prisma/client';
-import { appError } from '$lib/errors';
+import type { Prisma } from '#lib/prisma/client.js';
+import { appError } from '#lib/errors.js';
 
 // An org's automatic asset tags: its prefix and five digits, "40000186".
 // Switched on per org (`Organization.autoAssetTags`); off, a unit without a

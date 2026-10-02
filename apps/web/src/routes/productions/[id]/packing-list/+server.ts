@@ -1,7 +1,7 @@
 import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
-import { renderEquipmentSheet } from '$lib/server/services/equipment-sheet';
-import { pdfResponse } from '$lib/server/pdf-response';
+import { renderEquipmentSheet } from '#lib/server/services/equipment-sheet.js';
+import { pdfResponse } from '#lib/server/pdf-response.js';
 
 // The plain URL, for a bookmark or a link. The production page asks
 // `streamEquipmentSheet` instead, which reports progress while the pictures load.

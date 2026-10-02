@@ -1,31 +1,31 @@
 <script lang="ts">
-	import { naturalCompare } from '$lib/sort';
-	import { userLabel } from '$lib/user-label.svelte';
+	import { naturalCompare } from '#lib/sort.js';
+	import { userLabel } from '#lib/user-label.svelte.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { tick as nextTick } from 'svelte';
 	import { SvelteSet } from 'svelte/reactivity';
 	import { toast } from 'svelte-sonner';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { Modal } from '$lib/components/ui/modal';
-	import { CameraScanButton } from '$lib/components/ui/camera-scan';
-	import { OrgBadge } from '$lib/components/ui/org-badge';
-	import { CategoryPill } from '$lib/components/ui/category-pill';
-	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
-	import StocktakeProgress from '$lib/components/stocktake-progress.svelte';
-	import { categoryLabel } from '$lib/category';
-	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
-	import { errorCodeOf } from '$lib/errors';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
+	import { OrgBadge } from '#lib/components/ui/org-badge/index.js';
+	import { CategoryPill } from '#lib/components/ui/category-pill/index.js';
+	import { AssetStatusBadge } from '#lib/components/ui/asset-status/index.js';
+	import StocktakeProgress from '#lib/components/stocktake-progress.svelte';
+	import { categoryLabel } from '#lib/category.js';
+	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
+	import { errorCodeOf } from '#lib/errors.js';
 	import {
 		foundViaLabel,
 		stocktakeStateClass,
 		stocktakeStateLabel,
 		unexpectedReasonLabel,
 		type StocktakeItemState
-	} from '$lib/stocktake-labels.svelte';
+	} from '#lib/stocktake-labels.svelte.js';
 	import {
 		applyStocktakeAction,
 		cancelStocktake,
@@ -37,7 +37,7 @@
 		setStocktakeNote,
 		tickStocktake,
 		untickStocktake
-	} from '$lib/remote/stocktakes.remote';
+	} from '#lib/remote/stocktakes.remote.js';
 	import { CircleAlert, MessageSquare, TriangleAlert } from '@lucide/svelte';
 
 	let { stocktakeId }: { stocktakeId: string } = $props();
@@ -469,7 +469,7 @@
 		working = true;
 		try {
 			await cancelStocktake(stocktakeId);
-			goto(resolve('/stocktakes'));
+			goto(resolve('stocktakes'));
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			working = false;
@@ -480,7 +480,7 @@
 		working = true;
 		try {
 			const { id } = await recountStocktake(stocktakeId);
-			goto(resolve(`/stocktakes/${id}`));
+			goto(resolve(`stocktakes/${id}`));
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {
@@ -574,8 +574,7 @@
 <div class="space-y-6">
 	<div class="flex flex-wrap items-start justify-between gap-4">
 		<div class="min-w-0 space-y-1">
-			<Button variant="ghost" size="sm" icon="back" href={resolve('/stocktakes')}>Stocktakes</Button
-			>
+			<Button variant="ghost" size="sm" icon="back" href={resolve('stocktakes')}>Stocktakes</Button>
 			<h1 class="text-3xl font-bold tracking-tight">{stocktake.name}</h1>
 			<p class="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
 				<OrgBadge
@@ -597,7 +596,7 @@
 				{#if stocktake.recountOf}
 					Recount of
 					<a
-						href={resolve(`/stocktakes/${stocktake.recountOf.id}`)}
+						href={resolve(`stocktakes/${stocktake.recountOf.id}`)}
 						class="underline underline-offset-2">{stocktake.recountOf.name}</a
 					>
 				{:else}
@@ -618,13 +617,13 @@
 			<Button
 				variant="outline"
 				icon="print"
-				href={resolve(`/stocktakes/${stocktakeId}/print`)}
+				href={resolve(`stocktakes/${stocktakeId}/print`)}
 				target="_blank">Print</Button
 			>
 			<Button
 				variant="outline"
 				icon="download"
-				href={resolve(`/stocktakes/${stocktakeId}/export.csv`)}
+				href={resolve(`stocktakes/${stocktakeId}/export.csv`)}
 				data-sveltekit-reload>CSV</Button
 			>
 			{#if isOpen}
@@ -646,7 +645,7 @@
 					Recounted in
 					{#each stocktake.recounts as r, idx (r.id)}
 						{idx > 0 ? ', ' : ''}<a
-							href={resolve(`/stocktakes/${r.id}`)}
+							href={resolve(`stocktakes/${r.id}`)}
 							class="underline underline-offset-2">{r.name}</a
 						>
 					{/each}

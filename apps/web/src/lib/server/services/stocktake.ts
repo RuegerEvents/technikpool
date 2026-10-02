@@ -1,7 +1,7 @@
-import { bundleLabel, withCaption } from '$lib/product-label';
-import { naturalCompare } from '$lib/sort';
-import { prisma } from '$lib/server/auth';
-import type { Prisma } from '$lib/prisma/client';
+import { bundleLabel, withCaption } from '#lib/product-label.js';
+import { naturalCompare } from '#lib/sort.js';
+import { prisma } from '#lib/server/auth.js';
+import type { Prisma } from '#lib/prisma/client.js';
 import {
 	isSystemAdmin,
 	productionVisibility,
@@ -9,11 +9,11 @@ import {
 	visibleProductionName,
 	writableOrgIds
 } from './access';
-import { ACTIVE_ASSET_WHERE, isRetiredStatus, type AssetStatus } from '$lib/asset-status';
+import { ACTIVE_ASSET_WHERE, isRetiredStatus, type AssetStatus } from '#lib/asset-status.js';
 import { resolveScannedCode } from './asset-lookup';
 import { syncAccessories } from './accessories';
 import { CABLE_ENDS } from './cable-ends';
-import { userLabel } from '$lib/user-label.svelte';
+import { userLabel } from '#lib/user-label.svelte.js';
 
 // Stocktakes (Inventur): counting what an org actually has against what it
 // should have. Framework-agnostic like checkout.ts, so the web's remote

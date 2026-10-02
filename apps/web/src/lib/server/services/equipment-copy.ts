@@ -1,13 +1,13 @@
-import { naturalCompare } from '$lib/sort';
-import { prisma } from '$lib/server/auth';
-import { BOOKABLE_ASSET_WHERE, isBookableStatus } from '$lib/asset-status';
-import { accessoryIdsOf } from '$lib/server/services/accessories';
+import { naturalCompare } from '#lib/sort.js';
+import { prisma } from '#lib/server/auth.js';
+import { BOOKABLE_ASSET_WHERE, isBookableStatus } from '#lib/asset-status.js';
+import { accessoryIdsOf } from '#lib/server/services/accessories.js';
 import {
 	getOrgIdsNeedingApprovalNotification,
 	notifyPendingApproval
-} from '$lib/server/services/approval-notifications';
-import { orgLabel } from '$lib/utils';
-import type { AddedToProductionData, RequestedData } from '$lib/types/asset-transaction';
+} from '#lib/server/services/approval-notifications.js';
+import { orgLabel } from '#lib/utils.js';
+import type { AddedToProductionData, RequestedData } from '#lib/types/asset-transaction.js';
 
 // Taking over another production's equipment list. What carries over is the
 // list — so many of this product, so many of that kit — not a promise about

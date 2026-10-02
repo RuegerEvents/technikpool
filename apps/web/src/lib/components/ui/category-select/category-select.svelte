@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { cn } from '$lib/utils';
-	import { CategoryPill } from '$lib/components/ui/category-pill';
+	import { cn } from '#lib/utils.js';
+	import { CategoryPill } from '#lib/components/ui/category-pill/index.js';
 
 	type Category = { id: string; name: string; color: string };
 

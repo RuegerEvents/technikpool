@@ -5,21 +5,21 @@
 	import { tick as nextTick } from 'svelte';
 	import { SvelteSet } from 'svelte/reactivity';
 	import { toast } from 'svelte-sonner';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { CameraScanButton } from '$lib/components/ui/camera-scan';
-	import StocktakeProgress from '$lib/components/stocktake-progress.svelte';
-	import { getErrorMessage } from '$lib/utils';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
+	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
+	import StocktakeProgress from '#lib/components/stocktake-progress.svelte';
+	import { getErrorMessage } from '#lib/utils.js';
 	import {
 		describeCode,
 		findCaseByCode,
 		getCaseCheck,
 		recordCaseCheck
-	} from '$lib/remote/case-checks.remote';
+	} from '#lib/remote/case-checks.remote.js';
 
 	// Checking a case: scan the case (or open it from its page), then scan or
 	// tick what is in it. The ticks live on this page only; finishing writes the
@@ -84,9 +84,9 @@
 
 	function openCase(next: CaseRef, scannedAssetId: string | null) {
 		pendingTick = scannedAssetId;
-		const url = `${resolve('/case-check')}?${next.kind}=${encodeURIComponent(next.id)}`;
+		const url = `${resolve('case-check')}?${next.kind}=${encodeURIComponent(next.id)}`;
 		// eslint-disable-next-line svelte/no-navigation-without-resolve
-		return goto(url, { keepFocus: true });
+		return goto(url, { reset: false });
 	}
 
 	/** A code matches a unit by its tag, or by a serial number only one unit in the case has. */
@@ -194,7 +194,7 @@
 			</p>
 		</div>
 		{#if ref}
-			<Button variant="outline" href={resolve('/case-check')}>Check another case</Button>
+			<Button variant="outline" href={resolve('case-check')}>Check another case</Button>
 		{/if}
 	</div>
 

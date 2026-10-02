@@ -4,7 +4,7 @@ import {
 	MIN_STICKER_SIZE_MM,
 	minCutLineGapMm
 } from './geometry';
-import { DEFAULT_ORG_NAME, DEFAULT_STICKER_COLOR } from '$lib/stickers';
+import { DEFAULT_ORG_NAME, DEFAULT_STICKER_COLOR } from '#lib/stickers.js';
 import type { GeneratorOptions, SheetLayout, StickerSize } from './types';
 
 export interface RawGeneratorOptions {

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { CameraScanButton } from '$lib/components/ui/camera-scan';
-	import { getErrorMessage } from '$lib/utils';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
+	import { getErrorMessage } from '#lib/utils.js';
 	import type { ScanFeedback } from './scan-feedback';
 
 	// The scan field above every list a production is worked through: a

@@ -1,12 +1,12 @@
-import { naturalCompare } from '$lib/sort';
+import { naturalCompare } from '#lib/sort.js';
 import { query, command } from '$app/server';
-import { prisma } from '$lib/server/auth';
-import type { Prisma } from '$lib/prisma/client';
-import { sendMail } from '$lib/server/mail';
-import { appBaseUrl } from '$lib/server/app-url';
-import { bookingReviewedEmail } from '$lib/server/emails/booking-reviewed';
-import { addedAsCrewEmail } from '$lib/server/emails/added-as-crew';
-import { productionCancelledEmail } from '$lib/server/emails/production-cancelled';
+import { prisma } from '#lib/server/auth.js';
+import type { Prisma } from '#lib/prisma/client.js';
+import { sendMail } from '#lib/server/mail.js';
+import { appBaseUrl } from '#lib/server/app-url.js';
+import { bookingReviewedEmail } from '#lib/server/emails/booking-reviewed.js';
+import { addedAsCrewEmail } from '#lib/server/emails/added-as-crew.js';
+import { productionCancelledEmail } from '#lib/server/emails/production-cancelled.js';
 import * as v from 'valibot';
 import {
 	isSystemAdmin,
@@ -22,24 +22,24 @@ import {
 	managedOrgIds,
 	userOrgIds,
 	visibleProductionIds
-} from '$lib/server/services/access';
-import { ROLE_FOR, rolesAtLeast } from '$lib/roles';
-import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '$lib/asset-status';
-import { accessoryIdsOf } from '$lib/server/services/accessories';
+} from '#lib/server/services/access.js';
+import { ROLE_FOR, rolesAtLeast } from '#lib/roles.js';
+import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '#lib/asset-status.js';
+import { accessoryIdsOf } from '#lib/server/services/accessories.js';
 import {
 	getOrgIdsNeedingApprovalNotification,
 	notifyPendingApproval
-} from '$lib/server/services/approval-notifications';
-import { appError } from '$lib/errors';
-import { requireOpenProduction } from '$lib/server/services/production-state';
-import { shareExpiry, shareUrl } from '$lib/server/services/production-share';
-import { orgLabel } from '$lib/utils';
+} from '#lib/server/services/approval-notifications.js';
+import { appError } from '#lib/errors.js';
+import { requireOpenProduction } from '#lib/server/services/production-state.js';
+import { shareExpiry, shareUrl } from '#lib/server/services/production-share.js';
+import { orgLabel } from '#lib/utils.js';
 import { getKnownAddresses } from './addresses.remote';
 import type {
 	AddedToProductionData,
 	BookingCancelledData,
 	RequestedData
-} from '$lib/types/asset-transaction';
+} from '#lib/types/asset-transaction.js';
 
 // Tells the requesting org's OWNER/ADMIN members that the owner org has
 // answered every request it had for this production, and what it answered.

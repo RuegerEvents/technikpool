@@ -3,13 +3,13 @@
 	// over the org's customers plus the shared create/edit dialog, so every
 	// caller offers the same three moves — choose one, register a new one,
 	// correct the chosen one — without carrying its own form.
-	import { Button } from '$lib/components/ui/button';
+	import { Button } from '#lib/components/ui/button/index.js';
 	import {
 		CustomerFormModal,
 		type CustomerWithAddress
-	} from '$lib/components/ui/customer-form-modal';
-	import { getCustomers } from '$lib/remote/customers.remote';
-	import { customerLabel } from '$lib/utils';
+	} from '#lib/components/ui/customer-form-modal/index.js';
+	import { getCustomers } from '#lib/remote/customers.remote.js';
+	import { customerLabel } from '#lib/utils.js';
 
 	type Props = {
 		organizationId: string;

@@ -7,15 +7,15 @@
 		denyDevice,
 		getConnectedDevices,
 		disconnectDevice
-	} from '$lib/remote/devices.remote';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import * as Card from '$lib/components/ui/card';
+	} from '#lib/remote/devices.remote.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
 	import { toast } from 'svelte-sonner';
-	import { getErrorMessage } from '$lib/utils';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
-	import { USER_CODE_LENGTH, formatUserCode, normalizeUserCode } from '$lib/device-code';
+	import { getErrorMessage } from '#lib/utils.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
+	import { USER_CODE_LENGTH, formatUserCode, normalizeUserCode } from '#lib/device-code.js';
 
 	let pairingQuery = $derived(getPairingInfo());
 	let pairing = $derived(pairingQuery.current ?? { baseUrl: '' });
@@ -117,7 +117,7 @@
 		</Card.Header>
 		<Card.Content class="flex flex-col items-center gap-3">
 			<img
-				src={resolve('/devices/qr.png')}
+				src={resolve('devices/qr.png')}
 				alt="Server address"
 				width="220"
 				height="220"

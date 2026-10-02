@@ -1,8 +1,8 @@
-import { naturalCompare } from '$lib/sort';
+import { naturalCompare } from '#lib/sort.js';
 import { query, command } from '$app/server';
-import { prisma } from '$lib/server/auth';
+import { prisma } from '#lib/server/auth.js';
 import * as v from 'valibot';
-import { orgLabel } from '$lib/utils';
+import { orgLabel } from '#lib/utils.js';
 import { getAwaitingApprovals, getProduction, getProductionAudience } from './productions.remote';
 import {
 	productionReadWhere,
@@ -10,18 +10,18 @@ import {
 	requireOrgWrite,
 	requireProductionRead,
 	userOrgIds
-} from '$lib/server/services/access';
-import { BOOKABLE_ASSET_WHERE } from '$lib/asset-status';
-import { accessoryIdsOf } from '$lib/server/services/accessories';
-import { appError } from '$lib/errors';
+} from '#lib/server/services/access.js';
+import { BOOKABLE_ASSET_WHERE } from '#lib/asset-status.js';
+import { accessoryIdsOf } from '#lib/server/services/accessories.js';
+import { appError } from '#lib/errors.js';
 import {
 	getOrgIdsNeedingApprovalNotification,
 	notifyPendingApproval
-} from '$lib/server/services/approval-notifications';
-import { requireOpenProduction } from '$lib/server/services/production-state';
-import { copyEquipment, planEquipmentCopy } from '$lib/server/services/equipment-copy';
-import type { AddedToProductionData, RequestedData } from '$lib/types/asset-transaction';
-import { productLabel } from '$lib/product-label';
+} from '#lib/server/services/approval-notifications.js';
+import { requireOpenProduction } from '#lib/server/services/production-state.js';
+import { copyEquipment, planEquipmentCopy } from '#lib/server/services/equipment-copy.js';
+import type { AddedToProductionData, RequestedData } from '#lib/types/asset-transaction.js';
+import { productLabel } from '#lib/product-label.js';
 
 const ACTIVE_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT', 'RETURNED'] as const;
 const CONFLICT_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT'] as const;

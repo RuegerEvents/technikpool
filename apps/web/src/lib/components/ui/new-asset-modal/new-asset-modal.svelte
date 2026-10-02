@@ -14,7 +14,7 @@
 </script>
 
 <script lang="ts">
-	import { CameraScanButton } from '$lib/components/ui/camera-scan';
+	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
 	// Registering a unit at the moment you need it, rather than being sent to
 	// /assets/new and back to put it where it belongs. Two places need exactly
 	// this: an accessory on the asset detail page, and a member on the bundle
@@ -32,21 +32,21 @@
 	// has, and the server files it with no manufacturer — reusing an
 	// identical cable product where the catalogue already has one.
 	import type { Snippet } from 'svelte';
-	import { manufacturerIdOf, withNoManufacturer } from '$lib/no-manufacturer.svelte';
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import SerialNumberWarning from '$lib/components/SerialNumberWarning.svelte';
-	import { CreatableSelect } from '$lib/components/ui/creatable-select';
+	import { manufacturerIdOf, withNoManufacturer } from '#lib/no-manufacturer.svelte.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import SerialNumberWarning from '#lib/components/SerialNumberWarning.svelte';
+	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
 	import {
 		ProductFields,
 		cableInputFrom,
 		type ProductDraft
-	} from '$lib/components/ui/product-fields';
-	import { getErrorMessage } from '$lib/utils';
-	import { messageForErrorCode } from '$lib/error-messages.svelte';
-	import { getNextAssetTag } from '$lib/remote/orgs.remote';
+	} from '#lib/components/ui/product-fields/index.js';
+	import { getErrorMessage } from '#lib/utils.js';
+	import { messageForErrorCode } from '#lib/error-messages.svelte.js';
+	import { getNextAssetTag } from '#lib/remote/orgs.remote.js';
 	import { toast } from 'svelte-sonner';
 	import {
 		createAssets,
@@ -54,7 +54,7 @@
 		getManufacturers,
 		getProductAccessoryProfile,
 		getProducts
-	} from '$lib/remote/assets.remote';
+	} from '#lib/remote/assets.remote.js';
 
 	type Selection = { id: string | null; name: string } | null;
 	type LocationOption = { id: string; name: string; address?: { city: string | null } | null };

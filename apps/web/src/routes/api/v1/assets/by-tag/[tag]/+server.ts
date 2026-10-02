@@ -1,22 +1,22 @@
 import type { RequestHandler } from './$types';
-import { prisma } from '$lib/server/auth';
-import { CABLE_ENDS } from '$lib/server/services/cable-ends';
-import { apiError, apiJson, handleApi, requireApiUser, type Schemas } from '$lib/server/api';
-import { ApiResponse } from '$lib/server/api';
+import { prisma } from '#lib/server/auth.js';
+import { CABLE_ENDS } from '#lib/server/services/cable-ends.js';
+import { apiError, apiJson, handleApi, requireApiUser, type Schemas } from '#lib/server/api.js';
+import { ApiResponse } from '#lib/server/api.js';
 import {
 	isSystemAdmin,
 	productionVisibility,
 	userOrgIds,
 	visibleProductionName
-} from '$lib/server/services/access';
+} from '#lib/server/services/access.js';
 import {
 	toAsset,
 	toAssetTransaction,
 	toProductDocument,
 	toProduction
-} from '$lib/server/services/api-mappers';
-import { productDocuments } from '$lib/server/services/product-documents';
-import { resolveScannedCode } from '$lib/server/services/asset-lookup';
+} from '#lib/server/services/api-mappers.js';
+import { productDocuments } from '#lib/server/services/product-documents.js';
+import { resolveScannedCode } from '#lib/server/services/asset-lookup.js';
 
 const HISTORY_LIMIT = 20;
 

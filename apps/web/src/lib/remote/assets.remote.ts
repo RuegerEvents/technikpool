@@ -1,10 +1,10 @@
-import { naturalCompare } from '$lib/sort';
+import { naturalCompare } from '#lib/sort.js';
 import { query, command, requested } from '$app/server';
-import { prisma } from '$lib/server/auth';
-import type { Prisma } from '$lib/prisma/client';
+import { prisma } from '#lib/server/auth.js';
+import type { Prisma } from '#lib/prisma/client.js';
 import * as v from 'valibot';
 import { getOrgEquipmentValue } from './orgs.remote';
-import type { FieldChange } from '$lib/types/asset-transaction';
+import type { FieldChange } from '#lib/types/asset-transaction.js';
 import {
 	isSystemAdmin,
 	managedOrgIds,
@@ -20,12 +20,12 @@ import {
 	visibleProductionIds,
 	visibleProductionName,
 	writableOrgIds
-} from '$lib/server/services/access';
-import { productControl } from '$lib/server/services/product-control';
-import { assertProductNameFree } from '$lib/server/services/product-name';
-import { tagAllocator } from '$lib/server/services/tag-counter';
-import { assetsWithSerial } from '$lib/server/services/asset-lookup';
-import { fieldChanges, logCatalogChange } from '$lib/server/services/catalog-log';
+} from '#lib/server/services/access.js';
+import { productControl } from '#lib/server/services/product-control.js';
+import { assertProductNameFree } from '#lib/server/services/product-name.js';
+import { tagAllocator } from '#lib/server/services/tag-counter.js';
+import { assetsWithSerial } from '#lib/server/services/asset-lookup.js';
+import { fieldChanges, logCatalogChange } from '#lib/server/services/catalog-log.js';
 import {
 	ACTIVE_ASSET_WHERE,
 	ASSET_STATUSES,
@@ -33,21 +33,21 @@ import {
 	isBookableStatus,
 	isRetiredStatus,
 	RETIRED_ASSET_WHERE
-} from '$lib/asset-status';
-import { syncAccessories } from '$lib/server/services/accessories';
+} from '#lib/asset-status.js';
+import { syncAccessories } from '#lib/server/services/accessories.js';
 import {
 	assetImageForRead,
 	bundleImageForRead,
 	ensureAssetImage,
 	ensureBundleImage,
 	redrawPreviewsOf
-} from '$lib/server/services/bundle-image';
+} from '#lib/server/services/bundle-image.js';
 import {
 	assertAdditionsFitType,
 	assertNewInstanceMatchesType,
 	bundleTypeSpec
-} from '$lib/server/services/bundle-spec';
-import { getProduction } from '$lib/remote/productions.remote';
+} from '#lib/server/services/bundle-spec.js';
+import { getProduction } from '#lib/remote/productions.remote.js';
 import {
 	CABLE_TYPE_DEFAULTS,
 	CABLE_TYPE_SUGGESTIONS,
@@ -58,9 +58,9 @@ import {
 	waysKey,
 	type CableInput,
 	type CableWayAttrs
-} from '$lib/cable';
-import { connectorSlug, ensureConnectors } from '$lib/server/services/connectors';
-import { waySnapshot, writeWays, type WayInput } from '$lib/server/services/cable-ways';
+} from '#lib/cable.js';
+import { connectorSlug, ensureConnectors } from '#lib/server/services/connectors.js';
+import { waySnapshot, writeWays, type WayInput } from '#lib/server/services/cable-ways.js';
 import {
 	CABLE_ENDS,
 	CABLE_WAYS,
@@ -68,18 +68,18 @@ import {
 	withCableNames,
 	withEndNames,
 	withProductCableNames
-} from '$lib/server/services/cable-ends';
+} from '#lib/server/services/cable-ends.js';
 import {
 	normalizePorts,
 	portSnapshot,
 	samePorts,
 	writePorts,
 	type PortSnapshot
-} from '$lib/server/services/product-ports';
-import { getConnectors, getConnectorUsage } from '$lib/remote/connectors.remote';
-import { getKnownAddresses } from '$lib/remote/addresses.remote';
-import { appError } from '$lib/errors';
-import { productLabel } from '$lib/product-label';
+} from '#lib/server/services/product-ports.js';
+import { getConnectors, getConnectorUsage } from '#lib/remote/connectors.remote.js';
+import { getKnownAddresses } from '#lib/remote/addresses.remote.js';
+import { appError } from '#lib/errors.js';
+import { productLabel } from '#lib/product-label.js';
 
 async function ensureBundleImageWithoutBreakingRead(
 	bundle: Parameters<typeof ensureBundleImage>[0]
@@ -2276,7 +2276,7 @@ export const setProductPorts = command(setProductPortsSchema, async (input) => {
  * Every device list and every unit shows its product, and refreshing all of
  * them sent each one back in the response: 3.7 MB for one saved photo on an
  * install of 700 units, over a line that moves 350 KB/s. So the caller names
- * what it holds — `.updates(...PRODUCT_VIEWS)`, see `$lib/product-views` — and
+ * what it holds — `.updates(...PRODUCT_VIEWS)`, see `#lib/product-views.js` — and
  * only that is refreshed. Naming the query functions rather than instances
  * covers every instance the client has cached, including one a page left
  * behind that has not been collected yet; one nobody holds is fetched afresh

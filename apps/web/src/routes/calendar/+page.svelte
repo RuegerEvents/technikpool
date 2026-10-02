@@ -1,19 +1,19 @@
 <script lang="ts">
-	import { naturalCompare } from '$lib/sort';
-	import { customerLabel, getContrastingTextColor, orgLabel } from '$lib/utils';
+	import { naturalCompare } from '#lib/sort.js';
+	import { customerLabel, getContrastingTextColor, orgLabel } from '#lib/utils.js';
 	/* eslint-disable svelte/prefer-svelte-reactivity */
-	import { getCalendarData, getProductionsCalendar } from '$lib/remote/productions.remote';
+	import { getCalendarData, getProductionsCalendar } from '#lib/remote/productions.remote.js';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { OrgBadge } from '$lib/components/ui/org-badge';
-	import { FilterPopover } from '$lib/components/ui/filter-popover';
-	import { CalendarFeedButton } from '$lib/components/ui/calendar-feed';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { OrgBadge } from '#lib/components/ui/org-badge/index.js';
+	import { FilterPopover } from '#lib/components/ui/filter-popover/index.js';
+	import { CalendarFeedButton } from '#lib/components/ui/calendar-feed/index.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import {
 		ProductionHoverCard,
 		type ProductionHoverInfo
-	} from '$lib/components/ui/production-hover-card';
+	} from '#lib/components/ui/production-hover-card/index.js';
 
 	type Granularity = 'day' | 'week' | 'month' | 'year';
 	type ViewMode = 'assets' | 'productions';
@@ -29,13 +29,13 @@
 	// View state is persisted in URL query params (?view=&mode=&date=&orgs=) so
 	// a refresh or shared link keeps the same view.
 	function updateUrl(params: Record<string, string | null>) {
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		for (const [k, v] of Object.entries(params)) {
 			if (v === null) url.searchParams.delete(k);
 			else url.searchParams.set(k, v);
 		}
 		// eslint-disable-next-line svelte/no-navigation-without-resolve -- updating query params on the current route, not navigating to a typed path
-		goto(url, { replaceState: true, noScroll: true, keepFocus: true });
+		goto(url, { replace: true, reset: false });
 	}
 
 	const GRANULARITIES: Granularity[] = ['day', 'week', 'month', 'year'];
@@ -1318,7 +1318,7 @@
 							{@const segments = barSegments(bar)}
 							{#each segments as seg, si (si)}
 								<a
-									href={bar.event.restricted ? undefined : resolve(`/productions/${bar.event.id}`)}
+									href={bar.event.restricted ? undefined : resolve(`productions/${bar.event.id}`)}
 									{...hoverCard(bar.event.id)}
 									class="absolute flex items-center overflow-hidden px-1.5 text-[11px] font-medium no-underline {hoveredEventId ===
 									bar.event.id
@@ -1389,7 +1389,7 @@
 											<a
 												href={bar.event.restricted
 													? undefined
-													: resolve(`/productions/${bar.event.id}`)}
+													: resolve(`productions/${bar.event.id}`)}
 												aria-label={bar.event.name}
 												{...hoverCard(bar.event.id)}
 												class="absolute no-underline {hoveredEventId === bar.event.id
@@ -1605,9 +1605,7 @@
 								{#each row.bars as bar (bar.id)}
 									{#if bar.pending}
 										<a
-											href={bar.restricted
-												? undefined
-												: resolve(`/productions/${bar.productionId}`)}
+											href={bar.restricted ? undefined : resolve(`productions/${bar.productionId}`)}
 											aria-label={bar.label}
 											{...hoverCard(bar.productionId, { pending: true })}
 											class="absolute top-1 overflow-hidden rounded no-underline hover:brightness-110"
@@ -1625,7 +1623,7 @@
 												<a
 													href={bar.restricted
 														? undefined
-														: resolve(`/productions/${bar.productionId}`)}
+														: resolve(`productions/${bar.productionId}`)}
 													aria-label={bar.label}
 													{...hoverCard(bar.productionId)}
 													class="absolute top-1 overflow-hidden no-underline group-hover/bar:brightness-110 {seg.roundedLeft
@@ -1649,9 +1647,7 @@
 									{@const barH = Math.max(3, Math.round(bar.fraction * (PRODUCT_H - 6)))}
 									{#if bar.allPending}
 										<a
-											href={bar.restricted
-												? undefined
-												: resolve(`/productions/${bar.productionId}`)}
+											href={bar.restricted ? undefined : resolve(`productions/${bar.productionId}`)}
 											{...hoverCard(bar.productionId, {
 												pending: true,
 												booked: { count: bar.count, total: bar.total }
@@ -1674,7 +1670,7 @@
 												<a
 													href={bar.restricted
 														? undefined
-														: resolve(`/productions/${bar.productionId}`)}
+														: resolve(`productions/${bar.productionId}`)}
 													{...hoverCard(bar.productionId, {
 														booked: { count: bar.count, total: bar.total }
 													})}

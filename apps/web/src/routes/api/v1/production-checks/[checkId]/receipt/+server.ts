@@ -1,7 +1,7 @@
 import type { RequestHandler } from './$types';
-import { apiJson, handleApi, requireApiUser } from '$lib/server/api';
-import { withCheckErrors } from '$lib/server/production-check-api';
-import { confirmReceipt } from '$lib/server/services/production-check';
+import { apiJson, handleApi, requireApiUser } from '#lib/server/api.js';
+import { withCheckErrors } from '#lib/server/production-check-api.js';
+import { confirmReceipt } from '#lib/server/services/production-check.js';
 
 export const POST: RequestHandler = ({ locals, params }) =>
 	handleApi(async () => {

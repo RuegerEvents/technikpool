@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn, orgLabel } from '$lib/utils';
+	import { cn, orgLabel } from '#lib/utils.js';
 
 	type Org = { id: string; name: string; shortName?: string | null };
 

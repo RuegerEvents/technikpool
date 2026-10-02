@@ -1,9 +1,9 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { getErrorMessage } from '$lib/utils';
-	import { imageSrc } from '$lib/images';
-	import { getOrgWithMembers } from '$lib/remote/orgs.remote';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { getErrorMessage } from '#lib/utils.js';
+	import { imageSrc } from '#lib/images.js';
+	import { getOrgWithMembers } from '#lib/remote/orgs.remote.js';
 	import { toast } from 'svelte-sonner';
 
 	// Its own card rather than a field of the billing form: the file is uploaded

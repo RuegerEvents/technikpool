@@ -14,8 +14,8 @@
 	import { page } from '$app/state';
 	import { tick } from 'svelte';
 	import { ChevronDown, Search } from '@lucide/svelte';
-	import { cn, orgLabel, plural } from '$lib/utils';
-	import { naturalCompare } from '$lib/sort';
+	import { cn, orgLabel, plural } from '#lib/utils.js';
+	import { naturalCompare } from '#lib/sort.js';
 
 	// Picking a production to scan to. A native select could show one line of
 	// text per production, which is not enough to tell this week's job from

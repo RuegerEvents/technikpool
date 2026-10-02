@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { naturalCompare } from '$lib/sort';
-	import { userLabel } from '$lib/user-label.svelte';
+	import { naturalCompare } from '#lib/sort.js';
+	import { userLabel } from '#lib/user-label.svelte.js';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
-	import { getStocktake } from '$lib/remote/stocktakes.remote';
-	import { categoryLabel } from '$lib/category';
-	import { orgLabel } from '$lib/utils';
-	import { stocktakeStateLabel, unexpectedReasonLabel } from '$lib/stocktake-labels.svelte';
+	import { getStocktake } from '#lib/remote/stocktakes.remote.js';
+	import { categoryLabel } from '#lib/category.js';
+	import { orgLabel } from '#lib/utils.js';
+	import { stocktakeStateLabel, unexpectedReasonLabel } from '#lib/stocktake-labels.svelte.js';
 
 	const stocktakeId = $derived(page.params.id as string);
 	// Awaited like every print route: a page about to be printed should arrive complete.

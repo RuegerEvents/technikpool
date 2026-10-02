@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { sheetTitle, stageLabel, type SheetDownload } from '$lib/equipment-sheet-download.svelte';
+	import {
+		sheetTitle,
+		stageLabel,
+		type SheetDownload
+	} from '#lib/equipment-sheet-download.svelte.js';
 
 	let { download }: { download: SheetDownload } = $props();
 

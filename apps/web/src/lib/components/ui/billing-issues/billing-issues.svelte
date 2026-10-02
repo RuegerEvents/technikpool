@@ -1,7 +1,7 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
+	import * as Card from '#lib/components/ui/card/index.js';
 	import { resolve } from '$app/paths';
-	import type { BillingIssue, BillingIssueArea } from '$lib/billing-document-check.svelte';
+	import type { BillingIssue, BillingIssueArea } from '#lib/billing-document-check.svelte.js';
 
 	// What stops a document from becoming a PDF, listed where it can be fixed —
 	// the PDF link itself is disabled while this shows, so it never leads to a
@@ -24,7 +24,7 @@
 		{ key: 'lines', title: 'Line items' }
 	];
 
-	let billingHref = $derived(resolve(`/orgs/${organizationId}`) + '#billing');
+	let billingHref = $derived(resolve(`orgs/${organizationId}`) + '#billing');
 	const linkClass = 'underline underline-offset-2 hover:text-amber-950 dark:hover:text-amber-100';
 
 	let groups = $derived(

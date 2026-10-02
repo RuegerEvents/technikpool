@@ -1,15 +1,15 @@
 import { query, command } from '$app/server';
 import * as v from 'valibot';
-import { prisma } from '$lib/server/auth';
+import { prisma } from '#lib/server/auth.js';
 import {
 	isSystemAdmin,
 	managedOrgIds,
 	requireAuth,
 	requireSystemAdmin
-} from '$lib/server/services/access';
-import { connectorSlug } from '$lib/server/services/connectors';
-import { appError } from '$lib/errors';
-import { connectorFamily } from '$lib/cable';
+} from '#lib/server/services/access.js';
+import { connectorSlug } from '#lib/server/services/connectors.js';
+import { appError } from '#lib/errors.js';
+import { connectorFamily } from '#lib/cable.js';
 
 /**
  * The connector catalogue: what a cable's ends are called, and what they look

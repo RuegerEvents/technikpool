@@ -1,4 +1,4 @@
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { resolve } from '$app/paths';
 import { redirect } from '@sveltejs/kit';
 import { loadLocale } from 'wuchale/load-utils';

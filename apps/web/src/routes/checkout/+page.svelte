@@ -1,24 +1,24 @@
 <script lang="ts">
-	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
-	import { canWrite } from '$lib/roles';
-	import { getLocations } from '$lib/remote/assets.remote';
-	import { checkoutAssets, getAllProductions, scanAsset } from '$lib/remote/checkout.remote';
-	import { startProductionCheck } from '$lib/remote/production-checks.remote';
+	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
+	import { canWrite } from '#lib/roles.js';
+	import { getLocations } from '#lib/remote/assets.remote.js';
+	import { checkoutAssets, getAllProductions, scanAsset } from '#lib/remote/checkout.remote.js';
+	import { startProductionCheck } from '#lib/remote/production-checks.remote.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { Modal } from '$lib/components/ui/modal';
+	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
 	import { SvelteSet } from 'svelte/reactivity';
-	import type { ScanGroup } from '$lib/server/services/checkout';
-	import * as Card from '$lib/components/ui/card';
-	import { CreatableSelect } from '$lib/components/ui/creatable-select';
-	import { ProductionSelect } from '$lib/components/ui/production-select';
+	import type { ScanGroup } from '#lib/server/services/checkout.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
+	import { ProductionSelect } from '#lib/components/ui/production-select/index.js';
 	import { toast } from 'svelte-sonner';
 	import { tick, onDestroy } from 'svelte';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import type { Html5Qrcode } from 'html5-qrcode';
 
 	// Scanning writes, so the targets on offer are only the orgs this user may
@@ -166,8 +166,8 @@
 			await goto(
 				resolve(
 					targetType === 'production'
-						? `/productions/${targetId}/checkout`
-						: `/productions/${targetId}/checkin`
+						? `productions/${targetId}/checkout`
+						: `productions/${targetId}/checkin`
 				)
 			);
 			return;
@@ -176,7 +176,7 @@
 			startingCheck = true;
 			try {
 				const check = await startProductionCheck({ productionId: targetId });
-				await goto(resolve(`/productions/${targetId}/check/${check.id}`));
+				await goto(resolve(`productions/${targetId}/check/${check.id}`));
 			} catch (err) {
 				toast.error(getErrorMessage(err));
 			} finally {

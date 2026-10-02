@@ -1,24 +1,24 @@
 <script lang="ts">
-	import { CameraScanButton } from '$lib/components/ui/camera-scan';
+	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
 	import {
 		manufacturerIdOf,
 		manufacturerSelection,
 		withNoManufacturer
-	} from '$lib/no-manufacturer.svelte';
-	import { productLabel } from '$lib/product-label';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
-	import { Input } from '$lib/components/ui/input';
-	import SerialNumberWarning from '$lib/components/SerialNumberWarning.svelte';
-	import { Label } from '$lib/components/ui/label';
-	import { CreatableSelect } from '$lib/components/ui/creatable-select';
-	import { ImageUpload } from '$lib/components/ui/image-upload';
+	} from '#lib/no-manufacturer.svelte.js';
+	import { productLabel } from '#lib/product-label.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import SerialNumberWarning from '#lib/components/SerialNumberWarning.svelte';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
+	import { ImageUpload } from '#lib/components/ui/image-upload/index.js';
 	import {
 		ProductFields,
 		cableInputFrom,
 		type ProductDraft
-	} from '$lib/components/ui/product-fields';
+	} from '#lib/components/ui/product-fields/index.js';
 	import {
 		getManufacturers,
 		getCategories,
@@ -27,16 +27,16 @@
 		getAsset,
 		getProductAccessoryProfile,
 		createAssets
-	} from '$lib/remote/assets.remote';
-	import { getMyOrgs, getNextAssetTag } from '$lib/remote/orgs.remote';
+	} from '#lib/remote/assets.remote.js';
+	import { getMyOrgs, getNextAssetTag } from '#lib/remote/orgs.remote.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
-	import { plural, getErrorMessage, orgLabel } from '$lib/utils';
-	import { messageForErrorCode } from '$lib/error-messages.svelte';
-	import { canManageInventory } from '$lib/roles';
-	import { browser } from '$app/environment';
+	import { plural, getErrorMessage, orgLabel } from '#lib/utils.js';
+	import { messageForErrorCode } from '#lib/error-messages.svelte.js';
+	import { canManageInventory } from '#lib/roles.js';
+	import { browser } from '$app/env';
 
 	let saving = $state(false);
 	// Only the orgs this user may actually register equipment in — being a
@@ -329,7 +329,7 @@
 				resetForm();
 				saving = false;
 			} else {
-				goto(resolve(count === 1 ? `/assets/${created[0].id}` : '/assets'));
+				goto(resolve(count === 1 ? `assets/${created[0].id}` : 'assets'));
 			}
 		} catch (err) {
 			toast.error(getErrorMessage(err));
@@ -345,7 +345,7 @@
 		<h1 class="text-3xl font-bold tracking-tight">Add New Asset</h1>
 		<p class="text-muted-foreground">Register new equipment into your organization's inventory.</p>
 		<p class="mt-1 text-sm text-muted-foreground">
-			Registering cables? <a class="underline" href={resolve('/assets/new/cables')}
+			Registering cables? <a class="underline" href={resolve('assets/new/cables')}
 				>Add them by the drawer</a
 			> instead — one row per kind, quantities rather than units.
 		</p>
@@ -408,7 +408,7 @@
 							{#if locations.length === 0}
 								<p class="text-sm text-muted-foreground">
 									No locations yet. Create one in
-									<a class="underline" href={resolve(`/orgs/${selectedOrgId}/locations`)}
+									<a class="underline" href={resolve(`orgs/${selectedOrgId}/locations`)}
 										>Locations</a
 									>.
 								</p>
@@ -632,7 +632,7 @@
 							<Button icon="add" type="submit" disabled={saving}>
 								{saving ? 'Saving…' : quantity > 1 ? `Add ${quantity} Assets` : 'Add Asset'}
 							</Button>
-							<Button icon="close" type="button" variant="outline" href={resolve('/assets')}
+							<Button icon="close" type="button" variant="outline" href={resolve('assets')}
 								>Cancel</Button
 							>
 						</div>

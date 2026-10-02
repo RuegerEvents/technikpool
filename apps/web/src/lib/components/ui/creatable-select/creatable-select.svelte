@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { cn } from '$lib/utils';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
+	import { cn } from '#lib/utils.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 
 	type Item = {
 		id: string;

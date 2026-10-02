@@ -1,18 +1,17 @@
 import type { RequestHandler } from './$types';
-import { json } from '@sveltejs/kit';
-import { apiJson, handleApi, requireApiUser } from '$lib/server/api';
+import { apiJson, handleApi, requireApiUser } from '#lib/server/api.js';
 import {
 	jsonBody,
 	requireString,
 	stringList,
 	withStocktakeErrors
-} from '$lib/server/stocktake-api';
+} from '#lib/server/stocktake-api.js';
 import {
 	createStocktake,
 	getStocktakeSummary,
 	listStocktakes
-} from '$lib/server/services/stocktake';
-import { toStocktakeSummary } from '$lib/server/services/api-mappers';
+} from '#lib/server/services/stocktake.js';
+import { toStocktakeSummary } from '#lib/server/services/api-mappers.js';
 
 export const GET: RequestHandler = ({ locals, url }) =>
 	handleApi(async () => {
@@ -21,7 +20,7 @@ export const GET: RequestHandler = ({ locals, url }) =>
 		const stocktakes = await listStocktakes(user.id, {
 			status: status === 'OPEN' || status === 'CLOSED' ? status : undefined
 		});
-		return json(stocktakes.map(toStocktakeSummary));
+		return Response.json(stocktakes.map(toStocktakeSummary));
 	});
 
 export const POST: RequestHandler = ({ locals, request }) =>

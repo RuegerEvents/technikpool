@@ -1,5 +1,5 @@
 import type { PDFDocument, PDFImage, PDFPage } from 'pdf-lib';
-import { getObject } from '$lib/server/storage';
+import { getObject } from '#lib/server/storage.js';
 
 // The org's letterhead logo, shared by offers, invoices and delivery notes so
 // the three carry it in the same place at the same size.

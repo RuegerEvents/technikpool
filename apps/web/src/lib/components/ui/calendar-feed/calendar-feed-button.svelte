@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { CalendarPlus, Copy, RotateCcw } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
-	import { getCalendarFeedUrl, resetCalendarFeedUrl } from '$lib/remote/calendar-feed.remote';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { getCalendarFeedUrl, resetCalendarFeedUrl } from '#lib/remote/calendar-feed.remote.js';
 
 	let open = $state(false);
 	let confirmingReset = $state(false);

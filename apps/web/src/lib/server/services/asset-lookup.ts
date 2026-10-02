@@ -1,4 +1,4 @@
-import { prisma } from '$lib/server/auth';
+import { prisma } from '#lib/server/auth.js';
 import { isSystemAdmin, userOrgIds } from './access';
 
 // Turning a scanned code into one unit, in the one place both the web UI and

@@ -2,13 +2,13 @@
  * A cable's ends as everything above the database reads them: names.
  *
  * The rows hold only `connectorAId/BId`, so that a connector's name has one
- * home and a rename reaches every cable. But the forms, `$lib/cable`, the
+ * home and a rename reaches every cable. But the forms, `#lib/cable.js`, the
  * device list and the API's `CableSpec` all work in names, so a read loads the
  * two connectors with `CABLE_ENDS` and hands them on flattened by
  * `withCableNames` — `connectorA: 'XLR3 M'`, exactly the shape the columns
  * used to have.
  *
- * `$lib/cable` requires `connectorA/B` on everything it takes, so a query that
+ * `#lib/cable` requires `connectorA/B` on everything it takes, so a query that
  * forgets the include fails `pnpm check` rather than showing a cable without
  * ends.
  */

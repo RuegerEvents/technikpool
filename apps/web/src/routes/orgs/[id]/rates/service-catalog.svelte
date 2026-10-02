@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
 	import { ChevronDown, ChevronUp } from '@lucide/svelte';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { Modal } from '$lib/components/ui/modal';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
-	import { getErrorMessage } from '$lib/utils';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
+	import { getErrorMessage } from '#lib/utils.js';
 	import {
 		SERVICE_UNITS,
 		isServiceUnit,
 		serviceUnitLabel,
 		type ServiceUnit
-	} from '$lib/service-lines.svelte';
+	} from '#lib/service-lines.svelte.js';
 	import {
 		getServiceCatalog,
 		createServiceCategory,
@@ -23,7 +23,7 @@
 		createOrgService,
 		updateOrgService,
 		deleteOrgService
-	} from '$lib/remote/service-catalog.remote';
+	} from '#lib/remote/service-catalog.remote.js';
 
 	let { orgId }: { orgId: string } = $props();
 

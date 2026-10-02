@@ -1,6 +1,9 @@
 import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
-import { renderProductionsCalendar, verifyCalendarFeed } from '$lib/server/services/calendar-feed';
+import {
+	renderProductionsCalendar,
+	verifyCalendarFeed
+} from '#lib/server/services/calendar-feed.js';
 
 // Polled by calendar apps without a session: the signed path is the only
 // credential. A bad signature is a 404 rather than a 401, so probing the route

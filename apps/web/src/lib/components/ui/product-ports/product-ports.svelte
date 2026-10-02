@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import type { Prisma } from '$lib/prisma/client';
+	import type { Prisma } from '#lib/prisma/client.js';
 
 	export type StoredPort = Prisma.ProductPortGetPayload<{ include: { connector: true } }>;
 
@@ -66,12 +66,12 @@
 	// unpack the case to find out whether it takes powerCON or Schuko. Per
 	// product: every unit of a model has the same panel, so it is entered once.
 	// Controlled: the surrounding product form saves it with everything else.
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { CreatableSelect } from '$lib/components/ui/creatable-select';
-	import { ConnectorFormModal } from '$lib/components/ui/connector-form-modal';
-	import { getConnectors } from '$lib/remote/connectors.remote';
-	import { portLabelSuggestions } from '$lib/ports';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
+	import { ConnectorFormModal } from '#lib/components/ui/connector-form-modal/index.js';
+	import { getConnectors } from '#lib/remote/connectors.remote.js';
+	import { portLabelSuggestions } from '#lib/ports.js';
 
 	type Props = {
 		rows: PortDraft[];

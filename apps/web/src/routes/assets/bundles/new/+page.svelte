@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { CameraScanButton } from '$lib/components/ui/camera-scan';
-	import { makerAndName } from '$lib/product-label';
-	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
-	import { canManageInventory } from '$lib/roles';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { CreatableSelect } from '$lib/components/ui/creatable-select';
-	import { CategorySelect } from '$lib/components/ui/category-select';
-	import { NewAssetModal } from '$lib/components/ui/new-asset-modal';
-	import { BundleVsAccessoryInfo } from '$lib/components/ui/bundle-vs-accessory-info';
+	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
+	import { makerAndName } from '#lib/product-label.js';
+	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
+	import { canManageInventory } from '#lib/roles.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
+	import { CategorySelect } from '#lib/components/ui/category-select/index.js';
+	import { NewAssetModal } from '#lib/components/ui/new-asset-modal/index.js';
+	import { BundleVsAccessoryInfo } from '#lib/components/ui/bundle-vs-accessory-info/index.js';
 	import {
 		getAssets,
 		getCategories,
@@ -18,15 +18,15 @@
 		getBundleTemplates,
 		getBundleTypeSpec,
 		createBundleInstance
-	} from '$lib/remote/assets.remote';
-	import { countProducts, matchesSpec, specShortfall } from '$lib/bundle-spec';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
+	} from '#lib/remote/assets.remote.js';
+	import { countProducts, matchesSpec, specShortfall } from '#lib/bundle-spec.js';
+	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
-	import { AssetStatusBadge } from '$lib/components/ui/asset-status';
-	import { UnitPicker, type PickerUnit } from '$lib/components/ui/unit-picker';
-	import { isBookableStatus } from '$lib/asset-status';
+	import { AssetStatusBadge } from '#lib/components/ui/asset-status/index.js';
+	import { UnitPicker, type PickerUnit } from '#lib/components/ui/unit-picker/index.js';
+	import { isBookableStatus } from '#lib/asset-status.js';
 
 	// Bundle fields
 	type SelectionOrNew = { id: string | null; name: string } | null;
@@ -154,7 +154,7 @@
 				assetIds: selectedIds
 			});
 			toast.success('Bundle created!');
-			goto(resolve(`/assets/bundles/${bundle.id}`));
+			goto(resolve(`assets/bundles/${bundle.id}`));
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			saving = false;
@@ -166,9 +166,7 @@
 
 <div class="space-y-6">
 	<div>
-		<Button variant="ghost" href={resolve('/assets')} class="mb-2 -ml-3">
-			← Back to Inventory
-		</Button>
+		<Button variant="ghost" href={resolve('assets')} class="mb-2 -ml-3">← Back to Inventory</Button>
 		<h1 class="text-3xl font-bold tracking-tight">Create Bundle</h1>
 		<!-- The one place the wrong choice is actually made: someone with a case
 		     of gear in front of them is here, and a device with its accessories
@@ -348,7 +346,7 @@
 			>
 				{saving ? 'Creating…' : 'Create Bundle'}
 			</Button>
-			<Button icon="close" type="button" variant="outline" href={resolve('/assets')}>Cancel</Button>
+			<Button icon="close" type="button" variant="outline" href={resolve('assets')}>Cancel</Button>
 			{#if specLines.length > 0 && stillMissing > 0}
 				<p class="mr-auto text-sm text-muted-foreground">
 					{plural(stillMissing, [

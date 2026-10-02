@@ -8,8 +8,8 @@
 	//
 	// Reached from both places the distinction is made: the bundle list and the
 	// accessories card on a unit.
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
 	import { Boxes, Layers } from '@lucide/svelte';
 
 	let { open = $bindable(false) }: { open: boolean } = $props();

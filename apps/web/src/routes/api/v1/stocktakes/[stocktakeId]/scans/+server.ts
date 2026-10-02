@@ -1,8 +1,8 @@
 import type { RequestHandler } from './$types';
-import { apiJson, handleApi, requireApiUser } from '$lib/server/api';
-import { jsonBody, requireString, withStocktakeErrors } from '$lib/server/stocktake-api';
-import { scanIntoStocktake } from '$lib/server/services/stocktake';
-import { toStocktakeScanResult } from '$lib/server/services/api-mappers';
+import { apiJson, handleApi, requireApiUser } from '#lib/server/api.js';
+import { jsonBody, requireString, withStocktakeErrors } from '#lib/server/stocktake-api.js';
+import { scanIntoStocktake } from '#lib/server/services/stocktake.js';
+import { toStocktakeScanResult } from '#lib/server/services/api-mappers.js';
 
 export const POST: RequestHandler = ({ locals, params, request }) =>
 	handleApi(async () => {

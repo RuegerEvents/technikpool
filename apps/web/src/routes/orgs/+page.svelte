@@ -1,27 +1,27 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
 	import {
 		getMyOrgs,
 		getAllOrgs,
 		createOrg,
 		getOrgIdentityInUse,
 		setHomeOrg
-	} from '$lib/remote/orgs.remote';
+	} from '#lib/remote/orgs.remote.js';
 	import { Star } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { invalidateAll } from '$app/navigation';
-	import { plural, getErrorMessage, orgLabel, getContrastingTextColor } from '$lib/utils';
-	import { roleName } from '$lib/role-descriptions.svelte';
-	import { OrgBadge } from '$lib/components/ui/org-badge';
-	import { Modal } from '$lib/components/ui/modal';
-	import { ORG_COLOR_PALETTE, suggestOrgColor } from '$lib/org-colors';
-	import { orgIdentityProblem } from '$lib/org-identity.svelte';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { refreshAll } from '$app/navigation';
+	import { plural, getErrorMessage, orgLabel, getContrastingTextColor } from '#lib/utils.js';
+	import { roleName } from '#lib/role-descriptions.svelte.js';
+	import { OrgBadge } from '#lib/components/ui/org-badge/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { ORG_COLOR_PALETTE, suggestOrgColor } from '#lib/org-colors.js';
+	import { orgIdentityProblem } from '#lib/org-identity.svelte.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 
 	let { data } = $props();
 
@@ -50,7 +50,7 @@
 		starring = orgId;
 		try {
 			await setHomeOrg(orgId);
-			await invalidateAll();
+			await refreshAll();
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {
@@ -97,7 +97,7 @@
 			toast.success(`Organization "${newOrgName}" created!`);
 			// The nav keeps the org-scoped pages from someone without an org, and that
 			// answer comes from the layout's load — a first org has to reach it.
-			if (!data.hasOrg) await invalidateAll();
+			if (!data.hasOrg) await refreshAll();
 			createOpen = false;
 			newOrgName = '';
 			newOrgShortName = '';
@@ -175,10 +175,9 @@
 							</div>
 							<div class="flex gap-2">
 								{#if org.role === 'OWNER' || data.isAdmin}
-									<Button variant="outline" href={resolve(`/orgs/${org.id}`)}>Manage</Button>
+									<Button variant="outline" href={resolve(`orgs/${org.id}`)}>Manage</Button>
 								{/if}
-								<Button variant="outline" href={resolve(`/assets?org=${org.id}`)}
-									>View Assets</Button
+								<Button variant="outline" href={resolve(`assets?org=${org.id}`)}>View Assets</Button
 								>
 							</div>
 						</Card.Content>

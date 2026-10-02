@@ -1,9 +1,9 @@
-import { prisma } from '$lib/server/auth';
-import { ACTIVE_ASSET_WHERE } from '$lib/asset-status';
-import { countProducts, specShortfall } from '$lib/bundle-spec';
-import { bundleLabel, makerAndName } from '$lib/product-label';
-import { naturalCompare } from '$lib/sort';
-import { userLabel } from '$lib/user-label.svelte';
+import { prisma } from '#lib/server/auth.js';
+import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
+import { countProducts, specShortfall } from '#lib/bundle-spec.js';
+import { bundleLabel, makerAndName } from '#lib/product-label.js';
+import { naturalCompare } from '#lib/sort.js';
+import { userLabel } from '#lib/user-label.svelte.js';
 import {
 	isSystemAdmin,
 	productionVisibility,
@@ -13,7 +13,7 @@ import {
 } from './access';
 import { resolveScannedCode } from './asset-lookup';
 import { bundleTypeSpec } from './bundle-spec';
-import type { CaseCheckedData } from '$lib/types/asset-transaction';
+import type { CaseCheckedData } from '#lib/types/asset-transaction.js';
 
 // Checking a case (Kiste checken): open one kit, or one unit with its
 // accessories, and tick off what is in it. A stocktake for one box — but

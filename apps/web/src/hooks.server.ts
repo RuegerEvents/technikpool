@@ -1,13 +1,13 @@
-import { auth } from '$lib/server/auth';
+import { redirect } from '@sveltejs/kit';
+import { auth } from '#lib/server/auth.js';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
-import { building } from '$app/environment';
-import { redirect, type Handle } from '@sveltejs/kit';
-import { sequence } from '@sveltejs/kit/hooks';
+import { building } from '$app/env';
+import { sequence, type Handle } from '@sveltejs/kit/hooks';
 import * as main from './locales/main.loader.server.svelte.js';
 import { runWithLocale, loadLocales } from 'wuchale/load-utils/server';
 import { locales } from './locales/data.js';
-import { ensureBucket } from '$lib/server/storage';
-import { schedulePurge } from '$lib/server/cleanup';
+import { ensureBucket } from '#lib/server/storage.js';
+import { schedulePurge } from '#lib/server/cleanup.js';
 
 loadLocales(main.key, main.loadCount, main.loadCatalog, locales);
 

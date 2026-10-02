@@ -1,5 +1,5 @@
-import { prisma } from '$lib/server/auth';
-import { ACTIVE_ASSET_WHERE } from '$lib/asset-status';
+import { prisma } from '#lib/server/auth.js';
+import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
 
 // An accessory is an Asset with `parentAssetId` set — a converter's power
 // supply, a fixture's omega brackets, a stagebox's case. It stays a full asset

@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { orgLabel } from '$lib/utils';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { getInvoices } from '$lib/remote/offers.remote';
+	import { orgLabel } from '#lib/utils.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { getInvoices } from '#lib/remote/offers.remote.js';
 	import { resolve } from '$app/paths';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 
 	let invoicesQuery = $derived(getInvoices());
 	let invoices = $derived(invoicesQuery.current ?? []);
@@ -78,7 +78,7 @@
 									>{/if}</td
 							>
 							<td class="px-4 py-3 text-right">
-								<Button variant="outline" size="sm" href={resolve(`/invoices/${invoice.id}`)}
+								<Button variant="outline" size="sm" href={resolve(`invoices/${invoice.id}`)}
 									>View</Button
 								>
 							</td>

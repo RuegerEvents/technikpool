@@ -1,4 +1,4 @@
-import { prisma } from '$lib/server/auth';
+import { prisma } from '#lib/server/auth.js';
 
 export type ProductControl =
 	| { allowed: true }

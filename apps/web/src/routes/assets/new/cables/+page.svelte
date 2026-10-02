@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { naturalCompare } from '$lib/sort';
-	import { productLabel } from '$lib/product-label';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { CategorySelect } from '$lib/components/ui/category-select';
-	import { CreatableSelect } from '$lib/components/ui/creatable-select';
-	import { ConnectorFormModal } from '$lib/components/ui/connector-form-modal';
+	import { naturalCompare } from '#lib/sort.js';
+	import { productLabel } from '#lib/product-label.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { CategorySelect } from '#lib/components/ui/category-select/index.js';
+	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
+	import { ConnectorFormModal } from '#lib/components/ui/connector-form-modal/index.js';
 	import {
 		createCableBatch,
 		getCableVocabulary,
@@ -15,9 +15,9 @@
 		getLocations,
 		getManufacturers,
 		getProducts
-	} from '$lib/remote/assets.remote';
-	import { getConnectors } from '$lib/remote/connectors.remote';
-	import { getMyOrgs, getNextAssetTag } from '$lib/remote/orgs.remote';
+	} from '#lib/remote/assets.remote.js';
+	import { getConnectors } from '#lib/remote/connectors.remote.js';
+	import { getMyOrgs, getNextAssetTag } from '#lib/remote/orgs.remote.js';
 	import {
 		CABLE_END_LABEL,
 		QUICK_ENTRY_EXAMPLES,
@@ -32,12 +32,12 @@
 		parseCableQuickEntry,
 		parseLengthMeters,
 		type CableEndRole
-	} from '$lib/cable';
+	} from '#lib/cable.js';
 	import { resolve } from '$app/paths';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { toast } from 'svelte-sonner';
-	import { getErrorMessage, orgLabel, plural } from '$lib/utils';
-	import { canManageInventory } from '$lib/roles';
+	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
+	import { canManageInventory } from '#lib/roles.js';
 
 	// ⌘ on a Mac, Ctrl everywhere else. Also keeps the symbol out of the
 	// translation catalogue, where it has no business being.
@@ -484,7 +484,7 @@
 							{#if selectedOrgId && locations.length === 0}
 								<p class="text-sm text-muted-foreground">
 									No locations yet. Create one in
-									<a class="underline" href={resolve(`/orgs/${selectedOrgId}/locations`)}
+									<a class="underline" href={resolve(`orgs/${selectedOrgId}/locations`)}
 										>Locations</a
 									>.
 								</p>
@@ -728,7 +728,7 @@
 						<Button icon="add" type="submit" disabled={saving}>
 							{saving ? 'Saving…' : 'Add Cables'}
 						</Button>
-						<Button icon="close" type="button" variant="outline" href={resolve('/assets')}
+						<Button icon="close" type="button" variant="outline" href={resolve('assets')}
 							>Done</Button
 						>
 						<span class="mr-auto text-xs text-muted-foreground">{modLabel} + Enter saves</span>

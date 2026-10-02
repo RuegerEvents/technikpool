@@ -1,19 +1,19 @@
 <script lang="ts">
-	import { naturalCompare } from '$lib/sort';
-	import { withCaption } from '$lib/product-label';
-	import { CountStepper } from '$lib/components/ui/count-stepper';
-	import { categoryLabel } from '$lib/category';
-	import { getErrorMessage, plural, orgLabel } from '$lib/utils';
+	import { naturalCompare } from '#lib/sort.js';
+	import { withCaption } from '#lib/product-label.js';
+	import { CountStepper } from '#lib/components/ui/count-stepper/index.js';
+	import { categoryLabel } from '#lib/category.js';
+	import { getErrorMessage, plural, orgLabel } from '#lib/utils.js';
 	import { resolve } from '$app/paths';
-	import { Button } from '$lib/components/ui/button';
-	import { OrgBadge } from '$lib/components/ui/org-badge';
-	import { FilterPopover } from '$lib/components/ui/filter-popover';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { getEquipmentEditorData, setProductionQuantity } from '$lib/remote/equipment.remote';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { OrgBadge } from '#lib/components/ui/org-badge/index.js';
+	import { FilterPopover } from '#lib/components/ui/filter-popover/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
+	import { getEquipmentEditorData, setProductionQuantity } from '#lib/remote/equipment.remote.js';
 	import {
 		addBundleToProduction,
 		removeBundleFromProduction
-	} from '$lib/remote/productions.remote';
+	} from '#lib/remote/productions.remote.js';
 	import { toast } from 'svelte-sonner';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { onDestroy } from 'svelte';
@@ -504,7 +504,7 @@
 		<div>
 			<Button
 				variant="ghost"
-				href={resolve(`/productions/${productionId}`)}
+				href={resolve(`productions/${productionId}`)}
 				class="mb-1 flex items-center gap-1 text-muted-foreground"
 			>
 				<svg

@@ -7,8 +7,8 @@ declare global {
 		// and only falls back to `message`.
 		interface Error {
 			message: string;
-			code?: import('$lib/errors').AppErrorCode;
-			params?: import('$lib/errors').ErrorParams;
+			code?: import('#lib/errors.js').AppErrorCode;
+			params?: import('#lib/errors.js').ErrorParams;
 		}
 		interface Locals {
 			user: import('better-auth').User | null;

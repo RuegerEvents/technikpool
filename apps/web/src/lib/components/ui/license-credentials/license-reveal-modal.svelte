@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
-	import { getErrorMessage } from '$lib/utils';
-	import { revealLicenseCredentials } from '$lib/remote/licenses.remote';
-	import type { LicenseCredentials } from '$lib/license';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { getErrorMessage } from '#lib/utils.js';
+	import { revealLicenseCredentials } from '#lib/remote/licenses.remote.js';
+	import type { LicenseCredentials } from '#lib/license.js';
 
 	type Props = {
 		open: boolean;

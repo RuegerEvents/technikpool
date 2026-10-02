@@ -1,4 +1,4 @@
-import { naturalCompare } from '$lib/sort';
+import { naturalCompare } from '#lib/sort.js';
 
 // The shape of a production's list (check, handout, return), shared by the
 // server that builds it and the page that draws it. The server half is

@@ -1,9 +1,8 @@
 import type { RequestHandler } from './$types';
-import { prisma } from '$lib/server/auth';
-import { handleApi, requireApiUser } from '$lib/server/api';
-import { isSystemAdmin, userOrgIds } from '$lib/server/services/access';
-import { toLocation } from '$lib/server/services/api-mappers';
-import { json } from '@sveltejs/kit';
+import { prisma } from '#lib/server/auth.js';
+import { handleApi, requireApiUser } from '#lib/server/api.js';
+import { isSystemAdmin, userOrgIds } from '#lib/server/services/access.js';
+import { toLocation } from '#lib/server/services/api-mappers.js';
 
 export const GET: RequestHandler = ({ locals }) =>
 	handleApi(async () => {
@@ -17,5 +16,5 @@ export const GET: RequestHandler = ({ locals }) =>
 			orderBy: { name: 'asc' }
 		});
 
-		return json(locations.map(toLocation));
+		return Response.json(locations.map(toLocation));
 	});

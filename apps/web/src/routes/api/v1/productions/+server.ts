@@ -1,12 +1,11 @@
 import type { RequestHandler } from './$types';
-import { handleApi, requireApiUser } from '$lib/server/api';
-import { productionTargets } from '$lib/server/services/checkout';
-import { toProduction } from '$lib/server/services/api-mappers';
-import { json } from '@sveltejs/kit';
+import { handleApi, requireApiUser } from '#lib/server/api.js';
+import { productionTargets } from '#lib/server/services/checkout.js';
+import { toProduction } from '#lib/server/services/api-mappers.js';
 
 export const GET: RequestHandler = ({ locals }) =>
 	handleApi(async () => {
 		const user = requireApiUser(locals);
 		// Cancelled ones are left out: a scan to them is refused.
-		return json((await productionTargets(user.id)).map(toProduction));
+		return Response.json((await productionTargets(user.id)).map(toProduction));
 	});

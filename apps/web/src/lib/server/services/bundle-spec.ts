@@ -1,14 +1,14 @@
-import { naturalCompare } from '$lib/sort';
-import { makerAndName } from '$lib/product-label';
-import { prisma } from '$lib/server/auth';
-import { appError } from '$lib/errors';
+import { naturalCompare } from '#lib/sort.js';
+import { makerAndName } from '#lib/product-label.js';
+import { prisma } from '#lib/server/auth.js';
+import { appError } from '#lib/errors.js';
 import {
 	countProducts,
 	matchesSpec,
 	specShortfall,
 	specSurplus,
 	type BundleTypeSpec
-} from '$lib/bundle-spec';
+} from '#lib/bundle-spec.js';
 
 /**
  * What a bundle type holds, read off the cases that exist.

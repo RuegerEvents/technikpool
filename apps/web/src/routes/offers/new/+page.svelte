@@ -1,31 +1,31 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { CustomerSelect } from '$lib/components/ui/customer-select';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
-	import { canManageInventory } from '$lib/roles';
-	import { setOrgCategoryRate } from '$lib/remote/orgs.remote';
-	import { getProduction, getProductions } from '$lib/remote/productions.remote';
-	import { setOrgProductPrice } from '$lib/remote/assets.remote';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { CustomerSelect } from '#lib/components/ui/customer-select/index.js';
+	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
+	import { canManageInventory } from '#lib/roles.js';
+	import { setOrgCategoryRate } from '#lib/remote/orgs.remote.js';
+	import { getProduction, getProductions } from '#lib/remote/productions.remote.js';
+	import { setOrgProductPrice } from '#lib/remote/assets.remote.js';
 	import {
 		createOfferFromProduction,
 		getProductionBillingReadiness
-	} from '$lib/remote/offers.remote';
+	} from '#lib/remote/offers.remote.js';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
-	import { customerLabel, formatAddress, getErrorMessage, orgLabel, plural } from '$lib/utils';
-	import { localizedName } from '$lib/category';
+	import { customerLabel, formatAddress, getErrorMessage, orgLabel, plural } from '#lib/utils.js';
+	import { localizedName } from '#lib/category.js';
 	import {
 		DEFAULT_OFFER_CLOSING,
 		DEFAULT_OFFER_INTRO,
 		formatBillingDate,
 		renderBillingText
-	} from '$lib/billing-text';
+	} from '#lib/billing-text.js';
 
 	const preselectedProductionId = page.url.searchParams.get('productionId');
 
@@ -235,7 +235,7 @@
 				assetScope: hasCrossOrgItems ? assetScope : undefined
 			});
 			toast.success('Offer created');
-			goto(resolve(`/offers/${offer.id}`));
+			goto(resolve(`offers/${offer.id}`));
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			saving = false;
@@ -497,7 +497,7 @@
 											<div class="flex flex-wrap gap-1.5">
 												{#each group.assets as asset (asset.id)}
 													<a
-														href={resolve(`/assets/${asset.id}`)}
+														href={resolve(`assets/${asset.id}`)}
 														target="_blank"
 														class="rounded border px-1.5 py-0.5 font-mono text-xs text-muted-foreground transition-colors hover:bg-muted"
 													>
@@ -521,7 +521,7 @@
 												<p class="text-sm text-muted-foreground">
 													In bundle
 													<a
-														href={resolve(`/assets/bundles/${hint.bundleId}`)}
+														href={resolve(`assets/bundles/${hint.bundleId}`)}
 														target="_blank"
 														class="underline underline-offset-2">{hint.bundleName}</a
 													>, which has no price of its own and is billed as one line at the sum of

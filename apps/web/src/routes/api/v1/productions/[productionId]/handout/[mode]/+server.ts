@@ -1,8 +1,8 @@
 import type { RequestHandler } from './$types';
-import { apiJson, handleApi, requireApiUser } from '$lib/server/api';
-import { handoutMode, withHandoutErrors } from '$lib/server/production-handout-api';
-import { getHandout } from '$lib/server/services/production-handout';
-import { toProductionHandout } from '$lib/server/services/api-mappers';
+import { apiJson, handleApi, requireApiUser } from '#lib/server/api.js';
+import { handoutMode, withHandoutErrors } from '#lib/server/production-handout-api.js';
+import { getHandout } from '#lib/server/services/production-handout.js';
+import { toProductionHandout } from '#lib/server/services/api-mappers.js';
 
 export const GET: RequestHandler = ({ locals, params, url }) =>
 	handleApi(async () => {

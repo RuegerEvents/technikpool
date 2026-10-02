@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
-import { getStocktake, StocktakeError, stocktakeCsv } from '$lib/server/services/stocktake';
+import { getStocktake, StocktakeError, stocktakeCsv } from '#lib/server/services/stocktake.js';
 
 // A download, not a page: plain GET with the session cookie, so a link can
 // point at it. Only the caller's own orgs' stocktakes, like everything else.

@@ -13,16 +13,16 @@
 </script>
 
 <script lang="ts">
-	import { CameraScanButton } from '$lib/components/ui/camera-scan';
+	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
 	// Picking loose units for a kit the way a production books them: one row per
 	// product and place, a count, and "all" — because "4 of the CAT cables" is
 	// the question, not which four. A row opens into its units, tag by tag, for
 	// the times it is exactly that one; and the search finds a unit by its tag or
 	// serial number as well as by what it is.
 	import { SvelteSet } from 'svelte/reactivity';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { CountStepper } from '$lib/components/ui/count-stepper';
-	import { naturalCompare } from '$lib/sort';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
+	import { CountStepper } from '#lib/components/ui/count-stepper/index.js';
+	import { naturalCompare } from '#lib/sort.js';
 
 	let {
 		units,

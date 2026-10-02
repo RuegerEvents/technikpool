@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { getErrorMessage, orgLabel } from '$lib/utils';
-	import { canManageInventory } from '$lib/roles';
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
-	import { getLocations, getCategories, importAssets } from '$lib/remote/assets.remote';
-	import type { ImportResult } from '$lib/remote/assets.remote';
+	import { getErrorMessage, orgLabel } from '#lib/utils.js';
+	import { canManageInventory } from '#lib/roles.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
+	import { getLocations, getCategories, importAssets } from '#lib/remote/assets.remote.js';
+	import type { ImportResult } from '#lib/remote/assets.remote.js';
 	import { toast } from 'svelte-sonner';
 	import { SvelteSet } from 'svelte/reactivity';
 

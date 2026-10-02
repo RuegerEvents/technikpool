@@ -1,7 +1,7 @@
 import { query, command } from '$app/server';
-import { prisma } from '$lib/server/auth';
+import { prisma } from '#lib/server/auth.js';
 import * as v from 'valibot';
-import { requireOrgRead, requireOrgWrite } from '$lib/server/services/access';
+import { requireOrgRead, requireOrgWrite } from '#lib/server/services/access.js';
 import { getKnownAddresses } from './addresses.remote';
 
 const addressInputSchema = v.object({

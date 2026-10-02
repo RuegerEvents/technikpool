@@ -1,6 +1,6 @@
-import { apiError, ApiResponse } from '$lib/server/api';
-import { CHECKOUT_ERROR_STATUS, CheckoutError } from '$lib/server/services/checkout';
-import type { HandoutMode } from '$lib/server/services/production-handout';
+import { apiError, ApiResponse } from '#lib/server/api.js';
+import { CHECKOUT_ERROR_STATUS, CheckoutError } from '#lib/server/services/checkout.js';
+import type { HandoutMode } from '#lib/server/services/production-handout.js';
 
 // The /api/v1 handout handlers share one translation from the checkout
 // service's errors to the spec's envelope — the same codes /api/v1/scans

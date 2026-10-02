@@ -1,8 +1,8 @@
-import { prisma } from '$lib/server/auth';
-import type { Prisma } from '$lib/prisma/client';
-import { naturalCompare } from '$lib/sort';
-import { ACTIVE_ASSET_WHERE } from '$lib/asset-status';
-import { compareGroups, type ListGroup, type ListLine } from '$lib/production-list';
+import { prisma } from '#lib/server/auth.js';
+import type { Prisma } from '#lib/prisma/client.js';
+import { naturalCompare } from '#lib/sort.js';
+import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
+import { compareGroups, type ListGroup, type ListLine } from '#lib/production-list.js';
 
 // The list a production's equipment is worked through — checked (Prüfen),
 // handed out (Ausgabe) or taken back (Rücknahme). The three differ only in

@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { LegalLinks } from '$lib/components/ui/legal-links';
-	import { resetPassword } from '$lib/auth-client';
-	import { Input } from '$lib/components/ui/input';
-	import { Button } from '$lib/components/ui/button';
-	import { Label } from '$lib/components/ui/label';
-	import * as Card from '$lib/components/ui/card';
+	import { LegalLinks } from '#lib/components/ui/legal-links/index.js';
+	import { resetPassword } from '#lib/auth-client.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -34,7 +34,7 @@
 				onSuccess: () => {
 					success = true;
 					loading = false;
-					goto(resolve('/auth/login'));
+					goto(resolve('auth/login'));
 				},
 				onError: (ctx) => {
 					error = ctx.error.message;
@@ -61,7 +61,7 @@
 					This reset link is invalid or has expired.
 				</p>
 				<div class="mt-4 text-center text-sm">
-					<a href={resolve('/auth/forgot-password')} class="underline">Request a new reset link</a>
+					<a href={resolve('auth/forgot-password')} class="underline">Request a new reset link</a>
 				</div>
 			{:else}
 				<form onsubmit={handleSubmit} class="space-y-4">

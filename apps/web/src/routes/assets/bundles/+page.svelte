@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { categoryLabel } from '$lib/category';
-	import { getErrorMessage, orgLabel } from '$lib/utils';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { CategoryPill } from '$lib/components/ui/category-pill';
-	import { getBundleTemplates, deleteBundleTemplate } from '$lib/remote/assets.remote';
+	import { categoryLabel } from '#lib/category.js';
+	import { getErrorMessage, orgLabel } from '#lib/utils.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { CategoryPill } from '#lib/components/ui/category-pill/index.js';
+	import { getBundleTemplates, deleteBundleTemplate } from '#lib/remote/assets.remote.js';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import { Layers } from '@lucide/svelte';
-	import { imageSrc } from '$lib/images';
-	import { BundleVsAccessoryInfo } from '$lib/components/ui/bundle-vs-accessory-info';
+	import { imageSrc } from '#lib/images.js';
+	import { BundleVsAccessoryInfo } from '#lib/components/ui/bundle-vs-accessory-info/index.js';
 
 	let templatesQuery = $derived(getBundleTemplates());
 	let templates = $derived(templatesQuery.current ?? []);
@@ -49,7 +49,7 @@
 				>
 			</p>
 		</div>
-		<Button icon="add" href={resolve('/assets/bundles/new')}>New Bundle</Button>
+		<Button icon="add" href={resolve('assets/bundles/new')}>New Bundle</Button>
 	</div>
 
 	{#if !templatesQuery.ready}
@@ -58,7 +58,7 @@
 		<Card.Root>
 			<Card.Content class="py-12 text-center text-muted-foreground">
 				No bundles yet.
-				<a href={resolve('/assets/bundles/new')} class="ml-1 text-primary hover:underline"
+				<a href={resolve('assets/bundles/new')} class="ml-1 text-primary hover:underline"
 					>Create your first bundle →</a
 				>
 			</Card.Content>
@@ -106,7 +106,7 @@
 							<div class="mt-3 flex flex-wrap gap-1.5">
 								{#each template.instances as instance, i (instance.id)}
 									<a
-										href={resolve(`/assets/bundles/${instance.id}`)}
+										href={resolve(`assets/bundles/${instance.id}`)}
 										class="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground hover:border-foreground hover:text-foreground"
 									>
 										{instance.tag ?? `Instance ${i + 1}`}{instance.location

@@ -1,5 +1,5 @@
-import { apiError, ApiResponse } from '$lib/server/api';
-import { STOCKTAKE_ERROR_STATUS, StocktakeError } from '$lib/server/services/stocktake';
+import { apiError, ApiResponse } from '#lib/server/api.js';
+import { STOCKTAKE_ERROR_STATUS, StocktakeError } from '#lib/server/services/stocktake.js';
 
 // The /api/v1/stocktakes handlers share one translation from the service's
 // errors to the spec's envelope. The codes are the service's own, and every

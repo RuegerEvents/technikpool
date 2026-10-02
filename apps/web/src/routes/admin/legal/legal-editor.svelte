@@ -1,14 +1,14 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
-	import { legalTitle, type LegalSlug } from '$lib/legal.svelte';
-	import { saveLegalDocument } from '$lib/remote/legal.remote';
-	import { messageForErrorCode } from '$lib/error-messages.svelte';
-	import { getErrorMessage } from '$lib/utils';
+	import { legalTitle, type LegalSlug } from '#lib/legal.svelte.js';
+	import { saveLegalDocument } from '#lib/remote/legal.remote.js';
+	import { messageForErrorCode } from '#lib/error-messages.svelte.js';
+	import { getErrorMessage } from '#lib/utils.js';
 
 	let {
 		doc
@@ -72,7 +72,7 @@
 				Links to your own page.
 			{:else}
 				Shown at
-				<a href={resolve(`/legal/${doc.slug}`)} target="_blank" class="underline"
+				<a href={resolve(`legal/${doc.slug}`)} target="_blank" class="underline"
 					>/legal/{doc.slug}</a
 				>.
 			{/if}

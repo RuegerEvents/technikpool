@@ -1,14 +1,14 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { getErrorMessage } from '$lib/utils';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { getErrorMessage } from '#lib/utils.js';
 	import { toast } from 'svelte-sonner';
 	import {
 		orgSnapshotDiff,
 		type OrgSnapshotColumns,
 		type OrgSnapshotDiffKey,
 		type OrgSnapshotSource
-	} from '$lib/org-snapshot';
+	} from '#lib/org-snapshot.js';
 
 	// Offers and invoices snapshot the issuing org's letterhead at creation.
 	// When the live org has since changed, this hint appears — the snapshot

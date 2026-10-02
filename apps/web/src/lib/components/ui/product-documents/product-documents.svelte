@@ -6,17 +6,17 @@
 	// before anyone picks a file.
 	import { FileText, Info, Pencil, Trash2 } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
-	import { imageSrc } from '$lib/images';
-	import { getErrorMessage } from '$lib/utils';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
+	import { imageSrc } from '#lib/images.js';
+	import { getErrorMessage } from '#lib/utils.js';
 	import {
 		addProductDocument,
 		getProductDocuments,
 		removeProductDocument,
 		updateProductDocument
-	} from '$lib/remote/product-documents.remote';
+	} from '#lib/remote/product-documents.remote.js';
 
 	type Kind = 'MANUAL' | 'DATASHEET' | 'OTHER';
 

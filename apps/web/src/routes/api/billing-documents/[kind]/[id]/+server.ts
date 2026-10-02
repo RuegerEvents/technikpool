@@ -1,10 +1,10 @@
 import type { RequestHandler } from './$types';
 import { error, isHttpError } from '@sveltejs/kit';
-import { prisma } from '$lib/server/auth';
-import { getObject } from '$lib/server/storage';
-import { requireOrgInventory } from '$lib/server/services/access';
-import { generateBillingPdf } from '$lib/server/billing-pdf';
-import { organizationFromSnapshot } from '$lib/org-snapshot';
+import { prisma } from '#lib/server/auth.js';
+import { getObject } from '#lib/server/storage.js';
+import { requireOrgInventory } from '#lib/server/services/access.js';
+import { generateBillingPdf } from '#lib/server/billing-pdf.js';
+import { organizationFromSnapshot } from '#lib/org-snapshot.js';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
 	if (!locals.user) error(401, 'Unauthorized');

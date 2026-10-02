@@ -1,16 +1,16 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
 	import {
 		CustomerFormModal,
 		type CustomerWithAddress
-	} from '$lib/components/ui/customer-form-modal';
-	import { getCustomers } from '$lib/remote/customers.remote';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
+	} from '#lib/components/ui/customer-form-modal/index.js';
+	import { getCustomers } from '#lib/remote/customers.remote.js';
+	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
 	import { page } from '$app/state';
-	import { ROLE_FOR, canWrite, roleAtLeast } from '$lib/roles';
-	import { customerLabel, formatAddress, orgLabel } from '$lib/utils';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { ROLE_FOR, canWrite, roleAtLeast } from '#lib/roles.js';
+	import { customerLabel, formatAddress, orgLabel } from '#lib/utils.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 
 	// Read through the query rather than awaited: `await` in a `$derived`
 	// suspends the whole component until it answers, heading and all. See

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import InvoiceDetail from './invoice-detail.svelte';
 
 	const invoiceId = $derived(page.params.id as string);

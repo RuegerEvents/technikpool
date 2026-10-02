@@ -1,5 +1,5 @@
-import { prisma } from '$lib/server/auth';
-import { appError } from '$lib/errors';
+import { prisma } from '#lib/server/auth.js';
+import { appError } from '#lib/errors.js';
 
 /** One line of a device's panel as the forms send it. */
 export type PortInput = { connectorId: string; count: number; label: string | null };

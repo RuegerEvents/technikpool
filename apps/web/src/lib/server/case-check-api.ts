@@ -1,5 +1,5 @@
-import { apiError } from '$lib/server/api';
-import { CASE_CHECK_ERROR_STATUS, CaseCheckError } from '$lib/server/services/case-check';
+import { apiError } from '#lib/server/api.js';
+import { CASE_CHECK_ERROR_STATUS, CaseCheckError } from '#lib/server/services/case-check.js';
 
 // The /api/v1/case-checks handlers' one translation from the service's errors
 // to the spec's envelope. Every code is listed in openapi.yaml.

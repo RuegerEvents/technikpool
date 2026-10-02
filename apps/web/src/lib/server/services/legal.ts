@@ -6,8 +6,8 @@ import { getObject, putObject } from '../storage';
 import { sendMail } from '../mail';
 import { appBaseUrl } from '../app-url';
 import { dpaAcceptedEmail } from '../emails/dpa-accepted';
-import { PUBLIC_LEGAL_SLUGS, type LegalLink, type LegalSlug } from '$lib/legal.svelte';
-import type { LegalDocumentKind } from '$lib/prisma/client';
+import { PUBLIC_LEGAL_SLUGS, type LegalLink, type LegalSlug } from '#lib/legal.svelte.js';
+import type { LegalDocumentKind } from '#lib/prisma/client.js';
 
 export const KIND_OF: Record<LegalSlug, LegalDocumentKind> = {
 	imprint: 'IMPRINT',

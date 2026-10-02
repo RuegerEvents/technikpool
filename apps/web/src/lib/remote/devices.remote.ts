@@ -1,10 +1,10 @@
 import { query, command, getRequestEvent } from '$app/server';
 import * as v from 'valibot';
-import { auth, prisma } from '$lib/server/auth';
-import { appBaseUrl } from '$lib/server/app-url';
-import { requireAuth } from '$lib/server/services/access';
-import { appError } from '$lib/errors';
-import { USER_CODE_LENGTH, normalizeUserCode } from '$lib/device-code';
+import { auth, prisma } from '#lib/server/auth.js';
+import { appBaseUrl } from '#lib/server/app-url.js';
+import { requireAuth } from '#lib/server/services/access.js';
+import { appError } from '#lib/errors.js';
+import { USER_CODE_LENGTH, normalizeUserCode } from '#lib/device-code.js';
 
 export const getPairingInfo = query(async () => {
 	await requireAuth();

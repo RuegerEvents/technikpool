@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { dev } from '$app/environment';
+import { dev } from '$app/env';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 

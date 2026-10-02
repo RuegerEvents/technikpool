@@ -1,19 +1,19 @@
 <script lang="ts">
-	import { categoryLabel } from '$lib/category';
-	import { getErrorMessage } from '$lib/utils';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
+	import { categoryLabel } from '#lib/category.js';
+	import { getErrorMessage } from '#lib/utils.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
 	import {
 		getOrgWithMembers,
 		getOrgCategoryRates,
 		setOrgCategoryRate
-	} from '$lib/remote/orgs.remote';
+	} from '#lib/remote/orgs.remote.js';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import ServiceCatalog from './service-catalog.svelte';
 
 	let { data } = $props();
@@ -60,7 +60,7 @@
 	<div class="flex items-center gap-4">
 		<Button
 			variant="ghost"
-			href={resolve(`/orgs/${orgId}`)}
+			href={resolve(`orgs/${orgId}`)}
 			class="flex max-w-full min-w-0 items-center gap-1 text-muted-foreground"
 		>
 			<svg

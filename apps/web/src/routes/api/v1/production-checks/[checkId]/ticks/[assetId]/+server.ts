@@ -1,7 +1,7 @@
 import type { RequestHandler } from './$types';
-import { handleApi, requireApiUser } from '$lib/server/api';
-import { withCheckErrors } from '$lib/server/production-check-api';
-import { untickCheckItem } from '$lib/server/services/production-check';
+import { handleApi, requireApiUser } from '#lib/server/api.js';
+import { withCheckErrors } from '#lib/server/production-check-api.js';
+import { untickCheckItem } from '#lib/server/services/production-check.js';
 
 export const DELETE: RequestHandler = ({ locals, params }) =>
 	handleApi(async () => {

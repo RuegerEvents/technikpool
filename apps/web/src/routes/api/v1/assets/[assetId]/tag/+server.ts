@@ -1,12 +1,12 @@
 import type { RequestHandler } from './$types';
-import { apiError, apiJson, handleApi, requireApiUser, type Schemas } from '$lib/server/api';
-import { ApiResponse } from '$lib/server/api';
-import { toAsset } from '$lib/server/services/api-mappers';
+import { apiError, apiJson, handleApi, requireApiUser, type Schemas } from '#lib/server/api.js';
+import { ApiResponse } from '#lib/server/api.js';
+import { toAsset } from '#lib/server/services/api-mappers.js';
 import {
 	ASSET_TAG_ERROR_STATUS,
 	AssetTagError,
 	assignAssetTag
-} from '$lib/server/services/asset-tags';
+} from '#lib/server/services/asset-tags.js';
 
 export const PUT: RequestHandler = ({ locals, params, request }) =>
 	handleApi(async () => {

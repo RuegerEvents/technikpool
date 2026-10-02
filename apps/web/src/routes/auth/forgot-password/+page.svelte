@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { LegalLinks } from '$lib/components/ui/legal-links';
-	import { requestPasswordReset } from '$lib/auth-client';
-	import { Input } from '$lib/components/ui/input';
-	import { Button } from '$lib/components/ui/button';
-	import { Label } from '$lib/components/ui/label';
-	import * as Card from '$lib/components/ui/card';
+	import { LegalLinks } from '#lib/components/ui/legal-links/index.js';
+	import { requestPasswordReset } from '#lib/auth-client.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
 	import { resolve } from '$app/paths';
 
 	let email = $state('');
@@ -18,7 +18,7 @@
 		error = '';
 
 		await requestPasswordReset(
-			{ email, redirectTo: resolve('/auth/reset-password') },
+			{ email, redirectTo: resolve('auth/reset-password') },
 			{
 				onSuccess: () => {
 					sent = true;
@@ -71,7 +71,7 @@
 				</form>
 			{/if}
 			<div class="mt-4 text-center text-sm">
-				<a href={resolve('/auth/login')} class="underline">Back to login</a>
+				<a href={resolve('auth/login')} class="underline">Back to login</a>
 			</div>
 		</Card.Content>
 	</Card.Root>

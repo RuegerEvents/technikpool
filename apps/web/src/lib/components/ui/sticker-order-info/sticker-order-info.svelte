@@ -6,8 +6,8 @@
 	//
 	// The shop is named as an example and linked, not presented as the only way
 	// to get these printed.
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
 
 	let { open = $bindable(false) }: { open: boolean } = $props();
 

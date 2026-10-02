@@ -1,8 +1,8 @@
 import type { RequestHandler } from './$types';
-import { apiJson, handleApi, requireApiUser } from '$lib/server/api';
-import { jsonBody, requireString } from '$lib/server/stocktake-api';
-import { withCheckErrors } from '$lib/server/production-check-api';
-import { scanIntoCheck } from '$lib/server/services/production-check';
+import { apiJson, handleApi, requireApiUser } from '#lib/server/api.js';
+import { jsonBody, requireString } from '#lib/server/stocktake-api.js';
+import { withCheckErrors } from '#lib/server/production-check-api.js';
+import { scanIntoCheck } from '#lib/server/services/production-check.js';
 
 export const POST: RequestHandler = ({ locals, params, request }) =>
 	handleApi(async () => {

@@ -1,5 +1,5 @@
-import { isHttpError, json } from '@sveltejs/kit';
-import type { components } from '$lib/api/schema';
+import { isHttpError } from '@sveltejs/kit';
+import type { components } from '#lib/api/schema.js';
 
 // Helpers for the /api/v1 endpoints. Responses are typed against the generated
 // OpenAPI schema, so an endpoint that drifts from openapi.yaml fails `pnpm
@@ -10,7 +10,7 @@ export type Schemas = components['schemas'];
 /** Every failure on this surface uses the spec's Error envelope. */
 export function apiError(status: number, code: string, message: string) {
 	const body: Schemas['Error'] = { error: { code, message } };
-	return json(body, { status });
+	return Response.json(body, { status });
 }
 
 /**
@@ -89,5 +89,5 @@ export function handleApi<T>(fn: () => Promise<T>) {
 
 /** Response body typed as the schema the spec promises for this operation. */
 export function apiJson<K extends keyof Schemas>(_schema: K, body: Schemas[K]) {
-	return json(body);
+	return Response.json(body);
 }

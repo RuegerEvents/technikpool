@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { dayCountBetween, plural } from '$lib/utils';
+	import { dayCountBetween, plural } from '#lib/utils.js';
 	import type { ProductionHoverInfo } from './types';
 
 	type Props = {

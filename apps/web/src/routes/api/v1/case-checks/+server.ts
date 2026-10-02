@@ -1,8 +1,8 @@
 import type { RequestHandler } from './$types';
-import { apiError, apiJson, handleApi, requireApiUser } from '$lib/server/api';
-import { withCaseCheckErrors } from '$lib/server/case-check-api';
-import { jsonBody, stringList } from '$lib/server/stocktake-api';
-import { recordCaseCheck } from '$lib/server/services/case-check';
+import { apiError, apiJson, handleApi, requireApiUser } from '#lib/server/api.js';
+import { withCaseCheckErrors } from '#lib/server/case-check-api.js';
+import { jsonBody, stringList } from '#lib/server/stocktake-api.js';
+import { recordCaseCheck } from '#lib/server/services/case-check.js';
 
 const KINDS = ['bundle', 'asset'] as const;
 

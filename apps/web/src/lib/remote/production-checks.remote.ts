@@ -1,7 +1,7 @@
 import { query, command } from '$app/server';
 import * as v from 'valibot';
-import { requireAuth } from '$lib/server/services/access';
-import { appError, type AppErrorCode } from '$lib/errors';
+import { requireAuth } from '#lib/server/services/access.js';
+import { appError, type AppErrorCode } from '#lib/errors.js';
 import {
 	PRODUCTION_CHECK_ERROR_STATUS,
 	ProductionCheckError,
@@ -16,7 +16,7 @@ import {
 	setCheckLineCount,
 	tickCheckItems,
 	untickCheckItem
-} from '$lib/server/services/production-check';
+} from '#lib/server/services/production-check.js';
 import { getProduction } from './productions.remote';
 import { getAssetHistory } from './assets.remote';
 

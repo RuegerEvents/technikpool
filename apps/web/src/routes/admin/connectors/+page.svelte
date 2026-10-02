@@ -4,19 +4,23 @@
 	// the first time a product names a connector nobody had catalogued. The
 	// second kind is why this page exists — those rows have a guessed family and
 	// no picture, and this is where they get put right.
-	import { naturalCompare } from '$lib/sort';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { CategoryPill } from '$lib/components/ui/category-pill';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { Modal } from '$lib/components/ui/modal';
-	import { ConnectorFormModal } from '$lib/components/ui/connector-form-modal';
-	import { getConnectors, getConnectorUsage, deleteConnector } from '$lib/remote/connectors.remote';
-	import { categoryLabel } from '$lib/category';
-	import { CABLE_END_LABEL, connectorRole } from '$lib/cable';
-	import { getErrorMessage, plural } from '$lib/utils';
+	import { naturalCompare } from '#lib/sort.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { CategoryPill } from '#lib/components/ui/category-pill/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { ConnectorFormModal } from '#lib/components/ui/connector-form-modal/index.js';
+	import {
+		getConnectors,
+		getConnectorUsage,
+		deleteConnector
+	} from '#lib/remote/connectors.remote.js';
+	import { categoryLabel } from '#lib/category.js';
+	import { CABLE_END_LABEL, connectorRole } from '#lib/cable.js';
+	import { getErrorMessage, plural } from '#lib/utils.js';
 	import { toast } from 'svelte-sonner';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 
 	let connectorsQuery = $derived(getConnectors());
 	let connectors = $derived(connectorsQuery.current ?? []);

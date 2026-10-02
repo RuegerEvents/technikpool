@@ -1,8 +1,8 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { prisma } from '$lib/server/auth';
-import { appBaseUrl } from '$lib/server/app-url';
-import { renderCalendar, type AllDayEvent } from '$lib/server/ical';
-import { orgLabel } from '$lib/utils';
+import { prisma } from '#lib/server/auth.js';
+import { appBaseUrl } from '#lib/server/app-url.js';
+import { renderCalendar, type AllDayEvent } from '#lib/server/ical.js';
+import { orgLabel } from '#lib/utils.js';
 import { productionReadWhere } from './access';
 
 // A calendar app subscribes to a URL and polls it with no cookie and no bearer

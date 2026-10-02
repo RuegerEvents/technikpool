@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { getErrorMessage, plural } from '$lib/utils';
+	import { getErrorMessage, plural } from '#lib/utils.js';
 	import {
 		getManufacturers,
 		mergeManufacturers,
 		updateManufacturer
-	} from '$lib/remote/assets.remote';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import * as Card from '$lib/components/ui/card';
-	import { Modal } from '$lib/components/ui/modal';
+	} from '#lib/remote/assets.remote.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
 	import { toast } from 'svelte-sonner';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 
 	let { data } = $props();
 	let manufacturersQuery = $derived(getManufacturers());

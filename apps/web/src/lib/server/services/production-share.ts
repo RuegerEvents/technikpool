@@ -1,10 +1,10 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { prisma } from '$lib/server/auth';
-import { appBaseUrl } from '$lib/server/app-url';
-import { imageSrc } from '$lib/images';
-import { nestAccessories } from '$lib/production-items';
-import { naturalCompare } from '$lib/sort';
-import type { ShareUnit, ShareView } from '$lib/production-share';
+import { prisma } from '#lib/server/auth.js';
+import { appBaseUrl } from '#lib/server/app-url.js';
+import { imageSrc } from '#lib/images.js';
+import { nestAccessories } from '#lib/production-items.js';
+import { naturalCompare } from '#lib/sort.js';
+import type { ShareUnit, ShareView } from '#lib/production-share.js';
 
 // A production's info link for its customer: what is booked for the job, to
 // tick off while packing (in the customer's own browser, nothing is stored

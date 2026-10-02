@@ -1,17 +1,17 @@
 import { query, command } from '$app/server';
-import { prisma } from '$lib/server/auth';
+import { prisma } from '#lib/server/auth.js';
 import * as v from 'valibot';
-import { ORG_ROLES } from '$lib/roles';
+import { ORG_ROLES } from '#lib/roles.js';
 import {
 	isSystemAdmin,
 	requireAuth,
 	requireOrgOwner,
 	requireSystemAdmin
-} from '$lib/server/services/access';
-import { issueInvitation } from '$lib/server/services/invitations';
-import { findOpenInvitation, signUpOpen } from '$lib/server/signup-gate';
-import { appError } from '$lib/errors';
-import { orgLabel } from '$lib/utils';
+} from '#lib/server/services/access.js';
+import { issueInvitation } from '#lib/server/services/invitations.js';
+import { findOpenInvitation, signUpOpen } from '#lib/server/signup-gate.js';
+import { appError } from '#lib/errors.js';
+import { orgLabel } from '#lib/utils.js';
 
 const roleSchema = v.picklist(ORG_ROLES);
 

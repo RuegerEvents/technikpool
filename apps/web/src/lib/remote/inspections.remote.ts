@@ -1,14 +1,14 @@
 import { query, command } from '$app/server';
-import { prisma } from '$lib/server/auth';
+import { prisma } from '#lib/server/auth.js';
 import * as v from 'valibot';
 import {
 	isSystemAdmin,
 	requireAuth,
 	requireOrgInventory,
 	userOrgIds
-} from '$lib/server/services/access';
-import { ACTIVE_ASSET_WHERE, isRetiredStatus } from '$lib/asset-status';
-import { appError } from '$lib/errors';
+} from '#lib/server/services/access.js';
+import { ACTIVE_ASSET_WHERE, isRetiredStatus } from '#lib/asset-status.js';
+import { appError } from '#lib/errors.js';
 
 const UPCOMING_WINDOW_DAYS = 30;
 

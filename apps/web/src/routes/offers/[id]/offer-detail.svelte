@@ -5,11 +5,11 @@
 		dayCountBetween,
 		formatAddress,
 		orgLabel
-	} from '$lib/utils';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
+	} from '#lib/utils.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
 	import { DropdownMenu } from 'bits-ui';
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
@@ -30,17 +30,17 @@
 		updateDocumentOrgSnapshot,
 		finalizeOffer,
 		deleteOffer
-	} from '$lib/remote/offers.remote';
-	import { getCustomers } from '$lib/remote/customers.remote';
-	import { StalenessBanner } from '$lib/components/ui/staleness-banner';
-	import { OrgSnapshotBanner } from '$lib/components/ui/org-snapshot-banner';
-	import { BillingIssues } from '$lib/components/ui/billing-issues';
-	import { billingDocumentIssues } from '$lib/billing-document-check.svelte';
-	import { organizationFromSnapshot } from '$lib/org-snapshot';
-	import { BillingDocument } from '$lib/components/ui/billing-document';
-	import { Modal } from '$lib/components/ui/modal';
-	import { CustomerSelect } from '$lib/components/ui/customer-select';
-	import type { CustomerWithAddress } from '$lib/components/ui/customer-form-modal';
+	} from '#lib/remote/offers.remote.js';
+	import { getCustomers } from '#lib/remote/customers.remote.js';
+	import { StalenessBanner } from '#lib/components/ui/staleness-banner/index.js';
+	import { OrgSnapshotBanner } from '#lib/components/ui/org-snapshot-banner/index.js';
+	import { BillingIssues } from '#lib/components/ui/billing-issues/index.js';
+	import { billingDocumentIssues } from '#lib/billing-document-check.svelte.js';
+	import { organizationFromSnapshot } from '#lib/org-snapshot.js';
+	import { BillingDocument } from '#lib/components/ui/billing-document/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { CustomerSelect } from '#lib/components/ui/customer-select/index.js';
+	import type { CustomerWithAddress } from '#lib/components/ui/customer-form-modal/index.js';
 
 	let { offerId }: { offerId: string } = $props();
 	let offer = $derived(await getOffer(offerId));
@@ -171,7 +171,7 @@
 				customerId: copyCustomerId
 			});
 			toast.success('Offer copied');
-			goto(resolve(`/offers/${newOffer.id}`));
+			goto(resolve(`offers/${newOffer.id}`));
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			copying = false;
@@ -184,7 +184,7 @@
 	let revising = $state(false);
 	async function reviseOffer() {
 		const revision = await createOfferRevision(offerId);
-		await goto(resolve(`/offers/${revision.id}`));
+		await goto(resolve(`offers/${revision.id}`));
 	}
 	async function handleRevise() {
 		revising = true;
@@ -228,7 +228,7 @@
 			const previous = versions.versions
 				.filter((version) => version.revision < offer.revision)
 				.at(-1);
-			await goto(previous ? resolve(`/offers/${previous.id}`) : resolve('/offers'));
+			await goto(previous ? resolve(`offers/${previous.id}`) : resolve('offers'));
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			deleting = false;
@@ -244,7 +244,7 @@
 		try {
 			const invoice = await convertOfferToInvoice({ offerId, number: invoiceNumber.trim() });
 			toast.success(`Invoice ${invoice.number} created`);
-			goto(resolve(`/invoices/${invoice.id}`));
+			goto(resolve(`invoices/${invoice.id}`));
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			converting = false;
@@ -265,7 +265,7 @@
 				{#if offer.production}
 					·
 					<a
-						href={resolve(`/productions/${offer.production.id}`)}
+						href={resolve(`productions/${offer.production.id}`)}
 						class="underline underline-offset-2 hover:text-foreground"
 					>
 						{offer.production.name}
@@ -283,7 +283,7 @@
 							>
 						{:else}
 							<a
-								href={resolve(`/offers/${version.id}`)}
+								href={resolve(`offers/${version.id}`)}
 								class="rounded-full border px-2 py-0.5 text-xs font-semibold transition-colors hover:bg-muted"
 								title={version.number}>V{version.revision}</a
 							>
@@ -299,7 +299,7 @@
 				<Button
 					icon="back"
 					variant="outline"
-					href={resolve(`/productions/${offer.production.id}/equipment`)}
+					href={resolve(`productions/${offer.production.id}/equipment`)}
 				>
 					Back to equipment
 				</Button>
@@ -326,7 +326,7 @@
 				>
 			{/if}
 			{#if offer.invoices.length > 0}
-				<Button variant="outline" href={resolve(`/invoices/${offer.invoices[0].id}`)}>
+				<Button variant="outline" href={resolve(`invoices/${offer.invoices[0].id}`)}>
 					View invoice {offer.invoices[0].number}
 				</Button>
 			{:else if offer.finalizedAt && isCurrentVersion && !versions.invoiced}
@@ -415,7 +415,7 @@
 						invoice this version instead.
 					{/if}
 				</p>
-				<Button size="sm" variant="outline" href={resolve(`/offers/${currentVersion.id}`)}
+				<Button size="sm" variant="outline" href={resolve(`offers/${currentVersion.id}`)}
 					>Open {currentVersion.number}</Button
 				>
 			</Card.Content>

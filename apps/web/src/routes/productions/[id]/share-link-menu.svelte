@@ -4,10 +4,10 @@
 	// behind it is /share/…; what makes it valid is production-share.ts.
 	import { DropdownMenu } from 'bits-ui';
 	import { toast } from 'svelte-sonner';
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
-	import { getErrorMessage } from '$lib/utils';
-	import { getShareLink, setShareLink } from '$lib/remote/productions.remote';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { getErrorMessage } from '#lib/utils.js';
+	import { getShareLink, setShareLink } from '#lib/remote/productions.remote.js';
 
 	let { productionId }: { productionId: string } = $props();
 

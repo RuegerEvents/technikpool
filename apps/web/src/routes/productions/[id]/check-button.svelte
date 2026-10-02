@@ -3,9 +3,12 @@
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { DropdownMenu } from 'bits-ui';
-	import { Button } from '$lib/components/ui/button';
-	import { getErrorMessage } from '$lib/utils';
-	import { getProductionChecks, startProductionCheck } from '$lib/remote/production-checks.remote';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { getErrorMessage } from '#lib/utils.js';
+	import {
+		getProductionChecks,
+		startProductionCheck
+	} from '#lib/remote/production-checks.remote.js';
 
 	// "Check": join this side's open check, or start one. Someone in both the
 	// production's org and a lending one picks which list they check.
@@ -28,7 +31,7 @@
 		starting = true;
 		try {
 			const check = await startProductionCheck({ productionId, organizationId });
-			await goto(resolve(`/productions/${productionId}/check/${check.id}`));
+			await goto(resolve(`productions/${productionId}/check/${check.id}`));
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {

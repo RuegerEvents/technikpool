@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn } from '$lib/utils';
+	import { cn } from '#lib/utils.js';
 
 	type Props = {
 		progress: { expected: number; found: number; out: number; unexpected: number };

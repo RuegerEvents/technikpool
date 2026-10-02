@@ -1,9 +1,9 @@
-import type { Schemas } from '$lib/server/api';
-import type { OrgRole } from '$lib/roles';
-import { imageSrc } from '$lib/images';
-import { isCable } from '$lib/cable';
-import { bundleLabel } from '$lib/product-label';
-import { withCableNames } from '$lib/server/services/cable-ends';
+import type { Schemas } from '#lib/server/api.js';
+import type { OrgRole } from '#lib/roles.js';
+import { imageSrc } from '#lib/images.js';
+import { isCable } from '#lib/cable.js';
+import { bundleLabel } from '#lib/product-label.js';
+import { withCableNames } from '#lib/server/services/cable-ends.js';
 import {
 	itemState,
 	productCounts,
@@ -11,12 +11,12 @@ import {
 	type StocktakeItemRow,
 	type StocktakeScanOutcome,
 	type StocktakeSummary
-} from '$lib/server/services/stocktake';
-import { userLabel } from '$lib/user-label.svelte';
-import type { CaseCheck } from '$lib/server/services/case-check';
-import type { ProductionCheckView } from '$lib/server/services/production-check';
-import type { HandoutView } from '$lib/server/services/production-handout';
-import type { ListLine } from '$lib/production-list';
+} from '#lib/server/services/stocktake.js';
+import { userLabel } from '#lib/user-label.svelte.js';
+import type { CaseCheck } from '#lib/server/services/case-check.js';
+import type { ProductionCheckView } from '#lib/server/services/production-check.js';
+import type { HandoutView } from '#lib/server/services/production-handout.js';
+import type { ListLine } from '#lib/production-list.js';
 
 // Prisma payloads are deliberately not returned straight to clients: they carry
 // fields the API doesn't promise, and adding a column to the schema would

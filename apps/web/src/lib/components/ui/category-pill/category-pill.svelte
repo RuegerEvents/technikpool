@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn, getContrastingTextColor } from '$lib/utils';
+	import { cn, getContrastingTextColor } from '#lib/utils.js';
 
 	type Props = {
 		name: string;

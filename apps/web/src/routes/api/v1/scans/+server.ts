@@ -1,7 +1,11 @@
 import type { RequestHandler } from './$types';
-import { apiError, apiJson, handleApi, requireApiUser, type Schemas } from '$lib/server/api';
-import { ApiResponse } from '$lib/server/api';
-import { CHECKOUT_ERROR_STATUS, CheckoutError, performScan } from '$lib/server/services/checkout';
+import { apiError, apiJson, handleApi, requireApiUser, type Schemas } from '#lib/server/api.js';
+import { ApiResponse } from '#lib/server/api.js';
+import {
+	CHECKOUT_ERROR_STATUS,
+	CheckoutError,
+	performScan
+} from '#lib/server/services/checkout.js';
 
 const TARGET_TYPES = ['location', 'production'] as const;
 

@@ -2,19 +2,22 @@
 	import { DropdownMenu } from 'bits-ui';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
-	import { Button } from '$lib/components/ui/button';
-	import { Modal } from '$lib/components/ui/modal';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { approveProductionItems, declineProductionItems } from '$lib/remote/productions.remote';
-	import { getPackTodos } from '$lib/remote/production-handout.remote';
-	import { accessorySummary } from '$lib/production-items';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
+	import {
+		approveProductionItems,
+		declineProductionItems
+	} from '#lib/remote/productions.remote.js';
+	import { getPackTodos } from '#lib/remote/production-handout.remote.js';
+	import { accessorySummary } from '#lib/production-items.js';
 	import {
 		itemsOf,
 		type ApprovalRequest,
 		type RequestItem,
 		type RequestUnit
-	} from '$lib/approval-requests';
-	import { dayCountBetween, getErrorMessage, plural } from '$lib/utils';
+	} from '#lib/approval-requests.js';
+	import { dayCountBetween, getErrorMessage, plural } from '#lib/utils.js';
 	import { EllipsisVertical, Layers } from '@lucide/svelte';
 
 	type Props = {
@@ -243,7 +246,7 @@
 
 			{#if request.productionVisible}
 				<a
-					href={resolve(`/productions/${request.productionId}`)}
+					href={resolve(`productions/${request.productionId}`)}
 					class="inline-block text-sm text-muted-foreground hover:text-foreground hover:underline"
 					>Open production →</a
 				>

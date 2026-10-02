@@ -1,16 +1,17 @@
-import { env } from '$env/dynamic/public';
+import { PUBLIC_S3_URL_BASE } from '$app/env/public';
 
 /**
  * Where the object store is reachable from a *browser* — e.g. a reverse-proxied
  * path in front of the S3-compatible server, or a CDN. Read through
- * `$env/dynamic/public` rather than baked in at build time, so moving the store
- * is an env change and a restart, not a rebuild.
+ * `$app/env/public` as a dynamic variable (see `src/env.ts`) rather than baked
+ * in at build time, so moving the store is an env change and a restart, not a
+ * rebuild.
  *
  * It has to be absolute: `/api/v1` hands the resolved address to the scanner
  * app, which has no origin of its own to resolve a relative one against.
  */
 function base(): string {
-	return (env.PUBLIC_S3_URL_BASE ?? '').replace(/\/+$/, '');
+	return PUBLIC_S3_URL_BASE.replace(/\/+$/, '');
 }
 
 /**

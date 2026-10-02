@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
-	import { legalTitle, type LegalLink } from '$lib/legal.svelte';
-	import { cn } from '$lib/utils';
+	import { legalTitle, type LegalLink } from '#lib/legal.svelte.js';
+	import { cn } from '#lib/utils.js';
 
 	// The operator's imprint, privacy policy and terms, as far as they are set up
 	// (/admin/legal). Renders nothing on an install that has none.
@@ -29,7 +29,7 @@
 				>
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{:else}
-				<a href={resolve(`/legal/${link.slug}`)} class="hover:text-foreground hover:underline"
+				<a href={resolve(`legal/${link.slug}`)} class="hover:text-foreground hover:underline"
 					>{legalTitle(link.slug)}</a
 				>
 			{/if}

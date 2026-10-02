@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getErrorMessage, orgLabel } from '$lib/utils';
+	import { getErrorMessage, orgLabel } from '#lib/utils.js';
 	import {
 		DEFAULT_ORG_ROLE,
 		ORG_ROLES,
@@ -7,17 +7,17 @@
 		canManageInventory,
 		roleAtLeast,
 		type OrgRole
-	} from '$lib/roles';
-	import { roleName, roleSummary } from '$lib/role-descriptions.svelte';
+	} from '#lib/roles.js';
+	import { roleName, roleSummary } from '#lib/role-descriptions.svelte.js';
 	import {
 		InvitationLink,
 		InvitationList,
 		type IssuedInvitation
-	} from '$lib/components/ui/invitations';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
+	} from '#lib/components/ui/invitations/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
 	import {
 		getOrgWithMembers,
 		addUserToOrg,
@@ -28,23 +28,23 @@
 		getOrgIdentityInUse,
 		getNextAssetTag,
 		setAutoAssetTags
-	} from '$lib/remote/orgs.remote';
+	} from '#lib/remote/orgs.remote.js';
 	import { page } from '$app/state';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto, refreshAll } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
-	import { OrgBadge } from '$lib/components/ui/org-badge';
-	import { Modal } from '$lib/components/ui/modal';
-	import { AddressInput, type AddressValue } from '$lib/components/ui/address-input';
-	import { orgIdentityProblem } from '$lib/org-identity.svelte';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { OrgBadge } from '#lib/components/ui/org-badge/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { AddressInput, type AddressValue } from '#lib/components/ui/address-input/index.js';
+	import { orgIdentityProblem } from '#lib/org-identity.svelte.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import OrgLogoCard from './org-logo-card.svelte';
 	import {
 		DEFAULT_INVOICE_CLOSING,
 		DEFAULT_INVOICE_INTRO,
 		DEFAULT_OFFER_CLOSING,
 		DEFAULT_OFFER_INTRO
-	} from '$lib/billing-text';
+	} from '#lib/billing-text.js';
 
 	let { data } = $props();
 
@@ -87,7 +87,7 @@
 		try {
 			await deleteOrg(orgId);
 			toast.success('Organization deleted');
-			await goto(resolve('/orgs'));
+			await goto(resolve('orgs'));
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			deleting = false;
@@ -188,7 +188,7 @@
 			toast.success('Organization settings updated');
 			editingSettings = false;
 			// The user menu shows the home org's label and colour from the layout.
-			if (orgId === data.homeOrgId) await invalidateAll();
+			if (orgId === data.homeOrgId) await refreshAll();
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {
@@ -303,7 +303,7 @@
 	<div class="flex items-center gap-4">
 		<Button
 			variant="ghost"
-			href={resolve('/orgs')}
+			href={resolve('orgs')}
 			class="flex items-center gap-1 text-muted-foreground"
 		>
 			<svg
@@ -335,14 +335,13 @@
 				{#if canManage || canSeeValue}
 					<div class="flex flex-wrap items-center gap-2">
 						{#if canSeeValue}
-							<Button variant="outline" href={resolve(`/orgs/${orgId}/value`)}
+							<Button variant="outline" href={resolve(`orgs/${orgId}/value`)}
 								>Equipment value</Button
 							>
 						{/if}
 						{#if canManage}
-							<Button variant="outline" href={resolve(`/orgs/${orgId}/locations`)}>Locations</Button
-							>
-							<Button variant="outline" href={resolve(`/orgs/${orgId}/rates`)}
+							<Button variant="outline" href={resolve(`orgs/${orgId}/locations`)}>Locations</Button>
+							<Button variant="outline" href={resolve(`orgs/${orgId}/rates`)}
 								>Rates & services</Button
 							>
 							<Button variant="destructive" onclick={() => (deleteOpen = true)}>Delete</Button>
@@ -519,7 +518,7 @@
 									<Button
 										variant="outline"
 										size="sm"
-										href={resolve(`/api/dpa-acceptances/${org.dpaAcceptances[0].id}`)}
+										href={resolve(`api/dpa-acceptances/${org.dpaAcceptances[0].id}`)}
 										target="_blank">Download PDF</Button
 									>
 								</Card.Content>

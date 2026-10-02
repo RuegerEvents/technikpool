@@ -1,5 +1,5 @@
-import { prisma } from '$lib/server/auth';
-import { PUBLIC_PREFIX } from '$lib/server/storage';
+import { prisma } from '#lib/server/auth.js';
+import { PUBLIC_PREFIX } from '#lib/server/storage.js';
 import { isSystemAdmin, managedOrgIds, writableOrgIds } from './access';
 import { productControl } from './product-control';
 

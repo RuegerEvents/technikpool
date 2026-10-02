@@ -1,17 +1,17 @@
 <script lang="ts">
 	/* eslint-disable svelte/prefer-svelte-reactivity */
-	import * as Card from '$lib/components/ui/card';
-	import { DataView } from '$lib/components/ui/data-view';
-	import type { Column } from '$lib/components/ui/data-view';
-	import { OrgMultiSelect } from '$lib/components/ui/org-multi-select';
-	import { CalendarFeedButton } from '$lib/components/ui/calendar-feed';
-	import { getProductions } from '$lib/remote/productions.remote';
-	import { getMyOrgs } from '$lib/remote/orgs.remote';
-	import { canWrite } from '$lib/roles';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { DataView } from '#lib/components/ui/data-view/index.js';
+	import type { Column } from '#lib/components/ui/data-view/index.js';
+	import { OrgMultiSelect } from '#lib/components/ui/org-multi-select/index.js';
+	import { CalendarFeedButton } from '#lib/components/ui/calendar-feed/index.js';
+	import { getProductions } from '#lib/remote/productions.remote.js';
+	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
+	import { canWrite } from '#lib/roles.js';
 	import { page } from '$app/state';
-	import { plural, orgLabel } from '$lib/utils';
-	import { browser } from '$app/environment';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { plural, orgLabel } from '#lib/utils.js';
+	import { browser } from '$app/env';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import { Hourglass, PackageOpen } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -177,7 +177,7 @@
 		e.stopPropagation();
 		// resolve() takes a path only; the query is the lender's side.
 		// eslint-disable-next-line svelte/no-navigation-without-resolve
-		goto(`${resolve(`/productions/${p.id}/checkout`)}?org=${encodeURIComponent(orgId)}`);
+		goto(`${resolve(`productions/${p.id}/checkout`)}?org=${encodeURIComponent(orgId)}`);
 	}
 
 	function pendingCount(p: Production): number {

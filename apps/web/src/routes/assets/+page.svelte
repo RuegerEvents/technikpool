@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { naturalCompare } from '$lib/sort';
-	import { withCaption } from '$lib/product-label';
-	import { categoryLabel } from '$lib/category';
-	import { getErrorMessage, orgLabel } from '$lib/utils';
+	import { naturalCompare } from '#lib/sort.js';
+	import { withCaption } from '#lib/product-label.js';
+	import { categoryLabel } from '#lib/category.js';
+	import { getErrorMessage, orgLabel } from '#lib/utils.js';
 	import {
 		connectorLabel,
 		formatLength,
@@ -11,38 +11,38 @@
 		parseLengthMeters,
 		type CableAttrs,
 		type WithWays
-	} from '$lib/cable';
+	} from '#lib/cable.js';
 	import {
 		getAssets,
 		getCategories,
 		getBundleTemplates,
 		getRetiredAssets,
 		updateAsset
-	} from '$lib/remote/assets.remote';
-	import { getAllOrgs, getMyOrgs } from '$lib/remote/orgs.remote';
-	import { getLicenses } from '$lib/remote/licenses.remote';
-	import { Button } from '$lib/components/ui/button';
-	import { CategorySelect } from '$lib/components/ui/category-select';
-	import { CategoryPill } from '$lib/components/ui/category-pill';
-	import { ProductThumb } from '$lib/components/ui/product-thumb';
-	import { CameraScanButton } from '$lib/components/ui/camera-scan';
+	} from '#lib/remote/assets.remote.js';
+	import { getAllOrgs, getMyOrgs } from '#lib/remote/orgs.remote.js';
+	import { getLicenses } from '#lib/remote/licenses.remote.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { CategorySelect } from '#lib/components/ui/category-select/index.js';
+	import { CategoryPill } from '#lib/components/ui/category-pill/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
+	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
-	import BulkActionsBar from '$lib/components/ui/bulk-actions-bar.svelte';
-	import CsvImportModal from '$lib/components/CsvImportModal.svelte';
-	import { AssetStatusBadge, assetStatusLabel } from '$lib/components/ui/asset-status';
-	import { SortableHeader } from '$lib/components/ui/sortable-header';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import BulkActionsBar from '#lib/components/ui/bulk-actions-bar.svelte';
+	import CsvImportModal from '#lib/components/CsvImportModal.svelte';
+	import { AssetStatusBadge, assetStatusLabel } from '#lib/components/ui/asset-status/index.js';
+	import { SortableHeader } from '#lib/components/ui/sortable-header/index.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import LicenseList from './license-list.svelte';
-	import { Modal } from '$lib/components/ui/modal';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
 	import { DropdownMenu } from 'bits-ui';
 	import { Check, Ellipsis, Tag } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { tick } from 'svelte';
 
 	let showImportModal = $state(false);
@@ -188,7 +188,7 @@
 	// replaceState, not a new history entry: every keystroke in the search box
 	// would otherwise need its own Back press to get past.
 	$effect(() => {
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		const params = {
 			org: filterOrgId === defaultOrgId ? '' : filterOrgId,
 			q: searchQuery,
@@ -210,7 +210,7 @@
 		}
 		if (url.href === page.url.href) return;
 		// eslint-disable-next-line svelte/no-navigation-without-resolve -- updating query params on the current route, not navigating to a typed path
-		goto(url, { replaceState: true, noScroll: true, keepFocus: true });
+		goto(url, { replace: true, reset: false });
 	});
 
 	// Read through the queries rather than awaited: an `await` in a `$derived`
@@ -732,9 +732,9 @@
 				{/if}
 			</select>
 			<Button variant="outline" onclick={() => (showImportModal = true)}>Import CSV</Button>
-			<Button icon="add" variant="outline" href={resolve('/assets/bundles/new')}>Add Bundle</Button>
-			<Button icon="add" variant="outline" href={resolve('/assets/new/cables')}>Add Cables</Button>
-			<Button icon="add" href={resolve('/assets/new')}>Add Asset</Button>
+			<Button icon="add" variant="outline" href={resolve('assets/bundles/new')}>Add Bundle</Button>
+			<Button icon="add" variant="outline" href={resolve('assets/new/cables')}>Add Cables</Button>
+			<Button icon="add" href={resolve('assets/new')}>Add Asset</Button>
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					{#snippet child({ props })}
@@ -1000,7 +1000,7 @@
 						: 'Try a different search term or filter.'}
 				</p>
 				{#if assets.length === 0}
-					<Button class="mt-4" variant="outline" href={resolve('/assets/new')}
+					<Button class="mt-4" variant="outline" href={resolve('assets/new')}
 						>Add your first asset</Button
 					>
 				{/if}
@@ -1060,7 +1060,7 @@
 					{#each filteredDevices as asset (asset.id)}
 						<tr
 							class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
-							onclick={() => goto(resolve(`/assets/${asset.id}`))}
+							onclick={() => goto(resolve(`assets/${asset.id}`))}
 						>
 							<td class="px-4 py-2">
 								<input
@@ -1085,7 +1085,7 @@
 										</div>
 										{#if asset.parent}
 											<a
-												href={resolve(`/assets/${asset.parent.id}`)}
+												href={resolve(`assets/${asset.parent.id}`)}
 												class="text-xs text-muted-foreground hover:underline"
 												onclick={(e) => e.stopPropagation()}
 											>
@@ -1113,7 +1113,7 @@
 							<td class="px-4 py-2 text-muted-foreground">
 								{#if asset.bundle}
 									<a
-										href={resolve(`/assets/bundles/${asset.bundle.id}`)}
+										href={resolve(`assets/bundles/${asset.bundle.id}`)}
 										class="hover:underline"
 										onclick={(e) => e.stopPropagation()}
 									>
@@ -1204,7 +1204,7 @@
 						<div class="max-h-56 overflow-y-auto border-t">
 							{#each template.instanceGroups as instance, i (instance.id)}
 								<a
-									href={resolve(`/assets/bundles/${instance.id}`)}
+									href={resolve(`assets/bundles/${instance.id}`)}
 									class="flex items-center gap-2 border-b px-3 py-2 text-xs last:border-0 hover:bg-muted/30"
 								>
 									<span class="min-w-0 flex-1 truncate font-medium">
@@ -1294,7 +1294,7 @@
 					</button>
 					{#if expanded.get(group.productId)}
 						<a
-							href={resolve(`/products/${group.productId}`)}
+							href={resolve(`products/${group.productId}`)}
 							class="block border-t px-3 py-1.5 text-xs font-medium underline-offset-2 hover:bg-muted/30 hover:underline"
 							>Open product page →</a
 						>
@@ -1310,7 +1310,7 @@
 										class="h-4 w-4 shrink-0 cursor-pointer rounded border-input"
 									/>
 									<a
-										href={resolve(`/assets/${asset.id}`)}
+										href={resolve(`assets/${asset.id}`)}
 										class="flex min-w-0 flex-1 items-center gap-2"
 									>
 										<span class="truncate font-mono text-muted-foreground">
@@ -1547,7 +1547,7 @@
 													{instance.tag ?? `Instance ${i + 1}`}
 												</span>
 												<a
-													href={resolve(`/assets/bundles/${instance.id}`)}
+													href={resolve(`assets/bundles/${instance.id}`)}
 													class="text-xs whitespace-nowrap text-muted-foreground hover:text-foreground"
 													onclick={(e) => e.stopPropagation()}
 												>
@@ -1597,7 +1597,7 @@
 										{#each instance.filteredAssets as asset (asset.id)}
 											<tr
 												class="cursor-pointer border-b bg-muted/20 transition-colors last:border-0 hover:bg-muted/40"
-												onclick={() => goto(resolve(`/assets/${asset.id}`))}
+												onclick={() => goto(resolve(`assets/${asset.id}`))}
 											>
 												<td class="px-4 py-2 pl-8">
 													<input
@@ -1658,7 +1658,7 @@
 														{/if}
 														<AssetStatusBadge status={asset.status} />
 														<a
-															href={resolve(`/assets/${asset.id}`)}
+															href={resolve(`assets/${asset.id}`)}
 															class="text-xs whitespace-nowrap text-muted-foreground hover:text-foreground"
 															onclick={(e) => e.stopPropagation()}
 														>
@@ -1719,7 +1719,7 @@
 										<!-- The row itself expands the group; the name goes to the
 										     product's own page. -->
 										<a
-											href={resolve(`/products/${group.productId}`)}
+											href={resolve(`products/${group.productId}`)}
 											onclick={(e) => e.stopPropagation()}
 											class="font-medium underline-offset-2 hover:underline">{group.name}</a
 										>
@@ -1768,7 +1768,7 @@
 								{#each group.assets as asset (asset.id)}
 									<tr
 										class="cursor-pointer border-b bg-muted/10 transition-colors last:border-0 hover:bg-muted/30"
-										onclick={() => goto(resolve(`/assets/${asset.id}`))}
+										onclick={() => goto(resolve(`assets/${asset.id}`))}
 									>
 										<td class="px-4 py-2">
 											<input
@@ -1802,7 +1802,7 @@
 											     the first thing you need to know about it. -->
 												{#if asset.parent}
 													<a
-														href={resolve(`/assets/${asset.parent.id}`)}
+														href={resolve(`assets/${asset.parent.id}`)}
 														class="text-muted-foreground hover:underline"
 														onclick={(e) => e.stopPropagation()}
 													>
@@ -1819,7 +1819,7 @@
 												<span class="truncate">{orgLabel(asset.organization)}</span>
 												{#if asset.bundle}
 													<a
-														href={resolve(`/assets/bundles/${asset.bundle.id}`)}
+														href={resolve(`assets/bundles/${asset.bundle.id}`)}
 														class="truncate hover:underline"
 														onclick={(e) => e.stopPropagation()}
 													>
@@ -1828,7 +1828,7 @@
 												{/if}
 												<span class="ml-auto"><AssetStatusBadge status={asset.status} /></span>
 												<a
-													href={resolve(`/assets/${asset.id}`)}
+													href={resolve(`assets/${asset.id}`)}
 													class="whitespace-nowrap hover:text-foreground"
 													onclick={(e) => e.stopPropagation()}
 												>

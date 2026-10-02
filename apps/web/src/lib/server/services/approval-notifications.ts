@@ -1,7 +1,7 @@
-import { prisma } from '$lib/server/auth';
-import { sendMail } from '$lib/server/mail';
-import { appBaseUrl } from '$lib/server/app-url';
-import { pendingApprovalEmail } from '$lib/server/emails/pending-approval';
+import { prisma } from '#lib/server/auth.js';
+import { sendMail } from '#lib/server/mail.js';
+import { appBaseUrl } from '#lib/server/app-url.js';
+import { pendingApprovalEmail } from '#lib/server/emails/pending-approval.js';
 
 // Loan requests: every path that books another org's unit as PENDING tells
 // that org once per batch. Shared by the remote functions that book.

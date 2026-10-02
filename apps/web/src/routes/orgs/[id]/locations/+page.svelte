@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { getErrorMessage } from '$lib/utils';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { AddressInput } from '$lib/components/ui/address-input';
-	import { Modal } from '$lib/components/ui/modal';
-	import { getOrgWithMembers } from '$lib/remote/orgs.remote';
-	import { createLocation, getLocations, updateLocation } from '$lib/remote/assets.remote';
+	import { getErrorMessage } from '#lib/utils.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { AddressInput } from '#lib/components/ui/address-input/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { getOrgWithMembers } from '#lib/remote/orgs.remote.js';
+	import { createLocation, getLocations, updateLocation } from '#lib/remote/assets.remote.js';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 
 	let { data } = $props();
 
@@ -100,7 +100,7 @@
 
 <div class="space-y-6">
 	<div class="flex items-center gap-4">
-		<Button variant="ghost" href={resolve(`/orgs/${orgId}`)} class="-ml-3 text-muted-foreground">
+		<Button variant="ghost" href={resolve(`orgs/${orgId}`)} class="-ml-3 text-muted-foreground">
 			← Organization
 		</Button>
 	</div>

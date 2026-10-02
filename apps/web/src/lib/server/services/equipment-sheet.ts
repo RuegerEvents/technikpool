@@ -1,19 +1,19 @@
 import { error } from '@sveltejs/kit';
-import { naturalCompare } from '$lib/sort';
-import { prisma } from '$lib/server/auth';
-import { summarizeContents } from '$lib/billing-lines';
-import { productLabel } from '$lib/product-label';
-import { orgLabel } from '$lib/utils';
-import { compareGroups, groupKey, type ListGroup } from '$lib/production-list';
+import { naturalCompare } from '#lib/sort.js';
+import { prisma } from '#lib/server/auth.js';
+import { summarizeContents } from '#lib/billing-lines.js';
+import { productLabel } from '#lib/product-label.js';
+import { orgLabel } from '#lib/utils.js';
+import { compareGroups, groupKey, type ListGroup } from '#lib/production-list.js';
 import {
 	assetImageIsStale,
 	bundleImageIsStale,
 	ensureAssetImage,
 	ensureBundleImage
-} from '$lib/server/services/bundle-image';
-import { requireProductionRead } from '$lib/server/services/access';
+} from '#lib/server/services/bundle-image.js';
+import { requireProductionRead } from '#lib/server/services/access.js';
 import { fmtDate } from '../pdf-text';
-import type { SheetKind } from '$lib/equipment-sheet';
+import type { SheetKind } from '#lib/equipment-sheet.js';
 import {
 	generateEquipmentSheetPdf,
 	type EquipmentSheet,

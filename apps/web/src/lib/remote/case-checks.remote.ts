@@ -1,7 +1,7 @@
 import { query, command } from '$app/server';
 import * as v from 'valibot';
-import { requireAuth } from '$lib/server/services/access';
-import { appError, type AppErrorCode } from '$lib/errors';
+import { requireAuth } from '#lib/server/services/access.js';
+import { appError, type AppErrorCode } from '#lib/errors.js';
 import {
 	CASE_CHECK_ERROR_STATUS,
 	CaseCheckError,
@@ -9,7 +9,7 @@ import {
 	findCase,
 	getCaseCheck as load,
 	recordCaseCheck as record
-} from '$lib/server/services/case-check';
+} from '#lib/server/services/case-check.js';
 import { getAssetHistory } from './assets.remote';
 
 // The web's door to case checks. The rules are in services/case-check.ts,

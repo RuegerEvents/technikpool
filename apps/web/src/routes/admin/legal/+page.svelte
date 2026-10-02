@@ -2,10 +2,10 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import * as Card from '$lib/components/ui/card';
-	import { getDpaOverview, getLegalSettings } from '$lib/remote/legal.remote';
-	import { ContentSkeleton } from '$lib/components/ui/skeleton';
-	import { LEGAL_SLUGS, legalTitle, type LegalSlug } from '$lib/legal.svelte';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { getDpaOverview, getLegalSettings } from '#lib/remote/legal.remote.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
+	import { LEGAL_SLUGS, legalTitle, type LegalSlug } from '#lib/legal.svelte.js';
 	import LegalEditor from './legal-editor.svelte';
 
 	let settingsQuery = $derived(getLegalSettings());
@@ -25,10 +25,10 @@
 	};
 
 	function selectTab(slug: LegalSlug) {
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		url.searchParams.set('tab', slug);
 		// eslint-disable-next-line svelte/no-navigation-without-resolve -- updating query params on the current route, not navigating to a typed path
-		goto(url, { replaceState: true, noScroll: true, keepFocus: true });
+		goto(url, { replace: true, reset: false });
 	}
 </script>
 
@@ -121,7 +121,7 @@
 									<td class="py-2 text-right">
 										{#if org.latest}
 											<a
-												href={resolve(`/api/dpa-acceptances/${org.latest.id}`)}
+												href={resolve(`api/dpa-acceptances/${org.latest.id}`)}
 												target="_blank"
 												class="underline">PDF</a
 											>
