@@ -1,5 +1,31 @@
 [
 	{
+		"version": "0.26.0",
+		"date": "2026-10-02",
+		"en": [
+			"Handing out, taking back and checking a production now work through one list, on the web and in the scanner: scan a tag, tick a unit by hand, or count identical units such as cables on one line.",
+			"Lenders get their packing list: \"To pack for others\" on the dashboard, a \"Pack\" button in the productions list, and a production page and printed packing list filtered by owner.",
+			"The packing list is a PDF like the delivery note, with pictures and grouped by shelf; both show their progress while they are being prepared, and come out noticeably faster.",
+			"Scanning a different unit of a booked product takes over the booking instead of adding an extra line.",
+			"Borrowing: note other organizations' equipment first and request it in one go, optionally asking to borrow it for free. Lenders can approve free of charge and bill the borrowing organization for the rest.",
+			"Productions still to be invoiced show on the dashboard and on the production.",
+			"New page with the value of an organization's equipment by category; missing purchase prices can be entered right in the list.",
+			"Connection check: mark a device's connectors as required (or as alternatives, e.g. DMX on 3- or 5-pin), and the production page shows whether the cables on the list fit, including Thru ports and adapters.",
+			"A record that no longer exists shows a proper \"not found\" page instead of an error."
+		],
+		"de": [
+			"Ausgeben, Zurücknehmen und Prüfen laufen jetzt über eine Liste, im Web und im Scanner: Etikett scannen, Gerät von Hand abhaken oder gleiche Geräte wie Kabel in einer Zeile zählen.",
+			"Verleiher bekommen ihre Packliste: „Für andere packen“ auf dem Dashboard, ein „Packen“-Button in der Produktionsliste und eine nach Eigentümer gefilterte Produktionsseite samt Packliste.",
+			"Die Packliste ist ein PDF wie der Lieferschein, mit Bildern und nach Regal gruppiert; beide zeigen beim Erstellen ihren Fortschritt und sind spürbar schneller fertig.",
+			"Wird ein anderes Gerät eines gebuchten Produkts gescannt, übernimmt es die Buchung, statt eine zusätzliche Zeile anzulegen.",
+			"Ausleihen: Geräte anderer Organisationen erst vormerken und dann gesammelt anfragen, auf Wunsch mit der Bitte um kostenlose Leihe. Verleiher können kostenlos freigeben und den Rest der ausleihenden Organisation in Rechnung stellen.",
+			"Produktionen, die noch abgerechnet werden müssen, stehen auf dem Dashboard und an der Produktion.",
+			"Neue Seite mit dem Equipmentwert einer Organisation nach Kategorien; fehlende Einkaufspreise lassen sich direkt in der Liste eintragen.",
+			"Anschluss-Check: Stecker eines Geräts als Pflicht (oder als Alternativen, z. B. DMX 3- oder 5-polig) markieren, und die Produktionsseite zeigt, ob die Kabel auf der Liste passen, inklusive Thru-Anschlüssen und Adaptern.",
+			"Ein Datensatz, den es nicht mehr gibt, zeigt eine richtige „Nicht gefunden“-Seite statt eines Fehlers."
+		]
+	},
+	{
 		"version": "0.25.1",
 		"date": "2026-09-29",
 		"en": [

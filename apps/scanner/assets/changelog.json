@@ -1,5 +1,21 @@
 [
   {
+    "version": "1.8.0",
+    "date": "2026-10-02",
+    "en": [
+      "Hand out and take back a production's equipment against its list: scan a tag, tick a unit by hand, or count identical units such as cables on one line.",
+      "The production list shows each production's dates and sorts running, upcoming and past ones like the web.",
+      "Scanning a different unit of a booked product takes over the booking instead of adding an extra line.",
+      "Scan tones play at media volume on Android, and every scan result vibrates with its own pattern, even with \"vibrate on touch\" switched off."
+    ],
+    "de": [
+      "Equipment einer Produktion gegen ihre Liste ausgeben und zurücknehmen: Etikett scannen, Gerät von Hand abhaken oder gleiche Geräte wie Kabel in einer Zeile zählen.",
+      "Die Produktionsliste zeigt die Termine jeder Produktion und sortiert laufende, kommende und vergangene wie im Web.",
+      "Wird ein anderes Gerät eines gebuchten Produkts gescannt, übernimmt es die Buchung, statt eine zusätzliche Zeile anzulegen.",
+      "Scan-Töne spielen unter Android in Medienlautstärke, und jedes Scan-Ergebnis vibriert mit eigenem Muster, auch wenn „Vibration bei Berührung“ ausgeschaltet ist."
+    ]
+  },
+  {
     "version": "1.7.0",
     "date": "2026-09-29",
     "en": [
