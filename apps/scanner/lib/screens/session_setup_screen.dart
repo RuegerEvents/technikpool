@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../api/client.dart';
 import '../api/generated/export.dart';
 import '../l10n/generated/app_localizations.dart';
+import '../natural_sort.dart';
 import '../state/providers.dart';
 import 'case_check_screen.dart';
 import 'production_check_screen.dart';
@@ -218,9 +220,11 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
                 }
                 // A server older than checks sends neither field: every
                 // production it lists is one a scan may go to.
+                final language = Localizations.localeOf(context).languageCode;
                 final rows =
                     <({String id, String name, String subtitle, bool book, bool check})>[
-                          for (final item in items)
+                          for (final item
+                              in items is List<Production> ? _byDate(items) : items)
                             if (item is Location)
                               (
                                 id: item.id,
@@ -239,6 +243,7 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
                                 name: item.name,
                                 subtitle: [
                                   item.organization.shortName ?? item.organization.name,
+                                  ?_dateRange(item, language),
                                   // Lent to someone else's production: only
                                   // this org's own units go out to it.
                                   if (item.checkoutRole == ProductionCheckoutRole.lender)
@@ -284,6 +289,58 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
       ),
     );
   }
+}
+
+/// Running first (ending soonest), then upcoming (starting soonest, undated
+/// last), then past (most recent first) — the order the web's production
+/// picker uses, so this week's job is on top and not last year's of the same
+/// name.
+List<Production> _byDate(List<Production> productions) {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  DateTime? day(DateTime? d) {
+    if (d == null) return null;
+    final local = d.toLocal();
+    return DateTime(local.year, local.month, local.day);
+  }
+
+  int phase(Production p) {
+    final start = day(p.startDate);
+    if (start == null) return 1;
+    final end = day(p.endDate) ?? start;
+    if (end.isBefore(today)) return 2;
+    if (start.isAfter(today)) return 1;
+    return 0;
+  }
+
+  int compareDates(DateTime? a, DateTime? b) {
+    if (a == null) return b == null ? 0 : 1;
+    if (b == null) return -1;
+    return a.compareTo(b);
+  }
+
+  return [...productions]..sort((a, b) {
+    final pa = phase(a);
+    final byPhase = pa.compareTo(phase(b));
+    if (byPhase != 0) return byPhase;
+    final byDate = switch (pa) {
+      0 => compareDates(a.endDate ?? a.startDate, b.endDate ?? b.startDate),
+      1 => compareDates(a.startDate, b.startDate),
+      _ => compareDates(b.endDate ?? b.startDate, a.endDate ?? a.startDate),
+    };
+    return byDate != 0 ? byDate : naturalCompare(a.name, b.name);
+  });
+}
+
+/// "12. Okt. – 14. Okt.", or one date for a single day; null when undated.
+String? _dateRange(Production p, String language) {
+  final start = p.startDate;
+  if (start == null) return null;
+  final format = DateFormat.MMMd(language);
+  final from = format.format(start.toLocal());
+  final end = p.endDate;
+  final to = end == null ? null : format.format(end.toLocal());
+  return to == null || to == from ? from : '$from – $to';
 }
 
 class _StocktakeList extends StatelessWidget {

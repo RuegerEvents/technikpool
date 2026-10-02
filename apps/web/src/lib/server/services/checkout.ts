@@ -201,11 +201,17 @@ export async function productionTargets(userId: string) {
 		orderBy: [{ startDate: 'desc' }, { name: 'asc' }]
 	});
 	return productions.map(({ items, crew, ...production }) => {
-		const checkoutRole: 'production' | 'lender' | null =
-			admin || writable.includes(production.organizationId)
-				? 'production'
-				: items.length > 0
-					? 'lender'
+		// A system admin may book anything anywhere, but a production their own
+		// org only lends to still reads as `lender` — the role is also what the
+		// lists label it by, and the scan checks rights on its own.
+		const checkoutRole: 'production' | 'lender' | null = writable.includes(
+			production.organizationId
+		)
+			? 'production'
+			: items.length > 0
+				? 'lender'
+				: admin
+					? 'production'
 					: null;
 		return { ...production, checkoutRole, canCheck: checkoutRole !== null || crew.length > 0 };
 	});
