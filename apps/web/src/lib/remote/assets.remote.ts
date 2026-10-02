@@ -3,6 +3,7 @@ import { query, command, requested } from '$app/server';
 import { prisma } from '$lib/server/auth';
 import type { Prisma } from '$lib/prisma/client';
 import * as v from 'valibot';
+import { getOrgEquipmentValue } from './orgs.remote';
 import type { FieldChange } from '$lib/types/asset-transaction';
 import {
 	isSystemAdmin,
@@ -2714,7 +2715,8 @@ export const setOrgProductPrice = command(
 		await Promise.all([
 			getOrgProductPrices(organizationId).refresh(),
 			getProductCatalog().refresh(),
-			getProductCatalog(organizationId).refresh()
+			getProductCatalog(organizationId).refresh(),
+			getOrgEquipmentValue(organizationId).refresh()
 		]);
 	}
 );

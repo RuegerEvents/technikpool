@@ -120,6 +120,7 @@ msgstr "No assets found."
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/checkout/+page.svelte
+#: src/routes/orgs/[id]/value/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/products/[id]/product-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
@@ -3341,6 +3342,8 @@ msgstr "% / day"
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/rates/+page.svelte
+#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/value/+page.svelte
 msgid "Not set"
 msgstr "Not set"
 
@@ -4416,8 +4419,10 @@ msgid "Unsaved changes"
 msgstr "Unsaved changes"
 
 #. 0: product.assetCount
+#. 0: unpricedUnits
 #. 0: currentBundle.assets.length
 #: src/lib/components/ui/product-editor/product-editor.svelte
+#: src/routes/orgs/[id]/value/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "{0} units"
 msgstr "{0} units"
@@ -4480,6 +4485,7 @@ msgid "Enter a net purchase price first"
 msgstr "Enter a net purchase price first"
 
 #: src/routes/offers/new/+page.svelte
+#: src/routes/orgs/[id]/value/+page.svelte
 msgid "Enter a valid net purchase price"
 msgstr "Enter a valid net purchase price"
 
@@ -8174,6 +8180,7 @@ msgstr "It may have been merged into another product or deleted."
 msgid "Back to Products"
 msgstr "Back to Products"
 
+#: src/routes/orgs/[id]/value/+page.svelte
 #: src/routes/products/[id]/product-detail.svelte
 msgid "Units"
 msgstr "Units"
@@ -8385,6 +8392,7 @@ msgstr "No interval set"
 
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/routes/orgs/[id]/value/+page.svelte
 msgid "Net purchase price"
 msgstr "Net purchase price"
 
@@ -11801,3 +11809,68 @@ msgstr "Laying out pages"
 #: src/lib/equipment-sheet-download.svelte.ts
 msgid "Gathering the equipment"
 msgstr "Gathering the equipment"
+
+#. 0: org?.name ?? ''
+#: src/routes/orgs/[id]/value/+page.svelte
+msgid "Equipment value | {0} | Technikpool"
+msgstr "Equipment value | {0} | Technikpool"
+
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/value/+page.svelte
+msgid "Equipment value"
+msgstr "Equipment value"
+
+#: src/routes/orgs/[id]/value/+page.svelte
+msgid "Every unit still in the pool, at this organization's net purchase price."
+msgstr "Every unit still in the pool, at this organization's net purchase price."
+
+#: src/routes/orgs/[id]/value/+page.svelte
+msgid "This organization has no equipment yet."
+msgstr "This organization has no equipment yet."
+
+#: src/routes/orgs/[id]/value/+page.svelte
+msgid "Total value"
+msgstr "Total value"
+
+#. 0: units; 1: rows.length
+#: src/routes/orgs/[id]/value/+page.svelte
+msgid "{0} units, {1} products"
+msgstr "{0} units, {1} products"
+
+#: src/routes/orgs/[id]/value/+page.svelte
+msgid "Broken or in maintenance"
+msgstr "Broken or in maintenance"
+
+#: src/routes/orgs/[id]/value/+page.svelte
+msgid "Included in the total"
+msgstr "Included in the total"
+
+#: src/routes/orgs/[id]/value/+page.svelte
+msgid "Without a price"
+msgstr "Without a price"
+
+#. 0: unpriced.length
+#: src/routes/orgs/[id]/value/+page.svelte
+msgid "{0} products, not in the total"
+msgstr "{0} products, not in the total"
+
+#: src/routes/orgs/[id]/value/+page.svelte
+msgid "Every product has a price"
+msgstr "Every product has a price"
+
+#: src/routes/orgs/[id]/value/+page.svelte
+msgid "<0/> Only products without a price"
+msgstr "<0/> Only products without a price"
+
+#: src/routes/orgs/[id]/value/+page.svelte
+msgid "Net price"
+msgstr "Net price"
+
+#: src/routes/orgs/[id]/value/+page.svelte
+msgid "Value"
+msgstr "Value"
+
+#. 0: row.damaged
+#: src/routes/orgs/[id]/value/+page.svelte
+msgid "({0} damaged)"
+msgstr "({0} damaged)"

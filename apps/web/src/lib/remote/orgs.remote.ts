@@ -7,12 +7,14 @@ import * as v from 'valibot';
 import { ORG_ROLES, type OrgRole } from '$lib/roles';
 import {
 	isSystemAdmin,
+	readsOrgRecords,
 	requireAuth,
 	requireOrgInventory,
 	requireOrgOwner
 } from '$lib/server/services/access';
 import { peekNextTag } from '$lib/server/services/tag-counter';
 import { appError } from '$lib/errors';
+import { ACTIVE_ASSET_WHERE } from '$lib/asset-status';
 import { issueInvitation } from '$lib/server/services/invitations';
 import { accountDeletionBlocker } from '$lib/server/services/account-deletion';
 import { getInvitations } from './invitations.remote';
@@ -591,6 +593,59 @@ export const deleteUser = command(v.string(), async (userId: string) => {
 	await prisma.user.delete({ where: { id: userId } });
 	await getAllUsers().refresh();
 	return { id: userId };
+});
+
+// ── Equipment value ──────────────────────────────────────────────────────────
+
+// What the org's pool is worth: every unit still in it, at the org's own net
+// purchase price for its product (OrgProductPrice). Broken units and units in
+// maintenance count, since they are still owned, but are reported apart. A
+// bundle's own price is left out — its members are units and counted already.
+export const getOrgEquipmentValue = query(v.string(), async (orgId: string) => {
+	const user = await requireAuth();
+	if (!(await readsOrgRecords(user.id, orgId))) appError(403, 'unauthorized');
+
+	const groups = await prisma.asset.groupBy({
+		by: ['productId', 'status'],
+		where: { organizationId: orgId, ...ACTIVE_ASSET_WHERE },
+		_count: { _all: true }
+	});
+	const productIds = [...new Set(groups.map((g) => g.productId))];
+	const [products, prices] = await Promise.all([
+		prisma.product.findMany({
+			where: { id: { in: productIds } },
+			select: {
+				id: true,
+				name: true,
+				manufacturer: { select: { name: true } },
+				category: { select: { id: true, name: true, nameDe: true, color: true, sortOrder: true } }
+			}
+		}),
+		prisma.orgProductPrice.findMany({
+			where: { organizationId: orgId, productId: { in: productIds } },
+			select: { productId: true, netPurchasePrice: true }
+		})
+	]);
+	const priceOf = new Map(prices.map((p) => [p.productId, Number(p.netPurchasePrice)]));
+
+	return products.map((p) => {
+		const mine = groups.filter((g) => g.productId === p.id);
+		const units = mine.reduce((sum, g) => sum + g._count._all, 0);
+		const damaged = mine
+			.filter((g) => g.status === 'BROKEN' || g.status === 'MAINTENANCE')
+			.reduce((sum, g) => sum + g._count._all, 0);
+		const price = priceOf.get(p.id) ?? null;
+		return {
+			id: p.id,
+			name: p.name,
+			manufacturerName: p.manufacturer?.name ?? null,
+			category: p.category,
+			units,
+			damaged,
+			price,
+			value: price === null ? null : price * units
+		};
+	});
 });
 
 // ── Category rental rates (offers/invoices pricing, issue #9) ─────────────────

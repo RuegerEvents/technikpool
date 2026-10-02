@@ -1,6 +1,13 @@
 <script lang="ts">
 	import { getErrorMessage, orgLabel } from '$lib/utils';
-	import { DEFAULT_ORG_ROLE, ORG_ROLES, canManageInventory, type OrgRole } from '$lib/roles';
+	import {
+		DEFAULT_ORG_ROLE,
+		ORG_ROLES,
+		ROLE_FOR,
+		canManageInventory,
+		roleAtLeast,
+		type OrgRole
+	} from '$lib/roles';
 	import { roleName, roleSummary } from '$lib/role-descriptions.svelte';
 	import {
 		InvitationLink,
@@ -53,6 +60,10 @@
 	let canManage = $derived(myMembership?.role === 'OWNER' || data.isAdmin);
 	// Numbering new units is inventory work: an ADMIN may switch it as well.
 	let canNumber = $derived(canManage || (!!myMembership && canManageInventory(myMembership)));
+	// The value is prices, so it is for whoever may read the org's records.
+	let canSeeValue = $derived(
+		data.isAdmin || (!!myMembership && roleAtLeast(myMembership.role, ROLE_FOR.read))
+	);
 	let nextTagQuery = $derived(canNumber ? getNextAssetTag(orgId) : null);
 	let nextTag = $derived(nextTagQuery?.current ?? null);
 	let savingAutoTags = $state(false);
@@ -321,13 +332,21 @@
 					<h1 class="text-3xl font-bold tracking-tight break-words">{org.name}</h1>
 					<p class="text-muted-foreground">Manage members and roles.</p>
 				</div>
-				{#if canManage}
+				{#if canManage || canSeeValue}
 					<div class="flex flex-wrap items-center gap-2">
-						<Button variant="outline" href={resolve(`/orgs/${orgId}/locations`)}>Locations</Button>
-						<Button variant="outline" href={resolve(`/orgs/${orgId}/rates`)}
-							>Rates & services</Button
-						>
-						<Button variant="destructive" onclick={() => (deleteOpen = true)}>Delete</Button>
+						{#if canSeeValue}
+							<Button variant="outline" href={resolve(`/orgs/${orgId}/value`)}
+								>Equipment value</Button
+							>
+						{/if}
+						{#if canManage}
+							<Button variant="outline" href={resolve(`/orgs/${orgId}/locations`)}>Locations</Button
+							>
+							<Button variant="outline" href={resolve(`/orgs/${orgId}/rates`)}
+								>Rates & services</Button
+							>
+							<Button variant="destructive" onclick={() => (deleteOpen = true)}>Delete</Button>
+						{/if}
 					</div>
 				{/if}
 			</div>
