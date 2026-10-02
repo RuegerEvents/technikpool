@@ -81,6 +81,7 @@ async function requireAuth() {
 | `src/lib/remote/legal.remote.ts`              | `getLegalSettings`, `saveLegalDocument`, `getDpaOverview`, `acceptDpa` — the operator's legal texts and each org's acceptance of the AVV                                                                                                  |
 | `src/lib/remote/production-checks.remote.ts`  | `getProductionChecks`, `getProductionCheck`, `startProductionCheck`, `scanProductionCheck`, `tickProductionCheck`, `closeCheck`, `confirmCheckReceipt`, `reportCheckReturn`, `getHandoverTodos` — see "Loans: handover and checks"        |
 | `src/lib/remote/production-handout.remote.ts` | `getProductionHandout`, `getHandoutSummary`, `scanProductionHandout`, `setProductionHandoutDone`, `setProductionHandoutLine` — handing out / taking back against the list, see "Loans: handover and checks"                               |
+| `src/lib/remote/equipment-sheets.remote.ts`   | `streamEquipmentSheet` — a `query.live` that yields progress, then the delivery note or packing list PDF; see "Delivery note and packing list"                                                                                            |
 | `src/lib/remote/product-documents.remote.ts`  | `getProductDocuments`, `addProductDocument`, `updateProductDocument`, `removeProductDocument` — a product's PDFs, public by design (see `services/product-documents.ts`)                                                                  |
 
 ## External API (`/api/v1`)
@@ -270,6 +271,22 @@ shell. The URL is the credential, signed like the calendar feed rather than stor
 withdrawing it bumps the version and kills every older link. It stops opening 30 days after the
 production's end. The page gets `ShareView` (`src/lib/production-share.ts`) and nothing else — no
 prices, no customer record. Created from the "Customer link" menu on the production page (MEMBER+).
+
+## Delivery note and packing list
+
+Both are PDFs from one renderer (`src/lib/server/equipment-sheet-pdf.ts`, data in
+`services/equipment-sheet.ts`): same letterhead and table, identical units collapsed into one
+line with their tags, a bundle as one line with its contents. The delivery note groups by
+category and is addressed to the customer; the packing list groups by **shelf** (lent units one
+section per lender) and, with `?org=`, holds only that org's units on that org's letterhead —
+what a lender packs. Only what can ship is listed (no PENDING, DECLINED or CANCELLED items).
+
+The production page gets them through `streamEquipmentSheet`, because a sheet full of pictures
+takes a while: it reports progress (`SheetDownload` in `$lib/equipment-sheet-download.svelte.ts`,
+drawn by `SheetProgress`) and hands over the bytes. The tab is opened on the click and filled
+afterwards, since a tab opened after an `await` is a blocked popup. Each click passes a fresh
+`request`, or the live query's cache would answer with the previous PDF. The plain GET routes
+stay for links and bookmarks.
 
 ## Service lines on offers and invoices
 
@@ -517,8 +534,8 @@ src/routes/
 │   └── [id]/
 │       ├── +page.svelte
 │       ├── crew-passes/+page.svelte   # Print layout
-│       ├── packing-list/+page.svelte  # Print layout
-│       └── delivery-note/+page.svelte # Print layout
+│       ├── packing-list/+server.ts    # PDF, see "Delivery note and packing list"
+│       └── delivery-note/+server.ts   # PDF
 ├── devices/                # Pair a handheld scanner: QR of the server URL + code entry
 │   ├── +page.svelte
 │   └── qr.png/+server.ts
@@ -526,7 +543,7 @@ src/routes/
 └── calendar/+page.svelte
 ```
 
-Print routes (`/packing-list`, `/delivery-note`, `/crew-passes`) bypass the app header — detected via regex in `+layout.svelte`.
+Print routes (`/crew-passes`, `/inventory-list`, `…/print`) bypass the app header — detected via regex in `+layout.svelte`.
 
 ## UI Components
 
@@ -644,8 +661,7 @@ ordinary style. Two things to know about that boundary:
   children are not rendered at all. That is the trade: the shell arrives immediately, and the
   data comes from the client.
 
-**Print routes keep `await`** (`packing-list`, `delivery-note`, `crew-passes`,
-`inventory-list`). A page that is about to be printed should arrive complete, and nobody is
+**Print routes keep `await`** (`crew-passes`, `inventory-list`). A page that is about to be printed should arrive complete, and nobody is
 watching it load.
 
 **Shared components answer to the same rule**, because a component that suspends takes the page

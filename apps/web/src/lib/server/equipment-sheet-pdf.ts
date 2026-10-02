@@ -2,10 +2,11 @@ import sharp from 'sharp';
 import { PDFDocument, rgb, type PDFFont, type PDFImage, type PDFPage } from 'pdf-lib';
 import { getObject } from '$lib/server/storage';
 import { embedInter } from './fonts';
-import { fmtDate, safe, wrap } from './pdf-text.ts';
+import { safe, wrap } from './pdf-text.ts';
 import { drawLogo, embedLogo } from './pdf-logo.ts';
+import type { SheetProgress } from '$lib/equipment-sheet';
 
-export type DeliveryNoteLine = {
+export type EquipmentSheetLine = {
 	label: string;
 	subtitle: string | null;
 	/** Asset tags (or serial numbers) of the units, bundle tags for a kit. */
@@ -15,9 +16,15 @@ export type DeliveryNoteLine = {
 	imagePath: string | null;
 };
 
-export type DeliveryNoteGroup = { name: string; lines: DeliveryNoteLine[] };
+export type EquipmentSheetGroup = { name: string; lines: EquipmentSheetLine[] };
 
-export type DeliveryNoteData = {
+/**
+ * A list of equipment on the letterhead: the delivery note that travels with
+ * the goods, and the packing list they are packed by. Both draw the same
+ * table; what differs is said by the caller.
+ */
+export type EquipmentSheet = {
+	title: string;
 	organization: {
 		name: string;
 		address: { line1: string; line2: string | null; postalCode: string; city: string } | null;
@@ -26,14 +33,19 @@ export type DeliveryNoteData = {
 		/** Object key of the letterhead logo. */
 		logoPath: string | null;
 	};
+	/** The address block left of the metadata. */
 	recipient: { name: string; contactPerson: string | null; address: string[] };
-	customerNumber: string | null;
+	/** Label and value(s) under the logo, in order. */
+	meta: Array<{ label: string; value: string | string[] }>;
 	productionName: string;
-	/** Where the goods go, when that is not already the recipient's address. */
-	venue: string[];
-	startDate: Date | null;
-	endDate: Date | null;
-	groups: DeliveryNoteGroup[];
+	intro: string | null;
+	/** Heading of the tick-box column. */
+	checkLabel: string;
+	empty: string;
+	groups: EquipmentSheetGroup[];
+	/** Paragraphs after the table. */
+	closing: string[];
+	signatures: [string, string];
 };
 
 // Same sheet and margins as offers and invoices, so the three read as one set.
@@ -100,12 +112,17 @@ async function thumbnail(path: string): Promise<Uint8Array | null> {
 			.toBuffer();
 	} catch (cause) {
 		// A missing picture is a gap in one row, not a reason to refuse the note.
-		console.warn(`Could not include image "${path}" in delivery note:`, cause);
+		console.warn(`Could not include image "${path}" in equipment sheet:`, cause);
 		return null;
 	}
 }
 
-export async function generateDeliveryNotePdf(data: DeliveryNoteData, issuedAt = new Date()) {
+export type ReportProgress = (progress: SheetProgress) => void;
+
+export async function generateEquipmentSheetPdf(
+	data: EquipmentSheet,
+	report: ReportProgress = () => {}
+) {
 	const pdf = await PDFDocument.create();
 	const { regular, bold } = await embedInter(pdf);
 	const logo = await embedLogo(pdf, data.organization.logoPath);
@@ -116,14 +133,18 @@ export async function generateDeliveryNotePdf(data: DeliveryNoteData, issuedAt =
 		)
 	] as string[];
 	const images = new Map<string, PDFImage>();
+	let embedded = 0;
+	report({ stage: 'images', done: 0, total: paths.length });
 	await Promise.all(
 		paths.map(async (path) => {
 			const bytes = await thumbnail(path);
 			if (bytes) images.set(path, await pdf.embedJpg(bytes));
+			report({ stage: 'images', done: ++embedded, total: paths.length });
 		})
 	);
+	report({ stage: 'layout', done: 0, total: 1 });
 
-	const title = 'Lieferschein';
+	const title = data.title;
 	let page!: PDFPage;
 	let y = 0;
 	let pageNumber = 0;
@@ -192,7 +213,7 @@ export async function generateDeliveryNotePdf(data: DeliveryNoteData, issuedAt =
 		draw('Bild', IMG_X, baseline, 8.5, bold);
 		right('Menge', QTY_RIGHT, baseline, 8.5, bold);
 		draw('Bezeichnung', TEXT_X, baseline, 8.5, bold);
-		right('Geprüft', CHECK_RIGHT, baseline, 8.5, bold);
+		right(data.checkLabel, CHECK_RIGHT, baseline, 8.5, bold);
 		y -= HEADER_H;
 	};
 
@@ -236,22 +257,17 @@ export async function generateDeliveryNotePdf(data: DeliveryNoteData, issuedAt =
 		}
 		metaY -= 2;
 	};
-	meta('Datum:', fmtDate(issuedAt));
-	if (data.customerNumber) meta('Kundennr.:', data.customerNumber);
-	meta('Produktion:', data.productionName);
-	if (data.startDate)
-		meta('Zeitraum:', [fmtDate(data.startDate), `bis ${fmtDate(data.endDate ?? data.startDate)}`]);
-	if (data.venue.length) meta('Lieferort:', data.venue);
+	for (const { label, value } of data.meta) meta(label, value);
 
 	y = Math.min(y, metaY - 20, H - 190);
 	draw(title, LEFT, y, 19, regular);
 	y -= 30;
-	paragraph(`Für die Produktion "${data.productionName}" liefern wir Ihnen:`, 10, 3);
+	if (data.intro) paragraph(data.intro, 10, 3);
 	tableHeader();
 
 	if (data.groups.length === 0) {
 		y -= 16;
-		draw('Dieser Produktion ist noch keine Ausrüstung zugeordnet.', LEFT + 4, y, 9, regular, muted);
+		draw(data.empty, LEFT + 4, y, 9, regular, muted);
 		y -= 10;
 	}
 
@@ -361,26 +377,15 @@ export async function generateDeliveryNotePdf(data: DeliveryNoteData, issuedAt =
 		y -= TOTAL_H;
 	}
 
-	// Hand-over: the note travels with the goods and is signed on both sides.
 	y -= 24;
-	paragraph(
-		'Bitte prüfen Sie die Lieferung bei Übernahme auf Vollständigkeit und sichtbare Schäden. ' +
-			'Fehlende oder beschädigte Teile vermerken Sie bitte auf diesem Lieferschein.',
-		9,
-		9
-	);
-	paragraph(
-		'Die Ware wird dem Empfänger vorübergehend zur Nutzung überlassen, für sämtliche Schäden ' +
-			'während der Nutzungsdauer haftet der Empfänger.\n' +
-			'Wir freuen uns auf Ihre Rückmeldung und stehen für Fragen gerne zur Verfügung.',
-		9,
-		0
+	data.closing.forEach((text, index) =>
+		paragraph(text, 9, index === data.closing.length - 1 ? 0 : 9)
 	);
 	const SIGN_H = 70;
 	ensure(SIGN_H);
 	const signWidth = (CONTENT_W - 36) / 2;
 	const lineY = y - 46;
-	for (const [index, label] of ['Übergeben', 'Übernommen'].entries()) {
+	for (const [index, label] of data.signatures.entries()) {
 		const x = LEFT + index * (signWidth + 36);
 		page.drawLine({
 			start: { x, y: lineY },

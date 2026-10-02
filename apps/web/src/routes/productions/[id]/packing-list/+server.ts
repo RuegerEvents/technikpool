@@ -8,7 +8,7 @@ import { pdfResponse } from '$lib/server/pdf-response';
 export const GET: RequestHandler = async ({ params, locals, url }) => {
 	if (!locals.user) error(401, 'Unauthorized');
 	const { bytes, filename } = await renderEquipmentSheet(
-		'delivery-note',
+		'packing-list',
 		params.id,
 		url.searchParams.get('org')
 	);

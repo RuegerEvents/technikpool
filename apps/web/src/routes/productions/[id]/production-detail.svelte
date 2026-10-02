@@ -44,6 +44,8 @@
 	import CheckButton from './check-button.svelte';
 	import HandoutButtons from './handout-buttons.svelte';
 	import { accessorySummary, nestAccessories, type Nested } from '$lib/production-items';
+	import { SheetDownload } from '$lib/equipment-sheet-download.svelte';
+	import { SheetProgress } from '$lib/components/sheet-progress';
 
 	let { productionId }: { productionId: string } = $props();
 	let production = $derived(await getProduction(productionId));
@@ -383,12 +385,13 @@
 	// Units, not rows: an accessory travels with its unit and is counted with it.
 	let unitCount = $derived(displaySections.reduce((sum, s) => sum + s.total, 0));
 
-	function openPrint(route: 'packing-list' | 'delivery-note' | 'crew-passes') {
-		// The packing list prints what the equipment list shows.
-		const query =
-			route === 'packing-list' && ownerFilter ? `?org=${encodeURIComponent(ownerFilter)}` : '';
-		window.open(`${resolve(`/productions/${productionId}/${route}`)}${query}`, '_blank');
+	function openPrint(route: 'crew-passes') {
+		window.open(resolve(`/productions/${productionId}/${route}`), '_blank');
 	}
+
+	// The PDFs take a moment over their pictures, so they report progress. The
+	// packing list prints what the equipment list shows.
+	const sheetDownload = new SheetDownload();
 
 	let expanded = new SvelteMap<string, boolean>();
 	let selectedItemAssetIds = new SvelteSet<string>();
@@ -660,14 +663,16 @@
 						class="z-50 min-w-[190px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
 					>
 						<DropdownMenu.Item
-							onSelect={() => openPrint('packing-list')}
-							class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+							disabled={sheetDownload.busy}
+							onSelect={() => sheetDownload.open('packing-list', productionId, ownerFilter || null)}
+							class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[disabled]:opacity-50 data-[highlighted]:bg-accent"
 						>
 							Packing List
 						</DropdownMenu.Item>
 						<DropdownMenu.Item
-							onSelect={() => openPrint('delivery-note')}
-							class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+							disabled={sheetDownload.busy}
+							onSelect={() => sheetDownload.open('delivery-note', productionId, null)}
+							class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[disabled]:opacity-50 data-[highlighted]:bg-accent"
 						>
 							Delivery Note
 						</DropdownMenu.Item>
@@ -1620,3 +1625,5 @@
 		bind:open={copyEquipmentOpen}
 	/>
 {/if}
+
+<SheetProgress download={sheetDownload} />

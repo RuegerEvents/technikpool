@@ -38,19 +38,7 @@ export function nestAccessories<T extends NestableItem>(items: T[]): Nested<T>[]
 }
 
 /** "2× Omega Bracket · 1× Kaltgerätekabel" — the sub-line's whole text. */
-export function accessorySummary(
-	accessories: { asset: { assetTag: string | null; product: { name: string } } }[],
-	{ tags = false }: { tags?: boolean } = {}
-): string {
-	// The packing list names each unit with its tag, because someone is ticking
-	// physical objects off against it. Everywhere else a count reads better.
-	if (tags) {
-		return accessories
-			.map(({ asset }) =>
-				asset.assetTag ? `${asset.product.name} (${asset.assetTag})` : asset.product.name
-			)
-			.join(' · ');
-	}
+export function accessorySummary(accessories: { asset: { product: { name: string } } }[]): string {
 	const counts = new Map<string, number>();
 	for (const { asset } of accessories) {
 		counts.set(asset.product.name, (counts.get(asset.product.name) ?? 0) + 1);

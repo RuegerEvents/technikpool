@@ -10801,6 +10801,7 @@ msgstr "Kundenlink"
 #~ msgid "The link stops working for everyone who has it. Withdraw it?"
 #~ msgstr "Der Link funktioniert dann für niemanden mehr. Zurückziehen?"
 
+#: src/lib/equipment-sheet-download.svelte.ts
 #: src/routes/case-check/+page.svelte
 msgid "Open"
 msgstr "Öffnen"
@@ -11772,3 +11773,31 @@ msgid "1 more unit on the production is not on this list."
 msgid_plural "# more units on the production are not on this list."
 msgstr[0] "1 weiteres Gerät der Produktion steht nicht auf dieser Liste."
 msgstr[1] "# weitere Geräte der Produktion stehen nicht auf dieser Liste."
+
+#: src/lib/equipment-sheet-download.svelte.ts
+msgid "Delivery note"
+msgstr "Lieferschein"
+
+#: src/lib/equipment-sheet-download.svelte.ts
+msgid "Packing list"
+msgstr "Packliste"
+
+#: src/lib/equipment-sheet-download.svelte.ts
+msgid "Updating previews"
+msgstr "Vorschaubilder werden aktualisiert"
+
+#: src/lib/equipment-sheet-download.svelte.ts
+msgid "Loading pictures"
+msgstr "Bilder werden geladen"
+
+#: src/lib/equipment-sheet-download.svelte.ts
+msgid "Laying out pages"
+msgstr "Seiten werden gesetzt"
+
+#~ msgid "Preparing the PDF …"
+#~ msgstr "PDF wird erstellt …"
+
+#: src/lib/components/sheet-progress/sheet-progress.svelte
+#: src/lib/equipment-sheet-download.svelte.ts
+msgid "Gathering the equipment"
+msgstr "Equipment wird zusammengestellt"

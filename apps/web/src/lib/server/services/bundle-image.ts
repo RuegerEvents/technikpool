@@ -257,6 +257,11 @@ function bundleIsCurrent(bundle: BundleForImage, currentFingerprint: string) {
 	return !!bundle.imagePath && bundle.imageFingerprint === currentFingerprint;
 }
 
+/** Whether `ensureBundleImage` would have to draw — for a caller reporting progress. */
+export function bundleImageIsStale(bundle: BundleForImage) {
+	return !bundleIsCurrent(bundle, fingerprint(bundle.assets, featuredSet(bundle)));
+}
+
 /** Generate only when contents changed; force creates a fresh URL to bust browser caches. */
 export async function ensureBundleImage(bundle: BundleForImage, force = false) {
 	const featured = featuredSet(bundle);
@@ -289,6 +294,13 @@ async function drawBundleImage(
 	bundle.imagePath = path;
 	bundle.imageFingerprint = currentFingerprint;
 	return path;
+}
+
+/** Whether `ensureAssetImage` would have to draw — for a caller reporting progress. */
+export function assetImageIsStale(asset: AssetForImage) {
+	return (
+		asset.accessories.length > 0 && !assetIsCurrent(asset, assetContents(asset).currentFingerprint)
+	);
 }
 
 /** Generate a bundle-style preview for a unit that has attached accessories. */
