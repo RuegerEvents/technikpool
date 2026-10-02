@@ -113,6 +113,11 @@ class DemoBackend {
     if (path.startsWith('/api/v1/production-checks/')) {
       return _checkRoute(options, method, path);
     }
+    // ['', 'api', 'v1', 'productions', id, 'handout', mode, sub?]
+    final segments = path.split('/');
+    if (segments.length >= 7 && segments[3] == 'productions' && segments[5] == 'handout') {
+      return _handoutRoute(options, method, segments);
+    }
 
     return _error(options, 404, 'not_found', 'Not available in the demo');
   }
@@ -343,8 +348,8 @@ class DemoBackend {
 
   // ---------------------------------------------------------------------------
   // Production checks — mirrors services/production-check.ts on the server.
-  // The demo has no bookings, so a production's list is what is out on it, and
-  // the demo user is on every side: one check per production.
+  // A production's list is what is booked for it (`_booked`) and what is out on
+  // it, and the demo user is on every side: one check per production.
 
   final _checks = <String, _DemoCheck>{};
   final _received = <String>{};
@@ -436,6 +441,29 @@ class DemoBackend {
       case ('DELETE', 'ticks'):
         check.ticks.remove(parts[6]);
         return _noContent(options);
+      case ('PUT', 'lines'):
+        final body = options.data;
+        final key = body is Map ? '${body['key'] ?? ''}' : '';
+        final count = body is Map ? (body['count'] as num? ?? 0).toInt() : 0;
+        final line = _lines(
+          _checkList(check),
+          check.production,
+          (a) => check.ticks.containsKey(a.id),
+        ).where((l) => l.key == key).firstOrNull;
+        if (line == null) return _ok(options, const ProductionListLineResult(done: 0));
+        final target = count.clamp(0, line.total);
+        final ticked = line.assetIds.where(check.ticks.containsKey).toList();
+        if (target > ticked.length) {
+          final open = line.assetIds.where((id) => !check.ticks.containsKey(id));
+          for (final id in open.take(target - ticked.length)) {
+            check.ticks[id] = 'manual';
+          }
+        } else {
+          for (final id in ticked.skip(target)) {
+            check.ticks.remove(id);
+          }
+        }
+        return _ok(options, ProductionListLineResult(done: target));
       case ('POST', 'close'):
         final found = listed.where(check.ticks.containsKey).length;
         check.open = false;
@@ -465,15 +493,64 @@ class DemoBackend {
     return _error(options, 404, 'not_found', 'Not available in the demo');
   }
 
+  /// What is booked for the production or out on it, as a check lists it.
+  List<Asset> _checkList(_DemoCheck check) => _sorted(check.production, [
+    for (final asset in _units)
+      if (_checkedOutTo[asset.id]?.id == check.production.id ||
+          (_booked[check.production.id]?.contains(asset.id) ?? false))
+        asset,
+  ]);
+
   /// Sorted as the server sends it: own units by location, then lent ones.
-  List<Asset> _checkList(_DemoCheck check) {
-    String key(Asset a) => a.organization.id == check.production.organization.id
-        ? '0${a.location.name}'
-        : '1${a.organization.name}';
+  List<Asset> _sorted(Production production, List<Asset> list) {
+    String key(Asset a) => a.organization.id == production.organization.id
+        ? '0${a.location.name}|${a.product.name}|${a.orgIndex.toString().padLeft(6, '0')}'
+        : '1${a.organization.name}|${a.product.name}';
+    return list..sort((a, b) => key(a).compareTo(key(b)));
+  }
+
+  ProductionCheckGroup _groupOf(Asset asset, Production production) =>
+      asset.organization.id == production.organization.id
+      ? ProductionCheckGroup(
+          kind: ProductionCheckGroupKind.location,
+          name: asset.location.name,
+        )
+      : ProductionCheckGroup(
+          kind: ProductionCheckGroupKind.lender,
+          name: asset.organization.shortName ?? asset.organization.name,
+        );
+
+  /// Mirrors `buildLines`: units told apart by nothing, one line per product,
+  /// location and owner.
+  List<ProductionListLine> _lines(
+    List<Asset> list,
+    Production production,
+    bool Function(Asset) done,
+  ) {
+    final byKey = <String, List<Asset>>{};
+    for (final a in list) {
+      if (a.assetTag != null || a.bundleId != null || a.parentAssetId != null) continue;
+      if (_units.any((u) => u.parentAssetId == a.id)) continue;
+      final key = '${a.product.id}|${a.location.id}|${a.organization.id}';
+      byKey.putIfAbsent(key, () => []).add(a);
+    }
     return [
-      for (final asset in _assets)
-        if (_checkedOutTo[asset.id]?.id == check.production.id) asset,
-    ]..sort((a, b) => key(a).compareTo(key(b)));
+      for (final MapEntry(:key, value: units) in byKey.entries)
+        ProductionListLine(
+          key: key,
+          productName: units.first.product.name,
+          productCaption: units.first.product.caption,
+          manufacturerName: units.first.product.manufacturerName,
+          lentBy: units.first.organization.id == production.organization.id
+              ? null
+              : units.first.organization.shortName ?? units.first.organization.name,
+          group: _groupOf(units.first, production),
+          assetIds: [for (final u in units) u.id],
+          total: units.length,
+          done: units.where(done).length,
+          floor: 0,
+        ),
+    ];
   }
 
   ProductionCheck _checkView(_DemoCheck check) {
@@ -511,16 +588,10 @@ class DemoBackend {
                 ? null
                 : asset.organization.shortName ?? asset.organization.name,
             accessoryOf: asset.parentAssetId,
-            group: asset.organization.id == check.production.organization.id
-                ? ProductionCheckGroup(
-                    kind: ProductionCheckGroupKind.location,
-                    name: asset.location.name,
-                  )
-                : ProductionCheckGroup(
-                    kind: ProductionCheckGroupKind.lender,
-                    name: asset.organization.shortName ?? asset.organization.name,
-                  ),
-            status: ProductionCheckItemStatus.checkedOut,
+            group: _groupOf(asset, check.production),
+            status: _checkedOutTo[asset.id]?.id == check.production.id
+                ? ProductionCheckItemStatus.checkedOut
+                : ProductionCheckItemStatus.approved,
             received: _received.contains(asset.id),
             returnReported: _returnReported.contains(asset.id),
             tick: switch (check.ticks[asset.id]) {
@@ -534,9 +605,10 @@ class DemoBackend {
             },
           ),
       ],
+      lines: _lines(list, check.production, (a) => check.ticks.containsKey(a.id)),
       unexpected: [
         for (final id in check.ticks.keys.where((id) => !listed.contains(id)))
-          if (_assets.where((a) => a.id == id).firstOrNull case final asset?)
+          if (_units.where((a) => a.id == id).firstOrNull case final asset?)
             ProductionCheckUnexpected(
               assetId: asset.id,
               assetTag: asset.assetTag,
@@ -553,6 +625,239 @@ class DemoBackend {
                 .where((id) => _received.contains(id) && !_returnReported.contains(id))
                 .length
           : 0,
+    );
+  }
+
+
+  // ---------------------------------------------------------------------------
+  // Handing out and taking back — mirrors services/production-handout.ts. A
+  // tick is the booking itself, so the state is `_checkedOutTo` and nothing
+  // else; `_returnedFrom` remembers what came back, so the take-back list
+  // still shows it ticked.
+
+  /// Untagged cables on the shelf, booked for the festival, so a counted line
+  /// has something to count. Not in `_assets`: they have no tag to look up and
+  /// would only clutter the inventory and the stocktake.
+  late final List<Asset> _looseUnits = [
+    for (var i = 1; i <= 12; i++)
+      Asset(
+        id: 'asset_demo_schuko_$i',
+        assetTag: null,
+        serialNumber: null,
+        orgIndex: 200 + i,
+        status: AssetStatus.available,
+        product: _looseCable,
+        location: DemoData.locations.first,
+        organization: DemoData.nordlicht,
+        bundleId: null,
+        parentAssetId: null,
+      ),
+  ];
+
+  /// Every unit there is, tagged or not.
+  List<Asset> get _units => [..._assets, ..._looseUnits];
+
+  late final Map<String, Set<String>> _booked = {
+    'prdn_demo_festival': {
+      'asset_demo_40000001',
+      'asset_demo_40000002',
+      'asset_demo_40000004',
+      'asset_demo_40000006',
+      'asset_demo_40000008',
+      'asset_demo_40000011',
+      'asset_demo_40000013',
+      'asset_demo_40000014',
+      'asset_demo_40000015',
+      for (final unit in _looseUnits.take(10)) unit.id,
+    },
+  };
+  final _returnedFrom = <String, Set<String>>{};
+
+  bool _isOut(Asset a, Production p) => _checkedOutTo[a.id]?.id == p.id;
+
+  bool _handoutDone(Asset a, Production p, HandoutMode mode) => mode == HandoutMode.checkout
+      ? _isOut(a, p)
+      : !_isOut(a, p) && (_returnedFrom[p.id]?.contains(a.id) ?? false);
+
+  /// Taking back lists what is booked as well, handed out or not — kit goes
+  /// out unscanned, and comes back all the same.
+  List<Asset> _handoutList(Production p, HandoutMode mode) => _sorted(p, [
+    for (final a in _units)
+      // Handing out leaves what came back off, as the server's statuses do.
+      if (_isOut(a, p) ||
+          (_booked[p.id]?.contains(a.id) ?? false) &&
+              (mode == HandoutMode.checkin || !(_returnedFrom[p.id]?.contains(a.id) ?? false)))
+        a,
+  ]);
+
+  void _handOut(Asset asset, Production p) {
+    _checkedOutTo[asset.id] = p;
+    (_booked[p.id] ??= {}).add(asset.id);
+    _returnedFrom[p.id]?.remove(asset.id);
+    _returnReported.remove(asset.id);
+    if (asset.organization.id != p.organization.id) _received.add(asset.id);
+    _log(asset, 'CHECKED_OUT', p.name);
+  }
+
+  void _setDone(Asset asset, Production p, HandoutMode mode, bool done) {
+    if (_handoutDone(asset, p, mode) == done) return;
+    switch ((mode, done)) {
+      case (HandoutMode.checkout, true) || (HandoutMode.checkin, false):
+        _handOut(asset, p);
+      case (HandoutMode.checkout, false):
+        _checkedOutTo.remove(asset.id);
+        _log(asset, 'CHECKOUT_UNDONE', p.name);
+      default:
+        _checkedOutTo.remove(asset.id);
+        (_returnedFrom[p.id] ??= {}).add(asset.id);
+        _log(asset, 'RETURNED', p.name);
+    }
+  }
+
+  Response<dynamic> _handoutRoute(RequestOptions options, String method, List<String> parts) {
+    final production = DemoData.productions.where((p) => p.id == parts[4]).firstOrNull;
+    if (production == null) {
+      return _error(options, 403, 'forbidden', 'No access to this production');
+    }
+    final mode = HandoutMode.fromJson(parts[6]);
+    if (mode == HandoutMode.$unknown) {
+      return _error(options, 400, 'invalid_request', 'mode is checkout or checkin.');
+    }
+    final sub = parts.length > 7 ? parts[7] : null;
+    final body = options.data is Map ? options.data as Map : const {};
+    final byId = {for (final a in _units) a.id: a};
+
+    switch ((method, sub)) {
+      case ('GET', null):
+        return _ok(options, _handoutView(production, mode));
+      case ('POST', 'scans'):
+        final code = '${body['code'] ?? ''}'.trim();
+        final match = _resolve(code);
+        if (match.ambiguous) {
+          return _error(options, 409, 'serial_ambiguous', 'Serial number is on more than one unit');
+        }
+        final asset = match.asset;
+        if (asset == null) {
+          return _error(options, 404, 'asset_not_found', 'Tag "$code" not found');
+        }
+        final scanned = ScannedAsset(
+          id: asset.id,
+          assetTag: asset.assetTag ?? code,
+          productName: asset.product.name,
+          productCaption: asset.product.caption,
+          manufacturerName: asset.product.manufacturerName,
+        );
+        if (mode == HandoutMode.checkout) {
+          _handOut(asset, production);
+          return _ok(
+            options,
+            ScanResult(
+              asset: scanned,
+              action: ScanResultAction.checkedOut,
+              targetName: production.name,
+              returnedFrom: const [],
+            ),
+          );
+        }
+        // Booked here and never handed out: it was out all the same.
+        final from =
+            _checkedOutTo.remove(asset.id) ??
+            ((_booked[production.id]?.contains(asset.id) ?? false) ? production : null);
+        if (from != null) {
+          (_returnedFrom[from.id] ??= {}).add(asset.id);
+          _log(asset, 'RETURNED', from.name);
+        }
+        return _ok(
+          options,
+          ScanResult(
+            asset: scanned,
+            action: ScanResultAction.locationAssigned,
+            targetName: asset.location.name,
+            returnedFrom: from == null ? const [] : [from.name],
+          ),
+        );
+      case ('POST', 'ticks'):
+        final done = body['done'] == true;
+        var count = 0;
+        for (final id in (body['assetIds'] as List? ?? const []).whereType<String>()) {
+          final asset = byId[id];
+          if (asset == null) continue;
+          _setDone(asset, production, mode, done);
+          count++;
+        }
+        return _ok(options, HandoverResult(count: count));
+      case ('PUT', 'lines'):
+        final key = '${body['key'] ?? ''}';
+        final count = (body['count'] as num? ?? 0).toInt();
+        final line = _lines(
+          _handoutList(production, mode),
+          production,
+          (a) => _handoutDone(a, production, mode),
+        ).where((l) => l.key == key).firstOrNull;
+        if (line == null) return _ok(options, const ProductionListLineResult(done: 0));
+        final target = count.clamp(0, line.total);
+        final units = [for (final id in line.assetIds) byId[id]!];
+        final done = units.where((a) => _handoutDone(a, production, mode)).toList();
+        if (target > done.length) {
+          final open = units.where((a) => !_handoutDone(a, production, mode)).toList();
+          for (final a in open.take(target - done.length)) {
+            _setDone(a, production, mode, true);
+          }
+        } else {
+          for (final a in done.skip(target)) {
+            _setDone(a, production, mode, false);
+          }
+        }
+        return _ok(options, ProductionListLineResult(done: target));
+    }
+    return _error(options, 404, 'not_found', 'Not available in the demo');
+  }
+
+  ProductionHandout _handoutView(Production p, HandoutMode mode) {
+    final list = _handoutList(p, mode);
+    return ProductionHandout(
+      mode: mode,
+      productionId: p.id,
+      productionName: p.name,
+      cancelled: false,
+      // The demo user is on every side; one is enough to show the list.
+      side: ProductionCheckSide(
+        organizationId: p.organization.id,
+        organizationName: p.organization.shortName ?? p.organization.name,
+        own: true,
+      ),
+      sides: [
+        ProductionCheckSide(
+          organizationId: p.organization.id,
+          organizationName: p.organization.shortName ?? p.organization.name,
+          own: true,
+        ),
+      ],
+      items: [
+        for (final asset in list)
+          ProductionHandoutItem(
+            assetId: asset.id,
+            assetTag: asset.assetTag,
+            productName: asset.product.name,
+            productCaption: asset.product.caption,
+            manufacturerName: asset.product.manufacturerName,
+            lentBy: asset.organization.id == p.organization.id
+                ? null
+                : asset.organization.shortName ?? asset.organization.name,
+            accessoryOf: asset.parentAssetId,
+            group: _groupOf(asset, p),
+            status: _isOut(asset, p)
+                ? ProductionHandoutItemStatus.checkedOut
+                : _returnedFrom[p.id]?.contains(asset.id) ?? false
+                ? ProductionHandoutItemStatus.returned
+                : ProductionHandoutItemStatus.approved,
+            done: _handoutDone(asset, p, mode),
+            received: _received.contains(asset.id),
+            returnReported: _returnReported.contains(asset.id),
+          ),
+      ],
+      lines: _lines(list, p, (a) => _handoutDone(a, p, mode)),
+      othersCount: 0,
     );
   }
 

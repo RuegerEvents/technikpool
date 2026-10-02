@@ -72,6 +72,13 @@ tags:
       hands: ticked units another org lent can be confirmed as received, and
       later reported as sent back. The lender's side of the handover is the
       ordinary scan — out to the production, then back onto a location.
+  - name: productionHandout
+    description: |
+      Handing a production's equipment out and taking it back by working
+      through its list: scan a tag, tick a unit whose label was checked by
+      eye, or count interchangeable units without a tag. Unlike a check, a
+      tick here is the booking itself, so nothing is stored beyond the
+      units' own status and everyone on the list sees the same ticks.
 
 paths:
   /api/auth/device/code:
@@ -1120,6 +1127,185 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /api/v1/production-checks/{checkId}/lines:
+    put:
+      operationId: setProductionCheckLine
+      tags: [productionCheck]
+      summary: Set how many units of a counted line are ticked
+      description: |
+        For a line of `lines` — interchangeable units without a tag. Raising
+        the count ticks the next units as the caller's; lowering it takes back
+        only the caller's own ticks, never below the line's `floor`. A count
+        out of range is clamped, not refused.
+      parameters:
+        - $ref: '#/components/parameters/CheckId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductionListLineCount'
+      responses:
+        '200':
+          description: The line's count afterwards
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductionListLineResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/productions/{productionId}/handout/{mode}:
+    get:
+      operationId: getProductionHandout
+      tags: [productionHandout]
+      summary: The list to hand a production's equipment out or take it back
+      description: |
+        The same list a check works through, but a tick is the booking itself.
+        `checkout`: what is booked (APPROVED) or out (CHECKED_OUT), done when
+        out. `checkin`: all of that and what is back (RETURNED), done when
+        back — a unit booked but never handed out is taken back too, which
+        books its checkout first. Lists
+        only the units of the caller's orgs (MEMBER or above) — lent units are
+        handed over by their lender and only counted in `othersCount`.
+      parameters:
+        - $ref: '#/components/parameters/ProductionId'
+        - $ref: '#/components/parameters/HandoutMode'
+        - name: organizationId
+          in: query
+          required: false
+          description: |
+            The side to see the list from — one of `sides`. A lending org's
+            side lists only its units, by location: what it has to pack.
+            Without it, the production's own side when the caller stands on
+            it, else their first lending org.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductionHandout'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/productions/{productionId}/handout/{mode}/scans:
+    post:
+      operationId: scanIntoProductionHandout
+      tags: [productionHandout]
+      summary: Book one scanned code
+      description: |
+        `checkout` books it out to the production, exactly like a scan with
+        the production as the target. `checkin` puts it back onto the location
+        it is kept on, which returns it from the production; one booked here
+        and never handed out is checked out first. A unit from elsewhere is
+        still put back — `returnedFrom` without this production says so.
+      parameters:
+        - $ref: '#/components/parameters/ProductionId'
+        - $ref: '#/components/parameters/HandoutMode'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductionCheckScanRequest'
+      responses:
+        '200':
+          description: What was booked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/productions/{productionId}/handout/{mode}/ticks:
+    post:
+      operationId: tickProductionHandout
+      tags: [productionHandout]
+      summary: Tick or untick units by hand
+      description: |
+        `done: true` books them (out, or back onto their own location);
+        `done: false` undoes that (back to booked, or out again). Accessories
+        come along with the unit they hang off.
+      parameters:
+        - $ref: '#/components/parameters/ProductionId'
+        - $ref: '#/components/parameters/HandoutMode'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductionHandoutTickRequest'
+      responses:
+        '200':
+          description: How many units were booked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HandoverResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/productions/{productionId}/handout/{mode}/lines:
+    put:
+      operationId: setProductionHandoutLine
+      tags: [productionHandout]
+      summary: Set how many units of a counted line are done
+      description: |
+        Books the difference: raising the count books the next units of the
+        line, lowering it undoes the last ones. Clamped to the line.
+      parameters:
+        - $ref: '#/components/parameters/ProductionId'
+        - $ref: '#/components/parameters/HandoutMode'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductionListLineCount'
+      responses:
+        '200':
+          description: The line's count afterwards
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductionListLineResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1146,6 +1332,13 @@ components:
       required: true
       schema:
         type: string
+
+    HandoutMode:
+      name: mode
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/HandoutMode'
 
   responses:
     BadRequest:
@@ -2565,6 +2758,15 @@ components:
           description: The list as it is now, by section, each unit followed by its accessories.
           items:
             $ref: '#/components/schemas/ProductionCheckItem'
+        lines:
+          type: array
+          description: |
+            Interchangeable units without a tag, one counted line per product,
+            location and owner. Their units are in `items` as well; a client
+            that shows the lines leaves those out of the per-unit rows. Absent
+            from servers older than counted lines.
+          items:
+            $ref: '#/components/schemas/ProductionListLine'
         unexpected:
           type: array
           description: Ticked but not on the list.
@@ -2630,3 +2832,161 @@ components:
       properties:
         count:
           type: integer
+
+    ProductionListLine:
+      type: object
+      required:
+        - key
+        - productName
+        - productCaption
+        - manufacturerName
+        - lentBy
+        - group
+        - assetIds
+        - total
+        - done
+        - floor
+      properties:
+        key:
+          type: string
+          description: Identifies the line for a count; opaque to clients.
+        productName:
+          type: string
+        productCaption:
+          type: [string, 'null']
+        manufacturerName:
+          type: [string, 'null']
+        lentBy:
+          type: [string, 'null']
+        group:
+          $ref: '#/components/schemas/ProductionCheckGroup'
+        assetIds:
+          type: array
+          items:
+            type: string
+        total:
+          type: integer
+        done:
+          type: integer
+        floor:
+          type: integer
+          description: The lowest count the caller can set — what others ticked stays.
+
+    ProductionListLineCount:
+      type: object
+      required: [key, count]
+      properties:
+        key:
+          type: string
+        count:
+          type: integer
+          minimum: 0
+
+    ProductionListLineResult:
+      type: object
+      required: [done]
+      properties:
+        done:
+          type: integer
+
+    HandoutMode:
+      type: string
+      enum: [checkout, checkin]
+      description: '`checkout` hands out, `checkin` takes back.'
+
+    ProductionHandoutItem:
+      type: object
+      required:
+        - assetId
+        - assetTag
+        - productName
+        - productCaption
+        - manufacturerName
+        - lentBy
+        - accessoryOf
+        - group
+        - status
+        - done
+        - received
+        - returnReported
+      properties:
+        assetId:
+          type: string
+        assetTag:
+          type: [string, 'null']
+        productName:
+          type: string
+        productCaption:
+          type: [string, 'null']
+        manufacturerName:
+          type: [string, 'null']
+        lentBy:
+          type: [string, 'null']
+        accessoryOf:
+          type: [string, 'null']
+        group:
+          $ref: '#/components/schemas/ProductionCheckGroup'
+        status:
+          type: string
+          enum: [APPROVED, CHECKED_OUT, RETURNED]
+        done:
+          type: boolean
+          description: Out (`checkout`) or back (`checkin`).
+        received:
+          type: boolean
+        returnReported:
+          type: boolean
+
+    ProductionHandout:
+      type: object
+      required:
+        - mode
+        - productionId
+        - productionName
+        - cancelled
+        - side
+        - sides
+        - items
+        - lines
+        - othersCount
+      properties:
+        mode:
+          $ref: '#/components/schemas/HandoutMode'
+        productionId:
+          type: string
+        productionName:
+          type: string
+        cancelled:
+          type: boolean
+          description: Nothing more goes out to a cancelled production; taking back still works.
+        side:
+          $ref: '#/components/schemas/ProductionCheckSide'
+        sides:
+          type: array
+          description: Every side the caller could see the list from; more than one offers a choice.
+          items:
+            $ref: '#/components/schemas/ProductionCheckSide'
+        items:
+          type: array
+          description: By section, each unit followed by its accessories.
+          items:
+            $ref: '#/components/schemas/ProductionHandoutItem'
+        lines:
+          type: array
+          description: As in `ProductionCheck.lines`.
+          items:
+            $ref: '#/components/schemas/ProductionListLine'
+        othersCount:
+          type: integer
+          description: Units in this step that other orgs book themselves.
+
+    ProductionHandoutTickRequest:
+      type: object
+      required: [assetIds, done]
+      properties:
+        assetIds:
+          type: array
+          items:
+            type: string
+        done:
+          type: boolean

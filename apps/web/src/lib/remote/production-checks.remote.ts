@@ -13,6 +13,7 @@ import {
 	openProductionCheck,
 	reportReturn,
 	scanIntoCheck,
+	setCheckLineCount,
 	tickCheckItems,
 	untickCheckItem
 } from '$lib/server/services/production-check';
@@ -98,6 +99,20 @@ export const untickProductionCheck = command(
 		const user = await requireAuth();
 		await withCheckErrors(() => untickCheckItem(user.id, checkId, assetId));
 		await getProductionCheck(checkId).refresh();
+	}
+);
+
+export const setProductionCheckLine = command(
+	v.object({
+		checkId: v.string(),
+		key: v.string(),
+		count: v.pipe(v.number(), v.integer(), v.minValue(0))
+	}),
+	async ({ checkId, key, count }) => {
+		const user = await requireAuth();
+		const result = await withCheckErrors(() => setCheckLineCount(user.id, checkId, key, count));
+		await getProductionCheck(checkId).refresh();
+		return result;
 	}
 );
 

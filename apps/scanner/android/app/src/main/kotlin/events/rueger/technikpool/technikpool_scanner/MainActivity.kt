@@ -1,6 +1,10 @@
 package events.rueger.technikpool.technikpool_scanner
 
+import android.content.Context
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
@@ -44,6 +48,14 @@ class MainActivity : FlutterActivity() {
                     )
                 )
 
+                // A scan's answer, felt. Not Flutter's HapticFeedback: that is a
+                // keyboard tick, which Android drops whenever "vibrate on touch"
+                // is off in the system settings — on most phones, that is.
+                "vibrate" -> {
+                    vibrate(call.argument<List<Int>>("pattern").orEmpty())
+                    result.success(null)
+                }
+
                 "stop" -> {
                     receiver.unregister()
                     result.success(null)
@@ -51,6 +63,25 @@ class MainActivity : FlutterActivity() {
 
                 else -> result.notImplemented()
             }
+        }
+    }
+
+    /** [pattern] alternates off and on times in milliseconds, starting with off. */
+    private fun vibrate(pattern: List<Int>) {
+        if (pattern.size < 2) return
+        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            (getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+        if (!vibrator.hasVibrator()) return
+        val timings = pattern.map { it.toLong() }.toLongArray()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createWaveform(timings, -1))
+        } else {
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(timings, -1)
         }
     }
 

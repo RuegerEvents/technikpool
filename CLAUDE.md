@@ -68,19 +68,20 @@ async function requireAuth() {
 
 ## Remote Files
 
-| File                                         | Exports                                                                                                                                                                                                                                   |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/lib/remote/orgs.remote.ts`              | `getMyOrgs`, `getOrg`, `getOrgUsers`, `getOrgWithMembers`, `createOrg`, `addUserToOrg`, `removeUserFromOrg`, `updateMemberRole`, `getAllUsers`, `setUserAdmin`                                                                            |
-| `src/lib/remote/assets.remote.ts`            | `getAssets`, `getInventorySummary`, `getManufacturers`, `getProducts`, `createAssets`, `getAssetHistory`, `getBundles`, `getBundle`, `createBundle`, `addAssetToBundle`, `removeAssetFromBundle`                                          |
-| `src/lib/remote/productions.remote.ts`       | `getProductions`, `getProduction`, `createProduction`, `addAssetToProduction`, `approveProductionItems`, `declineProductionItems`, `getPendingApprovals`, `addBundleToProduction`, `addCrewMember`, `removeCrewMember`, `getCalendarData` |
-| `src/lib/remote/licenses.remote.ts`          | `getLicenses`, `getLicenseStatus`, `revealLicenseCredentials`, `setLicenseCredentials`, `clearLicenseCredentials`                                                                                                                         |
-| `src/lib/remote/invitations.remote.ts`       | `getSignUpStatus`, `getInvitationPreview`, `getSignUpSettings`, `setSignUpEnabled`, `getInvitations`, `inviteUser`, `resendInvitation`, `revokeInvitation`                                                                                |
-| `src/lib/remote/addresses.remote.ts`         | `getKnownAddresses` — feeds the picker in `AddressInput`; a pick copies the values, owners never share an `Address` row                                                                                                                   |
-| `src/lib/remote/service-catalog.remote.ts`   | `getServiceCatalog` and CRUD for `ServiceCategory` / `OrgService` — the org's price list for service lines (Personal, Transport …); a line copies from it and never points back                                                           |
-| `src/lib/remote/stocktakes.remote.ts`        | `getStocktakes`, `getStocktake`, `getStocktakePreview`, `createStocktake`, `scanStocktakeCode`, `tickStocktake`, `setStocktakeCount`, `closeStocktake`, `applyStocktakeAction`, `recountStocktake` …                                      |
-| `src/lib/remote/legal.remote.ts`             | `getLegalSettings`, `saveLegalDocument`, `getDpaOverview`, `acceptDpa` — the operator's legal texts and each org's acceptance of the AVV                                                                                                  |
-| `src/lib/remote/production-checks.remote.ts` | `getProductionChecks`, `getProductionCheck`, `startProductionCheck`, `scanProductionCheck`, `tickProductionCheck`, `closeCheck`, `confirmCheckReceipt`, `reportCheckReturn`, `getHandoverTodos` — see "Loans: handover and checks"        |
-| `src/lib/remote/product-documents.remote.ts` | `getProductDocuments`, `addProductDocument`, `updateProductDocument`, `removeProductDocument` — a product's PDFs, public by design (see `services/product-documents.ts`)                                                                  |
+| File                                          | Exports                                                                                                                                                                                                                                   |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/lib/remote/orgs.remote.ts`               | `getMyOrgs`, `getOrg`, `getOrgUsers`, `getOrgWithMembers`, `createOrg`, `addUserToOrg`, `removeUserFromOrg`, `updateMemberRole`, `getAllUsers`, `setUserAdmin`                                                                            |
+| `src/lib/remote/assets.remote.ts`             | `getAssets`, `getInventorySummary`, `getManufacturers`, `getProducts`, `createAssets`, `getAssetHistory`, `getBundles`, `getBundle`, `createBundle`, `addAssetToBundle`, `removeAssetFromBundle`                                          |
+| `src/lib/remote/productions.remote.ts`        | `getProductions`, `getProduction`, `createProduction`, `addAssetToProduction`, `approveProductionItems`, `declineProductionItems`, `getPendingApprovals`, `addBundleToProduction`, `addCrewMember`, `removeCrewMember`, `getCalendarData` |
+| `src/lib/remote/licenses.remote.ts`           | `getLicenses`, `getLicenseStatus`, `revealLicenseCredentials`, `setLicenseCredentials`, `clearLicenseCredentials`                                                                                                                         |
+| `src/lib/remote/invitations.remote.ts`        | `getSignUpStatus`, `getInvitationPreview`, `getSignUpSettings`, `setSignUpEnabled`, `getInvitations`, `inviteUser`, `resendInvitation`, `revokeInvitation`                                                                                |
+| `src/lib/remote/addresses.remote.ts`          | `getKnownAddresses` — feeds the picker in `AddressInput`; a pick copies the values, owners never share an `Address` row                                                                                                                   |
+| `src/lib/remote/service-catalog.remote.ts`    | `getServiceCatalog` and CRUD for `ServiceCategory` / `OrgService` — the org's price list for service lines (Personal, Transport …); a line copies from it and never points back                                                           |
+| `src/lib/remote/stocktakes.remote.ts`         | `getStocktakes`, `getStocktake`, `getStocktakePreview`, `createStocktake`, `scanStocktakeCode`, `tickStocktake`, `setStocktakeCount`, `closeStocktake`, `applyStocktakeAction`, `recountStocktake` …                                      |
+| `src/lib/remote/legal.remote.ts`              | `getLegalSettings`, `saveLegalDocument`, `getDpaOverview`, `acceptDpa` — the operator's legal texts and each org's acceptance of the AVV                                                                                                  |
+| `src/lib/remote/production-checks.remote.ts`  | `getProductionChecks`, `getProductionCheck`, `startProductionCheck`, `scanProductionCheck`, `tickProductionCheck`, `closeCheck`, `confirmCheckReceipt`, `reportCheckReturn`, `getHandoverTodos` — see "Loans: handover and checks"        |
+| `src/lib/remote/production-handout.remote.ts` | `getProductionHandout`, `getHandoutSummary`, `scanProductionHandout`, `setProductionHandoutDone`, `setProductionHandoutLine` — handing out / taking back against the list, see "Loans: handover and checks"                               |
+| `src/lib/remote/product-documents.remote.ts`  | `getProductDocuments`, `addProductDocument`, `updateProductDocument`, `removeProductDocument` — a product's PDFs, public by design (see `services/product-documents.ts`)                                                                  |
 
 ## External API (`/api/v1`)
 
@@ -335,6 +336,25 @@ Ausgabe) and the scanner's session both check a lent unit out and back in. Rules
   reported sent back (`RETURN_REPORTED`, only once received).
 - The dashboard's "Handovers" (`handoverTodos`) lists receipts to confirm and reported returns
   still to scan in.
+
+**One list, three meanings.** Checking, handing out (Ausgabe, `/productions/[id]/checkout`)
+and taking back (Rücknahme, `/productions/[id]/checkin`) all work through the same list
+(`services/production-list.ts`, client half `$lib/production-list.ts`, drawn by
+`$lib/components/production-list`; in the scanner `ProductionListScreen`). A unit is scanned or
+ticked by hand; units told apart by nothing (no tag, no kit, no accessories) are one **counted
+line** per product, shelf and owner, so twenty cables are a number, not twenty rows. Only what a
+tick means differs: a check stores it, a handout list _is_ the booking — tick = `CHECKED_OUT`
+(untick: back to `APPROVED`, history `CHECKOUT_UNDONE`), on the take-back list tick = back onto
+the unit's own location. `services/production-handout.ts` goes through `checkout.ts` for all of
+it, so stand-ins, accessories and the lender rules apply unchanged. The Scan page and the
+scanner's setup open these lists for a production; only a location target is still a plain run
+of scans. The mode is `checkout | checkin` everywhere — `return` is a Dart keyword. The take-back list also holds
+what is booked but was never handed out; ticking such a unit books the checkout first, then the
+return. A handout list is seen from a **side** (`HandoutSide`, `?org=` on the web): the
+production's own (everything the user books), or one lending org's (only its units, by shelf —
+its packing list). `packTodos` feeds the dashboard's "To pack for others" (productions starting
+within 7 days); the productions list's "Pack" button opens the same list at any time, and the
+production page's owner filter (`?org=` again) carries over to the printed packing list.
 
 ## Who may change a product
 

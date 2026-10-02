@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/client.dart';
@@ -100,7 +99,6 @@ class _CaseCheckScreenState extends ConsumerState<CaseCheckScreen> {
       } else {
         setState(() => _found.add(item.assetId));
         _report(_Tone.good, item.name, item.assetTag ?? code, ScanTone.ok);
-        unawaited(HapticFeedback.lightImpact());
       }
       return;
     }
@@ -128,7 +126,6 @@ class _CaseCheckScreenState extends ConsumerState<CaseCheckScreen> {
       code,
       ScanTone.attention,
     );
-    unawaited(HapticFeedback.mediumImpact());
   }
 
   Future<void> _open(ApiClient api, S l10n, String code) async {
@@ -147,7 +144,6 @@ class _CaseCheckScreenState extends ConsumerState<CaseCheckScreen> {
       _tone(ScanTone.ok);
     } catch (error) {
       _report(_Tone.bad, describeError(l10n, error), code, ScanTone.error);
-      unawaited(HapticFeedback.heavyImpact());
     } finally {
       if (mounted) setState(() => _busy = false);
     }

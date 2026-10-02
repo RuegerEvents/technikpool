@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/client.dart';
@@ -190,7 +189,6 @@ class _ProductUnitsScreenState extends ConsumerState<ProductUnitsScreen> {
       _feedback.add(CameraScanFeedback(ok: ok, title: code, detail: text));
     }
     if (mounted) ref.scanTone(ok ? ScanTone.ok : ScanTone.error);
-    unawaited(ok ? HapticFeedback.lightImpact() : HapticFeedback.heavyImpact());
     if (mounted) setState(() => _last = (ok: ok, text: text));
   }
 

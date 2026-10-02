@@ -708,6 +708,122 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/production-checks/{checkId}/lines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set how many units of a counted line are ticked
+         * @description For a line of `lines` — interchangeable units without a tag. Raising
+         *     the count ticks the next units as the caller's; lowering it takes back
+         *     only the caller's own ticks, never below the line's `floor`. A count
+         *     out of range is clamped, not refused.
+         */
+        put: operations["setProductionCheckLine"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/productions/{productionId}/handout/{mode}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The list to hand a production's equipment out or take it back
+         * @description The same list a check works through, but a tick is the booking itself.
+         *     `checkout`: what is booked (APPROVED) or out (CHECKED_OUT), done when
+         *     out. `checkin`: all of that and what is back (RETURNED), done when
+         *     back — a unit booked but never handed out is taken back too, which
+         *     books its checkout first. Lists
+         *     only the units of the caller's orgs (MEMBER or above) — lent units are
+         *     handed over by their lender and only counted in `othersCount`.
+         */
+        get: operations["getProductionHandout"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/productions/{productionId}/handout/{mode}/scans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Book one scanned code
+         * @description `checkout` books it out to the production, exactly like a scan with
+         *     the production as the target. `checkin` puts it back onto the location
+         *     it is kept on, which returns it from the production; one booked here
+         *     and never handed out is checked out first. A unit from elsewhere is
+         *     still put back — `returnedFrom` without this production says so.
+         */
+        post: operations["scanIntoProductionHandout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/productions/{productionId}/handout/{mode}/ticks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Tick or untick units by hand
+         * @description `done: true` books them (out, or back onto their own location);
+         *     `done: false` undoes that (back to booked, or out again). Accessories
+         *     come along with the unit they hang off.
+         */
+        post: operations["tickProductionHandout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/productions/{productionId}/handout/{mode}/lines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set how many units of a counted line are done
+         * @description Books the difference: raising the count books the next units of the
+         *     line, lowering it undoes the last ones. Clamped to the line.
+         */
+        put: operations["setProductionHandoutLine"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1459,6 +1575,13 @@ export interface components {
             closedBy: string | null;
             /** @description The list as it is now, by section, each unit followed by its accessories. */
             items: components["schemas"]["ProductionCheckItem"][];
+            /**
+             * @description Interchangeable units without a tag, one counted line per product,
+             *     location and owner. Their units are in `items` as well; a client
+             *     that shows the lines leaves those out of the per-unit rows. Absent
+             *     from servers older than counted lines.
+             */
+            lines?: components["schemas"]["ProductionListLine"][];
             /** @description Ticked but not on the list. */
             unexpected: components["schemas"]["ProductionCheckUnexpected"][];
             /** @description How many units `receipt` would confirm for the caller — 0 hides it. */
@@ -1489,6 +1612,68 @@ export interface components {
         };
         HandoverResult: {
             count: number;
+        };
+        ProductionListLine: {
+            /** @description Identifies the line for a count; opaque to clients. */
+            key: string;
+            productName: string;
+            productCaption: string | null;
+            manufacturerName: string | null;
+            lentBy: string | null;
+            group: components["schemas"]["ProductionCheckGroup"];
+            assetIds: string[];
+            total: number;
+            done: number;
+            /** @description The lowest count the caller can set — what others ticked stays. */
+            floor: number;
+        };
+        ProductionListLineCount: {
+            key: string;
+            count: number;
+        };
+        ProductionListLineResult: {
+            done: number;
+        };
+        /**
+         * @description `checkout` hands out, `checkin` takes back.
+         * @enum {string}
+         */
+        HandoutMode: "checkout" | "checkin";
+        ProductionHandoutItem: {
+            assetId: string;
+            assetTag: string | null;
+            productName: string;
+            productCaption: string | null;
+            manufacturerName: string | null;
+            lentBy: string | null;
+            accessoryOf: string | null;
+            group: components["schemas"]["ProductionCheckGroup"];
+            /** @enum {string} */
+            status: "APPROVED" | "CHECKED_OUT" | "RETURNED";
+            /** @description Out (`checkout`) or back (`checkin`). */
+            done: boolean;
+            received: boolean;
+            returnReported: boolean;
+        };
+        ProductionHandout: {
+            mode: components["schemas"]["HandoutMode"];
+            productionId: string;
+            productionName: string;
+            /** @description Nothing more goes out to a cancelled production; taking back still works. */
+            cancelled: boolean;
+            side: components["schemas"]["ProductionCheckSide"];
+            /** @description Every side the caller could see the list from; more than one offers a choice. */
+            sides: components["schemas"]["ProductionCheckSide"][];
+            /** @description By section, each unit followed by its accessories. */
+            items: components["schemas"]["ProductionHandoutItem"][];
+            /** @description As in `ProductionCheck.lines`. */
+            lines: components["schemas"]["ProductionListLine"][];
+            /** @description Units in this step that other orgs book themselves. */
+            othersCount: number;
+        };
+        ProductionHandoutTickRequest: {
+            assetIds: string[];
+            done: boolean;
         };
     };
     responses: {
@@ -1580,6 +1765,7 @@ export interface components {
         StocktakeId: string;
         ProductionId: string;
         CheckId: string;
+        HandoutMode: components["schemas"]["HandoutMode"];
     };
     requestBodies: never;
     headers: never;
@@ -2534,6 +2720,164 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    setProductionCheckLine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                checkId: components["parameters"]["CheckId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductionListLineCount"];
+            };
+        };
+        responses: {
+            /** @description The line's count afterwards */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductionListLineResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    getProductionHandout: {
+        parameters: {
+            query?: {
+                /**
+                 * @description The side to see the list from — one of `sides`. A lending org's
+                 *     side lists only its units, by location: what it has to pack.
+                 *     Without it, the production's own side when the caller stands on
+                 *     it, else their first lending org.
+                 */
+                organizationId?: string;
+            };
+            header?: never;
+            path: {
+                productionId: components["parameters"]["ProductionId"];
+                mode: components["parameters"]["HandoutMode"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductionHandout"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    scanIntoProductionHandout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                productionId: components["parameters"]["ProductionId"];
+                mode: components["parameters"]["HandoutMode"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductionCheckScanRequest"];
+            };
+        };
+        responses: {
+            /** @description What was booked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    tickProductionHandout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                productionId: components["parameters"]["ProductionId"];
+                mode: components["parameters"]["HandoutMode"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductionHandoutTickRequest"];
+            };
+        };
+        responses: {
+            /** @description How many units were booked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HandoverResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    setProductionHandoutLine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                productionId: components["parameters"]["ProductionId"];
+                mode: components["parameters"]["HandoutMode"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductionListLineCount"];
+            };
+        };
+        responses: {
+            /** @description The line's count afterwards */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductionListLineResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
         };
     };

@@ -6,23 +6,28 @@
 	//
 	// `limit` is what this row can reach on its own; `shownMax` is the "of n"
 	// beside it, which may count more than can be taken here (units that came in
-	// some other way).
+	// some other way). `min` is how low it can go — on a shared list, the part
+	// someone else counted.
 	let {
 		current,
 		limit,
 		shownMax = limit,
+		min = 0,
+		disabled = false,
 		onchange
 	}: {
 		current: number;
 		limit: number;
 		shownMax?: number;
+		min?: number;
+		disabled?: boolean;
 		onchange: (n: number) => void;
 	} = $props();
 
 	function commitTyped(e: Event) {
 		const input = e.currentTarget as HTMLInputElement;
 		const n = Number(input.value);
-		const next = Number.isFinite(n) ? Math.min(Math.max(0, Math.round(n)), limit) : current;
+		const next = Number.isFinite(n) ? Math.min(Math.max(min, Math.round(n)), limit) : current;
 		// Clamping to the value already shown changes no state, so nothing would
 		// redraw the input — put the number back by hand.
 		input.value = String(next);
@@ -35,13 +40,13 @@
 <div class="flex items-center gap-1.5">
 	<button
 		type="button"
-		disabled={current <= 0}
+		disabled={disabled || current <= min}
 		title="Remove all"
 		onclick={(e) => {
 			e.stopPropagation();
-			onchange(0);
+			onchange(min);
 		}}
-		class="h-6 w-12 rounded-md border text-xs font-medium hover:bg-muted {current <= 0
+		class="h-6 w-12 rounded-md border text-xs font-medium hover:bg-muted {disabled || current <= min
 			? 'invisible'
 			: ''}"
 	>
@@ -49,7 +54,7 @@
 	</button>
 	<button
 		type="button"
-		disabled={current <= 0}
+		disabled={disabled || current <= min}
 		onclick={(e) => {
 			e.stopPropagation();
 			onchange(current - 1);
@@ -61,8 +66,9 @@
 	<input
 		type="number"
 		inputmode="numeric"
-		min="0"
+		{min}
 		max={limit}
+		{disabled}
 		value={current}
 		aria-label="Quantity"
 		onclick={(e) => e.stopPropagation()}
@@ -79,7 +85,7 @@
 	/>
 	<button
 		type="button"
-		disabled={current >= limit}
+		disabled={disabled || current >= limit}
 		onclick={(e) => {
 			e.stopPropagation();
 			onchange(current + 1);
@@ -90,14 +96,14 @@
 	</button>
 	<button
 		type="button"
-		disabled={current >= limit}
+		disabled={disabled || current >= limit}
 		title="Add all available"
 		onclick={(e) => {
 			e.stopPropagation();
 			onchange(limit);
 		}}
-		class="h-6 w-14 rounded-md border text-xs font-medium whitespace-nowrap tabular-nums hover:bg-muted {current >=
-		limit
+		class="h-6 w-14 rounded-md border text-xs font-medium whitespace-nowrap tabular-nums hover:bg-muted {disabled ||
+		current >= limit
 			? 'invisible'
 			: ''}"
 	>

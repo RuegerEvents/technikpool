@@ -13,6 +13,8 @@ import '../models/production_check_scan_result.dart';
 import '../models/production_check_start_request.dart';
 import '../models/production_check_tick_request.dart';
 import '../models/production_check_tick_result.dart';
+import '../models/production_list_line_count.dart';
+import '../models/production_list_line_result.dart';
 
 part 'production_check_client.g.dart';
 
@@ -94,5 +96,17 @@ abstract class ProductionCheckClient {
   @POST('/api/v1/production-checks/{checkId}/return-report')
   Future<HandoverResult> reportProductionCheckReturn({
     @Path('checkId') required String checkId,
+  });
+
+  /// Set how many units of a counted line are ticked.
+  ///
+  /// For a line of `lines` — interchangeable units without a tag. Raising.
+  /// the count ticks the next units as the caller's; lowering it takes back.
+  /// only the caller's own ticks, never below the line's `floor`. A count.
+  /// out of range is clamped, not refused.
+  @PUT('/api/v1/production-checks/{checkId}/lines')
+  Future<ProductionListLineResult> setProductionCheckLine({
+    @Path('checkId') required String checkId,
+    @Body() required ProductionListLineCount body,
   });
 }

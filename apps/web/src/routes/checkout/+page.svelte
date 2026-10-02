@@ -55,7 +55,7 @@
 	);
 	let locationSelection = $state<{ id: string | null; name: string } | null>(null);
 
-	let targetType = $state<'location' | 'production' | 'check'>('location');
+	let targetType = $state<'location' | 'production' | 'return' | 'check'>('location');
 	let targetId = $state('');
 	let inputMode = $state<'qr' | 'text'>('qr');
 	let sessionActive = $state(false);
@@ -146,7 +146,7 @@
 	let successCount = $derived(sessionLog.filter((e) => e.status === 'success').length);
 	let errorCount = $derived(sessionLog.filter((e) => e.status === 'error').length);
 
-	function setTargetType(type: 'location' | 'production' | 'check') {
+	function setTargetType(type: 'location' | 'production' | 'return' | 'check') {
 		targetType = type;
 		targetId = '';
 		locationSelection = null;
@@ -159,8 +159,19 @@
 			toast.error('Please select a target first');
 			return;
 		}
-		// A check ticks against the production's list and lives on a page of its
-		// own, shared with whoever else is checking.
+		// A production is worked through as its list, on a page of its own shared
+		// with whoever else is on it: handed out, taken back or checked, by scan,
+		// by tick or by count. Only a shelf is a plain run of scans.
+		if (targetType === 'production' || targetType === 'return') {
+			await goto(
+				resolve(
+					targetType === 'production'
+						? `/productions/${targetId}/checkout`
+						: `/productions/${targetId}/checkin`
+				)
+			);
+			return;
+		}
 		if (targetType === 'check') {
 			startingCheck = true;
 			try {
@@ -240,12 +251,12 @@
 
 	async function processTag(tag: string) {
 		const t = tag.trim();
-		if (!t || processing || targetType === 'check') return;
+		if (!t || processing || targetType !== 'location') return;
 		processing = true;
 		try {
-			const result = await scanAsset({ assetTag: t, targetType, targetId });
+			const result = await scanAsset({ assetTag: t, targetType: 'location', targetId });
 			if (result.group && result.group.units.some((u) => !u.done)) {
-				groupOffers = [...groupOffers, { ...result.group, targetType, targetId }];
+				groupOffers = [...groupOffers, { ...result.group, targetType: 'location', targetId }];
 			}
 			let message = labelAction(result.action);
 			if (result.returnedFrom.length > 0) {
@@ -340,8 +351,8 @@
 	<div class="no-print">
 		<h1 class="text-3xl font-bold tracking-tight">Scan</h1>
 		<p class="text-muted-foreground">
-			Scan asset tags to put equipment on a shelf, check it out to a production, or check a
-			production's list.
+			Scan asset tags to put equipment on a shelf, or work through a production's list: hand it out,
+			take it back or check it.
 		</p>
 	</div>
 
@@ -373,7 +384,15 @@
 								? 'bg-primary text-primary-foreground'
 								: 'bg-background text-muted-foreground hover:bg-muted'}"
 						>
-							Production
+							Hand out
+						</button><button
+							type="button"
+							onclick={() => setTargetType('return')}
+							class="flex-1 px-4 py-2 transition-colors {targetType === 'return'
+								? 'bg-primary text-primary-foreground'
+								: 'bg-background text-muted-foreground hover:bg-muted'}"
+						>
+							Take back
 						</button><button
 							type="button"
 							onclick={() => setTargetType('check')}
@@ -388,6 +407,16 @@
 						<p class="text-xs text-muted-foreground">
 							Tick what is there against the production's list. Changes nothing, and can be repeated
 							as often as needed.
+						</p>
+					{:else if targetType === 'production'}
+						<p class="text-xs text-muted-foreground">
+							The production's list: scan, tick or count what goes out. Each tick checks the unit
+							out at once.
+						</p>
+					{:else if targetType === 'return'}
+						<p class="text-xs text-muted-foreground">
+							What is out on the production: scan, tick or count what comes back. Each tick puts the
+							unit back on its own shelf.
 						</p>
 					{/if}
 				</div>
@@ -412,7 +441,7 @@
 				{/if}
 
 				<!-- Input mode -->
-				<div class="space-y-2" class:hidden={targetType === 'check'}>
+				<div class="space-y-2" class:hidden={targetType !== 'location'}>
 					<Label>Input Mode</Label>
 					<div class="flex overflow-hidden rounded-md border border-input text-sm font-medium">
 						<button
@@ -437,7 +466,11 @@
 			</Card.Content>
 			<Card.Footer>
 				<Button onclick={startSession} disabled={!targetId || startingCheck}>
-					{targetType === 'check' ? 'Start check' : 'Start Session'}
+					{targetType === 'check'
+						? 'Start check'
+						: targetType === 'location'
+							? 'Start Session'
+							: 'Open list'}
 				</Button>
 			</Card.Footer>
 		</Card.Root>

@@ -211,10 +211,12 @@ final scanTonesEnabledProvider = AsyncNotifierProvider<ScanTonesEnabledNotifier,
 );
 
 /// `ref.scanTone(ScanTone.ok)` from any screen that scans: plays it unless
-/// the operator turned scan tones off.
+/// the operator turned scan tones off, and vibrates it either way — the one
+/// call that answers a scan, so no screen answers it differently.
 extension ScanToneRef on WidgetRef {
   void scanTone(ScanTone tone) {
     if (read(scanTonesEnabledProvider).value ?? true) read(scanTonesProvider).play(tone);
+    ScanBuzz.play(tone);
   }
 }
 

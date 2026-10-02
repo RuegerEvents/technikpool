@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/client.dart';
@@ -120,7 +119,6 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
       final group = result.group;
       final offer = group != null && group.units.any((u) => !u.done);
       if (mounted) ref.scanTone(offer ? ScanTone.attention : ScanTone.ok);
-      unawaited(HapticFeedback.lightImpact());
 
       // A unit taken out of its kit, or off the unit it hangs off, was booked
       // on its own; what it belongs with is offered now. The sheet holds the
@@ -129,7 +127,6 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
     } catch (error) {
       _push(_Entry(tag: tag, ok: false, title: tag, detail: describeError(l10n, error)));
       if (mounted) ref.scanTone(ScanTone.error);
-      unawaited(HapticFeedback.heavyImpact());
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -166,11 +163,9 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
         ),
       );
       if (mounted) ref.scanTone(ScanTone.ok);
-      unawaited(HapticFeedback.lightImpact());
     } catch (error) {
       _push(_Entry(tag: '', ok: false, title: group.name, detail: describeError(l10n, error)));
       if (mounted) ref.scanTone(ScanTone.error);
-      unawaited(HapticFeedback.heavyImpact());
     }
   }
 

@@ -1144,6 +1144,16 @@
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
 												>
+											{:else if tx?.type === 'CHECKOUT_UNDONE'}
+												Checkout undone for
+												<a
+													href={item.productionRestricted
+														? undefined
+														: resolve(`/productions/${tx.productionId}`)}
+													class="text-foreground {item.productionRestricted
+														? ''
+														: 'underline underline-offset-2'}">{tx.productionName}</a
+												>
 											{:else if tx?.type === 'RETURNED'}
 												Returned from
 												<a

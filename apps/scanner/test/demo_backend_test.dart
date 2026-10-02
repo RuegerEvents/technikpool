@@ -509,4 +509,154 @@ void main() {
       ),
     );
   });
+
+  test('a check lists the untagged cables as one counted line', () async {
+    final check = await api.productionCheck.startProductionCheck(
+      productionId: 'prdn_demo_festival',
+    );
+    final line = check.lines!.single;
+    expect(line.productName, 'Schuko 5 m');
+    expect(line.total, 10);
+    expect(line.done, 0);
+
+    final counted = await api.productionCheck.setProductionCheckLine(
+      checkId: check.id,
+      body: ProductionListLineCount(key: line.key, count: 7),
+    );
+    expect(counted.done, 7);
+    final after = await api.productionCheck.getProductionCheck(checkId: check.id);
+    expect(after.lines!.single.done, 7);
+    expect(after.items.where((i) => i.tick != null), hasLength(7));
+  });
+
+  group('handout', () {
+    const festival = 'prdn_demo_festival';
+
+    test('hands out by scan, by tick and by count, and undoes a tick', () async {
+      var list = await api.productionHandout.getProductionHandout(
+        productionId: festival,
+        mode: HandoutMode.checkout,
+      );
+      expect(list.items.where((i) => i.done), isEmpty);
+      final line = list.lines.single;
+      expect(line.total, 10);
+
+      final scan = await api.productionHandout.scanIntoProductionHandout(
+        productionId: festival,
+        mode: HandoutMode.checkout,
+        body: const ProductionCheckScanRequest(code: '40000001'),
+      );
+      expect(scan.action, ScanResultAction.checkedOut);
+
+      // Ticked by hand: the label was checked by eye.
+      await api.productionHandout.tickProductionHandout(
+        productionId: festival,
+        mode: HandoutMode.checkout,
+        body: const ProductionHandoutTickRequest(
+          assetIds: ['asset_demo_40000002'],
+          done: true,
+        ),
+      );
+      final counted = await api.productionHandout.setProductionHandoutLine(
+        productionId: festival,
+        mode: HandoutMode.checkout,
+        body: ProductionListLineCount(key: line.key, count: 4),
+      );
+      expect(counted.done, 4);
+
+      list = await api.productionHandout.getProductionHandout(
+        productionId: festival,
+        mode: HandoutMode.checkout,
+      );
+      expect(list.items.where((i) => i.done), hasLength(6));
+      expect(list.lines.single.done, 4);
+
+      // Unticked again: back to booked, still on the list.
+      await api.productionHandout.tickProductionHandout(
+        productionId: festival,
+        mode: HandoutMode.checkout,
+        body: const ProductionHandoutTickRequest(
+          assetIds: ['asset_demo_40000002'],
+          done: false,
+        ),
+      );
+      list = await api.productionHandout.getProductionHandout(
+        productionId: festival,
+        mode: HandoutMode.checkout,
+      );
+      final unit = list.items.singleWhere((i) => i.assetId == 'asset_demo_40000002');
+      expect(unit.done, isFalse);
+      expect(unit.status, ProductionHandoutItemStatus.approved);
+    });
+
+    test('takes back what went out, onto its own shelf', () async {
+      await api.productionHandout.tickProductionHandout(
+        productionId: festival,
+        mode: HandoutMode.checkout,
+        body: const ProductionHandoutTickRequest(
+          assetIds: ['asset_demo_40000001', 'asset_demo_40000006'],
+          done: true,
+        ),
+      );
+      var back = await api.productionHandout.getProductionHandout(
+        productionId: festival,
+        mode: HandoutMode.checkin,
+      );
+      // What is out, and what is booked but was never handed out.
+      expect(
+        back.items.where((i) => i.status == ProductionHandoutItemStatus.checkedOut),
+        hasLength(2),
+      );
+      expect(back.items.where((i) => i.done), isEmpty);
+
+      final scan = await api.productionHandout.scanIntoProductionHandout(
+        productionId: festival,
+        mode: HandoutMode.checkin,
+        body: const ProductionCheckScanRequest(code: '40000006'),
+      );
+      expect(scan.action, ScanResultAction.locationAssigned);
+      expect(scan.returnedFrom, ['Hafenfest Open Air']);
+
+      back = await api.productionHandout.getProductionHandout(
+        productionId: festival,
+        mode: HandoutMode.checkin,
+      );
+      expect(
+        back.items.singleWhere((i) => i.assetId == 'asset_demo_40000006').done,
+        isTrue,
+      );
+    });
+
+    test('takes back what was booked but never handed out', () async {
+      final back = await api.productionHandout.getProductionHandout(
+        productionId: festival,
+        mode: HandoutMode.checkin,
+      );
+      final unit = back.items.singleWhere((i) => i.assetId == 'asset_demo_40000004');
+      expect(unit.status, ProductionHandoutItemStatus.approved);
+      expect(unit.done, isFalse);
+
+      final scan = await api.productionHandout.scanIntoProductionHandout(
+        productionId: festival,
+        mode: HandoutMode.checkin,
+        body: const ProductionCheckScanRequest(code: '40000004'),
+      );
+      expect(scan.returnedFrom, ['Hafenfest Open Air']);
+
+      final counted = await api.productionHandout.setProductionHandoutLine(
+        productionId: festival,
+        mode: HandoutMode.checkin,
+        body: ProductionListLineCount(key: back.lines.single.key, count: 3),
+      );
+      expect(counted.done, 3);
+
+      final out = await api.productionHandout.getProductionHandout(
+        productionId: festival,
+        mode: HandoutMode.checkout,
+      );
+      // Back is back: what returned is no longer on the hand-out list.
+      expect(out.items.map((i) => i.assetId), isNot(contains('asset_demo_40000004')));
+      expect(out.lines.single.total, 7);
+    });
+  });
 }

@@ -1786,7 +1786,7 @@ abstract class S {
   /// No description provided for @productionActionBookHint.
   ///
   /// In en, this message translates to:
-  /// **'Every scan books the unit to this production.'**
+  /// **'Scan, tick or count what goes out. Each tick checks the unit out at once.'**
   String get productionActionBookHint;
 
   /// No description provided for @productionActionCheckHint.
@@ -1794,6 +1794,102 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Tick what is there against its list. Changes nothing.'**
   String get productionActionCheckHint;
+
+  /// Bottom sheet choice and list title: take a production's equipment back against its list.
+  ///
+  /// In en, this message translates to:
+  /// **'Take back'**
+  String get productionActionReturn;
+
+  /// No description provided for @productionActionReturnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan, tick or count what comes back. Each tick puts the unit back on its own shelf.'**
+  String get productionActionReturnHint;
+
+  /// Subtitle of a counted line: interchangeable units without a tag, counted instead of ticked one by one.
+  ///
+  /// In en, this message translates to:
+  /// **'No tag · counted'**
+  String get listCountedLine;
+
+  /// No description provided for @listHowMany.
+  ///
+  /// In en, this message translates to:
+  /// **'How many of {total}?'**
+  String listHowMany(int total);
+
+  /// A unit ticked on the hand-out list: it is checked out to the production.
+  ///
+  /// In en, this message translates to:
+  /// **'Out'**
+  String get handoutOut;
+
+  /// A unit ticked on the take-back list: it is back on its shelf.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get handoutBack;
+
+  /// No description provided for @handoutEmptyCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is booked for this production that you could hand out.'**
+  String get handoutEmptyCheckout;
+
+  /// No description provided for @handoutEmptyCheckin.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing of yours is booked for this production.'**
+  String get handoutEmptyCheckin;
+
+  /// No description provided for @handoutOthers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more unit belongs to another organization, which books it itself.} other{{count} more units belong to other organizations, which book them themselves.}}'**
+  String handoutOthers(int count);
+
+  /// No description provided for @handoutCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'This production has been cancelled. Nothing more goes out to it.'**
+  String get handoutCancelled;
+
+  /// No description provided for @handoutAllOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything is out'**
+  String get handoutAllOut;
+
+  /// No description provided for @handoutAllBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything is back'**
+  String get handoutAllBack;
+
+  /// No description provided for @handoutOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} still open'**
+  String handoutOpen(int count);
+
+  /// No description provided for @handoutRestOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Also the rest of {name} ({count})'**
+  String handoutRestOf(String name, int count);
+
+  /// The CHECKOUT_UNDONE history entry: a unit ticked as handed out was unticked again before it left.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout undone'**
+  String get actionCheckoutUndone;
+
+  /// No description provided for @handoutOthersElsewhere.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more unit on the production is not on this list.} other{{count} more units on the production are not on this list.}}'**
+  String handoutOthersElsewhere(int count);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

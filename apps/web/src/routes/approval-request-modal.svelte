@@ -6,6 +6,7 @@
 	import { Modal } from '$lib/components/ui/modal';
 	import { ProductThumb } from '$lib/components/ui/product-thumb';
 	import { approveProductionItems, declineProductionItems } from '$lib/remote/productions.remote';
+	import { getPackTodos } from '$lib/remote/production-handout.remote';
 	import { accessorySummary } from '$lib/production-items';
 	import {
 		itemsOf,
@@ -54,6 +55,8 @@
 			if (action === 'approve') {
 				const { reviewed } = await approveProductionItems(ids);
 				toast.success(plural(reviewed, ['# asset approved.', '# assets approved.']));
+				// What was just approved is what has to be packed next.
+				void getPackTodos().refresh();
 			} else {
 				const { reviewed } = await declineProductionItems(ids);
 				toast.success(plural(reviewed, ['# asset declined.', '# assets declined.']));

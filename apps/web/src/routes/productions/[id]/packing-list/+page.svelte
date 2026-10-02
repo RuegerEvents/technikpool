@@ -10,6 +10,18 @@
 
 	const productionId = $derived(page.params.id as string);
 	let production = $derived(await getProduction(productionId));
+	// `?org=`: only that org's units — what a lender packs. Set by the
+	// production page's owner filter.
+	const ownerOrgId = $derived(page.url.searchParams.get('org'));
+	let items = $derived(
+		ownerOrgId
+			? production.items.filter((i) => i.asset.organizationId === ownerOrgId)
+			: production.items
+	);
+	let ownerLabel = $derived.by(() => {
+		const owned = items.find((i) => i.asset.organizationId === ownerOrgId);
+		return owned ? orgLabel(owned.asset.organization) : null;
+	});
 	let venue = $derived(
 		[
 			production.venueName,
@@ -35,7 +47,7 @@
 
 	let bundleGroups = $derived.by((): BundleGroup[] => {
 		const map = new SvelteMap<string, BundleGroup>();
-		for (const item of production.items) {
+		for (const item of items) {
 			if (!item.sourceBundle) continue;
 			const bid = item.sourceBundle.id;
 			if (!map.has(bid)) {
@@ -67,7 +79,7 @@
 	// Accessories nest under the unit they travel with. Inside a bundle group the
 	// "Contains:" counts already include them — they mirror the parent's
 	// bundleId — so only the individual lines need the treatment.
-	let individualItems = $derived(nestAccessories(production.items.filter((i) => !i.sourceBundle)));
+	let individualItems = $derived(nestAccessories(items.filter((i) => !i.sourceBundle)));
 </script>
 
 <svelte:head>
@@ -87,6 +99,9 @@
 			<div>
 				<h1 class="text-4xl font-bold tracking-wider uppercase">Packing List</h1>
 				<h2 class="mt-2 text-2xl">{production.name}</h2>
+				{#if ownerLabel}
+					<p class="mt-1 text-lg font-semibold">Only the units of {ownerLabel}</p>
+				{/if}
 				{#if venue.length}
 					<p class="mt-2 text-sm text-zinc-700">{venue.join(' · ')}</p>
 				{/if}

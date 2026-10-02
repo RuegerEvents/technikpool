@@ -18,6 +18,7 @@
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
 	import { getStocktakes } from '$lib/remote/stocktakes.remote';
 	import { getHandoverTodos } from '$lib/remote/production-checks.remote';
+	import { getPackTodos } from '$lib/remote/production-handout.remote';
 	import StocktakeProgress from '$lib/components/stocktake-progress.svelte';
 	import { formatReleaseDate, notesFor, releases } from '$lib/changelog';
 	import {
@@ -34,6 +35,7 @@
 		Sparkles,
 		ReceiptText,
 		PackageCheck,
+		PackageOpen,
 		Undo2
 	} from '@lucide/svelte';
 
@@ -79,6 +81,9 @@
 	let handoverQuery = $derived(active ? getHandoverTodos() : null);
 	let toReceive = $derived(handoverQuery?.current?.toReceive ?? []);
 	let toTakeBack = $derived(handoverQuery?.current?.toTakeBack ?? []);
+	// Our units another org's production has booked, starting within the week.
+	let packQuery = $derived(active ? getPackTodos() : null);
+	let toPack = $derived(packQuery?.current ?? []);
 	let statsQuery = $derived(active ? getDashboardStats() : null);
 	let stocktakesQuery = $derived(active ? getStocktakes() : null);
 	let openStocktakes = $derived(
@@ -98,7 +103,11 @@
 	// Held back until everything it counts has answered, so "All clear" never
 	// flashes up in front of a queue that is still loading.
 	let attentionReady = $derived(
-		!!stats && pendingReady && !!awaitingQuery?.ready && !!handoverQuery?.ready
+		!!stats &&
+			pendingReady &&
+			!!awaitingQuery?.ready &&
+			!!handoverQuery?.ready &&
+			!!packQuery?.ready
 	);
 	let attention = $derived.by(() => {
 		if (!stats) return [];
@@ -157,6 +166,16 @@
 				label: 'Reported returned',
 				hint: 'Scan it back onto a shelf',
 				href: '#handovers',
+				tone: 'amber'
+			});
+		const packCount = toPack.reduce((sum, p) => sum + p.count, 0);
+		if (packCount > 0)
+			items.push({
+				key: 'pack',
+				count: packCount,
+				label: 'To pack for others',
+				hint: 'Lent out, starting within a week',
+				href: '#pack',
 				tone: 'amber'
 			});
 		const awaitingCount = awaiting.reduce((sum, req) => sum + req.count, 0);
@@ -670,6 +689,42 @@
 						</Card.Root>
 					{/if}
 				</section>
+
+				<!-- Our units booked by another org's production that starts within a
+				     week and nobody has handed out yet: the lender's packing list.
+				     Packing earlier goes through the productions list's "Pack". -->
+				{#if toPack.length > 0}
+					<section id="pack" class="scroll-mt-20">
+						<h2 class="mb-3 text-lg font-semibold">To pack for others</h2>
+						<Card.Root class="gap-0 overflow-hidden py-0">
+							<div class="divide-y">
+								{#each toPack as p (`${p.productionId}:${p.organizationId}`)}
+									<!-- resolve() takes a path only; the query is the lender's side. -->
+									<!-- eslint-disable svelte/no-navigation-without-resolve -->
+									<a
+										href={`${resolve(`/productions/${p.productionId}/checkout`)}?org=${encodeURIComponent(p.organizationId)}`}
+										class="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/40"
+									>
+										<!-- eslint-enable svelte/no-navigation-without-resolve -->
+										<PackageOpen aria-hidden="true" class="size-4 shrink-0 text-amber-500" />
+										<div class="min-w-0 flex-1">
+											<p class="truncate text-sm font-medium">{p.productionName}</p>
+											<p class="truncate text-xs text-muted-foreground">
+												{p.organizationName} · {plural(p.count, [
+													'1 unit to pack',
+													'# units to pack'
+												])}
+											</p>
+										</div>
+										<span class="shrink-0 text-xs text-muted-foreground"
+											>{formatDate(p.startDate)}</span
+										>
+									</a>
+								{/each}
+							</div>
+						</Card.Root>
+					</section>
+				{/if}
 
 				<!-- Loans changing hands: lent units our productions have not confirmed
 				     receiving, and our own units reported sent back that nobody has

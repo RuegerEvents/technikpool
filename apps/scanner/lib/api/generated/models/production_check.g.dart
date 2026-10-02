@@ -30,6 +30,9 @@ ProductionCheck _$ProductionCheckFromJson(Map<String, dynamic> json) =>
           .toList(),
       canConfirmReceipt: (json['canConfirmReceipt'] as num).toInt(),
       canReportReturn: (json['canReportReturn'] as num).toInt(),
+      lines: (json['lines'] as List<dynamic>?)
+          ?.map((e) => ProductionListLine.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$ProductionCheckToJson(ProductionCheck instance) =>
@@ -44,6 +47,7 @@ Map<String, dynamic> _$ProductionCheckToJson(ProductionCheck instance) =>
       'closedAt': ?instance.closedAt?.toIso8601String(),
       'closedBy': ?instance.closedBy,
       'items': instance.items,
+      'lines': ?instance.lines,
       'unexpected': instance.unexpected,
       'canConfirmReceipt': instance.canConfirmReceipt,
       'canReportReturn': instance.canReportReturn,

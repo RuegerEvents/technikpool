@@ -15,6 +15,8 @@ import {
 import { userLabel } from '$lib/user-label.svelte';
 import type { CaseCheck } from '$lib/server/services/case-check';
 import type { ProductionCheckView } from '$lib/server/services/production-check';
+import type { HandoutView } from '$lib/server/services/production-handout';
+import type { ListLine } from '$lib/production-list';
 
 // Prisma payloads are deliberately not returned straight to clients: they carry
 // fields the API doesn't promise, and adding a column to the schema would
@@ -431,6 +433,7 @@ export function toProductionCheck(check: ProductionCheckView): Schemas['Producti
 				at: i.tick.at.toISOString()
 			}
 		})),
+		lines: check.lines.map(toListLine),
 		unexpected: check.unexpected.map((u) => ({
 			assetId: u.assetId,
 			assetTag: u.assetTag,
@@ -440,5 +443,47 @@ export function toProductionCheck(check: ProductionCheckView): Schemas['Producti
 		})),
 		canConfirmReceipt: check.canConfirmReceipt,
 		canReportReturn: check.canReportReturn
+	};
+}
+
+export function toListLine(line: ListLine): Schemas['ProductionListLine'] {
+	return {
+		key: line.key,
+		productName: line.productName,
+		productCaption: line.productCaption,
+		manufacturerName: line.manufacturerName,
+		lentBy: line.lentBy,
+		group: { kind: line.group.kind, name: line.group.name },
+		assetIds: line.assetIds,
+		total: line.total,
+		done: line.done,
+		floor: line.floor
+	};
+}
+
+export function toProductionHandout(view: HandoutView): Schemas['ProductionHandout'] {
+	return {
+		mode: view.mode,
+		productionId: view.productionId,
+		productionName: view.productionName,
+		cancelled: view.cancelled,
+		side: { ...view.side },
+		sides: view.sides.map((side) => ({ ...side })),
+		items: view.items.map((i) => ({
+			assetId: i.assetId,
+			assetTag: i.assetTag,
+			productName: i.productName,
+			productCaption: i.productCaption,
+			manufacturerName: i.manufacturerName,
+			lentBy: i.lentBy,
+			accessoryOf: i.accessoryOf,
+			group: { kind: i.group.kind, name: i.group.name },
+			status: i.status,
+			done: i.done,
+			received: i.received,
+			returnReported: i.returnReported
+		})),
+		lines: view.lines.map(toListLine),
+		othersCount: view.othersCount
 	};
 }

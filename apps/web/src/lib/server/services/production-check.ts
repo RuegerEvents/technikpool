@@ -1,5 +1,4 @@
 import { prisma } from '$lib/server/auth';
-import type { Prisma } from '$lib/prisma/client';
 import { naturalCompare } from '$lib/sort';
 import { userLabel } from '$lib/user-label.svelte';
 import type {
@@ -14,6 +13,16 @@ import {
 	writableOrgIds
 } from './access';
 import { resolveScannedCode } from './asset-lookup';
+import {
+	buildLines,
+	groupOf,
+	listItems,
+	nestAndSort,
+	pickForCount,
+	type ListGroup,
+	type ListLine,
+	type ListedItem
+} from './production-list';
 
 // Checking a production's equipment against its list (Prüfen), and the two
 // steps of a loan that belong to the borrower.
@@ -104,15 +113,7 @@ export interface ProductionCheckItem {
 	tick: { userName: string; mine: boolean; via: 'scan' | 'manual'; at: Date } | null;
 }
 
-/**
- * `location`: the shelf the unit is kept on — packing is walking from one to the
- * next. `lender`: lent units, one section per lending org, because they come
- * from someone else's shelves and arrive as one delivery. `none`: no location.
- */
-export interface CheckGroup {
-	kind: 'location' | 'lender' | 'none';
-	name: string | null;
-}
+export type CheckGroup = ListGroup;
 
 export interface ProductionCheckUnexpected {
 	assetId: string;
@@ -133,6 +134,8 @@ export interface ProductionCheckView {
 	closedAt: Date | null;
 	closedBy: string | null;
 	items: ProductionCheckItem[];
+	/** Units without a tag, counted per product and shelf — see `ListLine`. */
+	lines: ListLine[];
 	unexpected: ProductionCheckUnexpected[];
 	/** How many ticked lent units each borrower step would apply to. */
 	canConfirmReceipt: number;
@@ -249,87 +252,21 @@ function requireOpen(check: { status: string }) {
 // ---------------------------------------------------------------------------
 // The list
 
-const ITEM_INCLUDE = {
-	asset: {
-		select: {
-			id: true,
-			assetTag: true,
-			organizationId: true,
-			parentAssetId: true,
-			location: { select: { name: true } },
-			organization: { select: { name: true, shortName: true } },
-			product: {
-				select: { name: true, caption: true, manufacturer: { select: { name: true } } }
-			}
-		}
-	}
-} satisfies Prisma.ProductionItemInclude;
-
 /** The production's units this side checks, as they are now. */
-async function listedItems(productionId: string, side: CheckSide) {
-	return prisma.productionItem.findMany({
-		where: {
-			productionId,
-			status: { in: LISTED_STATUSES },
-			...(side.own ? {} : { asset: { organizationId: side.organizationId } })
-		},
-		include: ITEM_INCLUDE
-	});
+function listedItems(productionId: string, side: CheckSide) {
+	return listItems(productionId, LISTED_STATUSES, side.own ? undefined : [side.organizationId]);
 }
-
-type ListedItem = Awaited<ReturnType<typeof listedItems>>[number];
 
 function isLent(item: ListedItem, productionOrgId: string) {
 	return item.asset.organizationId !== productionOrgId;
 }
 
 /**
- * Where a unit is listed. On the lending org's side every unit is its own, on
- * its own shelves, so there everything goes by location.
+ * On the lending org's side every unit is its own, on its own shelves, so
+ * there everything goes by location.
  */
-function groupOf(item: ListedItem, productionOrgId: string, side: CheckSide): CheckGroup {
-	if (side.own && isLent(item, productionOrgId)) {
-		const org = item.asset.organization;
-		return { kind: 'lender', name: org.shortName || org.name };
-	}
-	const location = item.asset.location?.name ?? null;
-	return location ? { kind: 'location', name: location } : { kind: 'none', name: null };
-}
-
-const GROUP_ORDER: Record<CheckGroup['kind'], number> = { location: 0, none: 1, lender: 2 };
-
-function compareGroups(a: CheckGroup, b: CheckGroup) {
-	return GROUP_ORDER[a.kind] - GROUP_ORDER[b.kind] || naturalCompare(a.name ?? '', b.name ?? '');
-}
-
-/**
- * By section, then parents first, each followed by its accessories; by name
- * within. An accessory is listed under its parent's section even when it is
- * booked somewhere else — it travels with it.
- */
-function nestAndSort<
-	T extends {
-		assetId: string;
-		accessoryOf: string | null;
-		productName: string;
-		assetTag: string | null;
-		group: CheckGroup;
-	}
->(items: T[]) {
-	const byName = (a: T, b: T) =>
-		naturalCompare(a.productName, b.productName) ||
-		naturalCompare(a.assetTag ?? '', b.assetTag ?? '');
-	const ids = new Set(items.map((i) => i.assetId));
-	const tops = items
-		.filter((i) => !i.accessoryOf || !ids.has(i.accessoryOf))
-		.sort((a, b) => compareGroups(a.group, b.group) || byName(a, b));
-	return tops.flatMap((top) => [
-		top,
-		...items
-			.filter((i) => i.accessoryOf === top.assetId && i !== top)
-			.sort(byName)
-			.map((i) => ({ ...i, group: top.group }))
-	]);
+function checkGroupOf(item: ListedItem, productionOrgId: string, side: CheckSide): CheckGroup {
+	return groupOf(item, productionOrgId, side.own);
 }
 
 export async function getProductionCheck(
@@ -368,7 +305,7 @@ export async function getProductionCheck(
 				manufacturerName: item.asset.product.manufacturer?.name ?? null,
 				lentBy: lent ? item.asset.organization.shortName || item.asset.organization.name : null,
 				accessoryOf: item.asset.parentAssetId,
-				group: groupOf(item, productionOrgId, side),
+				group: checkGroupOf(item, productionOrgId, side),
 				status: item.status as ProductionCheckItem['status'],
 				received: lent && item.receivedAt !== null,
 				returnReported: lent && item.returnReportedAt !== null,
@@ -412,6 +349,10 @@ export async function getProductionCheck(
 		closedAt: check.closedAt,
 		closedBy: check.closedBy ? userLabel(check.closedBy) : null,
 		items,
+		lines: buildLines(listed, productionOrgId, side.own, (item) => {
+			const t = tickOf.get(item.assetId);
+			return { done: !!t, undoable: !t || t.userId === userId };
+		}),
 		unexpected,
 		canConfirmReceipt:
 			borrower && check.status === 'OPEN'
@@ -579,6 +520,46 @@ export async function untickCheckItem(userId: string, checkId: string, assetId: 
 		throw new ProductionCheckError('tick_not_yours', 'Someone else ticked this unit');
 	}
 	await prisma.productionCheckTick.delete({ where: { id: existing.id } });
+}
+
+/**
+ * Sets how many units of a counted line are ticked. Raising it ticks the next
+ * units in line as this user's; lowering it takes back only this user's own
+ * ticks, so a count never undoes someone else's.
+ */
+export async function setCheckLineCount(
+	userId: string,
+	checkId: string,
+	key: string,
+	count: number
+) {
+	const { check, side } = await loadCheck(userId, checkId);
+	requireOpen(check);
+	const [listed, ticks] = await Promise.all([
+		listedItems(check.productionId, side),
+		prisma.productionCheckTick.findMany({
+			where: { checkId },
+			select: { assetId: true, userId: true }
+		})
+	]);
+	const tickOf = new Map(ticks.map((t) => [t.assetId, t]));
+	const state = (assetId: string) => {
+		const t = tickOf.get(assetId);
+		return { done: !!t, undoable: !t || t.userId === userId };
+	};
+	const line = buildLines(listed, check.production.organizationId, side.own, (item) =>
+		state(item.assetId)
+	).find((l) => l.key === key);
+	if (!line) return { done: 0 };
+
+	const { add, remove } = pickForCount(line, count, state);
+	await tick(checkId, userId, add, 'manual');
+	if (remove.length > 0) {
+		await prisma.productionCheckTick.deleteMany({
+			where: { checkId, userId, assetId: { in: remove } }
+		});
+	}
+	return { done: line.done + add.length - remove.length };
 }
 
 // ---------------------------------------------------------------------------

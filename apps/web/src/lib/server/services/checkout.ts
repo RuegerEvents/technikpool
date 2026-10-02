@@ -1,5 +1,5 @@
 import type { Prisma } from '$lib/prisma/client';
-import type { BookingReplacedData } from '$lib/types/asset-transaction';
+import type { BookingReplacedData, CheckoutUndoneData } from '$lib/types/asset-transaction';
 import { bundleLabel, withCaption } from '$lib/product-label';
 import { naturalCompare } from '$lib/sort';
 import { prisma } from '$lib/server/auth';
@@ -76,11 +76,11 @@ export interface AffectedRecords {
 	productionIds: string[];
 }
 
-function emptyAffected(): AffectedRecords {
+export function emptyAffected(): AffectedRecords {
 	return { assetIds: [], organizationIds: [], bundleIds: [], productionIds: [] };
 }
 
-function mergeAffected(into: AffectedRecords, from: Partial<AffectedRecords>) {
+export function mergeAffected(into: AffectedRecords, from: Partial<AffectedRecords>) {
 	for (const key of Object.keys(into) as (keyof AffectedRecords)[]) {
 		for (const id of from[key] ?? []) {
 			if (!into[key].includes(id)) into[key].push(id);
@@ -902,4 +902,70 @@ export async function performBulkCheckout(
 	mergeAffected(affected, { productionIds: [production.id] });
 
 	return { result: { count: assets.length, targetName: production.name }, affected };
+}
+
+/**
+ * Takes checked-out units back to booked (APPROVED) without them having been
+ * anywhere: the undo of a tick on the handout list, for a unit ticked by
+ * mistake or put back before the truck left. Accessories come along, as they
+ * went out along. A lent unit's handover starts over, so its receipt columns
+ * are cleared.
+ */
+export async function undoCheckout(
+	userId: string,
+	productionId: string,
+	assetIds: string[]
+): Promise<{ result: { count: number }; affected: AffectedRecords }> {
+	const [orgIds, systemAdmin] = await Promise.all([writableOrgIds(userId), isSystemAdmin(userId)]);
+	const ids = await withAccessories(assetIds);
+	const production = await prisma.production.findUniqueOrThrow({
+		where: { id: productionId },
+		select: { id: true, name: true }
+	});
+	const items = await prisma.productionItem.findMany({
+		where: { productionId, assetId: { in: ids }, status: 'CHECKED_OUT' },
+		select: { id: true, assetId: true, asset: { select: { organizationId: true } } }
+	});
+	for (const item of items) {
+		if (!systemAdmin && !orgIds.includes(item.asset.organizationId)) {
+			throw new CheckoutError('forbidden', 'No access to one or more assets');
+		}
+	}
+	if (items.length > 0) {
+		const data: CheckoutUndoneData = {
+			type: 'CHECKOUT_UNDONE',
+			productionId: production.id,
+			productionName: production.name
+		};
+		await prisma.$transaction([
+			prisma.productionItem.updateMany({
+				where: { id: { in: items.map((i) => i.id) } },
+				data: {
+					status: 'APPROVED',
+					receivedAt: null,
+					receivedById: null,
+					returnReportedAt: null,
+					returnReportedById: null
+				}
+			}),
+			prisma.assetTransaction.createMany({
+				data: items.map((i) => ({
+					assetId: i.assetId,
+					userId,
+					productionId,
+					action: 'CHECKOUT_UNDONE',
+					data
+				}))
+			})
+		]);
+	}
+	return {
+		result: { count: items.length },
+		affected: {
+			assetIds: items.map((i) => i.assetId),
+			organizationIds: [...new Set(items.map((i) => i.asset.organizationId))],
+			bundleIds: [],
+			productionIds: [productionId]
+		}
+	};
 }

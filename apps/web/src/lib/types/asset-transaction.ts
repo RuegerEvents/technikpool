@@ -25,6 +25,16 @@ export type CheckedOutData = {
 	productionName: string;
 };
 
+/**
+ * A unit ticked as handed out was unticked again before it left: back to
+ * booked, as if the checkout had not happened.
+ */
+export type CheckoutUndoneData = {
+	type: 'CHECKOUT_UNDONE';
+	productionId: string;
+	productionName: string;
+};
+
 export type ReturnedData = {
 	type: 'RETURNED';
 	fromProductionId: string;
@@ -162,6 +172,7 @@ export type TransactionData =
 	| UpdatedData
 	| LocationAssignedData
 	| CheckedOutData
+	| CheckoutUndoneData
 	| ReturnedData
 	| RequestedData
 	| AddedToProductionData

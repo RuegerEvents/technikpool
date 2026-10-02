@@ -29,6 +29,7 @@ class Labels {
   static String transactionAction(S l10n, String action) => switch (action) {
     'CREATED' => l10n.actionCreated,
     'CHECKED_OUT' => l10n.actionCheckedOut,
+    'CHECKOUT_UNDONE' => l10n.actionCheckoutUndone,
     'RETURNED' => l10n.actionReturned,
     'LOCATION_ASSIGNED' => l10n.actionLocationAssigned,
     'UPDATED' => l10n.actionUpdated,

@@ -42,6 +42,7 @@
 	import { LicenseRevealModal } from '$lib/components/ui/license-credentials';
 	import CopyEquipmentModal from './copy-equipment-modal.svelte';
 	import CheckButton from './check-button.svelte';
+	import HandoutButtons from './handout-buttons.svelte';
 	import { accessorySummary, nestAccessories, type Nested } from '$lib/production-items';
 
 	let { productionId }: { productionId: string } = $props();
@@ -124,6 +125,39 @@
 		page.data.isAdmin
 			? 'OWNER'
 			: ((await getMyOrgs()).find((org) => org.id === production.organizationId)?.role ?? null)
+	);
+
+	// Whose units the equipment list shows. On a production several orgs supply,
+	// a lender wants what it has to pack, not everyone's kit mixed together: the
+	// orgs of this user's that own units here can each be picked on their own. A
+	// pure lender starts on its own units; `?org=` picks one, as on the handout
+	// list.
+	let ownerOrgs = $derived.by(() => {
+		const owners = new SvelteMap<string, { id: string; label: string }>();
+		for (const item of production.items) {
+			const org = item.asset.organization;
+			owners.set(item.asset.organizationId, {
+				id: item.asset.organizationId,
+				label: orgLabel(org)
+			});
+		}
+		return [...owners.values()];
+	});
+	let myOrgIds = $derived(new Set((await getMyOrgs()).map((o) => o.id)));
+	let ownerChoices = $derived(
+		ownerOrgs.length > 1 ? ownerOrgs.filter((o) => myOrgIds.has(o.id)) : []
+	);
+	let chosenOwner = $state<string | null>(null);
+	let ownerFilter = $derived.by(() => {
+		if (ownerChoices.length === 0) return '';
+		const wanted =
+			chosenOwner ?? page.url.searchParams.get('org') ?? (role ? '' : ownerChoices[0].id);
+		return ownerChoices.some((o) => o.id === wanted) ? wanted : '';
+	});
+	let shownItems = $derived(
+		ownerFilter
+			? production.items.filter((i) => i.asset.organizationId === ownerFilter)
+			: production.items
 	);
 	let canEdit = $derived(!!role && roleAtLeast(role, ROLE_FOR.write));
 	let canPlan = $derived(canEdit && !cancelled);
@@ -290,7 +324,7 @@
 		const productMap = new SvelteMap<string, ProductSection>();
 		// Accessories are rolled into the item they travel with, so the counts
 		// below say how many *units* are booked rather than how many rows exist.
-		for (const item of nestAccessories(production.items)) {
+		for (const item of nestAccessories(shownItems)) {
 			if (item.sourceBundle) {
 				const bid = item.sourceBundle.id;
 				if (!bundleMap.has(bid)) {
@@ -350,7 +384,10 @@
 	let unitCount = $derived(displaySections.reduce((sum, s) => sum + s.total, 0));
 
 	function openPrint(route: 'packing-list' | 'delivery-note' | 'crew-passes') {
-		window.open(resolve(`/productions/${productionId}/${route}`), '_blank');
+		// The packing list prints what the equipment list shows.
+		const query =
+			route === 'packing-list' && ownerFilter ? `?org=${encodeURIComponent(ownerFilter)}` : '';
+		window.open(`${resolve(`/productions/${productionId}/${route}`)}${query}`, '_blank');
 	}
 
 	let expanded = new SvelteMap<string, boolean>();
@@ -643,6 +680,7 @@
 					</DropdownMenu.Content>
 				</DropdownMenu.Portal>
 			</DropdownMenu.Root>
+			<HandoutButtons productionId={production.id} {cancelled} />
 			{#if !cancelled}
 				<CheckButton productionId={production.id} />
 			{/if}
@@ -1077,6 +1115,27 @@
 					</div>
 				{/if}
 			</div>
+
+			{#if ownerChoices.length > 0}
+				<div class="mb-3 flex w-fit flex-wrap gap-1 rounded-md border p-1 text-sm">
+					<button
+						type="button"
+						onclick={() => (chosenOwner = '')}
+						class="rounded px-3 py-1 transition-colors {ownerFilter === ''
+							? 'bg-primary text-primary-foreground'
+							: 'text-muted-foreground hover:bg-muted'}">All organizations</button
+					>
+					{#each ownerChoices as org (org.id)}
+						<button
+							type="button"
+							onclick={() => (chosenOwner = org.id)}
+							class="rounded px-3 py-1 transition-colors {ownerFilter === org.id
+								? 'bg-primary text-primary-foreground'
+								: 'text-muted-foreground hover:bg-muted'}">Only {org.label}</button
+						>
+					{/each}
+				</div>
+			{/if}
 
 			{#if production.items.length === 0}
 				<Card.Root>

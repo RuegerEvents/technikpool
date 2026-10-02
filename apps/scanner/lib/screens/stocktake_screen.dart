@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/client.dart';
@@ -16,6 +15,7 @@ import '../scan/scan_tones.dart';
 import '../state/providers.dart';
 import '../theme.dart';
 import '../widgets/category_pill.dart';
+import '../widgets/count_dialog.dart';
 
 /// Ask where the counter is. A stocktake over one location needs no asking; a
 /// wider one offers its `countingLocations`, with the last pick for this
@@ -255,7 +255,6 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
               assetId: item?.assetId,
             ),
           );
-          unawaited(HapticFeedback.lightImpact());
         case StocktakeScanResultOutcome.unexpected:
           _push(
             _Entry(
@@ -268,7 +267,6 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
               assetId: item?.assetId,
             ),
           );
-          unawaited(HapticFeedback.mediumImpact());
         case StocktakeScanResultOutcome.already:
           _push(
             _Entry(
@@ -278,7 +276,6 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
               detail: l10n.stocktakeAlready(result.alreadyFoundByName ?? '—'),
             ),
           );
-          unawaited(HapticFeedback.lightImpact());
         case StocktakeScanResultOutcome.bundle:
           _push(
             _Entry(
@@ -315,7 +312,6 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
       _push(
         _Entry(code: code, kind: _Kind.error, title: code, detail: describeError(l10n, error)),
       );
-      unawaited(HapticFeedback.heavyImpact());
       _tone(ScanTone.error);
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -403,7 +399,6 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
           echo: false,
         );
       }
-      unawaited(HapticFeedback.lightImpact());
     } catch (error) {
       _push(
         _Entry(
@@ -577,12 +572,13 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
   Future<void> _count(StocktakeProductCount product, int? current) async {
     final count = await showDialog<int>(
       context: context,
-      builder: (_) => _CountDialog(
+      builder: (_) => CountDialog(
         title: withCaption(
           productLabel(product.manufacturerName, product.productName),
           product.productCaption,
         ),
         initial: current,
+        label: S.of(context).stocktakeYourCount,
       ),
     );
     if (count == null || !mounted) return;
@@ -1288,88 +1284,6 @@ class _Subtitle extends StatelessWidget {
         ),
         null => row,
       },
-    );
-  }
-}
-
-class _CountDialog extends StatefulWidget {
-  const _CountDialog({required this.title, required this.initial});
-
-  final String title;
-  final int? initial;
-
-  @override
-  State<_CountDialog> createState() => _CountDialogState();
-}
-
-class _CountDialogState extends State<_CountDialog> {
-  late final _controller = TextEditingController(text: widget.initial?.toString() ?? '');
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  int get _value => int.tryParse(_controller.text.trim()) ?? 0;
-
-  void _step(int by) {
-    final next = _value + by;
-    if (next < 0) return;
-    _controller.text = next.toString();
-    _controller.selection = TextSelection.collapsed(offset: _controller.text.length);
-  }
-
-  void _save() {
-    final value = int.tryParse(_controller.text.trim());
-    if (value == null || value < 0) return;
-    Navigator.of(context).pop(value);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = S.of(context);
-    return AlertDialog(
-      title: Text(widget.title),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.stocktakeYourCount, style: Theme.of(context).textTheme.bodyMedium),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              IconButton.filledTonal(
-                tooltip: l10n.stocktakeMinusOne,
-                onPressed: () => _step(-1),
-                icon: const Icon(Icons.remove),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  autofocus: true,
-                  textAlign: TextAlign.center,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(hintText: '0'),
-                  onSubmitted: (_) => _save(),
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButton.filledTonal(
-                tooltip: l10n.stocktakePlusOne,
-                onPressed: () => _step(1),
-                icon: const Icon(Icons.add),
-              ),
-            ],
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.cancel)),
-        FilledButton(onPressed: _save, child: Text(l10n.save)),
-      ],
     );
   }
 }

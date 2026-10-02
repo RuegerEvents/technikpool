@@ -8,6 +8,7 @@ import 'production_check_item.dart';
 import 'production_check_side.dart';
 import 'production_check_status.dart';
 import 'production_check_unexpected.dart';
+import 'production_list_line.dart';
 
 part 'production_check.g.dart';
 
@@ -27,6 +28,7 @@ class ProductionCheck {
     required this.unexpected,
     required this.canConfirmReceipt,
     required this.canReportReturn,
+    this.lines,
   });
   
   factory ProductionCheck.fromJson(Map<String, Object?> json) => _$ProductionCheckFromJson(json);
@@ -43,6 +45,13 @@ class ProductionCheck {
 
   /// The list as it is now, by section, each unit followed by its accessories.
   final List<ProductionCheckItem> items;
+
+  /// Interchangeable units without a tag, one counted line per product,.
+  /// location and owner. Their units are in `items` as well; a client.
+  /// that shows the lines leaves those out of the per-unit rows. Absent.
+  /// from servers older than counted lines.
+  ///
+  final List<ProductionListLine>? lines;
 
   /// Ticked but not on the list.
   final List<ProductionCheckUnexpected> unexpected;

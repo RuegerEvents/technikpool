@@ -1006,9 +1006,85 @@ class SDe extends S {
 
   @override
   String get productionActionBookHint =>
-      'Jeder Scan bucht das Gerät auf diese Produktion.';
+      'Scannen, abhaken oder zählen, was rausgeht. Jeder Haken bucht das Gerät sofort aus.';
 
   @override
   String get productionActionCheckHint =>
       'Abhaken, was da ist, gegen die Liste. Ändert nichts.';
+
+  @override
+  String get productionActionReturn => 'Zurücknehmen';
+
+  @override
+  String get productionActionReturnHint =>
+      'Scannen, abhaken oder zählen, was zurückkommt. Jeder Haken bucht das Gerät zurück an seinen Lagerort.';
+
+  @override
+  String get listCountedLine => 'Ohne Etikett · gezählt';
+
+  @override
+  String listHowMany(int total) {
+    return 'Wie viele von $total?';
+  }
+
+  @override
+  String get handoutOut => 'Ausgegeben';
+
+  @override
+  String get handoutBack => 'Zurück';
+
+  @override
+  String get handoutEmptyCheckout =>
+      'Für diese Produktion ist nichts gebucht, was du ausgeben könntest.';
+
+  @override
+  String get handoutEmptyCheckin =>
+      'Von euch ist nichts für diese Produktion gebucht.';
+
+  @override
+  String handoutOthers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count weitere Geräte gehören anderen Organisationen, die sie selbst buchen.',
+      one: '1 weiteres Gerät gehört einer anderen Organisation, die es selbst bucht.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get handoutCancelled =>
+      'Diese Produktion wurde abgesagt. Es geht nichts mehr raus.';
+
+  @override
+  String get handoutAllOut => 'Alles ausgegeben';
+
+  @override
+  String get handoutAllBack => 'Alles zurück';
+
+  @override
+  String handoutOpen(int count) {
+    return '$count noch offen';
+  }
+
+  @override
+  String handoutRestOf(String name, int count) {
+    return 'Auch den Rest von $name ($count)';
+  }
+
+  @override
+  String get actionCheckoutUndone => 'Ausgabe zurückgenommen';
+
+  @override
+  String handoutOthersElsewhere(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count weitere Geräte der Produktion stehen nicht auf dieser Liste.',
+      one: '1 weiteres Gerät der Produktion steht nicht auf dieser Liste.',
+    );
+    return '$_temp0';
+  }
 }

@@ -8,7 +8,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../natural_sort.dart';
 import '../state/providers.dart';
 import 'case_check_screen.dart';
-import 'production_check_screen.dart';
+import 'production_list_screen.dart';
 import 'session_screen.dart';
 import 'stocktake_new_screen.dart';
 import 'stocktake_screen.dart';
@@ -18,7 +18,7 @@ import 'stocktake_screen.dart';
 enum _Mode { location, production, stocktake }
 
 /// What a tap on a production offers — see `_open`.
-enum _ProductionAction { book, check }
+enum _ProductionAction { book, takeBack, check }
 
 /// Pick what the next batch of scans books against, mirroring the web app's
 /// /checkout setup step — or the stocktake it counts into.
@@ -33,13 +33,12 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
   _Mode _mode = _Mode.location;
   String _query = '';
 
+  /// A shelf is a plain run of scans, each one booked onto it.
   void _start(String id, String name) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => SessionScreen(
-          targetType: _mode == _Mode.production
-              ? ScanRequestTargetType.production
-              : ScanRequestTargetType.location,
+          targetType: ScanRequestTargetType.location,
           targetId: id,
           targetName: name,
         ),
@@ -47,13 +46,23 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
     );
   }
 
-  /// A production can be booked to or checked, and a second button on the row
-  /// read as the same action as the row itself — so the row asks. With only
-  /// one of the two on offer (a location; crew who may check but not book)
-  /// there is nothing to ask.
+  /// A production is worked through as its list — handed out, taken back or
+  /// checked — by scan, by tick, or by count for what has no tag.
+  void _list(String id, String name, ProductionListMode mode) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            ProductionListScreen(productionId: id, productionName: name, mode: mode),
+      ),
+    );
+  }
+
+  /// A production can be handed out, taken back or checked, and a second
+  /// button on the row read as the same action as the row itself — so the row
+  /// asks. A location, or crew who may check but not book, has nothing to ask.
   Future<void> _open(({String id, String name, String subtitle, bool book, bool check}) row) async {
-    if (!row.check) return _start(row.id, row.name);
-    if (!row.book) return _check(row.id, row.name);
+    if (_mode == _Mode.location) return _start(row.id, row.name);
+    if (!row.book) return _list(row.id, row.name, ProductionListMode.check);
     final l10n = S.of(context);
     final choice = await showModalBottomSheet<_ProductionAction>(
       context: context,
@@ -79,18 +88,26 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
             ),
             ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
-              leading: const Icon(Icons.qr_code_scanner),
+              leading: const Icon(Icons.outbox_outlined),
               title: Text(l10n.productionActionBook),
               subtitle: Text(l10n.productionActionBookHint),
               onTap: () => Navigator.of(context).pop(_ProductionAction.book),
             ),
             ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
-              leading: const Icon(Icons.checklist),
-              title: Text(l10n.productionCheck),
-              subtitle: Text(l10n.productionActionCheckHint),
-              onTap: () => Navigator.of(context).pop(_ProductionAction.check),
+              leading: const Icon(Icons.assignment_return_outlined),
+              title: Text(l10n.productionActionReturn),
+              subtitle: Text(l10n.productionActionReturnHint),
+              onTap: () => Navigator.of(context).pop(_ProductionAction.takeBack),
             ),
+            if (row.check)
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                leading: const Icon(Icons.checklist),
+                title: Text(l10n.productionCheck),
+                subtitle: Text(l10n.productionActionCheckHint),
+                onTap: () => Navigator.of(context).pop(_ProductionAction.check),
+              ),
             const SizedBox(height: 8),
           ],
         ),
@@ -99,20 +116,14 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
     if (!mounted) return;
     switch (choice) {
       case _ProductionAction.book:
-        _start(row.id, row.name);
+        _list(row.id, row.name, ProductionListMode.checkout);
+      case _ProductionAction.takeBack:
+        _list(row.id, row.name, ProductionListMode.checkin);
       case _ProductionAction.check:
-        _check(row.id, row.name);
+        _list(row.id, row.name, ProductionListMode.check);
       case null:
         break;
     }
-  }
-
-  void _check(String id, String name) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => ProductionCheckScreen(productionId: id, productionName: name),
-      ),
-    );
   }
 
   Future<void> _newStocktake() async {

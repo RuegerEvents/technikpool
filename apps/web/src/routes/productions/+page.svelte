@@ -12,7 +12,9 @@
 	import { plural, orgLabel } from '$lib/utils';
 	import { browser } from '$app/environment';
 	import { ContentSkeleton } from '$lib/components/ui/skeleton';
-	import { Hourglass } from '@lucide/svelte';
+	import { Hourglass, PackageOpen } from '@lucide/svelte';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	const ORG_FILTER_STORAGE_KEY = 'productions.selectedOrgIds';
 	const urlOrgId = page.url.searchParams.get('org');
@@ -150,6 +152,34 @@
 	// dashboard's approvals queue, flagged so they are not forgotten.
 	// Not on a production we only lend to: those are waiting on us, and the
 	// dashboard's approvals queue is where they are answered.
+	/**
+	 * The org of ours that lends to this production and may book its units — the
+	 * side the "Pack" list opens on. Always offered, however far off the date:
+	 * the dashboard only nags in the last week, and some kit goes out earlier.
+	 */
+	function packOrgId(p: Production): string | null {
+		// Not only for a production of someone else's: an org of ours may lend to
+		// another org of ours, and still has to pack.
+		if (p.cancelledAt) return null;
+		return p.lentBy.find((id) => orgs.some((o) => o.id === id && canWrite(o))) ?? null;
+	}
+
+	function packCount(p: Production, orgId: string): number {
+		return (
+			p.items?.filter((i) => i.status === 'APPROVED' && i.asset.organizationId === orgId).length ??
+			0
+		);
+	}
+
+	function openPack(e: MouseEvent, p: Production, orgId: string) {
+		// Inside a row that is a link itself.
+		e.preventDefault();
+		e.stopPropagation();
+		// resolve() takes a path only; the query is the lender's side.
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
+		goto(`${resolve(`/productions/${p.id}/checkout`)}?org=${encodeURIComponent(orgId)}`);
+	}
+
 	function pendingCount(p: Production): number {
 		if (isLentTo(p)) return 0;
 		return p.items?.filter((i) => i.status === 'PENDING').length ?? 0;
@@ -236,11 +266,15 @@
 							{/if}
 						</Card.Description>
 					</Card.Header>
-					<Card.Content>
+					<Card.Content class="space-y-3">
 						<div class="flex items-center justify-between text-sm">
 							<span class="text-muted-foreground">Items Booked</span>
 							<span class="font-medium">{prod.items?.length ?? 0}</span>
 						</div>
+						{@const packOrg = packOrgId(prod)}
+						{#if packOrg}
+							{@render packButton(prod, packOrg)}
+						{/if}
 					</Card.Content>
 				</Card.Root>
 			{/snippet}
@@ -259,6 +293,10 @@
 					{/if}
 					{#if isLentTo(prod)}
 						<span class="ml-2">{@render lentBadge()}</span>
+					{/if}
+					{@const packOrg = packOrgId(prod)}
+					{#if packOrg}
+						<span class="ml-2">{@render packButton(prod, packOrg)}</span>
 					{/if}
 				{:else if key === 'org'}
 					{orgLabel(prod.organization)}
@@ -295,6 +333,19 @@
 		<Hourglass aria-hidden="true" class="size-3" />
 		{count}
 	</span>
+{/snippet}
+
+{#snippet packButton(prod: Production, orgId: string)}
+	{@const n = packCount(prod, orgId)}
+	<button
+		type="button"
+		class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 align-middle text-xs font-medium transition-colors hover:bg-muted"
+		title="Hand out your units: the list of what to pack"
+		onclick={(e) => openPack(e, prod, orgId)}
+	>
+		<PackageOpen aria-hidden="true" class="size-3.5" />
+		{n > 0 ? `Pack (${n})` : 'Pack'}
+	</button>
 {/snippet}
 
 {#snippet lentBadge()}

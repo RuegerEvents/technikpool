@@ -1001,9 +1001,85 @@ class SEn extends S {
 
   @override
   String get productionActionBookHint =>
-      'Every scan books the unit to this production.';
+      'Scan, tick or count what goes out. Each tick checks the unit out at once.';
 
   @override
   String get productionActionCheckHint =>
       'Tick what is there against its list. Changes nothing.';
+
+  @override
+  String get productionActionReturn => 'Take back';
+
+  @override
+  String get productionActionReturnHint =>
+      'Scan, tick or count what comes back. Each tick puts the unit back on its own shelf.';
+
+  @override
+  String get listCountedLine => 'No tag · counted';
+
+  @override
+  String listHowMany(int total) {
+    return 'How many of $total?';
+  }
+
+  @override
+  String get handoutOut => 'Out';
+
+  @override
+  String get handoutBack => 'Back';
+
+  @override
+  String get handoutEmptyCheckout =>
+      'Nothing is booked for this production that you could hand out.';
+
+  @override
+  String get handoutEmptyCheckin =>
+      'Nothing of yours is booked for this production.';
+
+  @override
+  String handoutOthers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count more units belong to other organizations, which book them themselves.',
+      one:
+          '1 more unit belongs to another organization, which books it itself.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get handoutCancelled =>
+      'This production has been cancelled. Nothing more goes out to it.';
+
+  @override
+  String get handoutAllOut => 'Everything is out';
+
+  @override
+  String get handoutAllBack => 'Everything is back';
+
+  @override
+  String handoutOpen(int count) {
+    return '$count still open';
+  }
+
+  @override
+  String handoutRestOf(String name, int count) {
+    return 'Also the rest of $name ($count)';
+  }
+
+  @override
+  String get actionCheckoutUndone => 'Checkout undone';
+
+  @override
+  String handoutOthersElsewhere(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more units on the production are not on this list.',
+      one: '1 more unit on the production is not on this list.',
+    );
+    return '$_temp0';
+  }
 }
