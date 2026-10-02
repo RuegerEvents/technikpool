@@ -329,6 +329,7 @@ export const ProductPortScalarFieldEnum = {
   connectorId: 'connectorId',
   count: 'count',
   label: 'label',
+  requirement: 'requirement',
   sortOrder: 'sortOrder'
 } as const
 

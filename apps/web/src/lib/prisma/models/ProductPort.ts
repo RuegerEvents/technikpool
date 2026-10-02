@@ -49,6 +49,7 @@ export type ProductPortMinAggregateOutputType = {
   connectorId: string | null
   count: number | null
   label: string | null
+  requirement: string | null
   sortOrder: number | null
 }
 
@@ -58,6 +59,7 @@ export type ProductPortMaxAggregateOutputType = {
   connectorId: string | null
   count: number | null
   label: string | null
+  requirement: string | null
   sortOrder: number | null
 }
 
@@ -67,6 +69,7 @@ export type ProductPortCountAggregateOutputType = {
   connectorId: number
   count: number
   label: number
+  requirement: number
   sortOrder: number
   _all: number
 }
@@ -88,6 +91,7 @@ export type ProductPortMinAggregateInputType = {
   connectorId?: true
   count?: true
   label?: true
+  requirement?: true
   sortOrder?: true
 }
 
@@ -97,6 +101,7 @@ export type ProductPortMaxAggregateInputType = {
   connectorId?: true
   count?: true
   label?: true
+  requirement?: true
   sortOrder?: true
 }
 
@@ -106,6 +111,7 @@ export type ProductPortCountAggregateInputType = {
   connectorId?: true
   count?: true
   label?: true
+  requirement?: true
   sortOrder?: true
   _all?: true
 }
@@ -202,6 +208,7 @@ export type ProductPortGroupByOutputType = {
   connectorId: string
   count: number
   label: string | null
+  requirement: string | null
   sortOrder: number
   _count: ProductPortCountAggregateOutputType | null
   _avg: ProductPortAvgAggregateOutputType | null
@@ -234,6 +241,7 @@ export type ProductPortWhereInput = {
   connectorId?: Prisma.StringFilter<"ProductPort"> | string
   count?: Prisma.IntFilter<"ProductPort"> | number
   label?: Prisma.StringNullableFilter<"ProductPort"> | string | null
+  requirement?: Prisma.StringNullableFilter<"ProductPort"> | string | null
   sortOrder?: Prisma.IntFilter<"ProductPort"> | number
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
   connector?: Prisma.XOR<Prisma.ConnectorScalarRelationFilter, Prisma.ConnectorWhereInput>
@@ -245,6 +253,7 @@ export type ProductPortOrderByWithRelationInput = {
   connectorId?: Prisma.SortOrder
   count?: Prisma.SortOrder
   label?: Prisma.SortOrderInput | Prisma.SortOrder
+  requirement?: Prisma.SortOrderInput | Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   product?: Prisma.ProductOrderByWithRelationInput
   connector?: Prisma.ConnectorOrderByWithRelationInput
@@ -259,6 +268,7 @@ export type ProductPortWhereUniqueInput = Prisma.AtLeast<{
   connectorId?: Prisma.StringFilter<"ProductPort"> | string
   count?: Prisma.IntFilter<"ProductPort"> | number
   label?: Prisma.StringNullableFilter<"ProductPort"> | string | null
+  requirement?: Prisma.StringNullableFilter<"ProductPort"> | string | null
   sortOrder?: Prisma.IntFilter<"ProductPort"> | number
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
   connector?: Prisma.XOR<Prisma.ConnectorScalarRelationFilter, Prisma.ConnectorWhereInput>
@@ -270,6 +280,7 @@ export type ProductPortOrderByWithAggregationInput = {
   connectorId?: Prisma.SortOrder
   count?: Prisma.SortOrder
   label?: Prisma.SortOrderInput | Prisma.SortOrder
+  requirement?: Prisma.SortOrderInput | Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   _count?: Prisma.ProductPortCountOrderByAggregateInput
   _avg?: Prisma.ProductPortAvgOrderByAggregateInput
@@ -287,6 +298,7 @@ export type ProductPortScalarWhereWithAggregatesInput = {
   connectorId?: Prisma.StringWithAggregatesFilter<"ProductPort"> | string
   count?: Prisma.IntWithAggregatesFilter<"ProductPort"> | number
   label?: Prisma.StringNullableWithAggregatesFilter<"ProductPort"> | string | null
+  requirement?: Prisma.StringNullableWithAggregatesFilter<"ProductPort"> | string | null
   sortOrder?: Prisma.IntWithAggregatesFilter<"ProductPort"> | number
 }
 
@@ -294,6 +306,7 @@ export type ProductPortCreateInput = {
   id?: string
   count?: number
   label?: string | null
+  requirement?: string | null
   sortOrder?: number
   product: Prisma.ProductCreateNestedOneWithoutPortsInput
   connector: Prisma.ConnectorCreateNestedOneWithoutPortsInput
@@ -305,6 +318,7 @@ export type ProductPortUncheckedCreateInput = {
   connectorId: string
   count?: number
   label?: string | null
+  requirement?: string | null
   sortOrder?: number
 }
 
@@ -312,6 +326,7 @@ export type ProductPortUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   product?: Prisma.ProductUpdateOneRequiredWithoutPortsNestedInput
   connector?: Prisma.ConnectorUpdateOneRequiredWithoutPortsNestedInput
@@ -323,6 +338,7 @@ export type ProductPortUncheckedUpdateInput = {
   connectorId?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -332,6 +348,7 @@ export type ProductPortCreateManyInput = {
   connectorId: string
   count?: number
   label?: string | null
+  requirement?: string | null
   sortOrder?: number
 }
 
@@ -339,6 +356,7 @@ export type ProductPortUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -348,6 +366,7 @@ export type ProductPortUncheckedUpdateManyInput = {
   connectorId?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -367,6 +386,7 @@ export type ProductPortCountOrderByAggregateInput = {
   connectorId?: Prisma.SortOrder
   count?: Prisma.SortOrder
   label?: Prisma.SortOrder
+  requirement?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
 }
 
@@ -381,6 +401,7 @@ export type ProductPortMaxOrderByAggregateInput = {
   connectorId?: Prisma.SortOrder
   count?: Prisma.SortOrder
   label?: Prisma.SortOrder
+  requirement?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
 }
 
@@ -390,6 +411,7 @@ export type ProductPortMinOrderByAggregateInput = {
   connectorId?: Prisma.SortOrder
   count?: Prisma.SortOrder
   label?: Prisma.SortOrder
+  requirement?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
 }
 
@@ -486,6 +508,7 @@ export type ProductPortCreateWithoutConnectorInput = {
   id?: string
   count?: number
   label?: string | null
+  requirement?: string | null
   sortOrder?: number
   product: Prisma.ProductCreateNestedOneWithoutPortsInput
 }
@@ -495,6 +518,7 @@ export type ProductPortUncheckedCreateWithoutConnectorInput = {
   productId: string
   count?: number
   label?: string | null
+  requirement?: string | null
   sortOrder?: number
 }
 
@@ -533,6 +557,7 @@ export type ProductPortScalarWhereInput = {
   connectorId?: Prisma.StringFilter<"ProductPort"> | string
   count?: Prisma.IntFilter<"ProductPort"> | number
   label?: Prisma.StringNullableFilter<"ProductPort"> | string | null
+  requirement?: Prisma.StringNullableFilter<"ProductPort"> | string | null
   sortOrder?: Prisma.IntFilter<"ProductPort"> | number
 }
 
@@ -540,6 +565,7 @@ export type ProductPortCreateWithoutProductInput = {
   id?: string
   count?: number
   label?: string | null
+  requirement?: string | null
   sortOrder?: number
   connector: Prisma.ConnectorCreateNestedOneWithoutPortsInput
 }
@@ -549,6 +575,7 @@ export type ProductPortUncheckedCreateWithoutProductInput = {
   connectorId: string
   count?: number
   label?: string | null
+  requirement?: string | null
   sortOrder?: number
 }
 
@@ -583,6 +610,7 @@ export type ProductPortCreateManyConnectorInput = {
   productId: string
   count?: number
   label?: string | null
+  requirement?: string | null
   sortOrder?: number
 }
 
@@ -590,6 +618,7 @@ export type ProductPortUpdateWithoutConnectorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   product?: Prisma.ProductUpdateOneRequiredWithoutPortsNestedInput
 }
@@ -599,6 +628,7 @@ export type ProductPortUncheckedUpdateWithoutConnectorInput = {
   productId?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -607,6 +637,7 @@ export type ProductPortUncheckedUpdateManyWithoutConnectorInput = {
   productId?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -615,6 +646,7 @@ export type ProductPortCreateManyProductInput = {
   connectorId: string
   count?: number
   label?: string | null
+  requirement?: string | null
   sortOrder?: number
 }
 
@@ -622,6 +654,7 @@ export type ProductPortUpdateWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   connector?: Prisma.ConnectorUpdateOneRequiredWithoutPortsNestedInput
 }
@@ -631,6 +664,7 @@ export type ProductPortUncheckedUpdateWithoutProductInput = {
   connectorId?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -639,6 +673,7 @@ export type ProductPortUncheckedUpdateManyWithoutProductInput = {
   connectorId?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
   label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -650,6 +685,7 @@ export type ProductPortSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   connectorId?: boolean
   count?: boolean
   label?: boolean
+  requirement?: boolean
   sortOrder?: boolean
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   connector?: boolean | Prisma.ConnectorDefaultArgs<ExtArgs>
@@ -661,6 +697,7 @@ export type ProductPortSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   connectorId?: boolean
   count?: boolean
   label?: boolean
+  requirement?: boolean
   sortOrder?: boolean
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   connector?: boolean | Prisma.ConnectorDefaultArgs<ExtArgs>
@@ -672,6 +709,7 @@ export type ProductPortSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   connectorId?: boolean
   count?: boolean
   label?: boolean
+  requirement?: boolean
   sortOrder?: boolean
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   connector?: boolean | Prisma.ConnectorDefaultArgs<ExtArgs>
@@ -683,10 +721,11 @@ export type ProductPortSelectScalar = {
   connectorId?: boolean
   count?: boolean
   label?: boolean
+  requirement?: boolean
   sortOrder?: boolean
 }
 
-export type ProductPortOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productId" | "connectorId" | "count" | "label" | "sortOrder", ExtArgs["result"]["productPort"]>
+export type ProductPortOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productId" | "connectorId" | "count" | "label" | "requirement" | "sortOrder", ExtArgs["result"]["productPort"]>
 export type ProductPortInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   connector?: boolean | Prisma.ConnectorDefaultArgs<ExtArgs>
@@ -717,6 +756,19 @@ export type $ProductPortPayload<ExtArgs extends runtime.Types.Extensions.Interna
      * better than a column would.
      */
     label: string | null
+    /**
+     * Whether the production's connection check insists on a cable here.
+     * Null — optional: nobody plugs sixteen cables into a mixer because it has
+     * sixteen inputs. `required` — every unit needs `count` cables on this line
+     * (a moving head's power inlet). `A`/`B` — one group of alternatives: the
+     * lines sharing a letter need one set of cables between them, on any of
+     * them ("DMX In" on XLR3 *or* XLR5).
+     * 
+     * Only this is stored. Whether a port is an input or an output follows from
+     * the connector (`portFlow` in src/lib/ports.ts), and it is the outputs —
+     * a DMX Thru, a TRUE1 out — that the check counts as places to feed from.
+     */
+    requirement: string | null
     /**
      * Order on the panel as entered, so the list reads the way the device does.
      */
@@ -1151,6 +1203,7 @@ export interface ProductPortFieldRefs {
   readonly connectorId: Prisma.FieldRef<"ProductPort", 'String'>
   readonly count: Prisma.FieldRef<"ProductPort", 'Int'>
   readonly label: Prisma.FieldRef<"ProductPort", 'String'>
+  readonly requirement: Prisma.FieldRef<"ProductPort", 'String'>
   readonly sortOrder: Prisma.FieldRef<"ProductPort", 'Int'>
 }
     

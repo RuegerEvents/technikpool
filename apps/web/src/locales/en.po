@@ -12201,3 +12201,53 @@ msgstr "Something went wrong"
 #: src/routes/+error.svelte
 msgid "To the dashboard"
 msgstr "To the dashboard"
+
+#: src/routes/productions/[id]/connection-check.svelte
+msgid "Connections: the one required port has a matching cable."
+msgid_plural "Connections: all # required ports have a matching cable."
+msgstr[0] "Connections: the one required port has a matching cable."
+msgstr[1] "Connections: all # required ports have a matching cable."
+
+#. 0: f.missing; 1: f.needed; 2: f.label ?? ''; 3: f.connectors.join(' / ')
+#: src/routes/productions/[id]/connection-check.svelte
+msgid "— {0} of {1} {2} ({3}) without a cable"
+msgstr "— {0} of {1} {2} ({3}) without a cable"
+
+#: src/routes/productions/[id]/connection-check.svelte
+msgid "— cable ends with no free output on the list to plug into"
+msgstr "— cable ends with no free output on the list to plug into"
+
+#. 0: check.covered; 1: check.required
+#: src/routes/productions/[id]/connection-check.svelte
+msgid "Connections: {0} of {1} required ports have a matching cable"
+msgstr "Connections: {0} of {1} required ports have a matching cable"
+
+#: src/routes/productions/[id]/connection-check.svelte
+msgid "Counted from the connectors marked required on each product. A cable from the venue does not show up here."
+msgstr "Counted from the connectors marked required on each product. A cable from the venue does not show up here."
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Required for the connection check"
+msgstr "Required for the connection check"
+
+#. 0: port.requirement
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "One of the lines marked {0}"
+msgstr "One of the lines marked {0}"
+
+#: src/lib/components/ui/product-ports/product-ports.svelte
+msgid "Required — the connection check expects a cable here"
+msgstr "Required — the connection check expects a cable here"
+
+#. 0: value; 1: value
+#: src/lib/components/ui/product-ports/product-ports.svelte
+msgid "Group {0} — one cable on any line marked {1} is enough"
+msgstr "Group {0} — one cable on any line marked {1} is enough"
+
+#: src/lib/components/ui/product-ports/product-ports.svelte
+msgid "Optional — not part of the connection check"
+msgstr "Optional — not part of the connection check"
+
+#: src/lib/components/ui/product-ports/product-ports.svelte
+msgid "Click the circle: — optional, ● required, A/B one of the lines with that letter. The production's connection check expects a cable on every required line."
+msgstr "Click the circle: — optional, ● required, A/B one of the lines with that letter. The production's connection check expects a cable on every required line."

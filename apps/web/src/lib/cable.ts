@@ -596,3 +596,35 @@ export const CABLE_TYPE_DEFAULTS: Readonly<
 	Klinke: { connectorA: 'Klinke 6.3', connectorB: 'Klinke 6.3' },
 	USB: { connectorA: 'USB-A', connectorB: 'USB-C' }
 };
+
+/**
+ * Whether two connectors plug into each other — a cable end into a device's
+ * panel, or into another cable's end.
+ *
+ * The family says what mates with what, and gender says which way round:
+ *
+ * - A family with only one gender is the same part on both sides — an NL4, an
+ *   RJ45, an HDMI — so any two of it mate.
+ * - Otherwise the genders must differ. Where the family has exactly one of
+ *   each, that settles it (C13 into C14, XLR3 F onto XLR3 M).
+ * - powerCON has two of each, keyed by colour rather than contacts, so there
+ *   the rest of the name has to agree as well: blau F into blau M, never into
+ *   grau M.
+ */
+export function connectorsMate(
+	a: ConnectorRow,
+	b: ConnectorRow,
+	connectors: readonly ConnectorRow[]
+): boolean {
+	const familyOf = (c: ConnectorRow) => (c.family?.trim() || connectorBase(c.name)).toLowerCase();
+	const family = familyOf(a);
+	if (family !== familyOf(b)) return false;
+	const members = connectors.filter((c) => familyOf(c) === family);
+	const genders = new Set(members.map((c) => c.gender).filter(Boolean));
+	if (genders.size < 2) return true;
+	if (!a.gender || !b.gender || a.gender === b.gender) return false;
+	const males = members.filter((c) => c.gender === 'male').length;
+	const females = members.filter((c) => c.gender === 'female').length;
+	if (males === 1 && females === 1) return true;
+	return connectorBase(a.name).toLowerCase() === connectorBase(b.name).toLowerCase();
+}

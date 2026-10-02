@@ -49,6 +49,7 @@
 	} from '#lib/remote/billing.remote.js';
 	import { BillingTodoActions } from '#lib/components/billing-todo/index.js';
 	import CheckButton from './check-button.svelte';
+	import ConnectionCheck from './connection-check.svelte';
 	import HandoutButtons from './handout-buttons.svelte';
 	import {
 		accessorySummary,
@@ -1219,6 +1220,8 @@
 					</div>
 				{/if}
 			</div>
+
+			<ConnectionCheck {productionId} />
 
 			{#if canPlan && draftCount > 0}
 				<div

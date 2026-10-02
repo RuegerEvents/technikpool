@@ -42,44 +42,78 @@ export function portDirection(
 }
 
 /**
- * The labels worth offering for one connector on one device, and the one to
- * fill in unasked where the direction is knowable.
+ * Whether a port must be connected for the production's connection check —
+ * see `ProductPort.requirement`. `required` stands alone; lines sharing a
+ * letter are alternatives, one set of cables on any of them is enough.
+ */
+export const PORT_REQUIREMENTS = ['required', 'A', 'B'] as const;
+export type PortRequirement = (typeof PORT_REQUIREMENTS)[number];
+
+export function portRequirement(value: string | null | undefined): PortRequirement | null {
+	return (PORT_REQUIREMENTS as readonly string[]).includes(value ?? '')
+		? (value as PortRequirement)
+		: null;
+}
+
+/** What the chip on a port line moves to on the next click: — → ● → A → B → —. */
+export function nextPortRequirement(value: PortRequirement | null): PortRequirement | null {
+	if (value === null) return PORT_REQUIREMENTS[0];
+	const i = PORT_REQUIREMENTS.indexOf(value);
+	return PORT_REQUIREMENTS[i + 1] ?? null;
+}
+
+/** What a port carries and which way, where a rule knows it. */
+export type PortFlow = { kind: 'Power' | 'DMX'; direction: 'in' | 'out' | null };
+
+/**
+ * The kind and direction of one connector on one device — the rule behind both
+ * the label suggestions and the connection check's sense of which ports feed.
  *
- * - Anything in the Power department is "Power In" / "Power Out", whatever the
- *   device is — a moving head's powerCON is as much power as a distro's Schuko.
+ * - Anything in the Power department is power, whatever the device is — a
+ *   moving head's powerCON is as much power as a distro's Schuko.
  * - An XLR on a Light product carries DMX, not audio, whichever department the
  *   connector itself is filed under (XLR3 is Audio in the catalogue).
  *
- * Empty for everything else: an XLR on a mixer is "Mic 1–16" or "Main L", and
+ * Null for everything else: an XLR on a mixer is "Mic 1–16" or "Main L", and
  * no rule guesses that better than the person typing it.
+ */
+export function portFlow(
+	connector: ConnectorLike,
+	productCategoryId: string | null | undefined,
+	categories: readonly { id: string; cableInputGender?: string | null }[]
+): PortFlow | null {
+	const inputGenderOf = (id: string) =>
+		categories.find((c) => c.id === id)?.cableInputGender ?? null;
+
+	if (connector.categoryId === POWER_CATEGORY_ID) {
+		return {
+			kind: 'Power',
+			direction: portDirection(connector, inputGenderOf(POWER_CATEGORY_ID))
+		};
+	}
+	if (
+		productCategoryId === LIGHT_CATEGORY_ID &&
+		/^xlr/i.test(connector.family?.trim() || connector.name)
+	) {
+		return { kind: 'DMX', direction: portDirection(connector, inputGenderOf(LIGHT_CATEGORY_ID)) };
+	}
+	return null;
+}
+
+/**
+ * The labels worth offering for one connector on one device, and the one to
+ * fill in unasked where the direction is knowable.
  */
 export function portLabelSuggestions(
 	connector: ConnectorLike,
 	productCategoryId: string | null | undefined,
 	categories: readonly { id: string; cableInputGender?: string | null }[]
 ): { labels: string[]; preferred: string | null } {
-	const inputGenderOf = (id: string) =>
-		categories.find((c) => c.id === id)?.cableInputGender ?? null;
-
-	let kind: string;
-	let inputGender: string | null;
-	if (connector.categoryId === POWER_CATEGORY_ID) {
-		kind = 'Power';
-		inputGender = inputGenderOf(POWER_CATEGORY_ID);
-	} else if (
-		productCategoryId === LIGHT_CATEGORY_ID &&
-		/^xlr/i.test(connector.family?.trim() || connector.name)
-	) {
-		kind = 'DMX';
-		inputGender = inputGenderOf(LIGHT_CATEGORY_ID);
-	} else {
-		return { labels: [], preferred: null };
-	}
-
-	const labels = [`${kind} In`, `${kind} Out`];
-	const direction = portDirection(connector, inputGender);
+	const flow = portFlow(connector, productCategoryId, categories);
+	if (!flow) return { labels: [], preferred: null };
+	const labels = [`${flow.kind} In`, `${flow.kind} Out`];
 	return {
 		labels,
-		preferred: direction === 'in' ? labels[0] : direction === 'out' ? labels[1] : null
+		preferred: flow.direction === 'in' ? labels[0] : flow.direction === 'out' ? labels[1] : null
 	};
 }

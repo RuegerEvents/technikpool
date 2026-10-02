@@ -1,6 +1,8 @@
 <script module lang="ts">
 	import type { Prisma } from '#lib/prisma/client.js';
 
+	import { portRequirement, type PortRequirement } from '#lib/ports.js';
+
 	export type StoredPort = Prisma.ProductPortGetPayload<{ include: { connector: true } }>;
 
 	/**
@@ -16,6 +18,9 @@
 		count: number | null;
 		label: string;
 		autoLabel: string;
+		requirement: PortRequirement | null;
+		/** Like `autoLabel`: what a pick filled in, which the next pick may replace. */
+		autoRequirement: PortRequirement | null;
 	};
 
 	let nextKey = 0;
@@ -27,7 +32,9 @@
 			name: port?.connector.name ?? '',
 			count: port?.count ?? 1,
 			label: port?.label ?? '',
-			autoLabel: ''
+			autoLabel: '',
+			requirement: portRequirement(port?.requirement),
+			autoRequirement: null
 		};
 	}
 
@@ -42,7 +49,8 @@
 			.map((d) => ({
 				connectorId: d.connectorId,
 				count: Math.max(1, Math.round(d.count ?? 1)),
-				label: d.label.trim() || null
+				label: d.label.trim() || null,
+				requirement: d.requirement
 			}));
 	}
 
@@ -55,7 +63,8 @@
 				(p, i) =>
 					p.connectorId === stored[i].connectorId &&
 					p.count === stored[i].count &&
-					p.label === (stored[i].label ?? null)
+					p.label === (stored[i].label ?? null) &&
+					p.requirement === portRequirement(stored[i].requirement)
 			)
 		);
 	}
@@ -71,7 +80,7 @@
 	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
 	import { ConnectorFormModal } from '#lib/components/ui/connector-form-modal/index.js';
 	import { getConnectors } from '#lib/remote/connectors.remote.js';
-	import { portLabelSuggestions } from '#lib/ports.js';
+	import { nextPortRequirement, portLabelSuggestions } from '#lib/ports.js';
 
 	type Props = {
 		rows: PortDraft[];
@@ -137,6 +146,24 @@
 			row.label = preferred ?? '';
 			row.autoLabel = preferred ?? '';
 		}
+		// An inlet is what a device cannot run without, so "Power In" and "DMX
+		// In" start out required. Same rule as the label: never over a choice
+		// somebody made by clicking.
+		if (row.requirement === row.autoRequirement) {
+			const required = preferred?.endsWith(' In') ? ('required' as const) : null;
+			row.requirement = required;
+			row.autoRequirement = required;
+		}
+	}
+
+	function cycleRequirement(row: PortDraft) {
+		row.requirement = nextPortRequirement(row.requirement);
+	}
+
+	function requirementTitle(value: PortRequirement | null) {
+		if (value === 'required') return 'Required — the connection check expects a cable here';
+		if (value) return `Group ${value} — one cable on any line marked ${value} is enough`;
+		return 'Optional — not part of the connection check';
 	}
 
 	function addRow() {
@@ -199,6 +226,18 @@
 				{disabled}
 				bind:value={r.label}
 			/>
+			<button
+				type="button"
+				class="flex size-8 shrink-0 items-center justify-center rounded-full border text-xs font-semibold transition-colors disabled:opacity-50 {r.requirement
+					? 'border-primary bg-primary text-primary-foreground'
+					: 'text-muted-foreground hover:bg-muted'}"
+				title={requirementTitle(r.requirement)}
+				aria-label={requirementTitle(r.requirement)}
+				{disabled}
+				onclick={() => cycleRequirement(r)}
+			>
+				{#if r.requirement === 'required'}●{:else if r.requirement}{r.requirement}{:else}—{/if}
+			</button>
 			{#if labels.length > 0}
 				<datalist id="{idPrefix}-labels-{r.key}">
 					{#each labels as label (label)}<option value={label}></option>{/each}
@@ -217,6 +256,12 @@
 	{/each}
 	{#if !disabled}
 		<Button icon="add" variant="outline" size="sm" onclick={addRow}>Add connector</Button>
+	{/if}
+	{#if rows.length > 0}
+		<p class="text-xs text-muted-foreground">
+			Click the circle: — optional, ● required, A/B one of the lines with that letter. The
+			production's connection check expects a cable on every required line.
+		</p>
 	{/if}
 </div>
 

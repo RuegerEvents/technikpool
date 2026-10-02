@@ -1,8 +1,14 @@
 import { prisma } from '#lib/server/auth.js';
 import { appError } from '#lib/errors.js';
+import { portRequirement, type PortRequirement } from '#lib/ports.js';
 
 /** One line of a device's panel as the forms send it. */
-export type PortInput = { connectorId: string; count: number; label: string | null };
+export type PortInput = {
+	connectorId: string;
+	count: number;
+	label: string | null;
+	requirement: PortRequirement | null;
+};
 
 /**
  * One line of a device's panel as the catalog log records it. The connector's
@@ -21,7 +27,8 @@ export async function portSnapshot(productId: string): Promise<PortSnapshot[]> {
 		connectorId: p.connectorId,
 		connector: p.connector.name,
 		count: p.count,
-		label: p.label
+		label: p.label,
+		requirement: portRequirement(p.requirement)
 	}));
 }
 
@@ -36,7 +43,9 @@ export function samePorts(a: readonly PortInput[], b: readonly PortInput[]): boo
 			(p, i) =>
 				p.connectorId === b[i].connectorId &&
 				p.count === b[i].count &&
-				(p.label ?? null) === (b[i].label ?? null)
+				(p.label ?? null) === (b[i].label ?? null) &&
+				// Older log entries predate the column and carry no key at all.
+				(p.requirement ?? null) === (b[i].requirement ?? null)
 		)
 	);
 }
@@ -48,7 +57,8 @@ export function normalizePorts(ports: readonly PortInput[]): PortInput[] {
 		.map((p) => ({
 			connectorId: p.connectorId,
 			count: Math.max(1, Math.round(p.count)),
-			label: p.label?.trim() || null
+			label: p.label?.trim() || null,
+			requirement: portRequirement(p.requirement)
 		}));
 }
 
@@ -65,7 +75,14 @@ export async function writePorts(productId: string, ports: readonly PortInput[])
 	await prisma.$transaction(async (tx) => {
 		await tx.productPort.deleteMany({ where: { productId } });
 		await tx.productPort.createMany({
-			data: ports.map((p, sortOrder) => ({ ...p, productId, sortOrder }))
+			data: ports.map((p, sortOrder) => ({
+				connectorId: p.connectorId,
+				count: p.count,
+				label: p.label,
+				requirement: p.requirement ?? null,
+				productId,
+				sortOrder
+			}))
 		});
 	});
 }

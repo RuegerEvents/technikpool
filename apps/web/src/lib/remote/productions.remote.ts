@@ -26,6 +26,7 @@ import {
 import { ROLE_FOR, rolesAtLeast } from '#lib/roles.js';
 import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '#lib/asset-status.js';
 import { accessoryIdsOf } from '#lib/server/services/accessories.js';
+import { productionConnectionCheck } from '#lib/server/services/connection-check.js';
 import {
 	getOrgIdsNeedingApprovalNotification,
 	notifyPendingApproval
@@ -200,9 +201,24 @@ export const getProduction = query(v.string(), async (id: string) => {
 function refreshProduction(productionId: string) {
 	return Promise.all([
 		getProduction(productionId).refresh(),
-		getProductionAudience(productionId).refresh()
+		getProductionAudience(productionId).refresh(),
+		getConnectionCheck(productionId).refresh()
 	]);
 }
+
+/**
+ * Whether the cables on a production fit its devices — see
+ * `services/connection-check.ts`. Read by whoever may open the production:
+ * it names products and connectors, nothing more.
+ */
+export const getConnectionCheck = query(v.string(), async (productionId: string) => {
+	const production = await prisma.production.findUniqueOrThrow({
+		where: { id: productionId },
+		select: { id: true, organizationId: true }
+	});
+	await requireProductionRead(production);
+	return productionConnectionCheck(productionId);
+});
 
 /**
  * An org as a production page names it. Not the whole row: that carries the

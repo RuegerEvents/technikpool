@@ -76,6 +76,7 @@ import {
 	writePorts,
 	type PortSnapshot
 } from '#lib/server/services/product-ports.js';
+import { PORT_REQUIREMENTS } from '#lib/ports.js';
 import { getConnectors, getConnectorUsage } from '#lib/remote/connectors.remote.js';
 import { getKnownAddresses } from '#lib/remote/addresses.remote.js';
 import { appError } from '#lib/errors.js';
@@ -2208,7 +2209,8 @@ const setProductPortsSchema = v.object({
 			v.object({
 				connectorId: v.pipe(v.string(), v.minLength(1)),
 				count: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(999)),
-				label: v.nullable(v.pipe(v.string(), v.maxLength(80)))
+				label: v.nullable(v.pipe(v.string(), v.maxLength(80))),
+				requirement: v.optional(v.nullable(v.picklist(PORT_REQUIREMENTS)), null)
 			})
 		),
 		v.maxLength(100)
@@ -2399,6 +2401,7 @@ export const duplicateProduct = command(duplicateProductSchema, async (input) =>
 					connectorId: port.connectorId,
 					count: port.count,
 					label: port.label,
+					requirement: port.requirement,
 					sortOrder: port.sortOrder
 				}))
 			}

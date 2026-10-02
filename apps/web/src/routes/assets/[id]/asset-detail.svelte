@@ -938,6 +938,18 @@
 											<p class="truncate text-sm font-medium">
 												<span class="font-mono tabular-nums">{port.count}×</span>
 												{port.connector.name}
+												{#if port.requirement === 'required'}
+													<span
+														class="ml-1 text-xs text-muted-foreground"
+														title="Required for the connection check">●</span
+													>
+												{:else if port.requirement}
+													<span
+														class="ml-1 text-xs text-muted-foreground"
+														title="One of the lines marked {port.requirement}"
+														>{port.requirement}</span
+													>
+												{/if}
 											</p>
 											{#if port.label}
 												<p class="truncate text-xs text-muted-foreground">{port.label}</p>

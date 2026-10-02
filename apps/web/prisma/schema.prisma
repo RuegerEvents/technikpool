@@ -428,6 +428,17 @@ model ProductPort {
   /// direction, channel range and purpose are all things a person writes
   /// better than a column would.
   label       String?
+  /// Whether the production's connection check insists on a cable here.
+  /// Null — optional: nobody plugs sixteen cables into a mixer because it has
+  /// sixteen inputs. `required` — every unit needs `count` cables on this line
+  /// (a moving head's power inlet). `A`/`B` — one group of alternatives: the
+  /// lines sharing a letter need one set of cables between them, on any of
+  /// them ("DMX In" on XLR3 *or* XLR5).
+  ///
+  /// Only this is stored. Whether a port is an input or an output follows from
+  /// the connector (`portFlow` in src/lib/ports.ts), and it is the outputs —
+  /// a DMX Thru, a TRUE1 out — that the check counts as places to feed from.
+  requirement String?
   /// Order on the panel as entered, so the list reads the way the device does.
   sortOrder   Int       @default(0)
 
