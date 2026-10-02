@@ -1,6 +1,7 @@
+import { createHash } from 'node:crypto';
 import sharp from 'sharp';
 import { PDFDocument, rgb, type PDFFont, type PDFImage, type PDFPage } from 'pdf-lib';
-import { getObject } from '$lib/server/storage';
+import { getObject, putObject } from '$lib/server/storage';
 import { embedInter } from './fonts';
 import { safe, wrap } from './pdf-text.ts';
 import { drawLogo, embedLogo } from './pdf-logo.ts';
@@ -98,8 +99,7 @@ async function withPngPhotos(svg: Buffer) {
  * Flattened onto white: a JPEG has no alpha, and transparent pixels would
  * otherwise come out black.
  */
-async function thumbnail(path: string): Promise<Uint8Array | null> {
-	if (/^(https?:)?\/\//i.test(path) || path.startsWith('data:')) return null;
+async function drawThumbnail(path: string): Promise<Uint8Array | null> {
 	try {
 		const object = await getObject(path);
 		if (!object.contentType.startsWith('image/')) return null;
@@ -115,6 +115,58 @@ async function thumbnail(path: string): Promise<Uint8Array | null> {
 		console.warn(`Could not include image "${path}" in equipment sheet:`, cause);
 		return null;
 	}
+}
+
+// Drawing a thumbnail means fetching the full photo and running it through
+// sharp, and that is most of the time a sheet takes. The result can be kept
+// for good: an uploaded photo gets a fresh key and a kit preview's key carries
+// its fingerprint, so what is stored under a path never changes, and neither
+// does its thumbnail. Kept twice — in this process for the next print, and in
+// the store so a restart does not start over. Outside the public prefix: a
+// sheet's pictures are nobody else's business.
+//
+// Bump the version whenever drawThumbnail changes what it makes, or the old
+// renderings are reused.
+const THUMBNAIL_VERSION = 'v1';
+const MEMORY_LIMIT = 500; // at ~15 KB each, a few MB
+const inMemory = new Map<string, Uint8Array>();
+
+function remember(path: string, bytes: Uint8Array) {
+	// A Map iterates in insertion order, so re-inserting makes this the newest
+	// and the first key the one used longest ago.
+	inMemory.delete(path);
+	inMemory.set(path, bytes);
+	if (inMemory.size > MEMORY_LIMIT) inMemory.delete(inMemory.keys().next().value!);
+}
+
+function storedThumbnailKey(path: string) {
+	const hash = createHash('sha256').update(path).digest('hex').slice(0, 32);
+	return `sheet-thumbnails/${THUMBNAIL_VERSION}/${hash}.jpg`;
+}
+
+async function thumbnail(path: string): Promise<Uint8Array | null> {
+	if (/^(https?:)?\/\//i.test(path) || path.startsWith('data:')) return null;
+	const known = inMemory.get(path);
+	if (known) {
+		remember(path, known);
+		return known;
+	}
+	const key = storedThumbnailKey(path);
+	try {
+		const stored = await getObject(key);
+		remember(path, stored.bytes);
+		return stored.bytes;
+	} catch {
+		// Not drawn yet (or the store is unwell, and drawing will say so).
+	}
+	const bytes = await drawThumbnail(path);
+	if (!bytes) return null;
+	remember(path, bytes);
+	// Nobody waits for this: a thumbnail that failed to store is drawn again.
+	putObject(key, bytes, 'image/jpeg').catch((cause) =>
+		console.warn(`Could not store thumbnail of "${path}":`, cause)
+	);
+	return bytes;
 }
 
 export type ReportProgress = (progress: SheetProgress) => void;
