@@ -1041,6 +1041,7 @@ msgstr "Asset removed from bundle"
 #: src/lib/components/ui/bundle-vs-accessory-info/bundle-vs-accessory-info.svelte
 #: src/lib/components/ui/invitations/invitation-link.svelte
 #: src/lib/components/ui/license-credentials/license-reveal-modal.svelte
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 #: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
 #: src/routes/approval-request-modal.svelte
 #: src/routes/share/[id]/[signature]/+page.svelte
@@ -1334,6 +1335,8 @@ msgstr "Location"
 #~ msgid "Image URL"
 #~ msgstr "Image URL"
 
+#: src/lib/components/missing-pricing/missing-pricing.svelte
+#: src/lib/components/missing-pricing/missing-pricing.svelte
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/billing-document/billing-document.svelte
@@ -1352,8 +1355,6 @@ msgstr "Location"
 #: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/manufacturers/+page.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
-#: src/routes/offers/new/+page.svelte
-#: src/routes/offers/new/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
@@ -3317,7 +3318,7 @@ msgstr "Nothing booked yet."
 #~ msgid "Default daily rental rate per category, as a percentage of an asset's net purchase price. Feeds offer/invoice pricing."
 #~ msgstr "Default daily rental rate per category, as a percentage of an asset's net purchase price. Feeds offer/invoice pricing."
 
-#: src/routes/offers/new/+page.svelte
+#: src/lib/components/missing-pricing/missing-pricing.svelte
 #: src/routes/orgs/[id]/rates/+page.svelte
 msgid "% / day"
 msgstr "% / day"
@@ -4471,11 +4472,11 @@ msgstr "Select all units"
 msgid "Drop an image here, paste it, or click to choose"
 msgstr "Drop an image here, paste it, or click to choose"
 
-#: src/routes/offers/new/+page.svelte
+#: src/lib/components/missing-pricing/missing-pricing.svelte
 msgid "Enter a net purchase price first"
 msgstr "Enter a net purchase price first"
 
-#: src/routes/offers/new/+page.svelte
+#: src/lib/components/missing-pricing/missing-pricing.svelte
 #: src/routes/orgs/[id]/value/+page.svelte
 msgid "Enter a valid net purchase price"
 msgstr "Enter a valid net purchase price"
@@ -4485,15 +4486,15 @@ msgstr "Enter a valid net purchase price"
 #~ msgstr[0] "Price set on # unit"
 #~ msgstr[1] "Price set on # units"
 
-#: src/routes/offers/new/+page.svelte
+#: src/lib/components/missing-pricing/missing-pricing.svelte
 msgid "Enter a rental rate first"
 msgstr "Enter a rental rate first"
 
-#: src/routes/offers/new/+page.svelte
+#: src/lib/components/missing-pricing/missing-pricing.svelte
 msgid "Enter a valid rental rate"
 msgstr "Enter a valid rental rate"
 
-#: src/routes/offers/new/+page.svelte
+#: src/lib/components/missing-pricing/missing-pricing.svelte
 msgid "Rate saved"
 msgstr "Rate saved"
 
@@ -4536,33 +4537,33 @@ msgstr "Missing pricing data"
 msgid "An offer bills each item as a percentage of its net purchase price, so these have nothing to bill from. Set them here — the values are stored on the equipment itself, not just on this offer."
 msgstr "An offer bills each item as a percentage of its net purchase price, so these have nothing to bill from. Set them here — the values are stored on the equipment itself, not just on this offer."
 
-#: src/routes/offers/new/+page.svelte
+#: src/lib/components/missing-pricing/missing-pricing.svelte
 msgid "# category has no rental rate"
 msgid_plural "# categories have no rental rate"
 msgstr[0] "# category has no rental rate"
 msgstr[1] "# categories have no rental rate"
 
-#: src/routes/offers/new/+page.svelte
+#: src/lib/components/missing-pricing/missing-pricing.svelte
 msgid "Daily rate, as a percentage of the net purchase price."
 msgstr "Daily rate, as a percentage of the net purchase price."
 
-#: src/routes/offers/new/+page.svelte
+#: src/lib/components/missing-pricing/missing-pricing.svelte
 msgid "Ask an owner of this organization to set it."
 msgstr "Ask an owner of this organization to set it."
 
-#: src/routes/offers/new/+page.svelte
+#: src/lib/components/missing-pricing/missing-pricing.svelte
 msgid "# product has no net purchase price"
 msgid_plural "# products have no net purchase price"
 msgstr[0] "# product has no net purchase price"
 msgstr[1] "# products have no net purchase price"
 
-#: src/routes/offers/new/+page.svelte
+#: src/lib/components/missing-pricing/missing-pricing.svelte
 msgid "# unit"
 msgid_plural "# units"
 msgstr[0] "# unit"
 msgstr[1] "# units"
 
-#: src/routes/offers/new/+page.svelte
+#: src/lib/components/missing-pricing/missing-pricing.svelte
 msgid "€ net"
 msgstr "€ net"
 
@@ -4672,7 +4673,7 @@ msgstr "Unknown"
 #~ msgstr "What a rental rate is calculated from. An offer can't bill this product without it."
 
 #. 0: group.label
-#: src/routes/offers/new/+page.svelte
+#: src/lib/components/missing-pricing/missing-pricing.svelte
 msgid "Price saved on {0}"
 msgstr "Price saved on {0}"
 
@@ -5687,11 +5688,11 @@ msgstr "What your organization's rental rate is calculated from. It applies to e
 msgid "{0}'s price for this product — what its rental rate is calculated from. Other organizations price it themselves."
 msgstr "{0}'s price for this product — what its rental rate is calculated from. Other organizations price it themselves."
 
-#: src/routes/offers/new/+page.svelte
+#: src/lib/components/missing-pricing/missing-pricing.svelte
 msgid "The price is your organization's own for this product — it covers every unit of it in your billing, here and in every later offer."
 msgstr "The price is your organization's own for this product — it covers every unit of it in your billing, here and in every later offer."
 
-#: src/routes/offers/new/+page.svelte
+#: src/lib/components/missing-pricing/missing-pricing.svelte
 msgid "Ask an admin of this organization to price the product."
 msgstr "Ask an admin of this organization to price the product."
 
@@ -9103,7 +9104,7 @@ msgstr "Already in the catalog — the units are added to that entry."
 msgid "New cable — saving adds <0/> to the catalog."
 msgstr "New cable — saving adds <0/> to the catalog."
 
-#: src/routes/offers/new/+page.svelte
+#: src/lib/components/missing-pricing/missing-pricing.svelte
 msgid "In bundle <0/>, which has no price of its own and is billed as one line at the sum of its units' prices. A price on the bundle itself covers this unit instead."
 msgstr "In bundle <0/>, which has no price of its own and is billed as one line at the sum of its units' prices. A price on the bundle itself covers this unit instead."
 
@@ -12244,3 +12245,41 @@ msgstr "Left blank, this unit gets <0/>, the organisation's next free number. It
 #: src/lib/components/ui/asset-tag-input/asset-tag-input.svelte
 msgid "Type or scan to use a different tag instead — a sticker that is already on the unit, for example."
 msgstr "Type or scan to use a different tag instead — a sticker that is already on the unit, for example."
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Set prices"
+msgstr "Set prices"
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Set missing prices"
+msgstr "Set missing prices"
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Everything booked can be priced now. Close this dialog to review what the update changes."
+msgstr "Everything booked can be priced now. Close this dialog to review what the update changes."
+
+#~ msgid "An offer bills each item as a percentage of its net purchase price. For borrowed equipment that is your organization's price, not the lender's, so you can set it here."
+#~ msgstr "An offer bills each item as a percentage of its net purchase price. For borrowed equipment that is your organization's price, not the lender's, so you can set it here."
+
+#: src/lib/components/ui/staleness-banner/staleness-banner.svelte
+msgid "Each item is billed as a percentage of its net purchase price. For borrowed equipment that is your organization's price, not the lender's, so you can set it here."
+msgstr "Each item is billed as a percentage of its net purchase price. For borrowed equipment that is your organization's price, not the lender's, so you can set it here."
+
+#: src/lib/components/price-reference/price-reference.svelte
+#: src/lib/components/price-reference/price-reference.svelte
+msgid "Use this price"
+msgstr "Use this price"
+
+#. 0: lender.name
+#: src/lib/components/price-reference/price-reference.svelte
+msgid "Lender {0}:"
+msgstr "Lender {0}:"
+
+#: src/lib/components/price-reference/price-reference.svelte
+msgid "Your other organization:"
+msgstr "Your other organization:"
+
+#. 0: peers.count; 1: money(peers.min); 2: money(peers.max)
+#: src/lib/components/price-reference/price-reference.svelte
+msgid "Your {0} other organizations: {1} – {2}, median"
+msgstr "Your {0} other organizations: {1} – {2}, median"

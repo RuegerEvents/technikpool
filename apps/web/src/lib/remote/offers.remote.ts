@@ -705,10 +705,13 @@ type ChangedLine = {
 	categoryBefore: SnapshotCategory | null;
 	categoryAfter: SnapshotCategory | null;
 };
+type BillingScope = 'ALL' | 'OWN_ORG_ONLY' | 'LENT';
 type Staleness = {
 	applicable: boolean;
 	stale: boolean;
 	error?: string;
+	// See the banner's own copy of this type.
+	billing?: { productionId: string; organizationId: string; assetScope: BillingScope };
 	added: DiffLine[];
 	removed: DiffLine[];
 	changed: ChangedLine[];
@@ -1089,6 +1092,11 @@ export const getOfferStaleness = query(v.string(), async (offerId: string) => {
 			applicable: true,
 			stale: false,
 			error: getErrorMessage(err),
+			billing: {
+				productionId: offer.productionId,
+				organizationId: offer.organizationId,
+				assetScope: offer.assetScope as BillingScope
+			},
 			added: [],
 			removed: [],
 			changed: []
@@ -1663,6 +1671,11 @@ export const getInvoiceStaleness = query(v.string(), async (invoiceId: string) =
 			applicable: true,
 			stale: false,
 			error: (err as Error).message,
+			billing: {
+				productionId: invoice.productionId,
+				organizationId: invoice.organizationId,
+				assetScope: invoice.assetScope as BillingScope
+			},
 			added: [],
 			removed: [],
 			changed: []

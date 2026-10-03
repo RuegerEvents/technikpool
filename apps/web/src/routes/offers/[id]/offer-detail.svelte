@@ -433,6 +433,7 @@
 
 	<StalenessBanner
 		{staleness}
+		onPricingSaved={() => getOfferStaleness(offerId).refresh()}
 		mode={offer.finalizedAt ? 'revise' : 'update'}
 		nextRevision={versions.nextRevision}
 		onUpdate={async () => {

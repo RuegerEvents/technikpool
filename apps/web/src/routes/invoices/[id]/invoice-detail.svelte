@@ -333,6 +333,7 @@
 
 	<StalenessBanner
 		{staleness}
+		onPricingSaved={() => getInvoiceStaleness(invoiceId).refresh()}
 		onUpdate={async () => {
 			await updateInvoiceItemsFromProduction(invoiceId);
 		}}

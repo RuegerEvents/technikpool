@@ -2,6 +2,9 @@
 	import * as Card from '#lib/components/ui/card/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
+	import { MissingPricing } from '#lib/components/missing-pricing/index.js';
+	import { getProductionBillingReadiness } from '#lib/remote/offers.remote.js';
 	import { localizedName } from '#lib/category.js';
 	import { getErrorMessage } from '#lib/utils.js';
 	import { toast } from 'svelte-sonner';
@@ -11,10 +14,14 @@
 		staleness,
 		onUpdate,
 		mode = 'update',
-		nextRevision = 2
+		nextRevision = 2,
+		onPricingSaved
 	}: {
 		staleness: Staleness;
 		onUpdate: () => Promise<void>;
+		// Re-asks for the staleness once a price or rate was set in the dialog,
+		// so the banner moves on from "can't check" without a reload.
+		onPricingSaved?: () => unknown;
 		// 'revise' on a finalized offer: its lines can't be replaced, so the
 		// dialog creates the next version instead.
 		mode?: 'update' | 'revise';
@@ -23,6 +30,22 @@
 
 	let open = $state(false);
 	let working = $state(false);
+
+	// Captured on opening, not read from `staleness`: the first save that makes
+	// the document priceable clears `staleness.billing`, and the dialog has to
+	// stay put to say so.
+	let pricingArgs = $state<Staleness['billing'] | null>(null);
+	let pricingOpen = $state(false);
+	let pricingQuery = $derived(pricingArgs ? getProductionBillingReadiness(pricingArgs) : null);
+	let pricingDone = $derived(
+		!!pricingQuery?.current &&
+			pricingQuery.current.missingPrices.length + pricingQuery.current.missingRates.length === 0
+	);
+
+	function openPricing() {
+		pricingArgs = staleness.billing ?? null;
+		pricingOpen = true;
+	}
 
 	function fmtEUR(n: number): string {
 		return n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
@@ -70,7 +93,9 @@
 					</p>
 				{/if}
 			</div>
-			{#if !staleness.error}
+			{#if staleness.error && staleness.billing}
+				<Button size="sm" onclick={openPricing}>Set prices</Button>
+			{:else if !staleness.error}
 				<Button size="sm" onclick={() => (open = true)}>
 					{#if mode === 'revise'}Review & create V{nextRevision}{:else}Review & Update{/if}
 				</Button>
@@ -180,6 +205,32 @@
 			disabled={working}
 		>
 			Cancel
+		</Button>
+	{/snippet}
+</Modal>
+
+<Modal bind:open={pricingOpen} title="Set missing prices" size="lg">
+	{#snippet children()}
+		{#if !pricingQuery?.ready}
+			<ContentSkeleton shape="rows" count={3} error={pricingQuery?.error} />
+		{:else if pricingDone}
+			<p class="text-sm">
+				Everything booked can be priced now. Close this dialog to review what the update changes.
+			</p>
+		{:else}
+			<div class="space-y-4">
+				<p class="text-sm text-muted-foreground">
+					Each item is billed as a percentage of its net purchase price. For borrowed equipment that
+					is your organization's price, not the lender's, so you can set it here.
+				</p>
+				<MissingPricing query={pricingQuery} onSaved={onPricingSaved} />
+			</div>
+		{/if}
+	{/snippet}
+
+	{#snippet footer()}
+		<Button icon="close" type="button" variant="outline" onclick={() => (pricingOpen = false)}>
+			Close
 		</Button>
 	{/snippet}
 </Modal>

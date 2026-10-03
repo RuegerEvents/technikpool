@@ -2744,6 +2744,100 @@ export const setOrgProductPrice = command(
 	}
 );
 
+const priceReferencesSchema = v.object({
+	organizationId: v.string(),
+	productIds: v.array(v.string())
+});
+
+/**
+ * What others put on a product, as a starting point for this org's own price:
+ * the spread across the user's other orgs (any role — the price list of an org
+ * one belongs to is not a secret from its members here), and the exact price
+ * of every org that lent this org units of the product. A borrower is shown
+ * the lender's price because it is what the device is worth to its owner, and
+ * reselling a loan below that is the mistake this exists to prevent.
+ */
+export const getPriceReferences = query(
+	priceReferencesSchema,
+	async ({ organizationId, productIds }) => {
+		const user = await requireAuth();
+		await scopedOrgIds(user.id, organizationId);
+		if (productIds.length === 0) return {};
+
+		const peerOrgIds = (await userOrgIds(user.id)).filter((id) => id !== organizationId);
+		const lentItems = await prisma.productionItem.findMany({
+			where: {
+				production: { organizationId },
+				status: { notIn: ['DECLINED', 'CANCELLED', 'DRAFT'] },
+				asset: { productId: { in: productIds }, organizationId: { not: organizationId } }
+			},
+			select: { asset: { select: { productId: true, organizationId: true } } }
+		});
+		const lenderIdsByProduct = new Map<string, Set<string>>();
+		for (const { asset } of lentItems) {
+			const ids = lenderIdsByProduct.get(asset.productId) ?? new Set<string>();
+			ids.add(asset.organizationId);
+			lenderIdsByProduct.set(asset.productId, ids);
+		}
+		const lenderIds = [...new Set(lentItems.map((item) => item.asset.organizationId))];
+
+		const prices = await prisma.orgProductPrice.findMany({
+			where: {
+				productId: { in: productIds },
+				organizationId: { in: [...new Set([...peerOrgIds, ...lenderIds])] }
+			},
+			select: {
+				productId: true,
+				organizationId: true,
+				netPurchasePrice: true,
+				organization: { select: { name: true } }
+			}
+		});
+
+		const result: Record<
+			string,
+			{
+				peers: { count: number; min: number; median: number; max: number } | null;
+				lenders: { organizationId: string; name: string; price: number }[];
+			}
+		> = {};
+		for (const productId of productIds) {
+			const rows = prices.filter((p) => p.productId === productId);
+			const lenderSet = lenderIdsByProduct.get(productId);
+			// A lender is listed with its exact price below; counting it into the
+			// spread as well would show the same org twice.
+			const peerPrices = rows
+				.filter((p) => peerOrgIds.includes(p.organizationId) && !lenderSet?.has(p.organizationId))
+				.map((p) => Number(p.netPurchasePrice))
+				.sort((a, b) => a - b);
+			const mid = Math.floor(peerPrices.length / 2);
+			result[productId] = {
+				peers:
+					peerPrices.length === 0
+						? null
+						: {
+								count: peerPrices.length,
+								min: peerPrices[0],
+								max: peerPrices[peerPrices.length - 1],
+								median:
+									peerPrices.length % 2
+										? peerPrices[mid]
+										: Math.round(((peerPrices[mid - 1] + peerPrices[mid]) / 2) * 100) / 100
+							},
+				lenders: rows
+					.filter((p) => lenderSet?.has(p.organizationId))
+					.map((p) => ({
+						organizationId: p.organizationId,
+						name: p.organization.name,
+						price: Number(p.netPurchasePrice)
+					}))
+					.sort((a, b) => naturalCompare(a.name, b.name))
+			};
+		}
+		return result;
+	}
+);
+
 // The catalog audit trail, newest first — system-admin only, because it spans
 // every org's activity.
 export const getCatalogTransactions = query(async () => {

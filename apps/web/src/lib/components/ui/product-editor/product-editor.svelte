@@ -30,6 +30,7 @@
 		duplicateProduct,
 		getCategories,
 		getManufacturers,
+		getPriceReferences,
 		getProductCatalog,
 		getProducts,
 		mergeProducts,
@@ -47,6 +48,7 @@
 	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
 	import { Modal } from '#lib/components/ui/modal/index.js';
 	import ProductActions from './product-actions.svelte';
+	import { PriceReference } from '#lib/components/price-reference/index.js';
 	import { productLabel } from '#lib/product-label.js';
 	import { PRODUCT_VIEWS } from '#lib/product-views.js';
 	import {
@@ -687,7 +689,12 @@
 					organizations set their own price.
 				</p>
 				{#each priceOrgs as org (org.id)}
-					<div class="flex items-center gap-3">
+					{@const referencesQuery = getPriceReferences({
+						organizationId: org.id,
+						productIds: [product.id]
+					})}
+					{@const reference = referencesQuery.current?.[product.id]}
+					<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
 						<span class="w-40 truncate text-sm">{orgLabel(org)}</span>
 						<input
 							type="number"
@@ -697,6 +704,7 @@
 							bind:value={priceDrafts[org.id]}
 							class="h-10 w-40 rounded-md border border-input bg-background px-3 py-2 text-right text-sm focus:ring-2 focus:ring-ring focus:outline-none"
 						/>
+						<PriceReference {reference} onApply={(price) => (priceDrafts[org.id] = price)} />
 					</div>
 				{/each}
 			</div>
