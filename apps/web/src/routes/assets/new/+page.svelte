@@ -10,6 +10,8 @@
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Modal } from '#lib/components/ui/modal/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
+	import { AssetTagInput } from '#lib/components/ui/asset-tag-input/index.js';
+	import { previewAutoTags } from '#lib/asset-tag-preview.js';
 	import SerialNumberWarning from '#lib/components/SerialNumberWarning.svelte';
 	import { Label } from '#lib/components/ui/label/index.js';
 	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
@@ -206,6 +208,13 @@
 	let items = $state<{ serialNumber: string; assetTag: string }[]>([
 		{ serialNumber: '', assetTag: '' }
 	]);
+	// What each blank tag field will become, shown in the field itself.
+	let autoTags = $derived(
+		previewAutoTags(
+			nextTag,
+			items.map((item) => item.assetTag)
+		)
+	);
 
 	function setQuantity(n: number) {
 		const clamped = Math.max(1, Math.min(50, n));
@@ -549,16 +558,11 @@
 												<td class="px-3 py-2 text-muted-foreground tabular-nums">{i + 1}</td>
 												<td class="px-3 py-2">
 													<div class="flex gap-2">
-														<Input
+														<AssetTagInput
 															bind:value={item.assetTag}
-															placeholder={nextTag
-																? i === 0
-																	? `Blank: ${nextTag}`
-																	: 'Blank: next number'
-																: orgPrefix
-																	? `${orgPrefix}…`
-																	: 'Scan or type'}
-															class="h-8 font-mono text-sm"
+															auto={autoTags[i]}
+															placeholder={orgPrefix ? `${orgPrefix}…` : 'Scan or type'}
+															class="h-8 text-sm"
 														/>
 														<CameraScanButton
 															class="size-8"
@@ -591,15 +595,11 @@
 							<div class="col-span-2 space-y-2">
 								<Label for="tag-0">Asset Tag</Label>
 								<div class="flex gap-2">
-									<Input
+									<AssetTagInput
 										id="tag-0"
 										bind:value={items[0].assetTag}
-										placeholder={nextTag
-											? `Blank: ${nextTag}`
-											: orgPrefix
-												? `${orgPrefix}…`
-												: 'Scan or type the sticker'}
-										class="font-mono"
+										auto={autoTags[0]}
+										placeholder={orgPrefix ? `${orgPrefix}…` : 'Scan or type the sticker'}
 									/>
 									<CameraScanButton onscan={(code) => (items[0].assetTag = code)} />
 								</div>

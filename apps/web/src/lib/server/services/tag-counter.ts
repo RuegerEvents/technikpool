@@ -24,13 +24,21 @@ export type TagAllocator = {
 
 type Tx = Pick<Prisma.TransactionClient, 'organization' | '$queryRaw'>;
 
-/** The highest number among the tags already in the pattern, or 0. */
+/**
+ * The highest number among the tags already in the pattern, or 0.
+ *
+ * The `::int` casts are load-bearing. The pg adapter binds a JS number without
+ * a type, and `substring(text FROM unknown)` resolves to the *regex* overload:
+ * the start position became a pattern, nothing matched, and the counter alone
+ * decided — so a sticker typed above it was handed out a second time.
+ */
 async function highestInPattern(tx: Tx, prefix: string) {
+	const start = prefix.length + 1;
 	const [{ highest }] = await tx.$queryRaw<{ highest: number | null }[]>`
-		SELECT max(substring("assetTag" FROM ${prefix.length + 1})::int) AS highest
+		SELECT max(substring("assetTag" FROM ${start}::int)::int) AS highest
 		FROM "Asset"
-		WHERE left("assetTag", ${prefix.length}) = ${prefix}
-		  AND substring("assetTag" FROM ${prefix.length + 1}) ~ '^[0-9]{5}$'`;
+		WHERE left("assetTag", ${prefix.length}::int) = ${prefix}
+		  AND substring("assetTag" FROM ${start}::int) ~ '^[0-9]{5}$'`;
 	return highest ?? 0;
 }
 

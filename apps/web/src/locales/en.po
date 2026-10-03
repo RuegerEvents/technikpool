@@ -75,12 +75,10 @@ msgstr "Crew member added"
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/productions/[id]/crew-passes/+page.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
-#: src/routes/productions/[id]/packing-list/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Back"
 msgstr "Back"
 
-#: src/routes/productions/[id]/packing-list/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Packing List"
 msgstr "Packing List"
@@ -129,7 +127,6 @@ msgid "Product"
 msgstr "Product"
 
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-#: src/routes/productions/[id]/packing-list/+page.svelte
 #: src/routes/products/[id]/product-detail.svelte
 msgid "S/N"
 msgstr "S/N"
@@ -330,7 +327,6 @@ msgstr "Remove"
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
-#: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Manufacturer"
 msgstr "Manufacturer"
 
@@ -1076,7 +1072,6 @@ msgstr "No assets in this bundle yet. Click \"Add Assets\" to get started."
 
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/productions/[id]/crew-passes/+page.svelte
-#: src/routes/productions/[id]/packing-list/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Print"
@@ -1142,38 +1137,29 @@ msgstr "Qty"
 #~ msgid "Please verify all equipment is present and in good condition before signing."
 #~ msgstr "Please verify all equipment is present and in good condition before signing."
 
-#. 0: production.name
-#: src/routes/productions/[id]/packing-list/+page.svelte
-msgid "Packing List - {0}"
-msgstr "Packing List - {0}"
+#~ msgid "Packing List - {0}"
+#~ msgstr "Packing List - {0}"
 
 #. 0: new Date().toLocaleDateString()
-#. 0: new Date().toLocaleDateString()
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-#: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Date: {0}"
 msgstr "Date: {0}"
 
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-#: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Check"
 msgstr "Check"
 
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-#: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Item Description"
 msgstr "Item Description"
 
-#: src/routes/productions/[id]/packing-list/+page.svelte
-msgid "Source Org"
-msgstr "Source Org"
+#~ msgid "Source Org"
+#~ msgstr "Source Org"
 
-#: src/routes/productions/[id]/packing-list/+page.svelte
-msgid "Prepared By:"
-msgstr "Prepared By:"
+#~ msgid "Prepared By:"
+#~ msgstr "Prepared By:"
 
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-#: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Checked By:"
 msgstr "Checked By:"
 
@@ -1585,10 +1571,8 @@ msgstr "Create Production | Technikpool"
 msgid "Calendar | Technikpool"
 msgstr "Calendar | Technikpool"
 
-#. 0: group.productCounts.map((p) => `${p.count}× ${p.name}`).join(', ')
-#: src/routes/productions/[id]/packing-list/+page.svelte
-msgid "Contains: {0}"
-msgstr "Contains: {0}"
+#~ msgid "Contains: {0}"
+#~ msgstr "Contains: {0}"
 
 #: src/routes/calendar/+page.svelte
 msgid "Jan"
@@ -10700,24 +10684,16 @@ msgstr "Off: a device gets its tag by typing or scanning the sticker."
 msgid "<0/> Number new devices automatically"
 msgstr "<0/> Number new devices automatically"
 
-#. 0: nextTag
-#. 0: nextTag
-#. 0: nextTag
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-#: src/routes/assets/new/+page.svelte
-#: src/routes/assets/new/+page.svelte
-msgid "Blank: {0}"
-msgstr "Blank: {0}"
+#~ msgid "Blank: {0}"
+#~ msgstr "Blank: {0}"
 
 #. 0: nextTag
 #: src/routes/assets/new/cables/+page.svelte
 msgid "<0/> Number these cables (from {0})"
 msgstr "<0/> Number these cables (from {0})"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-#: src/routes/assets/new/+page.svelte
-msgid "Blank: next number"
-msgstr "Blank: next number"
+#~ msgid "Blank: next number"
+#~ msgstr "Blank: next number"
 
 #: src/lib/error-messages.svelte.ts
 msgid "Only whoever added this PDF, or whoever may change the product, can change or remove it."
@@ -11777,10 +11753,8 @@ msgstr "Pack ({0})"
 msgid "Pack"
 msgstr "Pack"
 
-#. 0: ownerLabel
-#: src/routes/productions/[id]/packing-list/+page.svelte
-msgid "Only the units of {0}"
-msgstr "Only the units of {0}"
+#~ msgid "Only the units of {0}"
+#~ msgstr "Only the units of {0}"
 
 #: src/routes/+page.svelte
 msgid "1 unit to pack"
@@ -12251,3 +12225,22 @@ msgstr "Optional — not part of the connection check"
 #: src/lib/components/ui/product-ports/product-ports.svelte
 msgid "Click the circle: — optional, ● required, A/B one of the lines with that letter. The production's connection check expects a cable on every required line."
 msgstr "Click the circle: — optional, ● required, A/B one of the lines with that letter. The production's connection check expects a cable on every required line."
+
+#~ msgid "Numbered automatically — type or scan to use a different tag"
+#~ msgstr "Numbered automatically — type or scan to use a different tag"
+
+#: src/lib/components/ui/asset-tag-input/asset-tag-input.svelte
+msgid "Numbered automatically"
+msgstr "Numbered automatically"
+
+#: src/lib/components/ui/asset-tag-input/asset-tag-input.svelte
+msgid "<0/> Numbered automatically"
+msgstr "<0/> Numbered automatically"
+
+#: src/lib/components/ui/asset-tag-input/asset-tag-input.svelte
+msgid "Left blank, this unit gets <0/>, the organisation's next free number. It is assigned when you save, so if someone else registers units in the meantime it moves up."
+msgstr "Left blank, this unit gets <0/>, the organisation's next free number. It is assigned when you save, so if someone else registers units in the meantime it moves up."
+
+#: src/lib/components/ui/asset-tag-input/asset-tag-input.svelte
+msgid "Type or scan to use a different tag instead — a sticker that is already on the unit, for example."
+msgstr "Type or scan to use a different tag instead — a sticker that is already on the unit, for example."

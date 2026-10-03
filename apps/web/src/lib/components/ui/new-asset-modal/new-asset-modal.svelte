@@ -36,6 +36,8 @@
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Modal } from '#lib/components/ui/modal/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
+	import { AssetTagInput } from '#lib/components/ui/asset-tag-input/index.js';
+	import { previewAutoTags } from '#lib/asset-tag-preview.js';
 	import { Label } from '#lib/components/ui/label/index.js';
 	import SerialNumberWarning from '#lib/components/SerialNumberWarning.svelte';
 	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
@@ -118,6 +120,7 @@
 	let nextTagQuery = $derived(open ? getNextAssetTag(organizationId) : null);
 	let nextTag = $derived(nextTagQuery?.current ?? null);
 	let numbered = $derived(nextTag !== null);
+	let autoTags = $derived(previewAutoTags(nextTag, tags));
 	let chosenLocationId = $state('');
 	let saving = $state(false);
 	// Remounts the product picker when the manufacturer changes, so a stale
@@ -557,17 +560,12 @@
 					<Label for="newAssetTag-0">{quantity === 1 ? 'Asset tag' : 'Asset tags'}</Label>
 					{#each tags, i (i)}
 						<div class="flex gap-2">
-							<Input
+							<AssetTagInput
 								id="newAssetTag-{i}"
 								bind:value={tags[i]}
+								auto={autoTags[i]}
 								disabled={saving}
-								placeholder={numbered
-									? i === 0
-										? `Blank: ${nextTag}`
-										: 'Blank: next number'
-									: quantity === 1
-										? 'Scan or type the sticker'
-										: `Unit ${i + 1}`}
+								placeholder={quantity === 1 ? 'Scan or type the sticker' : `Unit ${i + 1}`}
 							/>
 							<CameraScanButton disabled={saving} onscan={(code) => (tags[i] = code)} />
 						</div>

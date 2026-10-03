@@ -3,7 +3,7 @@ import { query, command, requested } from '$app/server';
 import { prisma } from '#lib/server/auth.js';
 import type { Prisma } from '#lib/prisma/client.js';
 import * as v from 'valibot';
-import { getOrgEquipmentValue } from './orgs.remote';
+import { getNextAssetTag, getOrgEquipmentValue } from './orgs.remote';
 import type { FieldChange } from '#lib/types/asset-transaction.js';
 import {
 	isSystemAdmin,
@@ -1026,6 +1026,24 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 	);
 	const parent = args.parent ?? null;
 
+	// The column is unique, but a violation would surface as a bare 500 — say
+	// which unit already carries a typed tag, the way `updateAsset` does.
+	const typedTags = args.units.flatMap((u) => (!u.noAssetTag && u.assetTag?.trim()) || []);
+	const repeated = typedTags.find((tag, i) => typedTags.indexOf(tag) !== i);
+	if (repeated) appError(409, 'asset_tag_in_use', [repeated, 'another row of this form']);
+	const holder = typedTags.length
+		? await tx.asset.findFirst({
+				where: { assetTag: { in: typedTags } },
+				select: { assetTag: true, serialNumber: true, product: { select: { name: true } } }
+			})
+		: null;
+	if (holder) {
+		const label = holder.serialNumber
+			? `${holder.product.name} (S/N ${holder.serialNumber})`
+			: holder.product.name;
+		appError(409, 'asset_tag_in_use', [holder.assetTag ?? '', label]);
+	}
+
 	// A licence has no wiring to test, so it never gets a DGUV interval.
 	const licenseProductIds = new Set(
 		(
@@ -1157,6 +1175,8 @@ async function refreshAfterUnitsCreated(organizationId: string, productIds: stri
 	await getAssets().refresh();
 	await getInventorySummary(organizationId).refresh();
 	await getInventorySummary().refresh();
+	// An open form shows the next number in its blank tag fields.
+	await getNextAssetTag(organizationId).refresh();
 	// The product just gained a unit, so what its fleet carries may have moved.
 	await Promise.all(
 		[...new Set(productIds)].map((productId) =>

@@ -75,12 +75,10 @@ msgstr "Crewmitglied hinzugefügt"
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/productions/[id]/crew-passes/+page.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
-#: src/routes/productions/[id]/packing-list/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Back"
 msgstr "Zurück"
 
-#: src/routes/productions/[id]/packing-list/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Packing List"
 msgstr "Packliste"
@@ -129,7 +127,6 @@ msgid "Product"
 msgstr "Produkt"
 
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-#: src/routes/productions/[id]/packing-list/+page.svelte
 #: src/routes/products/[id]/product-detail.svelte
 msgid "S/N"
 msgstr "S/N"
@@ -330,7 +327,6 @@ msgstr "Entfernen"
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
-#: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Manufacturer"
 msgstr "Hersteller"
 
@@ -1076,7 +1072,6 @@ msgstr "Noch keine Geräte in diesem Bundle. Klicken Sie auf „Geräte hinzufü
 
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/productions/[id]/crew-passes/+page.svelte
-#: src/routes/productions/[id]/packing-list/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Print"
@@ -1142,38 +1137,29 @@ msgstr "Menge"
 #~ msgid "Please verify all equipment is present and in good condition before signing."
 #~ msgstr "Bitte alle Geräte auf Vollständigkeit und einwandfreien Zustand prüfen, bevor Sie unterschreiben."
 
-#. 0: production.name
-#: src/routes/productions/[id]/packing-list/+page.svelte
-msgid "Packing List - {0}"
-msgstr "Packliste – {0}"
+#~ msgid "Packing List - {0}"
+#~ msgstr "Packliste – {0}"
 
 #. 0: new Date().toLocaleDateString()
-#. 0: new Date().toLocaleDateString()
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-#: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Date: {0}"
 msgstr "Datum: {0}"
 
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-#: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Check"
 msgstr "Haken"
 
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-#: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Item Description"
 msgstr "Artikelbeschreibung"
 
-#: src/routes/productions/[id]/packing-list/+page.svelte
-msgid "Source Org"
-msgstr "Herkunftsorg."
+#~ msgid "Source Org"
+#~ msgstr "Herkunftsorg."
 
-#: src/routes/productions/[id]/packing-list/+page.svelte
-msgid "Prepared By:"
-msgstr "Vorbereitet von:"
+#~ msgid "Prepared By:"
+#~ msgstr "Vorbereitet von:"
 
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-#: src/routes/productions/[id]/packing-list/+page.svelte
 msgid "Checked By:"
 msgstr "Geprüft von:"
 
@@ -1585,10 +1571,8 @@ msgstr "Produktion erstellen | Technikpool"
 msgid "Calendar | Technikpool"
 msgstr "Kalender | Technikpool"
 
-#. 0: group.productCounts.map((p) => `${p.count}× ${p.name}`).join(', ')
-#: src/routes/productions/[id]/packing-list/+page.svelte
-msgid "Contains: {0}"
-msgstr "Enthält: {0}"
+#~ msgid "Contains: {0}"
+#~ msgstr "Enthält: {0}"
 
 #: src/routes/calendar/+page.svelte
 msgid "Jan"
@@ -10700,24 +10684,16 @@ msgstr "Aus: Ein Gerät bekommt seinen Tag durch Eintippen oder Scannen des Aufk
 msgid "<0/> Number new devices automatically"
 msgstr "<0/> Neue Geräte automatisch nummerieren"
 
-#. 0: nextTag
-#. 0: nextTag
-#. 0: nextTag
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-#: src/routes/assets/new/+page.svelte
-#: src/routes/assets/new/+page.svelte
-msgid "Blank: {0}"
-msgstr "Leer: {0}"
+#~ msgid "Blank: {0}"
+#~ msgstr "Leer: {0}"
 
 #. 0: nextTag
 #: src/routes/assets/new/cables/+page.svelte
 msgid "<0/> Number these cables (from {0})"
 msgstr "<0/> Diese Kabel nummerieren (ab {0})"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-#: src/routes/assets/new/+page.svelte
-msgid "Blank: next number"
-msgstr "Leer: nächste Nummer"
+#~ msgid "Blank: next number"
+#~ msgstr "Leer: nächste Nummer"
 
 #: src/lib/error-messages.svelte.ts
 msgid "Only whoever added this PDF, or whoever may change the product, can change or remove it."
@@ -11777,10 +11753,8 @@ msgstr "Packen ({0})"
 msgid "Pack"
 msgstr "Packen"
 
-#. 0: ownerLabel
-#: src/routes/productions/[id]/packing-list/+page.svelte
-msgid "Only the units of {0}"
-msgstr "Nur die Geräte von {0}"
+#~ msgid "Only the units of {0}"
+#~ msgstr "Nur die Geräte von {0}"
 
 #: src/routes/+page.svelte
 msgid "1 unit to pack"
@@ -12251,3 +12225,22 @@ msgstr "Optional – nicht Teil des Anschluss-Checks"
 #: src/lib/components/ui/product-ports/product-ports.svelte
 msgid "Click the circle: — optional, ● required, A/B one of the lines with that letter. The production's connection check expects a cable on every required line."
 msgstr "Kreis anklicken: — optional, ● Pflicht, A/B eine der Zeilen mit diesem Buchstaben. Der Anschluss-Check der Produktion erwartet an jeder Pflichtzeile ein Kabel."
+
+#~ msgid "Numbered automatically — type or scan to use a different tag"
+#~ msgstr "Automatisch nummeriert – tippen oder scannen, um einen anderen Tag zu verwenden"
+
+#: src/lib/components/ui/asset-tag-input/asset-tag-input.svelte
+msgid "Numbered automatically"
+msgstr "Automatisch nummeriert"
+
+#: src/lib/components/ui/asset-tag-input/asset-tag-input.svelte
+msgid "<0/> Numbered automatically"
+msgstr "<0/> Automatisch nummeriert"
+
+#: src/lib/components/ui/asset-tag-input/asset-tag-input.svelte
+msgid "Left blank, this unit gets <0/>, the organisation's next free number. It is assigned when you save, so if someone else registers units in the meantime it moves up."
+msgstr "Bleibt das Feld leer, bekommt dieses Gerät <0/>, die nächste freie Nummer der Organisation. Vergeben wird sie erst beim Speichern – legt jemand anderes in der Zwischenzeit Geräte an, rückt sie weiter."
+
+#: src/lib/components/ui/asset-tag-input/asset-tag-input.svelte
+msgid "Type or scan to use a different tag instead — a sticker that is already on the unit, for example."
+msgstr "Tippen oder scannen, um stattdessen einen anderen Tag zu verwenden – etwa einen Aufkleber, der schon auf dem Gerät klebt."
