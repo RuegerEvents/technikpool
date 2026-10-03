@@ -9,9 +9,11 @@ import { toCii } from './cii.ts';
 
 // The official check is Mustang (https://www.mustangproject.org), which runs
 // the EN 16931 schematron over the XML and veraPDF over the PDF/A-3. It is a
-// Java jar, so it is opt-in:
+// Java jar, so plain `pnpm test` skips it;
 //
-//   MUSTANG_JAR=/path/to/Mustang-CLI-2.26.0.jar pnpm --filter web test
+//   pnpm --filter web test:einvoice
+//
+// fetches the pinned jar (scripts/fetch-mustang.mjs) and runs it (needs java).
 const MUSTANG_JAR = process.env.MUSTANG_JAR;
 
 function item(id: string, overrides: Partial<EInvoiceSource['items'][number]> = {}) {

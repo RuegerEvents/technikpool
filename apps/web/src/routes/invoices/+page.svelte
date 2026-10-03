@@ -62,7 +62,11 @@
 								>{#if invoice.sentAt}<span
 										class="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800 dark:bg-blue-900 dark:text-blue-300"
 										>Finalized</span
-									>{:else}<span
+									>{#if invoice.eInvoiceProfile}
+										<span
+											class="ml-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300"
+											title="ZUGFeRD, EN 16931">E-invoice</span
+										>{/if}{:else}<span
 										class="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground"
 										>Draft</span
 									>{/if}</td

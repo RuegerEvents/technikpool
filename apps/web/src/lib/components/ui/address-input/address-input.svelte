@@ -129,6 +129,7 @@
 				{#if value.postalCode?.trim() || value.city?.trim()}
 					<p>{value.postalCode} {value.city}</p>
 				{/if}
+				<p class="text-muted-foreground">Germany</p>
 			</div>
 			<div class="flex shrink-0 gap-1">
 				<Button
@@ -210,6 +211,12 @@
 		<div class="space-y-2">
 			<Label for="{idPrefix}-city">City</Label>
 			<Input id="{idPrefix}-city" bind:value={value.city} placeholder="Berlin" />
+		</div>
+		<!-- Fixed: Address has no country, and documents and e-invoices are German-only. -->
+		<div class="space-y-2 sm:col-span-2">
+			<Label for="{idPrefix}-country">Country</Label>
+			<Input id="{idPrefix}-country" value="Germany" disabled />
+			<p class="text-xs text-muted-foreground">Only addresses in Germany for now.</p>
 		</div>
 		{#if !noneKnown}
 			<div class="sm:col-span-2">

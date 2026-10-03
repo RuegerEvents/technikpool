@@ -785,6 +785,7 @@ export const InvoiceScalarFieldEnum = {
   recipientOrganizationId: 'recipientOrganizationId',
   sentAt: 'sentAt',
   pdfPath: 'pdfPath',
+  eInvoiceProfile: 'eInvoiceProfile',
   isKleinunternehmerSnapshot: 'isKleinunternehmerSnapshot',
   vatRatePercent: 'vatRatePercent',
   orgName: 'orgName',

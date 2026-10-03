@@ -1426,8 +1426,9 @@ msgstr "Berlin"
 #~ msgid "Region/State"
 #~ msgstr "Region/State"
 
-#~ msgid "Country"
-#~ msgstr "Country"
+#: src/lib/components/ui/address-input/address-input.svelte
+msgid "Country"
+msgstr "Country"
 
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Address updated"
@@ -5642,14 +5643,11 @@ msgstr "Its archived PDF is authoritative."
 msgid "Its PDF has not been archived yet."
 msgstr "Its PDF has not been archived yet."
 
-#. 0: new Date(invoice.sentAt).toLocaleDateString('de-DE')
-#: src/routes/invoices/[id]/invoice-detail.svelte
-msgid "Finalized on {0} — this invoice is immutable.<0/> Corrections require a new document."
-msgstr "Finalized on {0} — this invoice is immutable.<0/> Corrections require a new document."
+#~ msgid "Finalized on {0} — this invoice is immutable.<0/> Corrections require a new document."
+#~ msgstr "Finalized on {0} — this invoice is immutable.<0/> Corrections require a new document."
 
-#: src/routes/invoices/[id]/invoice-detail.svelte
-msgid "This invoice is a draft — items can still be corrected or resynced from the production. Finalizing archives its PDF and makes it immutable."
-msgstr "This invoice is a draft — items can still be corrected or resynced from the production. Finalizing archives its PDF and makes it immutable."
+#~ msgid "This invoice is a draft — items can still be corrected or resynced from the production. Finalizing archives its PDF and makes it immutable."
+#~ msgstr "This invoice is a draft — items can still be corrected or resynced from the production. Finalizing archives its PDF and makes it immutable."
 
 #: src/routes/manufacturers/+page.svelte
 msgid "Delete <0/> and move its products to:"
@@ -5761,8 +5759,6 @@ msgid "Edit invoice number"
 msgstr "Edit invoice number"
 
 #. 0: invoice.number
-#. 0: invoice.number
-#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Invoice {0} <0/>"
 msgstr "Invoice {0} <0/>"
@@ -12311,3 +12307,40 @@ msgstr "Street, postal code and city of the customer"
 #: src/lib/components/ui/billing-issues/billing-issues.svelte
 msgid "Complete them on the customer, then pick the customer again under “Edit customer”."
 msgstr "Complete them on the customer, then pick the customer again under “Edit customer”."
+
+#: src/lib/components/ui/address-input/address-input.svelte
+#: src/lib/components/ui/address-input/address-input.svelte
+msgid "Germany"
+msgstr "Germany"
+
+#: src/lib/components/ui/address-input/address-input.svelte
+msgid "Only addresses in Germany for now."
+msgstr "Only addresses in Germany for now."
+
+#: src/routes/invoices/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
+msgid "ZUGFeRD, EN 16931"
+msgstr "ZUGFeRD, EN 16931"
+
+#: src/routes/invoices/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
+msgid "E-invoice"
+msgstr "E-invoice"
+
+#. 0: invoice.number
+#: src/routes/invoices/[id]/invoice-detail.svelte
+msgid "Invoice {0} <0/> <1/>"
+msgstr "Invoice {0} <0/> <1/>"
+
+#: src/routes/invoices/[id]/invoice-detail.svelte
+msgid "It is an e-invoice (ZUGFeRD, EN 16931): the PDF carries the invoice as XML, which the customer's accounting software reads."
+msgstr "It is an e-invoice (ZUGFeRD, EN 16931): the PDF carries the invoice as XML, which the customer's accounting software reads."
+
+#. 0: new Date(invoice.sentAt).toLocaleDateString('de-DE')
+#: src/routes/invoices/[id]/invoice-detail.svelte
+msgid "Finalized on {0} — this invoice is immutable.<0/> Corrections require a new document. <1/>"
+msgstr "Finalized on {0} — this invoice is immutable.<0/> Corrections require a new document. <1/>"
+
+#: src/routes/invoices/[id]/invoice-detail.svelte
+msgid "This invoice is a draft — items can still be corrected or resynced from the production. Finalizing archives its PDF as an e-invoice (ZUGFeRD) and makes it immutable."
+msgstr "This invoice is a draft — items can still be corrected or resynced from the production. Finalizing archives its PDF as an e-invoice (ZUGFeRD) and makes it immutable."

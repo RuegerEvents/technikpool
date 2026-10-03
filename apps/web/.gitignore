@@ -1,3 +1,5 @@
+# Mustang CLI for the e-invoice tests (scripts/fetch-mustang.mjs)
+/.mustang
 # Background-removal model, fetched at build (scripts/fetch-imgly-assets.mjs)
 /static/imgly
 

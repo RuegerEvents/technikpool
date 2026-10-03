@@ -1807,7 +1807,7 @@ export const finalizeInvoice = command(v.string(), async (invoiceId: string) => 
 	// both slip past the check above.
 	const { count } = await prisma.invoice.updateMany({
 		where: { id: invoiceId, pdfPath: null },
-		data: { sentAt: invoice.sentAt ?? new Date(), pdfPath }
+		data: { sentAt: invoice.sentAt ?? new Date(), pdfPath, eInvoiceProfile: 'ZUGFERD_EN16931' }
 	});
 	if (count === 0) appError(409, 'invoice_already_finalized');
 

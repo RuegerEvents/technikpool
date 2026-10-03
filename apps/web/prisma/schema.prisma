@@ -1310,8 +1310,12 @@ model Invoice {
   // Null while the invoice is still a draft — items can be corrected and
   // re-synced from the production. Once set, the invoice is immutable
   // (GoBD/§14 UStG): no more item updates, no more field edits.
-  sentAt  DateTime?
-  pdfPath String?
+  sentAt          DateTime?
+  pdfPath         String?
+  // What the archived PDF carries: 'ZUGFERD_EN16931' (PDF/A-3 with the CII
+  // XML attached, see src/lib/server/einvoice). Null on a draft and on an
+  // invoice archived as a plain PDF before e-invoicing existed.
+  eInvoiceProfile String?
 
   // Snapshot of the org's Kleinunternehmer status at issuance — GoBD requires
   // the issued document's content to stay fixed even if the org flag changes later.

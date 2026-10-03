@@ -13,7 +13,8 @@
 		"openapi:preview": "redocly preview-docs openapi.yaml",
 		"openapi:types": "openapi-typescript openapi.yaml -o src/lib/api/schema.d.ts",
 		"preview": "vite preview",
-		"test": "vitest run"
+		"test": "vitest run",
+		"test:einvoice": "node scripts/fetch-mustang.mjs && MUSTANG_JAR=.mustang/Mustang-CLI-2.26.0.jar vitest run src/lib/server/einvoice"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^2.1.0",

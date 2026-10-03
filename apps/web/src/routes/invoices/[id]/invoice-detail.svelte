@@ -227,6 +227,12 @@
 			{:else}
 				<h1 class="flex items-center gap-2 text-3xl font-bold tracking-tight">
 					Invoice {invoice.number}
+					{#if invoice.eInvoiceProfile}
+						<span
+							class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold tracking-normal text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300"
+							title="ZUGFeRD, EN 16931">E-invoice</span
+						>
+					{/if}
 					{#if !invoice.sentAt}
 						<Button
 							icon="edit"
@@ -289,13 +295,19 @@
 				Finalized on {new Date(invoice.sentAt).toLocaleDateString('de-DE')} — this invoice is immutable.{#if invoice.pdfPath}
 					Its archived PDF is authoritative.{:else}
 					Its PDF has not been archived yet.{/if} Corrections require a new document.
+				{#if invoice.eInvoiceProfile}
+					<span class="mt-1 block">
+						It is an e-invoice (ZUGFeRD, EN 16931): the PDF carries the invoice as XML, which the
+						customer's accounting software reads.
+					</span>
+				{/if}
 			</Card.Content>
 		</Card.Root>
 	{:else}
 		<Card.Root class="bg-muted/30">
 			<Card.Content class="py-4 text-sm text-muted-foreground">
 				This invoice is a draft — items can still be corrected or resynced from the production.
-				Finalizing archives its PDF and makes it immutable.
+				Finalizing archives its PDF as an e-invoice (ZUGFeRD) and makes it immutable.
 			</Card.Content>
 		</Card.Root>
 	{/if}

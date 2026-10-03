@@ -1426,8 +1426,9 @@ msgstr "Berlin"
 #~ msgid "Region/State"
 #~ msgstr "Bundesland/Region"
 
-#~ msgid "Country"
-#~ msgstr "Land"
+#: src/lib/components/ui/address-input/address-input.svelte
+msgid "Country"
+msgstr "Land"
 
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Address updated"
@@ -5642,14 +5643,11 @@ msgstr "Die archivierte PDF ist maßgeblich."
 msgid "Its PDF has not been archived yet."
 msgstr "Die PDF wurde noch nicht archiviert."
 
-#. 0: new Date(invoice.sentAt).toLocaleDateString('de-DE')
-#: src/routes/invoices/[id]/invoice-detail.svelte
-msgid "Finalized on {0} — this invoice is immutable.<0/> Corrections require a new document."
-msgstr "Finalisiert am {0} — diese Rechnung ist unveränderbar.<0/> Korrekturen erfordern ein neues Dokument."
+#~ msgid "Finalized on {0} — this invoice is immutable.<0/> Corrections require a new document."
+#~ msgstr "Finalisiert am {0} — diese Rechnung ist unveränderbar.<0/> Korrekturen erfordern ein neues Dokument."
 
-#: src/routes/invoices/[id]/invoice-detail.svelte
-msgid "This invoice is a draft — items can still be corrected or resynced from the production. Finalizing archives its PDF and makes it immutable."
-msgstr "Diese Rechnung ist ein Entwurf — Positionen können noch korrigiert oder mit der Produktion synchronisiert werden. Beim Finalisieren wird die PDF archiviert und die Rechnung unveränderbar."
+#~ msgid "This invoice is a draft — items can still be corrected or resynced from the production. Finalizing archives its PDF and makes it immutable."
+#~ msgstr "Diese Rechnung ist ein Entwurf — Positionen können noch korrigiert oder mit der Produktion synchronisiert werden. Beim Finalisieren wird die PDF archiviert und die Rechnung unveränderbar."
 
 #: src/routes/manufacturers/+page.svelte
 msgid "Delete <0/> and move its products to:"
@@ -5761,8 +5759,6 @@ msgid "Edit invoice number"
 msgstr "Rechnungsnummer bearbeiten"
 
 #. 0: invoice.number
-#. 0: invoice.number
-#: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Invoice {0} <0/>"
 msgstr "Rechnung {0} <0/>"
@@ -12311,3 +12307,40 @@ msgstr "Straße, PLZ und Ort des Kunden"
 #: src/lib/components/ui/billing-issues/billing-issues.svelte
 msgid "Complete them on the customer, then pick the customer again under “Edit customer”."
 msgstr "Beim Kunden ergänzen und den Kunden dann unter „Kunde bearbeiten“ erneut auswählen."
+
+#: src/lib/components/ui/address-input/address-input.svelte
+#: src/lib/components/ui/address-input/address-input.svelte
+msgid "Germany"
+msgstr "Deutschland"
+
+#: src/lib/components/ui/address-input/address-input.svelte
+msgid "Only addresses in Germany for now."
+msgstr "Vorerst nur Adressen in Deutschland."
+
+#: src/routes/invoices/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
+msgid "ZUGFeRD, EN 16931"
+msgstr "ZUGFeRD, EN 16931"
+
+#: src/routes/invoices/+page.svelte
+#: src/routes/invoices/[id]/invoice-detail.svelte
+msgid "E-invoice"
+msgstr "E-Rechnung"
+
+#. 0: invoice.number
+#: src/routes/invoices/[id]/invoice-detail.svelte
+msgid "Invoice {0} <0/> <1/>"
+msgstr "Rechnung {0} <0/> <1/>"
+
+#: src/routes/invoices/[id]/invoice-detail.svelte
+msgid "It is an e-invoice (ZUGFeRD, EN 16931): the PDF carries the invoice as XML, which the customer's accounting software reads."
+msgstr "Sie ist eine E-Rechnung (ZUGFeRD, EN 16931): Die PDF enthält die Rechnung als XML, die die Buchhaltungssoftware des Kunden einliest."
+
+#. 0: new Date(invoice.sentAt).toLocaleDateString('de-DE')
+#: src/routes/invoices/[id]/invoice-detail.svelte
+msgid "Finalized on {0} — this invoice is immutable.<0/> Corrections require a new document. <1/>"
+msgstr "Finalisiert am {0} — diese Rechnung ist unveränderbar.<0/> Korrekturen erfordern ein neues Dokument. <1/>"
+
+#: src/routes/invoices/[id]/invoice-detail.svelte
+msgid "This invoice is a draft — items can still be corrected or resynced from the production. Finalizing archives its PDF as an e-invoice (ZUGFeRD) and makes it immutable."
+msgstr "Diese Rechnung ist ein Entwurf — Positionen können noch korrigiert oder mit der Produktion synchronisiert werden. Beim Finalisieren wird die PDF als E-Rechnung (ZUGFeRD) archiviert und die Rechnung unveränderbar."

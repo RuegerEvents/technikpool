@@ -303,8 +303,10 @@ copy to customer, invoice) goes through `copyItem`, so a new item column has to 
 
 An invoice is issued as a **ZUGFeRD 2 / Factur-X PDF in the EN 16931 profile**: the archived PDF
 is PDF/A-3b and carries the CII XML as `factur-x.xml`, which is what a recipient's software
-books. `finalizeInvoice` passes `{ eInvoice }` to `generateBillingPdf`; draft previews never get
-the XML, and invoices sent before this keep their plain PDF. Code in `src/lib/server/einvoice/`:
+books. `finalizeInvoice` passes `{ eInvoice }` to `generateBillingPdf` and records
+`Invoice.eInvoiceProfile` (`ZUGFERD_EN16931`), which is what the "E-invoice" badge on the
+invoice page and list reads; draft previews never get the XML, and invoices sent before this
+keep their plain PDF and a null profile. Code in `src/lib/server/einvoice/`:
 `model.ts` (invoice → EN 16931 terms, pure), `cii.ts` (→ XML, in the XSD's element order),
 `pdfa3.ts` (XMP, sRGB output intent, attachment).
 
@@ -324,9 +326,10 @@ the XML, and invoices sent before this keep their plain PDF. Code in `src/lib/se
 - Not built: XRechnung (pure XML for public-sector customers, needs a Leitweg-ID as BT-10),
   credit notes / cancellations (type 381/384), receiving e-invoices.
 
-`pnpm test` covers the model. With `MUSTANG_JAR=/path/to/Mustang-CLI-x.jar` it also renders
-sample invoices and runs Mustang's validator (EN 16931 schematron + veraPDF) over them; its
-XRechnung notices (BR-DE-\*) are expected and do not fail the check.
+`pnpm test` covers the model. `pnpm --filter web test:einvoice` also renders sample invoices
+and runs Mustang's validator (EN 16931 schematron + veraPDF) over them: it fetches the pinned
+Mustang CLI into `apps/web/.mustang/` (`scripts/fetch-mustang.mjs`, SHA-256-checked) and needs
+`java` 11+. Its XRechnung notices (BR-DE-\*) are expected and do not fail the check.
 
 ## Stocktakes (Inventur)
 

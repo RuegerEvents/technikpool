@@ -72,6 +72,7 @@ export type InvoiceMinAggregateOutputType = {
   recipientOrganizationId: string | null
   sentAt: Date | null
   pdfPath: string | null
+  eInvoiceProfile: string | null
   isKleinunternehmerSnapshot: boolean | null
   vatRatePercent: runtime.Decimal | null
   orgName: string | null
@@ -124,6 +125,7 @@ export type InvoiceMaxAggregateOutputType = {
   recipientOrganizationId: string | null
   sentAt: Date | null
   pdfPath: string | null
+  eInvoiceProfile: string | null
   isKleinunternehmerSnapshot: boolean | null
   vatRatePercent: runtime.Decimal | null
   orgName: string | null
@@ -176,6 +178,7 @@ export type InvoiceCountAggregateOutputType = {
   recipientOrganizationId: number
   sentAt: number
   pdfPath: number
+  eInvoiceProfile: number
   isKleinunternehmerSnapshot: number
   vatRatePercent: number
   orgName: number
@@ -244,6 +247,7 @@ export type InvoiceMinAggregateInputType = {
   recipientOrganizationId?: true
   sentAt?: true
   pdfPath?: true
+  eInvoiceProfile?: true
   isKleinunternehmerSnapshot?: true
   vatRatePercent?: true
   orgName?: true
@@ -296,6 +300,7 @@ export type InvoiceMaxAggregateInputType = {
   recipientOrganizationId?: true
   sentAt?: true
   pdfPath?: true
+  eInvoiceProfile?: true
   isKleinunternehmerSnapshot?: true
   vatRatePercent?: true
   orgName?: true
@@ -348,6 +353,7 @@ export type InvoiceCountAggregateInputType = {
   recipientOrganizationId?: true
   sentAt?: true
   pdfPath?: true
+  eInvoiceProfile?: true
   isKleinunternehmerSnapshot?: true
   vatRatePercent?: true
   orgName?: true
@@ -487,6 +493,7 @@ export type InvoiceGroupByOutputType = {
   recipientOrganizationId: string | null
   sentAt: Date | null
   pdfPath: string | null
+  eInvoiceProfile: string | null
   isKleinunternehmerSnapshot: boolean
   vatRatePercent: runtime.Decimal
   orgName: string
@@ -562,6 +569,7 @@ export type InvoiceWhereInput = {
   recipientOrganizationId?: Prisma.StringNullableFilter<"Invoice"> | string | null
   sentAt?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
   pdfPath?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  eInvoiceProfile?: Prisma.StringNullableFilter<"Invoice"> | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFilter<"Invoice"> | boolean
   vatRatePercent?: Prisma.DecimalFilter<"Invoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFilter<"Invoice"> | string
@@ -619,6 +627,7 @@ export type InvoiceOrderByWithRelationInput = {
   recipientOrganizationId?: Prisma.SortOrderInput | Prisma.SortOrder
   sentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   pdfPath?: Prisma.SortOrderInput | Prisma.SortOrder
+  eInvoiceProfile?: Prisma.SortOrderInput | Prisma.SortOrder
   isKleinunternehmerSnapshot?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
   orgName?: Prisma.SortOrder
@@ -680,6 +689,7 @@ export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
   recipientOrganizationId?: Prisma.StringNullableFilter<"Invoice"> | string | null
   sentAt?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
   pdfPath?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  eInvoiceProfile?: Prisma.StringNullableFilter<"Invoice"> | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFilter<"Invoice"> | boolean
   vatRatePercent?: Prisma.DecimalFilter<"Invoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFilter<"Invoice"> | string
@@ -737,6 +747,7 @@ export type InvoiceOrderByWithAggregationInput = {
   recipientOrganizationId?: Prisma.SortOrderInput | Prisma.SortOrder
   sentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   pdfPath?: Prisma.SortOrderInput | Prisma.SortOrder
+  eInvoiceProfile?: Prisma.SortOrderInput | Prisma.SortOrder
   isKleinunternehmerSnapshot?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
   orgName?: Prisma.SortOrder
@@ -797,6 +808,7 @@ export type InvoiceScalarWhereWithAggregatesInput = {
   recipientOrganizationId?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
   sentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Invoice"> | Date | string | null
   pdfPath?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  eInvoiceProfile?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolWithAggregatesFilter<"Invoice"> | boolean
   vatRatePercent?: Prisma.DecimalWithAggregatesFilter<"Invoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringWithAggregatesFilter<"Invoice"> | string
@@ -845,6 +857,7 @@ export type InvoiceCreateInput = {
   assetScope?: string
   sentAt?: Date | string | null
   pdfPath?: string | null
+  eInvoiceProfile?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName: string
@@ -902,6 +915,7 @@ export type InvoiceUncheckedCreateInput = {
   recipientOrganizationId?: string | null
   sentAt?: Date | string | null
   pdfPath?: string | null
+  eInvoiceProfile?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName: string
@@ -951,6 +965,7 @@ export type InvoiceUpdateInput = {
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1008,6 +1023,7 @@ export type InvoiceUncheckedUpdateInput = {
   recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1061,6 +1077,7 @@ export type InvoiceCreateManyInput = {
   recipientOrganizationId?: string | null
   sentAt?: Date | string | null
   pdfPath?: string | null
+  eInvoiceProfile?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName: string
@@ -1109,6 +1126,7 @@ export type InvoiceUpdateManyMutationInput = {
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1161,6 +1179,7 @@ export type InvoiceUncheckedUpdateManyInput = {
   recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1228,6 +1247,7 @@ export type InvoiceCountOrderByAggregateInput = {
   recipientOrganizationId?: Prisma.SortOrder
   sentAt?: Prisma.SortOrder
   pdfPath?: Prisma.SortOrder
+  eInvoiceProfile?: Prisma.SortOrder
   isKleinunternehmerSnapshot?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
   orgName?: Prisma.SortOrder
@@ -1287,6 +1307,7 @@ export type InvoiceMaxOrderByAggregateInput = {
   recipientOrganizationId?: Prisma.SortOrder
   sentAt?: Prisma.SortOrder
   pdfPath?: Prisma.SortOrder
+  eInvoiceProfile?: Prisma.SortOrder
   isKleinunternehmerSnapshot?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
   orgName?: Prisma.SortOrder
@@ -1339,6 +1360,7 @@ export type InvoiceMinOrderByAggregateInput = {
   recipientOrganizationId?: Prisma.SortOrder
   sentAt?: Prisma.SortOrder
   pdfPath?: Prisma.SortOrder
+  eInvoiceProfile?: Prisma.SortOrder
   isKleinunternehmerSnapshot?: Prisma.SortOrder
   vatRatePercent?: Prisma.SortOrder
   orgName?: Prisma.SortOrder
@@ -1581,6 +1603,7 @@ export type InvoiceCreateWithoutOrganizationInput = {
   assetScope?: string
   sentAt?: Date | string | null
   pdfPath?: string | null
+  eInvoiceProfile?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName: string
@@ -1636,6 +1659,7 @@ export type InvoiceUncheckedCreateWithoutOrganizationInput = {
   recipientOrganizationId?: string | null
   sentAt?: Date | string | null
   pdfPath?: string | null
+  eInvoiceProfile?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName: string
@@ -1695,6 +1719,7 @@ export type InvoiceCreateWithoutRecipientOrganizationInput = {
   assetScope?: string
   sentAt?: Date | string | null
   pdfPath?: string | null
+  eInvoiceProfile?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName: string
@@ -1750,6 +1775,7 @@ export type InvoiceUncheckedCreateWithoutRecipientOrganizationInput = {
   assetScope?: string
   sentAt?: Date | string | null
   pdfPath?: string | null
+  eInvoiceProfile?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName: string
@@ -1832,6 +1858,7 @@ export type InvoiceScalarWhereInput = {
   recipientOrganizationId?: Prisma.StringNullableFilter<"Invoice"> | string | null
   sentAt?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
   pdfPath?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  eInvoiceProfile?: Prisma.StringNullableFilter<"Invoice"> | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFilter<"Invoice"> | boolean
   vatRatePercent?: Prisma.DecimalFilter<"Invoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFilter<"Invoice"> | string
@@ -1896,6 +1923,7 @@ export type InvoiceCreateWithoutProductionInput = {
   assetScope?: string
   sentAt?: Date | string | null
   pdfPath?: string | null
+  eInvoiceProfile?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName: string
@@ -1951,6 +1979,7 @@ export type InvoiceUncheckedCreateWithoutProductionInput = {
   recipientOrganizationId?: string | null
   sentAt?: Date | string | null
   pdfPath?: string | null
+  eInvoiceProfile?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName: string
@@ -2026,6 +2055,7 @@ export type InvoiceCreateWithoutOfferInput = {
   assetScope?: string
   sentAt?: Date | string | null
   pdfPath?: string | null
+  eInvoiceProfile?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName: string
@@ -2081,6 +2111,7 @@ export type InvoiceUncheckedCreateWithoutOfferInput = {
   recipientOrganizationId?: string | null
   sentAt?: Date | string | null
   pdfPath?: string | null
+  eInvoiceProfile?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName: string
@@ -2156,6 +2187,7 @@ export type InvoiceCreateWithoutItemsInput = {
   assetScope?: string
   sentAt?: Date | string | null
   pdfPath?: string | null
+  eInvoiceProfile?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName: string
@@ -2212,6 +2244,7 @@ export type InvoiceUncheckedCreateWithoutItemsInput = {
   recipientOrganizationId?: string | null
   sentAt?: Date | string | null
   pdfPath?: string | null
+  eInvoiceProfile?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName: string
@@ -2276,6 +2309,7 @@ export type InvoiceUpdateWithoutItemsInput = {
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2332,6 +2366,7 @@ export type InvoiceUncheckedUpdateWithoutItemsInput = {
   recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2383,6 +2418,7 @@ export type InvoiceCreateManyOrganizationInput = {
   recipientOrganizationId?: string | null
   sentAt?: Date | string | null
   pdfPath?: string | null
+  eInvoiceProfile?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName: string
@@ -2434,6 +2470,7 @@ export type InvoiceCreateManyRecipientOrganizationInput = {
   assetScope?: string
   sentAt?: Date | string | null
   pdfPath?: string | null
+  eInvoiceProfile?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName: string
@@ -2482,6 +2519,7 @@ export type InvoiceUpdateWithoutOrganizationInput = {
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2537,6 +2575,7 @@ export type InvoiceUncheckedUpdateWithoutOrganizationInput = {
   recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2589,6 +2628,7 @@ export type InvoiceUncheckedUpdateManyWithoutOrganizationInput = {
   recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2637,6 +2677,7 @@ export type InvoiceUpdateWithoutRecipientOrganizationInput = {
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2692,6 +2733,7 @@ export type InvoiceUncheckedUpdateWithoutRecipientOrganizationInput = {
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2744,6 +2786,7 @@ export type InvoiceUncheckedUpdateManyWithoutRecipientOrganizationInput = {
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2795,6 +2838,7 @@ export type InvoiceCreateManyProductionInput = {
   recipientOrganizationId?: string | null
   sentAt?: Date | string | null
   pdfPath?: string | null
+  eInvoiceProfile?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName: string
@@ -2843,6 +2887,7 @@ export type InvoiceUpdateWithoutProductionInput = {
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2898,6 +2943,7 @@ export type InvoiceUncheckedUpdateWithoutProductionInput = {
   recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2950,6 +2996,7 @@ export type InvoiceUncheckedUpdateManyWithoutProductionInput = {
   recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -3001,6 +3048,7 @@ export type InvoiceCreateManyOfferInput = {
   recipientOrganizationId?: string | null
   sentAt?: Date | string | null
   pdfPath?: string | null
+  eInvoiceProfile?: string | null
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName: string
@@ -3049,6 +3097,7 @@ export type InvoiceUpdateWithoutOfferInput = {
   assetScope?: Prisma.StringFieldUpdateOperationsInput | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -3104,6 +3153,7 @@ export type InvoiceUncheckedUpdateWithoutOfferInput = {
   recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -3156,6 +3206,7 @@ export type InvoiceUncheckedUpdateManyWithoutOfferInput = {
   recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eInvoiceProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   orgName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -3239,6 +3290,7 @@ export type InvoiceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   recipientOrganizationId?: boolean
   sentAt?: boolean
   pdfPath?: boolean
+  eInvoiceProfile?: boolean
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: boolean
   orgName?: boolean
@@ -3297,6 +3349,7 @@ export type InvoiceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   recipientOrganizationId?: boolean
   sentAt?: boolean
   pdfPath?: boolean
+  eInvoiceProfile?: boolean
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: boolean
   orgName?: boolean
@@ -3353,6 +3406,7 @@ export type InvoiceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   recipientOrganizationId?: boolean
   sentAt?: boolean
   pdfPath?: boolean
+  eInvoiceProfile?: boolean
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: boolean
   orgName?: boolean
@@ -3409,6 +3463,7 @@ export type InvoiceSelectScalar = {
   recipientOrganizationId?: boolean
   sentAt?: boolean
   pdfPath?: boolean
+  eInvoiceProfile?: boolean
   isKleinunternehmerSnapshot?: boolean
   vatRatePercent?: boolean
   orgName?: boolean
@@ -3429,7 +3484,7 @@ export type InvoiceSelectScalar = {
   updatedAt?: boolean
 }
 
-export type InvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "organizationId" | "productionId" | "offerId" | "customerId" | "customerName" | "customerAddress" | "customerContactPerson" | "customerEmail" | "customerNumber" | "customerPhone" | "customerVatId" | "customerAddressLine1" | "customerAddressLine2" | "customerPostalCode" | "customerCity" | "customerCountry" | "serviceStartDate" | "serviceEndDate" | "introText" | "closingText" | "paymentTermsDays" | "issueDate" | "dayCount" | "discountType" | "discountValue" | "assetScope" | "recipientOrganizationId" | "sentAt" | "pdfPath" | "isKleinunternehmerSnapshot" | "vatRatePercent" | "orgName" | "orgAddressLine1" | "orgAddressLine2" | "orgPostalCode" | "orgCity" | "orgTaxNumber" | "orgVatId" | "orgBillingEmail" | "orgBillingWebsite" | "orgBankAccountHolder" | "orgBankName" | "orgIban" | "orgBic" | "orgLogoPath" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
+export type InvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "organizationId" | "productionId" | "offerId" | "customerId" | "customerName" | "customerAddress" | "customerContactPerson" | "customerEmail" | "customerNumber" | "customerPhone" | "customerVatId" | "customerAddressLine1" | "customerAddressLine2" | "customerPostalCode" | "customerCity" | "customerCountry" | "serviceStartDate" | "serviceEndDate" | "introText" | "closingText" | "paymentTermsDays" | "issueDate" | "dayCount" | "discountType" | "discountValue" | "assetScope" | "recipientOrganizationId" | "sentAt" | "pdfPath" | "eInvoiceProfile" | "isKleinunternehmerSnapshot" | "vatRatePercent" | "orgName" | "orgAddressLine1" | "orgAddressLine2" | "orgPostalCode" | "orgCity" | "orgTaxNumber" | "orgVatId" | "orgBillingEmail" | "orgBillingWebsite" | "orgBankAccountHolder" | "orgBankName" | "orgIban" | "orgBic" | "orgLogoPath" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
 export type InvoiceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   production?: boolean | Prisma.Invoice$productionArgs<ExtArgs>
@@ -3492,6 +3547,7 @@ export type $InvoicePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     recipientOrganizationId: string | null
     sentAt: Date | null
     pdfPath: string | null
+    eInvoiceProfile: string | null
     isKleinunternehmerSnapshot: boolean
     vatRatePercent: runtime.Decimal
     orgName: string
@@ -3969,6 +4025,7 @@ export interface InvoiceFieldRefs {
   readonly recipientOrganizationId: Prisma.FieldRef<"Invoice", 'String'>
   readonly sentAt: Prisma.FieldRef<"Invoice", 'DateTime'>
   readonly pdfPath: Prisma.FieldRef<"Invoice", 'String'>
+  readonly eInvoiceProfile: Prisma.FieldRef<"Invoice", 'String'>
   readonly isKleinunternehmerSnapshot: Prisma.FieldRef<"Invoice", 'Boolean'>
   readonly vatRatePercent: Prisma.FieldRef<"Invoice", 'Decimal'>
   readonly orgName: Prisma.FieldRef<"Invoice", 'String'>
