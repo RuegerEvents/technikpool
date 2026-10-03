@@ -178,6 +178,8 @@ export type AppErrorCode =
 	| 'org_prefix_invalid'
 	| 'org_avatar_label_invalid'
 	| 'org_color_invalid'
+	| 'org_iban_invalid'
+	| 'org_bic_invalid'
 	| 'org_prefix_taken'
 	| 'org_avatar_label_taken'
 	| 'org_color_taken'

@@ -22,8 +22,8 @@ const MAX_BYTES = 331;
  * invoice, so nothing here refuses.
  */
 export function giroCodePayload(transfer: GiroCodeTransfer): string | null {
-	// Not checked beyond what fits the field: the code repeats the IBAN the
-	// footer prints, and whether that one is right is the org form's question.
+	// Not checked beyond what fits the field: the document check has already
+	// refused an IBAN that is not one (`billingDocumentIssues`).
 	const iban = transfer.iban.replace(/\s+/g, '').toUpperCase();
 	if (!/^[A-Z0-9]{1,34}$/.test(iban)) return null;
 	// Version 002 lets the BIC stay empty, so a mistyped one is dropped rather

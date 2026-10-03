@@ -342,6 +342,10 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'The avatar label has to be exactly 2 letters.';
 		case 'org_color_invalid':
 			return 'Pick a color as #RRGGBB.';
+		case 'org_iban_invalid':
+			return 'This is not a valid IBAN. Check it for a typo.';
+		case 'org_bic_invalid':
+			return 'This is not a valid BIC. A BIC has 8 or 11 characters.';
 		case 'org_prefix_taken':
 			return `The asset ID prefix ${p0} is already taken. Pick another one.`;
 		case 'org_avatar_label_taken':

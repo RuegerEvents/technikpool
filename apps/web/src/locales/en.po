@@ -12287,3 +12287,19 @@ msgstr "Your {0} other organizations: {1} – {2}, median"
 #: src/lib/components/ui/customer-fields/customer-fields.svelte
 msgid "Sole proprietor <0>Documents are addressed to the contact person, with the company name beneath.</0>"
 msgstr "Sole proprietor <0>Documents are addressed to the contact person, with the company name beneath.</0>"
+
+#: src/lib/error-messages.svelte.ts
+msgid "This is not a valid IBAN. Check it for a typo."
+msgstr "This is not a valid IBAN. Check it for a typo."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This is not a valid BIC. A BIC has 8 or 11 characters."
+msgstr "This is not a valid BIC. A BIC has 8 or 11 characters."
+
+#: src/lib/billing-document-check.svelte.ts
+msgid "Valid IBAN"
+msgstr "Valid IBAN"
+
+#: src/lib/billing-document-check.svelte.ts
+msgid "Valid BIC"
+msgstr "Valid BIC"

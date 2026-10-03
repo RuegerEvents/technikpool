@@ -14,6 +14,7 @@ import {
 } from '#lib/server/services/access.js';
 import { peekNextTag } from '#lib/server/services/tag-counter.js';
 import { appError } from '#lib/errors.js';
+import { isValidBic, isValidIban } from '#lib/bank-account.svelte.js';
 import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
 import { issueInvitation } from '#lib/server/services/invitations.js';
 import { accountDeletionBlocker } from '#lib/server/services/account-deletion.js';
@@ -418,6 +419,9 @@ export const updateOrg = command(
 		invoiceClosingTemplate
 	}) => {
 		await requireOrgOwner(orgId);
+		// The form checks both while they are typed; this is the backstop.
+		if (iban?.trim() && !isValidIban(iban)) appError(400, 'org_iban_invalid');
+		if (bic?.trim() && !isValidBic(bic)) appError(400, 'org_bic_invalid');
 		const prefix = normalizePrefix(assetIdPrefix);
 		const normalizedColor = normalizeColor(color);
 		const normalizedLabel = normalizeAvatarLabel(avatarLabel);

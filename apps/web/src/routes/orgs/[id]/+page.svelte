@@ -37,6 +37,7 @@
 	import { Modal } from '#lib/components/ui/modal/index.js';
 	import { AddressInput, type AddressValue } from '#lib/components/ui/address-input/index.js';
 	import { orgIdentityProblem } from '#lib/org-identity.svelte.js';
+	import { bankAccountProblem } from '#lib/bank-account.svelte.js';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import OrgLogoCard from './org-logo-card.svelte';
 	import {
@@ -257,9 +258,15 @@
 	const customPreset = (value: string, preset: string) =>
 		value.trim() && value.trim() !== preset ? value : null;
 
+	let bankProblem = $derived(bankAccountProblem(billingDraft));
+
 	async function handleBillingSave(e: Event) {
 		e.preventDefault();
 		if (!org) return;
+		if (bankProblem) {
+			toast.error(bankProblem);
+			return;
+		}
 		savingBilling = true;
 		try {
 			const hasAddress = billingAddress.line1 || billingAddress.postalCode || billingAddress.city;
@@ -591,6 +598,9 @@
 												/>
 											</div>
 										</div>
+										{#if bankProblem}
+											<p class="text-xs text-destructive">{bankProblem}</p>
+										{/if}
 										<div class="space-y-2">
 											<Label for="billingBankName">Bank name</Label>
 											<Input id="billingBankName" bind:value={billingDraft.bankName} />

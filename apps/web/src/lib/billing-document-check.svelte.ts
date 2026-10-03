@@ -5,6 +5,7 @@
 //
 // A `.svelte.ts` module so wuchale extracts the labels.
 
+import { isValidBic, isValidIban } from './bank-account.svelte';
 import type { SnapshotOrganization } from './org-snapshot';
 
 export type BillingDocumentCheckInput = {
@@ -55,6 +56,11 @@ export function billingDocumentIssues(
 	need('organization', org.bankName, 'Bank name');
 	need('organization', org.iban, 'IBAN');
 	need('organization', org.bic, 'BIC');
+	// A wrong one sends the customer's money nowhere, and the GiroCode repeats it.
+	if (org.iban?.trim() && !isValidIban(org.iban))
+		issues.push({ area: 'organization', label: 'Valid IBAN' });
+	if (org.bic?.trim() && !isValidBic(org.bic))
+		issues.push({ area: 'organization', label: 'Valid BIC' });
 
 	need('customer', data.customerName, 'Customer name');
 	// §14 Abs. 4 Nr. 1 UStG asks it of an invoice; an offer is not a tax document
