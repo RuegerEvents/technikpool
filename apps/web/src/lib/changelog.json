@@ -1,5 +1,19 @@
 [
 	{
+		"version": "0.26.1",
+		"date": "2026-10-03",
+		"en": [
+			"Fixed: with automatic asset tags switched on, creating a unit could fail because the next number was already on another unit.",
+			"A blank asset tag field now shows the number the unit will get, marked with a wand that explains where it comes from.",
+			"Typing an asset tag that is already taken says which unit carries it, instead of failing with an error."
+		],
+		"de": [
+			"Behoben: Mit automatischer Asset-Tag-Vergabe konnte das Anlegen eines Geräts fehlschlagen, weil die nächste Nummer schon an einem anderen Gerät hing.",
+			"Ein leeres Asset-Tag-Feld zeigt jetzt die Nummer, die das Gerät bekommt, markiert mit einem Zauberstab, der erklärt, woher sie kommt.",
+			"Wer einen schon vergebenen Asset-Tag eintippt, erfährt jetzt, an welchem Gerät er hängt, statt eine Fehlermeldung zu bekommen."
+		]
+	},
+	{
 		"version": "0.26.0",
 		"date": "2026-10-02",
 		"en": [
