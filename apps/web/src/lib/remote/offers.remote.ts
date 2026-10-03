@@ -20,7 +20,8 @@ import {
 	DEFAULT_OFFER_CLOSING,
 	DEFAULT_OFFER_INTRO,
 	formatBillingDate,
-	renderBillingText
+	renderBillingText,
+	replaceDocumentNumber
 } from '#lib/billing-text.js';
 import { generateBillingPdf } from '#lib/server/billing-pdf.js';
 import { putObject } from '#lib/server/storage.js';
@@ -1796,7 +1797,15 @@ export const updateInvoiceNumber = command(
 		});
 		if (clash && clash.id !== invoiceId) appError(409, 'invoice_number_taken', [number]);
 
-		await prisma.invoice.update({ where: { id: invoiceId }, data: { number } });
+		await prisma.invoice.update({
+			where: { id: invoiceId },
+			data: {
+				number,
+				// The closing text names the number as the payment reference.
+				introText: replaceDocumentNumber(invoice.introText, invoice.number, number),
+				closingText: replaceDocumentNumber(invoice.closingText, invoice.number, number)
+			}
+		});
 		await getInvoice(invoiceId).refresh();
 		await getInvoices().refresh();
 		await getBillingTodos().refresh();

@@ -254,6 +254,9 @@
 		);
 	});
 
+	const customPreset = (value: string, preset: string) =>
+		value.trim() && value.trim() !== preset ? value : null;
+
 	async function handleBillingSave(e: Event) {
 		e.preventDefault();
 		if (!org) return;
@@ -282,10 +285,21 @@
 				billingEmail: billingDraft.billingEmail || null,
 				billingWebsite: billingDraft.billingWebsite || null,
 				paymentTermsDays: Number(billingDraft.paymentTermsDays) || 14,
-				offerIntroTemplate: billingDraft.offerIntroTemplate || null,
-				offerClosingTemplate: billingDraft.offerClosingTemplate || null,
-				invoiceIntroTemplate: billingDraft.invoiceIntroTemplate || null,
-				invoiceClosingTemplate: billingDraft.invoiceClosingTemplate || null
+				// A preset left at its default is stored as none, so the org follows
+				// the default when that changes.
+				offerIntroTemplate: customPreset(billingDraft.offerIntroTemplate, DEFAULT_OFFER_INTRO),
+				offerClosingTemplate: customPreset(
+					billingDraft.offerClosingTemplate,
+					DEFAULT_OFFER_CLOSING
+				),
+				invoiceIntroTemplate: customPreset(
+					billingDraft.invoiceIntroTemplate,
+					DEFAULT_INVOICE_INTRO
+				),
+				invoiceClosingTemplate: customPreset(
+					billingDraft.invoiceClosingTemplate,
+					DEFAULT_INVOICE_CLOSING
+				)
 			});
 			toast.success('Billing details updated');
 			editingBilling = false;

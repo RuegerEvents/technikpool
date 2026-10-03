@@ -6,6 +6,7 @@ import type { SnapshotOrganization } from '../org-snapshot.ts';
 import { embedInter } from './fonts';
 import { fmtDate, safe, wrap } from './pdf-text.ts';
 import { drawLogo, embedLogo } from './pdf-logo.ts';
+import { giroCodeModules, giroCodePayload } from './girocode.ts';
 import { formatQuantity } from '../service-lines.svelte.ts';
 
 type PdfOrganization = SnapshotOrganization;
@@ -323,6 +324,55 @@ export async function generateBillingPdf(
 		// Back from a top edge to the baseline paragraph() expects.
 		y -= 14 + capHeight(regular, 9);
 		paragraph(data.closingText, 9, 0);
+	}
+	// toFixed rounds as money() does, so the code asks for the amount printed above.
+	const giroCode =
+		kind === 'invoice' && data.number && data.organization.iban
+			? giroCodePayload({
+					name: data.organization.bankAccountHolder ?? data.organization.name,
+					iban: data.organization.iban,
+					bic: data.organization.bic,
+					amount: Number((net + vat).toFixed(2)),
+					reference: data.number
+				})
+			: null;
+	if (giroCode) {
+		const GIRO_SIZE = 68;
+		ensure(GIRO_SIZE + 8);
+		// `y` is a baseline one line below the closing text; on a fresh page it is the top.
+		y -= 8;
+		const { size, dark } = giroCodeModules(giroCode);
+		// One path for the whole code: modules drawn as separate rectangles show
+		// hairlines between them in some viewers.
+		let path = '';
+		for (let row = 0; row < size; row++)
+			for (let col = 0; col < size; col++) {
+				if (!dark[row * size + col]) continue;
+				const start = col;
+				while (col + 1 < size && dark[row * size + col + 1]) col++;
+				path += `M${start} ${row}h${col - start + 1}v1h-${col - start + 1}z`;
+			}
+		page.drawSvgPath(path, {
+			x: LEFT,
+			y,
+			scale: GIRO_SIZE / size,
+			color: rgb(0, 0, 0),
+			borderWidth: 0
+		});
+		const textX = LEFT + GIRO_SIZE + 12;
+		let textY = y - capHeight(bold, 9);
+		draw('Zahlen per GiroCode', textX, textY, 9, bold);
+		textY -= 12;
+		for (const line of wrap(
+			'QR-Code mit der Banking-App scannen: Empfänger, IBAN, Betrag und Verwendungszweck sind bereits ausgefüllt.',
+			regular,
+			7.5,
+			210
+		)) {
+			draw(line, textX, textY, 7.5, regular, muted);
+			textY -= 9.5;
+		}
+		y -= GIRO_SIZE;
 	}
 
 	// Stable three-column footer and real page counters on every page.
