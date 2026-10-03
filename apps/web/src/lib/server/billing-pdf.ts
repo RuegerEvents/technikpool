@@ -8,6 +8,10 @@ import { fmtDate, safe, wrap } from './pdf-text.ts';
 import { drawLogo, embedLogo } from './pdf-logo.ts';
 import { giroCodeModules, giroCodePayload } from './girocode.ts';
 import { formatQuantity } from '../service-lines.svelte.ts';
+import { billingTotals } from '../billing-totals.ts';
+import { buildEInvoice, type EInvoiceSource } from './einvoice/model.ts';
+import { toCii } from './einvoice/cii.ts';
+import { makeZugferd } from './einvoice/pdfa3.ts';
 
 type PdfOrganization = SnapshotOrganization;
 
@@ -70,9 +74,18 @@ function money(value: number) {
 export async function generateBillingPdf(
 	kind: 'offer' | 'invoice',
 	data: PdfDocumentData,
-	options: { draft?: boolean } = {}
+	options: {
+		draft?: boolean;
+		/**
+		 * The same invoice as an e-invoice: the PDF then becomes a ZUGFeRD one
+		 * (PDF/A-3 with the CII XML attached). Only for an invoice being issued —
+		 * a draft must not carry an XML that a recipient's software would book.
+		 */
+		eInvoice?: EInvoiceSource;
+	} = {}
 ) {
 	validateDocument(kind, data);
+	const eInvoiceXml = options.eInvoice ? toCii(buildEInvoice(options.eInvoice)) : null;
 	const pdf = await PDFDocument.create();
 	const { regular, bold } = await embedInter(pdf);
 	const logo = await embedLogo(pdf, data.organization.logoPath);
@@ -285,14 +298,7 @@ export async function generateBillingPdf(
 		y -= SUBTOTAL_H;
 	}
 
-	const subtotal = data.items.reduce((sum, item) => sum + Number(item.lineTotal), 0);
-	const discount =
-		data.discountType === 'PERCENT'
-			? subtotal * (Number(data.discountValue ?? 0) / 100)
-			: Math.min(subtotal, Number(data.discountValue ?? 0));
-	const net = subtotal - discount;
-	const vatRate = Number(data.vatRatePercent);
-	const vat = net * (vatRate / 100);
+	const { subtotal, discount, net, vatRatePercent: vatRate, vat, gross } = billingTotals(data);
 	const totals: [string, number, boolean][] = [['Zwischensumme (netto)', subtotal, false]];
 	if (discount)
 		totals.push([
@@ -305,7 +311,7 @@ export async function generateBillingPdf(
 	totals.push(
 		['Gesamt (netto)', net, false],
 		[`Umsatzsteuer ${vatRate.toLocaleString('de-DE')} %`, vat, false],
-		['Gesamtbetrag', net + vat, true]
+		['Gesamtbetrag', gross, true]
 	);
 	ensure(totals.length * TOTAL_ROW_H + GRAND_TOTAL_H);
 	for (const [label, value, strong] of totals) {
@@ -325,14 +331,13 @@ export async function generateBillingPdf(
 		y -= 14 + capHeight(regular, 9);
 		paragraph(data.closingText, 9, 0);
 	}
-	// toFixed rounds as money() does, so the code asks for the amount printed above.
 	const giroCode =
 		kind === 'invoice' && data.number && data.organization.iban
 			? giroCodePayload({
 					name: data.organization.bankAccountHolder ?? data.organization.name,
 					iban: data.organization.iban,
 					bic: data.organization.bic,
-					amount: Number((net + vat).toFixed(2)),
+					amount: gross,
 					reference: data.number
 				})
 			: null;
@@ -446,7 +451,10 @@ export async function generateBillingPdf(
 		});
 	});
 
-	pdf.setTitle(title);
-	pdf.setProducer('Technikpool');
+	if (eInvoiceXml) await makeZugferd(pdf, eInvoiceXml, title);
+	else {
+		pdf.setTitle(title);
+		pdf.setProducer('Technikpool');
+	}
 	return pdf.save();
 }

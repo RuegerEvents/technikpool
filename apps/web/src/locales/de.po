@@ -12303,3 +12303,11 @@ msgstr "Gültige IBAN"
 #: src/lib/billing-document-check.svelte.ts
 msgid "Valid BIC"
 msgstr "Gültige BIC"
+
+#: src/lib/billing-document-check.svelte.ts
+msgid "Street, postal code and city of the customer"
+msgstr "Straße, PLZ und Ort des Kunden"
+
+#: src/lib/components/ui/billing-issues/billing-issues.svelte
+msgid "Complete them on the customer, then pick the customer again under “Edit customer”."
+msgstr "Beim Kunden ergänzen und den Kunden dann unter „Kunde bearbeiten“ erneut auswählen."

@@ -1277,6 +1277,15 @@ model Invoice {
   customerNumber        String?
   customerPhone         String?
   customerVatId         String?
+  // The address again as separate fields, which the e-invoice XML needs
+  // (EN 16931 BG-8). Copied from the customer's (or recipient org's) Address
+  // whenever customerAddress is; sent invoices from before the column have none.
+  customerAddressLine1  String?
+  customerAddressLine2  String?
+  customerPostalCode    String?
+  customerCity          String?
+  // ISO 3166-1 alpha-2. Address has no country yet, so every customer is German.
+  customerCountry       String  @default("DE")
 
   serviceStartDate DateTime?
   serviceEndDate   DateTime?

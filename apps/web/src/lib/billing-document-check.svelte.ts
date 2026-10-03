@@ -14,6 +14,10 @@ export type BillingDocumentCheckInput = {
 	issueDate?: Date | null;
 	customerName: string;
 	customerAddress: string | null;
+	/** Invoices only: the address apart, which the e-invoice XML needs. */
+	customerAddressLine1?: string | null;
+	customerPostalCode?: string | null;
+	customerCity?: string | null;
 	serviceStartDate: Date | null;
 	serviceEndDate: Date | null;
 	introText: string | null;
@@ -65,7 +69,18 @@ export function billingDocumentIssues(
 	need('customer', data.customerName, 'Customer name');
 	// §14 Abs. 4 Nr. 1 UStG asks it of an invoice; an offer is not a tax document
 	// and often goes out before anyone has the customer's billing address.
-	if (kind === 'invoice') need('customer', data.customerAddress, 'Customer address');
+	if (kind === 'invoice') {
+		need('customer', data.customerAddress, 'Customer address');
+		// The e-invoice gives street, postal code and city each a field of its
+		// own, so a typed-in address block is not enough.
+		if (
+			!blank(data.customerAddress) &&
+			(blank(data.customerAddressLine1) ||
+				blank(data.customerPostalCode) ||
+				blank(data.customerCity))
+		)
+			issues.push({ area: 'customer', label: 'Street, postal code and city of the customer' });
+	}
 
 	need('document', data.serviceStartDate, 'Service start date');
 	need('document', data.serviceEndDate, 'Service end date');

@@ -66,6 +66,11 @@
 								<!-- eslint-enable svelte/no-navigation-without-resolve -->
 							</span>
 						{/if}
+						{#if group.key === 'customer' && editable}
+							<span class="block text-xs text-amber-800/80 dark:text-amber-300/80">
+								Complete them on the customer, then pick the customer again under “Edit customer”.
+							</span>
+						{/if}
 					</dd>
 				{/each}
 			</dl>

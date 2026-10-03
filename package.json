@@ -13,7 +13,8 @@
 		"format": "prettier --write .",
 		"prepare": "husky",
 		"release": "node scripts/release.mjs",
-		"release:app": "node scripts/release-app.mjs"
+		"release:app": "node scripts/release-app.mjs",
+		"test": "pnpm --filter web test"
 	},
 	"devDependencies": {
 		"husky": "^9.1.7",

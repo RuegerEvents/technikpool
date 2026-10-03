@@ -12,6 +12,7 @@
 	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import ServiceLineModal from './service-line-modal.svelte';
 	import type { BillingItem, DurationInfo, EditedServiceLine, ServiceLineTarget } from './types';
+	import { billingTotals } from '#lib/billing-totals.js';
 	import { loanMargins, type LoanCostEntry, type LoanLine } from '#lib/loan-margins.js';
 
 	let {
@@ -80,15 +81,12 @@
 	// Units of one product show as a single quantity line — see $lib/billing-lines.
 	let groups = $derived(groupBillingItems(items));
 
-	let subtotal = $derived(items.reduce((sum, i) => sum + Number(i.lineTotal), 0));
-	let discountAmount = $derived.by(() => {
-		if (discountType === 'PERCENT' && discountValue) return subtotal * (discountValue / 100);
-		if (discountType === 'AMOUNT' && discountValue) return Math.min(subtotal, discountValue);
-		return 0;
-	});
-	let netTotal = $derived(subtotal - discountAmount);
-	let vatAmount = $derived(netTotal * (vatRatePercent / 100));
-	let grossTotal = $derived(netTotal + vatAmount);
+	let totals = $derived(billingTotals({ items, discountType, discountValue, vatRatePercent }));
+	let subtotal = $derived(totals.subtotal);
+	let discountAmount = $derived(totals.discount);
+	let netTotal = $derived(totals.net);
+	let vatAmount = $derived(totals.vat);
+	let grossTotal = $derived(totals.gross);
 
 	// ── Margin on borrowed equipment ──
 	let margins = $derived(

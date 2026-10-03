@@ -299,6 +299,35 @@ change. Its `category*` columns snapshot a per-org `ServiceCategory`, not a `Cat
 after the equipment and never merges two service lines. Every copy of a document (revision,
 copy to customer, invoice) goes through `copyItem`, so a new item column has to be added there.
 
+## E-invoices (ZUGFeRD)
+
+An invoice is issued as a **ZUGFeRD 2 / Factur-X PDF in the EN 16931 profile**: the archived PDF
+is PDF/A-3b and carries the CII XML as `factur-x.xml`, which is what a recipient's software
+books. `finalizeInvoice` passes `{ eInvoice }` to `generateBillingPdf`; draft previews never get
+the XML, and invoices sent before this keep their plain PDF. Code in `src/lib/server/einvoice/`:
+`model.ts` (invoice → EN 16931 terms, pure), `cii.ts` (→ XML, in the XSD's element order),
+`pdfa3.ts` (XMP, sRGB output intent, attachment).
+
+- **The sums come from `billingTotals`** (`src/lib/billing-totals.ts`), in cents and rounded where
+  EN 16931 rounds. The page, the lists, the PDF and the XML all read it; a second copy of the
+  arithmetic is how a printed total and its XML end up a cent apart.
+- **The XML's lines are the PDF's lines** (`groupBillingItems`), so position 3 is position 3 on
+  paper. Equipment is quantity = units, price per unit for the billed days. A price that would
+  not multiply back to the line total exactly is written for the whole quantity
+  (`BasisQuantity`), since Mustang recalculates every line.
+- **The customer's address is stored apart** on the invoice (`customerAddressLine1`,
+  `customerPostalCode`, `customerCity`, `customerCountry`) next to the printed
+  `customerAddress`, copied from the customer's `Address` on conversion and on "Edit customer".
+  `billingDocumentIssues` refuses an invoice without them. Countries are always `DE` for now —
+  `Address` has no country, and the app knows no reverse charge.
+- A Kleinunternehmer invoice is VAT category `E` with the §19 reason.
+- Not built: XRechnung (pure XML for public-sector customers, needs a Leitweg-ID as BT-10),
+  credit notes / cancellations (type 381/384), receiving e-invoices.
+
+`pnpm test` covers the model. With `MUSTANG_JAR=/path/to/Mustang-CLI-x.jar` it also renders
+sample invoices and runs Mustang's validator (EN 16931 schematron + veraPDF) over them; its
+XRechnung notices (BR-DE-\*) are expected and do not fail the check.
+
 ## Stocktakes (Inventur)
 
 "Inventory" is taken (the catalogue, the scanner's Inventory tab), so counting stock is a

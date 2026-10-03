@@ -54,6 +54,11 @@ export type InvoiceMinAggregateOutputType = {
   customerNumber: string | null
   customerPhone: string | null
   customerVatId: string | null
+  customerAddressLine1: string | null
+  customerAddressLine2: string | null
+  customerPostalCode: string | null
+  customerCity: string | null
+  customerCountry: string | null
   serviceStartDate: Date | null
   serviceEndDate: Date | null
   introText: string | null
@@ -101,6 +106,11 @@ export type InvoiceMaxAggregateOutputType = {
   customerNumber: string | null
   customerPhone: string | null
   customerVatId: string | null
+  customerAddressLine1: string | null
+  customerAddressLine2: string | null
+  customerPostalCode: string | null
+  customerCity: string | null
+  customerCountry: string | null
   serviceStartDate: Date | null
   serviceEndDate: Date | null
   introText: string | null
@@ -148,6 +158,11 @@ export type InvoiceCountAggregateOutputType = {
   customerNumber: number
   customerPhone: number
   customerVatId: number
+  customerAddressLine1: number
+  customerAddressLine2: number
+  customerPostalCode: number
+  customerCity: number
+  customerCountry: number
   serviceStartDate: number
   serviceEndDate: number
   introText: number
@@ -211,6 +226,11 @@ export type InvoiceMinAggregateInputType = {
   customerNumber?: true
   customerPhone?: true
   customerVatId?: true
+  customerAddressLine1?: true
+  customerAddressLine2?: true
+  customerPostalCode?: true
+  customerCity?: true
+  customerCountry?: true
   serviceStartDate?: true
   serviceEndDate?: true
   introText?: true
@@ -258,6 +278,11 @@ export type InvoiceMaxAggregateInputType = {
   customerNumber?: true
   customerPhone?: true
   customerVatId?: true
+  customerAddressLine1?: true
+  customerAddressLine2?: true
+  customerPostalCode?: true
+  customerCity?: true
+  customerCountry?: true
   serviceStartDate?: true
   serviceEndDate?: true
   introText?: true
@@ -305,6 +330,11 @@ export type InvoiceCountAggregateInputType = {
   customerNumber?: true
   customerPhone?: true
   customerVatId?: true
+  customerAddressLine1?: true
+  customerAddressLine2?: true
+  customerPostalCode?: true
+  customerCity?: true
+  customerCountry?: true
   serviceStartDate?: true
   serviceEndDate?: true
   introText?: true
@@ -439,6 +469,11 @@ export type InvoiceGroupByOutputType = {
   customerNumber: string | null
   customerPhone: string | null
   customerVatId: string | null
+  customerAddressLine1: string | null
+  customerAddressLine2: string | null
+  customerPostalCode: string | null
+  customerCity: string | null
+  customerCountry: string
   serviceStartDate: Date | null
   serviceEndDate: Date | null
   introText: string | null
@@ -509,6 +544,11 @@ export type InvoiceWhereInput = {
   customerNumber?: Prisma.StringNullableFilter<"Invoice"> | string | null
   customerPhone?: Prisma.StringNullableFilter<"Invoice"> | string | null
   customerVatId?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerAddressLine1?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerAddressLine2?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerPostalCode?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerCity?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerCountry?: Prisma.StringFilter<"Invoice"> | string
   serviceStartDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
   serviceEndDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
   introText?: Prisma.StringNullableFilter<"Invoice"> | string | null
@@ -561,6 +601,11 @@ export type InvoiceOrderByWithRelationInput = {
   customerNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   customerPhone?: Prisma.SortOrderInput | Prisma.SortOrder
   customerVatId?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerAddressLine1?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerAddressLine2?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerPostalCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerCity?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerCountry?: Prisma.SortOrder
   serviceStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
   serviceEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
   introText?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -617,6 +662,11 @@ export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
   customerNumber?: Prisma.StringNullableFilter<"Invoice"> | string | null
   customerPhone?: Prisma.StringNullableFilter<"Invoice"> | string | null
   customerVatId?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerAddressLine1?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerAddressLine2?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerPostalCode?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerCity?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerCountry?: Prisma.StringFilter<"Invoice"> | string
   serviceStartDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
   serviceEndDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
   introText?: Prisma.StringNullableFilter<"Invoice"> | string | null
@@ -669,6 +719,11 @@ export type InvoiceOrderByWithAggregationInput = {
   customerNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   customerPhone?: Prisma.SortOrderInput | Prisma.SortOrder
   customerVatId?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerAddressLine1?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerAddressLine2?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerPostalCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerCity?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerCountry?: Prisma.SortOrder
   serviceStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
   serviceEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
   introText?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -724,6 +779,11 @@ export type InvoiceScalarWhereWithAggregatesInput = {
   customerNumber?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
   customerPhone?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
   customerVatId?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  customerAddressLine1?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  customerAddressLine2?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  customerPostalCode?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  customerCity?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  customerCountry?: Prisma.StringWithAggregatesFilter<"Invoice"> | string
   serviceStartDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Invoice"> | Date | string | null
   serviceEndDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Invoice"> | Date | string | null
   introText?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
@@ -768,6 +828,11 @@ export type InvoiceCreateInput = {
   customerNumber?: string | null
   customerPhone?: string | null
   customerVatId?: string | null
+  customerAddressLine1?: string | null
+  customerAddressLine2?: string | null
+  customerPostalCode?: string | null
+  customerCity?: string | null
+  customerCountry?: string
   serviceStartDate?: Date | string | null
   serviceEndDate?: Date | string | null
   introText?: string | null
@@ -819,6 +884,11 @@ export type InvoiceUncheckedCreateInput = {
   customerNumber?: string | null
   customerPhone?: string | null
   customerVatId?: string | null
+  customerAddressLine1?: string | null
+  customerAddressLine2?: string | null
+  customerPostalCode?: string | null
+  customerCity?: string | null
+  customerCountry?: string
   serviceStartDate?: Date | string | null
   serviceEndDate?: Date | string | null
   introText?: string | null
@@ -864,6 +934,11 @@ export type InvoiceUpdateInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -915,6 +990,11 @@ export type InvoiceUncheckedUpdateInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -963,6 +1043,11 @@ export type InvoiceCreateManyInput = {
   customerNumber?: string | null
   customerPhone?: string | null
   customerVatId?: string | null
+  customerAddressLine1?: string | null
+  customerAddressLine2?: string | null
+  customerPostalCode?: string | null
+  customerCity?: string | null
+  customerCountry?: string
   serviceStartDate?: Date | string | null
   serviceEndDate?: Date | string | null
   introText?: string | null
@@ -1007,6 +1092,11 @@ export type InvoiceUpdateManyMutationInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1053,6 +1143,11 @@ export type InvoiceUncheckedUpdateManyInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1115,6 +1210,11 @@ export type InvoiceCountOrderByAggregateInput = {
   customerNumber?: Prisma.SortOrder
   customerPhone?: Prisma.SortOrder
   customerVatId?: Prisma.SortOrder
+  customerAddressLine1?: Prisma.SortOrder
+  customerAddressLine2?: Prisma.SortOrder
+  customerPostalCode?: Prisma.SortOrder
+  customerCity?: Prisma.SortOrder
+  customerCountry?: Prisma.SortOrder
   serviceStartDate?: Prisma.SortOrder
   serviceEndDate?: Prisma.SortOrder
   introText?: Prisma.SortOrder
@@ -1169,6 +1269,11 @@ export type InvoiceMaxOrderByAggregateInput = {
   customerNumber?: Prisma.SortOrder
   customerPhone?: Prisma.SortOrder
   customerVatId?: Prisma.SortOrder
+  customerAddressLine1?: Prisma.SortOrder
+  customerAddressLine2?: Prisma.SortOrder
+  customerPostalCode?: Prisma.SortOrder
+  customerCity?: Prisma.SortOrder
+  customerCountry?: Prisma.SortOrder
   serviceStartDate?: Prisma.SortOrder
   serviceEndDate?: Prisma.SortOrder
   introText?: Prisma.SortOrder
@@ -1216,6 +1321,11 @@ export type InvoiceMinOrderByAggregateInput = {
   customerNumber?: Prisma.SortOrder
   customerPhone?: Prisma.SortOrder
   customerVatId?: Prisma.SortOrder
+  customerAddressLine1?: Prisma.SortOrder
+  customerAddressLine2?: Prisma.SortOrder
+  customerPostalCode?: Prisma.SortOrder
+  customerCity?: Prisma.SortOrder
+  customerCountry?: Prisma.SortOrder
   serviceStartDate?: Prisma.SortOrder
   serviceEndDate?: Prisma.SortOrder
   introText?: Prisma.SortOrder
@@ -1454,6 +1564,11 @@ export type InvoiceCreateWithoutOrganizationInput = {
   customerNumber?: string | null
   customerPhone?: string | null
   customerVatId?: string | null
+  customerAddressLine1?: string | null
+  customerAddressLine2?: string | null
+  customerPostalCode?: string | null
+  customerCity?: string | null
+  customerCountry?: string
   serviceStartDate?: Date | string | null
   serviceEndDate?: Date | string | null
   introText?: string | null
@@ -1503,6 +1618,11 @@ export type InvoiceUncheckedCreateWithoutOrganizationInput = {
   customerNumber?: string | null
   customerPhone?: string | null
   customerVatId?: string | null
+  customerAddressLine1?: string | null
+  customerAddressLine2?: string | null
+  customerPostalCode?: string | null
+  customerCity?: string | null
+  customerCountry?: string
   serviceStartDate?: Date | string | null
   serviceEndDate?: Date | string | null
   introText?: string | null
@@ -1558,6 +1678,11 @@ export type InvoiceCreateWithoutRecipientOrganizationInput = {
   customerNumber?: string | null
   customerPhone?: string | null
   customerVatId?: string | null
+  customerAddressLine1?: string | null
+  customerAddressLine2?: string | null
+  customerPostalCode?: string | null
+  customerCity?: string | null
+  customerCountry?: string
   serviceStartDate?: Date | string | null
   serviceEndDate?: Date | string | null
   introText?: string | null
@@ -1608,6 +1733,11 @@ export type InvoiceUncheckedCreateWithoutRecipientOrganizationInput = {
   customerNumber?: string | null
   customerPhone?: string | null
   customerVatId?: string | null
+  customerAddressLine1?: string | null
+  customerAddressLine2?: string | null
+  customerPostalCode?: string | null
+  customerCity?: string | null
+  customerCountry?: string
   serviceStartDate?: Date | string | null
   serviceEndDate?: Date | string | null
   introText?: string | null
@@ -1684,6 +1814,11 @@ export type InvoiceScalarWhereInput = {
   customerNumber?: Prisma.StringNullableFilter<"Invoice"> | string | null
   customerPhone?: Prisma.StringNullableFilter<"Invoice"> | string | null
   customerVatId?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerAddressLine1?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerAddressLine2?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerPostalCode?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerCity?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  customerCountry?: Prisma.StringFilter<"Invoice"> | string
   serviceStartDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
   serviceEndDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
   introText?: Prisma.StringNullableFilter<"Invoice"> | string | null
@@ -1744,6 +1879,11 @@ export type InvoiceCreateWithoutProductionInput = {
   customerNumber?: string | null
   customerPhone?: string | null
   customerVatId?: string | null
+  customerAddressLine1?: string | null
+  customerAddressLine2?: string | null
+  customerPostalCode?: string | null
+  customerCity?: string | null
+  customerCountry?: string
   serviceStartDate?: Date | string | null
   serviceEndDate?: Date | string | null
   introText?: string | null
@@ -1793,6 +1933,11 @@ export type InvoiceUncheckedCreateWithoutProductionInput = {
   customerNumber?: string | null
   customerPhone?: string | null
   customerVatId?: string | null
+  customerAddressLine1?: string | null
+  customerAddressLine2?: string | null
+  customerPostalCode?: string | null
+  customerCity?: string | null
+  customerCountry?: string
   serviceStartDate?: Date | string | null
   serviceEndDate?: Date | string | null
   introText?: string | null
@@ -1864,6 +2009,11 @@ export type InvoiceCreateWithoutOfferInput = {
   customerNumber?: string | null
   customerPhone?: string | null
   customerVatId?: string | null
+  customerAddressLine1?: string | null
+  customerAddressLine2?: string | null
+  customerPostalCode?: string | null
+  customerCity?: string | null
+  customerCountry?: string
   serviceStartDate?: Date | string | null
   serviceEndDate?: Date | string | null
   introText?: string | null
@@ -1913,6 +2063,11 @@ export type InvoiceUncheckedCreateWithoutOfferInput = {
   customerNumber?: string | null
   customerPhone?: string | null
   customerVatId?: string | null
+  customerAddressLine1?: string | null
+  customerAddressLine2?: string | null
+  customerPostalCode?: string | null
+  customerCity?: string | null
+  customerCountry?: string
   serviceStartDate?: Date | string | null
   serviceEndDate?: Date | string | null
   introText?: string | null
@@ -1984,6 +2139,11 @@ export type InvoiceCreateWithoutItemsInput = {
   customerNumber?: string | null
   customerPhone?: string | null
   customerVatId?: string | null
+  customerAddressLine1?: string | null
+  customerAddressLine2?: string | null
+  customerPostalCode?: string | null
+  customerCity?: string | null
+  customerCountry?: string
   serviceStartDate?: Date | string | null
   serviceEndDate?: Date | string | null
   introText?: string | null
@@ -2034,6 +2194,11 @@ export type InvoiceUncheckedCreateWithoutItemsInput = {
   customerNumber?: string | null
   customerPhone?: string | null
   customerVatId?: string | null
+  customerAddressLine1?: string | null
+  customerAddressLine2?: string | null
+  customerPostalCode?: string | null
+  customerCity?: string | null
+  customerCountry?: string
   serviceStartDate?: Date | string | null
   serviceEndDate?: Date | string | null
   introText?: string | null
@@ -2094,6 +2259,11 @@ export type InvoiceUpdateWithoutItemsInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2144,6 +2314,11 @@ export type InvoiceUncheckedUpdateWithoutItemsInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2190,6 +2365,11 @@ export type InvoiceCreateManyOrganizationInput = {
   customerNumber?: string | null
   customerPhone?: string | null
   customerVatId?: string | null
+  customerAddressLine1?: string | null
+  customerAddressLine2?: string | null
+  customerPostalCode?: string | null
+  customerCity?: string | null
+  customerCountry?: string
   serviceStartDate?: Date | string | null
   serviceEndDate?: Date | string | null
   introText?: string | null
@@ -2237,6 +2417,11 @@ export type InvoiceCreateManyRecipientOrganizationInput = {
   customerNumber?: string | null
   customerPhone?: string | null
   customerVatId?: string | null
+  customerAddressLine1?: string | null
+  customerAddressLine2?: string | null
+  customerPostalCode?: string | null
+  customerCity?: string | null
+  customerCountry?: string
   serviceStartDate?: Date | string | null
   serviceEndDate?: Date | string | null
   introText?: string | null
@@ -2280,6 +2465,11 @@ export type InvoiceUpdateWithoutOrganizationInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2329,6 +2519,11 @@ export type InvoiceUncheckedUpdateWithoutOrganizationInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2376,6 +2571,11 @@ export type InvoiceUncheckedUpdateManyWithoutOrganizationInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2420,6 +2620,11 @@ export type InvoiceUpdateWithoutRecipientOrganizationInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2470,6 +2675,11 @@ export type InvoiceUncheckedUpdateWithoutRecipientOrganizationInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2517,6 +2727,11 @@ export type InvoiceUncheckedUpdateManyWithoutRecipientOrganizationInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2562,6 +2777,11 @@ export type InvoiceCreateManyProductionInput = {
   customerNumber?: string | null
   customerPhone?: string | null
   customerVatId?: string | null
+  customerAddressLine1?: string | null
+  customerAddressLine2?: string | null
+  customerPostalCode?: string | null
+  customerCity?: string | null
+  customerCountry?: string
   serviceStartDate?: Date | string | null
   serviceEndDate?: Date | string | null
   introText?: string | null
@@ -2606,6 +2826,11 @@ export type InvoiceUpdateWithoutProductionInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2655,6 +2880,11 @@ export type InvoiceUncheckedUpdateWithoutProductionInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2702,6 +2932,11 @@ export type InvoiceUncheckedUpdateManyWithoutProductionInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2748,6 +2983,11 @@ export type InvoiceCreateManyOfferInput = {
   customerNumber?: string | null
   customerPhone?: string | null
   customerVatId?: string | null
+  customerAddressLine1?: string | null
+  customerAddressLine2?: string | null
+  customerPostalCode?: string | null
+  customerCity?: string | null
+  customerCountry?: string
   serviceStartDate?: Date | string | null
   serviceEndDate?: Date | string | null
   introText?: string | null
@@ -2792,6 +3032,11 @@ export type InvoiceUpdateWithoutOfferInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2841,6 +3086,11 @@ export type InvoiceUncheckedUpdateWithoutOfferInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2888,6 +3138,11 @@ export type InvoiceUncheckedUpdateManyWithoutOfferInput = {
   customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerCountry?: Prisma.StringFieldUpdateOperationsInput | string
   serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2966,6 +3221,11 @@ export type InvoiceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   customerNumber?: boolean
   customerPhone?: boolean
   customerVatId?: boolean
+  customerAddressLine1?: boolean
+  customerAddressLine2?: boolean
+  customerPostalCode?: boolean
+  customerCity?: boolean
+  customerCountry?: boolean
   serviceStartDate?: boolean
   serviceEndDate?: boolean
   introText?: boolean
@@ -3019,6 +3279,11 @@ export type InvoiceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   customerNumber?: boolean
   customerPhone?: boolean
   customerVatId?: boolean
+  customerAddressLine1?: boolean
+  customerAddressLine2?: boolean
+  customerPostalCode?: boolean
+  customerCity?: boolean
+  customerCountry?: boolean
   serviceStartDate?: boolean
   serviceEndDate?: boolean
   introText?: boolean
@@ -3070,6 +3335,11 @@ export type InvoiceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   customerNumber?: boolean
   customerPhone?: boolean
   customerVatId?: boolean
+  customerAddressLine1?: boolean
+  customerAddressLine2?: boolean
+  customerPostalCode?: boolean
+  customerCity?: boolean
+  customerCountry?: boolean
   serviceStartDate?: boolean
   serviceEndDate?: boolean
   introText?: boolean
@@ -3121,6 +3391,11 @@ export type InvoiceSelectScalar = {
   customerNumber?: boolean
   customerPhone?: boolean
   customerVatId?: boolean
+  customerAddressLine1?: boolean
+  customerAddressLine2?: boolean
+  customerPostalCode?: boolean
+  customerCity?: boolean
+  customerCountry?: boolean
   serviceStartDate?: boolean
   serviceEndDate?: boolean
   introText?: boolean
@@ -3154,7 +3429,7 @@ export type InvoiceSelectScalar = {
   updatedAt?: boolean
 }
 
-export type InvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "organizationId" | "productionId" | "offerId" | "customerId" | "customerName" | "customerAddress" | "customerContactPerson" | "customerEmail" | "customerNumber" | "customerPhone" | "customerVatId" | "serviceStartDate" | "serviceEndDate" | "introText" | "closingText" | "paymentTermsDays" | "issueDate" | "dayCount" | "discountType" | "discountValue" | "assetScope" | "recipientOrganizationId" | "sentAt" | "pdfPath" | "isKleinunternehmerSnapshot" | "vatRatePercent" | "orgName" | "orgAddressLine1" | "orgAddressLine2" | "orgPostalCode" | "orgCity" | "orgTaxNumber" | "orgVatId" | "orgBillingEmail" | "orgBillingWebsite" | "orgBankAccountHolder" | "orgBankName" | "orgIban" | "orgBic" | "orgLogoPath" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
+export type InvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "organizationId" | "productionId" | "offerId" | "customerId" | "customerName" | "customerAddress" | "customerContactPerson" | "customerEmail" | "customerNumber" | "customerPhone" | "customerVatId" | "customerAddressLine1" | "customerAddressLine2" | "customerPostalCode" | "customerCity" | "customerCountry" | "serviceStartDate" | "serviceEndDate" | "introText" | "closingText" | "paymentTermsDays" | "issueDate" | "dayCount" | "discountType" | "discountValue" | "assetScope" | "recipientOrganizationId" | "sentAt" | "pdfPath" | "isKleinunternehmerSnapshot" | "vatRatePercent" | "orgName" | "orgAddressLine1" | "orgAddressLine2" | "orgPostalCode" | "orgCity" | "orgTaxNumber" | "orgVatId" | "orgBillingEmail" | "orgBillingWebsite" | "orgBankAccountHolder" | "orgBankName" | "orgIban" | "orgBic" | "orgLogoPath" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
 export type InvoiceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   production?: boolean | Prisma.Invoice$productionArgs<ExtArgs>
@@ -3199,6 +3474,11 @@ export type $InvoicePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     customerNumber: string | null
     customerPhone: string | null
     customerVatId: string | null
+    customerAddressLine1: string | null
+    customerAddressLine2: string | null
+    customerPostalCode: string | null
+    customerCity: string | null
+    customerCountry: string
     serviceStartDate: Date | null
     serviceEndDate: Date | null
     introText: string | null
@@ -3671,6 +3951,11 @@ export interface InvoiceFieldRefs {
   readonly customerNumber: Prisma.FieldRef<"Invoice", 'String'>
   readonly customerPhone: Prisma.FieldRef<"Invoice", 'String'>
   readonly customerVatId: Prisma.FieldRef<"Invoice", 'String'>
+  readonly customerAddressLine1: Prisma.FieldRef<"Invoice", 'String'>
+  readonly customerAddressLine2: Prisma.FieldRef<"Invoice", 'String'>
+  readonly customerPostalCode: Prisma.FieldRef<"Invoice", 'String'>
+  readonly customerCity: Prisma.FieldRef<"Invoice", 'String'>
+  readonly customerCountry: Prisma.FieldRef<"Invoice", 'String'>
   readonly serviceStartDate: Prisma.FieldRef<"Invoice", 'DateTime'>
   readonly serviceEndDate: Prisma.FieldRef<"Invoice", 'DateTime'>
   readonly introText: Prisma.FieldRef<"Invoice", 'String'>

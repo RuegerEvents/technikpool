@@ -5,22 +5,12 @@
 	import { getOffers } from '#lib/remote/offers.remote.js';
 	import { supersededOfferIds } from '#lib/offer-versions.js';
 	import { resolve } from '$app/paths';
+	import { billingTotals } from '#lib/billing-totals.js';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 
 	let offersQuery = $derived(getOffers());
 	let offers = $derived(offersQuery.current ?? []);
 	let superseded = $derived(supersededOfferIds(offers));
-
-	function offerTotal(offer: (typeof offers)[number]): number {
-		const subtotal = offer.items.reduce((sum, i) => sum + Number(i.lineTotal), 0);
-		let netTotal = subtotal;
-		if (offer.discountType === 'PERCENT' && offer.discountValue) {
-			netTotal = subtotal * (1 - Number(offer.discountValue) / 100);
-		} else if (offer.discountType === 'AMOUNT' && offer.discountValue) {
-			netTotal = Math.max(0, subtotal - Number(offer.discountValue));
-		}
-		return netTotal * (1 + Number(offer.vatRatePercent) / 100);
-	}
 
 	function fmtEUR(n: number): string {
 		return n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
@@ -67,7 +57,7 @@
 							<td class="px-4 py-3 text-muted-foreground">{offer.production?.name ?? '—'}</td>
 							<td class="px-4 py-3 text-muted-foreground">{orgLabel(offer.organization)}</td>
 							<td class="px-4 py-3 text-right font-medium tabular-nums"
-								>{fmtEUR(offerTotal(offer))}</td
+								>{fmtEUR(billingTotals(offer).gross)}</td
 							>
 							<td class="px-4 py-3">
 								{#if offer.invoices.length > 0}

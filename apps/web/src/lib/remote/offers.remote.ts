@@ -33,6 +33,7 @@ import type { Prisma } from '#lib/prisma/client.js';
 import { SERVICE_UNITS, serviceLineTotal } from '#lib/service-lines.svelte.js';
 import { getServiceCatalog } from './service-catalog.remote';
 import { getBillingTodos } from './billing.remote';
+import { billingTotals, type BillingTotalsInput } from '#lib/billing-totals.js';
 
 /**
  * Offers and invoices are inventory-admin work, not org-owner work — deliberately
@@ -1506,6 +1507,7 @@ export const convertOfferToInvoice = command(convertOfferSchema, async ({ offerI
 	});
 	if (clash) appError(409, 'invoice_number_taken', [number]);
 
+	const address = await recipientAddress(offer);
 	const invoice = await prisma.$transaction(async (tx) => {
 		return tx.invoice.create({
 			data: {
@@ -1518,7 +1520,8 @@ export const convertOfferToInvoice = command(convertOfferSchema, async ({ offerI
 				offerId: offer.id,
 				customerId: offer.customerId,
 				customerName: offer.customerName,
-				customerAddress: offer.customerAddress,
+				// An offer can be weeks old; the invoice is addressed as of now.
+				...(address ? customerAddressColumns(address) : { customerAddress: offer.customerAddress }),
 				customerContactPerson: offer.customerContactPerson,
 				customerEmail: offer.customerEmail,
 				customerNumber: offer.customerNumber,
@@ -1583,6 +1586,42 @@ export const convertOfferToInvoice = command(convertOfferSchema, async ({ offerI
 });
 
 // ── Invoices ───────────────────────────────────────────────────────────────
+
+type PostalAddress = { line1: string; line2: string | null; postalCode: string; city: string };
+
+/** The printed address block and its parts, which the e-invoice XML needs apart. */
+function customerAddressColumns(address: PostalAddress) {
+	return {
+		customerAddress: formatAddress(address) || null,
+		customerAddressLine1: address.line1,
+		customerAddressLine2: address.line2,
+		customerPostalCode: address.postalCode,
+		customerCity: address.city
+	};
+}
+
+/** Where a document's customer — or, on a lender's document, the borrowing org — is. */
+async function recipientAddress(doc: {
+	organizationId: string;
+	customerId: string | null;
+	recipientOrganizationId: string | null;
+}): Promise<PostalAddress | null> {
+	if (doc.customerId) {
+		const customer = await prisma.customer.findFirst({
+			where: { id: doc.customerId, organizationId: doc.organizationId },
+			select: { address: true }
+		});
+		return customer?.address ?? null;
+	}
+	if (doc.recipientOrganizationId) {
+		const org = await prisma.organization.findUnique({
+			where: { id: doc.recipientOrganizationId },
+			select: { address: true }
+		});
+		return org?.address ?? null;
+	}
+	return null;
+}
 
 export const getInvoices = query(v.optional(v.string()), async (organizationId?: string) => {
 	const orgIds = await billingOrgIds(organizationId);
@@ -1760,10 +1799,9 @@ export const finalizeInvoice = command(v.string(), async (invoiceId: string) => 
 	}
 	const pdfPath = `billing-documents/${invoice.organizationId}/invoices/${invoice.id}.pdf`;
 	// Renders from the invoice's own org snapshot — see finalizeOffer.
-	const pdf = await generateBillingPdf('invoice', {
-		...invoice,
-		organization: organizationFromSnapshot(invoice)
-	});
+	const document = { ...invoice, organization: organizationFromSnapshot(invoice) };
+	// Issued as a ZUGFeRD e-invoice: the archived PDF carries its XML.
+	const pdf = await generateBillingPdf('invoice', document, { eInvoice: document });
 	await putObject(pdfPath, pdf, 'application/pdf');
 	// Conditional on not being archived yet, so two concurrent finalizes can't
 	// both slip past the check above.
@@ -1978,7 +2016,8 @@ export const updateInvoiceCustomer = command(updateInvoiceCustomerSchema, async 
 	}
 	const customer = data.customerId
 		? await prisma.customer.findFirst({
-				where: { id: data.customerId, organizationId: invoice.organizationId }
+				where: { id: data.customerId, organizationId: invoice.organizationId },
+				include: { address: true }
 			})
 		: null;
 
@@ -1987,7 +2026,15 @@ export const updateInvoiceCustomer = command(updateInvoiceCustomerSchema, async 
 		data: {
 			customerId: data.customerId || null,
 			customerName: data.customerName,
-			customerAddress: data.customerAddress?.trim() || null,
+			...(customer?.address
+				? customerAddressColumns(customer.address)
+				: {
+						customerAddress: data.customerAddress?.trim() || null,
+						customerAddressLine1: null,
+						customerAddressLine2: null,
+						customerPostalCode: null,
+						customerCity: null
+					}),
 			customerContactPerson: data.customerContactPerson?.trim() || null,
 			customerEmail: data.customerEmail?.trim() || null,
 			customerNumber: customer?.customerNumber ?? null,
@@ -2284,17 +2331,9 @@ export const moveServiceLine = command(
 // ── Margin on lent equipment ────────────────────────────────────────────────
 
 /** What a document's discount leaves of each euro on it: 0.9 under 10% off. */
-function netFactor(doc: {
-	discountType: string | null;
-	discountValue: unknown;
-	items: { lineTotal: unknown }[];
-}) {
-	const subtotal = doc.items.reduce((sum, i) => sum + Number(i.lineTotal), 0);
-	if (subtotal <= 0 || !doc.discountType || doc.discountValue == null) return 1;
-	const value = Number(doc.discountValue);
-	const discount =
-		doc.discountType === 'PERCENT' ? subtotal * (value / 100) : Math.min(subtotal, value);
-	return (subtotal - discount) / subtotal;
+function netFactor(doc: Omit<BillingTotalsInput, 'vatRatePercent'>) {
+	const { subtotal, net } = billingTotals({ ...doc, vatRatePercent: 0 });
+	return subtotal > 0 ? net / subtotal : 1;
 }
 
 /**

@@ -4,6 +4,7 @@
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { getInvoices } from '#lib/remote/offers.remote.js';
 	import { resolve } from '$app/paths';
+	import { billingTotals } from '#lib/billing-totals.js';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 
 	let invoicesQuery = $derived(getInvoices());
@@ -11,17 +12,6 @@
 
 	function fmtEUR(n: number): string {
 		return n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-	}
-
-	function invoiceTotal(invoice: (typeof invoices)[number]): number {
-		const subtotal = invoice.items.reduce((sum, i) => sum + Number(i.lineTotal), 0);
-		let netTotal = subtotal;
-		if (invoice.discountType === 'PERCENT' && invoice.discountValue) {
-			netTotal = subtotal * (1 - Number(invoice.discountValue) / 100);
-		} else if (invoice.discountType === 'AMOUNT' && invoice.discountValue) {
-			netTotal = Math.max(0, subtotal - Number(invoice.discountValue));
-		}
-		return netTotal * (1 + Number(invoice.vatRatePercent) / 100);
 	}
 </script>
 
@@ -66,7 +56,7 @@
 								>{new Date(invoice.issueDate).toLocaleDateString('de-DE')}</td
 							>
 							<td class="px-4 py-3 text-right font-medium tabular-nums"
-								>{fmtEUR(invoiceTotal(invoice))}</td
+								>{fmtEUR(billingTotals(invoice).gross)}</td
 							>
 							<td class="px-4 py-3"
 								>{#if invoice.sentAt}<span
