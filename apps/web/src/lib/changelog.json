@@ -1,5 +1,17 @@
 [
 	{
+		"version": "0.27.0",
+		"date": "2026-10-03",
+		"en": [
+			"An offer or invoice that can't check for updates because a price is missing now has a \"Set prices\" button: set the missing net purchase prices and rental rates right there, borrowed equipment included.",
+			"Next to a price field you see what the lender charges for the product and what your other organizations set (range and median); one click copies it."
+		],
+		"de": [
+			"Kann ein Angebot oder eine Rechnung wegen fehlender Preise nicht auf Aktualisierungen prüfen, gibt es jetzt den Button „Preise setzen“: Fehlende Netto-Einkaufspreise und Mietsätze lassen sich direkt dort eintragen, auch für geliehene Geräte.",
+			"Neben einem Preisfeld steht, welchen Preis der Verleiher für das Produkt angesetzt hat und was Ihre anderen Organisationen hinterlegt haben (Spanne und Median); ein Klick übernimmt den Wert."
+		]
+	},
+	{
 		"version": "0.26.1",
 		"date": "2026-10-03",
 		"en": [
