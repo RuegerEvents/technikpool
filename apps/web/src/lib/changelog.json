@@ -1,5 +1,17 @@
 [
 	{
+		"version": "0.27.1",
+		"date": "2026-10-03",
+		"en": [
+			"Tick \"Sole proprietor\" on a customer and offers, invoices and delivery notes are addressed to the person, with the business name as an ordinary line beneath. Lists show the person's name too.",
+			"Fixed: a customer with only a contact person was printed twice in the address block of offers and invoices."
+		],
+		"de": [
+			"Mit dem Häkchen „Einzelunternehmen“ am Kunden gehen Angebote, Rechnungen und Lieferscheine an die Person, die Geschäftsbezeichnung steht als normale Zeile darunter. Auch in Listen steht dann der Name der Person.",
+			"Behoben: Ein Kunde, bei dem nur ein Ansprechpartner eingetragen ist, stand im Adressblock von Angeboten und Rechnungen doppelt."
+		]
+	},
+	{
 		"version": "0.27.0",
 		"date": "2026-10-03",
 		"en": [
