@@ -13,12 +13,34 @@ export function orgLabel(org: { name: string; shortName?: string | null }): stri
 	return org.shortName?.trim() || org.name;
 }
 
-/** A customer may have a company, a person, or neither — never assume one. */
+/**
+ * A customer may have a company, a person, or neither — never assume one. A
+ * sole proprietor goes by the person, in lists as on documents.
+ */
 export function customerLabel(c: {
 	companyName: string | null;
 	contactPerson: string | null;
+	soleProprietor: boolean;
 }): string {
+	if (c.soleProprietor && c.contactPerson) return c.contactPerson;
 	return c.companyName || c.contactPerson || 'Unnamed customer';
+}
+
+/**
+ * The two name lines of a document's recipient block: the recipient itself,
+ * printed bold, and the line beneath it. A company stands first with its
+ * contact person below. A sole proprietor is the person, and what is filed as
+ * the company only names the trade, so the two swap places. The second line
+ * is what documents snapshot as `customerContactPerson`.
+ */
+export function customerRecipient(c: {
+	companyName: string | null;
+	contactPerson: string | null;
+	soleProprietor: boolean;
+}): { name: string; secondLine: string | null } {
+	const name = customerLabel(c);
+	if (c.soleProprietor && c.contactPerson) return { name, secondLine: c.companyName };
+	return { name, secondLine: c.companyName ? c.contactPerson : null };
 }
 
 // Inclusive day count between two dates (a single day counts as 1, not 0).

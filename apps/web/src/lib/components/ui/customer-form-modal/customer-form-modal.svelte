@@ -59,6 +59,7 @@
 			? {
 					companyName: customer.companyName ?? '',
 					contactPerson: customer.contactPerson ?? '',
+					soleProprietor: customer.soleProprietor,
 					email: customer.email ?? '',
 					customerNumber: customer.customerNumber ?? '',
 					phone: customer.phone ?? '',
@@ -85,6 +86,7 @@
 			const data = {
 				companyName: draft.companyName || undefined,
 				contactPerson: draft.contactPerson || undefined,
+				soleProprietor: draft.soleProprietor,
 				email: draft.email || undefined,
 				customerNumber: draft.customerNumber || undefined,
 				phone: draft.phone || undefined,

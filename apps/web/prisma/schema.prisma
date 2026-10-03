@@ -847,6 +847,9 @@ model Customer {
 
   companyName    String?
   contactPerson  String?
+  // A sole proprietor is the person: documents print the contact person as
+  // the recipient and the company name, which only names the trade, beneath.
+  soleProprietor Boolean @default(false)
   email          String?
   customerNumber String?
   phone          String?

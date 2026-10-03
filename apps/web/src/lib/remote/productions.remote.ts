@@ -1785,7 +1785,7 @@ export const getProductionsCalendar = query(async () => {
 		// Customer, venue and counts feed the calendar's hover card.
 		include: {
 			organization: { select: { name: true, shortName: true, color: true } },
-			customer: { select: { companyName: true, contactPerson: true } },
+			customer: { select: { companyName: true, contactPerson: true, soleProprietor: true } },
 			address: { select: { line1: true, line2: true, postalCode: true, city: true } },
 			_count: { select: { items: true, crew: true } }
 		},

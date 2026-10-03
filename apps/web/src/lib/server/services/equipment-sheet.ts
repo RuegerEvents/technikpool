@@ -3,7 +3,7 @@ import { naturalCompare } from '#lib/sort.js';
 import { prisma } from '#lib/server/auth.js';
 import { summarizeContents } from '#lib/billing-lines.js';
 import { productLabel } from '#lib/product-label.js';
-import { orgLabel } from '#lib/utils.js';
+import { customerRecipient, orgLabel } from '#lib/utils.js';
 import { compareGroups, groupKey, type ListGroup } from '#lib/production-list.js';
 import {
 	assetImageIsStale,
@@ -324,8 +324,11 @@ async function deliveryNoteSheet(
 		// note is addressed to.
 		recipient: customer
 			? {
-					name: customer.companyName || customer.contactPerson || production.name,
-					contactPerson: customer.companyName ? customer.contactPerson : null,
+					name:
+						customer.companyName || customer.contactPerson
+							? customerRecipient(customer).name
+							: production.name,
+					contactPerson: customerRecipient(customer).secondLine,
 					address: addressLines(customer.address)
 				}
 			: { name: production.name, contactPerson: null, address: venue },

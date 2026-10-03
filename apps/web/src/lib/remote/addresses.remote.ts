@@ -7,7 +7,7 @@ import {
 	requireAuth,
 	userOrgIds
 } from '#lib/server/services/access.js';
-import { orgLabel } from '#lib/utils.js';
+import { customerLabel, orgLabel } from '#lib/utils.js';
 
 export type KnownAddressKind = 'venue' | 'location' | 'customer' | 'organization';
 
@@ -54,7 +54,7 @@ export const getKnownAddresses = query(async (): Promise<KnownAddress[]> => {
 		}),
 		prisma.customer.findMany({
 			where: { ...recordScope, addressId: { not: null } },
-			select: { companyName: true, contactPerson: true, address: true }
+			select: { companyName: true, contactPerson: true, soleProprietor: true, address: true }
 		}),
 		prisma.organization.findMany({
 			where: { ...orgScope, addressId: { not: null } },
@@ -81,7 +81,8 @@ export const getKnownAddresses = query(async (): Promise<KnownAddress[]> => {
 	// entry for an address is the one that survives the dedupe below.
 	for (const p of productions) add('venue', p.venueName, p.address);
 	for (const l of locations) add('location', l.name, l.address);
-	for (const c of customers) add('customer', c.companyName || c.contactPerson, c.address);
+	for (const c of customers)
+		add('customer', c.companyName || c.contactPerson ? customerLabel(c) : null, c.address);
 	for (const o of organizations) add('organization', orgLabel(o), o.address);
 
 	const place = (a: KnownAddress) =>

@@ -2,7 +2,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import { prisma } from '#lib/server/auth.js';
 import { appBaseUrl } from '#lib/server/app-url.js';
 import { renderCalendar, type AllDayEvent } from '#lib/server/ical.js';
-import { orgLabel } from '#lib/utils.js';
+import { customerLabel, orgLabel } from '#lib/utils.js';
 import { productionReadWhere } from './access';
 
 // A calendar app subscribes to a URL and polls it with no cookie and no bearer
@@ -53,7 +53,7 @@ export async function renderProductionsCalendar(userId: string): Promise<string>
 		include: {
 			organization: { select: { name: true, shortName: true } },
 			address: true,
-			customer: { select: { companyName: true, contactPerson: true } }
+			customer: { select: { companyName: true, contactPerson: true, soleProprietor: true } }
 		},
 		orderBy: { startDate: 'asc' }
 	});
@@ -73,8 +73,8 @@ export async function renderProductionsCalendar(userId: string): Promise<string>
 		) {
 			lines.push(`Show: ${formatDay(showStart)} – ${formatDay(showEnd)}`);
 		}
-		const customer = p.customer?.companyName || p.customer?.contactPerson;
-		if (customer) lines.push(`Kunde: ${customer}`);
+		if (p.customer?.companyName || p.customer?.contactPerson)
+			lines.push(`Kunde: ${customerLabel(p.customer)}`);
 
 		const url = `${appBaseUrl}/productions/${p.id}`;
 		lines.push('', url);

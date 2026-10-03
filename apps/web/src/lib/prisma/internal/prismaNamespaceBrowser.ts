@@ -513,6 +513,7 @@ export const CustomerScalarFieldEnum = {
   organizationId: 'organizationId',
   companyName: 'companyName',
   contactPerson: 'contactPerson',
+  soleProprietor: 'soleProprietor',
   email: 'email',
   customerNumber: 'customerNumber',
   phone: 'phone',

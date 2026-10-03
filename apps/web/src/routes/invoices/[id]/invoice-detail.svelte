@@ -6,7 +6,7 @@
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import {
-		customerLabel,
+		customerRecipient,
 		getErrorMessage,
 		dayCountBetween,
 		formatAddress,
@@ -134,12 +134,13 @@
 			return;
 		}
 		savingCustomer = true;
+		const recipient = customerRecipient(c);
 		try {
 			await updateInvoiceCustomer({
 				invoiceId,
 				customerId: c.id,
-				customerName: customerLabel(c),
-				customerContactPerson: c.contactPerson || undefined,
+				customerName: recipient.name,
+				customerContactPerson: recipient.secondLine || undefined,
 				customerEmail: c.email || undefined,
 				customerAddress: formatAddress(c.address) || undefined
 			});

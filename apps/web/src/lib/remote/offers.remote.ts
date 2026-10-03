@@ -2,7 +2,7 @@ import { query, command } from '$app/server';
 import { prisma } from '#lib/server/auth.js';
 import * as v from 'valibot';
 import {
-	customerLabel,
+	customerRecipient,
 	dayCountBetween,
 	formatAddress,
 	getErrorMessage,
@@ -1321,9 +1321,9 @@ export const copyOfferToNewCustomer = command(copyOfferSchema, async ({ offerId,
 				organizationId: source.organizationId,
 				productionId: source.productionId,
 				customerId: customer.id,
-				customerName: customerLabel(customer),
+				customerName: customerRecipient(customer).name,
 				customerAddress: formatAddress(customer.address) || null,
-				customerContactPerson: customer.contactPerson,
+				customerContactPerson: customerRecipient(customer).secondLine,
 				customerEmail: customer.email,
 				customerNumber: customer.customerNumber,
 				customerPhone: customer.phone,

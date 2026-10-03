@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {
-		customerLabel,
+		customerRecipient,
 		getErrorMessage,
 		dayCountBetween,
 		formatAddress,
@@ -145,12 +145,13 @@
 			return;
 		}
 		savingCustomer = true;
+		const recipient = customerRecipient(c);
 		try {
 			await updateOfferCustomer({
 				offerId,
 				customerId: c.id,
-				customerName: customerLabel(c),
-				customerContactPerson: c.contactPerson || undefined,
+				customerName: recipient.name,
+				customerContactPerson: recipient.secondLine || undefined,
 				customerEmail: c.email || undefined,
 				customerAddress: formatAddress(c.address) || undefined
 			});

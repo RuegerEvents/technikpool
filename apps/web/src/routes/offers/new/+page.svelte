@@ -14,7 +14,14 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
-	import { customerLabel, formatAddress, getErrorMessage, orgLabel, plural } from '#lib/utils.js';
+	import {
+		customerLabel,
+		customerRecipient,
+		formatAddress,
+		getErrorMessage,
+		orgLabel,
+		plural
+	} from '#lib/utils.js';
 	import { MissingPricing } from '#lib/components/missing-pricing/index.js';
 	import {
 		DEFAULT_OFFER_CLOSING,
@@ -56,6 +63,7 @@
 		c: {
 			companyName: string | null;
 			contactPerson: string | null;
+			soleProprietor: boolean;
 			email: string | null;
 			address: {
 				line1: string;
@@ -65,8 +73,9 @@
 			} | null;
 		} | null
 	) {
-		customerName = c ? (c.companyName ?? c.contactPerson ?? '') : '';
-		customerContactPerson = c?.contactPerson ?? '';
+		const recipient = c ? customerRecipient(c) : null;
+		customerName = recipient?.name ?? '';
+		customerContactPerson = recipient?.secondLine ?? '';
 		customerEmail = c?.email ?? '';
 		customerAddress = {
 			line1: c?.address?.line1 ?? '',

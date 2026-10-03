@@ -73,7 +73,7 @@ export async function billingTodos(
 			endDate: true,
 			organizationId: true,
 			organization: { select: { name: true, shortName: true } },
-			customer: { select: { companyName: true, contactPerson: true } },
+			customer: { select: { companyName: true, contactPerson: true, soleProprietor: true } },
 			items: {
 				where: { status: { in: BILLED_STATUSES } },
 				select: {

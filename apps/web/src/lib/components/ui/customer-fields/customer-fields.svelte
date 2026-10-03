@@ -4,6 +4,7 @@
 	export type CustomerDraft = {
 		companyName: string;
 		contactPerson: string;
+		soleProprietor: boolean;
 		email: string;
 		customerNumber: string;
 		phone: string;
@@ -15,6 +16,7 @@
 		return {
 			companyName: '',
 			contactPerson: '',
+			soleProprietor: false,
 			email: '',
 			customerNumber: '',
 			phone: '',
@@ -56,6 +58,19 @@
 			<Label for="{idPrefix}-contact">Contact person</Label>
 			<Input id="{idPrefix}-contact" bind:value={value.contactPerson} />
 		</div>
+		<label class="flex cursor-pointer items-start gap-2 text-sm select-none sm:col-span-2">
+			<input
+				type="checkbox"
+				bind:checked={value.soleProprietor}
+				class="mt-0.5 h-4 w-4 rounded border-input"
+			/>
+			<span>
+				Sole proprietor
+				<span class="block text-muted-foreground">
+					Documents are addressed to the contact person, with the company name beneath.
+				</span>
+			</span>
+		</label>
 		<div class="space-y-2 sm:col-span-2">
 			<Label for="{idPrefix}-email">Email</Label>
 			<Input id="{idPrefix}-email" type="email" bind:value={value.email} />
