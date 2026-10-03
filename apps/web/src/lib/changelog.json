@@ -1,5 +1,21 @@
 [
 	{
+		"version": "0.28.0",
+		"date": "2026-10-03",
+		"en": [
+			"Invoices carry a GiroCode beneath the closing text: scan it with a banking app and recipient, IBAN, amount and payment reference are filled in.",
+			"The default closing text of an invoice now asks for the invoice number as the payment reference. An organization with its own closing text keeps it; add {documentNumber} there for the same.",
+			"The IBAN and BIC in an organization's billing details are checked as you type. An offer or invoice with an invalid IBAN or BIC lists that instead of producing a PDF.",
+			"Correcting the number of a draft invoice also corrects it in the introduction and closing text."
+		],
+		"de": [
+			"Rechnungen tragen unter dem Schlusstext einen GiroCode: mit der Banking-App scannen, und Empfänger, IBAN, Betrag und Verwendungszweck sind ausgefüllt.",
+			"Der Standard-Schlusstext einer Rechnung nennt jetzt die Rechnungsnummer als Verwendungszweck. Eine Organisation mit eigenem Schlusstext behält ihn; dort sorgt {documentNumber} für dasselbe.",
+			"IBAN und BIC in den Abrechnungsdaten einer Organisation werden beim Eintippen geprüft. Ein Angebot oder eine Rechnung mit ungültiger IBAN oder BIC weist darauf hin, statt ein PDF zu erzeugen.",
+			"Wird die Nummer eines Rechnungsentwurfs korrigiert, ändert sie sich auch im Einleitungs- und Schlusstext."
+		]
+	},
+	{
 		"version": "0.27.1",
 		"date": "2026-10-03",
 		"en": [
