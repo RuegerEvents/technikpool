@@ -20,7 +20,7 @@
 	</span>
 {:else}
 	<span
-		class="inline-flex items-center gap-1.5 text-foreground"
+		class="relative inline-flex items-center gap-1.5 text-foreground"
 		title={place.home ? `Checked out · home location: ${place.home}` : 'Checked out'}
 	>
 		<Truck aria-hidden="true" class="size-3.5 shrink-0" />

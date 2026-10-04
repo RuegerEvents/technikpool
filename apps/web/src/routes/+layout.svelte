@@ -757,8 +757,11 @@
 				</div>
 			</div>
 		</header>
+		<!-- `relative`: an absolutely placed element in a page (an `sr-only` label in a
+		     table row) is placed against the document otherwise, and every one far
+		     down the list made the page itself scroll as well as this area. -->
 		<main
-			class="min-h-0 flex-1 {isCalendarRoute
+			class="relative min-h-0 flex-1 {isCalendarRoute
 				? 'overflow-hidden p-0'
 				: isEquipmentRoute
 					? 'overflow-auto lg:overflow-hidden lg:p-0'
