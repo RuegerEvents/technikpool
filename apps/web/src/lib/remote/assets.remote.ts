@@ -35,6 +35,7 @@ import {
 	RETIRED_ASSET_WHERE
 } from '#lib/asset-status.js';
 import { syncAccessories } from '#lib/server/services/accessories.js';
+import { CHECKED_OUT_TO_INCLUDE, checkedOutTo } from '#lib/server/services/checked-out-to.js';
 import {
 	assetImageForRead,
 	bundleImageForRead,
@@ -167,13 +168,15 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 			organization: true,
 			bundle: { select: { id: true, template: { select: { name: true, caption: true } } } },
 			parent: PARENT_SELECT,
-			accessories: ACCESSORIES_INCLUDE
+			accessories: ACCESSORIES_INCLUDE,
+			...CHECKED_OUT_TO_INCLUDE
 		},
 		orderBy: ASSET_ORDER_BY
 	});
 	// Stale previews are redrawn behind the read — see `assetImageForRead`.
 	for (const asset of assets) assetImageForRead(asset);
-	return assets.map(assetWithCableNames);
+	const withCheckedOutTo = checkedOutTo(await productionVisibility(user.id));
+	return assets.map((asset) => withCheckedOutTo(assetWithCableNames(asset)));
 });
 
 /**
@@ -196,11 +199,12 @@ export const getProductUnits = query(v.string(), async (productId: string) => {
 			organization: true,
 			location: true,
 			bundle: { select: { id: true, template: { select: { name: true, caption: true } } } },
-			parent: PARENT_SELECT
+			parent: PARENT_SELECT,
+			...CHECKED_OUT_TO_INCLUDE
 		},
 		orderBy: [{ organization: { name: 'asc' } }, ...ASSET_ORDER_BY]
 	});
-	return assets;
+	return assets.map(checkedOutTo(await productionVisibility(user.id)));
 });
 
 /**
@@ -229,7 +233,8 @@ export const getRetiredAssets = query(v.optional(v.string()), async (organizatio
 		},
 		orderBy: ASSET_ORDER_BY
 	});
-	return assets.map(assetWithCableNames);
+	// A retired unit can't be out, so it is never checked out to anything.
+	return assets.map((asset) => ({ ...assetWithCableNames(asset), checkedOutTo: null }));
 });
 
 export const getAsset = query(v.string(), async (assetId: string) => {
@@ -3096,7 +3101,8 @@ export const getBundleTemplates = query(v.optional(v.string()), async (organizat
 									...CABLE_ENDS
 								}
 							},
-							location: true
+							location: true,
+							...CHECKED_OUT_TO_INCLUDE
 						},
 						orderBy: ASSET_ORDER_BY
 					}
@@ -3116,11 +3122,12 @@ export const getBundleTemplates = query(v.optional(v.string()), async (organizat
 		}
 	}
 	const priceOrgIds = await priceVisibleOrgIds(user.id, queryOrgIds);
+	const withCheckedOutTo = checkedOutTo(await productionVisibility(user.id));
 	return templates.map((template) => ({
 		...template,
 		instances: template.instances.map((bundle) => ({
 			...maskBundlePrice(bundle, template.organizationId, priceOrgIds),
-			assets: bundle.assets.map(withProductCableNames)
+			assets: bundle.assets.map((asset) => withCheckedOutTo(withProductCableNames(asset)))
 		}))
 	}));
 });
@@ -3163,7 +3170,8 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 					product: {
 						include: { manufacturer: true, category: true, ...CABLE_ENDS }
 					},
-					location: true
+					location: true,
+					...CHECKED_OUT_TO_INCLUDE
 				},
 				orderBy: ASSET_ORDER_BY
 			}
@@ -3172,9 +3180,10 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 	});
 	for (const bundle of bundles) bundleImageForRead(bundle);
 	const priceOrgIds = await priceVisibleOrgIds(user.id, queryOrgIds);
+	const withCheckedOutTo = checkedOutTo(await productionVisibility(user.id));
 	return bundles.map((bundle) => ({
 		...maskBundlePrice(bundle, bundle.template.organizationId, priceOrgIds),
-		assets: bundle.assets.map(withProductCableNames)
+		assets: bundle.assets.map((asset) => withCheckedOutTo(withProductCableNames(asset)))
 	}));
 });
 
@@ -3193,7 +3202,8 @@ export const getBundle = query(v.string(), async (id: string) => {
 						include: { manufacturer: true, category: true, ...CABLE_ENDS }
 					},
 					organization: true,
-					location: true
+					location: true,
+					...CHECKED_OUT_TO_INCLUDE
 				},
 				orderBy: ASSET_ORDER_BY
 			}
@@ -3209,9 +3219,10 @@ export const getBundle = query(v.string(), async (id: string) => {
 	// The page says "Not set" for a bundle without a price, so it has to be told
 	// apart from one whose price this user may not see.
 	const pricesVisible = await readsOrgRecords(user.id, bundle.template.organizationId);
+	const withCheckedOutTo = checkedOutTo(await productionVisibility(user.id));
 	return {
 		...(pricesVisible ? bundle : { ...bundle, netPurchasePrice: null }),
-		assets: bundle.assets.map(withProductCableNames),
+		assets: bundle.assets.map((asset) => withCheckedOutTo(withProductCableNames(asset))),
 		pricesVisible
 	};
 });

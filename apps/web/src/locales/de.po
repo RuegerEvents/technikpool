@@ -1699,6 +1699,7 @@ msgstr "Kamerazugriff verweigert. Auf Texteingabe gewechselt."
 msgid "Assigned to location"
 msgstr "Standort zugewiesen"
 
+#: src/lib/components/ui/asset-place/asset-place.svelte
 #: src/routes/assets/license-list.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -8034,6 +8035,7 @@ msgstr "Neue Adresse eingeben"
 msgid "Choose an existing address"
 msgstr "Vorhandene Adresse auswählen"
 
+#: src/lib/components/ui/asset-place/asset-place.svelte
 #: src/routes/assets/+page.svelte
 msgid "Mixed"
 msgstr "Gemischt"
@@ -12379,3 +12381,18 @@ msgstr "Prüfen ({0})"
 #: src/lib/components/ui/bulk-actions-bar.svelte
 msgid "or"
 msgstr "oder"
+
+#. 0: place.home
+#: src/lib/components/ui/asset-place/asset-place.svelte
+msgid "Checked out · home location: {0}"
+msgstr "Ausgecheckt · Stammstandort: {0}"
+
+#: src/lib/components/ui/asset-place/asset-place.svelte
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Checked out to"
+msgstr "Ausgecheckt an"
+
+#. 0: bundle.location.name
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Home location: {0}"
+msgstr "Stammstandort: {0}"

@@ -34,6 +34,12 @@
 	import CsvImportModal from '#lib/components/CsvImportModal.svelte';
 	import { AssetStatusBadge, assetStatusLabel } from '#lib/components/ui/asset-status/index.js';
 	import { SortableHeader } from '#lib/components/ui/sortable-header/index.js';
+	import {
+		AssetPlace,
+		placeOf,
+		sharedPlace,
+		type Place
+	} from '#lib/components/ui/asset-place/index.js';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import LicenseList from './license-list.svelte';
 	import { Modal } from '#lib/components/ui/modal/index.js';
@@ -267,7 +273,7 @@
 
 	type InstanceGroup = BundleInstance & {
 		filteredAssets: BundleAsset[];
-		locationLabel: string | null;
+		place: Place;
 		available: number;
 		unavailable: number;
 		maintenance: number;
@@ -276,7 +282,7 @@
 
 	type TemplateGroup = TemplateData & {
 		instanceGroups: InstanceGroup[];
-		locationLabel: string | null;
+		place: Place;
 		totalAssets: number;
 		// Bundle-instance counts (not asset counts) — how many physical kits of
 		// this type are ready to send out vs. need attention.
@@ -500,7 +506,7 @@
 		// By what the badge says, so the order matches what is on screen.
 		status: (a) => assetStatusLabel(a.status),
 		// The column is hidden for retired units; a sort by it must not linger there.
-		location: (a) => (showingRetired ? null : (a.location?.name ?? null)),
+		location: (a) => (showingRetired ? null : placeSortKey(placeOf(a))),
 		organization: (a) => orgLabel(a.organization),
 		bundle: (a) => a.bundle?.template.name ?? null
 	};
@@ -524,21 +530,15 @@
 	// A row that stands for several units names the place they share, or says
 	// that they don't. Read off the units rather than `AssetBundle.location`: a
 	// case is wherever its contents are, and those get moved one at a time.
-	// Units nobody has placed yet don't make the rest "mixed".
-	function mixedLabel() {
-		return 'Mixed';
-	}
-
-	function sharedLocation(units: { location: { name: string } | null }[]): string | null {
-		const names = new Set(units.flatMap((u) => (u.location ? [u.location.name] : [])));
-		if (names.size === 0) return null;
-		if (names.size > 1) return mixedLabel();
-		return [...names][0];
+	// A unit that is checked out is at its production, not on its shelf.
+	function placeSortKey(place: Place): string | null {
+		if (!place) return null;
+		return place.kind === 'mixed' ? 'Mixed' : place.name;
 	}
 
 	// Retired units have left their shelf, so the column stays a dash there.
-	function groupLocation(group: Group): string | null {
-		return showingRetired ? null : sharedLocation(group.assets);
+	function groupPlace(group: Group): Place {
+		return showingRetired ? null : sharedPlace(group.assets);
 	}
 
 	// Bundles and products sort as one list, so sorting by Total puts the biggest
@@ -550,7 +550,7 @@
 	const tableColumns: SortColumns<TableRow> = {
 		product: (r) => (r.kind === 'bundle' ? r.template.name : r.group.name),
 		manufacturer: (r) => (r.kind === 'bundle' ? null : r.group.manufacturerName),
-		location: (r) => (r.kind === 'bundle' ? r.template.locationLabel : groupLocation(r.group)),
+		location: (r) => placeSortKey(r.kind === 'bundle' ? r.template.place : groupPlace(r.group)),
 		category: (r) => {
 			if (r.kind === 'group') return r.group.categoryName;
 			return r.template.category ? categoryLabel(r.template.category) : null;
@@ -581,7 +581,9 @@
 								// Every unit in the case, not the filtered ones: a status
 								// filter doesn't move anything. An empty case has only the
 								// place it was given.
-								locationLabel: sharedLocation(inst.assets) ?? inst.location?.name ?? null,
+								place:
+									sharedPlace(inst.assets) ??
+									(inst.location ? { kind: 'location', name: inst.location.name } : null),
 								available: filteredAssets.filter((a) => a.status === 'AVAILABLE').length,
 								unavailable: filteredAssets.filter((a) => a.status === 'UNAVAILABLE').length,
 								maintenance: filteredAssets.filter((a) => a.status === 'MAINTENANCE').length,
@@ -591,7 +593,7 @@
 						return {
 							...t,
 							instanceGroups,
-							locationLabel: sharedLocation(t.instances.flatMap((inst) => inst.assets)),
+							place: sharedPlace(t.instances.flatMap((inst) => inst.assets)),
 							totalAssets: instanceGroups.reduce((sum, i) => sum + i.filteredAssets.length, 0),
 							totalInstances: instanceGroups.length,
 							availableInstances: instanceGroups.filter(
@@ -931,14 +933,6 @@
 
 	<!-- What the name can't be trusted to say: the ends and the length, spelled
 	     the same way on every row. -->
-	{#snippet sharedLocationLabel(label: string | null)}
-		{#if label === mixedLabel()}
-			<span class="opacity-60">{label}</span>
-		{:else}
-			{label ?? '—'}
-		{/if}
-	{/snippet}
-
 	<!-- The tag, or — in quick-add mode — the button that gives it one. The
 	     row behind it opens the unit, so the click must not get through. -->
 	{#snippet tagCell(asset: QuickTagTarget)}
@@ -1107,7 +1101,9 @@
 							</td>
 							<td class="px-4 py-2"><AssetStatusBadge status={asset.status} /></td>
 							{#if !showingRetired}
-								<td class="px-4 py-2 text-muted-foreground">{asset.location?.name ?? '—'}</td>
+								<td class="px-4 py-2 text-muted-foreground"
+									><AssetPlace place={placeOf(asset)} /></td
+								>
 							{/if}
 							<td class="px-4 py-2 text-muted-foreground">{orgLabel(asset.organization)}</td>
 							<td class="px-4 py-2 text-muted-foreground">
@@ -1210,9 +1206,9 @@
 									<span class="min-w-0 flex-1 truncate font-medium">
 										{instance.tag ?? `Instance ${i + 1}`}
 									</span>
-									{#if instance.locationLabel}
+									{#if instance.place}
 										<span class="truncate text-muted-foreground"
-											>{@render sharedLocationLabel(instance.locationLabel)}</span
+											><AssetPlace place={instance.place} link={false} /></span
 										>
 									{/if}
 									<span class="whitespace-nowrap text-muted-foreground"
@@ -1446,7 +1442,7 @@
 								</td>
 								<td class="px-4 py-3 text-muted-foreground">—</td>
 								<td class="px-4 py-3 text-muted-foreground">
-									{@render sharedLocationLabel(template.locationLabel)}
+									<AssetPlace place={template.place} />
 								</td>
 								<td class="px-4 py-3">
 									{#if template.category}
@@ -1557,7 +1553,7 @@
 										</td>
 										<td class="px-4 py-2"></td>
 										<td class="px-4 py-2 text-xs text-muted-foreground">
-											{@render sharedLocationLabel(instance.locationLabel)}
+											<AssetPlace place={instance.place} />
 										</td>
 										<td class="px-4 py-2"></td>
 										<td class="px-4 py-2 text-right font-mono text-xs tabular-nums">
@@ -1640,7 +1636,7 @@
 													{asset.product.manufacturer?.name}
 												</td>
 												<td class="px-4 py-2 text-xs text-muted-foreground">
-													{asset.location?.name ?? '—'}
+													<AssetPlace place={placeOf(asset)} />
 												</td>
 												<td class="px-4 py-2">
 													<CategoryPill
@@ -1729,7 +1725,7 @@
 								</td>
 								<td class="px-4 py-3 text-muted-foreground">{group.manufacturerName}</td>
 								<td class="px-4 py-3 text-muted-foreground">
-									{@render sharedLocationLabel(groupLocation(group))}
+									<AssetPlace place={groupPlace(group)} />
 								</td>
 								<td class="px-4 py-3">
 									<CategoryPill name={group.categoryName} color={group.categoryColor} />
@@ -1812,7 +1808,7 @@
 											</div>
 										</td>
 										<td class="px-4 py-2 text-xs text-muted-foreground">
-											{showingRetired ? '—' : (asset.location?.name ?? '—')}
+											<AssetPlace place={showingRetired ? null : placeOf(asset)} />
 										</td>
 										<td colspan="6" class="px-4 py-2">
 											<div class="flex items-center gap-4 text-xs text-muted-foreground">

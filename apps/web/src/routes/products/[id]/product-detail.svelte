@@ -14,6 +14,7 @@
 		type ProductEditorActions
 	} from '#lib/components/ui/product-editor/index.js';
 	import { AssetStatusBadge } from '#lib/components/ui/asset-status/index.js';
+	import { AssetPlace, placeOf } from '#lib/components/ui/asset-place/index.js';
 	import { ProductDocuments } from '#lib/components/ui/product-documents/index.js';
 	import {
 		getCategories,
@@ -184,7 +185,8 @@
 												<td class="px-4 py-2 text-muted-foreground"
 													>{unit.bundle?.template.name ?? '—'}</td
 												>
-												<td class="px-4 py-2 text-muted-foreground">{unit.location?.name ?? '—'}</td
+												<td class="px-4 py-2 text-muted-foreground"
+													><AssetPlace place={placeOf(unit)} /></td
 												>
 												<td
 													class="px-4 py-2 font-mono text-xs whitespace-nowrap text-muted-foreground"

@@ -24,6 +24,7 @@
 		Euro,
 		Layers,
 		MapPin,
+		Truck,
 		Star,
 		Tag,
 		Trash2
@@ -53,6 +54,7 @@
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import { AssetStatusBadge } from '#lib/components/ui/asset-status/index.js';
+	import { AssetPlace, placeOf, sharedPlace } from '#lib/components/ui/asset-place/index.js';
 	import {
 		NewAssetModal,
 		type NewAssetModalHandle
@@ -67,6 +69,8 @@
 	let { bundleId }: { bundleId: string } = $props();
 
 	let bundle = $derived(await getBundle(bundleId));
+	// A case that went out as a whole is at its production, not on its shelf.
+	let bundlePlace = $derived(sharedPlace(bundle.assets));
 	let allAssets = $derived(await getAssets());
 	let categories = $derived(await getCategories());
 	let locations = $derived(await getLocations(bundle.template.organizationId));
@@ -672,13 +676,30 @@
 						</span>
 					{/if}
 				</Fact>
-				<Fact icon={MapPin} label="Location">
-					{#if bundle.location}
-						{bundle.location.name}
-					{:else}
-						<span class="font-normal text-muted-foreground">No location</span>
-					{/if}
-				</Fact>
+				{#if bundlePlace?.kind === 'production'}
+					<Fact
+						icon={Truck}
+						label="Checked out to"
+						hint={bundle.location ? `Home location: ${bundle.location.name}` : undefined}
+					>
+						{#if bundlePlace.productionId}
+							<a
+								href={resolve(`productions/${bundlePlace.productionId}`)}
+								class="underline underline-offset-2">{bundlePlace.name}</a
+							>
+						{:else}
+							{bundlePlace.name}
+						{/if}
+					</Fact>
+				{:else}
+					<Fact icon={MapPin} label="Location">
+						{#if bundle.location}
+							{bundle.location.name}
+						{:else}
+							<span class="font-normal text-muted-foreground">No location</span>
+						{/if}
+					</Fact>
+				{/if}
 				{#if bundle.pricesVisible}
 					<Fact icon={Euro} label="Net purchase price" hint="Billed as one line on offers.">
 						{#if bundle.netPurchasePrice}
@@ -787,7 +808,7 @@
 										<AssetStatusBadge status={asset.status} class="px-2.5" />
 									</td>
 									<td class="px-4 py-3 text-sm text-muted-foreground">
-										{asset.location?.name ?? '—'}
+										<AssetPlace place={placeOf(asset)} />
 									</td>
 									<td class="px-4 py-3 text-center">
 										<button

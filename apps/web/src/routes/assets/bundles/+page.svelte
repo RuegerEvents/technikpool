@@ -8,6 +8,7 @@
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
+	import { AssetPlace, sharedPlace } from '#lib/components/ui/asset-place/index.js';
 	import { Layers } from '@lucide/svelte';
 	import { imageSrc } from '#lib/images.js';
 	import { BundleVsAccessoryInfo } from '#lib/components/ui/bundle-vs-accessory-info/index.js';
@@ -105,13 +106,16 @@
 						{#if template.instances.length > 0}
 							<div class="mt-3 flex flex-wrap gap-1.5">
 								{#each template.instances as instance, i (instance.id)}
+									{@const place = sharedPlace(instance.assets)}
 									<a
 										href={resolve(`assets/bundles/${instance.id}`)}
 										class="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground hover:border-foreground hover:text-foreground"
 									>
-										{instance.tag ?? `Instance ${i + 1}`}{instance.location
-											? ` · ${instance.location.name}`
-											: ''}
+										{instance.tag ?? `Instance ${i + 1}`}{#if place?.kind === 'production'}
+											· <AssetPlace {place} link={false} />
+										{:else if instance.location}
+											· {instance.location.name}
+										{/if}
 									</a>
 								{/each}
 							</div>
