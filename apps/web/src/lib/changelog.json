@@ -1,5 +1,19 @@
 [
 	{
+		"version": "0.29.1",
+		"date": "2026-10-04",
+		"en": [
+			"The Devices page scrolls once again and ends where the list ends.",
+			"The location list is no longer cut off inside a dialog.",
+			"In an opened case, each device can show its accessories. The arrow turns amber when one of them is somewhere else — the reason a case reads \"Mixed\"."
+		],
+		"de": [
+			"Die Geräteseite scrollt wieder nur einmal und endet mit der Liste.",
+			"Die Standortauswahl wird in Dialogen nicht mehr abgeschnitten.",
+			"In einem aufgeklappten Case zeigt jedes Gerät auf Wunsch sein Zubehör. Der Pfeil wird gelb, wenn ein Teil davon woanders ist – der Grund, warum ein Case „Gemischt“ anzeigt."
+		]
+	},
+	{
 		"version": "0.29.0",
 		"date": "2026-10-04",
 		"en": [
