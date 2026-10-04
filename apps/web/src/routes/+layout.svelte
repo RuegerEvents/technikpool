@@ -227,6 +227,23 @@
 									{/if}
 									{#if data.isAdmin}
 										<DropdownMenu.Separator class="my-1 h-px bg-border" />
+										<!-- The shared catalogue is the admin's to edit with or without an org. -->
+										{#if !data.hasOrg}
+											<DropdownMenu.Item
+												onSelect={() => goto(resolve('products'))}
+												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+											>
+												<Boxes aria-hidden="true" />
+												Products
+											</DropdownMenu.Item>
+											<DropdownMenu.Item
+												onSelect={() => goto(resolve('manufacturers'))}
+												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+											>
+												<Factory aria-hidden="true" />
+												Manufacturers
+											</DropdownMenu.Item>
+										{/if}
 										<DropdownMenu.Item
 											onSelect={() => goto(resolve('admin/categories'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
@@ -336,6 +353,10 @@
 										><ReceiptText aria-hidden="true" class="size-4" />Invoices</a
 									>
 								{/if}
+							{/if}
+							<!-- A system admin without an org still edits the shared catalogue
+							     (products, manufacturers, categories, connectors). -->
+							{#if data.hasOrg || data.isAdmin}
 								<DropdownMenu.Root>
 									<DropdownMenu.Trigger>
 										{#snippet child({ props })}
@@ -380,7 +401,7 @@
 											sideOffset={6}
 											class="z-50 min-w-[180px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md [&_svg]:size-4"
 										>
-											{#if data.canReadRecords}
+											{#if data.hasOrg && data.canReadRecords}
 												<DropdownMenu.Item
 													onSelect={() => goto(resolve('customers'))}
 													class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
@@ -403,27 +424,29 @@
 												<Factory aria-hidden="true" />
 												Manufacturers
 											</DropdownMenu.Item>
-											<DropdownMenu.Item
-												onSelect={() => goto(resolve('stickers'))}
-												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-											>
-												<Tags aria-hidden="true" />
-												Stickers
-											</DropdownMenu.Item>
-											<DropdownMenu.Item
-												onSelect={() => goto(resolve('inspections'))}
-												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-											>
-												<ClipboardCheck aria-hidden="true" />
-												Inspections
-											</DropdownMenu.Item>
-											<DropdownMenu.Item
-												onSelect={() => goto(resolve('stocktakes'))}
-												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-											>
-												<ListChecks aria-hidden="true" />
-												Stocktakes
-											</DropdownMenu.Item>
+											{#if data.hasOrg}
+												<DropdownMenu.Item
+													onSelect={() => goto(resolve('stickers'))}
+													class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+												>
+													<Tags aria-hidden="true" />
+													Stickers
+												</DropdownMenu.Item>
+												<DropdownMenu.Item
+													onSelect={() => goto(resolve('inspections'))}
+													class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+												>
+													<ClipboardCheck aria-hidden="true" />
+													Inspections
+												</DropdownMenu.Item>
+												<DropdownMenu.Item
+													onSelect={() => goto(resolve('stocktakes'))}
+													class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+												>
+													<ListChecks aria-hidden="true" />
+													Stocktakes
+												</DropdownMenu.Item>
+											{/if}
 											{#if data.isAdmin}
 												<DropdownMenu.Item
 													onSelect={() => goto(resolve('admin/categories'))}
@@ -440,13 +463,15 @@
 													Connectors
 												</DropdownMenu.Item>
 											{/if}
-											<DropdownMenu.Item
-												onSelect={() => goto(resolve('devices'))}
-												class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-											>
-												<ScanBarcode aria-hidden="true" />
-												Scanners
-											</DropdownMenu.Item>
+											{#if data.hasOrg}
+												<DropdownMenu.Item
+													onSelect={() => goto(resolve('devices'))}
+													class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+												>
+													<ScanBarcode aria-hidden="true" />
+													Scanners
+												</DropdownMenu.Item>
+											{/if}
 										</DropdownMenu.Content>
 									</DropdownMenu.Portal>
 								</DropdownMenu.Root>

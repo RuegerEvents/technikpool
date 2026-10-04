@@ -12,6 +12,10 @@ import type { LayoutLoad } from './$types';
 // admin pages.
 const orglessPaths = ['/profile', '/orgs', '/auth', '/legal'];
 
+// The catalogue is shared, not any org's, so a system admin edits it without
+// belonging to one.
+const adminOrglessPaths = ['/admin', '/products', '/manufacturers'];
+
 // Reading `url.pathname` below makes this load run on every navigation, and the
 // catalogs only need fetching when the locale is a different one.
 let loadedLocale: string | undefined;
@@ -31,7 +35,9 @@ export const load: LayoutLoad = async ({ data, url }) => {
 		data.user &&
 		!data.hasOrg &&
 		pathname !== '/' &&
-		!(data.isAdmin && pathname.startsWith('/admin/')) &&
+		!(
+			data.isAdmin && adminOrglessPaths.some((p) => pathname.startsWith(`${p}/`) || pathname === p)
+		) &&
 		!orglessPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`))
 	) {
 		redirect(303, resolve('/'));

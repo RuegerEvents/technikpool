@@ -5241,6 +5241,7 @@ msgstr "<0/> Categories"
 
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
 msgid "<0/> Products"
 msgstr "<0/> Products"
 
@@ -5315,6 +5316,7 @@ msgstr "Apply to all"
 msgid "Category rate: {0}% / day"
 msgstr "Category rate: {0}% / day"
 
+#: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 #: src/routes/+layout.svelte
 msgid "<0/> Manufacturers"
