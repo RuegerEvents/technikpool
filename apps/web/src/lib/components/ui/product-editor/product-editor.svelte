@@ -45,6 +45,7 @@
 	import * as Card from '#lib/components/ui/card/index.js';
 	import { isCable, sameWays } from '#lib/cable.js';
 	import { CategoryPill } from '#lib/components/ui/category-pill/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
 	import { Modal } from '#lib/components/ui/modal/index.js';
 	import ProductActions from './product-actions.svelte';
@@ -753,6 +754,11 @@
 									onchange={() => (keepCurrent = option.keep)}
 									disabled={merging}
 									class="mt-0.5 h-4 w-4"
+								/>
+								<ProductThumb
+									path={option.choice.imagePath}
+									alt={productLabel(option.choice)}
+									size={36}
 								/>
 								<span class="min-w-0 flex-1">
 									<span class="block font-medium">{productLabel(option.choice)}</span>

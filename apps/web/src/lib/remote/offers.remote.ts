@@ -260,6 +260,7 @@ type MissingPrice = {
 	key: string;
 	productId: string;
 	label: string;
+	imagePath: string | null;
 	categoryName: string;
 	categoryNameDe: string | null;
 	categoryColor: string;
@@ -417,6 +418,7 @@ async function computeProductionBilling(
 				key,
 				productId: asset.productId,
 				label: productLabel(asset.product),
+				imagePath: asset.product.imagePath,
 				categoryName: asset.product.category.name,
 				categoryNameDe: asset.product.category.nameDe,
 				categoryColor: asset.product.category.color,

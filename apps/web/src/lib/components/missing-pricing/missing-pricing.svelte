@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import { setOrgCategoryRate } from '#lib/remote/orgs.remote.js';
 	import { getPriceReferences, setOrgProductPrice } from '#lib/remote/assets.remote.js';
 	import { PriceReference } from '#lib/components/price-reference/index.js';
@@ -174,17 +175,20 @@
 				{#each r.missingPrices as group (group.key)}
 					<div class="space-y-3 rounded-md border p-3">
 						<div class="flex flex-wrap items-start justify-between gap-3">
-							<div class="min-w-0">
-								<p class="font-medium">{group.label}</p>
-								<p class="flex items-center gap-1.5 text-sm text-muted-foreground">
-									<span
-										class="h-2 w-2 shrink-0 rounded-full"
-										style="background-color: {group.categoryColor}"
-									></span>
-									{localizedName(group.categoryName, group.categoryNameDe)} ·
-									{plural(group.assets.length, ['# unit', '# units'])} ·
-									{group.organizationNames.join(', ')}
-								</p>
+							<div class="flex min-w-0 items-start gap-3">
+								<ProductThumb path={group.imagePath} alt={group.label} size={36} />
+								<div class="min-w-0">
+									<p class="font-medium">{group.label}</p>
+									<p class="flex items-center gap-1.5 text-sm text-muted-foreground">
+										<span
+											class="h-2 w-2 shrink-0 rounded-full"
+											style="background-color: {group.categoryColor}"
+										></span>
+										{localizedName(group.categoryName, group.categoryNameDe)} ·
+										{plural(group.assets.length, ['# unit', '# units'])} ·
+										{group.organizationNames.join(', ')}
+									</p>
+								</div>
 							</div>
 							{#if r.canEditPrices}
 								<div class="flex items-center gap-2">

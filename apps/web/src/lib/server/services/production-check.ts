@@ -97,6 +97,7 @@ export interface ProductionCheckItem {
 	assetTag: string | null;
 	productName: string;
 	productCaption: string | null;
+	productImagePath: string | null;
 	manufacturerName: string | null;
 	/** The org that owns the unit, shown when it is not the production's. */
 	lentBy: string | null;
@@ -302,6 +303,7 @@ export async function getProductionCheck(
 				assetTag: item.asset.assetTag,
 				productName: item.asset.product.name,
 				productCaption: item.asset.product.caption,
+				productImagePath: item.asset.product.imagePath,
 				manufacturerName: item.asset.product.manufacturer?.name ?? null,
 				lentBy: lent ? item.asset.organization.shortName || item.asset.organization.name : null,
 				accessoryOf: item.asset.parentAssetId,

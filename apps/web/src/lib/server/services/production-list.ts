@@ -30,7 +30,12 @@ export const LIST_ITEM_INCLUDE = {
 			location: { select: { name: true } },
 			organization: { select: { name: true, shortName: true } },
 			product: {
-				select: { name: true, caption: true, manufacturer: { select: { name: true } } }
+				select: {
+					name: true,
+					caption: true,
+					imagePath: true,
+					manufacturer: { select: { name: true } }
+				}
 			},
 			// Only whether there are any: a unit with accessories is never loose.
 			accessories: { where: ACTIVE_ASSET_WHERE, select: { id: true }, take: 1 }
@@ -133,6 +138,7 @@ export function buildLines(
 			key,
 			productName: item.asset.product.name,
 			productCaption: item.asset.product.caption,
+			productImagePath: item.asset.product.imagePath,
 			manufacturerName: item.asset.product.manufacturer?.name ?? null,
 			lentBy: lent ? lenderLabel(item) : null,
 			group: groupOf(item, productionOrgId, byLender),

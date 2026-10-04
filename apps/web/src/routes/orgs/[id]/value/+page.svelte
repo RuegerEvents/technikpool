@@ -2,6 +2,7 @@
 	import { categoryLabel } from '#lib/category.js';
 	import { naturalCompare } from '#lib/sort.js';
 	import { makerAndName } from '#lib/product-label.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import * as Card from '#lib/components/ui/card/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
@@ -219,13 +220,19 @@
 							{#each section.rows as row (row.id)}
 								<tr class="border-b last:border-0">
 									<td class="py-2 pr-4">
-										<a href={resolve(`products/${row.id}`)} class="hover:underline">
-											{makerAndName(row.manufacturerName, row.name)}
-										</a>
-										{#if row.damaged > 0}
-											<span class="ml-1 text-xs text-muted-foreground">({row.damaged} damaged)</span
-											>
-										{/if}
+										<div class="flex items-center gap-2">
+											<ProductThumb path={row.imagePath} alt={row.name} />
+											<div class="min-w-0">
+												<a href={resolve(`products/${row.id}`)} class="hover:underline">
+													{makerAndName(row.manufacturerName, row.name)}
+												</a>
+												{#if row.damaged > 0}
+													<span class="ml-1 text-xs text-muted-foreground"
+														>({row.damaged} damaged)</span
+													>
+												{/if}
+											</div>
+										</div>
 									</td>
 									<td class="py-2 pr-4 text-right tabular-nums">{row.units}</td>
 									<td class="py-2 pr-4 text-right tabular-nums">

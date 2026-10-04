@@ -6,6 +6,7 @@
 	import { getStocktake } from '#lib/remote/stocktakes.remote.js';
 	import { categoryLabel } from '#lib/category.js';
 	import { orgLabel } from '#lib/utils.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import { stocktakeStateLabel, unexpectedReasonLabel } from '#lib/stocktake-labels.svelte.js';
 
 	const stocktakeId = $derived(page.params.id as string);
@@ -137,6 +138,9 @@
 				<tbody>
 					{#each stocktake.products as p (p.product.id)}
 						<tr class="border-b border-gray-300">
+							<td class="w-8 py-1 pr-2">
+								<ProductThumb path={p.product.imagePath} alt={p.product.name} size={24} eager />
+							</td>
 							<td class="py-1 pr-2">
 								{p.product.manufacturer
 									? `${p.product.manufacturer.name} ${p.product.name}`
@@ -176,6 +180,14 @@
 								<td class="py-1 pr-2 font-mono text-xs"
 									>{i.asset.assetTag ?? i.asset.serialNumber ?? '—'}</td
 								>
+								<td class="w-8 py-1 pr-2">
+									<ProductThumb
+										path={i.asset.product.imagePath}
+										alt={i.asset.product.name}
+										size={24}
+										eager
+									/>
+								</td>
 								<td class="py-1 pr-2">{name(i)}</td>
 								<td class="py-1 pr-2 text-gray-600">{categoryLabel(i.asset.product.category)}</td>
 								<td class="py-1 text-gray-600">{detail(i)}</td>

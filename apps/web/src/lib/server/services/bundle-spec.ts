@@ -34,21 +34,27 @@ export async function bundleTypeSpec(templateId: string): Promise<BundleTypeSpec
 			select: {
 				bundleId: true,
 				productId: true,
-				product: { select: { name: true, manufacturer: { select: { name: true } } } }
+				product: {
+					select: { name: true, imagePath: true, manufacturer: { select: { name: true } } }
+				}
 			}
 		})
 	]);
 	if (instanceCount === 0) return { templateId, instanceCount, lines: [] };
 
 	const perInstance = new Map<string, Map<string, number>>();
-	const labels = new Map<string, { name: string; manufacturerName: string | null }>();
+	const labels = new Map<
+		string,
+		{ name: string; manufacturerName: string | null; imagePath: string | null }
+	>();
 	for (const member of members) {
 		const counts = perInstance.get(member.bundleId!) ?? new Map<string, number>();
 		counts.set(member.productId, (counts.get(member.productId) ?? 0) + 1);
 		perInstance.set(member.bundleId!, counts);
 		labels.set(member.productId, {
 			name: member.product.name,
-			manufacturerName: member.product.manufacturer?.name ?? null
+			manufacturerName: member.product.manufacturer?.name ?? null,
+			imagePath: member.product.imagePath
 		});
 	}
 	const quantities = new Map<string, number>();
@@ -62,7 +68,8 @@ export async function bundleTypeSpec(templateId: string): Promise<BundleTypeSpec
 			productId,
 			quantity,
 			name: labels.get(productId)!.name,
-			manufacturerName: labels.get(productId)!.manufacturerName
+			manufacturerName: labels.get(productId)!.manufacturerName,
+			imagePath: labels.get(productId)!.imagePath
 		}))
 		.sort((a, b) =>
 			naturalCompare(

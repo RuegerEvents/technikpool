@@ -4,6 +4,7 @@
 	import { getCatalogTransactions, revertCatalogChange } from '#lib/remote/assets.remote.js';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import { getErrorMessage } from '#lib/utils.js';
 	import { PRODUCT_VIEWS } from '#lib/product-views.js';
 	import { toast } from 'svelte-sonner';
@@ -14,6 +15,7 @@
 	const EMPTY_LOG: Awaited<ReturnType<typeof getCatalogTransactions>> = {
 		entries: [],
 		products: {},
+		productImages: {},
 		manufacturers: {},
 		categories: {},
 		organizations: {}
@@ -194,7 +196,20 @@
 									>
 								{/if}
 							</td>
-							<td class="px-4 py-3 font-medium">{subject(entry)}</td>
+							<td class="px-4 py-3 font-medium">
+								{#if entry.productId}
+									<div class="flex items-center gap-2">
+										<ProductThumb
+											path={log.productImages[entry.productId]}
+											alt={subject(entry)}
+											size={24}
+										/>
+										{subject(entry)}
+									</div>
+								{:else}
+									{subject(entry)}
+								{/if}
+							</td>
 							<td class="px-4 py-3 text-muted-foreground">
 								{entry.organizationId
 									? (log.organizations[entry.organizationId] ?? entry.organizationId)

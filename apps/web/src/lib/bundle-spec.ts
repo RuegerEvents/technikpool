@@ -22,6 +22,7 @@ export type BundleSpecLine = {
 	productId: string;
 	name: string;
 	manufacturerName: string | null;
+	imagePath: string | null;
 	quantity: number;
 };
 

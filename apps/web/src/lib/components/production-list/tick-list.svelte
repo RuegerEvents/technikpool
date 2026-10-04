@@ -1,10 +1,11 @@
 <script
 	lang="ts"
-	generics="U extends { assetId: string; assetTag: string | null; productName: string; productCaption: string | null; accessoryOf: string | null }"
+	generics="U extends { assetId: string; assetTag: string | null; productName: string; productCaption: string | null; productImagePath: string | null; accessoryOf: string | null }"
 >
 	import { Handshake, MapPin } from '@lucide/svelte';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { CountStepper } from '#lib/components/ui/count-stepper/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import type { ListLine, ListSection } from '#lib/production-list.js';
 
 	// The list a production's equipment is worked through, whatever a tick means
@@ -108,6 +109,7 @@
 									: ''}"
 								aria-hidden="true">{line.done >= line.total ? '✓' : ''}</span
 							>
+							<ProductThumb path={line.productImagePath} alt={line.productName} size={36} />
 							<span class="min-w-0 flex-1">
 								<span class="block truncate font-medium">{line.productName}</span>
 								<span class="block truncate text-xs text-muted-foreground">
@@ -142,6 +144,7 @@
 									onchange={() => ontoggle(unit)}
 									class="size-4 accent-emerald-600"
 								/>
+								<ProductThumb path={unit.productImagePath} alt={unit.productName} size={36} />
 								<span class="min-w-0 flex-1">
 									<span class="block truncate font-medium">{unit.productName}</span>
 									<span class="block truncate text-xs text-muted-foreground">

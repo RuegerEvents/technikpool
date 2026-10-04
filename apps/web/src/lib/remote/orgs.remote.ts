@@ -621,6 +621,7 @@ export const getOrgEquipmentValue = query(v.string(), async (orgId: string) => {
 			select: {
 				id: true,
 				name: true,
+				imagePath: true,
 				manufacturer: { select: { name: true } },
 				category: { select: { id: true, name: true, nameDe: true, color: true, sortOrder: true } }
 			}
@@ -642,6 +643,7 @@ export const getOrgEquipmentValue = query(v.string(), async (orgId: string) => {
 		return {
 			id: p.id,
 			name: p.name,
+			imagePath: p.imagePath,
 			manufacturerName: p.manufacturer?.name ?? null,
 			category: p.category,
 			units,

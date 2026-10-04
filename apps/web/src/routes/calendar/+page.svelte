@@ -10,6 +10,7 @@
 	import { FilterPopover } from '#lib/components/ui/filter-popover/index.js';
 	import { CalendarFeedButton } from '#lib/components/ui/calendar-feed/index.js';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import {
 		ProductionHoverCard,
 		type ProductionHoverInfo
@@ -471,6 +472,8 @@
 		id: string;
 		name: string;
 		mfr: string;
+		/** A product's picture, null if it has none; undefined for a kit, which has no slot for one. */
+		imagePath: string | null | undefined;
 		count: number;
 		collapsed: boolean;
 		collapsedBars: CollapsedBar[];
@@ -510,7 +513,10 @@
 
 		const rows: Row[] = [];
 		const byBundle = new Map<string, { name: string; assets: typeof rawData }>();
-		const byProduct = new Map<string, { name: string; mfr: string; assets: typeof rawData }>();
+		const byProduct = new Map<
+			string,
+			{ name: string; mfr: string; imagePath: string | null; assets: typeof rawData }
+		>();
 
 		for (const a of filteredData) {
 			if (a.bundle) {
@@ -523,6 +529,7 @@
 					byProduct.set(pid, {
 						name: a.product.name,
 						mfr: a.product.manufacturer?.name ?? '',
+						imagePath: a.product.imagePath,
 						assets: []
 					});
 				byProduct.get(pid)!.assets.push(a);
@@ -533,6 +540,7 @@
 			groupId: string,
 			groupName: string,
 			mfr: string,
+			imagePath: string | null | undefined,
 			assets: typeof rawData,
 			isBundle: boolean
 		) {
@@ -586,6 +594,7 @@
 				id: groupId,
 				name: groupName,
 				mfr,
+				imagePath,
 				count: assets.length,
 				collapsed,
 				collapsedBars
@@ -667,8 +676,9 @@
 			}
 		}
 
-		for (const [bid, bg] of byBundle) addGroupRows(bid, bg.name, '', bg.assets, true);
-		for (const [pid, pg] of byProduct) addGroupRows(pid, pg.name, pg.mfr, pg.assets, false);
+		for (const [bid, bg] of byBundle) addGroupRows(bid, bg.name, '', undefined, bg.assets, true);
+		for (const [pid, pg] of byProduct)
+			addGroupRows(pid, pg.name, pg.mfr, pg.imagePath, pg.assets, false);
 
 		return rows;
 	});
@@ -1547,6 +1557,9 @@
 									>
 										<path d="m9 18 6-6-6-6" />
 									</svg>
+									{#if row.imagePath !== undefined}
+										<ProductThumb path={row.imagePath} alt={row.name} size={20} />
+									{/if}
 									<span class="truncate text-xs font-semibold">{row.name}</span>
 									<span class="ml-auto shrink-0 text-xs text-muted-foreground">×{row.count}</span>
 								</button>

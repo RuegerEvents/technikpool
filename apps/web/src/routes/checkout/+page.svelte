@@ -10,7 +10,8 @@
 	import { Label } from '#lib/components/ui/label/index.js';
 	import { Modal } from '#lib/components/ui/modal/index.js';
 	import { SvelteSet } from 'svelte/reactivity';
-	import type { ScanGroup } from '#lib/server/services/checkout.js';
+	import type { ScanGroup, ScanGroupUnit } from '#lib/server/services/checkout.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import * as Card from '#lib/components/ui/card/index.js';
 	import { LocationSelect } from '#lib/components/ui/location-select/index.js';
 	import { ProductionSelect } from '#lib/components/ui/production-select/index.js';
@@ -47,6 +48,7 @@
 		assetTag: string;
 		productName: string;
 		manufacturerName: string | null;
+		imagePath: string | null;
 		action: string;
 		targetName: string;
 		status: 'success' | 'error';
@@ -61,7 +63,11 @@
 	// A unit scanned out of its kit, or off the unit it hangs off, is booked at
 	// once; what it belongs with is offered afterwards, so a scan never waits on
 	// a tap. Offers queue up — the camera keeps reading while one is open.
-	type GroupOffer = ScanGroup & { targetType: 'location' | 'production'; targetId: string };
+	type GroupOffer = Omit<ScanGroup, 'units'> & {
+		units: (ScanGroupUnit & { imagePath: string | null })[];
+		targetType: 'location' | 'production';
+		targetId: string;
+	};
 	let groupOffers = $state<GroupOffer[]>([]);
 	let offer = $derived(groupOffers[0] ?? null);
 	let offerChecked = new SvelteSet<string>();
@@ -93,6 +99,7 @@
 					assetTag: '',
 					productName: offer.name,
 					manufacturerName: null,
+					imagePath: null,
 					action: '',
 					targetName: result.targetName,
 					status: 'success',
@@ -245,6 +252,7 @@
 					assetTag: t,
 					productName: result.asset.productName,
 					manufacturerName: result.asset.manufacturerName,
+					imagePath: result.asset.imagePath,
 					action: result.action,
 					targetName: result.targetName,
 					status: 'success',
@@ -260,6 +268,7 @@
 					assetTag: t,
 					productName: '',
 					manufacturerName: '',
+					imagePath: null,
 					action: '',
 					targetName: '',
 					status: 'error',
@@ -549,8 +558,13 @@
 								<td class="px-3 py-2 font-mono text-xs">{entry.assetTag}</td>
 								<td class="px-3 py-2">
 									{#if entry.productName}
-										<p class="font-medium">{entry.productName}</p>
-										<p class="text-xs text-muted-foreground">{entry.manufacturerName}</p>
+										<div class="flex items-start gap-3">
+											<ProductThumb path={entry.imagePath} alt={entry.productName} size={36} />
+											<div class="min-w-0">
+												<p class="font-medium">{entry.productName}</p>
+												<p class="text-xs text-muted-foreground">{entry.manufacturerName}</p>
+											</div>
+										</div>
 									{:else}
 										<span class="text-muted-foreground">—</span>
 									{/if}
@@ -606,6 +620,7 @@
 							onchange={(e) =>
 								e.currentTarget.checked ? offerChecked.add(unit.id) : offerChecked.delete(unit.id)}
 						/>
+						<ProductThumb path={unit.imagePath} alt={unit.productName} size={36} />
 						<span class="min-w-0 flex-1">
 							<span class="block text-sm font-medium">
 								{unit.manufacturerName

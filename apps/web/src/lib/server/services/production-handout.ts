@@ -66,6 +66,7 @@ export interface HandoutItem {
 	assetTag: string | null;
 	productName: string;
 	productCaption: string | null;
+	productImagePath: string | null;
 	manufacturerName: string | null;
 	lentBy: string | null;
 	accessoryOf: string | null;
@@ -187,6 +188,7 @@ export async function getHandout(
 				assetTag: item.asset.assetTag,
 				productName: item.asset.product.name,
 				productCaption: item.asset.product.caption,
+				productImagePath: item.asset.product.imagePath,
 				manufacturerName: item.asset.product.manufacturer?.name ?? null,
 				lentBy: lent ? lenderLabel(item) : null,
 				accessoryOf: item.asset.parentAssetId,

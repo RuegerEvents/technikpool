@@ -131,6 +131,7 @@ export const getStocktakeProducts = query(v.string(), async (organizationId) => 
 			id: true,
 			name: true,
 			categoryId: true,
+			imagePath: true,
 			manufacturer: { select: { name: true } }
 		},
 		orderBy: { name: 'asc' }

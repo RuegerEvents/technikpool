@@ -10,10 +10,19 @@
 		size?: number;
 		/** Fill the parent instead of a fixed square — for the grid view's card image. */
 		fill?: boolean;
+		/** Load at once — for print pages, where a lazy image below the fold never arrives. */
+		eager?: boolean;
 		class?: string;
 	};
 
-	let { path, alt = '', size = 28, fill = false, class: className }: Props = $props();
+	let {
+		path,
+		alt = '',
+		size = 28,
+		fill = false,
+		eager = false,
+		class: className
+	}: Props = $props();
 
 	let src = $derived(imageSrc(path));
 	let box = $derived(fill ? undefined : `width: ${size}px; height: ${size}px;`);
@@ -30,7 +39,7 @@
 	<img
 		{src}
 		{alt}
-		loading="lazy"
+		loading={eager ? 'eager' : 'lazy'}
 		class={cn('shrink-0 rounded border bg-background object-contain p-px', boxClass, className)}
 		style={box}
 	/>

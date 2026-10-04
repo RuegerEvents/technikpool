@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { getBundle } from '#lib/remote/assets.remote.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import { onMount } from 'svelte';
 
 	const bundleId = $derived(page.params.id as string);
@@ -72,7 +73,17 @@
 					<td class="py-3 text-center">
 						<div class="inline-block h-5 w-5 border-2 border-black"></div>
 					</td>
-					<td class="py-3 font-medium">{asset.product.name}</td>
+					<td class="py-3 font-medium">
+						<div class="flex items-center gap-2">
+							<ProductThumb
+								path={asset.product.imagePath}
+								alt={asset.product.name}
+								size={24}
+								eager
+							/>
+							{asset.product.name}
+						</div>
+					</td>
 					<td class="py-3">{asset.product.manufacturer?.name}</td>
 					<td class="py-3 font-mono text-sm">{asset.serialNumber || 'N/A'}</td>
 					<td class="py-3 text-right font-mono text-sm">{asset.assetTag || 'N/A'}</td>

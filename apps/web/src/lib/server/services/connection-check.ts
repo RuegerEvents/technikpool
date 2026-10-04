@@ -24,13 +24,20 @@ type DevicePort = {
 	direction: 'in' | 'out' | null;
 };
 
-export type CheckDevice = { unitId: string; productName: string; ports: DevicePort[] };
+export type CheckDevice = {
+	unitId: string;
+	productName: string;
+	/** Carried through to the finding, for its thumbnail. */
+	imagePath?: string | null;
+	ports: DevicePort[];
+};
 /** One way of a cable — a lead has one, a loom one per pair it carries. */
 export type CheckCable = { unitId: string; ends: [string | null, string | null] };
 
 /** Required ports of one product that no cable on the list fits. */
 export type UnfedFinding = {
 	productName: string;
+	imagePath: string | null;
 	/** The connectors the cable may plug into — two or more for a group. */
 	connectors: string[];
 	label: string | null;
@@ -130,6 +137,7 @@ export function checkConnections(
 			}
 			const line = lines.get(key) ?? {
 				productName: device.productName,
+				imagePath: device.imagePath ?? null,
 				connectors: alternatives.map((id) => byId.get(id)?.name ?? id),
 				label: ports.find((p) => p.label)?.label ?? null,
 				needed: 0
@@ -250,6 +258,7 @@ export async function productionConnectionCheck(productionId: string): Promise<C
 						product: {
 							select: {
 								name: true,
+								imagePath: true,
 								categoryId: true,
 								connectorAId: true,
 								connectorBId: true,
@@ -281,6 +290,7 @@ export async function productionConnectionCheck(productionId: string): Promise<C
 			devices.push({
 				unitId: item.assetId,
 				productName: product.name,
+				imagePath: product.imagePath,
 				ports: product.ports.map((p) => ({
 					connectorId: p.connectorId,
 					count: p.count,

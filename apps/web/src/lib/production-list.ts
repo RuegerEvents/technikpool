@@ -24,6 +24,8 @@ export interface ListLine {
 	key: string;
 	productName: string;
 	productCaption: string | null;
+	/** The product's picture, as a stored key — see #lib/images. */
+	productImagePath: string | null;
 	manufacturerName: string | null;
 	lentBy: string | null;
 	group: ListGroup;

@@ -3091,7 +3091,7 @@ export const getCatalogTransactions = query(async () => {
 			where: {
 				id: { in: [...new Set(entries.map((e) => e.productId).filter((id): id is string => !!id))] }
 			},
-			select: { id: true, name: true, manufacturer: { select: { name: true } } }
+			select: { id: true, name: true, imagePath: true, manufacturer: { select: { name: true } } }
 		}),
 		prisma.manufacturer.findMany({
 			where: {
@@ -3121,6 +3121,7 @@ export const getCatalogTransactions = query(async () => {
 	return {
 		entries,
 		products: Object.fromEntries(products.map((p) => [p.id, productLabel(p)] as const)),
+		productImages: Object.fromEntries(products.map((p) => [p.id, p.imagePath] as const)),
 		manufacturers: Object.fromEntries(manufacturers.map((m) => [m.id, m.name] as const)),
 		categories: Object.fromEntries(categories.map((c) => [c.id, c.nameDe || c.name] as const)),
 		organizations: Object.fromEntries(

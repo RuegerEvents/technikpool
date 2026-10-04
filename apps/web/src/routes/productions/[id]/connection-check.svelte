@@ -4,6 +4,7 @@
 	// and nothing at all for a production whose devices mark no port required.
 	import { getConnectionCheck } from '#lib/remote/productions.remote.js';
 	import { plural } from '#lib/utils.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 
 	let { productionId }: { productionId: string } = $props();
 
@@ -29,12 +30,15 @@
 			</p>
 			<ul class="space-y-1">
 				{#each check.unfed as f (f.productName + f.connectors.join())}
-					<li>
-						<span class="font-medium">{f.productName}</span>
-						<span class="text-muted-foreground">
-							— {f.missing} of {f.needed}
-							{f.label ?? ''} ({f.connectors.join(' / ')}) without a cable</span
-						>
+					<li class="flex items-start gap-2">
+						<ProductThumb path={f.imagePath} alt={f.productName} size={24} />
+						<span>
+							<span class="font-medium">{f.productName}</span>
+							<span class="text-muted-foreground">
+								— {f.missing} of {f.needed}
+								{f.label ?? ''} ({f.connectors.join(' / ')}) without a cable</span
+							>
+						</span>
 					</li>
 				{/each}
 				{#each check.unsourced as u (u.connector)}

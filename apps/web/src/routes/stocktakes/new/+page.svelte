@@ -7,6 +7,7 @@
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
 	import { Label } from '#lib/components/ui/label/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import { categoryLabel } from '#lib/category.js';
 	import { getErrorMessage, orgLabel } from '#lib/utils.js';
@@ -211,16 +212,19 @@
 							{#each productMatches as p (p.id)}
 								<button
 									type="button"
-									class="block w-full px-3 py-2 text-left text-sm hover:bg-muted"
+									class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
 									onclick={() => {
 										productIds = [...productIds, p.id];
 										productSearch = '';
 									}}
 								>
-									{#if p.manufacturer}<span class="text-muted-foreground"
-											>{p.manufacturer.name}</span
-										>{/if}
-									{p.name}
+									<ProductThumb path={p.imagePath} alt={p.name} size={24} />
+									<span>
+										{#if p.manufacturer}<span class="text-muted-foreground"
+												>{p.manufacturer.name}</span
+											>{/if}
+										{p.name}
+									</span>
 								</button>
 							{/each}
 						</div>

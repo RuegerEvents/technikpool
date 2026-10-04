@@ -25,6 +25,7 @@
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { AssetStatusBadge } from '#lib/components/ui/asset-status/index.js';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import { UnitPicker, type PickerUnit } from '#lib/components/ui/unit-picker/index.js';
 	import { isBookableStatus } from '#lib/asset-status.js';
 
@@ -280,8 +281,9 @@
 						</p>
 						<ul class="mt-2 space-y-1 text-sm">
 							{#each shortfall as { line, have, missing } (line.productId)}
-								<li class={missing > 0 ? 'text-muted-foreground' : ''}>
+								<li class="flex items-center gap-2 {missing > 0 ? 'text-muted-foreground' : ''}">
 									<span class="font-mono text-xs">{have}/{line.quantity}</span>
+									<ProductThumb path={line.imagePath} alt={line.name} size={24} />
 									{makerAndName(line.manufacturerName, line.name)}
 								</li>
 							{/each}
@@ -300,7 +302,16 @@
 								<tbody>
 									{#each selectedAssets as asset (asset.id)}
 										<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
-											<td class="px-3 py-2 font-medium">{asset.product.name}</td>
+											<td class="px-3 py-2 font-medium">
+												<div class="flex items-center gap-2">
+													<ProductThumb
+														path={asset.product.imagePath}
+														alt={asset.product.name}
+														size={28}
+													/>
+													{asset.product.name}
+												</div>
+											</td>
 											<td class="px-3 py-2 text-muted-foreground">
 												{asset.product.manufacturer?.name}
 											</td>
