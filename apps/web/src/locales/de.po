@@ -9774,7 +9774,7 @@ msgstr "Noch nicht gezählt ({0})"
 msgid "Missing ({0})"
 msgstr "Fehlend ({0})"
 
-#. 0: stocktake.items.length
+#. 0: stocktake.items.length - (showOut ? 0 \\: counts.out)
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "All ({0})"
 msgstr "Alle ({0})"
@@ -12542,3 +12542,8 @@ msgstr "Sie werden sofort nach {0} umgebucht und dabei von jeder Produktion zur�
 #: src/routes/productions/[id]/handout-detail.svelte
 msgid "They are checked out to the production right away."
 msgstr "Sie werden sofort auf die Produktion ausgecheckt."
+
+#. 0: counts.out
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "<0/> Show units out on a production ({0})"
+msgstr "<0/> Geräte auf Produktion anzeigen ({0})"

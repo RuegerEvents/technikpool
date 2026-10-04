@@ -9774,7 +9774,7 @@ msgstr "Not counted yet ({0})"
 msgid "Missing ({0})"
 msgstr "Missing ({0})"
 
-#. 0: stocktake.items.length
+#. 0: stocktake.items.length - (showOut ? 0 \\: counts.out)
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "All ({0})"
 msgstr "All ({0})"
@@ -12542,3 +12542,8 @@ msgstr "They are put on {0} right away, and come back from any production they a
 #: src/routes/productions/[id]/handout-detail.svelte
 msgid "They are checked out to the production right away."
 msgstr "They are checked out to the production right away."
+
+#. 0: counts.out
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "<0/> Show units out on a production ({0})"
+msgstr "<0/> Show units out on a production ({0})"

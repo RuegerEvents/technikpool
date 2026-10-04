@@ -16,6 +16,7 @@
 	import { CategoryPill } from '#lib/components/ui/category-pill/index.js';
 	import { AssetStatusBadge } from '#lib/components/ui/asset-status/index.js';
 	import StocktakeProgress from '#lib/components/stocktake-progress.svelte';
+	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import { categoryLabel } from '#lib/category.js';
 	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
 	import { errorCodeOf } from '#lib/errors.js';
@@ -339,6 +340,9 @@
 	let categoryFilter = $state('');
 	let locationFilter = $state('');
 	let search = $state('');
+	// Units out on a production can't be on the shelf, so they only clutter the
+	// list unless asked for. Picking "Out on a production" shows them regardless.
+	let showOut = $state(false);
 
 	let counts = $derived.by(() => {
 		const c: Record<StocktakeItemState, number> = {
@@ -370,6 +374,7 @@
 	let visibleItems = $derived.by(() => {
 		const q = search.trim().toLowerCase();
 		return stocktake.items.filter((i) => {
+			if (i.state === 'out' && !showOut && effectiveState !== 'out') return false;
 			if (
 				effectiveState === 'attention'
 					? !i.needsAttention
@@ -639,7 +644,9 @@
 
 	<Card.Root>
 		<Card.Content class="space-y-4">
-			<StocktakeProgress progress={stocktake.progress} />
+			<!-- Units out on a production are no part of the count, so the bar never
+			     mentions them either; the list shows them on request. -->
+			<StocktakeProgress progress={{ ...stocktake.progress, out: 0 }} />
 			{#if stocktake.recounts.length > 0}
 				<p class="text-sm text-muted-foreground">
 					Recounted in
@@ -745,7 +752,7 @@
 			onchange={(e) => (stateFilter = e.currentTarget.value as StateFilter)}
 			class={selectClass}
 		>
-			<option value="all">All ({stocktake.items.length})</option>
+			<option value="all">All ({stocktake.items.length - (showOut ? 0 : counts.out)})</option>
 			{#if isOpen}
 				<option value="open">Not counted yet ({counts.open})</option>
 			{:else}
@@ -771,6 +778,12 @@
 			</select>
 		{/if}
 		<Input bind:value={search} placeholder="Search…" class="h-9 w-full sm:w-56" />
+		{#if counts.out > 0 && effectiveState !== 'out'}
+			<label class="flex items-center gap-2 text-sm">
+				<input type="checkbox" bind:checked={showOut} class="size-4" />
+				Show units out on a production ({counts.out})
+			</label>
+		{/if}
 	</div>
 
 	{#if visibleProducts.length > 0}
@@ -797,17 +810,22 @@
 							{@const here = p.locations.find((l) => l.location.id === locationId)}
 							<tr class="border-b align-top last:border-0">
 								<td class="px-4 py-2">
-									<p class="font-medium">
-										{#if p.product.manufacturer}<span class="font-normal text-muted-foreground"
-												>{p.product.manufacturer.name}</span
-											>{/if}
-										{p.product.name}
-									</p>
-									<CategoryPill
-										name={categoryLabel(p.product.category)}
-										color={p.product.category.color}
-										class="mt-1"
-									/>
+									<div class="flex items-start gap-3">
+										<ProductThumb path={p.product.imagePath} alt={p.product.name} size={36} />
+										<div class="min-w-0">
+											<p class="font-medium">
+												{#if p.product.manufacturer}<span class="font-normal text-muted-foreground"
+														>{p.product.manufacturer.name}</span
+													>{/if}
+												{p.product.name}
+											</p>
+											<CategoryPill
+												name={categoryLabel(p.product.category)}
+												color={p.product.category.color}
+												class="mt-1"
+											/>
+										</div>
+									</div>
 								</td>
 								<td class="px-4 py-2 text-xs text-muted-foreground">
 									{#each p.locations as l (l.location.id)}
@@ -891,25 +909,34 @@
 									/>
 								</td>
 								<td class="px-3 py-2 {item.asset.parentAssetId ? 'pl-8' : ''}">
-									<p class="font-medium">
-										{#if item.asset.product.manufacturer}<span
-												class="font-normal text-muted-foreground"
-												>{item.asset.product.manufacturer.name}</span
-											>{/if}
-										{item.asset.product.name}
-									</p>
-									<p class="text-xs text-muted-foreground">
-										{item.asset.assetTag ?? item.asset.serialNumber ?? 'No tag'}
-										{#if item.asset.parentAssetId}· Accessory{/if}
-										{#if item.asset.bundle}
-											· {item.asset.bundle.template.name}{item.asset.bundle.tag
-												? ` (${item.asset.bundle.tag})`
-												: ''}
-										{/if}
-										{#if item.asset.organizationId !== stocktake.organizationId}
-											· {orgLabel(item.asset.organization)}
-										{/if}
-									</p>
+									<div class="flex items-start gap-3">
+										<ProductThumb
+											path={item.asset.product.imagePath}
+											alt={item.asset.product.name}
+											size={36}
+										/>
+										<div class="min-w-0">
+											<p class="font-medium">
+												{#if item.asset.product.manufacturer}<span
+														class="font-normal text-muted-foreground"
+														>{item.asset.product.manufacturer.name}</span
+													>{/if}
+												{item.asset.product.name}
+											</p>
+											<p class="text-xs text-muted-foreground">
+												{item.asset.assetTag ?? item.asset.serialNumber ?? 'No tag'}
+												{#if item.asset.parentAssetId}· Accessory{/if}
+												{#if item.asset.bundle}
+													· {item.asset.bundle.template.name}{item.asset.bundle.tag
+														? ` (${item.asset.bundle.tag})`
+														: ''}
+												{/if}
+												{#if item.asset.organizationId !== stocktake.organizationId}
+													· {orgLabel(item.asset.organization)}
+												{/if}
+											</p>
+										</div>
+									</div>
 								</td>
 								<td class="hidden px-3 py-2 md:table-cell">
 									<CategoryPill

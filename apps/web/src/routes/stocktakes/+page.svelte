@@ -73,7 +73,7 @@
 										</span>
 									</p>
 								</div>
-								<StocktakeProgress progress={s.progress} class="w-full sm:w-64" />
+								<StocktakeProgress progress={{ ...s.progress, out: 0 }} class="w-full sm:w-64" />
 							</a>
 						{/each}
 					</div>
