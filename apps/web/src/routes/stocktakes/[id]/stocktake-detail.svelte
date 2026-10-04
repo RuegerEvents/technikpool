@@ -17,6 +17,7 @@
 	import { AssetStatusBadge } from '#lib/components/ui/asset-status/index.js';
 	import StocktakeProgress from '#lib/components/stocktake-progress.svelte';
 	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
+	import BulkActionsBar from '#lib/components/ui/bulk-actions-bar.svelte';
 	import { categoryLabel } from '#lib/category.js';
 	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
 	import { errorCodeOf } from '#lib/errors.js';
@@ -45,6 +46,24 @@
 
 	let stocktake = $derived(await getStocktake(stocktakeId));
 	let isOpen = $derived(stocktake.status === 'OPEN');
+
+	// On a closed report the first column picks units for the bar at the
+	// bottom — the same one as on the Devices list — so anything the
+	// corrections don't cover (a move to a third place, a status) is a
+	// selection away. While counting, that column is the tick.
+	let selected = new SvelteSet<string>();
+
+	function setSelected(ids: string[], on: boolean) {
+		for (const id of ids) {
+			if (on) selected.add(id);
+			else selected.delete(id);
+		}
+	}
+
+	function afterBulk() {
+		selected.clear();
+		getStocktake(stocktakeId).refresh();
+	}
 
 	// Others are counting at the same time, on handhelds and in other tabs, and
 	// nothing tells this page when they do. So an open stocktake is reloaded
@@ -576,7 +595,7 @@
 
 <svelte:head><title>{stocktake.name} | Technikpool</title></svelte:head>
 
-<div class="space-y-6">
+<div class="space-y-6 {selected.size > 0 ? 'pb-20' : ''}">
 	<div class="flex flex-wrap items-start justify-between gap-4">
 		<div class="min-w-0 space-y-1">
 			<Button variant="ghost" size="sm" icon="back" href={resolve('stocktakes')}>Stocktakes</Button>
@@ -718,7 +737,8 @@
 				<Card.Title>Corrections</Card.Title>
 				<Card.Description>
 					Each can be applied once. Worked out from the units as they are now, so anything that has
-					moved or been retired since the count is left alone.
+					moved or been retired since the count is left alone. To move other units or set their
+					status, tick them in the list below.
 				</Card.Description>
 			</Card.Header>
 			<Card.Content class="divide-y">
@@ -880,10 +900,24 @@
 	{/if}
 
 	{#each groups as group (group.id)}
+		{@const groupIds = group.items.map((i) => i.assetId)}
+		{@const groupAll = groupIds.every((id) => selected.has(id))}
 		<section class="space-y-2">
-			<h2 class="text-lg font-semibold">
-				{group.name}
-				<span class="text-sm font-normal text-muted-foreground">({group.items.length})</span>
+			<h2 class="flex items-center gap-3 text-lg font-semibold">
+				{#if !isOpen}
+					<input
+						type="checkbox"
+						class="ml-4 size-4"
+						aria-label="Select all in {group.name}"
+						checked={groupAll}
+						indeterminate={!groupAll && groupIds.some((id) => selected.has(id))}
+						onchange={(e) => setSelected(groupIds, e.currentTarget.checked)}
+					/>
+				{/if}
+				<span>
+					{group.name}
+					<span class="text-sm font-normal text-muted-foreground">({group.items.length})</span>
+				</span>
 			</h2>
 			<div class="overflow-x-auto rounded-md border">
 				<table class="w-full text-sm">
@@ -897,16 +931,26 @@
 								item.foundLocation.id !== item.expectedLocation.id}
 							<tr class="border-b align-top transition-colors last:border-0 hover:bg-muted/30">
 								<td class="w-10 py-2 pl-4">
-									<input
-										type="checkbox"
-										class="mt-1 size-4 accent-emerald-600"
-										checked={!!item.foundAt}
-										disabled={!canToggle}
-										title={item.foundAt && !mine
-											? `Counted by ${item.foundBy?.name || item.foundBy?.email}`
-											: undefined}
-										onchange={() => toggleItem(item)}
-									/>
+									{#if !isOpen}
+										<input
+											type="checkbox"
+											class="mt-1 size-4"
+											aria-label="Select"
+											checked={selected.has(item.assetId)}
+											onchange={(e) => setSelected([item.assetId], e.currentTarget.checked)}
+										/>
+									{:else}
+										<input
+											type="checkbox"
+											class="mt-1 size-4 accent-emerald-600"
+											checked={!!item.foundAt}
+											disabled={!canToggle}
+											title={item.foundAt && !mine
+												? `Counted by ${item.foundBy?.name || item.foundBy?.email}`
+												: undefined}
+											onchange={() => toggleItem(item)}
+										/>
+									{/if}
 								</td>
 								<td class="px-3 py-2 {item.asset.parentAssetId ? 'pl-8' : ''}">
 									<div class="flex items-start gap-3">
@@ -1006,6 +1050,12 @@
 		</section>
 	{/each}
 </div>
+
+{#if !isOpen}
+	<!-- Moves and status changes leave the report alone (it is the count of its
+	     day) but change what the corrections above still have to do. -->
+	<BulkActionsBar selectedIds={selected} onClear={afterBulk} canSetStatus />
+{/if}
 
 <Modal bind:open={confirmOpen} title={confirmTitle} size="md" dismissible={!confirming}>
 	{#snippet children()}

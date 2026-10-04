@@ -9746,9 +9746,8 @@ msgstr "Tag scannen oder eintippen"
 msgid "Corrections"
 msgstr "Korrekturen"
 
-#: src/routes/stocktakes/[id]/stocktake-detail.svelte
-msgid "Each can be applied once. Worked out from the units as they are now, so anything that has moved or been retired since the count is left alone."
-msgstr "Jede lässt sich einmal ausführen. Maßgeblich ist der aktuelle Stand der Geräte – was seit der Zählung bewegt oder ausgemustert wurde, bleibt unberührt."
+#~ msgid "Each can be applied once. Worked out from the units as they are now, so anything that has moved or been retired since the count is left alone."
+#~ msgstr "Jede lässt sich einmal ausführen. Maßgeblich ist der aktuelle Stand der Geräte – was seit der Zählung bewegt oder ausgemustert wurde, bleibt unberührt."
 
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Applied"
@@ -12547,3 +12546,16 @@ msgstr "Sie werden sofort auf die Produktion ausgecheckt."
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "<0/> Show units out on a production ({0})"
 msgstr "<0/> Geräte auf Produktion anzeigen ({0})"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Each can be applied once. Worked out from the units as they are now, so anything that has moved or been retired since the count is left alone. To move other units or set their status, tick them in the list below."
+msgstr "Jede lässt sich einmal ausführen. Maßgeblich ist der aktuelle Stand der Geräte – was seit der Zählung bewegt oder ausgemustert wurde, bleibt unberührt. Um andere Geräte umzubuchen oder ihren Status zu setzen, hake sie unten in der Liste an."
+
+#. 0: group.name
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Select all in {0}"
+msgstr "Alle in {0} auswählen"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Select"
+msgstr "Auswählen"

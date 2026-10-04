@@ -9746,9 +9746,8 @@ msgstr "Scan or type a tag"
 msgid "Corrections"
 msgstr "Corrections"
 
-#: src/routes/stocktakes/[id]/stocktake-detail.svelte
-msgid "Each can be applied once. Worked out from the units as they are now, so anything that has moved or been retired since the count is left alone."
-msgstr "Each can be applied once. Worked out from the units as they are now, so anything that has moved or been retired since the count is left alone."
+#~ msgid "Each can be applied once. Worked out from the units as they are now, so anything that has moved or been retired since the count is left alone."
+#~ msgstr "Each can be applied once. Worked out from the units as they are now, so anything that has moved or been retired since the count is left alone."
 
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Applied"
@@ -12547,3 +12546,16 @@ msgstr "They are checked out to the production right away."
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "<0/> Show units out on a production ({0})"
 msgstr "<0/> Show units out on a production ({0})"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Each can be applied once. Worked out from the units as they are now, so anything that has moved or been retired since the count is left alone. To move other units or set their status, tick them in the list below."
+msgstr "Each can be applied once. Worked out from the units as they are now, so anything that has moved or been retired since the count is left alone. To move other units or set their status, tick them in the list below."
+
+#. 0: group.name
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Select all in {0}"
+msgstr "Select all in {0}"
+
+#: src/routes/stocktakes/[id]/stocktake-detail.svelte
+msgid "Select"
+msgstr "Select"
