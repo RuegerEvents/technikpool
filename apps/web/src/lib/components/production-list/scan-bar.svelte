@@ -60,7 +60,7 @@
 		if (!action) return;
 		acting = true;
 		try {
-			await action.run();
+			if ((await action.run()) === false) return;
 			if (feedback) feedback = { ...feedback, action: undefined };
 		} catch (err) {
 			feedback = { tone: 'bad', title: getErrorMessage(err) };

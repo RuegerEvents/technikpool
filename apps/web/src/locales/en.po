@@ -178,6 +178,7 @@ msgstr "Crew"
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
 #: src/lib/components/ui/camera-scan/camera-scan-button.svelte
+#: src/lib/components/ui/confirm-dialog/confirm-host.svelte
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
@@ -11591,12 +11592,16 @@ msgstr "Scan asset tags to put equipment on a shelf, or work through a productio
 #: src/routes/checkout/+page.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/selection-actions.svelte
 msgid "Hand out"
 msgstr "Hand out"
 
 #: src/routes/checkout/+page.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/selection-actions.svelte
 msgid "Take back"
 msgstr "Take back"
 
@@ -12370,6 +12375,7 @@ msgid "Moving…"
 msgstr "Moving…"
 
 #: src/lib/components/ui/bulk-actions-bar.svelte
+#: src/lib/components/ui/bulk-actions-bar.svelte
 msgid "Move"
 msgstr "Move"
 
@@ -12483,3 +12489,56 @@ msgid "# accessory differs"
 msgid_plural "# accessories differ"
 msgstr[0] "# accessory differs"
 msgstr[1] "# accessories differ"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/selection-actions.svelte
+msgid "Hand out 1 unit?"
+msgid_plural "Hand out # units?"
+msgstr[0] "Hand out 1 unit?"
+msgstr[1] "Hand out # units?"
+
+#: src/routes/productions/[id]/selection-actions.svelte
+msgid "They are checked out to this production right away."
+msgstr "They are checked out to this production right away."
+
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/selection-actions.svelte
+msgid "Take back 1 unit?"
+msgid_plural "Take back # units?"
+msgstr[0] "Take back 1 unit?"
+msgstr[1] "Take back # units?"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/selection-actions.svelte
+msgid "They go back onto the shelf they are kept on right away."
+msgstr "They go back onto the shelf they are kept on right away."
+
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "Check out 1 asset?"
+msgid_plural "Check out # assets?"
+msgstr[0] "Check out 1 asset?"
+msgstr[1] "Check out # assets?"
+
+#. 0: target
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "They are checked out to {0} right away."
+msgstr "They are checked out to {0} right away."
+
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "Check out"
+msgstr "Check out"
+
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "Move 1 asset?"
+msgid_plural "Move # assets?"
+msgstr[0] "Move 1 asset?"
+msgstr[1] "Move # assets?"
+
+#. 0: target
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "They are put on {0} right away, and come back from any production they are out to."
+msgstr "They are put on {0} right away, and come back from any production they are out to."
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "They are checked out to the production right away."
+msgstr "They are checked out to the production right away."

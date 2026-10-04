@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { LocationSelect } from '#lib/components/ui/location-select/index.js';
-	import { getErrorMessage, orgLabel } from '#lib/utils.js';
+	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Modal } from '#lib/components/ui/modal/index.js';
 	import { bulkUpdateAssetStatus, getPlaceableLocations } from '#lib/remote/assets.remote.js';
@@ -11,6 +11,7 @@
 		assetStatusLabel
 	} from '#lib/components/ui/asset-status/index.js';
 	import { toast } from 'svelte-sonner';
+	import { confirmAction } from '#lib/confirm.svelte.js';
 	import type { Snippet } from 'svelte';
 
 	type Props = {
@@ -60,6 +61,27 @@
 
 	async function handleCheckout() {
 		if (!targetId || selectedIds.size === 0) return;
+		const n = selectedIds.size;
+		const toProduction = targetType === 'production' && productionTarget;
+		const target = toProduction
+			? targets.find((t) => t.id === targetId)?.label
+			: locations.find((l) => l.id === targetId)?.name;
+		const ok = await confirmAction(
+			toProduction
+				? {
+						title: plural(n, ['Check out 1 asset?', 'Check out # assets?']),
+						description: target ? `They are checked out to ${target} right away.` : undefined,
+						confirmLabel: 'Check out'
+					}
+				: {
+						title: plural(n, ['Move 1 asset?', 'Move # assets?']),
+						description: target
+							? `They are put on ${target} right away, and come back from any production they are out to.`
+							: undefined,
+						confirmLabel: 'Move'
+					}
+		);
+		if (!ok) return;
 		working = true;
 		try {
 			const result = await checkoutAssets({

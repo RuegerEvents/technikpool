@@ -5,7 +5,8 @@
 	import { toast } from 'svelte-sonner';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { canWrite } from '#lib/roles.js';
-	import { getErrorMessage } from '#lib/utils.js';
+	import { getErrorMessage, plural } from '#lib/utils.js';
+	import { confirmAction } from '#lib/confirm.svelte.js';
 	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
 	import { setProductionHandoutDone } from '#lib/remote/production-handout.remote.js';
 	import {
@@ -60,6 +61,20 @@
 	let working = $state(false);
 
 	async function handout(mode: 'checkout' | 'checkin', selected: SelectedItem[]) {
+		const ok = await confirmAction(
+			mode === 'checkout'
+				? {
+						title: plural(selected.length, ['Hand out 1 unit?', 'Hand out # units?']),
+						description: 'They are checked out to this production right away.',
+						confirmLabel: 'Hand out'
+					}
+				: {
+						title: plural(selected.length, ['Take back 1 unit?', 'Take back # units?']),
+						description: 'They go back onto the shelf they are kept on right away.',
+						confirmLabel: 'Take back'
+					}
+		);
+		if (!ok) return;
 		working = true;
 		try {
 			const { count } = await setProductionHandoutDone({

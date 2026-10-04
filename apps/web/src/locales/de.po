@@ -178,6 +178,7 @@ msgstr "Crew"
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
 #: src/lib/components/ui/camera-scan/camera-scan-button.svelte
+#: src/lib/components/ui/confirm-dialog/confirm-host.svelte
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
@@ -11591,12 +11592,16 @@ msgstr "Scanne Asset-Tags, um Equipment ins Lager zu buchen, oder arbeite die Li
 #: src/routes/checkout/+page.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/selection-actions.svelte
 msgid "Hand out"
 msgstr "Ausgeben"
 
 #: src/routes/checkout/+page.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/selection-actions.svelte
 msgid "Take back"
 msgstr "Zurücknehmen"
 
@@ -12370,6 +12375,7 @@ msgid "Moving…"
 msgstr "Wird umgebucht…"
 
 #: src/lib/components/ui/bulk-actions-bar.svelte
+#: src/lib/components/ui/bulk-actions-bar.svelte
 msgid "Move"
 msgstr "Umbuchen"
 
@@ -12476,10 +12482,63 @@ msgstr "<0/> Nächste Fälligkeit: {0}"
 
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "An accessory's status differs from its unit's, e.g. still approved while the unit is checked out"
-msgstr"Ein Zubehörteil hat einen anderen Status als sein Gerät, z. B. noch genehmigt, während das Gerät schon ausgecheckt ist"
+msgstr "Ein Zubehörteil hat einen anderen Status als sein Gerät, z. B. noch genehmigt, während das Gerät schon ausgecheckt ist"
 
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "# accessory differs"
 msgid_plural "# accessories differ"
 msgstr[0] "# Zubehörteil weicht ab"
 msgstr[1] "# Zubehörteile weichen ab"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/selection-actions.svelte
+msgid "Hand out 1 unit?"
+msgid_plural "Hand out # units?"
+msgstr[0] "1 Gerät ausgeben?"
+msgstr[1] "# Geräte ausgeben?"
+
+#: src/routes/productions/[id]/selection-actions.svelte
+msgid "They are checked out to this production right away."
+msgstr "Sie werden sofort auf diese Produktion ausgecheckt."
+
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/selection-actions.svelte
+msgid "Take back 1 unit?"
+msgid_plural "Take back # units?"
+msgstr[0] "1 Gerät zurücknehmen?"
+msgstr[1] "# Geräte zurücknehmen?"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/selection-actions.svelte
+msgid "They go back onto the shelf they are kept on right away."
+msgstr "Sie kommen sofort zurück an ihren Lagerplatz."
+
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "Check out 1 asset?"
+msgid_plural "Check out # assets?"
+msgstr[0] "1 Gerät auschecken?"
+msgstr[1] "# Geräte auschecken?"
+
+#. 0: target
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "They are checked out to {0} right away."
+msgstr "Sie werden sofort auf {0} ausgecheckt."
+
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "Check out"
+msgstr "Auschecken"
+
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "Move 1 asset?"
+msgid_plural "Move # assets?"
+msgstr[0] "1 Gerät umbuchen?"
+msgstr[1] "# Geräte umbuchen?"
+
+#. 0: target
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "They are put on {0} right away, and come back from any production they are out to."
+msgstr "Sie werden sofort nach {0} umgebucht und dabei von jeder Produktion zurückgenommen, auf der sie gerade sind."
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "They are checked out to the production right away."
+msgstr "Sie werden sofort auf die Produktion ausgecheckt."

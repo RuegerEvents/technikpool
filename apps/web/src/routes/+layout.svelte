@@ -35,6 +35,7 @@
 	import { OrgBadge } from '#lib/components/ui/org-badge/index.js';
 	import { legalTitle } from '#lib/legal.svelte.js';
 	import { DpaGate } from '#lib/components/ui/dpa-gate/index.js';
+	import { ConfirmHost } from '#lib/components/ui/confirm-dialog/index.js';
 
 	let { data, children } = $props();
 
@@ -802,4 +803,5 @@
 	{/if}
 {/if}
 
+<ConfirmHost />
 <Toaster richColors position="bottom-right" />

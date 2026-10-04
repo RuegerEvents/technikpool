@@ -8,6 +8,7 @@
 	import { listSections, type ListLine } from '#lib/production-list.js';
 	import { makerAndName } from '#lib/product-label.js';
 	import { getErrorMessage, plural } from '#lib/utils.js';
+	import { confirmAction } from '#lib/confirm.svelte.js';
 	import {
 		getProductionHandout,
 		scanProductionHandout,
@@ -102,15 +103,34 @@
 		}
 	}
 
+	/** Ticking one unit is booked at once; several at a stroke are asked first. */
+	function confirmMany(n: number) {
+		return confirmAction(
+			mode === 'checkout'
+				? {
+						title: plural(n, ['Hand out 1 unit?', 'Hand out # units?']),
+						description: 'They are checked out to the production right away.',
+						confirmLabel: 'Hand out'
+					}
+				: {
+						title: plural(n, ['Take back 1 unit?', 'Take back # units?']),
+						description: 'They go back onto the shelf they are kept on right away.',
+						confirmLabel: 'Take back'
+					}
+		);
+	}
+
+	async function applyMany(assetIds: string[]) {
+		if (assetIds.length === 0 || !(await confirmMany(assetIds.length))) return;
+		await apply(assetIds, true);
+	}
+
 	function tickSection(units: Item[], lines: ListLine[]) {
 		const counted = new Set(lines.flatMap((l) => l.assetIds));
-		return apply(
-			[
-				...units.map((u) => u.assetId),
-				...handout.items.filter((i) => counted.has(i.assetId) && !i.done).map((i) => i.assetId)
-			],
-			true
-		);
+		return applyMany([
+			...units.map((u) => u.assetId),
+			...handout.items.filter((i) => counted.has(i.assetId) && !i.done).map((i) => i.assetId)
+		]);
 	}
 
 	async function submitCode(value: string): Promise<ScanFeedback> {
@@ -146,14 +166,16 @@
 					`Also the rest of ${result.group.name} (1)`,
 					`Also the rest of ${result.group.name} (#)`
 				]),
-				run: () =>
-					setProductionHandoutDone({
+				run: async () => {
+					if (!(await confirmMany(rest.length))) return false;
+					await setProductionHandoutDone({
 						productionId,
 						mode,
 						organizationId,
 						assetIds: rest.map((u) => u.id),
 						done: true
-					}).then(() => undefined)
+					});
+				}
 			};
 		}
 		return feedback;
@@ -302,11 +324,7 @@
 						<Button
 							variant="outline"
 							disabled={busy}
-							onclick={() =>
-								apply(
-									remaining.map((i) => i.assetId),
-									true
-								)}>Tick all</Button
+							onclick={() => applyMany(remaining.map((i) => i.assetId))}>Tick all</Button
 						>
 					{/if}
 				</div>
