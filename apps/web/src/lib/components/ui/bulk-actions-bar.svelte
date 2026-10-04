@@ -12,6 +12,7 @@
 		assetStatusLabel
 	} from '#lib/components/ui/asset-status/index.js';
 	import { toast } from 'svelte-sonner';
+	import type { Snippet } from 'svelte';
 
 	type Props = {
 		selectedIds: Set<string>;
@@ -20,9 +21,23 @@
 		canCheckout?: boolean;
 		/** Off where the selection isn't a set of assets to administer. */
 		canSetStatus?: boolean;
+		/**
+		 * Off where the page is a production already: booking onto another one from
+		 * there is not what anyone means, and `actions` offers what they do mean.
+		 */
+		productionTarget?: boolean;
+		/** Actions of the page's own, drawn ahead of the move. */
+		actions?: Snippet;
 	};
 
-	let { selectedIds, onClear, canCheckout = true, canSetStatus = false }: Props = $props();
+	let {
+		selectedIds,
+		onClear,
+		canCheckout = true,
+		canSetStatus = false,
+		productionTarget = true,
+		actions
+	}: Props = $props();
 
 	let targetType = $state<'location' | 'production'>('location');
 	let targetId = $state('');
@@ -161,7 +176,32 @@
 						<span class="mx-1 hidden h-6 w-px bg-border sm:block"></span>
 					{/if}
 				{/if}
-				{#if canCheckout}
+				{#if actions}
+					{@render actions()}
+					{#if canCheckout}
+						<span class="mx-1 text-sm text-muted-foreground">or</span>
+					{/if}
+				{/if}
+				{#if canCheckout && !productionTarget}
+					<select
+						bind:value={targetId}
+						disabled={targets.length === 0}
+						class="h-9 min-w-44 rounded-md border border-input bg-background px-3 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+					>
+						<option value="">Move to location…</option>
+						{#each targets as t (t.id)}
+							<option value={t.id}>{t.label}</option>
+						{/each}
+					</select>
+					<Button
+						variant="outline"
+						onclick={handleCheckout}
+						disabled={!targetId || working}
+						size="sm"
+					>
+						{working ? 'Moving…' : 'Move'}
+					</Button>
+				{:else if canCheckout}
 					<select
 						bind:value={targetType}
 						onchange={() => (targetId = '')}

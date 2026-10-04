@@ -156,6 +156,8 @@ export const getProduction = query(v.string(), async (id: string) => {
 						include: {
 							product: { include: { manufacturer: true } },
 							organization: { select: PRODUCTION_ORG_SELECT },
+							// The shelf it is kept on — where it is packed from and goes back to.
+							location: { select: { id: true, name: true } },
 							accessories: { select: { id: true } }
 						}
 					},

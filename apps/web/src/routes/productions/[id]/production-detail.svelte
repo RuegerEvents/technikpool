@@ -51,6 +51,7 @@
 	import CheckButton from './check-button.svelte';
 	import ConnectionCheck from './connection-check.svelte';
 	import HandoutButtons from './handout-buttons.svelte';
+	import SelectionActions from './selection-actions.svelte';
 	import {
 		accessorySummary,
 		draftLenders,
@@ -346,6 +347,7 @@
 				include: {
 					product: { include: { manufacturer: true } };
 					organization: { select: { name: true; shortName: true } };
+					location: { select: { id: true; name: true } };
 					accessories: { select: { id: true } };
 				};
 			};
@@ -587,7 +589,7 @@
 			addr?.line2?.trim(),
 			[addr?.postalCode?.trim(), addr?.city?.trim()].filter(Boolean).join(' ')
 		].filter(Boolean);
-		return parts.length ? parts.join(' · ') : '—';
+		return parts.length ? parts : ['—'];
 	}
 
 	let editingCustomer = $state(false);
@@ -1028,7 +1030,11 @@
 								<h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
 									Address
 								</h3>
-								<p class="text-sm">{formatAddress(production.venueName, production.address)}</p>
+								<p class="text-sm">
+									{#each formatAddress(production.venueName, production.address) as line, i (i)}
+										<span class="block">{line}</span>
+									{/each}
+								</p>
 							</div>
 							{#if canEdit && !editingAddress}
 								<Button
@@ -1411,8 +1417,8 @@
 													class="h-4 w-4 cursor-pointer rounded border-input"
 												/>
 											</td>
-											<td colspan="6" class="px-3 py-2">
-												<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+											<td class="px-3 py-2">
+												<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
 													{#if section.kind === 'bundle'}
 														<ProductThumb
 															path={item.asset.product.imagePath}
@@ -1426,18 +1432,6 @@
 															)}</span
 														>
 													{/if}
-													<span class="w-36 font-mono text-xs text-muted-foreground">
-														{item.asset.serialNumber ? `S/N: ${item.asset.serialNumber}` : '—'}
-													</span>
-
-													<span class="text-xs text-muted-foreground"
-														>{orgLabel(item.asset.organization)}</span
-													>
-													<span
-														class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {statusClass[
-															item.status
-														] ?? ''}">{statusLabels[item.status] ?? item.status}</span
-													>
 													{#if item.freeOfCharge}
 														<span
 															class="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground"
@@ -1482,15 +1476,6 @@
 															Update accessories
 														</button>
 													{/if}
-													{#if canEdit}
-														<button
-															type="button"
-															onclick={() => handleRemoveItem(item.id)}
-															class="ml-auto text-xs text-muted-foreground transition-colors hover:text-destructive"
-														>
-															Remove
-														</button>
-													{/if}
 												</div>
 												{#if item.accessories.length > 0}
 													<!-- Attached to this unit, so booked and removed with it —
@@ -1498,6 +1483,38 @@
 													<p class="mt-1 pl-6 text-xs text-muted-foreground">
 														↳ {accessorySummary(item.accessories)}
 													</p>
+												{/if}
+											</td>
+											<!-- A unit's details stand under the count columns, so the
+											     rows of one section line up. -->
+											<td
+												class="px-3 py-2 text-right font-mono text-xs whitespace-nowrap text-muted-foreground"
+												>{item.asset.serialNumber ?? '—'}</td
+											>
+											<td
+												class="px-3 py-2 text-right text-xs whitespace-nowrap text-muted-foreground"
+												>{item.asset.location.name}</td
+											>
+											<td
+												class="px-3 py-2 text-right text-xs whitespace-nowrap text-muted-foreground"
+												>{orgLabel(item.asset.organization)}</td
+											>
+											<td class="px-3 py-2 text-right whitespace-nowrap">
+												<span
+													class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {statusClass[
+														item.status
+													] ?? ''}">{statusLabels[item.status] ?? item.status}</span
+												>
+											</td>
+											<td class="px-3 py-2 text-right">
+												{#if canEdit}
+													<button
+														type="button"
+														onclick={() => handleRemoveItem(item.id)}
+														class="text-xs text-muted-foreground transition-colors hover:text-destructive"
+													>
+														Remove
+													</button>
 												{/if}
 											</td>
 										</tr>
@@ -1742,7 +1759,20 @@
 	</div>
 </div>
 
-<BulkActionsBar selectedIds={selectedItemAssetIds} onClear={() => selectedItemAssetIds.clear()} />
+<BulkActionsBar
+	selectedIds={selectedItemAssetIds}
+	onClear={() => selectedItemAssetIds.clear()}
+	productionTarget={false}
+>
+	{#snippet actions()}
+		<SelectionActions
+			{productionId}
+			{cancelled}
+			items={production.items.filter((i) => selectedItemAssetIds.has(i.asset.id))}
+			onDone={() => selectedItemAssetIds.clear()}
+		/>
+	{/snippet}
+</BulkActionsBar>
 
 <Modal bind:open={deleteOpen} title="Delete production" dismissible={!deleting}>
 	{#snippet description()}

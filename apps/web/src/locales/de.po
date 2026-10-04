@@ -11610,12 +11610,16 @@ msgid "Checkout undone for <0/>"
 msgstr "Ausgabe zurückgenommen für <0/>"
 
 #. 0: summary.approved
+#. 0: toHandOut.length
 #: src/routes/productions/[id]/handout-buttons.svelte
+#: src/routes/productions/[id]/selection-actions.svelte
 msgid "Hand out ({0})"
 msgstr "Ausgeben ({0})"
 
 #. 0: summary.checkedOut
+#. 0: toTakeBack.length
 #: src/routes/productions/[id]/handout-buttons.svelte
+#: src/routes/productions/[id]/selection-actions.svelte
 msgid "Take back ({0})"
 msgstr "Zurücknehmen ({0})"
 
@@ -12344,3 +12348,34 @@ msgstr "Finalisiert am {0} — diese Rechnung ist unveränderbar.<0/> Korrekture
 #: src/routes/invoices/[id]/invoice-detail.svelte
 msgid "This invoice is a draft — items can still be corrected or resynced from the production. Finalizing archives its PDF as an e-invoice (ZUGFeRD) and makes it immutable."
 msgstr "Diese Rechnung ist ein Entwurf — Positionen können noch korrigiert oder mit der Produktion synchronisiert werden. Beim Finalisieren wird die PDF als E-Rechnung (ZUGFeRD) archiviert und die Rechnung unveränderbar."
+
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "Move to location…"
+msgstr "An Standort umbuchen…"
+
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "Moving…"
+msgstr "Wird umgebucht…"
+
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "Move"
+msgstr "Umbuchen"
+
+#. 0: count
+#: src/routes/productions/[id]/selection-actions.svelte
+msgid "Handed out: {0}"
+msgstr "Ausgegeben: {0}"
+
+#. 0: count
+#: src/routes/productions/[id]/selection-actions.svelte
+msgid "Taken back: {0}"
+msgstr "Zurückgenommen: {0}"
+
+#. 0: checkable.length
+#: src/routes/productions/[id]/selection-actions.svelte
+msgid "Check ({0})"
+msgstr "Prüfen ({0})"
+
+#: src/lib/components/ui/bulk-actions-bar.svelte
+msgid "or"
+msgstr "oder"
