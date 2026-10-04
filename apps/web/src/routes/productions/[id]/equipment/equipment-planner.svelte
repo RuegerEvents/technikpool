@@ -16,7 +16,7 @@
 	} from '#lib/remote/productions.remote.js';
 	import { toast } from 'svelte-sonner';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, untrack } from 'svelte';
 	import CopyEquipmentModal from '../copy-equipment-modal.svelte';
 	import LoanRequestModal from '../loan-request-modal.svelte';
 	import { getProduction } from '#lib/remote/productions.remote.js';
@@ -46,7 +46,18 @@
 
 	let activeCat = $state<string | null>(null);
 	let search = $state('');
-	let selectedOrgs = new SvelteSet<string>();
+	// The production's own org is what one plans from first; other orgs' gear
+	// is a click away. Only if it has anything to offer, or the planner would
+	// open on an empty list.
+	const ownOrgId = untrack(() => data.production.organizationId);
+	let selectedOrgs = new SvelteSet<string>(
+		untrack(() =>
+			data.groups.some((g) => g.organizationId === ownOrgId) ||
+			data.bundles.some((b) => b.organizationId === ownOrgId)
+				? [ownOrgId]
+				: []
+		)
+	);
 	let locMode = $state<'locations' | 'city'>('locations');
 	let selectedLocs = new SvelteSet<string>();
 	let selectedCities = new SvelteSet<string>();
@@ -160,9 +171,7 @@
 			}
 		}
 		for (const b of data.bundles) {
-			if (b.locationId && b.city && !seen.has(b.locationId)) {
-				seen.set(b.locationId, { id: b.locationId, name: b.locationName ?? '', city: b.city });
-			}
+			for (const l of b.locations) if (!seen.has(l.id)) seen.set(l.id, l);
 		}
 		return [...seen.values()].sort((a, b) => naturalCompare(a.name, b.name));
 	});
@@ -215,9 +224,10 @@
 		if (q && !(b.name.toLowerCase().includes(q) || b.memberSearchText.includes(q))) return false;
 		if (selectedOrgs.size > 0 && !selectedOrgs.has(b.organizationId)) return false;
 		if (locMode === 'locations') {
-			if (selectedLocs.size > 0 && b.locationId && !selectedLocs.has(b.locationId)) return false;
+			if (selectedLocs.size > 0 && !b.locations.some((l) => selectedLocs.has(l.id))) return false;
 		} else {
-			if (selectedCities.size > 0 && b.city && !selectedCities.has(b.city)) return false;
+			if (selectedCities.size > 0 && !b.locations.some((l) => selectedCities.has(l.city)))
+				return false;
 		}
 		return true;
 	}

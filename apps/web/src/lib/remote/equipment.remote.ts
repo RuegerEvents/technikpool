@@ -183,7 +183,10 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 			// counting it would make the kit look bigger than it is orderable.
 			assets: {
 				where: { parentAssetId: null },
-				include: { product: { include: { manufacturer: true } } }
+				include: {
+					product: { include: { manufacturer: true } },
+					location: { select: { id: true, name: true, address: { select: { city: true } } } }
+				}
 			}
 		}
 	});
@@ -201,6 +204,13 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 				if (status?.bookedFromBundleId === b.id) bookedHere++;
 				else if (!status?.unavailableElsewhere) availableCount++;
 			}
+			// Where the kit is, for the location filter. Most kits have no location
+			// of their own and are simply wherever their units are, so a kit
+			// without one answers with its units' — otherwise it would match every
+			// location there is.
+			const memberLocations = b.location
+				? [b.location]
+				: [...new Map(b.assets.map((a) => [a.location.id, a.location])).values()];
 			return {
 				id: b.id,
 				templateId: b.templateId,
@@ -220,6 +230,11 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 				locationId: b.locationId,
 				locationName: b.location?.name ?? null,
 				city: b.location?.address.city ?? null,
+				locations: memberLocations.map((l) => ({
+					id: l.id,
+					name: l.name,
+					city: l.address.city
+				})),
 				totalAssets: b.assets.length,
 				bookedHere,
 				availableCount,
