@@ -234,19 +234,55 @@
 	// way is the thing nobody can see from here, and it is what turns "attach a
 	// cable" into "twenty units, which ones have I done". So each accessory says
 	// where it stands, and offers to bring the others into line.
-	let accessoryRows = $derived.by(() => {
-		const here: Record<string, number> = {};
-		for (const a of asset.accessories) here[a.productId] = (here[a.productId] ?? 0) + 1;
+	// Grouped per product, because two identical brackets are one fact about the
+	// fleet, not two: the standing is said once, under the last line of its
+	// product, so it reads as being about all of them. Untagged units of one
+	// product and status are told apart by nothing, so they are one line
+	// ("2× Omega bracket"); a tagged one keeps its own line, tag and all.
+	type AccessoryLine = {
+		key: string;
+		accessory: (typeof asset.accessories)[number];
+		ids: string[];
+		nextInspectionDue: Date | null;
+	};
+	let accessoryGroups = $derived.by(() => {
+		const groups = new Map<
+			string,
+			{ productId: string; lines: AccessoryLine[]; members: typeof asset.accessories }
+		>();
+		for (const accessory of asset.accessories) {
+			let group = groups.get(accessory.productId);
+			if (!group) {
+				group = { productId: accessory.productId, lines: [], members: [] };
+				groups.set(accessory.productId, group);
+			}
+			group.members.push(accessory);
+			const due = accessory.nextInspectionDue ? new Date(accessory.nextInspectionDue) : null;
+			const loose =
+				accessory.assetTag === null
+					? group.lines.find(
+							(l) => l.accessory.assetTag === null && l.accessory.status === accessory.status
+						)
+					: undefined;
+			if (loose) {
+				loose.ids.push(accessory.id);
+				// The earliest date is the one somebody has to act on.
+				if (due && (!loose.nextInspectionDue || due < loose.nextInspectionDue)) {
+					loose.nextInspectionDue = due;
+				}
+			} else {
+				group.lines.push({
+					key: accessory.id,
+					accessory,
+					ids: [accessory.id],
+					nextInspectionDue: due
+				});
+			}
+		}
 
-		const said: string[] = [];
-		return asset.accessories.map((accessory) => {
-			// Said once per product rather than once per cable: two identical
-			// brackets are one fact about the fleet, not two.
-			if (said.includes(accessory.productId)) return { accessory, standing: null };
-			said.push(accessory.productId);
-
-			const count = here[accessory.productId] ?? 1;
-			const line = siblingProfile.accessories.find((x) => x.productId === accessory.productId);
+		return [...groups.values()].map(({ productId, lines, members }) => {
+			const count = members.length;
+			const line = siblingProfile.accessories.find((x) => x.productId === productId);
 			// Units that have *at least as many* as this one — `unitsWith` alone
 			// would call a fleet of ones agreed with a unit carrying two.
 			const matching = (line?.distribution ?? [])
@@ -254,13 +290,14 @@
 				.reduce((sum, d) => sum + d.units, 0);
 
 			return {
-				accessory,
+				productId,
+				lines,
 				standing: {
 					count,
 					matching,
 					// The copies follow *this* unit, since it is this unit's setup being
 					// handed to the others: a tagged cable begets tagged cables.
-					tagged: accessory.assetTag !== null
+					tagged: members[0].assetTag !== null
 				}
 			};
 		});
@@ -1022,69 +1059,71 @@
 						<p class="text-sm text-muted-foreground">Nothing is attached to this unit yet.</p>
 					{:else}
 						<ul class="divide-y rounded-md border">
-							{#each accessoryRows as { accessory, standing } (accessory.id)}
-								<li class="p-3">
-									<div class="flex items-center gap-3">
-										<ProductThumb
-											path={accessory.product.imagePath}
-											alt={accessory.product.name}
-											size={28}
-										/>
-										<div class="min-w-0 flex-1">
-											<a
-												href={resolve(`assets/${accessory.id}`)}
-												class="text-sm font-medium underline underline-offset-2"
-											>
-												{accessory.product.name}
-											</a>
-											<p class="text-xs text-muted-foreground">
-												{[accessory.product.manufacturer?.name, accessory.assetTag]
-													.filter(Boolean)
-													.join(' · ')}
-												{#if accessory.nextInspectionDue}
-													· Next due: {new Date(accessory.nextInspectionDue).toLocaleDateString(
-														'de-DE'
-													)}
-												{/if}
-											</p>
-										</div>
-										<AssetStatusBadge status={accessory.status} />
-										{#if !retired}
-											<Button
-												variant="outline"
-												size="sm"
-												disabled={attaching}
-												onclick={() => handleDetach(accessory.id)}>Detach</Button
-											>
-										{/if}
-									</div>
-									{#if standing && siblingProfile.unitCount > 1}
-										<div class="mt-2 flex flex-wrap items-center justify-between gap-2 pl-10">
-											{#if standing.matching >= siblingProfile.unitCount}
+							{#each accessoryGroups as { productId, lines, standing } (productId)}
+								{#each lines as { key, accessory, ids, nextInspectionDue }, i (key)}
+									{@const meta = [accessory.product.manufacturer?.name, accessory.assetTag]
+										.filter(Boolean)
+										.join(' · ')}
+									<li class="p-3">
+										<div class="flex items-center gap-3">
+											<ProductThumb
+												path={accessory.product.imagePath}
+												alt={accessory.product.name}
+												size={28}
+											/>
+											<div class="min-w-0 flex-1">
+												<a
+													href={resolve(`assets/${accessory.id}`)}
+													class="text-sm font-medium underline underline-offset-2"
+												>
+													{ids.length > 1 ? `${ids.length}× ` : ''}{accessory.product.name}
+												</a>
 												<p class="text-xs text-muted-foreground">
-													All {siblingProfile.unitCount} units of this product have this.
+													{meta}
+													{#if nextInspectionDue}
+														{#if meta}·{/if}
+														Next due: {nextInspectionDue.toLocaleDateString('de-DE')}
+													{/if}
 												</p>
-											{:else}
-												<p class="text-xs text-muted-foreground">
-													{standing.matching} of {siblingProfile.unitCount} units of this product have
-													this.
-												</p>
-												{#if !retired}
-													<Button
-														variant="outline"
-														size="sm"
-														disabled={copyingProductId !== null}
-														onclick={() => startCopy(accessory, standing)}
-													>
-														{copyingProductId === accessory.productId
-															? 'Copying…'
-															: 'Copy to the others'}
-													</Button>
-												{/if}
+											</div>
+											<AssetStatusBadge status={accessory.status} />
+											{#if !retired}
+												<Button
+													variant="outline"
+													size="sm"
+													disabled={attaching}
+													onclick={() => handleDetach(ids[ids.length - 1])}>Detach</Button
+												>
 											{/if}
 										</div>
-									{/if}
-								</li>
+										{#if i === lines.length - 1 && siblingProfile.unitCount > 1}
+											<div class="mt-2 flex flex-wrap items-center justify-between gap-2 pl-10">
+												{#if standing.matching >= siblingProfile.unitCount}
+													<p class="text-xs text-muted-foreground">
+														All {siblingProfile.unitCount} units of this product have this.
+													</p>
+												{:else}
+													<p class="text-xs text-muted-foreground">
+														{standing.matching} of {siblingProfile.unitCount} units of this product have
+														this.
+													</p>
+													{#if !retired}
+														<Button
+															variant="outline"
+															size="sm"
+															disabled={copyingProductId !== null}
+															onclick={() => startCopy(accessory, standing)}
+														>
+															{copyingProductId === accessory.productId
+																? 'Copying…'
+																: 'Copy to the others'}
+														</Button>
+													{/if}
+												{/if}
+											</div>
+										{/if}
+									</li>
+								{/each}
 							{/each}
 						</ul>
 					{/if}

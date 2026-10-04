@@ -4765,10 +4765,8 @@ msgstr "Attached as an accessory of <0/>"
 msgid "Detached from <0/>"
 msgstr "Detached from <0/>"
 
-#. 0: new Date(accessory.nextInspectionDue).toLocaleDateString( 'de-DE' )
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "· Next due: {0}"
-msgstr "· Next due: {0}"
+#~ msgid "· Next due: {0}"
+#~ msgstr "· Next due: {0}"
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 msgid "Please choose or name a manufacturer"
@@ -12470,3 +12468,8 @@ msgstr[1] "# accessories are somewhere else"
 #: src/routes/assets/+page.svelte
 msgid "Show accessories"
 msgstr "Show accessories"
+
+#. 0: nextInspectionDue.toLocaleDateString('de-DE')
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "<0/> Next due: {0}"
+msgstr "<0/> Next due: {0}"
