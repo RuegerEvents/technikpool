@@ -53,7 +53,8 @@
 	import HandoutButtons from './handout-buttons.svelte';
 	import SelectionActions from './selection-actions.svelte';
 	import {
-		accessorySummary,
+		accessoryLines,
+		divergentAccessoryCount,
 		draftLenders,
 		nestAccessories,
 		type Nested
@@ -1302,6 +1303,7 @@
 									sectionAssetIds.every((id) => selectedItemAssetIds.has(id))}
 								{@const divergence =
 									section.kind === 'bundle' ? bundleDivergence.get(section.bundleId) : null}
+								{@const divergentAccessories = divergentAccessoryCount(section.items)}
 								<tr
 									class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
 									onclick={() => toggleSection(sectionId)}
@@ -1322,7 +1324,7 @@
 										/>
 									</td>
 									<td class="px-3 py-3">
-										<div class="flex items-center gap-2">
+										<div class="flex flex-wrap items-center gap-x-2 gap-y-1">
 											<svg
 												xmlns="http://www.w3.org/2000/svg"
 												width="14"
@@ -1374,6 +1376,21 @@
 													{#if section.manufacturerName}
 														<p class="text-xs text-muted-foreground">{section.manufacturerName}</p>
 													{/if}
+												</div>
+											{/if}
+											{#if divergentAccessories > 0}
+												<!-- On a line of its own under the name, lined up with it
+												     (chevron 14 + gap + thumb 28 + gap), so it never squeezes
+												     the name into a column. -->
+												<div class="basis-full pl-[58px]">
+													<span
+														class="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium whitespace-nowrap text-amber-800 dark:bg-amber-900 dark:text-amber-300"
+														title="An accessory's status differs from its unit's, e.g. still approved while the unit is checked out"
+														>{plural(divergentAccessories, [
+															'# accessory differs',
+															'# accessories differ'
+														])}</span
+													>
 												</div>
 											{/if}
 										</div>
@@ -1477,13 +1494,6 @@
 														</button>
 													{/if}
 												</div>
-												{#if item.accessories.length > 0}
-													<!-- Attached to this unit, so booked and removed with it —
-													     never a line of its own. -->
-													<p class="mt-1 pl-6 text-xs text-muted-foreground">
-														↳ {accessorySummary(item.accessories)}
-													</p>
-												{/if}
 											</td>
 											<!-- A unit's details stand under the count columns, so the
 											     rows of one section line up. -->
@@ -1518,6 +1528,51 @@
 												{/if}
 											</td>
 										</tr>
+										<!-- Attached to this unit, so booked and removed with it: no
+										     checkbox and no Remove. But each says where it stands, since
+										     a cable still on the shelf is exactly what the unit's status
+										     cannot tell. -->
+										{#each accessoryLines(item.status, item.accessories) as { key, item: accessory, count, differs } (key)}
+											<tr class="border-b bg-muted/10 text-xs last:border-0">
+												<td></td>
+												<td class="py-1.5 pr-3 pl-9">
+													<div class="flex items-center gap-2 text-muted-foreground">
+														<span aria-hidden="true">↳</span>
+														<ProductThumb
+															path={accessory.asset.product.imagePath}
+															alt={accessory.asset.product.name}
+															size={18}
+														/>
+														<span class={differs ? 'font-medium text-foreground' : ''}
+															>{count > 1 ? `${count}× ` : ''}{withCaption(
+																accessory.asset.product.name,
+																accessory.asset.product.caption
+															)}</span
+														>
+														{#if accessory.asset.assetTag}
+															<span class="font-mono">{accessory.asset.assetTag}</span>
+														{/if}
+													</div>
+												</td>
+												<td
+													class="px-3 py-1.5 text-right font-mono whitespace-nowrap text-muted-foreground"
+													>{accessory.asset.serialNumber ?? ''}</td
+												>
+												<td class="px-3 py-1.5 text-right whitespace-nowrap text-muted-foreground"
+													>{accessory.asset.location.name}</td
+												>
+												<td></td>
+												<td class="px-3 py-1.5 text-right whitespace-nowrap">
+													<span
+														class="inline-flex items-center rounded-full px-2 py-0.5 font-semibold {statusClass[
+															accessory.status
+														] ?? ''} {differs ? 'ring-2 ring-amber-400' : 'opacity-60'}"
+														>{statusLabels[accessory.status] ?? accessory.status}</span
+													>
+												</td>
+												<td></td>
+											</tr>
+										{/each}
 									{/each}
 								{/if}
 							{/each}

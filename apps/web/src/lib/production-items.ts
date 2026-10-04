@@ -46,6 +46,52 @@ export function accessorySummary(accessories: { asset: { product: { name: string
 	return [...counts.entries()].map(([name, count]) => `${count}× ${name}`).join(' · ');
 }
 
+type AccessoryItem = {
+	id: string;
+	status: string;
+	asset: { productId: string; assetTag: string | null };
+};
+
+export type AccessoryLine<T> = { key: string; item: T; count: number; differs: boolean };
+
+/**
+ * A unit's accessories as lines of their own, each with its status. Untagged
+ * ones of one product and status are told apart by nothing, so they share a
+ * line ("2× Omega Bracket"); a tagged one keeps its own. `differs` marks an
+ * accessory that is not where its unit is — still APPROVED while the unit is
+ * out, say — which is the thing a summary line used to hide.
+ */
+export function accessoryLines<T extends AccessoryItem>(
+	parentStatus: string,
+	accessories: T[]
+): AccessoryLine<T>[] {
+	const lines: AccessoryLine<T>[] = [];
+	for (const item of accessories) {
+		const shared =
+			item.asset.assetTag === null
+				? lines.find(
+						(l) =>
+							l.item.asset.assetTag === null &&
+							l.item.asset.productId === item.asset.productId &&
+							l.item.status === item.status
+					)
+				: undefined;
+		if (shared) shared.count++;
+		else lines.push({ key: item.id, item, count: 1, differs: item.status !== parentStatus });
+	}
+	return lines;
+}
+
+/** How many of these units' accessories are not in their unit's status. */
+export function divergentAccessoryCount(
+	units: { status: string; accessories: { status: string }[] }[]
+): number {
+	return units.reduce(
+		(sum, u) => sum + u.accessories.filter((a) => a.status !== u.status).length,
+		0
+	);
+}
+
 export type DraftLender = { id: string; name: string; shortName: string | null; units: number };
 
 /**

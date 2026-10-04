@@ -12473,3 +12473,13 @@ msgstr "Zubehör anzeigen"
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "<0/> Next due: {0}"
 msgstr "<0/> Nächste Fälligkeit: {0}"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "An accessory's status differs from its unit's, e.g. still approved while the unit is checked out"
+msgstr"Ein Zubehörteil hat einen anderen Status als sein Gerät, z. B. noch genehmigt, während das Gerät schon ausgecheckt ist"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "# accessory differs"
+msgid_plural "# accessories differ"
+msgstr[0] "# Zubehörteil weicht ab"
+msgstr[1] "# Zubehörteile weichen ab"
