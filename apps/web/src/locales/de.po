@@ -12458,3 +12458,13 @@ msgstr "Mein Standard – klicken zum Entfernen"
 #: src/routes/orgs/[id]/locations/+page.svelte
 msgid "Make this your default"
 msgstr "Als meinen Standard festlegen"
+
+#: src/routes/assets/+page.svelte
+msgid "1 accessory is somewhere else"
+msgid_plural "# accessories are somewhere else"
+msgstr[0] "1 Zubehörteil ist woanders"
+msgstr[1] "# Zubehörteile sind woanders"
+
+#: src/routes/assets/+page.svelte
+msgid "Show accessories"
+msgstr "Zubehör anzeigen"

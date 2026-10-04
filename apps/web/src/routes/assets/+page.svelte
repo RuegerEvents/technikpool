@@ -2,7 +2,7 @@
 	import { naturalCompare } from '#lib/sort.js';
 	import { withCaption } from '#lib/product-label.js';
 	import { categoryLabel } from '#lib/category.js';
-	import { getErrorMessage, orgLabel } from '#lib/utils.js';
+	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
 	import {
 		connectorLabel,
 		formatLength,
@@ -46,7 +46,7 @@
 	import { Input } from '#lib/components/ui/input/index.js';
 	import { Label } from '#lib/components/ui/label/index.js';
 	import { DropdownMenu } from 'bits-ui';
-	import { Check, Ellipsis, Tag } from '@lucide/svelte';
+	import { Check, ChevronRight, Ellipsis, Tag } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { browser } from '$app/env';
 	import { tick } from 'svelte';
@@ -655,6 +655,19 @@
 
 	function toggle(id: string) {
 		expanded.set(id, !expanded.get(id));
+	}
+
+	// A device's accessories in an opened case, one level further in. They are
+	// in the case's list already (`instance.assets`), just not shown as rows of
+	// their own — so a case that reads "Mixed" because a lead stayed home can
+	// be traced to the lead.
+	function accessoriesOf(instance: InstanceGroup, assetId: string) {
+		return instance.assets.filter((a) => a.parentAssetId === assetId);
+	}
+
+	function samePlace(a: Place, b: Place) {
+		if (!a || !b || a.kind === 'mixed' || b.kind === 'mixed') return a === b;
+		return a.kind === b.kind && a.name === b.name;
 	}
 
 	let allFilteredAssetIds = $derived([
@@ -1591,6 +1604,10 @@
 									</tr>
 									{#if expanded.get(instance.id)}
 										{#each instance.filteredAssets as asset (asset.id)}
+											{@const accessories = accessoriesOf(instance, asset.id)}
+											{@const apart = accessories.filter(
+												(a) => !samePlace(placeOf(a), placeOf(asset))
+											).length}
 											<tr
 												class="cursor-pointer border-b bg-muted/20 transition-colors last:border-0 hover:bg-muted/40"
 												onclick={() => goto(resolve(`assets/${asset.id}`))}
@@ -1612,6 +1629,33 @@
 												</td>
 												<td class="py-2 pr-4 pl-16">
 													<div class="flex items-center gap-2">
+														{#if accessories.length > 0}
+															<button
+																type="button"
+																onclick={(e) => {
+																	e.stopPropagation();
+																	toggle(asset.id);
+																}}
+																aria-expanded={!!expanded.get(asset.id)}
+																title={apart > 0
+																	? plural(apart, [
+																			'1 accessory is somewhere else',
+																			'# accessories are somewhere else'
+																		])
+																	: 'Show accessories'}
+																class="-ml-6 flex size-5 shrink-0 items-center justify-center rounded transition-colors hover:bg-muted {apart >
+																0
+																	? 'text-amber-600 dark:text-amber-400'
+																	: 'text-muted-foreground'}"
+															>
+																<ChevronRight
+																	aria-hidden="true"
+																	class="size-3 transition-transform {expanded.get(asset.id)
+																		? 'rotate-90'
+																		: ''}"
+																/>
+															</button>
+														{/if}
 														<ProductThumb
 															path={asset.product.imagePath}
 															alt={asset.product.name}
@@ -1663,6 +1707,56 @@
 													</div>
 												</td>
 											</tr>
+											{#if expanded.get(asset.id)}
+												{#each accessories as accessory (accessory.id)}
+													{@const elsewhere = !samePlace(placeOf(accessory), placeOf(asset))}
+													<tr
+														class="cursor-pointer border-b bg-muted/30 transition-colors last:border-0 hover:bg-muted/50"
+														onclick={() => goto(resolve(`assets/${accessory.id}`))}
+													>
+														<td class="px-4 py-1.5"></td>
+														<td class="py-1.5 pr-4 pl-24">
+															<div class="flex items-center gap-2">
+																<span aria-hidden="true" class="text-xs text-muted-foreground"
+																	>↳</span
+																>
+																<ProductThumb
+																	path={accessory.product.imagePath}
+																	alt={accessory.product.name}
+																	size={18}
+																/>
+																<span class="truncate text-xs">{accessory.product.name}</span>
+																{#if accessory.assetTag}
+																	<span class="font-mono text-xs text-muted-foreground"
+																		>{accessory.assetTag}</span
+																	>
+																{/if}
+															</div>
+														</td>
+														<td class="px-4 py-1.5 text-xs text-muted-foreground">
+															{accessory.product.manufacturer?.name}
+														</td>
+														<td
+															class="px-4 py-1.5 text-xs {elsewhere
+																? 'font-medium text-amber-700 dark:text-amber-400'
+																: 'text-muted-foreground'}"
+														>
+															<AssetPlace place={placeOf(accessory)} />
+														</td>
+														<td class="px-4 py-1.5">
+															<CategoryPill
+																name={categoryLabel(accessory.product.category)}
+																color={accessory.product.category.color}
+															/>
+														</td>
+														<td colspan="5" class="px-4 py-1.5">
+															<div class="flex items-center justify-end gap-4">
+																<AssetStatusBadge status={accessory.status} />
+															</div>
+														</td>
+													</tr>
+												{/each}
+											{/if}
 										{/each}
 									{/if}
 								{/each}

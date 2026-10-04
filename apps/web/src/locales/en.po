@@ -12458,3 +12458,13 @@ msgstr "Your default — click to clear"
 #: src/routes/orgs/[id]/locations/+page.svelte
 msgid "Make this your default"
 msgstr "Make this your default"
+
+#: src/routes/assets/+page.svelte
+msgid "1 accessory is somewhere else"
+msgid_plural "# accessories are somewhere else"
+msgstr[0] "1 accessory is somewhere else"
+msgstr[1] "# accessories are somewhere else"
+
+#: src/routes/assets/+page.svelte
+msgid "Show accessories"
+msgstr "Show accessories"
