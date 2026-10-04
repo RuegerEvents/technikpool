@@ -87,6 +87,13 @@
 	let query = $state('');
 	let active = $state(0);
 	let rootEl: HTMLDivElement;
+	let buttonEl = $state<HTMLButtonElement | null>(null);
+	// Below the button, the list is fixed to the viewport: inside a dialog an
+	// absolute one is cut off by the scrolling body. It flips up when there is
+	// no room below. `above` (the bulk bar) stays absolute — that bar's backdrop
+	// blur would make `fixed` relative to the bar.
+	let popStyle = $state('');
+	let listMax = $state(320);
 	let searchEl = $state<HTMLInputElement | null>(null);
 	let listEl = $state<HTMLDivElement | null>(null);
 
@@ -190,6 +197,41 @@
 		active = 0;
 	});
 
+	function position() {
+		if (placement === 'above' || !buttonEl) return;
+		const r = buttonEl.getBoundingClientRect();
+		const width = Math.max(r.width, 256);
+		const left = Math.max(8, Math.min(r.left, window.innerWidth - width - 8));
+		const below = window.innerHeight - r.bottom - 12;
+		const above = r.top - 12;
+		const up = below < 240 && above > below;
+		// 41px is the search field above the list.
+		listMax = Math.max(120, Math.min(320, (up ? above : below) - 41));
+		popStyle = up
+			? `position:fixed;left:${left}px;bottom:${window.innerHeight - r.top + 4}px;width:${width}px`
+			: `position:fixed;left:${left}px;top:${r.bottom + 4}px;width:${width}px`;
+	}
+
+	// Follows the button every frame while open: a dialog that is still sliding
+	// in, a page that scrolls, a form that grows above it all move it, and none
+	// of those reliably fire an event here.
+	$effect(() => {
+		if (!open) return;
+		let frame = 0;
+		let last = '';
+		const follow = () => {
+			const r = buttonEl?.getBoundingClientRect();
+			const key = r ? `${r.top},${r.left},${r.width},${window.innerHeight}` : '';
+			if (key !== last) {
+				last = key;
+				position();
+			}
+			frame = requestAnimationFrame(follow);
+		};
+		follow();
+		return () => cancelAnimationFrame(frame);
+	});
+
 	$effect(() => {
 		if (!open) return;
 		function onDocMouseDown(e: MouseEvent) {
@@ -202,6 +244,7 @@
 
 <div bind:this={rootEl} class={cn('relative', className)}>
 	<button
+		bind:this={buttonEl}
 		type="button"
 		{id}
 		{disabled}
@@ -234,10 +277,11 @@
 
 	{#if open}
 		<div
-			class="absolute z-50 w-full min-w-64 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md {placement ===
+			class="z-50 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md {placement ===
 			'above'
-				? 'bottom-full mb-1'
-				: 'mt-1'}"
+				? 'absolute bottom-full mb-1 w-full min-w-64'
+				: ''}"
+			style={placement === 'above' ? undefined : popStyle}
 		>
 			<div class="flex items-center gap-2 border-b px-3">
 				<Search aria-hidden="true" class="size-4 shrink-0 text-muted-foreground" />
@@ -250,7 +294,12 @@
 					class="h-10 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
 				/>
 			</div>
-			<div bind:this={listEl} class="max-h-80 overflow-y-auto p-1" role="listbox">
+			<div
+				bind:this={listEl}
+				class="overflow-y-auto p-1"
+				style="max-height: {listMax}px"
+				role="listbox"
+			>
 				{#if showNone}
 					<button
 						type="button"
