@@ -1,5 +1,23 @@
 [
 	{
+		"version": "0.30.0",
+		"date": "2026-10-04",
+		"en": [
+			"Handing out or taking back several units at once — Tick all, Tick section, a selection on the production page, or Checkout and Move on the Devices list — now asks before booking. A single tick still books at once.",
+			"On a production, each accessory has its own line under its unit, with tag, location and status. One whose status differs from its unit's is ringed in amber.",
+			"Identical accessories without a tag are shown as one line, e.g. \"2× Omega bracket\".",
+			"The equipment planner opens on the production's own organization, and the location filter now also applies to kits.",
+			"A system admin without an organization can reach the shared catalogue again."
+		],
+		"de": [
+			"Mehrere Geräte auf einmal ausgeben oder zurücknehmen – „Alle abhaken“, „Abschnitt abhaken“, eine Auswahl auf der Produktionsseite oder Checkout und Umbuchen in der Geräteliste – fragt jetzt vor dem Buchen nach. Ein einzelner Haken bucht weiterhin sofort.",
+			"Auf einer Produktion hat jedes Zubehörteil eine eigene Zeile unter seinem Gerät, mit Tag, Standort und Status. Weicht sein Status vom Gerät ab, wird es gelb umrandet.",
+			"Gleiches Zubehör ohne Tag steht in einer Zeile, z. B. „2× Omega-Bügel“.",
+			"Die Equipment-Planung öffnet mit der Organisation der Produktion, und der Standortfilter greift jetzt auch bei Kits.",
+			"Systemadmins ohne Organisation erreichen den gemeinsamen Katalog wieder."
+		]
+	},
+	{
 		"version": "0.29.1",
 		"date": "2026-10-04",
 		"en": [
