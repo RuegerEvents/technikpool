@@ -1,5 +1,23 @@
 [
 	{
+		"version": "0.29.0",
+		"date": "2026-10-04",
+		"en": [
+			"Units can be kept at another organization's location — a friend storing your equipment. Any location of an organization you belong to can be picked, and that organization doesn't see your units.",
+			"Picking a location is searchable: your organization's locations come first, then the others under their organization's name. The same works when scanning, and stocktakes can count at a friend's location holding your units.",
+			"Star a location to make it your default: new units, cables and imports start there. Each person has their own default per organization.",
+			"Two entries for the same place can be merged on an organization's Locations page. Everything kept there moves along, and stocktake reports keep their counts.",
+			"A unit that is checked out shows the production it is out on instead of its location; its home location is on hover."
+		],
+		"de": [
+			"Geräte können an einem Standort einer anderen Organisation liegen – etwa bei einem Freund, der eure Technik lagert. Jeder Standort einer Organisation, der du angehörst, lässt sich wählen, und diese Organisation sieht eure Geräte nicht.",
+			"Die Standortauswahl ist durchsuchbar: die Standorte der eigenen Organisation zuerst, dann die der anderen unter deren Namen. Das gilt auch beim Scannen, und Inventuren können bei einem Freund zählen, der eure Geräte lagert.",
+			"Ein Stern macht einen Standort zum eigenen Standard: Neue Geräte, Kabel und Importe starten dort. Jede Person hat pro Organisation ihren eigenen.",
+			"Zwei Einträge für denselben Ort lassen sich auf der Standortseite einer Organisation zusammenführen. Alles, was dort liegt, zieht mit, und Inventurberichte behalten ihre Zählungen.",
+			"Ein ausgechecktes Gerät zeigt statt des Standorts die Produktion, auf der es ist; der Stammstandort steht im Tooltip."
+		]
+	},
+	{
 		"version": "0.28.1",
 		"date": "2026-10-04",
 		"en": [
