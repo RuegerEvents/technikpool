@@ -1,5 +1,17 @@
 [
 	{
+		"version": "0.31.0",
+		"date": "2026-10-04",
+		"en": [
+			"In a stocktake, units out on a production are hidden from the list unless you tick \"Show units out on a production\". The progress bar no longer mentions them at all.",
+			"Product pictures now appear in every list of units: handing out, taking back and checking a production, the Scan page, stocktakes and their printout, the calendar's equipment view, the equipment value, the catalog log and more."
+		],
+		"de": [
+			"In der Inventur sind Geräte, die auf einer Produktion sind, ausgeblendet, bis du „Geräte auf Produktion anzeigen“ anhakst. Der Fortschrittsbalken erwähnt sie gar nicht mehr.",
+			"Produktbilder stehen jetzt in jeder Geräteliste: beim Ausgeben, Zurücknehmen und Prüfen einer Produktion, auf der Scan-Seite, in Inventuren und ihrem Ausdruck, in der Geräteansicht des Kalenders, beim Bestandswert, im Katalog-Protokoll und mehr."
+		]
+	},
+	{
 		"version": "0.30.0",
 		"date": "2026-10-04",
 		"en": [
