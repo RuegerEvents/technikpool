@@ -5,6 +5,7 @@
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
 	import { Label } from '#lib/components/ui/label/index.js';
+	import { LocationSelect, defaultLocationFor } from '#lib/components/ui/location-select/index.js';
 	import { CategorySelect } from '#lib/components/ui/category-select/index.js';
 	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
 	import { ConnectorFormModal } from '#lib/components/ui/connector-form-modal/index.js';
@@ -12,7 +13,8 @@
 		createCableBatch,
 		getCableVocabulary,
 		getCategories,
-		getLocations,
+		getDefaultLocations,
+		getPlaceableLocations,
 		getManufacturers,
 		getProducts
 	} from '#lib/remote/assets.remote.js';
@@ -62,15 +64,24 @@
 		if (browser) localStorage.setItem('cable_batch_assign_tags', String(assignTags));
 	});
 	let locationId = $state('');
-	let locationsQuery = $derived(selectedOrgId ? getLocations(selectedOrgId) : null);
+	let locationsQuery = $derived(selectedOrgId ? getPlaceableLocations() : null);
 	let locations = $derived(locationsQuery?.current ?? []);
+	let ownLocations = $derived(locations.filter((l) => l.organizationId === selectedOrgId));
+	// Which org the location was last defaulted for: another org's units start on its own shelf.
+	let locationOrgId = '';
+	let defaultsQuery = $derived(getDefaultLocations());
 
 	$effect(() => {
 		if (!selectedOrgId || locations.length === 0) {
 			locationId = '';
 			return;
 		}
-		if (!locationId || !locations.some((l) => l.id === locationId)) locationId = locations[0].id;
+		// Wait for the star, or the first shelf would be picked and stay picked.
+		if (!defaultsQuery.ready) return;
+		if (locationOrgId !== selectedOrgId || !locations.some((l) => l.id === locationId)) {
+			locationOrgId = selectedOrgId;
+			locationId = defaultLocationFor(locations, selectedOrgId, defaultsQuery.current);
+		}
 	});
 
 	let categoriesQuery = $derived(getCategories());
@@ -469,19 +480,14 @@
 
 						<div class="space-y-2">
 							<Label for="location">Location</Label>
-							<select
+							<LocationSelect
 								id="location"
+								{locations}
+								ownerOrgId={selectedOrgId}
 								bind:value={locationId}
-								required
-								class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-							>
-								{#if locations.length === 0}
-									<option value="" disabled>—</option>
-								{:else}
-									{#each locations as loc (loc.id)}<option value={loc.id}>{loc.name}</option>{/each}
-								{/if}
-							</select>
-							{#if selectedOrgId && locations.length === 0}
+								disabled={!selectedOrgId}
+							/>
+							{#if selectedOrgId && locationsQuery?.ready && ownLocations.length === 0}
 								<p class="text-sm text-muted-foreground">
 									No locations yet. Create one in
 									<a class="underline" href={resolve(`orgs/${selectedOrgId}/locations`)}

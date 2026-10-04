@@ -417,6 +417,7 @@ export const ModelName = {
   OrgProductPrice: 'OrgProductPrice',
   Address: 'Address',
   Location: 'Location',
+  UserDefaultLocation: 'UserDefaultLocation',
   Asset: 'Asset',
   LicenseCredential: 'LicenseCredential',
   BundleTemplate: 'BundleTemplate',
@@ -461,7 +462,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "legalDocument" | "dpaAcceptance" | "invitation" | "manufacturer" | "connector" | "productPort" | "cableWay" | "category" | "product" | "orgProductPrice" | "address" | "location" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "loanRequest" | "productionCheck" | "productionCheckTick" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "serviceCategory" | "orgService" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem" | "stocktake" | "stocktakeItem" | "stocktakeLine" | "stocktakeCount" | "stocktakeEvent" | "productDocument" | "billingDismissal"
+    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "legalDocument" | "dpaAcceptance" | "invitation" | "manufacturer" | "connector" | "productPort" | "cableWay" | "category" | "product" | "orgProductPrice" | "address" | "location" | "userDefaultLocation" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "loanRequest" | "productionCheck" | "productionCheckTick" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "serviceCategory" | "orgService" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem" | "stocktake" | "stocktakeItem" | "stocktakeLine" | "stocktakeCount" | "stocktakeEvent" | "productDocument" | "billingDismissal"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1942,6 +1943,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.LocationCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.LocationCountAggregateOutputType> | number
+        }
+      }
+    }
+    UserDefaultLocation: {
+      payload: Prisma.$UserDefaultLocationPayload<ExtArgs>
+      fields: Prisma.UserDefaultLocationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserDefaultLocationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDefaultLocationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserDefaultLocationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDefaultLocationPayload>
+        }
+        findFirst: {
+          args: Prisma.UserDefaultLocationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDefaultLocationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserDefaultLocationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDefaultLocationPayload>
+        }
+        findMany: {
+          args: Prisma.UserDefaultLocationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDefaultLocationPayload>[]
+        }
+        create: {
+          args: Prisma.UserDefaultLocationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDefaultLocationPayload>
+        }
+        createMany: {
+          args: Prisma.UserDefaultLocationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserDefaultLocationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDefaultLocationPayload>[]
+        }
+        delete: {
+          args: Prisma.UserDefaultLocationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDefaultLocationPayload>
+        }
+        update: {
+          args: Prisma.UserDefaultLocationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDefaultLocationPayload>
+        }
+        deleteMany: {
+          args: Prisma.UserDefaultLocationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserDefaultLocationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserDefaultLocationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDefaultLocationPayload>[]
+        }
+        upsert: {
+          args: Prisma.UserDefaultLocationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDefaultLocationPayload>
+        }
+        aggregate: {
+          args: Prisma.UserDefaultLocationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserDefaultLocation>
+        }
+        groupBy: {
+          args: Prisma.UserDefaultLocationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserDefaultLocationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserDefaultLocationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserDefaultLocationCountAggregateOutputType> | number
         }
       }
     }
@@ -4433,6 +4508,18 @@ export const LocationScalarFieldEnum = {
 export type LocationScalarFieldEnum = (typeof LocationScalarFieldEnum)[keyof typeof LocationScalarFieldEnum]
 
 
+export const UserDefaultLocationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  locationId: 'locationId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserDefaultLocationScalarFieldEnum = (typeof UserDefaultLocationScalarFieldEnum)[keyof typeof UserDefaultLocationScalarFieldEnum]
+
+
 export const AssetScalarFieldEnum = {
   id: 'id',
   organizationId: 'organizationId',
@@ -5327,6 +5414,7 @@ export type GlobalOmitConfig = {
   orgProductPrice?: Prisma.OrgProductPriceOmit
   address?: Prisma.AddressOmit
   location?: Prisma.LocationOmit
+  userDefaultLocation?: Prisma.UserDefaultLocationOmit
   asset?: Prisma.AssetOmit
   licenseCredential?: Prisma.LicenseCredentialOmit
   bundleTemplate?: Prisma.BundleTemplateOmit

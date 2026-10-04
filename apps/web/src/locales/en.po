@@ -219,6 +219,7 @@ msgstr "Crew"
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/productions/[id]/copy-equipment-modal.svelte
@@ -923,6 +924,7 @@ msgstr "Search…"
 
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
+#: src/lib/components/ui/location-select/location-select.svelte
 #: src/lib/components/ui/production-select/production-select.svelte
 msgid "ArrowDown"
 msgstr "ArrowDown"
@@ -931,6 +933,7 @@ msgstr "ArrowDown"
 #: src/lib/components/ui/count-stepper/count-stepper.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
+#: src/lib/components/ui/location-select/location-select.svelte
 #: src/lib/components/ui/production-select/production-select.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
@@ -939,12 +942,14 @@ msgid "Enter"
 msgstr "Enter"
 
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
+#: src/lib/components/ui/location-select/location-select.svelte
 #: src/lib/components/ui/production-select/production-select.svelte
 msgid "ArrowUp"
 msgstr "ArrowUp"
 
 #: src/lib/components/ui/category-select/category-select.svelte
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
+#: src/lib/components/ui/location-select/location-select.svelte
 #: src/lib/components/ui/modal/modal.svelte
 #: src/lib/components/ui/org-multi-select/org-multi-select.svelte
 #: src/lib/components/ui/production-select/production-select.svelte
@@ -1723,8 +1728,9 @@ msgstr "Session Setup"
 msgid "Target"
 msgstr "Target"
 
-#~ msgid "Select a location…"
-#~ msgstr "Select a location…"
+#: src/lib/components/ui/location-select/location-select.svelte
+msgid "Select a location…"
+msgstr "Select a location…"
 
 #: src/lib/components/ui/production-select/production-select.svelte
 msgid "Select a production…"
@@ -1826,7 +1832,7 @@ msgstr "OK"
 msgid "Error"
 msgstr "Error"
 
-#: src/routes/checkout/+page.svelte
+#: src/lib/components/ui/location-select/location-select.svelte
 msgid "Search locations…"
 msgstr "Search locations…"
 
@@ -1856,6 +1862,7 @@ msgstr "{0} asset{1} selected"
 msgid "Clear"
 msgstr "Clear"
 
+#: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
 msgid "Select target…"
 msgstr "Select target…"
@@ -2030,8 +2037,8 @@ msgstr "All Products"
 #~ msgstr "Bundle location updated"
 
 #: src/lib/components/production-list/tick-list.svelte
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/lib/components/ui/location-select/location-select.svelte
+#: src/lib/components/ui/location-select/location-select.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "No location"
 msgstr "No location"
@@ -2109,9 +2116,8 @@ msgstr "Drag and drop a CSV file here, or <0>click to browse</0>"
 msgid "Supported: .csv files with column headers"
 msgstr "Supported: .csv files with column headers"
 
-#: src/lib/components/CsvImportModal.svelte
-msgid "No locations"
-msgstr "No locations"
+#~ msgid "No locations"
+#~ msgstr "No locations"
 
 #: src/lib/components/CsvImportModal.svelte
 msgid "Column Mapping"
@@ -4945,6 +4951,8 @@ msgstr[0] "1 accessory"
 msgstr[1] "# accessories"
 
 #: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
 msgid "1 unit"
 msgid_plural "# units"
 msgstr[0] "1 unit"
@@ -5073,6 +5081,7 @@ msgstr "Offers and invoices already written are not touched — they say what th
 
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/manufacturers/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
 msgid "Merging…"
 msgstr "Merging…"
 
@@ -5345,6 +5354,7 @@ msgstr[1] "# products"
 
 #: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/manufacturers/+page.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
 msgid "Merge…"
 msgstr "Merge…"
 
@@ -6735,9 +6745,8 @@ msgstr "This unit appears on an offer or invoice — decommission it instead of 
 msgid "This unit is already in the bundle \"{0}\" — remove it there first."
 msgstr "This unit is already in the bundle \"{0}\" — remove it there first."
 
-#: src/lib/error-messages.svelte.ts
-msgid "That location does not belong to this organization."
-msgstr "That location does not belong to this organization."
+#~ msgid "That location does not belong to this organization."
+#~ msgstr "That location does not belong to this organization."
 
 #: src/lib/error-messages.svelte.ts
 msgid "A location is required."
@@ -10918,6 +10927,7 @@ msgid_plural "# devices"
 msgstr[0] "1 device"
 msgstr[1] "# devices"
 
+#: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/share/[id]/[signature]/+page.svelte
 msgid "1 case"
 msgid_plural "# cases"
@@ -12396,3 +12406,55 @@ msgstr "Checked out to"
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Home location: {0}"
 msgstr "Home location: {0}"
+
+#: src/lib/error-messages.svelte.ts
+msgid "Units of this organization can’t be put at that location."
+msgstr "Units of this organization can’t be put at that location."
+
+#: src/lib/components/ui/location-select/location-select.svelte
+msgid "Search locations"
+msgstr "Search locations"
+
+#: src/lib/components/ui/location-select/location-select.svelte
+msgid "No locations found."
+msgstr "No locations found."
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "Locations merged"
+msgstr "Locations merged"
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "Merge location"
+msgstr "Merge location"
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "Merge into"
+msgstr "Merge into"
+
+#. 0: plural(mergeSource._count.assets, ['1 unit', '# units'])
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "{0} will be at <0/><1/>."
+msgstr "{0} will be at <0/><1/>."
+
+#. 0: mergeSource.name
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "Everything kept at <0/> moves to the location you pick, and {0} is deleted. Stocktake reports keep their counts under the new name."
+msgstr "Everything kept at <0/> moves to the location you pick, and {0} is deleted. Stocktake reports keep their counts under the new name."
+
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "Merge and delete"
+msgstr "Merge and delete"
+
+#: src/lib/components/ui/location-select/location-select.svelte
+msgid "Your default"
+msgstr "Your default"
+
+#: src/lib/components/ui/location-select/location-select.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "Your default — click to clear"
+msgstr "Your default — click to clear"
+
+#: src/lib/components/ui/location-select/location-select.svelte
+#: src/routes/orgs/[id]/locations/+page.svelte
+msgid "Make this your default"
+msgstr "Make this your default"

@@ -15,6 +15,11 @@
 
 <script lang="ts">
 	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
+	import {
+		LocationSelect,
+		defaultLocationFor,
+		type LocationOption
+	} from '#lib/components/ui/location-select/index.js';
 	// Registering a unit at the moment you need it, rather than being sent to
 	// /assets/new and back to put it where it belongs. Two places need exactly
 	// this: an accessory on the asset detail page, and a member on the bundle
@@ -53,13 +58,13 @@
 	import {
 		createAssets,
 		getCategories,
+		getDefaultLocations,
 		getManufacturers,
 		getProductAccessoryProfile,
 		getProducts
 	} from '#lib/remote/assets.remote.js';
 
 	type Selection = { id: string | null; name: string } | null;
-	type LocationOption = { id: string; name: string; address?: { city: string | null } | null };
 	type Kind = 'device' | 'cable';
 
 	type Props = {
@@ -122,6 +127,8 @@
 	let numbered = $derived(nextTag !== null);
 	let autoTags = $derived(previewAutoTags(nextTag, tags));
 	let chosenLocationId = $state('');
+	// Held, not read inline, so it is in hand by the time the dialog opens.
+	let defaultsQuery = $derived(getDefaultLocations());
 	let saving = $state(false);
 	// Remounts the product picker when the manufacturer changes, so a stale
 	// selection can't survive into a different catalogue.
@@ -264,7 +271,10 @@
 		noTag = defaultNoTag;
 		copyAccessories = true;
 		reuseAccessories = false;
-		chosenLocationId = locationId ?? locations?.[0]?.id ?? '';
+		// The kit's own place when it has one, else where the user starred.
+		chosenLocationId =
+			locationId ??
+			(locations ? defaultLocationFor(locations, organizationId, defaultsQuery.current) : '');
 		manufacturerKey++;
 		seed = typeof seedValue === 'string' ? seedValue.trim() : '';
 	}
@@ -504,17 +514,13 @@
 			{#if locations}
 				<div class="space-y-2">
 					<Label for="newAssetLocation">Location</Label>
-					<select
+					<LocationSelect
 						id="newAssetLocation"
+						{locations}
+						ownerOrgId={organizationId}
 						bind:value={chosenLocationId}
 						disabled={saving}
-						class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-					>
-						{#each locations as loc (loc.id)}
-							{@const city = loc.address?.city?.trim()}
-							<option value={loc.id}>{city ? `${loc.name} (${city})` : loc.name}</option>
-						{/each}
-					</select>
+					/>
 				</div>
 			{/if}
 

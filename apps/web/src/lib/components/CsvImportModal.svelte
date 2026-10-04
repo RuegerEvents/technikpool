@@ -4,7 +4,13 @@
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Modal } from '#lib/components/ui/modal/index.js';
 	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
-	import { getLocations, getCategories, importAssets } from '#lib/remote/assets.remote.js';
+	import {
+		getDefaultLocations,
+		getPlaceableLocations,
+		getCategories,
+		importAssets
+	} from '#lib/remote/assets.remote.js';
+	import { LocationSelect, defaultLocationFor } from '#lib/components/ui/location-select/index.js';
 	import type { ImportResult } from '#lib/remote/assets.remote.js';
 	import { toast } from 'svelte-sonner';
 	import { SvelteSet } from 'svelte/reactivity';
@@ -29,8 +35,11 @@
 	let orgs = $derived((orgsQuery.current ?? []).filter(canManageInventory));
 	let selectedOrgId = $state('');
 	let selectedLocationId = $state('');
-	let locationsQuery = $derived(selectedOrgId ? getLocations(selectedOrgId) : null);
+	let locationsQuery = $derived(selectedOrgId ? getPlaceableLocations() : null);
 	let locations = $derived(locationsQuery?.current ?? []);
+	// Which org the location was last defaulted for: another org's units start on its own shelf.
+	let locationOrgId = '';
+	let defaultsQuery = $derived(getDefaultLocations());
 	let categoriesQuery = $derived(getCategories());
 	let categories = $derived(categoriesQuery.current ?? []);
 
@@ -43,8 +52,11 @@
 			selectedLocationId = '';
 			return;
 		}
-		if (!selectedLocationId || !locations.some((l) => l.id === selectedLocationId)) {
-			selectedLocationId = locations[0].id;
+		// Wait for the star, or the first shelf would be picked and stay picked.
+		if (!defaultsQuery.ready) return;
+		if (locationOrgId !== selectedOrgId || !locations.some((l) => l.id === selectedLocationId)) {
+			locationOrgId = selectedOrgId;
+			selectedLocationId = defaultLocationFor(locations, selectedOrgId, defaultsQuery.current);
 		}
 	});
 
@@ -411,20 +423,13 @@
 				</div>
 				<div class="space-y-1.5">
 					<label class="text-sm font-medium" for="import-loc">Location</label>
-					<select
+					<LocationSelect
 						id="import-loc"
+						{locations}
+						ownerOrgId={selectedOrgId}
 						bind:value={selectedLocationId}
 						disabled={locations.length === 0}
-						class={selectClass}
-					>
-						{#if locations.length === 0}
-							<option value="">No locations</option>
-						{:else}
-							{#each locations as loc (loc.id)}
-								<option value={loc.id}>{loc.name}</option>
-							{/each}
-						{/if}
-					</select>
+					/>
 				</div>
 			</div>
 

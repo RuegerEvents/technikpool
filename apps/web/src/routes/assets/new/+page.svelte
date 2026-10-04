@@ -14,6 +14,7 @@
 	import { previewAutoTags } from '#lib/asset-tag-preview.js';
 	import SerialNumberWarning from '#lib/components/SerialNumberWarning.svelte';
 	import { Label } from '#lib/components/ui/label/index.js';
+	import { LocationSelect, defaultLocationFor } from '#lib/components/ui/location-select/index.js';
 	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
 	import { ImageUpload } from '#lib/components/ui/image-upload/index.js';
 	import {
@@ -25,7 +26,8 @@
 		getManufacturers,
 		getCategories,
 		getProducts,
-		getLocations,
+		getDefaultLocations,
+		getPlaceableLocations,
 		getAsset,
 		getProductAccessoryProfile,
 		createAssets
@@ -52,8 +54,12 @@
 	let nextTagQuery = $derived(selectedOrgId ? getNextAssetTag(selectedOrgId) : null);
 	let nextTag = $derived(nextTagQuery?.current ?? null);
 	let locationId = $state('');
-	let locationsQuery = $derived(selectedOrgId ? getLocations(selectedOrgId) : null);
+	let locationsQuery = $derived(selectedOrgId ? getPlaceableLocations() : null);
 	let locations = $derived(locationsQuery?.current ?? []);
+	let ownLocations = $derived(locations.filter((l) => l.organizationId === selectedOrgId));
+	// Which org the location was last defaulted for: another org's units start on its own shelf.
+	let locationOrgId = '';
+	let defaultsQuery = $derived(getDefaultLocations());
 
 	let duplicateFromId = $derived(page.url.searchParams.get('duplicateFrom'));
 	let duplicateSourceQuery = $derived(duplicateFromId ? getAsset(duplicateFromId) : null);
@@ -68,10 +74,16 @@
 			locationId = '';
 			return;
 		}
-		if (!locationId || !locations.some((l) => l.id === locationId)) {
+		// Wait for the star, or the first shelf would be picked and stay picked.
+		if (!defaultsQuery.ready) return;
+		if (locationOrgId !== selectedOrgId || !locations.some((l) => l.id === locationId)) {
+			locationOrgId = selectedOrgId;
+			// A copy goes where its original is; anything else where the user starred.
 			const preferred = duplicateSource?.locationId;
 			locationId =
-				preferred && locations.some((l) => l.id === preferred) ? preferred : locations[0].id;
+				preferred && locations.some((l) => l.id === preferred)
+					? preferred
+					: defaultLocationFor(locations, selectedOrgId, defaultsQuery.current);
 		}
 	});
 
@@ -395,26 +407,13 @@
 					{#if selectedOrgId}
 						<div class="space-y-2">
 							<Label for="location">Location</Label>
-							<select
+							<LocationSelect
 								id="location"
+								{locations}
+								ownerOrgId={selectedOrgId}
 								bind:value={locationId}
-								required
-								class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-							>
-								{#if locations.length === 0}
-									<option value="" disabled>—</option>
-								{:else}
-									{#each locations as loc (loc.id)}
-										{@const city = loc.address?.city?.trim()}
-										{@const line1 = loc.address?.line1?.trim()}
-										{@const addrParts = [line1, city].filter(Boolean).join(', ')}
-										<option value={loc.id}
-											>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option
-										>
-									{/each}
-								{/if}
-							</select>
-							{#if locations.length === 0}
+							/>
+							{#if locationsQuery?.ready && ownLocations.length === 0}
 								<p class="text-sm text-muted-foreground">
 									No locations yet. Create one in
 									<a class="underline" href={resolve(`orgs/${selectedOrgId}/locations`)}

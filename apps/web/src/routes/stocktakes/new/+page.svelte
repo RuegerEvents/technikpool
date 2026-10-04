@@ -157,7 +157,10 @@
 									l.id
 								)
 									? 'border-primary bg-primary text-primary-foreground'
-									: 'bg-background hover:bg-muted'}">{l.name}</button
+									: 'bg-background hover:bg-muted'}"
+								>{l.name}{#if l.organizationId !== org?.id}
+									<span class="opacity-70"> · {orgLabel(l.organization)}</span>
+								{/if}</button
 							>
 						{/each}
 					</div>

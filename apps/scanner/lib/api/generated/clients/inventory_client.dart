@@ -20,7 +20,12 @@ part 'inventory_client.g.dart';
 abstract class InventoryClient {
   factory InventoryClient(Dio dio, {String? baseUrl}) = _InventoryClient;
 
-  /// Locations across the user's organizations
+  /// Locations a unit can be put at.
+  ///
+  /// Every location of the user's organizations — any role, DEVICE_VIEWER included —.
+  /// plus any other location already holding active units of those organizations.
+  /// A unit may be scanned onto a location of another organization the user belongs.
+  /// to (a friend storing the equipment); that organization does not see it.
   @GET('/api/v1/locations')
   Future<List<Location>> listLocations();
 

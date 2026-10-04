@@ -71,6 +71,7 @@ export const ModelName = {
   OrgProductPrice: 'OrgProductPrice',
   Address: 'Address',
   Location: 'Location',
+  UserDefaultLocation: 'UserDefaultLocation',
   Asset: 'Asset',
   LicenseCredential: 'LicenseCredential',
   BundleTemplate: 'BundleTemplate',
@@ -419,6 +420,18 @@ export const LocationScalarFieldEnum = {
 } as const
 
 export type LocationScalarFieldEnum = (typeof LocationScalarFieldEnum)[keyof typeof LocationScalarFieldEnum]
+
+
+export const UserDefaultLocationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  locationId: 'locationId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserDefaultLocationScalarFieldEnum = (typeof UserDefaultLocationScalarFieldEnum)[keyof typeof UserDefaultLocationScalarFieldEnum]
 
 
 export const AssetScalarFieldEnum = {

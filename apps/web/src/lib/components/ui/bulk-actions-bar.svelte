@@ -1,11 +1,10 @@
 <script lang="ts">
+	import { LocationSelect } from '#lib/components/ui/location-select/index.js';
 	import { getErrorMessage, orgLabel } from '#lib/utils.js';
-	import { canWrite } from '#lib/roles.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Modal } from '#lib/components/ui/modal/index.js';
-	import { bulkUpdateAssetStatus, getLocations } from '#lib/remote/assets.remote.js';
+	import { bulkUpdateAssetStatus, getPlaceableLocations } from '#lib/remote/assets.remote.js';
 	import { getAllProductions, checkoutAssets } from '#lib/remote/checkout.remote.js';
-	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
 	import { ASSET_STATUSES, isRetiredStatus, type AssetStatus } from '#lib/asset-status.js';
 	import {
 		assetStatusDescription,
@@ -43,35 +42,20 @@
 	let targetId = $state('');
 	let working = $state(false);
 
-	// Scanning writes, so the targets on offer are only the orgs this user may
-	// write in — a VIEWER sees the shelf everywhere but can move nothing, and a
-	// target that will refuse the scan has no business being in the list.
-	// Read through the queries rather than awaited: this bar sits on the Devices
-	// page, and an `await` here would hold that whole page back until these three
-	// answered. See CLAUDE.md, "Loading states".
-	let orgsQuery = $derived(getMyOrgs());
-	let locationsQuery = $derived(getLocations());
+	// Locations are every one a unit may go to, a friend's included — the server
+	// decides per unit whether its org may be kept there. Productions are only
+	// those this user may check out to. Read through the queries rather than
+	// awaited: this bar sits on the Devices page, and an `await` here would hold
+	// that whole page back until they answered. See CLAUDE.md, "Loading states".
+	let locationsQuery = $derived(getPlaceableLocations());
 	let productionsQuery = $derived(getAllProductions());
-	let writableOrgIds = $derived(
-		new Set((orgsQuery.current ?? []).filter(canWrite).map((org) => org.id))
-	);
-	let locations = $derived(
-		(locationsQuery.current ?? []).filter((loc) => writableOrgIds.has(loc.organizationId))
-	);
+	let locations = $derived(locationsQuery.current ?? []);
 	let productions = $derived(
 		(productionsQuery.current ?? []).filter((prod) => prod.checkoutRole !== null)
 	);
 
 	let targets = $derived(
-		targetType === 'location'
-			? locations.map((l) => {
-					const addr = [l.address?.postalCode?.trim(), l.address?.city?.trim()]
-						.filter(Boolean)
-						.join(' ');
-					const detail = [orgLabel(l.organization), addr].filter(Boolean).join(' · ');
-					return { id: l.id, label: detail ? `${l.name} (${detail})` : l.name };
-				})
-			: productions.map((p) => ({ id: p.id, label: `${p.name} (${orgLabel(p.organization)})` }))
+		productions.map((p) => ({ id: p.id, label: `${p.name} (${orgLabel(p.organization)})` }))
 	);
 
 	async function handleCheckout() {
@@ -183,16 +167,15 @@
 					{/if}
 				{/if}
 				{#if canCheckout && !productionTarget}
-					<select
+					<LocationSelect
+						{locations}
 						bind:value={targetId}
-						disabled={targets.length === 0}
-						class="h-9 min-w-44 rounded-md border border-input bg-background px-3 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-					>
-						<option value="">Move to location…</option>
-						{#each targets as t (t.id)}
-							<option value={t.id}>{t.label}</option>
-						{/each}
-					</select>
+						disabled={locations.length === 0}
+						placeholder="Move to location…"
+						placement="above"
+						size="sm"
+						class="min-w-56"
+					/>
 					<Button
 						variant="outline"
 						onclick={handleCheckout}
@@ -210,16 +193,28 @@
 						<option value="location">Location</option>
 						<option value="production">Production</option>
 					</select>
-					<select
-						bind:value={targetId}
-						disabled={targets.length === 0}
-						class="h-9 min-w-44 rounded-md border border-input bg-background px-3 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-					>
-						<option value="">Select target…</option>
-						{#each targets as t (t.id)}
-							<option value={t.id}>{t.label}</option>
-						{/each}
-					</select>
+					{#if targetType === 'location'}
+						<LocationSelect
+							{locations}
+							bind:value={targetId}
+							disabled={locations.length === 0}
+							placeholder="Select target…"
+							placement="above"
+							size="sm"
+							class="min-w-56"
+						/>
+					{:else}
+						<select
+							bind:value={targetId}
+							disabled={targets.length === 0}
+							class="h-9 min-w-44 rounded-md border border-input bg-background px-3 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+						>
+							<option value="">Select target…</option>
+							{#each targets as t (t.id)}
+								<option value={t.id}>{t.label}</option>
+							{/each}
+						</select>
+					{/if}
 					<Button onclick={handleCheckout} disabled={!targetId || working} size="sm">
 						{working ? 'Checking out…' : 'Checkout'}
 					</Button>

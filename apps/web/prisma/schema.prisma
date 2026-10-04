@@ -53,6 +53,7 @@ model User {
   checkTicks           ProductionCheckTick[]
   loanRequests         LoanRequest[]
   billingDismissals    BillingDismissal[]
+  defaultLocations     UserDefaultLocation[]
 
   @@map("user")
 }
@@ -193,6 +194,7 @@ model Organization {
   invitations    Invitation[]
 
   locations         Location[]
+  defaultLocations  UserDefaultLocation[]
   assets            Asset[]
   bundleTemplates   BundleTemplate[]
   productions       Production[]
@@ -641,6 +643,26 @@ model Location {
   stocktakeFound    StocktakeItem[]  @relation("StocktakeFoundAt")
   stocktakeLines    StocktakeLine[]
   stocktakeCounts   StocktakeCount[]
+  defaultFor        UserDefaultLocation[]
+}
+
+// Where one user's new units of one org go unless they pick otherwise — the
+// star in the location picker. Per user, because two people of one org can
+// work out of different warehouses. May be another org's location (a friend
+// storing our things); see src/lib/server/services/locations.ts.
+model UserDefaultLocation {
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  locationId     String
+  location       Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([userId, organizationId])
+  @@index([locationId])
 }
 
 model Asset {

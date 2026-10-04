@@ -12,6 +12,7 @@ import {
 } from './access';
 import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '#lib/asset-status.js';
 import { withAccessories } from './accessories';
+import { canPlaceAt } from './locations';
 import { resolveScannedCode } from './asset-lookup';
 import { onProductionSide } from './production-check';
 
@@ -439,7 +440,7 @@ export async function performScan(
 
 	if (input.targetType === 'location') {
 		const location = await prisma.location.findUniqueOrThrow({ where: { id: input.targetId } });
-		if (!systemAdmin && location.organizationId !== asset.organizationId) {
+		if (!(await canPlaceAt(userId, location, asset.organizationId))) {
 			throw new CheckoutError('wrong_organization', 'Location belongs to a different organisation');
 		}
 
@@ -779,7 +780,7 @@ export async function performBulkCheckout(
 		}
 
 		for (const asset of assets) {
-			if (!systemAdmin && location.organizationId !== asset.organizationId) {
+			if (!(await canPlaceAt(userId, location, asset.organizationId))) {
 				throw new CheckoutError(
 					'wrong_organization',
 					'Location belongs to a different organisation'

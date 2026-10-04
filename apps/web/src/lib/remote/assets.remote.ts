@@ -36,6 +36,7 @@ import {
 } from '#lib/asset-status.js';
 import { syncAccessories } from '#lib/server/services/accessories.js';
 import { CHECKED_OUT_TO_INCLUDE, checkedOutTo } from '#lib/server/services/checked-out-to.js';
+import { canPlaceAt, placeableLocationWhere } from '#lib/server/services/locations.js';
 import {
 	assetImageForRead,
 	bundleImageForRead,
@@ -495,7 +496,11 @@ export const getLocations = query(v.optional(v.string()), async (organizationId?
 
 	return await prisma.location.findMany({
 		where: { organizationId: { in: queryOrgIds } },
-		include: { address: true, organization: { select: { name: true, shortName: true } } },
+		include: {
+			address: true,
+			organization: { select: { name: true, shortName: true } },
+			_count: { select: { assets: { where: ACTIVE_ASSET_WHERE }, assetBundles: true } }
+		},
 		orderBy: { name: 'asc' }
 	});
 });
@@ -538,6 +543,7 @@ export const createLocation = command(createLocationSchema, async (input) => {
 
 	await getLocations(input.organizationId).refresh();
 	await getLocations().refresh();
+	await getPlaceableLocations().refresh();
 	await getKnownAddresses().refresh();
 	return location;
 });
@@ -578,8 +584,231 @@ export const updateLocation = command(updateLocationSchema, async (input) => {
 
 	await getLocations(location.organizationId).refresh();
 	await getLocations().refresh();
+	await getPlaceableLocations().refresh();
 	await getKnownAddresses().refresh();
 	return updated;
+});
+
+/**
+ * Every location a unit can be put at: those of every org the user belongs to
+ * (DEVICE_VIEWER included — a friend's garage counts), and any other holding
+ * units of their orgs. `own` marks the orgs whose units the user may move,
+ * which the picker lists first. See `services/locations.ts`.
+ */
+export const getPlaceableLocations = query(async () => {
+	const user = await requireAuth();
+	const [where, writable] = await Promise.all([
+		placeableLocationWhere(user.id),
+		writableOrgIds(user.id)
+	]);
+	const locations = await prisma.location.findMany({
+		where,
+		include: {
+			address: { select: { city: true } },
+			organization: { select: { id: true, name: true, shortName: true } }
+		},
+		orderBy: { name: 'asc' }
+	});
+	return locations.map((location) => ({
+		...location,
+		own: writable.includes(location.organizationId)
+	}));
+});
+
+/** The user's starred location per org: `{ [organizationId]: locationId }`. */
+export const getDefaultLocations = query(async () => {
+	const user = await requireAuth();
+	const rows = await prisma.userDefaultLocation.findMany({
+		where: { userId: user.id },
+		select: { organizationId: true, locationId: true }
+	});
+	return Object.fromEntries(rows.map((r) => [r.organizationId, r.locationId])) as Record<
+		string,
+		string
+	>;
+});
+
+const setDefaultLocationSchema = v.object({
+	organizationId: v.string(),
+	locationId: v.nullable(v.string())
+});
+
+/**
+ * Stars a location as where this user's new units of an org go, or clears the
+ * star with `null`. Only the user's own default changes, so any member may set
+ * it — the location only has to be one the org's units may be put at.
+ */
+export const setDefaultLocation = command(
+	setDefaultLocationSchema,
+	async ({ organizationId, locationId }) => {
+		const user = await requireAuth();
+		if (!(await userOrgIds(user.id)).includes(organizationId)) appError(403, 'unauthorized');
+		if (locationId === null) {
+			await prisma.userDefaultLocation.deleteMany({ where: { userId: user.id, organizationId } });
+		} else {
+			const location = await prisma.location.findUniqueOrThrow({ where: { id: locationId } });
+			if (!(await canPlaceAt(user.id, location, organizationId))) appError(400, 'location_invalid');
+			await prisma.userDefaultLocation.upsert({
+				where: { userId_organizationId: { userId: user.id, organizationId } },
+				create: { userId: user.id, organizationId, locationId },
+				update: { locationId }
+			});
+		}
+		await getDefaultLocations().refresh();
+	}
+);
+
+const mergeLocationsSchema = v.object({ sourceId: v.string(), targetId: v.string() });
+
+/**
+ * Folds one location into another and deletes it: two names for one place.
+ * Whatever pointed at the first points at the second — units and cases of any
+ * org, the stocktake rows and scopes, so a closed report keeps its counts.
+ * Deleting takes inventory rights on the org that owns the source; the target
+ * may be any location the user could put a unit at, a friend's included.
+ */
+export const mergeLocations = command(mergeLocationsSchema, async ({ sourceId, targetId }) => {
+	const user = await requireAuth();
+	if (sourceId === targetId) appError(400, 'location_invalid');
+	const source = await prisma.location.findUniqueOrThrow({
+		where: { id: sourceId },
+		select: { id: true, organizationId: true, addressId: true }
+	});
+	await requireOrgInventory(source.organizationId);
+	const target = await prisma.location.findFirst({
+		where: {
+			id: targetId,
+			...((await isSystemAdmin(user.id)) ? {} : await placeableLocationWhere(user.id))
+		},
+		select: { id: true, organizationId: true }
+	});
+	if (!target) appError(400, 'location_invalid');
+
+	const affectedOrgIds = (
+		await prisma.asset.findMany({
+			where: { locationId: sourceId },
+			select: { organizationId: true },
+			distinct: ['organizationId']
+		})
+	).map((a) => a.organizationId);
+
+	const moved = await prisma.$transaction(async (tx) => {
+		const assets = await tx.asset.updateMany({
+			where: { locationId: sourceId },
+			data: { locationId: target.id }
+		});
+		const bundles = await tx.assetBundle.updateMany({
+			where: { locationId: sourceId },
+			data: { locationId: target.id }
+		});
+		await tx.stocktakeItem.updateMany({
+			where: { expectedLocationId: sourceId },
+			data: { expectedLocationId: target.id }
+		});
+		await tx.stocktakeItem.updateMany({
+			where: { foundLocationId: sourceId },
+			data: { foundLocationId: target.id }
+		});
+		await tx.stocktakeEvent.updateMany({
+			where: { locationId: sourceId },
+			data: { locationId: target.id }
+		});
+		// A star on the source was a star on the place, which is now the target.
+		await tx.userDefaultLocation.updateMany({
+			where: { locationId: sourceId },
+			data: { locationId: target.id }
+		});
+
+		// One row per product and location: where the target already has one, the
+		// two add up, which is what counting one place under two names amounts to.
+		for (const line of await tx.stocktakeLine.findMany({ where: { locationId: sourceId } })) {
+			const twin = await tx.stocktakeLine.findUnique({
+				where: {
+					stocktakeId_productId_locationId: {
+						stocktakeId: line.stocktakeId,
+						productId: line.productId,
+						locationId: target.id
+					}
+				}
+			});
+			if (twin) {
+				await tx.stocktakeLine.update({
+					where: { id: twin.id },
+					data: { expected: twin.expected + line.expected, out: twin.out + line.out }
+				});
+				await tx.stocktakeLine.delete({ where: { id: line.id } });
+			} else {
+				await tx.stocktakeLine.update({ where: { id: line.id }, data: { locationId: target.id } });
+			}
+		}
+		for (const count of await tx.stocktakeCount.findMany({ where: { locationId: sourceId } })) {
+			const twin = await tx.stocktakeCount.findFirst({
+				where: {
+					stocktakeId: count.stocktakeId,
+					productId: count.productId,
+					locationId: target.id,
+					userId: count.userId
+				}
+			});
+			if (twin) {
+				await tx.stocktakeCount.update({
+					where: { id: twin.id },
+					data: { count: twin.count + count.count }
+				});
+				await tx.stocktakeCount.delete({ where: { id: count.id } });
+			} else {
+				await tx.stocktakeCount.update({
+					where: { id: count.id },
+					data: { locationId: target.id }
+				});
+			}
+		}
+		const scoped = await tx.stocktake.findMany({
+			where: { scope: { path: ['locationIds'], array_contains: [sourceId] } },
+			select: { id: true, scope: true }
+		});
+		for (const stocktake of scoped) {
+			const scope = stocktake.scope as { locationIds: string[] } & Record<string, unknown>;
+			const locationIds = [
+				...new Set(scope.locationIds.map((id) => (id === sourceId ? target.id : id)))
+			];
+			await tx.stocktake.update({
+				where: { id: stocktake.id },
+				data: { scope: { ...scope, locationIds } }
+			});
+		}
+
+		await tx.location.delete({ where: { id: sourceId } });
+		// An address belongs to one owner; this one's is gone with it.
+		await tx.address.deleteMany({
+			where: {
+				id: source.addressId,
+				locations: { none: {} },
+				productions: { none: {} },
+				organizations: { none: {} },
+				customers: { none: {} }
+			}
+		});
+		return { assets: assets.count, bundles: bundles.count };
+	});
+
+	await Promise.all([
+		getLocations(source.organizationId).refresh(),
+		getLocations(target.organizationId).refresh(),
+		getLocations().refresh(),
+		getPlaceableLocations().refresh(),
+		getDefaultLocations().refresh(),
+		getKnownAddresses().refresh(),
+		getAssets().refresh(),
+		getBundles().refresh(),
+		getBundleTemplates().refresh(),
+		...affectedOrgIds.flatMap((orgId) => [
+			getAssets(orgId).refresh(),
+			getBundles(orgId).refresh(),
+			getBundleTemplates(orgId).refresh()
+		])
+	]);
+	return moved;
 });
 
 /**
@@ -1296,7 +1525,8 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 
 	const locationId = parent?.locationId ?? bundle?.locationId ?? data.locationId;
 	const location = await prisma.location.findUniqueOrThrow({ where: { id: locationId } });
-	if (location.organizationId !== data.organizationId) appError(400, 'location_invalid');
+	if (!(await canPlaceAt(user.id, location, data.organizationId)))
+		appError(400, 'location_invalid');
 
 	// What the org's other units of this product already carry. Read before the
 	// transaction opens, so it describes the fleet as it was — the units being
@@ -1379,7 +1609,8 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 	await requireOrgInventory(data.organizationId, 'asset_create_forbidden');
 
 	const location = await prisma.location.findUniqueOrThrow({ where: { id: data.locationId } });
-	if (location.organizationId !== data.organizationId) appError(400, 'location_invalid');
+	if (!(await canPlaceAt(user.id, location, data.organizationId)))
+		appError(400, 'location_invalid');
 	const { autoAssetTags: numbered } = await prisma.organization.findUniqueOrThrow({
 		where: { id: data.organizationId },
 		select: { autoAssetTags: true }
@@ -1603,7 +1834,8 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 	if ('locationId' in input) {
 		if (input.locationId) {
 			const loc = await prisma.location.findUniqueOrThrow({ where: { id: input.locationId } });
-			if (loc.organizationId !== asset.organizationId) appError(400, 'location_invalid');
+			if (!(await canPlaceAt(user.id, loc, asset.organizationId)))
+				appError(400, 'location_invalid');
 			nextLocation = loc;
 		} else {
 			appError(400, 'location_required');
@@ -3458,6 +3690,7 @@ const updateBundleSchema = v.object({
 });
 
 export const updateBundle = command(updateBundleSchema, async (input) => {
+	const user = await requireAuth();
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id: input.bundleId },
 		include: { template: true, assets: { select: { id: true } } }
@@ -3472,6 +3705,12 @@ export const updateBundle = command(updateBundleSchema, async (input) => {
 	if ('tag' in input) {
 		data.tag = input.tag?.trim() || null;
 		await assertBundleTagAvailable(data.tag, input.bundleId);
+	}
+	if (input.locationId) {
+		const location = await prisma.location.findUniqueOrThrow({ where: { id: input.locationId } });
+		if (!(await canPlaceAt(user.id, location, bundle.template.organizationId))) {
+			appError(400, 'location_invalid');
+		}
 	}
 	if ('locationId' in input) data.locationId = input.locationId ?? null;
 	if ('netPurchasePrice' in input) data.netPurchasePrice = input.netPurchasePrice ?? null;
@@ -4160,7 +4399,7 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 
 	if (data.locationId) {
 		const location = await prisma.location.findUniqueOrThrow({ where: { id: data.locationId } });
-		if (location.organizationId !== organizationId) appError(400, 'location_invalid');
+		if (!(await canPlaceAt(user.id, location, organizationId))) appError(400, 'location_invalid');
 	}
 
 	const members = bundleCopyMembers(source.assets);
@@ -5203,7 +5442,8 @@ export const importAssets = command(importAssetsSchema, async (data): Promise<Im
 	await requireOrgInventory(data.organizationId, 'asset_create_forbidden');
 
 	const location = await prisma.location.findUniqueOrThrow({ where: { id: data.locationId } });
-	if (location.organizationId !== data.organizationId) appError(400, 'location_invalid');
+	if (!(await canPlaceAt(user.id, location, data.organizationId)))
+		appError(400, 'location_invalid');
 
 	const org = await prisma.organization.findUniqueOrThrow({
 		where: { id: data.organizationId },

@@ -73,7 +73,8 @@ const prefixes: Partial<Record<ModelName, string>> = {
 	ProductionCheck: 'prck',
 	ProductionCheckTick: 'prct',
 	LoanRequest: 'lnrq',
-	BillingDismissal: 'bdis'
+	BillingDismissal: 'bdis',
+	UserDefaultLocation: 'udl'
 };
 
 // Extend the client with prefixed IDs

@@ -34,7 +34,7 @@
 		getBundleTypeSpec,
 		getCategories,
 		getAssets,
-		getLocations,
+		getPlaceableLocations,
 		getProducts,
 		addAssetsToBundle,
 		removeAssetFromBundle,
@@ -54,6 +54,7 @@
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import { AssetStatusBadge } from '#lib/components/ui/asset-status/index.js';
+	import { LocationSelect } from '#lib/components/ui/location-select/index.js';
 	import { AssetPlace, placeOf, sharedPlace } from '#lib/components/ui/asset-place/index.js';
 	import {
 		NewAssetModal,
@@ -73,7 +74,7 @@
 	let bundlePlace = $derived(sharedPlace(bundle.assets));
 	let allAssets = $derived(await getAssets());
 	let categories = $derived(await getCategories());
-	let locations = $derived(await getLocations(bundle.template.organizationId));
+	let locations = $derived(await getPlaceableLocations());
 
 	// ── Duplicating ───────────────────────────────────────────────────────────
 	// A copy is the same composition made of other units, because a fixture is in
@@ -974,21 +975,15 @@
 					{/if}
 					<div class="space-y-2">
 						<Label for="copy-location">Location</Label>
-						<select
+						<LocationSelect
 							id="copy-location"
+							{locations}
+							ownerOrgId={bundle.template.organizationId}
+							current={bundle.location}
+							allowNone
 							bind:value={copyDraft.locationId}
 							disabled={copying}
-							class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-						>
-							<option value="">No location</option>
-							{#each locations as loc (loc.id)}
-								{@const city = loc.address?.city?.trim()}
-								{@const line1 = loc.address?.line1?.trim()}
-								{@const addrParts = [line1, city].filter(Boolean).join(', ')}
-								<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option
-								>
-							{/each}
-						</select>
+						/>
 						<p class="text-xs text-muted-foreground">
 							Every unit in the copy is moved here. Leave it empty to keep each where it is.
 						</p>
@@ -1234,19 +1229,14 @@
 			</div>
 			<div class="space-y-2">
 				<Label for="location">Location</Label>
-				<select
+				<LocationSelect
 					id="location"
+					{locations}
+					ownerOrgId={bundle.template.organizationId}
+					current={bundle.location}
+					allowNone
 					bind:value={bundleDraft.locationId}
-					class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-				>
-					<option value="">No location</option>
-					{#each locations as loc (loc.id)}
-						{@const city = loc.address?.city?.trim()}
-						{@const line1 = loc.address?.line1?.trim()}
-						{@const addrParts = [line1, city].filter(Boolean).join(', ')}
-						<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option>
-					{/each}
-				</select>
+				/>
 			</div>
 		</form>
 	{/snippet}

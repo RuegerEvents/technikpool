@@ -29,6 +29,7 @@
 	import { CategoryPill } from '#lib/components/ui/category-pill/index.js';
 	import { OrgBadge } from '#lib/components/ui/org-badge/index.js';
 	import { Fact } from '#lib/components/ui/fact/index.js';
+	import { LocationSelect } from '#lib/components/ui/location-select/index.js';
 	import { ProductDocuments } from '#lib/components/ui/product-documents/index.js';
 	import SerialNumberWarning from '#lib/components/SerialNumberWarning.svelte';
 	import {
@@ -65,7 +66,7 @@
 		getAsset,
 		getAssets,
 		getAssetHistory,
-		getLocations,
+		getPlaceableLocations,
 		getCategories,
 		updateAsset,
 		updateProduct,
@@ -107,7 +108,7 @@
 	// starts as a copy of this unit and lets them pick one of their orgs.
 	let canAddDevices = $derived((await getMyOrgs()).some(canManageInventory));
 	let history = $derived(await getAssetHistory(assetId));
-	let locations = $derived(await getLocations(asset.organizationId));
+	let locations = $derived(await getPlaceableLocations());
 	let categories = $derived(await getCategories());
 
 	// Prices are per-org — this page shows and edits the owning org's price
@@ -1432,18 +1433,13 @@
 			{#if !retired}
 				<div class="space-y-2">
 					<Label for="location">Location</Label>
-					<select
+					<LocationSelect
 						id="location"
+						{locations}
+						ownerOrgId={asset.organizationId}
+						current={asset.location}
 						bind:value={assetDraft.locationId}
-						class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-					>
-						{#each locations as loc (loc.id)}
-							{@const city = loc.address?.city?.trim()}
-							{@const line1 = loc.address?.line1?.trim()}
-							{@const addrParts = [line1, city].filter(Boolean).join(', ')}
-							<option value={loc.id}>{addrParts ? `${loc.name} (${addrParts})` : loc.name}</option>
-						{/each}
-					</select>
+					/>
 				</div>
 				<div class="space-y-2">
 					<Label for="purchaseDate">Purchase date</Label>

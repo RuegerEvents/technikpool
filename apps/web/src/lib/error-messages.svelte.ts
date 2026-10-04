@@ -160,7 +160,7 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 		case 'asset_in_other_bundle':
 			return `This unit is already in the bundle "${p0}" — remove it there first.`;
 		case 'location_invalid':
-			return 'That location does not belong to this organization.';
+			return 'Units of this organization can’t be put at that location.';
 		case 'location_required':
 			return 'A location is required.';
 		case 'location_used_by_other_org':

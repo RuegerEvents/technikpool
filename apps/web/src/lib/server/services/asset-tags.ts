@@ -3,6 +3,7 @@ import type { Prisma } from '#lib/prisma/client.js';
 import { isRetiredStatus } from '#lib/asset-status.js';
 import { isSystemAdmin, managedOrgIds } from './access';
 import { CABLE_ENDS } from './cable-ends';
+import { canPlaceAt } from './locations';
 
 // Registering units and giving untagged ones their sticker, from the scanner.
 // Both are inventory work, so both take ADMIN of the org — the rule the web's
@@ -89,7 +90,7 @@ export async function registerTaggedUnit(
 		}),
 		prisma.location.findUnique({
 			where: { id: input.locationId },
-			select: { organizationId: true }
+			select: { id: true, organizationId: true }
 		}),
 		prisma.organization.findUniqueOrThrow({
 			where: { id: input.organizationId },
@@ -97,8 +98,8 @@ export async function registerTaggedUnit(
 		})
 	]);
 	if (!product) throw new AssetTagError('not_found', 'Product not found');
-	if (location?.organizationId !== input.organizationId) {
-		throw new AssetTagError('location_invalid', 'The location is not one of this org');
+	if (!location || !(await canPlaceAt(userId, location, input.organizationId))) {
+		throw new AssetTagError('location_invalid', 'The location is not one this org may use');
 	}
 	const assetTag = await checkTag(input.organizationId, input.assetTag);
 

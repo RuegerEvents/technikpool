@@ -243,7 +243,12 @@ paths:
     get:
       operationId: listLocations
       tags: [inventory]
-      summary: Locations across the user's organizations
+      summary: Locations a unit can be put at
+      description: |
+        Every location of the user's organizations — any role, DEVICE_VIEWER included —
+        plus any other location already holding active units of those organizations.
+        A unit may be scanned onto a location of another organization the user belongs
+        to (a friend storing the equipment); that organization does not see it.
       responses:
         '200':
           description: Locations
@@ -2060,7 +2065,9 @@ components:
           type: string
         locationIds:
           type: array
-          description: Only units at these locations. All of the org's when empty or absent.
+          description: |
+            Only units at these locations: the org's own, or another org's holding its units.
+            All of them when empty or absent.
           items:
             type: string
         categoryIds:

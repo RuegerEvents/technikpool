@@ -11,6 +11,7 @@ import {
 } from './access';
 import { ACTIVE_ASSET_WHERE, isRetiredStatus, type AssetStatus } from '#lib/asset-status.js';
 import { resolveScannedCode } from './asset-lookup';
+import { orgLocationWhere } from './locations';
 import { syncAccessories } from './accessories';
 import { CABLE_ENDS } from './cable-ends';
 import { userLabel } from '#lib/user-label.svelte.js';
@@ -166,14 +167,20 @@ async function loadOpenForWrite(userId: string, stocktakeId: string) {
 	return stocktake;
 }
 
-/** A counter's location has to be one of the stocktake's org. */
+/**
+ * A counter's location has to be one of the stocktake's org, or another org's
+ * that holds its units — what a friend stores for us is counted where it is.
+ */
 async function assertCountingLocation(organizationId: string, locationId: string) {
 	const location = await prisma.location.findUnique({
 		where: { id: locationId },
 		select: { id: true, name: true, organizationId: true }
 	});
 	if (!location) throw new StocktakeError('invalid_request', 'Unknown location');
-	if (location.organizationId !== organizationId) {
+	const usable = await prisma.location.count({
+		where: { id: locationId, ...orgLocationWhere(organizationId) }
+	});
+	if (usable === 0) {
 		throw new StocktakeError('wrong_organization', 'Location belongs to a different organisation');
 	}
 	return location;
@@ -447,7 +454,7 @@ async function defaultName(organizationId: string, scope: StocktakeScope, prefix
 	});
 	if (scope.locationIds.length === 0) return `${prefix} ${date}`;
 	const locations = await prisma.location.findMany({
-		where: { id: { in: scope.locationIds }, organizationId },
+		where: { id: { in: scope.locationIds }, ...orgLocationWhere(organizationId) },
 		select: { name: true },
 		orderBy: { name: 'asc' }
 	});
@@ -494,7 +501,7 @@ export async function createStocktake(
 	const scope: StocktakeScope = { ...input.scope, assetIds: [] };
 	const [locations, categories, products] = await Promise.all([
 		prisma.location.count({
-			where: { id: { in: scope.locationIds }, organizationId: input.organizationId }
+			where: { id: { in: scope.locationIds }, ...orgLocationWhere(input.organizationId) }
 		}),
 		prisma.category.count({ where: { id: { in: scope.categoryIds } } }),
 		prisma.product.count({ where: { id: { in: scope.productIds } } })
@@ -848,9 +855,25 @@ export async function listStocktakes(
 		},
 		orderBy: [{ status: 'desc' }, { createdAt: 'desc' }]
 	});
+	const stocktakeOrgIds = [...new Set(stocktakes.map((s) => s.organizationId))];
 	const locations = await prisma.location.findMany({
-		where: { organizationId: { in: [...new Set(stocktakes.map((s) => s.organizationId))] } },
-		select: { id: true, name: true, organizationId: true },
+		where: {
+			OR: [
+				{ organizationId: { in: stocktakeOrgIds } },
+				{ assets: { some: { organizationId: { in: stocktakeOrgIds }, ...ACTIVE_ASSET_WHERE } } },
+				{ id: { in: stocktakes.flatMap((s) => parseScope(s.scope).locationIds) } }
+			]
+		},
+		select: {
+			id: true,
+			name: true,
+			organizationId: true,
+			assets: {
+				where: { organizationId: { in: stocktakeOrgIds }, ...ACTIVE_ASSET_WHERE },
+				select: { organizationId: true },
+				distinct: ['organizationId']
+			}
+		},
 		orderBy: { name: 'asc' }
 	});
 	const summaries = [];
@@ -869,17 +892,26 @@ export async function listStocktakes(
 	return summaries;
 }
 
-/** Where a counter can say they are: the scope's locations, or all of the org's when it names none. */
+/**
+ * Where a counter can say they are: the scope's locations, or when it names
+ * none, all of the org's and any other org's holding its units.
+ */
 function countingLocationsOf(
 	organizationId: string,
 	scope: StocktakeScope,
-	locations: { id: string; name: string; organizationId: string }[]
+	locations: {
+		id: string;
+		name: string;
+		organizationId: string;
+		assets: { organizationId: string }[];
+	}[]
 ) {
 	return locations
-		.filter(
-			(l) =>
-				l.organizationId === organizationId &&
-				(scope.locationIds.length === 0 || scope.locationIds.includes(l.id))
+		.filter((l) =>
+			scope.locationIds.length > 0
+				? scope.locationIds.includes(l.id)
+				: l.organizationId === organizationId ||
+					l.assets.some((a) => a.organizationId === organizationId)
 		)
 		.map(({ id, name }) => ({ id, name }));
 }
@@ -919,10 +951,10 @@ export async function getStocktake(userId: string, stocktakeId: string) {
 		// The locations a counter can say they are at: the scope's, or every one
 		// of the org's when the scope names none.
 		prisma.location.findMany({
-			where: {
-				organizationId: stocktake.organizationId,
-				...(scope.locationIds.length > 0 ? { id: { in: scope.locationIds } } : {})
-			},
+			where:
+				scope.locationIds.length > 0
+					? { id: { in: scope.locationIds } }
+					: orgLocationWhere(stocktake.organizationId),
 			select: { id: true, name: true },
 			orderBy: { name: 'asc' }
 		}),

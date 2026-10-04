@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
-	import { canWrite } from '#lib/roles.js';
-	import { getLocations } from '#lib/remote/assets.remote.js';
+	import { getPlaceableLocations } from '#lib/remote/assets.remote.js';
 	import { checkoutAssets, getAllProductions, scanAsset } from '#lib/remote/checkout.remote.js';
 	import { startProductionCheck } from '#lib/remote/production-checks.remote.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
 	import { Label } from '#lib/components/ui/label/index.js';
@@ -14,28 +12,20 @@
 	import { SvelteSet } from 'svelte/reactivity';
 	import type { ScanGroup } from '#lib/server/services/checkout.js';
 	import * as Card from '#lib/components/ui/card/index.js';
-	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
+	import { LocationSelect } from '#lib/components/ui/location-select/index.js';
 	import { ProductionSelect } from '#lib/components/ui/production-select/index.js';
 	import { toast } from 'svelte-sonner';
 	import { tick, onDestroy } from 'svelte';
 	import { browser } from '$app/env';
 	import type { Html5Qrcode } from 'html5-qrcode';
 
-	// Scanning writes, so the targets on offer are only the orgs this user may
-	// write in — a VIEWER sees the shelf everywhere but can move nothing, and a
-	// target that will refuse the scan has no business being in the list.
-	// Read through the queries rather than awaited: the scan field is the point
-	// of this page and it works without any of them. See CLAUDE.md, "Loading
-	// states".
-	let orgsQuery = $derived(getMyOrgs());
-	let locationsQuery = $derived(getLocations());
+	// Locations are every one a unit may go to, a friend's included — the
+	// server decides per unit whether its org may be kept there. Read through the
+	// queries rather than awaited: the scan field is the point of this page and
+	// it works without any of them. See CLAUDE.md, "Loading states".
+	let locationsQuery = $derived(getPlaceableLocations());
 	let productionsQuery = $derived(getAllProductions());
-	let writableOrgIds = $derived(
-		new Set((orgsQuery.current ?? []).filter(canWrite).map((org) => org.id))
-	);
-	let locations = $derived(
-		(locationsQuery.current ?? []).filter((loc) => writableOrgIds.has(loc.organizationId))
-	);
+	let locations = $derived(locationsQuery.current ?? []);
 	// A lending org's units go out to someone else's production, so that one is
 	// on offer too — see `checkoutRole`. Checking takes less: crew may check.
 	let productions = $derived(
@@ -43,17 +33,6 @@
 			targetType === 'check' ? prod.canCheck : prod.checkoutRole !== null
 		)
 	);
-
-	let locationItems = $derived(
-		locations.map((loc) => {
-			const addr = [loc.address?.postalCode?.trim(), loc.address?.city?.trim()]
-				.filter(Boolean)
-				.join(' ');
-			const detail = [orgLabel(loc.organization), addr].filter(Boolean).join(' · ');
-			return { id: loc.id, name: detail ? `${loc.name} (${detail})` : loc.name };
-		})
-	);
-	let locationSelection = $state<{ id: string | null; name: string } | null>(null);
 
 	let targetType = $state<'location' | 'production' | 'return' | 'check'>('location');
 	let targetId = $state('');
@@ -136,7 +115,7 @@
 
 	let selectedTargetName = $derived(
 		targetType === 'location'
-			? (locationSelection?.name ?? '')
+			? (locations.find((l) => l.id === targetId)?.name ?? '')
 			: (() => {
 					const p = productions.find((p) => p.id === targetId);
 					return p ? `${p.name} (${orgLabel(p.organization)})` : '';
@@ -149,7 +128,6 @@
 	function setTargetType(type: 'location' | 'production' | 'return' | 'check') {
 		targetType = type;
 		targetId = '';
-		locationSelection = null;
 	}
 
 	let startingCheck = $state(false);
@@ -205,7 +183,6 @@
 	function newSession() {
 		sessionEnded = false;
 		targetId = '';
-		locationSelection = null;
 		sessionLog = [];
 		sessionStartedAt = null;
 		sessionEndedAt = null;
@@ -424,14 +401,8 @@
 				<!-- Target select -->
 				{#if targetType === 'location'}
 					<div class="space-y-2">
-						<Label>Location</Label>
-						<CreatableSelect
-							items={locationItems}
-							bind:value={locationSelection}
-							onchange={(sel) => (targetId = sel?.id ?? '')}
-							placeholder="Search locations…"
-							allowCreate={false}
-						/>
+						<Label for="target-location">Location</Label>
+						<LocationSelect id="target-location" {locations} bind:value={targetId} />
 					</div>
 				{:else}
 					<div class="space-y-2">

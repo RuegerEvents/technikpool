@@ -138,7 +138,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Locations across the user's organizations */
+        /**
+         * Locations a unit can be put at
+         * @description Every location of the user's organizations — any role, DEVICE_VIEWER included —
+         *     plus any other location already holding active units of those organizations.
+         *     A unit may be scanned onto a location of another organization the user belongs
+         *     to (a friend storing the equipment); that organization does not see it.
+         */
         get: operations["listLocations"];
         put?: never;
         post?: never;
@@ -1214,7 +1220,10 @@ export interface components {
         };
         StocktakeScopeRequest: {
             organizationId: string;
-            /** @description Only units at these locations. All of the org's when empty or absent. */
+            /**
+             * @description Only units at these locations: the org's own, or another org's holding its units.
+             *     All of them when empty or absent.
+             */
             locationIds?: string[];
             /** @description Only units whose product is in these categories. All when empty or absent. */
             categoryIds?: string[];

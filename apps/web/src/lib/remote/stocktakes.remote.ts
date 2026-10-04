@@ -4,6 +4,7 @@ import { prisma } from '#lib/server/auth.js';
 import { requireAuth, writableOrgIds, isSystemAdmin } from '#lib/server/services/access.js';
 import { appError, type AppErrorCode } from '#lib/errors.js';
 import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
+import { orgLocationWhere } from '#lib/server/services/locations.js';
 import {
 	STOCKTAKE_ACTIONS,
 	STOCKTAKE_ERROR_STATUS,
@@ -85,15 +86,10 @@ export const getStocktakeFormOptions = query(async () => {
 	const orgIds = (await isSystemAdmin(user.id))
 		? (await prisma.organization.findMany({ select: { id: true } })).map((o) => o.id)
 		: await writableOrgIds(user.id);
-	const [orgs, categories] = await Promise.all([
+	const [orgRows, categories] = await Promise.all([
 		prisma.organization.findMany({
 			where: { id: { in: orgIds } },
-			select: {
-				id: true,
-				name: true,
-				shortName: true,
-				locations: { select: { id: true, name: true }, orderBy: { name: 'asc' } }
-			},
+			select: { id: true, name: true, shortName: true },
 			orderBy: { name: 'asc' }
 		}),
 		prisma.category.findMany({
@@ -101,6 +97,22 @@ export const getStocktakeFormOptions = query(async () => {
 			orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }]
 		})
 	]);
+	// An org's own locations, and any other org's holding its units.
+	const orgs = await Promise.all(
+		orgRows.map(async (org) => ({
+			...org,
+			locations: await prisma.location.findMany({
+				where: orgLocationWhere(org.id),
+				select: {
+					id: true,
+					name: true,
+					organizationId: true,
+					organization: { select: { name: true, shortName: true } }
+				},
+				orderBy: { name: 'asc' }
+			})
+		}))
+	);
 	return { orgs, categories };
 });
 

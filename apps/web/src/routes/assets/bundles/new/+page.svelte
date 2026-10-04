@@ -14,7 +14,7 @@
 	import {
 		getAssets,
 		getCategories,
-		getLocations,
+		getPlaceableLocations,
 		getBundleTemplates,
 		getBundleTypeSpec,
 		createBundleInstance
@@ -69,7 +69,7 @@
 
 	let availableAssetsQuery = $derived(selectedOrgId ? getAssets(selectedOrgId) : null);
 	let availableAssets = $derived(availableAssetsQuery?.current ?? []);
-	let orgLocationsQuery = $derived(selectedOrgId ? getLocations(selectedOrgId) : null);
+	let orgLocationsQuery = $derived(selectedOrgId ? getPlaceableLocations() : null);
 	let orgLocations = $derived(orgLocationsQuery?.current ?? []);
 	// Read back from the org's units rather than kept on the side: a device
 	// registered from here is picked by id and shows up once the list refreshes.

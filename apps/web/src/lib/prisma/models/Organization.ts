@@ -426,6 +426,7 @@ export type OrganizationWhereInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceListRelationFilter
   invitations?: Prisma.InvitationListRelationFilter
   locations?: Prisma.LocationListRelationFilter
+  defaultLocations?: Prisma.UserDefaultLocationListRelationFilter
   assets?: Prisma.AssetListRelationFilter
   bundleTemplates?: Prisma.BundleTemplateListRelationFilter
   productions?: Prisma.ProductionListRelationFilter
@@ -481,6 +482,7 @@ export type OrganizationOrderByWithRelationInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceOrderByRelationAggregateInput
   invitations?: Prisma.InvitationOrderByRelationAggregateInput
   locations?: Prisma.LocationOrderByRelationAggregateInput
+  defaultLocations?: Prisma.UserDefaultLocationOrderByRelationAggregateInput
   assets?: Prisma.AssetOrderByRelationAggregateInput
   bundleTemplates?: Prisma.BundleTemplateOrderByRelationAggregateInput
   productions?: Prisma.ProductionOrderByRelationAggregateInput
@@ -539,6 +541,7 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   dpaAcceptances?: Prisma.DpaAcceptanceListRelationFilter
   invitations?: Prisma.InvitationListRelationFilter
   locations?: Prisma.LocationListRelationFilter
+  defaultLocations?: Prisma.UserDefaultLocationListRelationFilter
   assets?: Prisma.AssetListRelationFilter
   bundleTemplates?: Prisma.BundleTemplateListRelationFilter
   productions?: Prisma.ProductionListRelationFilter
@@ -665,6 +668,7 @@ export type OrganizationCreateInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -719,6 +723,7 @@ export type OrganizationUncheckedCreateInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -773,6 +778,7 @@ export type OrganizationUpdateInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -827,6 +833,7 @@ export type OrganizationUncheckedUpdateInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1203,6 +1210,20 @@ export type OrganizationUpdateOneRequiredWithoutLocationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutLocationsInput, Prisma.OrganizationUpdateWithoutLocationsInput>, Prisma.OrganizationUncheckedUpdateWithoutLocationsInput>
 }
 
+export type OrganizationCreateNestedOneWithoutDefaultLocationsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutDefaultLocationsInput, Prisma.OrganizationUncheckedCreateWithoutDefaultLocationsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutDefaultLocationsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutDefaultLocationsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutDefaultLocationsInput, Prisma.OrganizationUncheckedCreateWithoutDefaultLocationsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutDefaultLocationsInput
+  upsert?: Prisma.OrganizationUpsertWithoutDefaultLocationsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutDefaultLocationsInput, Prisma.OrganizationUpdateWithoutDefaultLocationsInput>, Prisma.OrganizationUncheckedUpdateWithoutDefaultLocationsInput>
+}
+
 export type OrganizationCreateNestedOneWithoutAssetsInput = {
   create?: Prisma.XOR<Prisma.OrganizationCreateWithoutAssetsInput, Prisma.OrganizationUncheckedCreateWithoutAssetsInput>
   connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutAssetsInput
@@ -1465,6 +1486,7 @@ export type OrganizationCreateWithoutHomeUsersInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -1518,6 +1540,7 @@ export type OrganizationUncheckedCreateWithoutHomeUsersInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1587,6 +1610,7 @@ export type OrganizationUpdateWithoutHomeUsersInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -1640,6 +1664,7 @@ export type OrganizationUncheckedUpdateWithoutHomeUsersInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1693,6 +1718,7 @@ export type OrganizationCreateWithoutMembersInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -1746,6 +1772,7 @@ export type OrganizationUncheckedCreateWithoutMembersInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1815,6 +1842,7 @@ export type OrganizationUpdateWithoutMembersInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -1868,6 +1896,7 @@ export type OrganizationUncheckedUpdateWithoutMembersInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1921,6 +1950,7 @@ export type OrganizationCreateWithoutDpaAcceptancesInput = {
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -1974,6 +2004,7 @@ export type OrganizationUncheckedCreateWithoutDpaAcceptancesInput = {
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2043,6 +2074,7 @@ export type OrganizationUpdateWithoutDpaAcceptancesInput = {
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -2096,6 +2128,7 @@ export type OrganizationUncheckedUpdateWithoutDpaAcceptancesInput = {
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2149,6 +2182,7 @@ export type OrganizationCreateWithoutInvitationsInput = {
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -2202,6 +2236,7 @@ export type OrganizationUncheckedCreateWithoutInvitationsInput = {
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2271,6 +2306,7 @@ export type OrganizationUpdateWithoutInvitationsInput = {
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -2324,6 +2360,7 @@ export type OrganizationUncheckedUpdateWithoutInvitationsInput = {
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2378,6 +2415,7 @@ export type OrganizationCreateWithoutProductPricesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -2431,6 +2469,7 @@ export type OrganizationUncheckedCreateWithoutProductPricesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2500,6 +2539,7 @@ export type OrganizationUpdateWithoutProductPricesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -2553,6 +2593,7 @@ export type OrganizationUncheckedUpdateWithoutProductPricesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2605,6 +2646,7 @@ export type OrganizationCreateWithoutAddressInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -2658,6 +2700,7 @@ export type OrganizationUncheckedCreateWithoutAddressInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2772,6 +2815,7 @@ export type OrganizationCreateWithoutLocationsInput = {
   members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -2825,6 +2869,7 @@ export type OrganizationUncheckedCreateWithoutLocationsInput = {
   members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2894,6 +2939,7 @@ export type OrganizationUpdateWithoutLocationsInput = {
   members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -2947,6 +2993,239 @@ export type OrganizationUncheckedUpdateWithoutLocationsInput = {
   members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
+  productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
+  categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput
+  productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput
+  offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput
+  offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrganizationNestedInput
+  offersReceived?: Prisma.OfferUncheckedUpdateManyWithoutRecipientOrganizationNestedInput
+  invoicesReceived?: Prisma.InvoiceUncheckedUpdateManyWithoutRecipientOrganizationNestedInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutOrganizationNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutOrganizationNestedInput
+  stocktakes?: Prisma.StocktakeUncheckedUpdateManyWithoutOrganizationNestedInput
+  productionChecks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutOrganizationNestedInput
+  loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutDefaultLocationsInput = {
+  id?: string
+  name: string
+  shortName?: string | null
+  assetIdPrefix: string
+  autoAssetTags?: boolean
+  nextAssetTagNumber?: number
+  nextAssetIndex?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  defaultAssetVisibility?: string
+  color: string
+  avatarLabel: string
+  defaultInspectionIntervalMonths?: number | null
+  isKleinunternehmer?: boolean
+  taxNumber?: string | null
+  vatId?: string | null
+  bankAccountHolder?: string | null
+  iban?: string | null
+  bic?: string | null
+  bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  logoPath?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
+  address?: Prisma.AddressCreateNestedOneWithoutOrganizationsInput
+  homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput
+  members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput
+  dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
+  locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
+  productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
+  categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput
+  productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput
+  offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput
+  offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutOrganizationInput
+  offersReceived?: Prisma.OfferCreateNestedManyWithoutRecipientOrganizationInput
+  invoicesReceived?: Prisma.InvoiceCreateNestedManyWithoutRecipientOrganizationInput
+  billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutOrganizationInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutOrganizationInput
+  stocktakes?: Prisma.StocktakeCreateNestedManyWithoutOrganizationInput
+  productionChecks?: Prisma.ProductionCheckCreateNestedManyWithoutOrganizationInput
+  loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutDefaultLocationsInput = {
+  id?: string
+  name: string
+  shortName?: string | null
+  assetIdPrefix: string
+  autoAssetTags?: boolean
+  nextAssetTagNumber?: number
+  nextAssetIndex?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  defaultAssetVisibility?: string
+  color: string
+  avatarLabel: string
+  defaultInspectionIntervalMonths?: number | null
+  isKleinunternehmer?: boolean
+  addressId?: string | null
+  taxNumber?: string | null
+  vatId?: string | null
+  bankAccountHolder?: string | null
+  iban?: string | null
+  bic?: string | null
+  bankName?: string | null
+  billingEmail?: string | null
+  billingWebsite?: string | null
+  logoPath?: string | null
+  paymentTermsDays?: number
+  offerIntroTemplate?: string | null
+  offerClosingTemplate?: string | null
+  invoiceIntroTemplate?: string | null
+  invoiceClosingTemplate?: string | null
+  homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput
+  members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
+  locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
+  bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
+  productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
+  categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
+  serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput
+  productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput
+  offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput
+  offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrganizationInput
+  offersReceived?: Prisma.OfferUncheckedCreateNestedManyWithoutRecipientOrganizationInput
+  invoicesReceived?: Prisma.InvoiceUncheckedCreateNestedManyWithoutRecipientOrganizationInput
+  billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutOrganizationInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutOrganizationInput
+  stocktakes?: Prisma.StocktakeUncheckedCreateNestedManyWithoutOrganizationInput
+  productionChecks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutOrganizationInput
+  loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutDefaultLocationsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutDefaultLocationsInput, Prisma.OrganizationUncheckedCreateWithoutDefaultLocationsInput>
+}
+
+export type OrganizationUpsertWithoutDefaultLocationsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutDefaultLocationsInput, Prisma.OrganizationUncheckedUpdateWithoutDefaultLocationsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutDefaultLocationsInput, Prisma.OrganizationUncheckedCreateWithoutDefaultLocationsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutDefaultLocationsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutDefaultLocationsInput, Prisma.OrganizationUncheckedUpdateWithoutDefaultLocationsInput>
+}
+
+export type OrganizationUpdateWithoutDefaultLocationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  shortName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
+  autoAssetTags?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  nextAssetTagNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  nextAssetIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.AddressUpdateOneWithoutOrganizationsNestedInput
+  homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput
+  members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput
+  dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
+  locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
+  bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
+  productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
+  categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
+  serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput
+  services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput
+  productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput
+  offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput
+  offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutOrganizationNestedInput
+  offersReceived?: Prisma.OfferUpdateManyWithoutRecipientOrganizationNestedInput
+  invoicesReceived?: Prisma.InvoiceUpdateManyWithoutRecipientOrganizationNestedInput
+  billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutOrganizationNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutOrganizationNestedInput
+  stocktakes?: Prisma.StocktakeUpdateManyWithoutOrganizationNestedInput
+  productionChecks?: Prisma.ProductionCheckUpdateManyWithoutOrganizationNestedInput
+  loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutDefaultLocationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  shortName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
+  autoAssetTags?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  nextAssetTagNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  nextAssetIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string
+  defaultInspectionIntervalMonths?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput
+  members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
+  locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3001,6 +3280,7 @@ export type OrganizationCreateWithoutAssetsInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
@@ -3054,6 +3334,7 @@ export type OrganizationUncheckedCreateWithoutAssetsInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3123,6 +3404,7 @@ export type OrganizationUpdateWithoutAssetsInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
@@ -3176,6 +3458,7 @@ export type OrganizationUncheckedUpdateWithoutAssetsInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3229,6 +3512,7 @@ export type OrganizationCreateWithoutBundleTemplatesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
@@ -3282,6 +3566,7 @@ export type OrganizationUncheckedCreateWithoutBundleTemplatesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3351,6 +3636,7 @@ export type OrganizationUpdateWithoutBundleTemplatesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
@@ -3404,6 +3690,7 @@ export type OrganizationUncheckedUpdateWithoutBundleTemplatesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3457,6 +3744,7 @@ export type OrganizationCreateWithoutProductionsInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput
@@ -3510,6 +3798,7 @@ export type OrganizationUncheckedCreateWithoutProductionsInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3579,6 +3868,7 @@ export type OrganizationUpdateWithoutProductionsInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput
@@ -3632,6 +3922,7 @@ export type OrganizationUncheckedUpdateWithoutProductionsInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3685,6 +3976,7 @@ export type OrganizationCreateWithoutCustomersInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -3738,6 +4030,7 @@ export type OrganizationUncheckedCreateWithoutCustomersInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3807,6 +4100,7 @@ export type OrganizationUpdateWithoutCustomersInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -3860,6 +4154,7 @@ export type OrganizationUncheckedUpdateWithoutCustomersInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3913,6 +4208,7 @@ export type OrganizationCreateWithoutLoanRequestsInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -3966,6 +4262,7 @@ export type OrganizationUncheckedCreateWithoutLoanRequestsInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -4035,6 +4332,7 @@ export type OrganizationUpdateWithoutLoanRequestsInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -4088,6 +4386,7 @@ export type OrganizationUncheckedUpdateWithoutLoanRequestsInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -4141,6 +4440,7 @@ export type OrganizationCreateWithoutProductionChecksInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -4194,6 +4494,7 @@ export type OrganizationUncheckedCreateWithoutProductionChecksInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -4263,6 +4564,7 @@ export type OrganizationUpdateWithoutProductionChecksInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -4316,6 +4618,7 @@ export type OrganizationUncheckedUpdateWithoutProductionChecksInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -4369,6 +4672,7 @@ export type OrganizationCreateWithoutCategoryRatesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -4422,6 +4726,7 @@ export type OrganizationUncheckedCreateWithoutCategoryRatesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -4491,6 +4796,7 @@ export type OrganizationUpdateWithoutCategoryRatesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -4544,6 +4850,7 @@ export type OrganizationUncheckedUpdateWithoutCategoryRatesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -4597,6 +4904,7 @@ export type OrganizationCreateWithoutServiceCategoriesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -4650,6 +4958,7 @@ export type OrganizationUncheckedCreateWithoutServiceCategoriesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -4719,6 +5028,7 @@ export type OrganizationUpdateWithoutServiceCategoriesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -4772,6 +5082,7 @@ export type OrganizationUncheckedUpdateWithoutServiceCategoriesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -4825,6 +5136,7 @@ export type OrganizationCreateWithoutServicesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -4878,6 +5190,7 @@ export type OrganizationUncheckedCreateWithoutServicesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -4947,6 +5260,7 @@ export type OrganizationUpdateWithoutServicesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -5000,6 +5314,7 @@ export type OrganizationUncheckedUpdateWithoutServicesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -5053,6 +5368,7 @@ export type OrganizationCreateWithoutOfferSequencesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -5106,6 +5422,7 @@ export type OrganizationUncheckedCreateWithoutOfferSequencesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -5175,6 +5492,7 @@ export type OrganizationUpdateWithoutOfferSequencesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -5228,6 +5546,7 @@ export type OrganizationUncheckedUpdateWithoutOfferSequencesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -5281,6 +5600,7 @@ export type OrganizationCreateWithoutOffersInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -5334,6 +5654,7 @@ export type OrganizationUncheckedCreateWithoutOffersInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -5392,6 +5713,7 @@ export type OrganizationCreateWithoutOffersReceivedInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -5445,6 +5767,7 @@ export type OrganizationUncheckedCreateWithoutOffersReceivedInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -5514,6 +5837,7 @@ export type OrganizationUpdateWithoutOffersInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -5567,6 +5891,7 @@ export type OrganizationUncheckedUpdateWithoutOffersInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -5631,6 +5956,7 @@ export type OrganizationUpdateWithoutOffersReceivedInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -5684,6 +6010,7 @@ export type OrganizationUncheckedUpdateWithoutOffersReceivedInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -5737,6 +6064,7 @@ export type OrganizationCreateWithoutInvoicesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -5790,6 +6118,7 @@ export type OrganizationUncheckedCreateWithoutInvoicesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -5848,6 +6177,7 @@ export type OrganizationCreateWithoutInvoicesReceivedInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -5901,6 +6231,7 @@ export type OrganizationUncheckedCreateWithoutInvoicesReceivedInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -5970,6 +6301,7 @@ export type OrganizationUpdateWithoutInvoicesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -6023,6 +6355,7 @@ export type OrganizationUncheckedUpdateWithoutInvoicesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -6087,6 +6420,7 @@ export type OrganizationUpdateWithoutInvoicesReceivedInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -6140,6 +6474,7 @@ export type OrganizationUncheckedUpdateWithoutInvoicesReceivedInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -6193,6 +6528,7 @@ export type OrganizationCreateWithoutStocktakesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -6246,6 +6582,7 @@ export type OrganizationUncheckedCreateWithoutStocktakesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -6315,6 +6652,7 @@ export type OrganizationUpdateWithoutStocktakesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -6368,6 +6706,7 @@ export type OrganizationUncheckedUpdateWithoutStocktakesInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -6421,6 +6760,7 @@ export type OrganizationCreateWithoutBillingDismissalsInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput
@@ -6474,6 +6814,7 @@ export type OrganizationUncheckedCreateWithoutBillingDismissalsInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput
   productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -6543,6 +6884,7 @@ export type OrganizationUpdateWithoutBillingDismissalsInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -6596,6 +6938,7 @@ export type OrganizationUncheckedUpdateWithoutBillingDismissalsInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -6679,6 +7022,7 @@ export type OrganizationUpdateWithoutAddressInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput
@@ -6732,6 +7076,7 @@ export type OrganizationUncheckedUpdateWithoutAddressInput = {
   dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput
   bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput
   productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -6793,6 +7138,7 @@ export type OrganizationCountOutputType = {
   dpaAcceptances: number
   invitations: number
   locations: number
+  defaultLocations: number
   assets: number
   bundleTemplates: number
   productions: number
@@ -6818,6 +7164,7 @@ export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   dpaAcceptances?: boolean | OrganizationCountOutputTypeCountDpaAcceptancesArgs
   invitations?: boolean | OrganizationCountOutputTypeCountInvitationsArgs
   locations?: boolean | OrganizationCountOutputTypeCountLocationsArgs
+  defaultLocations?: boolean | OrganizationCountOutputTypeCountDefaultLocationsArgs
   assets?: boolean | OrganizationCountOutputTypeCountAssetsArgs
   bundleTemplates?: boolean | OrganizationCountOutputTypeCountBundleTemplatesArgs
   productions?: boolean | OrganizationCountOutputTypeCountProductionsArgs
@@ -6880,6 +7227,13 @@ export type OrganizationCountOutputTypeCountInvitationsArgs<ExtArgs extends runt
  */
 export type OrganizationCountOutputTypeCountLocationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.LocationWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountDefaultLocationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserDefaultLocationWhereInput
 }
 
 /**
@@ -7038,6 +7392,7 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   dpaAcceptances?: boolean | Prisma.Organization$dpaAcceptancesArgs<ExtArgs>
   invitations?: boolean | Prisma.Organization$invitationsArgs<ExtArgs>
   locations?: boolean | Prisma.Organization$locationsArgs<ExtArgs>
+  defaultLocations?: boolean | Prisma.Organization$defaultLocationsArgs<ExtArgs>
   assets?: boolean | Prisma.Organization$assetsArgs<ExtArgs>
   bundleTemplates?: boolean | Prisma.Organization$bundleTemplatesArgs<ExtArgs>
   productions?: boolean | Prisma.Organization$productionsArgs<ExtArgs>
@@ -7164,6 +7519,7 @@ export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.Interna
   dpaAcceptances?: boolean | Prisma.Organization$dpaAcceptancesArgs<ExtArgs>
   invitations?: boolean | Prisma.Organization$invitationsArgs<ExtArgs>
   locations?: boolean | Prisma.Organization$locationsArgs<ExtArgs>
+  defaultLocations?: boolean | Prisma.Organization$defaultLocationsArgs<ExtArgs>
   assets?: boolean | Prisma.Organization$assetsArgs<ExtArgs>
   bundleTemplates?: boolean | Prisma.Organization$bundleTemplatesArgs<ExtArgs>
   productions?: boolean | Prisma.Organization$productionsArgs<ExtArgs>
@@ -7199,6 +7555,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     dpaAcceptances: Prisma.$DpaAcceptancePayload<ExtArgs>[]
     invitations: Prisma.$InvitationPayload<ExtArgs>[]
     locations: Prisma.$LocationPayload<ExtArgs>[]
+    defaultLocations: Prisma.$UserDefaultLocationPayload<ExtArgs>[]
     assets: Prisma.$AssetPayload<ExtArgs>[]
     bundleTemplates: Prisma.$BundleTemplatePayload<ExtArgs>[]
     productions: Prisma.$ProductionPayload<ExtArgs>[]
@@ -7647,6 +8004,7 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
   dpaAcceptances<T extends Prisma.Organization$dpaAcceptancesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$dpaAcceptancesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DpaAcceptancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   invitations<T extends Prisma.Organization$invitationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$invitationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvitationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   locations<T extends Prisma.Organization$locationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$locationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LocationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  defaultLocations<T extends Prisma.Organization$defaultLocationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$defaultLocationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserDefaultLocationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assets<T extends Prisma.Organization$assetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$assetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   bundleTemplates<T extends Prisma.Organization$bundleTemplatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$bundleTemplatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BundleTemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   productions<T extends Prisma.Organization$productionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$productionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -8259,6 +8617,30 @@ export type Organization$locationsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.LocationScalarFieldEnum | Prisma.LocationScalarFieldEnum[]
+}
+
+/**
+ * Organization.defaultLocations
+ */
+export type Organization$defaultLocationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserDefaultLocation
+   */
+  select?: Prisma.UserDefaultLocationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserDefaultLocation
+   */
+  omit?: Prisma.UserDefaultLocationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserDefaultLocationInclude<ExtArgs> | null
+  where?: Prisma.UserDefaultLocationWhereInput
+  orderBy?: Prisma.UserDefaultLocationOrderByWithRelationInput | Prisma.UserDefaultLocationOrderByWithRelationInput[]
+  cursor?: Prisma.UserDefaultLocationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserDefaultLocationScalarFieldEnum | Prisma.UserDefaultLocationScalarFieldEnum[]
 }
 
 /**

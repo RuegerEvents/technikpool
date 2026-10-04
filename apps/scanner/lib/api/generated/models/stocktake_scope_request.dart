@@ -18,7 +18,9 @@ class StocktakeScopeRequest {
   
   final String organizationId;
 
-  /// Only units at these locations. All of the org's when empty or absent.
+  /// Only units at these locations: the org's own, or another org's holding its units.
+  /// All of them when empty or absent.
+  ///
   final List<String>? locationIds;
 
   /// Only units whose product is in these categories. All when empty or absent.

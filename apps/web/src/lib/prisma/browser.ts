@@ -148,6 +148,11 @@ export type Address = Prisma.AddressModel
  */
 export type Location = Prisma.LocationModel
 /**
+ * Model UserDefaultLocation
+ * 
+ */
+export type UserDefaultLocation = Prisma.UserDefaultLocationModel
+/**
  * Model Asset
  * 
  */
