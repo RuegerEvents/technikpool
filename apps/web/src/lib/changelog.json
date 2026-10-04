@@ -1,5 +1,15 @@
 [
 	{
+		"version": "0.31.1",
+		"date": "2026-10-04",
+		"en": [
+			"On a closed stocktake, units can be ticked — one by one or a whole location — and moved to any location, checked out or given a status from the bar at the bottom, just like on the Devices list."
+		],
+		"de": [
+			"In einer abgeschlossenen Inventur lassen sich Geräte anhaken – einzeln oder ein ganzer Standort – und über die Leiste unten an einen beliebigen Standort umbuchen, auschecken oder auf einen Status setzen, genau wie in der Geräteliste."
+		]
+	},
+	{
 		"version": "0.31.0",
 		"date": "2026-10-04",
 		"en": [
