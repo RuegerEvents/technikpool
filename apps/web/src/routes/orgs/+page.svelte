@@ -1,11 +1,9 @@
 <script lang="ts">
-	import * as Card from '#lib/components/ui/card/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
 	import { Label } from '#lib/components/ui/label/index.js';
 	import {
-		getMyOrgs,
-		getAllOrgs,
+		getOrgOverview,
 		createOrg,
 		getOrgIdentityInUse,
 		setHomeOrg
@@ -15,7 +13,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { refreshAll } from '$app/navigation';
-	import { plural, getErrorMessage, orgLabel, getContrastingTextColor } from '#lib/utils.js';
+	import { getErrorMessage, orgLabel, getContrastingTextColor } from '#lib/utils.js';
 	import { roleName } from '#lib/role-descriptions.svelte.js';
 	import { OrgBadge } from '#lib/components/ui/org-badge/index.js';
 	import { Modal } from '#lib/components/ui/modal/index.js';
@@ -25,7 +23,8 @@
 
 	let { data } = $props();
 
-	let orgsQuery = $derived(data.isAdmin ? getAllOrgs() : getMyOrgs());
+	// A system admin gets every org, everyone else their own; the server decides.
+	let orgsQuery = $derived(getOrgOverview());
 	let orgs = $derived(orgsQuery.current ?? []);
 	// Colour, label and prefix are unique across all orgs, including ones this user cannot see.
 	let identityQuery = $derived(getOrgIdentityInUse());
@@ -133,7 +132,7 @@
 			{data.isAdmin ? `All Organizations (${orgs.length})` : 'Your Organizations'}
 		</h2>
 		{#if !orgsQuery.ready}
-			<ContentSkeleton count={4} error={orgsQuery.error} />
+			<ContentSkeleton shape="table" count={4} error={orgsQuery.error} />
 		{:else if orgs.length === 0}
 			<p class="text-muted-foreground">
 				{data.isAdmin
@@ -141,14 +140,24 @@
 					: 'You are not a member of any organization yet.'}
 			</p>
 		{:else}
-			<div class="grid gap-4">
-				{#each orgs as org (org.id)}
-					<Card.Root>
-						<Card.Content class="flex items-center justify-between py-4">
-							<div>
-								<p class="flex items-center gap-1.5 font-medium">
+			<div class="overflow-x-auto rounded-md border">
+				<table class="w-full text-sm">
+					<thead>
+						<tr class="border-b bg-muted/30">
+							<th class="w-10 px-2 py-2"><span class="sr-only">Home</span></th>
+							<th class="px-4 py-2 text-left font-medium text-muted-foreground">Organization</th>
+							<th class="px-4 py-2 text-left font-medium text-muted-foreground">Role</th>
+							<th class="px-4 py-2 text-right font-medium text-muted-foreground">Members</th>
+							<th class="px-4 py-2 text-right font-medium text-muted-foreground">Devices</th>
+							<th class="px-4 py-2"></th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each orgs as org (org.id)}
+							{@const home = org.id === data.homeOrgId}
+							<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
+								<td class="px-2 py-2 text-center">
 									{#if org.role}
-										{@const home = org.id === data.homeOrgId}
 										<button
 											type="button"
 											class="rounded-sm p-1 text-muted-foreground transition-colors hover:text-foreground disabled:cursor-default"
@@ -163,26 +172,31 @@
 											<Star class="size-4 {home ? 'fill-foreground text-foreground' : ''}" />
 										</button>
 									{/if}
+								</td>
+								<td class="px-4 py-2">
 									<OrgBadge name={orgLabel(org)} color={org.color} avatarLabel={org.avatarLabel} />
-								</p>
-								<p class="text-sm text-muted-foreground">
-									{#if org.role}
-										Role: {roleName(org.role)}
-									{:else if data.isAdmin && 'memberCount' in org}
-										{plural(org.memberCount, ['# member', '# members'])}
-									{/if}
-								</p>
-							</div>
-							<div class="flex gap-2">
-								{#if org.role === 'OWNER' || data.isAdmin}
-									<Button variant="outline" href={resolve(`orgs/${org.id}`)}>Manage</Button>
-								{/if}
-								<Button variant="outline" href={resolve(`assets?org=${org.id}`)}>View Assets</Button
-								>
-							</div>
-						</Card.Content>
-					</Card.Root>
-				{/each}
+								</td>
+								<td class="px-4 py-2 text-muted-foreground">
+									{org.role ? roleName(org.role) : '—'}
+								</td>
+								<td class="px-4 py-2 text-right tabular-nums">{org.memberCount}</td>
+								<td class="px-4 py-2 text-right font-medium tabular-nums">{org.assetCount}</td>
+								<td class="px-4 py-2">
+									<div class="flex justify-end gap-2">
+										{#if org.role === 'OWNER' || data.isAdmin}
+											<Button size="sm" variant="outline" href={resolve(`orgs/${org.id}`)}
+												>Manage</Button
+											>
+										{/if}
+										<Button size="sm" variant="outline" href={resolve(`assets?org=${org.id}`)}
+											>View Assets</Button
+										>
+									</div>
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
 			</div>
 		{/if}
 	</div>

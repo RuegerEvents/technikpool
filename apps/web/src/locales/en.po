@@ -252,6 +252,7 @@ msgid "Select a user…"
 msgstr "Select a user…"
 
 #: src/routes/admin/users/+page.svelte
+#: src/routes/orgs/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Role"
@@ -457,6 +458,7 @@ msgstr "Bundle"
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/offers/new/+page.svelte
+#: src/routes/orgs/+page.svelte
 #: src/routes/productions/+page.svelte
 #: src/routes/products/[id]/product-detail.svelte
 #: src/routes/stickers/+page.svelte
@@ -643,10 +645,8 @@ msgstr "No organizations exist yet."
 msgid "You are not a member of any organization yet."
 msgstr "You are not a member of any organization yet."
 
-#. 0: roleName(org.role)
-#: src/routes/orgs/+page.svelte
-msgid "Role: {0}"
-msgstr "Role: {0}"
+#~ msgid "Role: {0}"
+#~ msgstr "Role: {0}"
 
 #: src/routes/orgs/+page.svelte
 msgid "Manage"
@@ -2376,11 +2376,10 @@ msgstr[1] "# assets"
 #~ msgid "Requested by <0/> · {0}"
 #~ msgstr "Requested by <0/> · {0}"
 
-#: src/routes/orgs/+page.svelte
-msgid "# member"
-msgid_plural "# members"
-msgstr[0] "# member"
-msgstr[1] "# members"
+#~ msgid "# member"
+#~ msgid_plural "# members"
+#~ msgstr[0] "# member"
+#~ msgstr[1] "# members"
 
 #: src/routes/productions/+page.svelte
 msgid "# production older than 1 month hidden"
@@ -2426,6 +2425,7 @@ msgstr "Devices | Technikpool"
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/routes/orgs/+page.svelte
 msgid "Devices"
 msgstr "Devices"
 
@@ -12559,3 +12559,11 @@ msgstr "Select all in {0}"
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Select"
 msgstr "Select"
+
+#: src/routes/orgs/+page.svelte
+msgid "Home"
+msgstr "Home"
+
+#: src/routes/orgs/+page.svelte
+msgid "Members"
+msgstr "Members"

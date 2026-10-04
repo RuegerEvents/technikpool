@@ -356,6 +356,7 @@ export const createOrg = command(
 		});
 
 		await getMyOrgs().refresh();
+		await getOrgOverview().refresh();
 		if (await isSystemAdmin(user.id)) await getAllOrgs().refresh();
 		await getOrgIdentityInUse().refresh();
 		return org;
@@ -499,6 +500,7 @@ export const updateOrg = command(
 
 		await getOrgWithMembers(orgId).refresh();
 		await getMyOrgs().refresh();
+		await getOrgOverview().refresh();
 		await getOrgIdentityInUse().refresh();
 		await getKnownAddresses().refresh();
 		return org;
@@ -526,7 +528,12 @@ export const deleteOrg = command(v.string(), async (orgId: string) => {
 		await tx.organization.delete({ where: { id: orgId } });
 	});
 
-	await Promise.all([getMyOrgs().refresh(), getAllOrgs().refresh(), getAllUsers().refresh()]);
+	await Promise.all([
+		getMyOrgs().refresh(),
+		getAllOrgs().refresh(),
+		getOrgOverview().refresh(),
+		getAllUsers().refresh()
+	]);
 	return { id: orgId };
 });
 
@@ -551,6 +558,39 @@ export const getAllOrgs = query(async () => {
 		...org,
 		role: (members[0]?.role ?? null) as OrgRole | null,
 		memberCount: _count.members
+	}));
+});
+
+/**
+ * The Organizations page: every org for a system admin, otherwise the user's
+ * own, each with how many units it has in the pool (sold and decommissioned
+ * ones are gone, so they don't count). Its own query so `getMyOrgs`, which
+ * half the app reads, doesn't count units on every page.
+ */
+export const getOrgOverview = query(async () => {
+	const user = await requireAuth();
+	const admin = await isSystemAdmin(user.id);
+
+	const orgs = await prisma.organization.findMany({
+		where: admin ? {} : { members: { some: { userId: user.id } } },
+		include: {
+			members: { where: { userId: user.id }, select: { role: true } },
+			_count: { select: { members: true } }
+		},
+		orderBy: { name: 'asc' }
+	});
+	const counts = await prisma.asset.groupBy({
+		by: ['organizationId'],
+		where: { organizationId: { in: orgs.map((o) => o.id) }, ...ACTIVE_ASSET_WHERE },
+		_count: { _all: true }
+	});
+	const assetCount = new Map(counts.map((c) => [c.organizationId, c._count._all]));
+
+	return orgs.map(({ members, _count, ...org }) => ({
+		...org,
+		role: (members[0]?.role ?? null) as OrgRole | null,
+		memberCount: _count.members,
+		assetCount: assetCount.get(org.id) ?? 0
 	}));
 });
 
