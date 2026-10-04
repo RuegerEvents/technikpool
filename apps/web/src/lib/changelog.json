@@ -1,5 +1,23 @@
 [
 	{
+		"version": "0.28.1",
+		"date": "2026-10-04",
+		"en": [
+			"Invoices are issued as e-invoices (ZUGFeRD, EN 16931): the PDF carries the invoice data as XML, which the recipient's accounting software reads directly. Such invoices are marked \"E-invoice\"; invoices sent before stay plain PDFs.",
+			"An invoice needs the customer's street, postal code and city before it can be sent. Addresses show their country.",
+			"Units selected on a production can be handed out, taken back or checked right there, or moved to a location. A lender only gets its own units counted.",
+			"The booked equipment list shows each unit's location, and serial number, location, organization and status line up in columns.",
+			"A production's address is shown one line per part."
+		],
+		"de": [
+			"Rechnungen werden als E-Rechnung ausgestellt (ZUGFeRD, EN 16931): Das PDF enthält die Rechnungsdaten als XML, das die Buchhaltungssoftware des Empfängers direkt einliest. Solche Rechnungen sind mit „E-Rechnung“ markiert; bereits verschickte bleiben einfache PDFs.",
+			"Eine Rechnung braucht Straße, Postleitzahl und Ort des Kunden, bevor sie verschickt werden kann. Adressen zeigen ihr Land.",
+			"Auf einer Produktion ausgewählte Geräte lassen sich direkt dort ausgeben, zurücknehmen, prüfen oder an einen Standort umbuchen. Als Verleiher zählen nur die eigenen Geräte.",
+			"Die Liste der gebuchten Geräte zeigt den Standort jedes Geräts, und Seriennummer, Standort, Organisation und Status stehen sauber in Spalten.",
+			"Die Adresse einer Produktion steht Zeile für Zeile."
+		]
+	},
+	{
 		"version": "0.28.0",
 		"date": "2026-10-03",
 		"en": [
