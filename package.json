@@ -2,7 +2,7 @@
 	"name": "technikpool",
 	"private": true,
 	"license": "MIT",
-	"version": "0.29.1",
+	"version": "0.30.0",
 	"type": "module",
 	"scripts": {
 		"dev": "pnpm --filter web dev",
