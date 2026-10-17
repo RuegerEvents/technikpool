@@ -22,15 +22,18 @@
 	let busy = $state(false);
 
 	// A draft invoice is finished, an offer is turned into one, and without
-	// either the first step is the offer.
+	// either the invoice is made straight from the production — the reminder
+	// comes once the equipment is out, when an offer would only be a detour.
 	let href = $derived(
 		todo.draftInvoiceId
 			? resolve(`invoices/${todo.draftInvoiceId}`)
 			: todo.offerId
 				? resolve(`offers/${todo.offerId}`)
 				: todo.side === 'lender'
-					? resolve(`offers/new?productionId=${todo.productionId}&org=${todo.organizationId}`)
-					: resolve(`offers/new?productionId=${todo.productionId}`)
+					? resolve(
+							`offers/new?productionId=${todo.productionId}&org=${todo.organizationId}&kind=invoice`
+						)
+					: resolve(`offers/new?productionId=${todo.productionId}&kind=invoice`)
 	);
 
 	async function dismiss() {

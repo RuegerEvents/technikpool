@@ -21,7 +21,8 @@ import {
 	DEFAULT_OFFER_INTRO,
 	formatBillingDate,
 	renderBillingText,
-	replaceDocumentNumber
+	replaceDocumentNumber,
+	type BillingTextVariables
 } from '#lib/billing-text.js';
 import { generateBillingPdf } from '#lib/server/billing-pdf.js';
 import { putObject } from '#lib/server/storage.js';
@@ -934,7 +935,13 @@ function recipientColumns(org: {
 	};
 }
 
-export const createOfferFromProduction = command(createOfferSchema, async (data) => {
+/**
+ * What an offer and an invoice made from a production share: who issues it, to
+ * whom, for which days and with which lines. Both are built on it, so an
+ * invoice made straight from a production prices it exactly as an offer would
+ * have.
+ */
+async function draftFromProduction(data: v.InferOutput<typeof createOfferSchema>) {
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: data.productionId },
 		include: { organization: { include: { address: true } } }
@@ -970,7 +977,8 @@ export const createOfferFromProduction = command(createOfferSchema, async (data)
 	const customer =
 		!party.lending && data.customerId
 			? await prisma.customer.findFirst({
-					where: { id: data.customerId, organizationId: production.organizationId }
+					where: { id: data.customerId, organizationId: production.organizationId },
+					include: { address: true }
 				})
 			: null;
 	const recipient = party.lending ? recipientColumns(production.organization) : null;
@@ -984,7 +992,7 @@ export const createOfferFromProduction = command(createOfferSchema, async (data)
 		customerPhone: customer?.phone ?? null,
 		customerVatId: customer?.vatId ?? null
 	};
-	const variables = {
+	const variables: BillingTextVariables = {
 		production: production.name,
 		startDate: formatBillingDate(serviceStartDate),
 		endDate: formatBillingDate(serviceEndDate),
@@ -1005,6 +1013,25 @@ export const createOfferFromProduction = command(createOfferSchema, async (data)
 		netPurchasePrice: line.netPurchasePrice,
 		...priceLine(line.netPurchasePrice, line.ratePercent, dayCount)
 	}));
+	// Where the recipient is, in parts — an invoice's e-invoice XML needs them.
+	const address = party.lending ? production.organization.address : (customer?.address ?? null);
+	return {
+		production,
+		issuer,
+		assetScope,
+		dayCount,
+		serviceStartDate,
+		serviceEndDate,
+		customerColumns,
+		address,
+		variables,
+		itemsData
+	};
+}
+
+export const createOfferFromProduction = command(createOfferSchema, async (data) => {
+	const draft = await draftFromProduction(data);
+	const { production, issuer, variables } = draft;
 
 	const offer = await prisma.$transaction(async (tx) => {
 		return tx.offer.create({
@@ -1013,9 +1040,9 @@ export const createOfferFromProduction = command(createOfferSchema, async (data)
 				...orgSnapshotColumns(issuer),
 				organizationId: issuer.id,
 				productionId: production.id,
-				...customerColumns,
-				serviceStartDate,
-				serviceEndDate,
+				...draft.customerColumns,
+				serviceStartDate: draft.serviceStartDate,
+				serviceEndDate: draft.serviceEndDate,
 				introText:
 					data.introText?.trim() ||
 					renderBillingText(issuer.offerIntroTemplate || DEFAULT_OFFER_INTRO, variables),
@@ -1023,10 +1050,10 @@ export const createOfferFromProduction = command(createOfferSchema, async (data)
 					data.closingText?.trim() ||
 					renderBillingText(issuer.offerClosingTemplate || DEFAULT_OFFER_CLOSING, variables),
 				paymentTermsDays: issuer.paymentTermsDays,
-				dayCount,
-				assetScope,
+				dayCount: draft.dayCount,
+				assetScope: draft.assetScope,
 				vatRatePercent: issuer.isKleinunternehmer ? 0 : 19,
-				items: { create: itemsData }
+				items: { create: draft.itemsData }
 			},
 			include: { items: true }
 		});
@@ -1039,6 +1066,69 @@ export const createOfferFromProduction = command(createOfferSchema, async (data)
 	]);
 	return offer;
 });
+
+const createInvoiceSchema = v.object({
+	...createOfferSchema.entries,
+	// By hand, as when converting an offer — see convertOfferSchema.
+	number: v.pipe(v.string(), v.trim(), v.minLength(1))
+});
+
+/**
+ * An invoice straight from a production, without an offer first: once the
+ * event is over, an offer nobody needs any more is a detour. Built like an
+ * offer (`draftFromProduction`), then made an invoice — its number by hand, the
+ * invoice texts, the recipient's address in parts — and a draft, like one
+ * converted from an offer, so it can still be corrected before it is sent.
+ */
+export const createInvoiceFromProduction = command(
+	createInvoiceSchema,
+	async ({ number, ...data }) => {
+		const draft = await draftFromProduction(data);
+		const { production, issuer } = draft;
+		const clash = await prisma.invoice.findUnique({
+			where: { organizationId_number: { organizationId: issuer.id, number } },
+			select: { id: true }
+		});
+		if (clash) appError(409, 'invoice_number_taken', [number]);
+
+		// The page shows the texts before a number is typed, with the placeholder
+		// left in; it is filled in here.
+		const variables = { ...draft.variables, documentNumber: number };
+		const invoice = await prisma.invoice.create({
+			data: {
+				number,
+				...orgSnapshotColumns(issuer),
+				organizationId: issuer.id,
+				productionId: production.id,
+				...draft.customerColumns,
+				...(draft.address ? customerAddressColumns(draft.address) : {}),
+				serviceStartDate: draft.serviceStartDate,
+				serviceEndDate: draft.serviceEndDate,
+				introText: renderBillingText(
+					data.introText?.trim() || issuer.invoiceIntroTemplate || DEFAULT_INVOICE_INTRO,
+					variables
+				),
+				closingText: renderBillingText(
+					data.closingText?.trim() || issuer.invoiceClosingTemplate || DEFAULT_INVOICE_CLOSING,
+					variables
+				),
+				paymentTermsDays: issuer.paymentTermsDays,
+				dayCount: draft.dayCount,
+				assetScope: draft.assetScope,
+				isKleinunternehmerSnapshot: issuer.isKleinunternehmer,
+				vatRatePercent: issuer.isKleinunternehmer ? 0 : 19,
+				items: { create: draft.itemsData }
+			}
+		});
+
+		await Promise.all([
+			getInvoices().refresh(),
+			getInvoicesForProduction(production.id).refresh(),
+			getBillingTodos().refresh()
+		]);
+		return invoice;
+	}
+);
 
 export const getOfferStaleness = query(v.string(), async (offerId: string) => {
 	await requireAuth();

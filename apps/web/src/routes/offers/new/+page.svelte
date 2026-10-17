@@ -2,12 +2,15 @@
 	import * as Card from '#lib/components/ui/card/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Label } from '#lib/components/ui/label/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
 	import { CustomerSelect } from '#lib/components/ui/customer-select/index.js';
 	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
 	import { canManageInventory } from '#lib/roles.js';
 	import { getProduction, getProductions } from '#lib/remote/productions.remote.js';
 	import {
+		createInvoiceFromProduction,
 		createOfferFromProduction,
+		getOffersForProduction,
 		getProductionBillingReadiness
 	} from '#lib/remote/offers.remote.js';
 	import { goto } from '$app/navigation';
@@ -24,6 +27,8 @@
 	} from '#lib/utils.js';
 	import { MissingPricing } from '#lib/components/missing-pricing/index.js';
 	import {
+		DEFAULT_INVOICE_CLOSING,
+		DEFAULT_INVOICE_INTRO,
 		DEFAULT_OFFER_CLOSING,
 		DEFAULT_OFFER_INTRO,
 		formatBillingDate,
@@ -33,6 +38,14 @@
 	const preselectedProductionId = page.url.searchParams.get('productionId');
 	// A lender billing the production's org: `?org=` names the issuing org.
 	const preselectedOrgId = page.url.searchParams.get('org');
+
+	// An offer first, or the invoice straight away: once a production is over,
+	// an offer nobody needs any more is a detour. Both price the production the
+	// same way; an invoice is created as a draft, to be checked and sent.
+	let kind = $state<'offer' | 'invoice'>(
+		page.url.searchParams.get('kind') === 'invoice' ? 'invoice' : 'offer'
+	);
+	let invoiceNumber = $state('');
 
 	// Only orgs whose offers this user writes: the server refuses the rest
 	// (`requireOrgBilling`), and it would do so only after a production was picked.
@@ -123,6 +136,17 @@
 		readiness ? readiness.missingPrices.length + readiness.missingRates.length : 0
 	);
 
+	// An offer this org already made for the production: turning it into the
+	// invoice keeps the prices, discount and lines agreed on it.
+	let offersQuery = $derived(
+		productionId && kind === 'invoice' ? getOffersForProduction(productionId) : null
+	);
+	let existingOffer = $derived(
+		(offersQuery?.current ?? []).find(
+			(o) => o.organizationId === selectedOrgId && o.invoices.length === 0
+		)
+	);
+
 	$effect(() => {
 		if (!preselectedProductionId || selectedOrgId) return;
 		getProduction(preselectedProductionId).then((p) => {
@@ -134,6 +158,7 @@
 	$effect(() => {
 		if (!productionId) return;
 		const issuerId = selectedOrgId;
+		const asInvoice = kind === 'invoice';
 		getProduction(productionId).then((p) => {
 			const lent = p.organizationId !== issuerId;
 			const c = lent ? null : p.customer;
@@ -149,9 +174,18 @@
 				customer: lent ? p.organization.name : c ? customerLabel(c) : '',
 				paymentTermsDays: selectedOrg?.paymentTermsDays ?? 14
 			};
-			introText = renderBillingText(selectedOrg?.offerIntroTemplate || DEFAULT_OFFER_INTRO, values);
+			// An invoice's number goes into its texts; it is filled in on creation,
+			// so `{documentNumber}` stays in until then.
+			introText = renderBillingText(
+				asInvoice
+					? selectedOrg?.invoiceIntroTemplate || DEFAULT_INVOICE_INTRO
+					: selectedOrg?.offerIntroTemplate || DEFAULT_OFFER_INTRO,
+				values
+			);
 			closingText = renderBillingText(
-				selectedOrg?.offerClosingTemplate || DEFAULT_OFFER_CLOSING,
+				asInvoice
+					? selectedOrg?.invoiceClosingTemplate || DEFAULT_INVOICE_CLOSING
+					: selectedOrg?.offerClosingTemplate || DEFAULT_OFFER_CLOSING,
 				values
 			);
 		});
@@ -164,7 +198,15 @@
 			return;
 		}
 		if (blockers > 0) {
-			toast.error('Set the missing prices and rates before creating the offer');
+			toast.error(
+				kind === 'invoice'
+					? 'Set the missing prices and rates before creating the invoice'
+					: 'Set the missing prices and rates before creating the offer'
+			);
+			return;
+		}
+		if (kind === 'invoice' && !invoiceNumber.trim()) {
+			toast.error('Enter an invoice number first');
 			return;
 		}
 		if (!lending && (!customerId || !customerName)) {
@@ -172,21 +214,31 @@
 			return;
 		}
 		saving = true;
+		const input = {
+			productionId,
+			organizationId: lending ? selectedOrgId : undefined,
+			customerId,
+			customerName,
+			customerAddress: formatAddress(customerAddress) || undefined,
+			customerContactPerson: customerContactPerson || undefined,
+			customerEmail: customerEmail || undefined,
+			introText: introText || undefined,
+			closingText: closingText || undefined,
+			assetScope: hasCrossOrgItems ? assetScope : undefined
+		};
 		try {
-			const offer = await createOfferFromProduction({
-				productionId,
-				organizationId: lending ? selectedOrgId : undefined,
-				customerId,
-				customerName,
-				customerAddress: formatAddress(customerAddress) || undefined,
-				customerContactPerson: customerContactPerson || undefined,
-				customerEmail: customerEmail || undefined,
-				introText: introText || undefined,
-				closingText: closingText || undefined,
-				assetScope: hasCrossOrgItems ? assetScope : undefined
-			});
-			toast.success('Offer created');
-			goto(resolve(`offers/${offer.id}`));
+			if (kind === 'invoice') {
+				const invoice = await createInvoiceFromProduction({
+					...input,
+					number: invoiceNumber.trim()
+				});
+				toast.success(`Invoice ${invoice.number} created`);
+				goto(resolve(`invoices/${invoice.id}`));
+			} else {
+				const offer = await createOfferFromProduction(input);
+				toast.success('Offer created');
+				goto(resolve(`offers/${offer.id}`));
+			}
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			saving = false;
@@ -194,14 +246,35 @@
 	}
 </script>
 
-<svelte:head><title>New Offer | Technikpool</title></svelte:head>
+<svelte:head
+	><title>{kind === 'invoice' ? 'New invoice' : 'New Offer'} | Technikpool</title></svelte:head
+>
 
 <div class="space-y-6">
 	<div>
-		<h1 class="text-3xl font-bold tracking-tight">New Offer</h1>
+		<h1 class="text-3xl font-bold tracking-tight">
+			{kind === 'invoice' ? 'New invoice' : 'New Offer'}
+		</h1>
 		<p class="text-muted-foreground">
 			Generates line items from a production's currently booked equipment.
 		</p>
+	</div>
+
+	<div class="flex w-fit flex-wrap gap-1 rounded-md border p-1 text-sm">
+		<button
+			type="button"
+			onclick={() => (kind = 'offer')}
+			class="rounded px-3 py-1 transition-colors {kind === 'offer'
+				? 'bg-primary text-primary-foreground'
+				: 'text-muted-foreground hover:bg-muted'}">Offer</button
+		>
+		<button
+			type="button"
+			onclick={() => (kind = 'invoice')}
+			class="rounded px-3 py-1 transition-colors {kind === 'invoice'
+				? 'bg-primary text-primary-foreground'
+				: 'text-muted-foreground hover:bg-muted'}">Invoice without an offer</button
+		>
 	</div>
 
 	<div class="grid gap-6 lg:grid-cols-[minmax(0,32rem)_minmax(0,1fr)] lg:items-start">
@@ -292,6 +365,30 @@
 						</div>
 					{/if}
 
+					{#if kind === 'invoice'}
+						<div class="space-y-2">
+							<Label for="invoiceNumber">Invoice number</Label>
+							<Input
+								id="invoiceNumber"
+								bind:value={invoiceNumber}
+								placeholder="2026-0042"
+								required
+							/>
+							<p class="text-sm text-muted-foreground">
+								Assigned by you, following your organization's own numbering. It can still be
+								corrected while the invoice is a draft.
+							</p>
+						</div>
+						{#if existingOffer}
+							<div class="rounded-md bg-muted/50 px-3 py-2 text-sm">
+								There is already an offer for this production. Turning
+								<a class="font-medium underline" href={resolve(`offers/${existingOffer.id}`)}
+									>{existingOffer.number}</a
+								> into the invoice keeps the prices and discount agreed on it.
+							</div>
+						{/if}
+					{/if}
+
 					<div class="space-y-2">
 						<Label for="introText">Introduction</Label>
 						<textarea
@@ -311,7 +408,11 @@
 
 					<div class="space-y-2">
 						<Button type="submit" disabled={saving || blockers > 0}
-							>{saving ? 'Creating…' : 'Create Offer'}</Button
+							>{saving
+								? 'Creating…'
+								: kind === 'invoice'
+									? 'Create invoice'
+									: 'Create Offer'}</Button
 						>
 						{#if blockers > 0}
 							<p class="text-sm text-muted-foreground">

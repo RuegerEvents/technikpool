@@ -18,11 +18,14 @@
 <svelte:head><title>Invoices | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
-	<div>
-		<h1 class="text-3xl font-bold tracking-tight">Invoices</h1>
-		<p class="text-muted-foreground">
-			Rechnungen — numbered by hand, following your organization's own scheme.
-		</p>
+	<div class="flex flex-wrap items-center justify-between gap-4">
+		<div>
+			<h1 class="text-3xl font-bold tracking-tight">Invoices</h1>
+			<p class="text-muted-foreground">
+				Rechnungen — numbered by hand, following your organization's own scheme.
+			</p>
+		</div>
+		<Button icon="add" href={resolve('offers/new?kind=invoice')}>New invoice</Button>
 	</div>
 
 	{#if !invoicesQuery.ready}

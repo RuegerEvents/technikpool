@@ -1532,6 +1532,7 @@ msgstr "Asset Bundles | Technikpool"
 #. 0: asset.product.name
 #. 0: bundle.template.name
 #. 0: title
+#. 0: kind === 'invoice' ? 'New invoice' \\: 'New Offer'
 #. 0: org?.name ?? ''
 #. 0: production.name
 #. 0: product?.name ?? 'Product'
@@ -1540,6 +1541,7 @@ msgstr "Asset Bundles | Technikpool"
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/legal/[slug]/+page.svelte
+#: src/routes/offers/new/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/products/[id]/product-detail.svelte
@@ -2837,6 +2839,7 @@ msgstr "Angebote generated from production equipment bookings."
 
 #: src/routes/offers/+page.svelte
 #: src/routes/offers/new/+page.svelte
+#: src/routes/offers/new/+page.svelte
 msgid "New Offer"
 msgstr "New Offer"
 
@@ -2862,6 +2865,7 @@ msgstr "Customer"
 msgid "Invoiced"
 msgstr "Invoiced"
 
+#: src/routes/offers/new/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Offer"
 msgstr "Offer"
@@ -2985,9 +2989,8 @@ msgstr "Please select a production"
 msgid "Offer created"
 msgstr "Offer created"
 
-#: src/routes/offers/new/+page.svelte
-msgid "New Offer | Technikpool"
-msgstr "New Offer | Technikpool"
+#~ msgid "New Offer | Technikpool"
+#~ msgstr "New Offer | Technikpool"
 
 #: src/routes/offers/new/+page.svelte
 msgid "Generates line items from a production's currently booked equipment."
@@ -3035,7 +3038,9 @@ msgid "Offer copied"
 msgstr "Offer copied"
 
 #. 0: invoice.number
+#. 0: invoice.number
 #: src/routes/offers/[id]/offer-detail.svelte
+#: src/routes/offers/new/+page.svelte
 msgid "Invoice {0} created"
 msgstr "Invoice {0} created"
 
@@ -5729,6 +5734,7 @@ msgid "Use current details"
 msgstr "Use current details"
 
 #: src/routes/offers/[id]/offer-detail.svelte
+#: src/routes/offers/new/+page.svelte
 msgid "Enter an invoice number first"
 msgstr "Enter an invoice number first"
 
@@ -5747,6 +5753,7 @@ msgid "The invoice number is assigned by you — your organization's own numberi
 msgstr "The invoice number is assigned by you — your organization's own numbering scheme applies. It has to be unique within the organization and can still be corrected while the invoice is a draft."
 
 #: src/routes/offers/[id]/offer-detail.svelte
+#: src/routes/offers/new/+page.svelte
 msgid "Create invoice"
 msgstr "Create invoice"
 
@@ -6494,10 +6501,8 @@ msgid "<0/> Invoices"
 msgstr "<0/> Invoices"
 
 #. 0: fills.find(Boolean)
-#. 0: fills.find(Boolean)
 #. 0: suggestion
 #: src/lib/components/asset-form/asset-tag-hint.svelte
-#: src/routes/assets/new/asset-tag-hint.svelte
 #: src/routes/orgs/+page.svelte
 msgid "Use {0}"
 msgstr "Use {0}"
@@ -6543,6 +6548,7 @@ msgstr "Delete <0/> and all of its data?"
 
 #: src/lib/billing-document-check.svelte.ts
 #: src/routes/offers/[id]/offer-detail.svelte
+#: src/routes/offers/new/+page.svelte
 msgid "Invoice number"
 msgstr "Invoice number"
 
@@ -12690,29 +12696,24 @@ msgid "Remove new product"
 msgstr "Remove new product"
 
 #: src/lib/components/asset-form/asset-tag-hint.svelte
-#: src/routes/assets/new/asset-tag-hint.svelte
 msgid "New devices are now numbered automatically"
 msgstr "New devices are now numbered automatically"
 
 #: src/lib/components/asset-form/asset-tag-hint.svelte
-#: src/routes/assets/new/asset-tag-hint.svelte
 msgid "Highest tag so far: <0/>"
 msgstr "Highest tag so far: <0/>"
 
 #: src/lib/components/asset-form/asset-tag-hint.svelte
-#: src/routes/assets/new/asset-tag-hint.svelte
 msgid "No tag in this organization's numbering yet."
 msgstr "No tag in this organization's numbering yet."
 
 #: src/lib/components/asset-form/asset-tag-hint.svelte
-#: src/routes/assets/new/asset-tag-hint.svelte
 msgid "Fill in the next free number"
 msgid_plural "Fill in the next # free numbers"
 msgstr[0] "Fill in the next free number"
 msgstr[1] "Fill in the next # free numbers"
 
 #: src/lib/components/asset-form/asset-tag-hint.svelte
-#: src/routes/assets/new/asset-tag-hint.svelte
 msgid "Number new devices automatically"
 msgstr "Number new devices automatically"
 
@@ -12865,3 +12866,31 @@ msgstr[1] "# units missing"
 #: src/lib/error-messages.svelte.ts
 msgid "Tag \"{0}\" is already on {1}. A bundle's sticker is scanned like a unit's, so the two must differ."
 msgstr "Tag \"{0}\" is already on {1}. A bundle's sticker is scanned like a unit's, so the two must differ."
+
+#: src/routes/invoices/+page.svelte
+#: src/routes/offers/new/+page.svelte
+#: src/routes/offers/new/+page.svelte
+msgid "New invoice"
+msgstr "New invoice"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Set the missing prices and rates before creating the invoice"
+msgstr "Set the missing prices and rates before creating the invoice"
+
+#: src/routes/offers/new/+page.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Invoice without an offer"
+msgstr "Invoice without an offer"
+
+#: src/routes/offers/new/+page.svelte
+msgid "Assigned by you, following your organization's own numbering. It can still be corrected while the invoice is a draft."
+msgstr "Assigned by you, following your organization's own numbering. It can still be corrected while the invoice is a draft."
+
+#: src/routes/offers/new/+page.svelte
+msgid "There is already an offer for this production. Turning <0/> into the invoice keeps the prices and discount agreed on it."
+msgstr "There is already an offer for this production. Turning <0/> into the invoice keeps the prices and discount agreed on it."
+
+#. 0: orgLabel(production.organization)
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Invoice to {0}"
+msgstr "Invoice to {0}"

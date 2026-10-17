@@ -860,8 +860,15 @@
 								>
 									New offer
 								</DropdownMenu.Item>
-								<DropdownMenu.Separator class="my-1 h-px bg-border" />
 							{/if}
+							<DropdownMenu.Item
+								onSelect={() =>
+									goto(resolve(`offers/new?productionId=${production.id}&kind=invoice`))}
+								class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+							>
+								Invoice without an offer
+							</DropdownMenu.Item>
+							<DropdownMenu.Separator class="my-1 h-px bg-border" />
 							{#if cancelled}
 								<DropdownMenu.Item
 									onSelect={() => (reopenOpen = true)}
@@ -1867,6 +1874,14 @@
 										variant="outline"
 										href={resolve(`offers/new?productionId=${production.id}&org=${org.id}`)}
 										>Offer to {orgLabel(production.organization)}</Button
+									>
+									<Button
+										icon="add"
+										size="sm"
+										variant="outline"
+										href={resolve(
+											`offers/new?productionId=${production.id}&org=${org.id}&kind=invoice`
+										)}>Invoice to {orgLabel(production.organization)}</Button
 									>
 								{/if}
 							</div>
