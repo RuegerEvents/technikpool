@@ -4618,9 +4618,8 @@ msgstr "Kategorie gespeichert"
 msgid "Categories | Technikpool"
 msgstr "Kategorien | Technikpool"
 
-#: src/routes/admin/categories/+page.svelte
-msgid "Categories are shared by every organization. The English name is the source — it is what the API returns and what a billing line records; the German name is what the German UI and a German offer or invoice show."
-msgstr "Kategorien gelten für alle Organisationen. Der englische Name ist die Quelle — ihn liefert die API und ihn hält eine Abrechnungsposition fest; der deutsche Name erscheint in der deutschen Oberfläche und auf einem deutschen Angebot oder einer Rechnung."
+#~ msgid "Categories are shared by every organization. The English name is the source — it is what the API returns and what a billing line records; the German name is what the German UI and a German offer or invoice show."
+#~ msgstr "Kategorien gelten für alle Organisationen. Der englische Name ist die Quelle — ihn liefert die API und ihn hält eine Abrechnungsposition fest; der deutsche Name erscheint in der deutschen Oberfläche und auf einem deutschen Angebot oder einer Rechnung."
 
 #: src/routes/admin/categories/+page.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
@@ -13021,11 +13020,12 @@ msgstr[1] "Wird alle # Monate geprüft."
 msgid "{0} The next one is due an interval after the latest inspection — at once if it failed or there has never been one."
 msgstr "{0} Die nächste ist ein Intervall nach der letzten Prüfung fällig — sofort, wenn sie nicht bestanden wurde oder es noch keine gab."
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "No interval is set, so this unit is not tracked. Set one under Edit to have it come due."
-msgstr "Kein Intervall gesetzt, das Gerät wird daher nicht verfolgt. Unter Bearbeiten ein Intervall setzen, damit es fällig wird."
+#~ msgid "No interval is set, so this unit is not tracked. Set one under Edit to have it come due."
+#~ msgstr "Kein Intervall gesetzt, das Gerät wird daher nicht verfolgt. Unter Bearbeiten ein Intervall setzen, damit es fällig wird."
 
 #: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/products/[id]/product-detail.svelte
+#: src/routes/products/[id]/product-detail.svelte
 msgid "DGUV inspections"
 msgstr "DGUV-Prüfungen"
 
@@ -13079,6 +13079,100 @@ msgstr "Das Gerät wird als defekt markiert und bleibt fällig, bis eine bestand
 msgid "Inspection interval"
 msgstr "Prüfintervall"
 
+#~ msgid "Copied onto new assets at creation, which are due for their first inspection at once. Existing assets keep theirs — change those from the Devices list. Leave blank to not track inspections by default."
+#~ msgstr "Wird beim Anlegen auf neue Geräte übernommen, die sofort zur ersten Prüfung fällig sind. Bestehende Geräte behalten ihres — das änderst du in der Geräteliste. Leer lassen, um Prüfungen standardmäßig nicht zu verfolgen."
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Inspect this category?"
+msgstr "Diese Kategorie prüfen?"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Units of its products that have no interval get their organization's default and come due for a DGUV inspection. Products marked otherwise are left alone."
+msgstr "Geräte ihrer Produkte ohne Intervall bekommen den Standard ihrer Organisation und werden zur DGUV-Prüfung fällig. Produkte mit eigener Einstellung bleiben unberührt."
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Require inspection"
+msgstr "Prüfpflichtig machen"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Stop inspecting this category?"
+msgstr "Diese Kategorie nicht mehr prüfen?"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Units of its products lose their DGUV interval and leave the inspection list. Products marked as needing inspection are left alone."
+msgstr "Geräte ihrer Produkte verlieren ihr DGUV-Intervall und verschwinden aus der Prüfliste. Produkte, die selbst als prüfpflichtig markiert sind, bleiben unberührt."
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Stop inspecting"
+msgstr "Nicht mehr prüfen"
+
+#: src/lib/components/ui/mains-hint/mains-hint.svelte
+#: src/routes/admin/categories/+page.svelte
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Saved · 1 unit changed"
+msgid_plural "Saved · # units changed"
+msgstr[0] "Gespeichert · 1 Gerät geändert"
+msgstr[1] "Gespeichert · # Geräte geändert"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Categories are shared by every organization. The English name is the source — it is what the API returns and what a billing line records; the German name is what the German UI and a German offer or invoice show. \"DGUV\" marks a category whose devices need DGUV V3 inspections; a product can say otherwise on its own page."
+msgstr "Kategorien gelten für alle Organisationen. Der englische Name ist die Quelle — ihn liefert die API und ihn hält eine Abrechnungsposition fest; der deutsche Name erscheint in der deutschen Oberfläche und auf einem deutschen Angebot oder einer Rechnung. „DGUV“ markiert eine Kategorie, deren Geräte DGUV-V3-prüfpflichtig sind; ein Produkt kann auf seiner eigenen Seite davon abweichen."
+
+#: src/routes/admin/categories/+page.svelte
+msgid "DGUV"
+msgstr "DGUV"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "<0/> Inspect"
+msgstr "<0/> Prüfen"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Whether its devices need DGUV V3 inspections. Those that do get their organization's interval; the others are not tracked."
+msgstr "Ob seine Geräte DGUV-V3-prüfpflichtig sind. Prüfpflichtige bekommen das Intervall ihrer Organisation, die übrigen werden nicht verfolgt."
+
+#. 0: categoryLabel(product.category)
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Like {0}: needs inspection"
+msgstr "Wie {0}: prüfpflichtig"
+
+#. 0: categoryLabel(product.category)
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Like {0}: no inspection"
+msgstr "Wie {0}: nicht prüfpflichtig"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Needs inspection"
+msgstr "Prüfpflichtig"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "No inspection"
+msgstr "Nicht prüfpflichtig"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Not tracked: this device has no inspection interval. Whether a product's devices need DGUV inspections is set on <0>its page</0>; an interval of its own can be set under Edit."
+msgstr "Nicht verfolgt: Dieses Gerät hat kein Prüfintervall. Ob die Geräte eines Produkts DGUV-prüfpflichtig sind, wird auf <0>seiner Seite</0> festgelegt; ein eigenes Intervall lässt sich unter Bearbeiten setzen."
+
 #: src/routes/orgs/[id]/+page.svelte
-msgid "Copied onto new assets at creation, which are due for their first inspection at once. Existing assets keep theirs — change those from the Devices list. Leave blank to not track inspections by default."
-msgstr "Wird beim Anlegen auf neue Geräte übernommen, die sofort zur ersten Prüfung fällig sind. Bestehende Geräte behalten ihres — das änderst du in der Geräteliste. Leer lassen, um Prüfungen standardmäßig nicht zu verfolgen."
+msgid "Given to new devices whose product needs DGUV inspections (set per category, or on the product's page). They are due for their first inspection at once. Existing devices keep theirs — change those from the Devices list. Leave blank to not track inspections by default."
+msgstr "Wird neuen Geräten gegeben, deren Produkt DGUV-prüfpflichtig ist (pro Kategorie oder auf der Produktseite festgelegt). Sie sind sofort zur ersten Prüfung fällig. Bestehende Geräte behalten ihres — das änderst du in der Geräteliste. Leer lassen, um Prüfungen standardmäßig nicht zu verfolgen."
+
+#. 0: names.join(', ')
+#: src/lib/components/ui/mains-hint/mains-hint.svelte
+msgid "It has a mains connection ({0}), so its devices most likely need DGUV V3 inspections — but the product is not marked as needing them."
+msgstr "Hat einen Netzanschluss ({0}) und ist damit sehr wahrscheinlich DGUV-V3-prüfpflichtig — das Produkt ist aber nicht als prüfpflichtig markiert."
+
+#: src/lib/components/ui/mains-hint/mains-hint.svelte
+msgid "Mark as needing inspection"
+msgstr "Als prüfpflichtig markieren"
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "Carries mains voltage — needs DGUV inspections"
+msgstr "Führt Netzspannung — DGUV-prüfpflichtig"
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "Mains"
+msgstr "Netz"
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "Mains voltage"
+msgstr "Netzspannung"

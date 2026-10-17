@@ -4403,6 +4403,7 @@ export const ConnectorScalarFieldEnum = {
   gender: 'gender',
   categoryId: 'categoryId',
   imagePath: 'imagePath',
+  mains: 'mains',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -4444,7 +4445,8 @@ export const CategoryScalarFieldEnum = {
   sortOrder: 'sortOrder',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  cableInputGender: 'cableInputGender'
+  cableInputGender: 'cableInputGender',
+  requiresInspection: 'requiresInspection'
 } as const
 
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
@@ -4463,6 +4465,7 @@ export const ProductScalarFieldEnum = {
   connectorBId: 'connectorBId',
   lengthCm: 'lengthCm',
   isLicense: 'isLicense',
+  requiresInspection: 'requiresInspection',
   createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

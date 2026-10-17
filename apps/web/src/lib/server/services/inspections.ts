@@ -1,8 +1,8 @@
 import type { Prisma } from '#lib/prisma/client.js';
 import { prisma } from '#lib/server/auth.js';
 import { appError } from '#lib/errors.js';
-import { isRetiredStatus } from '#lib/asset-status.js';
-import { inspectionDue, type InspectionResult } from '#lib/inspection-due.js';
+import { ACTIVE_ASSET_WHERE, isRetiredStatus } from '#lib/asset-status.js';
+import { inspectionDue, requiresInspection, type InspectionResult } from '#lib/inspection-due.js';
 import { requireOrgInventory } from '#lib/server/services/access.js';
 import type { InspectedData, InspectionDeletedData } from '#lib/types/asset-transaction.js';
 
@@ -56,6 +56,126 @@ export async function refreshInspectionDue(tx: Tx, assetIds: string[]) {
 		await tx.asset.update({ where: { id: asset.id }, data: { nextInspectionDue: next } });
 	}
 	return due;
+}
+
+/** Products whose units need DGUV inspections — see `requiresInspection`. */
+const REQUIRES_INSPECTION_WHERE = {
+	isLicense: false,
+	OR: [
+		{ requiresInspection: true },
+		{ requiresInspection: null, category: { requiresInspection: true } }
+	]
+} satisfies Prisma.ProductWhereInput;
+
+/**
+ * What a new unit of a product starts with in this org: the org's default
+ * interval if the product needs inspecting, and nothing otherwise. Never
+ * inspected, so it is due at once. Synchronous once built, so it can sit
+ * inside a create whose tags are drawn in order.
+ */
+export async function initialInspection(
+	tx: Pick<Tx, 'organization' | 'product'>,
+	organizationId: string
+) {
+	const [org, required] = await Promise.all([
+		tx.organization.findUniqueOrThrow({
+			where: { id: organizationId },
+			select: { defaultInspectionIntervalMonths: true }
+		}),
+		tx.product.findMany({ where: REQUIRES_INSPECTION_WHERE, select: { id: true } })
+	]);
+	const requiredIds = new Set(required.map((p) => p.id));
+	const now = new Date();
+	return (productId: string) => {
+		const interval = requiredIds.has(productId) ? org.defaultInspectionIntervalMonths : null;
+		return {
+			inspectionIntervalMonths: interval,
+			nextInspectionDue: inspectionDue(interval, null, now)
+		};
+	};
+}
+
+/**
+ * After a product's or a category's "needs inspecting" changed: units that now
+ * need it and have no interval get their org's default, units that no longer
+ * do lose theirs. A unit with an interval of its own that still needs
+ * inspecting keeps it. Logged like any interval change.
+ */
+export async function applyInspectionRequirement(tx: Tx, userId: string, productIds: string[]) {
+	if (productIds.length === 0) return [];
+	const products = await tx.product.findMany({
+		where: { id: { in: productIds } },
+		select: {
+			id: true,
+			isLicense: true,
+			requiresInspection: true,
+			category: { select: { requiresInspection: true } }
+		}
+	});
+	const required = new Set(products.filter(requiresInspection).map((p) => p.id));
+	const assets = await tx.asset.findMany({
+		where: {
+			productId: { in: productIds },
+			...ACTIVE_ASSET_WHERE
+		},
+		select: {
+			id: true,
+			productId: true,
+			inspectionIntervalMonths: true,
+			organization: { select: { defaultInspectionIntervalMonths: true } }
+		}
+	});
+	const changed: string[] = [];
+	for (const asset of assets) {
+		const next = required.has(asset.productId)
+			? (asset.inspectionIntervalMonths ?? asset.organization.defaultInspectionIntervalMonths)
+			: null;
+		if (next === asset.inspectionIntervalMonths) continue;
+		await tx.asset.update({ where: { id: asset.id }, data: { inspectionIntervalMonths: next } });
+		await tx.assetTransaction.create({
+			data: {
+				assetId: asset.id,
+				userId,
+				action: 'UPDATED',
+				data: {
+					type: 'UPDATED',
+					changes: [
+						{
+							field: 'inspectionIntervalMonths',
+							from: asset.inspectionIntervalMonths?.toString() ?? null,
+							to: next?.toString() ?? null
+						}
+					]
+				}
+			}
+		});
+		changed.push(asset.id);
+	}
+	await refreshInspectionDue(tx, changed);
+	return changed;
+}
+
+/**
+ * The mains connectors a product has — on its panel, at either cable end, or on
+ * any way of a loom. Mains means electrical equipment, which needs DGUV V3
+ * inspections; a product with one that isn't marked so gets a hint.
+ */
+export async function mainsConnectorNames(productId: string) {
+	const rows = await prisma.connector.findMany({
+		where: {
+			mains: true,
+			OR: [
+				{ ports: { some: { productId } } },
+				{ productEndsA: { some: { id: productId } } },
+				{ productEndsB: { some: { id: productId } } },
+				{ wayEndsA: { some: { productId } } },
+				{ wayEndsB: { some: { productId } } }
+			]
+		},
+		select: { name: true },
+		orderBy: { name: 'asc' }
+	});
+	return rows.map((r) => r.name);
 }
 
 export type RecordInspectionInput = {

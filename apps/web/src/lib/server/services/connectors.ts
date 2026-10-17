@@ -39,6 +39,20 @@ export type ConnectorRefs = {
  * Reports what it created rather than refreshing anything itself: a service
  * has no business knowing which queries a remote layer caches.
  */
+/**
+ * Whether a new connector of this family carries mains voltage: it does if any
+ * connector of the family already does, so "TRUE1 TOP" comes in marked like
+ * "TRUE1 M". A family nobody has marked yet starts unmarked.
+ */
+export async function familyIsMains(families: readonly string[]) {
+	const rows = await prisma.connector.findMany({
+		where: { mains: true, family: { in: [...families], mode: 'insensitive' } },
+		select: { family: true }
+	});
+	const marked = new Set(rows.map((r) => r.family?.toLowerCase()));
+	return (family: string) => marked.has(family.toLowerCase());
+}
+
 export async function ensureConnectors(
 	names: readonly (string | null | undefined)[]
 ): Promise<ConnectorRefs> {
@@ -59,6 +73,7 @@ export async function ensureConnectors(
 		});
 		const missing = [...wanted].filter(([slug]) => !existing.some((row) => row.slug === slug));
 		if (missing.length > 0) {
+			const mains = await familyIsMains(missing.map(([, name]) => connectorFamily(name)));
 			// `skipDuplicates` rather than a transaction: two people registering
 			// the same new connector at the same moment is a race worth losing
 			// quietly — the read below finds whichever row won.
@@ -66,7 +81,10 @@ export async function ensureConnectors(
 				// The family is guessed the way the connector form prefills it. It is
 				// visible and editable there, which is where a wrong guess gets
 				// corrected.
-				data: missing.map(([slug, name]) => ({ name, slug, family: connectorFamily(name) })),
+				data: missing.map(([slug, name]) => {
+					const family = connectorFamily(name);
+					return { name, slug, family, mains: mains(family) };
+				}),
 				skipDuplicates: true
 			});
 			if (result.count > 0) created.push(...missing.map(([, name]) => name));

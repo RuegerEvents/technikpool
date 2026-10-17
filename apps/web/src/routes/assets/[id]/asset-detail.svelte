@@ -95,6 +95,8 @@
 	} from '#lib/components/ui/asset-status/index.js';
 	import type { TransactionData } from '#lib/types/asset-transaction.js';
 	import { InspectionDialog } from '#lib/components/ui/inspection-dialog/index.js';
+	import { MainsHint } from '#lib/components/ui/mains-hint/index.js';
+	import { requiresInspection } from '#lib/inspection-due.js';
 	import { deleteInspection, getAssetInspections } from '#lib/remote/inspections.remote.js';
 	import {
 		formatInspectionDay,
@@ -1048,8 +1050,12 @@
 									The next one is due an interval after the latest inspection — at once if it failed or
 									there has never been one.
 								{:else}
-									No interval is set, so this unit is not tracked. Set one under Edit to have it
-									come due.
+									Not tracked: this device has no inspection interval. Whether a product's devices
+									need DGUV inspections is set on
+									<a
+										href={resolve(`products/${asset.product.id}`)}
+										class="underline underline-offset-2">its page</a
+									>; an interval of its own can be set under Edit.
 								{/if}
 							</Card.Description>
 						</div>
@@ -1061,6 +1067,7 @@
 					</div>
 				</Card.Header>
 				<Card.Content class="space-y-4">
+					<MainsHint productId={asset.product.id} required={requiresInspection(asset.product)} />
 					{#if asset.nextInspectionDue}
 						<p class="text-sm">
 							Next inspection:

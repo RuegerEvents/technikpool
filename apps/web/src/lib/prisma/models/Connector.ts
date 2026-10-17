@@ -39,6 +39,7 @@ export type ConnectorMinAggregateOutputType = {
   gender: string | null
   categoryId: string | null
   imagePath: string | null
+  mains: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -52,6 +53,7 @@ export type ConnectorMaxAggregateOutputType = {
   gender: string | null
   categoryId: string | null
   imagePath: string | null
+  mains: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -65,6 +67,7 @@ export type ConnectorCountAggregateOutputType = {
   gender: number
   categoryId: number
   imagePath: number
+  mains: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -80,6 +83,7 @@ export type ConnectorMinAggregateInputType = {
   gender?: true
   categoryId?: true
   imagePath?: true
+  mains?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -93,6 +97,7 @@ export type ConnectorMaxAggregateInputType = {
   gender?: true
   categoryId?: true
   imagePath?: true
+  mains?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -106,6 +111,7 @@ export type ConnectorCountAggregateInputType = {
   gender?: true
   categoryId?: true
   imagePath?: true
+  mains?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -192,6 +198,7 @@ export type ConnectorGroupByOutputType = {
   gender: string | null
   categoryId: string | null
   imagePath: string | null
+  mains: boolean
   createdAt: Date
   updatedAt: Date
   _count: ConnectorCountAggregateOutputType | null
@@ -226,6 +233,7 @@ export type ConnectorWhereInput = {
   gender?: Prisma.StringNullableFilter<"Connector"> | string | null
   categoryId?: Prisma.StringNullableFilter<"Connector"> | string | null
   imagePath?: Prisma.StringNullableFilter<"Connector"> | string | null
+  mains?: Prisma.BoolFilter<"Connector"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Connector"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Connector"> | Date | string
   category?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
@@ -245,6 +253,7 @@ export type ConnectorOrderByWithRelationInput = {
   gender?: Prisma.SortOrderInput | Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   imagePath?: Prisma.SortOrderInput | Prisma.SortOrder
+  mains?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   category?: Prisma.CategoryOrderByWithRelationInput
@@ -267,6 +276,7 @@ export type ConnectorWhereUniqueInput = Prisma.AtLeast<{
   gender?: Prisma.StringNullableFilter<"Connector"> | string | null
   categoryId?: Prisma.StringNullableFilter<"Connector"> | string | null
   imagePath?: Prisma.StringNullableFilter<"Connector"> | string | null
+  mains?: Prisma.BoolFilter<"Connector"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Connector"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Connector"> | Date | string
   category?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
@@ -286,6 +296,7 @@ export type ConnectorOrderByWithAggregationInput = {
   gender?: Prisma.SortOrderInput | Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   imagePath?: Prisma.SortOrderInput | Prisma.SortOrder
+  mains?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ConnectorCountOrderByAggregateInput
@@ -305,6 +316,7 @@ export type ConnectorScalarWhereWithAggregatesInput = {
   gender?: Prisma.StringNullableWithAggregatesFilter<"Connector"> | string | null
   categoryId?: Prisma.StringNullableWithAggregatesFilter<"Connector"> | string | null
   imagePath?: Prisma.StringNullableWithAggregatesFilter<"Connector"> | string | null
+  mains?: Prisma.BoolWithAggregatesFilter<"Connector"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Connector"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Connector"> | Date | string
 }
@@ -317,6 +329,7 @@ export type ConnectorCreateInput = {
   form?: string | null
   gender?: string | null
   imagePath?: string | null
+  mains?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   category?: Prisma.CategoryCreateNestedOneWithoutConnectorsInput
@@ -336,6 +349,7 @@ export type ConnectorUncheckedCreateInput = {
   gender?: string | null
   categoryId?: string | null
   imagePath?: string | null
+  mains?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutConnectorInput
@@ -353,6 +367,7 @@ export type ConnectorUpdateInput = {
   form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mains?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.CategoryUpdateOneWithoutConnectorsNestedInput
@@ -372,6 +387,7 @@ export type ConnectorUncheckedUpdateInput = {
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mains?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutConnectorNestedInput
@@ -390,6 +406,7 @@ export type ConnectorCreateManyInput = {
   gender?: string | null
   categoryId?: string | null
   imagePath?: string | null
+  mains?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -402,6 +419,7 @@ export type ConnectorUpdateManyMutationInput = {
   form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mains?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -415,6 +433,7 @@ export type ConnectorUncheckedUpdateManyInput = {
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mains?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -428,6 +447,7 @@ export type ConnectorCountOrderByAggregateInput = {
   gender?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   imagePath?: Prisma.SortOrder
+  mains?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -441,6 +461,7 @@ export type ConnectorMaxOrderByAggregateInput = {
   gender?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   imagePath?: Prisma.SortOrder
+  mains?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -454,6 +475,7 @@ export type ConnectorMinOrderByAggregateInput = {
   gender?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
   imagePath?: Prisma.SortOrder
+  mains?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -606,6 +628,7 @@ export type ConnectorCreateWithoutPortsInput = {
   form?: string | null
   gender?: string | null
   imagePath?: string | null
+  mains?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   category?: Prisma.CategoryCreateNestedOneWithoutConnectorsInput
@@ -624,6 +647,7 @@ export type ConnectorUncheckedCreateWithoutPortsInput = {
   gender?: string | null
   categoryId?: string | null
   imagePath?: string | null
+  mains?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   productEndsA?: Prisma.ProductUncheckedCreateNestedManyWithoutConnectorARefInput
@@ -656,6 +680,7 @@ export type ConnectorUpdateWithoutPortsInput = {
   form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mains?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.CategoryUpdateOneWithoutConnectorsNestedInput
@@ -674,6 +699,7 @@ export type ConnectorUncheckedUpdateWithoutPortsInput = {
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mains?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   productEndsA?: Prisma.ProductUncheckedUpdateManyWithoutConnectorARefNestedInput
@@ -690,6 +716,7 @@ export type ConnectorCreateWithoutWayEndsAInput = {
   form?: string | null
   gender?: string | null
   imagePath?: string | null
+  mains?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   category?: Prisma.CategoryCreateNestedOneWithoutConnectorsInput
@@ -708,6 +735,7 @@ export type ConnectorUncheckedCreateWithoutWayEndsAInput = {
   gender?: string | null
   categoryId?: string | null
   imagePath?: string | null
+  mains?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutConnectorInput
@@ -729,6 +757,7 @@ export type ConnectorCreateWithoutWayEndsBInput = {
   form?: string | null
   gender?: string | null
   imagePath?: string | null
+  mains?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   category?: Prisma.CategoryCreateNestedOneWithoutConnectorsInput
@@ -747,6 +776,7 @@ export type ConnectorUncheckedCreateWithoutWayEndsBInput = {
   gender?: string | null
   categoryId?: string | null
   imagePath?: string | null
+  mains?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutConnectorInput
@@ -779,6 +809,7 @@ export type ConnectorUpdateWithoutWayEndsAInput = {
   form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mains?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.CategoryUpdateOneWithoutConnectorsNestedInput
@@ -797,6 +828,7 @@ export type ConnectorUncheckedUpdateWithoutWayEndsAInput = {
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mains?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutConnectorNestedInput
@@ -824,6 +856,7 @@ export type ConnectorUpdateWithoutWayEndsBInput = {
   form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mains?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.CategoryUpdateOneWithoutConnectorsNestedInput
@@ -842,6 +875,7 @@ export type ConnectorUncheckedUpdateWithoutWayEndsBInput = {
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mains?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutConnectorNestedInput
@@ -858,6 +892,7 @@ export type ConnectorCreateWithoutCategoryInput = {
   form?: string | null
   gender?: string | null
   imagePath?: string | null
+  mains?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   ports?: Prisma.ProductPortCreateNestedManyWithoutConnectorInput
@@ -875,6 +910,7 @@ export type ConnectorUncheckedCreateWithoutCategoryInput = {
   form?: string | null
   gender?: string | null
   imagePath?: string | null
+  mains?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutConnectorInput
@@ -922,6 +958,7 @@ export type ConnectorScalarWhereInput = {
   gender?: Prisma.StringNullableFilter<"Connector"> | string | null
   categoryId?: Prisma.StringNullableFilter<"Connector"> | string | null
   imagePath?: Prisma.StringNullableFilter<"Connector"> | string | null
+  mains?: Prisma.BoolFilter<"Connector"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Connector"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Connector"> | Date | string
 }
@@ -934,6 +971,7 @@ export type ConnectorCreateWithoutProductEndsAInput = {
   form?: string | null
   gender?: string | null
   imagePath?: string | null
+  mains?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   category?: Prisma.CategoryCreateNestedOneWithoutConnectorsInput
@@ -952,6 +990,7 @@ export type ConnectorUncheckedCreateWithoutProductEndsAInput = {
   gender?: string | null
   categoryId?: string | null
   imagePath?: string | null
+  mains?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutConnectorInput
@@ -973,6 +1012,7 @@ export type ConnectorCreateWithoutProductEndsBInput = {
   form?: string | null
   gender?: string | null
   imagePath?: string | null
+  mains?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   category?: Prisma.CategoryCreateNestedOneWithoutConnectorsInput
@@ -991,6 +1031,7 @@ export type ConnectorUncheckedCreateWithoutProductEndsBInput = {
   gender?: string | null
   categoryId?: string | null
   imagePath?: string | null
+  mains?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   ports?: Prisma.ProductPortUncheckedCreateNestedManyWithoutConnectorInput
@@ -1023,6 +1064,7 @@ export type ConnectorUpdateWithoutProductEndsAInput = {
   form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mains?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.CategoryUpdateOneWithoutConnectorsNestedInput
@@ -1041,6 +1083,7 @@ export type ConnectorUncheckedUpdateWithoutProductEndsAInput = {
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mains?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutConnectorNestedInput
@@ -1068,6 +1111,7 @@ export type ConnectorUpdateWithoutProductEndsBInput = {
   form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mains?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.CategoryUpdateOneWithoutConnectorsNestedInput
@@ -1086,6 +1130,7 @@ export type ConnectorUncheckedUpdateWithoutProductEndsBInput = {
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mains?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutConnectorNestedInput
@@ -1102,6 +1147,7 @@ export type ConnectorCreateManyCategoryInput = {
   form?: string | null
   gender?: string | null
   imagePath?: string | null
+  mains?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1114,6 +1160,7 @@ export type ConnectorUpdateWithoutCategoryInput = {
   form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mains?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ports?: Prisma.ProductPortUpdateManyWithoutConnectorNestedInput
@@ -1131,6 +1178,7 @@ export type ConnectorUncheckedUpdateWithoutCategoryInput = {
   form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mains?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ports?: Prisma.ProductPortUncheckedUpdateManyWithoutConnectorNestedInput
@@ -1148,6 +1196,7 @@ export type ConnectorUncheckedUpdateManyWithoutCategoryInput = {
   form?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mains?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1228,6 +1277,7 @@ export type ConnectorSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   gender?: boolean
   categoryId?: boolean
   imagePath?: boolean
+  mains?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   category?: boolean | Prisma.Connector$categoryArgs<ExtArgs>
@@ -1248,6 +1298,7 @@ export type ConnectorSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   gender?: boolean
   categoryId?: boolean
   imagePath?: boolean
+  mains?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   category?: boolean | Prisma.Connector$categoryArgs<ExtArgs>
@@ -1262,6 +1313,7 @@ export type ConnectorSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   gender?: boolean
   categoryId?: boolean
   imagePath?: boolean
+  mains?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   category?: boolean | Prisma.Connector$categoryArgs<ExtArgs>
@@ -1276,11 +1328,12 @@ export type ConnectorSelectScalar = {
   gender?: boolean
   categoryId?: boolean
   imagePath?: boolean
+  mains?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ConnectorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "family" | "form" | "gender" | "categoryId" | "imagePath" | "createdAt" | "updatedAt", ExtArgs["result"]["connector"]>
+export type ConnectorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "family" | "form" | "gender" | "categoryId" | "imagePath" | "mains" | "createdAt" | "updatedAt", ExtArgs["result"]["connector"]>
 export type ConnectorInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   category?: boolean | Prisma.Connector$categoryArgs<ExtArgs>
   ports?: boolean | Prisma.Connector$portsArgs<ExtArgs>
@@ -1354,6 +1407,13 @@ export type $ConnectorPayload<ExtArgs extends runtime.Types.Extensions.InternalA
      * Object key, like Manufacturer.logoPath.
      */
     imagePath: string | null
+    /**
+     * Carries mains voltage — Schuko, C13/C14, powerCON, TRUE1, CEE. A device
+     * or cable with one is electrical equipment that needs DGUV V3 inspections,
+     * which is what the hint on a product that isn't marked so says. A new
+     * connector takes it from its family.
+     */
+    mains: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["connector"]>
@@ -1793,6 +1853,7 @@ export interface ConnectorFieldRefs {
   readonly gender: Prisma.FieldRef<"Connector", 'String'>
   readonly categoryId: Prisma.FieldRef<"Connector", 'String'>
   readonly imagePath: Prisma.FieldRef<"Connector", 'String'>
+  readonly mains: Prisma.FieldRef<"Connector", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Connector", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Connector", 'DateTime'>
 }

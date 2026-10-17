@@ -481,9 +481,10 @@
 												class="w-28"
 											/>
 											<p class="text-xs text-muted-foreground">
-												Copied onto new assets at creation, which are due for their first inspection
-												at once. Existing assets keep theirs — change those from the Devices list.
-												Leave blank to not track inspections by default.
+												Given to new devices whose product needs DGUV inspections (set per category,
+												or on the product's page). They are due for their first inspection at once.
+												Existing devices keep theirs — change those from the Devices list. Leave
+												blank to not track inspections by default.
 											</p>
 										</div>
 										<label class="flex items-center gap-2 text-sm">

@@ -3,20 +3,31 @@ import { prisma } from '#lib/server/auth.js';
 import * as v from 'valibot';
 import {
 	isSystemAdmin,
+	managedOrgIds,
 	requireAuth,
 	requireOrgInventory,
 	userOrgIds
 } from '#lib/server/services/access.js';
+import { productControl } from '#lib/server/services/product-control.js';
+import { logCatalogChange } from '#lib/server/services/catalog-log.js';
 import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
 import { appError } from '#lib/errors.js';
 import { INSPECTION_RESULTS } from '#lib/inspection-due.js';
 import {
+	applyInspectionRequirement,
 	deleteInspection as deleteInspectionRecord,
+	mainsConnectorNames,
 	parseInspectionDate,
 	recordInspections,
 	refreshInspectionDue
 } from '#lib/server/services/inspections.js';
-import { getAsset, getAssetHistory, getAssets } from '#lib/remote/assets.remote.js';
+import {
+	getAsset,
+	getAssetHistory,
+	getAssets,
+	getCategories,
+	getProductCatalog
+} from '#lib/remote/assets.remote.js';
 import { getDashboardStats } from '#lib/remote/productions.remote.js';
 
 const UPCOMING_WINDOW_DAYS = 30;
@@ -87,6 +98,12 @@ export const getAssetInspections = query(v.string(), async (assetId: string) => 
 		where: { assetId },
 		orderBy: [{ performedAt: 'desc' }, { createdAt: 'desc' }]
 	});
+});
+
+/** A product's mains connectors, for the "this needs inspecting" hint. Catalog data, open to all. */
+export const getMainsConnectors = query(v.string(), async (productId: string) => {
+	await requireAuth();
+	return mainsConnectorNames(productId);
 });
 
 /** What shows a unit's inspection state, after any change to it. */
@@ -194,3 +211,127 @@ export const setInspectionInterval = command(setIntervalSchema, async (input) =>
 	}
 	return { updated: ids.length, unchanged: assets.length - ids.length };
 });
+
+/** After a change to who needs inspecting: the catalog, and every unit list. */
+async function refreshRequirementViews(changedAssetIds: string[]) {
+	await Promise.all([
+		getProductCatalog().refresh(),
+		getCategories().refresh(),
+		...changedAssetIds.flatMap((id) => [getAsset(id).refresh(), getAssetHistory(id).refresh()]),
+		getAssets().refresh(),
+		getOverdueAssets().refresh(),
+		getOverdueInspectionCount().refresh(),
+		getDashboardStats().refresh()
+	]);
+}
+
+const productRequirementSchema = v.object({
+	productId: v.string(),
+	/** Null follows the category. */
+	requiresInspection: v.nullable(v.boolean())
+});
+
+/**
+ * Whether a product's units need DGUV inspections, overriding its category.
+ * It is a fact about the product, so it answers to the same rule as its name
+ * (`productControl`), and it moves the interval of every unit of it.
+ */
+export const setProductInspectionRequirement = command(productRequirementSchema, async (input) => {
+	const user = await requireAuth();
+	const systemAdmin = await isSystemAdmin(user.id);
+	const managed = systemAdmin ? [] : await managedOrgIds(user.id);
+	if (!systemAdmin && managed.length === 0) appError(403, 'product_edit_forbidden');
+
+	const product = await prisma.product.findUniqueOrThrow({
+		where: { id: input.productId },
+		select: { id: true, name: true, createdById: true, requiresInspection: true }
+	});
+	const control = await productControl({ id: user.id, systemAdmin, managed }, product);
+	if (!control.allowed) {
+		if (control.reason === 'foreign_units') {
+			appError(403, 'product_units_other_orgs', [control.orgNames]);
+		}
+		appError(403, 'product_unowned_not_creator', [product.name]);
+	}
+	if (product.requiresInspection === input.requiresInspection) return { changed: 0 };
+
+	const changed = await prisma.$transaction(async (tx) => {
+		await tx.product.update({
+			where: { id: product.id },
+			data: { requiresInspection: input.requiresInspection }
+		});
+		return applyInspectionRequirement(tx, user.id, [product.id]);
+	});
+	await logCatalogChange({
+		userId: user.id,
+		action: 'PRODUCT_UPDATED',
+		productId: product.id,
+		data: {
+			changes: [
+				{
+					field: 'requiresInspection',
+					from: product.requiresInspection?.toString() ?? null,
+					to: input.requiresInspection?.toString() ?? null
+				}
+			]
+		}
+	});
+	await refreshRequirementViews(changed);
+	return { changed: changed.length };
+});
+
+const categoryRequirementSchema = v.object({
+	categoryId: v.string(),
+	requiresInspection: v.boolean()
+});
+
+/**
+ * Whether units in a category need DGUV inspections, unless their product says
+ * otherwise. Categories are global, so this is a system admin's call, and it
+ * moves the interval of every unit whose product follows the category.
+ */
+export const setCategoryInspectionRequirement = command(
+	categoryRequirementSchema,
+	async (input) => {
+		const user = await requireAuth();
+		if (!(await isSystemAdmin(user.id))) appError(403, 'admin_required');
+
+		const category = await prisma.category.findUniqueOrThrow({
+			where: { id: input.categoryId },
+			select: { id: true, requiresInspection: true }
+		});
+		if (category.requiresInspection === input.requiresInspection) return { changed: 0 };
+
+		const changed = await prisma.$transaction(async (tx) => {
+			await tx.category.update({
+				where: { id: category.id },
+				data: { requiresInspection: input.requiresInspection }
+			});
+			const following = await tx.product.findMany({
+				where: { categoryId: category.id, requiresInspection: null },
+				select: { id: true }
+			});
+			return applyInspectionRequirement(
+				tx,
+				user.id,
+				following.map((p) => p.id)
+			);
+		});
+		await logCatalogChange({
+			userId: user.id,
+			action: 'CATEGORY_UPDATED',
+			categoryId: category.id,
+			data: {
+				changes: [
+					{
+						field: 'requiresInspection',
+						from: String(category.requiresInspection),
+						to: String(input.requiresInspection)
+					}
+				]
+			}
+		});
+		await refreshRequirementViews(changed);
+		return { changed: changed.length };
+	}
+);

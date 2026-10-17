@@ -24,7 +24,12 @@
 		getProductUnits
 	} from '#lib/remote/assets.remote.js';
 	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
-	import { orgLabel } from '#lib/utils.js';
+	import { setProductInspectionRequirement } from '#lib/remote/inspections.remote.js';
+	import { categoryLabel } from '#lib/category.js';
+	import { requiresInspection } from '#lib/inspection-due.js';
+	import { MainsHint } from '#lib/components/ui/mains-hint/index.js';
+	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
+	import { toast } from 'svelte-sonner';
 	import { canManageInventory } from '#lib/roles.js';
 	import { Plus } from '@lucide/svelte';
 
@@ -52,6 +57,29 @@
 	// edits before a merge or a copy.
 	let editor = $state<ReturnType<typeof ProductEditor>>();
 	let actions = $state<ProductEditorActions>();
+
+	// DGUV: the category's answer unless the product gives its own. Saved on
+	// change, since it moves the interval of every unit of the product.
+	let savingInspection = $state(false);
+	async function setInspection(select: HTMLSelectElement) {
+		if (!product) return;
+		const choice = select.value;
+		savingInspection = true;
+		try {
+			const result = await setProductInspectionRequirement({
+				productId: product.id,
+				requiresInspection: choice === 'yes' ? true : choice === 'no' ? false : null
+			});
+			toast.success(plural(result.changed, ['Saved · 1 unit changed', 'Saved · # units changed']));
+		} catch (err) {
+			// Refused (someone else's units): show what is stored, not the choice.
+			select.value =
+				product.requiresInspection === null ? 'inherit' : product.requiresInspection ? 'yes' : 'no';
+			toast.error(getErrorMessage(err));
+		} finally {
+			savingInspection = false;
+		}
+	}
 </script>
 
 <svelte:head><title>{product?.name ?? 'Product'} | Technikpool</title></svelte:head>
@@ -117,6 +145,39 @@
 			/>
 
 			<div class="space-y-6 self-start">
+				{#if !product.isLicense}
+					<Card.Root>
+						<Card.Header>
+							<Card.Title>DGUV inspections</Card.Title>
+							<Card.Description>
+								Whether its devices need DGUV V3 inspections. Those that do get their organization's
+								interval; the others are not tracked.
+							</Card.Description>
+						</Card.Header>
+						<Card.Content class="space-y-3">
+							<select
+								aria-label="DGUV inspections"
+								value={product.requiresInspection === null
+									? 'inherit'
+									: product.requiresInspection
+										? 'yes'
+										: 'no'}
+								disabled={savingInspection}
+								onchange={(e) => setInspection(e.currentTarget as HTMLSelectElement)}
+								class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+							>
+								<option value="inherit">
+									{product.category.requiresInspection
+										? `Like ${categoryLabel(product.category)}: needs inspection`
+										: `Like ${categoryLabel(product.category)}: no inspection`}
+								</option>
+								<option value="yes">Needs inspection</option>
+								<option value="no">No inspection</option>
+							</select>
+							<MainsHint productId={product.id} required={requiresInspection(product)} />
+						</Card.Content>
+					</Card.Root>
+				{/if}
 				<Card.Root>
 					<Card.Header>
 						<Card.Title>Units</Card.Title>

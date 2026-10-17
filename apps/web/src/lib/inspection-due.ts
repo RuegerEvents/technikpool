@@ -48,3 +48,24 @@ export function inspectionDue(
 	if (latest.result === 'FAILED') return latest.performedAt;
 	return addMonths(latest.performedAt, intervalMonths);
 }
+
+/**
+ * Whether a product's units need DGUV inspections: the product's own answer if
+ * it has one, else its category's. A licence is software and never does.
+ */
+export function requiresInspection(product: {
+	requiresInspection: boolean | null;
+	isLicense: boolean;
+	category: { requiresInspection: boolean };
+}): boolean {
+	if (product.isLicense) return false;
+	return product.requiresInspection ?? product.category.requiresInspection;
+}
+
+/** The interval a new unit of this product starts with: the org's, if it needs inspecting. */
+export function initialInspectionInterval(
+	product: Parameters<typeof requiresInspection>[0],
+	orgDefaultMonths: number | null
+): number | null {
+	return requiresInspection(product) ? orgDefaultMonths : null;
+}

@@ -4618,9 +4618,8 @@ msgstr "Category saved"
 msgid "Categories | Technikpool"
 msgstr "Categories | Technikpool"
 
-#: src/routes/admin/categories/+page.svelte
-msgid "Categories are shared by every organization. The English name is the source — it is what the API returns and what a billing line records; the German name is what the German UI and a German offer or invoice show."
-msgstr "Categories are shared by every organization. The English name is the source — it is what the API returns and what a billing line records; the German name is what the German UI and a German offer or invoice show."
+#~ msgid "Categories are shared by every organization. The English name is the source — it is what the API returns and what a billing line records; the German name is what the German UI and a German offer or invoice show."
+#~ msgstr "Categories are shared by every organization. The English name is the source — it is what the API returns and what a billing line records; the German name is what the German UI and a German offer or invoice show."
 
 #: src/routes/admin/categories/+page.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
@@ -13021,11 +13020,12 @@ msgstr[1] "Inspected every # months."
 msgid "{0} The next one is due an interval after the latest inspection — at once if it failed or there has never been one."
 msgstr "{0} The next one is due an interval after the latest inspection — at once if it failed or there has never been one."
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "No interval is set, so this unit is not tracked. Set one under Edit to have it come due."
-msgstr "No interval is set, so this unit is not tracked. Set one under Edit to have it come due."
+#~ msgid "No interval is set, so this unit is not tracked. Set one under Edit to have it come due."
+#~ msgstr "No interval is set, so this unit is not tracked. Set one under Edit to have it come due."
 
 #: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/products/[id]/product-detail.svelte
+#: src/routes/products/[id]/product-detail.svelte
 msgid "DGUV inspections"
 msgstr "DGUV inspections"
 
@@ -13079,6 +13079,100 @@ msgstr "The unit is marked broken and stays due until a passed inspection is rec
 msgid "Inspection interval"
 msgstr "Inspection interval"
 
+#~ msgid "Copied onto new assets at creation, which are due for their first inspection at once. Existing assets keep theirs — change those from the Devices list. Leave blank to not track inspections by default."
+#~ msgstr "Copied onto new assets at creation, which are due for their first inspection at once. Existing assets keep theirs — change those from the Devices list. Leave blank to not track inspections by default."
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Inspect this category?"
+msgstr "Inspect this category?"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Units of its products that have no interval get their organization's default and come due for a DGUV inspection. Products marked otherwise are left alone."
+msgstr "Units of its products that have no interval get their organization's default and come due for a DGUV inspection. Products marked otherwise are left alone."
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Require inspection"
+msgstr "Require inspection"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Stop inspecting this category?"
+msgstr "Stop inspecting this category?"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Units of its products lose their DGUV interval and leave the inspection list. Products marked as needing inspection are left alone."
+msgstr "Units of its products lose their DGUV interval and leave the inspection list. Products marked as needing inspection are left alone."
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Stop inspecting"
+msgstr "Stop inspecting"
+
+#: src/lib/components/ui/mains-hint/mains-hint.svelte
+#: src/routes/admin/categories/+page.svelte
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Saved · 1 unit changed"
+msgid_plural "Saved · # units changed"
+msgstr[0] "Saved · 1 unit changed"
+msgstr[1] "Saved · # units changed"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Categories are shared by every organization. The English name is the source — it is what the API returns and what a billing line records; the German name is what the German UI and a German offer or invoice show. \"DGUV\" marks a category whose devices need DGUV V3 inspections; a product can say otherwise on its own page."
+msgstr "Categories are shared by every organization. The English name is the source — it is what the API returns and what a billing line records; the German name is what the German UI and a German offer or invoice show. \"DGUV\" marks a category whose devices need DGUV V3 inspections; a product can say otherwise on its own page."
+
+#: src/routes/admin/categories/+page.svelte
+msgid "DGUV"
+msgstr "DGUV"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "<0/> Inspect"
+msgstr "<0/> Inspect"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Whether its devices need DGUV V3 inspections. Those that do get their organization's interval; the others are not tracked."
+msgstr "Whether its devices need DGUV V3 inspections. Those that do get their organization's interval; the others are not tracked."
+
+#. 0: categoryLabel(product.category)
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Like {0}: needs inspection"
+msgstr "Like {0}: needs inspection"
+
+#. 0: categoryLabel(product.category)
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Like {0}: no inspection"
+msgstr "Like {0}: no inspection"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Needs inspection"
+msgstr "Needs inspection"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "No inspection"
+msgstr "No inspection"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Not tracked: this device has no inspection interval. Whether a product's devices need DGUV inspections is set on <0>its page</0>; an interval of its own can be set under Edit."
+msgstr "Not tracked: this device has no inspection interval. Whether a product's devices need DGUV inspections is set on <0>its page</0>; an interval of its own can be set under Edit."
+
 #: src/routes/orgs/[id]/+page.svelte
-msgid "Copied onto new assets at creation, which are due for their first inspection at once. Existing assets keep theirs — change those from the Devices list. Leave blank to not track inspections by default."
-msgstr "Copied onto new assets at creation, which are due for their first inspection at once. Existing assets keep theirs — change those from the Devices list. Leave blank to not track inspections by default."
+msgid "Given to new devices whose product needs DGUV inspections (set per category, or on the product's page). They are due for their first inspection at once. Existing devices keep theirs — change those from the Devices list. Leave blank to not track inspections by default."
+msgstr "Given to new devices whose product needs DGUV inspections (set per category, or on the product's page). They are due for their first inspection at once. Existing devices keep theirs — change those from the Devices list. Leave blank to not track inspections by default."
+
+#. 0: names.join(', ')
+#: src/lib/components/ui/mains-hint/mains-hint.svelte
+msgid "It has a mains connection ({0}), so its devices most likely need DGUV V3 inspections — but the product is not marked as needing them."
+msgstr "It has a mains connection ({0}), so its devices most likely need DGUV V3 inspections — but the product is not marked as needing them."
+
+#: src/lib/components/ui/mains-hint/mains-hint.svelte
+msgid "Mark as needing inspection"
+msgstr "Mark as needing inspection"
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "Carries mains voltage — needs DGUV inspections"
+msgstr "Carries mains voltage — needs DGUV inspections"
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "Mains"
+msgstr "Mains"
+
+#: src/routes/admin/connectors/+page.svelte
+msgid "Mains voltage"
+msgstr "Mains voltage"

@@ -4,7 +4,9 @@
 	import { Input } from '#lib/components/ui/input/index.js';
 	import { Label } from '#lib/components/ui/label/index.js';
 	import { getCategories, updateCategory } from '#lib/remote/assets.remote.js';
-	import { getErrorMessage } from '#lib/utils.js';
+	import { setCategoryInspectionRequirement } from '#lib/remote/inspections.remote.js';
+	import { confirmAction } from '#lib/confirm.svelte.js';
+	import { getErrorMessage, plural } from '#lib/utils.js';
 	import { toast } from 'svelte-sonner';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
@@ -59,6 +61,39 @@
 			saving.delete(c.id);
 		}
 	}
+
+	// Saved on its own, not with the row: it moves the DGUV interval of every
+	// unit whose product follows the category, so it is a decision, not a field.
+	async function toggleInspection(c: (typeof categories)[number], requiresInspection: boolean) {
+		const ok = await confirmAction(
+			requiresInspection
+				? {
+						title: 'Inspect this category?',
+						description:
+							"Units of its products that have no interval get their organization's default and come due for a DGUV inspection. Products marked otherwise are left alone.",
+						confirmLabel: 'Require inspection'
+					}
+				: {
+						title: 'Stop inspecting this category?',
+						description:
+							'Units of its products lose their DGUV interval and leave the inspection list. Products marked as needing inspection are left alone.',
+						confirmLabel: 'Stop inspecting'
+					}
+		);
+		if (!ok) return;
+		saving.add(c.id);
+		try {
+			const result = await setCategoryInspectionRequirement({
+				categoryId: c.id,
+				requiresInspection
+			});
+			toast.success(plural(result.changed, ['Saved · 1 unit changed', 'Saved · # units changed']));
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			saving.delete(c.id);
+		}
+	}
 </script>
 
 <svelte:head><title>Categories | Technikpool</title></svelte:head>
@@ -69,7 +104,8 @@
 		<p class="text-muted-foreground">
 			Categories are shared by every organization. The English name is the source — it is what the
 			API returns and what a billing line records; the German name is what the German UI and a
-			German offer or invoice show.
+			German offer or invoice show. "DGUV" marks a category whose devices need DGUV V3 inspections;
+			a product can say otherwise on its own page.
 		</p>
 	</div>
 
@@ -82,7 +118,7 @@
 				{@const draft = draftFor(category)}
 				{@const dirty = drafts.has(category.id)}
 				<div
-					class="grid items-end gap-3 border-b pb-3 last:border-0 last:pb-0 sm:grid-cols-[auto_1fr_1fr_5rem_auto]"
+					class="grid items-end gap-3 border-b pb-3 last:border-0 last:pb-0 sm:grid-cols-[auto_1fr_1fr_1fr_auto_5rem_auto]"
 				>
 					<div class="space-y-1">
 						<Label for="color-{category.id}" class="text-xs">Colour</Label>
@@ -132,6 +168,26 @@
 							<option value="male">Male end feeds</option>
 							<option value="female">Female end feeds</option>
 						</select>
+					</div>
+					<div class="space-y-1">
+						<!-- Whether its units need DGUV V3 inspections, unless a product says
+						     otherwise. Saved at once, see toggleInspection. -->
+						<Label for="dguv-{category.id}" class="text-xs">DGUV</Label>
+						<label class="flex h-10 items-center gap-2 text-sm">
+							<input
+								id="dguv-{category.id}"
+								type="checkbox"
+								checked={category.requiresInspection}
+								disabled={saving.has(category.id)}
+								onchange={(e) => {
+									const box = e.currentTarget as HTMLInputElement;
+									const wanted = box.checked;
+									box.checked = category.requiresInspection;
+									toggleInspection(category, wanted);
+								}}
+							/>
+							Inspect
+						</label>
 					</div>
 					<div class="space-y-1">
 						<Label for="sort-{category.id}" class="text-xs">Order</Label>

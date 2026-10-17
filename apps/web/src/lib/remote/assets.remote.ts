@@ -82,6 +82,7 @@ import { PORT_REQUIREMENTS } from '#lib/ports.js';
 import { getConnectors, getConnectorUsage } from '#lib/remote/connectors.remote.js';
 import { getKnownAddresses } from '#lib/remote/addresses.remote.js';
 import { inspectionDue } from '#lib/inspection-due.js';
+import { applyInspectionRequirement, initialInspection } from '#lib/server/services/inspections.js';
 import { appError } from '#lib/errors.js';
 import { productLabel } from '#lib/product-label.js';
 
@@ -1239,15 +1240,12 @@ type CreateUnitsArgs = {
  * allocation is how one batch hands the same number to two units.
  */
 async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
-	const { assetIdPrefix: prefix, defaultInspectionIntervalMonths } =
-		await tx.organization.findUniqueOrThrow({
-			where: { id: args.organizationId },
-			select: { assetIdPrefix: true, defaultInspectionIntervalMonths: true }
-		});
-
-	// Never inspected, so due at once — see `inspectionDue`.
-	const createdAt = new Date();
-	const nextInspectionDue = inspectionDue(defaultInspectionIntervalMonths, null, createdAt);
+	const { assetIdPrefix: prefix } = await tx.organization.findUniqueOrThrow({
+		where: { id: args.organizationId },
+		select: { assetIdPrefix: true }
+	});
+	// The org's interval, for products that need DGUV inspections — see `initialInspection`.
+	const inspection = await initialInspection(tx, args.organizationId);
 
 	const tags = await tagAllocator(
 		tx,
@@ -1276,16 +1274,6 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 	const kitHolder = await kitHoldingTag(typedTags);
 	if (kitHolder) appError(409, 'asset_tag_in_use', [kitHolder.tag, kitHolder.name]);
 
-	// A licence has no wiring to test, so it never gets a DGUV interval.
-	const licenseProductIds = new Set(
-		(
-			await tx.product.findMany({
-				where: { id: { in: args.units.map((u) => u.productId) }, isLicense: true },
-				select: { id: true }
-			})
-		).map((p) => p.id)
-	);
-
 	const created = await Promise.all(
 		// `tags.next()` is called synchronously inside the map, before anything
 		// is awaited, so the tags land in row order rather than completion order.
@@ -1313,10 +1301,7 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 					parentAssetId: parent?.id ?? null,
 					bundleId: parent?.bundleId ?? args.bundleId ?? null,
 					// Snapshot, not a live reference — see Organization.defaultInspectionIntervalMonths.
-					inspectionIntervalMonths: licenseProductIds.has(unit.productId)
-						? null
-						: defaultInspectionIntervalMonths,
-					nextInspectionDue: licenseProductIds.has(unit.productId) ? null : nextInspectionDue,
+					...inspection(unit.productId),
 					transactions: {
 						create: [
 							{ userId: args.userId, action: 'CREATED', data: { type: 'CREATED' } },
@@ -1384,8 +1369,7 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 						productId: acc.productId,
 						// A tagged original begets a tagged copy — where the org numbers.
 						assetTag: acc.tagged && tags.enabled ? tags.next() : null,
-						inspectionIntervalMonths: defaultInspectionIntervalMonths,
-						nextInspectionDue,
+						...inspection(acc.productId),
 						parent: parentRecord
 					});
 				}
@@ -2441,6 +2425,12 @@ export const updateProduct = command(updateProductSchema, async (input) => {
 		});
 	}
 
+	// A new category, or becoming a licence, can change whether its units need
+	// DGUV inspections — see `requiresInspection`.
+	if (product.categoryId !== previousProduct.categoryId || licenseChanged) {
+		await applyInspectionRequirement(prisma, user.id, [product.id]);
+	}
+
 	if (imageChanged) redrawPreviewsOf(product.id);
 	await refreshProductViews({
 		cable: cableChanged,
@@ -2834,6 +2824,8 @@ export const mergeProducts = command(
 			});
 			await tx.orgProductPrice.deleteMany({ where: { productId: sourceProductId } });
 			await tx.product.delete({ where: { id: sourceProductId } });
+			// The merged units are the target's now, and follow its DGUV requirement.
+			await applyInspectionRequirement(tx, user.id, [targetProductId]);
 		});
 
 		await logCatalogChange({
@@ -4405,11 +4397,7 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 
 	const result = await prisma.$transaction(
 		async (tx) => {
-			const { defaultInspectionIntervalMonths } = await tx.organization.findUniqueOrThrow({
-				where: { id: organizationId },
-				select: { defaultInspectionIntervalMonths: true }
-			});
-			const nextInspectionDue = inspectionDue(defaultInspectionIntervalMonths, null, new Date());
+			const inspection = await initialInspection(tx, organizationId);
 			// A tagged original begets a tagged copy, where the org numbers its
 			// units; elsewhere a copy is new hardware without a sticker yet.
 			const tags = await tagAllocator(tx, organizationId);
@@ -4460,8 +4448,7 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 								assetTag: copyTag(entry.member.tagged),
 								status: 'AVAILABLE',
 								bundleId: copy.id,
-								inspectionIntervalMonths: defaultInspectionIntervalMonths,
-								nextInspectionDue,
+								...inspection(entry.member.productId),
 								transactions: {
 									create: [{ userId: user.id, action: 'CREATED', data: { type: 'CREATED' } }]
 								}
@@ -4487,8 +4474,7 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 							organizationId,
 							productId: slot.productId,
 							assetTag: copyTag(slot.tagged),
-							inspectionIntervalMonths: defaultInspectionIntervalMonths,
-							nextInspectionDue,
+							...inspection(slot.productId),
 							parent
 						});
 						created++;
@@ -5180,12 +5166,7 @@ export const addProductAccessories = command(addProductAccessoriesSchema, async 
 	const pool = data.reuseExisting ? [...plan.pool] : [];
 
 	const { createdIds, reusedIds } = await prisma.$transaction(async (tx) => {
-		const { defaultInspectionIntervalMonths } = await tx.organization.findUniqueOrThrow({
-			where: { id: data.organizationId },
-			select: { defaultInspectionIntervalMonths: true }
-		});
-
-		const nextInspectionDue = inspectionDue(defaultInspectionIntervalMonths, null, new Date());
+		const inspection = await initialInspection(tx, data.organizationId);
 		const tags = await tagAllocator(tx, data.organizationId);
 
 		const created: string[] = [];
@@ -5203,8 +5184,7 @@ export const addProductAccessories = command(addProductAccessoriesSchema, async 
 					productId: accessoryProductId,
 					// Numbered like the units it copies, where the org numbers at all.
 					assetTag: data.noAssetTag || !tags.enabled ? null : tags.next(),
-					inspectionIntervalMonths: defaultInspectionIntervalMonths,
-					nextInspectionDue,
+					...inspection(accessoryProductId),
 					parent: unit
 				});
 				created.push(record.id);

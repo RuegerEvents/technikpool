@@ -399,6 +399,11 @@ model Connector {
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   /// Object key, like Manufacturer.logoPath.
   imagePath  String?
+  /// Carries mains voltage — Schuko, C13/C14, powerCON, TRUE1, CEE. A device
+  /// or cable with one is electrical equipment that needs DGUV V3 inspections,
+  /// which is what the hint on a product that isn't marked so says. A new
+  /// connector takes it from its family.
+  mains      Boolean   @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -503,6 +508,11 @@ model Category {
   /// and in light, so the answer belongs to the department, not the connector.
   cableInputGender String?
 
+  /// Whether units of products in this department need DGUV V3 inspections by
+  /// default. A product can say otherwise (Product.requiresInspection). Only
+  /// prüfpflichtig units get the org's default interval when registered.
+  requiresInspection Boolean @default(false)
+
   products        Product[]
   bundleTemplates BundleTemplate[]
   orgRates        OrgCategoryRate[]
@@ -560,6 +570,10 @@ model Product {
   /// A flag and not a category, because the category is what bills — a
   /// Resolume licence is Video like the media server it runs on.
   isLicense Boolean @default(false)
+
+  /// DGUV V3 inspections for this product's units: null follows the category
+  /// (Category.requiresInspection), true or false overrides it.
+  requiresInspection Boolean?
 
   /// Who added the row. While no org holds a unit of a product there is no
   /// owner to ask, so this is the only person besides a system admin who may

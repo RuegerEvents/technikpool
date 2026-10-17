@@ -7,7 +7,7 @@ import {
 	requireAuth,
 	requireSystemAdmin
 } from '#lib/server/services/access.js';
-import { connectorSlug } from '#lib/server/services/connectors.js';
+import { connectorSlug, familyIsMains } from '#lib/server/services/connectors.js';
 import { appError } from '#lib/errors.js';
 import { connectorFamily } from '#lib/cable.js';
 
@@ -67,6 +67,8 @@ export const createConnector = command(connectorInputSchema, async (input) => {
 
 	const existing = await prisma.connector.findUnique({ where: { slug } });
 	if (!existing) {
+		const storedFamily = family ?? connectorFamily(name);
+		const mains = await familyIsMains([storedFamily]);
 		const connector = await prisma.connector.create({
 			// A family is always stored, so "how many members does this family
 			// have?" stays a plain count. Unstated, it is the first word of the
@@ -74,7 +76,8 @@ export const createConnector = command(connectorInputSchema, async (input) => {
 			data: {
 				name,
 				slug,
-				family: family ?? connectorFamily(name),
+				family: storedFamily,
+				mains: mains(storedFamily),
 				form,
 				gender,
 				categoryId,
@@ -222,4 +225,19 @@ export const deleteConnector = command(v.string(), async (connectorId: string) =
 	await getConnectors().refresh();
 	await getConnectorUsage().refresh();
 	return { id: connectorId };
+});
+
+const connectorMainsSchema = v.object({ connectorId: v.string(), mains: v.boolean() });
+
+/**
+ * Whether a connector carries mains voltage, which is what makes a device or
+ * cable with it need DGUV inspections. Shared vocabulary, so system admin.
+ */
+export const setConnectorMains = command(connectorMainsSchema, async (input) => {
+	await requireSystemAdmin();
+	await prisma.connector.update({
+		where: { id: input.connectorId },
+		data: { mains: input.mains }
+	});
+	await getConnectors().refresh();
 });

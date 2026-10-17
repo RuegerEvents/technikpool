@@ -47,6 +47,7 @@ export type ProductMinAggregateOutputType = {
   connectorBId: string | null
   lengthCm: number | null
   isLicense: boolean | null
+  requiresInspection: boolean | null
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -65,6 +66,7 @@ export type ProductMaxAggregateOutputType = {
   connectorBId: string | null
   lengthCm: number | null
   isLicense: boolean | null
+  requiresInspection: boolean | null
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -83,6 +85,7 @@ export type ProductCountAggregateOutputType = {
   connectorBId: number
   lengthCm: number
   isLicense: number
+  requiresInspection: number
   createdById: number
   createdAt: number
   updatedAt: number
@@ -111,6 +114,7 @@ export type ProductMinAggregateInputType = {
   connectorBId?: true
   lengthCm?: true
   isLicense?: true
+  requiresInspection?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -129,6 +133,7 @@ export type ProductMaxAggregateInputType = {
   connectorBId?: true
   lengthCm?: true
   isLicense?: true
+  requiresInspection?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -147,6 +152,7 @@ export type ProductCountAggregateInputType = {
   connectorBId?: true
   lengthCm?: true
   isLicense?: true
+  requiresInspection?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -252,6 +258,7 @@ export type ProductGroupByOutputType = {
   connectorBId: string | null
   lengthCm: number | null
   isLicense: boolean
+  requiresInspection: boolean | null
   createdById: string | null
   createdAt: Date
   updatedAt: Date
@@ -293,6 +300,7 @@ export type ProductWhereInput = {
   connectorBId?: Prisma.StringNullableFilter<"Product"> | string | null
   lengthCm?: Prisma.IntNullableFilter<"Product"> | number | null
   isLicense?: Prisma.BoolFilter<"Product"> | boolean
+  requiresInspection?: Prisma.BoolNullableFilter<"Product"> | boolean | null
   createdById?: Prisma.StringNullableFilter<"Product"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Product"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Product"> | Date | string
@@ -324,6 +332,7 @@ export type ProductOrderByWithRelationInput = {
   connectorBId?: Prisma.SortOrderInput | Prisma.SortOrder
   lengthCm?: Prisma.SortOrderInput | Prisma.SortOrder
   isLicense?: Prisma.SortOrder
+  requiresInspection?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -358,6 +367,7 @@ export type ProductWhereUniqueInput = Prisma.AtLeast<{
   connectorBId?: Prisma.StringNullableFilter<"Product"> | string | null
   lengthCm?: Prisma.IntNullableFilter<"Product"> | number | null
   isLicense?: Prisma.BoolFilter<"Product"> | boolean
+  requiresInspection?: Prisma.BoolNullableFilter<"Product"> | boolean | null
   createdById?: Prisma.StringNullableFilter<"Product"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Product"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Product"> | Date | string
@@ -389,6 +399,7 @@ export type ProductOrderByWithAggregationInput = {
   connectorBId?: Prisma.SortOrderInput | Prisma.SortOrder
   lengthCm?: Prisma.SortOrderInput | Prisma.SortOrder
   isLicense?: Prisma.SortOrder
+  requiresInspection?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -415,6 +426,7 @@ export type ProductScalarWhereWithAggregatesInput = {
   connectorBId?: Prisma.StringNullableWithAggregatesFilter<"Product"> | string | null
   lengthCm?: Prisma.IntNullableWithAggregatesFilter<"Product"> | number | null
   isLicense?: Prisma.BoolWithAggregatesFilter<"Product"> | boolean
+  requiresInspection?: Prisma.BoolNullableWithAggregatesFilter<"Product"> | boolean | null
   createdById?: Prisma.StringNullableWithAggregatesFilter<"Product"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Product"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Product"> | Date | string
@@ -429,6 +441,7 @@ export type ProductCreateInput = {
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
   manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput
@@ -459,6 +472,7 @@ export type ProductUncheckedCreateInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -481,6 +495,7 @@ export type ProductUpdateInput = {
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput
@@ -511,6 +526,7 @@ export type ProductUncheckedUpdateInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -537,6 +553,7 @@ export type ProductCreateManyInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -551,6 +568,7 @@ export type ProductUpdateManyMutationInput = {
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -568,6 +586,7 @@ export type ProductUncheckedUpdateManyInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -601,6 +620,7 @@ export type ProductCountOrderByAggregateInput = {
   connectorBId?: Prisma.SortOrder
   lengthCm?: Prisma.SortOrder
   isLicense?: Prisma.SortOrder
+  requiresInspection?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -623,6 +643,7 @@ export type ProductMaxOrderByAggregateInput = {
   connectorBId?: Prisma.SortOrder
   lengthCm?: Prisma.SortOrder
   isLicense?: Prisma.SortOrder
+  requiresInspection?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -641,6 +662,7 @@ export type ProductMinOrderByAggregateInput = {
   connectorBId?: Prisma.SortOrder
   lengthCm?: Prisma.SortOrder
   isLicense?: Prisma.SortOrder
+  requiresInspection?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -888,6 +910,10 @@ export type ProductUncheckedUpdateManyWithoutCategoryNestedInput = {
   deleteMany?: Prisma.ProductScalarWhereInput | Prisma.ProductScalarWhereInput[]
 }
 
+export type NullableBoolFieldUpdateOperationsInput = {
+  set?: boolean | null
+}
+
 export type ProductCreateNestedOneWithoutOrgPricesInput = {
   create?: Prisma.XOR<Prisma.ProductCreateWithoutOrgPricesInput, Prisma.ProductUncheckedCreateWithoutOrgPricesInput>
   connectOrCreate?: Prisma.ProductCreateOrConnectWithoutOrgPricesInput
@@ -1005,6 +1031,7 @@ export type ProductCreateWithoutCreatedByInput = {
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
   manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput
@@ -1034,6 +1061,7 @@ export type ProductUncheckedCreateWithoutCreatedByInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
   ways?: Prisma.CableWayUncheckedCreateNestedManyWithoutProductInput
@@ -1088,6 +1116,7 @@ export type ProductScalarWhereInput = {
   connectorBId?: Prisma.StringNullableFilter<"Product"> | string | null
   lengthCm?: Prisma.IntNullableFilter<"Product"> | number | null
   isLicense?: Prisma.BoolFilter<"Product"> | boolean
+  requiresInspection?: Prisma.BoolNullableFilter<"Product"> | boolean | null
   createdById?: Prisma.StringNullableFilter<"Product"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Product"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Product"> | Date | string
@@ -1102,6 +1131,7 @@ export type ProductCreateWithoutManufacturerInput = {
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
   category: Prisma.CategoryCreateNestedOneWithoutProductsInput
@@ -1130,6 +1160,7 @@ export type ProductUncheckedCreateWithoutManufacturerInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1178,6 +1209,7 @@ export type ProductCreateWithoutConnectorARefInput = {
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
   manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput
@@ -1206,6 +1238,7 @@ export type ProductUncheckedCreateWithoutConnectorARefInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1238,6 +1271,7 @@ export type ProductCreateWithoutConnectorBRefInput = {
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
   manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput
@@ -1266,6 +1300,7 @@ export type ProductUncheckedCreateWithoutConnectorBRefInput = {
   connectorAId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1330,6 +1365,7 @@ export type ProductCreateWithoutPortsInput = {
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
   manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput
@@ -1359,6 +1395,7 @@ export type ProductUncheckedCreateWithoutPortsInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1396,6 +1433,7 @@ export type ProductUpdateWithoutPortsInput = {
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput
@@ -1425,6 +1463,7 @@ export type ProductUncheckedUpdateWithoutPortsInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1446,6 +1485,7 @@ export type ProductCreateWithoutWaysInput = {
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
   manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput
@@ -1475,6 +1515,7 @@ export type ProductUncheckedCreateWithoutWaysInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1512,6 +1553,7 @@ export type ProductUpdateWithoutWaysInput = {
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput
@@ -1541,6 +1583,7 @@ export type ProductUncheckedUpdateWithoutWaysInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1562,6 +1605,7 @@ export type ProductCreateWithoutCategoryInput = {
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
   manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput
@@ -1590,6 +1634,7 @@ export type ProductUncheckedCreateWithoutCategoryInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1638,6 +1683,7 @@ export type ProductCreateWithoutOrgPricesInput = {
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
   manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput
@@ -1667,6 +1713,7 @@ export type ProductUncheckedCreateWithoutOrgPricesInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1704,6 +1751,7 @@ export type ProductUpdateWithoutOrgPricesInput = {
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput
@@ -1733,6 +1781,7 @@ export type ProductUncheckedUpdateWithoutOrgPricesInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1754,6 +1803,7 @@ export type ProductCreateWithoutAssetsInput = {
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
   manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput
@@ -1783,6 +1833,7 @@ export type ProductUncheckedCreateWithoutAssetsInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1820,6 +1871,7 @@ export type ProductUpdateWithoutAssetsInput = {
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput
@@ -1849,6 +1901,7 @@ export type ProductUncheckedUpdateWithoutAssetsInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1870,6 +1923,7 @@ export type ProductCreateWithoutFeaturedInBundleTemplatesInput = {
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
   manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput
@@ -1899,6 +1953,7 @@ export type ProductUncheckedCreateWithoutFeaturedInBundleTemplatesInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1941,6 +1996,7 @@ export type ProductCreateWithoutStocktakeLinesInput = {
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
   manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput
@@ -1970,6 +2026,7 @@ export type ProductUncheckedCreateWithoutStocktakeLinesInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2007,6 +2064,7 @@ export type ProductUpdateWithoutStocktakeLinesInput = {
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput
@@ -2036,6 +2094,7 @@ export type ProductUncheckedUpdateWithoutStocktakeLinesInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2057,6 +2116,7 @@ export type ProductCreateWithoutStocktakeCountsInput = {
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
   manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput
@@ -2086,6 +2146,7 @@ export type ProductUncheckedCreateWithoutStocktakeCountsInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2123,6 +2184,7 @@ export type ProductUpdateWithoutStocktakeCountsInput = {
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput
@@ -2152,6 +2214,7 @@ export type ProductUncheckedUpdateWithoutStocktakeCountsInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2173,6 +2236,7 @@ export type ProductCreateWithoutDocumentsInput = {
   cableType?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
   manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput
@@ -2202,6 +2266,7 @@ export type ProductUncheckedCreateWithoutDocumentsInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2239,6 +2304,7 @@ export type ProductUpdateWithoutDocumentsInput = {
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput
@@ -2268,6 +2334,7 @@ export type ProductUncheckedUpdateWithoutDocumentsInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2293,6 +2360,7 @@ export type ProductCreateManyCreatedByInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -2306,6 +2374,7 @@ export type ProductUpdateWithoutCreatedByInput = {
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput
@@ -2335,6 +2404,7 @@ export type ProductUncheckedUpdateWithoutCreatedByInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ways?: Prisma.CableWayUncheckedUpdateManyWithoutProductNestedInput
@@ -2360,6 +2430,7 @@ export type ProductUncheckedUpdateManyWithoutCreatedByInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -2376,6 +2447,7 @@ export type ProductCreateManyManufacturerInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2390,6 +2462,7 @@ export type ProductUpdateWithoutManufacturerInput = {
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.CategoryUpdateOneRequiredWithoutProductsNestedInput
@@ -2418,6 +2491,7 @@ export type ProductUncheckedUpdateWithoutManufacturerInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2443,6 +2517,7 @@ export type ProductUncheckedUpdateManyWithoutManufacturerInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2460,6 +2535,7 @@ export type ProductCreateManyConnectorARefInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2477,6 +2553,7 @@ export type ProductCreateManyConnectorBRefInput = {
   connectorAId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2491,6 +2568,7 @@ export type ProductUpdateWithoutConnectorARefInput = {
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput
@@ -2519,6 +2597,7 @@ export type ProductUncheckedUpdateWithoutConnectorARefInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2544,6 +2623,7 @@ export type ProductUncheckedUpdateManyWithoutConnectorARefInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2558,6 +2638,7 @@ export type ProductUpdateWithoutConnectorBRefInput = {
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput
@@ -2586,6 +2667,7 @@ export type ProductUncheckedUpdateWithoutConnectorBRefInput = {
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2611,6 +2693,7 @@ export type ProductUncheckedUpdateManyWithoutConnectorBRefInput = {
   connectorAId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2628,6 +2711,7 @@ export type ProductCreateManyCategoryInput = {
   connectorBId?: string | null
   lengthCm?: number | null
   isLicense?: boolean
+  requiresInspection?: boolean | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2642,6 +2726,7 @@ export type ProductUpdateWithoutCategoryInput = {
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput
@@ -2670,6 +2755,7 @@ export type ProductUncheckedUpdateWithoutCategoryInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2695,6 +2781,7 @@ export type ProductUncheckedUpdateManyWithoutCategoryInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2709,6 +2796,7 @@ export type ProductUpdateWithoutFeaturedInBundleTemplatesInput = {
   cableType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput
@@ -2738,6 +2826,7 @@ export type ProductUncheckedUpdateWithoutFeaturedInBundleTemplatesInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2763,6 +2852,7 @@ export type ProductUncheckedUpdateManyWithoutFeaturedInBundleTemplatesInput = {
   connectorBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  requiresInspection?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2875,6 +2965,7 @@ export type ProductSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   connectorBId?: boolean
   lengthCm?: boolean
   isLicense?: boolean
+  requiresInspection?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -2907,6 +2998,7 @@ export type ProductSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   connectorBId?: boolean
   lengthCm?: boolean
   isLicense?: boolean
+  requiresInspection?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -2930,6 +3022,7 @@ export type ProductSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   connectorBId?: boolean
   lengthCm?: boolean
   isLicense?: boolean
+  requiresInspection?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -2953,12 +3046,13 @@ export type ProductSelectScalar = {
   connectorBId?: boolean
   lengthCm?: boolean
   isLicense?: boolean
+  requiresInspection?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "manufacturerId" | "categoryId" | "imagePath" | "caption" | "details" | "cableType" | "connectorAId" | "connectorBId" | "lengthCm" | "isLicense" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
+export type ProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "manufacturerId" | "categoryId" | "imagePath" | "caption" | "details" | "cableType" | "connectorAId" | "connectorBId" | "lengthCm" | "isLicense" | "requiresInspection" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
 export type ProductInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   manufacturer?: boolean | Prisma.Product$manufacturerArgs<ExtArgs>
   category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
@@ -3068,6 +3162,11 @@ export type $ProductPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
      * Resolume licence is Video like the media server it runs on.
      */
     isLicense: boolean
+    /**
+     * DGUV V3 inspections for this product's units: null follows the category
+     * (Category.requiresInspection), true or false overrides it.
+     */
+    requiresInspection: boolean | null
     /**
      * Who added the row. While no org holds a unit of a product there is no
      * owner to ask, so this is the only person besides a system admin who may
@@ -3525,6 +3624,7 @@ export interface ProductFieldRefs {
   readonly connectorBId: Prisma.FieldRef<"Product", 'String'>
   readonly lengthCm: Prisma.FieldRef<"Product", 'Int'>
   readonly isLicense: Prisma.FieldRef<"Product", 'Boolean'>
+  readonly requiresInspection: Prisma.FieldRef<"Product", 'Boolean'>
   readonly createdById: Prisma.FieldRef<"Product", 'String'>
   readonly createdAt: Prisma.FieldRef<"Product", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Product", 'DateTime'>

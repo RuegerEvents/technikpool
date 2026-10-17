@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { addMonths, inspectionDue } from './inspection-due.ts';
+import {
+	addMonths,
+	initialInspectionInterval,
+	inspectionDue,
+	requiresInspection
+} from './inspection-due.ts';
 
 const day = (iso: string) => new Date(`${iso}T00:00:00.000Z`);
 
@@ -39,5 +44,30 @@ describe('inspectionDue', () => {
 		expect(
 			inspectionDue(12, { performedAt: day('2026-02-01'), result: 'FAILED' }, created)
 		).toEqual(day('2026-02-01'));
+	});
+});
+
+describe('requiresInspection', () => {
+	const product = (own: boolean | null, category: boolean, isLicense = false) => ({
+		requiresInspection: own,
+		isLicense,
+		category: { requiresInspection: category }
+	});
+
+	it('follows the category unless the product says otherwise', () => {
+		expect(requiresInspection(product(null, true))).toBe(true);
+		expect(requiresInspection(product(null, false))).toBe(false);
+		expect(requiresInspection(product(false, true))).toBe(false);
+		expect(requiresInspection(product(true, false))).toBe(true);
+	});
+
+	it('never for a licence', () => {
+		expect(requiresInspection(product(true, true, true))).toBe(false);
+	});
+
+	it("gives a new unit the org's interval only when it needs inspecting", () => {
+		expect(initialInspectionInterval(product(null, true), 12)).toBe(12);
+		expect(initialInspectionInterval(product(null, false), 12)).toBeNull();
+		expect(initialInspectionInterval(product(true, false), null)).toBeNull();
 	});
 });

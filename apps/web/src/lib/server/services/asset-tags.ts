@@ -1,5 +1,5 @@
 import { prisma } from '#lib/server/auth.js';
-import { inspectionDue } from '#lib/inspection-due.js';
+import { initialInspection } from './inspections';
 import type { Prisma } from '#lib/prisma/client.js';
 import { isRetiredStatus } from '#lib/asset-status.js';
 import { isSystemAdmin, managedOrgIds } from './access';
@@ -89,7 +89,7 @@ export async function registerTaggedUnit(
 	input: { productId: string; organizationId: string; locationId: string; assetTag: string }
 ) {
 	await assertInventory(userId, input.organizationId);
-	const [product, location, org] = await Promise.all([
+	const [product, location] = await Promise.all([
 		prisma.product.findUnique({
 			where: { id: input.productId },
 			select: { id: true, isLicense: true }
@@ -97,10 +97,6 @@ export async function registerTaggedUnit(
 		prisma.location.findUnique({
 			where: { id: input.locationId },
 			select: { id: true, organizationId: true }
-		}),
-		prisma.organization.findUniqueOrThrow({
-			where: { id: input.organizationId },
-			select: { defaultInspectionIntervalMonths: true }
 		})
 	]);
 	if (!product) throw new AssetTagError('not_found', 'Product not found');
@@ -109,10 +105,8 @@ export async function registerTaggedUnit(
 	}
 	const assetTag = await checkTag(input.organizationId, input.assetTag);
 
-	// The same snapshot the web takes on creation: the org's interval as of
-	// today, and none for a license, which has no wiring to test.
-	const interval = product.isLicense ? null : org.defaultInspectionIntervalMonths;
-	const now = new Date();
+	// The same snapshot the web takes on creation — see `initialInspection`.
+	const inspection = await initialInspection(prisma, input.organizationId);
 	return prisma.asset.create({
 		data: {
 			organizationId: input.organizationId,
@@ -120,8 +114,7 @@ export async function registerTaggedUnit(
 			locationId: input.locationId,
 			assetTag,
 			status: 'AVAILABLE',
-			inspectionIntervalMonths: interval,
-			nextInspectionDue: inspectionDue(interval, null, now),
+			...inspection(product.id),
 			transactions: { create: [{ userId, action: 'CREATED', data: { type: 'CREATED' } }] }
 		},
 		include: API_ASSET_INCLUDE

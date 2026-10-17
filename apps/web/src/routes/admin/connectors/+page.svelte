@@ -14,7 +14,8 @@
 	import {
 		getConnectors,
 		getConnectorUsage,
-		deleteConnector
+		deleteConnector,
+		setConnectorMains
 	} from '#lib/remote/connectors.remote.js';
 	import { categoryLabel } from '#lib/category.js';
 	import { CABLE_END_LABEL, connectorRole } from '#lib/cable.js';
@@ -53,6 +54,16 @@
 			}, {})
 		).sort(([a], [b]) => naturalCompare(a, b))
 	);
+
+	// Mains voltage marks a device or cable with this connector as needing DGUV
+	// inspections (the hint on its product). Saved straight from the table.
+	async function toggleMains(connector: Row, mains: boolean) {
+		try {
+			await setConnectorMains({ connectorId: connector.id, mains });
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		}
+	}
 
 	let editing = $state<Row | null>(null);
 	let modalOpen = $state(false);
@@ -133,6 +144,9 @@
 						<th class="px-3 py-2 font-medium">Contacts</th>
 						<th class="px-3 py-2 font-medium">Direction</th>
 						<th class="px-3 py-2 font-medium">Department</th>
+						<th class="px-3 py-2 font-medium" title="Carries mains voltage — needs DGUV inspections"
+							>Mains</th
+						>
 						<th class="px-3 py-2 text-right font-medium">Products</th>
 						<th class="w-40 px-3 py-2"></th>
 					</tr>
@@ -142,7 +156,7 @@
 						<!-- Not uppercased: the names that matter here are camel-cased
 						     trademarks — powerCON, etherCON — and shouting them loses that. -->
 						<tr class="border-t border-b bg-muted/60">
-							<td colspan="8" class="px-3 py-2">
+							<td colspan="9" class="px-3 py-2">
 								<span class="font-semibold">{family}</span>
 								<span class="ml-2 text-xs text-muted-foreground">
 									{plural(members.length, ['# connector', '# connectors'])}
@@ -198,6 +212,15 @@
 									{:else}
 										<span class="text-muted-foreground">—</span>
 									{/if}
+								</td>
+								<td class="px-3 py-2">
+									<input
+										type="checkbox"
+										aria-label="Mains voltage"
+										checked={connector.mains}
+										onchange={(e) =>
+											toggleMains(connector, (e.currentTarget as HTMLInputElement).checked)}
+									/>
 								</td>
 								<td class="px-3 py-2 text-right font-mono tabular-nums">
 									{used === 0 ? '—' : used}

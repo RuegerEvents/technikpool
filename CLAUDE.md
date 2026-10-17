@@ -344,6 +344,21 @@ after creation. A failed inspection also sets the unit `BROKEN`; deleting it doe
 Both are logged (`INSPECTED`, `INSPECTION_DELETED`). Recording takes ADMIN+ of the unit's org.
 The service is shared with `/api/v1/inspections`, which the scanner's inspection mode uses.
 
+**Which units are tracked at all** is a catalog fact: `Category.requiresInspection` is the
+default, `Product.requiresInspection` (null = follow the category) overrides it, and a licence
+never is (`requiresInspection` in `inspection-due.ts`). Only units of such products get the org's
+`defaultInspectionIntervalMonths` when created (`initialInspection`, used by every path that
+creates units). Changing either flag, a product's category, or merging products runs
+`applyInspectionRequirement`: units that now need it and have no interval get their org's
+default, units that no longer do lose theirs. Categories are system-admin; a product's flag
+follows `productControl` like its name.
+
+`Connector.mains` marks a connector that carries mains voltage (set in the migration by family,
+editable on `/admin/connectors`; a new connector inherits it from its family, `familyIsMains`).
+A product with one — on its panel, at a cable end or on a loom's way (`mainsConnectorNames`) —
+that is not marked as needing inspection gets `MainsHint` on its page and its units' pages, with
+a button that marks it.
+
 ## Stocktakes (Inventur)
 
 "Inventory" is taken (the catalogue, the scanner's Inventory tab), so counting stock is a
