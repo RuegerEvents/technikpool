@@ -1,4 +1,5 @@
-• Equipment einer Produktion gegen ihre Liste ausgeben und zurücknehmen: Etikett scannen, Gerät von Hand abhaken oder gleiche Geräte wie Kabel in einer Zeile zählen.
-• Die Produktionsliste zeigt die Termine jeder Produktion und sortiert laufende, kommende und vergangene wie im Web.
-• Wird ein anderes Gerät eines gebuchten Produkts gescannt, übernimmt es die Buchung, statt eine zusätzliche Zeile anzulegen.
-• Scan-Töne spielen unter Android in Medienlautstärke, und jedes Scan-Ergebnis vibriert mit eigenem Muster, auch wenn „Vibration bei Berührung“ ausgeschaltet ist.
+• Beim Prüfen, Ausgeben und Zurücknehmen steht neben jeder Zeile das Produktbild, und ein Tipp irgendwo auf die Zeile hakt sie ab.
+• Nach dem Scannen oder Abhaken eines Geräts mit Zubehör fragt die App, ob alles mitgeht, da oder zurück ist. Was fehlt, abwählen – es bleibt dann auf der Liste offen.
+• Beim Zählen gleicher Geräte steht die gebuchte Anzahl schon drin, und mehr als gebucht nimmt die App nicht an.
+• Ein Case-Check zählt Geräte, die gerade auf einem anderen Job sind, nicht mehr als fehlend.
+• Die Inventarnummer heißt jetzt „Inventarnummer“, und das Scanfeld sagt, dass auch eine Seriennummer geht.

@@ -1,4 +1,5 @@
-• Hand out and take back a production's equipment against its list: scan a tag, tick a unit by hand, or count identical units such as cables on one line.
-• The production list shows each production's dates and sorts running, upcoming and past ones like the web.
-• Scanning a different unit of a booked product takes over the booking instead of adding an extra line.
-• Scan tones play at media volume on Android, and every scan result vibrates with its own pattern, even with "vibrate on touch" switched off.
+• Checking, handing out and taking back show each product's picture beside its row, and tapping anywhere on a row ticks it.
+• After you scan or tick a unit that has accessories, the app asks whether all of them go along, are there or are back. Untick what is missing and it stays open on the list.
+• Counting identical units starts at the booked number and refuses more than are booked.
+• A case check no longer counts units that are out on another job as missing.
+• In German the asset tag is now called "Inventarnummer", and the scan field says that a serial number works too.
