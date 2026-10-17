@@ -49,10 +49,11 @@ class Labels {
     'PRODUCTION_CHECKED' => l10n.actionProductionChecked,
     'HANDOVER_RECEIVED' => l10n.actionHandoverReceived,
     'RETURN_REPORTED' => l10n.actionReturnReported,
+    'INSPECTED' => l10n.actionInspected,
+    'INSPECTION_DELETED' => l10n.actionInspectionDeleted,
     // Not in that union today; kept because the server owns the vocabulary
     // and these cost nothing until it writes them.
     'DELETED' => l10n.actionDeleted,
-    'INSPECTED' => l10n.actionInspected,
     _ => action,
   };
 

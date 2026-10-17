@@ -1,4 +1,5 @@
 import { prisma } from '#lib/server/auth.js';
+import { inspectionDue } from '#lib/inspection-due.js';
 import type { Prisma } from '#lib/prisma/client.js';
 import { isRetiredStatus } from '#lib/asset-status.js';
 import { isSystemAdmin, managedOrgIds } from './access';
@@ -120,9 +121,7 @@ export async function registerTaggedUnit(
 			assetTag,
 			status: 'AVAILABLE',
 			inspectionIntervalMonths: interval,
-			nextInspectionDue: interval
-				? new Date(now.getFullYear(), now.getMonth() + interval, now.getDate())
-				: null,
+			nextInspectionDue: inspectionDue(interval, null, now),
 			transactions: { create: [{ userId, action: 'CREATED', data: { type: 'CREATED' } }] }
 		},
 		include: API_ASSET_INCLUDE

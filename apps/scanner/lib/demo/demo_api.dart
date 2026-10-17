@@ -35,6 +35,7 @@ class DemoBackend {
   /// demo itself shouldn't contain — two units sharing a serial number, say.
   DemoBackend({List<Asset>? assets}) : _assets = assets ?? DemoData.assets() {
     _seedStocktake();
+    _seedInspections();
   }
 
   final List<Asset> _assets;
@@ -118,6 +119,12 @@ class DemoBackend {
     if (segments.length >= 7 && segments[3] == 'productions' && segments[5] == 'handout') {
       return _handoutRoute(options, method, segments);
     }
+    if (method == 'POST' && path == '/api/v1/inspections') {
+      return _recordInspection(options);
+    }
+    if (method == 'DELETE' && path.startsWith('/api/v1/inspections/')) {
+      return _deleteInspection(options, Uri.decodeComponent(path.split('/').last));
+    }
 
     return _error(options, 404, 'not_found', 'Not available in the demo');
   }
@@ -192,6 +199,9 @@ class DemoBackend {
       parentAssetId: asset.parentAssetId,
       currentProduction: _checkedOutTo[asset.id],
       history: _history[asset.id] ?? const [],
+      inspectionIntervalMonths: _intervalOf(asset),
+      nextInspectionDue: _inspectionDue(asset),
+      inspections: _inspectionsOf(asset).take(10).toList(),
     );
     return _ok(options, detail);
   }
@@ -316,24 +326,33 @@ class DemoBackend {
     return (asset: null, ambiguous: bySerial.length > 1);
   }
 
-  void _moveTo(Asset asset, Location location) {
-    final index = _assets.indexOf(asset);
-    if (index < 0) return;
-    _assets[index] = Asset(
+  void _moveTo(Asset asset, Location location) => _replace(asset, location: location);
+
+  /// The generated models are immutable, so a changed unit is a new one in
+  /// its old place. Returns it, or [asset] itself if it isn't in the fixture.
+  Asset _replace(Asset asset, {Location? location, AssetStatus? status}) {
+    final index = _assets.indexWhere((a) => a.id == asset.id);
+    if (index < 0) return asset;
+    return _assets[index] = Asset(
       id: asset.id,
       assetTag: asset.assetTag,
       serialNumber: asset.serialNumber,
       orgIndex: asset.orgIndex,
-      status: asset.status,
+      status: status ?? asset.status,
       product: asset.product,
-      location: location,
+      location: location ?? asset.location,
       organization: asset.organization,
       bundleId: asset.bundleId,
       parentAssetId: asset.parentAssetId,
     );
   }
 
-  void _log(Asset asset, String action, String targetName) {
+  void _log(
+    Asset asset,
+    String action,
+    String targetName, {
+    TransactionInspection? inspection,
+  }) {
     (_history[asset.id] ??= []).insert(
       0,
       AssetTransaction(
@@ -342,8 +361,214 @@ class DemoBackend {
         createdAt: DateTime.now(),
         userName: DemoData.user.name,
         productionName: action == 'CHECKED_OUT' ? targetName : null,
+        inspection: inspection,
       ),
     );
+  }
+
+  // ---------------------------------------------------------------------------
+  // DGUV inspections — mirrors services/inspections.ts on the server. The next
+  // due date is never stored: it is derived from the interval and the latest
+  // inspection on every read, as the server derives it on every write.
+
+  /// Asset id → its inspections, in the order they were entered.
+  final _inspections = <String, List<Inspection>>{};
+  var _inspectionSeq = 0;
+
+  void _seedInspections() {
+    final today = DateTime.now().toUtc();
+    for (final (tag, daysAgo, result) in DemoData.inspectionHistory) {
+      final asset = _assets.where((a) => a.assetTag == tag).firstOrNull;
+      if (asset == null) continue;
+      final day = today.subtract(Duration(days: daysAgo));
+      (_inspections[asset.id] ??= []).add(
+        Inspection(
+          id: 'insp_demo_${++_inspectionSeq}',
+          assetId: asset.id,
+          performedAt: DateTime.utc(day.year, day.month, day.day),
+          result: InspectionResult.fromJson(result),
+          inspectorName: 'Prüfdienst Nord GmbH',
+          notes: null,
+        ),
+      );
+    }
+  }
+
+  int? _intervalOf(Asset asset) => DemoData.inspectionIntervals[asset.product.id];
+
+  /// Latest first by the day it took place, later entries first on the same
+  /// day — the order the server lists them in.
+  List<Inspection> _inspectionsOf(Asset asset) {
+    final list = _inspections[asset.id] ?? const <Inspection>[];
+    final indexed = list.indexed.toList()
+      ..sort((a, b) {
+        final byDay = b.$2.performedAt.compareTo(a.$2.performedAt);
+        return byDay != 0 ? byDay : b.$1.compareTo(a.$1);
+      });
+    return [for (final (_, inspection) in indexed) inspection];
+  }
+
+  /// `inspectionDue` in apps/web/src/lib/inspection-due.ts.
+  DateTime? _inspectionDue(Asset asset) {
+    final interval = _intervalOf(asset);
+    if (interval == null || interval == 0) return null;
+    final latest = _inspectionsOf(asset).firstOrNull;
+    if (latest == null) return DemoData.registeredAt();
+    if (latest.result == InspectionResult.failed) return latest.performedAt;
+    return _addMonths(latest.performedAt, interval);
+  }
+
+  /// Whole months in UTC, clamped to the end of a shorter month — 31 January
+  /// plus one month is the end of February, as on the server.
+  static DateTime _addMonths(DateTime date, int months) {
+    final target = DateTime.utc(date.year, date.month + months);
+    final lastDay = DateTime.utc(target.year, target.month + 1, 0).day;
+    return DateTime.utc(
+      target.year,
+      target.month,
+      date.day < lastDay ? date.day : lastDay,
+    );
+  }
+
+  /// The demo account is a MEMBER on paper (see DemoData.currentUser), which
+  /// would leave a reviewer nothing to inspect. So the demo lets it inspect
+  /// its own organization's units and refuses the lent-in ones, which is the
+  /// refusal an operator meets on a real server too.
+  bool _mayInspect(Asset asset) => asset.organization.id == DemoData.nordlicht.id;
+
+  Response<dynamic> _recordInspection(RequestOptions options) {
+    // Like `_scan`: the body is the request model's own `toJson` map, so the
+    // result may still be an enum here.
+    final body = options.data;
+    final code = body is Map ? '${body['code'] ?? ''}'.trim() : '';
+    final rawDate = body is Map ? '${body['performedAt'] ?? ''}' : '';
+    final rawResult = body is Map ? body['result'] : null;
+    final result = rawResult is InspectionResult
+        ? rawResult
+        : InspectionResult.fromJson('${rawResult ?? ''}');
+    final day = _parseDay(rawDate);
+    if (code.isEmpty || day == null || result == InspectionResult.$unknown) {
+      return _error(
+        options,
+        400,
+        'invalid_request',
+        'code, performedAt (YYYY-MM-DD) and result (PASSED|FAILED) are required.',
+      );
+    }
+    // A day ahead of UTC is still today somewhere the app is used.
+    if (day.isAfter(DateTime.now().toUtc().add(const Duration(days: 1)))) {
+      return _error(
+        options,
+        400,
+        'invalid_request',
+        'The inspection date is in the future.',
+      );
+    }
+
+    final match = _resolve(code);
+    if (match.ambiguous) {
+      return _error(
+        options,
+        409,
+        'serial_ambiguous',
+        'Serial number "$code" is on more than one unit — scan the asset tag instead',
+      );
+    }
+    var asset = match.asset;
+    if (asset == null) {
+      return _error(options, 404, 'asset_not_found', 'Tag "$code" not found');
+    }
+    if (!_mayInspect(asset)) {
+      return _error(options, 403, 'forbidden', 'No access to this asset');
+    }
+    if (asset.status == AssetStatus.sold || asset.status == AssetStatus.decommissioned) {
+      return _error(
+        options,
+        409,
+        'asset_retired',
+        'This unit is sold or decommissioned and is not inspected.',
+      );
+    }
+
+    String? text(Object? value) {
+      final trimmed = value is String ? value.trim() : '';
+      return trimmed.isEmpty ? null : trimmed;
+    }
+
+    final inspection = Inspection(
+      id: 'insp_demo_${++_inspectionSeq}',
+      assetId: asset.id,
+      performedAt: day,
+      result: result,
+      inspectorName: text(body is Map ? body['inspectorName'] : null),
+      notes: text(body is Map ? body['notes'] : null),
+    );
+    (_inspections[asset.id] ??= []).add(inspection);
+    final markedBroken =
+        result == InspectionResult.failed && asset.status != AssetStatus.broken;
+    _log(
+      asset,
+      'INSPECTED',
+      '',
+      inspection: TransactionInspection(
+        performedAt: inspection.performedAt,
+        result: inspection.result,
+        inspectorName: inspection.inspectorName,
+        markedBroken: markedBroken,
+      ),
+    );
+    if (markedBroken) asset = _replace(asset, status: AssetStatus.broken);
+
+    return _ok(
+      options,
+      InspectionRecorded(
+        inspection: inspection,
+        asset: asset,
+        inspectionIntervalMonths: _intervalOf(asset),
+        nextInspectionDue: _inspectionDue(asset),
+        markedBroken: markedBroken,
+      ),
+      status: 201,
+    );
+  }
+
+  Response<dynamic> _deleteInspection(RequestOptions options, String id) {
+    for (final MapEntry(key: assetId, value: list) in _inspections.entries) {
+      final index = list.indexWhere((i) => i.id == id);
+      if (index < 0) continue;
+      final asset = _assets.firstWhere((a) => a.id == assetId);
+      if (!_mayInspect(asset)) {
+        return _error(options, 403, 'forbidden', 'No access to this asset');
+      }
+      // A BROKEN status the inspection set stays, as on the server: whether
+      // the unit is broken is for someone to decide.
+      final removed = list.removeAt(index);
+      _log(
+        asset,
+        'INSPECTION_DELETED',
+        '',
+        inspection: TransactionInspection(
+          performedAt: removed.performedAt,
+          result: removed.result,
+        ),
+      );
+      return _ok(
+        options,
+        InspectionDeleted(assetId: assetId, nextInspectionDue: _inspectionDue(asset)),
+      );
+    }
+    return _error(options, 404, 'not_found', 'Inspection not found');
+  }
+
+  /// `YYYY-MM-DD` → midnight UTC, or null for anything that isn't a real day.
+  static DateTime? _parseDay(String value) {
+    final match = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch(value.trim());
+    if (match == null) return null;
+    final y = int.parse(match.group(1)!);
+    final m = int.parse(match.group(2)!);
+    final d = int.parse(match.group(3)!);
+    final day = DateTime.utc(y, m, d);
+    return day.year == y && day.month == m && day.day == d ? day : null;
   }
 
   // ---------------------------------------------------------------------------
@@ -1505,13 +1730,14 @@ class DemoBackend {
   /// instances, not maps — so serialise for real and decode it again. That is
   /// what a socket would have delivered, and it means `fromJson` on the other
   /// side is exercised exactly as it is against the server.
-  Response<dynamic> _ok(RequestOptions options, Object model) => Response(
-    requestOptions: options,
-    statusCode: 200,
-    data: jsonDecode(
-      jsonEncode(model, toEncodable: (value) => (value as dynamic).toJson()),
-    ),
-  );
+  Response<dynamic> _ok(RequestOptions options, Object model, {int status = 200}) =>
+      Response(
+        requestOptions: options,
+        statusCode: status,
+        data: jsonDecode(
+          jsonEncode(model, toEncodable: (value) => (value as dynamic).toJson()),
+        ),
+      );
 
   Response<dynamic> _error(
     RequestOptions options,

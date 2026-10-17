@@ -79,6 +79,16 @@ tags:
       eye, or count interchangeable units without a tag. Unlike a check, a
       tick here is the booking itself, so nothing is stored beyond the
       units' own status and everyone on the list sees the same ticks.
+  - name: inspection
+    description: |
+      DGUV inspections. Recording an inspection, or deleting one recorded by
+      mistake, is all a client ever does: the next due date is never set. It
+      follows from the unit's interval and its latest inspection — that plus
+      the interval after a pass, that same day after a fail, and the day the
+      unit was registered if it was never inspected. A unit without an
+      interval is not tracked and is never due. A failed inspection also
+      marks the unit `BROKEN`. Needs ADMIN or OWNER of the unit's
+      organization.
 
 paths:
   /api/auth/device/code:
@@ -1311,6 +1321,67 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /api/v1/inspections:
+    post:
+      operationId: recordInspection
+      tags: [inspection]
+      summary: Record an inspection of a scanned unit
+      description: |
+        `code` is resolved like `getAssetByTag`: the printed tag wins, and a
+        serial number only when exactly one visible unit carries it. A sold
+        or decommissioned unit is not inspected (`409 asset_retired`).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InspectionRequest'
+      responses:
+        '201':
+          description: The inspection was recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InspectionRecorded'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/inspections/{inspectionId}:
+    delete:
+      operationId: deleteInspection
+      tags: [inspection]
+      summary: Delete an inspection recorded by mistake
+      description: |
+        The unit's next due date is derived again from what is left. A
+        `BROKEN` status the inspection set stays.
+      parameters:
+        - name: inspectionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InspectionDeleted'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1389,6 +1460,9 @@ components:
 
         Case checks: a unit that is neither in a kit nor has accessories, or
         an accessory, is no case to check (`not_a_case`).
+
+        Inspections: a sold or decommissioned unit is not inspected
+        (`asset_retired`).
 
         Loans: a lending org checks out only units the production has booked
         and approved (`not_approved`). A closed production check takes no more
@@ -1862,6 +1936,26 @@ components:
                 client keeps compiling.
               items:
                 $ref: '#/components/schemas/ProductDocument'
+            inspectionIntervalMonths:
+              type: [integer, 'null']
+              description: |
+                Months between DGUV inspections. Null when the unit's
+                inspections are not tracked. Not required, so an older client
+                keeps compiling.
+            nextInspectionDue:
+              type: [string, 'null']
+              format: date-time
+              description: |
+                When the next DGUV inspection is due — derived, see the
+                `inspection` tag. Null when not tracked. Not required, so an
+                older client keeps compiling.
+            inspections:
+              type: array
+              description: |
+                The unit's DGUV inspections, latest first, at most ten. Not
+                required, so an older client keeps compiling.
+              items:
+                $ref: '#/components/schemas/Inspection'
 
     ProductDocument:
       type: object
@@ -1902,6 +1996,30 @@ components:
           description: >-
             The production involved, if any. For a production of an organization
             the caller is not a member of, that organization's name instead.
+        inspection:
+          description: |
+            For `INSPECTED` and `INSPECTION_DELETED`: the inspection the entry
+            is about. Null for every other action. Not required, so an older
+            client keeps compiling.
+          oneOf:
+            - $ref: '#/components/schemas/TransactionInspection'
+            - type: 'null'
+
+    TransactionInspection:
+      type: object
+      required: [performedAt, result]
+      properties:
+        performedAt:
+          type: string
+          format: date-time
+          description: The day it took place, as midnight UTC.
+        result:
+          $ref: '#/components/schemas/InspectionResult'
+        inspectorName:
+          type: [string, 'null']
+        markedBroken:
+          type: boolean
+          description: This inspection failed and set the unit to `BROKEN`.
 
     AssetPage:
       type: object
@@ -2050,6 +2168,77 @@ components:
         done:
           type: boolean
           description: Already at the scan's target; nothing to book.
+
+    InspectionResult:
+      type: string
+      enum: [PASSED, FAILED]
+
+    Inspection:
+      type: object
+      required: [id, assetId, performedAt, result, inspectorName, notes]
+      properties:
+        id:
+          type: string
+        assetId:
+          type: string
+        performedAt:
+          type: string
+          format: date-time
+          description: The day it took place, as midnight UTC.
+        result:
+          $ref: '#/components/schemas/InspectionResult'
+        inspectorName:
+          type: [string, 'null']
+          description: Who inspected it — often an outside firm, not a user.
+        notes:
+          type: [string, 'null']
+
+    InspectionRequest:
+      type: object
+      required: [code, performedAt, result]
+      properties:
+        code:
+          type: string
+          description: The scanned asset tag, or a serial number.
+        performedAt:
+          type: string
+          pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
+          description: The day it took place, `YYYY-MM-DD`. Not in the future.
+          examples: ['2026-10-17']
+        result:
+          $ref: '#/components/schemas/InspectionResult'
+        inspectorName:
+          type: string
+        notes:
+          type: string
+
+    InspectionRecorded:
+      type: object
+      required: [inspection, asset, nextInspectionDue, inspectionIntervalMonths, markedBroken]
+      properties:
+        inspection:
+          $ref: '#/components/schemas/Inspection'
+        asset:
+          $ref: '#/components/schemas/Asset'
+        inspectionIntervalMonths:
+          type: [integer, 'null']
+        nextInspectionDue:
+          type: [string, 'null']
+          format: date-time
+          description: The unit's next due date after this inspection. Null when not tracked.
+        markedBroken:
+          type: boolean
+          description: The inspection failed and set the unit to `BROKEN`.
+
+    InspectionDeleted:
+      type: object
+      required: [assetId, nextInspectionDue]
+      properties:
+        assetId:
+          type: string
+        nextInspectionDue:
+          type: [string, 'null']
+          format: date-time
 
     AssetCreateRequest:
       type: object

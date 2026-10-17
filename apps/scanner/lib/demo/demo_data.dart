@@ -293,6 +293,34 @@ class DemoData {
     _asset('40000015', _loom, 0, AssetStatus.available, null, kit: true),
   ];
 
+  /// Months between DGUV inspections, per product. The server keeps the
+  /// interval per unit; every unit of a product sharing it is what a warehouse
+  /// does anyway. The passive speaker has none, so "not tracked" shows too.
+  static const inspectionIntervals = <String, int>{
+    'prd_demo_mh': 12,
+    'prd_demo_par': 12,
+    'prd_demo_mixer': 24,
+    'prd_demo_hoist': 12,
+    'prd_demo_xlr': 12,
+    'prd_demo_loom': 12,
+  };
+
+  /// When the fixture's units were registered, which is when a unit nobody
+  /// has inspected yet fell due.
+  static DateTime registeredAt() =>
+      DateTime.now().toUtc().subtract(const Duration(days: 400));
+
+  /// Inspections already on file, as (tag, days ago, result): one recently,
+  /// one running out, one overdue, and the broken hoist failed. The rest were
+  /// never inspected, so a reviewer has plenty that is due.
+  static const inspectionHistory = <(String, int, String)>[
+    ('40000001', 340, 'PASSED'),
+    ('40000002', 60, 'PASSED'),
+    ('40000008', 200, 'PASSED'),
+    ('40000010', 420, 'PASSED'),
+    ('40000009', 20, 'FAILED'),
+  ];
+
   /// The one kit: the cables above, in a case with a tag of its own.
   static const cableKit = (
     id: 'bundle_demo_cables',

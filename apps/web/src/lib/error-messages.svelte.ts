@@ -133,6 +133,12 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'This unit is sold or decommissioned and cannot be added to a bundle.';
 		case 'asset_retired_no_inspection':
 			return 'This unit is sold or decommissioned and can no longer be inspected.';
+		case 'inspection_date_invalid':
+			return 'Enter the date the inspection took place.';
+		case 'inspection_date_future':
+			return 'An inspection cannot be recorded for a date that has not happened yet.';
+		case 'inspection_not_found':
+			return 'This inspection no longer exists.';
 		case 'asset_unavailable_no_booking':
 			return 'This unit is marked unavailable and cannot be booked or checked out.';
 		case 'asset_unavailable_no_bundle':

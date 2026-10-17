@@ -169,6 +169,27 @@ export type ReturnReportedData = {
 	productionName: string;
 };
 
+/**
+ * A DGUV inspection was recorded. A failed one marks the unit broken, unless it
+ * already was — `markedBroken` says whether this entry is what did it.
+ */
+export type InspectedData = {
+	type: 'INSPECTED';
+	inspectionId: string;
+	/** The day it took place, YYYY-MM-DD. The entry's own date is when it was entered. */
+	performedAt: string;
+	result: 'PASSED' | 'FAILED';
+	inspectorName: string | null;
+	markedBroken: boolean;
+};
+
+/** An inspection recorded by mistake was removed. The status it may have set stays. */
+export type InspectionDeletedData = {
+	type: 'INSPECTION_DELETED';
+	performedAt: string;
+	result: 'PASSED' | 'FAILED';
+};
+
 export type TransactionData =
 	| CreatedData
 	| UpdatedData
@@ -191,4 +212,6 @@ export type TransactionData =
 	| CaseCheckedData
 	| ProductionCheckedData
 	| HandoverReceivedData
-	| ReturnReportedData;
+	| ReturnReportedData
+	| InspectedData
+	| InspectionDeletedData;

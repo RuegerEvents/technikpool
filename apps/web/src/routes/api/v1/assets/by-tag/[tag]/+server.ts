@@ -12,6 +12,7 @@ import {
 import {
 	toAsset,
 	toAssetTransaction,
+	toInspection,
 	toProductDocument,
 	toProduction
 } from '#lib/server/services/api-mappers.js';
@@ -20,6 +21,7 @@ import { resolveScannedCode } from '#lib/server/services/asset-lookup.js';
 import { KIT_SELECT, kitOf } from '#lib/server/services/production-list.js';
 
 const HISTORY_LIMIT = 20;
+const INSPECTION_LIMIT = 10;
 
 export const GET: RequestHandler = ({ locals, params }) =>
 	handleApi(async () => {
@@ -50,7 +52,11 @@ export const GET: RequestHandler = ({ locals, params }) =>
 				},
 				location: { include: { address: true, organization: true } },
 				organization: true,
-				bundle: { select: KIT_SELECT }
+				bundle: { select: KIT_SELECT },
+				inspections: {
+					orderBy: [{ performedAt: 'desc' }, { createdAt: 'desc' }],
+					take: INSPECTION_LIMIT
+				}
 			}
 		});
 
@@ -91,6 +97,9 @@ export const GET: RequestHandler = ({ locals, params }) =>
 			...toAsset(asset),
 			documents: (await productDocuments(asset.productId)).map(toProductDocument),
 			kit: kitOf(asset.bundle),
+			inspectionIntervalMonths: asset.inspectionIntervalMonths,
+			nextInspectionDue: asset.nextInspectionDue?.toISOString() ?? null,
+			inspections: asset.inspections.map(toInspection),
 			currentProduction: openItem
 				? toProduction({
 						...openItem.production,

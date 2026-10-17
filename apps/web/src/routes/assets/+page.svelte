@@ -31,6 +31,10 @@
 	import { goto } from '$app/navigation';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import BulkActionsBar from '#lib/components/ui/bulk-actions-bar.svelte';
+	import {
+		InspectionDialog,
+		InspectionIntervalDialog
+	} from '#lib/components/ui/inspection-dialog/index.js';
 	import CsvImportModal from '#lib/components/CsvImportModal.svelte';
 	import EquipmentListModal from './equipment-list-modal.svelte';
 	import { AssetStatusBadge, assetStatusLabel } from '#lib/components/ui/asset-status/index.js';
@@ -189,6 +193,8 @@
 	let sortDir = $state<'asc' | 'desc'>(initial.get('dir') === 'desc' ? 'desc' : 'asc');
 	let expanded = new SvelteMap<string, boolean>();
 	let selectedAssetIds = new SvelteSet<string>();
+	let bulkInspectionOpen = $state(false);
+	let bulkIntervalOpen = $state(false);
 
 	let showingRetired = $derived(statusFilter === RETIRED_FILTER);
 
@@ -1954,6 +1960,28 @@
 	onClear={() => selectedAssetIds.clear()}
 	canCheckout={!showingRetired}
 	canSetStatus
+>
+	{#snippet actions()}
+		{#if !showingRetired}
+			<Button variant="outline" size="sm" onclick={() => (bulkInspectionOpen = true)}
+				>Record inspection</Button
+			>
+			<Button variant="outline" size="sm" onclick={() => (bulkIntervalOpen = true)}
+				>Inspection interval</Button
+			>
+		{/if}
+	{/snippet}
+</BulkActionsBar>
+
+<InspectionDialog
+	bind:open={bulkInspectionOpen}
+	assetIds={[...selectedAssetIds]}
+	ondone={() => selectedAssetIds.clear()}
+/>
+<InspectionIntervalDialog
+	bind:open={bulkIntervalOpen}
+	assetIds={[...selectedAssetIds]}
+	ondone={() => selectedAssetIds.clear()}
 />
 
 {#if showImportModal}

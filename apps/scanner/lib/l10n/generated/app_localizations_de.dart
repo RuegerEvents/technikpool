@@ -1153,4 +1153,144 @@ class SDe extends S {
 
   @override
   String get lookupKit => 'Bundle';
+
+  @override
+  String get actionInspectionDeleted => 'Prüfung gelöscht';
+
+  @override
+  String get inspectionHeading => 'DGUV-Prüfung';
+
+  @override
+  String get historyInspectionPassed => 'DGUV-Prüfung bestanden';
+
+  @override
+  String get historyInspectionFailed => 'DGUV-Prüfung nicht bestanden';
+
+  @override
+  String historyInspectionDeleted(String date) {
+    return 'DGUV-Prüfung vom $date gelöscht';
+  }
+
+  @override
+  String historyInspectedOn(String date) {
+    return 'am $date';
+  }
+
+  @override
+  String get inspection => 'Prüfen (DGUV)';
+
+  @override
+  String get inspectionDate => 'Prüfdatum';
+
+  @override
+  String get inspectionInspector => 'Prüfer';
+
+  @override
+  String get inspectionInspectorHint => 'Name oder Firma';
+
+  @override
+  String get inspectionNotes => 'Bemerkung (optional)';
+
+  @override
+  String get inspectionNotesHint =>
+      'Wird bei jedem Gerät dieses Durchgangs gespeichert';
+
+  @override
+  String get inspectionStart => 'Prüfung starten';
+
+  @override
+  String get inspectionEditSetup => 'Datum oder Prüfer ändern';
+
+  @override
+  String get inspectionPassed => 'Bestanden';
+
+  @override
+  String get inspectionFailed => 'Nicht bestanden';
+
+  @override
+  String get inspectionNextResult => 'Ergebnis für den nächsten Scan';
+
+  @override
+  String get inspectionFailedHint =>
+      'Der nächste Scan wird als nicht bestanden erfasst und das Gerät auf Defekt gesetzt. Danach steht es wieder auf Bestanden.';
+
+  @override
+  String get inspectionEmpty => 'Noch kein Gerät geprüft. Scanne das erste.';
+
+  @override
+  String inspectionTally(int passed, int failed) {
+    return '$passed bestanden · $failed nicht bestanden';
+  }
+
+  @override
+  String inspectionNextDue(String date) {
+    return 'Nächste Prüfung $date';
+  }
+
+  @override
+  String get inspectionNotTracked => 'Kein Prüfintervall';
+
+  @override
+  String get inspectionMarkedBroken => 'Auf Defekt gesetzt';
+
+  @override
+  String get inspectionUndo => 'Rückgängig';
+
+  @override
+  String get inspectionUndone => 'Rückgängig gemacht';
+
+  @override
+  String get inspectionUndoneKeepsBroken =>
+      'Prüfung gelöscht. Das Gerät bleibt auf Defekt.';
+
+  @override
+  String get inspectionAlreadyDeleted => 'Diese Prüfung ist schon gelöscht.';
+
+  @override
+  String get inspectionAlreadyTitle => 'Schon geprüft';
+
+  @override
+  String inspectionAlreadyBody(String name, String result) {
+    return '$name wurde in diesem Durchgang schon als „$result“ erfasst. Nochmal erfassen?';
+  }
+
+  @override
+  String get inspectionRecordAgain => 'Nochmal erfassen';
+
+  @override
+  String get inspectionRetired =>
+      'Verkaufte oder ausgemusterte Geräte werden nicht geprüft.';
+
+  @override
+  String get inspectionForbidden =>
+      'Prüfungen erfassen dürfen nur Admins der Organisation, der das Gerät gehört.';
+
+  @override
+  String get inspectionInterval => 'Prüfintervall';
+
+  @override
+  String inspectionIntervalMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Alle $count Monate',
+      one: 'Jeden Monat',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get inspectionNextDueLabel => 'Nächste Prüfung';
+
+  @override
+  String get inspectionOverdue => 'überfällig';
+
+  @override
+  String get inspectionDueToday => 'heute fällig';
+
+  @override
+  String get inspectionNeverInspected => 'noch nie geprüft';
+
+  @override
+  String get inspectionRecent => 'Letzte Prüfungen';
 }

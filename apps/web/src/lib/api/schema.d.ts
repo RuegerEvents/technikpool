@@ -830,6 +830,49 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inspections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record an inspection of a scanned unit
+         * @description `code` is resolved like `getAssetByTag`: the printed tag wins, and a
+         *     serial number only when exactly one visible unit carries it. A sold
+         *     or decommissioned unit is not inspected (`409 asset_retired`).
+         */
+        post: operations["recordInspection"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inspections/{inspectionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete an inspection recorded by mistake
+         * @description The unit's next due date is derived again from what is left. A
+         *     `BROKEN` status the inspection set stays.
+         */
+        delete: operations["deleteInspection"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1103,6 +1146,24 @@ export interface components {
              *     client keeps compiling.
              */
             documents?: components["schemas"]["ProductDocument"][];
+            /**
+             * @description Months between DGUV inspections. Null when the unit's
+             *     inspections are not tracked. Not required, so an older client
+             *     keeps compiling.
+             */
+            inspectionIntervalMonths?: number | null;
+            /**
+             * Format: date-time
+             * @description When the next DGUV inspection is due — derived, see the
+             *     `inspection` tag. Null when not tracked. Not required, so an
+             *     older client keeps compiling.
+             */
+            nextInspectionDue?: string | null;
+            /**
+             * @description The unit's DGUV inspections, latest first, at most ten. Not
+             *     required, so an older client keeps compiling.
+             */
+            inspections?: components["schemas"]["Inspection"][];
         };
         ProductDocument: {
             id: string;
@@ -1130,6 +1191,23 @@ export interface components {
             userName?: string | null;
             /** @description The production involved, if any. For a production of an organization the caller is not a member of, that organization's name instead. */
             productionName?: string | null;
+            /**
+             * @description For `INSPECTED` and `INSPECTION_DELETED`: the inspection the entry
+             *     is about. Null for every other action. Not required, so an older
+             *     client keeps compiling.
+             */
+            inspection?: components["schemas"]["TransactionInspection"] | null;
+        };
+        TransactionInspection: {
+            /**
+             * Format: date-time
+             * @description The day it took place, as midnight UTC.
+             */
+            performedAt: string;
+            result: components["schemas"]["InspectionResult"];
+            inspectorName?: string | null;
+            /** @description This inspection failed and set the unit to `BROKEN`. */
+            markedBroken?: boolean;
         };
         AssetPage: {
             items: components["schemas"]["Asset"][];
@@ -1226,6 +1304,50 @@ export interface components {
             productImageUrl?: string | null;
             /** @description Already at the scan's target; nothing to book. */
             done: boolean;
+        };
+        /** @enum {string} */
+        InspectionResult: "PASSED" | "FAILED";
+        Inspection: {
+            id: string;
+            assetId: string;
+            /**
+             * Format: date-time
+             * @description The day it took place, as midnight UTC.
+             */
+            performedAt: string;
+            result: components["schemas"]["InspectionResult"];
+            /** @description Who inspected it — often an outside firm, not a user. */
+            inspectorName: string | null;
+            notes: string | null;
+        };
+        InspectionRequest: {
+            /** @description The scanned asset tag, or a serial number. */
+            code: string;
+            /**
+             * @description The day it took place, `YYYY-MM-DD`. Not in the future.
+             * @example 2026-10-17
+             */
+            performedAt: string;
+            result: components["schemas"]["InspectionResult"];
+            inspectorName?: string;
+            notes?: string;
+        };
+        InspectionRecorded: {
+            inspection: components["schemas"]["Inspection"];
+            asset: components["schemas"]["Asset"];
+            inspectionIntervalMonths: number | null;
+            /**
+             * Format: date-time
+             * @description The unit's next due date after this inspection. Null when not tracked.
+             */
+            nextInspectionDue: string | null;
+            /** @description The inspection failed and set the unit to `BROKEN`. */
+            markedBroken: boolean;
+        };
+        InspectionDeleted: {
+            assetId: string;
+            /** Format: date-time */
+            nextInspectionDue: string | null;
         };
         AssetCreateRequest: {
             productId: string;
@@ -1837,6 +1959,9 @@ export interface components {
          *
          *     Case checks: a unit that is neither in a kit nor has accessories, or
          *     an accessory, is no case to check (`not_a_case`).
+         *
+         *     Inspections: a sold or decommissioned unit is not inspected
+         *     (`asset_retired`).
          *
          *     Loans: a lending org checks out only units the production has booked
          *     and approved (`not_approved`). A closed production check takes no more
@@ -2988,6 +3113,60 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
+        };
+    };
+    recordInspection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InspectionRequest"];
+            };
+        };
+        responses: {
+            /** @description The inspection was recorded */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InspectionRecorded"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    deleteInspection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                inspectionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InspectionDeleted"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
         };
     };
 }

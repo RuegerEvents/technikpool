@@ -4,6 +4,8 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import 'transaction_inspection.dart';
+
 part 'asset_transaction.g.dart';
 
 @JsonSerializable()
@@ -14,6 +16,7 @@ class AssetTransaction {
     required this.createdAt,
     this.userName,
     this.productionName,
+    this.inspection,
   });
   
   factory AssetTransaction.fromJson(Map<String, Object?> json) => _$AssetTransactionFromJson(json);
@@ -27,6 +30,12 @@ class AssetTransaction {
 
   /// The production involved, if any. For a production of an organization the caller is not a member of, that organization's name instead.
   final String? productionName;
+
+  /// For `INSPECTED` and `INSPECTION_DELETED`: the inspection the entry.
+  /// is about. Null for every other action. Not required, so an older.
+  /// client keeps compiling.
+  ///
+  final TransactionInspection? inspection;
 
   Map<String, Object?> toJson() => _$AssetTransactionToJson(this);
 }

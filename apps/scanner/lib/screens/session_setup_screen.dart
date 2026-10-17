@@ -8,6 +8,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../natural_sort.dart';
 import '../state/providers.dart';
 import 'case_check_screen.dart';
+import 'inspection_screen.dart';
 import 'production_list_screen.dart';
 import 'session_screen.dart';
 import 'stocktake_new_screen.dart';
@@ -149,6 +150,11 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final isStocktake = _mode == _Mode.stocktake;
+    // The demo account is a MEMBER, but the demo lets it inspect its own
+    // organization's units so a reviewer can see the mode — see DemoBackend.
+    final canInspect =
+        canRecordInspections(ref.watch(currentUserProvider).value) ||
+        ref.watch(isDemoProvider);
     final async = switch (_mode) {
       _Mode.location => ref.watch(locationsProvider),
       _Mode.production => ref.watch(productionsProvider),
@@ -226,6 +232,11 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
                     onCaseCheck: () => Navigator.of(context).push<void>(
                       MaterialPageRoute(builder: (_) => const CaseCheckScreen()),
                     ),
+                    onInspection: canInspect
+                        ? () => Navigator.of(context).push<void>(
+                            MaterialPageRoute(builder: (_) => const InspectionScreen()),
+                          )
+                        : null,
                     onRefresh: () => ref.refresh(openStocktakesProvider.future),
                   );
                 }
@@ -360,6 +371,7 @@ class _StocktakeList extends StatelessWidget {
     required this.onOpen,
     required this.onNew,
     required this.onCaseCheck,
+    required this.onInspection,
     required this.onRefresh,
   });
 
@@ -370,6 +382,11 @@ class _StocktakeList extends StatelessWidget {
   /// One case rather than a whole stocktake — it lives here because it is
   /// counting too, just of a single box.
   final VoidCallback onCaseCheck;
+
+  /// DGUV inspections, scanned unit after unit — checking too, of each unit's
+  /// safety rather than of a count. Null for an account that may not record
+  /// them, which hides the button rather than offering a refusal per scan.
+  final VoidCallback? onInspection;
   final Future<void> Function() onRefresh;
 
   @override
@@ -399,6 +416,18 @@ class _StocktakeList extends StatelessWidget {
             ),
           ),
         ),
+        if (onInspection != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+            child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: onInspection,
+                icon: const Icon(Icons.verified_outlined),
+                label: Text(l10n.inspection),
+              ),
+            ),
+          ),
         Expanded(
           child: RefreshIndicator(
             onRefresh: onRefresh,

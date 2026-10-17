@@ -13,6 +13,11 @@ AssetTransaction _$AssetTransactionFromJson(Map<String, dynamic> json) =>
       createdAt: DateTime.parse(json['createdAt'] as String),
       userName: json['userName'] as String?,
       productionName: json['productionName'] as String?,
+      inspection: json['inspection'] == null
+          ? null
+          : TransactionInspection.fromJson(
+              json['inspection'] as Map<String, dynamic>,
+            ),
     );
 
 Map<String, dynamic> _$AssetTransactionToJson(AssetTransaction instance) =>
@@ -22,4 +27,5 @@ Map<String, dynamic> _$AssetTransactionToJson(AssetTransaction instance) =>
       'createdAt': instance.createdAt.toIso8601String(),
       'userName': ?instance.userName,
       'productionName': ?instance.productionName,
+      'inspection': ?instance.inspection,
     };

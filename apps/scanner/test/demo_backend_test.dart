@@ -4,6 +4,7 @@ import 'package:technikpool_scanner/api/client.dart';
 import 'package:technikpool_scanner/api/generated/export.dart';
 import 'package:technikpool_scanner/demo/demo_api.dart';
 import 'package:technikpool_scanner/demo/demo_data.dart';
+import 'package:technikpool_scanner/inspection_due.dart';
 
 /// The demo is what app-store reviewers see, and it is the one path with no
 /// server behind it to catch a mistake — so it gets the tests.
@@ -657,6 +658,146 @@ void main() {
       // Back is back: what returned is no longer on the hand-out list.
       expect(out.items.map((i) => i.assetId), isNot(contains('asset_demo_40000004')));
       expect(out.lines.single.total, 7);
+    });
+  });
+
+  group('inspection', () {
+    Matcher failsWith(String code) => throwsA(
+      isA<Object>().having(
+        (e) => (unwrapError(e) as ApiException).code,
+        'code',
+        code,
+      ),
+    );
+
+    final today = inspectionRequestDate(DateTime.now());
+
+    test('the lookup carries the interval, the due date and the history', () async {
+      final detail = await api.inventory.getAssetByTag(tag: '40000001');
+      expect(detail.inspectionIntervalMonths, 12);
+      expect(detail.inspections, hasLength(1));
+      expect(detail.nextInspectionDue, isNotNull);
+
+      // A product without an interval is not tracked at all.
+      final speaker = await api.inventory.getAssetByTag(tag: '40000006');
+      expect(speaker.inspectionIntervalMonths, isNull);
+      expect(speaker.nextInspectionDue, isNull);
+
+      // Never inspected: due since the unit was registered.
+      final par = await api.inventory.getAssetByTag(tag: '40000004');
+      expect(par.inspections, isEmpty);
+      expect(par.nextInspectionDue!.isBefore(DateTime.now()), isTrue);
+    });
+
+    test('a pass moves the due date on by the interval', () async {
+      final recorded = await api.inspection.recordInspection(
+        body: InspectionRequest(
+          code: '40000004',
+          performedAt: today,
+          result: InspectionResult.passed,
+          inspectorName: '  Prüfdienst Nord  ',
+        ),
+      );
+      expect(recorded.markedBroken, isFalse);
+      expect(recorded.inspection.inspectorName, 'Prüfdienst Nord');
+      expect(recorded.inspectionIntervalMonths, 12);
+      final now = DateTime.now();
+      expect(recorded.nextInspectionDue, DateTime.utc(now.year + 1, now.month, now.day));
+
+      final detail = await api.inventory.getAssetByTag(tag: '40000004');
+      expect(detail.inspections!.first.id, recorded.inspection.id);
+      expect(detail.history.first.action, 'INSPECTED');
+    });
+
+    test('a fail marks the unit broken and leaves it due that day', () async {
+      final recorded = await api.inspection.recordInspection(
+        body: InspectionRequest(
+          code: 'MAC-0042',
+          performedAt: today,
+          result: InspectionResult.failed,
+        ),
+      );
+      expect(recorded.markedBroken, isTrue);
+      expect(recorded.asset.status, AssetStatus.broken);
+      expect(recorded.nextInspectionDue, recorded.inspection.performedAt);
+
+      // Deleting it derives the date again from what is left, and the unit
+      // stays broken: that is for someone to decide.
+      final deleted = await api.inspection.deleteInspection(
+        inspectionId: recorded.inspection.id,
+      );
+      expect(deleted.assetId, recorded.asset.id);
+      expect(deleted.nextInspectionDue!.isAfter(recorded.inspection.performedAt), isTrue);
+
+      final detail = await api.inventory.getAssetByTag(tag: '40000002');
+      expect(detail.status, AssetStatus.broken);
+      expect(
+        detail.inspections!.map((i) => i.id),
+        isNot(contains(recorded.inspection.id)),
+      );
+      expect(detail.history.first.action, 'INSPECTION_DELETED');
+    });
+
+    test('a failed unit that was broken already is not marked again', () async {
+      final recorded = await api.inspection.recordInspection(
+        body: InspectionRequest(
+          code: '40000009',
+          performedAt: today,
+          result: InspectionResult.failed,
+        ),
+      );
+      expect(recorded.markedBroken, isFalse);
+    });
+
+    test('refuses what a server refuses', () async {
+      final ahead = inspectionRequestDate(
+        DateTime.now().add(const Duration(days: 3)),
+      );
+      expect(
+        api.inspection.recordInspection(
+          body: InspectionRequest(
+            code: '40000001',
+            performedAt: ahead,
+            result: InspectionResult.passed,
+          ),
+        ),
+        failsWith('invalid_request'),
+      );
+      expect(
+        api.inspection.recordInspection(
+          body: const InspectionRequest(
+            code: '40000001',
+            performedAt: '2026-02-30',
+            result: InspectionResult.passed,
+          ),
+        ),
+        failsWith('invalid_request'),
+      );
+      expect(
+        api.inspection.recordInspection(
+          body: InspectionRequest(
+            code: '99999999',
+            performedAt: today,
+            result: InspectionResult.passed,
+          ),
+        ),
+        failsWith('asset_not_found'),
+      );
+      // Lent in from the other organization: not ours to inspect.
+      expect(
+        api.inspection.recordInspection(
+          body: InspectionRequest(
+            code: '40000011',
+            performedAt: today,
+            result: InspectionResult.passed,
+          ),
+        ),
+        failsWith('forbidden'),
+      );
+      expect(
+        api.inspection.deleteInspection(inspectionId: 'insp_nope'),
+        failsWith('not_found'),
+      );
     });
   });
 }

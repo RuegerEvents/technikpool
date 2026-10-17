@@ -83,6 +83,7 @@ async function requireAuth() {
 | `src/lib/remote/production-handout.remote.ts` | `getProductionHandout`, `getHandoutSummary`, `scanProductionHandout`, `setProductionHandoutDone`, `setProductionHandoutLine` — handing out / taking back against the list, see "Loans: handover and checks"                               |
 | `src/lib/remote/equipment-sheets.remote.ts`   | `streamEquipmentSheet` — a `query.live` that yields progress, then the delivery note or packing list PDF; see "Delivery note and packing list"                                                                                            |
 | `src/lib/remote/product-documents.remote.ts`  | `getProductDocuments`, `addProductDocument`, `updateProductDocument`, `removeProductDocument` — a product's PDFs, public by design (see `services/product-documents.ts`)                                                                  |
+| `src/lib/remote/inspections.remote.ts`        | `getOverdueAssets`, `getAssetInspections`, `logInspection`, `deleteInspection`, `setInspectionInterval` — see "DGUV inspections"                                                                                                          |
 
 ## External API (`/api/v1`)
 
@@ -330,6 +331,18 @@ keep their plain PDF and a null profile. Code in `src/lib/server/einvoice/`:
 and runs Mustang's validator (EN 16931 schematron + veraPDF) over them: it fetches the pinned
 Mustang CLI into `apps/web/.mustang/` (`scripts/fetch-mustang.mjs`, SHA-256-checked) and needs
 `java` 11+. Its XRechnung notices (BR-DE-\*) are expected and do not fail the check.
+
+## DGUV inspections
+
+Nobody sets a unit's next inspection date. People record inspections (or delete one entered by
+mistake), and `inspectionDue` (`src/lib/inspection-due.ts`) derives the date from the unit's
+`inspectionIntervalMonths` and its latest `Inspection` by `performedAt`: no interval → not
+tracked; never inspected → due since the unit was created; latest failed → due on that day;
+otherwise latest + interval. `Asset.nextInspectionDue` only stores the result so lists can sort
+by it, and `refreshInspectionDue` in `services/inspections.ts` is the one place that writes it
+after creation. A failed inspection also sets the unit `BROKEN`; deleting it does not undo that.
+Both are logged (`INSPECTED`, `INSPECTION_DELETED`). Recording takes ADMIN+ of the unit's org.
+The service is shared with `/api/v1/inspections`, which the scanner's inspection mode uses.
 
 ## Stocktakes (Inventur)
 

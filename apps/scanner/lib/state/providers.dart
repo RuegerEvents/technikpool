@@ -21,6 +21,7 @@ const _kHardwareSeen = 'hardware_seen';
 const _kLocale = 'locale';
 const _kSeenVersion = 'seen_version';
 const _kScanTones = 'scan_tones';
+const _kInspectorName = 'inspector_name';
 
 final storageProvider = Provider((_) => const FlutterSecureStorage());
 
@@ -219,6 +220,31 @@ extension ScanToneRef on WidgetRef {
     ScanBuzz.play(tone);
   }
 }
+
+/// Who the last DGUV inspection run was entered for — often an outside firm,
+/// and the same one for weeks, so the field starts out filled in. Per device,
+/// like the other settings: a handheld is usually kept by whoever inspects.
+class InspectorNameNotifier extends AsyncNotifier<String> {
+  FlutterSecureStorage get _storage => ref.read(storageProvider);
+
+  @override
+  Future<String> build() async => await _storage.read(key: _kInspectorName) ?? '';
+
+  Future<void> save(String name) async {
+    final trimmed = name.trim();
+    if (state.value == trimmed) return;
+    state = AsyncData(trimmed);
+    if (trimmed.isEmpty) {
+      await _storage.delete(key: _kInspectorName);
+    } else {
+      await _storage.write(key: _kInspectorName, value: trimmed);
+    }
+  }
+}
+
+final inspectorNameProvider = AsyncNotifierProvider<InspectorNameNotifier, String>(
+  InspectorNameNotifier.new,
+);
 
 /// The language the app is pinned to, or null to follow the device.
 ///

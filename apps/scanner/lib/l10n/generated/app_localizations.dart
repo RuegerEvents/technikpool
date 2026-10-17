@@ -1968,6 +1968,240 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Kit'**
   String get lookupKit;
+
+  /// No description provided for @actionInspectionDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspection deleted'**
+  String get actionInspectionDeleted;
+
+  /// Heading of the inspection section in Lookup.
+  ///
+  /// In en, this message translates to:
+  /// **'DGUV inspection'**
+  String get inspectionHeading;
+
+  /// No description provided for @historyInspectionPassed.
+  ///
+  /// In en, this message translates to:
+  /// **'DGUV inspection passed'**
+  String get historyInspectionPassed;
+
+  /// No description provided for @historyInspectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'DGUV inspection failed'**
+  String get historyInspectionFailed;
+
+  /// No description provided for @historyInspectionDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'DGUV inspection of {date} deleted'**
+  String historyInspectionDeleted(String date);
+
+  /// No description provided for @historyInspectedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'on {date}'**
+  String historyInspectedOn(String date);
+
+  /// Recording DGUV V3 safety inspections by scanning unit after unit (Prüfen (DGUV)).
+  ///
+  /// In en, this message translates to:
+  /// **'DGUV inspection'**
+  String get inspection;
+
+  /// No description provided for @inspectionDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of inspection'**
+  String get inspectionDate;
+
+  /// No description provided for @inspectionInspector.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspector'**
+  String get inspectionInspector;
+
+  /// No description provided for @inspectionInspectorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name or company'**
+  String get inspectionInspectorHint;
+
+  /// No description provided for @inspectionNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes (optional)'**
+  String get inspectionNotes;
+
+  /// No description provided for @inspectionNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved with every unit inspected in this run'**
+  String get inspectionNotesHint;
+
+  /// No description provided for @inspectionStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start inspecting'**
+  String get inspectionStart;
+
+  /// No description provided for @inspectionEditSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Change date or inspector'**
+  String get inspectionEditSetup;
+
+  /// No description provided for @inspectionPassed.
+  ///
+  /// In en, this message translates to:
+  /// **'Passed'**
+  String get inspectionPassed;
+
+  /// No description provided for @inspectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get inspectionFailed;
+
+  /// No description provided for @inspectionNextResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Result for the next scan'**
+  String get inspectionNextResult;
+
+  /// No description provided for @inspectionFailedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The next scan is recorded as failed and the unit is marked broken. Then it goes back to passed.'**
+  String get inspectionFailedHint;
+
+  /// No description provided for @inspectionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No unit inspected yet. Scan the first one.'**
+  String get inspectionEmpty;
+
+  /// No description provided for @inspectionTally.
+  ///
+  /// In en, this message translates to:
+  /// **'{passed} passed · {failed} failed'**
+  String inspectionTally(int passed, int failed);
+
+  /// No description provided for @inspectionNextDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Next inspection {date}'**
+  String inspectionNextDue(String date);
+
+  /// No description provided for @inspectionNotTracked.
+  ///
+  /// In en, this message translates to:
+  /// **'No inspection interval'**
+  String get inspectionNotTracked;
+
+  /// No description provided for @inspectionMarkedBroken.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked broken'**
+  String get inspectionMarkedBroken;
+
+  /// No description provided for @inspectionUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get inspectionUndo;
+
+  /// No description provided for @inspectionUndone.
+  ///
+  /// In en, this message translates to:
+  /// **'Undone'**
+  String get inspectionUndone;
+
+  /// No description provided for @inspectionUndoneKeepsBroken.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspection deleted. The unit stays marked broken.'**
+  String get inspectionUndoneKeepsBroken;
+
+  /// No description provided for @inspectionAlreadyDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'This inspection has already been deleted.'**
+  String get inspectionAlreadyDeleted;
+
+  /// No description provided for @inspectionAlreadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Already inspected'**
+  String get inspectionAlreadyTitle;
+
+  /// No description provided for @inspectionAlreadyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} was already recorded as \"{result}\" in this run. Record it again?'**
+  String inspectionAlreadyBody(String name, String result);
+
+  /// No description provided for @inspectionRecordAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Record again'**
+  String get inspectionRecordAgain;
+
+  /// No description provided for @inspectionRetired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sold or decommissioned units are not inspected.'**
+  String get inspectionRetired;
+
+  /// No description provided for @inspectionForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording inspections needs the Admin role in the organization that owns the unit.'**
+  String get inspectionForbidden;
+
+  /// No description provided for @inspectionInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval'**
+  String get inspectionInterval;
+
+  /// No description provided for @inspectionIntervalMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Every month} other{Every {count} months}}'**
+  String inspectionIntervalMonths(int count);
+
+  /// No description provided for @inspectionNextDueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Next inspection'**
+  String get inspectionNextDueLabel;
+
+  /// No description provided for @inspectionOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'overdue'**
+  String get inspectionOverdue;
+
+  /// No description provided for @inspectionDueToday.
+  ///
+  /// In en, this message translates to:
+  /// **'due today'**
+  String get inspectionDueToday;
+
+  /// No description provided for @inspectionNeverInspected.
+  ///
+  /// In en, this message translates to:
+  /// **'never inspected'**
+  String get inspectionNeverInspected;
+
+  /// No description provided for @inspectionRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest inspections'**
+  String get inspectionRecent;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

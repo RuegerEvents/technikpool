@@ -81,6 +81,7 @@ import {
 import { PORT_REQUIREMENTS } from '#lib/ports.js';
 import { getConnectors, getConnectorUsage } from '#lib/remote/connectors.remote.js';
 import { getKnownAddresses } from '#lib/remote/addresses.remote.js';
+import { inspectionDue } from '#lib/inspection-due.js';
 import { appError } from '#lib/errors.js';
 import { productLabel } from '#lib/product-label.js';
 
@@ -1244,14 +1245,9 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 			select: { assetIdPrefix: true, defaultInspectionIntervalMonths: true }
 		});
 
+	// Never inspected, so due at once — see `inspectionDue`.
 	const createdAt = new Date();
-	const nextInspectionDue = defaultInspectionIntervalMonths
-		? new Date(
-				createdAt.getFullYear(),
-				createdAt.getMonth() + defaultInspectionIntervalMonths,
-				createdAt.getDate()
-			)
-		: null;
+	const nextInspectionDue = inspectionDue(defaultInspectionIntervalMonths, null, createdAt);
 
 	const tags = await tagAllocator(
 		tx,
@@ -1863,20 +1859,11 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 	if ('inspectionIntervalMonths' in input) {
 		const interval = input.inspectionIntervalMonths ?? null;
 		updateData.inspectionIntervalMonths = interval;
-		if (interval) {
-			const lastInspection = await prisma.inspection.findFirst({
-				where: { assetId: asset.id },
-				orderBy: { performedAt: 'desc' }
-			});
-			const base = lastInspection?.performedAt ?? asset.createdAt;
-			updateData.nextInspectionDue = new Date(
-				base.getFullYear(),
-				base.getMonth() + interval,
-				base.getDate()
-			);
-		} else {
-			updateData.nextInspectionDue = null;
-		}
+		const lastInspection = await prisma.inspection.findFirst({
+			where: { assetId: asset.id },
+			orderBy: [{ performedAt: 'desc' }, { createdAt: 'desc' }]
+		});
+		updateData.nextInspectionDue = inspectionDue(interval, lastInspection, asset.createdAt);
 	}
 	if ('serialNumber' in input) {
 		const serialNumber = input.serialNumber?.trim() || null;
@@ -4422,14 +4409,7 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 				where: { id: organizationId },
 				select: { defaultInspectionIntervalMonths: true }
 			});
-			const now = new Date();
-			const nextInspectionDue = defaultInspectionIntervalMonths
-				? new Date(
-						now.getFullYear(),
-						now.getMonth() + defaultInspectionIntervalMonths,
-						now.getDate()
-					)
-				: null;
+			const nextInspectionDue = inspectionDue(defaultInspectionIntervalMonths, null, new Date());
 			// A tagged original begets a tagged copy, where the org numbers its
 			// units; elsewhere a copy is new hardware without a sticker yet.
 			const tags = await tagAllocator(tx, organizationId);
@@ -5205,10 +5185,7 @@ export const addProductAccessories = command(addProductAccessoriesSchema, async 
 			select: { defaultInspectionIntervalMonths: true }
 		});
 
-		const now = new Date();
-		const nextInspectionDue = defaultInspectionIntervalMonths
-			? new Date(now.getFullYear(), now.getMonth() + defaultInspectionIntervalMonths, now.getDate())
-			: null;
+		const nextInspectionDue = inspectionDue(defaultInspectionIntervalMonths, null, new Date());
 		const tags = await tagAllocator(tx, data.organizationId);
 
 		const created: string[] = [];

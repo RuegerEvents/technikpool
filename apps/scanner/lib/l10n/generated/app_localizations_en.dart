@@ -1146,4 +1146,145 @@ class SEn extends S {
 
   @override
   String get lookupKit => 'Kit';
+
+  @override
+  String get actionInspectionDeleted => 'Inspection deleted';
+
+  @override
+  String get inspectionHeading => 'DGUV inspection';
+
+  @override
+  String get historyInspectionPassed => 'DGUV inspection passed';
+
+  @override
+  String get historyInspectionFailed => 'DGUV inspection failed';
+
+  @override
+  String historyInspectionDeleted(String date) {
+    return 'DGUV inspection of $date deleted';
+  }
+
+  @override
+  String historyInspectedOn(String date) {
+    return 'on $date';
+  }
+
+  @override
+  String get inspection => 'DGUV inspection';
+
+  @override
+  String get inspectionDate => 'Date of inspection';
+
+  @override
+  String get inspectionInspector => 'Inspector';
+
+  @override
+  String get inspectionInspectorHint => 'Name or company';
+
+  @override
+  String get inspectionNotes => 'Notes (optional)';
+
+  @override
+  String get inspectionNotesHint =>
+      'Saved with every unit inspected in this run';
+
+  @override
+  String get inspectionStart => 'Start inspecting';
+
+  @override
+  String get inspectionEditSetup => 'Change date or inspector';
+
+  @override
+  String get inspectionPassed => 'Passed';
+
+  @override
+  String get inspectionFailed => 'Failed';
+
+  @override
+  String get inspectionNextResult => 'Result for the next scan';
+
+  @override
+  String get inspectionFailedHint =>
+      'The next scan is recorded as failed and the unit is marked broken. Then it goes back to passed.';
+
+  @override
+  String get inspectionEmpty => 'No unit inspected yet. Scan the first one.';
+
+  @override
+  String inspectionTally(int passed, int failed) {
+    return '$passed passed · $failed failed';
+  }
+
+  @override
+  String inspectionNextDue(String date) {
+    return 'Next inspection $date';
+  }
+
+  @override
+  String get inspectionNotTracked => 'No inspection interval';
+
+  @override
+  String get inspectionMarkedBroken => 'Marked broken';
+
+  @override
+  String get inspectionUndo => 'Undo';
+
+  @override
+  String get inspectionUndone => 'Undone';
+
+  @override
+  String get inspectionUndoneKeepsBroken =>
+      'Inspection deleted. The unit stays marked broken.';
+
+  @override
+  String get inspectionAlreadyDeleted =>
+      'This inspection has already been deleted.';
+
+  @override
+  String get inspectionAlreadyTitle => 'Already inspected';
+
+  @override
+  String inspectionAlreadyBody(String name, String result) {
+    return '$name was already recorded as \"$result\" in this run. Record it again?';
+  }
+
+  @override
+  String get inspectionRecordAgain => 'Record again';
+
+  @override
+  String get inspectionRetired =>
+      'Sold or decommissioned units are not inspected.';
+
+  @override
+  String get inspectionForbidden =>
+      'Recording inspections needs the Admin role in the organization that owns the unit.';
+
+  @override
+  String get inspectionInterval => 'Interval';
+
+  @override
+  String inspectionIntervalMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Every $count months',
+      one: 'Every month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get inspectionNextDueLabel => 'Next inspection';
+
+  @override
+  String get inspectionOverdue => 'overdue';
+
+  @override
+  String get inspectionDueToday => 'due today';
+
+  @override
+  String get inspectionNeverInspected => 'never inspected';
+
+  @override
+  String get inspectionRecent => 'Latest inspections';
 }

@@ -81,6 +81,7 @@ class ApiClient {
     caseCheck = CaseCheckClient(_dio);
     productionCheck = ProductionCheckClient(_dio);
     productionHandout = ProductionHandoutClient(_dio);
+    inspection = InspectionClient(_dio);
     auth = AuthClient(_dio);
   }
 
@@ -94,6 +95,7 @@ class ApiClient {
   late final CaseCheckClient caseCheck;
   late final ProductionCheckClient productionCheck;
   late final ProductionHandoutClient productionHandout;
+  late final InspectionClient inspection;
   late final AuthClient auth;
 
   Dio get raw => _dio;

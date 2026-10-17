@@ -6,6 +6,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 import 'asset_status.dart';
 import 'asset_transaction.dart';
+import 'inspection.dart';
 import 'list_kit.dart';
 import 'location.dart';
 import 'organization.dart';
@@ -32,6 +33,9 @@ class AssetDetail {
     this.parentAssetId,
     this.kit,
     this.documents,
+    this.inspectionIntervalMonths,
+    this.nextInspectionDue,
+    this.inspections,
   });
   
   factory AssetDetail.fromJson(Map<String, Object?> json) => _$AssetDetailFromJson(json);
@@ -89,6 +93,23 @@ class AssetDetail {
   /// client keeps compiling.
   ///
   final List<ProductDocument>? documents;
+
+  /// Months between DGUV inspections. Null when the unit's.
+  /// inspections are not tracked. Not required, so an older client.
+  /// keeps compiling.
+  ///
+  final int? inspectionIntervalMonths;
+
+  /// When the next DGUV inspection is due — derived, see the.
+  /// `inspection` tag. Null when not tracked. Not required, so an.
+  /// older client keeps compiling.
+  ///
+  final DateTime? nextInspectionDue;
+
+  /// The unit's DGUV inspections, latest first, at most ten. Not.
+  /// required, so an older client keeps compiling.
+  ///
+  final List<Inspection>? inspections;
 
   Map<String, Object?> toJson() => _$AssetDetailToJson(this);
 }

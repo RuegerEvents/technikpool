@@ -185,6 +185,8 @@ msgstr "Crew"
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+#: src/lib/components/ui/inspection-dialog/interval-dialog.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
@@ -209,7 +211,6 @@ msgstr "Crew"
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/equipment-list-modal.svelte
 #: src/routes/assets/new/+page.svelte
-#: src/routes/inspections/+page.svelte
 #: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/manufacturers/+page.svelte
@@ -733,6 +734,8 @@ msgstr "<0/> Create another after saving"
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
 #: src/lib/components/ui/dpa-gate/dpa-gate.svelte
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+#: src/lib/components/ui/inspection-dialog/interval-dialog.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/admin/legal/legal-editor.svelte
@@ -742,7 +745,6 @@ msgstr "<0/> Create another after saving"
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
-#: src/routes/inspections/+page.svelte
 #: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/invoices/[id]/invoice-detail.svelte
@@ -1116,7 +1118,7 @@ msgstr "To: <0/>"
 #~ msgid "Production Period:<0/> <1/> – <2/>"
 #~ msgstr "Production Period:<0/> <1/> – <2/>"
 
-#: src/routes/inspections/+page.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/invoices/+page.svelte
 msgid "Date"
 msgstr "Date"
@@ -1350,6 +1352,7 @@ msgstr "Location"
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
+#: src/lib/components/ui/inspection-dialog/interval-dialog.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/product-documents/product-documents.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
@@ -2755,56 +2758,56 @@ msgstr "DGUV inspection due"
 msgid "Orgs <0/>"
 msgstr "Orgs <0/>"
 
-#: src/routes/inspections/+page.svelte
-msgid "Inspection logged"
-msgstr "Inspection logged"
+#~ msgid "Inspection logged"
+#~ msgstr "Inspection logged"
 
 #: src/routes/inspections/+page.svelte
 msgid "Inspections | Technikpool"
 msgstr "Inspections | Technikpool"
 
-#. 0: target.product.name
-#: src/routes/inspections/+page.svelte
-msgid "Log inspection — {0}"
-msgstr "Log inspection — {0}"
+#~ msgid "Log inspection — {0}"
+#~ msgstr "Log inspection — {0}"
 
-#: src/routes/inspections/+page.svelte
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
 msgid "Result"
 msgstr "Result"
 
-#: src/routes/inspections/+page.svelte
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+#: src/lib/inspection-ui.svelte.ts
 msgid "Passed"
 msgstr "Passed"
 
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+#: src/lib/inspection-ui.svelte.ts
+#: src/routes/inspections/+page.svelte
 #: src/routes/inspections/+page.svelte
 msgid "Failed"
 msgstr "Failed"
 
-#: src/routes/inspections/+page.svelte
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
 msgid "Inspector"
 msgstr "Inspector"
 
-#: src/routes/inspections/+page.svelte
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
 msgid "Notes"
 msgstr "Notes"
 
-#: src/routes/inspections/+page.svelte
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
 msgid "Optional"
 msgstr "Optional"
 
-#: src/routes/inspections/+page.svelte
-#: src/routes/inspections/+page.svelte
-#: src/routes/inspections/+page.svelte
-msgid "Log inspection"
-msgstr "Log inspection"
+#~ msgid "Log inspection"
+#~ msgstr "Log inspection"
 
 #: src/routes/inspections/+page.svelte
 msgid "DGUV Inspections"
 msgstr "DGUV Inspections"
 
-#: src/routes/inspections/+page.svelte
-msgid "Overdue and upcoming asset inspections across your orgs."
-msgstr "Overdue and upcoming asset inspections across your orgs."
+#~ msgid "Overdue and upcoming asset inspections across your orgs."
+#~ msgstr "Overdue and upcoming asset inspections across your orgs."
 
 #. 0: data.overdue.length
 #: src/routes/inspections/+page.svelte
@@ -2936,6 +2939,7 @@ msgstr "Net purchase price (€)"
 msgid "Purchase date"
 msgstr "Purchase date"
 
+#: src/lib/components/ui/inspection-dialog/interval-dialog.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "DGUV inspection interval (months)"
 msgstr "DGUV inspection interval (months)"
@@ -3146,9 +3150,8 @@ msgstr "Asset ID prefix"
 msgid "Default DGUV inspection interval (months)"
 msgstr "Default DGUV inspection interval (months)"
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Copied onto new assets at creation; leave blank to not track inspections by default."
-msgstr "Copied onto new assets at creation; leave blank to not track inspections by default."
+#~ msgid "Copied onto new assets at creation; leave blank to not track inspections by default."
+#~ msgstr "Copied onto new assets at creation; leave blank to not track inspections by default."
 
 #: src/routes/orgs/[id]/+page.svelte
 msgid "<0/> Kleinunternehmer (§19 UStG) — no VAT charged"
@@ -4257,6 +4260,7 @@ msgstr "Only possible while it has never been booked, scanned, inspected or bill
 #: src/routes/admin/connectors/+page.svelte
 #: src/routes/admin/connectors/+page.svelte
 #: src/routes/admin/users/+page.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Delete"
 msgstr "Delete"
@@ -8395,6 +8399,7 @@ msgstr "No interval set"
 msgid "Net purchase price"
 msgstr "Net purchase price"
 
+#: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "Overdue"
 msgstr "Overdue"
@@ -12894,3 +12899,186 @@ msgstr "There is already an offer for this production. Turning <0/> into the inv
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Invoice to {0}"
 msgstr "Invoice to {0}"
+
+#: src/lib/error-messages.svelte.ts
+msgid "Enter the date the inspection took place."
+msgstr "Enter the date the inspection took place."
+
+#: src/lib/error-messages.svelte.ts
+msgid "An inspection cannot be recorded for a date that has not happened yet."
+msgstr "An inspection cannot be recorded for a date that has not happened yet."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This inspection no longer exists."
+msgstr "This inspection no longer exists."
+
+#: src/routes/inspections/+page.svelte
+msgid "Overdue and upcoming asset inspections across your orgs. A unit that was never inspected, or whose last inspection failed, is due at once."
+msgstr "Overdue and upcoming asset inspections across your orgs. A unit that was never inspected, or whose last inspection failed, is due at once."
+
+#: src/routes/inspections/+page.svelte
+#: src/routes/inspections/+page.svelte
+msgid "Last inspection"
+msgstr "Last inspection"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/inspections/+page.svelte
+#: src/routes/inspections/+page.svelte
+msgid "Never inspected"
+msgstr "Never inspected"
+
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+#: src/routes/assets/+page.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/inspections/+page.svelte
+#: src/routes/inspections/+page.svelte
+msgid "Record inspection"
+msgstr "Record inspection"
+
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+msgid "Inspection recorded · 1 unit marked broken"
+msgid_plural "Inspections recorded · # units marked broken"
+msgstr[0] "Inspection recorded · 1 unit marked broken"
+msgstr[1] "Inspections recorded · # units marked broken"
+
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+msgid "Inspection recorded"
+msgid_plural "# inspections recorded"
+msgstr[0] "Inspection recorded"
+msgstr[1] "# inspections recorded"
+
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+msgid "Record inspection"
+msgid_plural "Record inspection for # units"
+msgstr[0] "Record inspection"
+msgstr[1] "Record inspection for # units"
+
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+msgid "Inspected on"
+msgstr "Inspected on"
+
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+msgid "An earlier inspection can be entered too — the next due date follows from the latest one."
+msgstr "An earlier inspection can be entered too — the next due date follows from the latest one."
+
+#~ msgid "The units are"
+#~ msgstr "The units are"
+
+#~ msgid "The unit is"
+#~ msgstr "The unit is"
+
+#~ msgid "{0} marked broken and stay due until a passed inspection is recorded."
+#~ msgstr "{0} marked broken and stay due until a passed inspection is recorded."
+
+#: src/lib/components/ui/inspection-dialog/interval-dialog.svelte
+msgid "Already set — nothing changed"
+msgstr "Already set — nothing changed"
+
+#: src/lib/components/ui/inspection-dialog/interval-dialog.svelte
+msgid "Interval set for 1 unit"
+msgid_plural "Interval set for # units"
+msgstr[0] "Interval set for 1 unit"
+msgstr[1] "Interval set for # units"
+
+#: src/lib/components/ui/inspection-dialog/interval-dialog.svelte
+msgid "Inspection interval for 1 unit"
+msgid_plural "Inspection interval for # units"
+msgstr[0] "Inspection interval for 1 unit"
+msgstr[1] "Inspection interval for # units"
+
+#: src/lib/components/ui/inspection-dialog/interval-dialog.svelte
+msgid "The next due date of each unit follows from its latest inspection, or is due at once if it was never inspected. Leave empty to stop tracking the units."
+msgstr "The next due date of each unit follows from its latest inspection, or is due at once if it was never inspected. Leave empty to stop tracking the units."
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Delete this inspection?"
+msgstr "Delete this inspection?"
+
+#. 0: formatInspectionDay(inspection.performedAt)
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "The inspection of {0} is removed and the next due date is worked out again from the ones that remain. Only for an entry made by mistake."
+msgstr "The inspection of {0} is removed and the next due date is worked out again from the ones that remain. Only for an entry made by mistake."
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Inspection deleted"
+msgstr "Inspection deleted"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Last one failed"
+msgstr "Last one failed"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Inspected every month."
+msgid_plural "Inspected every # months."
+msgstr[0] "Inspected every month."
+msgstr[1] "Inspected every # months."
+
+#. 0: plural(asset.inspectionIntervalMonths, [ 'Inspected every month.', 'Inspected every # months.' ])
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "{0} The next one is due an interval after the latest inspection — at once if it failed or there has never been one."
+msgstr "{0} The next one is due an interval after the latest inspection — at once if it failed or there has never been one."
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "No interval is set, so this unit is not tracked. Set one under Edit to have it come due."
+msgstr "No interval is set, so this unit is not tracked. Set one under Edit to have it come due."
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "DGUV inspections"
+msgstr "DGUV inspections"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Next inspection: <0/> <1/>"
+msgstr "Next inspection: <0/> <1/>"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "No inspections recorded yet."
+msgstr "No inspections recorded yet."
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Delete inspection"
+msgstr "Delete inspection"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "DGUV inspection failed"
+msgstr "DGUV inspection failed"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "DGUV inspection passed"
+msgstr "DGUV inspection passed"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "— marked broken"
+msgstr "— marked broken"
+
+#. 0: formatInspectionDay(tx.performedAt); 1: tx.inspectorName ? ` · ${tx.inspectorName}` \\: ''
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "on {0}{1}"
+msgstr "on {0}{1}"
+
+#. 0: formatInspectionDay(tx.performedAt)
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "DGUV inspection of {0} deleted"
+msgstr "DGUV inspection of {0} deleted"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "The next due date follows from the latest inspection. Leave empty to stop tracking this unit."
+msgstr "The next due date follows from the latest inspection. Leave empty to stop tracking this unit."
+
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+msgid "The units are marked broken and stay due until a passed inspection is recorded."
+msgstr "The units are marked broken and stay due until a passed inspection is recorded."
+
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+msgid "The unit is marked broken and stays due until a passed inspection is recorded."
+msgstr "The unit is marked broken and stays due until a passed inspection is recorded."
+
+#: src/routes/assets/+page.svelte
+msgid "Inspection interval"
+msgstr "Inspection interval"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Copied onto new assets at creation, which are due for their first inspection at once. Existing assets keep theirs — change those from the Devices list. Leave blank to not track inspections by default."
+msgstr "Copied onto new assets at creation, which are due for their first inspection at once. Existing assets keep theirs — change those from the Devices list. Leave blank to not track inspections by default."

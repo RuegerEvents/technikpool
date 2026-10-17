@@ -94,6 +94,16 @@
 		assetStatusLabel
 	} from '#lib/components/ui/asset-status/index.js';
 	import type { TransactionData } from '#lib/types/asset-transaction.js';
+	import { InspectionDialog } from '#lib/components/ui/inspection-dialog/index.js';
+	import { deleteInspection, getAssetInspections } from '#lib/remote/inspections.remote.js';
+	import {
+		formatInspectionDay,
+		inspectionResultLabel,
+		inspectionState as stateOf,
+		inspectionTone as toneOf
+	} from '#lib/inspection-ui.svelte.js';
+	import { confirmAction } from '#lib/confirm.svelte.js';
+	import { page } from '$app/state';
 	import { PRODUCT_VIEWS } from '#lib/product-views.js';
 	import {
 		ASSET_STATUSES,
@@ -126,22 +136,38 @@
 		asset.accessories.length > 0 ? asset.generatedImagePath : asset.product.imagePath
 	);
 
-	// Same window the inspections page calls "upcoming".
-	const DUE_SOON_DAYS = 30;
-	let inspectionState = $derived.by(() => {
-		if (!asset.nextInspectionDue) return null;
-		const due = new Date(asset.nextInspectionDue).getTime();
-		if (due < Date.now()) return 'overdue';
-		if (due < Date.now() + DUE_SOON_DAYS * 86_400_000) return 'soon';
-		return 'ok';
-	});
-	let inspectionTone = $derived(
-		inspectionState === 'overdue'
-			? 'text-destructive'
-			: inspectionState === 'soon'
-				? 'text-amber-600 dark:text-amber-500'
-				: ''
+	// ── DGUV inspections ──────────────────────────────────────────────────────
+	// Recorded or deleted, never dated by hand: the next due date follows from
+	// the latest one and the interval (see `inspectionDue`).
+	let inspections = $derived(await getAssetInspections(assetId));
+	let inspectionState = $derived(stateOf(asset.nextInspectionDue));
+	let inspectionTone = $derived(toneOf(inspectionState));
+	let lastFailed = $derived(inspections[0]?.result === 'FAILED');
+	let canInspect = $derived(
+		!!page.data.isAdmin ||
+			(await getMyOrgs()).some((o) => o.id === asset.organizationId && canManageInventory(o))
 	);
+	let inspectionDialogOpen = $state(false);
+	let deletingInspectionId = $state<string | null>(null);
+
+	async function handleDeleteInspection(inspection: { id: string; performedAt: Date }) {
+		const ok = await confirmAction({
+			title: 'Delete this inspection?',
+			description: `The inspection of ${formatInspectionDay(inspection.performedAt)} is removed and the next due date is worked out again from the ones that remain. Only for an entry made by mistake.`,
+			confirmLabel: 'Delete',
+			destructive: true
+		});
+		if (!ok) return;
+		deletingInspectionId = inspection.id;
+		try {
+			await deleteInspection(inspection.id);
+			toast.success('Inspection deleted');
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			deletingInspectionId = null;
+		}
+	}
 
 	// ── Accessories ───────────────────────────────────────────────────────────
 	// What can be attached here: an active unit of this org that is not already
@@ -483,9 +509,8 @@
 		e.preventDefault();
 		savingAsset = true;
 		try {
-			// Purchase date and interval only when they moved: sending the interval
-			// makes the server recompute the next due date, which would quietly
-			// replace one set any other way whenever someone only moved the unit.
+			// Purchase date and interval only when they moved, so a unit that was
+			// only moved writes no change to either into its history.
 			const purchaseDate = assetDraft.purchaseDate || null;
 			const inspectionIntervalMonths = assetDraft.inspectionIntervalMonths
 				? Number(assetDraft.inspectionIntervalMonths)
@@ -747,10 +772,16 @@
 				<Fact icon={ClipboardCheck} label="Next inspection">
 					{#if asset.nextInspectionDue}
 						<span class={inspectionTone}>
-							{new Date(asset.nextInspectionDue).toLocaleDateString('de-DE')}
+							{formatInspectionDay(asset.nextInspectionDue)}
 						</span>
 						{#if inspectionState === 'overdue'}
-							<span class="ml-1 text-xs font-normal text-destructive">Overdue</span>
+							<span class="ml-1 text-xs font-normal text-destructive">
+								{inspections.length === 0
+									? 'Never inspected'
+									: lastFailed
+										? 'Last one failed'
+										: 'Overdue'}
+							</span>
 						{/if}
 					{:else}
 						<span class="font-normal text-muted-foreground">Not scheduled</span>
@@ -1001,6 +1032,103 @@
 				{/if}
 			</Card.Content>
 		</Card.Root>
+
+		{#if !asset.product.isLicense || inspections.length > 0}
+			<Card.Root class="lg:col-span-2">
+				<Card.Header>
+					<div class="flex flex-wrap items-start justify-between gap-4">
+						<div>
+							<Card.Title>DGUV inspections</Card.Title>
+							<Card.Description>
+								{#if asset.inspectionIntervalMonths}
+									{plural(asset.inspectionIntervalMonths, [
+										'Inspected every month.',
+										'Inspected every # months.'
+									])}
+									The next one is due an interval after the latest inspection — at once if it failed or
+									there has never been one.
+								{:else}
+									No interval is set, so this unit is not tracked. Set one under Edit to have it
+									come due.
+								{/if}
+							</Card.Description>
+						</div>
+						{#if canInspect && !retired}
+							<Button icon="add" variant="outline" onclick={() => (inspectionDialogOpen = true)}
+								>Record inspection</Button
+							>
+						{/if}
+					</div>
+				</Card.Header>
+				<Card.Content class="space-y-4">
+					{#if asset.nextInspectionDue}
+						<p class="text-sm">
+							Next inspection:
+							<span class="font-medium {inspectionTone}">
+								{formatInspectionDay(asset.nextInspectionDue)}
+							</span>
+							{#if inspectionState === 'overdue'}
+								<span class="text-destructive">
+									— {inspections.length === 0
+										? 'Never inspected'
+										: lastFailed
+											? 'Last one failed'
+											: 'Overdue'}
+								</span>
+							{/if}
+						</p>
+					{/if}
+					{#if inspections.length === 0}
+						<p class="text-sm text-muted-foreground">No inspections recorded yet.</p>
+					{:else}
+						<div class="overflow-x-auto rounded-md border">
+							<table class="w-full text-sm">
+								<thead>
+									<tr class="border-b bg-muted/30">
+										<th class="px-4 py-2 text-left font-medium text-muted-foreground">Date</th>
+										<th class="px-4 py-2 text-left font-medium text-muted-foreground">Result</th>
+										<th class="px-4 py-2 text-left font-medium text-muted-foreground">Inspector</th>
+										<th class="px-4 py-2 text-left font-medium text-muted-foreground">Notes</th>
+										<th class="w-12 px-4 py-2"></th>
+									</tr>
+								</thead>
+								<tbody>
+									{#each inspections as inspection (inspection.id)}
+										<tr class="border-b last:border-0">
+											<td class="px-4 py-2 whitespace-nowrap">
+												{formatInspectionDay(inspection.performedAt)}
+											</td>
+											<td
+												class="px-4 py-2 font-medium {inspection.result === 'FAILED'
+													? 'text-destructive'
+													: 'text-emerald-600 dark:text-emerald-500'}"
+											>
+												{inspectionResultLabel(inspection.result)}
+											</td>
+											<td class="px-4 py-2">{inspection.inspectorName ?? '—'}</td>
+											<td class="px-4 py-2 text-muted-foreground">{inspection.notes ?? ''}</td>
+											<td class="px-4 py-2 text-right">
+												{#if canInspect}
+													<button
+														type="button"
+														class="text-muted-foreground transition-colors hover:text-destructive disabled:opacity-50"
+														title="Delete inspection"
+														disabled={deletingInspectionId === inspection.id}
+														onclick={() => handleDeleteInspection(inspection)}
+													>
+														<Trash2 class="size-4" />
+													</button>
+												{/if}
+											</td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
+					{/if}
+				</Card.Content>
+			</Card.Root>
+		{/if}
 
 		<!-- Accessories: what travels with this unit, or what it travels with -->
 		<!-- The card clips to its rounded corners, cutting off any picker that
@@ -1387,6 +1515,20 @@
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
 												>
+											{:else if tx?.type === 'INSPECTED'}
+												{tx.result === 'FAILED'
+													? 'DGUV inspection failed'
+													: 'DGUV inspection passed'}
+												<span class="font-normal text-muted-foreground">
+													on {formatInspectionDay(tx.performedAt)}{tx.inspectorName
+														? ` · ${tx.inspectorName}`
+														: ''}
+												</span>
+												{#if tx.markedBroken}
+													<span class="font-normal text-destructive">— marked broken</span>
+												{/if}
+											{:else if tx?.type === 'INSPECTION_DELETED'}
+												DGUV inspection of {formatInspectionDay(tx.performedAt)} deleted
 											{:else if tx?.type === 'ACCESSORY_DETACHED'}
 												Detached from
 												<a
@@ -1492,6 +1634,10 @@
 						min="1"
 						bind:value={assetDraft.inspectionIntervalMonths}
 					/>
+					<p class="text-xs text-muted-foreground">
+						The next due date follows from the latest inspection. Leave empty to stop tracking this
+						unit.
+					</p>
 				</div>
 			{/if}
 		</form>
@@ -1713,3 +1859,9 @@
 </Modal>
 
 <BundleVsAccessoryInfo bind:open={differenceOpen} />
+
+<InspectionDialog
+	bind:open={inspectionDialogOpen}
+	assetIds={[asset.id]}
+	subject={`${productLabel(asset.product)}${asset.assetTag ? ` · ${asset.assetTag}` : ''}`}
+/>

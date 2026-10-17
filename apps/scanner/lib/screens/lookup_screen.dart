@@ -13,7 +13,9 @@ import '../product_label.dart';
 import '../scan/camera_scan_screen.dart';
 import '../scan/scan_tones.dart';
 import '../demo/demo_data.dart';
+import '../inspection_due.dart';
 import '../state/providers.dart';
+import '../theme.dart';
 import '../widgets/category_pill.dart';
 import 'case_check_screen.dart';
 
@@ -247,6 +249,7 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
             label: Text(l10n.caseCheck),
           ),
         ],
+        ..._inspection(l10n, asset),
         // The product's notes — what a label has no room for.
         if (asset.product.details case final details?
             when details.isNotEmpty) ...[
@@ -280,24 +283,132 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        for (final tx in asset.history)
-          ListTile(
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-            title: Text(Labels.transactionAction(l10n, tx.action)),
-            subtitle: Text(
-              [
-                tx.createdAt.toLocal().toString().substring(0, 16),
-                if (tx.userName != null) tx.userName!,
-                if (tx.productionName != null) tx.productionName!,
-              ].join(' · '),
-            ),
-          ),
+        for (final tx in asset.history) _historyTile(l10n, tx),
       ],
     );
   }
 
-  Widget _row(String label, String value) => Padding(
+  /// One history entry. An inspection entry carries the inspection it is
+  /// about, so it says what the result was and on which day, as the web does.
+  Widget _historyTile(S l10n, AssetTransaction tx) {
+    final inspection = tx.inspection;
+    final day = inspection == null
+        ? null
+        : formatInspectionDay(inspection.performedAt, l10n.localeName);
+    final failed = inspection?.result == InspectionResult.failed;
+    final title = switch ((tx.action, day)) {
+      ('INSPECTED', String _) =>
+        failed ? l10n.historyInspectionFailed : l10n.historyInspectionPassed,
+      ('INSPECTION_DELETED', final String day) => l10n.historyInspectionDeleted(
+        day,
+      ),
+      _ => Labels.transactionAction(l10n, tx.action),
+    };
+    final when = tx.createdAt.toLocal().toString().substring(0, 16);
+    return ListTile(
+      dense: true,
+      contentPadding: EdgeInsets.zero,
+      title: Text(title),
+      subtitle: Text(
+        [
+          if (tx.action == 'INSPECTED' && day != null) ...[
+            l10n.historyInspectedOn(day),
+            ?inspection?.inspectorName,
+            if (inspection?.markedBroken ?? false) l10n.inspectionMarkedBroken,
+          ],
+          when,
+          ?tx.userName,
+          ?tx.productionName,
+        ].join(' · '),
+      ),
+    );
+  }
+
+  /// Where the unit stands with its DGUV inspection. A server older than
+  /// inspections sends none of the three fields, and a unit with no interval
+  /// and nothing on file is not tracked — both show nothing at all.
+  List<Widget> _inspection(S l10n, AssetDetail asset) {
+    final interval = asset.inspectionIntervalMonths;
+    final due = asset.nextInspectionDue;
+    final inspections = asset.inspections ?? const <Inspection>[];
+    if (interval == null && due == null && inspections.isEmpty) return const [];
+
+    final scheme = Theme.of(context).colorScheme;
+    final status = StatusColors.of(context);
+    final locale = l10n.localeName;
+
+    Widget? dueRow;
+    if (due != null) {
+      final urgency = inspectionUrgency(due);
+      final color = switch (urgency) {
+        InspectionUrgency.overdue || InspectionUrgency.dueToday => scheme.error,
+        InspectionUrgency.soon => status.warning,
+        InspectionUrgency.later => null,
+      };
+      final notes = [
+        if (inspections.isEmpty) l10n.inspectionNeverInspected,
+        if (urgency == InspectionUrgency.overdue) l10n.inspectionOverdue,
+        if (urgency == InspectionUrgency.dueToday) l10n.inspectionDueToday,
+      ];
+      dueRow = _row(
+        l10n.inspectionNextDueLabel,
+        [formatInspectionDay(due, locale), ...notes].join(' · '),
+        color: color,
+      );
+    }
+
+    return [
+      const SizedBox(height: 24),
+      Text(
+        l10n.inspectionHeading,
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+      const SizedBox(height: 8),
+      _row(
+        l10n.inspectionInterval,
+        interval == null
+            ? l10n.inspectionNotTracked
+            : l10n.inspectionIntervalMonths(interval),
+      ),
+      ?dueRow,
+      if (inspections.isNotEmpty) ...[
+        const SizedBox(height: 8),
+        Text(
+          l10n.inspectionRecent,
+          style: TextStyle(color: scheme.onSurfaceVariant),
+        ),
+        for (final inspection in inspections.take(3))
+          ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(
+              inspection.result == InspectionResult.failed
+                  ? Icons.cancel_outlined
+                  : Icons.check_circle_outline,
+              color: inspection.result == InspectionResult.failed
+                  ? scheme.error
+                  : status.success,
+            ),
+            title: Text(
+              [
+                formatInspectionDay(inspection.performedAt, locale),
+                inspection.result == InspectionResult.failed
+                    ? l10n.inspectionFailed
+                    : l10n.inspectionPassed,
+              ].join(' · '),
+            ),
+            subtitle:
+                inspection.inspectorName == null && inspection.notes == null
+                ? null
+                : Text(
+                    [?inspection.inspectorName, ?inspection.notes].join(' · '),
+                  ),
+          ),
+      ],
+    ];
+  }
+
+  Widget _row(String label, String value, {Color? color}) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 6),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -314,7 +425,7 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(fontWeight: FontWeight.w500),
+            style: TextStyle(fontWeight: FontWeight.w500, color: color),
           ),
         ),
       ],

@@ -1,4 +1,5 @@
 import type { Schemas } from '#lib/server/api.js';
+import type { TransactionData } from '#lib/types/asset-transaction.js';
 import type { OrgRole } from '#lib/roles.js';
 import { imageSrc } from '#lib/images.js';
 import { isCable } from '#lib/cable.js';
@@ -253,7 +254,28 @@ type TransactionRow = {
 	createdAt: Date;
 	user: { name: string | null; email: string } | null;
 	production: { name: string } | null;
+	data?: unknown;
 };
+
+/** The inspection an INSPECTED or INSPECTION_DELETED entry is about; null for any other. */
+function transactionInspection(data: unknown): Schemas['TransactionInspection'] | null {
+	const tx = data as TransactionData | null | undefined;
+	if (tx?.type === 'INSPECTED') {
+		return {
+			performedAt: new Date(`${tx.performedAt}T00:00:00.000Z`).toISOString(),
+			result: tx.result,
+			inspectorName: tx.inspectorName,
+			markedBroken: tx.markedBroken
+		};
+	}
+	if (tx?.type === 'INSPECTION_DELETED') {
+		return {
+			performedAt: new Date(`${tx.performedAt}T00:00:00.000Z`).toISOString(),
+			result: tx.result
+		};
+	}
+	return null;
+}
 
 export function toAssetTransaction(tx: TransactionRow): Schemas['AssetTransaction'] {
 	return {
@@ -261,7 +283,28 @@ export function toAssetTransaction(tx: TransactionRow): Schemas['AssetTransactio
 		action: tx.action,
 		createdAt: tx.createdAt.toISOString(),
 		userName: tx.user?.name ?? tx.user?.email ?? null,
-		productionName: tx.production?.name ?? null
+		productionName: tx.production?.name ?? null,
+		inspection: transactionInspection(tx.data)
+	};
+}
+
+type InspectionRow = {
+	id: string;
+	assetId: string;
+	performedAt: Date;
+	result: string;
+	inspectorName: string | null;
+	notes: string | null;
+};
+
+export function toInspection(i: InspectionRow): Schemas['Inspection'] {
+	return {
+		id: i.id,
+		assetId: i.assetId,
+		performedAt: i.performedAt.toISOString(),
+		result: i.result === 'FAILED' ? 'FAILED' : 'PASSED',
+		inspectorName: i.inspectorName,
+		notes: i.notes
 	};
 }
 
