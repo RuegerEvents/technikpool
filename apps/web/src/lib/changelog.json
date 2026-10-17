@@ -1,5 +1,15 @@
 [
 	{
+		"version": "0.33.2",
+		"date": "2026-10-18",
+		"en": [
+			"Products has a second mode, \"DGUV inspections\": every product in one table, filtered by category and by whether it needs inspecting — including \"mains connector, not marked\" — and set for many products at once."
+		],
+		"de": [
+			"Die Produkte haben einen zweiten Modus „DGUV-Prüfungen“: alle Produkte in einer Tabelle, filterbar nach Kategorie und danach, ob sie prüfpflichtig sind — auch „Netzstecker, nicht markiert“ —, und für viele Produkte auf einmal einstellbar."
+		]
+	},
+	{
 		"version": "0.33.1",
 		"date": "2026-10-18",
 		"en": [
