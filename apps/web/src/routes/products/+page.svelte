@@ -21,12 +21,24 @@
 	import { browser } from '$app/env';
 	import { toast } from 'svelte-sonner';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
+	import { page } from '$app/state';
+	import DguvQuick from './dguv-quick.svelte';
 
 	let { data } = $props();
 
 	// ⌘ on a Mac, Ctrl everywhere else. Also keeps the symbol out of the
 	// translation catalogue, where it has no business being.
 	let modLabel = $derived(browser && /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘' : 'Ctrl');
+
+	// Two ways through the catalog: the one-at-a-time editor, and the DGUV quick
+	// mode — a table to say which products need inspecting, many at once.
+	// `?mode=dguv` opens the latter, so it can be linked to.
+	// Read through a $derived: on the server `page.url` is only there while
+	// rendering, and a $state initialiser is not that.
+	let modeChosen = $state<'edit' | 'dguv' | null>(null);
+	let mode = $derived(
+		modeChosen ?? (page.url.searchParams.get('mode') === 'dguv' ? 'dguv' : 'edit')
+	);
 
 	let filterOrgId = $state('');
 	let searchQuery = $state('');
@@ -313,7 +325,7 @@
 		// The merge dialog focuses its own panel, which is not a field — so
 		// without this, an arrow key aimed at nothing steps the wizard behind it
 		// and the dialog ends up describing a product that is no longer in front.
-		if (!entry || editorModalOpen) return;
+		if (!entry || editorModalOpen || mode !== 'edit') return;
 		const mod = e.metaKey || e.ctrlKey;
 		const key = e.key.toLowerCase();
 		const step = key === 'arrowright' ? 1 : key === 'arrowleft' ? -1 : 0;
@@ -343,7 +355,9 @@
 		<div>
 			<h1 class="text-3xl font-bold tracking-tight">Products</h1>
 			<p class="text-muted-foreground">
-				Step through the catalog and fill in what's missing — one product at a time.
+				{mode === 'edit'
+					? "Step through the catalog and fill in what's missing — one product at a time."
+					: 'Set which products need DGUV inspections — many at once.'}
 			</p>
 		</div>
 		<select
@@ -356,231 +370,248 @@
 		</select>
 	</div>
 
-	<div class="flex flex-wrap items-center gap-2">
-		<input
-			type="search"
-			bind:value={searchQuery}
-			placeholder="Search by product, manufacturer, category…"
-			class="h-10 w-64 rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-		/>
-		<div class="flex items-center gap-1">
+	<div class="inline-flex rounded-md border p-0.5">
+		{#each [{ key: 'edit', label: 'Edit one by one' }, { key: 'dguv', label: 'DGUV inspections' }] as tab (tab.key)}
 			<button
 				type="button"
-				onclick={() => (missing = 'none')}
-				class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {missing === 'none'
+				onclick={() => (modeChosen = tab.key as 'edit' | 'dguv')}
+				class="rounded px-3 py-1.5 text-sm font-medium transition-colors {mode === tab.key
 					? 'bg-primary text-primary-foreground'
-					: 'bg-muted text-muted-foreground hover:bg-muted/70'}">All products</button
+					: 'text-muted-foreground hover:bg-muted'}">{tab.label}</button
 			>
-			<button
-				type="button"
-				onclick={() => (missing = 'image')}
-				class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {missing === 'image'
-					? 'bg-primary text-primary-foreground'
-					: 'bg-muted text-muted-foreground hover:bg-muted/70'}"
-				>Missing image ({missingImageCount})</button
-			>
-			<!-- Only once there is one: unlike a missing image, most catalogues never
-			     have a duplicate cable, and a permanent "(0)" is a button to nowhere. -->
-			{#if twinCount > 0 || missing === 'twin'}
-				<button
-					type="button"
-					onclick={() => (missing = 'twin')}
-					class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {missing === 'twin'
-						? 'bg-primary text-primary-foreground'
-						: 'bg-muted text-muted-foreground hover:bg-muted/70'}"
-					>Duplicate cables ({twinCount})</button
-				>
-			{/if}
-			{#if managedOrgs.length > 0}
-				<button
-					type="button"
-					onclick={showMissingPrice}
-					class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {missing === 'price'
-						? 'bg-primary text-primary-foreground'
-						: 'bg-muted text-muted-foreground hover:bg-muted/70'}"
-				>
-					{#if missingPriceCount == null}Missing price{:else}Missing price ({missingPriceCount}){/if}
-				</button>
-			{/if}
-		</div>
-		{#if missing === 'price'}
-			<label class="flex items-center gap-2 text-sm text-muted-foreground">
-				<input type="checkbox" bind:checked={includeAccessories} class="h-4 w-4" />
-				Include accessories
-			</label>
-		{/if}
+		{/each}
 	</div>
 
-	{#if !canEdit}
-		<div class="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
-			You can look through the catalog and add a picture where one is missing. Editing a product
-			needs admin or owner rights in one of your organizations.
-		</div>
-	{/if}
-
-	{#if !productsQuery.ready || (missing === 'price' && bundlesQuery && !bundlesQuery.ready)}
-		<ContentSkeleton shape="table" count={8} error={productsQuery.error ?? bundlesQuery?.error} />
-	{:else if visible.length === 0}
-		<div class="rounded-md border">
-			<div class="flex flex-col items-center justify-center py-12 text-center">
-				<p class="text-lg font-medium">
-					{products.length === 0 ? 'No products yet' : 'Nothing left to edit'}
-				</p>
-				<p class="text-sm text-muted-foreground">
-					{products.length === 0
-						? 'Products appear here once your organizations own assets.'
-						: 'Every product in this filter is done.'}
-				</p>
+	{#if mode === 'dguv'}
+		<DguvQuick {products} {categories} ready={productsQuery.ready} error={productsQuery.error} />
+	{:else}
+		<div class="flex flex-wrap items-center gap-2">
+			<input
+				type="search"
+				bind:value={searchQuery}
+				placeholder="Search by product, manufacturer, category…"
+				class="h-10 w-64 rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+			/>
+			<div class="flex items-center gap-1">
+				<button
+					type="button"
+					onclick={() => (missing = 'none')}
+					class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {missing === 'none'
+						? 'bg-primary text-primary-foreground'
+						: 'bg-muted text-muted-foreground hover:bg-muted/70'}">All products</button
+				>
+				<button
+					type="button"
+					onclick={() => (missing = 'image')}
+					class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {missing === 'image'
+						? 'bg-primary text-primary-foreground'
+						: 'bg-muted text-muted-foreground hover:bg-muted/70'}"
+					>Missing image ({missingImageCount})</button
+				>
+				<!-- Only once there is one: unlike a missing image, most catalogues never
+			     have a duplicate cable, and a permanent "(0)" is a button to nowhere. -->
+				{#if twinCount > 0 || missing === 'twin'}
+					<button
+						type="button"
+						onclick={() => (missing = 'twin')}
+						class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {missing === 'twin'
+							? 'bg-primary text-primary-foreground'
+							: 'bg-muted text-muted-foreground hover:bg-muted/70'}"
+						>Duplicate cables ({twinCount})</button
+					>
+				{/if}
+				{#if managedOrgs.length > 0}
+					<button
+						type="button"
+						onclick={showMissingPrice}
+						class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors {missing === 'price'
+							? 'bg-primary text-primary-foreground'
+							: 'bg-muted text-muted-foreground hover:bg-muted/70'}"
+					>
+						{#if missingPriceCount == null}Missing price{:else}Missing price ({missingPriceCount}){/if}
+					</button>
+				{/if}
 			</div>
-		</div>
-	{:else if entry}
-		<div class="grid gap-6 lg:grid-cols-[22rem_minmax(0,1fr)] [&>*]:min-w-0">
-			<Card.Root class="overflow-hidden">
-				<Card.Header class="pb-3">
-					<Card.Title class="text-base">Catalog</Card.Title>
-					<Card.Description>{index + 1} of {visible.length}</Card.Description>
-				</Card.Header>
-				<Card.Content class="max-h-[32rem] overflow-y-auto p-0">
-					{#each visible as row (row.id)}
-						{@const active = row.id === entry.id}
-						<button
-							type="button"
-							use:scrollIntoViewWhenActive={active}
-							onclick={() => select(row)}
-							class="flex w-full items-center gap-3 border-b px-4 py-2.5 text-left transition-colors last:border-0 {active
-								? 'bg-muted'
-								: 'hover:bg-muted/40'}"
-						>
-							{#if row.kind === 'product'}
-								{@const product = row.item}
-								<ProductThumb path={product.imagePath} alt={product.name} size={32} />
-								<span class="min-w-0 flex-1">
-									<span class="block truncate text-sm font-medium">{product.name}</span>
-									<span class="block truncate text-xs text-muted-foreground"
-										>{[product.manufacturer?.name, product.caption]
-											.filter(Boolean)
-											.join(' · ')}</span
-									>
-								</span>
-								{#if hasTwin(product)}
-									<span
-										class="shrink-0 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800 dark:bg-amber-900 dark:text-amber-300"
-										>Duplicate cable</span
-									>
-								{/if}
-								{#if !product.imagePath}
-									<span
-										class="shrink-0 rounded-full bg-yellow-100 px-1.5 py-0.5 text-[10px] font-semibold text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-										>No image</span
-									>
-								{/if}
-							{:else}
-								<ProductThumb path={row.item.imagePath} alt={bundleLabel(row.item)} size={32} />
-								<span class="min-w-0 flex-1">
-									<span class="block truncate text-sm font-medium">{bundleLabel(row.item)}</span>
-									<!-- Untagged cases of one type share a name; where they are is
-									     what tells them apart in this list. -->
-									<span class="block truncate text-xs text-muted-foreground"
-										>Bundle{#if row.item.location}
-											· {row.item.location.name}{/if}</span
-									>
-								</span>
-							{/if}
-						</button>
-					{/each}
-				</Card.Content>
-			</Card.Root>
-
-			{#if current}
-				<ProductEditor
-					bind:this={editor}
-					product={current}
-					{orgs}
-					{categories}
-					{manufacturers}
-					{allProducts}
-					{unitCounts}
-					isAdmin={data.isAdmin}
-					userId={data.user?.id}
-					priceOrgId={filterOrgId}
-					bind:dirty={productDirty}
-					bind:saving
-					bind:modalOpen={editorModalOpen}
-					headerExtra={position}
-					footerActions={wizardFooter}
-					showProductLink
-					idPrefix="wizard"
-					onMerged={(survivorId) => (currentId = survivorId)}
-					onBeforeDelete={() =>
-						(afterDelete = visible[index + 1]?.id ?? visible[index - 1]?.id ?? '')}
-					onDeleted={() => (currentId = afterDelete)}
-				/>
-			{:else if currentBundle}
-				<Card.Root>
-					<Card.Header>
-						<div class="flex flex-wrap items-start justify-between gap-3">
-							<div class="min-w-0">
-								<Card.Title class="flex items-center gap-2">
-									{bundleLabel(currentBundle)}
-									{#if dirty}
-										<span
-											class="h-2 w-2 shrink-0 rounded-full bg-yellow-500"
-											title="Unsaved changes"
-										></span>
-									{/if}
-								</Card.Title>
-								<Card.Description class="flex flex-wrap items-center gap-2 pt-1">
-									<span class="rounded-full bg-muted px-2 py-0.5 text-xs font-medium">Bundle</span>
-									<CategoryPill
-										name={categoryLabel(currentBundle.template.category)}
-										color={currentBundle.template.category.color}
-									/>
-									<span>{currentBundle.assets.length} units</span>
-									<a
-										href={resolve(`assets/bundles/${currentBundle.id}`)}
-										class="underline-offset-2 hover:text-foreground hover:underline"
-										>Open bundle →</a
-									>
-								</Card.Description>
-							</div>
-							{@render position()}
-						</div>
-					</Card.Header>
-					<Card.Content class="space-y-4">
-						<div class="space-y-2">
-							<p class="text-sm font-medium">Net purchase price (€)</p>
-							<p class="text-sm text-muted-foreground">
-								If set, offers and invoices bill this bundle as one line at this price. Left empty,
-								its contents are billed one by one.
-							</p>
-							<input
-								type="number"
-								min="0"
-								step="0.01"
-								placeholder="Unknown"
-								bind:value={bundlePriceDraft}
-								class="h-10 w-40 rounded-md border border-input bg-background px-3 py-2 text-right text-sm focus:ring-2 focus:ring-ring focus:outline-none"
-							/>
-						</div>
-						<div class="space-y-2">
-							<p class="text-sm font-medium">Contents</p>
-							{#if currentBundle.assets.length === 0}
-								<p class="text-sm text-muted-foreground">This bundle is empty.</p>
-							{:else}
-								<ul class="space-y-1 text-sm text-muted-foreground">
-									{#each bundleContents(currentBundle) as line (line.productId)}
-										<li>{line.count}× {line.label}</li>
-									{/each}
-								</ul>
-							{/if}
-						</div>
-					</Card.Content>
-					<Card.Footer class="flex flex-wrap items-center justify-between gap-3">
-						{@render wizardFooter()}
-					</Card.Footer>
-				</Card.Root>
+			{#if missing === 'price'}
+				<label class="flex items-center gap-2 text-sm text-muted-foreground">
+					<input type="checkbox" bind:checked={includeAccessories} class="h-4 w-4" />
+					Include accessories
+				</label>
 			{/if}
 		</div>
+
+		{#if !canEdit}
+			<div class="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+				You can look through the catalog and add a picture where one is missing. Editing a product
+				needs admin or owner rights in one of your organizations.
+			</div>
+		{/if}
+
+		{#if !productsQuery.ready || (missing === 'price' && bundlesQuery && !bundlesQuery.ready)}
+			<ContentSkeleton shape="table" count={8} error={productsQuery.error ?? bundlesQuery?.error} />
+		{:else if visible.length === 0}
+			<div class="rounded-md border">
+				<div class="flex flex-col items-center justify-center py-12 text-center">
+					<p class="text-lg font-medium">
+						{products.length === 0 ? 'No products yet' : 'Nothing left to edit'}
+					</p>
+					<p class="text-sm text-muted-foreground">
+						{products.length === 0
+							? 'Products appear here once your organizations own assets.'
+							: 'Every product in this filter is done.'}
+					</p>
+				</div>
+			</div>
+		{:else if entry}
+			<div class="grid gap-6 lg:grid-cols-[22rem_minmax(0,1fr)] [&>*]:min-w-0">
+				<Card.Root class="overflow-hidden">
+					<Card.Header class="pb-3">
+						<Card.Title class="text-base">Catalog</Card.Title>
+						<Card.Description>{index + 1} of {visible.length}</Card.Description>
+					</Card.Header>
+					<Card.Content class="max-h-[32rem] overflow-y-auto p-0">
+						{#each visible as row (row.id)}
+							{@const active = row.id === entry.id}
+							<button
+								type="button"
+								use:scrollIntoViewWhenActive={active}
+								onclick={() => select(row)}
+								class="flex w-full items-center gap-3 border-b px-4 py-2.5 text-left transition-colors last:border-0 {active
+									? 'bg-muted'
+									: 'hover:bg-muted/40'}"
+							>
+								{#if row.kind === 'product'}
+									{@const product = row.item}
+									<ProductThumb path={product.imagePath} alt={product.name} size={32} />
+									<span class="min-w-0 flex-1">
+										<span class="block truncate text-sm font-medium">{product.name}</span>
+										<span class="block truncate text-xs text-muted-foreground"
+											>{[product.manufacturer?.name, product.caption]
+												.filter(Boolean)
+												.join(' · ')}</span
+										>
+									</span>
+									{#if hasTwin(product)}
+										<span
+											class="shrink-0 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800 dark:bg-amber-900 dark:text-amber-300"
+											>Duplicate cable</span
+										>
+									{/if}
+									{#if !product.imagePath}
+										<span
+											class="shrink-0 rounded-full bg-yellow-100 px-1.5 py-0.5 text-[10px] font-semibold text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+											>No image</span
+										>
+									{/if}
+								{:else}
+									<ProductThumb path={row.item.imagePath} alt={bundleLabel(row.item)} size={32} />
+									<span class="min-w-0 flex-1">
+										<span class="block truncate text-sm font-medium">{bundleLabel(row.item)}</span>
+										<!-- Untagged cases of one type share a name; where they are is
+									     what tells them apart in this list. -->
+										<span class="block truncate text-xs text-muted-foreground"
+											>Bundle{#if row.item.location}
+												· {row.item.location.name}{/if}</span
+										>
+									</span>
+								{/if}
+							</button>
+						{/each}
+					</Card.Content>
+				</Card.Root>
+
+				{#if current}
+					<ProductEditor
+						bind:this={editor}
+						product={current}
+						{orgs}
+						{categories}
+						{manufacturers}
+						{allProducts}
+						{unitCounts}
+						isAdmin={data.isAdmin}
+						userId={data.user?.id}
+						priceOrgId={filterOrgId}
+						bind:dirty={productDirty}
+						bind:saving
+						bind:modalOpen={editorModalOpen}
+						headerExtra={position}
+						footerActions={wizardFooter}
+						showProductLink
+						idPrefix="wizard"
+						onMerged={(survivorId) => (currentId = survivorId)}
+						onBeforeDelete={() =>
+							(afterDelete = visible[index + 1]?.id ?? visible[index - 1]?.id ?? '')}
+						onDeleted={() => (currentId = afterDelete)}
+					/>
+				{:else if currentBundle}
+					<Card.Root>
+						<Card.Header>
+							<div class="flex flex-wrap items-start justify-between gap-3">
+								<div class="min-w-0">
+									<Card.Title class="flex items-center gap-2">
+										{bundleLabel(currentBundle)}
+										{#if dirty}
+											<span
+												class="h-2 w-2 shrink-0 rounded-full bg-yellow-500"
+												title="Unsaved changes"
+											></span>
+										{/if}
+									</Card.Title>
+									<Card.Description class="flex flex-wrap items-center gap-2 pt-1">
+										<span class="rounded-full bg-muted px-2 py-0.5 text-xs font-medium">Bundle</span
+										>
+										<CategoryPill
+											name={categoryLabel(currentBundle.template.category)}
+											color={currentBundle.template.category.color}
+										/>
+										<span>{currentBundle.assets.length} units</span>
+										<a
+											href={resolve(`assets/bundles/${currentBundle.id}`)}
+											class="underline-offset-2 hover:text-foreground hover:underline"
+											>Open bundle →</a
+										>
+									</Card.Description>
+								</div>
+								{@render position()}
+							</div>
+						</Card.Header>
+						<Card.Content class="space-y-4">
+							<div class="space-y-2">
+								<p class="text-sm font-medium">Net purchase price (€)</p>
+								<p class="text-sm text-muted-foreground">
+									If set, offers and invoices bill this bundle as one line at this price. Left
+									empty, its contents are billed one by one.
+								</p>
+								<input
+									type="number"
+									min="0"
+									step="0.01"
+									placeholder="Unknown"
+									bind:value={bundlePriceDraft}
+									class="h-10 w-40 rounded-md border border-input bg-background px-3 py-2 text-right text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+								/>
+							</div>
+							<div class="space-y-2">
+								<p class="text-sm font-medium">Contents</p>
+								{#if currentBundle.assets.length === 0}
+									<p class="text-sm text-muted-foreground">This bundle is empty.</p>
+								{:else}
+									<ul class="space-y-1 text-sm text-muted-foreground">
+										{#each bundleContents(currentBundle) as line (line.productId)}
+											<li>{line.count}× {line.label}</li>
+										{/each}
+									</ul>
+								{/if}
+							</div>
+						</Card.Content>
+						<Card.Footer class="flex flex-wrap items-center justify-between gap-3">
+							{@render wizardFooter()}
+						</Card.Footer>
+					</Card.Root>
+				{/if}
+			</div>
+		{/if}
 	{/if}
 </div>
 

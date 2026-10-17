@@ -17,6 +17,7 @@ import {
 	applyInspectionRequirement,
 	deleteInspection as deleteInspectionRecord,
 	mainsConnectorNames,
+	mainsConnectorsByProduct,
 	parseInspectionDate,
 	recordInspections,
 	refreshInspectionDue
@@ -104,6 +105,12 @@ export const getAssetInspections = query(v.string(), async (assetId: string) => 
 export const getMainsConnectors = query(v.string(), async (productId: string) => {
 	await requireAuth();
 	return mainsConnectorNames(productId);
+});
+
+/** Product id → its mains connectors, for the DGUV quick mode on /products. */
+export const getMainsConnectorsByProduct = query(async () => {
+	await requireAuth();
+	return mainsConnectorsByProduct();
 });
 
 /** What shows a unit's inspection state, after any change to it. */
@@ -214,8 +221,11 @@ export const setInspectionInterval = command(setIntervalSchema, async (input) =>
 
 /** After a change to who needs inspecting: the catalog, and every unit list. */
 async function refreshRequirementViews(changedAssetIds: string[]) {
+	const user = await requireAuth();
+	const orgIds = await userOrgIds(user.id);
 	await Promise.all([
 		getProductCatalog().refresh(),
+		...orgIds.map((id) => getProductCatalog(id).refresh()),
 		getCategories().refresh(),
 		...changedAssetIds.flatMap((id) => [getAsset(id).refresh(), getAssetHistory(id).refresh()]),
 		getAssets().refresh(),
@@ -333,5 +343,72 @@ export const setCategoryInspectionRequirement = command(
 		});
 		await refreshRequirementViews(changed);
 		return { changed: changed.length };
+	}
+);
+
+const productsRequirementSchema = v.object({
+	productIds: v.pipe(v.array(v.string()), v.minLength(1)),
+	/** Null follows the category. */
+	requiresInspection: v.nullable(v.boolean())
+});
+
+/**
+ * `setProductInspectionRequirement` for a selection — the DGUV quick mode on
+ * /products. Each product answers to `productControl` on its own: those this
+ * user may not change are left as they are and named in the result, rather
+ * than one foreign product refusing the whole batch.
+ */
+export const setProductsInspectionRequirement = command(
+	productsRequirementSchema,
+	async (input) => {
+		const user = await requireAuth();
+		const systemAdmin = await isSystemAdmin(user.id);
+		const managed = systemAdmin ? [] : await managedOrgIds(user.id);
+		if (!systemAdmin && managed.length === 0) appError(403, 'product_edit_forbidden');
+
+		const products = await prisma.product.findMany({
+			where: { id: { in: input.productIds } },
+			select: { id: true, name: true, createdById: true, requiresInspection: true }
+		});
+		const allowed: typeof products = [];
+		const refused: string[] = [];
+		for (const product of products) {
+			const control = await productControl({ id: user.id, systemAdmin, managed }, product);
+			if (control.allowed) allowed.push(product);
+			else refused.push(product.name);
+		}
+		const changing = allowed.filter((p) => p.requiresInspection !== input.requiresInspection);
+
+		const changedUnits = changing.length
+			? await prisma.$transaction(async (tx) => {
+					await tx.product.updateMany({
+						where: { id: { in: changing.map((p) => p.id) } },
+						data: { requiresInspection: input.requiresInspection }
+					});
+					return applyInspectionRequirement(
+						tx,
+						user.id,
+						changing.map((p) => p.id)
+					);
+				})
+			: [];
+		for (const product of changing) {
+			await logCatalogChange({
+				userId: user.id,
+				action: 'PRODUCT_UPDATED',
+				productId: product.id,
+				data: {
+					changes: [
+						{
+							field: 'requiresInspection',
+							from: product.requiresInspection?.toString() ?? null,
+							to: input.requiresInspection?.toString() ?? null
+						}
+					]
+				}
+			});
+		}
+		if (changing.length > 0) await refreshRequirementViews(changedUnits);
+		return { products: changing.length, units: changedUnits.length, refused };
 	}
 );

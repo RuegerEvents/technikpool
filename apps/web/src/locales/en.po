@@ -123,6 +123,7 @@ msgstr "No assets found."
 #: src/routes/orgs/[id]/value/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/products/[id]/product-detail.svelte
+#: src/routes/products/dguv-quick.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Product"
 msgstr "Product"
@@ -1845,10 +1846,12 @@ msgstr "Search locations…"
 
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/license-list.svelte
+#: src/routes/products/dguv-quick.svelte
 msgid "All"
 msgstr "All"
 
 #: src/lib/components/ui/org-multi-select/org-multi-select.svelte
+#: src/routes/products/dguv-quick.svelte
 msgid "Select all"
 msgstr "Select all"
 
@@ -1866,6 +1869,7 @@ msgid "{0} asset{1} selected"
 msgstr "{0} asset{1} selected"
 
 #: src/lib/components/ui/bulk-actions-bar.svelte
+#: src/routes/products/dguv-quick.svelte
 msgid "Clear"
 msgstr "Clear"
 
@@ -1905,6 +1909,8 @@ msgstr "All Categories"
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/products/dguv-quick.svelte
+#: src/routes/products/dguv-quick.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Category"
 msgstr "Category"
@@ -2424,6 +2430,7 @@ msgstr "Devices | Technikpool"
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/orgs/+page.svelte
+#: src/routes/products/dguv-quick.svelte
 msgid "Devices"
 msgstr "Devices"
 
@@ -3277,6 +3284,7 @@ msgid "Categories"
 msgstr "Categories"
 
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
+#: src/routes/products/dguv-quick.svelte
 #: src/routes/stocktakes/[id]/print/+page.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
@@ -4322,6 +4330,7 @@ msgstr "Applying…"
 
 #: src/lib/components/asset-form/asset-form.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
+#: src/routes/products/dguv-quick.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Apply"
 msgstr "Apply"
@@ -12558,6 +12567,7 @@ msgstr "Each can be applied once. Worked out from the units as they are now, so 
 msgid "Select all in {0}"
 msgstr "Select all in {0}"
 
+#: src/routes/products/dguv-quick.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Select"
 msgstr "Select"
@@ -13024,8 +13034,10 @@ msgstr "{0} The next one is due an interval after the latest inspection — at o
 #~ msgstr "No interval is set, so this unit is not tracked. Set one under Edit to have it come due."
 
 #: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/products/+page.svelte
 #: src/routes/products/[id]/product-detail.svelte
 #: src/routes/products/[id]/product-detail.svelte
+#: src/routes/products/dguv-quick.svelte
 msgid "DGUV inspections"
 msgstr "DGUV inspections"
 
@@ -13119,6 +13131,7 @@ msgid "Categories are shared by every organization. The English name is the sour
 msgstr "Categories are shared by every organization. The English name is the source — it is what the API returns and what a billing line records; the German name is what the German UI and a German offer or invoice show. \"DGUV\" marks a category whose devices need DGUV V3 inspections; a product can say otherwise on its own page."
 
 #: src/routes/admin/categories/+page.svelte
+#: src/routes/products/dguv-quick.svelte
 msgid "DGUV"
 msgstr "DGUV"
 
@@ -13141,10 +13154,16 @@ msgid "Like {0}: no inspection"
 msgstr "Like {0}: no inspection"
 
 #: src/routes/products/[id]/product-detail.svelte
+#: src/routes/products/dguv-quick.svelte
+#: src/routes/products/dguv-quick.svelte
+#: src/routes/products/dguv-quick.svelte
 msgid "Needs inspection"
 msgstr "Needs inspection"
 
 #: src/routes/products/[id]/product-detail.svelte
+#: src/routes/products/dguv-quick.svelte
+#: src/routes/products/dguv-quick.svelte
+#: src/routes/products/dguv-quick.svelte
 msgid "No inspection"
 msgstr "No inspection"
 
@@ -13170,9 +13189,97 @@ msgid "Carries mains voltage — needs DGUV inspections"
 msgstr "Carries mains voltage — needs DGUV inspections"
 
 #: src/routes/admin/connectors/+page.svelte
+#: src/routes/products/dguv-quick.svelte
 msgid "Mains"
 msgstr "Mains"
 
 #: src/routes/admin/connectors/+page.svelte
 msgid "Mains voltage"
 msgstr "Mains voltage"
+
+#: src/routes/products/+page.svelte
+msgid "Set which products need DGUV inspections — many at once."
+msgstr "Set which products need DGUV inspections — many at once."
+
+#: src/routes/products/+page.svelte
+msgid "Edit one by one"
+msgstr "Edit one by one"
+
+#: src/routes/products/dguv-quick.svelte
+msgid "1 product left as it was, since it holds units of organizations you do not run:"
+msgid_plural "# products left as they were, since they hold units of organizations you do not run:"
+msgstr[0] "1 product left as it was, since it holds units of organizations you do not run:"
+msgstr[1] "# products left as they were, since they hold units of organizations you do not run:"
+
+#: src/routes/products/dguv-quick.svelte
+msgid "1 product saved"
+msgid_plural "# products saved"
+msgstr[0] "1 product saved"
+msgstr[1] "# products saved"
+
+#: src/routes/products/dguv-quick.svelte
+msgid "1 unit changed"
+msgid_plural "# units changed"
+msgstr[0] "1 unit changed"
+msgstr[1] "# units changed"
+
+#: src/routes/products/dguv-quick.svelte
+msgid "Mark 1 product as needing inspection?"
+msgid_plural "Mark # products as needing inspection?"
+msgstr[0] "Mark 1 product as needing inspection?"
+msgstr[1] "Mark # products as needing inspection?"
+
+#: src/routes/products/dguv-quick.svelte
+msgid "Mark 1 product as not needing inspection?"
+msgid_plural "Mark # products as not needing inspection?"
+msgstr[0] "Mark 1 product as not needing inspection?"
+msgstr[1] "Mark # products as not needing inspection?"
+
+#: src/routes/products/dguv-quick.svelte
+msgid "Let 1 product follow its category?"
+msgid_plural "Let # products follow their category?"
+msgstr[0] "Let 1 product follow its category?"
+msgstr[1] "Let # products follow their category?"
+
+#: src/routes/products/dguv-quick.svelte
+msgid "Their devices lose their DGUV interval and leave the inspection list."
+msgstr "Their devices lose their DGUV interval and leave the inspection list."
+
+#: src/routes/products/dguv-quick.svelte
+msgid "Devices that need inspecting and have no interval get their organization's default, and come due at once."
+msgstr "Devices that need inspecting and have no interval get their organization's default, and come due at once."
+
+#: src/routes/products/dguv-quick.svelte
+msgid "Search by product or connector…"
+msgstr "Search by product or connector…"
+
+#. 0: mainsUnmarkedCount
+#: src/routes/products/dguv-quick.svelte
+msgid "Mains, not marked ({0})"
+msgstr "Mains, not marked ({0})"
+
+#: src/routes/products/dguv-quick.svelte
+msgid "No products in this filter."
+msgstr "No products in this filter."
+
+#: src/routes/products/dguv-quick.svelte
+msgid "Like category: needs inspection"
+msgstr "Like category: needs inspection"
+
+#: src/routes/products/dguv-quick.svelte
+msgid "Like category: no inspection"
+msgstr "Like category: no inspection"
+
+#: src/routes/products/dguv-quick.svelte
+msgid "Which products' devices need DGUV V3 inspections. A product follows its category unless it is set otherwise; the category default is set under Admin › Categories."
+msgstr "Which products' devices need DGUV V3 inspections. A product follows its category unless it is set otherwise; the category default is set under Admin › Categories."
+
+#: src/routes/products/dguv-quick.svelte
+msgid "1 product selected"
+msgid_plural "# products selected"
+msgstr[0] "1 product selected"
+msgstr[1] "# products selected"
+
+#: src/routes/products/dguv-quick.svelte
+msgid "Like category"
+msgstr "Like category"

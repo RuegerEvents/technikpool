@@ -178,6 +178,34 @@ export async function mainsConnectorNames(productId: string) {
 	return rows.map((r) => r.name);
 }
 
+/** Every product with a mains connector, and which — `mainsConnectorNames` for the whole catalog at once. */
+export async function mainsConnectorsByProduct() {
+	const connectors = await prisma.connector.findMany({
+		where: { mains: true },
+		select: {
+			name: true,
+			ports: { select: { productId: true } },
+			productEndsA: { select: { id: true } },
+			productEndsB: { select: { id: true } },
+			wayEndsA: { select: { productId: true } },
+			wayEndsB: { select: { productId: true } }
+		},
+		orderBy: { name: 'asc' }
+	});
+	const byProduct: Record<string, string[]> = {};
+	for (const c of connectors) {
+		const ids = new Set([
+			...c.ports.map((p) => p.productId),
+			...c.productEndsA.map((p) => p.id),
+			...c.productEndsB.map((p) => p.id),
+			...c.wayEndsA.map((w) => w.productId),
+			...c.wayEndsB.map((w) => w.productId)
+		]);
+		for (const id of ids) (byProduct[id] ??= []).push(c.name);
+	}
+	return byProduct;
+}
+
 export type RecordInspectionInput = {
 	assetIds: string[];
 	performedAt: Date;
