@@ -1,5 +1,17 @@
 [
 	{
+		"version": "0.33.1",
+		"date": "2026-10-18",
+		"en": [
+			"Only devices that need DGUV inspections are tracked. Whether they do is set per category (Admin › Categories) and can be overridden on a product's page. New devices get the organization's interval only if their product needs inspecting, and cases and rigging no longer show up as due.",
+			"A product with a mains connector (Schuko, C13/C14, powerCON, TRUE1, CEE …) that isn't marked as needing inspection gets a hint on its page and on its devices' pages, with a button to mark it. Which connectors carry mains is set under Admin › Connectors."
+		],
+		"de": [
+			"Nur noch Geräte, die DGUV-prüfpflichtig sind, werden verfolgt. Das wird pro Kategorie festgelegt (Admin › Kategorien) und lässt sich auf der Produktseite überschreiben. Neue Geräte bekommen das Intervall der Organisation nur, wenn ihr Produkt prüfpflichtig ist, und Cases und Rigging erscheinen nicht mehr als fällig.",
+			"Ein Produkt mit Netzstecker (Schuko, Kaltgeräte, powerCON, TRUE1, CEE …), das nicht als prüfpflichtig markiert ist, bekommt auf seiner Seite und auf den Seiten seiner Geräte einen Hinweis mit einem Knopf zum Markieren. Welche Stecker Netzspannung führen, steht unter Admin › Stecker."
+		]
+	},
+	{
 		"version": "0.33.0",
 		"date": "2026-10-17",
 		"en": [
