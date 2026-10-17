@@ -13,6 +13,7 @@ msgid "Technikpool"
 msgstr "Technikpool"
 
 #: src/routes/+page.svelte
+#: src/routes/assets/equipment-list-modal.svelte
 msgid "Inventory"
 msgstr "Inventar"
 
@@ -205,6 +206,7 @@ msgstr "Crew"
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/assets/equipment-list-modal.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
@@ -313,6 +315,7 @@ msgstr "E-Mail"
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/org-logo-card.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/stocktakes/new/+page.svelte
@@ -454,6 +457,7 @@ msgstr "Bundle"
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/assets/equipment-list-modal.svelte
 #: src/routes/assets/license-list.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
@@ -728,6 +732,7 @@ msgstr "Menge"
 msgid "<0/> Create another after saving"
 msgstr "<0/> Nach dem Speichern weiteres erstellen"
 
+#: src/lib/components/production-list/tick-list.svelte
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
@@ -1333,6 +1338,7 @@ msgstr "Bearbeiten"
 #: src/routes/checkout/+page.svelte
 #: src/routes/inspections/+page.svelte
 #: src/routes/inspections/+page.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/products/[id]/product-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Location"
@@ -4812,6 +4818,7 @@ msgstr "Suchen oder neu eingeben…"
 
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
+#: src/routes/productions/[id]/handout-search.svelte
 msgid "How many"
 msgstr "Anzahl"
 
@@ -5670,11 +5677,13 @@ msgid "Select manufacturer…"
 msgstr "Hersteller auswählen…"
 
 #: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
 msgid "# accessory added"
 msgid_plural "# accessories added"
 msgstr[0] "# Zubehörteil hinzugefügt"
 msgstr[1] "# Zubehörteile hinzugefügt"
 
+#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "# accessory removed"
 msgid_plural "# accessories removed"
@@ -5685,6 +5694,7 @@ msgstr[1] "# Zubehörteile entfernt"
 msgid "Accessories changed"
 msgstr "Zubehör geändert"
 
+#: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Update accessories"
 msgstr "Zubehör aktualisieren"
@@ -11589,9 +11599,11 @@ msgid "Scan asset tags to put equipment on a shelf, or work through a production
 msgstr "Scanne Asset-Tags, um Equipment ins Lager zu buchen, oder arbeite die Liste einer Produktion ab: ausgeben, zurücknehmen oder prüfen."
 
 #: src/routes/checkout/+page.svelte
+#: src/routes/productions/[id]/handout-buttons.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-search.svelte
 #: src/routes/productions/[id]/selection-actions.svelte
 msgid "Hand out"
 msgstr "Ausgeben"
@@ -11625,7 +11637,7 @@ msgstr "Ohne Tag · gezählt{0}"
 msgid "Checkout undone for <0/>"
 msgstr "Ausgabe zurückgenommen für <0/>"
 
-#. 0: summary.approved
+#. 0: toHandOut
 #. 0: toHandOut.length
 #: src/routes/productions/[id]/handout-buttons.svelte
 #: src/routes/productions/[id]/selection-actions.svelte
@@ -12567,3 +12579,122 @@ msgstr "Heim-Organisation"
 #: src/routes/orgs/+page.svelte
 msgid "Members"
 msgstr "Mitglieder"
+
+#~ msgid "Equipment List with Prices"
+#~ msgstr "Equipmentliste mit Preisen"
+
+#~ msgid "Equipment List"
+#~ msgstr "Equipmentliste"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "Accessories changed on 1 unit"
+msgid_plural "Accessories changed on # units"
+msgstr[0] "Zubehör geändert bei 1 Gerät"
+msgstr[1] "Zubehör geändert bei # Geräten"
+
+#. 0: item.asset.serialNumber
+#. 0: accessory.asset.serialNumber
+#: src/routes/productions/[id]/production-detail.svelte
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "SN {0}"
+msgstr "SN {0}"
+
+#: src/lib/equipment-sheet-download.svelte.ts
+#: src/routes/assets/equipment-list-modal.svelte
+msgid "Equipment list"
+msgstr "Equipmentliste"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Taken back · tick to hand out again"
+msgstr "Zurückgenommen · abhaken, um es wieder auszugeben"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "New in the kit, not booked yet"
+msgstr "Neu im Bundle, noch nicht gebucht"
+
+#: src/routes/productions/[id]/handout-search.svelte
+msgid "Handed out: 1×"
+msgid_plural "Handed out: #×"
+msgstr[0] "Ausgegeben: 1×"
+msgstr[1] "Ausgegeben: #×"
+
+#: src/routes/productions/[id]/handout-search.svelte
+msgid "Nothing free under that name."
+msgstr "Unter diesem Namen ist nichts frei."
+
+#: src/routes/productions/[id]/handout-search.svelte
+msgid "1 free"
+msgid_plural "# free"
+msgstr[0] "1 frei"
+msgstr[1] "# frei"
+
+#: src/routes/productions/[id]/handout-search.svelte
+msgid "1 without a tag"
+msgid_plural "# without a tag"
+msgstr[0] "1 ohne Tag"
+msgstr[1] "# ohne Tag"
+
+#: src/routes/productions/[id]/handout-search.svelte
+msgid "Handing out…"
+msgstr "Wird ausgegeben…"
+
+#: src/routes/productions/[id]/handout-search.svelte
+msgid "Not on the list and no tag to scan? Find it by name"
+msgstr "Nicht auf der Liste und kein Tag zum Scannen? Nach Namen suchen"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "1 location"
+msgid_plural "# locations"
+msgstr[0] "1 Standort"
+msgstr[1] "# Standorte"
+
+#~ msgid "1 owner"
+#~ msgid_plural "# owners"
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#: src/routes/productions/[id]/handout-search.svelte
+msgid "Product name, maker or tag"
+msgstr "Produktname, Hersteller oder Tag"
+
+#: src/routes/productions/[id]/production-detail.svelte
+msgid "1 organization"
+msgid_plural "# organizations"
+msgstr[0] "1 Organisation"
+msgstr[1] "# Organisationen"
+
+#: src/lib/equipment-sheet-download.svelte.ts
+msgid "Inventory list"
+msgstr "Inventarliste"
+
+#: src/routes/assets/equipment-list-modal.svelte
+msgid "Catalogue"
+msgstr "Katalog"
+
+#: src/routes/assets/equipment-list-modal.svelte
+msgid "One line per product and kit with how many there are, by category — what can be rented."
+msgstr "Eine Zeile pro Produkt und Bundle mit der Anzahl, nach Kategorie – was gemietet werden kann."
+
+#: src/routes/assets/equipment-list-modal.svelte
+msgid "Everything by location, with every unit's tag or serial number."
+msgstr "Alles nach Standort, mit Tag oder Seriennummer jedes Geräts."
+
+#: src/routes/assets/equipment-list-modal.svelte
+msgid "Layout"
+msgstr "Aufbau"
+
+#: src/routes/assets/equipment-list-modal.svelte
+msgid "With rental prices"
+msgstr "Mit Mietpreisen"
+
+#: src/routes/assets/equipment-list-modal.svelte
+msgid "Net price per day, as an offer would charge it."
+msgstr "Nettopreis pro Tag, wie im Angebot."
+
+#: src/routes/assets/equipment-list-modal.svelte
+msgid "Create PDF"
+msgstr "PDF erstellen"
+
+#: src/routes/assets/+page.svelte
+msgid "Equipment list (PDF)…"
+msgstr "Equipmentliste (PDF)…"

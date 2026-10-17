@@ -61,6 +61,7 @@
 	} from '#lib/production-items.js';
 	import { SheetDownload } from '#lib/equipment-sheet-download.svelte.js';
 	import { SheetProgress } from '#lib/components/sheet-progress/index.js';
+	import { naturalCompare } from '#lib/sort.js';
 
 	let { productionId }: { productionId: string } = $props();
 	let production = $derived(await getProduction(productionId));
@@ -314,6 +315,30 @@
 		}
 	}
 
+	// Every unit of a section whose accessories changed, one after another — the
+	// hint sits on the section's row, so it is seen without opening it.
+	async function handleSyncAccessoriesMany(assetIds: string[]) {
+		working = true;
+		let added = 0;
+		let removed = 0;
+		try {
+			for (const assetId of assetIds) {
+				const result = await syncAssetAccessoriesInProduction({ productionId, assetId });
+				added += result.added;
+				removed += result.removed;
+			}
+			toast.success(
+				plural(added, ['# accessory added', '# accessories added']) +
+					' · ' +
+					plural(removed, ['# accessory removed', '# accessories removed'])
+			);
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			working = false;
+		}
+	}
+
 	function accessoriesChanged(item: Nested<ItemPayload>) {
 		const current = new Set(item.asset.accessories.map((accessory) => accessory.id));
 		const booked = new Set(item.accessories.map((accessory) => accessory.assetId));
@@ -451,6 +476,23 @@
 		}
 		return [...bundleMap.values(), ...productMap.values()];
 	});
+
+	// The count columns, left to right. A unit's row puts its status under the
+	// column it is counted in, so a section's rows line up with its counts;
+	// what no column counts (released, declined) stands under Total.
+	const COUNT_COLUMNS = ['total', 'pending', 'approved', 'out', 'returned'] as const;
+	function statusColumn(status: string): (typeof COUNT_COLUMNS)[number] {
+		if (status === 'PENDING' || status === 'DRAFT') return 'pending';
+		if (status === 'APPROVED') return 'approved';
+		if (status === 'CHECKED_OUT') return 'out';
+		if (status === 'RETURNED') return 'returned';
+		return 'total';
+	}
+
+	/** The distinct names, sorted; the cell shows one, or how many with all in its title. */
+	function distinct(names: string[]) {
+		return [...new Set(names)].sort(naturalCompare);
+	}
 
 	// Units, not rows: an accessory travels with its unit and is counted with it.
 	let unitCount = $derived(displaySections.reduce((sum, s) => sum + s.total, 0));
@@ -1032,8 +1074,9 @@
 									Address
 								</h3>
 								<p class="text-sm">
+									<!-- pre-line: a venue or street typed over two lines keeps them. -->
 									{#each formatAddress(production.venueName, production.address) as line, i (i)}
-										<span class="block">{line}</span>
+										<span class="block whitespace-pre-line">{line}</span>
 									{/each}
 								</p>
 							</div>
@@ -1276,7 +1319,7 @@
 					<table class="w-full text-sm">
 						<thead>
 							<tr class="border-b bg-muted/30">
-								<th class="w-10 px-4 py-3">
+								<th class="w-10 px-3 py-3">
 									<input
 										type="checkbox"
 										checked={allItemsSelected}
@@ -1285,12 +1328,23 @@
 										class="h-4 w-4 cursor-pointer rounded border-input"
 									/>
 								</th>
-								<th class="px-3 py-3 text-left font-medium text-muted-foreground">Product</th>
-								<th class="px-3 py-3 text-right font-medium text-muted-foreground">Total</th>
-								<th class="px-3 py-3 text-right font-medium text-muted-foreground">Pending</th>
-								<th class="px-3 py-3 text-right font-medium text-muted-foreground">Approved</th>
-								<th class="px-3 py-3 text-right font-medium text-muted-foreground">Out</th>
-								<th class="px-3 py-3 text-right font-medium text-muted-foreground">Returned</th>
+								<th class="px-2 py-3 text-left font-medium text-muted-foreground">Product</th>
+								<!-- A lender stands under the location: one column for where a
+								     unit comes from keeps the table on screen. -->
+								<th class="px-2 py-3 text-left font-medium text-muted-foreground">Location</th>
+								<th class="px-2 py-3 text-right text-xs font-medium text-muted-foreground">Total</th
+								>
+								<th class="px-2 py-3 text-right text-xs font-medium text-muted-foreground"
+									>Pending</th
+								>
+								<th class="px-2 py-3 text-right text-xs font-medium text-muted-foreground"
+									>Approved</th
+								>
+								<th class="px-2 py-3 text-right text-xs font-medium text-muted-foreground">Out</th>
+								<th class="px-2 py-3 text-right text-xs font-medium text-muted-foreground"
+									>Returned</th
+								>
+								<th class="w-0"></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -1304,11 +1358,23 @@
 								{@const divergence =
 									section.kind === 'bundle' ? bundleDivergence.get(section.bundleId) : null}
 								{@const divergentAccessories = divergentAccessoryCount(section.items)}
+								{@const accessoryChanges = canPlan
+									? section.items.filter(accessoriesChanged).map((i) => i.assetId)
+									: []}
+								{@const sectionLocations = distinct(
+									section.items.map((i) => i.asset.location.name)
+								)}
+								<!-- Only lenders are named: the production's own org goes without saying. -->
+								{@const sectionOwners = distinct(
+									section.items
+										.filter((i) => i.asset.organizationId !== production.organizationId)
+										.map((i) => orgLabel(i.asset.organization))
+								)}
 								<tr
 									class="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/30"
 									onclick={() => toggleSection(sectionId)}
 								>
-									<td class="px-4 py-3">
+									<td class="px-2 py-3">
 										<input
 											type="checkbox"
 											checked={allInSectionSelected}
@@ -1323,7 +1389,7 @@
 											class="h-4 w-4 cursor-pointer rounded border-input"
 										/>
 									</td>
-									<td class="px-3 py-3">
+									<td class="px-2 py-3">
 										<div class="flex flex-wrap items-center gap-x-2 gap-y-1">
 											<svg
 												xmlns="http://www.w3.org/2000/svg"
@@ -1378,6 +1444,30 @@
 													{/if}
 												</div>
 											{/if}
+											{#if accessoryChanges.length > 0}
+												<!-- Seen without opening the section: the button on each
+												     unit's row is only there once it is expanded. -->
+												<div class="flex basis-full flex-wrap items-center gap-2 pl-[58px]">
+													<span
+														class="rounded bg-yellow-100 px-1.5 py-0.5 text-xs font-medium whitespace-nowrap text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+														>{plural(accessoryChanges.length, [
+															'Accessories changed on 1 unit',
+															'Accessories changed on # units'
+														])}</span
+													>
+													<button
+														type="button"
+														disabled={working}
+														onclick={(e) => {
+															e.stopPropagation();
+															handleSyncAccessoriesMany(accessoryChanges);
+														}}
+														class="rounded border border-yellow-400 px-2 py-0.5 text-xs text-yellow-800 transition-colors hover:bg-yellow-100 dark:border-yellow-600 dark:text-yellow-300 dark:hover:bg-yellow-900/40"
+													>
+														Update accessories
+													</button>
+												</div>
+											{/if}
 											{#if divergentAccessories > 0}
 												<!-- On a line of its own under the name, lined up with it
 												     (chevron 14 + gap + thumb 28 + gap), so it never squeezes
@@ -1395,32 +1485,54 @@
 											{/if}
 										</div>
 									</td>
-									<td class="px-3 py-3 text-right font-mono tabular-nums">{section.total}</td>
+									<td class="px-2 py-3 text-xs whitespace-nowrap text-muted-foreground">
+										<span
+											class="block"
+											title={sectionLocations.length > 1 ? sectionLocations.join(', ') : undefined}
+											>{sectionLocations.length === 1
+												? sectionLocations[0]
+												: plural(sectionLocations.length, ['1 location', '# locations'])}</span
+										>
+										{#if sectionOwners.length > 0}
+											<span
+												class="block opacity-70"
+												title={sectionOwners.length > 1 ? sectionOwners.join(', ') : undefined}
+												>{sectionOwners.length === 1
+													? sectionOwners[0]
+													: plural(sectionOwners.length, [
+															'1 organization',
+															'# organizations'
+														])}</span
+											>
+										{/if}
+									</td>
+									<td class="px-2 py-3 text-right font-mono tabular-nums">{section.total}</td>
 									<td
-										class="px-3 py-3 text-right font-mono tabular-nums {section.pending > 0
+										class="px-2 py-3 text-right font-mono tabular-nums {section.pending > 0
 											? 'text-yellow-600 dark:text-yellow-400'
 											: 'text-muted-foreground'}">{section.pending > 0 ? section.pending : '—'}</td
 									>
 									<td
-										class="px-3 py-3 text-right font-mono tabular-nums {section.approved > 0
+										class="px-2 py-3 text-right font-mono tabular-nums {section.approved > 0
 											? 'text-green-700 dark:text-green-400'
 											: 'text-muted-foreground'}"
 										>{section.approved > 0 ? section.approved : '—'}</td
 									>
 									<td
-										class="px-3 py-3 text-right font-mono tabular-nums {section.checkedOut > 0
+										class="px-2 py-3 text-right font-mono tabular-nums {section.checkedOut > 0
 											? 'text-blue-600 dark:text-blue-400'
 											: 'text-muted-foreground'}"
 										>{section.checkedOut > 0 ? section.checkedOut : '—'}</td
 									>
-									<td class="px-3 py-3 text-right font-mono text-muted-foreground tabular-nums"
+									<td class="px-2 py-3 text-right font-mono text-muted-foreground tabular-nums"
 										>{section.returned > 0 ? section.returned : '—'}</td
 									>
+									<td></td>
 								</tr>
 								{#if expanded.get(sectionId)}
 									{#each section.items as item (item.id)}
 										<tr class="border-b bg-muted/10 last:border-0">
-											<td class="px-4 py-2">
+											<td class="px-2 py-2">
 												<input
 													type="checkbox"
 													checked={selectedItemAssetIds.has(item.asset.id)}
@@ -1434,7 +1546,7 @@
 													class="h-4 w-4 cursor-pointer rounded border-input"
 												/>
 											</td>
-											<td class="px-3 py-2">
+											<td class="px-2 py-2">
 												<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
 													{#if section.kind === 'bundle'}
 														<ProductThumb
@@ -1447,6 +1559,17 @@
 																item.asset.product.name,
 																item.asset.product.caption
 															)}</span
+														>
+													{/if}
+													{#if item.asset.assetTag}
+														<span class="font-mono text-xs">{item.asset.assetTag}</span>
+													{:else}
+														<span class="text-xs text-muted-foreground">#{item.asset.orgIndex}</span
+														>
+													{/if}
+													{#if item.asset.serialNumber}
+														<span class="font-mono text-xs text-muted-foreground"
+															>SN {item.asset.serialNumber}</span
 														>
 													{/if}
 													{#if item.freeOfCharge}
@@ -1495,36 +1618,34 @@
 													{/if}
 												</div>
 											</td>
-											<!-- A unit's details stand under the count columns, so the
-											     rows of one section line up. -->
-											<td
-												class="px-3 py-2 text-right font-mono text-xs whitespace-nowrap text-muted-foreground"
-												>{item.asset.serialNumber ?? '—'}</td
-											>
-											<td
-												class="px-3 py-2 text-right text-xs whitespace-nowrap text-muted-foreground"
-												>{item.asset.location.name}</td
-											>
-											<td
-												class="px-3 py-2 text-right text-xs whitespace-nowrap text-muted-foreground"
-												>{orgLabel(item.asset.organization)}</td
-											>
-											<td class="px-3 py-2 text-right whitespace-nowrap">
-												<span
-													class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {statusClass[
-														item.status
-													] ?? ''}">{statusLabels[item.status] ?? item.status}</span
-												>
+											<td class="px-2 py-2 text-xs whitespace-nowrap text-muted-foreground">
+												<span class="block">{item.asset.location.name}</span>
+												{#if item.asset.organizationId !== production.organizationId}
+													<span class="block opacity-70">{orgLabel(item.asset.organization)}</span>
+												{/if}
 											</td>
-											<td class="px-3 py-2 text-right">
+											{#each COUNT_COLUMNS as column (column)}
+												<td class="px-2 py-2 text-right whitespace-nowrap">
+													{#if column === statusColumn(item.status)}
+														<span
+															class="inline-flex items-center rounded-full px-1.5 py-0.5 text-[11px] font-semibold {statusClass[
+																item.status
+															] ?? ''}">{statusLabels[item.status] ?? item.status}</span
+														>
+													{/if}
+												</td>
+											{/each}
+											<td class="px-1 py-2 text-right">
 												{#if canEdit}
-													<button
-														type="button"
+													<Button
+														icon="close"
+														variant="ghost"
+														size="icon-sm"
+														aria-label="Remove"
+														title="Remove"
 														onclick={() => handleRemoveItem(item.id)}
-														class="text-xs text-muted-foreground transition-colors hover:text-destructive"
-													>
-														Remove
-													</button>
+														class="text-muted-foreground hover:text-destructive"
+													/>
 												{/if}
 											</td>
 										</tr>
@@ -1536,7 +1657,9 @@
 											<tr class="border-b bg-muted/10 text-xs last:border-0">
 												<td></td>
 												<td class="py-1.5 pr-3 pl-9">
-													<div class="flex items-center gap-2 text-muted-foreground">
+													<div
+														class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-muted-foreground"
+													>
 														<span aria-hidden="true">↳</span>
 														<ProductThumb
 															path={accessory.asset.product.imagePath}
@@ -1552,24 +1675,26 @@
 														{#if accessory.asset.assetTag}
 															<span class="font-mono">{accessory.asset.assetTag}</span>
 														{/if}
+														{#if accessory.asset.serialNumber}
+															<span class="font-mono">SN {accessory.asset.serialNumber}</span>
+														{/if}
 													</div>
 												</td>
-												<td
-													class="px-3 py-1.5 text-right font-mono whitespace-nowrap text-muted-foreground"
-													>{accessory.asset.serialNumber ?? ''}</td
-												>
-												<td class="px-3 py-1.5 text-right whitespace-nowrap text-muted-foreground"
+												<td class="px-2 py-1.5 whitespace-nowrap text-muted-foreground"
 													>{accessory.asset.location.name}</td
 												>
-												<td></td>
-												<td class="px-3 py-1.5 text-right whitespace-nowrap">
-													<span
-														class="inline-flex items-center rounded-full px-2 py-0.5 font-semibold {statusClass[
-															accessory.status
-														] ?? ''} {differs ? 'ring-2 ring-amber-400' : 'opacity-60'}"
-														>{statusLabels[accessory.status] ?? accessory.status}</span
-													>
-												</td>
+												{#each COUNT_COLUMNS as column (column)}
+													<td class="px-2 py-1.5 text-right whitespace-nowrap">
+														{#if column === statusColumn(accessory.status)}
+															<span
+																class="inline-flex items-center rounded-full px-1.5 py-0.5 text-[11px] font-semibold {statusClass[
+																	accessory.status
+																] ?? ''} {differs ? 'ring-2 ring-amber-400' : 'opacity-60'}"
+																>{statusLabels[accessory.status] ?? accessory.status}</span
+															>
+														{/if}
+													</td>
+												{/each}
 												<td></td>
 											</tr>
 										{/each}
@@ -1823,6 +1948,7 @@
 		<SelectionActions
 			{productionId}
 			{cancelled}
+			running={!production.endDate || toDateInput(production.endDate) >= toDateInput(new Date())}
 			items={production.items.filter((i) => selectedItemAssetIds.has(i.asset.id))}
 			onDone={() => selectedItemAssetIds.clear()}
 		/>

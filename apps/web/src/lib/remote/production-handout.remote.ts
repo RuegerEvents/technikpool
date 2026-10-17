@@ -3,9 +3,11 @@ import * as v from 'valibot';
 import { requireAuth } from '#lib/server/services/access.js';
 import {
 	getHandout,
+	handOutCandidates,
 	handoutSummary,
 	packTodos,
 	scanIntoHandout,
+	searchHandoutCandidates,
 	setHandoutDone,
 	setHandoutLineCount,
 	type HandoutMode
@@ -30,7 +32,7 @@ export const getProductionHandout = query(
 	async ({ productionId, mode, organizationId }) => {
 		const user = await requireAuth();
 		return await withCheckoutErrors(() =>
-			getHandout(user.id, productionId, mode, organizationId || undefined)
+			getHandout(user.id, productionId, mode, organizationId || undefined, { extras: true })
 		);
 	}
 );
@@ -101,7 +103,40 @@ export const setProductionHandoutLine = command(
 	async ({ productionId, mode, organizationId, key, count }) => {
 		const user = await requireAuth();
 		const { result, affected } = await withCheckoutErrors(() =>
-			setHandoutLineCount(user.id, productionId, mode, key, count)
+			setHandoutLineCount(user.id, productionId, mode, key, count, { extras: true })
+		);
+		await refreshHandout(user.id, productionId, organizationId, affected);
+		return result;
+	}
+);
+
+/** Units not on the list, found by name — see `searchHandoutCandidates`. */
+export const searchHandoutAdditions = query(
+	v.object({ productionId: v.string(), text: v.string() }),
+	async ({ productionId, text }) => {
+		const user = await requireAuth();
+		return await withCheckoutErrors(() => searchHandoutCandidates(user.id, productionId, text));
+	}
+);
+
+export const handOutAdditions = command(
+	v.object({
+		productionId: v.string(),
+		organizationId: side,
+		productId: v.string(),
+		ownerId: v.string(),
+		locationId: v.string(),
+		count: v.pipe(v.number(), v.integer(), v.minValue(1))
+	}),
+	async ({ productionId, organizationId, productId, ownerId, locationId, count }) => {
+		const user = await requireAuth();
+		const { result, affected } = await withCheckoutErrors(() =>
+			handOutCandidates(
+				user.id,
+				productionId,
+				{ productId, organizationId: ownerId, locationId },
+				count
+			)
 		);
 		await refreshHandout(user.id, productionId, organizationId, affected);
 		return result;

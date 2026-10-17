@@ -5,6 +5,7 @@
 	import { Button } from '#lib/components/ui/button/index.js';
 	import StocktakeProgress from '#lib/components/stocktake-progress.svelte';
 	import { ScanBar, TickList, type ScanFeedback } from '#lib/components/production-list/index.js';
+	import HandoutSearch from './handout-search.svelte';
 	import { listSections, type ListLine } from '#lib/production-list.js';
 	import { makerAndName } from '#lib/product-label.js';
 	import { getErrorMessage, plural } from '#lib/utils.js';
@@ -52,10 +53,19 @@
 		};
 	});
 
-	let remaining = $derived(handout.items.filter((i) => !i.done));
+	// On the hand-out list, a unit already taken back is there to be sent out
+	// again if that was a mistake — not something still to do.
+	function takenBack(item: Item) {
+		return mode === 'checkout' && item.status === 'RETURNED';
+	}
+	function open(item: Item) {
+		return !item.done && !takenBack(item);
+	}
+	let expected = $derived(handout.items.filter((i) => !takenBack(i)));
+	let remaining = $derived(handout.items.filter(open));
 	let progress = $derived({
-		expected: handout.items.length,
-		found: handout.items.length - remaining.length,
+		expected: expected.length,
+		found: expected.length - remaining.length,
 		out: 0,
 		unexpected: 0
 	});
@@ -66,28 +76,26 @@
 		// On the take-back list: booked, but nobody handed it out. A tick books both.
 		if (mode === 'checkin' && item.status === 'APPROVED')
 			note = { text: 'Not out yet', tone: 'muted' };
+		else if (takenBack(item)) note = { text: 'Taken back · tick to hand out again', tone: 'muted' };
+		else if (item.kitAddition) note = { text: 'New in the kit, not booked yet', tone: 'warn' };
 		else if (item.lentBy && item.returnReported) note = { text: 'Return reported', tone: 'muted' };
 		else if (item.lentBy && item.status === 'CHECKED_OUT' && !item.received)
 			note = { text: 'Receipt open', tone: 'warn' };
-		return { done: item.done, locked: false, note };
+		return { done: item.done, locked: false, note, optional: takenBack(item) };
 	}
 
 	let busy = $state(false);
 
 	async function apply(assetIds: string[], done: boolean) {
 		if (assetIds.length === 0) return;
-		busy = true;
 		try {
 			await setProductionHandoutDone({ productionId, mode, organizationId, assetIds, done });
 		} catch (err) {
 			toast.error(getErrorMessage(err));
-		} finally {
-			busy = false;
 		}
 	}
 
 	async function count(line: ListLine, n: number) {
-		busy = true;
 		try {
 			await setProductionHandoutLine({
 				productionId,
@@ -98,8 +106,6 @@
 			});
 		} catch (err) {
 			toast.error(getErrorMessage(err));
-		} finally {
-			busy = false;
 		}
 	}
 
@@ -122,14 +128,19 @@
 
 	async function applyMany(assetIds: string[]) {
 		if (assetIds.length === 0 || !(await confirmMany(assetIds.length))) return;
-		await apply(assetIds, true);
+		busy = true;
+		try {
+			await apply(assetIds, true);
+		} finally {
+			busy = false;
+		}
 	}
 
 	function tickSection(units: Item[], lines: ListLine[]) {
 		const counted = new Set(lines.flatMap((l) => l.assetIds));
 		return applyMany([
-			...units.map((u) => u.assetId),
-			...handout.items.filter((i) => counted.has(i.assetId) && !i.done).map((i) => i.assetId)
+			...units.filter(open).map((u) => u.assetId),
+			...handout.items.filter((i) => counted.has(i.assetId) && open(i)).map((i) => i.assetId)
 		]);
 	}
 
@@ -263,6 +274,9 @@
 					buttonLabel="Book"
 					submit={submitCode}
 				/>
+				{#if mode === 'checkout' && handout.books}
+					<HandoutSearch {productionId} {organizationId} />
+				{/if}
 			</Card.Content>
 		</Card.Root>
 	{/if}
@@ -287,7 +301,7 @@
 					{busy}
 					doneLabel={mode === 'checkout' ? 'Out' : 'Back'}
 					tickSectionLabel="Tick section"
-					ontoggle={(item) => apply([item.assetId], !item.done)}
+					ontoggle={(item, done) => apply([item.assetId], done)}
 					oncount={count}
 					ontickSection={tickSection}
 				/>

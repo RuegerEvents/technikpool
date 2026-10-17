@@ -32,6 +32,7 @@
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import BulkActionsBar from '#lib/components/ui/bulk-actions-bar.svelte';
 	import CsvImportModal from '#lib/components/CsvImportModal.svelte';
+	import EquipmentListModal from './equipment-list-modal.svelte';
 	import { AssetStatusBadge, assetStatusLabel } from '#lib/components/ui/asset-status/index.js';
 	import { SortableHeader } from '#lib/components/ui/sortable-header/index.js';
 	import {
@@ -222,6 +223,7 @@
 	// Read through the queries rather than awaited: an `await` in a `$derived`
 	// suspends the whole page until it answers — heading, filters and all — and
 	// this one asks for every unit in the pool. See CLAUDE.md, "Loading states".
+	let equipmentListOpen = $state(false);
 	let orgsQuery = $derived(getMyOrgs());
 	let orgs = $derived(orgsQuery.current ?? []);
 	// A system admin may scope any read to any org — `scopedOrgIds` lets them
@@ -784,6 +786,13 @@
 								<span class="min-w-0">Quick-add asset tags</span>
 							{/snippet}
 						</DropdownMenu.CheckboxItem>
+						<DropdownMenu.Separator class="my-1 h-px bg-border" />
+						<DropdownMenu.Item
+							onSelect={() => (equipmentListOpen = true)}
+							class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+						>
+							Equipment list (PDF)…
+						</DropdownMenu.Item>
 					</DropdownMenu.Content>
 				</DropdownMenu.Portal>
 			</DropdownMenu.Root>
@@ -1996,3 +2005,5 @@
 		</Button>
 	{/snippet}
 </Modal>
+
+<EquipmentListModal bind:open={equipmentListOpen} {orgs} organizationId={queryOrgId} />

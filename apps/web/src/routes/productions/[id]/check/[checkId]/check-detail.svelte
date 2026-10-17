@@ -96,23 +96,20 @@
 		return { tone: 'warn', title: `Not on this list: ${result.productName}`, detail };
 	}
 
-	async function toggle(item: Item) {
+	async function toggle(item: Item, done: boolean) {
 		try {
-			if (item.tick) await untickProductionCheck({ checkId, assetId: item.assetId });
-			else await tickProductionCheck({ checkId, assetIds: [item.assetId] });
+			if (done) await tickProductionCheck({ checkId, assetIds: [item.assetId] });
+			else await untickProductionCheck({ checkId, assetId: item.assetId });
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		}
 	}
 
 	async function count(line: ListLine, n: number) {
-		busy = true;
 		try {
 			await setProductionCheckLine({ checkId, key: line.key, count: n });
 		} catch (err) {
 			toast.error(getErrorMessage(err));
-		} finally {
-			busy = false;
 		}
 	}
 

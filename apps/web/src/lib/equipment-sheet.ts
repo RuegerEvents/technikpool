@@ -3,6 +3,9 @@
 
 export type SheetKind = 'delivery-note' | 'packing-list';
 
+/** An org's whole equipment, by product or by shelf — see `OrgListLayout`. */
+export type OrgListLayout = 'catalogue' | 'inventory';
+
 /**
  * How far along a sheet is. The pictures are what takes the time: a kit
  * preview may have to be regenerated first, then every photo is fetched and

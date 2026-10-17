@@ -13,6 +13,11 @@ export type EquipmentSheetLine = {
 	/** Asset tags (or serial numbers) of the units, bundle tags for a kit. */
 	identifiers: string[];
 	quantity: number;
+	/**
+	 * Net rental price per unit and day, on a sheet with `prices`; null where
+	 * the product or its category has none.
+	 */
+	unitPrice?: number | null;
 	/** Object key of the product photo, or of the generated kit/unit preview. */
 	imagePath: string | null;
 };
@@ -21,8 +26,9 @@ export type EquipmentSheetGroup = { name: string; lines: EquipmentSheetLine[] };
 
 /**
  * A list of equipment on the letterhead: the delivery note that travels with
- * the goods, and the packing list they are packed by. Both draw the same
- * table; what differs is said by the caller.
+ * the goods, the packing list they are packed by, and the equipment list a
+ * customer reads beforehand. All draw the same table; what differs is said by
+ * the caller.
  */
 export type EquipmentSheet = {
 	title: string;
@@ -35,18 +41,21 @@ export type EquipmentSheet = {
 		logoPath: string | null;
 	};
 	/** The address block left of the metadata. */
-	recipient: { name: string; contactPerson: string | null; address: string[] };
+	/** The address block left of the metadata; null for a list addressed to nobody. */
+	recipient: { name: string; contactPerson: string | null; address: string[] } | null;
 	/** Label and value(s) under the logo, in order. */
 	meta: Array<{ label: string; value: string | string[] }>;
 	productionName: string;
 	intro: string | null;
-	/** Heading of the tick-box column. */
-	checkLabel: string;
+	/** Heading of the tick-box column; null for a sheet without one. */
+	checkLabel: string | null;
+	/** A column with each line's `unitPrice`, in place of the tick boxes. */
+	prices: boolean;
 	empty: string;
 	groups: EquipmentSheetGroup[];
 	/** Paragraphs after the table. */
 	closing: string[];
-	signatures: [string, string];
+	signatures: [string, string] | null;
 };
 
 // Same sheet and margins as offers and invoices, so the three read as one set.
@@ -70,6 +79,14 @@ const QTY_RIGHT = IMG_X + IMG_W + 30;
 const TEXT_X = QTY_RIGHT + 12;
 const CHECK_RIGHT = W - RIGHT - 4;
 const TEXT_W = CHECK_RIGHT - 44 - TEXT_X;
+// With prices: the price per day at the right edge, where the box would be.
+const PRICE_RIGHT = CHECK_RIGHT;
+const PRICED_TEXT_W = PRICE_RIGHT - 70 - TEXT_X;
+
+// As on offers and invoices: the number, then the sign after an ordinary space.
+function euro(value: number) {
+	return `${value.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+}
 
 /**
  * The generated kit and unit previews embed their photos as WebP data URIs,
@@ -197,6 +214,7 @@ export async function generateEquipmentSheetPdf(
 	report({ stage: 'layout', done: 0, total: 1 });
 
 	const title = data.title;
+	const textWidth = data.prices ? PRICED_TEXT_W : TEXT_W;
 	let page!: PDFPage;
 	let y = 0;
 	let pageNumber = 0;
@@ -265,7 +283,11 @@ export async function generateEquipmentSheetPdf(
 		draw('Bild', IMG_X, baseline, 8.5, bold);
 		right('Menge', QTY_RIGHT, baseline, 8.5, bold);
 		draw('Bezeichnung', TEXT_X, baseline, 8.5, bold);
-		right(data.checkLabel, CHECK_RIGHT, baseline, 8.5, bold);
+		if (data.prices) {
+			right('Preis/Tag', PRICE_RIGHT, baseline, 8.5, bold);
+		} else if (data.checkLabel) {
+			right(data.checkLabel, CHECK_RIGHT, baseline, 8.5, bold);
+		}
 		y -= HEADER_H;
 	};
 
@@ -275,24 +297,28 @@ export async function generateEquipmentSheetPdf(
 	const senderAddress = org.address
 		? `${org.name}, ${org.address.line1}, ${org.address.postalCode} ${org.address.city}`
 		: org.name;
-	for (const line of wrap(senderAddress, regular, 7.2, 260)) {
-		draw(line, LEFT, y, 7.2);
-		y -= 9;
-	}
-	page.drawLine({
-		start: { x: LEFT, y: y + 5 },
-		end: { x: LEFT + 260, y: y + 5 },
-		thickness: 0.45
-	});
-	y -= 14;
-	for (const line of wrap(data.recipient.name, bold, 11, 260)) {
-		draw(line, LEFT, y, 11, bold);
+	// The sender line belongs to the address window: without a recipient
+	// there is neither, and the footer names the org.
+	if (data.recipient) {
+		for (const line of wrap(senderAddress, regular, 7.2, 260)) {
+			draw(line, LEFT, y, 7.2);
+			y -= 9;
+		}
+		page.drawLine({
+			start: { x: LEFT, y: y + 5 },
+			end: { x: LEFT + 260, y: y + 5 },
+			thickness: 0.45
+		});
 		y -= 14;
-	}
-	for (const line of [data.recipient.contactPerson, ...data.recipient.address]) {
-		if (!line) continue;
-		draw(line, LEFT, y, 9.5);
-		y -= 13;
+		for (const line of wrap(data.recipient.name, bold, 11, 260)) {
+			draw(line, LEFT, y, 11, bold);
+			y -= 14;
+		}
+		for (const line of [data.recipient.contactPerson, ...data.recipient.address]) {
+			if (!line) continue;
+			draw(line, LEFT, y, 9.5);
+			y -= 13;
+		}
 	}
 
 	// Logo top right, the metadata below it — as on offers and invoices.
@@ -341,14 +367,14 @@ export async function generateEquipmentSheetPdf(
 			// Each text line with the distance from the baseline above it: the
 			// name, then what it consists of, then the tags of the units.
 			const text = [
-				...wrap(line.label, bold, 9, TEXT_W).map((value, i) => ({
+				...wrap(line.label, bold, 9, textWidth).map((value, i) => ({
 					value,
 					size: 9,
 					font: bold,
 					color: black,
 					gap: i === 0 ? 0 : 11
 				})),
-				...(line.subtitle ? wrap(line.subtitle, regular, 7.5, TEXT_W) : []).map((value, i) => ({
+				...(line.subtitle ? wrap(line.subtitle, regular, 7.5, textWidth) : []).map((value, i) => ({
 					value,
 					size: 7.5,
 					font: regular,
@@ -356,7 +382,7 @@ export async function generateEquipmentSheetPdf(
 					gap: i === 0 ? 11 : 9
 				})),
 				...(line.identifiers.length
-					? wrap(`Nr. ${line.identifiers.join(', ')}`, regular, 7, TEXT_W)
+					? wrap(`Nr. ${line.identifiers.join(', ')}`, regular, 7, textWidth)
 					: []
 				).map((value, i) => ({
 					value,
@@ -388,15 +414,26 @@ export async function generateEquipmentSheetPdf(
 					height
 				});
 			}
-			// A box to tick per line when the goods are counted at hand-over.
-			page.drawRectangle({
-				x: CHECK_RIGHT - 20,
-				y: top - ROW_PAD - 10,
-				width: 10,
-				height: 10,
-				borderColor: black,
-				borderWidth: 0.6
-			});
+			if (data.prices) {
+				right(
+					line.unitPrice != null ? euro(line.unitPrice) : '—',
+					PRICE_RIGHT,
+					top - firstBaseline,
+					9,
+					line.unitPrice != null ? bold : regular,
+					line.unitPrice != null ? black : muted
+				);
+			} else if (data.checkLabel) {
+				// A box to tick per line when the goods are counted at hand-over.
+				page.drawRectangle({
+					x: CHECK_RIGHT - 20,
+					y: top - ROW_PAD - 10,
+					width: 10,
+					height: 10,
+					borderColor: black,
+					borderWidth: 0.6
+				});
+			}
 			y -= rowHeight;
 			page.drawLine({
 				start: { x: LEFT, y },
@@ -433,20 +470,22 @@ export async function generateEquipmentSheetPdf(
 	data.closing.forEach((text, index) =>
 		paragraph(text, 9, index === data.closing.length - 1 ? 0 : 9)
 	);
-	const SIGN_H = 70;
-	ensure(SIGN_H);
-	const signWidth = (CONTENT_W - 36) / 2;
-	const lineY = y - 46;
-	for (const [index, label] of data.signatures.entries()) {
-		const x = LEFT + index * (signWidth + 36);
-		page.drawLine({
-			start: { x, y: lineY },
-			end: { x: x + signWidth, y: lineY },
-			thickness: 0.6
-		});
-		draw(`${label}: Datum, Name, Unterschrift`, x, lineY - 11, 7.5, regular, muted);
+	if (data.signatures) {
+		const SIGN_H = 70;
+		ensure(SIGN_H);
+		const signWidth = (CONTENT_W - 36) / 2;
+		const lineY = y - 46;
+		for (const [index, label] of data.signatures.entries()) {
+			const x = LEFT + index * (signWidth + 36);
+			page.drawLine({
+				start: { x, y: lineY },
+				end: { x: x + signWidth, y: lineY },
+				thickness: 0.6
+			});
+			draw(`${label}: Datum, Name, Unterschrift`, x, lineY - 11, 7.5, regular, muted);
+		}
+		y = lineY - 20;
 	}
-	y = lineY - 20;
 
 	const pages = pdf.getPages();
 	pages.forEach((pdfPage, index) => {

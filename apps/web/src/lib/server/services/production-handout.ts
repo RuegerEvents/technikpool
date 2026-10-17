@@ -1,4 +1,7 @@
 import { prisma } from '#lib/server/auth.js';
+import { BOOKABLE_ASSET_WHERE } from '#lib/asset-status.js';
+import type { Prisma } from '#lib/prisma/client.js';
+import { naturalCompare } from '#lib/sort.js';
 import {
 	isSystemAdmin,
 	productionVisibility,
@@ -72,6 +75,12 @@ export interface HandoutItem {
 	accessoryOf: string | null;
 	group: ListGroup;
 	status: 'APPROVED' | 'CHECKED_OUT' | 'RETURNED';
+	/**
+	 * Not booked here: a unit put into a kit after the kit was booked. Listed
+	 * with the kit it belongs to, and a tick books it and hands it out at once.
+	 * Only on the web's handout list (`HandoutOptions.extras`).
+	 */
+	kitAddition: boolean;
 	done: boolean;
 	received: boolean;
 	returnReported: boolean;
@@ -89,6 +98,8 @@ export interface HandoutView {
 	lines: ListLine[];
 	/** Units on the production in this step that other orgs hand over themselves. */
 	othersCount: number;
+	/** This user may put units on it that it has not booked — see `searchHandoutCandidates`. */
+	books: boolean;
 }
 
 /**
@@ -116,6 +127,8 @@ async function handoutScope(userId: string, productionId: string, organizationId
 			id: true,
 			name: true,
 			organizationId: true,
+			startDate: true,
+			endDate: true,
 			cancelledAt: true,
 			organization: { select: { name: true, shortName: true } }
 		}
@@ -153,8 +166,92 @@ async function handoutScope(userId: string, productionId: string, organizationId
 		sides,
 		side,
 		organizationIds: side.own ? (admin ? undefined : writable) : [side.organizationId],
-		byLender: side.own
+		byLender: side.own,
+		/** May put units on the production that it has not booked — see `kitAdditions`. */
+		books: side.own && (admin || writable.includes(production.organizationId))
 	};
+}
+
+type Scope = Awaited<ReturnType<typeof handoutScope>>;
+
+/**
+ * What the web's handout list adds to the plain one, which the scanner reads
+ * through /api/v1 unchanged:
+ *
+ * - on the hand-out list, units taken back while the production still runs.
+ *   Taking back by mistake happens, and a unit that is RETURNED was otherwise
+ *   on neither list's open side, so nothing offered to send it out again.
+ *   Once the production is over, what came back stays back.
+ * - units put into a booked kit after it was booked (`kitAdditions`).
+ */
+export interface HandoutOptions {
+	extras?: boolean;
+}
+
+function startOfToday() {
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	return today;
+}
+
+/** Still running, or not started: a unit taken back may go out again. */
+function stillRunning(production: { endDate: Date | null }) {
+	return !production.endDate || production.endDate >= startOfToday();
+}
+
+function statusesFor(mode: HandoutMode, production: Scope['production'], options: HandoutOptions) {
+	return mode === 'checkout' && options.extras && stillRunning(production)
+		? [...MODE_STATUSES.checkout, 'RETURNED']
+		: MODE_STATUSES[mode];
+}
+
+const CONFLICT_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT'];
+
+/**
+ * Units of a kit booked here that the production does not have: put into the
+ * kit after it was booked. The production page flags the kit as changed, but
+ * whoever packs it puts the whole case on the truck, so the handout list
+ * offers them too, under the kit's other units. Only for someone who may book
+ * the production (`books`), only units free for its dates, and only top-level
+ * units — accessories go out with them.
+ */
+async function kitAdditions(scope: Scope) {
+	if (!scope.books || scope.production.cancelledAt) return [];
+	const { production } = scope;
+	const kits = await prisma.productionItem.findMany({
+		where: {
+			productionId: production.id,
+			sourceBundleId: { not: null },
+			status: { in: ['APPROVED', 'CHECKED_OUT', 'RETURNED'] }
+		},
+		select: { sourceBundleId: true },
+		distinct: ['sourceBundleId']
+	});
+	if (kits.length === 0) return [];
+	const assets = await prisma.asset.findMany({
+		where: {
+			bundleId: { in: kits.map((k) => k.sourceBundleId!) },
+			parentAssetId: null,
+			...BOOKABLE_ASSET_WHERE,
+			...(scope.organizationIds ? { organizationId: { in: scope.organizationIds } } : {}),
+			...freeForProduction(production)
+		},
+		select: {
+			id: true,
+			assetTag: true,
+			organizationId: true,
+			location: { select: { name: true } },
+			product: {
+				select: {
+					name: true,
+					caption: true,
+					imagePath: true,
+					manufacturer: { select: { name: true } }
+				}
+			}
+		}
+	});
+	return assets;
 }
 
 function isDone(item: ListedItem, mode: HandoutMode) {
@@ -165,23 +262,41 @@ export async function getHandout(
 	userId: string,
 	productionId: string,
 	mode: HandoutMode,
-	organizationId?: string
+	organizationId?: string,
+	options: HandoutOptions = {}
 ): Promise<HandoutView> {
-	const { production, sides, side, organizationIds, byLender } = await handoutScope(
-		userId,
-		productionId,
-		organizationId
-	);
-	const [listed, total] = await Promise.all([
-		listItems(productionId, MODE_STATUSES[mode], organizationIds),
+	const scope = await handoutScope(userId, productionId, organizationId);
+	const { production, sides, side, organizationIds, byLender } = scope;
+	const statuses = statusesFor(mode, production, options);
+	const [listed, total, additions] = await Promise.all([
+		listItems(productionId, statuses, organizationIds),
 		prisma.productionItem.count({
-			where: { productionId, status: { in: MODE_STATUSES[mode] } }
-		})
+			where: { productionId, status: { in: statuses } }
+		}),
+		mode === 'checkout' && options.extras ? kitAdditions(scope) : []
 	]);
 	const productionOrgId = production.organizationId;
 
-	const items: HandoutItem[] = nestAndSort(
-		listed.map((item) => {
+	const items: HandoutItem[] = nestAndSort([
+		...additions.map((asset) => ({
+			assetId: asset.id,
+			assetTag: asset.assetTag,
+			productName: asset.product.name,
+			productCaption: asset.product.caption,
+			productImagePath: asset.product.imagePath,
+			manufacturerName: asset.product.manufacturer?.name ?? null,
+			lentBy: null,
+			accessoryOf: null,
+			group: asset.location
+				? { kind: 'location' as const, name: asset.location.name }
+				: { kind: 'none' as const, name: null },
+			status: 'APPROVED' as const,
+			kitAddition: true,
+			done: false,
+			received: false,
+			returnReported: false
+		})),
+		...listed.map((item) => {
 			const lent = item.asset.organizationId !== productionOrgId;
 			return {
 				assetId: item.assetId,
@@ -194,12 +309,13 @@ export async function getHandout(
 				accessoryOf: item.asset.parentAssetId,
 				group: groupOf(item, productionOrgId, byLender),
 				status: item.status as HandoutItem['status'],
+				kitAddition: false,
 				done: isDone(item, mode),
 				received: lent && item.receivedAt !== null,
 				returnReported: lent && item.returnReportedAt !== null
 			};
 		})
-	);
+	]);
 
 	return {
 		mode,
@@ -213,7 +329,8 @@ export async function getHandout(
 			done: isDone(item, mode),
 			undoable: true
 		})),
-		othersCount: total - listed.length
+		othersCount: total - listed.length,
+		books: scope.books
 	};
 }
 
@@ -235,11 +352,16 @@ export async function handoutSummary(userId: string, productionId: string) {
 		_count: true
 	});
 	const count = (status: string) => items.find((i) => i.status === status)?._count ?? 0;
+	const additions = await kitAdditions(scope);
 	return {
 		cancelled: scope.production.cancelledAt !== null,
 		approved: count('APPROVED'),
 		checkedOut: count('CHECKED_OUT'),
-		returned: count('RETURNED')
+		returned: count('RETURNED'),
+		/** Units put into a booked kit since, which the handout list offers too. */
+		kitAdditions: additions.length,
+		/** Whether what was taken back may still go out again — see `HandoutOptions`. */
+		running: stillRunning(scope.production)
 	};
 }
 
@@ -384,10 +506,15 @@ export async function setHandoutLineCount(
 	productionId: string,
 	mode: HandoutMode,
 	key: string,
-	count: number
+	count: number,
+	options: HandoutOptions = {}
 ) {
 	const { production, organizationIds, byLender } = await handoutScope(userId, productionId);
-	const listed = await listItems(productionId, MODE_STATUSES[mode], organizationIds);
+	const listed = await listItems(
+		productionId,
+		statusesFor(mode, production, options),
+		organizationIds
+	);
 	const byId = new Map(listed.map((i) => [i.assetId, i]));
 	const state = (assetId: string) => ({
 		done: byId.has(assetId) && isDone(byId.get(assetId)!, mode),
@@ -410,6 +537,173 @@ export async function setHandoutLineCount(
 		);
 	}
 	return { result: { done: line.done + add.length - remove.length }, affected };
+}
+
+// ---------------------------------------------------------------------------
+// Handing out what was never booked, found by name
+
+export interface HandoutCandidate {
+	/** Product, shelf and owner: units under one key are interchangeable here. */
+	key: string;
+	productId: string;
+	organizationId: string;
+	locationId: string;
+	productName: string;
+	productCaption: string | null;
+	productImagePath: string | null;
+	manufacturerName: string | null;
+	locationName: string;
+	organizationName: string;
+	/** Free for the production's dates, not out anywhere, not on it already. */
+	available: number;
+	/** Of those, how many carry no tag — the ones a scan cannot reach. */
+	untagged: number;
+}
+
+function freeForProduction(production: Scope['production']) {
+	return {
+		productionItems: {
+			none: {
+				OR: [
+					{ productionId: production.id },
+					{ status: 'CHECKED_OUT' },
+					...(production.startDate && production.endDate
+						? [
+								{
+									status: { in: CONFLICT_STATUSES },
+									production: {
+										startDate: { not: null, lte: production.endDate },
+										endDate: { not: null, gte: production.startDate }
+									}
+								}
+							]
+						: [])
+				]
+			}
+		}
+	} satisfies Prisma.AssetWhereInput;
+}
+
+/**
+ * Units of this user's orgs whose product matches `text`, for handing out
+ * something the list does not have: a scan adds a tagged unit, but a cable
+ * without a tag has nothing to scan. Kit members and accessories are left out —
+ * they go with their kit or their unit. Grouped by product, shelf and owner,
+ * as the counted lines are.
+ */
+export async function searchHandoutCandidates(
+	userId: string,
+	productionId: string,
+	text: string
+): Promise<HandoutCandidate[]> {
+	const scope = await handoutScope(userId, productionId);
+	const words = text.trim().split(/\s+/).filter(Boolean);
+	if (!scope.books || scope.production.cancelledAt || words.join('').length < 2) return [];
+	const assets = await prisma.asset.findMany({
+		where: {
+			...(scope.organizationIds ? { organizationId: { in: scope.organizationIds } } : {}),
+			parentAssetId: null,
+			bundleId: null,
+			...BOOKABLE_ASSET_WHERE,
+			...freeForProduction(scope.production),
+			AND: words.map((word) => ({
+				OR: [
+					{ product: { name: { contains: word, mode: 'insensitive' as const } } },
+					{ product: { caption: { contains: word, mode: 'insensitive' as const } } },
+					{
+						product: { manufacturer: { name: { contains: word, mode: 'insensitive' as const } } }
+					},
+					{ assetTag: { contains: word, mode: 'insensitive' as const } }
+				]
+			}))
+		},
+		select: {
+			assetTag: true,
+			productId: true,
+			organizationId: true,
+			locationId: true,
+			location: { select: { name: true } },
+			organization: { select: { name: true, shortName: true } },
+			product: {
+				select: {
+					name: true,
+					caption: true,
+					imagePath: true,
+					manufacturer: { select: { name: true } }
+				}
+			}
+		},
+		take: 2000
+	});
+	const groups = new Map<string, HandoutCandidate>();
+	for (const asset of assets) {
+		const key = `${asset.productId}|${asset.locationId}|${asset.organizationId}`;
+		const group = groups.get(key) ?? {
+			key,
+			productId: asset.productId,
+			organizationId: asset.organizationId,
+			locationId: asset.locationId,
+			productName: asset.product.name,
+			productCaption: asset.product.caption,
+			productImagePath: asset.product.imagePath,
+			manufacturerName: asset.product.manufacturer?.name ?? null,
+			locationName: asset.location.name,
+			organizationName: asset.organization.shortName || asset.organization.name,
+			available: 0,
+			untagged: 0
+		};
+		group.available += 1;
+		if (!asset.assetTag) group.untagged += 1;
+		groups.set(key, group);
+	}
+	return [...groups.values()]
+		.sort(
+			(a, b) =>
+				naturalCompare(a.productName, b.productName) ||
+				naturalCompare(a.locationName, b.locationName)
+		)
+		.slice(0, 40);
+}
+
+/**
+ * Hands out up to `count` units of one search result. Untagged units go first —
+ * those are what the search is for; a tagged one is better scanned, so that
+ * the tag on the shelf and the one on the list agree — then by unit number.
+ */
+export async function handOutCandidates(
+	userId: string,
+	productionId: string,
+	group: { productId: string; organizationId: string; locationId: string },
+	count: number
+) {
+	const scope = await handoutScope(userId, productionId);
+	if (!scope.books) throw new CheckoutError('forbidden', 'No access to this production');
+	const free = await prisma.asset.findMany({
+		where: {
+			productId: group.productId,
+			organizationId: group.organizationId,
+			locationId: group.locationId,
+			parentAssetId: null,
+			bundleId: null,
+			...BOOKABLE_ASSET_WHERE,
+			...freeForProduction(scope.production)
+		},
+		select: { id: true, assetTag: true, orgIndex: true }
+	});
+	// Someone else may have taken some in the meantime: what is left goes, and
+	// the count says how many that was.
+	const picked = free
+		.sort(
+			(a, b) => Number(a.assetTag !== null) - Number(b.assetTag !== null) || a.orgIndex - b.orgIndex
+		)
+		.slice(0, count);
+	if (picked.length === 0) return { result: { count: 0 }, affected: emptyAffected() };
+	const { result, affected } = await performBulkCheckout(userId, {
+		assetIds: picked.map((a) => a.id),
+		targetType: 'production',
+		targetId: productionId
+	});
+	return { result: { count: result.count }, affected };
 }
 
 // ---------------------------------------------------------------------------

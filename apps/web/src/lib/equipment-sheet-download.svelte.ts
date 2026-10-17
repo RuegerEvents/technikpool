@@ -1,10 +1,23 @@
 import { toast } from 'svelte-sonner';
-import { streamEquipmentSheet } from '#lib/remote/equipment-sheets.remote.js';
+import {
+	streamEquipmentSheet,
+	streamOrgEquipmentList
+} from '#lib/remote/equipment-sheets.remote.js';
 import { getErrorMessage } from '#lib/utils.js';
-import { sheetFraction, type SheetKind, type SheetProgress } from '#lib/equipment-sheet.js';
+import {
+	sheetFraction,
+	type OrgListLayout,
+	type SheetKind,
+	type SheetProgress,
+	type SheetStep
+} from '#lib/equipment-sheet.js';
 
 export function sheetTitle(kind: SheetKind) {
 	return kind === 'delivery-note' ? 'Delivery note' : 'Packing list';
+}
+
+export function orgListTitle(layout: OrgListLayout) {
+	return layout === 'catalogue' ? 'Equipment list' : 'Inventory list';
 }
 
 export function stageLabel(stage: SheetProgress['stage']) {
@@ -70,7 +83,8 @@ function waitingTab(tab: Window, title: string) {
 }
 
 /**
- * Builds a delivery note or packing list and opens it in a new tab.
+ * Builds a delivery note, packing list or org equipment list and opens it in
+ * a new tab.
  *
  * The tab is opened on the click and filled once the PDF is there: a tab
  * opened after waiting is no longer the click's doing, and browsers block it
@@ -79,32 +93,39 @@ function waitingTab(tab: Window, title: string) {
  * offered in a toast at the end.
  */
 export class SheetDownload {
-	kind = $state<SheetKind | null>(null);
+	/** What is being made, while it is: the progress card's heading. */
+	title = $state<string | null>(null);
 	progress = $state<SheetProgress | null>(null);
 	/** The whole job, 0–1. */
 	fraction = $state(0);
 
 	get busy() {
-		return this.kind !== null;
+		return this.title !== null;
 	}
 
-	async open(kind: SheetKind, productionId: string, org: string | null) {
-		if (this.kind) return;
-		const title = sheetTitle(kind);
+	open(kind: SheetKind, productionId: string, org: string | null) {
+		return this.run(sheetTitle(kind), () =>
+			streamEquipmentSheet({ kind, productionId, org, request: crypto.randomUUID() })
+		);
+	}
+
+	/** An org's whole equipment; `prices` for those who may read them. */
+	openOrgList(organizationId: string, layout: OrgListLayout, prices: boolean) {
+		return this.run(orgListTitle(layout), () =>
+			streamOrgEquipmentList({ organizationId, layout, prices, request: crypto.randomUUID() })
+		);
+	}
+
+	private async run(title: string, start: () => AsyncIterable<SheetStep>) {
+		if (this.title) return;
 		const tab = window.open('', '_blank');
 		const showInTab = tab ? waitingTab(tab, title) : null;
-		this.kind = kind;
+		this.title = title;
 		this.progress = null;
 		this.fraction = 0;
 		let withPreviews = false;
 		try {
-			const steps = streamEquipmentSheet({
-				kind,
-				productionId,
-				org,
-				request: crypto.randomUUID()
-			});
-			for await (const step of steps) {
+			for await (const step of start()) {
 				if (step.type === 'progress') {
 					withPreviews ||= step.progress.stage === 'previews';
 					this.progress = step.progress;
@@ -132,7 +153,7 @@ export class SheetDownload {
 			tab?.close();
 			toast.error(getErrorMessage(err));
 		} finally {
-			this.kind = null;
+			this.title = null;
 			this.progress = null;
 		}
 	}

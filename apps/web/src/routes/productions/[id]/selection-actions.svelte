@@ -27,11 +27,14 @@
 	let {
 		productionId,
 		cancelled,
+		running,
 		items,
 		onDone
 	}: {
 		productionId: string;
 		cancelled: boolean;
+		/** Not over yet: what was taken back may go out again — a mistake, say. */
+		running: boolean;
 		items: SelectedItem[];
 		onDone: () => void;
 	} = $props();
@@ -44,7 +47,9 @@
 	let bookable = $derived(
 		items.filter((i) => page.data.isAdmin || writableOrgIds.has(i.asset.organizationId))
 	);
-	let toHandOut = $derived(bookable.filter((i) => i.status === 'APPROVED'));
+	let toHandOut = $derived(
+		bookable.filter((i) => i.status === 'APPROVED' || (running && i.status === 'RETURNED'))
+	);
 	let toTakeBack = $derived(bookable.filter((i) => i.status === 'CHECKED_OUT'));
 
 	// The check whose list holds the whole selection: the production's own sees

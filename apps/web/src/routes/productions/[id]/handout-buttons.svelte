@@ -11,12 +11,20 @@
 
 	let summaryQuery = $derived(getHandoutSummary(productionId));
 	let summary = $derived(summaryQuery.current);
+	// Booked and still on the shelf, kit members added since the kit was
+	// booked, and — while the production runs — what was taken back, which may
+	// have been a mistake. Only the first two are counted: the last is offered,
+	// not owed.
+	let toHandOut = $derived(summary ? summary.approved + summary.kitAdditions : 0);
+	let offersHandout = $derived(
+		!!summary && !cancelled && (toHandOut > 0 || (summary.running && summary.returned > 0))
+	);
 </script>
 
 {#if summary}
-	{#if !cancelled && summary.approved > 0}
+	{#if offersHandout}
 		<Button variant="secondary" href={resolve(`productions/${productionId}/checkout`)}
-			>Hand out ({summary.approved})</Button
+			>{toHandOut > 0 ? `Hand out (${toHandOut})` : 'Hand out'}</Button
 		>
 	{/if}
 	{#if summary.checkedOut > 0}

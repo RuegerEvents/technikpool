@@ -539,6 +539,8 @@ export async function performScan(
 	}
 
 	const lent = asset.organizationId !== production.organizationId;
+	const kit =
+		!alreadyBooked.has(asset.id) && (await bookedKits(production.id, [asset.bundleId])).size > 0;
 	await prisma.$transaction(async (tx) => {
 		await checkOutExisting(tx, existingItems, lent, role.borrower, userId);
 		if (standIn) {
@@ -557,6 +559,7 @@ export async function performScan(
 					sourceParentAssetId: accessories.some((accessory) => accessory.id === assetId)
 						? asset.id
 						: null,
+					sourceBundleId: assetId === asset.id && kit ? asset.bundleId : null,
 					status: 'CHECKED_OUT',
 					...handoverOnCheckout(lent, role.borrower, userId)
 				}))
@@ -585,6 +588,23 @@ export async function performScan(
 		},
 		affected
 	};
+}
+
+/**
+ * The kits among `bundleIds` that the production has booked. A unit going out
+ * that belongs to one of them — put into the kit after it was booked — joins
+ * the kit's booking rather than becoming a line of its own, so the production
+ * lists and bills the kit whole.
+ */
+async function bookedKits(productionId: string, bundleIds: (string | null)[]) {
+	const ids = [...new Set(bundleIds.filter((id): id is string => id !== null))];
+	if (ids.length === 0) return new Set<string>();
+	const items = await prisma.productionItem.findMany({
+		where: { productionId, sourceBundleId: { in: ids } },
+		select: { sourceBundleId: true },
+		distinct: ['sourceBundleId']
+	});
+	return new Set(items.map((i) => i.sourceBundleId!));
 }
 
 /**
@@ -858,6 +878,10 @@ export async function performBulkCheckout(
 	if (!role.asProduction) {
 		assertLenderMayHandOver(existingItems, input.assetIds, undefined, standIns);
 	}
+	const kits = await bookedKits(
+		production.id,
+		assets.map((a) => a.bundleId)
+	);
 
 	for (const asset of assets) {
 		const existing = existingItems.find((i) => i.assetId === asset.id);
@@ -879,6 +903,7 @@ export async function performBulkCheckout(
 					productionId: input.targetId,
 					assetId: asset.id,
 					sourceParentAssetId: asset.parentAssetId,
+					sourceBundleId: asset.bundleId && kits.has(asset.bundleId) ? asset.bundleId : null,
 					status: 'CHECKED_OUT',
 					...handoverOnCheckout(lent, role.borrower, userId)
 				}
