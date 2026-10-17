@@ -1,5 +1,27 @@
 [
 	{
+		"version": "0.32.0",
+		"date": "2026-10-17",
+		"en": [
+			"Offers and invoices: a discount \"down to\" a fixed price now keeps that price, net or gross, when lines are added or removed, instead of freezing the amount it worked out once. Typing into the discount editor no longer breaks the page.",
+			"Production page: statuses are coloured dots with a tooltip, so the product column has room again. A Location column shows where each unit is kept (with the lender for lent units), and every unit shows its tag and serial number.",
+			"Handing out: the list offers units added to a kit after it was booked and, while the production runs, units taken back by mistake. Untagged units such as cables can be found by name and handed out by number. Ticks and counts show at once.",
+			"Devices: the ⋯ menu prints an equipment list of the whole organization, as a catalogue by category or an inventory by location, with rental prices per day if you like.",
+			"Adding devices is one form everywhere, including the dialog inside a kit. A new product you type in shows as picked, the tag field shows the next free number, and automatic numbering starts over from the lowest free number. An org's counter can be set back on its settings page.",
+			"The Organizations page is a table that shows each organization's number of devices.",
+			"In German the asset tag is now called \"Inventarnummer\" everywhere, and every scan field says that a serial number works too."
+		],
+		"de": [
+			"Angebote und Rechnungen: Ein Rabatt „bis zu“ einem Festpreis hält diesen Preis, netto oder brutto, auch wenn Positionen dazukommen oder wegfallen, statt den einmal errechneten Betrag festzuschreiben. Tippen im Rabatt-Editor bringt die Seite nicht mehr zum Absturz.",
+			"Produktionsseite: Status sind farbige Punkte mit Tooltip, damit die Produktspalte wieder Platz hat. Eine Spalte „Standort“ zeigt, wo jedes Gerät steht (bei geliehenen mit dem Verleiher), und jedes Gerät zeigt Inventar- und Seriennummer.",
+			"Ausgeben: Die Liste bietet Geräte an, die nach der Buchung in ein Case kamen, und während der Produktion versehentlich zurückgenommene. Geräte ohne Inventarnummer wie Kabel lassen sich per Namen finden und in einer Anzahl ausgeben. Haken und Zahlen erscheinen sofort.",
+			"Geräte: Im ⋯-Menü gibt es eine Equipmentliste der ganzen Organisation, als Katalog nach Kategorie oder als Inventar nach Standort, wahlweise mit Mietpreisen pro Tag.",
+			"Geräte anlegen ist überall ein Formular, auch im Dialog innerhalb eines Cases. Ein neu eingetipptes Produkt erscheint als ausgewählt, das Feld für die Inventarnummer zeigt die nächste freie, und die automatische Nummerierung beginnt wieder bei der niedrigsten freien Nummer. Den Zähler einer Organisation kann man in ihren Einstellungen zurücksetzen.",
+			"Die Seite Organisationen ist eine Tabelle und zeigt, wie viele Geräte jede Organisation hat.",
+			"Die Inventarnummer heißt jetzt überall „Inventarnummer“, und jedes Scanfeld sagt, dass auch eine Seriennummer geht."
+		]
+	},
+	{
 		"version": "0.31.1",
 		"date": "2026-10-04",
 		"en": [
