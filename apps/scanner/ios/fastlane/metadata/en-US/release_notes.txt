@@ -1,5 +1,4 @@
-• Checking, handing out and taking back show each product's picture beside its row, and tapping anywhere on a row ticks it.
-• After you scan or tick a unit that has accessories, the app asks whether all of them go along, are there or are back. Untick what is missing and it stays open on the list.
-• Counting identical units starts at the booked number and refuses more than are booked.
-• A case check no longer counts units that are out on another job as missing.
-• In German the asset tag is now called "Inventarnummer", and the scan field says that a serial number works too.
+• New: DGUV inspection, under Scans › Stocktake. Pick the date and inspector once, then scan device after device — each scan records an inspection. Switch to "Failed" for a device that fails, and it is marked broken. Every entry can be undone. Needs the Admin role.
+• Lookup shows a device's inspection: its interval, when the next one is due and the latest inspections.
+• A kit's own sticker hands out, takes back or checks every unit in it, and the lists show a kit's units under its heading.
+• Product pictures in the accessory and kit questions and when counting. A finished handout now says "Ausgegeben", and scanning the same unit twice says so.

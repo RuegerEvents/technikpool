@@ -1,5 +1,4 @@
-• Beim Prüfen, Ausgeben und Zurücknehmen steht neben jeder Zeile das Produktbild, und ein Tipp irgendwo auf die Zeile hakt sie ab.
-• Nach dem Scannen oder Abhaken eines Geräts mit Zubehör fragt die App, ob alles mitgeht, da oder zurück ist. Was fehlt, abwählen – es bleibt dann auf der Liste offen.
-• Beim Zählen gleicher Geräte steht die gebuchte Anzahl schon drin, und mehr als gebucht nimmt die App nicht an.
-• Ein Case-Check zählt Geräte, die gerade auf einem anderen Job sind, nicht mehr als fehlend.
-• Die Inventarnummer heißt jetzt „Inventarnummer“, und das Scanfeld sagt, dass auch eine Seriennummer geht.
+• Neu: Prüfen (DGUV), unter Scans › Inventur. Einmal Datum und Prüfer wählen, dann Gerät für Gerät scannen — jeder Scan erfasst eine Prüfung. Für ein Gerät, das durchfällt, auf „Nicht bestanden“ umschalten, dann wird es als defekt markiert. Jeder Eintrag lässt sich rückgängig machen. Braucht die Admin-Rolle.
+• Nachschlagen zeigt die Prüfung eines Geräts: Intervall, nächste Fälligkeit und die letzten Prüfungen.
+• Der Sticker eines Bundles gibt alle Geräte darin aus, nimmt sie zurück oder prüft sie, und die Listen zeigen die Geräte eines Bundles unter seiner Überschrift.
+• Produktbilder bei den Fragen nach Zubehör und Bundle und beim Zählen. Eine Ausgabe meldet jetzt „Ausgegeben“, und ein doppelter Scan desselben Geräts wird angezeigt.
