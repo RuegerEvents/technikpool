@@ -27,8 +27,11 @@
 		updateOrg,
 		getOrgIdentityInUse,
 		getNextAssetTag,
+		getAssetTagSuggestion,
+		resetAssetTagCounter,
 		setAutoAssetTags
 	} from '#lib/remote/orgs.remote.js';
+	import { confirmAction } from '#lib/confirm.svelte.js';
 	import { page } from '$app/state';
 	import { goto, refreshAll } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
@@ -68,6 +71,31 @@
 	let nextTagQuery = $derived(canNumber ? getNextAssetTag(orgId) : null);
 	let nextTag = $derived(nextTagQuery?.current ?? null);
 	let savingAutoTags = $state(false);
+	// Whether the counter has run ahead of every number in use — a sticker
+	// typed high, or the unit carrying it deleted since.
+	let tagSuggestionQuery = $derived(canNumber ? getAssetTagSuggestion(orgId) : null);
+	let tagSuggestion = $derived(tagSuggestionQuery?.current ?? null);
+
+	async function resetCounter() {
+		if (!tagSuggestion) return;
+		const ok = await confirmAction({
+			title: `Reset the counter to ${tagSuggestion.resetTo}?`,
+			description: tagSuggestion.highest
+				? `The highest number a device carries is ${tagSuggestion.highest}. Numbers above it become free again, including those of deleted devices.`
+				: 'No device carries a number yet. Numbering starts over, including the numbers of deleted devices.',
+			confirmLabel: 'Reset'
+		});
+		if (!ok) return;
+		savingAutoTags = true;
+		try {
+			await resetAssetTagCounter(orgId);
+			toast.success('Counter reset');
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			savingAutoTags = false;
+		}
+	}
 
 	async function toggleAutoTags(enabled: boolean) {
 		savingAutoTags = true;
@@ -927,6 +955,25 @@
 					Next number: <span class="font-mono">{nextTag}</span>. A number is never handed out twice,
 					even after its device is deleted.
 				</p>
+				{#if tagSuggestion?.counterAhead}
+					<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+						<span>
+							{#if tagSuggestion.highest}
+								The highest number in use is <span class="font-mono">{tagSuggestion.highest}</span>
+								— the counter is further ahead.
+							{:else}
+								No device carries a number yet, but the counter is further ahead.
+							{/if}
+						</span>
+						<button
+							type="button"
+							disabled={savingAutoTags}
+							onclick={resetCounter}
+							class="font-medium text-foreground underline underline-offset-2 hover:no-underline disabled:opacity-50"
+							>Reset counter to {tagSuggestion.resetTo}</button
+						>
+					</div>
+				{/if}
 			{:else if !enabled}
 				<p class="text-xs text-muted-foreground">
 					Off: a device gets its tag by typing or scanning the sticker.

@@ -12726,3 +12726,38 @@ msgstr "Registered and attached to {0}{1} in one step. It inherits that unit's l
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "Registered and attached to {0}{1} in one step. It inherits that unit's location."
 msgstr "Registered and attached to {0}{1} in one step. It inherits that unit's location."
+
+#. 0: tagSuggestion.resetTo
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Reset the counter to {0}?"
+msgstr "Reset the counter to {0}?"
+
+#. 0: tagSuggestion.highest
+#: src/routes/orgs/[id]/+page.svelte
+msgid "The highest number a device carries is {0}. Numbers above it become free again, including those of deleted devices."
+msgstr "The highest number a device carries is {0}. Numbers above it become free again, including those of deleted devices."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "No device carries a number yet. Numbering starts over, including the numbers of deleted devices."
+msgstr "No device carries a number yet. Numbering starts over, including the numbers of deleted devices."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Reset"
+msgstr "Reset"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Counter reset"
+msgstr "Counter reset"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "The highest number in use is <0/> — the counter is further ahead."
+msgstr "The highest number in use is <0/> — the counter is further ahead."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "No device carries a number yet, but the counter is further ahead."
+msgstr "No device carries a number yet, but the counter is further ahead."
+
+#. 0: tagSuggestion.resetTo
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Reset counter to {0}"
+msgstr "Reset counter to {0}"

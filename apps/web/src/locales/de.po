@@ -12726,3 +12726,38 @@ msgstr "Wird in einem Schritt angelegt und an {0}{1} angehängt. Es übernimmt S
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "Registered and attached to {0}{1} in one step. It inherits that unit's location."
 msgstr "Wird in einem Schritt angelegt und an {0}{1} angehängt. Es übernimmt den Standort dieser Einheit."
+
+#. 0: tagSuggestion.resetTo
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Reset the counter to {0}?"
+msgstr "Zähler auf {0} zurücksetzen?"
+
+#. 0: tagSuggestion.highest
+#: src/routes/orgs/[id]/+page.svelte
+msgid "The highest number a device carries is {0}. Numbers above it become free again, including those of deleted devices."
+msgstr "Die höchste vergebene Inventarnummer ist {0}. Die Nummern darüber werden wieder frei – auch die von gelöschten Geräten."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "No device carries a number yet. Numbering starts over, including the numbers of deleted devices."
+msgstr "Noch kein Gerät hat eine Inventarnummer. Die Nummerierung beginnt von vorn – auch mit den Nummern gelöschter Geräte."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Reset"
+msgstr "Zurücksetzen"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Counter reset"
+msgstr "Zähler zurückgesetzt"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "The highest number in use is <0/> — the counter is further ahead."
+msgstr "Die höchste vergebene Inventarnummer ist <0/> – der Zähler steht weiter vorn."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "No device carries a number yet, but the counter is further ahead."
+msgstr "Noch kein Gerät hat eine Inventarnummer, der Zähler steht aber schon weiter vorn."
+
+#. 0: tagSuggestion.resetTo
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Reset counter to {0}"
+msgstr "Zähler auf {0} zurücksetzen"

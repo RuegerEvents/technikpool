@@ -12,7 +12,7 @@ import {
 	requireOrgInventory,
 	requireOrgOwner
 } from '#lib/server/services/access.js';
-import { peekNextTag, suggestTag } from '#lib/server/services/tag-counter.js';
+import { peekNextTag, resetTagCounter, suggestTag } from '#lib/server/services/tag-counter.js';
 import { appError } from '#lib/errors.js';
 import { isValidBic, isValidIban } from '#lib/bank-account.svelte.js';
 import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
@@ -130,6 +130,14 @@ export const getNextAssetTag = query(v.string(), async (orgId: string) => {
 export const getAssetTagSuggestion = query(v.string(), async (orgId: string) => {
 	await requireOrgInventory(orgId);
 	return suggestTag(prisma, orgId);
+});
+
+/** Sets the org's tag counter back to the numbers actually in use — see `resetTagCounter`. */
+export const resetAssetTagCounter = command(v.string(), async (orgId: string) => {
+	await requireOrgInventory(orgId);
+	await resetTagCounter(prisma, orgId);
+	await getNextAssetTag(orgId).refresh();
+	await getAssetTagSuggestion(orgId).refresh();
 });
 
 /**
