@@ -114,7 +114,6 @@ msgstr "Done"
 msgid "No assets found."
 msgstr "No assets found."
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -174,6 +173,8 @@ msgid "Crew"
 msgstr "Crew"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/asset-form/asset-form.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
@@ -185,7 +186,6 @@ msgstr "Crew"
 #: src/lib/components/ui/image-upload/image-upload.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
 #: src/lib/components/ui/license-credentials/license-credentials.svelte
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-documents/product-documents.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
@@ -207,8 +207,6 @@ msgstr "Crew"
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/equipment-list-modal.svelte
-#: src/routes/assets/new/+page.svelte
-#: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/inspections/+page.svelte
 #: src/routes/invoices/[id]/invoice-detail.svelte
@@ -323,14 +321,13 @@ msgid "Remove"
 msgstr "Remove"
 
 #: src/lib/components/CsvImportModal.svelte
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-#: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 msgid "Manufacturer"
@@ -424,20 +421,20 @@ msgid "Decline some…"
 msgstr "Decline some…"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/asset-form/asset-form.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/new/+page.svelte
-#: src/routes/assets/new/+page.svelte
 msgid "Serial Number"
 msgstr "Serial Number"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/asset-form/asset-form.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/new/+page.svelte
-#: src/routes/assets/new/+page.svelte
 msgid "Asset Tag"
 msgstr "Asset Tag"
 
@@ -450,6 +447,7 @@ msgid "Bundle"
 msgstr "Bundle"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/billing-issues/billing-issues.svelte
 #: src/routes/admin/legal/+page.svelte
@@ -459,7 +457,6 @@ msgstr "Bundle"
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/equipment-list-modal.svelte
 #: src/routes/assets/license-list.svelte
-#: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/offers/new/+page.svelte
 #: src/routes/orgs/+page.svelte
@@ -691,13 +688,11 @@ msgstr "Revoke Admin"
 msgid "Make Admin"
 msgstr "Make Admin"
 
-#: src/routes/assets/new/+page.svelte
-msgid "Please select a manufacturer"
-msgstr "Please select a manufacturer"
+#~ msgid "Please select a manufacturer"
+#~ msgstr "Please select a manufacturer"
 
-#: src/routes/assets/new/+page.svelte
-msgid "Please select a product"
-msgstr "Please select a product"
+#~ msgid "Please select a product"
+#~ msgstr "Please select a product"
 
 #~ msgid "Asset created!"
 #~ msgstr "Asset created!"
@@ -710,21 +705,21 @@ msgstr "Add New Asset"
 msgid "Register new equipment into your organization's inventory."
 msgstr "Register new equipment into your organization's inventory."
 
-#: src/routes/assets/new/+page.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "Search or create manufacturer…"
 msgstr "Search or create manufacturer…"
 
-#: src/routes/assets/new/+page.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "Product Model"
 msgstr "Product Model"
 
-#: src/routes/assets/new/+page.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "Search or create product…"
 msgstr "Search or create product…"
 
+#: src/lib/components/asset-form/asset-form.svelte
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/count-stepper/count-stepper.svelte
-#: src/routes/assets/new/+page.svelte
 msgid "Quantity"
 msgstr "Quantity"
 
@@ -1308,6 +1303,7 @@ msgstr "Asset"
 #~ msgid "Update serial, tag, status, and location."
 #~ msgstr "Update serial, tag, status, and location."
 
+#: src/lib/components/asset-form/asset-form.svelte
 #: src/lib/components/ui/customer-select/customer-select.svelte
 #: src/routes/admin/connectors/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -1321,9 +1317,9 @@ msgid "Edit"
 msgstr "Edit"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -1332,7 +1328,6 @@ msgstr "Edit"
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
-#: src/routes/assets/new/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/checkout/+page.svelte
@@ -1381,13 +1376,12 @@ msgstr "Location"
 msgid "Save"
 msgstr "Save"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-#: src/routes/assets/new/+page.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 #: src/routes/assets/new/cables/+page.svelte
 msgid "Please select a location"
 msgstr "Please select a location"
 
-#: src/routes/assets/new/+page.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 #: src/routes/assets/new/cables/+page.svelte
 msgid "No locations yet. Create one in <0>Locations</0>."
 msgstr "No locations yet. Create one in <0>Locations</0>."
@@ -1916,7 +1910,6 @@ msgstr "Category"
 #~ msgstr "Miscellaneous"
 
 #: src/routes/assets/bundles/new/+page.svelte
-#: src/routes/assets/new/+page.svelte
 msgid "Please select a category"
 msgstr "Please select a category"
 
@@ -2006,29 +1999,22 @@ msgstr "Edit Product"
 msgid "Changes apply to all assets of this product type."
 msgstr "Changes apply to all assets of this product type."
 
-#: src/routes/assets/new/+page.svelte
-msgid "Please complete the new product details"
-msgstr "Please complete the new product details"
+#~ msgid "Please complete the new product details"
+#~ msgstr "Please complete the new product details"
 
-#: src/routes/assets/new/+page.svelte
-msgid "· has image"
-msgstr "· has image"
+#~ msgid "· has image"
+#~ msgstr "· has image"
 
-#. 0: categories.find((c) => c.id === pendingProduct?.categoryId) ?.name ?? ''
-#: src/routes/assets/new/+page.svelte
-msgid "New product · {0} <0/>"
-msgstr "New product · {0} <0/>"
+#~ msgid "New product · {0} <0/>"
+#~ msgstr "New product · {0} <0/>"
 
-#: src/routes/assets/new/+page.svelte
-msgid "Create New Product"
-msgstr "Create New Product"
+#~ msgid "Create New Product"
+#~ msgstr "Create New Product"
 
-#: src/routes/assets/new/+page.svelte
-msgid "Fill in the details for the new product model."
-msgstr "Fill in the details for the new product model."
+#~ msgid "Fill in the details for the new product model."
+#~ msgstr "Fill in the details for the new product model."
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-#: src/routes/assets/new/+page.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "Add Product"
 msgstr "Add Product"
 
@@ -2285,7 +2271,7 @@ msgstr "Bundle changed"
 msgid "Update from bundle"
 msgstr "Update from bundle"
 
-#: src/routes/assets/new/+page.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "<0/> No asset tag (e.g. cables, consumables)"
 msgstr "<0/> No asset tag (e.g. cables, consumables)"
 
@@ -2915,8 +2901,8 @@ msgstr "Avatar label"
 msgid "Color and a 2-letter label identify this org at a glance in the calendar and device lists."
 msgstr "Color and a 2-letter label identify this org at a glance in the calendar and device lists."
 
-#: src/routes/assets/new/+page.svelte
-#: src/routes/assets/new/+page.svelte
+#: src/lib/components/asset-form/asset-form.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "Manufacturer logo"
 msgstr "Manufacturer logo"
 
@@ -4326,8 +4312,8 @@ msgstr "Set status…"
 msgid "Applying…"
 msgstr "Applying…"
 
+#: src/lib/components/asset-form/asset-form.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
-#: src/routes/assets/new/+page.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Apply"
 msgstr "Apply"
@@ -4775,17 +4761,17 @@ msgstr "Detached from <0/>"
 #~ msgid "· Next due: {0}"
 #~ msgstr "· Next due: {0}"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "Please choose or name a manufacturer"
 msgstr "Please choose or name a manufacturer"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/asset-form/asset-form.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "Please choose or name a product"
 msgstr "Please choose or name a product"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/asset-form/asset-form.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "A new product needs a category"
 msgstr "A new product needs a category"
 
@@ -4802,21 +4788,19 @@ msgstr "{0} accessories created and attached"
 msgid "Search this organisation's devices, or type a new one…"
 msgstr "Search this organisation's devices, or type a new one…"
 
+#: src/lib/components/asset-form/asset-form.svelte
 #: src/lib/components/ui/customer-select/customer-select.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "New"
 msgstr "New"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-msgid "Search or type a new one…"
-msgstr "Search or type a new one…"
+#~ msgid "Search or type a new one…"
+#~ msgstr "Search or type a new one…"
 
 #~ msgid "\"{0}\" is new, so it needs a category. It becomes a product like any other — the next unit of it is picked from the list."
 #~ msgstr "\"{0}\" is new, so it needs a category. It becomes a product like any other — the next unit of it is picked from the list."
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/productions/[id]/handout-search.svelte
 msgid "How many"
@@ -4825,7 +4809,6 @@ msgstr "How many"
 #~ msgid "Two omega brackets on one fixture is one entry here, not two."
 #~ msgstr "Two omega brackets on one fixture is one entry here, not two."
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
 #: src/routes/assets/+page.svelte
 msgid "Serial number"
 msgstr "Serial number"
@@ -4833,16 +4816,14 @@ msgstr "Serial number"
 #~ msgid "Leave blank for the next free number"
 #~ msgstr "Leave blank for the next free number"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-msgid "Asset tag"
-msgstr "Asset tag"
+#~ msgid "Asset tag"
+#~ msgstr "Asset tag"
 
 #~ msgid "Create & attach"
 #~ msgstr "Create & attach"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-msgid "<0/> No asset tag"
-msgstr "<0/> No asset tag"
+#~ msgid "<0/> No asset tag"
+#~ msgstr "<0/> No asset tag"
 
 #~ msgid "Only for something too small to label. A tag is what an inspection record hangs off, so anything DGUV-relevant wants one."
 #~ msgstr "Only for something too small to label. A tag is what an inspection record hangs off, so anything DGUV-relevant wants one."
@@ -4857,7 +4838,7 @@ msgstr "New accessory"
 #~ msgid "Most accessories carry no sticker, so this starts ticked. Untick it to give this one a number — that is what an inspection record hangs off, so anything DGUV-relevant wants one."
 #~ msgstr "Most accessories carry no sticker, so this starts ticked. Untick it to give this one a number — that is what an inspection record hangs off, so anything DGUV-relevant wants one."
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "Without a tag the unit can't be scanned, and an inspection record has nothing to hang off — so anything DGUV-relevant wants one."
 msgstr "Without a tag the unit can't be scanned, and an inspection record has nothing to hang off — so anything DGUV-relevant wants one."
 
@@ -4928,10 +4909,8 @@ msgstr "Edit Location"
 msgid "Rename it or correct its address."
 msgstr "Rename it or correct its address."
 
-#. 0.0: copyableSummary
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-msgid "Also create what the other units carry <0>{0} — each new unit gets its own, attached.</0>"
-msgstr "Also create what the other units carry <0>{0} — each new unit gets its own, attached.</0>"
+#~ msgid "Also create what the other units carry <0>{0} — each new unit gets its own, attached.</0>"
+#~ msgstr "Also create what the other units carry <0>{0} — each new unit gets its own, attached.</0>"
 
 #~ msgid "How many per unit"
 #~ msgstr "How many per unit"
@@ -4990,7 +4969,7 @@ msgstr[1] "# units"
 #~ msgstr "Also create the accessories the other units carry <0>{0} — {1} {2} its own, attached.</0>"
 
 #. 0.0: accessorySummary
-#: src/routes/assets/new/+page.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "Also create the accessories the other units carry <0>{0} — each new unit gets its own, attached.</0>"
 msgstr "Also create the accessories the other units carry <0>{0} — each new unit gets its own, attached.</0>"
 
@@ -6358,19 +6337,19 @@ msgstr "Every unit on its own row — click one to open it."
 msgid "All Devices"
 msgstr "All Devices"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "Describe the cable — its ends, a length or a type"
 msgstr "Describe the cable — its ends, a length or a type"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "Please name the cable"
 msgstr "Please name the cable"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "Device"
 msgstr "Device"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "Cable"
 msgstr "Cable"
 
@@ -6515,7 +6494,11 @@ msgstr "<0/> Offers"
 msgid "<0/> Invoices"
 msgstr "<0/> Invoices"
 
+#. 0: fills.find(Boolean)
+#. 0: fills.find(Boolean)
 #. 0: suggestion
+#: src/lib/components/asset-form/asset-tag-hint.svelte
+#: src/routes/assets/new/asset-tag-hint.svelte
 #: src/routes/orgs/+page.svelte
 msgid "Use {0}"
 msgstr "Use {0}"
@@ -7254,9 +7237,7 @@ msgid "A unit taken out of stock moves to the shelf and the kit of whatever it i
 msgstr "A unit taken out of stock moves to the shelf and the kit of whatever it is attached to."
 
 #. 0.0: reusableSummary
-#. 0.0: reusableSummary
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-#: src/routes/assets/new/+page.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "Take them out of stock where the pool has them <0>Free right now: {0}. Anything the shelf can't cover is still registered new.</0>"
 msgstr "Take them out of stock where the pool has them <0>Free right now: {0}. Anything the shelf can't cover is still registered new.</0>"
 
@@ -8900,10 +8881,8 @@ msgstr "It stays a software license, so the units' credentials remain available.
 #~ msgid "No manufacturer"
 #~ msgstr "No manufacturer"
 
-#. 0: productLabel(asset.product); 1: asset.assetTag ? ` (${asset.assetTag})` \\: ''; 2: asset.bundle ? ' and bundle' \\: ''
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Registered and attached to {0}{1} in one step. It inherits that unit's location{2}."
-msgstr "Registered and attached to {0}{1} in one step. It inherits that unit's location{2}."
+#~ msgid "Registered and attached to {0}{1} in one step. It inherits that unit's location{2}."
+#~ msgstr "Registered and attached to {0}{1} in one step. It inherits that unit's location{2}."
 
 #~ msgid "No manufacturer to pick: a cable is filed without one, and a cable with the same ends and length already in the catalogue is reused rather than added twice."
 #~ msgstr "No manufacturer to pick: a cable is filed without one, and a cable with the same ends and length already in the catalogue is reused rather than added twice."
@@ -8926,7 +8905,7 @@ msgstr "Generic / unknown manufacturer"
 msgid "Different manufacturers: the units end up under Generic / unknown manufacturer."
 msgstr "Different manufacturers: the units end up under Generic / unknown manufacturer."
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "No manufacturer to pick: a cable is filed as Generic / unknown manufacturer, and a cable with the same ends and length already in the catalogue is reused rather than added twice."
 msgstr "No manufacturer to pick: a cable is filed as Generic / unknown manufacturer, and a cable with the same ends and length already in the catalogue is reused rather than added twice."
 
@@ -10274,23 +10253,19 @@ msgstr[1] "Count # accessories"
 msgid "Enter the asset tag, or tick \"No asset tag\"."
 msgstr "Enter the asset tag, or tick \"No asset tag\"."
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-#: src/routes/assets/new/+page.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Asset tags"
 msgstr "Asset tags"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-#: src/routes/assets/new/+page.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "Scan or type the sticker"
 msgstr "Scan or type the sticker"
 
-#. 0: i + 1
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-msgid "Unit {0}"
-msgstr "Unit {0}"
+#~ msgid "Unit {0}"
+#~ msgstr "Unit {0}"
 
-#: src/routes/assets/new/+page.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "Scan or type"
 msgstr "Scan or type"
 
@@ -10298,12 +10273,10 @@ msgstr "Scan or type"
 msgid "Your count here was changed on another device in the meantime. It shows the current number now — count again from there."
 msgstr "Your count here was changed on another device in the meantime. It shows the current number now — count again from there."
 
-#. 0: category?.name ?? ''
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
-msgid "New product · {0} <0>Edit details</0>"
-msgstr "New product · {0} <0>Edit details</0>"
+#~ msgid "New product · {0} <0>Edit details</0>"
+#~ msgstr "New product · {0} <0>Edit details</0>"
 
-#: src/lib/components/ui/new-asset-modal/new-asset-modal.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "New product"
 msgstr "New product"
 
@@ -11172,9 +11145,9 @@ msgstr "The camera could not be started. Allow camera access for this site, or t
 msgid "Hold the label inside the frame."
 msgstr "Hold the label inside the frame."
 
+#: src/lib/components/asset-form/asset-form.svelte
 #: src/routes/+page.svelte
 #: src/routes/approval-request-modal.svelte
-#: src/routes/assets/new/+page.svelte
 #: src/routes/productions/[id]/loan-request-modal.svelte
 msgid "# device"
 msgid_plural "# devices"
@@ -11213,23 +11186,22 @@ msgstr "Approve some units"
 msgid "Decline some units"
 msgstr "Decline some units"
 
-#: src/routes/assets/new/+page.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "Paste or scan a list of tags…"
 msgstr "Paste or scan a list of tags…"
 
-#: src/routes/assets/new/+page.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "List of asset tags"
 msgstr "List of asset tags"
 
-#: src/routes/assets/new/+page.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "One tag per line"
 msgstr "One tag per line"
 
-#: src/routes/assets/new/+page.svelte
-msgid "At most 50 devices at a time."
-msgstr "At most 50 devices at a time."
+#~ msgid "At most 50 devices at a time."
+#~ msgstr "At most 50 devices at a time."
 
-#: src/routes/assets/new/+page.svelte
+#: src/lib/components/asset-form/asset-form.svelte
 msgid "One tag per line. Paste them, or scan one after another with a handheld scanner — each scan ends the line. Every line becomes a device."
 msgstr "One tag per line. Paste them, or scan one after another with a handheld scanner — each scan ends the line. Every line becomes a device."
 
@@ -12698,3 +12670,59 @@ msgstr "Create PDF"
 #: src/routes/assets/+page.svelte
 msgid "Equipment list (PDF)…"
 msgstr "Equipment list (PDF)…"
+
+#. 0: categories.find((c) => c.id === pendingProduct?.categoryId)?.name ?? ''
+#: src/lib/components/asset-form/asset-form.svelte
+msgid "{0} · Created when the device is saved"
+msgstr "{0} · Created when the device is saved"
+
+#: src/lib/components/asset-form/asset-form.svelte
+#: src/lib/components/asset-form/asset-form.svelte
+msgid "Remove new product"
+msgstr "Remove new product"
+
+#: src/lib/components/asset-form/asset-tag-hint.svelte
+#: src/routes/assets/new/asset-tag-hint.svelte
+msgid "New devices are now numbered automatically"
+msgstr "New devices are now numbered automatically"
+
+#: src/lib/components/asset-form/asset-tag-hint.svelte
+#: src/routes/assets/new/asset-tag-hint.svelte
+msgid "Highest tag so far: <0/>"
+msgstr "Highest tag so far: <0/>"
+
+#: src/lib/components/asset-form/asset-tag-hint.svelte
+#: src/routes/assets/new/asset-tag-hint.svelte
+msgid "No tag in this organization's numbering yet."
+msgstr "No tag in this organization's numbering yet."
+
+#: src/lib/components/asset-form/asset-tag-hint.svelte
+#: src/routes/assets/new/asset-tag-hint.svelte
+msgid "Fill in the next free number"
+msgid_plural "Fill in the next # free numbers"
+msgstr[0] "Fill in the next free number"
+msgstr[1] "Fill in the next # free numbers"
+
+#: src/lib/components/asset-form/asset-tag-hint.svelte
+#: src/routes/assets/new/asset-tag-hint.svelte
+msgid "Number new devices automatically"
+msgstr "Number new devices automatically"
+
+#: src/lib/components/asset-form/asset-form.svelte
+msgid "Fill in the details for the new product model. It is created along with the device."
+msgstr "Fill in the details for the new product model. It is created along with the device."
+
+#. 0: MAX_UNITS
+#: src/lib/components/asset-form/asset-form.svelte
+msgid "At most {0} devices at a time."
+msgstr "At most {0} devices at a time."
+
+#. 0: productLabel(asset.product); 1: asset.assetTag ? ` (${asset.assetTag})` \\: ''
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Registered and attached to {0}{1} in one step. It inherits that unit's location and bundle."
+msgstr "Registered and attached to {0}{1} in one step. It inherits that unit's location and bundle."
+
+#. 0: productLabel(asset.product); 1: asset.assetTag ? ` (${asset.assetTag})` \\: ''
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Registered and attached to {0}{1} in one step. It inherits that unit's location."
+msgstr "Registered and attached to {0}{1} in one step. It inherits that unit's location."

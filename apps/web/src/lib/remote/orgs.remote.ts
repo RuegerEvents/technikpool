@@ -12,7 +12,7 @@ import {
 	requireOrgInventory,
 	requireOrgOwner
 } from '#lib/server/services/access.js';
-import { peekNextTag } from '#lib/server/services/tag-counter.js';
+import { peekNextTag, suggestTag } from '#lib/server/services/tag-counter.js';
 import { appError } from '#lib/errors.js';
 import { isValidBic, isValidIban } from '#lib/bank-account.svelte.js';
 import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
@@ -124,6 +124,15 @@ export const getNextAssetTag = query(v.string(), async (orgId: string) => {
 });
 
 /**
+ * Where the org does not number its units: the highest tag in its pattern and
+ * the next free one, which the asset form offers to fill in by hand.
+ */
+export const getAssetTagSuggestion = query(v.string(), async (orgId: string) => {
+	await requireOrgInventory(orgId);
+	return suggestTag(prisma, orgId);
+});
+
+/**
  * Whether the org numbers units created without a tag. Inventory work, like
  * creating the units themselves, so an org ADMIN may switch it — not only the
  * OWNER who runs the rest of the org's settings.
@@ -135,6 +144,7 @@ export const setAutoAssetTags = command(
 		await prisma.organization.update({ where: { id: orgId }, data: { autoAssetTags: enabled } });
 		await getOrgWithMembers(orgId).refresh();
 		await getNextAssetTag(orgId).refresh();
+		await getAssetTagSuggestion(orgId).refresh();
 	}
 );
 

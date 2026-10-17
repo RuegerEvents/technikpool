@@ -111,3 +111,35 @@ export async function peekNextTag(tx: Tx, organizationId: string): Promise<strin
 		Math.max(org.nextAssetTagNumber, (await highestInPattern(tx, prefix)) + 1)
 	);
 }
+
+/**
+ * For an org that does not number its units: the highest tag already in its
+ * pattern, and the number a form can offer to fill in by hand — one past the
+ * highest, or, once that has reached the end of the pattern, the lowest number
+ * still free. Draws nothing and moves no counter: the tag only counts once a
+ * unit carries it.
+ */
+export async function suggestTag(
+	tx: Tx,
+	organizationId: string
+): Promise<{ highest: string | null; next: string | null }> {
+	const { assetIdPrefix: prefix } = await tx.organization.findUniqueOrThrow({
+		where: { id: organizationId },
+		select: { assetIdPrefix: true }
+	});
+	const highest = await highestInPattern(tx, prefix);
+	const last = highest > 0 ? formatTag(prefix, highest) : null;
+	const max = 10 ** DIGITS - 1;
+	if (highest < max) return { highest: last, next: formatTag(prefix, highest + 1) };
+	// A sticker typed at the end of the range (…99999) leaves nothing above it,
+	// but usually most of the range below.
+	const [free] = await tx.$queryRaw<{ n: number }[]>`
+		SELECT s.n::int AS n
+		FROM generate_series(1, ${max}::int) AS s(n)
+		WHERE NOT EXISTS (
+			SELECT 1 FROM "Asset" WHERE "assetTag" = ${prefix} || lpad(s.n::text, ${DIGITS}::int, '0')
+		)
+		ORDER BY s.n
+		LIMIT 1`;
+	return { highest: last, next: free ? formatTag(prefix, free.n) : null };
+}

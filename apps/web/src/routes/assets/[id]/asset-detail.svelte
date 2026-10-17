@@ -1659,9 +1659,17 @@
 	}}
 >
 	{#snippet description()}
-		Registered and attached to {productLabel(asset.product)}{asset.assetTag
-			? ` (${asset.assetTag})`
-			: ''} in one step. It inherits that unit's location{asset.bundle ? ' and bundle' : ''}.
+		<!-- Two whole sentences, not one with a tail glued on: the tail was never
+		     extracted, and the German read "Standort and bundle". -->
+		{#if asset.bundle}
+			Registered and attached to {productLabel(asset.product)}{asset.assetTag
+				? ` (${asset.assetTag})`
+				: ''} in one step. It inherits that unit's location and bundle.
+		{:else}
+			Registered and attached to {productLabel(asset.product)}{asset.assetTag
+				? ` (${asset.assetTag})`
+				: ''} in one step. It inherits that unit's location.
+		{/if}
 	{/snippet}
 </NewAssetModal>
 

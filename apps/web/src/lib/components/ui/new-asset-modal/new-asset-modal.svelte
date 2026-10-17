@@ -1,71 +1,21 @@
 <script lang="ts" module>
-	/**
-	 * A product already in the catalogue, picked instead of typed. `reset` takes
-	 * this where it would otherwise take a name, so a picker that lists products
-	 * under its units can hand one straight over with nothing left to fill in.
-	 */
-	export type NewAssetSeed = {
-		manufacturer: { id: string; name: string };
-		product: { id: string; name: string };
-	};
+	import type { NewAssetSeed } from '#lib/components/asset-form/index.js';
 
 	/** What `bind:this` gives a caller. */
 	export type NewAssetModalHandle = { reset: (seed?: string | NewAssetSeed) => void };
 </script>
 
 <script lang="ts">
-	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
-	import {
-		LocationSelect,
-		defaultLocationFor,
-		type LocationOption
-	} from '#lib/components/ui/location-select/index.js';
 	// Registering a unit at the moment you need it, rather than being sent to
-	// /assets/new and back to put it where it belongs. Two places need exactly
-	// this: an accessory on the asset detail page, and a member on the bundle
-	// page. They differ only in where the unit lands and whether a location has
-	// to be asked for, so both go through `createAssets` with `parentAssetId` or
-	// `bundleId` set and the unit is created already in place.
-	//
-	// This is deliberately smaller than /assets/new: no price, no per-unit serial
-	// grid. Those belong to registering a shipment; this is one cable that turned
-	// out not to be in the system.
-	//
-	// A cable is the common case here and is described rather than picked: its
-	// ends and its length are what make it that product. So the cable tab skips
-	// the manufacturer and product pickers for the same fields the product form
-	// has, and the server files it with no manufacturer — reusing an
-	// identical cable product where the catalogue already has one.
+	// /assets/new and back to put it where it belongs: an accessory on the asset
+	// page, a member on the bundle pages. The form is /assets/new's own, compact
+	// (see AssetForm); this only says where the unit lands and holds the buttons.
 	import type { Snippet } from 'svelte';
-	import { manufacturerIdOf, withNoManufacturer } from '#lib/no-manufacturer.svelte.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Modal } from '#lib/components/ui/modal/index.js';
-	import { Input } from '#lib/components/ui/input/index.js';
-	import { AssetTagInput } from '#lib/components/ui/asset-tag-input/index.js';
-	import { previewAutoTags } from '#lib/asset-tag-preview.js';
-	import { Label } from '#lib/components/ui/label/index.js';
-	import SerialNumberWarning from '#lib/components/SerialNumberWarning.svelte';
-	import { CreatableSelect } from '#lib/components/ui/creatable-select/index.js';
-	import {
-		ProductFields,
-		cableInputFrom,
-		type ProductDraft
-	} from '#lib/components/ui/product-fields/index.js';
-	import { getErrorMessage } from '#lib/utils.js';
-	import { messageForErrorCode } from '#lib/error-messages.svelte.js';
-	import { getNextAssetTag } from '#lib/remote/orgs.remote.js';
-	import { toast } from 'svelte-sonner';
-	import {
-		createAssets,
-		getCategories,
-		getDefaultLocations,
-		getManufacturers,
-		getProductAccessoryProfile,
-		getProducts
-	} from '#lib/remote/assets.remote.js';
-
-	type Selection = { id: string | null; name: string } | null;
-	type Kind = 'device' | 'cable';
+	import type { LocationOption } from '#lib/components/ui/location-select/index.js';
+	import { AssetForm } from '#lib/components/asset-form/index.js';
+	import type { createAssets } from '#lib/remote/assets.remote.js';
 
 	type Props = {
 		open: boolean;
@@ -101,484 +51,36 @@
 		onCreated
 	}: Props = $props();
 
-	let kind = $state<Kind>('device');
-	let manufacturer = $state<Selection>(null);
-	let product = $state<Selection>(null);
-	// A product typed in rather than picked is described in the same product
-	// dialog /assets/new opens — category, photo, price, and whether it is a
-	// cable or a license — so one found missing while packing a case can be
-	// anything the catalogue holds. Null until that dialog is confirmed.
-	let pendingProduct = $state<ProductDraft | null>(null);
-	let productDraft = $state<ProductDraft>(emptyProductDraft());
-	let productDialogOpen = $state(false);
-	let cableDraft = $state<ProductDraft>(emptyCableDraft());
-	let quantity = $state(1);
-	// One per unit, the length of `quantity`: a tag is what is printed on a
-	// sticker, so each unit brings its own and nothing is numbered for it.
-	let tags = $state<string[]>(['']);
-	let serial = $state('');
-	// Set from `defaultNoTag` by reset(), which every caller runs before opening —
-	// reading the prop here would capture only its first value.
-	let noTag = $state(false);
-	// Where the org numbers units created without a tag, the next number — so
-	// a blank field says what it will become. Null where it doesn't.
-	let nextTagQuery = $derived(open ? getNextAssetTag(organizationId) : null);
-	let nextTag = $derived(nextTagQuery?.current ?? null);
-	let numbered = $derived(nextTag !== null);
-	let autoTags = $derived(previewAutoTags(nextTag, tags));
-	let chosenLocationId = $state('');
-	// Held, not read inline, so it is in hand by the time the dialog opens.
-	let defaultsQuery = $derived(getDefaultLocations());
+	let seed = $state<string | NewAssetSeed>('');
 	let saving = $state(false);
-	// Remounts the product picker when the manufacturer changes, so a stale
-	// selection can't survive into a different catalogue.
-	let manufacturerKey = $state(0);
-	let seed = $state('');
-
-	// Gated on `open`: this component is mounted on three pages and spends most
-	// of its life closed, and an async derived nothing reads until it opens is
-	// both a wasted round trip and the await_waterfall warning.
-	let categoriesQuery = $derived(open ? getCategories() : null);
-	let categories = $derived(categoriesQuery?.current ?? []);
-	let manufacturersQuery = $derived(open ? getManufacturers() : null);
-	let manufacturers = $derived(manufacturersQuery?.current ?? []);
-	// undefined while the manufacturer is one being typed in: it has no products yet.
-	let chosenManufacturerId = $derived(manufacturer ? manufacturerIdOf(manufacturer) : undefined);
-	let productsForManufacturer = $derived(
-		open && chosenManufacturerId !== undefined ? await getProducts(chosenManufacturerId) : []
-	);
-	// A brand-new product needs a category and is the only case where a photo can
-	// be set: the image belongs to the product, and an existing one already has
-	// its own (edited from the asset detail page, where it applies to every unit).
-	let isNewProduct = $derived(kind === 'device' && product !== null && product.id === null);
-
-	// What the org's other units of the chosen product already carry. Only asked
-	// once an existing product is picked, and never for an accessory: that is
-	// already one level deep, and an accessory has no accessories of its own.
-	let copyable = $derived(
-		open && kind === 'device' && product?.id && !parentAssetId
-			? await getProductAccessoryProfile({ productId: product.id, organizationId })
-			: null
-	);
-	let copyableSummary = $derived(
-		copyable?.accessories.map((a) => `${a.perUnit}× ${a.name}`).join(' · ') ?? ''
-	);
-	let copyAccessories = $state(true);
-	// Where those copies come from. Only offered when the pool actually holds
-	// some, and off by default: a unit being registered now is usually a delivery,
-	// and a delivery arrives with its own cables. Bringing an existing fleet into
-	// line is the other way round — that is the asset page's fan-out.
-	let reuseAccessories = $state(false);
-	let reusableSummary = $derived(
-		copyable?.accessories
-			.filter((acc) => acc.freeStock > 0)
-			.map((acc) => `${acc.freeStock}× ${acc.name}`)
-			.join(' · ') ?? ''
-	);
-
-	// Same defaulting the product wizard uses: an unclassified thing is
-	// Miscellaneous until someone says otherwise. Refills for every new draft.
-	$effect(() => {
-		if (productDraft.categoryId) return;
-		const misc = categories.find((c) => c.name.toLowerCase() === 'miscellaneous');
-		if (misc) productDraft.categoryId = misc.id;
-	});
-
-	function emptyProductDraft(): ProductDraft {
-		return {
-			name: '',
-			categoryId: '',
-			imagePath: '',
-			netPurchasePrice: undefined,
-			cable: null,
-			isLicense: false
-		};
-	}
-
-	/** Opens the product dialog for a name typed into the picker, or to edit it again. */
-	function describeProduct(name: string) {
-		// A fresh object unless it is the same product being reopened:
-		// ProductFields keys its bookkeeping to the draft it was handed.
-		productDraft =
-			pendingProduct && pendingProduct.name === name
-				? { ...pendingProduct }
-				: { ...emptyProductDraft(), name };
-		productDialogOpen = true;
-	}
-
-	function confirmProduct() {
-		if (!productDraft.name.trim()) {
-			toast.error('Please choose or name a product');
-			return;
-		}
-		if (!productDraft.categoryId) {
-			toast.error('A new product needs a category');
-			return;
-		}
-		pendingProduct = { ...productDraft, name: productDraft.name.trim() };
-		product = { id: null, name: pendingProduct.name };
-		// A cable or a license rarely carries a sticker — set on the way in only,
-		// so unticking it afterwards sticks.
-		if (cableInputFrom(pendingProduct.cable) || pendingProduct.isLicense) noTag = true;
-		productDialogOpen = false;
-	}
-
-	function cancelProduct() {
-		productDialogOpen = false;
-		// Typed and then abandoned: nothing to create it from.
-		if (!pendingProduct) product = null;
-	}
-
-	// A fresh object every time: ProductFields keys its "is the name still the
-	// derived one?" bookkeeping to the draft it was handed.
-	function emptyCableDraft(): ProductDraft {
-		return {
-			name: '',
-			categoryId: '',
-			imagePath: '',
-			netPurchasePrice: undefined,
-			cable: { cableType: '', connectorA: '', connectorB: '', lengthM: '', ways: [] },
-			isLicense: false
-		};
-	}
-
-	function setKind(next: Kind) {
-		kind = next;
-		// A cable goes without a sticker far more often than with one — the batch
-		// form starts untagged for the same reason. Switching back restores what
-		// this caller defaults to.
-		noTag = next === 'cable' || defaultNoTag;
-	}
 
 	/**
-	 * Call before setting `open` — resets the form and seeds the product. A
-	 * string is whatever was typed into the picker that sent us here, which is
-	 * almost always the name of a product nobody has registered yet; a
-	 * `NewAssetSeed` is one that already exists, and fills both pickers in.
+	 * Call before setting `open`. The form appears with the dialog and starts
+	 * from this — see AssetForm's `reset`.
 	 */
 	export function reset(seedValue: string | NewAssetSeed = '') {
-		const preselected = typeof seedValue === 'string' ? null : seedValue;
-		kind = 'device';
-		manufacturer = preselected?.manufacturer ?? null;
-		product = preselected?.product ?? null;
-		pendingProduct = null;
-		productDraft = emptyProductDraft();
-		productDialogOpen = false;
-		cableDraft = emptyCableDraft();
-		quantity = 1;
-		tags = [''];
-		serial = '';
-		noTag = defaultNoTag;
-		copyAccessories = true;
-		reuseAccessories = false;
-		// The kit's own place when it has one, else where the user starred.
-		chosenLocationId =
-			locationId ??
-			(locations ? defaultLocationFor(locations, organizationId, defaultsQuery.current) : '');
-		manufacturerKey++;
-		seed = typeof seedValue === 'string' ? seedValue.trim() : '';
-	}
-
-	function setQuantity(next: number) {
-		quantity = Math.max(1, Math.min(20, next));
-		// Keeps what was already typed; a shorter list drops the tail.
-		tags = Array.from({ length: quantity }, (_, i) => tags[i] ?? '');
-	}
-
-	function handleManufacturer(sel: Selection) {
-		manufacturer = sel;
-		product = null;
-		pendingProduct = null;
-		manufacturerKey++;
-		// What was typed in the picker that sent us here names a product nobody
-		// has registered yet, so it goes straight to being described.
-		if (seed) describeProduct(seed);
-	}
-
-	async function handleSubmit(e: Event) {
-		e.preventDefault();
-		const cable = kind === 'cable' ? cableInputFrom(cableDraft.cable) : null;
-		if (kind === 'cable') {
-			if (!cable) {
-				toast.error('Describe the cable — its ends, a length or a type');
-				return;
-			}
-			if (!cableDraft.name.trim()) {
-				toast.error('Please name the cable');
-				return;
-			}
-			if (!cableDraft.categoryId) {
-				toast.error('A new product needs a category');
-				return;
-			}
-		} else {
-			if (!manufacturer?.name.trim()) {
-				toast.error('Please choose or name a manufacturer');
-				return;
-			}
-			if (!product?.name.trim()) {
-				toast.error('Please choose or name a product');
-				return;
-			}
-			if (isNewProduct && !pendingProduct) {
-				describeProduct(product.name);
-				return;
-			}
-		}
-		if (locations && !chosenLocationId) {
-			toast.error('Please select a location');
-			return;
-		}
-		// A blank tag is the org's next number where it numbers its units, and a
-		// unit someone forgot everywhere else.
-		if (!noTag && !numbered && tags.some((t) => !t.trim())) {
-			toast.error(messageForErrorCode('asset_tag_required'));
-			return;
-		}
-		saving = true;
-		try {
-			const productRef =
-				kind === 'cable'
-					? {
-							// No manufacturer on purpose — see the note at the top.
-							newProductName: cableDraft.name.trim(),
-							newProductImagePath: cableDraft.imagePath || undefined,
-							newProductCable: cable,
-							categoryId: cableDraft.categoryId
-						}
-					: {
-							manufacturerId: chosenManufacturerId ?? undefined,
-							newManufacturerName: manufacturer?.id ? undefined : manufacturer?.name.trim(),
-							productId: product?.id ?? undefined,
-							...(product?.id || !pendingProduct
-								? {}
-								: {
-										newProductName: pendingProduct.name,
-										newProductImagePath: pendingProduct.imagePath || undefined,
-										newProductNetPurchasePrice: pendingProduct.netPurchasePrice,
-										newProductCable: cableInputFrom(pendingProduct.cable) ?? undefined,
-										newProductIsLicense: pendingProduct.isLicense || undefined,
-										categoryId: pendingProduct.categoryId
-									}),
-							copyProductAccessories:
-								copyAccessories && (copyable?.accessories.length ?? 0) > 0 ? true : undefined,
-							reuseExistingAccessories:
-								copyAccessories && reuseAccessories && reusableSummary ? true : undefined
-						};
-			const created = await createAssets({
-				organizationId,
-				// Overridden server-side by the parent's or the kit's own location
-				// where there is one, but the command always requires a location.
-				locationId: chosenLocationId || locationId || '',
-				parentAssetId,
-				bundleId,
-				...productRef,
-				items: tags.map((tag) => ({
-					// A serial number is only asked for when exactly one unit is
-					// being created; several at once are usually a delivery of
-					// identical things, and the serials can go on afterwards.
-					serialNumber:
-						quantity === 1 && kind === 'device' ? serial.trim() || undefined : undefined,
-					assetTag: noTag ? undefined : tag.trim() || undefined,
-					noAssetTag: noTag || undefined
-				}))
-			});
-			open = false;
-			onCreated?.(created);
-		} catch (err) {
-			toast.error(getErrorMessage(err));
-		} finally {
-			saving = false;
-		}
+		seed = seedValue;
 	}
 </script>
 
 <Modal bind:open title={heading} size="xl" dismissible={!saving} {description}>
 	{#snippet children()}
-		<form id="new-asset-form" class="space-y-4" onsubmit={handleSubmit}>
-			<!-- Two ways to say what is being registered, not two forms: quantity, tag
-			     and location below are the same either way. -->
-			<div class="flex gap-1 rounded-md border p-1 text-sm">
-				<button
-					type="button"
-					aria-pressed={kind === 'device'}
-					disabled={saving}
-					onclick={() => setKind('device')}
-					class="flex-1 rounded px-3 py-1.5 transition-colors {kind === 'device'
-						? 'bg-primary text-primary-foreground'
-						: 'hover:bg-muted'}">Device</button
-				>
-				<button
-					type="button"
-					aria-pressed={kind === 'cable'}
-					disabled={saving}
-					onclick={() => setKind('cable')}
-					class="flex-1 rounded px-3 py-1.5 transition-colors {kind === 'cable'
-						? 'bg-primary text-primary-foreground'
-						: 'hover:bg-muted'}">Cable</button
-				>
-			</div>
-
-			{#if kind === 'device'}
-				<div class="space-y-2">
-					<Label>Manufacturer</Label>
-					<CreatableSelect
-						items={withNoManufacturer(manufacturers)}
-						value={manufacturer}
-						onchange={handleManufacturer}
-						oncreate={(name) => handleManufacturer({ id: null, name })}
-						placeholder="Search or type a new one…"
-						disabled={saving}
-					/>
-				</div>
-
-				{#if manufacturer}
-					{#key manufacturerKey}
-						<div class="space-y-2">
-							<Label>Product</Label>
-							<CreatableSelect
-								items={productsForManufacturer}
-								value={product}
-								onchange={(sel) => {
-									product = sel;
-									pendingProduct = null;
-								}}
-								oncreate={describeProduct}
-								placeholder="Search or type a new one…"
-								disabled={saving}
-							/>
-							{#if isNewProduct && pendingProduct}
-								{@const category = categories.find((c) => c.id === pendingProduct?.categoryId)}
-								<p class="text-xs text-muted-foreground">
-									New product · {category?.name ?? ''}
-									<button
-										type="button"
-										class="underline"
-										onclick={() => pendingProduct && describeProduct(pendingProduct.name)}
-										>Edit details</button
-									>
-								</p>
-							{/if}
-						</div>
-					{/key}
-				{/if}
-
-				{#if copyable && copyable.accessories.length > 0}
-					<div class="space-y-2">
-						<label class="flex items-start gap-2 text-sm">
-							<input
-								type="checkbox"
-								bind:checked={copyAccessories}
-								disabled={saving}
-								class="mt-0.5 h-4 w-4 rounded border-input"
-							/>
-							<span>
-								Also create what the other units carry
-								<span class="block text-xs text-muted-foreground">
-									{copyableSummary} — each new unit gets its own, attached.
-								</span>
-							</span>
-						</label>
-						{#if copyAccessories && reusableSummary}
-							<label class="flex items-start gap-2 pl-6 text-sm">
-								<input
-									type="checkbox"
-									bind:checked={reuseAccessories}
-									disabled={saving}
-									class="mt-0.5 h-4 w-4 rounded border-input"
-								/>
-								<span>
-									Take them out of stock where the pool has them
-									<span class="block text-xs text-muted-foreground">
-										Free right now: {reusableSummary}. Anything the shelf can't cover is still
-										registered new.
-									</span>
-								</span>
-							</label>
-						{/if}
-					</div>
-				{/if}
-			{:else}
-				<p class="text-xs text-muted-foreground">
-					No manufacturer to pick: a cable is filed as Generic / unknown manufacturer, and a cable
-					with the same ends and length already in the catalogue is reused rather than added twice.
-				</p>
-				<ProductFields
-					{categories}
-					bind:value={cableDraft}
-					idPrefix="new-asset-cable"
-					showPrice={false}
-				/>
-			{/if}
-
-			{#if locations}
-				<div class="space-y-2">
-					<Label for="newAssetLocation">Location</Label>
-					<LocationSelect
-						id="newAssetLocation"
-						{locations}
-						ownerOrgId={organizationId}
-						bind:value={chosenLocationId}
-						disabled={saving}
-					/>
-				</div>
-			{/if}
-
-			<div class="space-y-2">
-				<Label for="newAssetQty">How many</Label>
-				<Input
-					id="newAssetQty"
-					type="number"
-					min="1"
-					max="20"
-					value={quantity}
-					oninput={(e) => setQuantity(Number(e.currentTarget.value) || 1)}
-					disabled={saving}
-				/>
-			</div>
-
-			<label class="flex items-center gap-2 text-sm">
-				<input
-					type="checkbox"
-					bind:checked={noTag}
-					disabled={saving}
-					class="h-4 w-4 rounded border-input"
-				/>
-				No asset tag
-			</label>
-			<p class="text-xs text-muted-foreground">
-				Without a tag the unit can't be scanned, and an inspection record has nothing to hang off —
-				so anything DGUV-relevant wants one.
-			</p>
-
-			{#if quantity === 1 && kind === 'device'}
-				<div class="space-y-2">
-					<Label for="newAssetSerial">Serial number</Label>
-					<div class="flex gap-2">
-						<Input id="newAssetSerial" bind:value={serial} disabled={saving} />
-						<CameraScanButton disabled={saving} onscan={(code) => (serial = code)} />
-					</div>
-					<SerialNumberWarning serialNumber={serial} paused={saving} />
-				</div>
-			{/if}
-			{#if !noTag}
-				<div class="space-y-2">
-					<Label for="newAssetTag-0">{quantity === 1 ? 'Asset tag' : 'Asset tags'}</Label>
-					{#each tags, i (i)}
-						<div class="flex gap-2">
-							<AssetTagInput
-								id="newAssetTag-{i}"
-								bind:value={tags[i]}
-								auto={autoTags[i]}
-								disabled={saving}
-								placeholder={quantity === 1 ? 'Scan or type the sticker' : `Unit ${i + 1}`}
-							/>
-							<CameraScanButton disabled={saving} onscan={(code) => (tags[i] = code)} />
-						</div>
-					{/each}
-				</div>
-			{/if}
-		</form>
+		<AssetForm
+			formId="new-asset-form"
+			compact
+			{organizationId}
+			{parentAssetId}
+			{bundleId}
+			{locations}
+			{locationId}
+			{defaultNoTag}
+			{seed}
+			bind:saving
+			onCreated={(created) => {
+				open = false;
+				onCreated?.(created);
+			}}
+		/>
 	{/snippet}
 
 	{#snippet footer()}
@@ -597,16 +99,5 @@
 		>
 			Cancel
 		</Button>
-	{/snippet}
-</Modal>
-
-<!-- Stacked on top of the dialog above; the modal stack keeps Escape to the top one. -->
-<Modal bind:open={productDialogOpen} title="New product" size="xl" onclose={cancelProduct}>
-	{#snippet children()}
-		<ProductFields {categories} bind:value={productDraft} idPrefix="new-asset-product" />
-	{/snippet}
-	{#snippet footer()}
-		<Button icon="add" type="button" onclick={confirmProduct}>Add Product</Button>
-		<Button icon="close" type="button" variant="outline" onclick={cancelProduct}>Cancel</Button>
 	{/snippet}
 </Modal>
