@@ -27,7 +27,7 @@ class SDe extends S {
 
   @override
   String notAServerCode(String code) {
-    return '„$code“ ist keine Serveradresse. Etiketten werden nach dem Verbinden gescannt — oder in der Demo.';
+    return '„$code“ ist keine Serveradresse. Inventar- und Seriennummern werden nach dem Verbinden gescannt — oder in der Demo.';
   }
 
   @override
@@ -98,7 +98,8 @@ class SDe extends S {
   String get lookup => 'Nachschlagen';
 
   @override
-  String get lookupHint => 'Etikett scannen, um Details zu sehen.';
+  String get lookupHint =>
+      'Inventar- oder Seriennummer scannen, um Details zu sehen.';
 
   @override
   String get serialNumber => 'Seriennummer';
@@ -253,7 +254,7 @@ class SDe extends S {
   String get scanWithCamera => 'Mit Kamera scannen';
 
   @override
-  String get cameraHint => 'Etikett in den Rahmen halten.';
+  String get cameraHint => 'Code in den Rahmen halten.';
 
   @override
   String get cameraDenied =>
@@ -332,7 +333,7 @@ class SDe extends S {
 
   @override
   String demoTagHint(String tag) {
-    return 'Etikett $tag probieren — im Inventar stehen alle';
+    return 'Inventarnummer $tag probieren — im Inventar stehen alle';
   }
 
   @override
@@ -396,7 +397,7 @@ class SDe extends S {
   String get retry => 'Erneut versuchen';
 
   @override
-  String get manualEntry => 'Etikett oder Seriennummer eingeben';
+  String get manualEntry => 'Inventar- oder Seriennummer eingeben';
 
   @override
   String get reset => 'Zurücksetzen';
@@ -407,11 +408,12 @@ class SDe extends S {
   }
 
   @override
-  String get errorAssetNotFound => 'Dieses Etikett ist unbekannt.';
+  String get errorAssetNotFound =>
+      'Unbekannt: weder eine Inventarnummer noch eine Seriennummer.';
 
   @override
   String get errorSerialAmbiguous =>
-      'Mehrere Geräte haben diese Seriennummer. Bitte das Etikett scannen.';
+      'Mehrere Geräte haben diese Seriennummer. Bitte die Inventarnummer scannen.';
 
   @override
   String get errorForbidden => 'Kein Zugriff auf diesen Artikel.';
@@ -669,27 +671,28 @@ class SDe extends S {
   String get actionStocktakeCounted => 'Inventur';
 
   @override
-  String get productModeTag => 'Etiketten vergeben';
+  String get productModeTag => 'Inventarnummern vergeben';
 
   @override
   String get productModeRegister => 'Neu anlegen';
 
   @override
   String get productTagHint =>
-      'Etikett scannen: es kommt an das angetippte Gerät, sonst an das nächste ohne Etikett.';
+      'Inventarnummer scannen: sie kommt an das angetippte Gerät, sonst an das nächste ohne Inventarnummer.';
 
   @override
   String get productRegisterHint =>
-      'Jedes gescannte Etikett wird ein neues Gerät hier.';
+      'Jede gescannte Inventarnummer wird ein neues Gerät hier.';
 
   @override
   String get productRegisterAt => 'Neue Geräte nach';
 
   @override
-  String get productNoUntagged => 'Alle Geräte haben schon ein Etikett.';
+  String get productNoUntagged =>
+      'Alle Geräte haben schon eine Inventarnummer.';
 
   @override
-  String get productUntagged => 'Ohne Etikett';
+  String get productUntagged => 'Ohne Inventarnummer';
 
   @override
   String get productNextScan => 'nächster Scan';
@@ -706,25 +709,25 @@ class SDe extends S {
 
   @override
   String productNeedsAdmin(String org) {
-    return 'Geräte anlegen und Etiketten vergeben braucht ADMIN in $org.';
+    return 'Geräte anlegen und Inventarnummern vergeben braucht ADMIN in $org.';
   }
 
   @override
   String productUnitCount(int total, int untagged) {
-    return '$total Geräte · $untagged ohne Etikett';
+    return '$total Geräte · $untagged ohne Inventarnummer';
   }
 
   @override
   String get errorAssetTagInUse =>
-      'Dieses Etikett klebt schon an einem anderen Gerät.';
+      'Diese Inventarnummer ist schon an ein anderes Gerät vergeben.';
 
   @override
   String get errorAssetTagPrefixMismatch =>
-      'Dieses Etikett gehört zu einer anderen Organisation – das Präfix passt nicht.';
+      'Diese Inventarnummer gehört zu einer anderen Organisation – das Präfix passt nicht.';
 
   @override
   String get errorAssetAlreadyTagged =>
-      'Dieses Gerät hat schon ein Etikett. Ändern geht im Web.';
+      'Dieses Gerät hat schon eine Inventarnummer. Ändern geht im Web.';
 
   @override
   String get errorStocktakeNotFound => 'Diese Inventur gibt es nicht mehr.';
@@ -770,7 +773,7 @@ class SDe extends S {
 
   @override
   String get caseCheckScanCase =>
-      'Kiste scannen: das Etikett des Bundles oder eines Geräts darin.';
+      'Kiste scannen: die Inventarnummer des Bundles oder eines Geräts darin.';
 
   @override
   String caseCheckProgress(int found, int expected) {
@@ -815,7 +818,7 @@ class SDe extends S {
   String get caseCheckFound => 'Gefunden';
 
   @override
-  String get caseCheckNoTag => 'Kein Etikett: von Hand abhaken';
+  String get caseCheckNoTag => 'Keine Inventarnummer: von Hand abhaken';
 
   @override
   String caseCheckMissingCount(int count) {
@@ -846,7 +849,7 @@ class SDe extends S {
 
   @override
   String caseCheckDemoHint(String tag) {
-    return 'Etikett $tag der Kabelkiste probieren';
+    return 'Inventarnummer $tag der Kabelkiste probieren';
   }
 
   @override
@@ -1020,7 +1023,7 @@ class SDe extends S {
       'Scannen, abhaken oder zählen, was zurückkommt. Jeder Haken bucht das Gerät zurück an seinen Lagerort.';
 
   @override
-  String get listCountedLine => 'Ohne Etikett · gezählt';
+  String get listCountedLine => 'Ohne Inventarnummer · gezählt';
 
   @override
   String listHowMany(int total) {
