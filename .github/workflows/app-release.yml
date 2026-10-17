@@ -17,6 +17,11 @@ on:
         description: 'Tag to build (defaults to the current branch)'
         required: false
         type: string
+      resubmit:
+        description: 'iOS only: submit the build already on App Store Connect for review again (withdrawing one still waiting), without building or uploading'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -31,7 +36,8 @@ jobs:
   # Settings › Secrets and variables › Actions › Variables once that store's
   # credentials are in place.
   android:
-    if: vars.RELEASE_ANDROID == 'true'
+    # A resubmit is about Apple's review queue; Play already has the build.
+    if: vars.RELEASE_ANDROID == 'true' && !inputs.resubmit
     runs-on: ubuntu-latest
     # Only this job writes anything back: the APK goes on the GitHub release
     # for devices that can't reach Play, so it needs to create that release.
@@ -195,7 +201,7 @@ jobs:
           # would carry whatever else the issuing account can reach. match takes
           # the key's contents directly and loads it into an ssh-agent itself.
           MATCH_GIT_PRIVATE_KEY: ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
-        run: bundle exec fastlane release
+        run: bundle exec fastlane ${{ inputs.resubmit && 'resubmit' || 'release' }}
 
       - name: Shred credentials
         if: always()

@@ -1220,16 +1220,17 @@ publishes nothing, since there is no tag to hang a release on.
 fastlane lives next to each platform, not at the repo root, because that is where its tooling
 expects to be:
 
-| Lane                                           | Does                                                                  |
-| ---------------------------------------------- | --------------------------------------------------------------------- |
-| `cd apps/scanner/android && fastlane validate` | Checks the upload key and Play credentials, uploads nothing           |
-| `… fastlane production`                        | **What CI runs.** Builds and publishes to production, full rollout    |
-| `… fastlane internal`                          | Builds a signed `.aab` and puts it on the internal track as a draft   |
-| `… fastlane promote`                           | Promotes internal → production at 20%, without rebuilding             |
-| `… fastlane apk`                               | Builds the signed universal `.apk` that CI puts on the GitHub release |
-| `cd apps/scanner/ios && fastlane validate`     | Checks the App Store Connect key and the signing identity             |
-| `… fastlane release`                           | **What CI runs.** Uploads, submits for review, releases on approval   |
-| `… fastlane beta`                              | Uploads to TestFlight only, submitting nothing                        |
+| Lane                                           | Does                                                                              |
+| ---------------------------------------------- | --------------------------------------------------------------------------------- |
+| `cd apps/scanner/android && fastlane validate` | Checks the upload key and Play credentials, uploads nothing                       |
+| `… fastlane production`                        | **What CI runs.** Builds and publishes to production, full rollout                |
+| `… fastlane internal`                          | Builds a signed `.aab` and puts it on the internal track as a draft               |
+| `… fastlane promote`                           | Promotes internal → production at 20%, without rebuilding                         |
+| `… fastlane apk`                               | Builds the signed universal `.apk` that CI puts on the GitHub release             |
+| `cd apps/scanner/ios && fastlane validate`     | Checks the App Store Connect key and the signing identity                         |
+| `… fastlane release`                           | **What CI runs.** Uploads, submits for review, releases on approval               |
+| `… fastlane beta`                              | Uploads to TestFlight only, submitting nothing                                    |
+| `… fastlane resubmit`                          | Re-submits the uploaded build of pubspec's version, withdrawing one still waiting |
 
 **A tagged release goes all the way.** `scanner-v*` publishes to Play production at 100%,
 submits to App Store review with automatic release on approval, and puts the APK on a GitHub
@@ -1255,6 +1256,13 @@ Two consequences worth keeping in mind:
   looks exactly like a slow review queue. The answers there match
   `ITSAppUsesNonExemptEncryption` in `Info.plist`: the app encrypts nothing itself, and reads
   no advertising id.
+
+A tag cut while the previous version still **waits for review** used to fail: Apple refuses a
+new build on a version in the queue, and deliver had already renamed that version to the new
+number. `release` now withdraws a waiting submission first (`withdraw_pending_review`), and stops
+before changing anything if Apple has already started reviewing. To submit a build that is
+already uploaded, run the workflow by hand with `resubmit` ticked and `ref` = `main` — it builds
+nothing, skips Android, and runs `fastlane resubmit`.
 
 For a build that should _not_ go straight out, use `fastlane internal` / `fastlane beta` by
 hand instead of tagging.
