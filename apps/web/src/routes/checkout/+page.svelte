@@ -243,6 +243,10 @@
 				groupOffers = [...groupOffers, { ...result.group, targetType: 'location', targetId }];
 			}
 			let message = labelAction(result.action);
+			// A kit's sticker moved everything in the case.
+			if (result.kit) {
+				message += ` · ${plural(result.kit.units.length, ['1 unit of the kit', '# units of the kit'])}`;
+			}
 			if (result.returnedFrom.length > 0) {
 				message += ` · returned from ${result.returnedFrom.join(', ')}`;
 			}

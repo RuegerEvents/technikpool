@@ -10,6 +10,9 @@ import { appError } from '#lib/errors.js';
 // highest tag already in the pattern — which is how a sticker typed or scanned
 // by hand pushes the counter along without every place that writes a tag
 // having to know about it. Tags outside the pattern are no number at all.
+//
+// A kit's sticker counts as taken too: it is scanned like a unit's, so a unit
+// handed the same number would be the one every scan of the kit finds.
 
 const DIGITS = 5;
 /** The last number the pattern holds. Past it, numbering starts over from the lowest free one. */
@@ -39,10 +42,10 @@ type Tx = Pick<Prisma.TransactionClient, 'organization' | '$queryRaw'>;
 async function highestInPattern(tx: Tx, prefix: string) {
 	const start = prefix.length + 1;
 	const [{ highest }] = await tx.$queryRaw<{ highest: number | null }[]>`
-		SELECT max(substring("assetTag" FROM ${start}::int)::int) AS highest
-		FROM "Asset"
-		WHERE left("assetTag", ${prefix.length}::int) = ${prefix}
-		  AND substring("assetTag" FROM ${start}::int) ~ '^[0-9]{5}$'`;
+		SELECT max(substring(tag FROM ${start}::int)::int) AS highest
+		FROM (SELECT "assetTag" AS tag FROM "Asset" UNION ALL SELECT tag FROM "AssetBundle") t
+		WHERE left(tag, ${prefix.length}::int) = ${prefix}
+		  AND substring(tag FROM ${start}::int) ~ '^[0-9]{5}$'`;
 	return highest ?? 0;
 }
 
@@ -50,10 +53,10 @@ async function highestInPattern(tx: Tx, prefix: string) {
 async function numbersInPattern(tx: Tx, prefix: string) {
 	const start = prefix.length + 1;
 	const rows = await tx.$queryRaw<{ n: number }[]>`
-		SELECT substring("assetTag" FROM ${start}::int)::int AS n
-		FROM "Asset"
-		WHERE left("assetTag", ${prefix.length}::int) = ${prefix}
-		  AND substring("assetTag" FROM ${start}::int) ~ '^[0-9]{5}$'`;
+		SELECT substring(tag FROM ${start}::int)::int AS n
+		FROM (SELECT "assetTag" AS tag FROM "Asset" UNION ALL SELECT tag FROM "AssetBundle") t
+		WHERE left(tag, ${prefix.length}::int) = ${prefix}
+		  AND substring(tag FROM ${start}::int) ~ '^[0-9]{5}$'`;
 	return new Set(rows.map((r) => r.n));
 }
 
@@ -64,6 +67,9 @@ async function lowestFree(tx: Tx, prefix: string) {
 		FROM generate_series(1, ${MAX}::int) AS s(n)
 		WHERE NOT EXISTS (
 			SELECT 1 FROM "Asset" WHERE "assetTag" = ${prefix} || lpad(s.n::text, ${DIGITS}::int, '0')
+		)
+		  AND NOT EXISTS (
+			SELECT 1 FROM "AssetBundle" WHERE tag = ${prefix} || lpad(s.n::text, ${DIGITS}::int, '0')
 		)
 		ORDER BY s.n
 		LIMIT 1`;

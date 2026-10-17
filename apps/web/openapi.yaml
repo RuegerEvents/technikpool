@@ -1843,6 +1843,13 @@ components:
               oneOf:
                 - $ref: '#/components/schemas/Production'
                 - type: 'null'
+            kit:
+              description: |
+                The kit the unit is in, if any. Not required, so an older client
+                keeps compiling.
+              oneOf:
+                - $ref: '#/components/schemas/ListKit'
+                - type: 'null'
             history:
               type: array
               description: Most recent transactions first.
@@ -1949,6 +1956,52 @@ components:
           oneOf:
             - $ref: '#/components/schemas/ScanGroup'
             - type: 'null'
+        kit:
+          description: |
+            Set when the code was a kit's own sticker: every unit in it that the
+            caller may book went to the target at once, accessories along. `asset`
+            then stands for the kit — the id of its first unit, the kit's name
+            and tag — so an older client still reports something true. Ask about
+            `kit.units` and book back what is missing. Not required, so an older
+            client keeps working.
+          oneOf:
+            - $ref: '#/components/schemas/ScanKit'
+            - type: 'null'
+
+    ScanKit:
+      type: object
+      required: [id, name, tag, units]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          description: The kit's name with its caption.
+        tag:
+          type: [string, 'null']
+        units:
+          type: array
+          description: |
+            The kit's units this scan booked (or ticked), by name. Empty when none
+            of them was on the list scanned into — the kit is not from here.
+          items:
+            $ref: '#/components/schemas/ScanGroupUnit'
+
+    ListKit:
+      type: object
+      required: [id, name, tag]
+      description: |
+        The kit a unit on a list is in. A kit's units arrive one after another
+        within their section, so a client starts a kit heading whenever it
+        changes. An accessory carries its parent's kit.
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          description: The kit's name with its caption.
+        tag:
+          type: [string, 'null']
 
     ScanGroup:
       type: object
@@ -1988,6 +2041,12 @@ components:
           description: |
             The product's caption (see Product.caption), to be shown after the
             product name. Not required, so an older client keeps compiling.
+        productImageUrl:
+          type: [string, 'null']
+          description: |
+            The product's picture, absolute like Product.imageUrl — for a
+            thumbnail beside the row. Null for a product without one. Not
+            required, so an older client keeps compiling.
         done:
           type: boolean
           description: Already at the scan's target; nothing to book.
@@ -2287,6 +2346,12 @@ components:
           description: |
             The product's caption (see Product.caption), to be shown after the
             product name. Not required, so an older client keeps compiling.
+        productImageUrl:
+          type: [string, 'null']
+          description: |
+            The product's picture, absolute like Product.imageUrl. Null for a
+            product without one. Not required, so an older client keeps
+            compiling.
         manufacturerName:
           type: [string, 'null']
         category:
@@ -2418,6 +2483,12 @@ components:
           description: |
             The product's caption (see Product.caption), to be shown after the
             product name. Not required, so an older client keeps compiling.
+        productImageUrl:
+          type: [string, 'null']
+          description: |
+            The product's picture, absolute like Product.imageUrl — for a
+            thumbnail beside the row. Null for a product without one. Not
+            required, so an older client keeps compiling.
         foundByName:
           type: [string, 'null']
           description: Counted already, by this person. Null when still to confirm.
@@ -2682,6 +2753,11 @@ components:
           description: The unit it hangs off; listed right after it.
         group:
           $ref: '#/components/schemas/ProductionCheckGroup'
+        kit:
+          description: Not required, so an older client keeps compiling.
+          oneOf:
+            - $ref: '#/components/schemas/ListKit'
+            - type: 'null'
         status:
           type: string
           enum: [APPROVED, CHECKED_OUT]
@@ -2813,6 +2889,24 @@ components:
         ticked:
           type: integer
           description: Units this scan ticked — the unit and its untagged accessories.
+        group:
+          description: |
+            The rest of the scanned unit's kit on this list (kind `bundle`), to
+            offer ticking along; `done` is whether it is ticked already. Not
+            required, so an older client keeps working.
+          oneOf:
+            - $ref: '#/components/schemas/ScanGroup'
+            - type: 'null'
+        kit:
+          description: |
+            Set when the code was a kit's sticker: its units on this list were
+            ticked, accessories along, and `productName`/`assetTag` are the kit's.
+            `units` are the ones this scan ticked, to ask about. `unexpected`
+            with no units: none of the kit is on this list. Not required, so an
+            older client keeps working.
+          oneOf:
+            - $ref: '#/components/schemas/ScanKit'
+            - type: 'null'
 
     ProductionCheckTickRequest:
       type: object
@@ -2951,9 +3045,23 @@ components:
           type: [string, 'null']
         group:
           $ref: '#/components/schemas/ProductionCheckGroup'
+        kit:
+          description: Not required, so an older client keeps compiling.
+          oneOf:
+            - $ref: '#/components/schemas/ListKit'
+            - type: 'null'
+        kitAddition:
+          type: boolean
+          description: |
+            Not booked yet: put into a kit after the kit was booked, and listed
+            with it. A tick books it and hands it out at once. Not required, so
+            an older client keeps compiling.
         status:
           type: string
           enum: [APPROVED, CHECKED_OUT, RETURNED]
+          description: |
+            RETURNED on the `checkout` list: taken back while the production
+            still runs — not owed, but a tick sends it out again.
         done:
           type: boolean
           description: Out (`checkout`) or back (`checkin`).

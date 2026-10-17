@@ -96,6 +96,7 @@ msgstr "Crew Passes"
 #~ msgid "Booked Equipment"
 #~ msgstr "Booked Equipment"
 
+#: src/lib/components/production-list/unit-question.svelte
 #: src/lib/components/ui/camera-scan/camera-scan-button.svelte
 #: src/routes/assets/new/cables/+page.svelte
 msgid "Done"
@@ -9823,6 +9824,7 @@ msgid "Counted by {0}"
 msgstr "Counted by {0}"
 
 #: src/lib/components/production-list/tick-list.svelte
+#: src/lib/components/production-list/unit-question.svelte
 #: src/routes/case-check/+page.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
@@ -11308,7 +11310,9 @@ msgid "Found: {0} (+{1} accessories)"
 msgstr "Found: {0} (+{1} accessories)"
 
 #. 0: result.productName
+#. 0: kit.name
 #: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
 msgid "Already ticked: {0}"
 msgstr "Already ticked: {0}"
 
@@ -11632,11 +11636,15 @@ msgid "Returned: {0}"
 msgstr "Returned: {0}"
 
 #. 0: result.group.name
+#. 0: result.group.name
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
 msgid "Also the rest of {0} (1)"
 msgstr "Also the rest of {0} (1)"
 
 #. 0: result.group.name
+#. 0: result.group.name
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
 msgid "Also the rest of {0} (#)"
 msgstr "Also the rest of {0} (#)"
@@ -11707,6 +11715,8 @@ msgid "{0} still open."
 msgstr "{0} still open."
 
 #. 0: name
+#. 0: kit.name
+#: src/routes/productions/[id]/handout-detail.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
 msgid "Not on this production: {0}"
 msgstr "Not on this production: {0}"
@@ -12778,3 +12788,80 @@ msgstr "Fixed price {0} gross"
 #: src/lib/components/ui/billing-document/billing-document.svelte
 msgid "Fixed price {0} net"
 msgstr "Fixed price {0} net"
+
+#. 0: kit.name
+#. 0: kit.name
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Kit {0}"
+msgstr "Kit {0}"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Does all of it go along? Untick what stays behind."
+msgstr "Does all of it go along? Untick what stays behind."
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Is all of it back? Untick what is missing."
+msgstr "Is all of it back? Untick what is missing."
+
+#. 0: kit.name
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Checked out: {0} (1 unit)"
+msgstr "Checked out: {0} (1 unit)"
+
+#. 0: kit.name
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Checked out: {0} (# units)"
+msgstr "Checked out: {0} (# units)"
+
+#. 0: kit.name
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Returned: {0} (1 unit)"
+msgstr "Returned: {0} (1 unit)"
+
+#. 0: kit.name
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Returned: {0} (# units)"
+msgstr "Returned: {0} (# units)"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "1 unit left out"
+msgid_plural "# units left out"
+msgstr[0] "1 unit left out"
+msgstr[1] "# units left out"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Tick kit"
+msgstr "Tick kit"
+
+#: src/routes/checkout/+page.svelte
+msgid "1 unit of the kit"
+msgid_plural "# units of the kit"
+msgstr[0] "1 unit of the kit"
+msgstr[1] "# units of the kit"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Is all of it there? Untick what is missing."
+msgstr "Is all of it there? Untick what is missing."
+
+#. 0: kit.name
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Found: {0} (1 unit)"
+msgstr "Found: {0} (1 unit)"
+
+#. 0: kit.name
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Found: {0} (# units)"
+msgstr "Found: {0} (# units)"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "1 unit missing"
+msgid_plural "# units missing"
+msgstr[0] "1 unit missing"
+msgstr[1] "# units missing"
+
+#. 0: p0; 1: p1
+#: src/lib/error-messages.svelte.ts
+msgid "Tag \"{0}\" is already on {1}. A bundle's sticker is scanned like a unit's, so the two must differ."
+msgstr "Tag \"{0}\" is already on {1}. A bundle's sticker is scanned like a unit's, so the two must differ."

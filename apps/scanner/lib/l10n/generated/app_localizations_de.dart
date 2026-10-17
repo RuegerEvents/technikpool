@@ -120,7 +120,7 @@ class SDe extends S {
   String get cableLength => 'Länge';
 
   @override
-  String get checkedOutTo => 'Ausgebucht an';
+  String get checkedOutTo => 'Ausgegeben an';
 
   @override
   String get history => 'Verlauf';
@@ -343,7 +343,7 @@ class SDe extends S {
   String get actionCreated => 'Angelegt';
 
   @override
-  String get actionCheckedOut => 'Ausgebucht';
+  String get actionCheckedOut => 'Ausgegeben';
 
   @override
   String get actionReturned => 'Zurückgegeben';
@@ -537,7 +537,7 @@ class SDe extends S {
 
   @override
   String stocktakeWasOut(String name) {
-    return 'ausgebucht auf $name';
+    return 'ausgegeben an $name';
   }
 
   @override
@@ -1113,4 +1113,44 @@ class SDe extends S {
     );
     return '$_temp0';
   }
+
+  @override
+  String get handoutTakenBack =>
+      'Zurückgenommen · abhaken, um es wieder auszugeben';
+
+  @override
+  String get handoutKitAddition => 'Neu im Bundle, noch nicht gebucht';
+
+  @override
+  String get listTickKit => 'Bundle abhaken';
+
+  @override
+  String kitDialogTitle(String name) {
+    return 'Bundle $name';
+  }
+
+  @override
+  String kitScanned(String name, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$name: $count Geräte',
+      one: '$name: 1 Gerät',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String kitLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Geräte nicht dabei',
+      one: '1 Gerät nicht dabei',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get lookupKit => 'Bundle';
 }

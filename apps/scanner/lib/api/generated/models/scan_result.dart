@@ -5,6 +5,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'scan_group.dart';
+import 'scan_kit.dart';
 import 'scan_result_action.dart';
 import 'scanned_asset.dart';
 
@@ -18,6 +19,7 @@ class ScanResult {
     required this.targetName,
     required this.returnedFrom,
     this.group,
+    this.kit,
   });
   
   factory ScanResult.fromJson(Map<String, Object?> json) => _$ScanResultFromJson(json);
@@ -37,6 +39,15 @@ class ScanResult {
   /// `createScanBatch`. Not required, so an older client keeps working.
   ///
   final ScanGroup? group;
+
+  /// Set when the code was a kit's own sticker: every unit in it that the.
+  /// caller may book went to the target at once, accessories along. `asset`.
+  /// then stands for the kit — the id of its first unit, the kit's name.
+  /// and tag — so an older client still reports something true. Ask about.
+  /// `kit.units` and book back what is missing. Not required, so an older.
+  /// client keeps working.
+  ///
+  final ScanKit? kit;
 
   Map<String, Object?> toJson() => _$ScanResultToJson(this);
 }

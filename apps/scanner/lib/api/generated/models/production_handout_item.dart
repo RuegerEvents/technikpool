@@ -4,6 +4,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import 'list_kit.dart';
 import 'production_check_group.dart';
 import 'production_handout_item_status.dart';
 
@@ -25,6 +26,8 @@ class ProductionHandoutItem {
     required this.received,
     required this.returnReported,
     this.productImageUrl,
+    this.kit,
+    this.kitAddition,
   });
   
   factory ProductionHandoutItem.fromJson(Map<String, Object?> json) => _$ProductionHandoutItemFromJson(json);
@@ -43,6 +46,19 @@ class ProductionHandoutItem {
   final String? lentBy;
   final String? accessoryOf;
   final ProductionCheckGroup group;
+
+  /// Not required, so an older client keeps compiling.
+  final ListKit? kit;
+
+  /// Not booked yet: put into a kit after the kit was booked, and listed.
+  /// with it. A tick books it and hands it out at once. Not required, so.
+  /// an older client keeps compiling.
+  ///
+  final bool? kitAddition;
+
+  /// RETURNED on the `checkout` list: taken back while the production.
+  /// still runs — not owed, but a tick sends it out again.
+  ///
   final ProductionHandoutItemStatus status;
 
   /// Out (`checkout`) or back (`checkin`).

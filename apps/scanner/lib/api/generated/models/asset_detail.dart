@@ -6,6 +6,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 import 'asset_status.dart';
 import 'asset_transaction.dart';
+import 'list_kit.dart';
 import 'location.dart';
 import 'organization.dart';
 import 'product.dart';
@@ -29,6 +30,7 @@ class AssetDetail {
     this.orgIndex,
     this.bundleId,
     this.parentAssetId,
+    this.kit,
     this.documents,
   });
   
@@ -74,6 +76,11 @@ class AssetDetail {
 
   /// The production this asset is currently checked out to, if any. A production of an organization the caller is not a member of is still reported — the unit is not free — but its `name` is that organization's name, since the caller may not see the production itself.
   final Production? currentProduction;
+
+  /// The kit the unit is in, if any. Not required, so an older client.
+  /// keeps compiling.
+  ///
+  final ListKit? kit;
 
   /// Most recent transactions first.
   final List<AssetTransaction> history;

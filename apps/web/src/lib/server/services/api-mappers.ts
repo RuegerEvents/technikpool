@@ -9,6 +9,7 @@ import {
 	productCounts,
 	type StocktakeDetail,
 	type StocktakeItemRow,
+	type ConfirmEntry,
 	type StocktakeScanOutcome,
 	type StocktakeSummary
 } from '#lib/server/services/stocktake.js';
@@ -16,6 +17,12 @@ import { userLabel } from '#lib/user-label.svelte.js';
 import type { CaseCheck } from '#lib/server/services/case-check.js';
 import type { ProductionCheckView } from '#lib/server/services/production-check.js';
 import type { HandoutView } from '#lib/server/services/production-handout.js';
+import type {
+	ScanGroup,
+	ScanGroupUnit,
+	ScanKit,
+	ScanResult
+} from '#lib/server/services/checkout.js';
 import type { ListLine } from '#lib/production-list.js';
 
 // Prisma payloads are deliberately not returned straight to clients: they carry
@@ -329,6 +336,7 @@ export function toStocktakeDetail(
 			productId: p.product.id,
 			productName: p.product.name,
 			productCaption: p.product.caption,
+			productImageUrl: imageSrc(p.product.imagePath),
 			manufacturerName: p.product.manufacturer?.name ?? null,
 			category: toCategory(p.product.category),
 			cable: toCableSpec(p.product),
@@ -345,13 +353,66 @@ export function toStocktakeDetail(
 	};
 }
 
+/** A unit offered along with a scan, its picture as an address. */
+export function toScanGroupUnit(unit: ScanGroupUnit): Schemas['ScanGroupUnit'] {
+	return {
+		id: unit.id,
+		assetTag: unit.assetTag,
+		productName: unit.productName,
+		productCaption: unit.productCaption,
+		manufacturerName: unit.manufacturerName,
+		productImageUrl: imageSrc(unit.productImagePath),
+		done: unit.done
+	};
+}
+
+export function toScanGroup(group: ScanGroup | null | undefined): Schemas['ScanGroup'] | null {
+	return group
+		? { kind: group.kind, name: group.name, units: group.units.map(toScanGroupUnit) }
+		: null;
+}
+
+export function toScanKit(kit: ScanKit | null | undefined): Schemas['ScanKit'] | null {
+	return kit
+		? { id: kit.id, name: kit.name, tag: kit.tag, units: kit.units.map(toScanGroupUnit) }
+		: null;
+}
+
+export function toScanResult(result: ScanResult): Schemas['ScanResult'] {
+	return {
+		asset: { ...result.asset },
+		action: result.action,
+		targetName: result.targetName,
+		returnedFrom: result.returnedFrom,
+		group: toScanGroup(result.group),
+		kit: toScanKit(result.kit)
+	};
+}
+
+function toConfirmEntry(entry: ConfirmEntry): Schemas['StocktakeConfirmEntry'] {
+	return {
+		assetId: entry.assetId,
+		assetTag: entry.assetTag,
+		productName: entry.productName,
+		productCaption: entry.productCaption,
+		manufacturerName: entry.manufacturerName,
+		productImageUrl: imageSrc(entry.productImagePath),
+		foundByName: entry.foundByName
+	};
+}
+
 export function toStocktakeScanResult(
 	result: StocktakeScanOutcome,
 	closed: boolean,
 	userId: string
 ): Schemas['StocktakeScanResult'] {
 	if (result.outcome === 'bundle') {
-		return { outcome: 'bundle', item: null, bundle: result.bundle, confirm: result.confirm };
+		return {
+			outcome: 'bundle',
+			item: null,
+			bundle: result.bundle,
+			confirm: result.confirm.map(toConfirmEntry)
+		};
 	}
 	if (result.outcome === 'already') {
 		return {
@@ -365,7 +426,7 @@ export function toStocktakeScanResult(
 		outcome: result.outcome,
 		item: toStocktakeItem(result.item, closed, userId),
 		wasOutAt: result.wasOutAt,
-		confirm: result.confirm,
+		confirm: result.confirm.map(toConfirmEntry),
 		confirmGroup: result.confirmGroup
 	};
 }
@@ -424,6 +485,7 @@ export function toProductionCheck(check: ProductionCheckView): Schemas['Producti
 			lentBy: i.lentBy,
 			accessoryOf: i.accessoryOf,
 			group: { kind: i.group.kind, name: i.group.name },
+			kit: i.kit && { ...i.kit },
 			status: i.status,
 			received: i.received,
 			returnReported: i.returnReported,
@@ -481,6 +543,8 @@ export function toProductionHandout(view: HandoutView): Schemas['ProductionHando
 			lentBy: i.lentBy,
 			accessoryOf: i.accessoryOf,
 			group: { kind: i.group.kind, name: i.group.name },
+			kit: i.kit && { ...i.kit },
+			kitAddition: i.kitAddition,
 			status: i.status,
 			done: i.done,
 			received: i.received,

@@ -15,6 +15,7 @@ class ScanGroupUnit {
     required this.manufacturerName,
     required this.done,
     this.productCaption,
+    this.productImageUrl,
   });
   
   factory ScanGroupUnit.fromJson(Map<String, Object?> json) => _$ScanGroupUnitFromJson(json);
@@ -28,6 +29,12 @@ class ScanGroupUnit {
   /// product name. Not required, so an older client keeps compiling.
   ///
   final String? productCaption;
+
+  /// The product's picture, absolute like Product.imageUrl — for a.
+  /// thumbnail beside the row. Null for a product without one. Not.
+  /// required, so an older client keeps compiling.
+  ///
+  final String? productImageUrl;
 
   /// Already at the scan's target; nothing to book.
   final bool done;

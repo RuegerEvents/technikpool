@@ -436,5 +436,15 @@
   "actionCheckoutUndone": "Checkout undone",
   "@actionCheckoutUndone": {"description": "The CHECKOUT_UNDONE history entry: a unit ticked as handed out was unticked again before it left."},
   "handoutOthersElsewhere": "{count, plural, =1{1 more unit on the production is not on this list.} other{{count} more units on the production are not on this list.}}",
-  "@handoutOthersElsewhere": {"placeholders": {"count": {"type": "int"}}}
+  "@handoutOthersElsewhere": {"placeholders": {"count": {"type": "int"}}},
+  "handoutTakenBack": "Taken back · tick to hand out again",
+  "handoutKitAddition": "New in the kit, not booked yet",
+  "listTickKit": "Tick kit",
+  "kitDialogTitle": "Kit {name}",
+  "@kitDialogTitle": {"placeholders": {"name": {"type": "String"}}},
+  "kitScanned": "{count, plural, =1{{name}: 1 unit} other{{name}: {count} units}}",
+  "@kitScanned": {"placeholders": {"name": {"type": "String"}, "count": {"type": "int"}}},
+  "kitLeftOut": "{count, plural, =1{1 unit left out} other{{count} units left out}}",
+  "@kitLeftOut": {"placeholders": {"count": {"type": "int"}}},
+  "lookupKit": "Kit"
 }

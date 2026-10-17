@@ -13,7 +13,7 @@ import {
 import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '#lib/asset-status.js';
 import { withAccessories } from './accessories';
 import { canPlaceAt } from './locations';
-import { resolveScannedCode } from './asset-lookup';
+import { kitByTag, resolveScannedCode, type TaggedKit } from './asset-lookup';
 import { onProductionSide } from './production-check';
 
 // Scan/checkout behaviour lives here rather than in checkout.remote.ts so the
@@ -50,6 +50,21 @@ export interface ScanResult {
 	returnedFrom: string[];
 	/** What the scanned unit belongs with, offered to book along — see `scanGroup`. */
 	group: ScanGroup | null;
+	/**
+	 * Set when the code was a kit's own sticker: every unit in it was booked, and
+	 * `asset` stands for the kit (its first unit's id, the kit's name and tag).
+	 * See `performKitScan`.
+	 */
+	kit?: ScanKit | null;
+}
+
+export interface ScanKit {
+	id: string;
+	/** The kit's name with its caption. */
+	name: string;
+	tag: string | null;
+	/** The kit's units this scan booked, to be asked about; their accessories came along. */
+	units: ScanGroupUnit[];
 }
 
 export interface ScanGroupUnit {
@@ -58,6 +73,8 @@ export interface ScanGroupUnit {
 	productName: string;
 	productCaption: string | null;
 	manufacturerName: string | null;
+	/** The product's picture, as a stored key — see #lib/images. */
+	productImagePath: string | null;
 	/** Already where the scan put the unit: nothing to book, shown for completeness. */
 	done: boolean;
 }
@@ -396,6 +413,8 @@ export async function performScan(
 		);
 	}
 	if (match.kind === 'not_found') {
+		const kit = await kitByTag(input.assetTag);
+		if (kit) return await performKitScan(userId, kit, input);
 		throw new CheckoutError('asset_not_found', `Tag "${input.assetTag}" not found`, input.assetTag);
 	}
 
@@ -591,6 +610,126 @@ export async function performScan(
 }
 
 /**
+ * The units of a kit a scan of its sticker books, by name: the top-level ones
+ * this user may book — accessories come along with their unit, as always.
+ * `only` narrows them to the ones a list has. A unit marked unavailable stays
+ * behind when the scan goes to a production, as a scan of it alone would.
+ */
+export async function kitScanUnits(
+	userId: string,
+	kit: TaggedKit,
+	targetType: ScanTargetType,
+	only?: Set<string>
+) {
+	const [orgIds, systemAdmin] = await Promise.all([writableOrgIds(userId), isSystemAdmin(userId)]);
+	const name = withCaption(kit.template.name, kit.template.caption);
+	const units = await prisma.asset.findMany({
+		where: { bundleId: kit.id, parentAssetId: null, ...ACTIVE_ASSET_WHERE },
+		select: {
+			id: true,
+			assetTag: true,
+			status: true,
+			organizationId: true,
+			locationId: true,
+			location: { select: { name: true } },
+			product: {
+				select: {
+					name: true,
+					caption: true,
+					imagePath: true,
+					manufacturer: { select: { name: true } }
+				}
+			}
+		}
+	});
+	const mine = units.filter((u) => systemAdmin || orgIds.includes(u.organizationId));
+	if (units.length > 0 && mine.length === 0) {
+		throw new CheckoutError('forbidden', `No access to kit "${name}"`, kit.tag ?? undefined);
+	}
+	return mine
+		.filter((u) => !only || only.has(u.id))
+		.filter((u) => targetType === 'location' || isBookableStatus(u.status))
+		.sort(
+			(a, b) =>
+				naturalCompare(a.product.name, b.product.name) ||
+				naturalCompare(a.assetTag ?? '', b.assetTag ?? '')
+		);
+}
+
+type KitScanUnit = Awaited<ReturnType<typeof kitScanUnits>>[number];
+
+/** The answer to a kit's sticker, in the shape of any other scan's. */
+export function kitScanResult(
+	kit: TaggedKit,
+	units: KitScanUnit[],
+	rest: Pick<ScanResult, 'action' | 'targetName' | 'returnedFrom'>
+): ScanResult {
+	const name = withCaption(kit.template.name, kit.template.caption);
+	return {
+		asset: {
+			id: units[0]?.id ?? kit.id,
+			assetTag: kit.tag ?? '',
+			productName: name,
+			productCaption: null,
+			manufacturerName: null
+		},
+		...rest,
+		group: null,
+		kit: {
+			id: kit.id,
+			name,
+			tag: kit.tag,
+			units: units.map((u) => ({
+				id: u.id,
+				assetTag: u.assetTag,
+				productName: u.product.name,
+				productCaption: u.product.caption,
+				manufacturerName: u.product.manufacturer?.name ?? null,
+				productImagePath: u.product.imagePath,
+				done: true
+			}))
+		}
+	};
+}
+
+/**
+ * A kit's sticker scanned in a session: every unit in it goes to the target at
+ * once — the case is on the trolley, and its sticker stands for what is in it.
+ * Through `performBulkCheckout`, so every rule of booking a unit applies to each.
+ */
+async function performKitScan(
+	userId: string,
+	kit: TaggedKit,
+	input: ScanInput
+): Promise<{ result: ScanResult; affected: AffectedRecords }> {
+	const units = await kitScanUnits(userId, kit, input.targetType);
+	if (units.length === 0) {
+		throw new CheckoutError(
+			'asset_unavailable',
+			`Nothing in kit "${withCaption(kit.template.name, kit.template.caption)}" can be booked`,
+			kit.tag ?? undefined
+		);
+	}
+	const ids = units.map((u) => u.id);
+	const returning =
+		input.targetType === 'location'
+			? await prisma.productionItem.findMany({
+					where: { assetId: { in: ids }, status: 'CHECKED_OUT' },
+					include: { production: { select: RETURNED_FROM_SELECT } }
+				})
+			: [];
+	const { result, affected } = await performBulkCheckout(userId, { ...input, assetIds: ids });
+	return {
+		result: kitScanResult(kit, units, {
+			action: input.targetType === 'location' ? 'LOCATION_ASSIGNED' : 'CHECKED_OUT',
+			targetName: result.targetName,
+			returnedFrom: await returnedFromNames(userId, returning)
+		}),
+		affected
+	};
+}
+
+/**
  * The kits among `bundleIds` that the production has booked. A unit going out
  * that belongs to one of them — put into the kit after it was booked — joins
  * the kit's booking rather than becoming a line of its own, so the production
@@ -639,7 +778,9 @@ const GROUP_UNIT_SELECT = {
 	status: true,
 	locationId: true,
 	parentAssetId: true,
-	product: { select: { name: true, caption: true, manufacturer: { select: { name: true } } } },
+	product: {
+		select: { name: true, caption: true, imagePath: true, manufacturer: { select: { name: true } } }
+	},
 	productionItems: { where: { status: 'CHECKED_OUT' }, select: { productionId: true } }
 } as const;
 
@@ -706,6 +847,7 @@ async function scanGroup(
 			productName: row.product.name,
 			productCaption: row.product.caption,
 			manufacturerName: row.product.manufacturer?.name ?? null,
+			productImagePath: row.product.imagePath,
 			done: toProduction
 				? row.productionItems.some((item) => item.productionId === target.targetId)
 				: row.locationId === target.targetId && row.productionItems.length === 0

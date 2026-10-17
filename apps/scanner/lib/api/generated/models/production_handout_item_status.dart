@@ -4,6 +4,9 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+/// RETURNED on the `checkout` list: taken back while the production.
+/// still runs — not owed, but a tick sends it out again.
+///
 @JsonEnum()
 enum ProductionHandoutItemStatus {
   @JsonValue('APPROVED')

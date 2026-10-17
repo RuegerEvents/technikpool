@@ -10,7 +10,9 @@ export const PUT: RequestHandler = ({ locals, params, request }) =>
 		const mode = handoutMode(params.mode);
 		const { key, count } = lineCount(await jsonBody(request));
 		return withHandoutErrors(async () => {
-			const { result } = await setHandoutLineCount(user.id, params.productionId, mode, key, count);
+			const { result } = await setHandoutLineCount(user.id, params.productionId, mode, key, count, {
+				extras: true
+			});
 			return apiJson('ProductionListLineResult', { done: result.done });
 		});
 	});

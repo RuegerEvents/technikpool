@@ -1091,6 +1091,11 @@ export interface components {
         AssetDetail: components["schemas"]["Asset"] & {
             /** @description The production this asset is currently checked out to, if any. A production of an organization the caller is not a member of is still reported — the unit is not free — but its `name` is that organization's name, since the caller may not see the production itself. */
             currentProduction: components["schemas"]["Production"] | null;
+            /**
+             * @description The kit the unit is in, if any. Not required, so an older client
+             *     keeps compiling.
+             */
+            kit?: components["schemas"]["ListKit"] | null;
             /** @description Most recent transactions first. */
             history: components["schemas"]["AssetTransaction"][];
             /**
@@ -1156,6 +1161,37 @@ export interface components {
              *     `createScanBatch`. Not required, so an older client keeps working.
              */
             group?: components["schemas"]["ScanGroup"] | null;
+            /**
+             * @description Set when the code was a kit's own sticker: every unit in it that the
+             *     caller may book went to the target at once, accessories along. `asset`
+             *     then stands for the kit — the id of its first unit, the kit's name
+             *     and tag — so an older client still reports something true. Ask about
+             *     `kit.units` and book back what is missing. Not required, so an older
+             *     client keeps working.
+             */
+            kit?: components["schemas"]["ScanKit"] | null;
+        };
+        ScanKit: {
+            id: string;
+            /** @description The kit's name with its caption. */
+            name: string;
+            tag: string | null;
+            /**
+             * @description The kit's units this scan booked (or ticked), by name. Empty when none
+             *     of them was on the list scanned into — the kit is not from here.
+             */
+            units: components["schemas"]["ScanGroupUnit"][];
+        };
+        /**
+         * @description The kit a unit on a list is in. A kit's units arrive one after another
+         *     within their section, so a client starts a kit heading whenever it
+         *     changes. An accessory carries its parent's kit.
+         */
+        ListKit: {
+            id: string;
+            /** @description The kit's name with its caption. */
+            name: string;
+            tag: string | null;
         };
         ScanGroup: {
             /**
@@ -1182,6 +1218,12 @@ export interface components {
              *     product name. Not required, so an older client keeps compiling.
              */
             productCaption?: string | null;
+            /**
+             * @description The product's picture, absolute like Product.imageUrl — for a
+             *     thumbnail beside the row. Null for a product without one. Not
+             *     required, so an older client keeps compiling.
+             */
+            productImageUrl?: string | null;
             /** @description Already at the scan's target; nothing to book. */
             done: boolean;
         };
@@ -1332,6 +1374,12 @@ export interface components {
              *     product name. Not required, so an older client keeps compiling.
              */
             productCaption?: string | null;
+            /**
+             * @description The product's picture, absolute like Product.imageUrl. Null for a
+             *     product without one. Not required, so an older client keeps
+             *     compiling.
+             */
+            productImageUrl?: string | null;
             manufacturerName: string | null;
             category: components["schemas"]["Category"];
             /**
@@ -1408,6 +1456,12 @@ export interface components {
              *     product name. Not required, so an older client keeps compiling.
              */
             productCaption?: string | null;
+            /**
+             * @description The product's picture, absolute like Product.imageUrl — for a
+             *     thumbnail beside the row. Null for a product without one. Not
+             *     required, so an older client keeps compiling.
+             */
+            productImageUrl?: string | null;
             /** @description Counted already, by this person. Null when still to confirm. */
             foundByName: string | null;
         };
@@ -1545,6 +1599,8 @@ export interface components {
             /** @description The unit it hangs off; listed right after it. */
             accessoryOf: string | null;
             group: components["schemas"]["ProductionCheckGroup"];
+            /** @description Not required, so an older client keeps compiling. */
+            kit?: components["schemas"]["ListKit"] | null;
             /**
              * @description APPROVED is booked but not handed over yet.
              * @enum {string}
@@ -1614,6 +1670,20 @@ export interface components {
             productName: string;
             /** @description Units this scan ticked — the unit and its untagged accessories. */
             ticked: number;
+            /**
+             * @description The rest of the scanned unit's kit on this list (kind `bundle`), to
+             *     offer ticking along; `done` is whether it is ticked already. Not
+             *     required, so an older client keeps working.
+             */
+            group?: components["schemas"]["ScanGroup"] | null;
+            /**
+             * @description Set when the code was a kit's sticker: its units on this list were
+             *     ticked, accessories along, and `productName`/`assetTag` are the kit's.
+             *     `units` are the ones this scan ticked, to ask about. `unexpected`
+             *     with no units: none of the kit is on this list. Not required, so an
+             *     older client keeps working.
+             */
+            kit?: components["schemas"]["ScanKit"] | null;
         };
         ProductionCheckTickRequest: {
             assetIds: string[];
@@ -1675,7 +1745,19 @@ export interface components {
             lentBy: string | null;
             accessoryOf: string | null;
             group: components["schemas"]["ProductionCheckGroup"];
-            /** @enum {string} */
+            /** @description Not required, so an older client keeps compiling. */
+            kit?: components["schemas"]["ListKit"] | null;
+            /**
+             * @description Not booked yet: put into a kit after the kit was booked, and listed
+             *     with it. A tick books it and hands it out at once. Not required, so
+             *     an older client keeps compiling.
+             */
+            kitAddition?: boolean;
+            /**
+             * @description RETURNED on the `checkout` list: taken back while the production
+             *     still runs — not owed, but a tick sends it out again.
+             * @enum {string}
+             */
             status: "APPROVED" | "CHECKED_OUT" | "RETURNED";
             /** @description Out (`checkout`) or back (`checkin`). */
             done: boolean;

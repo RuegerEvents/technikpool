@@ -96,6 +96,7 @@ msgstr "Crew-Ausweise"
 #~ msgid "Booked Equipment"
 #~ msgstr "Gebuchte Geräte"
 
+#: src/lib/components/production-list/unit-question.svelte
 #: src/lib/components/ui/camera-scan/camera-scan-button.svelte
 #: src/routes/assets/new/cables/+page.svelte
 msgid "Done"
@@ -9823,6 +9824,7 @@ msgid "Counted by {0}"
 msgstr "Gezählt von {0}"
 
 #: src/lib/components/production-list/tick-list.svelte
+#: src/lib/components/production-list/unit-question.svelte
 #: src/routes/case-check/+page.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
@@ -10234,12 +10236,12 @@ msgstr "Wähle aus, was gezählt wird. Die Liste folgt während der Zählung dem
 #. 0: result.wasOutAt
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Checked out to {0}"
-msgstr "Ausgebucht auf {0}"
+msgstr "Ausgecheckt an {0}"
 
 #. 0: item.outProductionName
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "· Checked out to {0}"
-msgstr "· Ausgebucht auf {0}"
+msgstr "· Ausgecheckt an {0}"
 
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Count # accessory"
@@ -11308,7 +11310,9 @@ msgid "Found: {0} (+{1} accessories)"
 msgstr "Gefunden: {0} (+{1} Zubehör)"
 
 #. 0: result.productName
+#. 0: kit.name
 #: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
 msgid "Already ticked: {0}"
 msgstr "Schon abgehakt: {0}"
 
@@ -11632,11 +11636,15 @@ msgid "Returned: {0}"
 msgstr "Zurück: {0}"
 
 #. 0: result.group.name
+#. 0: result.group.name
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
 msgid "Also the rest of {0} (1)"
 msgstr "Auch den Rest von {0} (1)"
 
 #. 0: result.group.name
+#. 0: result.group.name
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
 msgid "Also the rest of {0} (#)"
 msgstr "Auch den Rest von {0} (#)"
@@ -11707,6 +11715,8 @@ msgid "{0} still open."
 msgstr "{0} noch offen."
 
 #. 0: name
+#. 0: kit.name
+#: src/routes/productions/[id]/handout-detail.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
 msgid "Not on this production: {0}"
 msgstr "Nicht auf dieser Produktion: {0}"
@@ -12778,3 +12788,80 @@ msgstr "Festpreis {0} brutto"
 #: src/lib/components/ui/billing-document/billing-document.svelte
 msgid "Fixed price {0} net"
 msgstr "Festpreis {0} netto"
+
+#. 0: kit.name
+#. 0: kit.name
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Kit {0}"
+msgstr "Bundle {0}"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Does all of it go along? Untick what stays behind."
+msgstr "Geht alles mit? Was nicht mitgeht, abwählen."
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Is all of it back? Untick what is missing."
+msgstr "Ist alles zurück? Was fehlt, abwählen."
+
+#. 0: kit.name
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Checked out: {0} (1 unit)"
+msgstr "Ausgegeben: {0} (1 Gerät)"
+
+#. 0: kit.name
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Checked out: {0} (# units)"
+msgstr "Ausgegeben: {0} (# Geräte)"
+
+#. 0: kit.name
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Returned: {0} (1 unit)"
+msgstr "Zurück: {0} (1 Gerät)"
+
+#. 0: kit.name
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Returned: {0} (# units)"
+msgstr "Zurück: {0} (# Geräte)"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "1 unit left out"
+msgid_plural "# units left out"
+msgstr[0] "1 Gerät nicht dabei"
+msgstr[1] "# Geräte nicht dabei"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Tick kit"
+msgstr "Bundle abhaken"
+
+#: src/routes/checkout/+page.svelte
+msgid "1 unit of the kit"
+msgid_plural "# units of the kit"
+msgstr[0] "1 Gerät des Bundles"
+msgstr[1] "# Geräte des Bundles"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Is all of it there? Untick what is missing."
+msgstr "Ist alles da? Was fehlt, abwählen."
+
+#. 0: kit.name
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Found: {0} (1 unit)"
+msgstr "Gefunden: {0} (1 Gerät)"
+
+#. 0: kit.name
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "Found: {0} (# units)"
+msgstr "Gefunden: {0} (# Geräte)"
+
+#: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
+msgid "1 unit missing"
+msgid_plural "# units missing"
+msgstr[0] "1 Gerät fehlt"
+msgstr[1] "# Geräte fehlen"
+
+#. 0: p0; 1: p1
+#: src/lib/error-messages.svelte.ts
+msgid "Tag \"{0}\" is already on {1}. A bundle's sticker is scanned like a unit's, so the two must differ."
+msgstr "Die Inventarnummer „{0}“ hat schon {1}. Der Aufkleber eines Bundles wird gescannt wie der eines Geräts, deshalb müssen beide verschieden sein."

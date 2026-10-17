@@ -1,5 +1,6 @@
 import { prisma } from '#lib/server/auth.js';
 import { naturalCompare } from '#lib/sort.js';
+import { bundleLabel, withCaption } from '#lib/product-label.js';
 import { userLabel } from '#lib/user-label.svelte.js';
 import type {
 	HandoverReceivedData,
@@ -12,14 +13,17 @@ import {
 	visibleProductionName,
 	writableOrgIds
 } from './access';
-import { resolveScannedCode } from './asset-lookup';
+import { kitByTag, resolveScannedCode } from './asset-lookup';
+import type { ScanGroup, ScanGroupUnit, ScanKit } from './checkout';
 import {
 	buildLines,
 	groupOf,
+	kitOf,
 	listItems,
 	nestAndSort,
 	pickForCount,
 	type ListGroup,
+	type ListKit,
 	type ListLine,
 	type ListedItem
 } from './production-list';
@@ -108,6 +112,8 @@ export interface ProductionCheckItem {
 	 * by it, so a client starts a new heading whenever it changes.
 	 */
 	group: CheckGroup;
+	/** The kit the unit is in, for a heading over its units. */
+	kit: ListKit | null;
 	status: 'APPROVED' | 'CHECKED_OUT';
 	received: boolean;
 	returnReported: boolean;
@@ -149,6 +155,14 @@ export type CheckScanResult = {
 	productName: string;
 	/** Units ticked by this scan: the unit and its accessories that carry no tag of their own. */
 	ticked: number;
+	/** The rest of the scanned unit's kit on this list, offered to tick along. */
+	group?: ScanGroup | null;
+	/**
+	 * Set when the code was a kit's sticker: its units on this list were ticked,
+	 * and `productName` and `assetTag` are the kit's. `units` are the ones this
+	 * scan ticked, to be asked about.
+	 */
+	kit?: ScanKit | null;
 };
 
 // ---------------------------------------------------------------------------
@@ -308,6 +322,7 @@ export async function getProductionCheck(
 				lentBy: lent ? item.asset.organization.shortName || item.asset.organization.name : null,
 				accessoryOf: item.asset.parentAssetId,
 				group: checkGroupOf(item, productionOrgId, side),
+				kit: kitOf(item.asset.bundle),
 				status: item.status as ProductionCheckItem['status'],
 				received: lent && item.receivedAt !== null,
 				returnReported: lent && item.returnReportedAt !== null,
@@ -452,12 +467,20 @@ export async function scanIntoCheck(
 		);
 	}
 	if (match.kind === 'not_found') {
+		const kit = await kitByTag(code);
+		if (kit) return await tickKit(userId, checkId, check.productionId, side, kit);
 		throw new ProductionCheckError('asset_not_found', `Tag "${code}" not found`, code);
 	}
 
 	const asset = await prisma.asset.findUniqueOrThrow({
 		where: { id: match.assetId },
-		select: { id: true, assetTag: true, product: { select: { name: true } } }
+		select: {
+			id: true,
+			assetTag: true,
+			bundleId: true,
+			bundle: { select: { tag: true, template: { select: { name: true, caption: true } } } },
+			product: { select: { name: true } }
+		}
 	});
 	const listed = await listedItems(check.productionId, side);
 	const listedIds = new Set(listed.map((i) => i.assetId));
@@ -483,7 +506,80 @@ export async function scanIntoCheck(
 		.filter((i) => i.asset.parentAssetId === asset.id && !i.asset.assetTag)
 		.map((i) => i.assetId);
 	const ticked = await tick(checkId, userId, [asset.id, ...riders], 'scan');
-	return { ...base, result: 'ticked', ticked };
+
+	// The rest of its kit on this list, offered as a handout scan offers it.
+	let group: ScanGroup | null = null;
+	if (asset.bundleId && asset.bundle) {
+		const ticks = new Set(
+			(
+				await prisma.productionCheckTick.findMany({ where: { checkId }, select: { assetId: true } })
+			).map((t) => t.assetId)
+		);
+		const units = listed
+			.filter(
+				(i) =>
+					i.asset.bundleId === asset.bundleId && !i.asset.parentAssetId && i.assetId !== asset.id
+			)
+			.map((i) => unitOf(i, ticks.has(i.assetId)));
+		if (units.length > 0) group = { kind: 'bundle', name: bundleLabel(asset.bundle), units };
+	}
+	return { ...base, result: 'ticked', ticked, group };
+}
+
+function unitOf(item: ListedItem, done: boolean): ScanGroupUnit {
+	return {
+		id: item.assetId,
+		assetTag: item.asset.assetTag,
+		productName: item.asset.product.name,
+		productCaption: item.asset.product.caption,
+		manufacturerName: item.asset.product.manufacturer?.name ?? null,
+		productImagePath: item.asset.product.imagePath,
+		done
+	};
+}
+
+/**
+ * A kit's sticker: its units on this list are ticked, with their accessories,
+ * and named in the answer so they can be asked about. Already all ticked is
+ * `already`; none of them on the list is `unexpected`, with nothing ticked —
+ * a kit is not a unit, and has no tick of its own to be unexpected with.
+ */
+async function tickKit(
+	userId: string,
+	checkId: string,
+	productionId: string,
+	side: CheckSide,
+	kit: NonNullable<Awaited<ReturnType<typeof kitByTag>>>
+): Promise<CheckScanResult> {
+	const listed = await listedItems(productionId, side);
+	const inKit = new Set(
+		listed
+			.filter((i) => i.asset.bundleId === kit.id && !i.asset.parentAssetId)
+			.map((i) => i.assetId)
+	);
+	const members = listed.filter(
+		(i) => inKit.has(i.assetId) || (i.asset.parentAssetId && inKit.has(i.asset.parentAssetId))
+	);
+	const ticks = new Set(
+		(
+			await prisma.productionCheckTick.findMany({ where: { checkId }, select: { assetId: true } })
+		).map((t) => t.assetId)
+	);
+	const fresh = members.filter((i) => !ticks.has(i.assetId)).map((i) => i.assetId);
+	const ticked = await tick(checkId, userId, fresh, 'scan');
+	const freshIds = new Set(fresh);
+	const units = listed
+		.filter((i) => inKit.has(i.assetId) && freshIds.has(i.assetId))
+		.sort((a, b) => naturalCompare(a.asset.product.name, b.asset.product.name))
+		.map((i) => unitOf(i, true));
+	const name = withCaption(kit.template.name, kit.template.caption);
+	return {
+		result: inKit.size === 0 ? 'unexpected' : fresh.length === 0 ? 'already' : 'ticked',
+		assetTag: kit.tag ?? '',
+		productName: name,
+		ticked,
+		kit: { id: kit.id, name, tag: kit.tag, units }
+	};
 }
 
 /** Tick by hand — the list, for units without a tag or a place without a scanner. */

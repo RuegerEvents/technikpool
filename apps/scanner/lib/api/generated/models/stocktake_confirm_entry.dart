@@ -15,6 +15,7 @@ class StocktakeConfirmEntry {
     required this.manufacturerName,
     required this.foundByName,
     this.productCaption,
+    this.productImageUrl,
   });
   
   factory StocktakeConfirmEntry.fromJson(Map<String, Object?> json) => _$StocktakeConfirmEntryFromJson(json);
@@ -28,6 +29,12 @@ class StocktakeConfirmEntry {
   /// product name. Not required, so an older client keeps compiling.
   ///
   final String? productCaption;
+
+  /// The product's picture, absolute like Product.imageUrl — for a.
+  /// thumbnail beside the row. Null for a product without one. Not.
+  /// required, so an older client keeps compiling.
+  ///
+  final String? productImageUrl;
 
   /// Counted already, by this person. Null when still to confirm.
   final String? foundByName;

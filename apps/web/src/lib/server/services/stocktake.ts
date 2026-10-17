@@ -1139,7 +1139,9 @@ async function tick(
 const CONFIRM_SELECT = {
 	id: true,
 	assetTag: true,
-	product: { select: { name: true, caption: true, manufacturer: { select: { name: true } } } }
+	product: {
+		select: { name: true, caption: true, imagePath: true, manufacturer: { select: { name: true } } }
+	}
 } as const;
 
 type ConfirmAsset = Prisma.AssetGetPayload<{ select: typeof CONFIRM_SELECT }>;
@@ -1151,6 +1153,7 @@ export type ConfirmEntry = {
 	productName: string;
 	productCaption: string | null;
 	manufacturerName: string | null;
+	productImagePath: string | null;
 	foundByName: string | null;
 };
 
@@ -1170,6 +1173,7 @@ async function confirmEntries(
 			productName: a.product.name,
 			productCaption: a.product.caption,
 			manufacturerName: a.product.manufacturer?.name ?? null,
+			productImagePath: a.product.imagePath,
 			foundByName: item ? item.foundBy?.name || item.foundBy?.email || '—' : null
 		};
 	});

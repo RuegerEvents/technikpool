@@ -1107,4 +1107,43 @@ class SEn extends S {
     );
     return '$_temp0';
   }
+
+  @override
+  String get handoutTakenBack => 'Taken back · tick to hand out again';
+
+  @override
+  String get handoutKitAddition => 'New in the kit, not booked yet';
+
+  @override
+  String get listTickKit => 'Tick kit';
+
+  @override
+  String kitDialogTitle(String name) {
+    return 'Kit $name';
+  }
+
+  @override
+  String kitScanned(String name, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$name: $count units',
+      one: '$name: 1 unit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String kitLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count units left out',
+      one: '1 unit left out',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get lookupKit => 'Kit';
 }

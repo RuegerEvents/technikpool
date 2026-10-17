@@ -64,11 +64,13 @@ class _Unit {
     required this.productImageUrl,
     required this.accessoryOf,
     required this.group,
+    required this.kit,
     required this.done,
     required this.locked,
     this.doneBy,
     this.note,
     this.noteWarn = false,
+    this.optional = false,
   });
 
   final String assetId;
@@ -78,6 +80,9 @@ class _Unit {
   final String? productImageUrl;
   final String? accessoryOf;
   final ProductionCheckGroup group;
+
+  /// The kit it is in, listed under the kit's heading.
+  final ListKit? kit;
   final bool done;
 
   /// Ticked by someone else, who alone may take it back.
@@ -85,10 +90,36 @@ class _Unit {
   final String? doneBy;
   final String? note;
   final bool noteWarn;
+
+  /// On the list to be ticked if need be, but not owed: left out of the counts
+  /// and of "tick all" — a unit already taken back, on the hand-out list.
+  final bool optional;
 }
 
-/// A row of a section: a unit, or a counted line.
-typedef _Row = ({_Unit? unit, ProductionListLine? line});
+/// Rows that stay together when the counted lines are slotted in by name.
+class _Block {
+  _Block(this.id, this.name, this.rows, [this.head]);
+
+  /// The unit the next accessory would hang off.
+  String? id;
+  final String name;
+  final List<_Row> rows;
+  final _KitHead? head;
+}
+
+/// A kit's heading, over its units (and their accessories) that follow it.
+class _KitHead {
+  _KitHead(this.kit);
+
+  final ListKit kit;
+  final units = <_Unit>[];
+}
+
+/// What a scan leaves to ask about: the accessories of a unit, or a kit's units.
+typedef _Scanned = ({String? unit, ScanKit? kit});
+
+/// A row of a section: a unit, a counted line, or a kit's heading.
+typedef _Row = ({_Unit? unit, ProductionListLine? line, _KitHead? kit});
 
 class _Section {
   _Section(this.group);
@@ -106,6 +137,17 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
   /// One scan after another, as in the other scanning screens.
   Future<void> _queue = Future<void>.value();
   bool _busy = false;
+
+  /// Scans waiting in [_queue], the running one included. A run of quick
+  /// scans reloads the list once, after the last of them, instead of after
+  /// each — a reload is the whole list, and doing it per scan is what made
+  /// fast scanning stutter.
+  int _waiting = 0;
+  bool _stale = false;
+
+  /// Units booked by a scan since the list was last loaded, which the list in
+  /// hand does not show as ticked yet.
+  final _justBooked = <String>{};
 
   ProductionCheck? _check;
   ProductionHandout? _handout;
@@ -188,20 +230,31 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
       final check = _check;
       if (check == null) return;
       final fresh = await api.productionCheck.getProductionCheck(checkId: check.id);
-      if (mounted) setState(() => _check = fresh);
+      if (mounted) {
+        setState(() {
+          _check = fresh;
+          _stale = false;
+        });
+      }
     } else {
       final fresh = await api.productionHandout.getProductionHandout(
         productionId: widget.productionId,
         mode: _handoutMode,
         organizationId: _organizationId,
       );
-      if (mounted) setState(() => _handout = fresh);
+      if (mounted) {
+        setState(() {
+          _handout = fresh;
+          _justBooked.clear();
+          _stale = false;
+        });
+      }
     }
   }
 
   Future<void> _reload() async {
     final api = ref.read(apiClientProvider);
-    if (api == null || !_open || _lineTimers.isNotEmpty) return;
+    if (api == null || !_open || _lineTimers.isNotEmpty || _busy || _waiting > 0) return;
     try {
       await _fetch(api);
     } catch (_) {
@@ -233,6 +286,7 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
             productImageUrl: item.productImageUrl,
             accessoryOf: item.accessoryOf,
             group: item.group,
+            kit: item.kit,
             done: item.tick != null,
             locked: item.tick != null && !item.tick!.mine,
             doneBy: item.tick != null && !item.tick!.mine ? item.tick!.userName : null,
@@ -255,24 +309,38 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
           productImageUrl: item.productImageUrl,
           accessoryOf: item.accessoryOf,
           group: item.group,
+          kit: item.kit,
           done: item.done,
           locked: false,
-          // On the take-back list: booked, but nobody handed it out. A tick
-          // books both.
-          note:
-              widget.mode == ProductionListMode.checkin &&
-                  item.status == ProductionHandoutItemStatus.approved
-              ? l10n.productionCheckNotOut
-              : item.lentBy == null
-              ? null
-              : item.returnReported
-              ? l10n.productionCheckReturnReported
-              : item.status == ProductionHandoutItemStatus.checkedOut && !item.received
-              ? l10n.productionCheckReceiptOpen
-              : null,
-          noteWarn: item.status == ProductionHandoutItemStatus.checkedOut && !item.received,
+          note: _handoutNote(l10n, item),
+          noteWarn:
+              item.kitAddition == true ||
+              item.status == ProductionHandoutItemStatus.checkedOut && !item.received,
+          optional: _takenBack(item),
         ),
     ];
+  }
+
+  /// On the hand-out list, a unit taken back while the production still runs
+  /// is there to send out again if that was a mistake — not something to do.
+  bool _takenBack(ProductionHandoutItem item) =>
+      widget.mode == ProductionListMode.checkout &&
+      item.status == ProductionHandoutItemStatus.returned;
+
+  String? _handoutNote(S l10n, ProductionHandoutItem item) {
+    // On the take-back list: booked, but nobody handed it out. A tick books both.
+    if (widget.mode == ProductionListMode.checkin &&
+        item.status == ProductionHandoutItemStatus.approved) {
+      return l10n.productionCheckNotOut;
+    }
+    if (_takenBack(item)) return l10n.handoutTakenBack;
+    if (item.kitAddition == true) return l10n.handoutKitAddition;
+    if (item.lentBy == null) return null;
+    if (item.returnReported) return l10n.productionCheckReturnReported;
+    if (item.status == ProductionHandoutItemStatus.checkedOut && !item.received) {
+      return l10n.productionCheckReceiptOpen;
+    }
+    return null;
   }
 
   /// Where a unit on a check stands: not handed over yet, or — lent units
@@ -296,31 +364,37 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
     _Section section(ProductionCheckGroup g) =>
         sections.putIfAbsent('${g.kind.json}:${g.name ?? ''}', () => _Section(g));
 
-    // Blocks of a unit and its accessories, so a line never lands between them.
-    final blocks = <_Section, List<({String? id, String name, List<_Row> rows})>>{};
+    // Blocks of a unit and its accessories, so a line never lands between them;
+    // a kit is one block, under its heading.
+    final blocks = <_Section, List<_Block>>{};
     for (final unit in units) {
       if (counted.contains(unit.assetId)) continue;
       final s = section(unit.group);
       final list = blocks.putIfAbsent(s, () => []);
-      if (unit.accessoryOf != null && list.isNotEmpty && list.last.id == unit.accessoryOf) {
-        list.last.rows.add((unit: unit, line: null));
+      final last = list.isEmpty ? null : list.last;
+      final row = (unit: unit, line: null, kit: null);
+      if (unit.accessoryOf != null && last != null && last.id == unit.accessoryOf) {
+        last.rows.add(row);
+        last.head?.units.add(unit);
+      } else if (unit.kit case final kit? when last?.head?.kit.id == kit.id) {
+        last!
+          ..id = unit.assetId
+          ..rows.add(row)
+          ..head!.units.add(unit);
+      } else if (unit.kit case final kit?) {
+        final head = _KitHead(kit)..units.add(unit);
+        list.add(
+          _Block(unit.assetId, kit.name, [(unit: null, line: null, kit: head), row], head),
+        );
       } else {
-        list.add((
-          id: unit.assetId,
-          name: unit.productName,
-          rows: [(unit: unit, line: null)],
-        ));
+        list.add(_Block(unit.assetId, unit.productName, [row]));
       }
     }
     for (final line in _lines) {
       final s = section(line.group);
       final list = blocks.putIfAbsent(s, () => []);
       final at = list.indexWhere((b) => naturalCompare(b.name, line.productName) > 0);
-      final block = (
-        id: null,
-        name: line.productName,
-        rows: <_Row>[(unit: null, line: line)],
-      );
+      final block = _Block(null, line.productName, [(unit: null, line: line, kit: null)]);
       if (at < 0) {
         list.add(block);
       } else {
@@ -341,7 +415,7 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
             : naturalCompare(a.group.name ?? '', b.group.name ?? '');
       });
     for (final s in out) {
-      for (final b in blocks[s] ?? const <({String? id, String name, List<_Row> rows})>[]) {
+      for (final b in blocks[s] ?? const <_Block>[]) {
         s.rows.addAll(b.rows);
       }
     }
@@ -370,7 +444,8 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
   void _enqueue(String code) {
     final trimmed = code.trim();
     if (trimmed.isEmpty) return;
-    _queue = _queue.then((_) => _submit(trimmed));
+    _waiting++;
+    _queue = _queue.then((_) => _submit(trimmed)).whenComplete(() => _waiting--);
   }
 
   void _submitManual() {
@@ -388,42 +463,79 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
 
     setState(() => _busy = true);
     try {
-      final unitAssetId = _isCheck
+      final scanned = _isCheck
           ? await _scanCheck(api, l10n, code)
           : await _scanHandout(api, l10n, code);
-      await _fetch(api);
+      final unitAssetId = scanned.unit;
+      // The accessory question reads the list, so it needs the fresh one.
+      final ask = unitAssetId != null && _hasAccessories(unitAssetId);
+      if (_waiting <= 1 || ask) {
+        await _fetch(api);
+      } else {
+        _stale = true;
+      }
       if (mounted) setState(() => _busy = false);
       // Asked inside the queue, so the next scan waits for the answer.
-      if (unitAssetId != null) await _askAccessories(unitAssetId);
+      if (ask) await _askAccessories(unitAssetId);
+      if (scanned.kit case final kit?) await _askKit(kit);
     } catch (error) {
       _report(_Tone.bad, describeError(l10n, error), code, ScanTone.error);
     } finally {
+      // The run's last scan failed: the ones before it still want showing.
+      if (_stale && _waiting <= 1) await _fetch(api).catchError((_) {});
       if (mounted) setState(() => _busy = false);
     }
   }
 
   /// Ticks the scanned unit; answers it, if it is on the list and was ticked
-  /// just now, so its accessories can be asked about. The scan answers with
-  /// the unit's tag rather than its id.
-  Future<String?> _scanCheck(ApiClient api, S l10n, String code) async {
+  /// just now, so its accessories can be asked about — or the kit whose
+  /// sticker it was, so its units can be. The scan answers with the unit's
+  /// tag rather than its id.
+  Future<_Scanned> _scanCheck(ApiClient api, S l10n, String code) async {
     final result = await api.productionCheck.scanIntoProductionCheck(
       checkId: _check!.id,
       body: ProductionCheckScanRequest(code: code),
     );
+    if (result.kit case final kit?
+        when result.result == ProductionCheckScanResultResult.ticked) {
+      _report(
+        _Tone.good,
+        l10n.kitScanned(kit.name, kit.units.length),
+        kit.tag,
+        ScanTone.ok,
+      );
+      return (unit: null, kit: kit);
+    }
     switch (result.result) {
       case ProductionCheckScanResultResult.ticked:
+        // One unit of a kit: the rest of it is offered, as when handing out.
+        final rest = [
+          for (final u in result.group?.units ?? const <ScanGroupUnit>[])
+            if (!u.done) u.id,
+        ];
         _report(
-          _Tone.good,
+          rest.isEmpty ? _Tone.good : _Tone.warn,
           result.ticked > 1
               ? l10n.productionCheckWithAccessories(result.productName, result.ticked - 1)
               : result.productName,
           result.assetTag,
-          ScanTone.ok,
+          rest.isEmpty ? ScanTone.ok : ScanTone.attention,
         );
-        return _check?.items
-            .where((i) => i.assetTag == result.assetTag)
-            .firstOrNull
-            ?.assetId;
+        if (rest.isNotEmpty && mounted) {
+          setState(
+            () => _offer = (
+              label: l10n.handoutRestOf(result.group!.name, rest.length),
+              assetIds: rest,
+            ),
+          );
+        }
+        return (
+          unit: _check?.items
+              .where((i) => i.assetTag == result.assetTag)
+              .firstOrNull
+              ?.assetId,
+          kit: null,
+        );
       case ProductionCheckScanResultResult.already:
         _report(
           _Tone.info,
@@ -439,17 +551,21 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
           ScanTone.attention,
         );
     }
-    return null;
+    return _nothingToAsk;
   }
 
+  static const _Scanned _nothingToAsk = (unit: null, kit: null);
+
   /// Books the scanned unit; answers it when it went where this list books
-  /// to, so its accessories can be asked about.
-  Future<String?> _scanHandout(ApiClient api, S l10n, String code) async {
+  /// to, so its accessories can be asked about — or the kit whose sticker it
+  /// was, which booked all of it.
+  Future<_Scanned> _scanHandout(ApiClient api, S l10n, String code) async {
     final result = await api.productionHandout.scanIntoProductionHandout(
       productionId: widget.productionId,
       mode: _handoutMode,
       body: ProductionCheckScanRequest(code: code),
     );
+    if (result.kit case final kit?) return _kitBooked(l10n, kit, result.action);
     final rest = [
       for (final u in result.group?.units ?? const <ScanGroupUnit>[])
         if (!u.done) u.id,
@@ -464,6 +580,23 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
       productLabel(result.asset.manufacturerName, result.asset.productName),
       result.asset.productCaption,
     );
+    // The server books a unit that is already out once more without a word,
+    // and a second green "handed out" reads as if it had not been the first
+    // time — so a unit that was ticked before this scan is said to be.
+    final already =
+        !foreign &&
+        (_justBooked.contains(result.asset.id) ||
+            (_handout?.items.any((i) => i.assetId == result.asset.id && i.done) ?? false));
+    _justBooked.add(result.asset.id);
+    if (already) {
+      _report(
+        _Tone.info,
+        '${l10n.productionCheckAlready}: $name',
+        result.asset.assetTag,
+        ScanTone.already,
+      );
+      return _nothingToAsk;
+    }
     _report(
       rest.isEmpty && !foreign ? _Tone.good : _Tone.warn,
       foreign ? '${l10n.productionCheckNotOnList}: $name' : name,
@@ -482,7 +615,97 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
         ),
       );
     }
-    return foreign ? null : result.asset.id;
+    return (unit: foreign ? null : result.asset.id, kit: null);
+  }
+
+  /// A kit's sticker booked every unit in it that this list has. None of them
+  /// here means the kit is not from this production; all of them done before
+  /// is said like a second scan of one unit.
+  _Scanned _kitBooked(S l10n, ScanKit kit, ScanResultAction action) {
+    if (kit.units.isEmpty) {
+      _report(
+        _Tone.warn,
+        '${l10n.productionCheckNotOnList}: ${kit.name}',
+        kit.tag,
+        ScanTone.attention,
+      );
+      return _nothingToAsk;
+    }
+    final already = kit.units.every(
+      (u) =>
+          _justBooked.contains(u.id) ||
+          (_handout?.items.any((i) => i.assetId == u.id && i.done) ?? false),
+    );
+    _justBooked.addAll(kit.units.map((u) => u.id));
+    if (already) {
+      _report(
+        _Tone.info,
+        '${l10n.productionCheckAlready}: ${kit.name}',
+        kit.tag,
+        ScanTone.already,
+      );
+      return _nothingToAsk;
+    }
+    _report(
+      _Tone.good,
+      l10n.kitScanned(kit.name, kit.units.length),
+      [?kit.tag, Labels.scanAction(l10n, action)].join(' · '),
+      ScanTone.ok,
+    );
+    return (unit: null, kit: kit);
+  }
+
+  /// After a kit's sticker: is all of it there? Booked back (or unticked) is
+  /// what was unticked, with what hangs off it.
+  Future<void> _askKit(ScanKit kit) async {
+    if (!mounted) return;
+    final l10n = S.of(context);
+    final there = await showDialog<Set<String>>(
+      context: context,
+      builder: (_) => AccessoryDialog(
+        title: l10n.kitDialogTitle(kit.name),
+        question: switch (widget.mode) {
+          ProductionListMode.check => l10n.accessoryDialogCheck,
+          ProductionListMode.checkout => l10n.accessoryDialogCheckout,
+          ProductionListMode.checkin => l10n.accessoryDialogCheckin,
+        },
+        accessories: [
+          for (final u in kit.units)
+            (
+              assetId: u.id,
+              name: withCaption(
+                productLabel(u.manufacturerName, u.productName),
+                u.productCaption,
+              ),
+              assetTag: u.assetTag,
+              imageUrl: u.productImageUrl,
+            ),
+        ],
+      ),
+    );
+    if (there == null) return;
+    final missing = {
+      for (final u in kit.units)
+        if (!there.contains(u.id)) u.id,
+    };
+    if (missing.isEmpty) return;
+    // On a check the accessories were ticked along, and are missing along.
+    final untick = {
+      ...missing,
+      for (final i in _check?.items ?? const <ProductionCheckItem>[])
+        if (missing.contains(i.accessoryOf)) i.assetId,
+    };
+    _justBooked.removeAll(missing);
+    await _act((api) async {
+      await _tick(api, untick.toList(), done: false);
+      return null;
+    });
+    _report(
+      _Tone.warn,
+      l10n.kitScanned(kit.name, kit.units.length - missing.length),
+      l10n.kitLeftOut(missing.length),
+      ScanTone.attention,
+    );
   }
 
   void _report(_Tone tone, String title, String? detail, ScanTone sound) {
@@ -563,6 +786,11 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
   /// shows what the server booked along; the answer ticks or unticks the
   /// accessories one by one to match. Ticks somebody else made are theirs,
   /// and are not asked about.
+  bool _hasAccessories(String unitAssetId) =>
+      _check?.items.any((i) => i.accessoryOf == unitAssetId) ??
+      _handout?.items.any((i) => i.accessoryOf == unitAssetId) ??
+      false;
+
   Future<void> _askAccessories(String unitAssetId) async {
     if (!mounted) return;
     final l10n = S.of(context);
@@ -584,7 +812,12 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
         },
         accessories: [
           for (final a in accessories)
-            (assetId: a.assetId, name: a.productName, assetTag: a.assetTag),
+            (
+              assetId: a.assetId,
+              name: a.productName,
+              assetTag: a.assetTag,
+              imageUrl: a.productImageUrl,
+            ),
         ],
       ),
     );
@@ -611,7 +844,9 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
     final ids = <String>[];
     final lines = <ProductionListLine>[];
     for (final row in rows) {
-      if (row.unit case final u? when !u.done && !u.locked) ids.add(u.assetId);
+      if (row.unit case final u? when !u.done && !u.locked && !u.optional) {
+        ids.add(u.assetId);
+      }
       if (row.line case final l? when _lineCount(l) < l.total) lines.add(l);
     }
     _act((api) async {
@@ -657,6 +892,7 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
         // part of it: the booked number is the one to accept with one tap.
         initial: line.total,
         label: l10n.listHowMany(line.total),
+        imageUrl: line.productImageUrl,
         max: line.total,
       ),
     );
@@ -830,9 +1066,10 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
     final units = _units(l10n);
     final sections = _sections(units);
     final counted = {for (final l in _lines) ...l.assetIds};
-    final total = units.length;
+    final owed = units.where((u) => !u.optional || u.done);
+    final total = owed.length;
     final done =
-        units.where((u) => u.done && !counted.contains(u.assetId)).length +
+        owed.where((u) => u.done && !counted.contains(u.assetId)).length +
         _lines.fold<int>(0, (n, l) => n + _lineCount(l));
     final check = _check;
     final handout = _handout;
@@ -910,6 +1147,8 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
           for (final row in section.rows)
             if (row.line case final line?)
               _lineTile(l10n, line, open)
+            else if (row.kit case final head?)
+              _kitHeader(l10n, head, open)
             else if (row.unit case final unit?)
               _unitTile(l10n, unit, open),
         ],
@@ -959,7 +1198,10 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
     // CheckboxListTile has room for only one of them in front.
     return ListTile(
       dense: true,
-      contentPadding: EdgeInsets.only(left: unit.accessoryOf == null ? 8 : 40, right: 16),
+      contentPadding: EdgeInsets.only(
+        left: (unit.accessoryOf == null ? 8 : 40) + (unit.kit == null ? 0 : 16),
+        right: 16,
+      ),
       leading: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1033,6 +1275,49 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
     );
   }
 
+  /// A kit's name over its units, with how many are done and a tick for the
+  /// rest of them.
+  Widget _kitHeader(S l10n, _KitHead head, bool open) {
+    final owed = head.units.where((u) => !u.optional || u.done).toList();
+    final done = owed.where((u) => u.done).length;
+    final rest = owed.where((u) => !u.done && !u.locked).toList();
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
+    return Container(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+      padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
+      child: Row(
+        children: [
+          Icon(Icons.inventory_2_outlined, size: 18, color: muted),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              [head.kit.name, ?head.kit.tag].join(' · '),
+              style: const TextStyle(fontWeight: FontWeight.w600),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Text(
+            '$done/${owed.length}',
+            style: TextStyle(
+              color: muted,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+          if (open && rest.isNotEmpty)
+            TextButton(
+              onPressed: _busy
+                  ? null
+                  : () =>
+                        _tickRows([for (final u in rest) (unit: u, line: null, kit: null)]),
+              child: Text(l10n.listTickKit),
+            )
+          else
+            const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
   Widget _sectionHeader(S l10n, _Section section, bool open) {
     var done = 0;
     var total = 0;
@@ -1040,7 +1325,7 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
       if (row.line case final l?) {
         done += _lineCount(l);
         total += l.total;
-      } else if (row.unit case final u?) {
+      } else if (row.unit case final u? when !u.optional || u.done) {
         total += 1;
         if (u.done) done += 1;
       }
@@ -1087,7 +1372,7 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
     var open = 0;
     for (final row in allRows) {
       if (row.line case final l?) open += l.total - _lineCount(l);
-      if (row.unit case final u? when !u.done) open += 1;
+      if (row.unit case final u? when !u.done && !u.optional) open += 1;
     }
     final isOpen = _open;
     final check = _check;

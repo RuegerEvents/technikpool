@@ -25,6 +25,9 @@ ProductionCheckItem _$ProductionCheckItemFromJson(Map<String, dynamic> json) =>
           ? null
           : ProductionCheckTick.fromJson(json['tick'] as Map<String, dynamic>),
       productImageUrl: json['productImageUrl'] as String?,
+      kit: json['kit'] == null
+          ? null
+          : ListKit.fromJson(json['kit'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$ProductionCheckItemToJson(
@@ -39,6 +42,7 @@ Map<String, dynamic> _$ProductionCheckItemToJson(
   'lentBy': ?instance.lentBy,
   'accessoryOf': ?instance.accessoryOf,
   'group': instance.group,
+  'kit': ?instance.kit,
   'status': instance.status,
   'received': instance.received,
   'returnReported': instance.returnReported,

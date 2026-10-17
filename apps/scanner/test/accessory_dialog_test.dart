@@ -26,8 +26,18 @@ void main() {
                   title: 'Accessories of MAC Aura XB',
                   question: 'Does all of it go along?',
                   accessories: [
-                    (assetId: 'a1', name: 'Omega bracket', assetTag: null),
-                    (assetId: 'a2', name: 'Power cable', assetTag: '40000099'),
+                    (
+                      assetId: 'a1',
+                      name: 'Omega bracket',
+                      assetTag: null,
+                      imageUrl: null,
+                    ),
+                    (
+                      assetId: 'a2',
+                      name: 'Power cable',
+                      assetTag: '40000099',
+                      imageUrl: null,
+                    ),
                   ],
                 ),
               );

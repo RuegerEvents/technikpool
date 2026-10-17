@@ -16,6 +16,9 @@ ScanResult _$ScanResultFromJson(Map<String, dynamic> json) => ScanResult(
   group: json['group'] == null
       ? null
       : ScanGroup.fromJson(json['group'] as Map<String, dynamic>),
+  kit: json['kit'] == null
+      ? null
+      : ScanKit.fromJson(json['kit'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$ScanResultToJson(ScanResult instance) =>
@@ -25,4 +28,5 @@ Map<String, dynamic> _$ScanResultToJson(ScanResult instance) =>
       'targetName': instance.targetName,
       'returnedFrom': instance.returnedFrom,
       'group': ?instance.group,
+      'kit': ?instance.kit,
     };

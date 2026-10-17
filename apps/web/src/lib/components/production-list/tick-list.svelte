@@ -1,18 +1,19 @@
 <script
 	lang="ts"
-	generics="U extends { assetId: string; assetTag: string | null; productName: string; productCaption: string | null; productImagePath: string | null; accessoryOf: string | null }"
+	generics="U extends { assetId: string; assetTag: string | null; productName: string; productCaption: string | null; productImagePath: string | null; accessoryOf: string | null; kit: ListKit | null }"
 >
-	import { Handshake, MapPin } from '@lucide/svelte';
+	import { Handshake, MapPin, Package } from '@lucide/svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { CountStepper } from '#lib/components/ui/count-stepper/index.js';
 	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
-	import type { ListLine, ListSection } from '#lib/production-list.js';
+	import type { ListKit, ListLine, ListSection } from '#lib/production-list.js';
 
 	// The list a production's equipment is worked through, whatever a tick means
 	// there — checked, handed out, taken back. Units with a tag (or anything
 	// else that tells them apart) are ticked one by one; interchangeable units
-	// without one are a counted line. Each section can be ticked at once.
+	// without one are a counted line. Each section can be ticked at once, and
+	// so can a kit, whose units are listed under its name.
 	//
 	// What a unit's row says besides its name is up to the caller (`unitState`),
 	// since that is where the three lists differ.
@@ -47,6 +48,7 @@
 		busy: boolean;
 		doneLabel: string;
 		tickSectionLabel: string;
+		tickKitLabel: string;
 		/** Saves a tick; reports a failure itself, and settles either way. */
 		ontoggle: (unit: U, done: boolean) => Promise<unknown>;
 		oncount: (line: ListLine, count: number) => Promise<unknown>;
@@ -60,6 +62,7 @@
 		busy,
 		doneLabel,
 		tickSectionLabel,
+		tickKitLabel,
 		ontoggle,
 		oncount,
 		ontickSection
@@ -128,6 +131,7 @@
 		const openUnits: U[] = [];
 		const openLines: ListLine[] = [];
 		for (const row of section.rows) {
+			if (row.kind === 'kit') continue;
 			if (row.kind === 'line') {
 				done += doneOf(row.line);
 				total += row.line.total;
@@ -141,6 +145,26 @@
 			}
 		}
 		return { done, total, openUnits, openLines };
+	}
+
+	/** A kit's units, as its heading counts them and "tick kit" takes them. */
+	function kitTally(units: U[]) {
+		let done = 0;
+		let total = 0;
+		const open: U[] = [];
+		for (const unit of units) {
+			const s = stateOf(unit);
+			if (s.optional && !s.done) continue;
+			total += 1;
+			if (s.done) done += 1;
+			else if (!s.locked) open.push(unit);
+		}
+		return { done, total, open };
+	}
+
+	function indent(unit: U) {
+		if (unit.accessoryOf) return unit.kit ? 'pl-15' : 'pl-9';
+		return unit.kit ? 'pl-6' : '';
 	}
 </script>
 
@@ -175,8 +199,28 @@
 				{/if}
 			</div>
 			<ul class="divide-y rounded-md border">
-				{#each section.rows as row (row.kind === 'line' ? `line:${row.line.key}` : row.unit.assetId)}
-					{#if row.kind === 'line'}
+				{#each section.rows as row (row.kind === 'line' ? `line:${row.line.key}` : row.kind === 'kit' ? `kit:${row.kit.id}` : row.unit.assetId)}
+					{#if row.kind === 'kit'}
+						{@const k = kitTally(row.units)}
+						<li class="flex items-center gap-3 bg-muted/40 px-3 py-1.5">
+							<Package aria-hidden="true" class="size-4 shrink-0 text-muted-foreground" />
+							<span class="min-w-0 flex-1 truncate text-sm font-medium">
+								{row.kit.name}{#if row.kit.tag}<span class="ml-1 font-normal text-muted-foreground"
+										>· {row.kit.tag}</span
+									>{/if}
+							</span>
+							<span class="text-xs text-muted-foreground tabular-nums">{k.done} / {k.total}</span>
+							{#if enabled && k.open.length > 0}
+								<Button
+									variant="ghost"
+									size="sm"
+									class="h-7"
+									disabled={busy}
+									onclick={() => ontickSection(k.open, [])}>{tickKitLabel}</Button
+								>
+							{/if}
+						</li>
+					{:else if row.kind === 'line'}
 						{@const line = row.line}
 						{@const lineDone = doneOf(line)}
 						<li class="flex flex-wrap items-center gap-3 px-3 py-2">
@@ -213,7 +257,7 @@
 							<label
 								class="flex items-center gap-3 px-3 py-2 {enabled && !s.locked
 									? 'cursor-pointer hover:bg-muted/40'
-									: ''} {unit.accessoryOf ? 'pl-9' : ''}"
+									: ''} {indent(unit)}"
 							>
 								<input
 									type="checkbox"

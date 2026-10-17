@@ -22,6 +22,7 @@ class StocktakeProductCount {
     required this.counted,
     required this.locations,
     this.productCaption,
+    this.productImageUrl,
     this.cable,
   });
   
@@ -34,6 +35,12 @@ class StocktakeProductCount {
   /// product name. Not required, so an older client keeps compiling.
   ///
   final String? productCaption;
+
+  /// The product's picture, absolute like Product.imageUrl. Null for a.
+  /// product without one. Not required, so an older client keeps.
+  /// compiling.
+  ///
+  final String? productImageUrl;
   final String? manufacturerName;
   final Category category;
 

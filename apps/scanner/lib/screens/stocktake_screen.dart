@@ -16,6 +16,7 @@ import '../state/providers.dart';
 import '../theme.dart';
 import '../widgets/category_pill.dart';
 import '../widgets/count_dialog.dart';
+import '../widgets/product_thumb.dart';
 
 /// Ask where the counter is. A stocktake over one location needs no asking; a
 /// wider one offers its `countingLocations`, with the last pick for this
@@ -579,6 +580,7 @@ class _StocktakeScreenState extends ConsumerState<StocktakeScreen> {
         ),
         initial: current,
         label: S.of(context).stocktakeYourCount,
+        imageUrl: product.productImageUrl,
       ),
     );
     if (count == null || !mounted) return;
@@ -912,6 +914,7 @@ class _ConfirmSheetState extends State<_ConfirmSheet> {
                   for (final e in widget.entries)
                     CheckboxListTile(
                       value: e.foundByName != null || _checked.contains(e.assetId),
+                      secondary: ProductThumb(url: e.productImageUrl),
                       onChanged: e.foundByName != null
                           ? null
                           : (on) => setState(

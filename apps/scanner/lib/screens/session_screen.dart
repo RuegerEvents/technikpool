@@ -12,6 +12,8 @@ import '../scan/scan_tones.dart';
 import '../scan/camera_scan_screen.dart';
 import '../state/providers.dart';
 import '../theme.dart';
+import '../widgets/product_thumb.dart';
+
 
 class _Entry {
   _Entry({required this.tag, required this.ok, required this.title, required this.detail})
@@ -103,10 +105,14 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
         _Entry(
           tag: tag,
           ok: true,
-          title: withCaption(
-            productLabel(result.asset.manufacturerName, result.asset.productName),
-            result.asset.productCaption,
-          ),
+          // A kit's sticker moved everything in it.
+          title: switch (result.kit) {
+            final kit? => l10n.kitScanned(kit.name, kit.units.length),
+            null => withCaption(
+              productLabel(result.asset.manufacturerName, result.asset.productName),
+              result.asset.productCaption,
+            ),
+          },
           detail: returned.isEmpty
               ? Labels.scanAction(l10n, result.action)
               : '${Labels.scanAction(l10n, result.action)} · '
@@ -359,6 +365,7 @@ class _GroupSheetState extends State<_GroupSheet> {
                   for (final u in group.units)
                     CheckboxListTile(
                       value: u.done || _checked.contains(u.id),
+                      secondary: ProductThumb(url: u.productImageUrl),
                       onChanged: u.done
                           ? null
                           : (on) => setState(

@@ -4,7 +4,12 @@
 	import * as Card from '#lib/components/ui/card/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import StocktakeProgress from '#lib/components/stocktake-progress.svelte';
-	import { ScanBar, TickList, type ScanFeedback } from '#lib/components/production-list/index.js';
+	import {
+		ScanBar,
+		TickList,
+		UnitQuestion,
+		type ScanFeedback
+	} from '#lib/components/production-list/index.js';
 	import HandoutSearch from './handout-search.svelte';
 	import { listSections, type ListLine } from '#lib/production-list.js';
 	import { makerAndName } from '#lib/product-label.js';
@@ -144,8 +149,12 @@
 		]);
 	}
 
+	let question = $state<ReturnType<typeof UnitQuestion> | null>(null);
+
 	async function submitCode(value: string): Promise<ScanFeedback> {
+		const doneBefore = new Set(handout.items.filter((i) => i.done).map((i) => i.assetId));
 		const result = await scanProductionHandout({ productionId, mode, organizationId, code: value });
+		if (result.kit) return await kitScanned(result.kit, doneBefore);
 		const name = makerAndName(result.asset.manufacturerName, result.asset.productName);
 		const rest = (result.group?.units ?? []).filter((u) => !u.done);
 		// Taking back puts any unit on its shelf, but only one that came from this
@@ -190,6 +199,52 @@
 			};
 		}
 		return feedback;
+	}
+
+	type ScannedKit = NonNullable<Awaited<ReturnType<typeof scanProductionHandout>>['kit']>;
+
+	/**
+	 * A kit's sticker booked every unit in it at once; the question that follows
+	 * books back what did not go along (or did not come back).
+	 */
+	async function kitScanned(kit: ScannedKit, doneBefore: Set<string>): Promise<ScanFeedback> {
+		const detail = kit.tag ?? undefined;
+		if (kit.units.length === 0) {
+			return { tone: 'warn', title: `Not on this production: ${kit.name}`, detail };
+		}
+		if (kit.units.every((u) => doneBefore.has(u.id))) {
+			return { tone: 'info', title: `Already ticked: ${kit.name}`, detail };
+		}
+		const there = await question?.ask(
+			`Kit ${kit.name}`,
+			mode === 'checkout'
+				? 'Does all of it go along? Untick what stays behind.'
+				: 'Is all of it back? Untick what is missing.',
+			kit.units.map((u) => ({
+				id: u.id,
+				name: makerAndName(u.manufacturerName, u.productName),
+				tag: u.assetTag
+			}))
+		);
+		const missing = there ? kit.units.filter((u) => !there.has(u.id)).map((u) => u.id) : [];
+		if (missing.length > 0) await apply(missing, false);
+		const booked = kit.units.length - missing.length;
+		return {
+			tone: missing.length > 0 ? 'warn' : 'good',
+			title:
+				mode === 'checkout'
+					? plural(booked, [
+							`Checked out: ${kit.name} (1 unit)`,
+							`Checked out: ${kit.name} (# units)`
+						])
+					: plural(booked, [`Returned: ${kit.name} (1 unit)`, `Returned: ${kit.name} (# units)`]),
+			detail: [
+				kit.tag,
+				missing.length > 0 ? plural(missing.length, ['1 unit left out', '# units left out']) : null
+			]
+				.filter(Boolean)
+				.join(' · ')
+		};
 	}
 </script>
 
@@ -301,6 +356,7 @@
 					{busy}
 					doneLabel={mode === 'checkout' ? 'Out' : 'Back'}
 					tickSectionLabel="Tick section"
+					tickKitLabel="Tick kit"
 					ontoggle={(item, done) => apply([item.assetId], done)}
 					oncount={count}
 					ontickSection={tickSection}
@@ -346,3 +402,5 @@
 		</Card.Content>
 	</Card.Root>
 </div>
+
+<UnitQuestion bind:this={question} />

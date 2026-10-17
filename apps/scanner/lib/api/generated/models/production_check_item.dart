@@ -4,6 +4,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import 'list_kit.dart';
 import 'production_check_group.dart';
 import 'production_check_item_status.dart';
 import 'production_check_tick.dart';
@@ -26,6 +27,7 @@ class ProductionCheckItem {
     required this.returnReported,
     required this.tick,
     this.productImageUrl,
+    this.kit,
   });
   
   factory ProductionCheckItem.fromJson(Map<String, Object?> json) => _$ProductionCheckItemFromJson(json);
@@ -48,6 +50,9 @@ class ProductionCheckItem {
   /// The unit it hangs off; listed right after it.
   final String? accessoryOf;
   final ProductionCheckGroup group;
+
+  /// Not required, so an older client keeps compiling.
+  final ListKit? kit;
 
   /// APPROVED is booked but not handed over yet.
   final ProductionCheckItemStatus status;

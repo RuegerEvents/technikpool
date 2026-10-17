@@ -22,6 +22,10 @@ ProductionHandoutItem _$ProductionHandoutItemFromJson(
   received: json['received'] as bool,
   returnReported: json['returnReported'] as bool,
   productImageUrl: json['productImageUrl'] as String?,
+  kit: json['kit'] == null
+      ? null
+      : ListKit.fromJson(json['kit'] as Map<String, dynamic>),
+  kitAddition: json['kitAddition'] as bool?,
 );
 
 Map<String, dynamic> _$ProductionHandoutItemToJson(
@@ -36,6 +40,8 @@ Map<String, dynamic> _$ProductionHandoutItemToJson(
   'lentBy': ?instance.lentBy,
   'accessoryOf': ?instance.accessoryOf,
   'group': instance.group,
+  'kit': ?instance.kit,
+  'kitAddition': ?instance.kitAddition,
   'status': instance.status,
   'done': instance.done,
   'received': instance.received,

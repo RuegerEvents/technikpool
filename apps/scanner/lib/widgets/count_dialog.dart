@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../l10n/generated/app_localizations.dart';
+import 'product_thumb.dart';
 
 /// Typing a number for a counted line — a stocktake's loose products, and the
 /// untagged units on a production's list. −/+ beside the field for the last
@@ -16,6 +17,7 @@ class CountDialog extends StatefulWidget {
     required this.title,
     required this.initial,
     required this.label,
+    this.imageUrl,
     this.max,
   });
 
@@ -23,6 +25,9 @@ class CountDialog extends StatefulWidget {
   final int? initial;
   final String label;
   final int? max;
+
+  /// The product's picture beside the title, so the shelf is recognised.
+  final String? imageUrl;
 
   @override
   State<CountDialog> createState() => _CountDialogState();
@@ -68,7 +73,13 @@ class _CountDialogState extends State<CountDialog> {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     return AlertDialog(
-      title: Text(widget.title),
+      title: Row(
+        children: [
+          ProductThumb(url: widget.imageUrl, size: 44),
+          const SizedBox(width: 12),
+          Expanded(child: Text(widget.title)),
+        ],
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

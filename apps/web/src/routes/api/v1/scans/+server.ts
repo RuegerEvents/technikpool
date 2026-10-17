@@ -6,6 +6,7 @@ import {
 	CheckoutError,
 	performScan
 } from '#lib/server/services/checkout.js';
+import { toScanResult } from '#lib/server/services/api-mappers.js';
 
 const TARGET_TYPES = ['location', 'production'] as const;
 
@@ -30,7 +31,7 @@ export const POST: RequestHandler = ({ locals, request }) =>
 
 		try {
 			const { result } = await performScan(user.id, { assetTag, targetType, targetId });
-			return apiJson('ScanResult', result);
+			return apiJson('ScanResult', toScanResult(result));
 		} catch (err) {
 			if (err instanceof CheckoutError) {
 				return apiError(CHECKOUT_ERROR_STATUS[err.code], err.code, err.message);

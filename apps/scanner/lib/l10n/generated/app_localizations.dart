@@ -1926,6 +1926,48 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 more unit on the production is not on this list.} other{{count} more units on the production are not on this list.}}'**
   String handoutOthersElsewhere(int count);
+
+  /// No description provided for @handoutTakenBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Taken back · tick to hand out again'**
+  String get handoutTakenBack;
+
+  /// No description provided for @handoutKitAddition.
+  ///
+  /// In en, this message translates to:
+  /// **'New in the kit, not booked yet'**
+  String get handoutKitAddition;
+
+  /// No description provided for @listTickKit.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick kit'**
+  String get listTickKit;
+
+  /// No description provided for @kitDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Kit {name}'**
+  String kitDialogTitle(String name);
+
+  /// No description provided for @kitScanned.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{name}: 1 unit} other{{name}: {count} units}}'**
+  String kitScanned(String name, int count);
+
+  /// No description provided for @kitLeftOut.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 unit left out} other{{count} units left out}}'**
+  String kitLeftOut(int count);
+
+  /// No description provided for @lookupKit.
+  ///
+  /// In en, this message translates to:
+  /// **'Kit'**
+  String get lookupKit;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

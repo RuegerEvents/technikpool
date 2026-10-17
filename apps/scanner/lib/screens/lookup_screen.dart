@@ -80,6 +80,16 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
       final asset = await api.inventory.getAssetByTag(tag: tag);
       if (mounted) setState(() => _asset = asset);
     } catch (error) {
+      // No unit carries the code — it may be a kit's own sticker, whose
+      // contents the case check shows.
+      if (unwrapError(error) case ApiException(code: 'asset_not_found')
+          when await _isKit(api, tag)) {
+        if (mounted) {
+          setState(() => _asset = null);
+          unawaited(_checkCase(tag));
+        }
+        return;
+      }
       if (mounted) {
         // A hit is read off the screen anyway; only a miss makes a sound.
         ref.scanTone(ScanTone.error);
@@ -90,6 +100,15 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
       }
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<bool> _isKit(ApiClient api, String code) async {
+    try {
+      final found = await api.caseCheck.getCaseCheckByCode(code: code);
+      return found.kind == CaseKind.bundle && found.scannedAssetId == null;
+    } catch (_) {
+      return false;
     }
   }
 
@@ -214,6 +233,8 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
         ],
         if (asset.currentProduction != null)
           _row(l10n.checkedOutTo, asset.currentProduction!.name),
+        if (asset.kit case final kit?)
+          _row(l10n.lookupKit, [kit.name, ?kit.tag].join(' · ')),
         // A kit member or an accessory belongs to a case that can be checked.
         // A unit that *has* accessories can be too, but the detail doesn't
         // say so; scanning it on the case-check screen opens it all the same.

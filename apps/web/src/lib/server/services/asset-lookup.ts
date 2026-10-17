@@ -1,4 +1,5 @@
 import { prisma } from '#lib/server/auth.js';
+import { withCaption } from '#lib/product-label.js';
 import { isSystemAdmin, userOrgIds } from './access';
 
 // Turning a scanned code into one unit, in the one place both the web UI and
@@ -82,4 +83,33 @@ export async function assetsWithSerial(
 		orderBy: { id: 'asc' },
 		take: options.take
 	});
+}
+
+/**
+ * The kit a code is the sticker of, asked once no unit's tag or serial matched
+ * it. A kit's tag is unique like a unit's, and is what is stuck on the case — so
+ * scanning it means the case and everything in it.
+ */
+export async function kitByTag(code: string) {
+	const trimmed = code.trim();
+	if (!trimmed) return null;
+	return await prisma.assetBundle.findUnique({
+		where: { tag: trimmed },
+		select: { id: true, tag: true, template: { select: { name: true, caption: true } } }
+	});
+}
+
+export type TaggedKit = NonNullable<Awaited<ReturnType<typeof kitByTag>>>;
+
+/**
+ * The kit among `tags` that already carries one, named for a message — a unit
+ * may not take a kit's sticker, since scanning it would find the unit.
+ */
+export async function kitHoldingTag(tags: string[]) {
+	if (tags.length === 0) return null;
+	const kit = await prisma.assetBundle.findFirst({
+		where: { tag: { in: tags } },
+		select: { tag: true, template: { select: { name: true, caption: true } } }
+	});
+	return kit && { tag: kit.tag!, name: withCaption(kit.template.name, kit.template.caption) };
 }

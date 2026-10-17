@@ -2,7 +2,13 @@ import { prisma } from '#lib/server/auth.js';
 import type { Prisma } from '#lib/prisma/client.js';
 import { naturalCompare } from '#lib/sort.js';
 import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
-import { compareGroups, type ListGroup, type ListLine } from '#lib/production-list.js';
+import { withCaption } from '#lib/product-label.js';
+import {
+	compareGroups,
+	type ListGroup,
+	type ListKit,
+	type ListLine
+} from '#lib/production-list.js';
 
 // The list a production's equipment is worked through — checked (Prüfen),
 // handed out (Ausgabe) or taken back (Rücknahme). The three differ only in
@@ -14,7 +20,30 @@ import { compareGroups, type ListGroup, type ListLine } from '#lib/production-li
 //   into one counted line per product and shelf, as a stocktake counts them,
 //   because nobody can scan them and nobody should tick them twenty times
 
-export type { ListGroup, ListLine };
+export type { ListGroup, ListKit, ListLine };
+
+export const KIT_SELECT = {
+	id: true,
+	tag: true,
+	template: { select: { name: true, caption: true } }
+} satisfies Prisma.AssetBundleSelect;
+
+/** A unit's kit as the list shows it — see `ListKit`. */
+export function kitOf(
+	bundle: {
+		id: string;
+		tag: string | null;
+		template: { name: string; caption: string | null };
+	} | null
+): ListKit | null {
+	return bundle
+		? {
+				id: bundle.id,
+				name: withCaption(bundle.template.name, bundle.template.caption),
+				tag: bundle.tag
+			}
+		: null;
+}
 
 export const LIST_ITEM_INCLUDE = {
 	asset: {
@@ -25,6 +54,7 @@ export const LIST_ITEM_INCLUDE = {
 			organizationId: true,
 			parentAssetId: true,
 			bundleId: true,
+			bundle: { select: KIT_SELECT },
 			productId: true,
 			locationId: true,
 			location: { select: { name: true } },
@@ -76,8 +106,9 @@ export function groupOf(item: ListedItem, productionOrgId: string, byLender: boo
 
 /**
  * By section, then parents first, each followed by its accessories; by name
- * within. An accessory is listed under its parent's section even when it is
- * booked somewhere else — it travels with it.
+ * within. A kit's units stay together, placed by the kit's name. An accessory
+ * is listed under its parent's section and kit even when it is booked
+ * somewhere else — it travels with it.
  */
 export function nestAndSort<
 	T extends {
@@ -86,21 +117,26 @@ export function nestAndSort<
 		productName: string;
 		assetTag: string | null;
 		group: ListGroup;
+		kit: ListKit | null;
 	}
 >(items: T[]) {
 	const byName = (a: T, b: T) =>
 		naturalCompare(a.productName, b.productName) ||
 		naturalCompare(a.assetTag ?? '', b.assetTag ?? '');
+	const byKit = (a: T, b: T) =>
+		naturalCompare(a.kit?.name ?? a.productName, b.kit?.name ?? b.productName) ||
+		naturalCompare(a.kit?.tag ?? '', b.kit?.tag ?? '') ||
+		naturalCompare(a.kit?.id ?? '', b.kit?.id ?? '');
 	const ids = new Set(items.map((i) => i.assetId));
 	const tops = items
 		.filter((i) => !i.accessoryOf || !ids.has(i.accessoryOf))
-		.sort((a, b) => compareGroups(a.group, b.group) || byName(a, b));
+		.sort((a, b) => compareGroups(a.group, b.group) || byKit(a, b) || byName(a, b));
 	return tops.flatMap((top) => [
 		top,
 		...items
 			.filter((i) => i.accessoryOf === top.assetId && i !== top)
 			.sort(byName)
-			.map((i) => ({ ...i, group: top.group }))
+			.map((i) => ({ ...i, group: top.group, kit: top.kit }))
 	]);
 }
 

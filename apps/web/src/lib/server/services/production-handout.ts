@@ -8,10 +8,12 @@ import {
 	visibleProductionName,
 	writableOrgIds
 } from './access';
-import { resolveScannedCode } from './asset-lookup';
+import { kitByTag, resolveScannedCode, type TaggedKit } from './asset-lookup';
 import {
 	CheckoutError,
 	emptyAffected,
+	kitScanResult,
+	kitScanUnits,
 	mergeAffected,
 	performBulkCheckout,
 	performScan,
@@ -21,11 +23,14 @@ import {
 import {
 	buildLines,
 	groupOf,
+	KIT_SELECT,
+	kitOf,
 	lenderLabel,
 	listItems,
 	nestAndSort,
 	pickForCount,
 	type ListGroup,
+	type ListKit,
 	type ListLine,
 	type ListedItem
 } from './production-list';
@@ -74,11 +79,13 @@ export interface HandoutItem {
 	lentBy: string | null;
 	accessoryOf: string | null;
 	group: ListGroup;
+	/** The kit the unit is in, for a heading over its units. */
+	kit: ListKit | null;
 	status: 'APPROVED' | 'CHECKED_OUT' | 'RETURNED';
 	/**
 	 * Not booked here: a unit put into a kit after the kit was booked. Listed
 	 * with the kit it belongs to, and a tick books it and hands it out at once.
-	 * Only on the web's handout list (`HandoutOptions.extras`).
+	 * Only with `HandoutOptions.extras`, which the web and /api/v1 both ask for.
 	 */
 	kitAddition: boolean;
 	done: boolean;
@@ -175,8 +182,9 @@ async function handoutScope(userId: string, productionId: string, organizationId
 type Scope = Awaited<ReturnType<typeof handoutScope>>;
 
 /**
- * What the web's handout list adds to the plain one, which the scanner reads
- * through /api/v1 unchanged:
+ * What a handout list adds to the plain one — asked for by the web's list and
+ * by /api/v1's, so the scanner sees the same; the production page's summary
+ * counts without it:
  *
  * - on the hand-out list, units taken back while the production still runs.
  *   Taking back by mistake happens, and a unit that is RETURNED was otherwise
@@ -240,6 +248,7 @@ async function kitAdditions(scope: Scope) {
 			id: true,
 			assetTag: true,
 			organizationId: true,
+			bundle: { select: KIT_SELECT },
 			location: { select: { name: true } },
 			product: {
 				select: {
@@ -290,6 +299,7 @@ export async function getHandout(
 			group: asset.location
 				? { kind: 'location' as const, name: asset.location.name }
 				: { kind: 'none' as const, name: null },
+			kit: kitOf(asset.bundle),
 			status: 'APPROVED' as const,
 			kitAddition: true,
 			done: false,
@@ -308,6 +318,7 @@ export async function getHandout(
 				lentBy: lent ? lenderLabel(item) : null,
 				accessoryOf: item.asset.parentAssetId,
 				group: groupOf(item, productionOrgId, byLender),
+				kit: kitOf(item.asset.bundle),
 				status: item.status as HandoutItem['status'],
 				kitAddition: false,
 				done: isDone(item, mode),
@@ -394,6 +405,8 @@ export async function scanIntoHandout(
 		);
 	}
 	if (match.kind === 'not_found') {
+		const kit = await kitByTag(code);
+		if (kit) return await takeBackKit(userId, productionId, kit);
 		throw new CheckoutError('asset_not_found', `Tag "${code}" not found`, code);
 	}
 	const asset = await prisma.asset.findUniqueOrThrow({
@@ -441,6 +454,48 @@ export async function scanIntoHandout(
 		targetId: asset.locationId
 	});
 	return { result: back.result, affected: mergeAffected(affected, back.affected) };
+}
+
+/**
+ * A kit's sticker on the take-back list: its units that are on this production
+ * and not back yet go onto their shelves, as if each were ticked. None of them
+ * there answers with no units, which a client reports as not from here — as
+ * for a single unit.
+ */
+async function takeBackKit(userId: string, productionId: string, kit: TaggedKit) {
+	const production = await prisma.production.findUniqueOrThrow({
+		where: { id: productionId },
+		select: { name: true }
+	});
+	const open = await prisma.productionItem.findMany({
+		where: {
+			productionId,
+			status: { in: ['APPROVED', 'CHECKED_OUT'] },
+			asset: { bundleId: kit.id, parentAssetId: null }
+		},
+		select: { assetId: true }
+	});
+	const units = await kitScanUnits(userId, kit, 'location', new Set(open.map((i) => i.assetId)));
+	const affected =
+		units.length > 0
+			? (
+					await setHandoutDone(
+						userId,
+						productionId,
+						'checkin',
+						units.map((u) => u.id),
+						true
+					)
+				).affected
+			: emptyAffected();
+	return {
+		result: kitScanResult(kit, units, {
+			action: 'LOCATION_ASSIGNED',
+			targetName: units[0]?.location.name ?? '',
+			returnedFrom: units.length > 0 ? [production.name] : []
+		}),
+		affected
+	};
 }
 
 /** Ticks or unticks units by hand — see the table at the top. */

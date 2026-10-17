@@ -3,6 +3,7 @@ import { apiJson, handleApi, requireApiUser } from '#lib/server/api.js';
 import { jsonBody, requireString } from '#lib/server/stocktake-api.js';
 import { withCheckErrors } from '#lib/server/production-check-api.js';
 import { scanIntoCheck } from '#lib/server/services/production-check.js';
+import { toScanGroup, toScanKit } from '#lib/server/services/api-mappers.js';
 
 export const POST: RequestHandler = ({ locals, params, request }) =>
 	handleApi(async () => {
@@ -14,7 +15,9 @@ export const POST: RequestHandler = ({ locals, params, request }) =>
 				result: result.result,
 				assetTag: result.assetTag,
 				productName: result.productName,
-				ticked: result.ticked
+				ticked: result.ticked,
+				group: toScanGroup(result.group),
+				kit: toScanKit(result.kit)
 			});
 		});
 	});

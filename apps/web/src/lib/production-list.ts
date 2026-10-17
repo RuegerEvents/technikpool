@@ -37,6 +37,17 @@ export interface ListLine {
 	floor: number;
 }
 
+/**
+ * The kit a unit is in, so the list can put a kit's units under one heading
+ * and tick them at once. An accessory is shown with its parent's kit.
+ */
+export interface ListKit {
+	id: string;
+	/** The kit's name with its caption. */
+	name: string;
+	tag: string | null;
+}
+
 const GROUP_ORDER: Record<ListGroup['kind'], number> = { location: 0, none: 1, lender: 2 };
 
 export function compareGroups(a: ListGroup, b: ListGroup) {
@@ -52,9 +63,14 @@ type ListedUnit = {
 	accessoryOf: string | null;
 	productName: string;
 	group: ListGroup;
+	kit: ListKit | null;
 };
 
-export type ListRow<U> = { kind: 'unit'; unit: U } | { kind: 'line'; line: ListLine };
+export type ListRow<U> =
+	| { kind: 'unit'; unit: U }
+	| { kind: 'line'; line: ListLine }
+	/** A kit's heading; its units follow, up to the next heading or plain unit. */
+	| { kind: 'kit'; kit: ListKit; units: U[] };
 
 export interface ListSection<U> {
 	key: string;
@@ -78,8 +94,9 @@ export function listSections<U extends ListedUnit>(items: U[], lines: ListLine[]
 		return s;
 	};
 
-	// Blocks of a unit and its accessories, so a line never lands between them.
-	type Block = { id: string | null; name: string; rows: ListRow<U>[] };
+	// Blocks of a unit and its accessories, so a line never lands between them;
+	// a kit is one block, headed by its name, holding all of its units.
+	type Block = { id: string | null; kitId: string | null; name: string; rows: ListRow<U>[] };
 	const blocks = new Map<string, Block[]>();
 	for (const unit of items) {
 		if (counted.has(unit.assetId)) continue;
@@ -87,8 +104,31 @@ export function listSections<U extends ListedUnit>(items: U[], lines: ListLine[]
 		section(unit.group);
 		const list = blocks.get(key) ?? [];
 		const last = list.at(-1);
-		if (unit.accessoryOf && last?.id === unit.accessoryOf) last.rows.push({ kind: 'unit', unit });
-		else list.push({ id: unit.assetId, name: unit.productName, rows: [{ kind: 'unit', unit }] });
+		if (unit.accessoryOf && last?.id === unit.accessoryOf) {
+			last.rows.push({ kind: 'unit', unit });
+			if (last.kitId) (last.rows[0] as { units: U[] }).units.push(unit);
+		} else if (unit.kit && last?.kitId === unit.kit.id) {
+			last.id = unit.assetId;
+			last.rows.push({ kind: 'unit', unit });
+			(last.rows[0] as { units: U[] }).units.push(unit);
+		} else if (unit.kit) {
+			list.push({
+				id: unit.assetId,
+				kitId: unit.kit.id,
+				name: unit.kit.name,
+				rows: [
+					{ kind: 'kit', kit: unit.kit, units: [unit] },
+					{ kind: 'unit', unit }
+				]
+			});
+		} else {
+			list.push({
+				id: unit.assetId,
+				kitId: null,
+				name: unit.productName,
+				rows: [{ kind: 'unit', unit }]
+			});
+		}
 		blocks.set(key, list);
 	}
 	for (const line of lines) {
@@ -98,6 +138,7 @@ export function listSections<U extends ListedUnit>(items: U[], lines: ListLine[]
 		const at = list.findIndex((b) => naturalCompare(b.name, line.productName) > 0);
 		const block = {
 			id: null,
+			kitId: null,
 			name: line.productName,
 			rows: [{ kind: 'line', line } as ListRow<U>]
 		};

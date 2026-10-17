@@ -4,6 +4,7 @@ import { isRetiredStatus } from '#lib/asset-status.js';
 import { isSystemAdmin, managedOrgIds } from './access';
 import { CABLE_ENDS } from './cable-ends';
 import { canPlaceAt } from './locations';
+import { kitHoldingTag } from './asset-lookup';
 
 // Registering units and giving untagged ones their sticker, from the scanner.
 // Both are inventory work, so both take ADMIN of the org — the rule the web's
@@ -73,6 +74,10 @@ async function checkTag(organizationId: string, raw: string) {
 			'asset_tag_in_use',
 			`Asset tag "${tag}" is already on ${holder.product.name}`
 		);
+	}
+	const kit = await kitHoldingTag([tag]);
+	if (kit) {
+		throw new AssetTagError('asset_tag_in_use', `Asset tag "${tag}" is already on ${kit.name}`);
 	}
 	return tag;
 }

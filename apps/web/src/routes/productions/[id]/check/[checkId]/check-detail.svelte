@@ -4,7 +4,13 @@
 	import * as Card from '#lib/components/ui/card/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import StocktakeProgress from '#lib/components/stocktake-progress.svelte';
-	import { ScanBar, TickList, type ScanFeedback } from '#lib/components/production-list/index.js';
+	import {
+		ScanBar,
+		TickList,
+		UnitQuestion,
+		type ScanFeedback
+	} from '#lib/components/production-list/index.js';
+	import { makerAndName } from '#lib/product-label.js';
 	import { listSections, type ListLine } from '#lib/production-list.js';
 	import { getErrorMessage, plural } from '#lib/utils.js';
 	import {
@@ -77,11 +83,46 @@
 
 	let busy = $state(false);
 
+	let question = $state<ReturnType<typeof UnitQuestion> | null>(null);
+
 	async function submitCode(value: string): Promise<ScanFeedback> {
 		const result = await scanProductionCheck({ checkId, code: value });
 		const detail = result.assetTag;
-		if (result.result === 'ticked') {
+		if (result.kit && result.result === 'ticked') {
+			// A kit's sticker ticked everything in it on the list: is all of it there?
+			const kit = result.kit;
+			const there = await question?.ask(
+				`Kit ${kit.name}`,
+				'Is all of it there? Untick what is missing.',
+				kit.units.map((u) => ({
+					id: u.id,
+					name: makerAndName(u.manufacturerName, u.productName),
+					tag: u.assetTag
+				}))
+			);
+			const missing = there ? kit.units.filter((u) => !there.has(u.id)).map((u) => u.id) : [];
+			for (const id of missing) {
+				// What hangs off a missing unit is not there either.
+				for (const item of check.items.filter((i) => i.assetId === id || i.accessoryOf === id)) {
+					await untickProductionCheck({ checkId, assetId: item.assetId });
+				}
+			}
 			return {
+				tone: missing.length > 0 ? 'warn' : 'good',
+				title: plural(kit.units.length - missing.length, [
+					`Found: ${kit.name} (1 unit)`,
+					`Found: ${kit.name} (# units)`
+				]),
+				detail: [
+					detail,
+					missing.length > 0 ? plural(missing.length, ['1 unit missing', '# units missing']) : null
+				]
+					.filter(Boolean)
+					.join(' · ')
+			};
+		}
+		if (result.result === 'ticked') {
+			const feedback: ScanFeedback = {
 				tone: 'good',
 				title:
 					result.ticked > 1
@@ -89,6 +130,21 @@
 						: `Found: ${result.productName}`,
 				detail
 			};
+			// One unit of a kit: the rest of it is offered, as when handing out.
+			const rest = (result.group?.units ?? []).filter((u) => !u.done);
+			if (result.group && rest.length > 0) {
+				feedback.tone = 'warn';
+				feedback.action = {
+					label: plural(rest.length, [
+						`Also the rest of ${result.group.name} (1)`,
+						`Also the rest of ${result.group.name} (#)`
+					]),
+					run: async () => {
+						await tickProductionCheck({ checkId, assetIds: rest.map((u) => u.id) });
+					}
+				};
+			}
+			return feedback;
 		}
 		if (result.result === 'already') {
 			return { tone: 'info', title: `Already ticked: ${result.productName}`, detail };
@@ -267,6 +323,7 @@
 					{busy}
 					doneLabel="Found"
 					tickSectionLabel="Tick section"
+					tickKitLabel="Tick kit"
 					ontoggle={toggle}
 					oncount={count}
 					ontickSection={tickSection}
@@ -304,3 +361,5 @@
 		</Card.Content>
 	</Card.Root>
 </div>
+
+<UnitQuestion bind:this={question} />

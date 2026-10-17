@@ -17,6 +17,7 @@ import {
 } from '#lib/server/services/api-mappers.js';
 import { productDocuments } from '#lib/server/services/product-documents.js';
 import { resolveScannedCode } from '#lib/server/services/asset-lookup.js';
+import { KIT_SELECT, kitOf } from '#lib/server/services/production-list.js';
 
 const HISTORY_LIMIT = 20;
 
@@ -48,7 +49,8 @@ export const GET: RequestHandler = ({ locals, params }) =>
 					include: { manufacturer: true, category: true, ...CABLE_ENDS }
 				},
 				location: { include: { address: true, organization: true } },
-				organization: true
+				organization: true,
+				bundle: { select: KIT_SELECT }
 			}
 		});
 
@@ -88,6 +90,7 @@ export const GET: RequestHandler = ({ locals, params }) =>
 		const body: Schemas['AssetDetail'] = {
 			...toAsset(asset),
 			documents: (await productDocuments(asset.productId)).map(toProductDocument),
+			kit: kitOf(asset.bundle),
 			currentProduction: openItem
 				? toProduction({
 						...openItem.production,

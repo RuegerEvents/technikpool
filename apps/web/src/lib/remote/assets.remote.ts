@@ -24,7 +24,7 @@ import {
 import { productControl } from '#lib/server/services/product-control.js';
 import { assertProductNameFree } from '#lib/server/services/product-name.js';
 import { tagAllocator } from '#lib/server/services/tag-counter.js';
-import { assetsWithSerial } from '#lib/server/services/asset-lookup.js';
+import { assetsWithSerial, kitHoldingTag } from '#lib/server/services/asset-lookup.js';
 import { fieldChanges, logCatalogChange } from '#lib/server/services/catalog-log.js';
 import {
 	ACTIVE_ASSET_WHERE,
@@ -1277,6 +1277,8 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 			: holder.product.name;
 		appError(409, 'asset_tag_in_use', [holder.assetTag ?? '', label]);
 	}
+	const kitHolder = await kitHoldingTag(typedTags);
+	if (kitHolder) appError(409, 'asset_tag_in_use', [kitHolder.tag, kitHolder.name]);
 
 	// A licence has no wiring to test, so it never gets a DGUV interval.
 	const licenseProductIds = new Set(
@@ -1898,6 +1900,8 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 					: holder.product.name;
 				appError(409, 'asset_tag_in_use', [assetTag, label]);
 			}
+			const kit = await kitHoldingTag([assetTag]);
+			if (kit) appError(409, 'asset_tag_in_use', [assetTag, kit.name]);
 		}
 		updateData.assetTag = assetTag;
 		if (assetTag !== asset.assetTag)
@@ -3491,6 +3495,11 @@ async function assertBundleTagAvailable(tag: string | null, exceptBundleId?: str
 	if (clash && clash.id !== exceptBundleId) {
 		appError(409, 'bundle_tag_taken', [tag]);
 	}
+	const unit = await prisma.asset.findUnique({
+		where: { assetTag: tag },
+		select: { product: { select: { name: true } } }
+	});
+	if (unit) appError(409, 'bundle_tag_on_unit', [tag, unit.product.name]);
 }
 
 const createBundleInstanceSchema = v.object({

@@ -38,6 +38,8 @@ export 'models/asset_transaction.dart';
 export 'models/asset_page.dart';
 export 'models/scan_request.dart';
 export 'models/scan_result.dart';
+export 'models/scan_kit.dart';
+export 'models/list_kit.dart';
 export 'models/scan_group.dart';
 export 'models/scan_group_unit.dart';
 export 'models/asset_create_request.dart';

@@ -16,7 +16,8 @@ export const GET: RequestHandler = ({ locals, params, url }) =>
 						user.id,
 						params.productionId,
 						mode,
-						url.searchParams.get('organizationId') ?? undefined
+						url.searchParams.get('organizationId') ?? undefined,
+						{ extras: true }
 					)
 				)
 			)

@@ -208,6 +208,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'That bundle belongs to a different organization.';
 		case 'bundle_tag_taken':
 			return `Tag "${p0}" is already used by another bundle.`;
+		case 'bundle_tag_on_unit':
+			return `Tag "${p0}" is already on ${p1}. A bundle's sticker is scanned like a unit's, so the two must differ.`;
 		case 'bundle_category_required':
 			return 'A category is required for a new bundle type.';
 		case 'bundle_type_required':

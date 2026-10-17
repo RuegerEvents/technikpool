@@ -111,6 +111,7 @@ export type AppErrorCode =
 	// Bundles
 	| 'bundle_org_mismatch'
 	| 'bundle_tag_taken'
+	| 'bundle_tag_on_unit'
 	| 'bundle_category_required'
 	| 'bundle_type_required'
 	| 'bundle_accessory_member'

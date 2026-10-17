@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/generated/app_localizations.dart';
+import 'product_thumb.dart';
 
 /// One accessory as the question lists it.
-typedef AccessoryChoice = ({String assetId, String name, String? assetTag});
+typedef AccessoryChoice = ({
+  String assetId,
+  String name,
+  String? assetTag,
+  String? imageUrl,
+});
 
 /// Asked after a unit with accessories went on a list: is all of it there?
 /// Booking a unit takes what hangs off it along, and mostly that is right —
@@ -49,8 +55,10 @@ class _AccessoryDialogState extends State<AccessoryDialog> {
             for (final a in widget.accessories)
               CheckboxListTile(
                 value: _there.contains(a.assetId),
-                controlAffinity: ListTileControlAffinity.leading,
                 dense: true,
+                // The picture first, as in the lists: a unit is recognised
+                // before its name is read.
+                secondary: ProductThumb(url: a.imageUrl),
                 title: Text(a.name),
                 subtitle: Text(a.assetTag ?? l10n.caseCheckNoTag),
                 onChanged: (on) => setState(() {
