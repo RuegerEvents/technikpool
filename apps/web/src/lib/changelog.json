@@ -1,5 +1,23 @@
 [
 	{
+		"version": "0.33.0",
+		"date": "2026-10-17",
+		"en": [
+			"DGUV inspections: record an inspection on a device's page, for a whole selection on the Devices list, or from the Inspections page — an earlier one can be entered afterwards. The next due date is no longer set by hand: it follows from the latest inspection and the interval.",
+			"A device that has never been inspected is due at once, so after this update every device with an interval but no recorded inspection shows as overdue. A failed inspection marks the device broken and keeps it due until it passes.",
+			"Each device lists its inspections, and one entered by mistake can be deleted. The Devices list sets the inspection interval for a selection.",
+			"A kit's own sticker hands out, takes back or checks every unit in it, and the lists show a kit's units under its heading with \"tick kit\".",
+			"Invoice without an offer: a production can be invoiced straight away, with the same lines and prices an offer would have."
+		],
+		"de": [
+			"DGUV-Prüfungen: Eine Prüfung wird auf der Geräteseite erfasst, für eine ganze Auswahl in der Geräteliste oder auf der Prüfungsseite — auch nachträglich mit früherem Datum. Die nächste Fälligkeit wird nicht mehr von Hand gesetzt, sie ergibt sich aus der letzten Prüfung und dem Intervall.",
+			"Ein Gerät, das noch nie geprüft wurde, ist sofort fällig. Nach diesem Update erscheinen deshalb alle Geräte mit Intervall, aber ohne erfasste Prüfung, als überfällig. Eine nicht bestandene Prüfung setzt das Gerät auf Defekt, und es bleibt fällig, bis es besteht.",
+			"Jedes Gerät zeigt seine Prüfungen, und eine versehentlich erfasste lässt sich löschen. In der Geräteliste lässt sich das Prüfintervall für eine Auswahl setzen.",
+			"Der Sticker eines Bundles gibt alle Geräte darin aus, nimmt sie zurück oder prüft sie, und die Listen zeigen die Geräte eines Bundles unter seiner Überschrift mit „Bundle abhaken“.",
+			"Rechnung ohne Angebot: Eine Produktion lässt sich direkt abrechnen, mit denselben Positionen und Preisen wie in einem Angebot."
+		]
+	},
+	{
 		"version": "0.32.0",
 		"date": "2026-10-17",
 		"en": [

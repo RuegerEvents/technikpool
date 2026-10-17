@@ -1,5 +1,21 @@
 [
   {
+    "version": "1.10.0",
+    "date": "2026-10-17",
+    "en": [
+      "New: DGUV inspection, under Scans › Stocktake. Pick the date and inspector once, then scan device after device — each scan records an inspection. Switch to \"Failed\" for a device that fails, and it is marked broken. Every entry can be undone. Needs the Admin role.",
+      "Lookup shows a device's inspection: its interval, when the next one is due and the latest inspections.",
+      "A kit's own sticker hands out, takes back or checks every unit in it, and the lists show a kit's units under its heading.",
+      "Product pictures in the accessory and kit questions and when counting. A finished handout now says \"Ausgegeben\", and scanning the same unit twice says so."
+    ],
+    "de": [
+      "Neu: Prüfen (DGUV), unter Scans › Inventur. Einmal Datum und Prüfer wählen, dann Gerät für Gerät scannen — jeder Scan erfasst eine Prüfung. Für ein Gerät, das durchfällt, auf „Nicht bestanden“ umschalten, dann wird es als defekt markiert. Jeder Eintrag lässt sich rückgängig machen. Braucht die Admin-Rolle.",
+      "Nachschlagen zeigt die Prüfung eines Geräts: Intervall, nächste Fälligkeit und die letzten Prüfungen.",
+      "Der Sticker eines Bundles gibt alle Geräte darin aus, nimmt sie zurück oder prüft sie, und die Listen zeigen die Geräte eines Bundles unter seiner Überschrift.",
+      "Produktbilder bei den Fragen nach Zubehör und Bundle und beim Zählen. Eine Ausgabe meldet jetzt „Ausgegeben“, und ein doppelter Scan desselben Geräts wird angezeigt."
+    ]
+  },
+  {
     "version": "1.9.0",
     "date": "2026-10-17",
     "en": [
