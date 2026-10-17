@@ -585,7 +585,9 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
           productLabel(line.manufacturerName, line.productName),
           line.productCaption,
         ),
-        initial: _lineCount(line),
+        // Opened to confirm the whole line far more often than to count a
+        // part of it: the booked number is the one to accept with one tap.
+        initial: line.total,
         label: l10n.listHowMany(line.total),
         max: line.total,
       ),

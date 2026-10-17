@@ -282,6 +282,11 @@ class _CaseCheckScreenState extends ConsumerState<CaseCheckScreen> {
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     final status = Theme.of(context).extension<StatusColors>();
     final found = check.items.where((i) => _found.contains(i.assetId)).length;
+    // A unit out on another job is away, not missing, so it is not counted
+    // as expected either — unless it turned up after all.
+    final expected = check.items
+        .where((i) => _found.contains(i.assetId) || i.awayOn == null)
+        .length;
     return ListView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.only(bottom: 16),
@@ -292,13 +297,11 @@ class _CaseCheckScreenState extends ConsumerState<CaseCheckScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                l10n.caseCheckProgress(found, check.items.length),
+                l10n.caseCheckProgress(found, expected),
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 6),
-              LinearProgressIndicator(
-                value: check.items.isEmpty ? 1 : found / check.items.length,
-              ),
+              LinearProgressIndicator(value: expected == 0 ? 1 : found / expected),
               const SizedBox(height: 6),
               if (check.checkedOutTo case final production?)
                 Text(l10n.caseCheckOutTo(production), style: TextStyle(color: muted)),

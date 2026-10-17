@@ -1026,6 +1026,11 @@ class SDe extends S {
   String get listCountedLine => 'Ohne Inventarnummer · gezählt';
 
   @override
+  String countOverMax(int max) {
+    return 'Höchstens $max — so viele stehen auf der Liste.';
+  }
+
+  @override
   String listHowMany(int total) {
     return 'Wie viele von $total?';
   }

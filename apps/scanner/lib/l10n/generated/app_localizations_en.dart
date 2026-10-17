@@ -1018,6 +1018,11 @@ class SEn extends S {
   String get listCountedLine => 'No tag · counted';
 
   @override
+  String countOverMax(int max) {
+    return 'At most $max — that is how many are on the list.';
+  }
+
+  @override
   String listHowMany(int total) {
     return 'How many of $total?';
   }

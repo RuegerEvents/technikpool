@@ -1813,6 +1813,12 @@ abstract class S {
   /// **'No tag · counted'**
   String get listCountedLine;
 
+  /// No description provided for @countOverMax.
+  ///
+  /// In en, this message translates to:
+  /// **'At most {max} — that is how many are on the list.'**
+  String countOverMax(int max);
+
   /// No description provided for @listHowMany.
   ///
   /// In en, this message translates to:

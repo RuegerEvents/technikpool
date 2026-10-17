@@ -408,6 +408,8 @@
   "productionActionReturnHint": "Scan, tick or count what comes back. Each tick puts the unit back on its own shelf.",
   "listCountedLine": "No tag · counted",
   "@listCountedLine": {"description": "Subtitle of a counted line: interchangeable units without a tag, counted instead of ticked one by one."},
+  "countOverMax": "At most {max} — that is how many are on the list.",
+  "@countOverMax": {"placeholders": {"max": {"type": "int"}}},
   "listHowMany": "How many of {total}?",
   "@listHowMany": {"placeholders": {"total": {"type": "int"}}},
   "handoutOut": "Out",

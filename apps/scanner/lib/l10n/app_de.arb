@@ -286,6 +286,7 @@
   "productionActionReturn": "Zurücknehmen",
   "productionActionReturnHint": "Scannen, abhaken oder zählen, was zurückkommt. Jeder Haken bucht das Gerät zurück an seinen Lagerort.",
   "listCountedLine": "Ohne Inventarnummer · gezählt",
+  "countOverMax": "Höchstens {max} — so viele stehen auf der Liste.",
   "listHowMany": "Wie viele von {total}?",
   "handoutOut": "Ausgegeben",
   "handoutBack": "Zurück",

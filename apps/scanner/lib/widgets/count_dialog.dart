@@ -5,9 +5,11 @@ import '../l10n/generated/app_localizations.dart';
 
 /// Typing a number for a counted line — a stocktake's loose products, and the
 /// untagged units on a production's list. −/+ beside the field for the last
-/// one or two, the keyboard for forty. [max] caps it where more than a line
-/// holds makes no sense; a stocktake has none, since finding more than
-/// expected is exactly what it is there to notice.
+/// one or two, the keyboard for forty. [max] is the most a line holds; more
+/// is refused with a message rather than quietly cut down, since a count
+/// that came out higher than booked is something to look at. A stocktake has
+/// none, since finding more than expected is exactly what it is there to
+/// notice.
 class CountDialog extends StatefulWidget {
   const CountDialog({
     super.key,
@@ -37,6 +39,9 @@ class _CountDialogState extends State<CountDialog> {
     super.dispose();
   }
 
+  /// Set when the typed number is more than [CountDialog.max].
+  String? _error;
+
   int get _value => int.tryParse(_controller.text.trim()) ?? 0;
 
   void _step(int by) {
@@ -51,8 +56,12 @@ class _CountDialogState extends State<CountDialog> {
   void _save() {
     final value = int.tryParse(_controller.text.trim());
     if (value == null || value < 0) return;
-    Navigator.of(context)
-        .pop(widget.max == null ? value : value.clamp(0, widget.max!));
+    final max = widget.max;
+    if (max != null && value > max) {
+      setState(() => _error = S.of(context).countOverMax(max));
+      return;
+    }
+    Navigator.of(context).pop(value);
   }
 
   @override
@@ -84,7 +93,14 @@ class _CountDialogState extends State<CountDialog> {
                   decoration: InputDecoration(
                     hintText: '0',
                     suffixText: widget.max == null ? null : '/ ${widget.max}',
+                    // Red frame only: the field is too narrow for the
+                    // sentence, which goes under the whole row instead.
+                    errorText: _error == null ? null : '',
+                    errorStyle: const TextStyle(height: 0, fontSize: 0),
                   ),
+                  onChanged: (_) {
+                    if (_error != null) setState(() => _error = null);
+                  },
                   onSubmitted: (_) => _save(),
                 ),
               ),
@@ -96,6 +112,13 @@ class _CountDialogState extends State<CountDialog> {
               ),
             ],
           ),
+          if (_error case final error?) ...[
+            const SizedBox(height: 8),
+            Text(
+              error,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ],
         ],
       ),
       actions: [
