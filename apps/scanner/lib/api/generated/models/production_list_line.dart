@@ -21,6 +21,7 @@ class ProductionListLine {
     required this.total,
     required this.done,
     required this.floor,
+    this.productImageUrl,
   });
   
   factory ProductionListLine.fromJson(Map<String, Object?> json) => _$ProductionListLineFromJson(json);
@@ -30,6 +31,12 @@ class ProductionListLine {
   final String productName;
   final String? productCaption;
   final String? manufacturerName;
+
+  /// The product's picture, absolute like Product.imageUrl — for a.
+  /// thumbnail beside the row. Null for a product without one. Not.
+  /// required, so an older client keeps compiling.
+  ///
+  final String? productImageUrl;
   final String? lentBy;
   final ProductionCheckGroup group;
   final List<String> assetIds;

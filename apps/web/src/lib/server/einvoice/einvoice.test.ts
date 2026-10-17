@@ -197,6 +197,7 @@ describe.skipIf(!MUSTANG_JAR)('ZUGFeRD PDF, validated by Mustang', () => {
 	const cases: [string, Partial<EInvoiceSource>][] = [
 		['standard rate, percentage discount', {}],
 		['amount discount', { discountType: 'AMOUNT', discountValue: 50 }],
+		['discount down to a fixed gross price', { discountType: 'TARGET_GROSS', discountValue: 1000 }],
 		[
 			'price for the whole quantity',
 			{

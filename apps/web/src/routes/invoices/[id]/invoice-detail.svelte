@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { DiscountType } from '#lib/billing-totals.js';
 	import * as Card from '#lib/components/ui/card/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
@@ -416,7 +417,7 @@
 		dayCount={invoice.dayCount}
 		{fullDuration}
 		{showDuration}
-		discountType={invoice.discountType as 'PERCENT' | 'AMOUNT' | null}
+		discountType={invoice.discountType as DiscountType | null}
 		discountValue={invoice.discountValue != null ? Number(invoice.discountValue) : null}
 		vatRatePercent={Number(invoice.vatRatePercent)}
 		noVat={invoice.isKleinunternehmerSnapshot}

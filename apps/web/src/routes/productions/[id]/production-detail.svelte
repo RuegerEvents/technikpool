@@ -581,6 +581,16 @@
 		CANCELLED: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
 	};
 
+	// A unit's status in its count column is a dot: the column already names
+	// it, and a word per row took the room the product's name needs. A status
+	// with no column of its own (noted, released) keeps its word.
+	const statusDot: Record<string, string> = {
+		APPROVED: 'bg-green-600 dark:bg-green-400',
+		PENDING: 'bg-yellow-500 dark:bg-yellow-400',
+		CHECKED_OUT: 'bg-blue-600 dark:bg-blue-400',
+		RETURNED: 'bg-gray-400 dark:bg-gray-500'
+	};
+
 	const statusLabels: Record<string, string> = {
 		DRAFT: 'Noted',
 		APPROVED: 'Approved',
@@ -1627,11 +1637,19 @@
 											{#each COUNT_COLUMNS as column (column)}
 												<td class="px-2 py-2 text-right whitespace-nowrap">
 													{#if column === statusColumn(item.status)}
-														<span
-															class="inline-flex items-center rounded-full px-1.5 py-0.5 text-[11px] font-semibold {statusClass[
-																item.status
-															] ?? ''}">{statusLabels[item.status] ?? item.status}</span
-														>
+														{#if statusDot[item.status]}
+															<span
+																class="inline-block size-2.5 rounded-full {statusDot[item.status]}"
+																title={statusLabels[item.status]}
+																><span class="sr-only">{statusLabels[item.status]}</span></span
+															>
+														{:else}
+															<span
+																class="inline-flex items-center rounded-full px-1.5 py-0.5 text-[11px] font-semibold {statusClass[
+																	item.status
+																] ?? ''}">{statusLabels[item.status] ?? item.status}</span
+															>
+														{/if}
 													{/if}
 												</td>
 											{/each}
@@ -1686,12 +1704,25 @@
 												{#each COUNT_COLUMNS as column (column)}
 													<td class="px-2 py-1.5 text-right whitespace-nowrap">
 														{#if column === statusColumn(accessory.status)}
-															<span
-																class="inline-flex items-center rounded-full px-1.5 py-0.5 text-[11px] font-semibold {statusClass[
-																	accessory.status
-																] ?? ''} {differs ? 'ring-2 ring-amber-400' : 'opacity-60'}"
-																>{statusLabels[accessory.status] ?? accessory.status}</span
-															>
+															{#if statusDot[accessory.status]}
+																<span
+																	class="inline-block size-2 rounded-full {statusDot[
+																		accessory.status
+																	]} {differs
+																		? 'ring-2 ring-amber-400 ring-offset-1'
+																		: 'opacity-50'}"
+																	title={statusLabels[accessory.status]}
+																	><span class="sr-only">{statusLabels[accessory.status]}</span
+																	></span
+																>
+															{:else}
+																<span
+																	class="inline-flex items-center rounded-full px-1.5 py-0.5 text-[11px] font-semibold {statusClass[
+																		accessory.status
+																	] ?? ''} {differs ? 'ring-2 ring-amber-400' : 'opacity-60'}"
+																	>{statusLabels[accessory.status] ?? accessory.status}</span
+																>
+															{/if}
 														{/if}
 													</td>
 												{/each}

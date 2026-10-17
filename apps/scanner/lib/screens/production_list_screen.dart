@@ -13,7 +13,9 @@ import '../scan/camera_scan_screen.dart';
 import '../scan/scan_tones.dart';
 import '../state/providers.dart';
 import '../theme.dart';
+import '../widgets/accessory_dialog.dart';
 import '../widgets/count_dialog.dart';
+import '../widgets/product_thumb.dart';
 
 /// What working through a production's list does with a tick.
 ///
@@ -59,6 +61,7 @@ class _Unit {
     required this.assetTag,
     required this.productName,
     required this.productCaption,
+    required this.productImageUrl,
     required this.accessoryOf,
     required this.group,
     required this.done,
@@ -72,6 +75,7 @@ class _Unit {
   final String? assetTag;
   final String productName;
   final String? productCaption;
+  final String? productImageUrl;
   final String? accessoryOf;
   final ProductionCheckGroup group;
   final bool done;
@@ -226,6 +230,7 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
             assetTag: item.assetTag,
             productName: item.productName,
             productCaption: item.productCaption,
+            productImageUrl: item.productImageUrl,
             accessoryOf: item.accessoryOf,
             group: item.group,
             done: item.tick != null,
@@ -247,6 +252,7 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
           assetTag: item.assetTag,
           productName: item.productName,
           productCaption: item.productCaption,
+          productImageUrl: item.productImageUrl,
           accessoryOf: item.accessoryOf,
           group: item.group,
           done: item.done,
@@ -382,12 +388,13 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
 
     setState(() => _busy = true);
     try {
-      if (_isCheck) {
-        await _scanCheck(api, l10n, code);
-      } else {
-        await _scanHandout(api, l10n, code);
-      }
+      final unitAssetId = _isCheck
+          ? await _scanCheck(api, l10n, code)
+          : await _scanHandout(api, l10n, code);
       await _fetch(api);
+      if (mounted) setState(() => _busy = false);
+      // Asked inside the queue, so the next scan waits for the answer.
+      if (unitAssetId != null) await _askAccessories(unitAssetId);
     } catch (error) {
       _report(_Tone.bad, describeError(l10n, error), code, ScanTone.error);
     } finally {
@@ -395,7 +402,10 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
     }
   }
 
-  Future<void> _scanCheck(ApiClient api, S l10n, String code) async {
+  /// Ticks the scanned unit; answers it, if it is on the list and was ticked
+  /// just now, so its accessories can be asked about. The scan answers with
+  /// the unit's tag rather than its id.
+  Future<String?> _scanCheck(ApiClient api, S l10n, String code) async {
     final result = await api.productionCheck.scanIntoProductionCheck(
       checkId: _check!.id,
       body: ProductionCheckScanRequest(code: code),
@@ -410,6 +420,10 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
           result.assetTag,
           ScanTone.ok,
         );
+        return _check?.items
+            .where((i) => i.assetTag == result.assetTag)
+            .firstOrNull
+            ?.assetId;
       case ProductionCheckScanResultResult.already:
         _report(
           _Tone.info,
@@ -425,9 +439,12 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
           ScanTone.attention,
         );
     }
+    return null;
   }
 
-  Future<void> _scanHandout(ApiClient api, S l10n, String code) async {
+  /// Books the scanned unit; answers it when it went where this list books
+  /// to, so its accessories can be asked about.
+  Future<String?> _scanHandout(ApiClient api, S l10n, String code) async {
     final result = await api.productionHandout.scanIntoProductionHandout(
       productionId: widget.productionId,
       mode: _handoutMode,
@@ -465,6 +482,7 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
         ),
       );
     }
+    return foreign ? null : result.asset.id;
   }
 
   void _report(_Tone tone, String title, String? detail, ScanTone sound) {
@@ -532,10 +550,60 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
     }
   }
 
-  void _toggle(_Unit unit) => _act((api) async {
-    await _tick(api, [unit.assetId], done: !unit.done);
-    return null;
-  });
+  Future<void> _toggle(_Unit unit) async {
+    await _act((api) async {
+      await _tick(api, [unit.assetId], done: !unit.done);
+      return null;
+    });
+    if (!unit.done) await _askAccessories(unit.assetId);
+  }
+
+  /// After a unit went on the list, asks whether what hangs off it is there
+  /// too — see AccessoryDialog. The list is the freshly loaded one, so it
+  /// shows what the server booked along; the answer ticks or unticks the
+  /// accessories one by one to match. Ticks somebody else made are theirs,
+  /// and are not asked about.
+  Future<void> _askAccessories(String unitAssetId) async {
+    if (!mounted) return;
+    final l10n = S.of(context);
+    final units = _units(l10n);
+    final unit = units.where((u) => u.assetId == unitAssetId).firstOrNull;
+    final accessories = [
+      for (final u in units)
+        if (u.accessoryOf == unitAssetId && !u.locked) u,
+    ];
+    if (unit == null || accessories.isEmpty) return;
+    final there = await showDialog<Set<String>>(
+      context: context,
+      builder: (_) => AccessoryDialog(
+        title: l10n.accessoryDialogTitle(unit.productName),
+        question: switch (widget.mode) {
+          ProductionListMode.check => l10n.accessoryDialogCheck,
+          ProductionListMode.checkout => l10n.accessoryDialogCheckout,
+          ProductionListMode.checkin => l10n.accessoryDialogCheckin,
+        },
+        accessories: [
+          for (final a in accessories)
+            (assetId: a.assetId, name: a.productName, assetTag: a.assetTag),
+        ],
+      ),
+    );
+    if (there == null) return;
+    final tick = [
+      for (final a in accessories)
+        if (there.contains(a.assetId) && !a.done) a.assetId,
+    ];
+    final untick = [
+      for (final a in accessories)
+        if (!there.contains(a.assetId) && a.done) a.assetId,
+    ];
+    if (tick.isEmpty && untick.isEmpty) return;
+    await _act((api) async {
+      await _tick(api, tick);
+      await _tick(api, untick, done: false);
+      return null;
+    });
+  }
 
   /// Every open unit of these rows, the counted lines' included — they are
   /// units too.
@@ -886,12 +954,20 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
       ProductionListMode.checkout => l10n.handoutOut,
       ProductionListMode.checkin => l10n.handoutBack,
     };
-    return CheckboxListTile(
-      value: unit.done,
-      onChanged: open && !unit.locked && !_busy ? (_) => _toggle(unit) : null,
-      controlAffinity: ListTileControlAffinity.leading,
+    final onChanged = open && !unit.locked && !_busy ? (_) => _toggle(unit) : null;
+    // The checkbox and the picture side by side, as on the web; a
+    // CheckboxListTile has room for only one of them in front.
+    return ListTile(
       dense: true,
       contentPadding: EdgeInsets.only(left: unit.accessoryOf == null ? 8 : 40, right: 16),
+      leading: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Checkbox(value: unit.done, onChanged: onChanged),
+          ProductThumb(url: unit.productImageUrl),
+        ],
+      ),
+      onTap: onChanged == null ? null : () => onChanged(null),
       title: Text(unit.productName, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text.rich(
         TextSpan(
@@ -922,9 +998,16 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
     return ListTile(
       dense: true,
       contentPadding: const EdgeInsets.only(left: 20, right: 8),
-      leading: Icon(
-        complete ? Icons.check_box : Icons.check_box_outline_blank,
-        color: complete ? status?.success : null,
+      leading: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            complete ? Icons.check_box : Icons.check_box_outline_blank,
+            color: complete ? status?.success : null,
+          ),
+          const SizedBox(width: 12),
+          ProductThumb(url: line.productImageUrl),
+        ],
       ),
       title: Text(line.productName, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text([l10n.listCountedLine, ?line.productCaption].join(' · ')),

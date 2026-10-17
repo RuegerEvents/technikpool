@@ -12,7 +12,7 @@
 	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import ServiceLineModal from './service-line-modal.svelte';
 	import type { BillingItem, DurationInfo, EditedServiceLine, ServiceLineTarget } from './types';
-	import { billingTotals } from '#lib/billing-totals.js';
+	import { billingTotals, type DiscountType } from '#lib/billing-totals.js';
 	import { loanMargins, type LoanCostEntry, type LoanLine } from '#lib/loan-margins.js';
 
 	let {
@@ -52,13 +52,13 @@
 		dayCount: number;
 		fullDuration: DurationInfo;
 		showDuration: DurationInfo;
-		discountType: 'PERCENT' | 'AMOUNT' | null;
+		discountType: DiscountType | null;
 		discountValue: number | null;
 		vatRatePercent: number;
 		noVat: boolean;
 		onSaveDayCount: (dayCount: number) => Promise<void>;
 		onSaveDiscount: (
-			discountType: 'PERCENT' | 'AMOUNT' | undefined,
+			discountType: DiscountType | undefined,
 			discountValue: number | undefined
 		) => Promise<void>;
 		onSaveItemRate: (itemIds: string[], ratePercent: number) => Promise<void>;
@@ -135,32 +135,53 @@
 	}
 
 	// ── Discount ──
+	// "Until" is the editor's word for a fixed price: the customer pays this
+	// much, whatever the lines add up to. It is stored as that price
+	// (TARGET_NET / TARGET_GROSS) and the discount follows the lines — see
+	// billingTotals. It used to be stored as the amount it worked out to on the
+	// day, and the next line added left the total off the agreed price.
 	let discountTypeDraft = $state<'NONE' | 'PERCENT' | 'AMOUNT' | 'UNTIL'>('NONE');
 	let discountValueDraft = $state('');
-	$effect(() => {
-		discountTypeDraft = discountType ?? 'NONE';
-		discountValueDraft = discountValue?.toString() ?? '';
-	});
-	let savingDiscount = $state(false);
-
-	// "Until" mode: the user names a fixed price the customer should end up
-	// paying, and we back-compute the AMOUNT discount needed to land exactly
-	// there. It's saved as a plain AMOUNT discount — the customer only ever
-	// sees a normal fixed-amount discount, never an "until" concept.
 	let untilTargetDraft = $state('');
 	let untilMode = $state<'NET' | 'GROSS'>('NET');
+	let isTarget = $derived(discountType === 'TARGET_NET' || discountType === 'TARGET_GROSS');
+
+	function resetDiscountDrafts() {
+		if (discountType === 'TARGET_NET' || discountType === 'TARGET_GROSS') {
+			discountTypeDraft = 'UNTIL';
+			untilTargetDraft = discountValue?.toString() ?? '';
+			untilMode = discountType === 'TARGET_GROSS' ? 'GROSS' : 'NET';
+			discountValueDraft = '';
+		} else {
+			discountTypeDraft = discountType ?? 'NONE';
+			discountValueDraft = discountValue?.toString() ?? '';
+			untilTargetDraft = '';
+		}
+	}
+	$effect(resetDiscountDrafts);
+	let savingDiscount = $state(false);
+
+	/** What the drafted fixed price is stored as. */
+	let untilType = $derived<DiscountType>(
+		untilMode === 'GROSS' && !noVat ? 'TARGET_GROSS' : 'TARGET_NET'
+	);
+	/** The discount the drafted fixed price works out to on today's lines. */
 	let untilComputedDiscount = $derived.by(() => {
 		const target = Number(untilTargetDraft);
 		if (!untilTargetDraft || Number.isNaN(target)) return null;
-		const netTarget =
-			untilMode === 'GROSS' && !noVat ? target / (1 + vatRatePercent / 100) : target;
-		return Math.max(0, subtotal - netTarget);
+		return billingTotals({
+			items,
+			discountType: untilType,
+			discountValue: target,
+			vatRatePercent
+		}).discount;
 	});
 
 	// Save only appears once the draft says something the document doesn't. The
 	// drafts are reset from the props after a save, which is also what hides it
-	// again. "Until" is compared by the discount it works out to, since that is
-	// all that gets stored.
+	// again. Read through String(): a number field bound to them hands back a
+	// number once something is typed, and `.trim()` on that threw — taking the
+	// whole offer page down with it.
 	let discountDirty = $derived.by(() => {
 		const differs = (a: number, b: number | null) => b == null || Math.abs(a - b) > 0.000001;
 		switch (discountTypeDraft) {
@@ -168,13 +189,14 @@
 				return discountType != null;
 			case 'UNTIL':
 				return (
-					untilComputedDiscount != null &&
-					(discountType !== 'AMOUNT' || differs(untilComputedDiscount, discountValue))
+					String(untilTargetDraft).trim() !== '' &&
+					(discountType !== untilType || differs(Number(untilTargetDraft), discountValue))
 				);
 			default:
 				if (discountTypeDraft !== discountType) return true;
 				return (
-					discountValueDraft.trim() !== '' && differs(Number(discountValueDraft), discountValue)
+					String(discountValueDraft).trim() !== '' &&
+					differs(Number(discountValueDraft), discountValue)
 				);
 		}
 	});
@@ -183,11 +205,7 @@
 	// pen; closing it again throws away whatever wasn't saved.
 	let editingDiscount = $state(false);
 	function toggleDiscountEditor() {
-		if (editingDiscount) {
-			discountTypeDraft = discountType ?? 'NONE';
-			discountValueDraft = discountValue?.toString() ?? '';
-			untilTargetDraft = '';
-		}
+		if (editingDiscount) resetDiscountDrafts();
 		editingDiscount = !editingDiscount;
 	}
 
@@ -199,7 +217,7 @@
 		savingDiscount = true;
 		try {
 			if (discountTypeDraft === 'UNTIL') {
-				await onSaveDiscount('AMOUNT', untilComputedDiscount!);
+				await onSaveDiscount(untilType, Number(untilTargetDraft));
 			} else {
 				await onSaveDiscount(
 					discountTypeDraft === 'NONE' ? undefined : discountTypeDraft,
@@ -208,7 +226,6 @@
 			}
 			toast.success('Discount updated');
 			editingDiscount = false;
-			untilTargetDraft = '';
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {
@@ -651,15 +668,29 @@
 							</div>
 							{#if discountTypeDraft === 'UNTIL' && untilComputedDiscount != null}
 								<p class="text-xs text-muted-foreground">
-									Computed discount: {fmtEUR(untilComputedDiscount)}
+									Discount right now: {fmtEUR(untilComputedDiscount)} — it follows when lines are added
+									or removed.
 								</p>
 							{/if}
+						{:else if isTarget && discountValue != null}
+							<p class="text-xs text-muted-foreground">
+								{discountType === 'TARGET_GROSS'
+									? `Fixed price ${fmtEUR(discountValue)} gross`
+									: `Fixed price ${fmtEUR(discountValue)} net`}
+							</p>
 						{/if}
 					</div>
 				{:else if discountAmount > 0}
 					<div class="flex justify-between text-muted-foreground">
 						<span>Discount</span><span>−{fmtEUR(discountAmount)}</span>
 					</div>
+					{#if isTarget && discountValue != null}
+						<p class="text-xs text-muted-foreground">
+							{discountType === 'TARGET_GROSS'
+								? `Fixed price ${fmtEUR(discountValue)} gross`
+								: `Fixed price ${fmtEUR(discountValue)} net`}
+						</p>
+					{/if}
 				{/if}
 				<div class="flex justify-between border-t pt-2">
 					<span>Net total</span><span>{fmtEUR(netTotal)}</span>

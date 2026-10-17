@@ -21,6 +21,7 @@ ProductionHandoutItem _$ProductionHandoutItemFromJson(
   done: json['done'] as bool,
   received: json['received'] as bool,
   returnReported: json['returnReported'] as bool,
+  productImageUrl: json['productImageUrl'] as String?,
 );
 
 Map<String, dynamic> _$ProductionHandoutItemToJson(
@@ -31,6 +32,7 @@ Map<String, dynamic> _$ProductionHandoutItemToJson(
   'productName': instance.productName,
   'productCaption': ?instance.productCaption,
   'manufacturerName': ?instance.manufacturerName,
+  'productImageUrl': ?instance.productImageUrl,
   'lentBy': ?instance.lentBy,
   'accessoryOf': ?instance.accessoryOf,
   'group': instance.group,

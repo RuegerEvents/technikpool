@@ -3817,10 +3817,8 @@ msgstr "Netto"
 msgid "Gross"
 msgstr "Brutto"
 
-#. 0: fmtEUR(untilComputedDiscount)
-#: src/lib/components/ui/billing-document/billing-document.svelte
-msgid "Computed discount: {0}"
-msgstr "Berechneter Rabatt: {0}"
+#~ msgid "Computed discount: {0}"
+#~ msgstr "Berechneter Rabatt: {0}"
 
 #: src/lib/components/ui/billing-document/billing-document.svelte
 msgid "Enter a target amount"
@@ -12761,3 +12759,22 @@ msgstr "Noch kein Gerät hat eine Inventarnummer, der Zähler steht aber schon w
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Reset counter to {0}"
 msgstr "Zähler auf {0} zurücksetzen"
+
+#. 0: fmtEUR(untilComputedDiscount)
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Discount right now: {0} — it follows when lines are added or removed."
+msgstr "Rabatt derzeit: {0} – er passt sich an, wenn Positionen dazukommen oder wegfallen."
+
+#. 0: fmtEUR(discountValue)
+#. 0: fmtEUR(discountValue)
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Fixed price {0} gross"
+msgstr "Festpreis {0} brutto"
+
+#. 0: fmtEUR(discountValue)
+#. 0: fmtEUR(discountValue)
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Fixed price {0} net"
+msgstr "Festpreis {0} netto"

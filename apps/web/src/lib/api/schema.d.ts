@@ -1534,6 +1534,12 @@ export interface components {
             productName: string;
             productCaption: string | null;
             manufacturerName: string | null;
+            /**
+             * @description The product's picture, absolute like Product.imageUrl — for a
+             *     thumbnail beside the row. Null for a product without one. Not
+             *     required, so an older client keeps compiling.
+             */
+            productImageUrl?: string | null;
             /** @description The org that lent the unit; null for the production's own. */
             lentBy: string | null;
             /** @description The unit it hangs off; listed right after it. */
@@ -1628,6 +1634,12 @@ export interface components {
             productName: string;
             productCaption: string | null;
             manufacturerName: string | null;
+            /**
+             * @description The product's picture, absolute like Product.imageUrl — for a
+             *     thumbnail beside the row. Null for a product without one. Not
+             *     required, so an older client keeps compiling.
+             */
+            productImageUrl?: string | null;
             lentBy: string | null;
             group: components["schemas"]["ProductionCheckGroup"];
             assetIds: string[];
@@ -1654,6 +1666,12 @@ export interface components {
             productName: string;
             productCaption: string | null;
             manufacturerName: string | null;
+            /**
+             * @description The product's picture, absolute like Product.imageUrl — for a
+             *     thumbnail beside the row. Null for a product without one. Not
+             *     required, so an older client keeps compiling.
+             */
+            productImageUrl?: string | null;
             lentBy: string | null;
             accessoryOf: string | null;
             group: components["schemas"]["ProductionCheckGroup"];

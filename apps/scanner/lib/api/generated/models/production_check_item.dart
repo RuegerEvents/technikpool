@@ -25,6 +25,7 @@ class ProductionCheckItem {
     required this.received,
     required this.returnReported,
     required this.tick,
+    this.productImageUrl,
   });
   
   factory ProductionCheckItem.fromJson(Map<String, Object?> json) => _$ProductionCheckItemFromJson(json);
@@ -34,6 +35,12 @@ class ProductionCheckItem {
   final String productName;
   final String? productCaption;
   final String? manufacturerName;
+
+  /// The product's picture, absolute like Product.imageUrl — for a.
+  /// thumbnail beside the row. Null for a product without one. Not.
+  /// required, so an older client keeps compiling.
+  ///
+  final String? productImageUrl;
 
   /// The org that lent the unit; null for the production's own.
   final String? lentBy;

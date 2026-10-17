@@ -33,7 +33,7 @@ import type { Prisma } from '#lib/prisma/client.js';
 import { SERVICE_UNITS, serviceLineTotal } from '#lib/service-lines.svelte.js';
 import { getServiceCatalog } from './service-catalog.remote';
 import { getBillingTodos } from './billing.remote';
-import { billingTotals, type BillingTotalsInput } from '#lib/billing-totals.js';
+import { billingTotals, DISCOUNT_TYPES, type BillingTotalsInput } from '#lib/billing-totals.js';
 
 /**
  * Offers and invoices are inventory-admin work, not org-owner work — deliberately
@@ -1234,7 +1234,7 @@ export const updateOfferItemRate = command(
 
 const updateOfferDiscountSchema = v.object({
 	offerId: v.string(),
-	discountType: v.optional(v.picklist(['PERCENT', 'AMOUNT'])),
+	discountType: v.optional(v.picklist(DISCOUNT_TYPES)),
 	discountValue: v.optional(v.number())
 });
 
@@ -1976,7 +1976,7 @@ export const updateInvoiceItemRate = command(
 
 const updateInvoiceDiscountSchema = v.object({
 	invoiceId: v.string(),
-	discountType: v.optional(v.picklist(['PERCENT', 'AMOUNT'])),
+	discountType: v.optional(v.picklist(DISCOUNT_TYPES)),
 	discountValue: v.optional(v.number())
 });
 

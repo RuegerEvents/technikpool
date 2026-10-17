@@ -1819,6 +1819,36 @@ abstract class S {
   /// **'At most {max} — that is how many are on the list.'**
   String countOverMax(int max);
 
+  /// No description provided for @accessoryDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Accessories of {name}'**
+  String accessoryDialogTitle(String name);
+
+  /// No description provided for @accessoryDialogCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Is all of it here? Untick what is missing.'**
+  String get accessoryDialogCheck;
+
+  /// No description provided for @accessoryDialogCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'Does all of it go along? Untick what stays behind.'**
+  String get accessoryDialogCheckout;
+
+  /// No description provided for @accessoryDialogCheckin.
+  ///
+  /// In en, this message translates to:
+  /// **'Has all of it come back? Untick what is missing.'**
+  String get accessoryDialogCheckin;
+
+  /// No description provided for @accessoryDialogConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get accessoryDialogConfirm;
+
   /// No description provided for @listHowMany.
   ///
   /// In en, this message translates to:

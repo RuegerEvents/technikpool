@@ -3817,10 +3817,8 @@ msgstr "Net"
 msgid "Gross"
 msgstr "Gross"
 
-#. 0: fmtEUR(untilComputedDiscount)
-#: src/lib/components/ui/billing-document/billing-document.svelte
-msgid "Computed discount: {0}"
-msgstr "Computed discount: {0}"
+#~ msgid "Computed discount: {0}"
+#~ msgstr "Computed discount: {0}"
 
 #: src/lib/components/ui/billing-document/billing-document.svelte
 msgid "Enter a target amount"
@@ -12761,3 +12759,22 @@ msgstr "No device carries a number yet, but the counter is further ahead."
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Reset counter to {0}"
 msgstr "Reset counter to {0}"
+
+#. 0: fmtEUR(untilComputedDiscount)
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Discount right now: {0} — it follows when lines are added or removed."
+msgstr "Discount right now: {0} — it follows when lines are added or removed."
+
+#. 0: fmtEUR(discountValue)
+#. 0: fmtEUR(discountValue)
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Fixed price {0} gross"
+msgstr "Fixed price {0} gross"
+
+#. 0: fmtEUR(discountValue)
+#. 0: fmtEUR(discountValue)
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Fixed price {0} net"
+msgstr "Fixed price {0} net"

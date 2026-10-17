@@ -2668,6 +2668,12 @@ components:
           type: [string, 'null']
         manufacturerName:
           type: [string, 'null']
+        productImageUrl:
+          type: [string, 'null']
+          description: |
+            The product's picture, absolute like Product.imageUrl — for a
+            thumbnail beside the row. Null for a product without one. Not
+            required, so an older client keeps compiling.
         lentBy:
           type: [string, 'null']
           description: The org that lent the unit; null for the production's own.
@@ -2863,6 +2869,12 @@ components:
           type: [string, 'null']
         manufacturerName:
           type: [string, 'null']
+        productImageUrl:
+          type: [string, 'null']
+          description: |
+            The product's picture, absolute like Product.imageUrl — for a
+            thumbnail beside the row. Null for a product without one. Not
+            required, so an older client keeps compiling.
         lentBy:
           type: [string, 'null']
         group:
@@ -2927,6 +2939,12 @@ components:
           type: [string, 'null']
         manufacturerName:
           type: [string, 'null']
+        productImageUrl:
+          type: [string, 'null']
+          description: |
+            The product's picture, absolute like Product.imageUrl — for a
+            thumbnail beside the row. Null for a product without one. Not
+            required, so an older client keeps compiling.
         lentBy:
           type: [string, 'null']
         accessoryOf:

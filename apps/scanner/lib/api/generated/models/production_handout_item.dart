@@ -24,6 +24,7 @@ class ProductionHandoutItem {
     required this.done,
     required this.received,
     required this.returnReported,
+    this.productImageUrl,
   });
   
   factory ProductionHandoutItem.fromJson(Map<String, Object?> json) => _$ProductionHandoutItemFromJson(json);
@@ -33,6 +34,12 @@ class ProductionHandoutItem {
   final String productName;
   final String? productCaption;
   final String? manufacturerName;
+
+  /// The product's picture, absolute like Product.imageUrl — for a.
+  /// thumbnail beside the row. Null for a product without one. Not.
+  /// required, so an older client keeps compiling.
+  ///
+  final String? productImageUrl;
   final String? lentBy;
   final String? accessoryOf;
   final ProductionCheckGroup group;

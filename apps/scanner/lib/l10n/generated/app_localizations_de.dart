@@ -1031,6 +1031,24 @@ class SDe extends S {
   }
 
   @override
+  String accessoryDialogTitle(String name) {
+    return 'Zubehör von $name';
+  }
+
+  @override
+  String get accessoryDialogCheck => 'Ist alles da? Was fehlt, abwählen.';
+
+  @override
+  String get accessoryDialogCheckout =>
+      'Geht alles mit? Was nicht mitgeht, abwählen.';
+
+  @override
+  String get accessoryDialogCheckin => 'Ist alles zurück? Was fehlt, abwählen.';
+
+  @override
+  String get accessoryDialogConfirm => 'Fertig';
+
+  @override
   String listHowMany(int total) {
     return 'Wie viele von $total?';
   }

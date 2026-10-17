@@ -22,6 +22,7 @@ ProductionListLine _$ProductionListLineFromJson(Map<String, dynamic> json) =>
       total: (json['total'] as num).toInt(),
       done: (json['done'] as num).toInt(),
       floor: (json['floor'] as num).toInt(),
+      productImageUrl: json['productImageUrl'] as String?,
     );
 
 Map<String, dynamic> _$ProductionListLineToJson(ProductionListLine instance) =>
@@ -30,6 +31,7 @@ Map<String, dynamic> _$ProductionListLineToJson(ProductionListLine instance) =>
       'productName': instance.productName,
       'productCaption': ?instance.productCaption,
       'manufacturerName': ?instance.manufacturerName,
+      'productImageUrl': ?instance.productImageUrl,
       'lentBy': ?instance.lentBy,
       'group': instance.group,
       'assetIds': instance.assetIds,

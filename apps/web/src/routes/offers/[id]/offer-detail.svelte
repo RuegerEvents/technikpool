@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { DiscountType } from '#lib/billing-totals.js';
 	import {
 		customerRecipient,
 		getErrorMessage,
@@ -465,7 +466,7 @@
 		dayCount={offer.dayCount}
 		{fullDuration}
 		{showDuration}
-		discountType={offer.discountType as 'PERCENT' | 'AMOUNT' | null}
+		discountType={offer.discountType as DiscountType | null}
 		discountValue={offer.discountValue != null ? Number(offer.discountValue) : null}
 		vatRatePercent={Number(offer.vatRatePercent)}
 		noVat={offer.isKleinunternehmerSnapshot}

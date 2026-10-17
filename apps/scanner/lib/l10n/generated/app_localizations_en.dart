@@ -1023,6 +1023,26 @@ class SEn extends S {
   }
 
   @override
+  String accessoryDialogTitle(String name) {
+    return 'Accessories of $name';
+  }
+
+  @override
+  String get accessoryDialogCheck =>
+      'Is all of it here? Untick what is missing.';
+
+  @override
+  String get accessoryDialogCheckout =>
+      'Does all of it go along? Untick what stays behind.';
+
+  @override
+  String get accessoryDialogCheckin =>
+      'Has all of it come back? Untick what is missing.';
+
+  @override
+  String get accessoryDialogConfirm => 'Done';
+
+  @override
   String listHowMany(int total) {
     return 'How many of $total?';
   }
