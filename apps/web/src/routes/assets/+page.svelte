@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { rowLinkClick } from '#lib/row-link.js';
 	import { naturalCompare } from '#lib/sort.js';
 	import { withCaption } from '#lib/product-label.js';
 	import { categoryLabel } from '#lib/category.js';
@@ -1109,7 +1110,7 @@
 											<a
 												href={resolve(`assets/${asset.parent.id}`)}
 												class="text-xs text-muted-foreground hover:underline"
-												onclick={(e) => e.stopPropagation()}
+												onclick={rowLinkClick}
 											>
 												↳ Accessory of {asset.parent.product.name}
 											</a>
@@ -1139,7 +1140,7 @@
 									<a
 										href={resolve(`assets/bundles/${asset.bundle.id}`)}
 										class="hover:underline"
-										onclick={(e) => e.stopPropagation()}
+										onclick={rowLinkClick}
 									>
 										{withCaption(asset.bundle.template.name, asset.bundle.template.caption)}
 									</a>
@@ -1573,7 +1574,7 @@
 												<a
 													href={resolve(`assets/bundles/${instance.id}`)}
 													class="text-xs whitespace-nowrap text-muted-foreground hover:text-foreground"
-													onclick={(e) => e.stopPropagation()}
+													onclick={rowLinkClick}
 												>
 													View →
 												</a>
@@ -1715,7 +1716,7 @@
 														<a
 															href={resolve(`assets/${asset.id}`)}
 															class="text-xs whitespace-nowrap text-muted-foreground hover:text-foreground"
-															onclick={(e) => e.stopPropagation()}
+															onclick={rowLinkClick}
 														>
 															View →
 														</a>
@@ -1825,7 +1826,7 @@
 										     product's own page. -->
 										<a
 											href={resolve(`products/${group.productId}`)}
-											onclick={(e) => e.stopPropagation()}
+											onclick={rowLinkClick}
 											class="font-medium underline-offset-2 hover:underline">{group.name}</a
 										>
 										{@render captionChip(group.caption)}
@@ -1909,7 +1910,7 @@
 													<a
 														href={resolve(`assets/${asset.parent.id}`)}
 														class="text-muted-foreground hover:underline"
-														onclick={(e) => e.stopPropagation()}
+														onclick={rowLinkClick}
 													>
 														↳ Accessory of {asset.parent.product.name}
 													</a>
@@ -1926,7 +1927,7 @@
 													<a
 														href={resolve(`assets/bundles/${asset.bundle.id}`)}
 														class="truncate hover:underline"
-														onclick={(e) => e.stopPropagation()}
+														onclick={rowLinkClick}
 													>
 														{withCaption(asset.bundle.template.name, asset.bundle.template.caption)}
 													</a>
@@ -1935,7 +1936,7 @@
 												<a
 													href={resolve(`assets/${asset.id}`)}
 													class="whitespace-nowrap hover:text-foreground"
-													onclick={(e) => e.stopPropagation()}
+													onclick={rowLinkClick}
 												>
 													View →
 												</a>

@@ -71,12 +71,12 @@ msgstr "Crewmitglied hinzugefügt"
 #~ msgstr "Organisation: {0}"
 
 #: src/lib/components/CsvImportModal.svelte
+#: src/lib/components/ui/back-button/back-button.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
 #: src/routes/+error.svelte
 #: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/productions/[id]/crew-passes/+page.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
-#: src/routes/productions/[id]/production-detail.svelte
 msgid "Back"
 msgstr "Zurück"
 
@@ -8186,10 +8186,8 @@ msgstr "Produkt nicht gefunden"
 msgid "It may have been merged into another product or deleted."
 msgstr "Es wurde vielleicht mit einem anderen Produkt zusammengeführt oder gelöscht."
 
-#: src/routes/products/[id]/product-detail.svelte
-#: src/routes/products/[id]/product-detail.svelte
-msgid "Back to Products"
-msgstr "Zurück zu den Produkten"
+#~ msgid "Back to Products"
+#~ msgstr "Zurück zu den Produkten"
 
 #: src/routes/orgs/[id]/value/+page.svelte
 #: src/routes/products/[id]/product-detail.svelte

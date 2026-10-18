@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { BackButton } from '#lib/components/ui/back-button/index.js';
 	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
 	import { userLabel } from '#lib/user-label.svelte.js';
 	import {
@@ -473,7 +474,7 @@
 			await deleteAsset(assetId);
 			confirmingDelete = false;
 			toast.success('Asset deleted');
-			await goto(resolve('assets'));
+			await goto(resolve('assets'), { replace: true });
 		} catch (err) {
 			// The command refuses anything with history, and says which kind — that
 			// reason is the useful part, so it goes in front of the user verbatim.
@@ -630,7 +631,7 @@
 		<!-- On a phone the image stacks above everything else, so the way back
 		     would otherwise sit a whole picture further down. -->
 		<div class="sm:hidden">
-			<Button icon="back" variant="outline" href={resolve('assets')}>Back to Devices</Button>
+			<BackButton fallback={resolve('assets')} />
 		</div>
 		<div
 			class="flex h-48 w-full shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted/40 sm:size-48"
@@ -678,12 +679,7 @@
 					{/if}
 				</div>
 				<div class="flex flex-wrap gap-2">
-					<Button
-						icon="back"
-						variant="outline"
-						class="hidden sm:inline-flex"
-						href={resolve('assets')}>Back to Devices</Button
-					>
+					<BackButton class="hidden sm:inline-flex" fallback={resolve('assets')} />
 					{#if canAddDevices}
 						<Button
 							icon="add"

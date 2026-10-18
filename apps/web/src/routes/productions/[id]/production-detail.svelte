@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { BackButton } from '#lib/components/ui/back-button/index.js';
 	import { withCaption } from '#lib/product-label.js';
 	import ShareLinkMenu from './share-link-menu.svelte';
 	import { customerLabel, getErrorMessage, orgLabel, plural } from '#lib/utils.js';
@@ -74,7 +75,7 @@
 		try {
 			await deleteProduction(productionId);
 			toast.success('Production deleted');
-			goto(resolve('productions'));
+			goto(resolve('productions'), { replace: true });
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			deleting = false;
@@ -773,7 +774,10 @@
 			</p>
 		</div>
 		<div class="flex flex-wrap gap-2">
-			<Button icon="back" variant="outline" href={resolve('productions')}>Back</Button>
+			<BackButton
+				fallback={resolve('productions')}
+				scope={resolve(`productions/${productionId}`)}
+			/>
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					{#snippet child({ props })}

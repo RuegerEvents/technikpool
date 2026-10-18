@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { rowLinkClick } from '#lib/row-link.js';
 	import { resolve } from '$app/paths';
 	import { MapPin, Truck } from '@lucide/svelte';
 	import type { Place } from './asset-place.js';
@@ -29,7 +30,7 @@
 			<a
 				href={resolve(`productions/${place.productionId}`)}
 				class="underline-offset-2 hover:underline"
-				onclick={(e) => e.stopPropagation()}>{place.name}</a
+				onclick={rowLinkClick}>{place.name}</a
 			>
 		{:else}
 			{place.name}

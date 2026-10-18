@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { rowLinkClick } from '#lib/row-link.js';
+	import { BackButton } from '#lib/components/ui/back-button/index.js';
 	// One catalog product: everything about it that can be changed — the same
 	// editor the /products wizard steps through — and every unit of it this user
 	// can see. Where the Devices list and a unit's page lead to when the question
@@ -88,7 +90,7 @@
 	<div class="space-y-4">
 		<h1 class="text-3xl font-bold tracking-tight">Product not found</h1>
 		<p class="text-muted-foreground">It may have been merged into another product or deleted.</p>
-		<Button icon="back" variant="outline" href={resolve('products')}>Back to Products</Button>
+		<BackButton fallback={resolve('products')} />
 	</div>
 {:else}
 	<div class="space-y-6">
@@ -103,7 +105,7 @@
 				</div>
 			</div>
 			<div class="flex flex-wrap items-center gap-2">
-				<Button icon="back" variant="ghost" href={resolve('products')}>Back to Products</Button>
+				<BackButton variant="ghost" fallback={resolve('products')} />
 				{#if orgs.some(canManageInventory)}
 					<Button
 						variant="outline"
@@ -139,9 +141,9 @@
 				{userId}
 				idPrefix="product-page"
 				onMerged={(survivorId) => {
-					if (survivorId !== productId) goto(resolve(`products/${survivorId}`));
+					if (survivorId !== productId) goto(resolve(`products/${survivorId}`), { replace: true });
 				}}
-				onDeleted={() => goto(resolve('products'))}
+				onDeleted={() => goto(resolve('products'), { replace: true })}
 			/>
 
 			<div class="space-y-6 self-start">
@@ -225,13 +227,13 @@
 													<a
 														href={resolve(`assets/${unit.id}`)}
 														class="font-mono whitespace-nowrap hover:underline"
-														onclick={(e) => e.stopPropagation()}>{unit.assetTag ?? '—'}</a
+														onclick={rowLinkClick}>{unit.assetTag ?? '—'}</a
 													>
 													{#if unit.parent}
 														<a
 															href={resolve(`assets/${unit.parent.id}`)}
 															class="block text-xs whitespace-nowrap text-muted-foreground hover:underline"
-															onclick={(e) => e.stopPropagation()}
+															onclick={rowLinkClick}
 														>
 															↳ Accessory of {unit.parent.product.name}
 															{unit.parent.assetTag ?? ''}

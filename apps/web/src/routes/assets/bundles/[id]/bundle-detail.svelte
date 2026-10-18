@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { rowLinkClick } from '#lib/row-link.js';
+	import { BackButton } from '#lib/components/ui/back-button/index.js';
 	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
 	import { makerAndName } from '#lib/product-label.js';
 	import { manufacturerSelection } from '#lib/no-manufacturer.svelte.js';
@@ -483,7 +485,7 @@
 		<!-- On a phone the image stacks above everything else, so the way back
 		     would otherwise sit a whole picture further down. -->
 		<div class="lg:hidden">
-			<Button icon="back" variant="outline" href={resolve('assets')}>Back to Devices</Button>
+			<BackButton fallback={resolve('assets')} />
 		</div>
 		<div
 			class="relative w-full shrink-0 overflow-hidden rounded-lg bg-muted/40 lg:w-96 lg:self-start"
@@ -556,12 +558,7 @@
 					<Button variant="outline" href={`${resolve('case-check')}?bundle=${bundleId}`}
 						>Check case</Button
 					>
-					<Button
-						icon="back"
-						variant="outline"
-						class="hidden lg:inline-flex"
-						href={resolve('assets')}>Back to Devices</Button
-					>
+					<BackButton class="hidden lg:inline-flex" fallback={resolve('assets')} />
 					<DropdownMenu.Root>
 						<DropdownMenu.Trigger>
 							{#snippet child({ props })}
@@ -789,7 +786,7 @@
 												<a
 													href={resolve(`assets/${asset.id}`)}
 													class="font-medium hover:underline"
-													onclick={(e) => e.stopPropagation()}>{asset.product.name}</a
+													onclick={rowLinkClick}>{asset.product.name}</a
 												>
 												<p class="text-xs text-muted-foreground">
 													{asset.product.manufacturer?.name}

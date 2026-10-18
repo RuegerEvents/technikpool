@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { rowLinkClick } from '#lib/row-link.js';
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import type { SvelteSet } from 'svelte/reactivity';
@@ -189,7 +190,7 @@
 												<a
 													href={resolve(`productions/${holder.productionId}`)}
 													class="font-medium underline underline-offset-2"
-													onclick={(e) => e.stopPropagation()}>{holder.productionName}</a
+													onclick={rowLinkClick}>{holder.productionName}</a
 												>
 											{:else}
 												<span class="font-medium">{holder.productionName}</span>

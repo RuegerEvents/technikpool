@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { signOut } from '#lib/auth-client.js';
-	import { goto } from '$app/navigation';
+	import { afterNavigate, goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { Toaster } from 'svelte-sonner';
 	import { browser } from '$app/env';
@@ -36,8 +36,14 @@
 	import { legalTitle } from '#lib/legal.svelte.js';
 	import { DpaGate } from '#lib/components/ui/dpa-gate/index.js';
 	import { ConfirmHost } from '#lib/components/ui/confirm-dialog/index.js';
+	import { recordNavigation } from '#lib/back-navigation.js';
 
 	let { data, children } = $props();
+
+	// Feeds the Back buttons on detail pages (see back-navigation.ts).
+	afterNavigate(({ to, type }) => {
+		if (to) recordNavigation(to.url, type);
+	});
 
 	async function handleSignOut() {
 		await signOut();

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { BackButton } from '#lib/components/ui/back-button/index.js';
 	import type { DiscountType } from '#lib/billing-totals.js';
 	import {
 		customerRecipient,
@@ -239,7 +240,9 @@
 			const previous = versions.versions
 				.filter((version) => version.revision < offer.revision)
 				.at(-1);
-			await goto(previous ? resolve(`offers/${previous.id}`) : resolve('offers'));
+			await goto(previous ? resolve(`offers/${previous.id}`) : resolve('offers'), {
+				replace: true
+			});
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 			deleting = false;
@@ -306,15 +309,11 @@
 		<!-- What moves the offer along stays up here; copying and deleting are
 		     rare enough to live behind the menu. -->
 		<div class="flex flex-wrap gap-2">
-			{#if offer.production}
-				<Button
-					icon="back"
-					variant="outline"
-					href={resolve(`productions/${offer.production.id}/equipment`)}
-				>
-					Back to equipment
-				</Button>
-			{/if}
+			<BackButton
+				fallback={offer.production
+					? resolve(`productions/${offer.production.id}/equipment`)
+					: resolve('offers')}
+			/>
 			{#if offer.pdfPath}
 				<Button
 					icon="download"
