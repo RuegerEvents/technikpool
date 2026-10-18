@@ -1,5 +1,15 @@
 [
 	{
+		"version": "0.33.3",
+		"date": "2026-10-18",
+		"en": [
+			"Back on a product, device, bundle, production or offer page returns to where you came from — the filtered Devices list, the calendar, a production — instead of always to the same list. Opened from a link or in a new tab, it still goes to the list."
+		],
+		"de": [
+			"Zurück auf der Seite eines Produkts, Geräts, Bundles, einer Produktion oder eines Angebots führt dorthin, wo du herkamst — in die gefilterte Geräteliste, den Kalender, eine Produktion — statt immer in dieselbe Liste. Über einen Link oder in einem neuen Tab geöffnet, geht es weiterhin zur Liste."
+		]
+	},
+	{
 		"version": "0.33.2",
 		"date": "2026-10-18",
 		"en": [
